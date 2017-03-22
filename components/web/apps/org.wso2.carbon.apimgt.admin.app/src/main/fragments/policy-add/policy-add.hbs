@@ -2,7 +2,13 @@
 {{js "js/index.js"}}
 
 <div class="page-header">
+{{#if @queryParams.api}}
     <h2 id="tierTopic">{{i18n "Add.Advanced.Throttle.Policy"}}</h2>
+    {{else if @queryParams.application}}
+    <h2 id="tierTopic">{{i18n "add.application.level.policy"}}</h2>
+    {{else if @queryParams.subscription}}
+    <h2 id="tierTopic">{{i18n "add.subscription.tier"}}</h2>
+    {{/if}}
     <p class="lead"></p>
 </div>
 
@@ -140,8 +146,104 @@
             </select>
         </div>
     </div>
-</form>
+    {{#if @queryParams.subscription}}
+    <div class="page-header">
+        <h2><br></h2>
+        <p class="lead">{{i18n "burst.control.rate.limiting"}}</p>
+    </div>
 
+    <div class="form-group">
+        <label class="control-label col-sm-3">{{i18n "Request.Count"}} </label>
+        <div class="col-sm-6">
+            <input class="form-control" type="text" id="rateLimitCount" name="rateLimitCount"/>
+        </div>
+        <div class="col-sm-3">
+            <select class="form-control select required" id="rateLimitTimeUnit" name="rateLimitTimeUnit">
+                <option value="sec" selected="true">{{i18n "request.s"}}</option>
+                <option value="min">{{i18n "request.min"}}</option>
+            </select>
+        </div>
+    </div>
+        <div class="page-header">
+            <h2><br></h2>
+            <p class="lead">{{i18n "policy.flags"}}</p>
+        </div>
+    <div class="form-group">
+        <label class="control-label col-sm-3">{{i18n "stop.on.quota.reach"}}</label>
+        <div class="col-sm-6">
+            <label class="checkbox">
+                <input type="checkbox" id="stopOnQuotaReach" name="stopOnQuotaReach">
+                <span class="helper"></span>
+            </label>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label class="col-sm-3 control-label">{{i18n "billing.plan"}}</label>
+        <div class="col-sm-3">
+            <select class="form-control select required" id="tierPlan" name="tierPlan">
+                <option value="FREE" selected="true">{{i18n "free"}}</option>
+                <option value="COMMERCIAL">{{i18n "commercial"}}</option>
+            </select>
+        </div>
+    </div>
+
+        <div class="page-header">
+            <h2><br></h2>
+            <p class="lead">{{i18n "custom.attributes"}}</p>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-3">
+                <button id="add-attribute-btn" name="add-attribute-btn" type="button" class="btn"
+                        value="<%=i18n.localize('Custom Attributes')%>" >
+                                <span class="icon fw-stack">
+	                                    <i class="fw fw-add fw-stack-1x"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+	                 			</span>
+                    {{i18n "add.custom.attribute"}}
+                </button>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-6">
+                <table id="custom-attribute-table">
+                    <tbody id="custom-attribute-tbody" name="custom-attribute-tbody"/>
+                </table>
+            </div>
+        </div>
+
+        <legend>{{i18n "permissions"}}</legend>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">{{i18n "Roles"}}
+                <span class="requiredAstrix">*</span></label>
+            <div class="col-sm-6">
+                <input class="form-control" type="text" id="roles" name="roles" value=""/>
+                <p class="help-block">{{ i18n "this.tier.is"}}
+                    <span class="label label-success">
+	                        				{{i18n "allowed"}}</span>
+	                        		{{i18n "for.above.roles"}}
+                </p>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-3"></div>
+            <div class="col-sm-3" id="permissionTypes">
+                <label class="radio">
+                    <input type="radio" name="permissionAction" value="allow">
+                    <span class="helper">{{i18n "allow"}}</span>
+                </label>
+                <label class="radio">
+                    <input type="radio" name="permissionAction" value="deny">
+                    <span class="helper">{{i18n "deny"}}</span>
+                </label>
+            </div>
+        </div>
+
+    {{/if}}
+</form>
+{{#if @queryParams.api}}
 <div class="page-header">
     <h2><br/></h2>
     <p class="lead">{{i18n "Conditional.Groups"}}</p>
@@ -155,7 +257,10 @@
     </button>
 </div>
 
+
 {{defineZone "pipeline-content"}}
+{{/if}}
+
 <div class="page-header">
     <h2><br/></h2>
 </div>

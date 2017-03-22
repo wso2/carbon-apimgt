@@ -41,22 +41,22 @@ public class PolicyMappingUtil {
 
     public static Policy toPolicy(String tierLevel, TierDTO tierDTO) {
 
-        Policy policy = null;
+        Policy policy;
         if (APIMgtConstants.ThrottlePolicyConstants.API_LEVEL.equals(tierLevel))    {
             policy = new APIPolicy(tierDTO.getName());
-            policy.setDescription(tierDTO.getDescription());
-            QuotaPolicy quotaPolicy = new QuotaPolicy();
-            Limit limit = new Limit();
-            limit.setTimeUnit(tierDTO.getTimeUnit());
-            limit.setUnitTime(tierDTO.getUnitTime());
-            quotaPolicy.setLimit(limit);
-            quotaPolicy.setType("request");
-            policy.setDefaultQuotaPolicy(quotaPolicy);
         } else if (APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL.equals(tierLevel)) {
             policy = new ApplicationPolicy(tierDTO.getName());
-        } else if (APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL.equals(tierLevel)){
+        } else {
             policy = new SubscriptionPolicy(tierDTO.getName());
         }
+        policy.setDescription(tierDTO.getDescription());
+        QuotaPolicy quotaPolicy = new QuotaPolicy();
+        Limit limit = new Limit();
+        limit.setTimeUnit(tierDTO.getTimeUnit());
+        limit.setUnitTime(tierDTO.getUnitTime());
+        quotaPolicy.setLimit(limit);
+        quotaPolicy.setType("requestCount");
+        policy.setDefaultQuotaPolicy(quotaPolicy);
 
         return policy;
     }

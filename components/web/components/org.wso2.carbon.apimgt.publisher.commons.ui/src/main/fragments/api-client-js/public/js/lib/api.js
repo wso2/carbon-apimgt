@@ -356,7 +356,7 @@ class API {
         var promise_policies = this.client.then(
             (client) => {
                 return client["Throttling Tier (Collection)"].get_policies_tierLevel(
-                    {tierLevel: 'api'}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+                    {tierLevel: 'subscription'}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
             }
         );
         return promise_policies;

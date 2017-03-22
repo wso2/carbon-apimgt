@@ -14,6 +14,7 @@
  *  limitations under the License.
  */
 var index = 0;
+var attributeCount =0;
 var headerTables =[];
 var queryParamTables =[];
 var claimsTables = [];
@@ -23,6 +24,11 @@ $(function () {
 
     $('#cancel-tier-btn').on('click', function () {
         window.location = contextPath + "/throttling/advanced-throttling"
+    });
+    $('#add-attribute-btn').on('click',function(){
+        ++ attributeCount;
+        var tBody = $('#custom-attribute-tbody');
+        addCustomAttribute(tBody, attributeCount);
     });
 });
 
@@ -49,6 +55,7 @@ var addPolicy = function () {
         "id": 0,
         "enabled": false,
         "description": "",
+        "roleList" : "Internal/everyone",
         "quotaPolicy": {
             "requestCount": true,
             "badndwidth" : true,
@@ -194,7 +201,7 @@ var addPolicyToBackend = function () {
     var policy = {};
     policy.name = apiPolicyNew.policyName;
     policy.description = apiPolicyNew.policyDescription;
-    policy.tierLevel = "api";
+    policy.tierLevel = policyQuery ; // from send to client.
     policy.unitTime = parseInt(apiPolicyNew.defaultQuotaPolicy.limit.unitTime);
     policy.timeUnit = apiPolicyNew.defaultQuotaPolicy.limit.timeUnit;
     policy.stopOnQuotaReach = true;
@@ -306,6 +313,24 @@ function validateForSpaces(text, element, errorMsg){
         element.css("border", "1px solid #cccccc");
         return true;
     }
+}
+
+function addCustomAttribute(element, count){
+
+    var elementId = element.attr('id');
+    element.parent().append(
+        '<tr id="attribute'+count+'">'+
+        '<td><div class="clear"></div></td>'+
+        '<td><input type="text" class="form-control" id="attributeName'+count+'" name="attributeName'+count+'" placeholder="Attribute Name"/></td>'+
+        '<td><input type="text" class="form-control" id="attributeValue'+count+'" name="attributeValue'+count+'" placeholder="Value"/></td>'+
+        '<td class="delete_resource_td"><a  id="attributeDelete'+count+'"  href="javascript:removeCustomAttribute('+count+')">'+
+        '<span class="fw-stack"> <i class="fw fw-delete fw-stack-1x"></i> <i class="fw fw-circle-outline fw-stack-2x"></i></span></td></a></td>'+
+        '</tr>'
+    );
+}
+
+function removeCustomAttribute(count){
+    $('#attribute'+count).remove();
 }
 
 

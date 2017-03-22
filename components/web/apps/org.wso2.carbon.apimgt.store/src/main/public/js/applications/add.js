@@ -41,25 +41,42 @@ var _renderApplicationAddPage = function(){
     var swaggerClient = new SwaggerClient({
         url: swaggerURL,
         success: function (data) {
-
             //TODO:Replace this once the tierList retrieval api is implemented
-            var tier = {};
-            tier.name = "50PerMin";
-            tier.description = "Allows 50000 requests per minute";
             var list = [];
-            list.push(tier);
-            //TODO:Replace this once the tierList retrieval api is implemented
-
-            UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.application-add", {"list":list},
-                "application-add", mode, {
-                    onSuccess: function () {
-                    }, onFailure: function (message, e) {
-                        alert(e);
+            setAuthHeader(swaggerClient);
+            swaggerClient["Tier Collection"].get_policies_tierLevel
+            ({
+                    "tierLevel": "application",
+                    "Content-Type": "application/json"
+                },
+                function (data) {
+                    debugger;
+                    for(var i=0; i<data.obj.count;i++) {
+                        var tier = {};
+                        tier.name = data.obj.list[i].name;
+                        tier.description = data.obj.list[i].description;
+                        list.push(tier);
+                    }
+                    UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.application-add", {"list":list},
+                        "application-add", mode, {
+                            onSuccess: function () {
+                            }, onFailure: function (message, e) {
+                                alert(e);
+                            }
+                        });
+                    console.log(data);
+                },
+                function (error) {
+                    if(error.status==401){
+                        redirectToLogin(contextPath);
                     }
                 });
+            //TODO:Replace this once the tierList retrieval api is implemented
+
         }
     });
-}
+    console.log(swaggerClient);
+};
 
 var addApplication = function () {
 

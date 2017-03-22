@@ -1,19 +1,3 @@
-/*
-* Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 import java.util.Objects;
@@ -29,14 +13,14 @@ import java.util.Map;
 /**
  * WorkflowDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", 
-    date = "2017-03-13T14:16:40.822+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-22T14:28:21.878+05:30")
 public class WorkflowDTO   {
   /**
    * This attribute declares whether this workflow task is approved or rejected. 
    */
   public enum StatusEnum {
-    APPROVED("APPROVED"),    
+    APPROVED("APPROVED"),
+    
     REJECTED("REJECTED");
 
     private String value;
@@ -80,8 +64,7 @@ public class WorkflowDTO   {
    * This attribute declares whether this workflow task is approved or rejected. 
    * @return status
   **/
-  @ApiModelProperty(example = "APPROVED", required = true, 
-          value = "This attribute declares whether this workflow task is approved or rejected. ")
+  @ApiModelProperty(example = "APPROVED", required = true, value = "This attribute declares whether this workflow task is approved or rejected. ")
   public StatusEnum getStatus() {
     return status;
   }

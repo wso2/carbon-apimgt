@@ -590,7 +590,7 @@ definitions:
         enum:
           - api
           - application
-          - resource
+          - subscription
         example: api
       attributes:
         description: |

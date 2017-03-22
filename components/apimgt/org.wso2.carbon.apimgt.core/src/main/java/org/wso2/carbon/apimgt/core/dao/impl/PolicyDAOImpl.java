@@ -60,6 +60,8 @@ public class PolicyDAOImpl implements PolicyDAO {
                 return getAPIPolicies();
             } else if (APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL.equals(policyLevel)) {
                 return getApplicationPolicies();
+            } else if (APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL.equals(policyLevel)) {
+                return getSubscriptionPolicies();
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException("Couldn't find " + policyLevel + " policies", e);
@@ -83,11 +85,14 @@ public class PolicyDAOImpl implements PolicyDAO {
                              policy.getDefaultQuotaPolicy().getLimit().getTimeUnit(), "API");
             } else if (APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL.equals(policyLevel))   {
                 addApplicationPolicy(connection, policy.getPolicyName(), policy.getDisplayName(),
-                                     policy.getDescription(), policy.getDefaultQuotaPolicy().getType(), 0, null, 0,
-                                     "APPLICATION");
+                        policy.getDescription(), policy.getDefaultQuotaPolicy().getType(), 0, "",
+                        (int) policy.getDefaultQuotaPolicy().getLimit().getUnitTime(),
+                        policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
             } else if (APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL.equals(policyLevel))   {
                 addSubscriptionPolicy(connection, policy.getPolicyName(), policy.getDisplayName(),
-                                      policy.getDescription());
+                        policy.getDescription(), policy.getDefaultQuotaPolicy().getType(), 0, "",
+                        (int) policy.getDefaultQuotaPolicy().getLimit().getUnitTime(),
+                        policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -172,6 +177,30 @@ public class PolicyDAOImpl implements PolicyDAO {
                             resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_NAME));
                     setCommonPolicyDetails(applicationPolicy, resultSet);
                     policyList.add(applicationPolicy);
+                }
+            }
+        }
+        return policyList;
+    }
+
+    /**
+     * Retrieves all Subscription policies.
+     *
+     * @return  List of subscriptions.
+     * @throws SQLException     If error occurs while retrieving subscription level policies.
+     */
+    private List<Policy> getSubscriptionPolicies() throws SQLException {
+        List<Policy> policyList = new ArrayList<>();
+        String sqlQuery = "SELECT * from AM_SUBSCRIPTION_POLICY";
+
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(
+                            resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_NAME));
+                    setCommonPolicyDetails(subscriptionPolicy, resultSet);
+                    policyList.add(subscriptionPolicy);
                 }
             }
         }
@@ -616,10 +645,13 @@ public class PolicyDAOImpl implements PolicyDAO {
                     addAPIPolicy(connection, "Silver", "Silver", "Silver", "requestCount", 1, 60, "s", "API");
                     addAPIPolicy(connection, "Bronze", "Bronze", "Bronze", "requestCount", 1, 60, "s", "API");
 
-                    addSubscriptionPolicy(connection, "Unlimited", "Unlimited", "Unlimited");
-                    addSubscriptionPolicy(connection, "Gold", "Gold", "Gold");
-                    addSubscriptionPolicy(connection, "Silver", "Silver", "Silver");
-                    addSubscriptionPolicy(connection, "Bronze", "Bronze", "Bronze");
+                    addSubscriptionPolicy(connection, "Unlimited", "Unlimited", "Unlimited", "requestCount",
+                            Integer.MAX_VALUE, "REQ", 1, "min");
+                    addSubscriptionPolicy(connection, "Gold", "Gold", "Gold", "requestCount", 5000, "REQ", 1, "min");
+                    addSubscriptionPolicy(connection, "Silver", "Silver", "Silver", "requestCount", 2000, "REQ", 1,
+                            "min");
+                    addSubscriptionPolicy(connection, "Bronze", "Bronze", "Bronze", "requestCount", 1000, "REQ", 1,
+                            "min");
 
                     addApplicationPolicy(connection, "50PerMin", "50PerMin", "50PerMin Tier",
                                                                                     "requestCount", 10, "REQ", 1, "s");
@@ -676,15 +708,22 @@ public class PolicyDAOImpl implements PolicyDAO {
     }
 
     private static void addSubscriptionPolicy(Connection connection, String name, String displayName,
-                                              String description) throws SQLException {
-        final String query = "INSERT INTO AM_SUBSCRIPTION_POLICY (UUID, NAME, DISPLAY_NAME, DESCRIPTION) " +
-                "VALUES (?,?,?,?)";
+            String description, String quotaType, int quota, String quotaUnit, int unitTime, String timeUnit)
+            throws SQLException {
+        final String query =
+                "INSERT INTO AM_SUBSCRIPTION_POLICY (UUID, NAME, DISPLAY_NAME, DESCRIPTION, QUOTA_TYPE, QUOTA, "
+                        + "QUOTA_UNIT, UNIT_TIME, TIME_UNIT) VALUES (?,?,?,?,?,?,?,?,?)";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, UUID.randomUUID().toString());
             statement.setString(2, name);
             statement.setString(3, displayName);
             statement.setString(4, description);
+            statement.setString(5, quotaType);
+            statement.setInt(6, quota);
+            statement.setString(7, quotaUnit);
+            statement.setInt(8, unitTime);
+            statement.setString(9, timeUnit);
 
             statement.execute();
         }

@@ -27,7 +27,7 @@ import javax.ws.rs.*;
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the workflows API")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-13T14:16:40.822+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-22T14:28:21.878+05:30")
 public class WorkflowsApi implements Microservice  {
    private final WorkflowsApiService delegate = WorkflowsApiServiceFactory.getWorkflowsApi();
 

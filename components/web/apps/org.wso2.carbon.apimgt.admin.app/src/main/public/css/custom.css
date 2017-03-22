@@ -322,3 +322,8 @@ a {
 .fw-number{
     color: black;
 }
+
+.checkbox{
+    padding-left: 23px;
+    position: relative;
+}
