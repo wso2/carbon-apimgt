@@ -21,6 +21,7 @@
 package org.wso2.carbon.apimgt.core.impl;
 
 import com.google.common.io.Files;
+import javassist.tools.reflect.Sample;
 import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -179,16 +180,11 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
-        String bal = "package passthroughservice.samples;\n" + "\n" + "import ballerina.net.http;\n"
-                + "@http:BasePath (\"/passthrough\")\n" + "service passthrough {\n" + "\n" + "    @http:GET\n"
-                + "    resource passthrough (message m) {\n"
-                + "        http:ClientConnector nyseEP = create http:ClientConnector(\"http://localhost:9090\");\n"
-                + "        message response = http:ClientConnector.get(nyseEP, \"/nyseStock\", m);\n"
-                + "        reply response;\n" + "\n" + "    }\n" + "\n" + "}";
+        String configString = SampleTestObjectCreator.createSampleGatewayConfig();
         APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null, null);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
-        apiPublisher.updateApiGatewayConfig(uuid, bal);
-        Mockito.verify(apiDAO, Mockito.times(1)).updateGatewayConfig(uuid, bal, user);
+        apiPublisher.updateApiGatewayConfig(uuid, configString);
+        Mockito.verify(apiDAO, Mockito.times(1)).updateGatewayConfig(uuid, configString, user);
     }
 
     @Test(description = "Exception updating Gateway Config for API", expectedExceptions = APIManagementException.class)
@@ -196,17 +192,12 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
-        String bal = "package passthroughservice.samples;\n" + "\n" + "import ballerina.net.http;\n"
-                + "@http:BasePath (\"/passthrough\")\n" + "service passthrough {\n" + "\n" + "    @http:GET\n"
-                + "    resource passthrough (message m) {\n"
-                + "        http:ClientConnector nyseEP = create http:ClientConnector(\"http://localhost:9090\");\n"
-                + "        message response = http:ClientConnector.get(nyseEP, \"/nyseStock\", m);\n"
-                + "        reply response;\n" + "\n" + "    }\n" + "\n" + "}";
+        String configString = SampleTestObjectCreator.createSampleGatewayConfig();
         APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null, null);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
         Mockito.doThrow(new APIMgtDAOException("Couldn't update configuration for apiId " + uuid)).when(apiDAO)
-                .updateGatewayConfig(uuid, bal, user);
-        apiPublisher.updateApiGatewayConfig(uuid, bal);
+                .updateGatewayConfig(uuid, configString, user);
+        apiPublisher.updateApiGatewayConfig(uuid, configString);
     }
 
     @Test(description = "Test add api with duplicate context", expectedExceptions = APIManagementException.class)
@@ -415,14 +406,8 @@ public class APIPublisherImplTestCase {
                 null);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.lifeCycleStatus(APIStatus.CREATED.getStatus()).build());
         Mockito.when(apiDAO.isAPIContextExists(api.getContext())).thenReturn(true);
-
-        String bal = "package passthroughservice.samples;\n" + "\n" + "import ballerina.net.http;\n"
-                + "@http:BasePath (\"/passthrough\")\n" + "service passthrough {\n" + "\n" + "    @http:GET\n"
-                + "    resource passthrough (message m) {\n"
-                + "        http:ClientConnector nyseEP = create http:ClientConnector(\"http://localhost:9090\");\n"
-                + "        message response = http:ClientConnector.get(nyseEP, \"/nyseStock\", m);\n"
-                + "        reply response;\n" + "\n" + "    }\n" + "\n" + "}";
-        Mockito.when(apiDAO.getGatewayConfig(uuid)).thenReturn(bal);
+        String configString = SampleTestObjectCreator.createSampleGatewayConfig();
+        Mockito.when(apiDAO.getGatewayConfig(uuid)).thenReturn(configString);
         apiPublisher.updateAPI(api.lifeCycleStatus(APIStatus.CREATED.getStatus()).id(uuid));
         Mockito.verify(apiDAO, Mockito.times(1)).getAPI(uuid);
         Mockito.verify(apiDAO, Mockito.times(0)).isAPIContextExists(api.getContext());
@@ -1130,8 +1115,9 @@ public class APIPublisherImplTestCase {
     public void testSaveThumbnailImage() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, null, null, null);
-        apiPublisher.saveThumbnailImage(API_ID, null, "jpeg");
-        Mockito.verify(apiDAO, Mockito.times(1)).updateImage(API_ID, null, "jpeg", user);
+        InputStream image = SampleTestObjectCreator.createDefaultThumbnailImage();
+        apiPublisher.saveThumbnailImage(API_ID, image, "png");
+        Mockito.verify(apiDAO, Mockito.times(1)).updateImage(API_ID, image, "png", user);
     }
 
     @Test(description = "Exception when saving thumbnail image for API",
@@ -1380,8 +1366,8 @@ public class APIPublisherImplTestCase {
 
     }
 
-    @Test(description = "Event Observers for event listning")
-    public void testObserverEventListner() throws APIManagementException {
+    @Test(description = "Event Observers for event listening")
+    public void testObserverEventListener() throws APIManagementException {
 
         EventLogger observer = Mockito.mock(EventLogger.class);
 
