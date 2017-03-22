@@ -147,13 +147,13 @@ public class TestUtil {
 
     /**
      * Utility for get Docker running host
-     * @return
-     * @throws URISyntaxException
+     * @return docker host
+     * @throws URISyntaxException if docker Host url is malformed this will throw
      */
     public String getIpAddressOfContainer() throws URISyntaxException {
         String ip = "localhost";
         String dockerHost = System.getenv("DOCKER_HOST");
-        if (!StringUtils.isEmpty("DOCKER_HOST: " + dockerHost)) {
+        if (!StringUtils.isEmpty(dockerHost)) {
             URI uri = new URI(dockerHost);
             ip = uri.getHost();
         }
