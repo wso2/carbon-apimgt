@@ -79,14 +79,36 @@ $(function () {
 
                                     },
                                     function (error) {
-                                        alert("Error occurred while retrieve Applications" + error);
+                                        var message = "Error occurred while retrieve Applications";
+                                        noty({
+                                            text: message,
+                                            type: 'error',
+                                            dismissQueue: true,
+                                            modal: true,
+                                            progressBar: true,
+                                            timeout: 2000,
+                                            layout: 'top',
+                                            theme: 'relax',
+                                            maxVisible: 10,
+                                        });
                                         if(error.status==401){
                                             redirectToLogin(contextPath);
                                         }
                                     });
                         },
                         function (error) {
-                            alert("Error occurred while retrieve Applications" + error);
+                            var message = "Error occurred while retrieve Applications";
+                            noty({
+                                text: message,
+                                type: 'error',
+                                dismissQueue: true,
+                                modal: true,
+                                progressBar: true,
+                                timeout: 2000,
+                                layout: 'top',
+                                theme: 'relax',
+                                maxVisible: 10,
+                            });
                             if(error.status==401){
                                 redirectToLogin(contextPath);
                             }
@@ -325,7 +347,18 @@ $(function () {
 	    	                                                		});
 	                                                            },
 	                                                            function (error) {
-	                                                                alert("Error occurred while retrieving Application details" + error);
+	                                                                var message = "Error occurred while retrieving Application details";
+	                                                                noty({
+	                                                                    text: message,
+	                                                                    type: 'error',
+	                                                                    dismissQueue: true,
+	                                                                    modal: true,
+	                                                                    progressBar: true,
+	                                                                    timeout: 2000,
+	                                                                    layout: 'top',
+	                                                                    theme: 'relax',
+	                                                                    maxVisible: 10,
+	                                                                });
 	                                                                if(error.status==401){
 	                                                                    redirectToLogin(contextPath);
 	                                                                }
@@ -334,7 +367,18 @@ $(function () {
 	                                                      
 	                                        },
 	                                        function (error) {
-	                                            alert("Error occurred while retrieving Subscriptions" + error);
+	                                            var message = "Error occurred while retrieving Subscriptions";
+	                                            noty({
+                                                    text: message,
+                                                    type: 'error',
+                                                    dismissQueue: true,
+                                                    modal: true,
+                                                    progressBar: true,
+                                                    timeout: 2000,
+                                                    layout: 'top',
+                                                    theme: 'relax',
+                                                    maxVisible: 10,
+                                                });
 	                                            if(error.status==401){
 	                                                redirectToLogin(contextPath);
 	                                            }
@@ -343,7 +387,18 @@ $(function () {
 	                            		
 	                              },
 	                              function (error) {
-	                            	  alert("Error occurred while retrieving Applications" + error);
+	                            	  var message = "Error occurred while retrieving Applications";
+	                            	  noty({
+                                          text: message,
+                                          type: 'error',
+                                          dismissQueue: true,
+                                          modal: true,
+                                          progressBar: true,
+                                          timeout: 2000,
+                                          layout: 'top',
+                                          theme: 'relax',
+                                          maxVisible: 10,
+                                      });
 	                                  if(error.status==401){
 	                                	  redirectToLogin(contextPath);
 	                                  }
@@ -351,7 +406,18 @@ $(function () {
 
                             },
                             function (error) {
-                                alert("Error occurred while retrieve Applications" + error);
+                                var message = "Error occurred while retrieve Applications";
+                                noty({
+                                    text: message,
+                                    type: 'error',
+                                    dismissQueue: true,
+                                    modal: true,
+                                    progressBar: true,
+                                    timeout: 2000,
+                                    layout: 'top',
+                                    theme: 'relax',
+                                    maxVisible: 10,
+                                });
                                 if(error.status==401){
                                     redirectToLogin(contextPath);
                                 }
@@ -379,7 +445,18 @@ $(function () {
 
                 },
                 function (jqXHR, textStatus, errorThrown) {
-                    alert("Error occurred while retrieve api with id  : " + apiId);
+                    var message = "Error occurred while retrieve api with id  : " + apiId;
+                    noty({
+                        text: message,
+                        type: 'error',
+                        dismissQueue: true,
+                        modal: true,
+                        progressBar: true,
+                        timeout: 2000,
+                        layout: 'top',
+                        theme: 'relax',
+                        maxVisible: 10,
+                    });
                     if(jqXHR.status==401){
                         redirectToLogin(contextPath);
                     }
@@ -448,7 +525,18 @@ $(function () {
 
                         },
                         function (error) {
-                            alert("Error occurred while adding Application : " + applicationName);
+                            var message = "Error occurred while adding Application : " + applicationName;
+                            noty({
+                                text: message,
+                                type: 'error',
+                                dismissQueue: true,
+                                modal: true,
+                                progressBar: true,
+                                timeout: 2000,
+                                layout: 'top',
+                                theme: 'relax',
+                                maxVisible: 10,
+                            });
                         });
                 }
 
