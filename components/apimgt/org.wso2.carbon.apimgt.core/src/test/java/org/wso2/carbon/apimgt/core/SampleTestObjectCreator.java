@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
@@ -93,7 +94,7 @@ public class SampleTestObjectCreator {
                 id(UUID.randomUUID().toString()).
                 context("weather").
                 description("Get Weather Info").
-                lifeCycleStatus("CREATED").
+                lifeCycleStatus(APIStatus.CREATED.getStatus()).
                 lifecycleInstanceId(UUID.randomUUID().toString()).
                 endpoint(Collections.emptyMap()).
                 wsdlUri("http://localhost:9443/echo?wsdl").
@@ -151,7 +152,7 @@ public class SampleTestObjectCreator {
         LifecycleState lifecycleState = new LifecycleState();
         lifecycleState.setLcName("API_LIFECYCLE");
         lifecycleState.setLifecycleId(lifecycleId);
-        lifecycleState.setState("PUBLISH");
+        lifecycleState.setState("PUBLISHED");
         return lifecycleState;
     }
 
@@ -188,7 +189,7 @@ public class SampleTestObjectCreator {
                 id(UUID.randomUUID().toString()).
                 context("weather").
                 description("Get Food & Beverage Info").
-                lifeCycleStatus("CREATED").
+                lifeCycleStatus(APIStatus.CREATED.getStatus()).
                 endpoint(Collections.emptyMap()).
                 wsdlUri("http://www.webservicex.net/globalweather.asmx?op=GetWeather?wsdl").
                 isResponseCachingEnabled(true).
@@ -240,7 +241,7 @@ public class SampleTestObjectCreator {
                 id(UUID.randomUUID().toString()).
                 context(UUID.randomUUID().toString()).
                 description("Get Food & Beverage Info").
-                lifeCycleStatus("CREATED").
+                lifeCycleStatus(APIStatus.CREATED.getStatus()).
                 endpoint(Collections.emptyMap()).
                 wsdlUri("http://www.webservicex.net/globalweather.asmx?op=GetWeather?wsdl").
                 isResponseCachingEnabled(true).
