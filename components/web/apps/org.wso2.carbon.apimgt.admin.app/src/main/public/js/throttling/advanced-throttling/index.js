@@ -35,7 +35,6 @@ $(function () {
     });
 
     function _initDataTable(raw_data) {
-        debugger;
         $('#api-policy').DataTable({
             ajax: function (data, callback, settings) {
                 callback(raw_data);
