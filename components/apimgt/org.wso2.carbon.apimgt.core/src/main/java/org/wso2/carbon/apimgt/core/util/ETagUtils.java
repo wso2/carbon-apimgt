@@ -52,12 +52,15 @@ public class ETagUtils {
             messageDigest.update(updatedTime.getBytes("UTF-8"));
             byte[] digest = messageDigest.digest();
 
+            //conversion to hexadecimal
             StringBuilder sb = new StringBuilder();
-            for (byte aDigest : digest) {
-                sb.append(Integer.toString((aDigest & 0xff) + 0x100, 16).substring(1)); // not quite necessary
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b & 0xff));
             }
+
+            String generatedHash = sb.toString();
             if (log.isDebugEnabled()) {
-                log.debug("ETag generated in HEX :: " + sb.toString());
+                log.debug("ETag generated in HEX '" + generatedHash + "' for '" + updatedTime + "'");
             }
             return sb.toString();
         } catch (UnsupportedEncodingException e) {
