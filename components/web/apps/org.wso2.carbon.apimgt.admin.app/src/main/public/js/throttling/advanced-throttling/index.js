@@ -43,6 +43,8 @@ $(function () {
             columns: [
                 {'data': 'name'},
                 {'data': 'description'},
+                {'data': 'unitTime'},
+                {'data': 'timeUnit'},
                 {'data': 'name'}
             ],
             columnDefs: [
