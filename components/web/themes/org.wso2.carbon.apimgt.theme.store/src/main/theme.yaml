@@ -11,10 +11,9 @@ headJs:
  - lib/jquery-v2.2.3/jquery.min.js
  - lib/bootstrap_3.3.5/js/bootstrap.min.js
  - lib/i18n/i18next-1.5.9.js
-# - lib/jquery-csrf/jquery-csrf.js
- - lib/handlebars-v4.0.5.js
+# - lib/jquery-csrf/jquery-csrf.js 
  - lib/bootstrap-rating/bootstrap-rating.js
- - lib/swagger/swagger-client.min.js
+
 js:
  - lib/theme-wso2_1.0/js/theme-wso2.js
  - lib/bootstrap-select/js/bootstrap-select.min.js
