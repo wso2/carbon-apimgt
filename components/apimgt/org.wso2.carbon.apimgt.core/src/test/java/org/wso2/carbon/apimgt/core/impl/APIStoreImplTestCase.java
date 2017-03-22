@@ -40,21 +40,25 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.API.APIBuilder;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.ApplicationCreationResponse;
 import org.wso2.carbon.apimgt.core.models.ApplicationCreationWorkflow;
 import org.wso2.carbon.apimgt.core.models.Event;
+import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
 import org.wso2.carbon.apimgt.core.models.SubscriptionWorkflow;
 import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.SubscriptionStatus;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationSimpleWorkflowExecutor;
 import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
 import org.wso2.carbon.apimgt.core.workflow.SubscriptionCreationSimpleWorkflowExecutor;
+import org.wso2.carbon.apimgt.core.workflow.SubscriptionDeletionSimpleWorkflowExecutor;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -253,7 +257,7 @@ public class APIStoreImplTestCase {
 
         // before workflow add subscription with blocked state
         verify(apiSubscriptionDAO, times(1)).addAPISubscription(subscriptionId, apiId, UUID, TIER,
-                APIMgtConstants.SubscriptionStatus.BLOCKED);
+                APIMgtConstants.SubscriptionStatus.ON_HOLD);
         // after workflow change the state
         verify(apiSubscriptionDAO, times(1)).updateSubscriptionStatus(subscriptionId,
                 APIMgtConstants.SubscriptionStatus.ACTIVE);
@@ -283,7 +287,7 @@ public class APIStoreImplTestCase {
 
         // subscription should not be added
         verify(apiSubscriptionDAO, times(0)).addAPISubscription(subscriptionId, apiId, UUID, TIER,
-                APIMgtConstants.SubscriptionStatus.BLOCKED);
+                APIMgtConstants.SubscriptionStatus.ON_HOLD);
     }
     
     @Test(description = "Add subscription without a valid api" , expectedExceptions = APIManagementException.class)
@@ -306,16 +310,23 @@ public class APIStoreImplTestCase {
         Assert.assertNotNull(subscriptionId);
 
         // subscription should not be added
-        verify(apiSubscriptionDAO, times(1)).addAPISubscription(subscriptionId, API_ID, UUID, TIER,
-                APIMgtConstants.SubscriptionStatus.BLOCKED);
+        verify(apiSubscriptionDAO, times(0)).addAPISubscription(subscriptionId, API_ID, UUID, TIER,
+                APIMgtConstants.SubscriptionStatus.ON_HOLD);
     }
     
     @Test(description = "Delete subscription")
     public void testDeleteSubscription() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
+        WorkflowDAO workflowDAO = mock(WorkflowDAO.class);
         APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, apiSubscriptionDAO, null, null, null,
-                null);
+                workflowDAO);   
+        
+        Application application = SampleTestObjectCreator.createDefaultApplication();
+        APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
+        API api = builder.build();
+        Subscription subscription = new Subscription(UUID, application, api, "Gold");    
+        when(apiSubscriptionDAO.getAPISubscription(UUID)).thenReturn(subscription);
         apiStore.deleteAPISubscription(UUID);
         verify(apiSubscriptionDAO, times(1)).deleteAPISubscription(UUID);
     }
@@ -613,7 +624,7 @@ public class APIStoreImplTestCase {
         workflow.setWorkflowReference(null);
         apiStore.completeWorkflow(executor, workflow);
     }  
-
+    
     @Test(description = "Test Application workflow rejection")
     public void testAddApplicationWorkflowReject() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
@@ -643,6 +654,41 @@ public class APIStoreImplTestCase {
   
         verify(applicationDAO, times(1)).updateApplicationState(application.getId(), "REJECTED");
     }      
+    
+    @Test(description = "Test Subscription workflow rejection")
+    public void testAddSubscriptionWorkflowReject() throws APIManagementException {
+        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
+        ApiDAO apiDAO = mock(ApiDAO.class);
+        WorkflowDAO workflowDAO = mock(WorkflowDAO.class);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, applicationDAO, apiSubscriptionDAO, null, null, null,
+                workflowDAO);
+
+        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI();
+        API api = apiBuilder.build();
+        String apiId = api.getId();
+        Application application = new Application("TestApp", USER_ID);
+        application.setId(UUID);
+
+        when(apiDAO.getAPI(apiId)).thenReturn(api);
+        when(applicationDAO.getApplication(UUID)).thenReturn(application);
+
+        SubscriptionResponse response = apiStore.addApiSubscription(apiId, UUID, TIER);
+
+        SubscriptionCreationSimpleWorkflowExecutor executor = mock(SubscriptionCreationSimpleWorkflowExecutor.class);
+        Workflow workflow = new SubscriptionWorkflow();
+        workflow.setWorkflowType(APIMgtConstants.WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+        workflow.setWorkflowReference(response.getSubscriptionUUID());
+        
+        WorkflowResponse reponse = new GeneralWorkflowResponse();
+        reponse.setWorkflowStatus(WorkflowStatus.REJECTED);
+        
+        when(executor.complete(workflow)).thenReturn(reponse);              
+        apiStore.completeWorkflow(executor, workflow);
+  
+        verify(apiSubscriptionDAO, times(1)).updateSubscriptionStatus(response.getSubscriptionUUID(),
+                SubscriptionStatus.REJECTED);
+    }  
 
     @Test(description = "Event Observers registration and removal")
     public void testObserverRegistration() throws APIManagementException {

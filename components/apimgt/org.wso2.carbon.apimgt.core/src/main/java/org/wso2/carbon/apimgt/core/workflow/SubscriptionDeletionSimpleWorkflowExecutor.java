@@ -15,7 +15,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.wso2.carbon.apimgt.core.workflow;
 
 import org.apache.commons.logging.Log;
@@ -27,48 +26,44 @@ import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 
 /**
- * This is a simple work flow extension to have Application creation process
+ * Subscription deletion simple workflow
  */
-public class ApplicationCreationSimpleWorkflowExecutor implements WorkflowExecutor {
-    private static final Log log = LogFactory.getLog(ApplicationCreationSimpleWorkflowExecutor.class);
+public class SubscriptionDeletionSimpleWorkflowExecutor implements WorkflowExecutor {
+    private static final Log log = LogFactory.getLog(SubscriptionDeletionSimpleWorkflowExecutor.class);
 
     /**
-     * Execute the workflow executor
-     *
-     * @param workFlow
-     * @throws WorkflowException
+     * execute subscription deletion 
      */
-
-    public WorkflowResponse execute(Workflow workFlow) throws WorkflowException {
+    @Override
+    public WorkflowResponse execute(Workflow workflow) throws WorkflowException {
         if (log.isDebugEnabled()) {
-            log.debug("Executing Application creation Workflow..");
+            log.debug("Executing Subscription deletion Workflow..");
         }
-    
+
         WorkflowResponse workflowResponse = new GeneralWorkflowResponse();
-        //set the state to approved
+        // set the state to approved
         workflowResponse.setWorkflowStatus(WorkflowStatus.APPROVED);
         return workflowResponse;
     }
 
     /**
-     * Complete the external process status
-     * Based on the workflow status we will update the status column of the
-     * Application table
-     *
-     * @param workFlow - Workflow
+     * complete subscription deletion 
      */
-    public WorkflowResponse complete(Workflow workFlow) throws WorkflowException {
+    @Override
+    public WorkflowResponse complete(Workflow workflow) throws WorkflowException {
         if (log.isDebugEnabled()) {
-            log.debug("Complete  Application creation Workflow..");
+            log.debug("Complete  Subscription deletion Workflow..");
         }
 
         WorkflowResponse workflowResponse = new GeneralWorkflowResponse();
-        workflowResponse.setWorkflowStatus(workFlow.getStatus());
+        workflowResponse.setWorkflowStatus(workflow.getStatus());
         return workflowResponse;
     }
 
+    /**
+     * clean up pending subscription deletiion tasks
+     */
     @Override
-    public void cleanUpPendingTask(String workflowExtRef) throws WorkflowException {
-        
-    }
+    public void cleanUpPendingTask(String workflowExtRef) throws WorkflowException {}
+
 }

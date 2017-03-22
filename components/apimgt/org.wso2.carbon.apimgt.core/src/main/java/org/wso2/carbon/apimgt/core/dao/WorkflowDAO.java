@@ -49,4 +49,12 @@ public interface WorkflowDAO {
      * @throws APIMgtDAOException if API Manager core level exception occurred
      */
     public Workflow retrieveWorkflow(String workflowReference) throws APIMgtDAOException;
+
+    /**
+     * Get the exernal reference id for a given subsription id. 
+     * @param subscriptionId subscription id
+     * @return String external reference id
+     * @throws APIMgtDAOException if API Manager core level exception occurred
+     */
+    String getExternalWorkflowReferenceForSubscription(String subscriptionId) throws APIMgtDAOException;
 }

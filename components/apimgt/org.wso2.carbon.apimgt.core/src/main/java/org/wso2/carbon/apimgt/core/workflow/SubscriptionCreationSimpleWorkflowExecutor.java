@@ -41,7 +41,7 @@ public class SubscriptionCreationSimpleWorkflowExecutor implements WorkflowExecu
 
     public WorkflowResponse execute(Workflow workFlow) throws WorkflowException {
         if (log.isDebugEnabled()) {
-            log.info("Executing Subscription creation Workflow..");
+            log.debug("Executing Subscription creation Workflow..");
         }
     
         WorkflowResponse workflowResponse = new GeneralWorkflowResponse();
@@ -59,7 +59,7 @@ public class SubscriptionCreationSimpleWorkflowExecutor implements WorkflowExecu
      */
     public WorkflowResponse complete(Workflow workFlow) throws WorkflowException {
         if (log.isDebugEnabled()) {
-            log.info("Complete  Subscription creation Workflow..");
+            log.debug("Complete  Subscription creation Workflow..");
         }
 
         WorkflowResponse workflowResponse = new GeneralWorkflowResponse();
