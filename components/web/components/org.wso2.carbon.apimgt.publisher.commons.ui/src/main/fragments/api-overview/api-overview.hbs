@@ -63,37 +63,38 @@
         <table class="table table-bordered">
             <tbody>
             <tr>
-                <td class="col-sm-3">Visibility</td>
+                <td class="col-sm-3">{{i18n "Visibility"}}</td>
                 <td id="inUrl">
                     {{@params.visibility}}
                 </td>
             </tr>
             <tr>
-                <td class="col-sm-3">Context</td>
+                <td class="col-sm-3">{{i18n "Context"}}</td>
                 <td id="inUrl">{{@params.context}}</td>
             </tr>
-
             <tr>
-                <td>Date Last Updated</td>
+                <td>{{i18n "Date Last Updated"}}</td>
                 <td id="inUpdated" class="dateFull">{{@params.lastUpdatedTime}}</td>
             </tr>
             <tr>
-                <td>Tier Availability</td>
+                <td>{{i18n "Tier Availability"}}</td>
                 <td id="tierAvb">{{@params.policies}}{{#unless @params.policies}}<b>N/A</b>{{/unless}}</td>
             </tr>
             <tr>
-                <td>Default API Version</td>
+                <td>{{i18n "Default API Version"}}</td>
                 <td id="defaultAPIVersion">
                     {{@params.isDefaultVersion}}
                 </td>
-
             </tr>
-
             <tr>
-                <td>Published Environments</td>
+                <td>{{i18n "Published Environments"}}</td>
                 <td>
                     <b>N/A</b>
                 </td>
+            </tr>
+            <tr>
+                <td>{{i18n "Labels"}}</td>
+                <td id="labelValues">{{@params.labels}}{{#unless @params.labels}}<b>N/A</b>{{/unless}}</td>
             </tr>
             </tbody>
         </table>

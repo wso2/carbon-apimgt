@@ -81,11 +81,11 @@
     </div>
     <div class="col-md-6 col-sm-6">
         <div class="page-header">
-            <h4 class="lead">Change Policies</h4>
+            <h4 class="lead">{{i18n "Change Policies"}}</h4>
         </div>
         <div class="col-md-6 col-sm-6">
             <label for="policies-list-dropdown">
-                Policies :
+                {{i18n "Policies"}} :
             </label>
             <select id="policies-list-dropdown" multiple="multiple">
                 {{#each @params.policies}}
@@ -95,7 +95,26 @@
             </select>
         </div>
         <div class="col-md-3 col-sm-3">
-            <button id="update-tiers-button" type="button" class="btn btn-primary">Update</button>
+            <button id="update-tiers-button" type="button" class="btn btn-primary">{{i18n "Update"}}</button>
+        </div>
+    </div>
+    <div class="col-md-6 col-sm-6">
+        <div class="page-header">
+            <h4 class="lead">{{i18n "Change Labels"}}</h4>
+        </div>
+        <div class="col-md-6 col-sm-6">
+            <label for="labels-list-dropdown">
+                {{i18n "Labels"}} :
+            </label>
+            <select id="labels-list-dropdown" multiple="multiple">
+                {{#each @params.labels}}
+                    <option {{#if this.isSelected }}selected{{/if}}
+                            value="{{this.name}}">{{this.name}}</option>
+                {{/each}}
+            </select>
+        </div>
+        <div class="col-md-3 col-sm-3">
+            <button id="update-labels-button" type="button" class="btn btn-primary">{{i18n "Update"}}</button>
         </div>
     </div>
 </div>
