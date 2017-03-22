@@ -176,4 +176,27 @@ public class WorkflowDAOImpl implements WorkflowDAO {
         return workflow.getExternalWorkflowReference();  
     }
 
+    /**
+     * Get the external reference id for a given application id. 
+     * @param appId application id
+     * @return String external reference id
+     * @throws APIMgtDAOException if API Manager core level exception occurred
+     */
+    public String getExternalWorkflowReferenceForApplication(String appId) throws APIMgtDAOException {
+        final String getworkflowQuery = "SELECT * FROM AM_WORKFLOWS WHERE WF_REFERENCE=? AND WF_TYPE=?";
+        
+        Workflow workflow;
+        try (Connection conn = DAOUtil.getConnection();
+                PreparedStatement ps = conn.prepareStatement(getworkflowQuery)) {
+            ps.setString(1, appId);
+            ps.setString(2, APIMgtConstants.WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+            try (ResultSet rs = ps.executeQuery()) {
+                workflow = this.createWorkflowFromResultSet(rs);                
+            }
+        } catch (SQLException ex) {
+            throw new APIMgtDAOException(ex);
+        }
+        return workflow.getExternalWorkflowReference();  
+    }
+
 }

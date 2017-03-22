@@ -217,4 +217,13 @@ public interface APISubscriptionDAO {
      * @throws APIMgtDAOException if DB level exception occurred
      */
     String getLastUpdatedTimeOfSubscription(String subscriptionId) throws APIMgtDAOException;
+
+    /**
+     * Retrieve the list of subscriptions of an Application which are in pending state
+     *
+     * @param applicationId The UUID of Application
+     * @return A list of {@link Subscription} objects which has pending status
+     * @throws APIMgtDAOException   If failed to get subscriptions.
+     */
+    List<Subscription> getPendingAPISubscriptionsByApplication(String applicationId) throws APIMgtDAOException;
 }
