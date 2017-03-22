@@ -641,7 +641,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             API api = getApiDAO().getAPI(apiId);
             if (api != null) {
                 if (api.getVersion().equals(newVersion)) {
-                    String errMsg = "New API version cannot be same as the previous version";
+                    String errMsg = "New API version " + newVersion + " cannot be same as the previous version for " +
+                            "API " + api.getName();
                     log.error(errMsg);
                     throw new APIManagementException(errMsg, ExceptionCodes.API_ALREADY_EXISTS);
                 }

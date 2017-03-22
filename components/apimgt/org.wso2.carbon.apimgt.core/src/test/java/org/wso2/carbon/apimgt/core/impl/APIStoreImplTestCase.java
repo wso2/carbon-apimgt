@@ -595,16 +595,16 @@ public class APIStoreImplTestCase {
     
     
     @Test(description = "Exception when completing workflow without valid workflow obj",
-            expectedExceptions = WorkflowException.class)
-    public void testCompleteWorkflowWithoutValidWokflowObj() throws APIManagementException {
+            expectedExceptions = APIManagementException.class)
+    public void testCompleteWorkflowWithoutValidWokflowObj() throws Exception {
 
         APIStore apiStore = new APIStoreImpl(USER_NAME, null, null, null, null, null, null, null);
         apiStore.completeWorkflow(null, new Workflow());
     }
     
     @Test(description = "Exception when completing application creation workflow without a reference", 
-            expectedExceptions = WorkflowException.class)
-    public void testCompleteApplicaitonWorkflowWithoutReference() throws APIManagementException {
+            expectedExceptions = APIManagementException.class)
+    public void testCompleteApplicaitonWorkflowWithoutReference() throws Exception {
 
         APIStore apiStore = new APIStoreImpl(USER_NAME, null, null, null, null, null, null, null);
 

@@ -66,10 +66,10 @@ import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.SubscriptionStatus;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
-import org.wso2.carbon.apimgt.core.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExecutorFactory;
 
 import java.time.LocalDateTime;
@@ -289,7 +289,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             workflow.setApplicationName(application.getName());
             workflow.setApplicationId(applicationId);
             
-            //workflow.setSubscriber(userId); //TODO check
+            workflow.setSubscriber(getUsername());
             WorkflowResponse response = addSubscriptionWFExecutor.execute(workflow);
             workflow.setStatus(response.getWorkflowStatus());
             
@@ -603,14 +603,14 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
     
     public void completeWorkflow(WorkflowExecutor workflowExecutor, Workflow workflow) throws APIManagementException {
+        
+        if (workflow.getWorkflowReference() == null) {
+            String message = "Error while changing the workflow. Missing reference";
+            log.error(message);
+            throw new APIManagementException(message, ExceptionCodes.WORKFLOW_EXCEPTION);
+        }
 
         if (workflow instanceof ApplicationCreationWorkflow) {
-            if (workflow.getWorkflowReference() == null) {
-                String message = "Error while changing the application state. Missing application UUID";
-                log.error(message);
-                throw new WorkflowException(message);
-            }
-
             WorkflowResponse response = workflowExecutor.complete(workflow);
 
             // setting the workflow status from the one getting from the executor. this gives the executor developer
@@ -619,7 +619,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             updateWorkflowEntries(workflow);
             String applicationState = "";
             if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
-                // TODO do whatever needed here
                 if (log.isDebugEnabled()) {
                     log.debug("Application Creation workflow complete: Approved");
                 }
@@ -635,16 +634,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             getApplicationDAO().updateApplicationState(workflow.getWorkflowReference(), applicationState);
 
         } else if (workflow instanceof SubscriptionWorkflow) { 
-            if (workflow.getWorkflowReference() == null) {
-                String message = "Error while changing the Subscription state. Missing application UUID";
-                log.error(message);
-                throw new WorkflowException(message);
-            }
-
             WorkflowResponse response = workflowExecutor.complete(workflow);
             SubscriptionStatus subscriptionState = null;
             if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
-                // TODO do whatever needed here
                 if (log.isDebugEnabled()) {
                     log.debug("Application Creation workflow complete: Approved");
                 }
@@ -662,23 +654,34 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         } else {
             String message = "Invalid workflow type:  " + workflow.getWorkflowType();
             log.error(message);
-            throw new WorkflowException(message);
+            throw new APIManagementException(message, ExceptionCodes.WORKFLOW_EXCEPTION);
         }
     }
     
-    private void updateWorkflowEntries(Workflow workflow) throws APIMgtDAOException {
+    private void updateWorkflowEntries(Workflow workflow) throws APIManagementException {
         workflow.setUpdatedTime(LocalDateTime.now());
-        getWorkflowDAO().updateWorkflowStatus(workflow);
-        //TODO stats stuff
+        try {
+            getWorkflowDAO().updateWorkflowStatus(workflow);
+            //TODO stats stuff
+        } catch (APIMgtDAOException e) {
+            String message = "Error while updating workflow entry";
+            log.error(message);
+            throw new APIManagementException(message, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+       
     }
 
 
-    private void addWorkflowEntries(Workflow workflow) throws APIMgtDAOException {
-        
-        //TODO if needed to stop adding entries to simple workflow, then do a validation here for state (Completed) and
-        // prevent it from adding it to the db
-        getWorkflowDAO().addWorkflowEntry(workflow);
-        
+    private void addWorkflowEntries(Workflow workflow) throws APIManagementException {
+
+        try {
+            getWorkflowDAO().addWorkflowEntry(workflow);
+            //TODO stats publish            
+        } catch (APIMgtDAOException e) {
+            String message = "Error while adding workflow entry";
+            log.error(message);
+            throw new APIManagementException(message, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
 
     }
 }
