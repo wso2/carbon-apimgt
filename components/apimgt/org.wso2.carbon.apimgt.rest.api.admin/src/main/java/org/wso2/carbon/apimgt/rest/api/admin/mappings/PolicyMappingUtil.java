@@ -33,9 +33,12 @@ public class PolicyMappingUtil {
     public static List<TierDTO> fromPoliciesToDTOs(List<Policy> policies)   {
         List<TierDTO> tiers = new ArrayList();
 
-        for (Policy policy : policies)  {
-            tiers.add(fromPolicyToDTO(policy));
+        if (policies != null)   {
+            for (Policy policy : policies)  {
+                tiers.add(fromPolicyToDTO(policy));
+            }
         }
+
         return tiers;
     }
 
