@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExecutorFactory;
 
 import java.sql.Connection;
@@ -145,11 +146,57 @@ public class WorkflowDAOImpl implements WorkflowDAO {
                 workflow.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
             } else {
                 throw new APIMgtDAOException("Invalid workflow type");
-            }
-           
+            }        
 
         }
         return workflow;
+    }
+
+    /**
+     * Get the exernal reference id for a given subsription id. 
+     * @param subscriptionId subscription id
+     * @return String external reference id
+     * @throws APIMgtDAOException if API Manager core level exception occurred
+     */
+    @Override
+    public String getExternalWorkflowReferenceForSubscription(String subscriptionId) throws APIMgtDAOException {
+        final String getworkflowQuery = "SELECT * FROM AM_WORKFLOWS WHERE WF_REFERENCE=? AND WF_TYPE=?";
+  
+        Workflow workflow;
+        try (Connection conn = DAOUtil.getConnection();
+                PreparedStatement ps = conn.prepareStatement(getworkflowQuery)) {
+            ps.setString(1, subscriptionId);
+            ps.setString(2, APIMgtConstants.WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+            try (ResultSet rs = ps.executeQuery()) {
+                workflow = this.createWorkflowFromResultSet(rs);                
+            }
+        } catch (SQLException ex) {
+            throw new APIMgtDAOException(ex);
+        }
+        return workflow.getExternalWorkflowReference();  
+    }
+
+    /**
+     * Get the external reference id for a given application id. 
+     * @param appId application id
+     * @return String external reference id
+     * @throws APIMgtDAOException if API Manager core level exception occurred
+     */
+    public String getExternalWorkflowReferenceForApplication(String appId) throws APIMgtDAOException {
+        final String getworkflowQuery = "SELECT * FROM AM_WORKFLOWS WHERE WF_REFERENCE=? AND WF_TYPE=?";
+        
+        Workflow workflow;
+        try (Connection conn = DAOUtil.getConnection();
+                PreparedStatement ps = conn.prepareStatement(getworkflowQuery)) {
+            ps.setString(1, appId);
+            ps.setString(2, APIMgtConstants.WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+            try (ResultSet rs = ps.executeQuery()) {
+                workflow = this.createWorkflowFromResultSet(rs);                
+            }
+        } catch (SQLException ex) {
+            throw new APIMgtDAOException(ex);
+        }
+        return workflow.getExternalWorkflowReference();  
     }
 
 }

@@ -392,7 +392,6 @@
                     <plugin>
                         <groupId>io.fabric8</groupId>
                         <artifactId>docker-maven-plugin</artifactId>
-                        <version>0.18.1</version>
                         <executions>
                             <execution>
                                 <id>start-docker-for-mysql</id>
@@ -421,6 +420,9 @@
                                             <MYSQL_DATABASE>testamdb</MYSQL_DATABASE>
                                             <MYSQL_ROOT_PASSWORD>root</MYSQL_ROOT_PASSWORD>
                                         </env>
+                                        <ports>
+                                            <port>13306:3306</port>
+                                        </ports>
                                         <wait>
                                             <tcp>
                                                 <ports>
@@ -470,7 +472,6 @@
                     <plugin>
                         <groupId>io.fabric8</groupId>
                         <artifactId>docker-maven-plugin</artifactId>
-                        <version>0.18.1</version>
                         <executions>
                             <execution>
                                 <id>start-docker-for-db2</id>
@@ -549,7 +550,6 @@
                     <plugin>
                         <groupId>io.fabric8</groupId>
                         <artifactId>docker-maven-plugin</artifactId>
-                        <version>0.18.1</version>
                         <executions>
                             <execution>
                                 <id>start-docker-for-mssql</id>
@@ -578,6 +578,9 @@
                                             <ACCEPT_EULA>Y</ACCEPT_EULA>
                                             <SA_PASSWORD>wso2apim123#</SA_PASSWORD>
                                         </env>
+                                        <ports>
+                                            <port>11433:1433</port>
+                                        </ports>
                                         <wait>
                                             <tcp>
                                                 <ports>
@@ -676,7 +679,6 @@
                     <plugin>
                         <groupId>io.fabric8</groupId>
                         <artifactId>docker-maven-plugin</artifactId>
-                        <version>0.18.1</version>
                         <executions>
                             <execution>
                                 <id>start-docker-for-postgres</id>
@@ -706,6 +708,9 @@
                                             <POSTGRES_USER>root</POSTGRES_USER>
                                             <POSTGRES_DB>testamdb</POSTGRES_DB>
                                         </env>
+                                        <ports>
+                                            <port>15432:5432</port>
+                                        </ports>
                                         <wait>
                                             <tcp>
                                                 <ports>
@@ -755,7 +760,6 @@
                     <plugin>
                         <groupId>io.fabric8</groupId>
                         <artifactId>docker-maven-plugin</artifactId>
-                        <version>0.18.1</version>
                         <executions>
                             <execution>
                                 <id>start-docker-for-oracle</id>
@@ -783,6 +787,9 @@
                                         <env>
                                             <DB_NAME>testamdb</DB_NAME>
                                         </env>
+                                        <ports>
+                                            <port>11521:1521</port>
+                                        </ports>
                                         <wait>
                                             <log>DATABASE IS READY TO USE!</log>
                                             <time>400000</time>

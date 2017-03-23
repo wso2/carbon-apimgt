@@ -27,10 +27,10 @@ import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 
 /**
- * This is a simple work flow extension to have Application creation process
+ * This is a simple work flow extension to have Application deletion process
  */
-public class ApplicationCreationSimpleWorkflowExecutor implements WorkflowExecutor {
-    private static final Log log = LogFactory.getLog(ApplicationCreationSimpleWorkflowExecutor.class);
+public class ApplicationDeletionSimpleWorkflowExecutor implements WorkflowExecutor {
+    private static final Log log = LogFactory.getLog(ApplicationDeletionSimpleWorkflowExecutor.class);
 
     /**
      * Execute the workflow executor
@@ -41,7 +41,7 @@ public class ApplicationCreationSimpleWorkflowExecutor implements WorkflowExecut
 
     public WorkflowResponse execute(Workflow workFlow) throws WorkflowException {
         if (log.isDebugEnabled()) {
-            log.debug("Executing Application creation Workflow..");
+            log.debug("Executing Application deletion Workflow..");
         }
     
         WorkflowResponse workflowResponse = new GeneralWorkflowResponse();
@@ -59,7 +59,7 @@ public class ApplicationCreationSimpleWorkflowExecutor implements WorkflowExecut
      */
     public WorkflowResponse complete(Workflow workFlow) throws WorkflowException {
         if (log.isDebugEnabled()) {
-            log.debug("Complete  Application creation Workflow..");
+            log.debug("Complete  Application deletion Workflow..");
         }
 
         WorkflowResponse workflowResponse = new GeneralWorkflowResponse();

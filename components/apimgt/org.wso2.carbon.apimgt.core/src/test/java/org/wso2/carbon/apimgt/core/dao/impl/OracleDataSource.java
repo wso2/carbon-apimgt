@@ -34,9 +34,9 @@ public class OracleDataSource implements DataSource {
     static String databaseName = "xe";
 
     OracleDataSource() throws Exception {
-        String ipAddress = TestUtil.getInstance().getIpAddressOfContainer("apim-oracle");
+        String ipAddress = TestUtil.getInstance().getIpAddressOfContainer();
         basicDataSource.setDriverClassName("oracle.jdbc.driver.OracleDriver");
-        basicDataSource.setJdbcUrl("jdbc:oracle:thin:@" + ipAddress + ":1521/" + databaseName);
+        basicDataSource.setJdbcUrl("jdbc:oracle:thin:@" + ipAddress + ":11521/" + databaseName);
         basicDataSource.setUsername("testamdb");
         basicDataSource.setPassword("testamdb");
         basicDataSource.setAutoCommit(true);

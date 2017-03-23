@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationResult;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.SubscriptionStatus;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -129,6 +130,34 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
         }
     }
 
+    /**
+     * Retrieve the list of subscriptions of an Application which are in pending state
+     *
+     * @param applicationId The UUID of Application
+     * @return A list of {@link Subscription} objects which has pendig status
+     * @throws APIMgtDAOException   If failed to get subscriptions.
+     */
+    @Override
+    public List<Subscription> getPendingAPISubscriptionsByApplication(String applicationId) throws APIMgtDAOException {
+        final String getSubscriptionsByAppSql = "SELECT SUBS.UUID AS SUBS_UUID, SUBS.TIER_ID AS SUBS_TIER, " +
+                "SUBS.API_ID AS API_ID, SUBS.APPLICATION_ID AS APP_ID, SUBS.SUB_STATUS AS SUB_STATUS, " +
+                "SUBS.SUB_TYPE AS SUB_TYPE, API.PROVIDER AS API_PROVIDER, API.NAME AS API_NAME, " +
+                "API.CONTEXT AS API_CONTEXT, API.VERSION AS API_VERSION, POLICY.NAME AS SUBS_POLICY " +
+                "FROM AM_SUBSCRIPTION SUBS, AM_API API, AM_SUBSCRIPTION_POLICY POLICY  " +
+                "WHERE SUBS.APPLICATION_ID = ? AND SUBS.API_ID = API.UUID AND SUBS.TIER_ID = POLICY.UUID " +
+                "AND SUBS.SUB_STATUS=?";
+
+        try (Connection conn = DAOUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(getSubscriptionsByAppSql)) {
+            ps.setString(1, applicationId);
+            ps.setString(2, SubscriptionStatus.ON_HOLD.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                return createSubscriptionsWithApiInformationOnly(rs);
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
     /**
      * Retrieve all API Subscriptions for validation
      *
