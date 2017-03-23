@@ -1,3 +1,0 @@
-- [ ] Code review completed
-- [ ] Test cases created
-- [ ] Documantation updated
