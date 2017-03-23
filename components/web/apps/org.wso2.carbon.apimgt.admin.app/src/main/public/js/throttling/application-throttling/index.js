@@ -1,7 +1,8 @@
 $(function () {
+
     var policyInstance = new Policy();
 
-    var promised_get_tiers =  policyInstance.getAllPoliciesByTier("api");
+    var promised_get_tiers =  policyInstance.getAllPoliciesByTier("application");
 
     promised_get_tiers.then(function (response) {
         var raw_data = {
@@ -70,7 +71,7 @@ $(function () {
                     .append(editSpanIcon)
                     .append(editSpanText);
 
-            var deleteIcon1 = $("<i>").addClass("fw fw-ring fw-stack-2x");
+            var deleteIcon1 = $("<i>").addClass("fw fw-rin  g fw-stack-2x");
             var deleteIcon2 = $("<i>").addClass("fw fw-delete fw-stack-1x");
             var deleteSpanIcon = $("<span>").addClass("fw-stack").append(deleteIcon1).append(deleteIcon2);
             var deleteSpanText = $("<span>").addClass("hidden-xs").text("delete");
