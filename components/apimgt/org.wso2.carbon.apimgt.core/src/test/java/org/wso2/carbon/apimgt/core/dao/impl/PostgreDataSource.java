@@ -30,15 +30,15 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PostgreDataSource implements DataSource{
-   static HikariDataSource basicDataSource = new HikariDataSource();
+public class PostgreDataSource implements DataSource {
+    static HikariDataSource basicDataSource = new HikariDataSource();
     static String databaseName = "testamdb";
 
 
     PostgreDataSource() throws Exception {
         String ipAddress = TestUtil.getInstance().getIpAddressOfContainer();
         basicDataSource.setDriverClassName("org.postgresql.Driver");
-        basicDataSource.setJdbcUrl("jdbc:postgresql://"+ipAddress+":"+System.getenv("PORT")+"/" + databaseName);
+        basicDataSource.setJdbcUrl("jdbc:postgresql://" + ipAddress + ":" + System.getenv("PORT") + "/" + databaseName);
         basicDataSource.setUsername("root");
         basicDataSource.setPassword("root");
         basicDataSource.setAutoCommit(true);
@@ -84,10 +84,10 @@ public class PostgreDataSource implements DataSource{
                     listOfSequences.add(resultSet.getString("SEQUENCE"));
                 }
             }
-            for(int i = 0; i<listOfTables.size();i++){
+            for (int i = 0; i < listOfTables.size(); i++) {
                 statement.addBatch("DROP TABLE " + listOfTables.get(i) + " CASCADE");
             }
-            for(int i = 0; i<listOfSequences.size();i++){
+            for (int i = 0; i < listOfSequences.size(); i++) {
                 statement.addBatch("DROP SEQUENCE " + listOfSequences.get(i) + " CASCADE");
             }
             statement.executeBatch();

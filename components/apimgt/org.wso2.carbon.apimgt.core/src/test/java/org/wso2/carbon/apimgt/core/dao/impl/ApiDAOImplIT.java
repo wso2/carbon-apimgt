@@ -490,7 +490,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNotNull(apiFromDB);
         Assert.assertEquals(apiFromDB, expectedAPI, TestUtil.printDiff(apiFromDB, expectedAPI));
     }
-    
+
     @Test
     public void testFingerprintAfterUpdatingAPI() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
@@ -698,7 +698,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         API expectedAPI = SampleTestObjectCreator.copyAPIIgnoringNonEditableFields(api, substituteAPI);
         Assert.assertNotNull(apiFromDB);
-        Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiFromDB.getLabels(),expectedAPI.getLabels()),
+        Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiFromDB.getLabels(), expectedAPI.getLabels()),
                 TestUtil.printDiff(apiFromDB, expectedAPI));
 
     }
@@ -770,5 +770,5 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         Assert.assertNotEquals(fingerprintBeforeUpdate, fingerprintAfterUpdate);
     }
-    
+
 }

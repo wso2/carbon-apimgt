@@ -32,14 +32,14 @@ import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
+import org.wso2.carbon.apimgt.core.models.Workflow;
+import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.core.models.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.core.models.Workflow;
-import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
@@ -60,12 +60,13 @@ public class SampleTestObjectCreator {
     public static InputStream inputStream;
     private static final Logger log = LoggerFactory.getLogger(SampleTestObjectCreator.class);
     static String endpointId = UUID.randomUUID().toString();
+
     static {
         try {
             inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("swagger.json");
             apiDefinition = IOUtils.toString(inputStream);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
 
     }
@@ -84,7 +85,7 @@ public class SampleTestObjectCreator {
         policies.add("Bronze");
 
         BusinessInformation businessInformation = new BusinessInformation();
-        CorsConfiguration corsConfiguration =  new CorsConfiguration();
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
         String permissionJson = "[{\"groupId\" : 1000, \"permission\" : " +
                 "[\"READ\",\"UPDATE\"]},{\"groupId\" : 1001, \"permission\" : [\"READ\",\"UPDATE\"]}]";
 
@@ -114,35 +115,35 @@ public class SampleTestObjectCreator {
                 permission(permissionJson).
                 uriTemplates(getMockUriTemplates()).
                 apiDefinition(apiDefinition);
-		        HashMap map = new HashMap();
-                map.put("1000", 6);
-                map.put("1001", 4);
-            	apiBuilder.permissionMap(map);
+        HashMap map = new HashMap();
+        map.put("1000", 6);
+        map.put("1001", 4);
+        apiBuilder.permissionMap(map);
         return apiBuilder;
     }
 
     public static API getSummaryFromAPI(API api) {
-            return new API.APIBuilder(api.getProvider(), api.getName(), api.getVersion()).
-                    id(api.getId()).
-                    context(api.getContext()).
-                    description(api.getDescription()).
-                    lifeCycleStatus(api.getLifeCycleStatus()).
-                    lifecycleInstanceId(api.getLifecycleInstanceId()).build();
+        return new API.APIBuilder(api.getProvider(), api.getName(), api.getVersion()).
+                id(api.getId()).
+                context(api.getContext()).
+                description(api.getDescription()).
+                lifeCycleStatus(api.getLifeCycleStatus()).
+                lifecycleInstanceId(api.getLifecycleInstanceId()).build();
     }
 
     public static API copyAPIIgnoringNonEditableFields(API fromAPI, API toAPI) {
         API.APIBuilder builder = new API.APIBuilder(toAPI);
 
         return builder.provider(fromAPI.getProvider()).
-                    id(fromAPI.getId()).
-                    name(fromAPI.getName()).
-                    version(fromAPI.getVersion()).
-                    context(fromAPI.getContext()).
-                    createdTime(fromAPI.getCreatedTime()).
-                    createdBy(fromAPI.getCreatedBy()).
-                    lifecycleInstanceId(fromAPI.getLifecycleInstanceId()).
-                    lifeCycleStatus(fromAPI.getLifeCycleStatus()).
-                    copiedFromApiId(fromAPI.getCopiedFromApiId()).build();
+                id(fromAPI.getId()).
+                name(fromAPI.getName()).
+                version(fromAPI.getVersion()).
+                context(fromAPI.getContext()).
+                createdTime(fromAPI.getCreatedTime()).
+                createdBy(fromAPI.getCreatedBy()).
+                lifecycleInstanceId(fromAPI.getLifecycleInstanceId()).
+                lifeCycleStatus(fromAPI.getLifeCycleStatus()).
+                copiedFromApiId(fromAPI.getCopiedFromApiId()).build();
 
     }
 
@@ -154,8 +155,8 @@ public class SampleTestObjectCreator {
         return lifecycleState;
     }
 
-    public static API getMockApiSummaryObject(){
-        return new API.APIBuilder("admin","Sample","1.0.0").build();
+    public static API getMockApiSummaryObject() {
+        return new API.APIBuilder("admin", "Sample", "1.0.0").build();
     }
 
     public static API.APIBuilder createAlternativeAPI() {
@@ -176,7 +177,7 @@ public class SampleTestObjectCreator {
         businessInformation.setTechnicalOwner("Jane Doe");
         businessInformation.setBusinessOwnerEmail("jane.doe@annonymous.com");
 
-        CorsConfiguration corsConfiguration =  new CorsConfiguration();
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setEnabled(true);
         corsConfiguration.setAllowMethods(Arrays.asList("GET", "POST", "DELETE"));
         corsConfiguration.setAllowHeaders(Arrays.asList("Authorization", "X-Custom"));
@@ -227,14 +228,15 @@ public class SampleTestObjectCreator {
         businessInformation.setTechnicalOwner("Jane Doe");
         businessInformation.setBusinessOwnerEmail("jane.doe@annonymous.com");
 
-        CorsConfiguration corsConfiguration =  new CorsConfiguration();
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setEnabled(true);
         corsConfiguration.setAllowMethods(Arrays.asList("GET", "POST", "DELETE"));
         corsConfiguration.setAllowHeaders(Arrays.asList("Authorization", "X-Custom"));
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.setAllowOrigins(Arrays.asList("*"));
 
-        API.APIBuilder apiBuilder = new API.APIBuilder(UUID.randomUUID().toString(), UUID.randomUUID().toString(), "1.0.0").
+        API.APIBuilder apiBuilder = new API.APIBuilder(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
+                "1.0.0").
                 id(UUID.randomUUID().toString()).
                 context(UUID.randomUUID().toString()).
                 description("Get Food & Beverage Info").
@@ -356,7 +358,7 @@ public class SampleTestObjectCreator {
                         .getResourceAsStream("document/inline2.txt"));
     }
 
-    public static Application createDefaultApplication(){
+    public static Application createDefaultApplication() {
         //created by admin
         Application application = new Application("TestApp", "admin");
         application.setId(UUID.randomUUID().toString());
@@ -371,7 +373,7 @@ public class SampleTestObjectCreator {
         return application;
     }
 
-    public static Application createAlternativeApplication(){
+    public static Application createAlternativeApplication() {
         //created by admin and updated by admin2
         Application application = new Application("TestApp2", "admin");
         application.setId(UUID.randomUUID().toString());
@@ -385,7 +387,7 @@ public class SampleTestObjectCreator {
         return application;
     }
 
-    public static Application createCustomApplication(String applicationName, String owner){
+    public static Application createCustomApplication(String applicationName, String owner) {
         Application application = new Application(applicationName, owner);
         application.setId(UUID.randomUUID().toString());
         application.setCallbackUrl("http://localhost/myapp");
@@ -399,7 +401,7 @@ public class SampleTestObjectCreator {
         return application;
     }
 
-    public static APIPolicy createDefaultAPIPolicy(){
+    public static APIPolicy createDefaultAPIPolicy() {
         APIPolicy apiPolicy = new APIPolicy("SampleAPIPolicy");
         apiPolicy.setDisplayName("SampleAPIPolicy");
         apiPolicy.setDescription("SampleAPIPolicy Description");
@@ -415,7 +417,7 @@ public class SampleTestObjectCreator {
         return apiPolicy;
     }
 
-    public static ApplicationPolicy createDefaultApplicationPolicy(){
+    public static ApplicationPolicy createDefaultApplicationPolicy() {
         ApplicationPolicy applicationPolicy = new ApplicationPolicy("SampleAppPolicy");
         applicationPolicy.setDisplayName("SampleAppPolicy");
         applicationPolicy.setDescription("SampleAppPolicy Description");
@@ -430,7 +432,7 @@ public class SampleTestObjectCreator {
         return applicationPolicy;
     }
 
-    public static SubscriptionPolicy createDefaultSubscriptionPolicy(){
+    public static SubscriptionPolicy createDefaultSubscriptionPolicy() {
         SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy("SampleAPIPolicy");
         subscriptionPolicy.setDisplayName("SampleSubscriptionPolicy");
         subscriptionPolicy.setDescription("SampleSubscriptionPolicy Description");
@@ -482,13 +484,15 @@ public class SampleTestObjectCreator {
                 .maxTps(1000L).security("{'enabled':false}").build();
 
     }
-    public static Map<String,String> getMockEndpointMap(){
-        Map<String,String > endpointMap = new HashedMap();
-        endpointMap.put("production",endpointId);
+
+    public static Map<String, String> getMockEndpointMap() {
+        Map<String, String> endpointMap = new HashedMap();
+        endpointMap.put("production", endpointId);
         return endpointMap;
     }
-    public static Map<String,UriTemplate> getMockUriTemplates(){
-        Map<String,UriTemplate> uriTemplateMap = new HashMap();
+
+    public static Map<String, UriTemplate> getMockUriTemplates() {
+        Map<String, UriTemplate> uriTemplateMap = new HashMap();
         UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
         uriTemplateBuilder.endpoint(getMockEndpointMap());
         uriTemplateBuilder.templateId("getApisApiIdGet");
@@ -510,12 +514,12 @@ public class SampleTestObjectCreator {
     }
 
     public static Workflow createWorkflow(String workflowReferenceID) {
-        Workflow workflow = new Workflow();      
+        Workflow workflow = new Workflow();
         workflow.setExternalWorkflowReference(workflowReferenceID);
         workflow.setStatus(WorkflowStatus.CREATED);
         workflow.setCreatedTime(LocalDateTime.now());
         workflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
-        workflow.setWorkflowReference(UUID.randomUUID().toString());        
+        workflow.setWorkflowReference(UUID.randomUUID().toString());
         return workflow;
     }
 }

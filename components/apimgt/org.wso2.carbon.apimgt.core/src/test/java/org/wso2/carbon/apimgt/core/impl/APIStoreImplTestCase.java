@@ -31,14 +31,13 @@ import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
+import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.TagDAO;
-import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
-import org.wso2.carbon.apimgt.core.exception.WorkflowException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Application;
@@ -46,7 +45,6 @@ import org.wso2.carbon.apimgt.core.models.ApplicationCreationResponse;
 import org.wso2.carbon.apimgt.core.models.ApplicationCreationWorkflow;
 import org.wso2.carbon.apimgt.core.models.Event;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
-import org.wso2.carbon.apimgt.core.models.SubscriptionWorkflow;
 import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
@@ -54,7 +52,6 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationSimpleWorkflowExecutor;
 import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
-import org.wso2.carbon.apimgt.core.workflow.SubscriptionCreationSimpleWorkflowExecutor;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -65,11 +62,11 @@ import java.util.List;
 import java.util.Map;
 
 import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Test class for APIStore
@@ -130,7 +127,7 @@ public class APIStoreImplTestCase {
         APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
         List<API> expectedAPIs = new ArrayList<API>();
         when(apiDAO.getAPIsByStatus(Arrays.asList(STATUS_CREATED, STATUS_PUBLISHED))).thenReturn(expectedAPIs);
-        List<API> actualAPIs = apiStore.getAllAPIsByStatus(1, 2, new String[] { STATUS_CREATED, STATUS_PUBLISHED });
+        List<API> actualAPIs = apiStore.getAllAPIsByStatus(1, 2, new String[] {STATUS_CREATED, STATUS_PUBLISHED});
         Assert.assertNotNull(actualAPIs);
         verify(apiDAO, times(1)).getAPIsByStatus(Arrays.asList(STATUS_CREATED, STATUS_PUBLISHED));
     }
@@ -138,7 +135,7 @@ public class APIStoreImplTestCase {
     @Test(description = "Retrieve an application by name")
     public void testGetApplicationByName() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null ,null, null, null, null);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null, null);
         Application applicationFromDAO = new Application(APP_NAME, null);
         when(applicationDAO.getApplicationByName(APP_NAME, USER_ID)).thenReturn(applicationFromDAO);
         Application application = apiStore.getApplicationByName(APP_NAME, USER_ID, GROUP_ID);
@@ -149,7 +146,7 @@ public class APIStoreImplTestCase {
     @Test(description = "Retrieve an application by uuid")
     public void testGetApplicationByUUID() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null,null);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null, null);
         Application applicationFromDAO = new Application(APP_NAME, USER_NAME);
         when(applicationDAO.getApplication(UUID)).thenReturn(applicationFromDAO);
         Application application = apiStore.getApplicationByUuid(UUID);
@@ -181,14 +178,14 @@ public class APIStoreImplTestCase {
         PolicyDAO policyDAO = mock(PolicyDAO.class);
         Policy policy = mock(Policy.class);
         WorkflowDAO workflowDAO = mock(WorkflowDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, policyDAO, null, null,workflowDAO);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, policyDAO, null, null, workflowDAO);
         Application application = new Application(APP_NAME, USER_NAME);
         application.setTier(TIER);
         application.setPermissionString(null);
         when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
         when(policyDAO.getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, TIER)).thenReturn(policy);
         ApplicationCreationResponse applicationResponse = apiStore.addApplication(application);
-        String applicationUuid = applicationResponse.getApplicationUUID();        
+        String applicationUuid = applicationResponse.getApplicationUUID();
         Assert.assertNotNull(applicationUuid);
         verify(applicationDAO, times(1)).addApplication(application);
     }
@@ -199,14 +196,14 @@ public class APIStoreImplTestCase {
         PolicyDAO policyDAO = mock(PolicyDAO.class);
         Policy policy = mock(Policy.class);
         WorkflowDAO workflowDAO = mock(WorkflowDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, policyDAO, null, null,workflowDAO);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, policyDAO, null, null, workflowDAO);
         Application application = new Application(APP_NAME, USER_NAME);
         application.setTier(TIER);
         application.setPermissionString("");
         when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
         when(policyDAO.getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, TIER)).thenReturn(policy);
         ApplicationCreationResponse applicationResponse = apiStore.addApplication(application);
-        String applicationUuid = applicationResponse.getApplicationUUID();     
+        String applicationUuid = applicationResponse.getApplicationUUID();
         Assert.assertNotNull(applicationUuid);
         verify(applicationDAO, times(1)).addApplication(application);
     }
@@ -224,7 +221,7 @@ public class APIStoreImplTestCase {
         when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
         when(policyDAO.getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, TIER)).thenReturn(policy);
         ApplicationCreationResponse applicationResponse = apiStore.addApplication(application);
-        String applicationUuid = applicationResponse.getApplicationUUID();     
+        String applicationUuid = applicationResponse.getApplicationUUID();
         Assert.assertNotNull(applicationUuid);
         verify(applicationDAO, times(1)).addApplication(application);
     }
@@ -259,7 +256,7 @@ public class APIStoreImplTestCase {
                 APIMgtConstants.SubscriptionStatus.ACTIVE);
     }
 
-    @Test(description = "Add subscription without a valid app" , expectedExceptions = APIManagementException.class)
+    @Test(description = "Add subscription without a valid app", expectedExceptions = APIManagementException.class)
     public void testAddSubscriptionForInvalidApplicatoin() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
@@ -285,8 +282,8 @@ public class APIStoreImplTestCase {
         verify(apiSubscriptionDAO, times(0)).addAPISubscription(subscriptionId, apiId, UUID, TIER,
                 APIMgtConstants.SubscriptionStatus.BLOCKED);
     }
-    
-    @Test(description = "Add subscription without a valid api" , expectedExceptions = APIManagementException.class)
+
+    @Test(description = "Add subscription without a valid api", expectedExceptions = APIManagementException.class)
     public void testAddSubscriptionForInvalidAPI() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
@@ -309,7 +306,7 @@ public class APIStoreImplTestCase {
         verify(apiSubscriptionDAO, times(1)).addAPISubscription(subscriptionId, API_ID, UUID, TIER,
                 APIMgtConstants.SubscriptionStatus.BLOCKED);
     }
-    
+
     @Test(description = "Delete subscription")
     public void testDeleteSubscription() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
@@ -401,7 +398,7 @@ public class APIStoreImplTestCase {
     @Test(description = "Retrieve all tags")
     public void testGetAllTags() throws APIManagementException {
         TagDAO tagDAO = mock(TagDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, null,null,null,null,tagDAO, null, null);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, null, null, null, tagDAO, null, null);
         apiStore.getAllTags();
         verify(tagDAO, times(1)).getTags();
     }
@@ -409,7 +406,7 @@ public class APIStoreImplTestCase {
     @Test(description = "Get all policies of a specific policy level")
     public void testGetPolicies() throws APIManagementException {
         PolicyDAO policyDAO = mock(PolicyDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME,null,null,null, policyDAO, null, null, null);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, null, null, policyDAO, null, null, null);
         apiStore.getPolicies(APPLICATION_POLICY_LEVEL);
         verify(policyDAO, times(1)).getPolicies(APPLICATION_POLICY_LEVEL);
     }
@@ -516,7 +513,7 @@ public class APIStoreImplTestCase {
     public void getAPIsByStatusException() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
         APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
-        String[] statuses = { STATUS_CREATED, STATUS_PUBLISHED };
+        String[] statuses = {STATUS_CREATED, STATUS_PUBLISHED};
         when(apiDAO.getAPIsByStatus(Arrays.asList(STATUS_CREATED, STATUS_PUBLISHED))).thenThrow(new APIMgtDAOException(
                 "Error occurred while fetching APIs for the given statuses - " + Arrays.toString(statuses)));
         apiStore.getAllAPIsByStatus(1, 2, statuses);
@@ -592,8 +589,8 @@ public class APIStoreImplTestCase {
                 .thenThrow(new APIMgtDAOException("Error occurred while retrieving label information"));
         apiStore.getLabelInfo(labels);
     }
-    
-    
+
+
     @Test(description = "Exception when completing workflow without valid workflow obj",
             expectedExceptions = APIManagementException.class)
     public void testCompleteWorkflowWithoutValidWokflowObj() throws Exception {
@@ -601,8 +598,8 @@ public class APIStoreImplTestCase {
         APIStore apiStore = new APIStoreImpl(USER_NAME, null, null, null, null, null, null, null);
         apiStore.completeWorkflow(null, new Workflow());
     }
-    
-    @Test(description = "Exception when completing application creation workflow without a reference", 
+
+    @Test(description = "Exception when completing application creation workflow without a reference",
             expectedExceptions = APIManagementException.class)
     public void testCompleteApplicaitonWorkflowWithoutReference() throws Exception {
 
@@ -612,7 +609,7 @@ public class APIStoreImplTestCase {
         Workflow workflow = new ApplicationCreationWorkflow();
         workflow.setWorkflowReference(null);
         apiStore.completeWorkflow(executor, workflow);
-    }  
+    }
 
     @Test(description = "Test Application workflow rejection")
     public void testAddApplicationWorkflowReject() throws APIManagementException {
@@ -626,58 +623,58 @@ public class APIStoreImplTestCase {
         application.setPermissionString(
                 "[{\"groupId\": \"testGroup\",\"permission\":[\"READ\",\"UPDATE\",\"DELETE\",\"SUBSCRIPTION\"]}]");
         when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
-        when(policyDAO.getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, TIER)).thenReturn(policy);       
-        
+        when(policyDAO.getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, TIER)).thenReturn(policy);
+
         apiStore.addApplication(application);
-        
+
 
         ApplicationCreationSimpleWorkflowExecutor executor = mock(ApplicationCreationSimpleWorkflowExecutor.class);
         Workflow workflow = new ApplicationCreationWorkflow();
         workflow.setWorkflowReference(application.getId());
-        
+
         WorkflowResponse reponse = new GeneralWorkflowResponse();
         reponse.setWorkflowStatus(WorkflowStatus.REJECTED);
-        
-        when(executor.complete(workflow)).thenReturn(reponse);              
+
+        when(executor.complete(workflow)).thenReturn(reponse);
         apiStore.completeWorkflow(executor, workflow);
-  
+
         verify(applicationDAO, times(1)).updateApplicationState(application.getId(), "REJECTED");
-    }      
+    }
 
     @Test(description = "Event Observers registration and removal")
     public void testObserverRegistration() throws APIManagementException {
-        
+
         EventLogger observer = new EventLogger();
 
         APIStoreImpl apiStore = new APIStoreImpl(USER_NAME, null, null, null, null, null, null, null);
-        
+
         apiStore.registerObserver(new EventLogger());
-       
-        Map<String, EventObserver> observers = apiStore.getEventObservers();        
+
+        Map<String, EventObserver> observers = apiStore.getEventObservers();
         Assert.assertEquals(observers.size(), 1);
-        
+
         apiStore.removeObserver(observers.get(observer.getClass().getName()));
-        
+
         Assert.assertEquals(observers.size(), 0);
-     
+
     }
-    
+
     @Test(description = "Event Observers for event listning")
     public void testObserverEventListner() throws APIManagementException {
-        
+
         EventLogger observer = mock(EventLogger.class);
 
-        APIStoreImpl apiStore = new APIStoreImpl(USER_NAME, null, null, null, null, null, null, null);        
+        APIStoreImpl apiStore = new APIStoreImpl(USER_NAME, null, null, null, null, null, null, null);
         apiStore.registerObserver(observer);
-       
+
         Event event = Event.APP_CREATION;
         String username = USER_NAME;
         Map<String, String> metaData = new HashMap<>();
         ZonedDateTime eventTime = ZonedDateTime.now(ZoneOffset.UTC);
         apiStore.notifyObservers(event, username, eventTime, metaData);
-     
+
         verify(observer, times(1)).captureEvent(event, username, eventTime, metaData);
-        
+
     }
 
 }
