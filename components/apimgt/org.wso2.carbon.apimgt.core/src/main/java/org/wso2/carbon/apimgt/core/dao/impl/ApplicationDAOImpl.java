@@ -33,6 +33,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -469,12 +470,14 @@ public class ApplicationDAOImpl implements ApplicationDAO {
 
     @Override
     public void updateApplicationState(String appID, String state) throws APIMgtDAOException {
-        final String updateAppQuery = "UPDATE AM_APPLICATION SET APPLICATION_STATUS=? WHERE UUID = ?";
+        final String updateAppQuery = "UPDATE AM_APPLICATION SET APPLICATION_STATUS=?, LAST_UPDATED_TIME=?  "
+                + "WHERE UUID = ?";
         try (Connection conn = DAOUtil.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement ps = conn.prepareStatement(updateAppQuery)) {
                 ps.setString(1, state);
-                ps.setString(2, appID);   
+                ps.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+                ps.setString(3, appID);               
                 ps.executeUpdate();
                 conn.commit();
             } catch (SQLException ex) {
