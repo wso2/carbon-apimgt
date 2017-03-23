@@ -16,8 +16,11 @@
 package org.wso2.carbon.apimgt.core.impl;
 
 import org.testng.annotations.Test;
+import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.api.APIStore;
+import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
+import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
@@ -41,8 +44,12 @@ public class UserAwareAPIStoreTestCase {
     @Test(description = "Delete application")
     public void testDeleteApplication() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        APIStore apiStore = new UserAwareAPIStore(USER_NAME, null, applicationDAO, null, null, null, null, null);
-        Application applicationFromDAO = new Application(APP_NAME, null);
+        APISubscriptionDAO subscriptionDAO = mock(APISubscriptionDAO.class);
+        WorkflowDAO workflowDAO = mock(WorkflowDAO.class);
+        APIStore apiStore = new UserAwareAPIStore(USER_NAME, null, applicationDAO, subscriptionDAO, null, null, null,
+                workflowDAO);
+        Application applicationFromDAO = SampleTestObjectCreator.createDefaultApplication();
+        applicationFromDAO.setId(UUID);
         applicationFromDAO.setCreatedUser(USER_NAME);
         when(applicationDAO.getApplication(UUID)).thenReturn(applicationFromDAO);
         apiStore.deleteApplication(UUID);

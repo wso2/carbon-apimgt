@@ -205,7 +205,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 if (APIMgtConstants.DEFAULT_APPLICATION_NAME.equals(application.getName())) {
                     ps.setString(6, APIMgtConstants.ApplicationStatus.APPLICATION_APPROVED);
                 } else {
-                    ps.setString(6, APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
+                    ps.setString(6, APIMgtConstants.ApplicationStatus.APPLICATION_ONHOLD);
                 }
 
                 ps.setString(7, application.getGroupId());

@@ -383,10 +383,13 @@ public class APIStoreImplTestCase {
     @Test(description = "Delete application")
     public void testDeleteApplication() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        APISubscriptionDAO subscriptionDAO = mock(APISubscriptionDAO.class);
         WorkflowDAO workflowDAO = mock(WorkflowDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null, workflowDAO);
-        Application application = new Application(APP_NAME, USER_NAME);
+        APIStore apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, subscriptionDAO, null, null, null, 
+                workflowDAO);
+        Application application = SampleTestObjectCreator.createDefaultApplication();
         application.setId(UUID);
+        when(applicationDAO.getApplication(UUID)).thenReturn(application);
         apiStore.deleteApplication(UUID);
         verify(applicationDAO, times(1)).deleteApplication(UUID);
     }

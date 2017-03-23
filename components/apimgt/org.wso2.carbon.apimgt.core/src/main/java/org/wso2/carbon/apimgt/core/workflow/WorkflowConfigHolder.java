@@ -68,8 +68,8 @@ public class WorkflowConfigHolder {
             }            
             workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION, workFlowExecutor);
             
-/*            // Load application deletion workflow configurations
-            workflowConfig = config.getSubscriptionDeletion();
+            // Load application deletion workflow configurations
+            workflowConfig = config.getApplicationDeletion();
             executorClass = workflowConfig.getExecutor();
             clazz = WorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
             workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
@@ -78,7 +78,7 @@ public class WorkflowConfigHolder {
                 loadProperties(properties, workFlowExecutor);
             }            
             workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION, workFlowExecutor);  
-*/    
+    
             
             // Load subscription creation workflow configurations
             workflowConfig = config.getSubscriptionCreation();

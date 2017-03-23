@@ -77,6 +77,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -327,11 +328,13 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                     String pendingRefForSubscription = getWorkflowDAO()
                             .getExternalWorkflowReferenceForSubscription(subscriptionId);
                     if (pendingRefForSubscription != null) {
-                        createSubscriptionWFExecutor.cleanUpPendingTask(pendingRefForSubscription);
-                    } else {
-                        String warn = "Failed to clean pending subscription approval task for " + subscriptionId;
-                        // failed cleanup processes are ignored to prevent failing the deletion process
-                        log.warn(warn);
+                        try {
+                            createSubscriptionWFExecutor.cleanUpPendingTask(pendingRefForSubscription);
+                        } catch (WorkflowException e) {
+                            String warn = "Failed to clean pending subscription approval task for " + subscriptionId;
+                            // failed cleanup processes are ignored to prevent failing the deletion process
+                            log.warn(warn, e.getLocalizedMessage());
+                        }
                     }
                 }
 
@@ -470,7 +473,72 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     @Override
     public void deleteApplication(String appId) throws APIManagementException {
         try {
-            getApplicationDAO().deleteApplication(appId);
+            if (appId == null) {
+                String message = "Application Id is not provided";
+                throw new APIManagementException(message, ExceptionCodes.PARAMETER_NOT_PROVIDED);
+            }
+            // get app info
+            Application application = getApplicationDAO().getApplication(appId);
+            if (application == null) {
+                String message = "Application cannot be found for id :" + appId;
+                throw new APIManagementException(message, ExceptionCodes.APPLICATION_NOT_FOUND);
+            }           
+            
+            WorkflowExecutor createApplicationWFExecutor = WorkflowExecutorFactory.getInstance().
+                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+            WorkflowExecutor createSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance().
+                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);  
+            WorkflowExecutor removeApplicationWFExecutor = WorkflowExecutorFactory.getInstance().
+                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
+            
+            // get subscriptions with pending status
+            List<Subscription> pendingSubscriptions = getApiSubscriptionDAO()
+                    .getPendingAPISubscriptionsByApplication(appId);
+            String pendingExtReference;
+            if (pendingSubscriptions == null || pendingSubscriptions.isEmpty()) {
+                pendingExtReference = getWorkflowDAO().getExternalWorkflowReferenceForApplication(appId);
+                try {
+                    createApplicationWFExecutor.cleanUpPendingTask(pendingExtReference);
+                } catch (WorkflowException e) {
+                    String warn = "Failed to clean pending application approval task for " + appId;
+                    // failed cleanup processes are ignored to prevent failing the deletion process
+                    log.warn(warn, e.getLocalizedMessage());
+                }
+            } else {
+
+                // this means there are pending subsriptions. It also implies that there cannot be pending application
+                // approvals (cannot subscribe to a pending application)
+                for (Iterator iterator = pendingSubscriptions.iterator(); iterator.hasNext();) {
+                    Subscription pendingSubscription = (Subscription) iterator.next();
+                    pendingExtReference = getWorkflowDAO()
+                            .getExternalWorkflowReferenceForSubscription(pendingSubscription.getId());
+                    createSubscriptionWFExecutor.cleanUpPendingTask(pendingExtReference);
+
+                    try {
+                        createSubscriptionWFExecutor.cleanUpPendingTask(pendingExtReference);
+                    } catch (WorkflowException e) {
+                        String warn = "Failed to clean pending subscription approval task for "
+                                + pendingSubscription.getId();
+                        // failed cleanup processes are ignored to prevent failing the deletion process
+                        log.warn(warn, e.getLocalizedMessage());
+                    }
+                }
+            }
+            
+            ApplicationCreationWorkflow workflow = new ApplicationCreationWorkflow();
+            workflow.setApplication(application);
+            workflow.setWorkflowType(APIMgtConstants.WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
+            workflow.setWorkflowReference(application.getId());
+            workflow.setExternalWorkflowReference(UUID.randomUUID().toString());
+            workflow.setCreatedTime(LocalDateTime.now());
+            WorkflowResponse response = removeApplicationWFExecutor.execute(workflow);
+            workflow.setStatus(response.getWorkflowStatus());
+            addWorkflowEntries(workflow);
+
+            if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
+                completeWorkflow(removeApplicationWFExecutor, workflow);
+            }          
+         
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while deleting the application - " + appId;
             log.error(errorMsg, e);
@@ -654,7 +722,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             throw new APIManagementException(message, ExceptionCodes.WORKFLOW_EXCEPTION);
         }
 
-        if (workflow instanceof ApplicationCreationWorkflow) {
+        if (workflow instanceof ApplicationCreationWorkflow
+                && WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION.equals(workflow.getWorkflowType())) {
             WorkflowResponse response = workflowExecutor.complete(workflow);
 
             // setting the workflow status from the one getting from the executor. this gives the executor developer
@@ -666,16 +735,31 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 if (log.isDebugEnabled()) {
                     log.debug("Application Creation workflow complete: Approved");
                 }
-                // TODO check the application state is same as wf state.
-                applicationState = response.getWorkflowStatus().toString();
+                applicationState = APIMgtConstants.ApplicationStatus.APPLICATION_APPROVED;
 
             } else if (WorkflowStatus.REJECTED == response.getWorkflowStatus()) {
                 if (log.isDebugEnabled()) {
                     log.debug("Application Creation workflow complete: Rejected");
                 }
-                applicationState = response.getWorkflowStatus().toString();
+                applicationState = APIMgtConstants.ApplicationStatus.APPLICATION_REJECTED;
             }
             getApplicationDAO().updateApplicationState(workflow.getWorkflowReference(), applicationState);
+
+        } else if (workflow instanceof ApplicationCreationWorkflow
+                && WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION.equals(workflow.getWorkflowType())) {
+            WorkflowResponse response = workflowExecutor.complete(workflow);
+
+            if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Application Deletion workflow complete: Approved");
+                }
+                getApplicationDAO().deleteApplication(workflow.getWorkflowReference());
+
+            } else if (WorkflowStatus.REJECTED == response.getWorkflowStatus()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Subscription Creation workflow complete: Rejected");
+                }
+            }
 
         } else if (workflow instanceof SubscriptionWorkflow
                 && WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION.equals(workflow.getWorkflowType())) {
