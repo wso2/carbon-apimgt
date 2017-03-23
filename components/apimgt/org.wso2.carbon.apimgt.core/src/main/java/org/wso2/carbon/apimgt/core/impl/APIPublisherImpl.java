@@ -523,6 +523,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 apiBuilder.lifecycleState(getApiLifecycleManager().getCurrentLifecycleState(apiBuilder
                         .getLifecycleInstanceId()));
                 for (Map.Entry<String, Boolean> checkListItem : checkListItemMap.entrySet()) {
+                    getApiLifecycleManager().checkListItemEvent(api.getLifecycleInstanceId
+                            (), api.getLifeCycleStatus(),
+                    checkListItem.getKey(), checkListItem.getValue());
                     if (APIMgtConstants.DEPRECATE_PREVIOUS_VERSIONS.equals(checkListItem.getKey())) {
                         deprecateOlderVersion = checkListItem.getValue();
                     } else if (APIMgtConstants.REQUIRE_RE_SUBSCRIPTIONS.equals(checkListItem.getKey())) {
