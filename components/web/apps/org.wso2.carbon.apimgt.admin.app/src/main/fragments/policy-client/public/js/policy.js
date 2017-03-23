@@ -67,11 +67,21 @@ Policy.prototype._requestMetaData = function _requestMetaData() {
 
 
 
-Policy.prototype.getAll = function getAll(callback, apiId) {
-
+Policy.prototype.getAllPoliciesByTier = function (callback, tierLevel) {
+    let param = {"tierLevel" : tierLevel};
+    let promise_create = this.client.then(
+            (client) => {
+                return_client["Throttling Tier (Collection)"].get_policies_tierLevel(
+                        param, this._requestMetaData()).catch(unauthorizedErrorHandler)
+            });
+    if (callback) {
+        return promise_create.then(callback);
+    } else {
+        return promise_create;
+    }
 };
 
-Policy.prototype.create =function(policy, callback) {
+Policy.prototype.create = function(policy, callback) {
     let payload;
     let promise_create;
         payload = {tierLevel: policy.tierLevel, body: policy, "Content-Type": "application/json"};
@@ -79,8 +89,7 @@ Policy.prototype.create =function(policy, callback) {
                 (client) => {
                 return client["Throttling Tier (Collection)"].post_policies_tierLevel(
                     payload, this._requestMetaData()).catch(unauthorizedErrorHandler);
-    }
-    );
+                });
     if (callback) {
         return promise_create.then(callback);
     } else {
