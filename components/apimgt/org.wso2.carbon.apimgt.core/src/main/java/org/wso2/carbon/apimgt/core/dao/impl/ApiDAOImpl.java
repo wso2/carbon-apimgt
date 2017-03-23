@@ -24,6 +24,8 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -69,6 +71,7 @@ public class ApiDAOImpl implements ApiDAO {
             "CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID FROM AM_API";
     private static final String AM_API_TABLE_NAME = "AM_API";
     private static final String AM_ENDPOINT_TABLE_NAME = "AM_ENDPOINT";
+    private static final Logger log = LoggerFactory.getLogger(ApiDAOImpl.class);
 
     ApiDAOImpl(ApiDAOVendorSpecificStatements sqlStatements) {
         this.sqlStatements = sqlStatements;
@@ -145,7 +148,9 @@ public class ApiDAOImpl implements ApiDAO {
         try (Connection connection = DAOUtil.getConnection()) {
             return ApiResourceDAO.getAPIUniqueResourceLastUpdatedTime(connection, apiId, ResourceCategory.SWAGGER);
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            String errorMessage = "Error while retrieving last updated time of swagger definition. API ID: " + apiId;
+            log.error(errorMessage, e);
+            throw new APIMgtDAOException(errorMessage, e);
         }
     }
 
@@ -159,7 +164,9 @@ public class ApiDAOImpl implements ApiDAO {
             return ApiResourceDAO
                     .getAPIUniqueResourceLastUpdatedTime(connection, apiId, ResourceCategory.GATEWAY_CONFIG);
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            String errorMessage = "Error while retrieving last updated time of gateway config. API ID: " + apiId;
+            log.error(errorMessage, e);
+            throw new APIMgtDAOException(errorMessage, e);
         }
     }
 
@@ -663,7 +670,10 @@ public class ApiDAOImpl implements ApiDAO {
             return ApiResourceDAO
                     .getResourceLastUpdatedTime(connection, apiId, documentId, ResourceCategory.DOC);
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            String errorMessage =
+                    "Error while getting last updated time of document. API Id: " + apiId + ", doc Id: " + documentId;
+            log.error(errorMessage, e);
+            throw new APIMgtDAOException(errorMessage, e);
         }
     }
 
@@ -676,7 +686,9 @@ public class ApiDAOImpl implements ApiDAO {
             return ApiResourceDAO
                     .getAPIUniqueResourceLastUpdatedTime(connection, apiId, ResourceCategory.IMAGE);
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            String errorMessage = "Error while retrieving last updated time of thumbnail image. API ID: " + apiId;
+            log.error(errorMessage, e);
+            throw new APIMgtDAOException(errorMessage, e);
         }
     }
 

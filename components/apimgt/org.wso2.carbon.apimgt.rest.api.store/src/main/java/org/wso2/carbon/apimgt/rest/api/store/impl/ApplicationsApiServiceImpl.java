@@ -112,7 +112,8 @@ public class ApplicationsApiServiceImpl
 
                 }
                 applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
-                return Response.ok().entity(applicationDTO).header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").build();
+                return Response.ok().entity(applicationDTO).header(HttpHeaders.ETAG,
+                        "\"" + existingFingerprint + "\"").build();
             } else {
                 String errorMessage = "Application not found: " + applicationId;
                 APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
