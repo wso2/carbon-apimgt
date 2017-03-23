@@ -55,6 +55,6 @@ environments.]
 
 #### Documentation
 
-- [ ] **Are changes to the UI documented in the platform docs?** If this PR introduces new platform site functionality or changes existing ones, the changes must be documented.
+- [ ] **Are changes to the UI documented in the platform docs?** If this PR introduces new platform site functionality or changes existing ones, the changes should be documented.
 - [ ] **Are changes to the API documented in the API docs?** If this PR introduces new API functionality or changes existing ones, the changes must be documented.
 - [ ] **Are reusable components documented?** If this PR introduces components that are relevant to other developers (for instance a mixin for a view or a generic form) they should be documented in the Wiki.
