@@ -1405,19 +1405,6 @@ public class APIPublisherImplTestCase {
         apiPublisher.getApiGatewayConfig(API_ID);
     }
 
-    @Test(description = "Add api from swagger resource url")
-    public void testAddApiFromSwaggerResourceUrl() throws APIManagementException, LifecycleException {
-        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
-        Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user))
-                .thenReturn(new LifecycleState());
-        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null,
-                null);
-        apiPublisher.addApiFromDefinition(
-                "https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.0.4/components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher/src/main/resources/publisher-api.yaml");
-        Mockito.verify(apiLifecycleManager, Mockito.times(1)).addLifecycle(APIMgtConstants.API_LIFECYCLE, user);
-    }
-
     @Test(description = "Error while getting swagger resource from url when adding api from swagger resource",
             expectedExceptions = APIManagementException.class)
     public void testAddApiFromDefinitionErrorGettingSwaggerResource()
