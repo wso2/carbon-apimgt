@@ -28,12 +28,12 @@ If you want to build carbon-apimgt from the source code:
 
 ### For docker based tests
 
-....* mvn -P local-mysql -Dmaven.failsafe.debug verify
+    * mvn -P local-mysql -Dmaven.failsafe.debug verify
       Note: local-mysql is the profile. Use other profiles accordingly.
 
 ### For unit tests :
 
-    mvn -Dmaven.surefire.debug="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000 -Xnoagent -Djava.compiler=NONE" test
+    * mvn -Dmaven.surefire.debug="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000 -Xnoagent -Djava.compiler=NONE" test
 
 ## How to create a new REST API in C5
 
@@ -47,7 +47,7 @@ If you want to build carbon-apimgt from the source code:
 
 
     3 Build the org.wso2.carbon.apimgt.rest.api.publisher or org.wso2.carbon.apimgt.rest.api.store REST API components with following command.
-        * mvn swagger2msf4j:generate
+       * mvn swagger2msf4j:generate
 
         NOTE : This command will erase some existing classes. Please filter relevant changes which regard to your modification.
 
