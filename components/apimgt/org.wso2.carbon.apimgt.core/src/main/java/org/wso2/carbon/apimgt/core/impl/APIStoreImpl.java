@@ -600,6 +600,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
             if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
                 completeWorkflow(appCreationWFExecutor, workflow);
+            } else {
+                getApplicationDAO().updateApplicationState(generatedUuid,
+                        APIMgtConstants.ApplicationStatus.APPLICATION_ONHOLD);
             }
 
             APIUtils.logDebug("successfully added application with appId " + application.getId(), log);
