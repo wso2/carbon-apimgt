@@ -67,11 +67,11 @@ Policy.prototype._requestMetaData = function _requestMetaData() {
 
 
 
-Policy.prototype.getAllPoliciesByTier = function (callback, tierLevel) {
+Policy.prototype.getAllPoliciesByTier = function (tierLevel, callback) {
     let param = {"tierLevel" : tierLevel};
     let promise_create = this.client.then(
             (client) => {
-                return_client["Throttling Tier (Collection)"].get_policies_tierLevel(
+                return client["Throttling Tier (Collection)"].get_policies_tierLevel(
                         param, this._requestMetaData()).catch(unauthorizedErrorHandler)
             });
     if (callback) {
