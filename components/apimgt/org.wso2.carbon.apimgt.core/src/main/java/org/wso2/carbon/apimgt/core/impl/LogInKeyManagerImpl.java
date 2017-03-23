@@ -450,7 +450,7 @@ public class LogInKeyManagerImpl implements KeyManager {
                 tokenInfo.setRefreshToken(refreshToken);
             } else {
                 throw new KeyManagementException(
-                        "Error occurred while getting token for user : " + tokenRequest.getResourceOwnerUsername(),
+                        "Error occurred while getting token for grant type : " + tokenRequest.getGrantType(),
                         ExceptionCodes.APPLICATION_TOKEN_GENERATION_FAILED);
             }
         } catch (IOException e) {

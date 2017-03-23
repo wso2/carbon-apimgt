@@ -94,7 +94,8 @@ class AuthClient {
         var currentTimestamp =  Math.floor(Date.now() / 1000);
         var tokenTimestamp = window.localStorage.getItem("expiresIn");
         if(tokenTimestamp - currentTimestamp < 100) {
-            var loginPromise = authManager.refresh();
+            var bearerToken = "Bearer " + AuthClient.getCookie("WSO2_AM_REFRESH_TOKEN_1");
+            var loginPromise = authManager.refresh(bearerToken);
             loginPromise.then(function(data,status,xhr){
                 authManager.setAuthStatus(true);
                 var expiresIn = data.validityPeriod + Math.floor(Date.now() / 1000);
@@ -103,7 +104,7 @@ class AuthClient {
             loginPromise.error(
                 function (error) {
                     var error_data = JSON.parse(error.responseText);
-                    var message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message ;
+                    var message = "Error while refreshing token" + "<br/> You will be redirect to the login page ..." ;
                     noty({
                         text: message,
                         type: 'error',
@@ -114,6 +115,11 @@ class AuthClient {
                         layout: 'top',
                         theme: 'relax',
                         maxVisible: 10,
+                        callback: {
+                            afterClose: function () {
+                                window.location = loginPageUri;
+                            },
+                        }
                     });
 
                 }
