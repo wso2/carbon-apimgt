@@ -421,7 +421,7 @@
                                             <MYSQL_ROOT_PASSWORD>root</MYSQL_ROOT_PASSWORD>
                                         </env>
                                         <ports>
-                                            <port>13306:3306</port>
+                                            <port>${apim-mysql.port}:3306</port>
                                         </ports>
                                         <wait>
                                             <tcp>
@@ -459,6 +459,7 @@
                         <configuration>
                             <environmentVariables>
                                 <DATABASE_TYPE>mysql</DATABASE_TYPE>
+                                <PORT>${apim-mysql.port}</PORT>
                             </environmentVariables>
                         </configuration>
                     </plugin>
@@ -579,7 +580,7 @@
                                             <SA_PASSWORD>wso2apim123#</SA_PASSWORD>
                                         </env>
                                         <ports>
-                                            <port>11433:1433</port>
+                                            <port>${apim-mssql.port}:1433</port>
                                         </ports>
                                         <wait>
                                             <tcp>
@@ -636,6 +637,7 @@
                         <configuration>
                             <environmentVariables>
                                 <DATABASE_TYPE>mssql</DATABASE_TYPE>
+                                <PORT>${apim-mssql.port}</PORT>
                             </environmentVariables>
                         </configuration>
                     </plugin>
@@ -709,7 +711,7 @@
                                             <POSTGRES_DB>testamdb</POSTGRES_DB>
                                         </env>
                                         <ports>
-                                            <port>15432:5432</port>
+                                            <port>${apim-postgres.port}:5432</port>
                                         </ports>
                                         <wait>
                                             <tcp>
@@ -747,6 +749,7 @@
                         <configuration>
                             <environmentVariables>
                                 <DATABASE_TYPE>postgres</DATABASE_TYPE>
+                                <PORT>${apim-postgres.port}</PORT>
                             </environmentVariables>
                         </configuration>
                     </plugin>
@@ -788,7 +791,7 @@
                                             <DB_NAME>testamdb</DB_NAME>
                                         </env>
                                         <ports>
-                                            <port>11521:1521</port>
+                                            <port>${apim-oracle.port}:1521</port>
                                         </ports>
                                         <wait>
                                             <log>DATABASE IS READY TO USE!</log>
@@ -823,6 +826,7 @@
                         <configuration>
                             <environmentVariables>
                                 <DATABASE_TYPE>oracle</DATABASE_TYPE>
+                                <PORT>${apim-oracle.port}</PORT>
                             </environmentVariables>
                         </configuration>
                     </plugin>

@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 import com.zaxxer.hikari.HikariDataSource;
 import org.wso2.carbon.apimgt.core.TestUtil;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -36,7 +37,7 @@ public class OracleDataSource implements DataSource {
     OracleDataSource() throws Exception {
         String ipAddress = TestUtil.getInstance().getIpAddressOfContainer();
         basicDataSource.setDriverClassName("oracle.jdbc.driver.OracleDriver");
-        basicDataSource.setJdbcUrl("jdbc:oracle:thin:@" + ipAddress + ":11521/" + databaseName);
+        basicDataSource.setJdbcUrl("jdbc:oracle:thin:@" + ipAddress + ":" + System.getenv("PORT") + "/" + databaseName);
         basicDataSource.setUsername("testamdb");
         basicDataSource.setPassword("testamdb");
         basicDataSource.setAutoCommit(true);
@@ -68,6 +69,16 @@ public class OracleDataSource implements DataSource {
         Map<String,String> objectMap = new HashMap<>();
         try (Connection connection = basicDataSource.getConnection();
              Statement statement = connection.createStatement()) {
+            try{
+                CallableStatement callableStatement = connection.prepareCall("SELECT PRE_NAME FROM CTXSYS" +
+                        ".CTX_PREFERENCES WHERE PRE_OBJECT='MULTI_COLUMN_DATASTORE' AND PRE_OWNER = 'TESTAMDB'");
+                ResultSet resultSet = callableStatement.executeQuery();
+                while (resultSet.next()) {
+                    statement.execute("BEGIN\nctx_ddl.drop_preference('"+resultSet.getString("PRE_NAME")+"');\nEND;");
+                }
+            }catch (SQLException e){
+               throw e;
+            }
             try (ResultSet resultSet = statement.executeQuery("SELECT object_name, object_type FROM user_objects " +
                     "WHERE object_type IN ('TABLE','VIEW','PACKAGE','PROCEDURE','FUNCTION','SEQUENCE')")) {
                 while (resultSet.next()) {
