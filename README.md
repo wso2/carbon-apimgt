@@ -26,12 +26,12 @@ If you want to build carbon-apimgt from the source code:
 
 ## Start integration tests in debug mode
 
-### For docker based tests
+ ### For docker based tests
 
     * mvn -P local-mysql -Dmaven.failsafe.debug verify
       Note: local-mysql is the profile. Use other profiles accordingly.
 
-### For unit tests :
+ ### For unit tests :
 
     * mvn -Dmaven.surefire.debug="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000 -Xnoagent -Djava.compiler=NONE" test
 
