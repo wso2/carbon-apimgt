@@ -36,7 +36,7 @@ public class MySQLDataSource implements DataSource {
     MySQLDataSource() throws Exception {
         String ipAddress = TestUtil.getInstance().getIpAddressOfContainer();
         basicDataSource.setDriverClassName("com.mysql.jdbc.Driver");
-        basicDataSource.setJdbcUrl("jdbc:mysql://" + ipAddress + ":"+System.getenv("PORT")+"/" + databaseName);
+        basicDataSource.setJdbcUrl("jdbc:mysql://" + ipAddress + ":" + System.getenv("PORT") + "/" + databaseName);
         basicDataSource.setUsername("root");
         basicDataSource.setPassword("root");
         basicDataSource.setAutoCommit(true);

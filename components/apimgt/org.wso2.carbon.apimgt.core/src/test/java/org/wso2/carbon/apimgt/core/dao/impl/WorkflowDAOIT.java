@@ -24,7 +24,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
-import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 
@@ -60,7 +59,7 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
         Assert.assertEquals(retrieveWorflow.getStatus(), workflow.getStatus());
 
         workflow.setStatus(WorkflowStatus.APPROVED);
-        workflow.setUpdatedTime(LocalDateTime.now());        
+        workflow.setUpdatedTime(LocalDateTime.now());
         workflowDAO.updateWorkflowStatus(workflow);
         retrieveWorflow = workflowDAO.retrieveWorkflow(workflow.getExternalWorkflowReference());
 

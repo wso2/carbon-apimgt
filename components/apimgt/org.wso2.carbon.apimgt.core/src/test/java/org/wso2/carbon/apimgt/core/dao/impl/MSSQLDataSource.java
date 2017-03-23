@@ -77,12 +77,12 @@ public class MSSQLDataSource implements DataSource {
                 }
             }
             for (String table : tables) {
-                try(ResultSet resultSet = statement.executeQuery("SELECT name as ForeignKey_Name,OBJECT_SCHEMA_NAME" +
+                try (ResultSet resultSet = statement.executeQuery("SELECT name as ForeignKey_Name,OBJECT_SCHEMA_NAME" +
                         "(parent_object_id) as Schema_Name,OBJECT_NAME(parent_object_id) as Table_Name FROM sys" +
                         ".foreign_keys " +
-                        "WHERE referenced_object_id = object_id('" + table + "')")){
+                        "WHERE referenced_object_id = object_id('" + table + "')")) {
                     while (resultSet.next()) {
-                        try(Statement statement1= connection.createStatement()){
+                        try (Statement statement1 = connection.createStatement()) {
                             statement1.execute("ALTER TABLE " + resultSet.getString("Schema_Name") + "." +
                                     resultSet.getString("Table_Name") + " DROP CONSTRAINT " +
                                     resultSet.getString("ForeignKey_Name"));
