@@ -1739,6 +1739,7 @@ definitions:
         enum:
           - api
           - application
+          - subscription
       attributes:
         description: |
           Custom attributes added to the policy policy

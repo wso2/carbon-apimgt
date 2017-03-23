@@ -4,7 +4,7 @@ import org.wso2.carbon.apimgt.rest.api.store.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.store.impl.ApisApiServiceImpl;
 
 public class ApisApiServiceFactory {
-    private final static ApisApiService service = new ApisApiServiceImpl();
+    private static final ApisApiService service = new ApisApiServiceImpl();
 
     public static ApisApiService getApisApi() {
         return service;

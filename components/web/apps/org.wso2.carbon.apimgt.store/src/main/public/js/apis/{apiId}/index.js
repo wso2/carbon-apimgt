@@ -31,11 +31,6 @@ $(function () {
                                 });
                             });
                         },onFailure: function (message, e) {}});
-
-                    //TODO:Since the tiers are not setting from the rest api, the default tier is attached
-                    if (!api.policies || api.policies.length == 0) {
-                        api.policies = ["Unlimited"];
-                    }
                     UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.tier-list",api,
                         "tier-list", mode, callbacks);
 
