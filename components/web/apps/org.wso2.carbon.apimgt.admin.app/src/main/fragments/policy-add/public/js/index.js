@@ -55,7 +55,7 @@ var addPolicy = function () {
         "id": 0,
         "enabled": false,
         "description": "",
-        "roleList" : "Internal/everyone",
+        "roleList" : "",
         "quotaPolicy": {
             "requestCount": true,
             "badndwidth" : true,

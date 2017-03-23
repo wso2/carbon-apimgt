@@ -15,6 +15,8 @@ import java.util.List;
 
 public class PolicyMappingUtil {
 
+    public static final String QUOTA_TYPE = "requestCount";
+
     public static TierDTO fromPolicyToDTO(Policy policy)    {
         TierDTO tierDTO = new TierDTO();
         if (policy != null) {
@@ -55,7 +57,8 @@ public class PolicyMappingUtil {
         limit.setTimeUnit(tierDTO.getTimeUnit());
         limit.setUnitTime(tierDTO.getUnitTime());
         quotaPolicy.setLimit(limit);
-        quotaPolicy.setType("requestCount");
+        quotaPolicy.setType(QUOTA_TYPE);  // Hard coded as request count. Rest api should support bandwidth type as
+        // well.
         policy.setDefaultQuotaPolicy(quotaPolicy);
 
         return policy;

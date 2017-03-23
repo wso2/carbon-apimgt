@@ -61,21 +61,18 @@ var _renderApplicationAddPage = function(){
                         "application-add", mode, {
                             onSuccess: function () {
                             }, onFailure: function (message, e) {
-                                alert(e);
+                                console.debug(message);
                             }
                         });
-                    console.log(data);
                 },
                 function (error) {
                     if(error.status==401){
                         redirectToLogin(contextPath);
                     }
                 });
-            //TODO:Replace this once the tierList retrieval api is implemented
 
         }
     });
-    console.log(swaggerClient);
 };
 
 var addApplication = function () {

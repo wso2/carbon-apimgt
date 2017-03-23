@@ -1,6 +1,8 @@
 package org.wso2.carbon.apimgt.core.dao.impl;
 
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
@@ -34,9 +36,24 @@ import java.util.UUID;
  */
 public class PolicyDAOImpl implements PolicyDAO {
 
+    private static final Logger log = LoggerFactory.getLogger(PolicyDAOImpl.class);
+
+    public static final String FIFTY_PER_MIN_TIER = "50PerMin";
     private static final String AM_API_POLICY_TABLE_NAME = "AM_API_POLICY";
     private static final String AM_APPLICATION_POLICY_TABLE_NAME = "AM_APPLICATION_POLICY";
     private static final String AM_SUBSCRIPTION_POLICY_TABLE_NAME = "AM_SUBSCRIPTION_POLICY";
+    public static final String UNLIMITED_TIER = "Unlimited";
+    public static final String GOLD_TIER = "Gold";
+    public static final String SILVER_TIER = "Silver";
+    public static final String BRONZE_TIER = "Bronze";
+    public static final String API_TIER_LEVEL = "API";
+    public static final String REQUEST_COUNT_TYPE = "requestCount";
+    public static final String SECONDS_TIMUNIT = "s";
+    public static final String MINUTE_TIMEUNIT = "min";
+    public static final String QUOTA_UNIT = "REQ";
+    public static final String TWENTY_PER_MIN_TIER = "20PerMin";
+    public static final String FIFTY_PER_MIN_TIER_DESCRIPTION = "50PerMin Tier";
+    public static final String TWENTY_PER_MIN_TIER_DESCRIPTION = "20PerMin Tier";
 
     @Override
     public Policy getPolicy(String policyLevel, String policyName) throws APIMgtDAOException {
@@ -82,7 +99,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                 addAPIPolicy(connection, policy.getPolicyName(), policy.getDisplayName(), policy.getDescription(),
                              policy.getDefaultQuotaPolicy().getType(), 0,
                              policy.getDefaultQuotaPolicy().getLimit().getUnitTime(),
-                             policy.getDefaultQuotaPolicy().getLimit().getTimeUnit(), "API");
+                             policy.getDefaultQuotaPolicy().getLimit().getTimeUnit(), API_TIER_LEVEL);
             } else if (APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL.equals(policyLevel))   {
                 addApplicationPolicy(connection, policy.getPolicyName(), policy.getDisplayName(),
                         policy.getDescription(), policy.getDefaultQuotaPolicy().getType(), 0, "",
@@ -95,6 +112,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                         policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
             }
         } catch (SQLException e) {
+            log.error(e.getMessage(), e);
             throw new APIMgtDAOException(e);
         }
     }
@@ -640,23 +658,40 @@ public class PolicyDAOImpl implements PolicyDAO {
                 if (!isDefaultPoliciesExist(connection)) {
                     connection.setAutoCommit(false);
 
-                    addAPIPolicy(connection, "Unlimited", "Unlimited", "Unlimited", "requestCount", 1, 60, "s", "API");
-                    addAPIPolicy(connection, "Gold", "Gold", "Gold", "requestCount", 1, 60, "s", "API");
-                    addAPIPolicy(connection, "Silver", "Silver", "Silver", "requestCount", 1, 60, "s", "API");
-                    addAPIPolicy(connection, "Bronze", "Bronze", "Bronze", "requestCount", 1, 60, "s", "API");
+                    addAPIPolicy(connection, UNLIMITED_TIER, UNLIMITED_TIER, UNLIMITED_TIER, REQUEST_COUNT_TYPE, 1, 60,
+                            SECONDS_TIMUNIT,
+                            API_TIER_LEVEL);
+                    addAPIPolicy(connection, GOLD_TIER, GOLD_TIER, GOLD_TIER, REQUEST_COUNT_TYPE, 1, 60,
+                            SECONDS_TIMUNIT,
+                            API_TIER_LEVEL);
+                    addAPIPolicy(connection, SILVER_TIER, SILVER_TIER, SILVER_TIER, REQUEST_COUNT_TYPE, 1, 60,
+                            SECONDS_TIMUNIT,
+                            API_TIER_LEVEL);
+                    addAPIPolicy(connection, BRONZE_TIER, BRONZE_TIER, BRONZE_TIER, REQUEST_COUNT_TYPE, 1, 60,
+                            SECONDS_TIMUNIT,
+                            API_TIER_LEVEL);
 
-                    addSubscriptionPolicy(connection, "Unlimited", "Unlimited", "Unlimited", "requestCount",
-                            Integer.MAX_VALUE, "REQ", 1, "min");
-                    addSubscriptionPolicy(connection, "Gold", "Gold", "Gold", "requestCount", 5000, "REQ", 1, "min");
-                    addSubscriptionPolicy(connection, "Silver", "Silver", "Silver", "requestCount", 2000, "REQ", 1,
-                            "min");
-                    addSubscriptionPolicy(connection, "Bronze", "Bronze", "Bronze", "requestCount", 1000, "REQ", 1,
-                            "min");
+                    addSubscriptionPolicy(connection, UNLIMITED_TIER, UNLIMITED_TIER, UNLIMITED_TIER,
+                            REQUEST_COUNT_TYPE,
+                            Integer.MAX_VALUE, QUOTA_UNIT, 1, MINUTE_TIMEUNIT);
+                    addSubscriptionPolicy(connection, GOLD_TIER, GOLD_TIER, GOLD_TIER, REQUEST_COUNT_TYPE, 5000,
+                            QUOTA_UNIT, 1,
+                            MINUTE_TIMEUNIT);
+                    addSubscriptionPolicy(connection, SILVER_TIER, SILVER_TIER, SILVER_TIER, REQUEST_COUNT_TYPE, 2000,
+                            QUOTA_UNIT, 1,
+                            MINUTE_TIMEUNIT);
+                    addSubscriptionPolicy(connection, BRONZE_TIER, BRONZE_TIER, BRONZE_TIER, REQUEST_COUNT_TYPE, 1000,
+                            QUOTA_UNIT, 1,
+                            MINUTE_TIMEUNIT);
 
-                    addApplicationPolicy(connection, "50PerMin", "50PerMin", "50PerMin Tier",
-                                                                                    "requestCount", 10, "REQ", 1, "s");
-                    addApplicationPolicy(connection, "20PerMin", "20PerMin", "20PerMin Tier",
-                                                                                    "requestCount", 50, "REQ", 1, "s");
+                    addApplicationPolicy(connection, FIFTY_PER_MIN_TIER, FIFTY_PER_MIN_TIER,
+                            FIFTY_PER_MIN_TIER_DESCRIPTION, REQUEST_COUNT_TYPE, 10,
+                            QUOTA_UNIT, 1,
+                            SECONDS_TIMUNIT);
+                    addApplicationPolicy(connection, TWENTY_PER_MIN_TIER, TWENTY_PER_MIN_TIER,
+                            TWENTY_PER_MIN_TIER_DESCRIPTION, REQUEST_COUNT_TYPE, 50,
+                            QUOTA_UNIT, 1,
+                            SECONDS_TIMUNIT);
                     connection.commit();
                 }
             } catch (SQLException e) {
