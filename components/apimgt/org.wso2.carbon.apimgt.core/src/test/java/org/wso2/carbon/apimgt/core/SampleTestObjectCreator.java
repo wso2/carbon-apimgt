@@ -363,7 +363,7 @@ public class SampleTestObjectCreator {
         application.setCallbackUrl("http://localhost/myapp");
         application.setDescription("This is a test application");
         application.setGroupId("groupx");
-        application.setStatus("CREATED");
+        application.setStatus("ON_HOLD");
         application.setTier("50PerMin");
         application.setCreatedTime(LocalDateTime.now());
         application.setUpdatedUser("admin");
@@ -391,7 +391,7 @@ public class SampleTestObjectCreator {
         application.setCallbackUrl("http://localhost/myapp");
         application.setDescription("This is a test application");
         application.setGroupId("groupx");
-        application.setStatus("CREATED");
+        application.setStatus("ON_HOLD");
         application.setTier("50PerMin");
         application.setCreatedTime(LocalDateTime.now());
         application.setUpdatedUser("admin");
