@@ -62,7 +62,7 @@ authManager.login = function () {
     });
 };
 
-authManager.refresh = function () {
+authManager.refresh = function (authzHeader) {
     var params = {
         grant_type: 'refresh_token',
         validity_period: '3600',
@@ -78,7 +78,7 @@ authManager.refresh = function () {
         data: params,
         traditional:true,
         headers: {
-            'Authorization': 'Basic deidwe',
+            'Authorization': authzHeader,
             'Accept': 'application/json',
             'Content-Type': 'application/x-www-form-urlencoded',
             'X-Alt-Referer': referrer

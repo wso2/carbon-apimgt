@@ -154,7 +154,7 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
         cookie = cookie.trim();
         String[] cookies = cookie.split(";");
         String token2 = Arrays.stream(cookies).filter(name -> name.contains(APIConstants.AccessTokenConstants.TOKEN_2))
-                .findFirst().get();
+                .findFirst().orElse("");
         if (token2.split("=").length == 2) {
             return token2.split("=")[1];
         }

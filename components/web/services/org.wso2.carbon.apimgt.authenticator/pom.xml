@@ -42,6 +42,7 @@
                             org.wso2.msf4j.*;version="${msf4j.package.import.version.range}",
                             org.wso2.carbon.apimgt.core.*;version="${carbon.apimgt.import.pkg.version}",
                             org.slf4j.*;version="${slf4j.logging.package.import.version.range}",
+                            org.wso2.carbon.messaging.*;version="${carbon.messaging.package.import.version.range}",
                             javax.ws.rs.*
                         </Import-Package>
                     </instructions>
