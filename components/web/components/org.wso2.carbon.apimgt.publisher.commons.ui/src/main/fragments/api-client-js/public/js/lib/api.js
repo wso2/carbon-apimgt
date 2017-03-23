@@ -510,4 +510,18 @@ class API {
         ).catch(AuthClient.unauthorizedErrorHandler)
     }
 
+    /**
+     * Get the available labels.
+     * @returns {Promise.<TResult>}
+     */
+    labels() {
+        var promise_labels = this.client.then (
+            (client) => {
+                return client["Label (Collection)"].get_labels({},
+                    this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+            }
+        );
+        return promise_labels;
+    }
+
 }

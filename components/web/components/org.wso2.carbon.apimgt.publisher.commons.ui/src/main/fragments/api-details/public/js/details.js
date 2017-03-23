@@ -54,7 +54,8 @@ function overviewTabHandler(event) {
                 provider: context.provider,
                 id: context.id,
                 lifeCycleStatus: context.lifeCycleStatus,
-                policies: context.policies.join(', ')
+                policies: context.policies.join(', '),
+                labels: context.labels.join(', ')
             };
             UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-overview", data, callbacks);
         }
@@ -99,9 +100,11 @@ function lifecycleTabHandler(event) {
         var policies = response[1];
         var lcState = response[2];
         var lcHistory = response[3];
+        var labels =  response[4];
         var mode = "OVERWRITE"; // Available modes [OVERWRITE,APPEND, PREPEND]
         var api_data = JSON.parse(api.data);
         var policies_data = JSON.parse(policies.data);
+        var label_data = JSON.parse(labels.data)['list'];
         var callbacks = {
             onSuccess: function (data) {
                 $('#policies-list-dropdown').multiselect(
@@ -124,6 +127,20 @@ function lifecycleTabHandler(event) {
                         }
                     }
                 );
+
+                if(label_data.length == 0) {
+                    $('#labels-list-dropdown').multiselect(
+                        {
+                            nonSelectedText:"No Labels Found"
+                        }
+                    );
+                }else {
+                    $('#labels-list-dropdown').multiselect(
+                        {
+                            allSelectedText: false
+                        }
+                    );
+                }
 
                 // Handle svg object
                 var svg_object = document.getElementById("lifecycle-svg");
@@ -174,12 +191,19 @@ function lifecycleTabHandler(event) {
                 policies_data[index].isSelected = api_data.policies.indexOf(policy.policyName) >= 0;
             }
         }
+        for (var index in label_data) {
+            if (label_data.hasOwnProperty(index)) {
+                var label = label_data[index];
+                label_data[index].isSelected = api_data.labels.indexOf(label.name) >= 0;
+            }
+        }
         var data = {
             lifeCycleStatus: api_data.lifeCycleStatus,
             isPublished: api_data.lifeCycleStatus.toLowerCase() === "published",
             policies: policies_data,
             lcState: lcState.obj,
-            lcHistory: lcHistory.obj
+            lcHistory: lcHistory.obj,
+            labels: label_data
         };
         UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-lifecycle", data, "lc-tab-content", mode, callbacks);
     }
@@ -188,7 +212,8 @@ function lifecycleTabHandler(event) {
     var promised_tiers = api_client.policies('api');
     var promised_lcState = api_client.getLcState(api_id);
     var promised_lcHistory = api_client.getLcHistory(api_id);
-    Promise.all([promised_api, promised_tiers, promised_lcState, promised_lcHistory]).then(renderLCTab)
+    var promised_labels = api_client.labels();
+    Promise.all([promised_api, promised_tiers, promised_lcState, promised_lcHistory, promised_labels]).then(renderLCTab)
 }
 
 /**
@@ -407,7 +432,7 @@ function updateTiersHandler(event) {
             var promised_update = this.api_client.update(api_data);
             promised_update.then(
                 function (response) {
-                    var message = "Update policies successfully.";
+                    var message = "Updated policies successfully.";
                     noty({
                         text: message,
                         type: 'success',
@@ -423,6 +448,53 @@ function updateTiersHandler(event) {
             promised_update.catch(
                 function (error_response) {
                     $('#policies-list-dropdown').multiselect("deselectAll", false).multiselect("refresh");
+                    var message = "Error[" + error_response.status + "]: " + error_response.data;
+                    noty({
+                        text: message,
+                        type: 'error',
+                        dismissQueue: true,
+                        progressBar: true,
+                        timeout: 5000,
+                        layout: 'topCenter',
+                        theme: 'relax',
+                        maxVisible: 10,
+                    });
+                }
+            );
+        }.bind(data));
+}
+
+function updateLabelsHandler(event) {
+    var api_client = event.data.api_client;
+    var api_id = event.data.api_id;
+    var data = {
+        api_client: api_client,
+        api_id: api_id
+    };
+    var selected_label_name = $('#labels-list-dropdown').val();
+    api_client.get(api_id).then(
+        function (response) {
+            var api_data = JSON.parse(response.data);
+            api_data.labels = selected_label_name;
+            var promised_update = this.api_client.update(api_data);
+            promised_update.then(
+                function (response) {
+                    var message = "Updated labels successfully.";
+                    noty({
+                        text: message,
+                        type: 'success',
+                        dismissQueue: true,
+                        progressBar: true,
+                        timeout: 5000,
+                        layout: 'topCenter',
+                        theme: 'relax',
+                        maxVisible: 10,
+                    });
+                }
+            );
+            promised_update.catch(
+                function (error_response) {
+                    $('#labels-list-dropdown').multiselect("deselectAll", false).multiselect("refresh");
                     var message = "Error[" + error_response.status + "]: " + error_response.data;
                     noty({
                         text: message,
@@ -462,6 +534,7 @@ $(function () {
     $(document).on('click', ".lc-state-btn", {api_client: client, api_id: api_id}, updateLifecycleHandler);
     $(document).on('click', "#checkItem", {api_client: client, api_id: api_id}, updateLifecycleCheckListHandler);
     $(document).on('click', "#update-tiers-button", {api_client: client, api_id: api_id}, updateTiersHandler);
+    $(document).on('click', "#update-labels-button", {api_client: client, api_id: api_id}, updateLabelsHandler);
     $(document).on('click', "#update-endpoints-configuration", {
         api_client: client,
         api_id: api_id
