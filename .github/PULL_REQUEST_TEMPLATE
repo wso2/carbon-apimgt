@@ -11,13 +11,6 @@ add a reference to that issue as well.]
 can merge this pull request.]
 
 
-
-### Risks
-
-[List any risks that could arise from merging your pull request.]
-
--
-
 ### Follow up actions
 
 [List any possible follow-up actions here; for instance, testing data
@@ -32,8 +25,7 @@ environments.]
 #### General
 
 - [ ] **Is this PR explained thoroughly?** All code changes must be accounted for in the PR description.
-- [ ] **Is the PR labeled correctly?** It should have the `migration` label if a new migration is added.
-- [ ] **Is the risk level assessment sufficient?** The risks section should contain all risks that might be introduced with the PR and which actions we need to take to mitigate these risks. Possible risks are database migrations, new libraries that need to be installed or changes to deployment scripts.
+- [ ] **Is the PR labeled correctly?
 
 #### Functionality
 
