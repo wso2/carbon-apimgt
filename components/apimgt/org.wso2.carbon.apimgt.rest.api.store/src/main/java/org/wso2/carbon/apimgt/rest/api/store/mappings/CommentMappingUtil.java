@@ -1,5 +1,4 @@
 /*
- *
  *   Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *   WSO2 Inc. licenses this file to you under the Apache License,
@@ -17,7 +16,6 @@
  *  under the License.
  *
  */
-
 package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
 import org.wso2.carbon.apimgt.core.models.Comment;
@@ -39,7 +37,7 @@ public class CommentMappingUtil {
         CommentDTO commentDTO = new CommentDTO();
         commentDTO.setCommentId(comment.getUuid());
         commentDTO.setApiId(comment.getApiId());
-        commentDTO.setSubscriber(comment.getCommentedUser());
+        commentDTO.setSubscriberName(comment.getCommentedUser());
         commentDTO.setCommentText(comment.getCommentText());
         commentDTO.setCreatedTime(comment.getCreatedTime().toString());
         commentDTO.setCreatedBy(comment.getCreatedUser());

@@ -19,7 +19,9 @@
  */
 package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
+import org.wso2.carbon.apimgt.core.models.AvgRating;
 import org.wso2.carbon.apimgt.core.models.Rating;
+import org.wso2.carbon.apimgt.rest.api.store.dto.AvgRatingDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.RatingDTO;
 
 /**
@@ -38,10 +40,24 @@ public class RatingMappingUtil {
         RatingDTO ratingDTO = new RatingDTO();
         ratingDTO.setRatingId(rating.getUuid());
         ratingDTO.setApiId(rating.getApiId());
-        ratingDTO.setSubscriber(rating.getSubscriber());
+        ratingDTO.setSubscriberName(rating.getSubscriber());
         ratingDTO.setRating(Integer.parseInt(rating.getRating()));
 
         return ratingDTO;
+    }
+
+    /** Converts an ArtifactResource object into corresponding REST API Average Rating DTO object
+     *
+     * @param apiId UUID of the API
+     * @param averageRating Average Rating object
+     * @return a new Comment object corresponding to given ArtifactResource object
+     */
+    public static AvgRatingDTO fromAverageRatingToDTO(String apiId, AvgRating averageRating) {
+
+        AvgRatingDTO averageRatingDTO = new AvgRatingDTO();
+        averageRatingDTO.setApiId(averageRating.getApiId());
+        averageRatingDTO.setAvgRating(averageRating.getAvgRating());
+        return averageRatingDTO;
     }
 }
 
