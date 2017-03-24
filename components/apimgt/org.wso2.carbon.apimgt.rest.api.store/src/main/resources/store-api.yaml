@@ -14,7 +14,7 @@ info:
     name: "WSO2"
     url: "http://wso2.com/products/api-manager/"
     email: "architecture@wso2.com"
-  license: 
+  license:
     name: "Apache 2.0"
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 
@@ -23,7 +23,7 @@ info:
 ######################################################
 
 # The schemes supported by the API
-schemes: 
+schemes:
   - https
   - http
 
@@ -40,17 +40,17 @@ basePath: /api/am/store/v1
 # The actual media type must be specified in the Content-Type header field of the request.
 # The default is json, i.e. the Content-Type header is not needed to
 # be set, but supporting it serves extensibility.
-consumes: 
+consumes:
   - application/json
 
 # The following media types may be passed as output in message bodies of the API.
 # The media type(s) consumable by the requestor is specified in the Accept header field
-# of the corresponding request. 
-# The actual media type returned will be specfied in the Content-Type header field 
+# of the corresponding request.
+# The actual media type returned will be specfied in the Content-Type header field
 # of the of the response.
 # The default of the Accept header is json, i.e. there is not needed to
 # set the value, but supporting it serves extensibility.
-produces: 
+produces:
   - application/json
 
 x-wso2-security:
@@ -68,7 +68,7 @@ paths:
   /apis:
 
 #-----------------------------------------------------
-# Retrieving the list of all APIs qualifying under a given search condition  
+# Retrieving the list of all APIs qualifying under a given search condition
 #-----------------------------------------------------
     get:
       summary: |
@@ -425,6 +425,455 @@ paths:
             schema:
               $ref: '#/definitions/Error'
 
+######################################################
+# The "API Rating" resource APIs
+######################################################
+  '/apis/{apiId}/rating':
+
+#-----------------------------------------------------
+# Retrieve the average rating of a certain API
+#-----------------------------------------------------
+    get:
+      description: |
+        Get the average rating of an API.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
+        - $ref: '#/parameters/Minor-Version'
+      tags:
+        - API (individual)
+        - Retrieve Average Rating
+      responses:
+        200:
+          description: |
+            OK.
+            Rating returned.
+          schema:
+            $ref: '#/definitions/AvgRating'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests.
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional reuquests.
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+        404:
+          description: |
+            Not Found.
+            Requested rating does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# Add a new Rating
+#-----------------------------------------------------
+    post:
+      x-scope: apim:subscribe
+      description: |
+        Add a new Rating
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - in: body
+          name: body
+          description: |
+            Rating object that should to be added
+          required: true
+          schema:
+            $ref: '#/definitions/Rating'
+        - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/Minor-Version'
+      tags:
+        - API (individual)
+        - Create
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created object as entity in the body.
+            Location header contains URL of newly created entity.
+          schema:
+            $ref: '#/definitions/Rating'
+          headers:
+            Location:
+              description: |
+                Location to the newly created Rating.
+              type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional request.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        415:
+          description: |
+            Unsupported media type.
+            The entity of the request was in a not supported format.
+          schema:
+            $ref: '#/definitions/Error'
+
+#########################################################
+# The "API Rating given by the Subscriber" resource APIs
+#########################################################
+# '/apis/{apiId}/rating/{subscriberName}':
+
+#-----------------------------------------------------------------------
+# Retrieve the individual rating given by a subscriber for a certain API
+#-----------------------------------------------------------------------
+    get:
+      x-scope: apim:subscribe
+      description: |
+        Get the individual rating given by a subscriber for a certain API.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/subscriberName'
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
+        - $ref: '#/parameters/Minor-Version'
+      tags:
+        - API (individual)
+        - Retrieve Rating
+      responses:
+        200:
+          description: |
+            OK.
+            Rating returned.
+          schema:
+            $ref: '#/definitions/Rating'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests.
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional reuquests.
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+        404:
+          description: |
+            Not Found.
+            Requested rating does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
+# The "Comments Collection" resource API
+######################################################
+  '/apis/{apiId}/comments':
+
+#-----------------------------------------------------
+# Retrieve a list of all comments of a certain API
+#-----------------------------------------------------
+   get:
+      description: |
+        Get a list of Comments that are already added to APIs
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/Minor-Version'
+      tags:
+        - Comments Collection
+        - Retrieve
+      responses:
+        200:
+          description: |
+            OK.
+            Comments list is returned.
+          schema:
+            $ref: '#/definitions/CommentList'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests.
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+        404:
+          description: |
+            Not Found. Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable. The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+#########################################################
+# "Individual API comment" resource APIs
+#########################################################
+  '/apis/{apiId}/comment/{commentId}':
+
+#-----------------------------------------------------------------------
+# Retrieve an individual Comment for a certain API
+#-----------------------------------------------------------------------
+    get:
+      x-scope: apim:subscribe
+      description: |
+        Get the individual comment given by a subscriber for a certain API.
+      parameters:
+        - $ref: '#/parameters/commentId'
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
+        - $ref: '#/parameters/Minor-Version'
+      tags:
+        - API (individual)
+        - Retrieve Comment
+      responses:
+        200:
+          description: |
+            OK.
+            Comment returned.
+          schema:
+            $ref: '#/definitions/Comment'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests.
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests.
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+        404:
+          description: |
+            Not Found.
+            Requested comment does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# Delete a particular Comment
+#-----------------------------------------------------
+    delete:
+      x-scope: apim:subscribe
+      description: |
+        Remove a Comment
+      parameters:
+        - $ref: '#/parameters/commentId'
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
+        - $ref: '#/parameters/Minor-Version'
+      tags:
+        - API (individual)
+        - Delete
+      responses:
+        200:
+          description: |
+            OK.
+            Resource successfully deleted.
+        404:
+          description: |
+            Not Found.
+            Resource to be deleted does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+#########################################################
+# "Add API comment" resource APIs
+#########################################################
+  '/apis/{apiId}/comment':
+#-----------------------------------------------------
+# Add a new Comment
+#-----------------------------------------------------
+    post:
+      x-scope: apim:subscribe
+      description: |
+        Add a new Comment
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - in: body
+          name: body
+          description: |
+            Comment object that should to be added
+          required: true
+          schema:
+            $ref: '#/definitions/Comment'
+        - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/Minor-Version'
+      tags:
+        - API (individual)
+        - Create
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created object as entity in the body.
+            Location header contains URL of newly created entity.
+          schema:
+            $ref: '#/definitions/Comment'
+          headers:
+            Location:
+              description: |
+                Location to the newly created Comment.
+              type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional request.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        415:
+          description: |
+            Unsupported media type.
+            The entity of the request was in a not supported format.
+          schema:
+            $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# Update a particular Comment
+#-----------------------------------------------------
+    put:
+      x-scope: apim:subscribe
+      description: |
+        Update a certain Comment
+      parameters:
+        - $ref: '#/parameters/commentId'
+        - $ref: '#/parameters/apiId'
+        - in: body
+          name: body
+          description: |
+            Comment object that needs to be updated
+          required: true
+          schema:
+            $ref: '#/definitions/Comment'
+        - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
+        - $ref: '#/parameters/Minor-Version'
+      tags:
+        - API (individual)
+        - Update
+      responses:
+        200:
+          description: |
+            OK.
+            Comment updated.
+          schema:
+            $ref: '#/definitions/Comment'
+          headers:
+            Location:
+              description: |
+                The URL of the newly created resource.
+              type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional request.
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional reuquests.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
 
 ######################################################
 # The "Application Collection" resource APIs
@@ -1312,6 +1761,26 @@ parameters:
     required: true
     type: string
 
+# Comment Identifier
+# Specified as part of the path expression
+  commentId:
+    name: commentId
+    in: path
+    description: |
+      Comment Id
+    required: true
+    type: string
+
+# Subscriber Name
+# Specified as part of the path expression
+  subscriberName:
+    name: subscriberName
+    in: path
+    description: |
+      subscriber Name
+    required: true
+    type: string
+
 # Tier Name
 # Specified as part of the path expression
   tierName:
@@ -1869,6 +2338,101 @@ definitions:
           $ref: '#/definitions/Tag'
 
 #-----------------------------------------------------
+# The Rating resource
+#-----------------------------------------------------
+  Rating:
+    title: Rating
+    required:
+      - ratingId
+      - apiId
+      - subscriberName
+      - rating
+    properties:
+      ratingId:
+        type: string
+      apiId:
+        type: string
+      subscriberName:
+        type: string
+        description: |
+          If subscriberName is not given user invoking the API will be taken as the subscriberName.
+      rating:
+        type: integer
+
+#-----------------------------------------------------
+# The Average Rating resource
+#-----------------------------------------------------
+  AvgRating:
+    title: AvgRating
+    required:
+      - apiId
+      - avgRating
+    properties:
+      apiId:
+        type: string
+      avgRating:
+        type: string
+        description: |
+          Average rating of the API
+
+#-----------------------------------------------------
+# The Comment resource
+#-----------------------------------------------------
+  Comment:
+    title: Comment
+    required:
+      - commentId
+      - apiId
+      - subscriberName
+      - commentText
+    properties:
+      commentId:
+        type: string
+      apiId:
+        type: string
+      subscriberName:
+        type: string
+        description: |
+          If subscriberName is not given user invoking the API will be taken as the subscriberName.
+      commentText:
+        type: string
+      createdTime:
+        type: string
+        example: 2017-02-20T13:57:16.229
+      createdBy:
+        type: string
+      lastUpdatedTime:
+        type: string
+        example: 2017-02-20T13:57:16.229
+      lastUpdatedBy:
+        type: string
+
+#-----------------------------------------------------
+# The Comments List resource
+#-----------------------------------------------------
+  CommentList:
+    title: Comments List
+    properties:
+      count:
+        type: integer
+        description: |
+           Number of Comments returned.
+      next:
+        type: string
+        description: |
+           Link to the next subset of resources qualified.
+           Empty if no more resources are to be returned.
+      previous:
+        type: string
+        description: |
+           Link to the previous subset of resources qualified.
+           Empty if current subset is the first subset returned.
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/Comment'
+
+#-----------------------------------------------------
 # The Error resource
 #-----------------------------------------------------
   Error:
@@ -1962,7 +2526,7 @@ definitions:
           - SANDBOX
       token:
         $ref: '#/definitions/Token'
-  
+
 #-----------------------------------------------------
 # The Application Key Generation Request schema
 #-----------------------------------------------------
@@ -1985,12 +2549,12 @@ definitions:
         description: Callback URL
       accessAllowDomains:
         type: array
-        items: 
+        items:
           type: string
         description: Allowed domains for the access token
       scopes:
         type: array
-        items: 
+        items:
           type: string
         description: Allowed scopes for the access token
 
