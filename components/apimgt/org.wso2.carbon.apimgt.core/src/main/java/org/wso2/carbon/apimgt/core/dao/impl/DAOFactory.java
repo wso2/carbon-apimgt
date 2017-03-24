@@ -295,4 +295,12 @@ public class DAOFactory {
         PolicyDAOImpl.initDefaultPolicies();
     }
 
+    public static CommentDAO getCommentDAO() throws APIMgtDAOException {
+
+        return null;
+    }
+
+    public static RatingDAO getRatingDAO() throws  APIMgtDAOException {
+        return null;
+    }
 }
