@@ -37,11 +37,9 @@ import java.util.Objects;
 
 public class TestUtil {
     private static TestUtil instance = new TestUtil();
-
-    private TestUtil() {
+    private TestUtil(){
 
     }
-
     public static Application addTestApplication() throws APIMgtDAOException {
         ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
         Application application = SampleTestObjectCreator.createDefaultApplication();
@@ -91,7 +89,7 @@ public class TestUtil {
      * @param app Complete Application object
      * @return Summary Application object
      */
-    public static Application createSummaryApplication(Application app) {
+    public static Application createSummaryApplication(Application app){
         Application summaryApp = new Application(app.getName(), app.getCreatedUser());
         summaryApp.setId(app.getId());
         summaryApp.setCallbackUrl(app.getCallbackUrl());
@@ -149,7 +147,6 @@ public class TestUtil {
 
     /**
      * Utility for get Docker running host
-     *
      * @return docker host
      * @throws URISyntaxException if docker Host url is malformed this will throw
      */

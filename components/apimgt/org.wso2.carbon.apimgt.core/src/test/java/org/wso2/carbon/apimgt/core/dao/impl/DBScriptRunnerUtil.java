@@ -47,22 +47,22 @@ public class DBScriptRunnerUtil {
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
 
-                if (line.startsWith("//")) {
-                    continue;
-                }
-                if (line.startsWith("--")) {
-                    continue;
-                }
-                if (line.startsWith("#")) {
-                    continue;
-                }
-                StringTokenizer st = new StringTokenizer(line);
-                if (st.hasMoreTokens()) {
-                    String token = st.nextToken();
-                    if ("REM".equalsIgnoreCase(token)) {
+                    if (line.startsWith("//")) {
                         continue;
                     }
-                }
+                    if (line.startsWith("--")) {
+                        continue;
+                    }
+                    if (line.startsWith("#")) {
+                        continue;
+                    }
+                    StringTokenizer st = new StringTokenizer(line);
+                    if (st.hasMoreTokens()) {
+                        String token = st.nextToken();
+                        if ("REM".equalsIgnoreCase(token)) {
+                            continue;
+                        }
+                    }
 
                 sql.append(" ").append(line);
 
@@ -118,7 +118,7 @@ public class DBScriptRunnerUtil {
                     + "where index_type like '%DOMAIN%' and (domidx_status <> 'VALID' or domidx_opstatus <> 'VALID')";
             try (Statement statement = connection.createStatement(); ResultSet rs = statement.executeQuery(q);) {
                 while (rs.next()) {
-                    if (rs.getString("index_name").equals("API_INDEX")) { // re build index if it has failed.
+                    if(rs.getString("index_name").equals("API_INDEX")) { // re build index if it has failed.
                         String rebuild = "alter index API_INDEX rebuild";
                         statement.execute(rebuild);
                     }

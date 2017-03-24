@@ -21,6 +21,8 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
+import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
+import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,10 +32,9 @@ import java.sql.SQLException;
 public class DAOIntegrationTestBase {
     protected DataSource dataSource;
     String database;
-
     public DAOIntegrationTestBase() {
-        database = System.getenv("DATABASE_TYPE");
-        if (StringUtils.isEmpty(database)) {
+         database = System.getenv("DATABASE_TYPE");
+        if (StringUtils.isEmpty(database)){
             database = "h2";
         }
     }
@@ -41,35 +42,35 @@ public class DAOIntegrationTestBase {
     @BeforeMethod
     public void setUp() throws Exception {
         String sqlFilePath = null;
-        if ("h2".equals(database)) {
+        if ("h2".equals(database)){
             dataSource = new H2DataSource();
             ((H2DataSource) dataSource).resetDB();
             sqlFilePath = ".." + File.separator + ".." + File.separator + ".." + File.separator
                     + "features" + File.separator + "apimgt" + File.separator
                     + "org.wso2.carbon.apimgt.core.feature" + File.separator + "resources"
                     + File.separator + "dbscripts" + File.separator + "h2.sql";
-        } else if ("mysql".contains(database)) {
+        }else if ("mysql".contains(database)){
             dataSource = new MySQLDataSource();
             ((MySQLDataSource) dataSource).resetDB();
             sqlFilePath = ".." + File.separator + ".." + File.separator + ".." + File.separator
                     + "features" + File.separator + "apimgt" + File.separator
                     + "org.wso2.carbon.apimgt.core.feature" + File.separator + "resources"
                     + File.separator + "dbscripts" + File.separator + "mysql.sql";
-        } else if ("postgres".contains(database)) {
+        }else if ("postgres".contains(database)){
             dataSource = new PostgreDataSource();
             ((PostgreDataSource) dataSource).resetDB();
             sqlFilePath = ".." + File.separator + ".." + File.separator + ".." + File.separator
                     + "features" + File.separator + "apimgt" + File.separator
                     + "org.wso2.carbon.apimgt.core.feature" + File.separator + "resources"
                     + File.separator + "dbscripts" + File.separator + "postgres.sql";
-        } else if ("mssql".contains(database)) {
+        }else if ("mssql".contains(database)){
             dataSource = new MSSQLDataSource();
             ((MSSQLDataSource) dataSource).resetDB();
             sqlFilePath = ".." + File.separator + ".." + File.separator + ".." + File.separator
                     + "features" + File.separator + "apimgt" + File.separator
                     + "org.wso2.carbon.apimgt.core.feature" + File.separator + "resources"
                     + File.separator + "dbscripts" + File.separator + "mssql.sql";
-        } else if ("oracle".contains(database)) {
+        }else if ("oracle".contains(database)){
             dataSource = new OracleDataSource();
             ((OracleDataSource) dataSource).resetDB();
             sqlFilePath = ".." + File.separator + ".." + File.separator + ".." + File.separator
@@ -83,18 +84,17 @@ public class DAOIntegrationTestBase {
             DBScriptRunnerUtil.executeSQLScript(sqlFilePath, connection);
         }
     }
-
-    @AfterClass
+@AfterClass
     public void tempDBCleanup() throws SQLException, IOException {
-        if ("h2".equals(database)) {
+        if ("h2".equals(database)){
             ((H2DataSource) dataSource).resetDB();
-        } else if ("mysql".contains(database)) {
+        }else if ("mysql".contains(database)){
             ((MySQLDataSource) dataSource).resetDB();
-        } else if ("mssql".contains(database)) {
+        }else if ("mssql".contains(database)){
             ((MSSQLDataSource) dataSource).resetDB();
-        } else if ("postgres".contains(database)) {
+        }else if ("postgres".contains(database)){
             ((PostgreDataSource) dataSource).resetDB();
-        } else if ("oracle".contains(database)) {
+        }else if ("oracle".contains(database)){
             ((OracleDataSource) dataSource).resetDB();
         }
     }
