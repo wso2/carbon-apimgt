@@ -39,6 +39,8 @@ import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.TagDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
+import org.wso2.carbon.apimgt.core.dao.impl.CommentDAO;
+import org.wso2.carbon.apimgt.core.dao.impl.RatingDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
@@ -53,10 +55,13 @@ import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.ApplicationCreationResponse;
 import org.wso2.carbon.apimgt.core.models.ApplicationCreationWorkflow;
+import org.wso2.carbon.apimgt.core.models.AvgRating;
+import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.Event;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
 import org.wso2.carbon.apimgt.core.models.SubscriptionWorkflow;
@@ -96,9 +101,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
     public APIStoreImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
             APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, TagDAO tagDAO, LabelDAO labelDAO,
-            WorkflowDAO workflowDAO) {
+            WorkflowDAO workflowDAO, CommentDAO commentDAO, RatingDAO ratingDAO) {
         super(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, new APILifeCycleManagerImpl(), labelDAO,
-                workflowDAO);
+                workflowDAO, commentDAO, ratingDAO);
         this.tagDAO = tagDAO;
     }
 
@@ -317,7 +322,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 log.error(errorMsg);
                 throw new APIManagementException(errorMsg, ExceptionCodes.PARAMETER_NOT_PROVIDED);
             }
-            
+
             Subscription subscription = getApiSubscriptionDAO().getAPISubscription(subscriptionId);
             if (subscription == null) {
                 String errorMsg = "Subscription not found for the id - " + subscriptionId;
@@ -363,7 +368,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
                     completeWorkflow(removeSubscriptionWFExecutor, workflow);
                 }
-            }      
+            }
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while deleting api subscription - " + subscriptionId;
             log.error(errorMsg, e);
@@ -422,6 +427,29 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return labelList;
+    }
+
+    @Override
+    public Comment getCommentByUUID(String commentId, String apiId) throws APIManagementException {
+        Comment comment;
+        try {
+            comment = getCommentDAO().getCommentByUUID(commentId, apiId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while retrieving label information";
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+            return comment;
+    }
+
+    @Override
+    public AvgRating getRatingByApiId(String apiId) throws APIManagementException {
+        return null;
+    }
+
+    @Override
+    public Rating getAPIRatingBySubscriber(String apiId, String subscriberName) throws APIManagementException {
+        return null;
     }
 
     @Override

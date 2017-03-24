@@ -30,6 +30,8 @@ import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
+import org.wso2.carbon.apimgt.core.dao.impl.CommentDAO;
+import org.wso2.carbon.apimgt.core.dao.impl.RatingDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
@@ -59,10 +61,13 @@ public abstract class AbstractAPIManager implements APIManager {
     private APILifecycleManager apiLifecycleManager;
     private LabelDAO labelDAO;
     private WorkflowDAO workflowDAO;
+    private final CommentDAO commentDAO;
+    private final RatingDAO ratingDAO;
 
     public AbstractAPIManager(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
             APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager apiLifecycleManager,
-            LabelDAO labelDAO, WorkflowDAO workflowDAO) {
+            LabelDAO labelDAO, WorkflowDAO workflowDAO, CommentDAO commentDAO, RatingDAO ratingDAO) {
+
         this.username = username;
         this.apiDAO = apiDAO;
         this.applicationDAO = applicationDAO;
@@ -71,6 +76,9 @@ public abstract class AbstractAPIManager implements APIManager {
         this.apiLifecycleManager = apiLifecycleManager;
         this.labelDAO = labelDAO;
         this.workflowDAO = workflowDAO;
+        this.commentDAO = commentDAO;
+        this.ratingDAO = ratingDAO;
+
     }
 
     /**
@@ -123,7 +131,7 @@ public abstract class AbstractAPIManager implements APIManager {
             log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
-        
+
         return lastUpdatedTime;
     }
 
@@ -346,9 +354,9 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
-     * @see APIManager#getLastUpdatedTimeOfDocument(String) 
+     * @see APIManager#getLastUpdatedTimeOfDocument(String)
      */
-    @Override 
+    @Override
     public String getLastUpdatedTimeOfDocument(String documentId) throws APIManagementException {
         String lastUpdatedTime;
         try {
@@ -483,9 +491,16 @@ public abstract class AbstractAPIManager implements APIManager {
     protected LabelDAO getLabelDAO() {
         return labelDAO;
     }
-    
+
     protected WorkflowDAO getWorkflowDAO() {
         return workflowDAO;
+    }
+
+    protected CommentDAO getCommentDAO() {
+        return commentDAO;
+    }
+    protected RatingDAO getRatingDAO() {
+        return ratingDAO;
     }
 
     protected String getUsername() {

@@ -24,7 +24,10 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.ApplicationCreationResponse;
+import org.wso2.carbon.apimgt.core.models.AvgRating;
+import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.Label;
+import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
 import org.wso2.carbon.apimgt.core.models.Tag;
@@ -74,7 +77,7 @@ public interface APIStore extends APIManager {
      * Adds an application
      *
      * @param application Application
-     * @return ApplicationCreationResponse 
+     * @return ApplicationCreationResponse
      * @throws APIManagementException if failed to add Application
      */
     ApplicationCreationResponse addApplication(Application application) throws APIManagementException;
@@ -200,4 +203,34 @@ public interface APIStore extends APIManager {
      * @throws APIManagementException if failed to get labels
      */
     List<Label> getLabelInfo(List<String> labels) throws APIManagementException;
+
+    /**
+     * Retrieve Individual Comment based on Comment ID
+     *
+     * @param commentId UUID od the comment
+     * @param apiId UUID of the API
+     * @return Comment Object.
+     * @throws APIManagementException if failed to get labels
+     */
+    Comment getCommentByUUID(String commentId, String apiId) throws APIManagementException;
+
+    /**
+     * Retrieve Average Rating based on the API ID
+     *
+     * @param apiId UUID of the API
+     * @return AvgRating Object.
+     * @throws APIManagementException if failed to get labels
+     */
+    AvgRating getRatingByApiId(String apiId) throws APIManagementException;
+
+    /**
+     * Retrieve Individual Rating
+     *
+     * @param apiId UUID of the API
+     * @param subscriberName Name of the subscriber who has given the rating
+     * @return Comment Object.
+     * @throws APIManagementException if failed to get labels
+     */
+    Rating getAPIRatingBySubscriber(String apiId, String subscriberName) throws APIManagementException;
+
 }

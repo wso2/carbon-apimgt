@@ -87,7 +87,8 @@ public class APIManagerFactory {
         try {
             UserAwareAPIPublisher userAwareAPIPublisher = new UserAwareAPIPublisher(username, DAOFactory.getApiDAO(),
                     DAOFactory.getApplicationDAO(), DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO(),
-                    DAOFactory.getLabelDAO(), DAOFactory.getWorkflowDAO());
+                    DAOFactory.getLabelDAO(), DAOFactory.getWorkflowDAO(), DAOFactory.getCommentDAO(),
+                    DAOFactory.getRatingDAO());
 
             // Register all the observers which need to observe 'Publisher' component
             userAwareAPIPublisher.registerObserver(new EventLogger());
@@ -122,7 +123,7 @@ public class APIManagerFactory {
             UserAwareAPIStore userAwareAPIStore = new UserAwareAPIStore(username, DAOFactory.getApiDAO(),
                     DAOFactory.getApplicationDAO(), DAOFactory.getAPISubscriptionDAO(),
                     DAOFactory.getPolicyDAO(), DAOFactory.getTagDAO(), DAOFactory.getLabelDAO(),
-                    DAOFactory.getWorkflowDAO());
+                    DAOFactory.getWorkflowDAO(), DAOFactory.getCommentDAO(), DAOFactory.getRatingDAO());
 
             // Register all the observers which need to observe 'Store' component
             userAwareAPIStore.registerObserver(new EventLogger());
