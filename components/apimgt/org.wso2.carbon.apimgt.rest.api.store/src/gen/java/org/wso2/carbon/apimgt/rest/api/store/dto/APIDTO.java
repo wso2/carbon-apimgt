@@ -12,7 +12,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.API_businessInformationDTO;
 /**
  * APIDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-22T14:28:21.878+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-24T14:21:25.168+05:30")
 public class APIDTO   {
   @JsonProperty("id")
   private String id = null;
@@ -46,6 +46,9 @@ public class APIDTO   {
 
   @JsonProperty("tags")
   private List<String> tags = new ArrayList<String>();
+
+  @JsonProperty("labels")
+  private List<String> labels = new ArrayList<String>();
 
   @JsonProperty("policies")
   private List<String> policies = new ArrayList<String>();
@@ -261,6 +264,29 @@ public class APIDTO   {
     this.tags = tags;
   }
 
+  public APIDTO labels(List<String> labels) {
+    this.labels = labels;
+    return this;
+  }
+
+  public APIDTO addLabelsItem(String labelsItem) {
+    this.labels.add(labelsItem);
+    return this;
+  }
+
+   /**
+   * Get labels
+   * @return labels
+  **/
+  @ApiModelProperty(value = "")
+  public List<String> getLabels() {
+    return labels;
+  }
+
+  public void setLabels(List<String> labels) {
+    this.labels = labels;
+  }
+
   public APIDTO policies(List<String> policies) {
     this.policies = policies;
     return this;
@@ -323,13 +349,14 @@ public class APIDTO   {
         Objects.equals(this.isDefaultVersion, API.isDefaultVersion) &&
         Objects.equals(this.transport, API.transport) &&
         Objects.equals(this.tags, API.tags) &&
+        Objects.equals(this.labels, API.labels) &&
         Objects.equals(this.policies, API.policies) &&
         Objects.equals(this.businessInformation, API.businessInformation);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, apiDefinition, lifeCycleStatus, isDefaultVersion, transport, tags, policies, businessInformation);
+    return Objects.hash(id, name, description, context, version, provider, apiDefinition, lifeCycleStatus, isDefaultVersion, transport, tags, labels, policies, businessInformation);
   }
 
   @Override
@@ -348,6 +375,7 @@ public class APIDTO   {
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
+    sb.append("    labels: ").append(toIndentedString(labels)).append("\n");
     sb.append("    policies: ").append(toIndentedString(policies)).append("\n");
     sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
     sb.append("}");
