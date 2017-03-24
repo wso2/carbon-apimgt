@@ -91,6 +91,7 @@ class DocMetaDataDAO {
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             try {
+                connection.setAutoCommit(false);
                 statement.setString(1, documentInfo.getName());
                 statement.setString(2, documentInfo.getSummary());
                 statement.setString(3, documentInfo.getType().toString());
@@ -102,8 +103,12 @@ class DocMetaDataDAO {
                 statement.setTimestamp(9, Timestamp.valueOf(LocalDateTime.now()));
                 statement.setString(10, documentInfo.getId());
                 statement.execute();
+                connection.commit();
             } catch (SQLException e) {
+                connection.rollback();
                 throw new APIMgtDAOException(e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
