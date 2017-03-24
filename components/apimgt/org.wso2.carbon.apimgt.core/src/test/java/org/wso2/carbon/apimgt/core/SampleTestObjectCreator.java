@@ -150,9 +150,9 @@ public class SampleTestObjectCreator {
 
     public static LifecycleState getMockLifecycleStateObject(String lifecycleId) {
         LifecycleState lifecycleState = new LifecycleState();
-        lifecycleState.setLcName("API_LIFECYCLE");
+        lifecycleState.setLcName(APIMgtConstants.API_LIFECYCLE);
         lifecycleState.setLifecycleId(lifecycleId);
-        lifecycleState.setState("PUBLISHED");
+        lifecycleState.setState(APIStatus.PUBLISHED.getStatus());
         return lifecycleState;
     }
 
