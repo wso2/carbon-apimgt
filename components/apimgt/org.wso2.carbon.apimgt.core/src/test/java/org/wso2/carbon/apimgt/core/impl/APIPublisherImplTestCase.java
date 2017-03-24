@@ -1433,4 +1433,3 @@ public class APIPublisherImplTestCase {
     }
 
 }
-
