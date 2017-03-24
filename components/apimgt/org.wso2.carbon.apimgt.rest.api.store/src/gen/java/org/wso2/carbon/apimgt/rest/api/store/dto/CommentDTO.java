@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * CommentDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-22T12:22:55.771+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-24T18:12:27.379+05:30")
 public class CommentDTO   {
   @JsonProperty("commentId")
   private String commentId = null;
@@ -17,8 +17,8 @@ public class CommentDTO   {
   @JsonProperty("apiId")
   private String apiId = null;
 
-  @JsonProperty("subscriber")
-  private String subscriber = null;
+  @JsonProperty("subscriberName")
+  private String subscriberName = null;
 
   @JsonProperty("commentText")
   private String commentText = null;
@@ -71,22 +71,22 @@ public class CommentDTO   {
     this.apiId = apiId;
   }
 
-  public CommentDTO subscriber(String subscriber) {
-    this.subscriber = subscriber;
+  public CommentDTO subscriberName(String subscriberName) {
+    this.subscriberName = subscriberName;
     return this;
   }
 
    /**
-   * If subscriber is not given user invoking the API will be taken as the subscriber. 
-   * @return subscriber
+   * If subscriberName is not given user invoking the API will be taken as the subscriberName. 
+   * @return subscriberName
   **/
-  @ApiModelProperty(required = true, value = "If subscriber is not given user invoking the API will be taken as the subscriber. ")
-  public String getSubscriber() {
-    return subscriber;
+  @ApiModelProperty(required = true, value = "If subscriberName is not given user invoking the API will be taken as the subscriberName. ")
+  public String getSubscriberName() {
+    return subscriberName;
   }
 
-  public void setSubscriber(String subscriber) {
-    this.subscriber = subscriber;
+  public void setSubscriberName(String subscriberName) {
+    this.subscriberName = subscriberName;
   }
 
   public CommentDTO commentText(String commentText) {
@@ -191,7 +191,7 @@ public class CommentDTO   {
     CommentDTO comment = (CommentDTO) o;
     return Objects.equals(this.commentId, comment.commentId) &&
         Objects.equals(this.apiId, comment.apiId) &&
-        Objects.equals(this.subscriber, comment.subscriber) &&
+        Objects.equals(this.subscriberName, comment.subscriberName) &&
         Objects.equals(this.commentText, comment.commentText) &&
         Objects.equals(this.createdTime, comment.createdTime) &&
         Objects.equals(this.createdBy, comment.createdBy) &&
@@ -201,7 +201,7 @@ public class CommentDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(commentId, apiId, subscriber, commentText, createdTime, createdBy, lastUpdatedTime, lastUpdatedBy);
+    return Objects.hash(commentId, apiId, subscriberName, commentText, createdTime, createdBy, lastUpdatedTime, lastUpdatedBy);
   }
 
   @Override
@@ -211,7 +211,7 @@ public class CommentDTO   {
     
     sb.append("    commentId: ").append(toIndentedString(commentId)).append("\n");
     sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
-    sb.append("    subscriber: ").append(toIndentedString(subscriber)).append("\n");
+    sb.append("    subscriberName: ").append(toIndentedString(subscriberName)).append("\n");
     sb.append("    commentText: ").append(toIndentedString(commentText)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    createdBy: ").append(toIndentedString(createdBy)).append("\n");

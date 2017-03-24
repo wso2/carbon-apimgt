@@ -1,14 +1,15 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.annotations.ApiModelProperty;
-
 import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * RatingDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-22T12:22:55.771+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-24T18:12:27.379+05:30")
 public class RatingDTO   {
   @JsonProperty("ratingId")
   private String ratingId = null;
@@ -16,8 +17,8 @@ public class RatingDTO   {
   @JsonProperty("apiId")
   private String apiId = null;
 
-  @JsonProperty("subscriber")
-  private String subscriber = null;
+  @JsonProperty("subscriberName")
+  private String subscriberName = null;
 
   @JsonProperty("rating")
   private Integer rating = null;
@@ -58,22 +59,22 @@ public class RatingDTO   {
     this.apiId = apiId;
   }
 
-  public RatingDTO subscriber(String subscriber) {
-    this.subscriber = subscriber;
+  public RatingDTO subscriberName(String subscriberName) {
+    this.subscriberName = subscriberName;
     return this;
   }
 
    /**
-   * If subscriber is not given user invoking the API will be taken as the subscriber. 
-   * @return subscriber
+   * If subscriberName is not given user invoking the API will be taken as the subscriberName. 
+   * @return subscriberName
   **/
-  @ApiModelProperty(required = true, value = "If subscriber is not given user invoking the API will be taken as the subscriber. ")
-  public String getSubscriber() {
-    return subscriber;
+  @ApiModelProperty(required = true, value = "If subscriberName is not given user invoking the API will be taken as the subscriberName. ")
+  public String getSubscriberName() {
+    return subscriberName;
   }
 
-  public void setSubscriber(String subscriber) {
-    this.subscriber = subscriber;
+  public void setSubscriberName(String subscriberName) {
+    this.subscriberName = subscriberName;
   }
 
   public RatingDTO rating(Integer rating) {
@@ -106,13 +107,13 @@ public class RatingDTO   {
     RatingDTO rating = (RatingDTO) o;
     return Objects.equals(this.ratingId, rating.ratingId) &&
         Objects.equals(this.apiId, rating.apiId) &&
-        Objects.equals(this.subscriber, rating.subscriber) &&
+        Objects.equals(this.subscriberName, rating.subscriberName) &&
         Objects.equals(this.rating, rating.rating);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(ratingId, apiId, subscriber, rating);
+    return Objects.hash(ratingId, apiId, subscriberName, rating);
   }
 
   @Override
@@ -122,7 +123,7 @@ public class RatingDTO   {
     
     sb.append("    ratingId: ").append(toIndentedString(ratingId)).append("\n");
     sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
-    sb.append("    subscriber: ").append(toIndentedString(subscriber)).append("\n");
+    sb.append("    subscriberName: ").append(toIndentedString(subscriberName)).append("\n");
     sb.append("    rating: ").append(toIndentedString(rating)).append("\n");
     sb.append("}");
     return sb.toString();

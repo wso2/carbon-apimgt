@@ -1,22 +1,13 @@
 package org.wso2.carbon.apimgt.rest.api.store;
 
-import org.wso2.carbon.apimgt.rest.api.store.factories.WorkflowsApiServiceFactory;
-
 import io.swagger.annotations.ApiParam;
-
-import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowDTO;
-
-import org.wso2.msf4j.Microservice;
 import org.osgi.service.component.annotations.Component;
+import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.rest.api.store.factories.WorkflowsApiServiceFactory;
+import org.wso2.msf4j.Microservice;
 
-import java.io.InputStream;
-
-import org.wso2.msf4j.formparam.FormDataParam;
-import org.wso2.msf4j.formparam.FileInfo;
-
-import javax.ws.rs.core.Response;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
 
 @Component(
     name = "org.wso2.carbon.apimgt.rest.api.store.WorkflowsApi",
@@ -27,7 +18,7 @@ import javax.ws.rs.*;
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the workflows API")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-22T14:28:21.878+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-24T18:12:27.379+05:30")
 public class WorkflowsApi implements Microservice  {
    private final WorkflowsApiService delegate = WorkflowsApiServiceFactory.getWorkflowsApi();
 
