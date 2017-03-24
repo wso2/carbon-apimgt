@@ -17,7 +17,6 @@
  *  under the License.
  *
  */
-
 package org.wso2.carbon.apimgt.core.models;
 
 import java.time.LocalDateTime;
