@@ -6,8 +6,11 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.AvgRating;
+import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -17,10 +20,15 @@ import org.wso2.carbon.apimgt.rest.api.store.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.AvgRatingDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.RatingDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.store.mappings.CommentMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.DocumentationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.store.mappings.RatingMappingUtil;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -34,6 +42,47 @@ import java.util.List;
 public class ApisApiServiceImpl extends ApisApiService {
 
     private static final Logger log = LoggerFactory.getLogger(ApisApiServiceImpl.class);
+
+    @Override
+    public Response apisApiIdCommentCommentIdDelete(String commentId, String apiId, String ifMatch,
+                                            String ifUnmodifiedSince, String minorVersion) throws NotFoundException {
+        return null;
+    }
+
+    @Override
+    public Response apisApiIdCommentCommentIdGet(String commentId, String apiId, String accept, String ifNoneMatch,
+                                                 String ifModifiedSince, String minorVersion) throws NotFoundException {
+        CommentDTO commentDTO = null;
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIStore apiStore = RestApiUtil.getConsumer(username);
+            Comment comment = apiStore.getCommentByUUID(commentId, apiId);
+            commentDTO = CommentMappingUtil.fromCommentToDTO(comment);
+        } catch (APIManagementException e) {
+            RestApiUtil
+                    .handleInternalServerError("Error while retrieving Comment for given API " + apiId
+                            + "with commentId " + commentId, e, log);
+        }
+        return Response.ok().entity(commentDTO).build();
+    }
+
+    @Override
+    public Response apisApiIdCommentPost(String apiId, CommentDTO body, String contentType, String minorVersion)
+            throws NotFoundException {
+        return null;
+    }
+
+    @Override
+    public Response apisApiIdCommentPut(String commentId, String apiId, CommentDTO body, String contentType, String
+            ifMatch, String ifUnmodifiedSince, String minorVersion) throws NotFoundException {
+        return null;
+    }
+
+    @Override
+    public Response apisApiIdCommentsGet(String apiId, Integer limit, Integer offset, String accept, String ifNoneMatch,
+                                         String minorVersion) throws NotFoundException {
+        return null;
+    }
 
     @Override
     public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String accept,
@@ -88,7 +137,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Retrieves the fingerprint of a document content given its UUID
-     * 
+     *
      * @param apiId API ID
      * @param documentId Document ID
      * @param accept Accept header value
@@ -145,7 +194,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Retrieves the fingerprint of the document given its UUID
-     * 
+     *
      * @param apiId API ID
      * @param documentId Document ID
      * @param accept Accept header value
@@ -154,7 +203,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param minorVersion Minor-Version header value
      * @return Fingerprint of the document
      */
-    
+
     public String apisApiIdDocumentsDocumentIdGetFingerprint(String apiId, String documentId, String accept,
             String ifNoneMatch, String ifModifiedSince, String minorVersion) {
         String username = RestApiUtil.getLoggedInUsername();
@@ -232,6 +281,40 @@ public class ApisApiServiceImpl extends ApisApiService {
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
+    }
+
+    @Override
+    public Response apisApiIdRatingGet(String apiId, String subscriberName, String accept, String ifNoneMatch,
+                                       String ifModifiedSince, String minorVersion) throws NotFoundException {
+        RatingDTO ratingDTO = null;
+        AvgRatingDTO avgRatingDTO = null;
+        AvgRating avgRating = null;
+        String username = RestApiUtil.getLoggedInUsername();
+        Response response;
+        try {
+            APIStore apiStore = RestApiUtil.getConsumer(username);
+
+            if(subscriberName != null){
+                Rating rating = apiStore.getAPIRatingBySubscriber(apiId, subscriberName);
+                ratingDTO = RatingMappingUtil.fromRatingToDTO(rating);
+
+                return Response.ok().entity(ratingDTO).build();
+            } else {
+                avgRating = apiStore.getRatingByApiId(apiId);
+                avgRatingDTO = RatingMappingUtil.fromAverageRatingToDTO(apiId, avgRating);
+                return Response.ok().entity(avgRatingDTO).build();
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil
+                    .handleInternalServerError("Error while retrieving Rating for given API " + apiId, e, log);
+            return null;
+        }
+    }
+
+    @Override
+    public Response apisApiIdRatingPost(String apiId, RatingDTO body, String contentType, String minorVersion)
+            throws NotFoundException {
+        return null;
     }
 
     /**
