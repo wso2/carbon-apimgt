@@ -27,7 +27,9 @@ import org.wso2.carbon.apimgt.core.models.Comment;
  */
 public class CommentDAOImpl implements CommentDAO {
 
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Comment getCommentByUUID(String commentId, String apiId) {
         return null;
