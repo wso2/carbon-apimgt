@@ -99,6 +99,20 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     private static final Logger log = LoggerFactory.getLogger(APIStoreImpl.class);
     private TagDAO tagDAO;
 
+    /**
+     * Constructor.
+     *
+     * @param username   Logged in user's username
+     * @param apiDAO  API Data Access Object
+     * @param applicationDAO  Application Data Access Object
+     * @param apiSubscriptionDAO   API Subscription Data Access Object
+     * @param policyDAO Policy Data Access Object
+     * @param tagDAO Tag Data Access Object
+     * @param labelDAO Label Data Access Object
+     * @param workflowDAO WorkFlow Data Access Object
+     * @param commentDAO Comment Data Access Object
+     * @param ratingDAO Rating Data Access Object
+     */
     public APIStoreImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
             APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, TagDAO tagDAO, LabelDAO labelDAO,
             WorkflowDAO workflowDAO, CommentDAO commentDAO, RatingDAO ratingDAO) {
@@ -435,7 +449,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         try {
             comment = getCommentDAO().getCommentByUUID(commentId, apiId);
         } catch (APIMgtDAOException e) {
-            String errorMsg = "Error occurred while retrieving label information";
+            String errorMsg = "Error occurred while retrieving Comment + " + commentId + " for API " + apiId;
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
