@@ -105,6 +105,15 @@ public class APIMgtConstants {
         UN_SUBSCRIBE
     }
 
+
+    /**
+     * API workflow statuses.
+     */
+    public enum APILCWorkflowStatus {
+        APPROVED,
+        REJECTED,
+        PENDING
+    }
     /**
      * Throttle policy related constants
      */

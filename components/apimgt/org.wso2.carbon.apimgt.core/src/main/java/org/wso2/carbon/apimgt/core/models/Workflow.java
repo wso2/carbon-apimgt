@@ -47,6 +47,8 @@ public class Workflow {
 
     private String callbackURL;
     
+    private String createdBy;
+    
     //to pass any additional parameters. This can be used to pass parameters to the executor's complete() method
     private Map<String, String> attributes = new HashMap<String, String>();
 
@@ -135,11 +137,20 @@ public class Workflow {
         this.attributes = attributes;
     }
 
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
     @Override
     public String toString() {
         return "Workflow [workflowReference=" + workflowReference + ", workflowType=" + workflowType + ", status="
                 + status + ", createdTime=" + createdTime + ", updatedTime=" + updatedTime + ", workflowDescription="
-                + workflowDescription + ", callbackUrl=" + callbackURL + ", attributes=" + attributes + "]";
-    }    
+                + workflowDescription + ", externalWorkflowReference=" + externalWorkflowReference + ", callbackURL="
+                + callbackURL + ", createdBy=" + createdBy + ", attributes=" + attributes + "]";
+    }   
     
 }
