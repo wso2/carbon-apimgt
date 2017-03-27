@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.authenticator.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.authenticator.utils.AuthUtil;
 import org.wso2.carbon.apimgt.authenticator.utils.bean.AuthResponseBean;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.formparam.FormDataParam;
@@ -65,9 +66,14 @@ public class AuthenticatorAPI implements Microservice {
             String appContext = AuthUtil.getAppContext(request);
             String restAPIContext = "/api/am" + appContext;
             String refToken = null;
-            String cookies = request.getHeader(AuthenticatorConstants.COOKIE_HEADER);
             if (AuthenticatorConstants.REFRESH_GRANT.equals(grantType)) {
-                refToken = AuthUtil.extractPartialAccessTokenFromCookie(cookies);
+                refToken = AuthUtil.extractRefreshTokenFromHeaders(request.getHeaders());
+                if (refToken == null) {
+                    ErrorDTO errorDTO = new ErrorDTO();
+                    errorDTO.setCode(ExceptionCodes.INVALID_AUTHORIZATION_HEADER.getErrorCode());
+                    errorDTO.setMessage(ExceptionCodes.INVALID_AUTHORIZATION_HEADER.getErrorMessage());
+                    return Response.status(Response.Status.UNAUTHORIZED).entity(errorDTO).build();
+                }
             }
             String tokens = loginTokenService
                     .getTokens(authResponseBean, appContext.substring(1), userName, password, grantType, refToken,
@@ -80,20 +86,20 @@ public class AuthenticatorAPI implements Microservice {
 
             String part1 = accessToken.substring(0, accessToken.length() / 2);
             String part2 = accessToken.substring(accessToken.length() / 2);
-            NewCookie cookie = new NewCookie(AuthenticatorConstants.TOKEN_1,
-                    part1 + "; path=" + appContext + "; " + AuthenticatorConstants.SECURE_COOKIE);
-            NewCookie cookie2 = new NewCookie(AuthenticatorConstants.TOKEN_2,
-                    part2 + "; path=" + restAPIContext + "; " + AuthenticatorConstants.HTTP_ONLY_COOKIE + "; "
-                            + AuthenticatorConstants.SECURE_COOKIE);
-            NewCookie refreshTokenCookie = null;
+            NewCookie cookie = AuthUtil.cookieBuilder(AuthenticatorConstants.TOKEN_1, part1, appContext, true, false);
+            NewCookie cookie2 = AuthUtil
+                    .cookieBuilder(AuthenticatorConstants.TOKEN_2, part2, restAPIContext, true, true);
+            NewCookie refreshTokenCookie1, refreshTokenCookie2 = null;
             if (refreshToken != null) {
-                refreshTokenCookie = new NewCookie(AuthenticatorConstants.REFRESH_TOKEN,
-                        refreshToken + "; path=" + appContext + "; " + AuthenticatorConstants.HTTP_ONLY_COOKIE + "; "
-                                + AuthenticatorConstants.SECURE_COOKIE);
-            }
-            if (refreshTokenCookie != null) {
+                String refTokenPart1 = refreshToken.substring(0, refreshToken.length() / 2);
+                String refTokenPart2 = refreshToken.substring(refreshToken.length() / 2);
+                refreshTokenCookie1 = AuthUtil
+                        .cookieBuilder(AuthenticatorConstants.REFRESH_TOKEN_1, refTokenPart1, appContext, true, false);
+                refreshTokenCookie2 = AuthUtil
+                        .cookieBuilder(AuthenticatorConstants.REFRESH_TOKEN_2, refTokenPart2, appContext, true, true);
                 return Response.ok(authResponseBean, MediaType.APPLICATION_JSON)
-                        .cookie(cookie, cookie2, refreshTokenCookie).header(AuthenticatorConstants.
+                        .cookie(cookie, cookie2, refreshTokenCookie1, refreshTokenCookie2)
+                        .header(AuthenticatorConstants.
                                         REFERER_HEADER,
                                 (request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null && request
                                         .getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER)

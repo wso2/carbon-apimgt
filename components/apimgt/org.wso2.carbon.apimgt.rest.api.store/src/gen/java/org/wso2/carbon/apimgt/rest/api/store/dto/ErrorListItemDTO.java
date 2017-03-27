@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * ErrorListItemDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-08T11:10:07.219+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-22T14:28:21.878+05:30")
 public class ErrorListItemDTO   {
   @JsonProperty("code")
   private String code = null;

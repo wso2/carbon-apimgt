@@ -1,0 +1,49 @@
+{{log this}}
+{{#if @params.subscribedAppsAndKeys}}
+<form class="form-horizontal">
+      <div class="form-group">
+          <label for="" class="col-sm-3 control-label">{{i18n "Try"}}</label>
+          <div class="col-sm-9">
+            <select id="sub_app_list" class="form-control subapp">
+              {{#each @params.subscribedAppsAndKeys}}
+                <option value="" {{#if prodKey}}data-production="{{prodKey}}"{{/if}} {{#if sandBKey}}data-sandbox="{{sandBKey}}"{{/if}}>
+                     {{name}}
+                </option>
+              {{/each}}
+            </select>
+          </div>
+      </div>
+      <div class="form-group">
+        <label for="" class="col-sm-3 control-label">{{i18n "Using"}}</label>
+            <div class="col-sm-9">
+            <div class="input-group">
+              <select id="key_type" class="form-control keytype">
+                      <option value="production">{{i18n "Production"}}</option>
+                      <option value="sandbox">{{i18n "Sandbox"}}</option>
+              </select>
+              <div class="input-group-addon">{{i18n "Key"}}</div>
+              </div>
+            </div>
+      </div>
+      <!--<div class="form-group">
+        <label for="" class="col-sm-3 control-label OnEnvironment">{{i18n "On Environment"}}</label>
+        <div class="col-sm-9">
+          <select id="environment_name" class="env_name">
+             
+          </select>
+        </div>
+      </div>-->
+</form>
+
+<form class="form-horizontal">
+          <div class="form-group">
+            <label class="col-sm-3 control-label">{{i18n "Set Request Header"}}</label>
+            <div class=" col-sm-9">
+            <div class="input-group">
+              <span class="input-group-addon" id="sizing-addon1">Authorization : Bearer</span>
+              <input type="text" id="access_token" name="access_token" title="access_token" placeholder="Access Token" class="form-control" onkeypress="return checkOnKeyPress(event)">
+            </div>
+            </div>
+          </div>
+        </form>
+{{/if}}

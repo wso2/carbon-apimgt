@@ -1757,7 +1757,7 @@ public class ApiDAOImpl implements ApiDAO {
 
     private void addLabelMapping(Connection connection, String apiID, List<String> labels) throws SQLException {
 
-        if (!labels.isEmpty()) {
+        if (labels != null && !labels.isEmpty()) {
             final String query = "INSERT INTO AM_API_LABEL_MAPPING (API_ID, LABEL_ID) VALUES (?,?)";
 
             try (PreparedStatement statement = connection.prepareStatement(query)) {

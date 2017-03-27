@@ -41,7 +41,7 @@ public class ApplicationCreationSimpleWorkflowExecutor implements WorkflowExecut
 
     public WorkflowResponse execute(Workflow workFlow) throws WorkflowException {
         if (log.isDebugEnabled()) {
-            log.info("Executing Application creation Workflow..");
+            log.debug("Executing Application creation Workflow..");
         }
     
         WorkflowResponse workflowResponse = new GeneralWorkflowResponse();
@@ -59,7 +59,7 @@ public class ApplicationCreationSimpleWorkflowExecutor implements WorkflowExecut
      */
     public WorkflowResponse complete(Workflow workFlow) throws WorkflowException {
         if (log.isDebugEnabled()) {
-            log.info("Complete  Application creation Workflow..");
+            log.debug("Complete  Application creation Workflow..");
         }
 
         WorkflowResponse workflowResponse = new GeneralWorkflowResponse();

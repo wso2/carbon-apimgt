@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * SubscriptionDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-08T11:10:07.219+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-22T14:28:21.878+05:30")
 public class SubscriptionDTO   {
   @JsonProperty("subscriptionId")
   private String subscriptionId = null;
@@ -35,13 +35,13 @@ public class SubscriptionDTO   {
    */
   public enum LifeCycleStatusEnum {
     BLOCKED("BLOCKED"),
-
+    
     PROD_ONLY_BLOCKED("PROD_ONLY_BLOCKED"),
-
+    
     ACTIVE("ACTIVE"),
-
+    
     ON_HOLD("ON_HOLD"),
-
+    
     REJECTED("REJECTED");
 
     private String value;
@@ -224,7 +224,7 @@ public class SubscriptionDTO   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class SubscriptionDTO {\n");
-
+    
     sb.append("    subscriptionId: ").append(toIndentedString(subscriptionId)).append("\n");
     sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
     sb.append("    apiIdentifier: ").append(toIndentedString(apiIdentifier)).append("\n");

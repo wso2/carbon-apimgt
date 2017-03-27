@@ -19,10 +19,7 @@
 
 package org.wso2.carbon.apimgt.core;
 
-import com.spotify.docker.client.DefaultDockerClient;
-import com.spotify.docker.client.DockerCertificateException;
-import com.spotify.docker.client.DockerClient;
-import com.spotify.docker.client.DockerException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
@@ -33,17 +30,18 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 public class TestUtil {
-    private static Map<String, String> ipAddressMap = new HashMap<>();
     private static TestUtil instance = new TestUtil();
-    private TestUtil(){
+
+    private TestUtil() {
 
     }
+
     public static Application addTestApplication() throws APIMgtDAOException {
         ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
         Application application = SampleTestObjectCreator.createDefaultApplication();
@@ -93,7 +91,7 @@ public class TestUtil {
      * @param app Complete Application object
      * @return Summary Application object
      */
-    public static Application createSummaryApplication(Application app){
+    public static Application createSummaryApplication(Application app) {
         Application summaryApp = new Application(app.getName(), app.getCreatedUser());
         summaryApp.setId(app.getId());
         summaryApp.setCallbackUrl(app.getCallbackUrl());
@@ -148,16 +146,21 @@ public class TestUtil {
 
         return null;
     }
-    public String getIpAddressOfContainer(String aliasName) throws DockerCertificateException,
-            DockerException, InterruptedException {
-        DockerClient docker = DefaultDockerClient.fromEnv().build();
-        if (ipAddressMap.containsKey(aliasName)){
-            return ipAddressMap.get(aliasName);
-        }else{
-            String ipAddress = docker.inspectContainer(aliasName).networkSettings().ipAddress();
-            ipAddressMap.put(aliasName,ipAddress);
-            return ipAddress;
+
+    /**
+     * Utility for get Docker running host
+     *
+     * @return docker host
+     * @throws URISyntaxException if docker Host url is malformed this will throw
+     */
+    public String getIpAddressOfContainer() throws URISyntaxException {
+        String ip = "localhost";
+        String dockerHost = System.getenv("DOCKER_HOST");
+        if (!StringUtils.isEmpty(dockerHost)) {
+            URI uri = new URI(dockerHost);
+            ip = uri.getHost();
         }
+        return ip;
     }
 
     public static TestUtil getInstance() {

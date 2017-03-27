@@ -1,6 +1,8 @@
 package org.wso2.carbon.apimgt.core.dao.impl;
 
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
@@ -34,9 +36,24 @@ import java.util.UUID;
  */
 public class PolicyDAOImpl implements PolicyDAO {
 
+    private static final Logger log = LoggerFactory.getLogger(PolicyDAOImpl.class);
+
+    public static final String FIFTY_PER_MIN_TIER = "50PerMin";
     private static final String AM_API_POLICY_TABLE_NAME = "AM_API_POLICY";
     private static final String AM_APPLICATION_POLICY_TABLE_NAME = "AM_APPLICATION_POLICY";
     private static final String AM_SUBSCRIPTION_POLICY_TABLE_NAME = "AM_SUBSCRIPTION_POLICY";
+    public static final String UNLIMITED_TIER = "Unlimited";
+    public static final String GOLD_TIER = "Gold";
+    public static final String SILVER_TIER = "Silver";
+    public static final String BRONZE_TIER = "Bronze";
+    public static final String API_TIER_LEVEL = "API";
+    public static final String REQUEST_COUNT_TYPE = "requestCount";
+    public static final String SECONDS_TIMUNIT = "s";
+    public static final String MINUTE_TIMEUNIT = "min";
+    public static final String QUOTA_UNIT = "REQ";
+    public static final String TWENTY_PER_MIN_TIER = "20PerMin";
+    public static final String FIFTY_PER_MIN_TIER_DESCRIPTION = "50PerMin Tier";
+    public static final String TWENTY_PER_MIN_TIER_DESCRIPTION = "20PerMin Tier";
 
     @Override
     public Policy getPolicy(String policyLevel, String policyName) throws APIMgtDAOException {
@@ -60,6 +77,8 @@ public class PolicyDAOImpl implements PolicyDAO {
                 return getAPIPolicies();
             } else if (APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL.equals(policyLevel)) {
                 return getApplicationPolicies();
+            } else if (APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL.equals(policyLevel)) {
+                return getSubscriptionPolicies();
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException("Couldn't find " + policyLevel + " policies", e);
@@ -80,16 +99,20 @@ public class PolicyDAOImpl implements PolicyDAO {
                 addAPIPolicy(connection, policy.getPolicyName(), policy.getDisplayName(), policy.getDescription(),
                              policy.getDefaultQuotaPolicy().getType(), 0,
                              policy.getDefaultQuotaPolicy().getLimit().getUnitTime(),
-                             policy.getDefaultQuotaPolicy().getLimit().getTimeUnit(), "API");
+                             policy.getDefaultQuotaPolicy().getLimit().getTimeUnit(), API_TIER_LEVEL);
             } else if (APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL.equals(policyLevel))   {
                 addApplicationPolicy(connection, policy.getPolicyName(), policy.getDisplayName(),
-                                     policy.getDescription(), policy.getDefaultQuotaPolicy().getType(), 0, null, 0,
-                                     "APPLICATION");
+                        policy.getDescription(), policy.getDefaultQuotaPolicy().getType(), 0, "",
+                        (int) policy.getDefaultQuotaPolicy().getLimit().getUnitTime(),
+                        policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
             } else if (APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL.equals(policyLevel))   {
                 addSubscriptionPolicy(connection, policy.getPolicyName(), policy.getDisplayName(),
-                                      policy.getDescription());
+                        policy.getDescription(), policy.getDefaultQuotaPolicy().getType(), 0, "",
+                        (int) policy.getDefaultQuotaPolicy().getLimit().getUnitTime(),
+                        policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
             }
         } catch (SQLException e) {
+            log.error(e.getMessage(), e);
             throw new APIMgtDAOException(e);
         }
     }
@@ -172,6 +195,30 @@ public class PolicyDAOImpl implements PolicyDAO {
                             resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_NAME));
                     setCommonPolicyDetails(applicationPolicy, resultSet);
                     policyList.add(applicationPolicy);
+                }
+            }
+        }
+        return policyList;
+    }
+
+    /**
+     * Retrieves all Subscription policies.
+     *
+     * @return  List of subscriptions.
+     * @throws SQLException     If error occurs while retrieving subscription level policies.
+     */
+    private List<Policy> getSubscriptionPolicies() throws SQLException {
+        List<Policy> policyList = new ArrayList<>();
+        String sqlQuery = "SELECT * from AM_SUBSCRIPTION_POLICY";
+
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(
+                            resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_NAME));
+                    setCommonPolicyDetails(subscriptionPolicy, resultSet);
+                    policyList.add(subscriptionPolicy);
                 }
             }
         }
@@ -611,20 +658,40 @@ public class PolicyDAOImpl implements PolicyDAO {
                 if (!isDefaultPoliciesExist(connection)) {
                     connection.setAutoCommit(false);
 
-                    addAPIPolicy(connection, "Unlimited", "Unlimited", "Unlimited", "requestCount", 1, 60, "s", "API");
-                    addAPIPolicy(connection, "Gold", "Gold", "Gold", "requestCount", 1, 60, "s", "API");
-                    addAPIPolicy(connection, "Silver", "Silver", "Silver", "requestCount", 1, 60, "s", "API");
-                    addAPIPolicy(connection, "Bronze", "Bronze", "Bronze", "requestCount", 1, 60, "s", "API");
+                    addAPIPolicy(connection, UNLIMITED_TIER, UNLIMITED_TIER, UNLIMITED_TIER, REQUEST_COUNT_TYPE, 1, 60,
+                            SECONDS_TIMUNIT,
+                            API_TIER_LEVEL);
+                    addAPIPolicy(connection, GOLD_TIER, GOLD_TIER, GOLD_TIER, REQUEST_COUNT_TYPE, 1, 60,
+                            SECONDS_TIMUNIT,
+                            API_TIER_LEVEL);
+                    addAPIPolicy(connection, SILVER_TIER, SILVER_TIER, SILVER_TIER, REQUEST_COUNT_TYPE, 1, 60,
+                            SECONDS_TIMUNIT,
+                            API_TIER_LEVEL);
+                    addAPIPolicy(connection, BRONZE_TIER, BRONZE_TIER, BRONZE_TIER, REQUEST_COUNT_TYPE, 1, 60,
+                            SECONDS_TIMUNIT,
+                            API_TIER_LEVEL);
 
-                    addSubscriptionPolicy(connection, "Unlimited", "Unlimited", "Unlimited");
-                    addSubscriptionPolicy(connection, "Gold", "Gold", "Gold");
-                    addSubscriptionPolicy(connection, "Silver", "Silver", "Silver");
-                    addSubscriptionPolicy(connection, "Bronze", "Bronze", "Bronze");
+                    addSubscriptionPolicy(connection, UNLIMITED_TIER, UNLIMITED_TIER, UNLIMITED_TIER,
+                            REQUEST_COUNT_TYPE,
+                            Integer.MAX_VALUE, QUOTA_UNIT, 1, MINUTE_TIMEUNIT);
+                    addSubscriptionPolicy(connection, GOLD_TIER, GOLD_TIER, GOLD_TIER, REQUEST_COUNT_TYPE, 5000,
+                            QUOTA_UNIT, 1,
+                            MINUTE_TIMEUNIT);
+                    addSubscriptionPolicy(connection, SILVER_TIER, SILVER_TIER, SILVER_TIER, REQUEST_COUNT_TYPE, 2000,
+                            QUOTA_UNIT, 1,
+                            MINUTE_TIMEUNIT);
+                    addSubscriptionPolicy(connection, BRONZE_TIER, BRONZE_TIER, BRONZE_TIER, REQUEST_COUNT_TYPE, 1000,
+                            QUOTA_UNIT, 1,
+                            MINUTE_TIMEUNIT);
 
-                    addApplicationPolicy(connection, "50PerMin", "50PerMin", "50PerMin Tier",
-                                                                                    "requestCount", 10, "REQ", 1, "s");
-                    addApplicationPolicy(connection, "20PerMin", "20PerMin", "20PerMin Tier",
-                                                                                    "requestCount", 50, "REQ", 1, "s");
+                    addApplicationPolicy(connection, FIFTY_PER_MIN_TIER, FIFTY_PER_MIN_TIER,
+                            FIFTY_PER_MIN_TIER_DESCRIPTION, REQUEST_COUNT_TYPE, 10,
+                            QUOTA_UNIT, 1,
+                            SECONDS_TIMUNIT);
+                    addApplicationPolicy(connection, TWENTY_PER_MIN_TIER, TWENTY_PER_MIN_TIER,
+                            TWENTY_PER_MIN_TIER_DESCRIPTION, REQUEST_COUNT_TYPE, 50,
+                            QUOTA_UNIT, 1,
+                            SECONDS_TIMUNIT);
                     connection.commit();
                 }
             } catch (SQLException e) {
@@ -676,15 +743,22 @@ public class PolicyDAOImpl implements PolicyDAO {
     }
 
     private static void addSubscriptionPolicy(Connection connection, String name, String displayName,
-                                              String description) throws SQLException {
-        final String query = "INSERT INTO AM_SUBSCRIPTION_POLICY (UUID, NAME, DISPLAY_NAME, DESCRIPTION) " +
-                "VALUES (?,?,?,?)";
+            String description, String quotaType, int quota, String quotaUnit, int unitTime, String timeUnit)
+            throws SQLException {
+        final String query =
+                "INSERT INTO AM_SUBSCRIPTION_POLICY (UUID, NAME, DISPLAY_NAME, DESCRIPTION, QUOTA_TYPE, QUOTA, "
+                        + "QUOTA_UNIT, UNIT_TIME, TIME_UNIT) VALUES (?,?,?,?,?,?,?,?,?)";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, UUID.randomUUID().toString());
             statement.setString(2, name);
             statement.setString(3, displayName);
             statement.setString(4, description);
+            statement.setString(5, quotaType);
+            statement.setInt(6, quota);
+            statement.setString(7, quotaUnit);
+            statement.setInt(8, unitTime);
+            statement.setString(9, timeUnit);
 
             statement.execute();
         }

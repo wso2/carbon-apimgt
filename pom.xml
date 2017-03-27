@@ -43,8 +43,19 @@
         <module>components/apimgt</module>
         <module>components/web</module>
         <module>features/apimgt</module>
-        <module>coverage-reports</module>
     </modules>
+
+    <profiles>
+        <profile>
+            <id>coverage</id>
+            <modules>
+                <module>components/apimgt</module>
+                <module>components/web</module>
+                <module>features/apimgt</module>
+                <module>coverage-reports</module>
+            </modules>
+        </profile>
+    </profiles>
 
     <pluginRepositories>
         <pluginRepository>
@@ -467,6 +478,11 @@
                 <artifactId>workspace-service</artifactId>
                 <version>0.8.2</version>
             </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-log4j12</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -671,6 +687,11 @@
                         </execution>
                     </executions>
                 </plugin>
+                <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.20.0</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -790,7 +811,7 @@
         <snakeyaml.version.range>[1.16, 2.0.0)</snakeyaml.version.range>
         <carbon.uuf.version>1.0.0-m13</carbon.uuf.version>
         <carbon-uuf-maven-plugin.version>1.0.0-m11</carbon-uuf-maven-plugin.version>
-        <carbon.uuf.common.version>1.0.0-m5</carbon.uuf.common.version>
+        <carbon.uuf.common.version>1.0.0-m6</carbon.uuf.common.version>
         <findbug.exclude.version>3.0.0</findbug.exclude.version>
         <!--Start of Dependency for integration gateway extension-->
         <carbon.messaging.version>2.2.3</carbon.messaging.version>
@@ -815,6 +836,6 @@
         <lucene.version>3.6.2_1</lucene.version>
         <lucene.bundle.version>3.6.2.1</lucene.bundle.version>
         <h2.version>1.4.192</h2.version>
-        <carbon.lcm.version>1.0.2</carbon.lcm.version>
+        <carbon.lcm.version>1.0.3</carbon.lcm.version>
     </properties>
 </project>

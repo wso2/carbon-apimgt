@@ -1,3 +1,4 @@
+{{log this}}
 <div class="row">
     <div class="col-md-8 col-sm-8 col-md-offset-2 col-sm-offset-2">
         <object type="image/svg+xml" data="{{public "images/API_LIFECYCLE.svg"}}" id="lifecycle-svg">
@@ -58,7 +59,7 @@
                                     <td>&nbsp;&nbsp;&nbsp; <i class="glyphicon glyphicon-user" title="user"></i>&nbsp;<a
                                             href="/publisher/apis?query=provider:{{this.user}}" title="user">{{this.user}}</a>
                                         {{i18n "changed the API status from "}} '{{i18n this.previousState}}'
-                                        {{i18n "to "}} '{{i18n this.postState}}'
+                                        {{i18n "to"}} '{{i18n this.postState}}'
                                     </td>
                                 </tr>
                             {{else}}
@@ -78,23 +79,42 @@
             </div>
         </form>
     </div>
-    <div class="col-md-6 col-sm-6">
+    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
         <div class="page-header">
-            <h4 class="lead">Change Policies</h4>
+            <h4 class="lead">{{i18n "Change Policies"}}</h4>
         </div>
-        <div class="col-md-6 col-sm-6">
+        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
             <label for="policies-list-dropdown">
-                Policies :
+                {{i18n "Policies"}} :
             </label>
             <select id="policies-list-dropdown" multiple="multiple">
                 {{#each @params.policies}}
                     <option {{#if this.isSelected }}selected{{/if}}
-                            value="{{this.policyName}}">{{this.displayName}}</option>
+                            value="{{this.policyName}}">{{this.policyName}}</option>
                 {{/each}}
             </select>
         </div>
-        <div class="col-md-3 col-sm-3">
-            <button id="update-tiers-button" type="button" class="btn btn-primary">Update</button>
+        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+            <button id="update-tiers-button" type="button" class="btn btn-primary">{{i18n "Update"}}</button>
+        </div>
+    </div>
+    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+        <div class="page-header">
+            <h4 class="lead">{{i18n "Change Labels"}}</h4>
+        </div>
+        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+            <label for="labels-list-dropdown">
+                {{i18n "Labels"}} :
+            </label>
+            <select id="labels-list-dropdown" multiple="multiple">
+                {{#each @params.labels}}
+                    <option {{#if this.isSelected }}selected{{/if}}
+                            value="{{this.name}}">{{this.name}}</option>
+                {{/each}}
+            </select>
+        </div>
+        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+            <button id="update-labels-button" type="button" class="btn btn-primary">{{i18n "Update"}}</button>
         </div>
     </div>
 </div>

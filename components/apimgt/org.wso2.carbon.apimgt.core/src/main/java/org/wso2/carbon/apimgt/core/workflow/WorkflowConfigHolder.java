@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.core.exception.WorkflowException;
 import org.wso2.carbon.apimgt.core.models.WorkflowConfig;
 import org.wso2.carbon.apimgt.core.models.WorkflowConfigProperties;
 import org.wso2.carbon.apimgt.core.models.WorkflowExecutorInfo;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -67,8 +68,8 @@ public class WorkflowConfigHolder {
             }            
             workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION, workFlowExecutor);
             
-/*            // Load application deletion workflow configurations
-            workflowConfig = config.getSubscriptionDeletion();
+            // Load application deletion workflow configurations
+            workflowConfig = config.getApplicationDeletion();
             executorClass = workflowConfig.getExecutor();
             clazz = WorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
             workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
@@ -77,7 +78,7 @@ public class WorkflowConfigHolder {
                 loadProperties(properties, workFlowExecutor);
             }            
             workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION, workFlowExecutor);  
-*/    
+    
             
             // Load subscription creation workflow configurations
             workflowConfig = config.getSubscriptionCreation();
@@ -91,7 +92,7 @@ public class WorkflowConfigHolder {
             workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION, workFlowExecutor);
 
             
-/*            // Load subscription deletion workflow configurations
+           // Load subscription deletion workflow configurations
             workflowConfig = config.getSubscriptionDeletion();
             executorClass = workflowConfig.getExecutor();
             clazz = WorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
@@ -101,7 +102,7 @@ public class WorkflowConfigHolder {
                 loadProperties(properties, workFlowExecutor);
             }            
             workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION, workFlowExecutor);
-            
+/*           
             // Load production token generation workflow configurations
             workflowConfig = config.getProductionApplicationRegistration();
             executorClass = workflowConfig.getExecutor();
@@ -111,6 +112,7 @@ public class WorkflowConfigHolder {
             if (properties != null) {
                 loadProperties(properties, workFlowExecutor);
             }
+ 
             workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION, workFlowExecutor);
             
             // Load sandbox token generation workflow configurations
