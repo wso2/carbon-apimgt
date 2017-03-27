@@ -291,10 +291,8 @@ public final class API {
     private final String apiDefinition;
     private final HashMap permissionMap;
     private final String apiPermission;
-    private final String workflowStatus;
+    private final String workflowStatus; 
     
-    
-
     public String getWorkflowStatus() {
         return workflowStatus;
     }
@@ -428,6 +426,7 @@ public final class API {
         private String copiedFromApiId;
         private String apiDefinition;
         private String workflowStatus;
+        
         public APIBuilder(String provider, String name, String version) {
             this.provider = provider;
             this.name = name;
