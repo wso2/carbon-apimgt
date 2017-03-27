@@ -566,6 +566,12 @@ public class SampleTestObjectCreator {
         workflow.setCreatedTime(LocalDateTime.now());
         workflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
         workflow.setWorkflowReference(UUID.randomUUID().toString());
+        
+        Map<String, String> properties = new HashMap<>();
+        properties.put("property1", "value1");
+        properties.put("property2", "value2");
+        workflow.setAttributes(properties);
+        
         return workflow;
     }
 }

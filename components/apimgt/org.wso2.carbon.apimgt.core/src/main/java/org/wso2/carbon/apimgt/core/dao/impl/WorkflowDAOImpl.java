@@ -19,11 +19,13 @@
  */
 package org.wso2.carbon.apimgt.core.dao.impl;
 
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.WorkflowUtils;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExecutorFactory;
 
 import java.sql.Connection;
@@ -48,7 +50,7 @@ public class WorkflowDAOImpl implements WorkflowDAO {
     public void addWorkflowEntry(Workflow workflow) throws APIMgtDAOException {
 
         final String query = " INSERT INTO AM_WORKFLOWS (WF_REFERENCE,WF_TYPE,WF_STATUS,WF_CREATED_TIME,"
-                + "WF_EXTERNAL_REFERENCE) VALUES (?,?,?,?,?)";
+                + "WF_EXTERNAL_REFERENCE, WF_ATTRIBUTES) VALUES (?,?,?,?,?,?)";
 
         try (Connection connection = DAOUtil.getConnection()) {
             connection.setAutoCommit(false);
@@ -59,12 +61,13 @@ public class WorkflowDAOImpl implements WorkflowDAO {
                 prepStmt.setString(3, workflow.getStatus().toString());
                 prepStmt.setTimestamp(4, Timestamp.valueOf(workflow.getCreatedTime()));
                 prepStmt.setString(5, workflow.getExternalWorkflowReference());
+                prepStmt.setString(6, WorkflowUtils.mapTojsonString(workflow.getAttributes()));
 
                 prepStmt.execute();
                 connection.commit();
             } catch (SQLException ex) {
                 connection.rollback();
-                throw new APIMgtDAOException(ex);
+                throw new APIMgtDAOException(ex);           
             } finally {
                 connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
@@ -124,6 +127,8 @@ public class WorkflowDAOImpl implements WorkflowDAO {
             ps.setString(1, workflowReference);
             try (ResultSet rs = ps.executeQuery()) {
                 workflow = this.createWorkflowFromResultSet(rs);
+            } catch (ParseException e) {
+                throw new APIMgtDAOException(e);
             }
         } catch (SQLException ex) {
             throw new APIMgtDAOException(ex);
@@ -131,7 +136,7 @@ public class WorkflowDAOImpl implements WorkflowDAO {
         return workflow;  
     }
 
-    private Workflow createWorkflowFromResultSet(ResultSet rs) throws SQLException, APIMgtDAOException {
+    private Workflow createWorkflowFromResultSet(ResultSet rs) throws SQLException, APIMgtDAOException, ParseException {
         Workflow workflow = null;
 
         if (rs.next()) {
@@ -144,6 +149,7 @@ public class WorkflowDAOImpl implements WorkflowDAO {
                 workflow.setUpdatedTime(rs.getTimestamp("WF_UPDATED_TIME").toLocalDateTime());
                 workflow.setWorkflowReference(rs.getString("WF_REFERENCE"));
                 workflow.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
+                workflow.setAttributes(WorkflowUtils.jsonStringToMap(rs.getString("WF_ATTRIBUTES")));;
             } else {
                 throw new APIMgtDAOException("Invalid workflow type");
             }        
@@ -169,6 +175,8 @@ public class WorkflowDAOImpl implements WorkflowDAO {
             ps.setString(2, APIMgtConstants.WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
             try (ResultSet rs = ps.executeQuery()) {
                 workflow = this.createWorkflowFromResultSet(rs);                
+            } catch (ParseException e) {
+                throw new APIMgtDAOException(e);
             }
         } catch (SQLException ex) {
             throw new APIMgtDAOException(ex);
@@ -192,6 +200,8 @@ public class WorkflowDAOImpl implements WorkflowDAO {
             ps.setString(2, APIMgtConstants.WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
             try (ResultSet rs = ps.executeQuery()) {
                 workflow = this.createWorkflowFromResultSet(rs);                
+            } catch (ParseException e) {
+                throw new APIMgtDAOException(e);
             }
         } catch (SQLException ex) {
             throw new APIMgtDAOException(ex);
