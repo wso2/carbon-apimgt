@@ -17,29 +17,12 @@ package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.rest.api.store.dto.LabelDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.LabelInfoListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.LabelListDTO;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class LabelMappingUtil {
-
-    /**
-     * Converts a LabelInfoListDTO to a List of label names
-     *
-     * @param labelInfoListDTO LabelInfoList which contains label names
-     * @return List of label names
-     */
-    public static List<String> fromLabelInfoListDTO(LabelInfoListDTO labelInfoListDTO) {
-        List<String> labelNames = new ArrayList<>();
-
-        for (int i = 0; i < labelInfoListDTO.getLabels().size(); i++) {
-            labelNames.add(labelInfoListDTO.getLabels().get(i));
-        }
-
-        return labelNames;
-    }
 
     /**
      * Convert List of labels to LabelListDTO

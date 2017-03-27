@@ -1142,14 +1142,7 @@ paths:
       description: |
         This operation can be used to retrieve the information of the labels
       parameters:
-        - in: body
-          name: body
-          description: |
-            Label names to get information.
-          required: true
-          schema:
-            $ref: '#/definitions/LabelInfoList'
-        - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/labels-Q'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
@@ -1433,6 +1426,16 @@ parameters:
     required: true
     type: string
 
+# List of labels
+# Specified as part of the query string
+  labels-Q:
+    name: labels
+    in: query
+    description: |
+      Defines comma separated list of labels
+    required: true
+    type: string
+
 ######################################################
 # The resources used by some of the APIs above within the message body
 ######################################################
@@ -1530,6 +1533,10 @@ definitions:
             Supported transports for the API (http and/or https).
           type: string
       tags:
+        type: array
+        items:
+          type: string
+      labels:
         type: array
         items:
           type: string
@@ -2006,19 +2013,6 @@ definitions:
       name:
         type: string
       access_urls:
-        type: array
-        items:
-          type: string
-
-#-----------------------------------------------------
-# The Label Info List resource
-#-----------------------------------------------------
-  LabelInfoList:
-    title: Label Info List
-    required:
-      - labels
-    properties:
-      labels:
         type: array
         items:
           type: string
