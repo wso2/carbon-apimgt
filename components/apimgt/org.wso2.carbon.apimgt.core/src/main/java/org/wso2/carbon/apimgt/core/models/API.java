@@ -77,6 +77,7 @@ public final class API {
             apiPermission = "";
         }
         permissionMap = builder.permissionMap;
+        workflowStatus = builder.workflowStatus;
     }
 
     public HashMap getPermissionMap() {
@@ -246,7 +247,8 @@ public final class API {
         return Objects.hash(id, provider, name, version, context, description, lifeCycleStatus, lifecycleInstanceId,
                 endpoint, gatewayConfig, wsdlUri, isResponseCachingEnabled, cacheTimeout, isDefaultVersion,
                 transport, tags, labels, policies, visibility, visibleRoles, businessInformation, corsConfiguration,
-                createdTime, createdBy, updatedBy, lastUpdatedTime, lifecycleState, uriTemplates, copiedFromApiId);
+                createdTime, createdBy, updatedBy, lastUpdatedTime, lifecycleState, uriTemplates, copiedFromApiId,
+                workflowStatus);
     }
 
 
@@ -289,6 +291,11 @@ public final class API {
     private final String apiDefinition;
     private final HashMap permissionMap;
     private final String apiPermission;
+    private final String workflowStatus; 
+    
+    public String getWorkflowStatus() {
+        return workflowStatus;
+    }
 
     /**
      * {@code API} builder static inner class.
@@ -418,6 +425,8 @@ public final class API {
         private Map<String, UriTemplate> uriTemplates = Collections.EMPTY_MAP;
         private String copiedFromApiId;
         private String apiDefinition;
+        private String workflowStatus;
+        
         public APIBuilder(String provider, String name, String version) {
             this.provider = provider;
             this.name = name;
@@ -459,6 +468,7 @@ public final class API {
                 this.apiPermission = new StringBuilder();
             }
             this.permissionMap = new HashMap<>();
+            this.workflowStatus = copy.workflowStatus;
         }
 
         /**
@@ -846,6 +856,18 @@ public final class API {
         }
 
         /**
+         * Sets the {@code workflowStatus} and returns a reference to this APIBuilder so that the methods can be
+         * chained together.
+         *
+         * @param workflowStatus the {@code workflowStatus} to set
+         * @return a reference to this APIBuilder
+         */
+        public APIBuilder workflowStatus(String workflowStatus) {
+            this.workflowStatus = workflowStatus;
+            return this;
+        }
+
+        /**
          * Returns a {@code API} built from the parameters previously set.
          *
          * @return a {@code API} built with parameters of this {@code API.APIBuilder}
@@ -944,6 +966,10 @@ public final class API {
 
         public void setPermission(String permission) {
             this.permission = permission;
+        }
+
+        public String getWorkflowStatus() {
+            return workflowStatus;
         }
     }
 

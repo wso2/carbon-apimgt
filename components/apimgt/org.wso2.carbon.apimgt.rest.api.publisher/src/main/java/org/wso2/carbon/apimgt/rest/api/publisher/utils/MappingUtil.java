@@ -77,6 +77,7 @@ public class MappingUtil {
         apidto.setProvider(api.getProvider());
         apidto.setPermission(api.getApiPermission());
         apidto.setLifeCycleStatus(api.getLifeCycleStatus());
+        apidto.setWorkflowStatus(api.getWorkflowStatus());
         apidto.setTags(api.getTags());
         apidto.setLabels(api.getLabels());
         apidto.setTransport(api.getTransport());
@@ -223,6 +224,7 @@ public class MappingUtil {
             apiInfo.setProvider(apiSummary.getProvider());
             apiInfo.setLifeCycleStatus(apiSummary.getLifeCycleStatus());
             apiInfo.setVersion(apiSummary.getVersion());
+            apiInfo.setWorkflowStatus(apiSummary.getWorkflowStatus());
             apiInfoList.add(apiInfo);
         }
         return apiInfoList;

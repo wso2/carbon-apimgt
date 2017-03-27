@@ -42,6 +42,7 @@ import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.Workflow;
 
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 /**
@@ -510,5 +511,29 @@ public abstract class AbstractAPIManager implements APIManager {
         return workflowDAO.retrieveWorkflow(workflowRefId);
     }
     
-   
+    protected void updateWorkflowEntries(Workflow workflow) throws APIManagementException {
+        workflow.setUpdatedTime(LocalDateTime.now());
+        try {
+            getWorkflowDAO().updateWorkflowStatus(workflow);
+            // TODO stats stuff
+        } catch (APIMgtDAOException e) {
+            String message = "Error while updating workflow entry";
+            log.error(message);
+            throw new APIManagementException(message, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+
+    }
+
+    protected void addWorkflowEntries(Workflow workflow) throws APIManagementException {
+
+        try {
+            getWorkflowDAO().addWorkflowEntry(workflow);
+            // TODO stats publish
+        } catch (APIMgtDAOException e) {
+            String message = "Error while adding workflow entry";
+            log.error(message);
+            throw new APIManagementException(message, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+
+    }
 }

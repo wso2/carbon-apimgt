@@ -2958,6 +2958,9 @@ definitions:
       lifeCycleStatus:
         type: string
         example: CREATED
+      workflowStatus:
+        type: string
+        example: APPROVED
 
 #-----------------------------------------------------
 # The API resource
@@ -3003,6 +3006,9 @@ definitions:
       lifeCycleStatus:
         type: string
         example: CREATED
+      workflowStatus:
+        type: string
+        example: APPROVED
       createdTime:
         type: string
         example: 2017-02-20T13:57:16.229
@@ -3775,3 +3781,4 @@ definitions:
                 type: string
             forTarget:
               type: string
+
