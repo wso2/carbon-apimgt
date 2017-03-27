@@ -232,7 +232,7 @@ public class AbstractAPIManagerTestCase {
      */
 
     @Test(description = "Exception when retrieving an application by uuid",
-            expectedExceptions = APIMgtDAOException.class)
+            expectedExceptions = APIManagementException.class)
     public void testGetApplicationByUuidException() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null, null);
@@ -252,7 +252,7 @@ public class AbstractAPIManagerTestCase {
     }
 
     @Test(description = "Exception when retrieving list of documentations",
-            expectedExceptions = APIMgtDAOException.class)
+            expectedExceptions = APIManagementException.class)
     public void testAllDocumentationException() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
         AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
@@ -261,7 +261,7 @@ public class AbstractAPIManagerTestCase {
         apiStore.getAllDocumentation(UUID, 1, 10);
     }
 
-    @Test(description = "Exception when getting API by UUID", expectedExceptions = APIMgtDAOException.class)
+    @Test(description = "Exception when getting API by UUID", expectedExceptions = APIManagementException.class)
     public void testSearchAPIByUUIDException() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
         AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
