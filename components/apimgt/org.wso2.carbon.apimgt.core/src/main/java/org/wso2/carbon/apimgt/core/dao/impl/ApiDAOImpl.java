@@ -432,8 +432,8 @@ public class ApiDAOImpl implements ApiDAO {
                 statement.setString(21, String.join(",", corsConfiguration.getAllowMethods()));
 
                 statement.setString(22, api.getCreatedBy());
-                statement.setTimestamp(23, Timestamp.valueOf(api.getCreatedTime()));
-                statement.setTimestamp(24, Timestamp.valueOf(api.getLastUpdatedTime()));
+                statement.setTimestamp(23, Timestamp.valueOf(LocalDateTime.now()));
+                statement.setTimestamp(24, Timestamp.valueOf(LocalDateTime.now()));
                 statement.setString(25, api.getCopiedFromApiId());
                 statement.setString(26, api.getUpdatedBy());
                 statement.execute();
@@ -508,7 +508,7 @@ public class ApiDAOImpl implements ApiDAO {
                 statement.setString(14, String.join(",", corsConfiguration.getAllowHeaders()));
                 statement.setString(15, String.join(",", corsConfiguration.getAllowMethods()));
 
-                statement.setTimestamp(16, Timestamp.valueOf(substituteAPI.getLastUpdatedTime()));
+                statement.setTimestamp(16, Timestamp.valueOf(LocalDateTime.now()));
                 statement.setString(17, substituteAPI.getUpdatedBy());
                 statement.setString(18, apiID);
 

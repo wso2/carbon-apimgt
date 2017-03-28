@@ -349,7 +349,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public void updateAPI(API.APIBuilder apiBuilder) throws APIManagementException {
-        apiBuilder.lastUpdatedTime(LocalDateTime.now());
         apiBuilder.provider(getUsername());
         apiBuilder.updatedBy(getUsername());
         try {
