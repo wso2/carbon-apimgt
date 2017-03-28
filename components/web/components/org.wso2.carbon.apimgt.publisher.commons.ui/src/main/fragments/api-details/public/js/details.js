@@ -558,7 +558,6 @@ function showTab(tab_name) {
     }
 
 function initDataTable(raw_data) {
-    console.log(raw_data);
     $('#doc-table').DataTable({
         ajax: function (data, callback, settings) {
             callback(raw_data);
@@ -632,7 +631,6 @@ function createDocHandler(event) {
                  permission: '[{"groupId" : "1000", "permission" : ["READ","UPDATE"]},{"groupId" : "1001", "permission" : ["READ","UPDATE"]}]',
                  visibility: "API_LEVEL"
                  };
-            console.log(api_documents_data);
             var api_client = new API('');
             var promised_add = api_client.addDocument(api_id, api_documents_data);
 
@@ -731,13 +729,10 @@ $(function () {
     $('#tab-5').bind('show.bs.tab', {api_client: client, api_id: api_id}, documentTabHandler);
     $(document).on('click', ".lc-state-btn", {api_client: client, api_id: api_id}, updateLifecycleHandler);
     $(document).on('click', "#checkItem", {api_client: client, api_id: api_id}, updateLifecycleCheckListHandler);
-<<<<<<< HEAD
-=======
     $(document).on('click', "#update-tiers-button", {api_client: client, api_id: api_id}, updateTiersHandler);
     $(document).on('click', ".doc-listing-delete", {api_client: client,api_id: api_id}, deleteDocHandler);
     $(document).on('click', "#add-doc-submit", {api_id: api_id}, createDocHandler);
     $(document).on('click', "#add-new-doc", {}, toggleDocAdder);
->>>>>>> adding the add,view and delete api documents
     $(document).on('click', "#update-labels-button", {api_client: client, api_id: api_id}, updateLabelsHandler);
     loadFromHash();
 });
