@@ -6,11 +6,9 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.AvgRating;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
-import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -20,11 +18,11 @@ import org.wso2.carbon.apimgt.rest.api.store.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.AvgRatingDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.RatingDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.RatingListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.CommentMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.DocumentationMappingUtil;
@@ -44,13 +42,13 @@ public class ApisApiServiceImpl extends ApisApiService {
     private static final Logger log = LoggerFactory.getLogger(ApisApiServiceImpl.class);
 
     @Override
-    public Response apisApiIdCommentCommentIdDelete(String commentId, String apiId, String ifMatch,
+    public Response apisApiIdCommentsCommentIdDelete(String commentId, String apiId, String ifMatch,
                                             String ifUnmodifiedSince, String minorVersion) throws NotFoundException {
         return null;
     }
 
     @Override
-    public Response apisApiIdCommentCommentIdGet(String commentId, String apiId, String accept, String ifNoneMatch,
+    public Response apisApiIdCommentsCommentIdGet(String commentId, String apiId, String accept, String ifNoneMatch,
                                                  String ifModifiedSince, String minorVersion) throws NotFoundException {
         CommentDTO commentDTO = null;
         String username = RestApiUtil.getLoggedInUsername();
@@ -67,23 +65,29 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     @Override
-    public Response apisApiIdCommentPost(String apiId, CommentDTO body, String contentType, String minorVersion)
+    public Response apisApiIdCommentsPost(String apiId, CommentDTO body, String contentType, String minorVersion)
             throws NotFoundException {
         return null;
     }
 
     @Override
-    public Response apisApiIdCommentPut(String commentId, String apiId, CommentDTO body, String contentType, String
+    public Response apisApiIdCommentsPut(String commentId, String apiId, CommentDTO body, String contentType, String
             ifMatch, String ifUnmodifiedSince, String minorVersion) throws NotFoundException {
         return null;
     }
 
-    @Override
-    public Response apisApiIdCommentsGet(String apiId, Integer limit, Integer offset, String accept, String ifNoneMatch,
-                                         String minorVersion) throws NotFoundException {
-        return null;
-    }
-
+    /**
+     * Retrieves the content of the document
+     *
+     * @param apiId API ID
+     * @param documentId Document ID
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param minorVersion Minor-Version header value
+     * @return content of the document
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
     public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String accept,
                                                            String ifNoneMatch, String ifModifiedSince,
@@ -163,6 +167,18 @@ public class ApisApiServiceImpl extends ApisApiService {
         }
     }
 
+    /**
+     * Retrives the document identified by the API's ID and the document's ID
+     *
+     * @param apiId UUID of API
+     * @param documentId UUID of the document
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param minorVersion minor version header
+     * @return the document qualifying for the provided IDs
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
     public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String accept,
                                                     String ifNoneMatch, String ifModifiedSince, String minorVersion)
@@ -220,7 +236,18 @@ public class ApisApiServiceImpl extends ApisApiService {
         }
     }
 
-
+    /**
+     * Retrieves a list of documents of an API
+     *
+     * @param apiId UUID of API
+     * @param limit maximum documents to return
+     * @param offset starting position of the pagination
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param minorVersion minor version header
+     * @return a list of document DTOs
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
     public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String accept,
                                           String ifNoneMatch, String minorVersion) throws NotFoundException {
@@ -284,31 +311,32 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     @Override
-    public Response apisApiIdRatingGet(String apiId, String subscriberName, String accept, String ifNoneMatch,
-                                       String ifModifiedSince, String minorVersion) throws NotFoundException {
-        RatingDTO ratingDTO = null;
-        AvgRatingDTO avgRatingDTO = null;
-        AvgRating avgRating = null;
+    public Response apisApiIdRatingGet(String apiId, Integer limit, Integer offset, String accept, String minorVersion)
+            throws NotFoundException {
+
+        RatingListDTO ratingListDTO = null;
+        double avgRating, userRating;
+        List<RatingDTO> ratingDTOList = null;
+
+
         String username = RestApiUtil.getLoggedInUsername();
         Response response;
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
+            userRating = apiStore.getUserRating(apiId, username);
+            avgRating = apiStore.getAvgRating(apiId);
+            ratingDTOList = RatingMappingUtil.fromRatingListToDTOList(apiStore.getUserRatingDTOList(apiId));
 
-            if(subscriberName != null){
-                Rating rating = apiStore.getAPIRatingBySubscriber(apiId, subscriberName);
-                ratingDTO = RatingMappingUtil.fromRatingToDTO(rating);
+            ratingListDTO = RatingMappingUtil.fromRatingListToDTO(avgRating, userRating, offset, limit, ratingDTOList);
 
-                return Response.ok().entity(ratingDTO).build();
-            } else {
-                avgRating = apiStore.getRatingByApiId(apiId);
-                avgRatingDTO = RatingMappingUtil.fromAverageRatingToDTO(apiId, avgRating);
-                return Response.ok().entity(avgRatingDTO).build();
-            }
+            return Response.ok().entity(ratingListDTO).build();
+
         } catch (APIManagementException e) {
             RestApiUtil
                     .handleInternalServerError("Error while retrieving Rating for given API " + apiId, e, log);
             return null;
         }
+
     }
 
     @Override
@@ -341,6 +369,17 @@ public class ApisApiServiceImpl extends ApisApiService {
         }
     }
 
+    /**
+     * Retrieves the swagger definition of an API
+     *
+     * @param apiId UUID of API
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param minorVersion minor version header
+     * @return swagger definition of an API
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
     public Response apisApiIdSwaggerGet(String apiId, String accept, String ifNoneMatch,
             String ifModifiedSince, String minorVersion) throws NotFoundException {
@@ -373,7 +412,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param accept Accept header value
      * @param ifNoneMatch If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
-     * @param minorVersion 
+     * @param minorVersion Minor-Version header value
      * @return Retrieves the fingerprint String of the swagger
      */
     public String apisApiIdSwaggerGetFingerprint(String apiId, String accept, String ifNoneMatch,

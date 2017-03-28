@@ -28,6 +28,18 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
+    /**
+     * Retrieve a list of tiers for a particular tier level
+     *
+     * @param tierLevel Tier level
+     * @param limit maximum number of tiers to return
+     * @param offset starting position of the pagination
+     * @param accept accept header value
+     * @param ifNoneMatch If-Non-Match header value
+     * @param minorVersion minor version
+     * @return A list of qualifying tiers
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
     public Response policiesTierLevelGet(String tierLevel, Integer limit, Integer offset, String accept,
                                          String ifNoneMatch, String minorVersion) throws NotFoundException {
@@ -47,6 +59,16 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         }
     }
 
+    /**
+     * Add a new policy
+     * 
+     * @param body Details of the policy to be added 
+     * @param tierLevel Tier level
+     * @param contentType Content-Type header
+     * @param minorVersion minor version
+     * @return Newly added policy as the response
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
     public Response policiesTierLevelPost(TierDTO body, String tierLevel, String contentType, String minorVersion)
             throws NotFoundException {

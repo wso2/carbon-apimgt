@@ -19,10 +19,12 @@
  */
 package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
-import org.wso2.carbon.apimgt.core.models.AvgRating;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 import org.wso2.carbon.apimgt.core.models.Rating;
-import org.wso2.carbon.apimgt.rest.api.store.dto.AvgRatingDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.RatingDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.RatingListDTO;
 
 /**
  * Mapping class for Comment Object and Comment List object to DTO and vise-versa
@@ -33,7 +35,7 @@ public class RatingMappingUtil {
     /** Converts an ArtifactResource object into corresponding REST API Comment DTO object
      *
      * @param rating Comment object
-     * @return a new Comment object corresponding to given ArtifactResource object
+     * @return a new RatingDTO object corresponding to given ArtifactResource object
      */
     public static RatingDTO fromRatingToDTO(Rating rating) {
 
@@ -46,20 +48,45 @@ public class RatingMappingUtil {
         return ratingDTO;
     }
 
-    /** Converts an ArtifactResource object into corresponding REST API Average Rating DTO object
+    /** Converts an ArtifactResource object into corresponding REST API Rating List DTO object
      *
-     * @param apiId UUID of the API
-     * @param averageRating Average Rating object
-     * @return a new Comment object corresponding to given ArtifactResource object
+     * @param avgRating     Average Rating of the API
+     * @param userRating    User Rating of the API
+     * @param offset        starting index
+     * @param limit         maximum number of APIs returns
+     * @param ratingList    List of Rating Objects available for the API
+     * @return a new RatingLIstDTO object corresponding to given ArtifactResource object
      */
-    public static AvgRatingDTO fromAverageRatingToDTO(String apiId, AvgRating averageRating) {
+    public static RatingListDTO fromRatingListToDTO(double avgRating, double userRating, Integer offset, Integer limit,
+                                                    List<RatingDTO> ratingList) {
 
-        AvgRatingDTO averageRatingDTO = new AvgRatingDTO();
-        averageRatingDTO.setApiId(averageRating.getApiId());
-        averageRatingDTO.setAvgRating(averageRating.getAvgRating());
-        return averageRatingDTO;
+        RatingListDTO ratingListDTO = new RatingListDTO();
+        List<RatingDTO> ratingDTOs = ratingListDTO.getList();
+
+        DecimalFormat decimalFormat = new DecimalFormat("###.#");
+        ratingListDTO.setAvgRating(String.valueOf(decimalFormat.format(avgRating)));
+        ratingListDTO.setUserRating(String.valueOf(decimalFormat.format(userRating)));
+
+        if(ratingList == null){
+
+            ratingList = new ArrayList<>();
+            ratingListDTO.setList(ratingList);
+        }
+        //add the required range of objects to be returned
+        int start = offset < ratingList.size() && offset >= 0 ? offset : Integer.MAX_VALUE;
+        int end = offset + limit - 1 <= ratingList.size() - 1 ? offset + limit - 1 : ratingList.size() - 1;
+        for (int i = start; i <= end; i++) {
+            ratingDTOs.add(ratingList.get(i));
+        }
+        return ratingListDTO;
+    }
+
+    /** Converts a List of User Rating objects into User Rating DTO Object List
+     *
+     * @param userRatingDTOList List of rating objects of the API
+     * @return a new list object of ratingDTO objects
+     */
+    public static List<RatingDTO> fromRatingListToDTOList(List<Rating> userRatingDTOList) {
+        return null;
     }
 }
-
-
-

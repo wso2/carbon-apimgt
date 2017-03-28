@@ -213,7 +213,9 @@ function lifecycleTabHandler(event) {
     var promised_lcState = api_client.getLcState(api_id);
     var promised_lcHistory = api_client.getLcHistory(api_id);
     var promised_labels = api_client.labels();
-    Promise.all([promised_api, promised_tiers, promised_lcState, promised_lcHistory, promised_labels]).then(renderLCTab)
+    Promise.all([promised_api, promised_tiers, promised_lcState, promised_lcHistory, promised_labels]).then(renderLCTab);
+
+    $(document).on('click', "#update-tiers-button", {api_client: api_client, api_id: api_id, promised_api: promised_api}, updateTiersHandler);
 }
 
 /**
@@ -260,6 +262,7 @@ function endpointsTabHandler(event) {
                     UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-endpoints", data, "endpoints-tab-content", mode, callbacks);
                 }
             );
+            $(document).on('click', "#update-endpoints-configuration", {api_client: api_client, api_id: api_id, promised_all_endpoints: all_endpoints}, updateEndpointsHandler);
         }
     ).catch(apiGetErrorHandler);
 }
@@ -374,18 +377,33 @@ function getCheckListItems() {
 function updateEndpointsHandler(event) {
     event.preventDefault();
     var api_client = event.data.api_client;
-    var api_id = event.data.api_id;
-    var inputs = $(".endpoint-inputs");
+    var promised_all_endpoints = event.data.promised_all_endpoints;
     var promised_updates = [];
-    for (var endpoint_input of inputs) {
-        var input = $(endpoint_input);
-        var id = input.data().uuid;
-        var url = input.val();
-        var data = {
-            endpointConfig: url,
-        };
-        promised_updates.push(api_client.updateEndpoint(id, data));
-    }
+
+    promised_all_endpoints.then(
+        function (responses) {
+            for (var endpoint_index in responses) {
+                if (responses.hasOwnProperty(endpoint_index)) {
+                    var endpoint = responses[endpoint_index].obj;
+
+                    var input = $("#" + endpoint.id);
+                    var url = input.val();
+                    var data = {
+                        endpointConfig: url
+                    };
+                    //sanity check
+                    for (var attribute in data) {
+                        if (!endpoint.hasOwnProperty(attribute)) {
+                            throw 'Invalid key : ' + attribute + ', Valid keys are `' + Object.keys(endpoint) + '`';
+                        }
+                    }
+                    var updated_endpoint = Object.assign(endpoint, data);
+                    promised_updates.push(api_client.updateEndpoint(endpoint));
+                }
+            }
+        }
+    );
+
     Promise.all(promised_updates).then(
         function (responses) {
             var message = "Endpoint configuration(s) updated successfully!";
@@ -406,6 +424,7 @@ function updateEndpointsHandler(event) {
 function updateTiersHandler(event) {
     var api_client = event.data.api_client;
     var api_id = event.data.api_id;
+    var promised_api = event.data.promised_api;
     var data = {
         api_client: api_client,
         api_id: api_id
@@ -425,7 +444,7 @@ function updateTiersHandler(event) {
         });
         return false;
     }
-    api_client.get(api_id).then(
+    promised_api.then(
         function (response) {
             var api_data = JSON.parse(response.data);
             api_data.policies = selected_policy_uuids;
@@ -447,8 +466,14 @@ function updateTiersHandler(event) {
             );
             promised_update.catch(
                 function (error_response) {
-                    $('#policies-list-dropdown').multiselect("deselectAll", false).multiselect("refresh");
-                    var message = "Error[" + error_response.status + "]: " + error_response.data;
+                    var message;
+                    if (error_response.status == 412) {
+                        message = "Error: You have provided an outdated request. " +
+                            "Please try refreshing and updating again.";
+                    } else {
+                        $('#policies-list-dropdown').multiselect("deselectAll", false).multiselect("refresh");
+                        message = "Error[" + error_response.status + "]: " + error_response.data;
+                    }
                     noty({
                         text: message,
                         type: 'error',
@@ -533,11 +558,6 @@ $(function () {
     $('#tab-3').bind('show.bs.tab', {api_client: client, api_id: api_id}, endpointsTabHandler);
     $(document).on('click', ".lc-state-btn", {api_client: client, api_id: api_id}, updateLifecycleHandler);
     $(document).on('click', "#checkItem", {api_client: client, api_id: api_id}, updateLifecycleCheckListHandler);
-    $(document).on('click', "#update-tiers-button", {api_client: client, api_id: api_id}, updateTiersHandler);
     $(document).on('click', "#update-labels-button", {api_client: client, api_id: api_id}, updateLabelsHandler);
-    $(document).on('click', "#update-endpoints-configuration", {
-        api_client: client,
-        api_id: api_id
-    }, updateEndpointsHandler);
     loadFromHash();
 });

@@ -55,6 +55,7 @@ public interface ApiDAO {
 
 
     /**
+     * Retrieves the last updated time of an API
      *
      * @param apiId UUID of API
      * @return Last updated time of API given its uuid
@@ -63,6 +64,7 @@ public interface ApiDAO {
     String getLastUpdatedTimeOfAPI(String apiId) throws APIMgtDAOException;
 
     /**
+     * Retrieves the last updated time of the swagger definition of an API
      *
      * @param apiId UUID of API
      * @return Last updated time of Swagger definition given the uuid of API
@@ -71,6 +73,7 @@ public interface ApiDAO {
     String getLastUpdatedTimeOfSwaggerDefinition(String apiId) throws APIMgtDAOException;
 
     /**
+     * Retrieves the last updated time of the gateway config of an API
      *
      * @param apiId UUID of API
      * @return Last updated time of gateway configuration given the uuid of API

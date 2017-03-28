@@ -153,6 +153,8 @@ public class AuthUtil {
                     return null;
                 }
             }
+        } else {
+            return null;
         }
         String cookie = headers.get(AuthenticatorConstants.COOKIE_HEADER);
         if (cookie != null) {
@@ -167,6 +169,8 @@ public class AuthUtil {
                 return null;
             }
 
+        } else {
+            return null;
         }
         return refreshToken;
     }

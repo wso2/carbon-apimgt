@@ -22,13 +22,20 @@ import javax.ws.rs.core.Response;
 public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     private static final Logger log = LoggerFactory.getLogger(ApplicationsApiServiceImpl.class);
 
+    /**
+     * Retrives an application
+     * 
+     * @param applicationId ID of the application
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param minorVersion minor version header
+     * @return the DTO object respresenting the application as the response payload
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
-    public Response applicationsApplicationIdGet(String applicationId
-            , String accept
-            , String ifNoneMatch
-            , String ifModifiedSince
-            , String minorVersion
-    ) throws NotFoundException {
+    public Response applicationsApplicationIdGet(String applicationId, String accept, String ifNoneMatch,
+            String ifModifiedSince, String minorVersion) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -46,7 +53,8 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             }
 
             ApplicationDTO applicationDTO = MappingUtil.toApplicationDto(application);
-            return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(applicationDTO).build();
+            return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(applicationDTO)
+                    .build();
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving application " + applicationId, e, log);
             return null;
@@ -54,6 +62,16 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
 
     }
 
+    /**
+     * Retrieves the fingerprint of a particular application
+     * 
+     * @param applicationId ID of the application
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param minorVersion minor version header
+     * @return fingerprint of the application
+     */
     public String applicationsApplicationIdGetFingerprint(String applicationId, String accept, String ifNoneMatch,
             String ifModifiedSince, String minorVersion) {
         String username = RestApiUtil.getLoggedInUsername();

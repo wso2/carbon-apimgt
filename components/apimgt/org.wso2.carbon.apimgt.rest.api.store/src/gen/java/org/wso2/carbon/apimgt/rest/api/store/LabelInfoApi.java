@@ -1,14 +1,12 @@
 package org.wso2.carbon.apimgt.rest.api.store;
 
 import io.swagger.annotations.ApiParam;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
 import org.osgi.service.component.annotations.Component;
-import org.wso2.carbon.apimgt.rest.api.store.dto.LabelInfoListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.LabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.factories.LabelInfoApiServiceFactory;
 import org.wso2.msf4j.Microservice;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
 
 @Component(
     name = "org.wso2.carbon.apimgt.rest.api.store.LabelInfoApi",
@@ -19,7 +17,7 @@ import javax.ws.rs.core.Response;
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the label-info API")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-24T18:12:27.379+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-28T22:28:05.676+05:30")
 public class LabelInfoApi implements Microservice  {
    private final LabelInfoApiService delegate = LabelInfoApiServiceFactory.getLabelInfoApi();
 
@@ -34,14 +32,13 @@ public class LabelInfoApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = LabelListDTO.class),
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = LabelListDTO.class) })
-    public Response labelInfoGet(@ApiParam(value = "Label names to get information. " ,required=true) LabelInfoListDTO body
-,@ApiParam(value = "Media type of the entity in the body. Default is JSON. " ,required=true, defaultValue="JSON")@HeaderParam("Content-Type") String contentType
+    public Response labelInfoGet(@ApiParam(value = "Defines comma separated list of labels ",required=true) @QueryParam("labels") String labels
 ,@ApiParam(value = "Media types acceptable for the response. Default is JSON. " , defaultValue="JSON")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
 ,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
 )
     throws NotFoundException {
-        return delegate.labelInfoGet(body,contentType,accept,ifNoneMatch,ifModifiedSince,minorVersion);
+        return delegate.labelInfoGet(labels,accept,ifNoneMatch,ifModifiedSince,minorVersion);
     }
 }

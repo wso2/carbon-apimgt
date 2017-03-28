@@ -55,7 +55,6 @@ import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.ApplicationCreationResponse;
 import org.wso2.carbon.apimgt.core.models.ApplicationCreationWorkflow;
-import org.wso2.carbon.apimgt.core.models.AvgRating;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.Event;
 import org.wso2.carbon.apimgt.core.models.Label;
@@ -457,12 +456,17 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
     @Override
-    public AvgRating getRatingByApiId(String apiId) throws APIManagementException {
-        return null;
+    public double getUserRating(String apiId, String username) throws APIManagementException {
+        return 0;
     }
 
     @Override
-    public Rating getAPIRatingBySubscriber(String apiId, String subscriberName) throws APIManagementException {
+    public double getAvgRating(String apiId) throws APIManagementException {
+        return 0;
+    }
+
+    @Override
+    public List<Rating> getUserRatingDTOList(String apiId) throws APIManagementException {
         return null;
     }
 
@@ -759,6 +763,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         return eventObservers;
     }
 
+    @Override
     public void completeWorkflow(WorkflowExecutor workflowExecutor, Workflow workflow) throws APIManagementException {
 
         if (workflow.getWorkflowReference() == null) {
@@ -847,29 +852,5 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         }
     }
 
-    private void updateWorkflowEntries(Workflow workflow) throws APIManagementException {
-        workflow.setUpdatedTime(LocalDateTime.now());
-        try {
-            getWorkflowDAO().updateWorkflowStatus(workflow);
-            // TODO stats stuff
-        } catch (APIMgtDAOException e) {
-            String message = "Error while updating workflow entry";
-            log.error(message);
-            throw new APIManagementException(message, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
-        }
-
-    }
-
-    private void addWorkflowEntries(Workflow workflow) throws APIManagementException {
-
-        try {
-            getWorkflowDAO().addWorkflowEntry(workflow);
-            // TODO stats publish
-        } catch (APIMgtDAOException e) {
-            String message = "Error while adding workflow entry";
-            log.error(message);
-            throw new APIManagementException(message, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
-        }
-
-    }
+    
 }

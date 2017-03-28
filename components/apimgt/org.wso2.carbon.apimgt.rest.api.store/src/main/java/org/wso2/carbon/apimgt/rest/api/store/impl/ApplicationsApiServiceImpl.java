@@ -46,6 +46,16 @@ public class ApplicationsApiServiceImpl
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationsApiServiceImpl.class);
 
+    /**
+     * Deletes an existing application
+     * 
+     * @param applicationId ID of the application
+     * @param ifMatch If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param minorVersion minor version header
+     * @return 200 response if the deletion was successful
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
     public Response applicationsApplicationIdDelete(String applicationId, String ifMatch, String ifUnmodifiedSince,
                                                     String minorVersion) throws NotFoundException {
@@ -71,6 +81,17 @@ public class ApplicationsApiServiceImpl
         return Response.ok().build();
     }
 
+    /**
+     * Retrives an existing application
+     * 
+     * @param applicationId application Id
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param minorVersion minor version
+     * @return Requested application detials as the response
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
     public Response applicationsApplicationIdGet(String applicationId, String accept, String ifNoneMatch,
                                                  String ifModifiedSince, String minorVersion) throws NotFoundException {
@@ -112,7 +133,8 @@ public class ApplicationsApiServiceImpl
 
                 }
                 applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
-                return Response.ok().entity(applicationDTO).header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").build();
+                return Response.ok().entity(applicationDTO).header(HttpHeaders.ETAG,
+                        "\"" + existingFingerprint + "\"").build();
             } else {
                 String errorMessage = "Application not found: " + applicationId;
                 APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
@@ -157,6 +179,18 @@ public class ApplicationsApiServiceImpl
         }
     }
 
+    /**
+     * Updates an existing application
+     * 
+     * @param applicationId application Id
+     * @param body Application details to be updated
+     * @param contentType Content-Type header
+     * @param ifMatch If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param minorVersion minor version
+     * @return Updated application details as the response
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
     public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body,
                                                  String contentType, String ifMatch, String ifUnmodifiedSince,
@@ -191,6 +225,18 @@ public class ApplicationsApiServiceImpl
         }
     }
 
+    /**
+     * Generates keys for the application
+     * 
+     * @param applicationId application Id
+     * @param body Key generation request details 
+     * @param contentType Content-Type header
+     * @param ifMatch If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param minorVersion minor version
+     * @return Generated application key details
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
     public Response applicationsGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO body,
                                                  String contentType, String ifMatch, String ifUnmodifiedSince,
@@ -231,6 +277,18 @@ public class ApplicationsApiServiceImpl
         return Response.ok().entity(applicationKeyDTO).build();
     }
 
+    /**
+     * Retrieves all applications that qualifies for the search query
+     * 
+     * @param query Search query
+     * @param limit Max number of applications to return
+     * @param offset Starting position of pagination
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param minorVersion minor version
+     * @return A list of qualifying application DTOs as the response
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
     public Response applicationsGet(String query, Integer limit, Integer offset, String accept,
                                     String ifNoneMatch, String minorVersion) throws NotFoundException {
@@ -269,6 +327,15 @@ public class ApplicationsApiServiceImpl
         return Response.ok().entity(applicationListDTO).build();
     }
 
+    /**
+     * Adds a new application
+     * 
+     * @param body Application details to be added
+     * @param contentType Content-Type header
+     * @param minorVersion minor version
+     * @return
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
     public Response applicationsPost(ApplicationDTO body, String contentType, String minorVersion)
             throws NotFoundException {

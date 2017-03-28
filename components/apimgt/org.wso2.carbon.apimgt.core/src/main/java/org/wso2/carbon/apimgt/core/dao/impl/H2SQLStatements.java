@@ -38,7 +38,7 @@ public class H2SQLStatements implements ApiDAOVendorSpecificStatements {
     private static final Logger log = LoggerFactory.getLogger(H2SQLStatements.class);
     private static final String API_SUMMARY_SELECT =
             "SELECT API.UUID, API.PROVIDER, API.NAME, API.CONTEXT, API.VERSION, API.DESCRIPTION,"
-                    + "API.CURRENT_LC_STATUS, API.LIFECYCLE_INSTANCE_ID "
+                    + "API.CURRENT_LC_STATUS, API.LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS "
                     + "FROM AM_API API LEFT JOIN AM_API_GROUP_PERMISSION PERMISSION ON UUID = API_ID";
 
     /**
