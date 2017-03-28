@@ -26,6 +26,18 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 
     private static final Logger log = LoggerFactory.getLogger(PoliciesApiServiceImpl.class);
 
+    /**
+     * Retrieve a list of tiers for a particular tier level
+     * 
+     * @param tierLevel Tier level
+     * @param limit maximum number of tiers to return
+     * @param offset starting position of the pagination
+     * @param accept accept header value
+     * @param ifNoneMatch If-Non-Match header value
+     * @param minorVersion minor version
+     * @return A list of qualifying tiers
+     * @throws NotFoundException
+     */
     @Override
     public Response policiesTierLevelGet(String tierLevel, Integer limit, Integer offset, String accept,
                                          String ifNoneMatch, String minorVersion) throws NotFoundException {
@@ -46,6 +58,18 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         return Response.ok().entity(tierListDTO).build();
     }
 
+    /**
+     * Retrieves a tier by tier name and level
+     * 
+     * @param tierName Name of the tier
+     * @param tierLevel Level of the tier
+     * @param accept accept header value
+     * @param ifNoneMatch If-Non-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param minorVersion minor version
+     * @return The requested tier as the response
+     * @throws NotFoundException
+     */
     @Override
     public Response policiesTierLevelTierNameGet(String tierName, String tierLevel, String accept, String ifNoneMatch,
                                                  String ifModifiedSince, String minorVersion) throws NotFoundException {

@@ -20,6 +20,18 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 
     private static final Logger log = LoggerFactory.getLogger(PoliciesApiService.class);
 
+    /**
+     * Retrieve tiers that corresponding to the level specified
+     * 
+     * @param tierLevel Tier Level
+     * @param limit Maximum tiers to return in a single response
+     * @param offset Starting position of the pagination
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param minorVersion Minor version header value
+     * @return A list of tiers qualifying
+     * @throws NotFoundException
+     */
     @Override
     public Response policiesTierLevelGet(String tierLevel, Integer limit, Integer offset, String accept,
                                          String ifNoneMatch, String minorVersion) throws NotFoundException {
@@ -40,6 +52,18 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 
     }
 
+    /**
+     * Retrieves a single tier
+     * 
+     * @param tierName Name of the tier
+     * @param tierLevel Tier Level
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since value
+     * @param minorVersion Minor version header value
+     * @return Requested tier as the response
+     * @throws NotFoundException
+     */
     @Override
     public Response policiesTierLevelTierNameGet(String tierName, String tierLevel, String accept, String ifNoneMatch,
                                                  String ifModifiedSince, String minorVersion) throws NotFoundException {
@@ -63,6 +87,17 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         }
     }
 
+    /**
+     * Retrieves the fingerprint of an existing tier
+     * 
+     * @param tierName Name of the tier
+     * @param tierLevel Tier Level
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since value
+     * @param minorVersion Minor version header value
+     * @return fingerprint of an existing tier
+     */
     public String policiesTierLevelTierNameGetFingerprint(String tierName, String tierLevel, String accept,
             String ifNoneMatch, String ifModifiedSince, String minorVersion) {
         String username = RestApiUtil.getLoggedInUsername();

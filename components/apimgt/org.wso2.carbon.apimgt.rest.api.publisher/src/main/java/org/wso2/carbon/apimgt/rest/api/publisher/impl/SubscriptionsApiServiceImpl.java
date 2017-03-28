@@ -26,13 +26,20 @@ import java.util.List;
 public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
     private static final Logger log = LoggerFactory.getLogger(SubscriptionsApiService.class);
 
+    /**
+     * Block an existing subscription
+     * 
+     * @param subscriptionId ID of the subscription
+     * @param blockState Subscription block state
+     * @param ifMatch If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param minorVersion Minor version header
+     * @return Updated subscription DTO as the response
+     * @throws NotFoundException
+     */
     @Override
-    public Response subscriptionsBlockSubscriptionPost(String subscriptionId
-            , String blockState
-            , String ifMatch
-            , String ifUnmodifiedSince
-            , String minorVersion
-    ) throws NotFoundException {
+    public Response subscriptionsBlockSubscriptionPost(String subscriptionId, String blockState, String ifMatch,
+            String ifUnmodifiedSince, String minorVersion) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -47,14 +54,21 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         return null;
     }
 
+    /**
+     * Retrieve all subscriptions for a particular API
+     * 
+     * @param apiId ID of the API 
+     * @param limit Maximum subscriptions to return
+     * @param offset Starting position of the pagination
+     * @param accept Accept header value
+     * @param ifNoneMatch If-Match header value
+     * @param minorVersion Minor version header
+     * @return List of qualifying subscriptions DTOs as the response
+     * @throws NotFoundException
+     */
     @Override
-    public Response subscriptionsGet(String apiId
-            , Integer limit
-            , Integer offset
-            , String accept
-            , String ifNoneMatch
-            , String minorVersion
-    ) throws NotFoundException {
+    public Response subscriptionsGet(String apiId, Integer limit, Integer offset, String accept, String ifNoneMatch,
+            String minorVersion) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -75,13 +89,20 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         return null;
     }
 
+    /**
+     * Retrieves a single subscription
+     * 
+     * @param subscriptionId ID of the subscription
+     * @param accept Accept header value
+     * @param ifNoneMatch If-Match header value
+     * @param ifModifiedSince If-Modified-Since value
+     * @param minorVersion Minor version header
+     * @return Requested subscription details
+     * @throws NotFoundException
+     */
     @Override
-    public Response subscriptionsSubscriptionIdGet(String subscriptionId
-            , String accept
-            , String ifNoneMatch
-            , String ifModifiedSince
-            , String minorVersion
-    ) throws NotFoundException {
+    public Response subscriptionsSubscriptionIdGet(String subscriptionId, String accept, String ifNoneMatch,
+            String ifModifiedSince, String minorVersion) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -97,7 +118,8 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
             }
             SubscriptionDTO subscriptionDTO = MappingUtil.fromSubscription(subscription);
-            return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(subscriptionDTO).build();
+            return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(subscriptionDTO)
+                    .build();
         } catch (APIManagementException e) {
             String msg = "Error while getting the subscription " + subscriptionId;
             RestApiUtil.handleInternalServerError(msg, e, log);
@@ -105,6 +127,16 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         return null;
     }
 
+    /**
+     * Retrieve the fingerprint of the subscription
+     * 
+     * @param subscriptionId ID of the subscription
+     * @param accept Accept header value
+     * @param ifNoneMatch If-Match header value
+     * @param ifModifiedSince If-Modified-Since value
+     * @param minorVersion Minor version header
+     * @return Fingerprint of the subscription
+     */
     public String subscriptionsSubscriptionIdGetFingerprint(String subscriptionId, String accept, String ifNoneMatch,
             String ifModifiedSince, String minorVersion) {
         String username = RestApiUtil.getLoggedInUsername();
@@ -121,11 +153,8 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
     }
 
     @Override
-    public Response subscriptionsUnblockSubscriptionPost(String subscriptionId
-            , String ifMatch
-            , String ifUnmodifiedSince
-            , String minorVersion
-    ) throws NotFoundException {
+    public Response subscriptionsUnblockSubscriptionPost(String subscriptionId, String ifMatch,
+            String ifUnmodifiedSince, String minorVersion) throws NotFoundException {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }

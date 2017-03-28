@@ -28,13 +28,20 @@ import java.util.List;
 public class EndpointsApiServiceImpl extends EndpointsApiService {
     private static final Logger log = LoggerFactory.getLogger(EndpointsApiServiceImpl.class);
 
+    /**
+     * Delete an endpoint by providing its ID
+     * 
+     * @param endpointId ID of the endpoint
+     * @param contentType Content-Type header value
+     * @param ifMatch If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param minorVersion minor version header
+     * @return 200 OK response if the deletion was successful
+     * @throws NotFoundException
+     */
     @Override
-    public Response endpointsEndpointIdDelete(String endpointId
-            , String contentType
-            , String ifMatch
-            , String ifUnmodifiedSince
-            , String minorVersion
-    ) throws NotFoundException {
+    public Response endpointsEndpointIdDelete(String endpointId, String contentType, String ifMatch,
+            String ifUnmodifiedSince, String minorVersion) throws NotFoundException {
         String username = "";
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -57,13 +64,20 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
         }
     }
 
+    /**
+     * Retrieves an endpoint by providing its ID
+     * 
+     * @param endpointId ID of the endpoint
+     * @param contentType Content-Type header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header
+     * @param minorVersion minor version header
+     * @return Endpoint DTO represented by the ID
+     * @throws NotFoundException
+     */
     @Override
-    public Response endpointsEndpointIdGet(String endpointId
-            , String contentType
-            , String ifNoneMatch
-            , String ifModifiedSince
-            , String minorVersion
-    ) throws NotFoundException {
+    public Response endpointsEndpointIdGet(String endpointId, String contentType, String ifNoneMatch,
+            String ifModifiedSince, String minorVersion) throws NotFoundException {
         String username = "";
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -95,6 +109,16 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
         }
     }
 
+    /**
+     * Retrieves the fingerprint of the endpoint identified by the UUID
+     * 
+     * @param endpointId ID of the endpoint
+     * @param contentType Content-Type header value
+     * @param ifMatch If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param minorVersion minor version header
+     * @return fingerprint of the endpoint
+     */
     public String endpointsEndpointIdGetFingerprint(String endpointId, String contentType, String ifMatch,
             String ifUnmodifiedSince, String minorVersion) {
         String username = RestApiUtil.getLoggedInUsername();
@@ -111,14 +135,21 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
         }
     }
 
+    /**
+     * Updates an existing endpoint
+     * 
+     * @param endpointId ID of the endpoint
+     * @param body Updated endpoint details 
+     * @param contentType Content-Type header value
+     * @param ifMatch If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param minorVersion minor version header
+     * @return updated endpoint
+     * @throws NotFoundException
+     */
     @Override
-    public Response endpointsEndpointIdPut(String endpointId
-            , EndPointDTO body
-            , String contentType
-            , String ifMatch
-            , String ifUnmodifiedSince
-            , String minorVersion
-    ) throws NotFoundException {
+    public Response endpointsEndpointIdPut(String endpointId, EndPointDTO body, String contentType, String ifMatch,
+            String ifUnmodifiedSince, String minorVersion) throws NotFoundException {
         String username = "";
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -151,11 +182,19 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
         }
     }
 
+    /**
+     * Retrieve all endpoints available
+     * 
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header
+     * @param minorVersion minor version header
+     * @return A list of endpoints avaliable 
+     * @throws NotFoundException
+     */
     @Override
-    public Response endpointsGet(String accept
-            , String ifNoneMatch
-            , String ifModifiedSince
-            , String minorVersion) throws NotFoundException {
+    public Response endpointsGet(String accept, String ifNoneMatch, String ifModifiedSince, String minorVersion)
+            throws NotFoundException {
         String username = "";
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -174,14 +213,21 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
         }
     }
 
+    /**
+     * Adds a new Endpoint
+     * 
+     * @param body Endpoint details to be added
+     * @param contentType Content-Type header value
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header
+     * @param minorVersion minor version header
+     * @return Newly created endpoint details as the payload
+     * @throws NotFoundException
+     */
     @Override
-    public Response endpointsPost(EndPointDTO body
-            , String contentType
-            , String accept
-            , String ifNoneMatch
-            , String ifModifiedSince
-            , String minorVersion
-    ) throws NotFoundException {
+    public Response endpointsPost(EndPointDTO body, String contentType, String accept, String ifNoneMatch,
+            String ifModifiedSince, String minorVersion) throws NotFoundException {
         String username = "";
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);

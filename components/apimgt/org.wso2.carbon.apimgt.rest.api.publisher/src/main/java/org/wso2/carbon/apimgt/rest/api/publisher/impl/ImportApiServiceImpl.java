@@ -23,7 +23,18 @@ import java.util.UUID;
 
     private static final Logger log = LoggerFactory.getLogger(ImportApiServiceImpl.class);
 
-    @Override public Response importApisPost(InputStream fileInputStream, FileInfo fileDetail,String contentType
+    /**
+     * Imports a set of new APIs which have been exported as a zip file
+     * 
+     * @param fileInputStream content stream of the zip file which contains exported API(s)
+     * @param fileDetail meta information of the zip file
+     * @param contentType Content-Type header
+     * @param provider provider of the API (if it needs to be updated)
+     * @return List of APIs that were imported
+     * @throws NotFoundException
+     */
+    @Override
+    public Response importApisPost(InputStream fileInputStream, FileInfo fileDetail,String contentType
             ,String provider) throws NotFoundException {
 
         APIPublisher publisher = null;
@@ -45,7 +56,18 @@ import java.util.UUID;
         }
     }
 
-    @Override public Response importApisPut(InputStream fileInputStream, FileInfo fileDetail, String contentType,
+    /**
+     * Imports an updates a set of existing APIs which have been exported as a zip file
+     * 
+     * @param fileInputStream content stream of the zip file which contains exported API(s)
+     * @param fileDetail meta information of the zip file
+     * @param contentType Content-Type header
+     * @param provider provider of the API (if it needs to be updated)
+     * @return List of APIs that were imported
+     * @throws NotFoundException
+     */
+    @Override
+    public Response importApisPut(InputStream fileInputStream, FileInfo fileDetail, String contentType,
             String provider) throws NotFoundException {
 
         APIPublisher publisher = null;

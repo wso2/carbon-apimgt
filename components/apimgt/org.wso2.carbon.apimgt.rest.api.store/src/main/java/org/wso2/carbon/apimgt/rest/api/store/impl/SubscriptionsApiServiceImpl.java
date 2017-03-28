@@ -101,6 +101,15 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         return Response.ok().entity(subscriptionListDTO).build();
     }
 
+    /**
+     * Adds a new subscription
+     * 
+     * @param body Subscription details to be added
+     * @param contentType Content-Type header value
+     * @param minorVersion minor version
+     * @return Newly added subscription as the response
+     * @throws NotFoundException
+     */
     @Override
     public Response subscriptionsPost(SubscriptionDTO body, String contentType, String minorVersion)
             throws NotFoundException {
@@ -151,6 +160,16 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         return Response.status(Response.Status.CREATED).entity(subscriptionDTO).build();
     }
 
+    /**
+     * Delete a subscription
+     * 
+     * @param subscriptionId Id of the subscription
+     * @param ifMatch If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param minorVersion minor version
+     * @return 200 OK response if the deletion was successful
+     * @throws NotFoundException
+     */
     @Override
     public Response subscriptionsSubscriptionIdDelete(String subscriptionId, String ifMatch,
             String ifUnmodifiedSince, String minorVersion) throws NotFoundException {
@@ -177,6 +196,17 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         return Response.ok().build();
     }
 
+    /**
+     * Retrieves a single subscription
+     * 
+     * @param subscriptionId Id of the subscription
+     * @param accept accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param minorVersion minor version
+     * @return Requested subscription DTO as the payload
+     * @throws NotFoundException
+     */
     @Override
     public Response subscriptionsSubscriptionIdGet(String subscriptionId, String accept, String ifNoneMatch,
                                                    String ifModifiedSince, String minorVersion)
