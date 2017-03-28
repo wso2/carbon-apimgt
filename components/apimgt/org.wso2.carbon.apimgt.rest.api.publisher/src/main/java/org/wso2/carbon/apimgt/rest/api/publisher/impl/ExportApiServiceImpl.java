@@ -26,7 +26,18 @@ import java.util.UUID;
 
     private static final Logger log = LoggerFactory.getLogger(ExportApiServiceImpl.class);
 
-    @Override public Response exportApisGet(String contentType, String query, Integer limit, Integer offset)
+    /**
+     * Exports an existing API
+     * 
+     * @param contentType Content-Type header value
+     * @param query Search query
+     * @param limit maximum APIs to export
+     * @param offset Starting position of the search
+     * @return Zip file containing the exported APIs
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
+    @Override 
+    public Response exportApisGet(String contentType, String query, Integer limit, Integer offset)
             throws NotFoundException {
 
         APIPublisher publisher = null;

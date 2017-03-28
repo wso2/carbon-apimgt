@@ -174,7 +174,9 @@ class API {
     constructor(access_key) {
         this.client = new SwaggerClient({
             url: this._getSwaggerURL(),
-            usePromise: true
+            usePromise: true,
+            requestInterceptor: this._getRequestInterceptor(),
+            responseInterceptor: this._getResponseInterceptor()
         });
         this.auth_client = new AuthClient();
         this.client.then(
@@ -205,6 +207,49 @@ class API {
                 });
             }
         );
+    }
+
+    /**
+     * Get the ETag of a given resource key from the session storage
+     * @param key {string} key of resource.
+     * @returns {string} ETag value for the given key
+     */
+    static getETag(key) {
+        return sessionStorage.getItem("etag_" + key);
+    }
+
+    /**
+     * Add an ETag to a given resource key into the session storage
+     * @param key {string} key of resource.
+     * @param etag {string} etag value to be stored against the key
+     */
+    static addETag(key, etag) {
+        sessionStorage.setItem("etag_" + key, etag);
+    }
+
+    _getResponseInterceptor() {
+        var responseInterceptor = {
+            apply: function (data) {
+                if (data.headers.etag) {
+                    API.addETag(data.url, data.headers.etag);
+                }
+                return data;
+            }
+        };
+        return responseInterceptor;
+    }
+
+    _getRequestInterceptor() {
+        var requestInterceptor = {
+            apply: function (data) {
+                if (API.getETag(data.url) && (data.method == "PUT" || data.method == "DELETE"
+                    || data.method == "POST")) {
+                    data.headers["If-Match"] = API.getETag(data.url);
+                }
+                return data;
+            }
+        };
+        return requestInterceptor;
     }
 
     _getSwaggerURL() {
@@ -492,28 +537,21 @@ class API {
         );
     }
 
-    updateEndpoint(id, data) {
-        return this.getEndpoint(id).then(
-            function (response) {
-                var endpoint = response.obj;
-                for (var attribute in data) {
-                    if (!endpoint.hasOwnProperty(attribute)) {
-                        throw 'Invalid key : ' + attribute + ', Valid keys are `' + Object.keys(endpoint) + '`';
-                    }
-                }
-                var updated_endpoint = Object.assign(endpoint, data);
-                return this.client.then(
-                    (client) => {
-                        return client["Endpoint (individual)"].put_endpoints_endpointId(
-                            {
-                                endpointId: id,
-                                body: updated_endpoint,
-                                'Content-Type': 'application/json'
-                            }, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
-                    }
-                ).catch(AuthClient.unauthorizedErrorHandler);
-            }.bind(this)
-        ).catch(AuthClient.unauthorizedErrorHandler)
+    /**
+     * Update endpoint object.
+     * @param data {Object} Endpoint to be updated
+     * @returns {Promise.<TResult>}
+     */
+    updateEndpoint(data) {
+        return this.client.then(
+            (client) => {
+            return client["Endpoint (individual)"].put_endpoints_endpointId(
+                {
+                    endpointId: data.id,
+                    body: data,
+                    'Content-Type': 'application/json'
+                }, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+        }).catch(AuthClient.unauthorizedErrorHandler);
     }
 
     /**

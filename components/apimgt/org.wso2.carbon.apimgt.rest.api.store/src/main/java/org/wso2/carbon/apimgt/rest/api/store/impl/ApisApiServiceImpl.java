@@ -35,6 +35,18 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     private static final Logger log = LoggerFactory.getLogger(ApisApiServiceImpl.class);
 
+    /**
+     * Retrieves the content of the document
+     * 
+     * @param apiId API ID
+     * @param documentId Document ID
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param minorVersion Minor-Version header value
+     * @return content of the document
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
     public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String accept,
                                                            String ifNoneMatch, String ifModifiedSince,
@@ -114,6 +126,18 @@ public class ApisApiServiceImpl extends ApisApiService {
         }
     }
 
+    /**
+     * Retrives the document identified by the API's ID and the document's ID
+     *
+     * @param apiId UUID of API
+     * @param documentId UUID of the document
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param minorVersion minor version header
+     * @return the document qualifying for the provided IDs
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
     public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String accept,
                                                     String ifNoneMatch, String ifModifiedSince, String minorVersion)
@@ -171,7 +195,18 @@ public class ApisApiServiceImpl extends ApisApiService {
         }
     }
 
-
+    /**
+     * Retrieves a list of documents of an API
+     *
+     * @param apiId UUID of API
+     * @param limit maximum documents to return
+     * @param offset starting position of the pagination
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param minorVersion minor version header
+     * @return a list of document DTOs
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
     public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String accept,
                                           String ifNoneMatch, String minorVersion) throws NotFoundException {
@@ -258,6 +293,17 @@ public class ApisApiServiceImpl extends ApisApiService {
         }
     }
 
+    /**
+     * Retrieves the swagger definition of an API
+     *
+     * @param apiId UUID of API
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param minorVersion minor version header
+     * @return swagger definition of an API
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
     public Response apisApiIdSwaggerGet(String apiId, String accept, String ifNoneMatch,
             String ifModifiedSince, String minorVersion) throws NotFoundException {
