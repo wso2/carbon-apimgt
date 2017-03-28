@@ -31,7 +31,7 @@ import java.util.UUID;
      * @param contentType Content-Type header
      * @param provider provider of the API (if it needs to be updated)
      * @return List of APIs that were imported
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response importApisPost(InputStream fileInputStream, FileInfo fileDetail,String contentType
@@ -64,7 +64,7 @@ import java.util.UUID;
      * @param contentType Content-Type header
      * @param provider provider of the API (if it needs to be updated)
      * @return List of APIs that were imported
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response importApisPut(InputStream fileInputStream, FileInfo fileDetail, String contentType,

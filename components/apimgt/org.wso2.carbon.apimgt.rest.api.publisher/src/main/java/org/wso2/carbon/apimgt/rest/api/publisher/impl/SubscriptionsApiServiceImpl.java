@@ -35,7 +35,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param minorVersion Minor version header
      * @return Updated subscription DTO as the response
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response subscriptionsBlockSubscriptionPost(String subscriptionId, String blockState, String ifMatch,
@@ -64,7 +64,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      * @param ifNoneMatch If-Match header value
      * @param minorVersion Minor version header
      * @return List of qualifying subscriptions DTOs as the response
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response subscriptionsGet(String apiId, Integer limit, Integer offset, String accept, String ifNoneMatch,
@@ -98,7 +98,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      * @param ifModifiedSince If-Modified-Since value
      * @param minorVersion Minor version header
      * @return Requested subscription details
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response subscriptionsSubscriptionIdGet(String subscriptionId, String accept, String ifNoneMatch,

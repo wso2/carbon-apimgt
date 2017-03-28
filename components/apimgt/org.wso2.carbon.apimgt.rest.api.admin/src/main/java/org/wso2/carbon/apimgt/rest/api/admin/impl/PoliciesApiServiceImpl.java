@@ -38,7 +38,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
      * @param ifNoneMatch If-Non-Match header value
      * @param minorVersion minor version
      * @return A list of qualifying tiers
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response policiesTierLevelGet(String tierLevel, Integer limit, Integer offset, String accept,
@@ -67,7 +67,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
      * @param contentType Content-Type header
      * @param minorVersion minor version
      * @return Newly added policy as the response
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response policiesTierLevelPost(TierDTO body, String tierLevel, String contentType, String minorVersion)

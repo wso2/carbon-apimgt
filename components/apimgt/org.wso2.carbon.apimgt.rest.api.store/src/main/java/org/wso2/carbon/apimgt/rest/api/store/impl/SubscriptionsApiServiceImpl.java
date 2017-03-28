@@ -108,7 +108,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      * @param contentType Content-Type header value
      * @param minorVersion minor version
      * @return Newly added subscription as the response
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response subscriptionsPost(SubscriptionDTO body, String contentType, String minorVersion)
@@ -168,7 +168,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param minorVersion minor version
      * @return 200 OK response if the deletion was successful
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response subscriptionsSubscriptionIdDelete(String subscriptionId, String ifMatch,
@@ -205,7 +205,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      * @param ifModifiedSince If-Modified-Since header value
      * @param minorVersion minor version
      * @return Requested subscription DTO as the payload
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response subscriptionsSubscriptionIdGet(String subscriptionId, String accept, String ifNoneMatch,

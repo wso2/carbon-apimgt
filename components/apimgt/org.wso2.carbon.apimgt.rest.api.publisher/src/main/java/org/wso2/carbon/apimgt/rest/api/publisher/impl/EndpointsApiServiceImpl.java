@@ -37,7 +37,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param minorVersion minor version header
      * @return 200 OK response if the deletion was successful
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response endpointsEndpointIdDelete(String endpointId, String contentType, String ifMatch,
@@ -73,7 +73,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
      * @param ifModifiedSince If-Modified-Since header
      * @param minorVersion minor version header
      * @return Endpoint DTO represented by the ID
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response endpointsEndpointIdGet(String endpointId, String contentType, String ifNoneMatch,
@@ -145,7 +145,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param minorVersion minor version header
      * @return updated endpoint
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response endpointsEndpointIdPut(String endpointId, EndPointDTO body, String contentType, String ifMatch,
@@ -190,7 +190,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
      * @param ifModifiedSince If-Modified-Since header
      * @param minorVersion minor version header
      * @return A list of endpoints avaliable 
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response endpointsGet(String accept, String ifNoneMatch, String ifModifiedSince, String minorVersion)
@@ -223,7 +223,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
      * @param ifModifiedSince If-Modified-Since header
      * @param minorVersion minor version header
      * @return Newly created endpoint details as the payload
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response endpointsPost(EndPointDTO body, String contentType, String accept, String ifNoneMatch,

@@ -31,7 +31,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
      * @param ifModifiedSince If-Modified-Since header value
      * @param minorVersion minor version header
      * @return the DTO object respresenting the application as the response payload
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response applicationsApplicationIdGet(String applicationId, String accept, String ifNoneMatch,

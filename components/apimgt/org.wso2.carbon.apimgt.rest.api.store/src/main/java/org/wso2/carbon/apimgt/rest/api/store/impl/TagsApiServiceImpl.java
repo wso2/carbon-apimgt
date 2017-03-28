@@ -31,7 +31,7 @@ public class TagsApiServiceImpl extends TagsApiService {
      * @param ifNoneMatch If-None-Match header value
      * @param minorVersion minor version header
      * @return A list of qualifying tags as the response
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response tagsGet(Integer limit, Integer offset, String accept, String ifNoneMatch,

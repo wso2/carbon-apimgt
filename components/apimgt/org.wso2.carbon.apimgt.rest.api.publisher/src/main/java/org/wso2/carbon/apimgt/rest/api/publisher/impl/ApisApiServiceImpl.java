@@ -51,7 +51,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param minorVersion minor version header
      * @return 200 OK if the opration was successful
-     * @throws NotFoundException
+     * @throws NotFoundException when the particular resource does not exist
      */
     @Override
     public Response apisApiIdDelete(String apiId, String ifMatch, String ifUnmodifiedSince, String minorVersion)
@@ -88,7 +88,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifModifiedSince If-Modified-Since header value
      * @param minorVersion minor version header
      * @return Content of the document
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String accept,
@@ -181,7 +181,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param minorVersion minor version header
      * @return updated document meta information
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdContentPost(String apiId, String documentId, String contentType,
@@ -266,7 +266,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param minorVersion minor version header
      * @return 200 OK response if the deletion was successful
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdDelete(String apiId, String documentId, String ifMatch,
@@ -303,7 +303,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifModifiedSince If-Modified-Since header value
      * @param minorVersion minor version header
      * @return the document qualifying for the provided IDs
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String accept, String ifNoneMatch,
@@ -379,7 +379,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param minorVersion minor version header
      * @return updated document meta info DTO as the response
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdPut(String apiId, String documentId, DocumentDTO body,
@@ -460,7 +460,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifNoneMatch If-None-Match header value
      * @param minorVersion minor version header
      * @return a list of document DTOs
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String accept,
@@ -491,7 +491,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param minorVersion minor version header
      * @return newly added document meta info object
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdDocumentsPost(String apiId, DocumentDTO body, String contentType, String ifMatch,
@@ -533,7 +533,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifModifiedSince If-Modified-Since header value
      * @param minorVersion minor version header
      * @return gateway configuration
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdGatewayConfigGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince,
@@ -598,7 +598,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param minorVersion minor version header
      * @return Updated gateway configuration
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdGatewayConfigPut(String apiId, String gatewayConfig, String contentType, String ifMatch,
@@ -638,7 +638,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifModifiedSince If-Modified-Since header value
      * @param minorVersion minor version header
      * @return API which is identified by the given UUID
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince,
@@ -703,7 +703,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifModifiedSince If-Modified-Since header value
      * @param minorVersion minor version header
      * @return possible lifecycle states of a given API
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdLifecycleGet(String apiId, String accept, String ifNoneMatch,
@@ -732,7 +732,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifModifiedSince If-Modified-Since header value
      * @param minorVersion minor version header
      * @return lifecycle history of the API
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdLifecycleHistoryGet(String apiId, String accept, String ifNoneMatch,
@@ -777,7 +777,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param minorVersion minor version header
      * @return Updated API
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdPut(String apiId, APIDTO body, String contentType, String ifMatch,
@@ -818,7 +818,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifModifiedSince If-Modified-Since header value
      * @param minorVersion minor version header
      * @return swagger definition of an API
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdSwaggerGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince,
@@ -879,7 +879,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param minorVersion minor version header
      * @return Updated swagger definition
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String contentType, String ifMatch,
@@ -916,7 +916,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifModifiedSince If-Modified-Since header value
      * @param minorVersion minor version header
      * @return the thumbnail image of an API
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdThumbnailGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince,
@@ -986,7 +986,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param minorVersion minor version header
      * @return meta info about the updated thumbnail image
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdThumbnailPost(String apiId, InputStream fileInputStream, FileInfo fileDetail,
@@ -1031,7 +1031,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param minorVersion minor version header
      * @return 200 OK if the operation is succesful
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisChangeLifecyclePost(String action, String apiId, String lifecycleChecklist, String ifMatch,
@@ -1072,7 +1072,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param apiId UUID of API
      * @param minorVersion minor version header
      * @return created new API
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisCopyApiPost(String newVersion, String apiId, String minorVersion) throws NotFoundException {
@@ -1104,7 +1104,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifNoneMatch If-None-Match header value
      * @param minorVersion minor version header
      * @return a list of qualifying APIs
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch,
@@ -1132,7 +1132,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifNoneMatch If-None-Match header value
      * @param minorVersion minor version header
      * @return 200 if an API is found for the query, 404 otherwise
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisHead(String query, String accept, String ifNoneMatch, String minorVersion)
@@ -1182,7 +1182,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param minorVersion minor version header
      * @return Imported API
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisImportDefinitionPost(InputStream fileInputStream, FileInfo fileDetail, String url,
@@ -1229,7 +1229,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param contentType Content-Type header value
      * @param minorVersion minor version header
      * @return Newly created API
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisPost(APIDTO body, String contentType, String minorVersion) throws NotFoundException {

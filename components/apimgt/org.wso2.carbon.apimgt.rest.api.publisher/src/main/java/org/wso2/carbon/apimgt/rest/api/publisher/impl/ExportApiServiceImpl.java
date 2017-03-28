@@ -34,7 +34,7 @@ import java.util.UUID;
      * @param limit maximum APIs to export
      * @param offset Starting position of the search
      * @return Zip file containing the exported APIs
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override 
     public Response exportApisGet(String contentType, String query, Integer limit, Integer offset)

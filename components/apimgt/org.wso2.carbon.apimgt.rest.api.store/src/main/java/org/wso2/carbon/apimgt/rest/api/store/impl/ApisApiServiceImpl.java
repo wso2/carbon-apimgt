@@ -45,7 +45,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifModifiedSince If-Modified-Since header value
      * @param minorVersion Minor-Version header value
      * @return content of the document
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String accept,
@@ -136,7 +136,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifModifiedSince If-Modified-Since header value
      * @param minorVersion minor version header
      * @return the document qualifying for the provided IDs
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String accept,
@@ -205,7 +205,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifNoneMatch If-None-Match header value
      * @param minorVersion minor version header
      * @return a list of document DTOs
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String accept,
@@ -302,7 +302,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifModifiedSince If-Modified-Since header value
      * @param minorVersion minor version header
      * @return swagger definition of an API
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdSwaggerGet(String apiId, String accept, String ifNoneMatch,

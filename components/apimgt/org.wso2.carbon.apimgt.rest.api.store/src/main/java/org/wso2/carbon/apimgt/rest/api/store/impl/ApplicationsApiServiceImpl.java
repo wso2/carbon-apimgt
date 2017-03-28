@@ -54,7 +54,7 @@ public class ApplicationsApiServiceImpl
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param minorVersion minor version header
      * @return 200 response if the deletion was successful
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response applicationsApplicationIdDelete(String applicationId, String ifMatch, String ifUnmodifiedSince,
@@ -90,7 +90,7 @@ public class ApplicationsApiServiceImpl
      * @param ifModifiedSince If-Modified-Since header value
      * @param minorVersion minor version
      * @return Requested application detials as the response
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response applicationsApplicationIdGet(String applicationId, String accept, String ifNoneMatch,
@@ -189,7 +189,7 @@ public class ApplicationsApiServiceImpl
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param minorVersion minor version
      * @return Updated application details as the response
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body,
@@ -235,7 +235,7 @@ public class ApplicationsApiServiceImpl
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param minorVersion minor version
      * @return Generated application key details
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response applicationsGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO body,
@@ -287,7 +287,7 @@ public class ApplicationsApiServiceImpl
      * @param ifNoneMatch If-None-Match header value
      * @param minorVersion minor version
      * @return A list of qualifying application DTOs as the response
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response applicationsGet(String query, Integer limit, Integer offset, String accept,
@@ -334,7 +334,7 @@ public class ApplicationsApiServiceImpl
      * @param contentType Content-Type header
      * @param minorVersion minor version
      * @return
-     * @throws NotFoundException
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response applicationsPost(ApplicationDTO body, String contentType, String minorVersion)
