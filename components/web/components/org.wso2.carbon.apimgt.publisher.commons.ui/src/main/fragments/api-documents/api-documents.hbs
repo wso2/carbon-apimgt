@@ -7,7 +7,7 @@
             <div id="addDoc">
                 <a id="add-new-doc" href="#" title="Add New Document" class="btn btn-primary add-new-doc btn-sm padding-reduce-on-grid-view">
                     <i class=" glyphicon glyphicon-plus-sign" title="Add New Document"></i>
-                    Add New Document
+                    {{i18n "Add New Document"}}
                 </a>
             </div>
             <br/>
@@ -29,7 +29,7 @@
                     </div>
 
                     <div class="control-group">
-                        <label class="control-label">Summary<span class="requiredAstrix">*</span></label>
+                        <label class="control-label">{{i18n "Summary"}}<span class="requiredAstrix">*</span></label>
                         <div class="controls form-group">
                             <textarea  id="summary" class="required form-control" rows="3" style="width:100%" title="summary"></textarea>
                         </div>
@@ -45,27 +45,27 @@
                                 <li><label> <input type="radio"
                                                    name="optionsRadios" id="optionsRadios1" value="HOWTO"
                                                    checked="" onChange="disableInline()"
-                                                   onclick="javascript:$('#otherTypeDiv').hide('slow')" /> How To
+                                                   onclick="javascript:$('#otherTypeDiv').hide('slow')" /> {{i18n "How To"}}
                                 </label></li>
                                 <li><label> <input type="radio"
                                                    name="optionsRadios" id="optionsRadios2" value="SAMPLES"
                                                    onChange="disableInline()"
-                                                   onclick="javascript:$('#otherTypeDiv').hide('slow')" /> Samples & SDK
+                                                   onclick="javascript:$('#otherTypeDiv').hide('slow')" /> {{i18n "Samples & SDK"}}
                                 </label></li>
                                 <li><label> <input type="radio"
                                                    name="optionsRadios" id="optionsRadios3" value="PUBLIC_FORUM"
                                                    onChange="disableInline('forum')"
-                                                   onclick="javascript:$('#otherTypeDiv').hide('slow')" /> Public Forum
+                                                   onclick="javascript:$('#otherTypeDiv').hide('slow')" /> {{i18n "Public Forum"}}
                                 </label></li>
                                 <label> <input type="radio" name="optionsRadios"
                                                id="optionsRadios4" value="SUPPORT_FORUM"
                                                onChange="disableInline('forum')"
-                                               onclick="javascript:$('#otherTypeDiv').hide('slow')" /> Support Forum
+                                               onclick="javascript:$('#otherTypeDiv').hide('slow')" /> {{i18n "Support Forum"}}
                                 </label>
                                 <li><label> <input type="radio"
                                                    name="optionsRadios" id="optionsRadios5" value="OTHER"
                                                    onChange="disableInline()"
-                                                   onclick="javascript:$('#otherTypeDiv').toggle('slow')" />Other (specify)
+                                                   onclick="javascript:$('#otherTypeDiv').toggle('slow')" />{{i18n "Other (specify)"}}
                                 </label></li>
                             </ul>
                             <div id="otherTypeDiv" class="controls form-group" style="display: none;">
@@ -85,19 +85,19 @@
                             <ul class="nav">
                                 <li>
                                     <label>
-                                        <input type="radio" name="optionsRadios1" id="optionsRadios6" value="INLINE" onclick="javascript:$('#sourceUrlDoc').hide('slow');$('#sourceFile').hide('slow')" checked="">Inline
+                                        <input type="radio" name="optionsRadios1" id="optionsRadios6" value="INLINE" onclick="javascript:$('#sourceUrlDoc').hide('slow');$('#sourceFile').hide('slow')" checked="">{{i18n "Inline"}}
                                         <a class="icon-question-sign help_popup" help_data="inlineDoc_help" title="inlineDoc_help""></a>
                                         <p id="inlineDoc_help" class="hide">
-                                            Documentation that is hosted in the system and can be edited directly from the UI
+                                                {{i18n "Documentation that is hosted in the system and can be edited directly from the UI"}}
                                         </p>
                                     </label>
                                 </li>
                                 <li>
                                     <label>
-                                        <input type="radio" name="optionsRadios1" id="optionsRadios7" value="URL" onclick="javascript:$('#sourceUrlDoc').toggle('slow');$('#sourceFile').hide('slow')">URL
+                                        <input type="radio" name="optionsRadios1" id="optionsRadios7" value="URL" onclick="javascript:$('#sourceUrlDoc').toggle('slow');$('#sourceFile').hide('slow')">{{i18n "URL"}}
                                         <a class="icon-question-sign help_popup" help_data="urlDoc_help" title=""urlDoc_help""></a>
                                         <p id="urlDoc_help" class="hide">
-                                            Link to documentation is managed by an external configuration management system
+                                            {{i18n "Link to documentation is managed by an external configuration management system"}}
                                         </p>
                                     </label>
 
@@ -107,12 +107,12 @@
                                 </li>
                                 <li>
                                     <label>
-                                        <input type="radio" name="optionsRadios1" id="optionsRadios8" value="FILE" onclick="javascript:$('#sourceFile').toggle('slow');$('#sourceUrlDoc').hide('slow')">File
+                                        <input type="radio" name="optionsRadios1" id="optionsRadios8" value="FILE" onclick="javascript:$('#sourceFile').toggle('slow');$('#sourceUrlDoc').hide('slow')">{{i18n "File"}}
                                         <a class="icon-question-sign help_popup" help_data="fileDoc_help" title="fileDoc_help"></a>
-                                        <p id="fileDoc_help" class="hide">Upload a documentation file</p>
+                                        <p id="fileDoc_help" class="hide">{{i18n "Upload a documentation file"}}</p>
                                     </label>
                                     <div id="fileNameDiv" style="display:none;"></div>
-                                    <button type="button" class="btn btn-secondary" id="toggleFileDoc" style="display:none;" onclick="javascript:$('#sourceFile').toggle('slow')">Change File</button>
+                                    <button type="button" class="btn btn-secondary" id="toggleFileDoc" style="display:none;" onclick="javascript:$('#sourceFile').toggle('slow')">{{i18n "Change File"}}</button>
                                     <form class="form-horizontal">
                                     <div class="input-group input-wrap file-upload-control">
                                         <input type="text" placeholder="Click on brows to add a file" class="form-control" readonly="">
@@ -120,7 +120,7 @@
                                         <div class="input-group-btn">
                                             <button class="btn browse" type="button" title="Browse File">
                                                 <i class="fw fw-file-browse" aria-hidden="true"></i>
-                                                <span class="hidden-xs">Browse</span>
+                                                <span class="hidden-xs">{{i18n "Browse"}}</span>
                                             </button>
                                         </div>
                                     </div>
@@ -135,8 +135,8 @@
             <div class="row">
                 <div class="col-sm-12">
                     <div class="form-group">
-                        <button type="button" class="btn btn-primary" id="add-doc-submit">Add Document</button>
-                        <button type="button" class="btn btn-secondary" id='clear-doc-form'>Cancel</button>
+                        <button type="button" class="btn btn-primary" id="add-doc-submit">{{i18n "Add Document"}}</button>
+                        <button type="button" class="btn btn-secondary" id='clear-doc-form'>{{i18n "Cancel"}}</button>
                     </div>
                 </div>
 
