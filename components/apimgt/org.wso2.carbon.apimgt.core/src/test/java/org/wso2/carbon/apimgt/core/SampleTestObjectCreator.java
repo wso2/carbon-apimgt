@@ -514,6 +514,15 @@ public class SampleTestObjectCreator {
         return docList;
     }
 
+    public static List<API> createMockAPIList() {
+        List<API> apiList = new ArrayList<>();
+        API api1 = createDefaultAPI().build();
+        API api2 = createAlternativeAPI().build();
+        apiList.add(api1);
+        apiList.add(api2);
+        return apiList;
+    }
+
     public static Endpoint createMockEndpoint() {
         return new Endpoint.Builder().endpointConfig("{'type':'http','url':'http://localhost:8280'}").id(endpointId)
                 .maxTps(1000L).security("{'enabled':false}").name("Endpoint1").build();
