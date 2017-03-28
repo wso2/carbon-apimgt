@@ -283,4 +283,12 @@ public class APIMgtConstants {
         public static final String WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX = "AM_APPLICATION_REGISTRATION_SANDBOX";
 
     }
+
+    /**
+     * ETags related constants
+     */
+    public static class ETagConstants {
+        public static final String MESSAGE_DIGEST_ALGORITHM_MD5 = "MD5";
+    }
+    
 }

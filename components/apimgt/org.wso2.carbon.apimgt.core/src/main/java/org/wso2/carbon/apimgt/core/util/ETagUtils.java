@@ -1,4 +1,3 @@
-package org.wso2.carbon.apimgt.core.util;
 /*
 *  Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
@@ -16,6 +15,7 @@ package org.wso2.carbon.apimgt.core.util;
 * specific language governing permissions and limitations
 * under the License.
 */
+package org.wso2.carbon.apimgt.core.util;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -79,7 +79,9 @@ public class ETagUtils {
      */
     public static String generateETag(String updatedTime) throws ETagGenerationException {
         try {
-            return StringUtils.isBlank(updatedTime) ? null : getHash(updatedTime, "MD5");
+            return StringUtils.isBlank(updatedTime) ?
+                    null :
+                    getHash(updatedTime, APIMgtConstants.ETagConstants.MESSAGE_DIGEST_ALGORITHM_MD5);
         } catch (NoSuchAlgorithmException e) {
             String errorMessage = "Error while generating md5 hash for the timestamp :" + updatedTime;
             log.error(errorMessage, e);
