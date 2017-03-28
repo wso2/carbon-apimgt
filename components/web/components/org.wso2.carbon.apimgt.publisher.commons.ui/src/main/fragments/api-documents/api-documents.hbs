@@ -1,0 +1,163 @@
+{{js "js/document.js"}}
+<div id="document-content" class="tab-content col-md-6 col-sm-6">
+    <div class="row-fluid">
+        <div class="control-group">
+            <input type="hidden" id="docAPIVersion" value="1.0"/>
+            <input type="hidden" id="docAPIName" value="test"/>
+            <div id="addDoc">
+                <a id="add-new-doc" href="#" title="Add New Document" class="btn btn-primary add-new-doc btn-sm padding-reduce-on-grid-view">
+                    <i class=" glyphicon glyphicon-plus-sign" title="Add New Document"></i>
+                    Add New Document
+                </a>
+            </div>
+            <br/>
+            <div id="updateDoc" style="display:none;">
+                <h4></h4>
+            </div>
+        </div>
+    </div>
+    <!-- Row -->
+    <div class="container-fluid" style="padding-left:0">
+        <div id="newDoc" style="display:none;">
+            <div class="row-fluid">
+                <div class="col-sm-4 name-column" style="margin-bottom: 10px">
+                    <div class="control-group">
+                        <label class="control-label" for="docName">Name<span class="requiredAstrix">*</span></label>
+                        <div class="form-group">
+                            <input type="text" class="form-control required validInput" id="docName" style="width:100%"/>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Summary<span class="requiredAstrix">*</span></label>
+                        <div class="controls form-group">
+                            <textarea  id="summary" class="required form-control" rows="3" style="width:100%" title="summary"></textarea>
+                        </div>
+                    </div>
+
+
+                </div>
+                <div class="col-sm-4">
+                    <div class="well">
+                        <div class="control-group">
+                            <label class="control-label">Type</label>
+                            <ul class="nav">
+                                <li><label> <input type="radio"
+                                                   name="optionsRadios" id="optionsRadios1" value="HOWTO"
+                                                   checked="" onChange="disableInline()"
+                                                   onclick="javascript:$('#otherTypeDiv').hide('slow')" /> How To
+                                </label></li>
+                                <li><label> <input type="radio"
+                                                   name="optionsRadios" id="optionsRadios2" value="SAMPLES"
+                                                   onChange="disableInline()"
+                                                   onclick="javascript:$('#otherTypeDiv').hide('slow')" /> Samples & SDK
+                                </label></li>
+                                <li><label> <input type="radio"
+                                                   name="optionsRadios" id="optionsRadios3" value="PUBLIC_FORUM"
+                                                   onChange="disableInline('forum')"
+                                                   onclick="javascript:$('#otherTypeDiv').hide('slow')" /> Public Forum
+                                </label></li>
+                                <label> <input type="radio" name="optionsRadios"
+                                               id="optionsRadios4" value="SUPPORT_FORUM"
+                                               onChange="disableInline('forum')"
+                                               onclick="javascript:$('#otherTypeDiv').hide('slow')" /> Support Forum
+                                </label>
+                                <li><label> <input type="radio"
+                                                   name="optionsRadios" id="optionsRadios5" value="OTHER"
+                                                   onChange="disableInline()"
+                                                   onclick="javascript:$('#otherTypeDiv').toggle('slow')" />Other (specify)
+                                </label></li>
+                            </ul>
+                            <div id="otherTypeDiv" class="controls form-group" style="display: none;">
+                                <span class="requiredAstrix">*</span> <input type="text" title="otherTypeDoc"
+                                                                             class="required form-control" id="specifyBox"
+                                                                             style="width: 98%;" />
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-4">
+                    <div class="well">
+                        <div class="form-group">
+                            <label class="control-label">Source</label>
+                            <ul class="nav">
+                                <li>
+                                    <label>
+                                        <input type="radio" name="optionsRadios1" id="optionsRadios6" value="INLINE" onclick="javascript:$('#sourceUrlDoc').hide('slow');$('#sourceFile').hide('slow')" checked="">Inline
+                                        <a class="icon-question-sign help_popup" help_data="inlineDoc_help" title="inlineDoc_help""></a>
+                                        <p id="inlineDoc_help" class="hide">
+                                            Documentation that is hosted in the system and can be edited directly from the UI
+                                        </p>
+                                    </label>
+                                </li>
+                                <li>
+                                    <label>
+                                        <input type="radio" name="optionsRadios1" id="optionsRadios7" value="URL" onclick="javascript:$('#sourceUrlDoc').toggle('slow');$('#sourceFile').hide('slow')">URL
+                                        <a class="icon-question-sign help_popup" help_data="urlDoc_help" title=""urlDoc_help""></a>
+                                        <p id="urlDoc_help" class="hide">
+                                            Link to documentation is managed by an external configuration management system
+                                        </p>
+                                    </label>
+
+                                    <div id="sourceUrlDoc" class="controls" style="display:none;">
+                                        <span class="requiredAstrix">*</span> <input type="text" class="form-control required" style="width:98%" title="docUrl" id="docUrl">
+                                    </div>
+                                </li>
+                                <li>
+                                    <label>
+                                        <input type="radio" name="optionsRadios1" id="optionsRadios8" value="FILE" onclick="javascript:$('#sourceFile').toggle('slow');$('#sourceUrlDoc').hide('slow')">File
+                                        <a class="icon-question-sign help_popup" help_data="fileDoc_help" title="fileDoc_help"></a>
+                                        <p id="fileDoc_help" class="hide">Upload a documentation file</p>
+                                    </label>
+                                    <div id="fileNameDiv" style="display:none;"></div>
+                                    <button type="button" class="btn btn-secondary" id="toggleFileDoc" style="display:none;" onclick="javascript:$('#sourceFile').toggle('slow')">Change File</button>
+                                    <form class="form-horizontal">
+                                    <div class="input-group input-wrap file-upload-control">
+                                        <input type="text" placeholder="Click on brows to add a file" class="form-control" readonly="">
+                                        <input name="doc-file" id="doc-file" type="file" class="form-control" multiple="">
+                                        <div class="input-group-btn">
+                                            <button class="btn browse" type="button" title="Browse File">
+                                                <i class="fw fw-file-browse" aria-hidden="true"></i>
+                                                <span class="hidden-xs">Browse</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    </form>
+
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <button type="button" class="btn btn-primary" id="add-doc-submit">Add Document</button>
+                        <button type="button" class="btn btn-secondary" id='clear-doc-form'>Cancel</button>
+                    </div>
+                </div>
+
+            </div><!-- Enod of row -->
+        </div>
+    </div>
+
+
+
+    <table class="table table-striped table-hover table-bordered display data-table" id="doc-table">
+        <thead>
+        <tr>
+            <th class="doc-listing-name">Name</th>
+            <th>{{i18n "Type"}}</th>
+            <th>{{i18n "Modified On"}}</th>
+            <th class="doc-listing-action">{{i18n "Actions"}}</th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+
+</div>

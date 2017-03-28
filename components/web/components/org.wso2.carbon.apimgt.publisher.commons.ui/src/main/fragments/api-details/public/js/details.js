@@ -540,6 +540,178 @@ function showTab(tab_name) {
     $('.nav a[href="#' + tab_name + '"]').tab('show');
 }
 
+  function _renderActionButtons(data, type, row) {
+        if (type === "display") {
+            var icon = $("<i>").addClass("fw");
+            var edit_button = $('<a>', {id: data.id, href: data.id})
+                .text('Edit ')
+                .addClass("cu-reg-btn btn-edit text-warning")
+                .append(icon.addClass("fw-edit"));
+            var delete_button = $('<a>', {id: data.id})
+                .text('Delete ')
+                .addClass("cu-reg-btn btn-delete text-danger doc-listing-delete")
+                .append(icon.clone().removeClass("fw-edit").addClass("fw-delete"));
+            return $('<div></div>').append(edit_button).append(delete_button).html();
+        } else {
+            return data;
+        }
+    }
+
+function initDataTable(raw_data) {
+    console.log(raw_data);
+    $('#doc-table').DataTable({
+        ajax: function (data, callback, settings) {
+            callback(raw_data);
+        },
+        columns: [
+            {'data': 'name'},
+            {'data': 'type'},
+            {'data': null},
+            {'data': null},
+        ],
+                columnDefs: [
+                    {
+                        targets: ["doc-listing-action"], //class name will be matched on the TH for the column
+                        searchable: false,
+                        sortable: false,
+                        render: _renderActionButtons // Method to render the action buttons per row
+                    }
+                ]
+    })
+   }
+
+
+function getDocsCallback(response) {
+    var dt_data = apiResponseToData(response);
+    initDataTable(dt_data);
+}
+
+function apiResponseToData(response) {
+    var raw_data = {
+        data: response.obj.list
+    };
+    return raw_data;
+}
+
+
+function documentTabHandler(event) {
+    var api_client = event.data.api_client;
+    var api_id = event.data.api_id;
+    var callbacks = {
+            onSuccess: function (data) {
+            api_client.getDocuments(api_id,getDocsCallback);
+            $(".browse").on("click", function(){
+              var elem = $("#doc-file");
+               if(elem && document.createEvent) {
+                 elem.click();
+                }
+               })
+            }, onFailure: function (data) {
+           }
+          };
+     var mode = "OVERWRITE";
+     var data = {};
+     UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-documents", data, "api-tab-doc-content", mode, callbacks);
+    }
+
+/**
+ * Jquery event handler on click event for api create submit button
+ * @param event
+ */
+function createDocHandler(event) {
+            var api_id = event.data.api_id;
+            var api_documents_data = {
+                 documentId: "",
+                 name: $('#docName').val(),
+                 type: $('input[name=optionsRadios]:checked').val(),
+                 summary: $('#summary').val(),
+                 sourceType: $('input[name=optionsRadios1]:checked').val(),
+                 sourceUrl: $('#docUrl').val(),
+                 inlineContent: "string",
+                 otherTypeName: $('#specifyBox').val(),
+                 permission: '[{"groupId" : "1000", "permission" : ["READ","UPDATE"]},{"groupId" : "1001", "permission" : ["READ","UPDATE"]}]',
+                 visibility: "API_LEVEL"
+                 };
+            console.log(api_documents_data);
+            var api_client = new API('');
+            var promised_add = api_client.addDocument(api_id, api_documents_data);
+
+
+
+promised_add.catch(function(error) {
+             var error_data = JSON.parse(error_response.data);
+             var message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+             noty({
+                text: message,
+                type: 'error',
+                dismissQueue: true,
+                modal: true,
+                closeWith: ['click', 'backdrop'],
+                progressBar: true,
+                timeout: 5000,
+                layout: 'top',
+                theme: 'relax',
+                maxVisible: 10
+                });
+             $('[data-toggle="loading"]').loading('hide');
+             console.debug(error_response);
+            }).then(function(done) {
+              var dt_data = done.obj;
+              var name = dt_data.name;
+              var type = dt_data.type;
+              var docId = dt_data.documentId;
+
+              var t = $('#doc-table').DataTable();
+              t.row.add({name,type,name, _renderActionButtons}).draw();
+
+            });
+ }
+
+
+    function deleteDocHandler(event) {
+        var data_table = $('#doc-table').DataTable();
+        var current_row = data_table.row($(this).parents('tr'));
+        var documentId = current_row.data().documentId;
+        var doc_name = current_row.data().name;
+        var api_client = event.data.api_client;
+        var api_id = event.data.api_id;
+        noty({
+            text: 'Do you want to delete <span class="text-info">' + doc_name + '</span> ?',
+            type: 'alert',
+            dismissQueue: true,
+            layout: "topCenter",
+            modal: true,
+            theme: 'relax',
+            buttons: [
+                {
+                    addClass: 'btn btn-danger', text: 'Ok', onClick: function ($noty) {
+                    $noty.close();
+                    let promised_delete = api_client.deleteDocument(api_id,documentId);
+                    promised_delete.then(
+                        function (response) {
+                            if (!response) {
+                                return;
+                            }
+                            current_row.remove();
+                            data_table.draw();
+                        }
+                    );
+                }
+                },
+                {
+                    addClass: 'btn btn-info', text: 'Cancel', onClick: function ($noty) {
+                    $noty.close();
+                }
+                }
+            ]
+        });
+    }
+
+
+    function toggleDocAdder() {
+    $('#newDoc').toggle();
+    }
+
 /**
  * Execute once the page load is done.
  */
@@ -556,8 +728,16 @@ $(function () {
     $('#tab-1').bind('show.bs.tab', {api_client: client, api_id: api_id}, overviewTabHandler);
     $('#tab-2').bind('show.bs.tab', {api_client: client, api_id: api_id}, lifecycleTabHandler);
     $('#tab-3').bind('show.bs.tab', {api_client: client, api_id: api_id}, endpointsTabHandler);
+    $('#tab-5').bind('show.bs.tab', {api_client: client, api_id: api_id}, documentTabHandler);
     $(document).on('click', ".lc-state-btn", {api_client: client, api_id: api_id}, updateLifecycleHandler);
     $(document).on('click', "#checkItem", {api_client: client, api_id: api_id}, updateLifecycleCheckListHandler);
+<<<<<<< HEAD
+=======
+    $(document).on('click', "#update-tiers-button", {api_client: client, api_id: api_id}, updateTiersHandler);
+    $(document).on('click', ".doc-listing-delete", {api_client: client,api_id: api_id}, deleteDocHandler);
+    $(document).on('click', "#add-doc-submit", {api_id: api_id}, createDocHandler);
+    $(document).on('click', "#add-new-doc", {}, toggleDocAdder);
+>>>>>>> adding the add,view and delete api documents
     $(document).on('click', "#update-labels-button", {api_client: client, api_id: api_id}, updateLabelsHandler);
     loadFromHash();
 });

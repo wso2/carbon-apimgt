@@ -261,10 +261,10 @@ public class MappingUtil {
         documentDTO.setSummary(documentInfo.getSummary());
         documentDTO.setVisibility(DocumentDTO.VisibilityEnum.fromValue(documentInfo.getVisibility().toString()));
         documentDTO.setType(DocumentDTO.TypeEnum.fromValue(documentInfo.getType().toString()));
-        documentDTO.setCreatedBy(documentInfo.getCreatedBy());
-        documentDTO.setCreatedTime(documentInfo.getCreatedTime().toString());
-        documentDTO.setLastUpdatedBy(documentInfo.getUpdatedBy());
-        documentDTO.setLastUpdatedTime(documentInfo.getLastUpdatedTime().toString());
+//        documentDTO.setCreatedBy(documentInfo.getCreatedBy());
+//        documentDTO.setCreatedTime(documentInfo.getCreatedTime().toString());
+//        documentDTO.setLastUpdatedBy(documentInfo.getUpdatedBy());
+//        documentDTO.setLastUpdatedTime(documentInfo.getLastUpdatedTime().toString());
         return documentDTO;
     }
 
