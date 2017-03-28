@@ -20,6 +20,8 @@
 package org.wso2.carbon.apimgt.core.dao.impl;
 
 import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.Workflow;
@@ -41,6 +43,7 @@ import java.sql.Timestamp;
 
 public class WorkflowDAOImpl implements WorkflowDAO {
     
+    private static final Logger log = LoggerFactory.getLogger(WorkflowDAO.class);
     /**
      * Persists WorkflowDTO to Database
      *
@@ -66,12 +69,14 @@ public class WorkflowDAOImpl implements WorkflowDAO {
                 prepStmt.execute();
                 connection.commit();
             } catch (SQLException ex) {
+                log.error("Error while executing sql query", ex);
                 connection.rollback();
                 throw new APIMgtDAOException(ex);           
             } finally {
                 connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException ex) {
+            log.error("Error while executing sql query", ex);
             throw new APIMgtDAOException(ex);
         }
     }
@@ -100,12 +105,14 @@ public class WorkflowDAOImpl implements WorkflowDAO {
                 prepStmt.execute();
                 connection.commit();
             } catch (SQLException ex) {
+                log.error("Error while executing sql query", ex);
                 connection.rollback();
                 throw new APIMgtDAOException(ex);
             } finally {
                 connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException ex) {
+            log.error("Error while executing sql query", ex);
             throw new APIMgtDAOException(ex);
         }
     }
@@ -128,9 +135,11 @@ public class WorkflowDAOImpl implements WorkflowDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 workflow = this.createWorkflowFromResultSet(rs);
             } catch (ParseException e) {
+                log.error("Error while parsing json string", e);
                 throw new APIMgtDAOException(e);
             }
         } catch (SQLException ex) {
+            log.error("Error while executing sql query", ex);
             throw new APIMgtDAOException(ex);
         }
         return workflow;  
@@ -179,6 +188,7 @@ public class WorkflowDAOImpl implements WorkflowDAO {
                 throw new APIMgtDAOException(e);
             }
         } catch (SQLException ex) {
+            log.error("Error while executing sql query", ex);
             throw new APIMgtDAOException(ex);
         }
         return workflow.getExternalWorkflowReference();  
@@ -201,9 +211,11 @@ public class WorkflowDAOImpl implements WorkflowDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 workflow = this.createWorkflowFromResultSet(rs);                
             } catch (ParseException e) {
+                log.error("Error while parsing json string", e);
                 throw new APIMgtDAOException(e);
             }
         } catch (SQLException ex) {
+            log.error("Error while executing sql query", ex);
             throw new APIMgtDAOException(ex);
         }
         return workflow.getExternalWorkflowReference();  
