@@ -39,8 +39,6 @@ import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.TagDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
-import org.wso2.carbon.apimgt.core.dao.impl.CommentDAO;
-import org.wso2.carbon.apimgt.core.dao.impl.RatingDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
@@ -109,14 +107,12 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
      * @param tagDAO Tag Data Access Object
      * @param labelDAO Label Data Access Object
      * @param workflowDAO WorkFlow Data Access Object
-     * @param commentDAO Comment Data Access Object
-     * @param ratingDAO Rating Data Access Object
      */
     public APIStoreImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
             APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, TagDAO tagDAO, LabelDAO labelDAO,
-            WorkflowDAO workflowDAO, CommentDAO commentDAO, RatingDAO ratingDAO) {
+            WorkflowDAO workflowDAO) {
         super(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, new APILifeCycleManagerImpl(), labelDAO,
-                workflowDAO, commentDAO, ratingDAO);
+                workflowDAO);
         this.tagDAO = tagDAO;
     }
 
@@ -446,7 +442,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     public Comment getCommentByUUID(String commentId, String apiId) throws APIManagementException {
         Comment comment;
         try {
-            comment = getCommentDAO().getCommentByUUID(commentId, apiId);
+            comment = getApiDAO().getCommentByUUID(commentId, apiId);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while retrieving Comment + " + commentId + " for API " + apiId;
             log.error(errorMsg, e);

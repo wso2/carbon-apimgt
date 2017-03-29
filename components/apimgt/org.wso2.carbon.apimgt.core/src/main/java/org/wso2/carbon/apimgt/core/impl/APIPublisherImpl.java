@@ -41,8 +41,6 @@ import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
-import org.wso2.carbon.apimgt.core.dao.impl.CommentDAO;
-import org.wso2.carbon.apimgt.core.dao.impl.RatingDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
@@ -103,9 +101,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     public APIPublisherImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
             APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager apiLifecycleManager,
-            LabelDAO labelDAO, WorkflowDAO workflowDAO, CommentDAO commentDAO, RatingDAO ratingDAO) {
+            LabelDAO labelDAO, WorkflowDAO workflowDAO) {
         super(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, apiLifecycleManager, labelDAO,
-                workflowDAO, commentDAO, ratingDAO);
+                workflowDAO);
     }
 
     /**

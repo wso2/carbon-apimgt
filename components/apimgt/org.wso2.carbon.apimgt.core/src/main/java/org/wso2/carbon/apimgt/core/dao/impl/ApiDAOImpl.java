@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
+import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
@@ -702,6 +703,14 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     public String getLastUpdatedTimeOfEndpoint(String endpointId) throws APIMgtDAOException {
         return EntityDAO.getLastUpdatedTimeOfResourceByUUID(AM_ENDPOINT_TABLE_NAME, endpointId);
+    }
+
+    /**
+     * @see ApiDAO#getCommentByUUID(String, String)
+     */
+    @Override
+    public Comment getCommentByUUID(String commentId, String apiId) throws APIMgtDAOException {
+        return null;
     }
 
     /**

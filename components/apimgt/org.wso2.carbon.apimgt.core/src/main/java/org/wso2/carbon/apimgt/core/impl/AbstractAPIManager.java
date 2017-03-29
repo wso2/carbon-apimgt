@@ -30,8 +30,6 @@ import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
-import org.wso2.carbon.apimgt.core.dao.impl.CommentDAO;
-import org.wso2.carbon.apimgt.core.dao.impl.RatingDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
@@ -62,12 +60,10 @@ public abstract class AbstractAPIManager implements APIManager {
     private APILifecycleManager apiLifecycleManager;
     private LabelDAO labelDAO;
     private WorkflowDAO workflowDAO;
-    private final CommentDAO commentDAO;
-    private final RatingDAO ratingDAO;
 
     public AbstractAPIManager(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
             APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager apiLifecycleManager,
-            LabelDAO labelDAO, WorkflowDAO workflowDAO, CommentDAO commentDAO, RatingDAO ratingDAO) {
+            LabelDAO labelDAO, WorkflowDAO workflowDAO) {
 
         this.username = username;
         this.apiDAO = apiDAO;
@@ -77,10 +73,9 @@ public abstract class AbstractAPIManager implements APIManager {
         this.apiLifecycleManager = apiLifecycleManager;
         this.labelDAO = labelDAO;
         this.workflowDAO = workflowDAO;
-        this.commentDAO = commentDAO;
-        this.ratingDAO = ratingDAO;
-
     }
+
+
 
     /**
      * Returns a list of all existing APIs by all providers. The API objects returned by this
@@ -495,13 +490,6 @@ public abstract class AbstractAPIManager implements APIManager {
 
     protected WorkflowDAO getWorkflowDAO() {
         return workflowDAO;
-    }
-
-    protected CommentDAO getCommentDAO() {
-        return commentDAO;
-    }
-    protected RatingDAO getRatingDAO() {
-        return ratingDAO;
     }
 
     protected String getUsername() {
