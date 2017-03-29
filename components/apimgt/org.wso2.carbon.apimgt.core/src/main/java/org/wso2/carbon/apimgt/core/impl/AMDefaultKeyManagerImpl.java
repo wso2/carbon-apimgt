@@ -459,6 +459,18 @@ public class AMDefaultKeyManagerImpl implements KeyManager {
         return tokenInfo;
     }
 
+    /**
+     * This method is called to revoke an existing access token which is used to log in to publisher,store or admin
+     * apps.
+     *
+     * @param tokenRequest AccessTokenRequest which encapsulates parameters sent from UI.
+     * @throws KeyManagementException   Exception while revoking the access token
+     */
+    @Override
+    public void revokeLogInAccessToken(AccessTokenRequest tokenRequest) throws KeyManagementException {
+        // No implementation required since this is only used to revoke login access token.
+    }
+
     @Override public KeyManagerConfiguration getKeyManagerConfiguration() throws KeyManagementException {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }

@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.authenticator.utils.AuthUtil;
 import org.wso2.carbon.apimgt.authenticator.utils.bean.AuthResponseBean;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.rest.api.common.APIConstants;
 import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.formparam.FormDataParam;
@@ -61,14 +62,14 @@ public class AuthenticatorAPI implements Microservice {
             @FormDataParam ("validity_period") String validityPeriod,
             @FormDataParam ("scopes") String scopesList) {
         try {
-
             LoginTokenService loginTokenService = new LoginTokenService();
             AuthResponseBean authResponseBean = new AuthResponseBean();
             String appContext = AuthUtil.getAppContext(request);
-            String restAPIContext = "/api/am" + appContext;
+            String restAPIContext = AuthenticatorConstants.REST_CONTEXT + appContext;
             String refToken = null;
             if (AuthenticatorConstants.REFRESH_GRANT.equals(grantType)) {
-                refToken = AuthUtil.extractRefreshTokenFromHeaders(request.getHeaders());
+                refToken = AuthUtil
+                        .extractTokenFromHeaders(request.getHeaders(), AuthenticatorConstants.REFRESH_TOKEN_2);
                 if (refToken == null) {
                     ErrorDTO errorDTO = new ErrorDTO();
                     errorDTO.setCode(ExceptionCodes.INVALID_AUTHORIZATION_HEADER.getErrorCode());
@@ -85,22 +86,30 @@ public class AuthenticatorAPI implements Microservice {
                 refreshToken = tokens.split(":")[1];
             }
 
+            // The access token is stored as two cookies in client side. One is a normal cookie and other is a http
+            // only cookie. Hence we need to split the access token
             String part1 = accessToken.substring(0, accessToken.length() / 2);
             String part2 = accessToken.substring(accessToken.length() / 2);
-            NewCookie cookie = AuthUtil.cookieBuilder(AuthenticatorConstants.TOKEN_1, part1, appContext, true, false);
-            NewCookie cookie2 = AuthUtil
-                    .cookieBuilder(AuthenticatorConstants.TOKEN_2, part2, restAPIContext, true, true);
-            NewCookie refreshTokenCookie1, refreshTokenCookie2 = null;
+            NewCookie cookieWithAppContext = AuthUtil
+                    .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_1, part1, appContext, true, false, "");
+            NewCookie httpOnlyCookieWithAppContext = AuthUtil
+                    .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_2, part2, appContext, true, true, "");
+            NewCookie restAPIContextCookie = AuthUtil
+                    .cookieBuilder(APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J, part2, restAPIContext, true, true,
+                            "");
+            NewCookie refreshTokenCookie, refreshTokenHttpOnlyCookie = null;
             if (refreshToken != null) {
                 String refTokenPart1 = refreshToken.substring(0, refreshToken.length() / 2);
                 String refTokenPart2 = refreshToken.substring(refreshToken.length() / 2);
-                refreshTokenCookie1 = AuthUtil
-                        .cookieBuilder(AuthenticatorConstants.REFRESH_TOKEN_1, refTokenPart1, appContext, true, false);
-                refreshTokenCookie2 = AuthUtil
-                        .cookieBuilder(AuthenticatorConstants.REFRESH_TOKEN_2, refTokenPart2, appContext, true, true);
+                refreshTokenCookie = AuthUtil
+                        .cookieBuilder(AuthenticatorConstants.REFRESH_TOKEN_1, refTokenPart1, appContext, true, false,
+                                "");
+                refreshTokenHttpOnlyCookie = AuthUtil
+                        .cookieBuilder(AuthenticatorConstants.REFRESH_TOKEN_2, refTokenPart2, appContext, true, true,
+                                "");
                 return Response.ok(authResponseBean, MediaType.APPLICATION_JSON)
-                        .cookie(cookie, cookie2, refreshTokenCookie1, refreshTokenCookie2)
-                        .header(AuthenticatorConstants.
+                        .cookie(cookieWithAppContext, httpOnlyCookieWithAppContext, restAPIContextCookie,
+                                refreshTokenCookie, refreshTokenHttpOnlyCookie).header(AuthenticatorConstants.
                                         REFERER_HEADER,
                                 (request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null && request
                                         .getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER)
@@ -110,7 +119,8 @@ public class AuthenticatorAPI implements Microservice {
                                                 request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) :
                                                 "").build();
             } else {
-                return Response.ok(authResponseBean, MediaType.APPLICATION_JSON).cookie(cookie, cookie2)
+                return Response.ok(authResponseBean, MediaType.APPLICATION_JSON)
+                        .cookie(cookieWithAppContext, httpOnlyCookieWithAppContext, restAPIContextCookie)
                         .header(AuthenticatorConstants.
                                         REFERER_HEADER,
                                 (request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null && request
@@ -135,11 +145,39 @@ public class AuthenticatorAPI implements Microservice {
     @Path ("/revoke")
     public Response logout(@Context Request request) {
         String appContext = AuthUtil.getAppContext(request);
-        String restAPIContext = "/api/am" + appContext;
-        return Response.ok().header("Set-Cookie",
-                AuthenticatorConstants.TOKEN_2 + "=;Path=" + restAPIContext + ";Expires=Thu, 01-Jan-1970 00:00:01 GMT")
-                .build();
-        //TODO : Need to call revoke endpoint.
+        String restAPIContext = AuthenticatorConstants.REST_CONTEXT + appContext;
+        String accessToken = AuthUtil
+                .extractTokenFromHeaders(request.getHeaders(), AuthenticatorConstants.ACCESS_TOKEN_2);
+        if (accessToken != null) {
+            try {
+                LoginTokenService loginTokenService = new LoginTokenService();
+                loginTokenService.revokeAccessToken(appContext.substring(1), accessToken);
+                // Lets invalidate all the cookies saved.
+                NewCookie appContextCookie = AuthUtil
+                        .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_2, "", appContext, true, true,
+                                AuthenticatorConstants.COOKIE_EXPIRE_TIME);
+                NewCookie restContextCookie = AuthUtil
+                        .cookieBuilder(APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J, "", restAPIContext, true, true,
+                                AuthenticatorConstants.COOKIE_EXPIRE_TIME);
+                NewCookie refreshTokenCookie = AuthUtil
+                        .cookieBuilder(AuthenticatorConstants.REFRESH_TOKEN_1, "", appContext, true, false,
+                                AuthenticatorConstants.COOKIE_EXPIRE_TIME);
+                NewCookie refreshTokenHttpOnlyCookie = AuthUtil
+                        .cookieBuilder(AuthenticatorConstants.REFRESH_TOKEN_2, "", appContext, true, true,
+                                AuthenticatorConstants.COOKIE_EXPIRE_TIME);
+                return Response.ok().cookie(appContextCookie, restContextCookie, refreshTokenCookie,
+                        refreshTokenHttpOnlyCookie).build();
+            } catch (APIManagementException e) {
+                ErrorDTO errorDTO = AuthUtil.getErrorDTO(e.getErrorHandler(), null);
+                log.error(e.getMessage(), e);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+            }
+        }
+        ErrorDTO errorDTO = new ErrorDTO();
+        errorDTO.setCode(ExceptionCodes.INVALID_AUTHORIZATION_HEADER.getErrorCode());
+        errorDTO.setMessage(ExceptionCodes.INVALID_AUTHORIZATION_HEADER.getErrorMessage());
+        return Response.status(Response.Status.UNAUTHORIZED).entity(errorDTO).build();
+
     }
 
 }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 var authManager = {};
+var bearer = "Bearer ";
 authManager.isLogged = false;
 authManager.user = {};
 authManager.getAuthStatus = function () {
@@ -86,24 +87,49 @@ authManager.refresh = function (authzHeader) {
     });
 
 };
-authManager.logout = function () {
+authManager.logout = function (authzHeader) {
     var url = contextPath + '/auth/apis/login/revoke';
     return $.ajax({
         type: 'POST',
         url: url,
         headers: {
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'Authorization': authzHeader
         }
     });
 };
 
 var doLogout = function () {
-    var logoutPromise = authManager.logout();
+    var logoutPromise = authManager.logout(bearer + getCookie("WSO2_AM_TOKEN_1"));
     logoutPromise.then(function (data, status, xhr) {
         delete_cookie("WSO2_AM_TOKEN_1");
         window.location.href = contextPath + "/auth/login";
-    })
+    });
+    logoutPromise.error(
+        function (error) {
+            var message = "Error while logging out";
+            noty({
+                text: message,
+                type: 'error',
+                dismissQueue: true,
+                modal: true,
+                progressBar: true,
+                timeout: 5000,
+                layout: 'top',
+                theme: 'relax',
+                maxVisible: 10
+            });
 
+        }
+    );
+
+};
+
+var getCookie = function(name) {
+    var value = "; " + document.cookie; // append ; to use the same splitting logic for first cookie as well. Then
+    // we can get the cookie value that is after "; {name}=" and before next ";"
+    var parts = value.split("; " + name + "=");
+    if (parts.length == 2) return parts.pop().split(";").shift();
 };
 
 function delete_cookie(name) {
