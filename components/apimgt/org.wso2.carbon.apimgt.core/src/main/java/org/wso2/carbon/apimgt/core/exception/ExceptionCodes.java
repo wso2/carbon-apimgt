@@ -61,6 +61,7 @@ public enum ExceptionCodes implements ErrorHandler {
     TOKEN_INTROSPECTION_FAILED(900407, "Keymanagement Error", 500, " Error while introspecting the access token."),
     APPLICATION_TOKEN_GENERATION_FAILED(900408, "Keymanagement Error", 500, " Error while generating the application" +
             "access token."),
+    ACCESS_TOKEN_REVOKE_FAILED(900409, "Keymanagement Error", 500, " Error while revoking the access token."),
     DOCUMENT_CONTENT_NOT_FOUND(900314, "Document content not found", 404, "Document content not found"),
     DOCUMENT_NOT_FOUND(900315, "Document not found", 404, "Document not found"),
     API_EXPORT_ERROR(900316, "API export Error", 500, "Error while exporting the given APIs"),
