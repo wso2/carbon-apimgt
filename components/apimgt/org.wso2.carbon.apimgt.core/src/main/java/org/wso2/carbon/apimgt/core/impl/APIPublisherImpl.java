@@ -138,15 +138,24 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     /**
-     * Get a list of all the consumers for all APIs
+     * Get a list of subscriptions for provider's APIs
      *
-     * @param providerId if of the provider
-     * @return {@code Set<String>}
-     * @throws APIManagementException if failed to get subscribed APIs of given provider
+     * @param offset Starting index of the search results
+     * @param limit Number of search results returned
+     * @param providerName if of the provider
+     * @return {@code List<Subscriber>} List of subscriptions for provider's APIs
+     * @throws APIManagementException
      */
     @Override
-    public Set<String> getSubscribersOfProvider(String providerId) throws APIManagementException {
-        return null;
+    public List<Subscription> getSubscribersOfProvider(int offset, int limit, String providerName)
+            throws APIManagementException {
+        try {
+            return getApiSubscriptionDAO().getAPISubscriptionsForUser(offset, limit, providerName);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Unable to fetch subscriptions APIs of provider " + providerName;
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
     }
 
     /**

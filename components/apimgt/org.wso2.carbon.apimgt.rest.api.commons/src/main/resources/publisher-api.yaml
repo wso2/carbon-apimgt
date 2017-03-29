@@ -3423,31 +3423,31 @@ definitions:
   Subscription:
     title: Subscription
     required:
-      - applicationId
-      - apiIdentifier
-      - policy
+      - subscriptionId
+      - applicationInfo
+      - apiInfo
+      - subscriptionTier
+      - status
     properties:
       subscriptionId:
         type: string
         example: 01234567-0123-0123-0123-012345678901
-      applicationId:
-        type: string
-        example: 01234567-0123-0123-0123-012345678901
-      apiIdentifier:
-        type: string
-        example: 01234567-0123-0123-0123-012345678901
-      policy:
+      applicationInfo:
+        type: Application
+        $ref: '#/definitions/Application'
+      subscriptionTier:
         type: string
         example: Unlimited
-      lifeCycleStatus:
+      subscriptionStatus:
         type: string
         enum:
           - BLOCKED
           - PROD_ONLY_BLOCKED
-          - UNBLOCKED
+          - SANDBOX_ONLY_BLOCKED
+          - ACTIVE
           - ON_HOLD
           - REJECTED
-        example: UNBLOCKED
+        example: BLOCKED
 
 #-----------------------------------------------------
 # The Sequence resource
