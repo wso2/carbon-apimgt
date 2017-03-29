@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.APILCWorkflowStatus;
 
 import java.io.InputStream;
 import java.util.List;
@@ -449,5 +450,14 @@ public interface ApiDAO {
      * @return last updated time 
      */
     String getLastUpdatedTimeOfEndpoint(String endpointId) throws APIMgtDAOException;
+    
+    /**
+     * Update an existing API workflow state
+     *
+     * @param apiID         The {@link String} of the API that needs to be updated
+     * @param workflowStatus workflow status
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    void updateAPIWorkflowStatus(String apiID, APILCWorkflowStatus workflowStatus) throws APIMgtDAOException;
 
 }

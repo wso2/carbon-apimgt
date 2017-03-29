@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.util.APIComparator;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.APILCWorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.core.util.EndPointComparator;
@@ -771,4 +772,19 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNotEquals(fingerprintBeforeUpdate, fingerprintAfterUpdate);
     }
 
+    @Test
+    public void testAPIWorkflowStatusUpdate() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);        
+        Thread.sleep(10);
+        apiDAO.updateAPIWorkflowStatus(api.getId(), APILCWorkflowStatus.PENDING);
+        
+        API apiFromDB = apiDAO.getAPI(api.getId());
+
+        Assert.assertNotNull(apiFromDB);
+        Assert.assertNotEquals(api.getLastUpdatedTime(), apiFromDB.getLastUpdatedTime());
+    }
 }

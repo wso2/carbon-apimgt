@@ -1809,4 +1809,37 @@ public class ApiDAOImpl implements ApiDAO {
         return labelNames;
     }
 
+    /**
+     * Update an existing API workflow state
+     *
+     * @param apiID         The {@link String} of the API that needs to be updated
+     * @param workflowStatus workflow status
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    @Override
+    public void updateAPIWorkflowStatus(String apiID, APILCWorkflowStatus workflowStatus) throws APIMgtDAOException {
+        final String query = "UPDATE AM_API SET LAST_UPDATED_TIME = ?, LC_WORKFLOW_STATUS=? WHERE UUID = ?";
+
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            try {
+                connection.setAutoCommit(false);
+                statement.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
+                statement.setString(2, workflowStatus.toString());
+                statement.setString(3, apiID);
+                statement.execute();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new APIMgtDAOException(e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
+            }
+        } catch (SQLException e) {
+            String errorMessage = "SQL exception while updating api workflow status for :" + apiID; 
+            log.error(errorMessage, e);
+            throw new APIMgtDAOException(e);
+        }
+    }
+
 }
