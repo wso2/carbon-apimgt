@@ -554,6 +554,57 @@ class API {
         }).catch(AuthClient.unauthorizedErrorHandler);
     }
 
+
+    addDocument(api_id,body) {
+
+            var promised_addEndpoint = this.client.then(
+                (client) => {
+                    let payload = {apiId: api_id, body:body,"Content-Type": "application/json"};
+                    return client["Document (Collection)"].post_apis_apiId_documents(
+                        payload, this._requestMetaData());
+                }
+            ).catch(AuthClient.unauthorizedErrorHandler);
+
+            return promised_addEndpoint;
+        }
+
+    addFileToDocument(api_id,docId,filePath) {
+
+            var promised_addEndpoint = this.client.then(
+                (client) => {
+                    let payload = {apiId: api_id, documentId: docId,"Content-Type": "application/json"};
+                    return client["Document (Individual)"].post_apis_apiId_documents_documentId_content(
+                        payload, this._requestMetaData({"Content-Type": "multipart/form-data"}));
+                }
+            ).catch(AuthClient.unauthorizedErrorHandler);
+
+            return promised_addEndpoint;
+     }
+
+
+    getDocuments(api_id, callback) {
+            var promise_get_all = this.client.then(
+                (client) => {
+                    return client["Document (Collection)"].get_apis_apiId_documents({apiId: api_id}, this._requestMetaData()).
+                    catch(AuthClient.unauthorizedErrorHandler);
+                }
+            );
+            if (callback) {
+                return promise_get_all.catch(AuthClient.unauthorizedErrorHandler).then(callback);
+            } else {
+                return promise_get_all;
+            }
+    }
+
+
+    deleteDocument(api_id,document_id) {
+            var promise_get_all = this.client.then(
+                (client) => {
+                    return client["Document (Individual)"].delete_apis_apiId_documents_documentId({apiId: api_id, documentId:document_id}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+                }
+            );
+            return promise_get_all;
+    }
     /**
      * Get the available labels.
      * @returns {Promise.<TResult>}
