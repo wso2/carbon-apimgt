@@ -294,5 +294,4 @@ public class DAOFactory {
         ApiDAOImpl.initResourceCategories();
         PolicyDAOImpl.initDefaultPolicies();
     }
-
 }

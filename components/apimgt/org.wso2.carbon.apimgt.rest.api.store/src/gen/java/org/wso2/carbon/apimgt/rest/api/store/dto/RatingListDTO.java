@@ -7,13 +7,19 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.RatingDTO;
 
 /**
- * SubscriptionListDTO
+ * RatingListDTO
  */
 @javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-28T22:39:18.827+05:30")
-public class SubscriptionListDTO   {
+public class RatingListDTO   {
+  @JsonProperty("avgRating")
+  private String avgRating = null;
+
+  @JsonProperty("userRating")
+  private String userRating = null;
+
   @JsonProperty("count")
   private Integer count = null;
 
@@ -24,18 +30,54 @@ public class SubscriptionListDTO   {
   private String previous = null;
 
   @JsonProperty("list")
-  private List<SubscriptionDTO> list = new ArrayList<SubscriptionDTO>();
+  private List<RatingDTO> list = new ArrayList<RatingDTO>();
 
-  public SubscriptionListDTO count(Integer count) {
+  public RatingListDTO avgRating(String avgRating) {
+    this.avgRating = avgRating;
+    return this;
+  }
+
+   /**
+   * Average Rating of the API 
+   * @return avgRating
+  **/
+  @ApiModelProperty(value = "Average Rating of the API ")
+  public String getAvgRating() {
+    return avgRating;
+  }
+
+  public void setAvgRating(String avgRating) {
+    this.avgRating = avgRating;
+  }
+
+  public RatingListDTO userRating(String userRating) {
+    this.userRating = userRating;
+    return this;
+  }
+
+   /**
+   * Rating given by the user 
+   * @return userRating
+  **/
+  @ApiModelProperty(value = "Rating given by the user ")
+  public String getUserRating() {
+    return userRating;
+  }
+
+  public void setUserRating(String userRating) {
+    this.userRating = userRating;
+  }
+
+  public RatingListDTO count(Integer count) {
     this.count = count;
     return this;
   }
 
    /**
-   * Number of Subscriptions returned. 
+   * Number of Subscriber Ratings returned. 
    * @return count
   **/
-  @ApiModelProperty(value = "Number of Subscriptions returned. ")
+  @ApiModelProperty(value = "Number of Subscriber Ratings returned. ")
   public Integer getCount() {
     return count;
   }
@@ -44,7 +86,7 @@ public class SubscriptionListDTO   {
     this.count = count;
   }
 
-  public SubscriptionListDTO next(String next) {
+  public RatingListDTO next(String next) {
     this.next = next;
     return this;
   }
@@ -62,7 +104,7 @@ public class SubscriptionListDTO   {
     this.next = next;
   }
 
-  public SubscriptionListDTO previous(String previous) {
+  public RatingListDTO previous(String previous) {
     this.previous = previous;
     return this;
   }
@@ -80,12 +122,12 @@ public class SubscriptionListDTO   {
     this.previous = previous;
   }
 
-  public SubscriptionListDTO list(List<SubscriptionDTO> list) {
+  public RatingListDTO list(List<RatingDTO> list) {
     this.list = list;
     return this;
   }
 
-  public SubscriptionListDTO addListItem(SubscriptionDTO listItem) {
+  public RatingListDTO addListItem(RatingDTO listItem) {
     this.list.add(listItem);
     return this;
   }
@@ -95,11 +137,11 @@ public class SubscriptionListDTO   {
    * @return list
   **/
   @ApiModelProperty(value = "")
-  public List<SubscriptionDTO> getList() {
+  public List<RatingDTO> getList() {
     return list;
   }
 
-  public void setList(List<SubscriptionDTO> list) {
+  public void setList(List<RatingDTO> list) {
     this.list = list;
   }
 
@@ -112,23 +154,27 @@ public class SubscriptionListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    SubscriptionListDTO subscriptionList = (SubscriptionListDTO) o;
-    return Objects.equals(this.count, subscriptionList.count) &&
-        Objects.equals(this.next, subscriptionList.next) &&
-        Objects.equals(this.previous, subscriptionList.previous) &&
-        Objects.equals(this.list, subscriptionList.list);
+    RatingListDTO ratingList = (RatingListDTO) o;
+    return Objects.equals(this.avgRating, ratingList.avgRating) &&
+        Objects.equals(this.userRating, ratingList.userRating) &&
+        Objects.equals(this.count, ratingList.count) &&
+        Objects.equals(this.next, ratingList.next) &&
+        Objects.equals(this.previous, ratingList.previous) &&
+        Objects.equals(this.list, ratingList.list);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(count, next, previous, list);
+    return Objects.hash(avgRating, userRating, count, next, previous, list);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class SubscriptionListDTO {\n");
+    sb.append("class RatingListDTO {\n");
     
+    sb.append("    avgRating: ").append(toIndentedString(avgRating)).append("\n");
+    sb.append("    userRating: ").append(toIndentedString(userRating)).append("\n");
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
     sb.append("    next: ").append(toIndentedString(next)).append("\n");
     sb.append("    previous: ").append(toIndentedString(previous)).append("\n");

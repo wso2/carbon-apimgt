@@ -7,13 +7,13 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.CommentDTO;
 
 /**
- * SubscriptionListDTO
+ * CommentListDTO
  */
 @javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-28T22:39:18.827+05:30")
-public class SubscriptionListDTO   {
+public class CommentListDTO   {
   @JsonProperty("count")
   private Integer count = null;
 
@@ -24,18 +24,18 @@ public class SubscriptionListDTO   {
   private String previous = null;
 
   @JsonProperty("list")
-  private List<SubscriptionDTO> list = new ArrayList<SubscriptionDTO>();
+  private List<CommentDTO> list = new ArrayList<CommentDTO>();
 
-  public SubscriptionListDTO count(Integer count) {
+  public CommentListDTO count(Integer count) {
     this.count = count;
     return this;
   }
 
    /**
-   * Number of Subscriptions returned. 
+   * Number of Comments returned. 
    * @return count
   **/
-  @ApiModelProperty(value = "Number of Subscriptions returned. ")
+  @ApiModelProperty(value = "Number of Comments returned. ")
   public Integer getCount() {
     return count;
   }
@@ -44,7 +44,7 @@ public class SubscriptionListDTO   {
     this.count = count;
   }
 
-  public SubscriptionListDTO next(String next) {
+  public CommentListDTO next(String next) {
     this.next = next;
     return this;
   }
@@ -62,7 +62,7 @@ public class SubscriptionListDTO   {
     this.next = next;
   }
 
-  public SubscriptionListDTO previous(String previous) {
+  public CommentListDTO previous(String previous) {
     this.previous = previous;
     return this;
   }
@@ -80,12 +80,12 @@ public class SubscriptionListDTO   {
     this.previous = previous;
   }
 
-  public SubscriptionListDTO list(List<SubscriptionDTO> list) {
+  public CommentListDTO list(List<CommentDTO> list) {
     this.list = list;
     return this;
   }
 
-  public SubscriptionListDTO addListItem(SubscriptionDTO listItem) {
+  public CommentListDTO addListItem(CommentDTO listItem) {
     this.list.add(listItem);
     return this;
   }
@@ -95,11 +95,11 @@ public class SubscriptionListDTO   {
    * @return list
   **/
   @ApiModelProperty(value = "")
-  public List<SubscriptionDTO> getList() {
+  public List<CommentDTO> getList() {
     return list;
   }
 
-  public void setList(List<SubscriptionDTO> list) {
+  public void setList(List<CommentDTO> list) {
     this.list = list;
   }
 
@@ -112,11 +112,11 @@ public class SubscriptionListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    SubscriptionListDTO subscriptionList = (SubscriptionListDTO) o;
-    return Objects.equals(this.count, subscriptionList.count) &&
-        Objects.equals(this.next, subscriptionList.next) &&
-        Objects.equals(this.previous, subscriptionList.previous) &&
-        Objects.equals(this.list, subscriptionList.list);
+    CommentListDTO commentList = (CommentListDTO) o;
+    return Objects.equals(this.count, commentList.count) &&
+        Objects.equals(this.next, commentList.next) &&
+        Objects.equals(this.previous, commentList.previous) &&
+        Objects.equals(this.list, commentList.list);
   }
 
   @Override
@@ -127,7 +127,7 @@ public class SubscriptionListDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class SubscriptionListDTO {\n");
+    sb.append("class CommentListDTO {\n");
     
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
     sb.append("    next: ").append(toIndentedString(next)).append("\n");

@@ -64,6 +64,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public AbstractAPIManager(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
             APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager apiLifecycleManager,
             LabelDAO labelDAO, WorkflowDAO workflowDAO) {
+
         this.username = username;
         this.apiDAO = apiDAO;
         this.applicationDAO = applicationDAO;
@@ -73,6 +74,8 @@ public abstract class AbstractAPIManager implements APIManager {
         this.labelDAO = labelDAO;
         this.workflowDAO = workflowDAO;
     }
+
+
 
     /**
      * Returns a list of all existing APIs by all providers. The API objects returned by this
@@ -124,7 +127,7 @@ public abstract class AbstractAPIManager implements APIManager {
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
-        
+
         return lastUpdatedTime;
     }
 
@@ -347,9 +350,9 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
-     * @see APIManager#getLastUpdatedTimeOfDocument(String) 
+     * @see APIManager#getLastUpdatedTimeOfDocument(String)
      */
-    @Override 
+    @Override
     public String getLastUpdatedTimeOfDocument(String documentId) throws APIManagementException {
         String lastUpdatedTime;
         try {
@@ -484,7 +487,7 @@ public abstract class AbstractAPIManager implements APIManager {
     protected LabelDAO getLabelDAO() {
         return labelDAO;
     }
-    
+
     protected WorkflowDAO getWorkflowDAO() {
         return workflowDAO;
     }

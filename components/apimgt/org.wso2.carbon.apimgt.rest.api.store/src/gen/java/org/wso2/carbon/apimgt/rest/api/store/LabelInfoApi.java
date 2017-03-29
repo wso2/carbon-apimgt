@@ -1,22 +1,12 @@
 package org.wso2.carbon.apimgt.rest.api.store;
 
-import org.wso2.carbon.apimgt.rest.api.store.factories.LabelInfoApiServiceFactory;
-
 import io.swagger.annotations.ApiParam;
-
-import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.LabelListDTO;
-
-import org.wso2.msf4j.Microservice;
-import org.osgi.service.component.annotations.Component;
-
-import java.io.InputStream;
-
-import org.wso2.msf4j.formparam.FormDataParam;
-import org.wso2.msf4j.formparam.FileInfo;
-
-import javax.ws.rs.core.Response;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
+import org.osgi.service.component.annotations.Component;
+import org.wso2.carbon.apimgt.rest.api.store.dto.LabelListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.factories.LabelInfoApiServiceFactory;
+import org.wso2.msf4j.Microservice;
 
 @Component(
     name = "org.wso2.carbon.apimgt.rest.api.store.LabelInfoApi",
@@ -27,7 +17,7 @@ import javax.ws.rs.*;
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the label-info API")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-24T14:21:25.168+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-28T22:28:05.676+05:30")
 public class LabelInfoApi implements Microservice  {
    private final LabelInfoApiService delegate = LabelInfoApiServiceFactory.getLabelInfoApi();
 

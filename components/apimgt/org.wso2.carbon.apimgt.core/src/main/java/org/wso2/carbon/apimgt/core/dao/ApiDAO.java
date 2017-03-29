@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.core.dao;
 
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.APILCWorkflowStatus;
@@ -459,5 +460,15 @@ public interface ApiDAO {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     void updateAPIWorkflowStatus(String apiID, APILCWorkflowStatus workflowStatus) throws APIMgtDAOException;
+
+    /**
+     * Returns all the available labels
+     *
+     * @param commentId UUID of the comment
+     * @param apiId UUID of the API
+     * @return Comment Object
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    Comment getCommentByUUID(String commentId, String apiId) throws APIMgtDAOException;
 
 }

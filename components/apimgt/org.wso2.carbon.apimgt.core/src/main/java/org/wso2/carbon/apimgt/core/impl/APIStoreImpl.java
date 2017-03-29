@@ -53,10 +53,12 @@ import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.ApplicationCreationResponse;
 import org.wso2.carbon.apimgt.core.models.ApplicationCreationWorkflow;
+import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.Event;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
 import org.wso2.carbon.apimgt.core.models.SubscriptionWorkflow;
@@ -94,6 +96,18 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     private static final Logger log = LoggerFactory.getLogger(APIStoreImpl.class);
     private TagDAO tagDAO;
 
+    /**
+     * Constructor.
+     *
+     * @param username   Logged in user's username
+     * @param apiDAO  API Data Access Object
+     * @param applicationDAO  Application Data Access Object
+     * @param apiSubscriptionDAO   API Subscription Data Access Object
+     * @param policyDAO Policy Data Access Object
+     * @param tagDAO Tag Data Access Object
+     * @param labelDAO Label Data Access Object
+     * @param workflowDAO WorkFlow Data Access Object
+     */
     public APIStoreImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
             APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, TagDAO tagDAO, LabelDAO labelDAO,
             WorkflowDAO workflowDAO) {
@@ -317,7 +331,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 log.error(errorMsg);
                 throw new APIManagementException(errorMsg, ExceptionCodes.PARAMETER_NOT_PROVIDED);
             }
-            
+
             Subscription subscription = getApiSubscriptionDAO().getAPISubscription(subscriptionId);
             if (subscription == null) {
                 String errorMsg = "Subscription not found for the id - " + subscriptionId;
@@ -363,7 +377,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
                     completeWorkflow(removeSubscriptionWFExecutor, workflow);
                 }
-            }      
+            }
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while deleting api subscription - " + subscriptionId;
             log.error(errorMsg, e);
@@ -422,6 +436,34 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return labelList;
+    }
+
+    @Override
+    public Comment getCommentByUUID(String commentId, String apiId) throws APIManagementException {
+        Comment comment;
+        try {
+            comment = getApiDAO().getCommentByUUID(commentId, apiId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while retrieving Comment + " + commentId + " for API " + apiId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+            return comment;
+    }
+
+    @Override
+    public double getUserRating(String apiId, String username) throws APIManagementException {
+        return 0;
+    }
+
+    @Override
+    public double getAvgRating(String apiId) throws APIManagementException {
+        return 0;
+    }
+
+    @Override
+    public List<Rating> getUserRatingDTOList(String apiId) throws APIManagementException {
+        return null;
     }
 
     @Override
