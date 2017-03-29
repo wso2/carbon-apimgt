@@ -20,13 +20,16 @@
 
 package org.wso2.carbon.apimgt.core.impl;
 
+import org.mockito.Mockito;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 
@@ -107,6 +110,16 @@ public class APIMgtAdminServiceImplTestCase {
         verify(apiDAO, times(1)).getAPIs();
     }
 
+    @Test(description = "Delete a label")
+    public void testDeleteLabel() throws APIManagementException {
+        LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforLabelDAO(labelDAO);
+        Label label = SampleTestObjectCreator.createLabel("Public").build();
+        String labelId = label.getId();
+        adminService.deleteLabel(labelId);
+        Mockito.verify(labelDAO, Mockito.times(1)).deleteLabel(labelId);
+    }
+
     private APIMgtAdminServiceImpl newAPIMgtAdminServiceImplforApiDAO(ApiDAO apiDAO) {
         return new APIMgtAdminServiceImpl(null, null, apiDAO, null);
     }
@@ -118,6 +131,10 @@ public class APIMgtAdminServiceImplTestCase {
     private APIMgtAdminServiceImpl newAPIMgtAdminServiceImplforAPISubscriptionDAO(APISubscriptionDAO
                                                                                           apiSubscriptionDAO) {
         return new APIMgtAdminServiceImpl(apiSubscriptionDAO, null, null, null);
+    }
+
+    private APIMgtAdminServiceImpl newAPIMgtAdminServiceImplforLabelDAO(LabelDAO labelDAO) {
+        return new APIMgtAdminServiceImpl(null, null, null, labelDAO);
     }
 
 }
