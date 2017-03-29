@@ -10,12 +10,18 @@ import java.util.Objects;
  * categorizing sets of entities against a given label. When starting up gateway, label can be given.
  */
 public final class Label {
+    private final String id;
     private final String name;
     private final List<String> accessUrls;
 
     private Label(Builder builder) {
+        id = builder.id;
         name = builder.name;
         accessUrls = builder.accessUrls;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getName() {
@@ -37,18 +43,20 @@ public final class Label {
         }
 
         Label label = (Label) o;
-        return Objects.equals(name, label.name) &&
+        return Objects.equals(id, label.id) &&
+                Objects.equals(name, label.name) &&
                 APIUtils.isListsEqualIgnoreOrder(accessUrls, label.accessUrls);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, accessUrls);
+        return Objects.hash(id, name, accessUrls);
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
+                .append("id", id)
                 .append("name", name)
                 .append("accessUrls", accessUrls)
                 .toString();
@@ -58,6 +66,7 @@ public final class Label {
      * {@code Label} builder static inner class.
      */
     public static final class Builder {
+        private String id;
         private String name;
         private List<String> accessUrls;
 
@@ -65,8 +74,20 @@ public final class Label {
         }
 
         public Builder(Label label) {
+            this.id = label.id;
             this.name = label.name;
             this.accessUrls = label.accessUrls;
+        }
+
+        /**
+         * Sets the {@code id} and returns a reference to this Builder so that the methods can be chained together.
+         *
+         * @param id the {@code id} to set
+         * @return a reference to this Builder
+         */
+        public Builder id(String id) {
+            this.id = id;
+            return this;
         }
 
         /**

@@ -49,7 +49,7 @@ public class APIMgtAdminServiceImplTestCase {
     @Test(description = "Get api subscriptions")
     public void testGetAPISubscriptions() throws APIManagementException {
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
-        APIMgtAdminServiceImpl adminService = new APIMgtAdminServiceImpl(apiSubscriptionDAO, null, null);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforAPISubscriptionDAO(apiSubscriptionDAO);
         when(apiSubscriptionDAO.getAPISubscriptionsOfAPIForValidation(LIMIT))
                 .thenReturn(new ArrayList<SubscriptionValidationData>());
         adminService.getAPISubscriptions(LIMIT);
@@ -59,7 +59,7 @@ public class APIMgtAdminServiceImplTestCase {
     @Test(description = "Get api subscriptions of API")
     public void testGetAPISubscriptionsOfApi() throws APIManagementException {
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
-        APIMgtAdminServiceImpl adminService = new APIMgtAdminServiceImpl(apiSubscriptionDAO, null, null);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforAPISubscriptionDAO(apiSubscriptionDAO);
         when(apiSubscriptionDAO.getAPISubscriptionsOfAPIForValidation(API_CONTEXT, API_VERSION))
                 .thenReturn(new ArrayList<SubscriptionValidationData>());
         adminService.getAPISubscriptionsOfApi(API_CONTEXT, API_VERSION);
@@ -69,7 +69,7 @@ public class APIMgtAdminServiceImplTestCase {
     @Test(description = "Get policy")
     public void testGetPolicy() throws APIManagementException {
         PolicyDAO policyDAO = mock(PolicyDAO.class);
-        APIMgtAdminServiceImpl adminService = new APIMgtAdminServiceImpl(null, policyDAO, null);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforPolicyDAO(policyDAO);
         Policy policy = mock(Policy.class);
         when(policyDAO.getPolicy(POLICY_LEVEL, POLICY_NAME)).thenReturn(policy);
         adminService.getPolicy(POLICY_LEVEL, POLICY_NAME);
@@ -79,7 +79,7 @@ public class APIMgtAdminServiceImplTestCase {
     @Test(description = "Get all policies by level")
     public void testGetAllPoliciesByLevel() throws APIManagementException {
         PolicyDAO policyDAO = mock(PolicyDAO.class);
-        APIMgtAdminServiceImpl adminService = new APIMgtAdminServiceImpl(null, policyDAO, null);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforPolicyDAO(policyDAO);
         Policy policy = mock(Policy.class);
         List<Policy> policyList = new ArrayList<>();
         policyList.add(policy);
@@ -91,7 +91,7 @@ public class APIMgtAdminServiceImplTestCase {
     @Test(description = "Add policy")
     public void testAddPolicy() throws APIManagementException {
         PolicyDAO policyDAO = mock(PolicyDAO.class);
-        APIMgtAdminServiceImpl adminService = new APIMgtAdminServiceImpl(null, policyDAO, null);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforPolicyDAO(policyDAO);
         Policy policy = mock(Policy.class);
         adminService.addPolicy(POLICY_LEVEL, policy);
         verify(policyDAO, times(1)).addPolicy(POLICY_LEVEL, policy);
@@ -100,11 +100,24 @@ public class APIMgtAdminServiceImplTestCase {
     @Test(description = "Get API Info")
     public void testGetAPIInfo() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
-        APIMgtAdminServiceImpl adminService = new APIMgtAdminServiceImpl(null, null, apiDAO);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforApiDAO(apiDAO);
         List<API> apiList = SampleTestObjectCreator.createMockAPIList();
         when(apiDAO.getAPIs()).thenReturn(apiList);
         adminService.getAPIInfo();
         verify(apiDAO, times(1)).getAPIs();
+    }
+
+    private APIMgtAdminServiceImpl newAPIMgtAdminServiceImplforApiDAO(ApiDAO apiDAO) {
+        return new APIMgtAdminServiceImpl(null, null, apiDAO, null);
+    }
+
+    private APIMgtAdminServiceImpl newAPIMgtAdminServiceImplforPolicyDAO(PolicyDAO policyDAO) {
+        return new APIMgtAdminServiceImpl(null, policyDAO, null, null);
+    }
+
+    private APIMgtAdminServiceImpl newAPIMgtAdminServiceImplforAPISubscriptionDAO(APISubscriptionDAO
+                                                                                          apiSubscriptionDAO) {
+        return new APIMgtAdminServiceImpl(apiSubscriptionDAO, null, null, null);
     }
 
 }

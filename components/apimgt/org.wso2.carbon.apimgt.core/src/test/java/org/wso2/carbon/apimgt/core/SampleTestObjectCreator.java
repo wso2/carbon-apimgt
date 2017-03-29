@@ -564,6 +564,7 @@ public class SampleTestObjectCreator {
         List<String> accessUrls = new ArrayList<>();
         accessUrls.add(ACCESS_URL + name);
         return new Label.Builder().
+                id(UUID.randomUUID().toString()).
                 name(name).
                 accessUrls(accessUrls);
     }

@@ -5,8 +5,11 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
@@ -25,12 +28,14 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     private APISubscriptionDAO apiSubscriptionDAO;
     private PolicyDAO policyDAO;
     private ApiDAO apiDAO;
+    private LabelDAO labelDAO;
 
-    public APIMgtAdminServiceImpl(APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, ApiDAO apiDAO) {
+    public APIMgtAdminServiceImpl(APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, ApiDAO apiDAO,
+                                  LabelDAO labelDAO) {
         this.apiSubscriptionDAO = apiSubscriptionDAO;
         this.policyDAO = policyDAO;
         this.apiDAO = apiDAO;
-
+        this.labelDAO = labelDAO;
     }
 
     /**
@@ -38,7 +43,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
      *
      * @param limit Subscription Limit
      * @return all subscriptions
-     * @throws APIManagementException   If failed to retrieve subscription list.
+     * @throws APIManagementException If failed to retrieve subscription list.
      */
     @Override
     public List<SubscriptionValidationData> getAPISubscriptions(int limit) throws APIManagementException {
@@ -51,7 +56,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
      * @param apiContext Context of API
      * @param apiVersion Version of API
      * @return all subscriptions
-     * @throws APIManagementException   If failed to retrieve subscription list.
+     * @throws APIManagementException If failed to retrieve subscription list.
      */
     @Override
     public List<SubscriptionValidationData> getAPISubscriptionsOfApi(String apiContext, String apiVersion)
@@ -103,5 +108,17 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public List<Policy> getAllPoliciesByLevel(String policyLevel) throws APIManagementException {
         return policyDAO.getPolicies(policyLevel);
+    }
+
+    @Override
+    public void deleteLabel(String labelId) throws APIManagementException {
+
+        try {
+            labelDAO.deleteLabel(labelId);
+        } catch (APIMgtDAOException e) {
+            String msg = "Error occurred while deleting label [labelId] " + labelId;
+            log.error(msg, e);
+            throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
     }
 }

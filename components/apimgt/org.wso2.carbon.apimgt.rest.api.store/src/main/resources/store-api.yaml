@@ -2495,6 +2495,8 @@ definitions:
       - name
       - access_urls
     properties:
+      labelId:
+        type: string
       name:
         type: string
       access_urls:
