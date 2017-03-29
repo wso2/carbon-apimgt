@@ -432,11 +432,13 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         try {
 
             // TODO: Need to validate users roles against results returned
+            //this should be current logged in user
+            String user = "admin";
+            //role list of current user
+            List<String> roles = APIUtils.getAllRolesOfUser(user);
             if (query != null && !query.isEmpty()) {
                 String[] attributes = query.split(",");
                 Map<String, String> attributeMap = new HashMap<>();
-                List<String> roles = new ArrayList<>();
-                String user = "admin";
                 // TODO get the logged in user and user roles from key manager.
                 boolean isFullTextSearch = false;
                 for (String attribute : attributes) {
@@ -458,7 +460,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 List<String> statuses = new ArrayList<>();
                 statuses.add(APIStatus.PUBLISHED.getStatus());
                 statuses.add(APIStatus.PROTOTYPED.getStatus());
-                apiResults = getApiDAO().getAPIsByStatus(statuses);
+                apiResults = getApiDAO().getAPIsByStatus(roles, statuses);
             }
 
         } catch (APIMgtDAOException e) {
