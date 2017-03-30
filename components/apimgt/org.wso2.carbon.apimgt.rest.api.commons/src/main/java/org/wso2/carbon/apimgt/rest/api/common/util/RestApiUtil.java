@@ -679,10 +679,10 @@ public class RestApiUtil {
      * @param label Gateway label object
      * @param scheme Transport scheme (http or https).
      * @return Swagger definition
-     * @throws APIMgtSecurityException
+     * @throws APIManagementException if error occurred while passing the swagger definition
      */
     public static String getSwaggerDefinitionWithLabel(String swagger, Label label, String scheme)
-            throws APIMgtSecurityException {
+            throws APIManagementException {
         try {
             JSONParser parser = new JSONParser();
             JSONObject swaggerJSON = (JSONObject) parser.parse(swagger);
@@ -703,7 +703,7 @@ public class RestApiUtil {
         } catch (ParseException e) {
             String message = "Error while passing the swagger definition";
             log.error(message, e);
-            throw new APIMgtSecurityException(message, ExceptionCodes.SWAGGER_PARSE_EXCEPTION);
+            throw new APIManagementException(message, ExceptionCodes.SWAGGER_PARSE_EXCEPTION);
         }
         return swagger;
 
