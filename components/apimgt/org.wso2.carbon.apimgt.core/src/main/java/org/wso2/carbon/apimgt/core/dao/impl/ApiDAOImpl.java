@@ -240,13 +240,7 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
-     * Retrieves summary data of all available APIs with life cycle status that matches the status list provided
-     * which has role based visibility
-     *
-     * @param roles    role list of current user
-     * @param statuses status of APIs to be returned
-     * @return API list
-     * @throws APIMgtDAOException if failed to fetch APIs from database
+     * @see org.wso2.carbon.apimgt.core.dao.ApiDAO#getAPIsByStatus(List, List)
      */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
