@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.Workflow;
 
@@ -538,5 +539,10 @@ public abstract class AbstractAPIManager implements APIManager {
             throw new APIManagementException(message, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
 
+    }
+    
+    @Override
+    public Label getLabelByName(String labelName) throws APIManagementException {
+        return labelDAO.getLabelByName(labelName);
     }
 }

@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.Workflow;
 
@@ -248,5 +249,14 @@ public interface APIManager {
      * @throws APIManagementException if API Manager core level exception occurred
      */
     void completeWorkflow(WorkflowExecutor workflowExecutor, Workflow workflow) throws APIManagementException;
+    
+    /**
+     * Retrieves Label information of the given label.
+     * 
+     * @param labelName
+     * @return {@code Label} Label information
+     * @throws APIManagementException if API Manager core level exception occurred
+     */
+    Label getLabelByName(String labelName) throws APIManagementException;
 
 }
