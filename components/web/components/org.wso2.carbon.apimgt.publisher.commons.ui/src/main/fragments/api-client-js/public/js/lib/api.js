@@ -504,6 +504,70 @@ class API {
     }
 
     /**
+     * Get the available subscriptions for a given API
+     * @param {String} apiId API UUID
+     * @returns {Promise} With given callback attached to the success chain else API invoke promise.
+     */
+    subscriptions(id, callback = null) {
+        var promise_subscription = this.client.then(
+            (client) => {
+                return client["Subscription (Collection)"].get_subscriptions(
+                    {apiId: id},
+                    this._requestMetaData()
+                ).catch(AuthClient.unauthorizedErrorHandler);
+            }
+        );
+        if (callback) {
+            return promise_subscription.then(callback);
+        } else {
+            return promise_subscription;
+        }
+    }
+
+    /**
+     * Block subscriptions for given subscriptionId
+     * @param {String} id Subscription UUID
+     * @param {String} state Subscription status
+     * @returns {Promise} With given callback attached to the success chain else API invoke promise.
+     */
+    blockSubscriptions(id, state, callback = null) {
+        var promise_subscription = this.client.then(
+            (client) => {
+                return client["Subscription (Individual)"].post_subscriptions_block_subscription(
+                    {subscriptionId: id,blockState: state},
+                    this._requestMetaData()
+                ).catch(AuthClient.unauthorizedErrorHandler);
+            }
+        );
+        if (callback) {
+            return promise_subscription.then(callback);
+        } else {
+            return promise_subscription;
+        }
+    }
+
+    /**
+     * Unblock subscriptions for given subscriptionId
+     * @param {String} id Subscription UUID
+     * @returns {Promise} With given callback attached to the success chain else API invoke promise.
+     */
+    unblockSubscriptions(id, callback = null) {
+        var promise_subscription = this.client.then(
+            (client) => {
+                return client["Subscription (Individual)"].post_subscriptions_unblock_subscription(
+                    {subscriptionId: id},
+                    this._requestMetaData()
+                ).catch(AuthClient.unauthorizedErrorHandler);
+            }
+        );
+        if (callback) {
+            return promise_subscription.then(callback);
+        } else {
+            return promise_subscription;
+        }
+    }
+
+    /**
      * Add endpoint via POST HTTP method, need to provided endpoint properties and callback function as argument
      * @param body {Object} Endpoint to be added
      * @param callback {function} Callback function

@@ -12,7 +12,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
 /**
  * SubscriptionListDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-19T18:14:01.803+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-29T11:00:00.292+05:30")
 public class SubscriptionListDTO   {
   @JsonProperty("count")
   private Integer count = null;
