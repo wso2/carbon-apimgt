@@ -73,9 +73,7 @@ Policy.prototype.getAllPoliciesByTier = function (tierLevel, callback) {
             (client) => {
                 return client["Throttling Tier Collection"].get_policies_tierLevel_tierLevel(
                         param, this._requestMetaData()).catch(unauthorizedErrorHandler)
-            }).catch (function (error) {
-                console.log(error);
-    })
+            })
     if (callback) {
         return promise_create.then(callback);
     } else {
@@ -106,15 +104,12 @@ Policy.prototype.deletePolicy = function(policyTier, policyId, callback) {
 Policy.prototype.create = function(policy, callback) {
     let payload;
     let promise_create;
-    debugger
         payload = {tierLevel: policy.tierLevel, body: policy, "Content-Type": "application/json"};
         promise_create = this.client.then(
                 (client) => {
                 return client["Throttling Tier (individual)"].post_policies_tierLevel_tierLevel(
                     payload, this._requestMetaData()).catch(unauthorizedErrorHandler);
-                }).catch (function (error) {
-                    console.log(error);
-    })
+                })
     if (callback) {
         return promise_create.then(callback);
     } else {
