@@ -242,6 +242,7 @@ public class APIUtils {
         List<String> userRoles = new ArrayList<>();
         if ("admin".equalsIgnoreCase(username)) {
             userRoles.add("admin");
+            userRoles.add(APIMgtConstants.Permission.EVERYONE_GROUP);
         } else if ("subscriber".equalsIgnoreCase(username)) {
             userRoles.add("subscriber");
         } else if ("John".equalsIgnoreCase(username)) {
