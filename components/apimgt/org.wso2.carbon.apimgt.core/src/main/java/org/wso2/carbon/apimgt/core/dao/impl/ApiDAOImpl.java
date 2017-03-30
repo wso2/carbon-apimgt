@@ -240,6 +240,43 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
+     * @see org.wso2.carbon.apimgt.core.dao.ApiDAO#getAPIsByStatus(List, List)
+     */
+    @Override
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
+    public List<API> getAPIsByStatus(List<String> roles, List<String> statuses) throws APIMgtDAOException {
+
+        final String query = API_SUMMARY_SELECT +
+                " WHERE UUID IN (SELECT API_ID FROM AM_API_VISIBLE_ROLES WHERE ROLE IN (" +
+                DAOUtil.getParameterString(roles.size()) + "))" +
+                " AND" +
+                " CURRENT_LC_STATUS  IN (" +
+                DAOUtil.getParameterString(statuses.size()) + ")" +
+                " OR " +
+                "VISIBILITY = '" + API.Visibility.PUBLIC + "'";
+
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            int i;
+            //put desired roles into the query
+            for (i = 0; i < roles.size(); ++i) {
+                statement.setString(i + 1, roles.get(i));
+            }
+            //put desired API status into the query
+            //this will be inserted after the roles, so we start after the roles
+            for (int j = i; j < roles.size() + statuses.size(); ++j) {
+                statement.setString(j + 1, statuses.get(j - i));
+            }
+            return constructAPISummaryList(statement);
+        } catch (SQLException e) {
+            String errorMessage = "Error while retrieving API list in store.";
+            log.error(errorMessage, e);
+            throw new APIMgtDAOException(errorMessage, e);
+        }
+    }
+
+
+    /**
      * Retrieves summary of paginated data of all available APIs that match the given search criteria. This will use
      * the full text search for API table
      *

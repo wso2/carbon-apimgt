@@ -21,7 +21,9 @@ package org.wso2.carbon.apimgt.core.util;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
@@ -30,6 +32,7 @@ import org.wso2.carbon.lcm.core.impl.LifecycleState;
 
 import java.time.Duration;
 import java.time.temporal.Temporal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -43,6 +46,7 @@ import java.util.StringTokenizer;
  */
 public class APIUtils {
 
+    private static final Logger log = LoggerFactory.getLogger(APIUtils.class);
 
     /**
      * Checks if debug log is enabled and logs the message
@@ -209,4 +213,81 @@ public class APIUtils {
                 availableTransitionBean.getTargetState().equals(nextState));
     }
 
+    /**
+     * This method returns all available roles
+     *
+     * @return all available roles
+     */
+    public static List<String> getAllAvailableRoles() {
+
+        //this should be a call to IS endpoint and get all the roles, we are returning a dummy list till then
+        List<String> availableRoleList = new ArrayList<>();
+        availableRoleList.add("admin");
+        availableRoleList.add("subscriber");
+        availableRoleList.add("manager");
+        availableRoleList.add("developer");
+        availableRoleList.add("lead");
+        return availableRoleList;
+    }
+
+    /**
+     * Used to get roles of a particular user
+     *
+     * @param username username of the person
+     * @return role list of the user
+     */
+    public static List<String> getAllRolesOfUser(String username) {
+
+        //this should be a call to IS endpoint and get roles of the user, we are returning a dummy list till then
+        List<String> userRoles = new ArrayList<>();
+        if ("admin".equalsIgnoreCase(username)) {
+            userRoles.add("admin");
+            userRoles.add(APIMgtConstants.Permission.EVERYONE_GROUP);
+        } else if ("subscriber".equalsIgnoreCase(username)) {
+            userRoles.add("subscriber");
+        } else if ("John".equalsIgnoreCase(username)) {
+            userRoles.add("manager");
+            userRoles.add("developer");
+        } else if ("Smith".equalsIgnoreCase(username)) {
+            userRoles.add("lead");
+        } else if ("Alex".equalsIgnoreCase(username)) {
+            userRoles.add("admin");
+            userRoles.add("manager");
+        }
+        return userRoles;
+    }
+
+    /**
+     * Check the validity of roles to be assigned to an API
+     *
+     * @param availableRoleList all available roles
+     * @param candidateRoleList candidate roles to be assigned to the API
+     * @return true if all candidate roles are eligible
+     * @throws APIManagementException if the check fails
+     */
+    public static boolean checkAllowedRoles(List<String> availableRoleList, List<String> candidateRoleList)
+            throws APIManagementException {
+
+        //check if availableRoleList and candidateRoleList is not null
+        if (availableRoleList != null && candidateRoleList != null) {
+            if (availableRoleList.isEmpty() || candidateRoleList.isEmpty()) {
+                String errorMsg = "Role list is empty.";
+                log.error(errorMsg);
+                throw new APIManagementException(errorMsg, ExceptionCodes.ROLES_CANNOT_BE_EMPTY);
+            } else {
+                //check if all roles in candidateRoleList are in availableRoleList
+                if (availableRoleList.containsAll(candidateRoleList)) {
+                    return true;
+                } else {
+                    String errorMsg = "Invalid role(s) found.";
+                    log.error(errorMsg);
+                    throw new APIManagementException(errorMsg, ExceptionCodes.UNSUPPORTED_ROLE);
+                }
+            }
+        } else {
+            String errorMsg = "Role(s) list is null.";
+            log.error(errorMsg);
+            throw new APIManagementException(errorMsg, ExceptionCodes.ROLES_CANNOT_BE_NULL);
+        }
+    }
 }
