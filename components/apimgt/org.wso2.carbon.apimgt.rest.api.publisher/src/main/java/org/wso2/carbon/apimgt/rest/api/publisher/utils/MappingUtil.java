@@ -77,6 +77,7 @@ public class MappingUtil {
         apidto.setProvider(api.getProvider());
         apidto.setPermission(api.getApiPermission());
         apidto.setLifeCycleStatus(api.getLifeCycleStatus());
+        apidto.setWorkflowStatus(api.getWorkflowStatus());
         apidto.setTags(api.getTags());
         apidto.setLabels(api.getLabels());
         apidto.setTransport(api.getTransport());
@@ -223,6 +224,7 @@ public class MappingUtil {
             apiInfo.setProvider(apiSummary.getProvider());
             apiInfo.setLifeCycleStatus(apiSummary.getLifeCycleStatus());
             apiInfo.setVersion(apiSummary.getVersion());
+            apiInfo.setWorkflowStatus(apiSummary.getWorkflowStatus());
             apiInfoList.add(apiInfo);
         }
         return apiInfoList;
@@ -259,10 +261,6 @@ public class MappingUtil {
         documentDTO.setSummary(documentInfo.getSummary());
         documentDTO.setVisibility(DocumentDTO.VisibilityEnum.fromValue(documentInfo.getVisibility().toString()));
         documentDTO.setType(DocumentDTO.TypeEnum.fromValue(documentInfo.getType().toString()));
-        documentDTO.setCreatedBy(documentInfo.getCreatedBy());
-        documentDTO.setCreatedTime(documentInfo.getCreatedTime().toString());
-        documentDTO.setLastUpdatedBy(documentInfo.getUpdatedBy());
-        documentDTO.setLastUpdatedTime(documentInfo.getLastUpdatedTime().toString());
         return documentDTO;
     }
 

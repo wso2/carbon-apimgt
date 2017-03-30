@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * APIInfoDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-19T18:14:01.803+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-27T13:24:09.071+05:30")
 public class APIInfoDTO   {
   @JsonProperty("id")
   private String id = null;
@@ -31,6 +31,9 @@ public class APIInfoDTO   {
 
   @JsonProperty("lifeCycleStatus")
   private String lifeCycleStatus = null;
+
+  @JsonProperty("workflowStatus")
+  private String workflowStatus = null;
 
   public APIInfoDTO id(String id) {
     this.id = id;
@@ -158,6 +161,24 @@ public class APIInfoDTO   {
     this.lifeCycleStatus = lifeCycleStatus;
   }
 
+  public APIInfoDTO workflowStatus(String workflowStatus) {
+    this.workflowStatus = workflowStatus;
+    return this;
+  }
+
+   /**
+   * Get workflowStatus
+   * @return workflowStatus
+  **/
+  @ApiModelProperty(example = "APPROVED", value = "")
+  public String getWorkflowStatus() {
+    return workflowStatus;
+  }
+
+  public void setWorkflowStatus(String workflowStatus) {
+    this.workflowStatus = workflowStatus;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -174,12 +195,13 @@ public class APIInfoDTO   {
         Objects.equals(this.context, apIInfo.context) &&
         Objects.equals(this.version, apIInfo.version) &&
         Objects.equals(this.provider, apIInfo.provider) &&
-        Objects.equals(this.lifeCycleStatus, apIInfo.lifeCycleStatus);
+        Objects.equals(this.lifeCycleStatus, apIInfo.lifeCycleStatus) &&
+        Objects.equals(this.workflowStatus, apIInfo.workflowStatus);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, workflowStatus);
   }
 
   @Override
@@ -194,6 +216,7 @@ public class APIInfoDTO   {
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
+    sb.append("    workflowStatus: ").append(toIndentedString(workflowStatus)).append("\n");
     sb.append("}");
     return sb.toString();
   }

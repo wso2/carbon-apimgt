@@ -178,7 +178,7 @@ $(function () {
                         }
                     }
 
-                       var context = {};
+                        var context = {};
                         context.tabList = tabs;
                     var callback = {onSuccess: function ( tabdata
                     ) {
@@ -187,28 +187,40 @@ $(function () {
                         for (var i = 0; i < tabs.length; i++) {
                             var tab = tabs[i];
                             if (tab.id == "api-overview") {
-                                for (var endpointURL in  api.endpointURLs) {
-                                    var environmentURLs = api.endpointURLs[endpointURL].environmentURLs;
-                                    for (var environmentURL in environmentURLs) {
-                                        var currentEnvironmentURL = [];
-                                        currentEnvironmentURL.push(environmentURLs[environmentURL]);
-                                        if (api.isDefaultVersion) {
-                                            var defaultEnvironmentURL = null;
-                                            defaultEnvironmentURL = environmentURLs[environmentURL].replace(api.version + "/", "");
-                                            defaultEnvironmentURL = environmentURLs[environmentURL].replace(api.version, "");
-                                            currentEnvironmentURL.push(defaultEnvironmentURL);
-                                        }
-                                        api.endpointURLs[endpointURL].environmentURLs[environmentURL] = currentEnvironmentURL;
-                                    }
-                                }
-                                context.api = api;
-                                UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.api-overview",context, {
-                                    onSuccess: function (renderedData) {
-                                        $("#api-overview").append(renderedData);
-                                        setOverviewTabData();
 
-                                    }.bind(context), onFailure: function (message, e) {
-                                        var message = "Error occurred while getting api overview details." + message;
+                                var label_names = api.labels.join(',');
+                                var label_data = {};
+                                setAuthHeader(swaggerClient);
+                                swaggerClient["Label (Collection)"].get_label_info({
+                                        "labels": label_names
+                                    },
+                                    function (jsonData) {
+                                        label_data = jsonData.obj.list;
+                                        context.api = api;
+                                        context.labels = label_data;
+                                        UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.api-overview", context, {
+                                            onSuccess: function (renderedData) {
+                                                $("#api-overview").append(renderedData);
+                                                setOverviewTabData();
+
+                                            }.bind(context), onFailure: function (message, e) {
+                                                var message = "Error occurred while getting api overview details." + message;
+                                                noty({
+                                                    text: message,
+                                                    type: 'error',
+                                                    dismissQueue: true,
+                                                    modal: true,
+                                                    progressBar: true,
+                                                    timeout: 2000,
+                                                    layout: 'top',
+                                                    theme: 'relax',
+                                                    maxVisible: 10
+                                                });
+                                            }
+                                        });
+                                    },
+                                    function (error) {
+                                        var message = "Error occurred while retrieving labels";
                                         noty({
                                             text: message,
                                             type: 'error',
@@ -218,10 +230,12 @@ $(function () {
                                             timeout: 2000,
                                             layout: 'top',
                                             theme: 'relax',
-                                            maxVisible: 10,
+                                            maxVisible: 10
                                         });
-                                    }
-                                });
+                                        if(error.status==401){
+                                            redirectToLogin(contextPath);
+                                        }
+                                    });
                             }
 
                             if (tab.id == "api-documentation") {

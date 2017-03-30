@@ -24,16 +24,20 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
+import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.ResourceCategory;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.APILCWorkflowStatus;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -66,9 +70,10 @@ public class ApiDAOImpl implements ApiDAO {
 
     private final ApiDAOVendorSpecificStatements sqlStatements;
     private static final String API_SUMMARY_SELECT = "SELECT UUID, PROVIDER, NAME, CONTEXT, VERSION, DESCRIPTION, " +
-            "CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID FROM AM_API";
+            "CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS FROM AM_API";
     private static final String AM_API_TABLE_NAME = "AM_API";
     private static final String AM_ENDPOINT_TABLE_NAME = "AM_ENDPOINT";
+    private static final Logger log = LoggerFactory.getLogger(ApiDAOImpl.class);
 
     ApiDAOImpl(ApiDAOVendorSpecificStatements sqlStatements) {
         this.sqlStatements = sqlStatements;
@@ -88,7 +93,8 @@ public class ApiDAOImpl implements ApiDAO {
                 "VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, TECHNICAL_OWNER, TECHNICAL_EMAIL, " +
                 "BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, CURRENT_LC_STATUS, " +
                 "CORS_ENABLED, CORS_ALLOW_ORIGINS, CORS_ALLOW_CREDENTIALS, CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS, " +
-                "CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME, COPIED_FROM_API, UPDATED_BY FROM AM_API WHERE UUID = ?";
+                "CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME, COPIED_FROM_API, UPDATED_BY, LC_WORKFLOW_STATUS" +
+                " FROM AM_API WHERE UUID = ?";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -145,7 +151,9 @@ public class ApiDAOImpl implements ApiDAO {
         try (Connection connection = DAOUtil.getConnection()) {
             return ApiResourceDAO.getAPIUniqueResourceLastUpdatedTime(connection, apiId, ResourceCategory.SWAGGER);
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            String errorMessage = "Error while retrieving last updated time of swagger definition. API ID: " + apiId;
+            log.error(errorMessage, e);
+            throw new APIMgtDAOException(errorMessage, e);
         }
     }
 
@@ -159,7 +167,9 @@ public class ApiDAOImpl implements ApiDAO {
             return ApiResourceDAO
                     .getAPIUniqueResourceLastUpdatedTime(connection, apiId, ResourceCategory.GATEWAY_CONFIG);
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            String errorMessage = "Error while retrieving last updated time of gateway config. API ID: " + apiId;
+            log.error(errorMessage, e);
+            throw new APIMgtDAOException(errorMessage, e);
         }
     }
 
@@ -388,8 +398,8 @@ public class ApiDAOImpl implements ApiDAO {
                 "IS_DEFAULT_VERSION, DESCRIPTION, VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, " +
                 "UUID, TECHNICAL_OWNER, TECHNICAL_EMAIL, BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, " +
                 "CURRENT_LC_STATUS, CORS_ENABLED, CORS_ALLOW_ORIGINS, CORS_ALLOW_CREDENTIALS, CORS_ALLOW_HEADERS, " +
-                "CORS_ALLOW_METHODS,CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME, COPIED_FROM_API, UPDATED_BY) " +
-                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                "CORS_ALLOW_METHODS,CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME, COPIED_FROM_API, UPDATED_BY, " +
+                "LC_WORKFLOW_STATUS) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(addAPIQuery)) {
@@ -425,10 +435,11 @@ public class ApiDAOImpl implements ApiDAO {
                 statement.setString(21, String.join(",", corsConfiguration.getAllowMethods()));
 
                 statement.setString(22, api.getCreatedBy());
-                statement.setTimestamp(23, Timestamp.valueOf(api.getCreatedTime()));
-                statement.setTimestamp(24, Timestamp.valueOf(api.getLastUpdatedTime()));
+                statement.setTimestamp(23, Timestamp.valueOf(LocalDateTime.now()));
+                statement.setTimestamp(24, Timestamp.valueOf(LocalDateTime.now()));
                 statement.setString(25, api.getCopiedFromApiId());
                 statement.setString(26, api.getUpdatedBy());
+                statement.setString(27, APILCWorkflowStatus.APPROVED.toString());
                 statement.execute();
 
                 if (API.Visibility.RESTRICTED == api.getVisibility()) {
@@ -475,7 +486,7 @@ public class ApiDAOImpl implements ApiDAO {
                 + "IS_RESPONSE_CACHED = ?, CACHE_TIMEOUT = ?, TECHNICAL_OWNER = ?, TECHNICAL_EMAIL = ?, " +
                 "BUSINESS_OWNER = ?, BUSINESS_EMAIL = ?, CORS_ENABLED = ?, CORS_ALLOW_ORIGINS = ?, " +
                 "CORS_ALLOW_CREDENTIALS = ?, CORS_ALLOW_HEADERS = ?, CORS_ALLOW_METHODS = ?, LAST_UPDATED_TIME = ?," +
-                "UPDATED_BY = ? WHERE UUID = ?";
+                "UPDATED_BY = ?, LC_WORKFLOW_STATUS=? WHERE UUID = ?";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -501,9 +512,10 @@ public class ApiDAOImpl implements ApiDAO {
                 statement.setString(14, String.join(",", corsConfiguration.getAllowHeaders()));
                 statement.setString(15, String.join(",", corsConfiguration.getAllowMethods()));
 
-                statement.setTimestamp(16, Timestamp.valueOf(substituteAPI.getLastUpdatedTime()));
+                statement.setTimestamp(16, Timestamp.valueOf(LocalDateTime.now()));
                 statement.setString(17, substituteAPI.getUpdatedBy());
-                statement.setString(18, apiID);
+                statement.setString(18, substituteAPI.getWorkflowStatus());
+                statement.setString(19, apiID);
 
                 statement.execute();
 
@@ -663,7 +675,10 @@ public class ApiDAOImpl implements ApiDAO {
             return ApiResourceDAO
                     .getResourceLastUpdatedTime(connection, apiId, documentId, ResourceCategory.DOC);
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            String errorMessage =
+                    "Error while getting last updated time of document. API Id: " + apiId + ", doc Id: " + documentId;
+            log.error(errorMessage, e);
+            throw new APIMgtDAOException(errorMessage, e);
         }
     }
 
@@ -676,7 +691,9 @@ public class ApiDAOImpl implements ApiDAO {
             return ApiResourceDAO
                     .getAPIUniqueResourceLastUpdatedTime(connection, apiId, ResourceCategory.IMAGE);
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            String errorMessage = "Error while retrieving last updated time of thumbnail image. API ID: " + apiId;
+            log.error(errorMessage, e);
+            throw new APIMgtDAOException(errorMessage, e);
         }
     }
 
@@ -686,6 +703,14 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     public String getLastUpdatedTimeOfEndpoint(String endpointId) throws APIMgtDAOException {
         return EntityDAO.getLastUpdatedTimeOfResourceByUUID(AM_ENDPOINT_TABLE_NAME, endpointId);
+    }
+
+    /**
+     * @see ApiDAO#getCommentByUUID(String, String)
+     */
+    @Override
+    public Comment getCommentByUUID(String commentId, String apiId) throws APIMgtDAOException {
+        return null;
     }
 
     /**
@@ -1033,7 +1058,8 @@ public class ApiDAOImpl implements ApiDAO {
                         lastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toLocalDateTime()).
                         uriTemplates(getUriTemplates(connection, apiPrimaryKey)).
                         policies(getSubscripitonPolciesByAPIId(connection, apiPrimaryKey)).copiedFromApiId(rs.getString
-                        ("COPIED_FROM_API")).build();
+                        ("COPIED_FROM_API")).
+                        workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).build();
             }
         }
 
@@ -1050,7 +1076,8 @@ public class ApiDAOImpl implements ApiDAO {
                         context(rs.getString("CONTEXT")).
                         description(rs.getString("DESCRIPTION")).
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
-                        lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).build();
+                        lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
+                        workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).build();
 
                 apiList.add(apiSummary);
             }
@@ -1789,6 +1816,39 @@ public class ApiDAOImpl implements ApiDAO {
         }
 
         return labelNames;
+    }
+
+    /**
+     * Update an existing API workflow state
+     *
+     * @param apiID         The {@link String} of the API that needs to be updated
+     * @param workflowStatus workflow status
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    @Override
+    public void updateAPIWorkflowStatus(String apiID, APILCWorkflowStatus workflowStatus) throws APIMgtDAOException {
+        final String query = "UPDATE AM_API SET LAST_UPDATED_TIME = ?, LC_WORKFLOW_STATUS=? WHERE UUID = ?";
+
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            try {
+                connection.setAutoCommit(false);
+                statement.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
+                statement.setString(2, workflowStatus.toString());
+                statement.setString(3, apiID);
+                statement.execute();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new APIMgtDAOException(e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
+            }
+        } catch (SQLException e) {
+            String errorMessage = "SQL exception while updating api workflow status for :" + apiID; 
+            log.error(errorMessage, e);
+            throw new APIMgtDAOException(e);
+        }
     }
 
 }

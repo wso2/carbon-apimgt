@@ -174,7 +174,9 @@ class API {
     constructor(access_key) {
         this.client = new SwaggerClient({
             url: this._getSwaggerURL(),
-            usePromise: true
+            usePromise: true,
+            requestInterceptor: this._getRequestInterceptor(),
+            responseInterceptor: this._getResponseInterceptor()
         });
         this.auth_client = new AuthClient();
         this.client.then(
@@ -205,6 +207,49 @@ class API {
                 });
             }
         );
+    }
+
+    /**
+     * Get the ETag of a given resource key from the session storage
+     * @param key {string} key of resource.
+     * @returns {string} ETag value for the given key
+     */
+    static getETag(key) {
+        return sessionStorage.getItem("etag_" + key);
+    }
+
+    /**
+     * Add an ETag to a given resource key into the session storage
+     * @param key {string} key of resource.
+     * @param etag {string} etag value to be stored against the key
+     */
+    static addETag(key, etag) {
+        sessionStorage.setItem("etag_" + key, etag);
+    }
+
+    _getResponseInterceptor() {
+        var responseInterceptor = {
+            apply: function (data) {
+                if (data.headers.etag) {
+                    API.addETag(data.url, data.headers.etag);
+                }
+                return data;
+            }
+        };
+        return responseInterceptor;
+    }
+
+    _getRequestInterceptor() {
+        var requestInterceptor = {
+            apply: function (data) {
+                if (API.getETag(data.url) && (data.method == "PUT" || data.method == "DELETE"
+                    || data.method == "POST")) {
+                    data.headers["If-Match"] = API.getETag(data.url);
+                }
+                return data;
+            }
+        };
+        return requestInterceptor;
     }
 
     _getSwaggerURL() {
@@ -492,30 +537,74 @@ class API {
         );
     }
 
-    updateEndpoint(id, data) {
-        return this.getEndpoint(id).then(
-            function (response) {
-                var endpoint = response.obj;
-                for (var attribute in data) {
-                    if (!endpoint.hasOwnProperty(attribute)) {
-                        throw 'Invalid key : ' + attribute + ', Valid keys are `' + Object.keys(endpoint) + '`';
-                    }
-                }
-                var updated_endpoint = Object.assign(endpoint, data);
-                return this.client.then(
-                    (client) => {
-                        return client["Endpoint (individual)"].put_endpoints_endpointId(
-                            {
-                                endpointId: id,
-                                body: updated_endpoint,
-                                'Content-Type': 'application/json'
-                            }, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
-                    }
-                ).catch(AuthClient.unauthorizedErrorHandler);
-            }.bind(this)
-        ).catch(AuthClient.unauthorizedErrorHandler)
+    /**
+     * Update endpoint object.
+     * @param data {Object} Endpoint to be updated
+     * @returns {Promise.<TResult>}
+     */
+    updateEndpoint(data) {
+        return this.client.then(
+            (client) => {
+            return client["Endpoint (individual)"].put_endpoints_endpointId(
+                {
+                    endpointId: data.id,
+                    body: data,
+                    'Content-Type': 'application/json'
+                }, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+        }).catch(AuthClient.unauthorizedErrorHandler);
     }
 
+
+    addDocument(api_id,body) {
+
+            var promised_addEndpoint = this.client.then(
+                (client) => {
+                    let payload = {apiId: api_id, body:body,"Content-Type": "application/json"};
+                    return client["Document (Collection)"].post_apis_apiId_documents(
+                        payload, this._requestMetaData());
+                }
+            ).catch(AuthClient.unauthorizedErrorHandler);
+
+            return promised_addEndpoint;
+        }
+
+    addFileToDocument(api_id,docId,filePath) {
+
+            var promised_addEndpoint = this.client.then(
+                (client) => {
+                    let payload = {apiId: api_id, documentId: docId,"Content-Type": "application/json"};
+                    return client["Document (Individual)"].post_apis_apiId_documents_documentId_content(
+                        payload, this._requestMetaData({"Content-Type": "multipart/form-data"}));
+                }
+            ).catch(AuthClient.unauthorizedErrorHandler);
+
+            return promised_addEndpoint;
+     }
+
+
+    getDocuments(api_id, callback) {
+            var promise_get_all = this.client.then(
+                (client) => {
+                    return client["Document (Collection)"].get_apis_apiId_documents({apiId: api_id}, this._requestMetaData()).
+                    catch(AuthClient.unauthorizedErrorHandler);
+                }
+            );
+            if (callback) {
+                return promise_get_all.catch(AuthClient.unauthorizedErrorHandler).then(callback);
+            } else {
+                return promise_get_all;
+            }
+    }
+
+
+    deleteDocument(api_id,document_id) {
+            var promise_get_all = this.client.then(
+                (client) => {
+                    return client["Document (Individual)"].delete_apis_apiId_documents_documentId({apiId: api_id, documentId:document_id}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+                }
+            );
+            return promise_get_all;
+    }
     /**
      * Get the available labels.
      * @returns {Promise.<TResult>}

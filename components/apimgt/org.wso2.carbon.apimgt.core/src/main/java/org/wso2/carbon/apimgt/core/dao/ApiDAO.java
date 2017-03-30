@@ -22,8 +22,10 @@ package org.wso2.carbon.apimgt.core.dao;
 
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.APILCWorkflowStatus;
 
 import java.io.InputStream;
 import java.util.List;
@@ -55,6 +57,7 @@ public interface ApiDAO {
 
 
     /**
+     * Retrieves the last updated time of an API
      *
      * @param apiId UUID of API
      * @return Last updated time of API given its uuid
@@ -63,6 +66,7 @@ public interface ApiDAO {
     String getLastUpdatedTimeOfAPI(String apiId) throws APIMgtDAOException;
 
     /**
+     * Retrieves the last updated time of the swagger definition of an API
      *
      * @param apiId UUID of API
      * @return Last updated time of Swagger definition given the uuid of API
@@ -71,6 +75,7 @@ public interface ApiDAO {
     String getLastUpdatedTimeOfSwaggerDefinition(String apiId) throws APIMgtDAOException;
 
     /**
+     * Retrieves the last updated time of the gateway config of an API
      *
      * @param apiId UUID of API
      * @return Last updated time of gateway configuration given the uuid of API
@@ -446,5 +451,24 @@ public interface ApiDAO {
      * @return last updated time 
      */
     String getLastUpdatedTimeOfEndpoint(String endpointId) throws APIMgtDAOException;
+    
+    /**
+     * Update an existing API workflow state
+     *
+     * @param apiID         The {@link String} of the API that needs to be updated
+     * @param workflowStatus workflow status
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    void updateAPIWorkflowStatus(String apiID, APILCWorkflowStatus workflowStatus) throws APIMgtDAOException;
+
+    /**
+     * Returns all the available labels
+     *
+     * @param commentId UUID of the comment
+     * @param apiId UUID of the API
+     * @return Comment Object
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    Comment getCommentByUUID(String commentId, String apiId) throws APIMgtDAOException;
 
 }

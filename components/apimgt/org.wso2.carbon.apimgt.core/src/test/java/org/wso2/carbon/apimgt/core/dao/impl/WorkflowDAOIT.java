@@ -47,8 +47,25 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
         Assert.assertEquals(retrieveWorflow.getExternalWorkflowReference(), workflowRefId);
         Assert.assertEquals(retrieveWorflow.getStatus(), workflow.getStatus());
         Assert.assertEquals(retrieveWorflow.getWorkflowReference(), workflow.getWorkflowReference());
+        Assert.assertEquals(retrieveWorflow.getAttributes(), workflow.getAttributes());
     }
 
+    @Test
+    public void testAddWorkflowEntryWithoutAttributes() throws Exception {
+
+        String workflowRefId = UUID.randomUUID().toString();
+        WorkflowDAO workflowDAO = DAOFactory.getWorkflowDAO();
+        Workflow workflow = SampleTestObjectCreator.createWorkflow(workflowRefId);
+        workflow.setAttributes(null);
+        
+        workflowDAO.addWorkflowEntry(workflow);
+        Workflow retrieveWorflow = workflowDAO.retrieveWorkflow(workflow.getExternalWorkflowReference());
+
+        Assert.assertEquals(retrieveWorflow.getExternalWorkflowReference(), workflowRefId);
+        Assert.assertEquals(retrieveWorflow.getStatus(), workflow.getStatus());
+        Assert.assertEquals(retrieveWorflow.getWorkflowReference(), workflow.getWorkflowReference());
+        Assert.assertNull(retrieveWorflow.getAttributes());
+    }
     @Test
     public void testUpdateWorkflowStatus() throws Exception {
         WorkflowDAO workflowDAO = DAOFactory.getWorkflowDAO();

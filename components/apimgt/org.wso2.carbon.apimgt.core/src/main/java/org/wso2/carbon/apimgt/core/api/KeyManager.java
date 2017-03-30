@@ -101,6 +101,16 @@ public interface KeyManager {
      * @return {@code KeyManagerConfiguration}
      * @throws KeyManagementException error while getting key manager configuration.
      */
+
+    /**
+     * This method is called to revoke an existing access token which is used to log in to publisher,store or admin
+     * apps.
+     *
+     * @param tokenRequest AccessTokenRequest which encapsulates parameters sent from UI.
+     * @throws KeyManagementException   Exception while revoking the access token
+     */
+    void revokeLogInAccessToken(AccessTokenRequest tokenRequest) throws KeyManagementException;
+
     KeyManagerConfiguration getKeyManagerConfiguration() throws KeyManagementException;
 
     /** 

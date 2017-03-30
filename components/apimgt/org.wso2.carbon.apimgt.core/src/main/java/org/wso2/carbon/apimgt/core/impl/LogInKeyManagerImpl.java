@@ -553,6 +553,69 @@ public class LogInKeyManagerImpl implements KeyManager {
         return tokenInfo;
     }
 
+    /**
+     * This method is called to revoke an existing access token which is used to log in to publisher,store or admin
+     * apps.
+     *
+     * @param tokenRequest AccessTokenRequest which encapsulates parameters sent from UI.
+     * @throws KeyManagementException   Exception while revoking the access token
+     */
+    @Override
+    public void revokeLogInAccessToken(AccessTokenRequest tokenRequest) throws KeyManagementException {
+
+        if (tokenRequest == null) {
+            log.warn("No information available to generate Token.");
+            return;
+        }
+
+        //TO-DO -ADD A CONFIG FOR REVOKE ENDPOINT
+        String revokeEndpoint = getKeyManagerEndPoint("/oauth2/revoke");
+
+        URL url;
+        HttpURLConnection urlConn = null;
+
+        if (tokenRequest.getTokenToRevoke() != null && !tokenRequest.getTokenToRevoke().isEmpty()) {
+            //Revoke the Old Access Token
+            try {
+                createSSLConnection();
+                url = new URL(revokeEndpoint);
+                urlConn = (HttpURLConnection) url.openConnection();
+                urlConn.setDoOutput(true);
+                urlConn.setRequestMethod("POST");
+                String clientEncoded = Base64.getEncoder().encodeToString(
+                        (tokenRequest.getClientId() + ":" + tokenRequest.getClientSecret())
+                                .getBytes(StandardCharsets.UTF_8));
+                urlConn.setRequestProperty("Authorization", "Basic " + clientEncoded);
+                String postParams = KeyManagerConstants.OAUTH_TOKEN + "=" + tokenRequest.getTokenToRevoke();
+                urlConn.getOutputStream().write((postParams).getBytes("UTF-8"));
+                int responseCode = urlConn.getResponseCode();
+                if (responseCode != 200) { //If token revoke failed
+                    throw new KeyManagementException("Token revoke failed : HTTP error code : " + responseCode,
+                            ExceptionCodes.
+                                    ACCESS_TOKEN_REVOKE_FAILED);
+                } else {
+                    APIUtils.logDebug(
+                            "Successfully submitted revoke request for old access token. HTTP status : 200", log);
+                }
+            } catch (IOException e) {
+                String msg = "Error while revoking the existing token.";
+                log.error(msg, e);
+                throw new KeyManagementException(msg + e.getMessage(), e, ExceptionCodes.
+                        ACCESS_TOKEN_REVOKE_FAILED);
+            } catch (NoSuchAlgorithmException | java.security.KeyManagementException e) {
+                String msg = "Error while connecting with the revoke endpoint for revoking the existing token.";
+                log.error(msg, e);
+                throw new KeyManagementException(msg + e.getMessage(), e, ExceptionCodes.
+                        ACCESS_TOKEN_REVOKE_FAILED);
+            } finally {
+                if (urlConn != null) {
+                    urlConn.disconnect();
+                }
+            }
+
+        }
+    }
+
     @Override public KeyManagerConfiguration getKeyManagerConfiguration() throws KeyManagementException {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
