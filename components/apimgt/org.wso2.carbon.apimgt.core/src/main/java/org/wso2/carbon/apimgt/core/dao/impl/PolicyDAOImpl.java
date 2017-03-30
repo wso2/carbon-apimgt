@@ -796,9 +796,7 @@ public class PolicyDAOImpl implements PolicyDAO {
     }
 
     public void deleteAPIPolicy(String policyName) throws APIMgtDAOException {
-
         String sqlQuery = "DELETE FROM AM_API_POLICY WHERE NAME = ?";
-
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery))    {
@@ -811,9 +809,7 @@ public class PolicyDAOImpl implements PolicyDAO {
     }
 
     public void deleteApplicationPolicy(String policyName) throws APIMgtDAOException {
-
         String sqlQuery = "DELETE FROM AM_APPLICATION_POLICY WHERE NAME = ?";
-
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery))    {
@@ -826,9 +822,7 @@ public class PolicyDAOImpl implements PolicyDAO {
     }
 
     public void deleteSubscriptionPolicy(String policyName) throws APIMgtDAOException {
-
         String sqlQuery = "DELETE FROM AM_SUBSCRIPTION_POLICY WHERE NAME = ?";
-
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery))    {
