@@ -1,0 +1,51 @@
+<div class="resource_body_padding add-margin-bottom-2x">
+    <div class="add-margin-bottom-4x">
+        <strong>{{i18n "Description"}} : </strong><a class="notes" data-path="{{@params.resource_path}}" data-attr="description" title="description">{{#if @params.description}}{{ @params.description }}{{/if}}</a>
+    </div>
+    <table class="table-fullwidth add-margin-bottom-4x">
+        <tr>
+            <td width="40%"><strong>{{i18n "Produces"}} : </strong><a href="#" data-path="{{@params.resource_path}}" data-attr="produces" data-attr-type="comma_seperated" class="content_type produces" data-type="text" data-pk="1" data-title="Produces" title="Produces">{{#if @params.produces}}{{ @params.produces }}{{/if}}</a></td>
+            <td><strong>{{i18n "Consumes"}} : </strong><a href="#" data-path="{{@params.resource_path}}" data-attr="consumes" data-attr-type="comma_seperated" class="content_type consumes" data-type="text" data-pk="1" data-title="Consumes" title="Consumes">{{#if @params.consumes}}{{ @params.consumes }}{{/if}}</a></td>
+        </tr>
+    </table>
+    <div class="add-margin-bottom-4x">
+        <div class="add-margin-bottom-2x">
+            <strong>{{i18n "Parameters"}} :</strong>
+        </div>
+        {{#if @params.parameters}}
+        <table class="table table-condensed table-bordered">
+            <tr>
+                <th width="15%">{{i18n "Parameter Name"}}</th>
+                <th width="35%">{{i18n "Description"}}</th>
+                <th width="15%">{{i18n "Parameter Type"}}</th>
+                <th width="15%">{{i18n "Data Type"}}</th>
+                <th width="15%">{{i18n "Required"}}</th>
+                <th width="5%">{{i18n "Delete"}}</th>
+            </tr>
+            {{#each @params.parameters}}
+                <tr id="{{name}}">
+                    <td>{{ name }}</td>
+                    <td><a class="param_desc" data-path="{{ ../@params.resource_path}}.parameters[{{@index}}]" data-attr="description" title="description">{{#if description}}{{ description }}{{/if}}</a></td>
+                    <td><a class="param_paramType" data-type="select" data-path="{{ ../@params.resource_path}}.parameters[{{@index}}]" data-attr="in" title="in">{{ in }}</a></td>
+                    <td><a class="param_type" data-path="{{../@params.resource_path}}.parameters[{{@index}}]" data-attr="type" title="type">{{#if type}}{{ type }}{{/if}}</a></td>
+                    <td><a class="param_required" data-type="select" data-path="{{../@params.resource_path}}.parameters[{{@index}}]" data-attr="required" data-value="{{ required }}" title="required"></a></td>
+                    <td align="center">
+                        <a data-path-name="" data-path="{{../@params.resource_path}}.parameters[{{@index}}]" data-index="{{@index}}" class="delete_parameter" title="index">
+						<span class="fw-stack" style="font-size:10px">
+							<i class="fw fw-delete fw-stack-1x"></i>
+							<i class="fw fw-circle-outline fw-stack-2x"></i>
+						</span>
+                        </a>
+                    </td>
+                </tr>
+            {{/each}}
+        {{/if}}
+    </table>
+    </div>
+    <input type="text" style="width:200px;margin-right:5px;" class="parameter_name form-control input-sm pull-left" name="parameter_name" placeholder="Parameter Name"/>
+    <a class="btn btn-small btn-secondary add_parameter btn-sm" type="button" title="Add Parameter" >
+				<span class="icon fw-stack fw-lg" style="font-size:10px">
+					<i class="fw fw-add fw-stack-1x"></i>
+					<i class="fw fw-circle-outline fw-stack-2x"></i>
+				</span>&nbsp;{{i18n "Add Parameter"}}</a>
+</div>
