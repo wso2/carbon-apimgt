@@ -25,7 +25,19 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
     @Override
     public Response policiesTierLevelDelete(String tierName, String tierLevel, String ifMatch, String ifUnmodifiedSince,
                                             String minorVersion) throws NotFoundException {
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        log.info("Received Policy DELETE request with tierName = " + tierName + ", limit = ");
+
+        try {
+            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
+            apiMgtAdminService.deletePolicy(tierName, tierLevel);
+            return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        } catch (APIManagementException e) {
+            String msg = "Error occurred while deleting a Policy [" + tierName + "]";
+            RestApiUtil.handleInternalServerError(msg, e, log);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            log.error(msg, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
     }
 
     @Override

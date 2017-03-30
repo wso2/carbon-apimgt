@@ -91,8 +91,8 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     }
 
     @Override
-    public void deletePolicy(Policy policy) throws APIManagementException {
-
+    public void deletePolicy(String policyName, String policyLevel) throws APIManagementException {
+        policyDAO.deletePolicy(policyName, policyLevel);
     }
 
     @Override

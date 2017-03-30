@@ -38,7 +38,7 @@ public interface PolicyDAO {
 
     void addPolicy(String policyLevel, Policy policy) throws APIMgtDAOException;
 
-    void deletePolicy(String policyName);
+    void deletePolicy(String policyName, String policyLevel) throws APIMgtDAOException;
 
     /**
      * Retrieves Subscription Policy by name
