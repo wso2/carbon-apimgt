@@ -249,12 +249,12 @@ $(function () {
                             	//Get Swagger definition of the API
                                 swaggerClient["API (individual)"].get_apis_apiId_swagger({"apiId": apiId},
                                     function (jsonData) {
-	                                	//by default get the first label to load the swagger UI
-	                        			var label = {};
-	                        			var swaggerURL = jsonData.url;
-	                        			if (label_data.length > 0) {
-	                        				swaggerURL = jsonData.url + "?labelName=" + label_data[0].name + "&scheme=" + location.protocol;
-	                        			}
+                                		//by default get the first label to load the swagger UI
+                                		var label = {};
+                                		var swaggerURL = jsonData.url;
+                                		if (label_data.length > 0) {
+                                			swaggerURL = jsonData.url + "?labelName=" + label_data[0].name + "&scheme=" + location.protocol;
+                                		}
                                 		$(document).ready(function(){
                                 			window.swaggerUi = new SwaggerUi({
 	                                			url: swaggerURL,
@@ -346,9 +346,9 @@ $(function () {
 	    	                                                			onSuccess: function (renderedData) {
 	    	                                                				$("#authorizations").html(renderedData);
 	    	                                                				$(".subapp").change(change_token);
-	    	                                                                $(".keytype").change(change_token);
-	    	                                                                $(".env_name").change(select_environment);
-	    	                                                                change_token();
+	    	                                                				$(".keytype").change(change_token);
+	    	                                                				$(".env_name").change(select_environment);
+	    	                                                				change_token();
 	    	                                                			}.bind(context), onFailure: function (message, e) {
 	    	                                                				var message = "Error occurred while loading API console." + message;
 	    	                                                                noty({
