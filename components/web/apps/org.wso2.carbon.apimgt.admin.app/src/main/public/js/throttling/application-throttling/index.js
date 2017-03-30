@@ -48,7 +48,20 @@ $(function () {
                              $noty.close();
                              var promised_delete_tier =  policyInstance.deletePolicy(policyId);
                              promised_delete_tier.then(deletePolicySuccessCallback)
-                                     .catch(deletePolicyFailureCallback());
+                                     .catch(function (error) {
+                                         var message = "Error occurred while deleting application";
+                                         noty({
+                                                  text: message,
+                                                  type: 'warning',
+                                                  dismissQueue: true,
+                                                  modal: true,
+                                                  progressBar: true,
+                                                  timeout: 2000,
+                                                  layout: 'top',
+                                                  theme: 'relax',
+                                                  maxVisible: 10,
+                                              });
+                                     });
                              }
                          },
             {addClass: 'btn btn-danger', text: 'Cancel', onClick: function ($noty) {
