@@ -71,9 +71,11 @@ Policy.prototype.getAllPoliciesByTier = function (tierLevel, callback) {
     let param = {"tierLevel" : tierLevel};
     let promise_create = this.client.then(
             (client) => {
-                return client["Throttling Tier (Collection)"].get_policies_tierLevel(
+                return client["Throttling Tier Collection"].get_policies_tierLevel_tierLevel(
                         param, this._requestMetaData()).catch(unauthorizedErrorHandler)
-            });
+            }).catch (function (error) {
+                console.log(error);
+    })
     if (callback) {
         return promise_create.then(callback);
     } else {
@@ -81,15 +83,38 @@ Policy.prototype.getAllPoliciesByTier = function (tierLevel, callback) {
     }
 };
 
+/**
+ * Delete an API given an api identifier
+ * @param policyId {String} PolicyName
+ * @param callback {function} Function which needs to be called upon success of the API deletion
+ * @returns {promise} With given callback attached to the success chain else API invoke promise.
+ */
+Policy.prototype.deletePolicy = function(policyId, callback) {
+    let param = {tierLevel: "application", tierName: policyId};
+    var promised_delete = this.client.then(
+            (client) => {
+                return client["Throttling Tier (Individual)"].delete_policies_tierLevel_tierLevel_tierName_tierName(
+                        param, this._requestMetaData()).catch(unauthorizedErrorHandler);
+            })
+    if (callback) {
+        return promised_delete.then(callback);
+    } else {
+        return promised_delete;
+    }
+};
+
 Policy.prototype.create = function(policy, callback) {
     let payload;
     let promise_create;
+    debugger
         payload = {tierLevel: policy.tierLevel, body: policy, "Content-Type": "application/json"};
         promise_create = this.client.then(
                 (client) => {
-                return client["Throttling Tier (Collection)"].post_policies_tierLevel(
+                return client["Throttling Tier (individual)"].post_policies_tierLevel_tierLevel(
                     payload, this._requestMetaData()).catch(unauthorizedErrorHandler);
-                });
+                }).catch (function (error) {
+                    console.log(error);
+    })
     if (callback) {
         return promise_create.then(callback);
     } else {
@@ -128,3 +153,5 @@ function unauthorizedErrorHandler(error_response) {
         }
     });
 }
+
+
