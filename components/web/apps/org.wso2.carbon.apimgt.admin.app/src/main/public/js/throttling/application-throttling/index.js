@@ -24,7 +24,6 @@ $(function () {
                                  "policy-view", mode, callbacks);
         promised_get_tiers.catch(
                 function (error) {
-                    console.log("Error occurred while loading swagger definition");
                     if (error.status == 401) {
                         redirectToLogin(contextPath);
                     }
