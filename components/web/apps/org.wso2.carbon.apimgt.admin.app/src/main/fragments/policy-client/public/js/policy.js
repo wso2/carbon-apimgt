@@ -89,8 +89,8 @@ Policy.prototype.getAllPoliciesByTier = function (tierLevel, callback) {
  * @param callback {function} Function which needs to be called upon success of the API deletion
  * @returns {promise} With given callback attached to the success chain else API invoke promise.
  */
-Policy.prototype.deletePolicy = function(policyId, callback) {
-    let param = {tierLevel: "application", tierName: policyId};
+Policy.prototype.deletePolicy = function(policyTier, policyId, callback) {
+    let param = {tierLevel: policyTier, tierName: policyId};
     var promised_delete = this.client.then(
             (client) => {
                 return client["Throttling Tier (Individual)"].delete_policies_tierLevel_tierLevel_tierName_tierName(

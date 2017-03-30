@@ -46,7 +46,7 @@ $(function () {
                      buttons : [
                          { addClass: 'btn btn-primary', text: 'Ok', onClick: function ($noty) {
                              $noty.close();
-                             var promised_delete_tier =  policyInstance.deletePolicy(policyId);
+                             var promised_delete_tier =  policyInstance.deletePolicy("application", policyId);
                              promised_delete_tier.then(deletePolicySuccessCallback)
                                      .catch(function (error) {
                                          var message = "Error occurred while deleting application";
@@ -141,21 +141,6 @@ $(function () {
                          window.location = contextPath + "/throttling/application-throttling";
                      },
                  }
-             });
-    }
-
-    function deletePolicyFailureCallback(response) {
-        var message = "Error occurred while deleting application";
-        noty({
-                 text: message,
-                 type: 'warning',
-                 dismissQueue: true,
-                 modal: true,
-                 progressBar: true,
-                 timeout: 2000,
-                 layout: 'top',
-                 theme: 'relax',
-                 maxVisible: 10,
              });
     }
 
