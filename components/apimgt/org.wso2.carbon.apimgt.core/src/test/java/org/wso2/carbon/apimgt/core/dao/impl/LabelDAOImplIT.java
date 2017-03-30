@@ -161,7 +161,7 @@ public class LabelDAOImplIT extends DAOIntegrationTestBase {
         labelList.add(label);
         labelDAO.addLabels(labelList);
 
-        labelDAO.deleteLabel(label.getName());
+        labelDAO.deleteLabel(label.getId());
         Label labelFromDb = labelDAO.getLabelByName(label.getName());
         Assert.assertNull(labelFromDb);
     }
@@ -177,7 +177,8 @@ public class LabelDAOImplIT extends DAOIntegrationTestBase {
 
         List<String> accessUrls = new ArrayList<>();
         accessUrls.add("https://updated.public");
-        Label updatedLabel = SampleTestObjectCreator.createLabel("public").accessUrls(accessUrls).build();
+        Label updatedLabel = SampleTestObjectCreator.createLabel("public").id(label.getId()).accessUrls(accessUrls)
+                .build();
 
         labelDAO.updateLabel(updatedLabel);
         List<Label> labelsFromDb = labelDAO.getLabels();

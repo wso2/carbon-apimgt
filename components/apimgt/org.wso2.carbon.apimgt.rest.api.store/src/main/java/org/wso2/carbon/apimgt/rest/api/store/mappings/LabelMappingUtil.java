@@ -47,6 +47,7 @@ public class LabelMappingUtil {
         List<LabelDTO> labelDTOs = new ArrayList<>();
         for (Label label : labels) {
             LabelDTO labelDTO = new LabelDTO();
+            labelDTO.setLabelId(label.getId());
             labelDTO.setName(label.getName());
             labelDTO.setAccessUrls(label.getAccessUrls());
             labelDTOs.add(labelDTO);

@@ -96,6 +96,9 @@ public class RestApiConstants {
 //    public static final String SWAGGER_GET_URL_HEADER = "Swagger-Config-Location";
 
     public static final String COOKIE_HEADER = "Cookie";
+    
+    public static final String WEB_PROTOCOL_SUFFIX = "://";
+    public static final String SWAGGER_HOST_ELEMENT = "host";
 
 
     /**

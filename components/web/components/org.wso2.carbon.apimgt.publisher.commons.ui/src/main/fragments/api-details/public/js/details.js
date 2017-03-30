@@ -267,6 +267,22 @@ function endpointsTabHandler(event) {
     ).catch(apiGetErrorHandler);
 }
 
+function subscriptionsTabHandler(event) {
+    var mode = "OVERWRITE"; // Available modes [OVERWRITE,APPEND, PREPEND]
+    var callbacks = {
+        onSuccess: function (data) {
+            var api_client = new API();
+            var api_id = $("#apiId").val();
+            api_client.subscriptions(api_id, getSubscriptionsCallback);
+        },
+        onFailure: function (data) {
+            console.debug("Failed");
+        }
+    };
+    UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-subscriptions", {}, "subscriptions-tab-content", mode, callbacks);
+
+}
+
 /**
  * Do the life cycle update when user clicks on the relevant life cycle state button.
  * @param event {object} click event of the lc state button
@@ -727,9 +743,9 @@ $(function () {
     $('#tab-2').bind('show.bs.tab', {api_client: client, api_id: api_id}, lifecycleTabHandler);
     $('#tab-3').bind('show.bs.tab', {api_client: client, api_id: api_id}, endpointsTabHandler);
     $('#tab-5').bind('show.bs.tab', {api_client: client, api_id: api_id}, documentTabHandler);
+    $('#tab-9').bind('show.bs.tab', {api_client: client, api_id: api_id}, subscriptionsTabHandler);
     $(document).on('click', ".lc-state-btn", {api_client: client, api_id: api_id}, updateLifecycleHandler);
     $(document).on('click', "#checkItem", {api_client: client, api_id: api_id}, updateLifecycleCheckListHandler);
-    $(document).on('click', "#update-tiers-button", {api_client: client, api_id: api_id}, updateTiersHandler);
     $(document).on('click', ".doc-listing-delete", {api_client: client,api_id: api_id}, deleteDocHandler);
     $(document).on('click', "#add-doc-submit", {api_id: api_id}, createDocHandler);
     $(document).on('click', "#add-new-doc", {}, toggleDocAdder);

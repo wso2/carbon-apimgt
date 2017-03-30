@@ -1,38 +1,36 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.Objects;
 
 /**
  * SubscriptionDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-19T18:14:01.803+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-29T11:00:00.292+05:30")
 public class SubscriptionDTO   {
   @JsonProperty("subscriptionId")
   private String subscriptionId = null;
 
-  @JsonProperty("applicationId")
-  private String applicationId = null;
+  @JsonProperty("applicationInfo")
+  private ApplicationDTO applicationInfo = null;
 
-  @JsonProperty("apiIdentifier")
-  private String apiIdentifier = null;
-
-  @JsonProperty("policy")
-  private String policy = null;
+  @JsonProperty("subscriptionTier")
+  private String subscriptionTier = null;
 
   /**
-   * Gets or Sets lifeCycleStatus
+   * Gets or Sets subscriptionStatus
    */
-  public enum LifeCycleStatusEnum {
+  public enum SubscriptionStatusEnum {
     BLOCKED("BLOCKED"),
     
     PROD_ONLY_BLOCKED("PROD_ONLY_BLOCKED"),
     
-    UNBLOCKED("UNBLOCKED"),
+    SANDBOX_ONLY_BLOCKED("SANDBOX_ONLY_BLOCKED"),
+    
+    ACTIVE("ACTIVE"),
     
     ON_HOLD("ON_HOLD"),
     
@@ -40,7 +38,7 @@ public class SubscriptionDTO   {
 
     private String value;
 
-    LifeCycleStatusEnum(String value) {
+    SubscriptionStatusEnum(String value) {
       this.value = value;
     }
 
@@ -51,8 +49,8 @@ public class SubscriptionDTO   {
     }
 
     @JsonCreator
-    public static LifeCycleStatusEnum fromValue(String text) {
-      for (LifeCycleStatusEnum b : LifeCycleStatusEnum.values()) {
+    public static SubscriptionStatusEnum fromValue(String text) {
+      for (SubscriptionStatusEnum b : SubscriptionStatusEnum.values()) {
         if (String.valueOf(b.value).equals(text)) {
           return b;
         }
@@ -61,8 +59,8 @@ public class SubscriptionDTO   {
     }
   }
 
-  @JsonProperty("lifeCycleStatus")
-  private LifeCycleStatusEnum lifeCycleStatus = null;
+  @JsonProperty("subscriptionStatus")
+  private SubscriptionStatusEnum subscriptionStatus = null;
 
   public SubscriptionDTO subscriptionId(String subscriptionId) {
     this.subscriptionId = subscriptionId;
@@ -73,7 +71,7 @@ public class SubscriptionDTO   {
    * Get subscriptionId
    * @return subscriptionId
   **/
-  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "")
+  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", required = true, value = "")
   public String getSubscriptionId() {
     return subscriptionId;
   }
@@ -82,76 +80,58 @@ public class SubscriptionDTO   {
     this.subscriptionId = subscriptionId;
   }
 
-  public SubscriptionDTO applicationId(String applicationId) {
-    this.applicationId = applicationId;
+  public SubscriptionDTO applicationInfo(ApplicationDTO applicationInfo) {
+    this.applicationInfo = applicationInfo;
     return this;
   }
 
    /**
-   * Get applicationId
-   * @return applicationId
+   * Get applicationInfo
+   * @return applicationInfo
   **/
-  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", required = true, value = "")
-  public String getApplicationId() {
-    return applicationId;
+  @ApiModelProperty(required = true, value = "")
+  public ApplicationDTO getApplicationInfo() {
+    return applicationInfo;
   }
 
-  public void setApplicationId(String applicationId) {
-    this.applicationId = applicationId;
+  public void setApplicationInfo(ApplicationDTO applicationInfo) {
+    this.applicationInfo = applicationInfo;
   }
 
-  public SubscriptionDTO apiIdentifier(String apiIdentifier) {
-    this.apiIdentifier = apiIdentifier;
+  public SubscriptionDTO subscriptionTier(String subscriptionTier) {
+    this.subscriptionTier = subscriptionTier;
     return this;
   }
 
    /**
-   * Get apiIdentifier
-   * @return apiIdentifier
-  **/
-  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", required = true, value = "")
-  public String getApiIdentifier() {
-    return apiIdentifier;
-  }
-
-  public void setApiIdentifier(String apiIdentifier) {
-    this.apiIdentifier = apiIdentifier;
-  }
-
-  public SubscriptionDTO policy(String policy) {
-    this.policy = policy;
-    return this;
-  }
-
-   /**
-   * Get policy
-   * @return policy
+   * Get subscriptionTier
+   * @return subscriptionTier
   **/
   @ApiModelProperty(example = "Unlimited", required = true, value = "")
-  public String getPolicy() {
-    return policy;
+  public String getSubscriptionTier() {
+    return subscriptionTier;
   }
 
-  public void setPolicy(String policy) {
-    this.policy = policy;
+  public void setSubscriptionTier(String subscriptionTier) {
+    this.subscriptionTier = subscriptionTier;
   }
 
-  public SubscriptionDTO lifeCycleStatus(LifeCycleStatusEnum lifeCycleStatus) {
-    this.lifeCycleStatus = lifeCycleStatus;
+  public SubscriptionDTO subscriptionStatus(SubscriptionStatusEnum subscriptionStatus) {
+    this.subscriptionStatus = subscriptionStatus;
     return this;
   }
 
    /**
-   * Get lifeCycleStatus
-   * @return lifeCycleStatus
+   * Get subscriptionStatus
+   * @return subscriptionStatus
   **/
-  @ApiModelProperty(example = "UNBLOCKED", value = "")
-  public LifeCycleStatusEnum getLifeCycleStatus() {
-    return lifeCycleStatus;
+  @ApiModelProperty(example = "BLOCKED", value = "")
+  public SubscriptionStatusEnum getSubscriptionStatus() {
+    return subscriptionStatus;
   }
 
-  public void setLifeCycleStatus(LifeCycleStatusEnum lifeCycleStatus) {
-    this.lifeCycleStatus = lifeCycleStatus;
+  public void setSubscriptionStatus(SubscriptionStatusEnum subscriptionStatus) {
+    this.subscriptionStatus = subscriptionStatus;
   }
 
 
@@ -165,15 +145,14 @@ public class SubscriptionDTO   {
     }
     SubscriptionDTO subscription = (SubscriptionDTO) o;
     return Objects.equals(this.subscriptionId, subscription.subscriptionId) &&
-        Objects.equals(this.applicationId, subscription.applicationId) &&
-        Objects.equals(this.apiIdentifier, subscription.apiIdentifier) &&
-        Objects.equals(this.policy, subscription.policy) &&
-        Objects.equals(this.lifeCycleStatus, subscription.lifeCycleStatus);
+        Objects.equals(this.applicationInfo, subscription.applicationInfo) &&
+        Objects.equals(this.subscriptionTier, subscription.subscriptionTier) &&
+        Objects.equals(this.subscriptionStatus, subscription.subscriptionStatus);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(subscriptionId, applicationId, apiIdentifier, policy, lifeCycleStatus);
+    return Objects.hash(subscriptionId, applicationInfo, subscriptionTier, subscriptionStatus);
   }
 
   @Override
@@ -182,10 +161,9 @@ public class SubscriptionDTO   {
     sb.append("class SubscriptionDTO {\n");
     
     sb.append("    subscriptionId: ").append(toIndentedString(subscriptionId)).append("\n");
-    sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
-    sb.append("    apiIdentifier: ").append(toIndentedString(apiIdentifier)).append("\n");
-    sb.append("    policy: ").append(toIndentedString(policy)).append("\n");
-    sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
+    sb.append("    applicationInfo: ").append(toIndentedString(applicationInfo)).append("\n");
+    sb.append("    subscriptionTier: ").append(toIndentedString(subscriptionTier)).append("\n");
+    sb.append("    subscriptionStatus: ").append(toIndentedString(subscriptionStatus)).append("\n");
     sb.append("}");
     return sb.toString();
   }
