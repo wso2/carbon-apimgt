@@ -6,8 +6,10 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -17,14 +19,20 @@ import org.wso2.carbon.apimgt.rest.api.store.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.RatingDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.RatingListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.store.mappings.CommentMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.DocumentationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.store.mappings.RatingMappingUtil;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -35,9 +43,44 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     private static final Logger log = LoggerFactory.getLogger(ApisApiServiceImpl.class);
 
+    @Override
+    public Response apisApiIdCommentsCommentIdDelete(String commentId, String apiId, String ifMatch,
+                                            String ifUnmodifiedSince, String minorVersion) throws NotFoundException {
+        return null;
+    }
+
+    @Override
+    public Response apisApiIdCommentsCommentIdGet(String commentId, String apiId, String accept, String ifNoneMatch,
+                                                 String ifModifiedSince, String minorVersion) throws NotFoundException {
+        CommentDTO commentDTO = null;
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIStore apiStore = RestApiUtil.getConsumer(username);
+            Comment comment = apiStore.getCommentByUUID(commentId, apiId);
+            commentDTO = CommentMappingUtil.fromCommentToDTO(comment);
+        } catch (APIManagementException e) {
+            RestApiUtil
+                    .handleInternalServerError("Error while retrieving Comment for given API " + apiId
+                            + "with commentId " + commentId, e, log);
+        }
+        return Response.ok().entity(commentDTO).build();
+    }
+
+    @Override
+    public Response apisApiIdCommentsPost(String apiId, CommentDTO body, String contentType, String minorVersion)
+            throws NotFoundException {
+        return null;
+    }
+
+    @Override
+    public Response apisApiIdCommentsPut(String commentId, String apiId, CommentDTO body, String contentType, String
+            ifMatch, String ifUnmodifiedSince, String minorVersion) throws NotFoundException {
+        return null;
+    }
+
     /**
      * Retrieves the content of the document
-     * 
+     *
      * @param apiId API ID
      * @param documentId Document ID
      * @param accept Accept header value
@@ -100,7 +143,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Retrieves the fingerprint of a document content given its UUID
-     * 
+     *
      * @param apiId API ID
      * @param documentId Document ID
      * @param accept Accept header value
@@ -169,7 +212,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Retrieves the fingerprint of the document given its UUID
-     * 
+     *
      * @param apiId API ID
      * @param documentId Document ID
      * @param accept Accept header value
@@ -178,7 +221,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param minorVersion Minor-Version header value
      * @return Fingerprint of the document
      */
-    
+
     public String apisApiIdDocumentsDocumentIdGetFingerprint(String apiId, String documentId, String accept,
             String ifNoneMatch, String ifModifiedSince, String minorVersion) {
         String username = RestApiUtil.getLoggedInUsername();
@@ -269,6 +312,41 @@ public class ApisApiServiceImpl extends ApisApiService {
         }
     }
 
+    @Override
+    public Response apisApiIdRatingGet(String apiId, Integer limit, Integer offset, String accept, String minorVersion)
+            throws NotFoundException {
+
+        RatingListDTO ratingListDTO = null;
+        double avgRating, userRating;
+        List<RatingDTO> ratingDTOList = null;
+
+
+        String username = RestApiUtil.getLoggedInUsername();
+        Response response;
+        try {
+            APIStore apiStore = RestApiUtil.getConsumer(username);
+            userRating = apiStore.getUserRating(apiId, username);
+            avgRating = apiStore.getAvgRating(apiId);
+            ratingDTOList = RatingMappingUtil.fromRatingListToDTOList(apiStore.getUserRatingDTOList(apiId));
+
+            ratingListDTO = RatingMappingUtil.fromRatingListToDTO(avgRating, userRating, offset, limit, ratingDTOList);
+
+            return Response.ok().entity(ratingListDTO).build();
+
+        } catch (APIManagementException e) {
+            RestApiUtil
+                    .handleInternalServerError("Error while retrieving Rating for given API " + apiId, e, log);
+            return null;
+        }
+
+    }
+
+    @Override
+    public Response apisApiIdRatingPost(String apiId, RatingDTO body, String contentType, String minorVersion)
+            throws NotFoundException {
+        return null;
+    }
+
     /**
      * Retrieves the fingerprint of the API given its ID
      * 
@@ -297,6 +375,8 @@ public class ApisApiServiceImpl extends ApisApiService {
      * Retrieves the swagger definition of an API
      *
      * @param apiId UUID of API
+     * @param labelName Label name of the gateway
+     * @param scheme Transport scheme (http | https)
      * @param accept Accept header value
      * @param ifNoneMatch If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
@@ -305,19 +385,24 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response apisApiIdSwaggerGet(String apiId, String accept, String ifNoneMatch,
-            String ifModifiedSince, String minorVersion) throws NotFoundException {
+    public Response apisApiIdSwaggerGet(String apiId, String labelName, String scheme, String accept,
+    		String ifNoneMatch, String ifModifiedSince, String minorVersion) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             String existingFingerprint = apisApiIdSwaggerGetFingerprint(apiId, accept, ifNoneMatch, ifModifiedSince,
                     minorVersion);
             if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
-                    .contains(existingFingerprint)) {
+                    .contains(existingFingerprint) && StringUtils.isEmpty(labelName)) {
                 return Response.notModified().build();
             }
 
             String swagger = apiStore.getSwagger20Definition(apiId);
+            // Provide the swagger with label
+            if (!StringUtils.isEmpty(labelName)) {
+                Label label = apiStore.getLabelByName(labelName);
+                swagger = RestApiUtil.getSwaggerDefinitionWithLabel(swagger, label, scheme);
+            }
             return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(swagger).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving swagger definition of API : " + apiId;
@@ -336,7 +421,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param accept Accept header value
      * @param ifNoneMatch If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
-     * @param minorVersion 
+     * @param minorVersion Minor-Version header value
      * @return Retrieves the fingerprint String of the swagger
      */
     public String apisApiIdSwaggerGetFingerprint(String apiId, String accept, String ifNoneMatch,

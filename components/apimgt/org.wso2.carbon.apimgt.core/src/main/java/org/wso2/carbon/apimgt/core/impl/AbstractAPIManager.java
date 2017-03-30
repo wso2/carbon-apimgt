@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.Workflow;
 
@@ -64,6 +65,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public AbstractAPIManager(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
             APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager apiLifecycleManager,
             LabelDAO labelDAO, WorkflowDAO workflowDAO) {
+
         this.username = username;
         this.apiDAO = apiDAO;
         this.applicationDAO = applicationDAO;
@@ -73,6 +75,8 @@ public abstract class AbstractAPIManager implements APIManager {
         this.labelDAO = labelDAO;
         this.workflowDAO = workflowDAO;
     }
+
+
 
     /**
      * Returns a list of all existing APIs by all providers. The API objects returned by this
@@ -124,7 +128,7 @@ public abstract class AbstractAPIManager implements APIManager {
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
-        
+
         return lastUpdatedTime;
     }
 
@@ -347,9 +351,9 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
-     * @see APIManager#getLastUpdatedTimeOfDocument(String) 
+     * @see APIManager#getLastUpdatedTimeOfDocument(String)
      */
-    @Override 
+    @Override
     public String getLastUpdatedTimeOfDocument(String documentId) throws APIManagementException {
         String lastUpdatedTime;
         try {
@@ -484,7 +488,7 @@ public abstract class AbstractAPIManager implements APIManager {
     protected LabelDAO getLabelDAO() {
         return labelDAO;
     }
-    
+
     protected WorkflowDAO getWorkflowDAO() {
         return workflowDAO;
     }
@@ -535,5 +539,16 @@ public abstract class AbstractAPIManager implements APIManager {
             throw new APIManagementException(message, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
 
+    }
+    
+    @Override
+    public Label getLabelByName(String labelName) throws APIManagementException {
+        try {
+            return labelDAO.getLabelByName(labelName);
+        } catch (APIMgtDAOException e) {
+            String message = "Error occured while retrieving Label information for " + labelName;
+            log.error(message);
+            throw new APIManagementException(message, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
     }
 }

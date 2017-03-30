@@ -248,10 +248,16 @@ $(function () {
                             	setAuthHeader(swaggerClient);                          
                             	//Get Swagger definition of the API
                                 swaggerClient["API (individual)"].get_apis_apiId_swagger({"apiId": apiId},
-                                    function (jsonData) {                              	
+                                    function (jsonData) {
+                                		//by default get the first label to load the swagger UI
+                                		var label = {};
+                                		var swaggerURL = jsonData.url;
+                                		if (label_data.length > 0) {
+                                			swaggerURL = jsonData.url + "?labelName=" + label_data[0].name + "&scheme=" + location.protocol;
+                                		}
                                 		$(document).ready(function(){
                                 			window.swaggerUi = new SwaggerUi({
-	                                			url: jsonData.url,
+	                                			url: swaggerURL,
 	                                			dom_id: "swagger-ui-container",
 	                                			authorizations: {
 	                                				key: new SwaggerClient.ApiKeyAuthorization("Authorization", bearerToken, "header")
@@ -334,11 +340,15 @@ $(function () {
 	                                                            	}
 	                                                            	subscribedAppsAndKeys.push(app);
 	                                                            	context.subscribedAppsAndKeys = subscribedAppsAndKeys;
+	                                                            	context.label_data = label_data;
 	    	                                                        
 	    	                                                        UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.api-console-auth",context, {
 	    	                                                			onSuccess: function (renderedData) {
 	    	                                                				$("#authorizations").html(renderedData);
-	    	                                                				setOverviewTabData();
+	    	                                                				$(".subapp").change(change_token);
+	    	                                                				$(".keytype").change(change_token);
+	    	                                                				$(".env_name").change(select_environment);
+	    	                                                				change_token();
 	    	                                                			}.bind(context), onFailure: function (message, e) {
 	    	                                                				var message = "Error occurred while loading API console." + message;
 	    	                                                                noty({
@@ -662,3 +672,50 @@ function setOverviewTabData() {
     $("#googleplus").attr("href","https://plus.google.com/share?url="+api_url);
     $("#digg").attr("href","http://www.digg.com/submit?url="+api_url);
 }
+
+var change_token = function() {
+    $(".notoken").hide();
+    var option = $("#sub_app_list option:selected");
+    var type = $("#key_type").val();
+    var key = option.attr("data-" + type);
+    if(key == "null") {
+    	$(".notoken").show("slow");
+    	$("#access_token").val("");
+    } else {
+    	$("#access_token").val(key);
+    	//Set changed token as the token for API calls
+    	if(key && key.trim() != "") {
+    		swaggerUi.api.clientAuthorizations.add("key", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer "+ key, "header"));
+    	} else{
+    		swaggerUi.api.clientAuthorizations.add("key", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer ", "header"));
+    	}
+    }
+  };
+
+
+var select_environment = function(){
+    var selectedEnvironment = $("#environment_name");
+    var name = selectedEnvironment.val();
+    
+    //Token to load the swagger definition
+    var bearerToken = "Bearer " + getCookie("WSO2_AM_TOKEN_1");
+    swaggerUi.api.clientAuthorizations.add("key", new SwaggerClient.ApiKeyAuthorization("Authorization", bearerToken, "header"));
+    
+    //Set Swagger URL
+    if (window.swaggerUi.api.url.indexOf("?") != -1) {
+    	if (window.swaggerUi.api.url.indexOf("labelName") != -1) {
+    		window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url.split("labelName")[0] + "labelName=" + name + "&scheme=" + location.protocol});
+    	} else {
+            window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "&labelName=" + name + "&scheme=" + location.protocol});
+    	}
+    } else {
+    	window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "?labelName=" + name + "&scheme=" + location.protocol});
+    }
+    change_token();
+  };
+
+function checkOnKeyPress(e) {
+	if (e.which == 13 ||e.keyCode == 13) {
+		return false;
+		}
+	}

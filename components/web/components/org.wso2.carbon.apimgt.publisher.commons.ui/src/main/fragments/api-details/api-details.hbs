@@ -57,6 +57,10 @@
                                                           data-toggle="tab"><i
                             class="fw fw-prototype"></i>&nbsp; Scripting</a>
                     </li>
+                    <li id="tab-9" role="presentation"><a href="#subscriptions-tab" role="tab" aria-controls="subscriptions-tab"
+                                                          data-toggle="tab"><i
+                            class="fw fw-subscribe"></i>&nbsp; {{i18n "Subscriptions"}}</a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -88,9 +92,7 @@
             </div>
             <div role="tabpanel" class="tab-pane fade" id="documents-tab">
                 <div class="card">
-                    <div class="message message-info">
-                        <h4><i class="icon fw fw-info"></i>This feature is not supported yet.</h4>
-                    </div>
+                    {{defineZone "api-tab-doc-content"}}
                 </div>
             </div>
             <div role="tabpanel" class="tab-pane fade" id="actrl-tab">
@@ -107,14 +109,12 @@
                     </div>
                 </div>
             </div>
-            <div role="tabpanel" class="tab-pane fade" id="scripting-tab">
-                <div class="card">
-                    <div class="message message-info">
-                        <h4><i class="icon fw fw-info"></i>This feature is not supported yet.</h4>
-                    </div>
-                </div>
+            <div role="tabpanel" class="tab-pane fade" id="subscriptions-tab">
+              <div class="card">
+                  {{defineZone "subscriptions-tab-content"}}
+              </div>
             </div>
         </div>
     </div>
 </div>
-<input type="hidden" name="apiId" value="{{@pathParams.id}}"/>
+<input type="hidden" name="apiId" id="apiId" value="{{@pathParams.id}}"/>

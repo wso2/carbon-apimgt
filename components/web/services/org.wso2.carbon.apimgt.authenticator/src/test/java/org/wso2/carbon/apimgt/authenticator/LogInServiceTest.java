@@ -75,6 +75,7 @@ public class LogInServiceTest {
         wireMockRule = new WireMockRule(wireMockConfig().httpsPort(9292));
         wireMockRule.start();
 
+        // Mock service for key manager DCR endpoint
         wireMockRule.stubFor(post(urlEqualTo("/keyserver/identity/connect/register")).withBasicAuth("admin", "admin")
                 .withRequestBody(equalToJson("{\"client_name\":\"oauth_application\"}", true, true)).willReturn(
                         aResponse().withStatus(201).withHeader("Content-Type", "application/json").withBody(
@@ -84,6 +85,7 @@ public class LogInServiceTest {
                                         + "\"redirect_uris\":[\"\"],\"grant_types\":[\"password\","
                                         + "\"refresh_token\"]}")));
 
+        // Mock service for key manager token endpoint
         wireMockRule.stubFor(post(urlEqualTo("/keyserver/oauth2/token"))
                 .willReturn(
                         aResponse().withStatus(200).withHeader("Content-Type", "application/x-www-form-urlencoded")
@@ -93,6 +95,9 @@ public class LogInServiceTest {
                                         + "\"apim:api_publish\",\"apim:tier_view\",\"apim:tier_manage\","
                                         + "\"apim:subscription_view\",\"apim:subscription_block\",\"apim:subscribe\","
                                         + "\"apim:api_workflow\"],\"expiresTimestamp\":1490615736702}")));
+
+        // Mock service for key manager revoke endpoint
+        wireMockRule.stubFor(post(urlEqualTo("/keyserver/oauth2/revoke")).willReturn(aResponse().withStatus(200)));
 
         baseURI = URI.create(String.format("http://%s:%d", HOSTNAME, PORT));
         microservicesRunner = new MicroservicesRunner(PORT);
@@ -141,6 +146,8 @@ public class LogInServiceTest {
     @Test
     public void testLogOut() throws IOException {
         HttpURLConnection urlConn = request("/oauth/revoke", HttpMethod.POST, true);
+        urlConn.setRequestProperty("Authorization", "Bearer 1234");
+        urlConn.setRequestProperty("Cookie", "WSO2_AM_TOKEN_2=2345");
         assertEquals(200, urlConn.getResponseCode());
 
         urlConn.disconnect();
