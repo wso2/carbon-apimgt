@@ -253,7 +253,7 @@ public interface APIManager {
     /**
      * Retrieves Label information of the given label.
      * 
-     * @param labelName
+     * @param labelName Label name of the gateway
      * @return {@code Label} Label information
      * @throws APIManagementException if API Manager core level exception occurred
      */
