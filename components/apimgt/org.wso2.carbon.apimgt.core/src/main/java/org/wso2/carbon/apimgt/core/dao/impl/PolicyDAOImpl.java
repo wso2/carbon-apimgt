@@ -118,7 +118,15 @@ public class PolicyDAOImpl implements PolicyDAO {
     }
 
     @Override
-    public void deletePolicy(String policyName) {
+    public void deletePolicy(String policyName, String policyLevel) throws APIMgtDAOException {
+
+        if (APIMgtConstants.ThrottlePolicyConstants.API_LEVEL.equals(policyLevel))  {
+            deleteAPIPolicy(policyName);
+        } else if (APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL.equals(policyLevel))   {
+            deleteApplicationPolicy(policyName);
+        } else if (APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL.equals(policyLevel))   {
+            deleteSubscriptionPolicy(policyName);
+        }
 
     }
 
@@ -532,6 +540,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                 }
             }
         } catch (SQLException e) {
+            log.error("An Error occurred while retrieving Policy with name [" + policyName + "], " , e);
             throw new APIMgtDAOException("Couldn't retrieve subscription tier for name : " + policyName, e);
         }
         return null;
@@ -785,4 +794,45 @@ public class PolicyDAOImpl implements PolicyDAO {
             statement.execute();
         }
     }
+
+    public void deleteAPIPolicy(String policyName) throws APIMgtDAOException {
+        String sqlQuery = "DELETE FROM AM_API_POLICY WHERE NAME = ?";
+
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery))    {
+            preparedStatement.setString(1, policyName);
+            preparedStatement.execute();
+        } catch (SQLException e)    {
+            log.error("An Error occurred while deleting Policy with name [" + policyName + "], " , e);
+            throw new APIMgtDAOException("Error occurred while deleting Policy with name : " + policyName, e);
+        }
+    }
+
+    public void deleteApplicationPolicy(String policyName) throws APIMgtDAOException {
+        String sqlQuery = "DELETE FROM AM_APPLICATION_POLICY WHERE NAME = ?";
+
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery))    {
+            preparedStatement.setString(1, policyName);
+            preparedStatement.execute();
+        } catch (SQLException e)    {
+            log.error("An Error occurred while deleting Policy with name [" + policyName + "], " , e);
+            throw new APIMgtDAOException("Error occurred while deleting Policy with name : " + policyName, e);
+        }
+    }
+
+    public void deleteSubscriptionPolicy(String policyName) throws APIMgtDAOException {
+        String sqlQuery = "DELETE FROM AM_SUBSCRIPTION_POLICY WHERE NAME = ?";
+
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery))    {
+            preparedStatement.setString(1, policyName);
+            preparedStatement.execute();
+        } catch (SQLException e)    {
+            log.error("An Error occurred while deleting Policy with name [" + policyName + "], " , e);
+            throw new APIMgtDAOException("Error occurred while deleting Policy with name : " + policyName, e);
+        }
+    }
+
+
 }

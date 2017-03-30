@@ -93,7 +93,7 @@ x-wso2-security:
 # The "Tier Collection" resource APIs
 ######################################################
 paths:
-  '/policies/{tierLevel}':
+  '/policies/tierLevel/{tierLevel}':
 
 #-----------------------------------------------------
 # Retrieve the list of all available policies
@@ -206,6 +206,8 @@ paths:
           description: |
             Unsupported media type.
             The entity of the request was in a not supported format.
+
+  '/policies/tierLevel/{tierLevel}/tierName/{tierName}':
 #-----------------------------------------------------
 # Update a certain policy
 #-----------------------------------------------------

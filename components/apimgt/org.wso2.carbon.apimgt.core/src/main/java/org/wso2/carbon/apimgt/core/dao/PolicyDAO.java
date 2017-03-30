@@ -32,13 +32,43 @@ import java.util.List;
  */
 public interface PolicyDAO {
 
+
+    /**
+     * Gets a Policy by Name and Level
+     *
+     * @param policyLevel Policy level to which this policy belongs to
+     * @param policyName Policy Name
+     * @return @{@link Policy}
+     * @throws APIMgtDAOException
+     */
     Policy getPolicy(String policyLevel, String policyName) throws APIMgtDAOException;
 
+    /**
+     * Gets all the Policies belongs to a level
+     *
+     * @param policyLevel Policy level
+     * @return {@link List<Policy>} List Policies belongs to the provided level
+     * @throws APIMgtDAOException If failed to get Policies
+     */
     List<Policy> getPolicies(String policyLevel) throws APIMgtDAOException;
 
+    /**
+     * Adds a Policy belongs to a level
+     *
+     * @param policyLevel Policy Level to which this Policy belongs to
+     * @param policy Policy to add
+     * @throws APIMgtDAOException If failed to add a Policy
+     */
     void addPolicy(String policyLevel, Policy policy) throws APIMgtDAOException;
 
-    void deletePolicy(String policyName);
+    /**
+     * Deletes a Policy by Name and Level
+     *
+     * @param policyName Policy Name to delete
+     * @param policyLevel Policy Level to which the policy belongs to
+     * @throws APIMgtDAOException If failed to delete a policy.
+     */
+    void deletePolicy(String policyName, String policyLevel) throws APIMgtDAOException;
 
     /**
      * Retrieves Subscription Policy by name

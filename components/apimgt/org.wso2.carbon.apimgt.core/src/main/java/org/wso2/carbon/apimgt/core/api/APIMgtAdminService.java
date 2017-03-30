@@ -79,10 +79,11 @@ public interface APIMgtAdminService {
     /**
      * Delete existing @{@link Policy} in the system
      *
-     * @param policy Policy object to be deleted.
-     * @throws APIManagementException If failed to delete the policy.
+     * @param policyName    Policy Name to be deleted.
+     * @param policyLevel Policy Level to which above Policy belongs to
+     * @throws APIManagementException   If failed to delete the policy.
      */
-    void deletePolicy(Policy policy) throws APIManagementException;
+    void deletePolicy(String policyName, String policyLevel) throws APIManagementException;
 
 
     /**

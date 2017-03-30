@@ -19,18 +19,55 @@ $(function () {
         };
         var mode = "OVERWRITE";
         var obj = {};
-        obj.list=response.obj;
+        obj.list = response.obj;
         UUFClient.renderFragment("org.wso2.carbon.apimgt.web.admin.feature.policy-view", obj,
                                  "policy-view", mode, callbacks);
-    });
-    promised_get_tiers.catch(
-            function (error) {
-                console.log("Error occurred while loading swagger definition");
-                if (error.status == 401) {
-                    redirectToLogin(contextPath);
+        promised_get_tiers.catch(
+                function (error) {
+                    if (error.status == 401) {
+                        redirectToLogin(contextPath);
+                    }
                 }
+        );
+    })
+
+        $(document).on('click', 'a.deletePolicy', function () {
+            var policyId = $(this).attr("data-id");
+            var type = "alert";
+            var layout = "topCenter";
+
+            noty({
+                     text : "Do you want to delete the policy",
+                     type : type,
+                     dismissQueue: true,
+                     layout: layout,
+                     theme: 'relax',
+                     buttons : [
+                         { addClass: 'btn btn-primary', text: 'Ok', onClick: function ($noty) {
+                             $noty.close();
+                             var promised_delete_tier =  policyInstance.deletePolicy("application", policyId);
+                             promised_delete_tier.then(deletePolicySuccessCallback)
+                                     .catch(function (error) {
+                                         var message = "Error occurred while deleting application";
+                                         noty({
+                                                  text: message,
+                                                  type: 'warning',
+                                                  dismissQueue: true,
+                                                  modal: true,
+                                                  progressBar: true,
+                                                  timeout: 2000,
+                                                  layout: 'top',
+                                                  theme: 'relax',
+                                                  maxVisible: 10,
+                                              });
+                                     });
+                             }
+                         },
+            {addClass: 'btn btn-danger', text: 'Cancel', onClick: function ($noty) {
+                $noty.close();}
             }
-    );
+            ]
+        })})
 
     function _initDataTable(raw_data) {
         $('#api-policy').DataTable({
@@ -76,13 +113,34 @@ $(function () {
             var deleteSpanIcon = $("<span>").addClass("fw-stack").append(deleteIcon1).append(deleteIcon2);
             var deleteSpanText = $("<span>").addClass("hidden-xs").text("delete");
             var delete_button = $('<a>', {id: data, href: '#', 'data-id': data, title: 'delete'})
-                    .addClass("btn btn-sm padding-reduce-on-grid-view deleteApp")
+                    .addClass("btn btn-sm padding-reduce-on-grid-view deletePolicy")
                     .append(deleteSpanIcon)
                     .append(deleteSpanText);
             return $('<div></div>').append(edit_button).append(delete_button).html();
         } else {
             return data;
         }
+    }
+
+    function deletePolicySuccessCallback(response) {
+        //TODO: Reload element only
+        var message = "Application deleted successfully";
+        noty({
+                 text: message,
+                 type: 'success',
+                 dismissQueue: true,
+                 modal: true,
+                 progressBar: true,
+                 timeout: 3000,
+                 layout: 'top',
+                 theme: 'relax',
+                 maxVisible: 10,
+                 callback: {
+                     afterClose: function () {
+                         window.location = contextPath + "/throttling/application-throttling";
+                     },
+                 }
+             });
     }
 
 })
