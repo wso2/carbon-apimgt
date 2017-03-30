@@ -543,6 +543,12 @@ public abstract class AbstractAPIManager implements APIManager {
     
     @Override
     public Label getLabelByName(String labelName) throws APIManagementException {
-        return labelDAO.getLabelByName(labelName);
+        try {
+            return labelDAO.getLabelByName(labelName);
+        } catch (APIMgtDAOException e) {
+            String message = "Error occured while retrieving Label information for " + labelName;
+            log.error(message);
+            throw new APIManagementException(message, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
     }
 }
