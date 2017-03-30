@@ -497,6 +497,8 @@ paths:
         This operation can be used to retrieve the swagger definition of an API.
       parameters:
         - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/labelName'
+        - $ref: '#/parameters/scheme'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
@@ -2809,6 +2811,27 @@ parameters:
       - resource
     required: true
 
+# Label name of the gateway
+# Specified as part of the query string
+  labelName:
+    name: labelName
+    in: query
+    description: |
+      Label name of the gateway
+    required: false
+    type: string
+    
+# Protocol of the gateway access URL
+# Specified as part of the query string
+  scheme:
+    name: scheme
+    in: query
+    description: |
+      Protocol of the gateway access URL.
+      Value should be either "http" or "https"
+    required: false
+    type: string
+
 # Used for pagination:
 # The maximum number of resoures to be returned by a GET
   limit:
@@ -2896,6 +2919,7 @@ parameters:
       Validator for API Minor Version
     type: string
     default: 1.0
+
 ######################################################
 # The resources used by some of the APIs above within the message body
 ######################################################
@@ -3781,4 +3805,5 @@ definitions:
                 type: string
             forTarget:
               type: string
+
 

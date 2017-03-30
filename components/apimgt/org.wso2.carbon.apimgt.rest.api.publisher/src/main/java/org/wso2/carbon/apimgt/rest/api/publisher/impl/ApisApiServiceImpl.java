@@ -10,6 +10,7 @@ import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -34,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -813,6 +815,8 @@ public class ApisApiServiceImpl extends ApisApiService {
      * Retrieves the swagger definition of an API
      * 
      * @param apiId UUID of API
+     * @param labelName Label name of the gateway
+     * @param scheme Transport scheme (http | https)
      * @param accept Accept header value
      * @param ifNoneMatch If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
@@ -821,19 +825,23 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response apisApiIdSwaggerGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince,
-            String minorVersion
-    ) throws NotFoundException {
+    public Response apisApiIdSwaggerGet(String apiId, String labelName, String scheme, String accept, 
+    		String ifNoneMatch, String ifModifiedSince, String minorVersion) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String existingFingerprint = apisApiIdSwaggerGetFingerprint(apiId, accept, ifNoneMatch, ifModifiedSince,
                     minorVersion);
             if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
-                    .contains(existingFingerprint)) {
+                    .contains(existingFingerprint) && StringUtils.isEmpty(labelName)) {
                 return Response.notModified().build();
             }
             String swagger = apiPublisher.getSwagger20Definition(apiId);
+            // Provide the swagger with label
+            if (!StringUtils.isEmpty(labelName)) {
+                Label label = apiPublisher.getLabelByName(labelName);
+                swagger = RestApiUtil.getSwaggerDefinitionWithLabel(swagger, label, scheme);
+            }
             return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(swagger).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving swagger definition of API : " + apiId;
@@ -1185,8 +1193,8 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response apisImportDefinitionPost(InputStream fileInputStream, FileInfo fileDetail, String url,
-            String contentType, String ifMatch, String ifUnmodifiedSince, String minorVersion)
+    public Response apisImportDefinitionPost(String contentType, InputStream fileInputStream, FileInfo fileDetail, String url,
+            String ifMatch, String ifUnmodifiedSince, String minorVersion)
             throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {

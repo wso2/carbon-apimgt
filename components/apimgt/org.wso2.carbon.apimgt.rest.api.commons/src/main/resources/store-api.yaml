@@ -199,6 +199,8 @@ paths:
         Get the swagger of an API
       parameters:
         - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/labelName'
+        - $ref: '#/parameters/scheme'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
@@ -1700,6 +1702,27 @@ parameters:
       - api
       - application
     required: true
+    
+# Label name of the gateway
+# Specified as part of the query string
+  labelName:
+    name: labelName
+    in: query
+    description: |
+      Label name 
+    required: false
+    type: string
+    
+# Protocol of the gateway access URL
+# Specified as part of the query string
+  scheme:
+    name: scheme
+    in: query
+    description: |
+      Protocol of the gateway access URL.
+      Value should be either "http" or "https"
+    required: false
+    type: string
 
 # Used for pagination:
 # The maximum number of resoures to be returned by a GET
