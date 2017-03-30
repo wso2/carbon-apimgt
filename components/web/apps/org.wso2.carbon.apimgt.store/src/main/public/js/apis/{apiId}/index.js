@@ -702,8 +702,8 @@ var select_environment = function(){
     swaggerUi.api.clientAuthorizations.add("key", new SwaggerClient.ApiKeyAuthorization("Authorization", bearerToken, "header"));
     
     //Set Swagger URL
-    if (window.swaggerUi.api.url.indexOf("?")!=-1) {
-    	if (window.swaggerUi.api.url.indexOf("labelName")!=-1) {
+    if (window.swaggerUi.api.url.indexOf("?") != -1) {
+    	if (window.swaggerUi.api.url.indexOf("labelName") != -1) {
     		window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url.split("labelName")[0] + "labelName=" + name + "&scheme=" + location.protocol});
     	} else {
             window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "&labelName=" + name + "&scheme=" + location.protocol});
