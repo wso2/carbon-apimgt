@@ -5,8 +5,11 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
@@ -25,20 +28,18 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     private APISubscriptionDAO apiSubscriptionDAO;
     private PolicyDAO policyDAO;
     private ApiDAO apiDAO;
+    private LabelDAO labelDAO;
 
-    public APIMgtAdminServiceImpl(APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, ApiDAO apiDAO) {
+    public APIMgtAdminServiceImpl(APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, ApiDAO apiDAO,
+                                  LabelDAO labelDAO) {
         this.apiSubscriptionDAO = apiSubscriptionDAO;
         this.policyDAO = policyDAO;
         this.apiDAO = apiDAO;
-
+        this.labelDAO = labelDAO;
     }
 
     /**
-     * Return all API subscriptions
-     *
-     * @param limit Subscription Limit
-     * @return all subscriptions
-     * @throws APIManagementException   If failed to retrieve subscription list.
+     * @see #getAPISubscriptions(int)
      */
     @Override
     public List<SubscriptionValidationData> getAPISubscriptions(int limit) throws APIManagementException {
@@ -46,12 +47,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     }
 
     /**
-     * Return all API subscriptions of a given API
-     *
-     * @param apiContext Context of API
-     * @param apiVersion Version of API
-     * @return all subscriptions
-     * @throws APIManagementException   If failed to retrieve subscription list.
+     * @see #getAPISubscriptionsOfApi(String, String)
      */
     @Override
     public List<SubscriptionValidationData> getAPISubscriptionsOfApi(String apiContext, String apiVersion)
@@ -60,10 +56,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     }
 
     /**
-     * Load api info from db
-     *
-     * @return List summery of al the available apis
-     * @throws APIManagementException If failed to get API information.
+     * @see #getAPIInfo()
      */
     @Override
     public List<APISummary> getAPIInfo() throws APIManagementException {
@@ -80,28 +73,58 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         return apiSummaryList;
     }
 
+    /**
+     * @see #addPolicy(String, Policy)
+     */
     @Override
     public void addPolicy(String policyLevel, Policy policy) throws APIManagementException {
         policyDAO.addPolicy(policyLevel, policy);
     }
 
+    /**
+     * @see #updatePolicy(Policy)
+     */
     @Override
     public void updatePolicy(Policy policy) throws APIManagementException {
 
     }
 
+    /**
+     * @see #deletePolicy(Policy)
+     */
     @Override
     public void deletePolicy(Policy policy) throws APIManagementException {
 
     }
 
+    /**
+     * @see #getPolicy(String, String)
+     */
     @Override
     public Policy getPolicy(String policyLevel, String policyName) throws APIManagementException {
         return policyDAO.getPolicy(policyLevel, policyName);
     }
 
+    /**
+     * @see #getAllPoliciesByLevel(String)
+     */
     @Override
     public List<Policy> getAllPoliciesByLevel(String policyLevel) throws APIManagementException {
         return policyDAO.getPolicies(policyLevel);
+    }
+
+    /**
+     * @see #deleteLabel(String)
+     */
+    @Override
+    public void deleteLabel(String labelId) throws APIManagementException {
+
+        try {
+            labelDAO.deleteLabel(labelId);
+        } catch (APIMgtDAOException e) {
+            String msg = "Error occurred while deleting label [labelId] " + labelId;
+            log.error(msg, e);
+            throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
     }
 }
