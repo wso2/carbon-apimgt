@@ -1562,7 +1562,7 @@ paths:
             OK.
             Workflow request information is returned.
           schema:
-            $ref: '#/definitions/Workflow'
+            $ref: '#/definitions/WorkflowResponse'
           headers:
             Content-Type:
               description: |
@@ -2010,6 +2010,8 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/ApplicationKey'
+      workflowResponse:
+        $ref: '#/definitions/WorkflowResponse'
 
 #-----------------------------------------------------
 # The Application Info resource
@@ -2231,6 +2233,8 @@ definitions:
           - ACTIVE
           - ON_HOLD
           - REJECTED
+      workflowResponse:
+        $ref: '#/definitions/WorkflowResponse'
 
 #-----------------------------------------------------
 # The Tag resource
@@ -2578,7 +2582,30 @@ definitions:
       description:
         type: string
         example: "Approve workflow request."
-        
+
+#-----------------------------------------------------
+# The workflow executor's response resource
+#-----------------------------------------------------
+  WorkflowResponse:
+    title: workflow Response
+    required:
+      - workflowStatus
+    properties:
+      workflowStatus:
+        description: |
+          This attribute declares whether this workflow task is approved or rejected.
+        type: string
+        enum:
+          - CREATED
+          - APPROVED
+          - REJECTED
+          - REGISTERED
+        example: APPROVED
+      jsonPayload:
+        description: |
+          Attributes that returned after the workflow execution
+        type: string
+       
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------
