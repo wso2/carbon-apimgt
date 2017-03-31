@@ -582,8 +582,8 @@ function initDataTable(raw_data) {
             {'data': 'documentId'},
             {'data': 'name'},
             {'data': 'sourceType'},
+            {'data': null}
             //TODO add modified date column once the service implementation is completed.
-            {'data': null},
         ],
                 columnDefs: [
                     {
@@ -669,13 +669,12 @@ function createDocHandler(event) {
              console.debug(error_response);
             }).then(function(done) {
               var dt_data = done.obj;
+              var documentId = dt_data.documentId;
               var name = dt_data.name;
-              var type = dt_data.type;
+              var sourceType = dt_data.sourceType;
               var docId = dt_data.documentId;
-
-              var t = $('#doc-table').DataTable();
-              t.row.add({name,type,name, _renderActionButtons}).draw();
-
+              var data_table = $('#doc-table').DataTable();
+              data_table.row.add({documentId,name,sourceType, _renderActionButtons}).draw();
             });
  }
 
@@ -808,7 +807,8 @@ function createDocHandler(event) {
             $('#sourceUrlDoc').fadeOut("slow");
             $('#fileNameDiv').fadeOut("slow");
          }
-
+            $('#fileNameDiv').fadeOut("slow");
+            $('#update-doc-submit').fadeIn("slow");
          $('#docName').disabled = true;
     }
 
