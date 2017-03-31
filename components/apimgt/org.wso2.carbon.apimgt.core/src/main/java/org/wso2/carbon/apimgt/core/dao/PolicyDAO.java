@@ -38,8 +38,8 @@ public interface PolicyDAO {
      *
      * @param policyLevel Policy level to which this policy belongs to
      * @param policyName Policy Name
-     * @return @{@link Policy}
-     * @throws APIMgtDAOException
+     * @return {@link Policy} Gets a Policy by given name and level
+     * @throws APIMgtDAOException If failed to get the Policy
      */
     Policy getPolicy(String policyLevel, String policyName) throws APIMgtDAOException;
 
@@ -47,7 +47,7 @@ public interface PolicyDAO {
      * Gets all the Policies belongs to a level
      *
      * @param policyLevel Policy level
-     * @return {@link List<Policy>} List Policies belongs to the provided level
+     * @return {@link List} List Policies belongs to the provided level
      * @throws APIMgtDAOException If failed to get Policies
      */
     List<Policy> getPolicies(String policyLevel) throws APIMgtDAOException;
@@ -75,7 +75,7 @@ public interface PolicyDAO {
      *
      * @param policyName Subscription policy name
      * @return {@link SubscriptionPolicy} of given UUID
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException If failed to get a Subscription Policy by Name
      */
     SubscriptionPolicy getSubscriptionPolicy(String policyName) throws APIMgtDAOException;
 
