@@ -92,6 +92,7 @@ public class APIMgtConstants {
     public enum SubscriptionStatus {
         BLOCKED,
         PROD_ONLY_BLOCKED,
+        SANDBOX_ONLY_BLOCKED,
         ACTIVE,
         ON_HOLD,
         REJECTED

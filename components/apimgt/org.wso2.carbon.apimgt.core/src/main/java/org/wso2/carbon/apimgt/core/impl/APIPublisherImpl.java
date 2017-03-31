@@ -138,15 +138,24 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     /**
-     * Get a list of all the consumers for all APIs
+     * Get a list of subscriptions for provider's APIs
      *
-     * @param providerId if of the provider
-     * @return {@code Set<String>}
-     * @throws APIManagementException if failed to get subscribed APIs of given provider
+     * @param offset Starting index of the search results
+     * @param limit Number of search results returned
+     * @param providerName if of the provider
+     * @return {@code List<Subscriber>} List of subscriptions for provider's APIs
+     * @throws APIManagementException
      */
     @Override
-    public Set<String> getSubscribersOfProvider(String providerId) throws APIManagementException {
-        return null;
+    public List<Subscription> getSubscribersOfProvider(int offset, int limit, String providerName)
+            throws APIManagementException {
+        try {
+            return getApiSubscriptionDAO().getAPISubscriptionsForUser(offset, limit, providerName);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Unable to fetch subscriptions APIs of provider " + providerName;
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
     }
 
     /**
@@ -285,7 +294,20 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
                 createdAPI = apiBuilder.build();
                 APIUtils.validate(createdAPI);
-                getApiDAO().addAPI(createdAPI);
+                List<String> apiRoleList;
+                //if the API has public visibility, add the API without any role checking
+                //if the API has role based visibility, add the API with role checking
+                if (API.Visibility.PUBLIC == createdAPI.getVisibility()) {
+                    getApiDAO().addAPI(createdAPI);
+                } else if (API.Visibility.RESTRICTED == createdAPI.getVisibility()) {
+                    //get all the roles in the system
+                    List<String> availableRoleList = APIUtils.getAllAvailableRoles();
+                    //get the roles needed to be associated with the API
+                    apiRoleList = createdAPI.getVisibleRoles();
+                    if (APIUtils.checkAllowedRoles(availableRoleList, apiRoleList)) {
+                        getApiDAO().addAPI(createdAPI);
+                    }
+                }
                 //publishing config to gateway
                 publishToGateway(createdAPI);
                 APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
@@ -374,7 +396,19 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     API api = apiBuilder.build();
                     if (originalAPI.getContext() != null && !originalAPI.getContext().equals(apiBuilder.getContext())) {
                         if (!checkIfAPIContextExists(api.getContext())) {
-                            getApiDAO().updateAPI(api.getId(), api);
+                            //if the API has public visibility, update the API without any role checking
+                            if (API.Visibility.PUBLIC == api.getVisibility()) {
+                                getApiDAO().updateAPI(api.getId(), api);
+                            } else if (API.Visibility.RESTRICTED == api.getVisibility()) {
+                                //get all the roles in the system
+                                List<String> availableRoleList = APIUtils.getAllAvailableRoles();
+                                //get the roles needed to be associated with the API
+                                List<String> apiRoleList = api.getVisibleRoles();
+                                //if the API has role based visibility, update the API with role checking
+                                if (APIUtils.checkAllowedRoles(availableRoleList, apiRoleList)) {
+                                    getApiDAO().updateAPI(api.getId(), api);
+                                }
+                            }
                             getApiDAO().updateSwaggerDefinition(api.getId(), updatedSwagger, api.getUpdatedBy());
                             getApiDAO().updateGatewayConfig(api.getId(), updatedGatewayConfig, api.getUpdatedBy());
                         } else {
@@ -382,7 +416,19 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                                     .API_ALREADY_EXISTS);
                         }
                     } else {
-                        getApiDAO().updateAPI(api.getId(), api);
+                        //if the API has public visibility, update the API without any role checking
+                        if (API.Visibility.PUBLIC == api.getVisibility()) {
+                            getApiDAO().updateAPI(api.getId(), api);
+                        } else if (API.Visibility.RESTRICTED == api.getVisibility()) {
+                            //get all the roles in the system
+                            List<String> availableRoleList = APIUtils.getAllAvailableRoles();
+                            //get the roles needed to be associated with the API
+                            List<String> apiRoleList = api.getVisibleRoles();
+                            //if the API has role based visibility, update the API with role checking
+                            if (APIUtils.checkAllowedRoles(availableRoleList, apiRoleList)) {
+                                getApiDAO().updateAPI(api.getId(), api);
+                            }
+                        }
                         getApiDAO().updateSwaggerDefinition(api.getId(), updatedSwagger, api.getUpdatedBy());
                         getApiDAO().updateGatewayConfig(api.getId(), updatedGatewayConfig, api.getUpdatedBy());
                     }
@@ -986,8 +1032,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         try {
             //TODO: Need to validate users roles against results returned
             if (query != null && !query.isEmpty()) {
-                List<String> roles = new ArrayList<>();
                 String user = "admin";
+                List<String> roles = APIUtils.getAllRolesOfUser(user);
                 //TODO get the logged in user and user roles from key manager.
                 apiResults = getApiDAO().searchAPIs(roles, user, query, offset, limit);
             } else {

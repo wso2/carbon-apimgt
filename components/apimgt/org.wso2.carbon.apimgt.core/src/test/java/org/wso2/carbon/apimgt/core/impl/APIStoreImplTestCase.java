@@ -92,7 +92,8 @@ public class APIStoreImplTestCase {
         Mockito.when(apiDAO.searchAPIs(new ArrayList<>(), "admin", "pizza", 1, 2)).thenReturn(apimResultsFromDAO);
         List<API> apis = apiStore.searchAPIs("pizza", 1, 2);
         Assert.assertNotNull(apis);
-        Mockito.verify(apiDAO, Mockito.atLeastOnce()).searchAPIs(new ArrayList<>(), "admin", "pizza", 1, 2);
+        Mockito.verify(apiDAO, Mockito.atLeastOnce()).searchAPIs(APIUtils.getAllRolesOfUser("admin"),
+                "admin", "pizza", 1, 2);
     }
 
     @Test(description = "Search APIs with an empty query")
@@ -106,7 +107,7 @@ public class APIStoreImplTestCase {
         Mockito.when(apiDAO.getAPIsByStatus(statuses)).thenReturn(apimResultsFromDAO);
         List<API> apis = apiStore.searchAPIs("", 1, 2);
         Assert.assertNotNull(apis);
-        Mockito.verify(apiDAO, Mockito.atLeastOnce()).getAPIsByStatus(statuses);
+        Mockito.verify(apiDAO, Mockito.atLeastOnce()).getAPIsByStatus(APIUtils.getAllRolesOfUser("admin"), statuses);
     }
 
     @Test(description = "Search API", expectedExceptions = APIManagementException.class)
@@ -115,7 +116,8 @@ public class APIStoreImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
         PowerMockito.mockStatic(APIUtils.class); // TODO
-        Mockito.when(apiDAO.searchAPIs(new ArrayList<>(), "admin", "select *", 1, 2)).thenThrow(APIMgtDAOException
+        Mockito.when(apiDAO.searchAPIs(APIUtils.getAllRolesOfUser("admin"), "admin",
+                "select *", 1, 2)).thenThrow(APIMgtDAOException
                 .class);
         //doThrow(new Exception()).when(APIUtils).logAndThrowException(null, null, null)).
         apiStore.searchAPIs("select *", 1, 2);

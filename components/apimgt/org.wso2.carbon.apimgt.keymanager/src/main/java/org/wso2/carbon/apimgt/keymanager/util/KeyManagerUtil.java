@@ -173,6 +173,7 @@ public class KeyManagerUtil {
         userMap.put("subscriber", "subscriber");
         userMap.put("John", "John");
         userMap.put("Smith", "Smith");
+        userMap.put("Alex", "Alex");
         userScopesMap.put("admin", adminScopes);
         userScopesMap.put("subscriber", subsciberScopes);
         userScopesMap.put("John", adminScopes);

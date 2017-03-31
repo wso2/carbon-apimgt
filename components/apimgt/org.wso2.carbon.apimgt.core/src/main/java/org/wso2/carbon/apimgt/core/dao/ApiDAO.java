@@ -110,6 +110,17 @@ public interface ApiDAO {
     List<API> getAPIsByStatus(List<String> statuses) throws APIMgtDAOException;
 
     /**
+     * Retrieves summary data of all available APIs with life cycle status that matches the status list provided
+     * which has role based visibility
+     *
+     * @param roles    role list of current user
+     * @param statuses status of APIs to be returned
+     * @return API list
+     * @throws APIMgtDAOException if failed to fetch APIs from database
+     */
+    List<API> getAPIsByStatus(List<String> roles, List<String> statuses) throws APIMgtDAOException;
+
+    /**
      * Retrieves summary of paginated data of all available APIs that match the given search criteria. This will use
      * the full text search for API table
      * @param roles     List of the roles of the user.

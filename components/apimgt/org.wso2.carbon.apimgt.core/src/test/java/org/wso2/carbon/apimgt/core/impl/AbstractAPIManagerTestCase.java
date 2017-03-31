@@ -21,11 +21,13 @@ import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
+import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 
 import java.io.ByteArrayInputStream;
@@ -52,6 +54,7 @@ public class AbstractAPIManagerTestCase {
     private static final String LAST_UPDATED_TIME = "2017-03-19T13:45:30";
     public static final String UUID = "7a2298c4-c905-403f-8fac-38c73301631f";
     public static final String DOC_ID = "docId";
+    public static final String LABEL_NAME = "testLabel";
 
     @Test(description = "Search API by UUID")
     public void testSearchAPIByUUID() throws APIManagementException {
@@ -451,6 +454,16 @@ public class AbstractAPIManagerTestCase {
         apiPublisher.getDocumentationContent(DOC_ID);
         verify(apiDAO, times(0)).getDocumentFileContent(DOC_ID);
         verify(apiDAO, times(0)).getDocumentInlineContent(DOC_ID);
+    }
+    
+    @Test(description = "Get Label by name")
+    public void testGetLabelByName() throws APIManagementException {
+        LabelDAO labelDAO = mock(LabelDAO.class);
+        Label label = SampleTestObjectCreator.createLabel(LABEL_NAME).build();
+        AbstractAPIManager apiManager = new APIPublisherImpl(USER_NAME, null, null, null, null, null, labelDAO, null);
+        when(labelDAO.getLabelByName(LABEL_NAME)).thenReturn(label);
+        apiManager.getLabelByName(LABEL_NAME);
+        verify(labelDAO, times(1)).getLabelByName(LABEL_NAME);
     }
 
 }

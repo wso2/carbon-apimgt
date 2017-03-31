@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
+import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
@@ -61,13 +62,16 @@ public interface APIPublisher extends APIManager {
     List<API> getAPIsByProvider(String providerName) throws APIManagementException;
 
     /**
-     * Get a list of all the consumers for all APIs
+     * Get a list of subscriptions for provider's APIs
      *
-     * @param providerId if of the provider
-     * @return {@code Set<Subscriber>}
+     * @param offset Starting index of the search results
+     * @param limit Number of search results returned
+     * @param providerName if of the provider
+     * @return {@code List<Subscriber>} List of subscriptions for provider's APIs
      * @throws APIManagementException if failed to get subscribed APIs of given provider
      */
-    Set<String> getSubscribersOfProvider(String providerId) throws APIManagementException;
+    List<Subscription> getSubscribersOfProvider(int offset, int limit, String providerName)
+            throws APIManagementException;
 
     /**
      * get details of provider

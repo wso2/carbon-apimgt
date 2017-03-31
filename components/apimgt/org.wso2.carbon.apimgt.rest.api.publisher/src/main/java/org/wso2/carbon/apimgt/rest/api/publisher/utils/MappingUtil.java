@@ -340,12 +340,11 @@ public class MappingUtil {
      */
     public static SubscriptionDTO fromSubscription(Subscription subscription) {
         SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
-        subscriptionDTO.setApplicationId(subscription.getId());
-        subscriptionDTO.setLifeCycleStatus(
-                SubscriptionDTO.LifeCycleStatusEnum.fromValue(subscription.getStatus().toString()));
-        subscriptionDTO.setApplicationId(subscription.getApplication().getId());
-        subscriptionDTO.setApiIdentifier(subscription.getApi().getId());
-        subscriptionDTO.setPolicy(subscription.getSubscriptionTier());
+        subscriptionDTO.setSubscriptionId(subscription.getId());
+        subscriptionDTO.setSubscriptionStatus(
+                SubscriptionDTO.SubscriptionStatusEnum.fromValue(subscription.getStatus().toString()));
+        subscriptionDTO.setApplicationInfo(toApplicationDto(subscription.getApplication()));
+        subscriptionDTO.setSubscriptionTier(subscription.getSubscriptionTier());
         return subscriptionDTO;
     }
 
@@ -405,6 +404,7 @@ public class MappingUtil {
         List<LabelDTO> labelDTOs = new ArrayList<>();
         for (Label label : labels) {
             LabelDTO labelDTO = new LabelDTO();
+            labelDTO.setLabelId(label.getId());
             labelDTO.setName(label.getName());
             labelDTO.setAccessUrls(label.getAccessUrls());
             labelDTOs.add(labelDTO);

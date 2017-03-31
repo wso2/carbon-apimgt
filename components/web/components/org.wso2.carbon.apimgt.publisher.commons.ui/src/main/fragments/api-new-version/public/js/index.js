@@ -47,7 +47,7 @@ function createNewVersion(event) {
                 maxVisible: 10,
                 callback: {
                     afterClose: function () {
-                        window.location = contextPath + "/";
+                        window.location = contextPath + "/apis/" + response.obj.id;
                     },
                 }
             });

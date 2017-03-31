@@ -85,7 +85,12 @@ public enum ExceptionCodes implements ErrorHandler {
     WORKFLOW_NOT_FOUND(900325, "Workflow error", 500,
             "Error while retrieving worklow task for the reference id"),
     WORKFLOW_COMPLETED(900326, "Workflow error", 500,
-            "Workflow is already completed");
+            "Workflow is already completed"),
+    ROLES_CANNOT_BE_EMPTY(900327, "Role list cannot be empty", 400, " Role list cannot be empty"),
+    ROLES_CANNOT_BE_NULL(900328, "Role list cannot be null", 400, " Role list cannot be null"),
+    UNSUPPORTED_ROLE(900329, "Non existing roles cannot be added to an API", 400,
+            " Non existing roles cannot be added to an API");
+
 
     private final long errorCode;
     private final String errorMessage;

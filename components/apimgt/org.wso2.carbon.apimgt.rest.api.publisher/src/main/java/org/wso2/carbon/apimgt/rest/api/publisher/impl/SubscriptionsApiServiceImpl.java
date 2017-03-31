@@ -1,5 +1,8 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
+import java.util.List;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +13,6 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.publisher.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
@@ -18,32 +20,31 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import java.util.List;
-
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:47:43.416+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
+        "2016-11-01T13:47:43.416+05:30")
 public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
     private static final Logger log = LoggerFactory.getLogger(SubscriptionsApiService.class);
 
     /**
      * Block an existing subscription
-     * 
-     * @param subscriptionId ID of the subscription
-     * @param blockState Subscription block state
-     * @param ifMatch If-Match header value
+     *
+     * @param subscriptionId    ID of the subscription
+     * @param blockState        Subscription block state
+     * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @param minorVersion Minor version header
+     * @param minorVersion      Minor version header
      * @return Updated subscription DTO as the response
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response subscriptionsBlockSubscriptionPost(String subscriptionId, String blockState, String ifMatch,
-            String ifUnmodifiedSince, String minorVersion) throws NotFoundException {
+                                                       String ifUnmodifiedSince, String minorVersion) throws
+            NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            apiPublisher.updateSubscriptionStatus(subscriptionId, APIMgtConstants.SubscriptionStatus.valueOf(blockState));
+            apiPublisher.updateSubscriptionStatus(subscriptionId, APIMgtConstants.SubscriptionStatus.valueOf
+                    (blockState));
             Subscription newSubscription = apiPublisher.getSubscriptionByUUID(subscriptionId);
             SubscriptionDTO subscriptionDTO = MappingUtil.fromSubscription(newSubscription);
             return Response.ok().entity(subscriptionDTO).build();
@@ -56,26 +57,32 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
     /**
      * Retrieve all subscriptions for a particular API
-     * 
-     * @param apiId ID of the API 
-     * @param limit Maximum subscriptions to return
-     * @param offset Starting position of the pagination
-     * @param accept Accept header value
-     * @param ifNoneMatch If-Match header value
+     *
+     * @param apiId        ID of the API
+     * @param limit        Maximum subscriptions to return
+     * @param offset       Starting position of the pagination
+     * @param accept       Accept header value
+     * @param ifNoneMatch  If-Match header value
      * @param minorVersion Minor version header
      * @return List of qualifying subscriptions DTOs as the response
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response subscriptionsGet(String apiId, Integer limit, Integer offset, String accept, String ifNoneMatch,
-            String minorVersion) throws NotFoundException {
+                                     String minorVersion) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
+        List<Subscription> subscriptionList;
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            List<Subscription> subscriptionList = apiPublisher.getSubscriptionsByAPI(apiId);
-            SubscriptionListDTO subscriptionListDTO = MappingUtil.fromSubscriptionListToDTO(subscriptionList, limit,
-                    offset);
-            return Response.ok().entity(subscriptionListDTO).build();
+            if (StringUtils.isNotEmpty(apiId)) {
+                subscriptionList = apiPublisher.getSubscriptionsByAPI(apiId);
+                SubscriptionListDTO subscriptionListDTO = MappingUtil.fromSubscriptionListToDTO(subscriptionList, limit,
+                        offset);
+                return Response.ok().entity(subscriptionListDTO).build();
+            } else {
+                RestApiUtil.handleBadRequest("API ID can not be null", log);
+            }
+
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
@@ -91,18 +98,19 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
     /**
      * Retrieves a single subscription
-     * 
-     * @param subscriptionId ID of the subscription
-     * @param accept Accept header value
-     * @param ifNoneMatch If-Match header value
+     *
+     * @param subscriptionId  ID of the subscription
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-Match header value
      * @param ifModifiedSince If-Modified-Since value
-     * @param minorVersion Minor version header
+     * @param minorVersion    Minor version header
      * @return Requested subscription details
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response subscriptionsSubscriptionIdGet(String subscriptionId, String accept, String ifNoneMatch,
-            String ifModifiedSince, String minorVersion) throws NotFoundException {
+    public Response subscriptionsSubscriptionIdGet(String subscriptionId, String accept, String ifNoneMatch, String
+            ifModifiedSince, String minorVersion) throws
+            NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -129,16 +137,16 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
     /**
      * Retrieve the fingerprint of the subscription
-     * 
-     * @param subscriptionId ID of the subscription
-     * @param accept Accept header value
-     * @param ifNoneMatch If-Match header value
+     *
+     * @param subscriptionId  ID of the subscription
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-Match header value
      * @param ifModifiedSince If-Modified-Since value
-     * @param minorVersion Minor version header
+     * @param minorVersion    Minor version header
      * @return Fingerprint of the subscription
      */
     public String subscriptionsSubscriptionIdGetFingerprint(String subscriptionId, String accept, String ifNoneMatch,
-            String ifModifiedSince, String minorVersion) {
+                                                            String ifModifiedSince, String minorVersion) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username)
@@ -152,10 +160,29 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         }
     }
 
+    /**
+     * @param subscriptionId    ID of the subscription
+     * @param ifMatch           If-Match header value
+     * @param ifUnmodifiedSince If-Modified-Since value
+     * @param minorVersion      Minor version header
+     * @return Minor version header
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
-    public Response subscriptionsUnblockSubscriptionPost(String subscriptionId, String ifMatch,
-            String ifUnmodifiedSince, String minorVersion) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+    public Response subscriptionsUnblockSubscriptionPost(String subscriptionId, String ifMatch, String
+            ifUnmodifiedSince, String minorVersion) throws
+            NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            apiPublisher.updateSubscriptionStatus(subscriptionId, APIMgtConstants.SubscriptionStatus.ACTIVE);
+            Subscription newSubscription = apiPublisher.getSubscriptionByUUID(subscriptionId);
+            SubscriptionDTO subscriptionDTO = MappingUtil.fromSubscription(newSubscription);
+            return Response.ok().entity(subscriptionDTO).build();
+        } catch (APIManagementException e) {
+            String msg = "Error while unblocking the subscription " + subscriptionId;
+            RestApiUtil.handleInternalServerError(msg, e, log);
+        }
+        return null;
     }
 }
