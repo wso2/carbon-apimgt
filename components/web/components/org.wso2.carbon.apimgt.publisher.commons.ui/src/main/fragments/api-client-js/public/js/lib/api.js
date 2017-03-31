@@ -309,16 +309,16 @@ class API {
             payload = {file: api_data, 'Content-Type': "multipart/form-data"};
             promise_create = this.client.then(
                 (client) => {
-                    return client["API (Collection)"].post_apis_import_definition(
-                        payload, this._requestMetaData({'Content-Type': "multipart/form-data"})).catch(AuthClient.unauthorizedErrorHandler);
+                    return client["API (Collection)"].post_apis_import_definition(payload,
+                    this._requestMetaData({'Content-Type': "multipart/form-data"})).catch(AuthClient.unauthorizedErrorHandler);
                 }
             );
         } else if (api_data.type == 'swagger-url') {
             payload = {url: api_data.url, 'Content-Type': "multipart/form-data"};
             promise_create = this.client.then(
                     (client) => {
-                    return client["API (Collection)"].post_apis_import_definition(
-                        payload, this._requestMetaData({'Content-Type': "multipart/form-data"})).catch(AuthClient.unauthorizedErrorHandler);
+                    return client["API (Collection)"].post_apis_import_definition(payload,
+                    this._requestMetaData({'Content-Type': "multipart/form-data"})).catch(AuthClient.unauthorizedErrorHandler);
                     }
             );
         } else {
@@ -632,11 +632,11 @@ class API {
             return promised_addEndpoint;
         }
 
-    addFileToDocument(api_id,docId,filePath) {
+    addFileToDocument(api_id,docId,file) {
 
             var promised_addEndpoint = this.client.then(
                 (client) => {
-                    let payload = {apiId: api_id, documentId: docId,"Content-Type": "application/json"};
+                    let payload = {apiId: api_id, documentId: docId, file:file, "Content-Type": "application/json"};
                     return client["Document (Individual)"].post_apis_apiId_documents_documentId_content(
                         payload, this._requestMetaData({"Content-Type": "multipart/form-data"}));
                 }
@@ -660,11 +660,33 @@ class API {
             }
     }
 
+    updateDocument(api_id, docId, body) {
+            var promised_addEndpoint = this.client.then(
+                (client) => {
+                   let payload = {apiId: api_id, body:body, documentId:$('#docId').val(),"Content-Type": "application/json"};
+                       return client["Document (Individual)"].put_apis_apiId_documents_documentId(
+                            payload, this._requestMetaData());
+                   }
+                ).catch(AuthClient.unauthorizedErrorHandler);
+                return promised_addEndpoint;
+            }
+
+    getDocument(api_id, docId, callback) {
+            var promise_get_all = this.client.then(
+                (client) => {
+                    return client["Document (Individual)"].get_apis_apiId_documents_documentId({apiId: api_id, documentId: docId},
+                    this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+                }
+            );
+            return promise_get_all;
+    }
+
 
     deleteDocument(api_id,document_id) {
             var promise_get_all = this.client.then(
                 (client) => {
-                    return client["Document (Individual)"].delete_apis_apiId_documents_documentId({apiId: api_id, documentId:document_id}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+                    return client["Document (Individual)"].delete_apis_apiId_documents_documentId({apiId: api_id, documentId:document_id},
+                    this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
                 }
             );
             return promise_get_all;
