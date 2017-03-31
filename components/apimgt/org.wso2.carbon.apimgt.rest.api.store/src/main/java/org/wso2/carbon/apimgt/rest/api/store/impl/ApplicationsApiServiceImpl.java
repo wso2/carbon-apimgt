@@ -375,6 +375,8 @@ public class ApplicationsApiServiceImpl
             log.error(errorMessage, e);
             return Response.status(errorHandler.getHttpStatusCode()).entity(errorDTO).build();
         }
-        return Response.created(location).entity(createdApplicationDTO).build();
+        // TODO: set location header once msf4j is updates : Response.created(location).entity(createdApplicationDTO)
+        // .build()
+        return Response.ok().header("Location", location).entity(createdApplicationDTO).build();
     }
 }
