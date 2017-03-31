@@ -21,7 +21,9 @@ import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.SubscriptionMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.store.mappings.WorkflowMappintUtil;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
@@ -128,6 +130,11 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                 String subscriptionId = addSubResponse.getSubscriptionUUID();
                 Subscription subscription = apiStore.getSubscriptionByUUID(subscriptionId);
                 subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscription);
+                
+                WorkflowResponseDTO workflowResponse = WorkflowMappintUtil
+                        .fromWorkflowResponsetoDTO(addSubResponse.getWorkflowResponse());
+                subscriptionDTO.setWorkflowResponse(workflowResponse);
+
             } else {
                 String errorMessage = null;
                 ExceptionCodes exceptionCode = null;

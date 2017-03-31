@@ -246,10 +246,12 @@ public interface APIManager {
      * Complete workflow task 
      * @param workflowExecutor executor related to the workflow task
      * @param workflow workflow object
+     * @return WorkflowResponse WorkflowResponse of the executor
      * @throws APIManagementException if API Manager core level exception occurred
      */
-    void completeWorkflow(WorkflowExecutor workflowExecutor, Workflow workflow) throws APIManagementException;
-    
+    WorkflowResponse completeWorkflow(WorkflowExecutor workflowExecutor, Workflow workflow)
+            throws APIManagementException;
+
     /**
      * Retrieves Label information of the given label.
      * 

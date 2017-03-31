@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
+import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
@@ -35,8 +36,11 @@ import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.WorkflowsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.store.mappings.WorkflowMappintUtil;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
@@ -89,11 +93,19 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
                 }
 
                 if (body.getAttributes() != null) {
-                    workflow.setAttributes(body.getAttributes());
+                    Map<String, String> existingAttributs = workflow.getAttributes();
+                    Map<String, String> newAttributes = body.getAttributes();
+                    if (existingAttributs == null) {
+                        workflow.setAttributes(newAttributes);
+                    } else {
+                        newAttributes.forEach(existingAttributs::putIfAbsent);
+                        workflow.setAttributes(existingAttributs);
+                    }                
                 }
 
-                apiStore.completeWorkflow(workflowExecutor, workflow);
-                return Response.ok().entity(body).build();
+                WorkflowResponse response = apiStore.completeWorkflow(workflowExecutor, workflow);
+                WorkflowResponseDTO workflowResponseDTO = WorkflowMappintUtil.fromWorkflowResponsetoDTO(response);
+                return Response.ok().entity(workflowResponseDTO).build();
             }
 
         } catch (APIManagementException e) {
@@ -104,5 +116,5 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-    }
+    }    
 }

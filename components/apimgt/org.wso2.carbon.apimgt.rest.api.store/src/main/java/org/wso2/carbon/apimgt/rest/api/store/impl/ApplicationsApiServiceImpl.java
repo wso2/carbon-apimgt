@@ -28,8 +28,10 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.store.mappings.WorkflowMappintUtil;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -351,6 +353,9 @@ public class ApplicationsApiServiceImpl
             String applicationUUID = applicationResponse.getApplicationUUID();
             Application createdApplication = apiConsumer.getApplication(applicationUUID, username, groupId);
             createdApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(createdApplication);
+            WorkflowResponseDTO workflowResponse = WorkflowMappintUtil
+                    .fromWorkflowResponsetoDTO(applicationResponse.getWorkflowResponse());
+            createdApplicationDTO.setWorkflowResponse(workflowResponse);
 
             location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" +
                                 createdApplicationDTO.getApplicationId());
