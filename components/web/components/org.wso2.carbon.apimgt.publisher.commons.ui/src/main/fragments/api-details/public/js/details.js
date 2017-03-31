@@ -561,7 +561,7 @@ function showTab(tab_name) {
             var icon = $("<i>").addClass("fw");
             var edit_button = $('<a>', {id: data.id, href: data.id})
                 .text('Edit ')
-                .addClass("cu-reg-btn btn-edit text-warning")
+                .addClass("cu-reg-btn btn-edit text-warning doc-listing-update")
                 .append(icon.addClass("fw-edit"));
             var delete_button = $('<a>', {id: data.id})
                 .text('Delete ')
@@ -579,12 +579,18 @@ function initDataTable(raw_data) {
             callback(raw_data);
         },
         columns: [
+            {'data': 'documentId'},
             {'data': 'name'},
-            {'data': 'type'},
-            {'data': null},
+            {'data': 'sourceType'},
+            //TODO add modified date column once the service implementation is completed.
             {'data': null},
         ],
                 columnDefs: [
+                    {
+                        "targets": [ 0 ],
+                        "visible": false,
+                        "searchable": false
+                    },
                     {
                         targets: ["doc-listing-action"], //class name will be matched on the TH for the column
                         searchable: false,
@@ -615,12 +621,6 @@ function documentTabHandler(event) {
     var callbacks = {
             onSuccess: function (data) {
             api_client.getDocuments(api_id,getDocsCallback);
-            $(".browse").on("click", function(){
-              var elem = $("#doc-file");
-               if(elem && document.createEvent) {
-                 elem.click();
-                }
-               })
             }, onFailure: function (data) {
            }
           };
@@ -635,10 +635,11 @@ function documentTabHandler(event) {
  */
 function createDocHandler(event) {
             var api_id = event.data.api_id;
+            var api_client = event.data.api_client;
             var api_documents_data = {
                  documentId: "",
                  name: $('#docName').val(),
-                 type: $('input[name=optionsRadios]:checked').val(),
+                 type: "HOWTO",
                  summary: $('#summary').val(),
                  sourceType: $('input[name=optionsRadios1]:checked').val(),
                  sourceUrl: $('#docUrl').val(),
@@ -647,12 +648,9 @@ function createDocHandler(event) {
                  permission: '[{"groupId" : "1000", "permission" : ["READ","UPDATE"]},{"groupId" : "1001", "permission" : ["READ","UPDATE"]}]',
                  visibility: "API_LEVEL"
                  };
-            var api_client = new API('');
             var promised_add = api_client.addDocument(api_id, api_documents_data);
 
-
-
-promised_add.catch(function(error) {
+      promised_add.catch(function(error) {
              var error_data = JSON.parse(error_response.data);
              var message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
              noty({
@@ -721,9 +719,102 @@ promised_add.catch(function(error) {
         });
     }
 
+    function getAPIDocumentByDocId(event){
+        var data_table = $('#doc-table').DataTable();
+        var current_row = data_table.row($(this).parents('tr'));
+        var documentId = current_row.data().documentId;
+        $('#docId').val(documentId);
+        var doc_name = current_row.data().name;
+        var api_client = event.data.api_client;
+        var api_id = event.data.api_id;
+
+        let promised_update = api_client.getDocument(api_id,documentId);
+           promised_update.then(
+             function (response) {
+                   if (!response) {
+                  return;
+                 }
+             loadDocumentDataToForm(response);
+             }
+         );
+    }
+
+    function updateAPIDocument(event){
+           var api_id = event.data.api_id;
+           var api_client = event.data.api_client;
+           var documentId = $('#docId').val();
+           var update_documents_data = {
+                 documentId: $('#docId').val(),
+                 name: $('#docName').val(),
+                 type: "HOWTO",
+                 summary: $('#summary').val(),
+                 sourceType: $('input[name=optionsRadios1]:checked').val(),
+                 sourceUrl: $('#docUrl').val(),
+                 inlineContent: "",
+                 otherTypeName: $('#specifyBox').val(),
+                 permission: '[{"groupId" : "1000", "permission" : ["READ","UPDATE"]},{"groupId" : "1001", "permission" : ["READ","UPDATE"]}]',
+                 visibility: "API_LEVEL"
+                 };
+           var promised_update = api_client.updateDocument(api_id, documentId, update_documents_data);
+
+
+        promised_update.catch(function(error) {
+             var error_data = JSON.parse(error_response.data);
+             var message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+             noty({
+                text: message,
+                type: 'error',
+                dismissQueue: true,
+                modal: true,
+                closeWith: ['click', 'backdrop'],
+                progressBar: true,
+                timeout: 5000,
+                layout: 'top',
+                theme: 'relax',
+                maxVisible: 10
+                });
+             $('[data-toggle="loading"]').loading('hide');
+             console.debug(error_response);
+             }).then(function(done) {
+             var dt_data = done.obj;
+             var name = dt_data.name;
+             var type = dt_data.type;
+             var docId = dt_data.documentId;
+
+             var data_table = $('#doc-table').DataTable();
+             var current_row = data_table.cell(documentId, 0).row();
+             current_row.invalidate();
+             current_row.data(dt_data);
+             data_table.draw();
+             $('#newDoc').fadeOut();
+            });
+    }
+
+    function loadDocumentDataToForm(response){
+         $('#add-doc-submit').hide();
+         $('#newDoc').fadeIn();
+         $('#add-new-doc').hide();
+         $('#doc-header').html("<h4> Update Document - "+ response.obj.name +"</h4>");
+         $('#docName').val(response.obj.name);
+         $('#summary').val(response.obj.summary);
+         $("input[value='"+response.obj.sourceType+"']").prop("checked",true);
+         if(response.obj.sourceType == "URL"){
+            $('#sourceUrlDoc').show("slow");
+            $('#docUrl').val(response.obj.sourceUrl);
+         }else if(response.obj.sourceType == "FILE"){
+            $('#fileNameDiv').show("slow");
+            $('#docUrl').val(response.obj.sourceUrl);
+         }else{
+            $('#sourceUrlDoc').fadeOut("slow");
+            $('#fileNameDiv').fadeOut("slow");
+         }
+
+         $('#docName').disabled = true;
+    }
+
 
     function toggleDocAdder() {
-    $('#newDoc').toggle();
+        $('#newDoc').toggle();
     }
 
 /**
@@ -747,7 +838,9 @@ $(function () {
     $(document).on('click', ".lc-state-btn", {api_client: client, api_id: api_id}, updateLifecycleHandler);
     $(document).on('click', "#checkItem", {api_client: client, api_id: api_id}, updateLifecycleCheckListHandler);
     $(document).on('click', ".doc-listing-delete", {api_client: client,api_id: api_id}, deleteDocHandler);
-    $(document).on('click', "#add-doc-submit", {api_id: api_id}, createDocHandler);
+    $(document).on('click', ".doc-listing-update", {api_client: client,api_id: api_id}, getAPIDocumentByDocId);
+    $(document).on('click', "#add-doc-submit", {api_client: client, api_id: api_id}, createDocHandler);
+    $(document).on('click', "#update-doc-submit", {api_client: client, api_id: api_id}, updateAPIDocument);
     $(document).on('click', "#add-new-doc", {}, toggleDocAdder);
     $(document).on('click', "#update-labels-button", {api_client: client, api_id: api_id}, updateLabelsHandler);
     loadFromHash();
