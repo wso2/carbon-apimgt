@@ -90,7 +90,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     }
 
     /**
-     * @see #deletePolicy(Policy)
+     * @see #deletePolicy(String policyName, String policyLevel)
      */
     @Override
     public void deletePolicy(String policyName, String policyLevel) throws APIManagementException {
