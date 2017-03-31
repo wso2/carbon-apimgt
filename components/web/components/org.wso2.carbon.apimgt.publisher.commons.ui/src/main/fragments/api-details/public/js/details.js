@@ -614,6 +614,45 @@ function apiResponseToData(response) {
     return raw_data;
 }
 
+function resourcesTabHandler(event) {
+    var api_client = event.data.api_client;
+    var api_id = event.data.api_id;
+    var api_context;
+
+    api_client.get(api_id).then(
+        function (response) {
+            api_context = response.obj.context;
+
+            api_client.getSwagger(api_id).then(
+                function (response) {
+                    var api = response.obj;
+                    var data = {
+                        name: api.info.title,
+                        id: api_id,
+                        version: api.info.version,
+                        context: api_context,
+                        verbs: [ 'get' , 'post' , 'put' , 'delete', 'patch', 'head']
+                    };
+                    var callbacks = {
+                        onSuccess: function (data) {
+                            $.fn.editable.defaults.mode = 'inline';
+                            api_client.getSwagger(api_id).then(
+                                function (response) {
+                                    api_doc_local = response.obj;
+                                    var designer = new APIDesigner();
+                                    designer.initControllersCall = "";
+                                    designer.load_api_document(api_doc_local);
+                                });
+                        }, onFailure: function (data) {
+                        }
+                    };
+                    var mode = "OVERWRITE"; // Available modes [OVERWRITE,APPEND, PREPEND]
+                    UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-resources", data, "resources-tab-content", mode, callbacks);
+                }
+            ).catch(apiGetErrorHandler);
+
+        }).catch(apiGetErrorHandler);
+}
 
 function documentTabHandler(event) {
     var api_client = event.data.api_client;
@@ -833,6 +872,7 @@ $(function () {
     $('#tab-1').bind('show.bs.tab', {api_client: client, api_id: api_id}, overviewTabHandler);
     $('#tab-2').bind('show.bs.tab', {api_client: client, api_id: api_id}, lifecycleTabHandler);
     $('#tab-3').bind('show.bs.tab', {api_client: client, api_id: api_id}, endpointsTabHandler);
+    $('#tab-4').bind('show.bs.tab', {api_client: client, api_id: api_id}, resourcesTabHandler);
     $('#tab-5').bind('show.bs.tab', {api_client: client, api_id: api_id}, documentTabHandler);
     $('#tab-9').bind('show.bs.tab', {api_client: client, api_id: api_id}, subscriptionsTabHandler);
     $(document).on('click', ".lc-state-btn", {api_client: client, api_id: api_id}, updateLifecycleHandler);

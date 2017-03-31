@@ -398,6 +398,41 @@ class API {
         }
     }
 
+     /**
+     * Get the swagger of an API
+     * @param id {String} UUID of the API in which the swagger is needed
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    getSwagger(id, callback = null) {
+        var promise_get = this.client.then(
+                        (client) => {
+                        return client["API (Individual)"].get_apis_apiId_swagger(
+                            {apiId: id}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+            }
+        );
+            if (callback) {
+                return promise_get.then(callback);
+            } else {
+                return promise_get;
+            }
+    }
+
+    /**
+     * Update an api via PUT HTTP method, Need to give the updated API object as the argument.
+     * @param api {Object} Updated API object(JSON) which needs to be updated
+     */
+    updateSwagger(id, swagger) {
+        var promised_update = this.client.then(
+                (client) => {
+                    let payload = {"apiId": id, "endpointId": JSON.stringify(swagger), "Content-Type": "multipart/form-data"};
+                    return client["API (Individual)"].put_apis_apiId_swagger(
+                        payload, this._requestMetaData({'Content-Type': "multipart/form-data"})).catch(AuthClient.unauthorizedErrorHandler);
+        }
+        );
+        return promised_update;
+    }
+
     /**
      * Get the available policies information by tier level.
      * @param {String} tier_level List API or Application or Resource type policies.parameter should be one of api, application and resource
