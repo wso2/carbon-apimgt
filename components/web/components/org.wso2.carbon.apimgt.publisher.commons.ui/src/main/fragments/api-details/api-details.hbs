@@ -63,7 +63,7 @@
                     </li>
                     <li id="tab-10" role="presentation"><a href="#apiconsole-tab" role="tab" aria-controls="apiconsole-tab" 
                     									  data-toggle="tab"><i
-                 			class="fw fw-document"></i>&nbsp; API Console</a>
+                 			class="fw fw-document"></i>&nbsp; {{i18n "API Console"}}</a>
                     </li> 
                 </ul>
             </div>
@@ -117,11 +117,9 @@
               </div>
             </div>
             <div role="tabpanel" class="tab-pane fade" id="apiconsole-tab">
-            	<div class="card">
-            		<div class="message message-info">
-            			{{defineZone "api-console-content"}}
-            		</div>
-            	</div>
+              <div class="card">
+            	  {{defineZone "api-console-content"}}
+              </div>
             </div>
         </div>
     </div>
