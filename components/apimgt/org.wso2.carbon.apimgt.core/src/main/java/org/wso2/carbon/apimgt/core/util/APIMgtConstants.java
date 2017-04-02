@@ -291,6 +291,10 @@ public class APIMgtConstants {
         public static final String WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION = 
                 "AM_APPLICATION_REGISTRATION_PRODUCTION";
         public static final String WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX = "AM_APPLICATION_REGISTRATION_SANDBOX";
+        public static final String ATTRIBUTE_API_CUR_STATE = "apiCurrentState";
+        public static final String ATTRIBUTE_API_TARGET_STATE = "apiTargetState";
+        public static final String ATTRIBUTE_API_LC_INVOKER = "lcStateChangeInvoker";
+        public static final String ATTRIBUTE_API_LAST_UPTIME = "lastUpdatedTime";        
 
     }
 

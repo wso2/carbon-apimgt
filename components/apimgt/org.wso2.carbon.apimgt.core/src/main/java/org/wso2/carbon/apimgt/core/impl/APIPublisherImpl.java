@@ -50,6 +50,7 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIResource;
+import org.wso2.carbon.apimgt.core.models.APIStateChangeWorkflow;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
@@ -61,11 +62,16 @@ import org.wso2.carbon.apimgt.core.models.Provider;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.Workflow;
+import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.template.APITemplateException;
 import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.APILCWorkflowStatus;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
+import org.wso2.carbon.apimgt.core.workflow.WorkflowExecutorFactory;
+import org.wso2.carbon.lcm.core.beans.CheckItemBean;
 import org.wso2.carbon.lcm.core.exception.LifecycleException;
 import org.wso2.carbon.lcm.core.impl.LifecycleEventManager;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
@@ -83,6 +89,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -553,61 +560,133 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @param apiId            UUID of the API.
      * @param status           Target life cycle status.
      * @param checkListItemMap Map of check list items.
+     * @return WorkflowResponse workflow response related to LC state change.
      * @throws APIManagementException If failed to update API lifecycle status..
      */
     @Override
-    public void updateAPIStatus(String apiId, String status, Map<String, Boolean> checkListItemMap) throws
+    public WorkflowResponse updateAPIStatus(String apiId, String status, Map<String, Boolean> checkListItemMap) throws
             APIManagementException {
+        WorkflowResponse workflowResponse = null;
+        try {
+            API api = getApiDAO().getAPI(apiId);           
+            if (api != null && !APILCWorkflowStatus.PENDING.toString().equals(api.getWorkflowStatus())) {
+                API.APIBuilder apiBuilder = new API.APIBuilder(api);
+                apiBuilder.lastUpdatedTime(LocalDateTime.now());
+                apiBuilder.updatedBy(getUsername());
+                LifecycleState currentState = getApiLifecycleManager().getCurrentLifecycleState(apiBuilder
+                        .getLifecycleInstanceId());
+                apiBuilder.lifecycleState(currentState);
+                for (Map.Entry<String, Boolean> checkListItem : checkListItemMap.entrySet()) {
+                    getApiLifecycleManager().checkListItemEvent(api.getLifecycleInstanceId
+                            (), api.getLifeCycleStatus(),
+                    checkListItem.getKey(), checkListItem.getValue());                   
+                }
+                API originalAPI = apiBuilder.build();
+                WorkflowExecutor executor = WorkflowExecutorFactory.getInstance()
+                        .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
+                APIStateChangeWorkflow workflow = new APIStateChangeWorkflow();
+                workflow.setApiName(originalAPI.getName());
+                workflow.setApiProvider(originalAPI.getProvider());
+                workflow.setApiVersion(originalAPI.getVersion());
+                workflow.setCurrentState(currentState.getState()); 
+                workflow.setTransitionState(status);
+
+                workflow.setWorkflowReference(originalAPI.getId());
+                workflow.setExternalWorkflowReference(UUID.randomUUID().toString());
+                workflow.setCreatedTime(LocalDateTime.now());
+                workflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_API_STATE);             
+                workflow.setInvoker(getUsername());
+                
+                //setting attributes for internal use. These are set to use from outside the executor's method
+                //these will be saved in the AM_WORKFLOW table so these can be retrieved later
+                workflow.setAttribute(WorkflowConstants.ATTRIBUTE_API_CUR_STATE, currentState.getState());
+                workflow.setAttribute(WorkflowConstants.ATTRIBUTE_API_TARGET_STATE, status);
+                workflow.setAttribute(WorkflowConstants.ATTRIBUTE_API_LC_INVOKER, getUsername());
+                workflow.setAttribute(WorkflowConstants.ATTRIBUTE_API_LAST_UPTIME,
+                        originalAPI.getLastUpdatedTime().toString());
+                
+                workflowResponse = executor.execute(workflow);             
+                workflow.setStatus(workflowResponse.getWorkflowStatus());
+
+                addWorkflowEntries(workflow);
+
+                if (WorkflowStatus.APPROVED == workflowResponse.getWorkflowStatus()) {
+                    completeWorkflow(executor, workflow);
+                } else {
+                    getApiDAO().updateAPIWorkflowStatus(api.getId(), APILCWorkflowStatus.PENDING);
+                }
+            } else if (api != null && APILCWorkflowStatus.PENDING.toString().equals(api.getWorkflowStatus())) {
+                String message = "Pending state transition for api :" + api.getName();
+                log.error(message);     
+                throw new APIManagementException(message, ExceptionCodes.WORKFLOW_PENDING);
+            } else {
+                throw new APIMgtResourceNotFoundException("Requested API " + apiId + " Not Available");
+            }
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Couldn't change the status of api ID " + apiId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        } catch (LifecycleException e) {
+            String errorMsg = "Couldn't change the status of api ID " + apiId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
+        }
+        return workflowResponse;
+    }
+    
+    private void updateAPIStatusForWorkflowComplete(String apiId, String status, String updatedBy, LocalDateTime time)
+            throws APIManagementException {
         boolean requireReSubscriptions = false;
         boolean deprecateOlderVersion = false;
         try {
             API api = getApiDAO().getAPI(apiId);
             if (api != null) {
                 API.APIBuilder apiBuilder = new API.APIBuilder(api);
-                apiBuilder.lastUpdatedTime(LocalDateTime.now());
-                apiBuilder.updatedBy(getUsername());
-                apiBuilder.lifecycleState(getApiLifecycleManager().getCurrentLifecycleState(apiBuilder
-                        .getLifecycleInstanceId()));
-                for (Map.Entry<String, Boolean> checkListItem : checkListItemMap.entrySet()) {
-                    getApiLifecycleManager().checkListItemEvent(api.getLifecycleInstanceId
-                            (), api.getLifeCycleStatus(),
-                    checkListItem.getKey(), checkListItem.getValue());
-                    if (APIMgtConstants.DEPRECATE_PREVIOUS_VERSIONS.equals(checkListItem.getKey())) {
-                        deprecateOlderVersion = checkListItem.getValue();
-                    } else if (APIMgtConstants.REQUIRE_RE_SUBSCRIPTIONS.equals(checkListItem.getKey())) {
-                        requireReSubscriptions = checkListItem.getValue();
+                apiBuilder.lastUpdatedTime(time);
+                apiBuilder.updatedBy(updatedBy);
+                LifecycleState currentState = getApiLifecycleManager()
+                        .getCurrentLifecycleState(apiBuilder.getLifecycleInstanceId());
+                apiBuilder.lifecycleState(currentState);
+                List<CheckItemBean> list = currentState.getCheckItemBeanList();
+                for (Iterator iterator = list.iterator(); iterator.hasNext();) {
+                    CheckItemBean checkItemBean = (CheckItemBean) iterator.next();
+                    if (APIMgtConstants.DEPRECATE_PREVIOUS_VERSIONS.equals(checkItemBean.getName())) {
+                        deprecateOlderVersion = checkItemBean.isValue();
+                    } else if (APIMgtConstants.REQUIRE_RE_SUBSCRIPTIONS.equals(checkItemBean.getName())) {
+                        requireReSubscriptions = checkItemBean.isValue();
                     }
                 }
                 API originalAPI = apiBuilder.build();
-                getApiLifecycleManager().executeLifecycleEvent(api.getLifeCycleStatus(), status, apiBuilder
-                        .getLifecycleInstanceId(), getUsername(), originalAPI);
+
+                getApiLifecycleManager().executeLifecycleEvent(api.getLifeCycleStatus(), status,
+                        apiBuilder.getLifecycleInstanceId(), updatedBy, originalAPI);
                 if (deprecateOlderVersion) {
                     if (StringUtils.isNotEmpty(api.getCopiedFromApiId())) {
                         API oldAPI = getApiDAO().getAPI(api.getCopiedFromApiId());
                         if (oldAPI != null) {
                             API.APIBuilder previousAPI = new API.APIBuilder(oldAPI);
-                            previousAPI.setLifecycleStateInfo(getApiLifecycleManager().getCurrentLifecycleState
-                                    (previousAPI.getLifecycleInstanceId()));
+                            previousAPI.setLifecycleStateInfo(getApiLifecycleManager()
+                                    .getCurrentLifecycleState(previousAPI.getLifecycleInstanceId()));
                             if (APIUtils.validateTargetState(previousAPI.getLifecycleState(),
                                     APIStatus.DEPRECATED.getStatus())) {
                                 getApiLifecycleManager().executeLifecycleEvent(previousAPI.getLifeCycleStatus(),
                                         APIStatus.DEPRECATED.getStatus(), previousAPI.getLifecycleInstanceId(),
-                                        getUsername(), previousAPI.build());
+                                        updatedBy, previousAPI.build());
                             }
                         }
                     }
                 }
                 if (!requireReSubscriptions) {
                     if (StringUtils.isNotEmpty(api.getCopiedFromApiId())) {
-                        List<Subscription> subscriptions = getApiSubscriptionDAO().getAPISubscriptionsByAPI(api
-                                .getCopiedFromApiId());
+                        List<Subscription> subscriptions = getApiSubscriptionDAO()
+                                .getAPISubscriptionsByAPI(api.getCopiedFromApiId());
                         List<Subscription> subscriptionList = new ArrayList<>();
                         for (Subscription subscription : subscriptions) {
                             if (api.getPolicies().contains(subscription.getSubscriptionTier())) {
                                 if (!APIMgtConstants.SubscriptionStatus.ON_HOLD.equals(subscription.getStatus())) {
-                                    subscriptionList.add(new Subscription(UUID.randomUUID().toString(), subscription
-                                            .getApplication(), subscription.getApi(), subscription
-                                            .getSubscriptionTier()));
+                                    subscriptionList.add(new Subscription(UUID.randomUUID().toString(),
+                                            subscription.getApplication(), subscription.getApi(),
+                                            subscription.getSubscriptionTier()));
                                 }
                             }
                             getApiSubscriptionDAO().copySubscriptions(subscriptionList);
@@ -1582,7 +1661,33 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public WorkflowResponse completeWorkflow(WorkflowExecutor workflowExecutor, Workflow workflow)
             throws APIManagementException {
-        // TODO Auto-generated method stub
-        return null;
+        WorkflowResponse response = null;
+        if (workflow.getWorkflowReference() == null) {
+            String message = "Error while changing the workflow. Missing reference";
+            log.error(message);
+            throw new APIManagementException(message, ExceptionCodes.WORKFLOW_EXCEPTION);
+        }
+
+        if (workflow instanceof APIStateChangeWorkflow) {
+            response = workflowExecutor.complete(workflow);
+            workflow.setStatus(response.getWorkflowStatus());
+
+            if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Application Creation workflow complete: Approved");
+                }             
+                String invoker = workflow.getAttribute(WorkflowConstants.ATTRIBUTE_API_LC_INVOKER);
+                String targetState = workflow.getAttribute(WorkflowConstants.ATTRIBUTE_API_TARGET_STATE);
+                String localTime = workflow.getAttribute(WorkflowConstants.ATTRIBUTE_API_LAST_UPTIME);
+                LocalDateTime time = LocalDateTime.parse(localTime);
+                updateAPIStatusForWorkflowComplete(workflow.getWorkflowReference(), targetState, invoker, time);
+            } else if (WorkflowStatus.REJECTED == response.getWorkflowStatus()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Application Creation workflow complete: Rejected");
+                }              
+            }
+            updateWorkflowEntries(workflow); 
+        }
+        return response;
     }
 }

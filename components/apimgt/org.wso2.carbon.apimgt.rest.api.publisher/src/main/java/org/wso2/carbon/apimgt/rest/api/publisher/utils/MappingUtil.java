@@ -23,6 +23,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.utils;
 
 
+import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
@@ -48,6 +49,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowResponseDTO.WorkflowStatusEnum;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -411,4 +414,16 @@ public class MappingUtil {
         }
         return labelDTOs;
     }
+    /**
+     * Map WorkflowResponse to WorkflowResponseDTO
+     * @param response WorkflowResponse object
+     * @return WorkflowResponseDTO mapped WorkflowResponseDTO
+     */
+    public static WorkflowResponseDTO toWorkflowResponseDTO(WorkflowResponse response) {
+        WorkflowResponseDTO responseDTO = new WorkflowResponseDTO();
+        responseDTO.setWorkflowStatus(WorkflowStatusEnum.valueOf(response.getWorkflowStatus().toString()));
+        responseDTO.setJsonPayload(response.getJSONPayload());
+        return responseDTO;
+    }
+
 }
