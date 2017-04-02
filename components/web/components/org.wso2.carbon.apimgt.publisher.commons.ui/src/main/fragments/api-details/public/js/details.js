@@ -855,6 +855,53 @@ function createDocHandler(event) {
     function toggleDocAdder() {
         $('#newDoc').toggle();
     }
+    
+    
+    function loadSwaggerUI(response) {
+        var bearerToken = "Bearer " + getCookie("WSO2_AM_TOKEN_1");
+        $(document).ready(function() {
+	        window.swaggerUi = new SwaggerUi({
+	                url: response.url,
+	                dom_id: "swagger-ui-container",
+	                authorizations: {
+	                        key: new SwaggerClient.ApiKeyAuthorization("Authorization", bearerToken, "header")
+	                },
+	                supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch', 'head'],
+	                onComplete: function(swaggerApi, swaggerUi){
+	                        console.log("Loaded SwaggerUI");
+	                },
+	                onFailure: function(data) {
+	                        console.log("Unable to Load SwaggerUI");
+	                },
+	                docExpansion: "list",
+	                jsonEditor: false,
+	                defaultModelRendering: 'schema',
+	                showRequestHeaders: true,
+	                validatorUrl: null
+	        });
+	        window.swaggerUi.load();
+        });
+    }
+    
+    /**
+     * Event handler for API Console tab onclick event;Get the API swagger definition and display in Swagger UI
+     * @param event {object} Click event of the API Console tab
+     */
+    function apiConsoleTabHandler(event) {
+    	  var api_client = event.data.api_client;
+    	  var api_id = event.data.api_id;
+    	  var callbacks = {
+    	          onSuccess: function (data) {
+    	                 api_client.getSwagger(api_id, loadSwaggerUI);
+    	          }, onFailure: function (data) {
+    	         }
+    	        };
+    	   var mode = "OVERWRITE";
+    	   var data = {};
+    	   UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-console", data, 
+    			   "api-console-content", mode, callbacks);
+    	  }
+
 
 /**
  * Execute once the page load is done.
@@ -875,6 +922,7 @@ $(function () {
     $('#tab-4').bind('show.bs.tab', {api_client: client, api_id: api_id}, resourcesTabHandler);
     $('#tab-5').bind('show.bs.tab', {api_client: client, api_id: api_id}, documentTabHandler);
     $('#tab-9').bind('show.bs.tab', {api_client: client, api_id: api_id}, subscriptionsTabHandler);
+    $('#tab-10').bind('show.bs.tab', {api_client: client, api_id: api_id}, apiConsoleTabHandler);
     $(document).on('click', ".lc-state-btn", {api_client: client, api_id: api_id}, updateLifecycleHandler);
     $(document).on('click', "#checkItem", {api_client: client, api_id: api_id}, updateLifecycleCheckListHandler);
     $(document).on('click', ".doc-listing-delete", {api_client: client,api_id: api_id}, deleteDocHandler);
