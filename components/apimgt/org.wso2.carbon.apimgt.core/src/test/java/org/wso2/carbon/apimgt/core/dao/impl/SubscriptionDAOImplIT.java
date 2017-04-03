@@ -39,6 +39,24 @@ import java.util.UUID;
 
 public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
 
+    private static final String GOLD_TIER = "Gold";
+    private static final String SILVER_TIER = "Silver";
+    private static final String ADMIN  = "admin";
+    private static final String INVALID_SUBSCRIPTION_FOUND = "Invalid subscription found!!!";
+    private static final String APP_1 = "App1";
+    private static final String APP_2 = "App2";
+    private static final String APP_3 = "App3";
+    private static final String APP_4 = "App4";
+    private static final String API_VERSION = "1.0.0";
+    private static final String API_1 = "API1";
+    private static final String API_2 = "API2";
+    private static final String API_3 = "API3";
+    private static final String API_4 = "API4";
+    private static final String API1_CONTEXT = "api1";
+    private static final String API2_CONTEXT = "api2";
+    private static final String API3_CONTEXT = "api3";
+    private static final String API4_CONTEXT = "api4";
+
     @Test
     public void testAddAndGetSubscription() throws Exception {
 
@@ -47,7 +65,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         //add new api
         API api = TestUtil.addTestAPI();
         //add subscription
-        String subscriptionTier = "Gold";
+        String subscriptionTier = GOLD_TIER;
         APISubscriptionDAO apiSubscriptionDAO = DAOFactory.getAPISubscriptionDAO();
         String uuid = UUID.randomUUID().toString();
         apiSubscriptionDAO.addAPISubscription(uuid, api.getId(), app.getId(), subscriptionTier,
@@ -73,7 +91,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         //add new api
         API api = TestUtil.addTestAPI();
         //add subscription
-        String subscriptionPolicy = "Gold";
+        String subscriptionPolicy = GOLD_TIER;
         APISubscriptionDAO apiSubscriptionDAO = DAOFactory.getAPISubscriptionDAO();
         String uuid = UUID.randomUUID().toString();
         apiSubscriptionDAO.addAPISubscription(uuid, api.getId(), app.getId(), subscriptionPolicy,
@@ -93,7 +111,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertEquals(subscription.getSubscriptionTier(), subscriptionPolicy);
 
         //update subscription policy
-        String newSubscriptionPolicy = "Silver";
+        String newSubscriptionPolicy = SILVER_TIER;
         apiSubscriptionDAO.updateSubscriptionPolicy(uuid, newSubscriptionPolicy);
         //get subscription
         subscription = apiSubscriptionDAO.getAPISubscription(uuid);
@@ -253,7 +271,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
             } else if (subscription.getApplicationName().equals(app4.getName())) {
                 validateSubscriptionsOfApi(subscription, api1, app4);
             } else {
-                Assert.fail("Invalid subscription found!!!");
+                Assert.fail(INVALID_SUBSCRIPTION_FOUND);
             }
         }
 
@@ -273,7 +291,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
             } else if (subscription.getApplicationName().equals(app4.getName())) {
                 validateSubscriptionsOfApi(subscription, api2, app4);
             } else {
-                Assert.fail("Invalid subscription found!!!");
+                Assert.fail(INVALID_SUBSCRIPTION_FOUND);
             }
         }
 
@@ -293,7 +311,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
             } else if (subscription.getApplicationName().equals(app4.getName())) {
                 validateSubscriptionsOfApi(subscription, api3, app4);
             } else {
-                Assert.fail("Invalid subscription found!!!");
+                Assert.fail(INVALID_SUBSCRIPTION_FOUND);
             }
         }
 
@@ -309,7 +327,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
             if (subscription.getApplicationName().equals(app4.getName())) {
                 validateSubscriptionsOfApi(subscription, api4, app4);
             } else {
-                Assert.fail("Invalid subscription found!!!");
+                Assert.fail(INVALID_SUBSCRIPTION_FOUND);
             }
         }
     }
@@ -319,7 +337,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertEquals(validationData.getApiProvider(), api.getProvider());
         Assert.assertEquals(validationData.getApiVersion(), api.getVersion());
         Assert.assertEquals(validationData.getApplicationOwner(), app.getCreatedUser());
-        Assert.assertEquals(validationData.getSubscriptionPolicy(), "Gold");
+        Assert.assertEquals(validationData.getSubscriptionPolicy(), GOLD_TIER);
     }
 
     @Test
@@ -355,7 +373,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
                 Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app4),
                         TestUtil.printDiff(subscription.getApplication(), TestUtil.createSummaryApplication(app4)));
             } else {
-                Assert.fail("Invalid subscription found!!!");
+                Assert.fail(INVALID_SUBSCRIPTION_FOUND);
             }
         }
 
@@ -378,7 +396,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
                 Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app4),
                         TestUtil.printDiff(subscription.getApplication(), TestUtil.createSummaryApplication(app4)));
             } else {
-                Assert.fail("Invalid subscription found!!!");
+                Assert.fail(INVALID_SUBSCRIPTION_FOUND);
             }
         }
 
@@ -401,7 +419,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
                 Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app4),
                         TestUtil.printDiff(subscription.getApplication(), TestUtil.createSummaryApplication(app4)));
             } else {
-                Assert.fail("Invalid subscription found!!!");
+                Assert.fail(INVALID_SUBSCRIPTION_FOUND);
             }
         }
 
@@ -418,7 +436,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
                 Assert.assertEquals(subscription.getApplication(), TestUtil.createSummaryApplication(app4),
                         TestUtil.printDiff(subscription.getApplication(), TestUtil.createSummaryApplication(app4)));
             } else {
-                Assert.fail("Invalid subscription found!!!");
+                Assert.fail(INVALID_SUBSCRIPTION_FOUND);
             }
         }
     }
@@ -451,7 +469,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
                 Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api2),
                         TestUtil.printDiff(subscription.getApi(), TestUtil.createSummaryAPI(api2)));
             } else {
-                Assert.fail("Invalid subscription found!!!");
+                Assert.fail(INVALID_SUBSCRIPTION_FOUND);
             }
         }
 
@@ -471,7 +489,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
                 Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api3),
                         TestUtil.printDiff(subscription.getApi(), TestUtil.createSummaryAPI(api3)));
             } else {
-                Assert.fail("Invalid subscription found!!!");
+                Assert.fail(INVALID_SUBSCRIPTION_FOUND);
             }
         }
 
@@ -485,7 +503,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
                 Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api3),
                         TestUtil.printDiff(subscription.getApi(), TestUtil.createSummaryAPI(api3)));
             } else {
-                Assert.fail("Invalid subscription found!!!");
+                Assert.fail(INVALID_SUBSCRIPTION_FOUND);
             }
         }
 
@@ -508,7 +526,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
                 Assert.assertEquals(subscription.getApi(), TestUtil.createSummaryAPI(api4),
                         TestUtil.printDiff(subscription.getApi(), TestUtil.createSummaryAPI(api4)));
             } else {
-                Assert.fail("Invalid subscription found!!!");
+                Assert.fail(INVALID_SUBSCRIPTION_FOUND);
             }
         }
     }
@@ -520,10 +538,9 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         //add new api
         API api = TestUtil.addTestAPI();
         //add subscription
-        String subscriptionTier = "Gold";
         APISubscriptionDAO apiSubscriptionDAO = DAOFactory.getAPISubscriptionDAO();
         String uuid = UUID.randomUUID().toString();
-        apiSubscriptionDAO.addAPISubscription(uuid, api.getId(), app.getId(), subscriptionTier,
+        apiSubscriptionDAO.addAPISubscription(uuid, api.getId(), app.getId(), GOLD_TIER,
                 APIMgtConstants.SubscriptionStatus.ACTIVE);
         //get subscription
         Subscription subscription = apiSubscriptionDAO.getAPISubscription(uuid);
@@ -535,57 +552,80 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNull(apiSubscriptionDAO.getAPISubscription(uuid));
     }
 
+    @Test
+    public void testGetPendingAPISubscriptionsByApplication() throws Exception {
+        //add new app
+        Application app = TestUtil.addTestApplication();
+        //add new api
+        API api1 = TestUtil.addCustomAPI(API_1, API_VERSION, API1_CONTEXT);
+        API api2 = TestUtil.addCustomAPI(API_2, API_VERSION, API2_CONTEXT);
+        API api3 = TestUtil.addCustomAPI(API_3, API_VERSION, API3_CONTEXT);
+        //Add subscriptions
+        APISubscriptionDAO subscriptionDAO = DAOFactory.getAPISubscriptionDAO();
+        subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api1.getId(), app.getId(), GOLD_TIER,
+                APIMgtConstants.SubscriptionStatus.ON_HOLD);
+        subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api2.getId(), app.getId(), GOLD_TIER,
+                APIMgtConstants.SubscriptionStatus.ACTIVE);
+        subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api3.getId(), app.getId(), GOLD_TIER,
+                APIMgtConstants.SubscriptionStatus.ON_HOLD);
+
+        List<Subscription> pendingSubscriptions = subscriptionDAO.getPendingAPISubscriptionsByApplication(app.getId());
+
+        Assert.assertNotNull(pendingSubscriptions);
+        Assert.assertTrue(pendingSubscriptions.size() == 2);
+    }
+
     private ApisAndApps createApisAppsAndSubscriptions() throws Exception {
         List<Application> apps = new ArrayList<>();
         //add 4 apps
-        String username = "admin";
-        Application app1 = TestUtil.addCustomApplication("App1", username);
+        String username = ADMIN;
+        Application app1 = TestUtil.addCustomApplication(APP_1, username);
         apps.add(app1);
-        Application app2 = TestUtil.addCustomApplication("App2", username);
+        Application app2 = TestUtil.addCustomApplication(APP_2, username);
         apps.add(app2);
-        Application app3 = TestUtil.addCustomApplication("App3", username);
+        Application app3 = TestUtil.addCustomApplication(APP_3, username);
         apps.add(app3);
-        Application app4 = TestUtil.addCustomApplication("App4", username);
+        Application app4 = TestUtil.addCustomApplication(APP_4, username);
         apps.add(app4);
 
         //add 4 apis
         List<API> apis = new ArrayList<>();
-        API api1 = TestUtil.addCustomAPI("API1", "1.0.0", "api1");
+        API api1 = TestUtil.addCustomAPI(API_1, API_VERSION, API1_CONTEXT);
         apis.add(api1);
-        API api2 = TestUtil.addCustomAPI("API2", "1.0.0", "api2");
+        API api2 = TestUtil.addCustomAPI(API_2, API_VERSION, API2_CONTEXT);
         apis.add(api2);
-        API api3 = TestUtil.addCustomAPI("API3", "1.0.0", "api3");
+        API api3 = TestUtil.addCustomAPI(API_3, API_VERSION, API3_CONTEXT);
         apis.add(api3);
-        API api4 = TestUtil.addCustomAPI("API4", "1.0.0", "api4");
+        API api4 = TestUtil.addCustomAPI(API_4, API_VERSION, API4_CONTEXT);
         apis.add(api4);
 
         //Add subscriptions
         APISubscriptionDAO subscriptionDAO = DAOFactory.getAPISubscriptionDAO();
 
         //app1: api2
-        subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api2.getId(), app1.getId(), "Gold",
+        subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api2.getId(), app1.getId(), GOLD_TIER,
                 APIMgtConstants.SubscriptionStatus.ACTIVE);
 
         //app2: api1, api2, api3
-        subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api1.getId(), app2.getId(), "Gold",
+        subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api1.getId(), app2.getId(), GOLD_TIER,
                 APIMgtConstants.SubscriptionStatus.ACTIVE);
-        subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api2.getId(), app2.getId(), "Gold",
+        subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api2.getId(), app2.getId(), GOLD_TIER,
                 APIMgtConstants.SubscriptionStatus.ACTIVE);
-        subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api3.getId(), app2.getId(), "Gold",
+        subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api3.getId(), app2.getId(), GOLD_TIER,
                 APIMgtConstants.SubscriptionStatus.ACTIVE);
 
         //app3: api3
-        subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api3.getId(), app3.getId(), "Gold",
+        subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api3.getId(), app3.getId(), GOLD_TIER,
                 APIMgtConstants.SubscriptionStatus.ACTIVE);
 
         //app4: api1, api2, api3, api4
-        subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api1.getId(), app4.getId(), "Gold",
+        subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api1.getId(), app4.getId(), GOLD_TIER,
                 APIMgtConstants.SubscriptionStatus.ACTIVE);
-        subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api2.getId(), app4.getId(), "Gold",
+        subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api2.getId(), app4.getId(), GOLD_TIER,
                 APIMgtConstants.SubscriptionStatus.ACTIVE);
-        subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api3.getId(), app4.getId(), "Gold",
+        subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api3.getId(), app4.getId(), GOLD_TIER,
                 APIMgtConstants.SubscriptionStatus.ACTIVE);
-        subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api4.getId(), app4.getId(), "Gold",
+        subscriptionDAO.addAPISubscription(UUID.randomUUID().toString(), api4.getId(), app4.getId(), GOLD_TIER,
                 APIMgtConstants.SubscriptionStatus.ACTIVE);
 
         return new ApisAndApps(apis, apps);
