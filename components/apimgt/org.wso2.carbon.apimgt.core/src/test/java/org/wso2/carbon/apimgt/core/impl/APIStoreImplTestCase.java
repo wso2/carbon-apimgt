@@ -106,6 +106,7 @@ public class APIStoreImplTestCase {
             }
         });
     }
+    
     @Test(description = "Search APIs with a search query")
     public void searchAPIs() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
