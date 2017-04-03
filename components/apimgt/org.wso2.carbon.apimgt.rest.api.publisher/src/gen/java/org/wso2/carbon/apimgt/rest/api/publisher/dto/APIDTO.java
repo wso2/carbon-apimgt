@@ -17,40 +17,63 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.SequenceDTO;
 /**
  * APIDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-28T15:06:55.065+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-27T13:24:09.071+05:30")
 public class APIDTO   {
+  @JsonProperty("id")
   private String id = null;
 
+  @JsonProperty("name")
   private String name = null;
 
+  @JsonProperty("description")
   private String description = null;
 
+  @JsonProperty("context")
   private String context = null;
 
+  @JsonProperty("version")
   private String version = null;
 
+  @JsonProperty("provider")
   private String provider = null;
 
+  @JsonProperty("wsdlUri")
   private String wsdlUri = null;
 
+  @JsonProperty("lifeCycleStatus")
   private String lifeCycleStatus = null;
 
+  @JsonProperty("workflowStatus")
+  private String workflowStatus = null;
+
+  @JsonProperty("createdTime")
   private String createdTime = null;
 
+  @JsonProperty("lastUpdatedTime")
   private String lastUpdatedTime = null;
 
+  @JsonProperty("responseCaching")
   private String responseCaching = null;
 
+  @JsonProperty("cacheTimeout")
   private Integer cacheTimeout = null;
 
+  @JsonProperty("destinationStatsEnabled")
   private String destinationStatsEnabled = null;
 
+  @JsonProperty("isDefaultVersion")
   private Boolean isDefaultVersion = null;
 
+  @JsonProperty("transport")
   private List<String> transport = new ArrayList<String>();
 
+  @JsonProperty("tags")
   private List<String> tags = new ArrayList<String>();
 
+  @JsonProperty("labels")
+  private List<String> labels = new ArrayList<String>();
+
+  @JsonProperty("policies")
   private List<String> policies = new ArrayList<String>();
 
   /**
@@ -88,24 +111,34 @@ public class APIDTO   {
     }
   }
 
+  @JsonProperty("visibility")
   private VisibilityEnum visibility = null;
 
+  @JsonProperty("visibleRoles")
   private List<String> visibleRoles = new ArrayList<String>();
 
+  @JsonProperty("permission")
   private String permission = null;
 
+  @JsonProperty("visibleTenants")
   private List<String> visibleTenants = new ArrayList<String>();
 
+  @JsonProperty("gatewayEnvironments")
   private String gatewayEnvironments = null;
 
+  @JsonProperty("sequences")
   private List<SequenceDTO> sequences = new ArrayList<SequenceDTO>();
 
+  @JsonProperty("businessInformation")
   private API_businessInformationDTO businessInformation = null;
 
+  @JsonProperty("corsConfiguration")
   private API_corsConfigurationDTO corsConfiguration = null;
 
+  @JsonProperty("endpoint")
   private List<API_endpointDTO> endpoint = new ArrayList<API_endpointDTO>();
 
+  @JsonProperty("operations")
   private List<API_operationsDTO> operations = new ArrayList<API_operationsDTO>();
 
   public APIDTO id(String id) {
@@ -252,6 +285,24 @@ public class APIDTO   {
     this.lifeCycleStatus = lifeCycleStatus;
   }
 
+  public APIDTO workflowStatus(String workflowStatus) {
+    this.workflowStatus = workflowStatus;
+    return this;
+  }
+
+   /**
+   * Get workflowStatus
+   * @return workflowStatus
+  **/
+  @ApiModelProperty(example = "APPROVED", value = "")
+  public String getWorkflowStatus() {
+    return workflowStatus;
+  }
+
+  public void setWorkflowStatus(String workflowStatus) {
+    this.workflowStatus = workflowStatus;
+  }
+
   public APIDTO createdTime(String createdTime) {
     this.createdTime = createdTime;
     return this;
@@ -374,7 +425,7 @@ public class APIDTO   {
    * Supported transports for the API (http and/or https). 
    * @return transport
   **/
-  @ApiModelProperty(required = true, value = "Supported transports for the API (http and/or https). ")
+  @ApiModelProperty(example = "[&quot;http&quot;,&quot;https&quot;]", required = true, value = "Supported transports for the API (http and/or https). ")
   public List<String> getTransport() {
     return transport;
   }
@@ -397,13 +448,36 @@ public class APIDTO   {
    * Get tags
    * @return tags
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[&quot;substract&quot;,&quot;add&quot;]", value = "")
   public List<String> getTags() {
     return tags;
   }
 
   public void setTags(List<String> tags) {
     this.tags = tags;
+  }
+
+  public APIDTO labels(List<String> labels) {
+    this.labels = labels;
+    return this;
+  }
+
+  public APIDTO addLabelsItem(String labelsItem) {
+    this.labels.add(labelsItem);
+    return this;
+  }
+
+   /**
+   * Get labels
+   * @return labels
+  **/
+  @ApiModelProperty(example = "[&quot;public&quot;,&quot;private&quot;]", value = "")
+  public List<String> getLabels() {
+    return labels;
+  }
+
+  public void setLabels(List<String> labels) {
+    this.labels = labels;
   }
 
   public APIDTO policies(List<String> policies) {
@@ -420,7 +494,7 @@ public class APIDTO   {
    * Get policies
    * @return policies
   **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(example = "[&quot;Unlimited&quot;]", required = true, value = "")
   public List<String> getPolicies() {
     return policies;
   }
@@ -461,7 +535,7 @@ public class APIDTO   {
    * Get visibleRoles
    * @return visibleRoles
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[]", value = "")
   public List<String> getVisibleRoles() {
     return visibleRoles;
   }
@@ -502,7 +576,7 @@ public class APIDTO   {
    * Get visibleTenants
    * @return visibleTenants
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[]", value = "")
   public List<String> getVisibleTenants() {
     return visibleTenants;
   }
@@ -543,7 +617,7 @@ public class APIDTO   {
    * Get sequences
    * @return sequences
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[]", value = "")
   public List<SequenceDTO> getSequences() {
     return sequences;
   }
@@ -652,6 +726,7 @@ public class APIDTO   {
         Objects.equals(this.provider, API.provider) &&
         Objects.equals(this.wsdlUri, API.wsdlUri) &&
         Objects.equals(this.lifeCycleStatus, API.lifeCycleStatus) &&
+        Objects.equals(this.workflowStatus, API.workflowStatus) &&
         Objects.equals(this.createdTime, API.createdTime) &&
         Objects.equals(this.lastUpdatedTime, API.lastUpdatedTime) &&
         Objects.equals(this.responseCaching, API.responseCaching) &&
@@ -660,6 +735,7 @@ public class APIDTO   {
         Objects.equals(this.isDefaultVersion, API.isDefaultVersion) &&
         Objects.equals(this.transport, API.transport) &&
         Objects.equals(this.tags, API.tags) &&
+        Objects.equals(this.labels, API.labels) &&
         Objects.equals(this.policies, API.policies) &&
         Objects.equals(this.visibility, API.visibility) &&
         Objects.equals(this.visibleRoles, API.visibleRoles) &&
@@ -675,7 +751,7 @@ public class APIDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, wsdlUri, lifeCycleStatus, createdTime, lastUpdatedTime, responseCaching, cacheTimeout, destinationStatsEnabled, isDefaultVersion, transport, tags, policies, visibility, visibleRoles, permission, visibleTenants, gatewayEnvironments, sequences, businessInformation, corsConfiguration, endpoint, operations);
+    return Objects.hash(id, name, description, context, version, provider, wsdlUri, lifeCycleStatus, workflowStatus, createdTime, lastUpdatedTime, responseCaching, cacheTimeout, destinationStatsEnabled, isDefaultVersion, transport, tags, labels, policies, visibility, visibleRoles, permission, visibleTenants, gatewayEnvironments, sequences, businessInformation, corsConfiguration, endpoint, operations);
   }
 
   @Override
@@ -691,6 +767,7 @@ public class APIDTO   {
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    wsdlUri: ").append(toIndentedString(wsdlUri)).append("\n");
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
+    sb.append("    workflowStatus: ").append(toIndentedString(workflowStatus)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
     sb.append("    responseCaching: ").append(toIndentedString(responseCaching)).append("\n");
@@ -699,6 +776,7 @@ public class APIDTO   {
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
+    sb.append("    labels: ").append(toIndentedString(labels)).append("\n");
     sb.append("    policies: ").append(toIndentedString(policies)).append("\n");
     sb.append("    visibility: ").append(toIndentedString(visibility)).append("\n");
     sb.append("    visibleRoles: ").append(toIndentedString(visibleRoles)).append("\n");

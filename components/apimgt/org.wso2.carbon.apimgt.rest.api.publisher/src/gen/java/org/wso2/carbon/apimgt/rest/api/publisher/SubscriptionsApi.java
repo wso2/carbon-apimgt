@@ -1,23 +1,13 @@
 package org.wso2.carbon.apimgt.rest.api.publisher;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.factories.SubscriptionsApiServiceFactory;
-
 import io.swagger.annotations.ApiParam;
-
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
-
-import org.wso2.msf4j.Microservice;
-import org.osgi.service.component.annotations.Component;
-
-import java.io.InputStream;
-
-import org.wso2.msf4j.formparam.FormDataParam;
-import org.wso2.msf4j.formparam.FileInfo;
-
-import javax.ws.rs.core.Response;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
+import org.osgi.service.component.annotations.Component;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.factories.SubscriptionsApiServiceFactory;
+import org.wso2.msf4j.Microservice;
 
 @Component(
     name = "org.wso2.carbon.apimgt.rest.api.publisher.SubscriptionsApi",
@@ -28,7 +18,7 @@ import javax.ws.rs.*;
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the subscriptions API")
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-28T15:06:55.065+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-29T11:00:00.292+05:30")
 public class SubscriptionsApi implements Microservice  {
    private final SubscriptionsApiService delegate = SubscriptionsApiServiceFactory.getSubscriptionsApi();
 

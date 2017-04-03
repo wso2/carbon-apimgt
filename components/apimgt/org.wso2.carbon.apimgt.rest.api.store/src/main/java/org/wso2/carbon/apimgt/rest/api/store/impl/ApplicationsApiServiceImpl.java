@@ -14,9 +14,11 @@ import org.wso2.carbon.apimgt.core.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.core.models.APIKey;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.ApplicationCreationResponse;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
+import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -26,8 +28,10 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.store.mappings.WorkflowMappintUtil;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -35,6 +39,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:48:55.078+05:30")
@@ -43,12 +48,29 @@ public class ApplicationsApiServiceImpl
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationsApiServiceImpl.class);
 
+    /**
+     * Deletes an existing application
+     * 
+     * @param applicationId ID of the application
+     * @param ifMatch If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param minorVersion minor version header
+     * @return 200 response if the deletion was successful
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
     public Response applicationsApplicationIdDelete(String applicationId, String ifMatch, String ifUnmodifiedSince,
                                                     String minorVersion) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
+            String existingFingerprint = applicationsApplicationIdGetFingerprint(applicationId, null, null, null,
+                    minorVersion);
+            if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
+                    .contains(existingFingerprint)) {
+                return Response.status(Response.Status.PRECONDITION_FAILED).build();
+            }
+
             apiConsumer.deleteApplication(applicationId);
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting application: " + applicationId;
@@ -61,6 +83,17 @@ public class ApplicationsApiServiceImpl
         return Response.ok().build();
     }
 
+    /**
+     * Retrives an existing application
+     * 
+     * @param applicationId application Id
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param minorVersion minor version
+     * @return Requested application detials as the response
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
     public Response applicationsApplicationIdGet(String applicationId, String accept, String ifNoneMatch,
                                                  String ifModifiedSince, String minorVersion) throws NotFoundException {
@@ -68,6 +101,13 @@ public class ApplicationsApiServiceImpl
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
+            String existingFingerprint = applicationsApplicationIdGetFingerprint(applicationId, accept, ifNoneMatch,
+                    ifModifiedSince, minorVersion);
+            if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
+                    .contains(existingFingerprint)) {
+                return Response.notModified().build();
+            }
+
             Application application = apiConsumer.getApplication(applicationId, username, null);
             if (application != null) {
                 if (application.getKeys() != null) {
@@ -95,7 +135,8 @@ public class ApplicationsApiServiceImpl
 
                 }
                 applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
-
+                return Response.ok().entity(applicationDTO).header(HttpHeaders.ETAG,
+                        "\"" + existingFingerprint + "\"").build();
             } else {
                 String errorMessage = "Application not found: " + applicationId;
                 APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
@@ -114,9 +155,44 @@ public class ApplicationsApiServiceImpl
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-        return Response.ok().entity(applicationDTO).build();
     }
 
+    /**
+     * Retrieves the fingerprint of a application given its UUID
+     * 
+     * @param applicationId application Id
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param minorVersion minor version
+     * @return Retrieves the fingerprint of a application
+     */
+    public String applicationsApplicationIdGetFingerprint(String applicationId, String accept, String ifNoneMatch,
+            String ifModifiedSince, String minorVersion) {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            String lastUpdatedTime = RestApiUtil.getConsumer(username).getLastUpdatedTimeOfApplication(applicationId);
+            return ETagUtils.generateETag(lastUpdatedTime);
+        } catch (APIManagementException e) {
+            //gives a warning and let it continue the execution
+            String errorMessage = "Error while retrieving last updated time of application " + applicationId;
+            log.error(errorMessage, e);
+            return null;
+        }
+    }
+
+    /**
+     * Updates an existing application
+     * 
+     * @param applicationId application Id
+     * @param body Application details to be updated
+     * @param contentType Content-Type header
+     * @param ifMatch If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param minorVersion minor version
+     * @return Updated application details as the response
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
     public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body,
                                                  String contentType, String ifMatch, String ifUnmodifiedSince,
@@ -125,13 +201,22 @@ public class ApplicationsApiServiceImpl
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
+            String existingFingerprint = applicationsApplicationIdGetFingerprint(applicationId, null, null, null,
+                    minorVersion);
+            if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
+                    .contains(existingFingerprint)) {
+                return Response.status(Response.Status.PRECONDITION_FAILED).build();
+            }
+
             Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
             apiConsumer.updateApplication(applicationId, application);
 
             //retrieves the updated application and send as the response
             Application updatedApplication = apiConsumer.getApplication(applicationId, username, null);
             updatedApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(updatedApplication);
-
+            String newFingerprint = applicationsApplicationIdGetFingerprint(applicationId, null, null, null,
+                    minorVersion);
+            return Response.ok().entity(updatedApplicationDTO).header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"").build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while updating application: " + body.getName();
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -140,9 +225,20 @@ public class ApplicationsApiServiceImpl
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-        return Response.ok().entity(updatedApplicationDTO).build();
     }
 
+    /**
+     * Generates keys for the application
+     * 
+     * @param applicationId application Id
+     * @param body Key generation request details 
+     * @param contentType Content-Type header
+     * @param ifMatch If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param minorVersion minor version
+     * @return Generated application key details
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
     public Response applicationsGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO body,
                                                  String contentType, String ifMatch, String ifUnmodifiedSince,
@@ -183,6 +279,18 @@ public class ApplicationsApiServiceImpl
         return Response.ok().entity(applicationKeyDTO).build();
     }
 
+    /**
+     * Retrieves all applications that qualifies for the search query
+     * 
+     * @param query Search query
+     * @param limit Max number of applications to return
+     * @param offset Starting position of pagination
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param minorVersion minor version
+     * @return A list of qualifying application DTOs as the response
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
     public Response applicationsGet(String query, Integer limit, Integer offset, String accept,
                                     String ifNoneMatch, String minorVersion) throws NotFoundException {
@@ -221,6 +329,15 @@ public class ApplicationsApiServiceImpl
         return Response.ok().entity(applicationListDTO).build();
     }
 
+    /**
+     * Adds a new application
+     * 
+     * @param body Application details to be added
+     * @param contentType Content-Type header
+     * @param minorVersion minor version
+     * @return
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
     public Response applicationsPost(ApplicationDTO body, String contentType, String minorVersion)
             throws NotFoundException {
@@ -232,10 +349,13 @@ public class ApplicationsApiServiceImpl
             Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
             String groupId = RestApiUtil.getLoggedInUserGroupId();
             application.setGroupId(groupId);
-            String applicationUUID = apiConsumer.addApplication(application);
-
+            ApplicationCreationResponse applicationResponse = apiConsumer.addApplication(application);
+            String applicationUUID = applicationResponse.getApplicationUUID();
             Application createdApplication = apiConsumer.getApplication(applicationUUID, username, groupId);
             createdApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(createdApplication);
+            WorkflowResponseDTO workflowResponse = WorkflowMappintUtil
+                    .fromWorkflowResponsetoDTO(applicationResponse.getWorkflowResponse());
+            createdApplicationDTO.setWorkflowResponse(workflowResponse);
 
             location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" +
                                 createdApplicationDTO.getApplicationId());
@@ -255,6 +375,8 @@ public class ApplicationsApiServiceImpl
             log.error(errorMessage, e);
             return Response.status(errorHandler.getHttpStatusCode()).entity(errorDTO).build();
         }
-            return Response.created(location).entity(createdApplicationDTO).build();
+        // TODO: set location header once msf4j is updates : Response.created(location).entity(createdApplicationDTO)
+        // .build()
+        return Response.ok().header("Location", location).entity(createdApplicationDTO).build();
     }
 }

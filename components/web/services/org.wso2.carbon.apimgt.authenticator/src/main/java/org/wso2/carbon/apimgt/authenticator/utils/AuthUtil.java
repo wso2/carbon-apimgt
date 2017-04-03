@@ -24,18 +24,25 @@ import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
+import org.wso2.carbon.messaging.Headers;
 import org.wso2.msf4j.Request;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import javax.ws.rs.core.Cookie;
+import javax.ws.rs.core.NewCookie;
+
 /**
  * This method authenticate the user.
  *
  */
 public class AuthUtil {
+
+    public static final String COOKIE_PATH_SEPERATOR = "; path=";
+    public static final String COOKIE_VALUE_SEPERATOR = "; ";
 
     /**
      * This method authenticate the user.
@@ -64,7 +71,8 @@ public class AuthUtil {
      *
      */
     public static AccessTokenRequest createAccessTokenRequest(String username, String password, String grantType,
-            String refreshToken, Long validityPeriod, String[] scopes, String clientId, String clientSecret) {
+            String refreshToken, String accessToken, long validityPeriod, String[] scopes, String clientId, String
+            clientSecret) {
 
         AccessTokenRequest tokenRequest = new AccessTokenRequest();
         tokenRequest.setClientId(clientId);
@@ -75,6 +83,7 @@ public class AuthUtil {
         tokenRequest.setResourceOwnerPassword(password);
         tokenRequest.setScopes(scopes);
         tokenRequest.setValidityPeriod(validityPeriod);
+        tokenRequest.setTokenToRevoke(accessToken);
         return tokenRequest;
 
     }
@@ -128,20 +137,69 @@ public class AuthUtil {
     }
 
     /**
-     * @param cookie Cookies  header which contains the access token
-     * @return partial access token present in the cookie.
+     * Method used to extract refresh token from headers.
+     * @param headers  headers which contains the access token
+     * @return refresh token present in the cookie and authorization header..
      */
-    public static String extractPartialAccessTokenFromCookie(String cookie) {
-        cookie = cookie.trim();
-        String[] cookies = cookie.split(";");
-        String token = Arrays.stream(cookies).filter(name -> name.contains(AuthenticatorConstants.REFRESH_TOKEN))
-                .findFirst().get();
-        if (token.split("=").length == 2) {
-            return token.split("=")[1];
+    public static String extractTokenFromHeaders(Headers headers, String cookieHeader) {
+        String authHeader = headers.get(AuthenticatorConstants.AUTHORIZATION_HTTP_HEADER);
+        String refreshToken = "";
+        if (authHeader != null) {
+            authHeader = authHeader.trim();
+            if (authHeader.toLowerCase(Locale.US).startsWith(AuthenticatorConstants.BEARER_PREFIX)) {
+                // Split the auth header to get the access token.
+                String[] authHeaderParts = authHeader.split(" ");
+                if (authHeaderParts.length == 2) {
+                    refreshToken = authHeaderParts[1];
+                } else if (authHeaderParts.length < 2) {
+                    return null;
+                }
+            }
+        } else {
+            return null;
         }
-        return null;
+        String cookie = headers.get(AuthenticatorConstants.COOKIE_HEADER);
+        if (cookie != null) {
+            cookie = cookie.trim();
+            String[] cookies = cookie.split(";");
+            String token = Arrays.stream(cookies).filter(name -> name.contains(cookieHeader))
+                    .findFirst().orElse("");
+            String[] tokenParts = token.split("=");
+            if (tokenParts.length == 2) {
+                refreshToken += tokenParts[1];
+            } else {
+                return null;
+            }
+
+        } else {
+            return null;
+        }
+        return refreshToken;
     }
 
-
+    /**
+     * Method used to build a cookie object.
+     * @param name  Name of the cookie.
+     * @param value Value of the cookie.
+     * @param path  Context to which cookie should be set.
+     * @param isHttpOnly    If this a http only cookie.
+     * @param isSecure      If this a secure cookie.
+     * @return Cookie object..
+     */
+    public static NewCookie cookieBuilder(String name, String value, String path, boolean isSecure,
+            boolean isHttpOnly, String expiresIn) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(value).append(COOKIE_PATH_SEPERATOR).append(path).append(COOKIE_VALUE_SEPERATOR);
+        if (isHttpOnly) {
+            stringBuilder.append(AuthenticatorConstants.HTTP_ONLY_COOKIE).append(COOKIE_VALUE_SEPERATOR);
+        }
+        if (isSecure) {
+            stringBuilder.append(AuthenticatorConstants.SECURE_COOKIE);
+        }
+        if (expiresIn != null && !expiresIn.isEmpty()) {
+            stringBuilder.append(COOKIE_VALUE_SEPERATOR).append(expiresIn);
+        }
+        return new NewCookie(name, stringBuilder.toString());
+    }
 
 }

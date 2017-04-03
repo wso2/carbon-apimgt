@@ -36,7 +36,7 @@ public class PostgresSQLStatements implements ApiDAOVendorSpecificStatements {
 
     private static final String API_SUMMARY_SELECT =
             "SELECT API.UUID, API.PROVIDER, API.NAME, API.CONTEXT, API.VERSION, API.DESCRIPTION,"
-                    + "API.CURRENT_LC_STATUS, API.LIFECYCLE_INSTANCE_ID "
+                    + "API.CURRENT_LC_STATUS, API.LIFECYCLE_INSTANCE_ID, API.LC_WORKFLOW_STATUS "
                     + "FROM AM_API API LEFT JOIN AM_API_GROUP_PERMISSION PERMISSION ON UUID = API_ID";
 
     /**
@@ -59,7 +59,7 @@ public class PostgresSQLStatements implements ApiDAOVendorSpecificStatements {
         roles.forEach(item -> roleListBuilder.append("?,"));
         roleListBuilder.append("?");
         final String query =
-                API_SUMMARY_SELECT + " WHERE textsearchable_index_col @@ to_tsquery(replace(?, ' ', '&')) AND "
+                API_SUMMARY_SELECT + " WHERE textsearchable_index_col @@ to_tsquery(replace(?, ' ', '+')) AND "
                         + "((GROUP_ID IN (" + roleListBuilder.toString() + ")) OR (PROVIDER = ?)) GROUP BY UUID "
                         + "ORDER BY NAME LIMIT ? OFFSET ?";
         int queryIndex = 1;

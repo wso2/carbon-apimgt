@@ -6,7 +6,7 @@ function getUrlFromKey (string key) (string){
 #foreach($endpoint in $endpoints)
     endpointMap["$endpoint.name"] = "$endpoint.endpointConfig";
 #end
-    string endpoint = endpointMap[key];
+    string endpoint =  (string)endpointMap[key];
     return endpoint;
 }
 

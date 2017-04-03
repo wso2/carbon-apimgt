@@ -1,0 +1,124 @@
+{{js "js/document.js"}}
+<div id="document-content" class="tab-content col-md-6 col-sm-6">
+    <div class="row-fluid">
+        <div class="control-group">
+            <input type="hidden" id="docAPIVersion" value="1.0"/>
+            <input type="hidden" id="docAPIName" value="test"/>
+            <input type="hidden" id="docId" value="test"/>
+            <div id="doc-header">
+                <a id="add-new-doc" href="#" title="{{i18n "Add New Document"}}" onclick="javascript:$('#add-doc-submit').show();$('#update-doc-submit').hide();" class="btn btn-primary add-new-doc btn-sm padding-reduce-on-grid-view">
+                    <i class=" glyphicon glyphicon-plus-sign" title="{{i18n "Add New Document"}}"></i>
+                    {{i18n "Add New Document"}}
+                </a>
+            </div>
+            <br/>
+            <div id="updateDoc" style="display:none;">
+                <h4></h4>
+            </div>
+        </div>
+    </div>
+    <!-- Row -->
+    <div class="container-fluid" style="padding-left:0">
+        <div id="newDoc" style="display:none;">
+            <div class="row-fluid">
+                <div class="col-sm-4 name-column" style="margin-bottom: 10px">
+                    <div class="control-group">
+                        <label class="control-label" for="docName">Name<span class="requiredAstrix">*</span></label>
+                        <div class="form-group">
+                            <input type="text" class="form-control required validInput" id="docName" style="width:100%"/>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">{{i18n "Summary"}}<span class="requiredAstrix">*</span></label>
+                        <div class="controls form-group">
+                            <textarea  id="summary" class="required form-control" rows="3" style="width:100%" title="summary"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-4">
+                    <div class="well">
+                        <div class="form-group">
+                            <label class="control-label">Source</label>
+                            <ul class="nav">
+                                <li>
+                                    <label>
+                                        <input type="radio" name="optionsRadios1" id="optionsRadios6" value="INLINE" onclick="javascript:$('#sourceUrlDoc').hide('slow');$('#fileNameDiv').hide('slow')" checked="">{{i18n "Inline"}}
+                                        <a class="icon-question-sign help_popup" help_data="inlineDoc_help" title="inlineDoc_help""></a>
+                                        <p id="inlineDoc_help" class="hide">
+                                                {{i18n "Documentation that is hosted in the system and can be edited directly from the UI"}}
+                                        </p>
+                                    </label>
+                                </li>
+                                <li>
+                                    <label>
+                                        <input type="radio" name="optionsRadios1" id="optionsRadios7" value="URL" onclick="javascript:$('#sourceUrlDoc').toggle('slow');$('#fileNameDiv').hide('slow')">{{i18n "URL"}}
+                                        <a class="icon-question-sign help_popup" help_data="urlDoc_help" title=""urlDoc_help""></a>
+                                        <p id="urlDoc_help" class="hide">
+                                            {{i18n "Link to documentation is managed by an external configuration management system"}}
+                                        </p>
+                                    </label>
+
+                                    <div id="sourceUrlDoc" class="controls" style="display:none;">
+                                        <span class="requiredAstrix">*</span> <input type="text" class="form-control required" style="width:98%" title="docUrl" id="docUrl">
+                                    </div>
+                                </li>
+                                <li>
+                                    <label>
+                                        <input type="radio" name="optionsRadios1" id="optionsRadios8" value="FILE" onclick="javascript:$('#fileNameDiv').toggle('slow');$('#sourceUrlDoc').hide('slow')">{{i18n "File"}}
+                                        <a class="icon-question-sign help_popup" help_data="fileDoc_help" title="fileDoc_help"></a>
+                                        <p id="fileDoc_help" class="hide">{{i18n "Upload a documentation file"}}</p>
+                                    </label>
+                                    <div id="fileNameDiv" style="display:none;">
+                                    <button type="button" class="btn btn-secondary" id="toggleFileDoc" style="display:none;" onclick="javascript:$('#fileNameDiv').toggle('slow')">{{i18n "Change File"}}</button>
+                                    <form class="form-horizontal">
+                                    <div class="input-group input-wrap file-upload-control">
+                                        <input type="text" placeholder="Click on brows to add a file" class="form-control" readonly="">
+                                        <input name="doc-file" id="doc-file" type="file" class="form-control" multiple="">
+                                        <div class="input-group-btn">
+                                            <button class="btn browse" type="button" title="Browse File">
+                                                <i class="fw fw-file-browse" aria-hidden="true"></i>
+                                                <span class="hidden-xs">{{i18n "Browse"}}</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    </form>
+                                    </div>
+
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <button type="button" class="btn btn-primary" id="add-doc-submit">{{i18n "Add"}}</button>
+                        <button type="button" class="btn btn-primary" id="update-doc-submit">{{i18n "Update"}}</button>
+                        <button type="button" class="btn btn-secondary" onclick="javascript:$('#newDoc').fadeOut('slow');" id='clear-doc-form' >{{i18n "Cancel"}}</button>
+                    </div>
+                </div>
+
+            </div><!-- Enod of row -->
+        </div>
+    </div>
+
+
+
+    <table class="table table-striped table-hover table-bordered display data-table" id="doc-table">
+        <thead>
+        <tr>
+            <th class="doc-listing-Id">Id</th>
+            <th class="doc-listing-name">Name</th>
+            <th>{{i18n "Source"}}</th>
+            <!-- TODO add Modified Date column once the service implementation is completed. -->
+            <th class="doc-listing-action">{{i18n "Actions"}}</th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+
+</div>

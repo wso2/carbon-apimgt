@@ -29,7 +29,7 @@ import javax.validation.constraints.NotNull;
 @ApiModel(description = "")
 public class ErrorDTO {
 
-    @NotNull private Long code = null;
+    @NotNull private long code;
 
     @NotNull private String message = null;
 
@@ -44,7 +44,7 @@ public class ErrorDTO {
         return code;
     }
 
-    public void setCode(Long code) {
+    public void setCode(long code) {
         this.code = code;
     }
 

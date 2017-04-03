@@ -1,17 +1,15 @@
 
 <div class="row">
     <div class="col-md-12 col-lg-9">
-        {{#each api.endpointURLs}}
-            <h4>{{this.environmentName}} Endpoints</h4>
-            <h5 class="add-margin-top-2x">{{this.environmentName}} URLs :</h5>
-                {{#each this.environmentURLs}}
+        {{#each @params.labels}}
+            <h4>{{this.name}} {{i18n "Gateway"}}</h4>
+            <h5 class="add-margin-top-2x">{{i18n "Access URLs"}} :</h5>
+                {{#each this.accessUrls}}
                     <div class="endpoint-copybtn well well-sm add-margin-bottom-1x">
                         <a data-clipboard-text="{{this}}"
-                            class="pull-right copy-button" title="Copy"><i class="fw fw-copy"></i>
+                           class="pull-right copy-button" title="Copy"><i class="fw fw-copy"></i>
                         </a>
-                        {{#each this}}
-                            {{this}} <br/>
-                        {{/each}}
+                        {{this}} <br/>
                     </div>
                 {{/each}}
         {{/each}}

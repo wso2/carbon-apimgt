@@ -22,6 +22,17 @@ public class TagsApiServiceImpl extends TagsApiService {
 
     private static final Logger log = LoggerFactory.getLogger(TagsApiServiceImpl.class);
 
+    /**
+     * Retrieve tags of APIs
+     * 
+     * @param limit Maximum number of tags to return
+     * @param offset Starting position of the pagination
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param minorVersion minor version header
+     * @return A list of qualifying tags as the response
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
     public Response tagsGet(Integer limit, Integer offset, String accept, String ifNoneMatch,
                             String minorVersion) throws NotFoundException {

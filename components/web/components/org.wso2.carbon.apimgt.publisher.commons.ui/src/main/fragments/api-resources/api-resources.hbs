@@ -1,0 +1,85 @@
+{{js "js/resources.js"}}
+
+<div class="page-header">
+    <h4 class="lead">{{i18n "Resources.Configuration"}}</h4>
+</div>
+<div class="row">
+    <div id="api_designer">
+        <div>
+            <div class="resource_create col-xs-12 col-sm-12 col-md-8 col-lg-8">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">{{i18n "URL.Pattern"}}</label>
+                    <div class="col-sm-9">
+                        <div class="input-group">
+                            <span class="input-group-addon" id="resource_url_pattern_refix">{{@params.context}}/{{@params.version}}/</span>
+                            <input id="resource_url_pattern" type="text" placeholder="E.g., path/to/resource" class="resource_url_pattern form-control"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for=""></label>
+                    <div class="col-sm-9">
+                        <table class="resource-table-width">
+                            <tr>
+                                {{#each @params.verbs}}
+                                    <td class="resource-td-width">
+                                        <label class="checkbox resource-label" id="{{ . }}">
+                                            <input type="checkbox" value="{{ . }}" class="http_verb_select">
+                                            <span class="helper"> {{ . }}</span>
+                                        </label>
+                                    </td>
+                                {{/each}}
+                                <td class="resource-td-width-next" id="options">
+                                    <label class="checkbox">
+                                        <input type="checkbox" value="options" class="http_verb_select">
+                                        <span class="helper">{{i18n "OPTIONS"}}</span>
+                                        &nbsp;<a class="help_popup" help_data="options_help" data-trigger="hover" title="options_help">
+                                    <span class="icon fw-stack fw-lg resource-span">
+                                                               <i class="fw fw-circle fw-stack-2x"></i>
+                                                               <i class="fw fw-question fw-stack-1x fw-inverse resource-span-font"></i>
+                                                            </span>
+                                    </a>
+                                        <p id="options_help" class="hide">Select the OPTIONS method to send OPTIONS calls to the backend. If OPTIONS method is not selected, OPTIONS calls will be returned from the Gateway with allowed methods.</p>
+                                    </label>
+                                    <!--</div>-->
+                                </td>
+                                <td id="less" class="resource-less">
+                                    <label>
+                                        {{i18n "less"}}<span class="icon fw-stack"/>
+                                    </label>
+                                </td>
+                                <td class="resource-more" id="more">
+                                    <label>
+                                        {{i18n "more"}}<span class="icon fw-stack"/>
+                                    </label>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label"></label>
+                    <div class="col-sm-9">
+                        <button class="btn btn-secondary resource-add-btn" type="button" id="add_resource" ><span class="icon fw-stack resource-add-span">
+                                            <i class="fw fw-add fw-stack-1x"></i>
+                                            <i class="fw fw-circle-outline fw-stack-2x"></i>
+                            </span>&nbsp;Add</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="panel-group add-margin-bottom-2x" role="tablist" aria-multiselectable="false" id="resource_details">
+
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="panel-group add-margin-bottom-2x" role="tablist" aria-multiselectable="false" id="resource_details">
+                    <div>
+                        <input type="button" class="btn btn-secondary has-spinner resource-add-btn" id="save_resources" value="{{i18n "Save"}}"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

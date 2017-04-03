@@ -87,7 +87,7 @@ public class APIManagerFactory {
         try {
             UserAwareAPIPublisher userAwareAPIPublisher = new UserAwareAPIPublisher(username, DAOFactory.getApiDAO(),
                     DAOFactory.getApplicationDAO(), DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO(),
-                    DAOFactory.getLabelDAO());
+                    DAOFactory.getLabelDAO(), DAOFactory.getWorkflowDAO());
 
             // Register all the observers which need to observe 'Publisher' component
             userAwareAPIPublisher.registerObserver(new EventLogger());
@@ -105,7 +105,7 @@ public class APIManagerFactory {
     private APIMgtAdminServiceImpl newAPIMgtAdminService() throws APIManagementException {
         try {
             return new APIMgtAdminServiceImpl(DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO(),
-                    DAOFactory.getApiDAO());
+                    DAOFactory.getApiDAO(), DAOFactory.getLabelDAO());
         } catch (APIMgtDAOException e) {
             log.error("Couldn't create API Management Admin Service", e);
             throw new APIMgtDAOException("Couldn't create API Management Admin Service",
@@ -121,7 +121,8 @@ public class APIManagerFactory {
         try {
             UserAwareAPIStore userAwareAPIStore = new UserAwareAPIStore(username, DAOFactory.getApiDAO(),
                     DAOFactory.getApplicationDAO(), DAOFactory.getAPISubscriptionDAO(),
-                    DAOFactory.getPolicyDAO(), DAOFactory.getTagDAO(), DAOFactory.getLabelDAO());
+                    DAOFactory.getPolicyDAO(), DAOFactory.getTagDAO(), DAOFactory.getLabelDAO(),
+                    DAOFactory.getWorkflowDAO());
 
             // Register all the observers which need to observe 'Store' component
             userAwareAPIStore.registerObserver(new EventLogger());

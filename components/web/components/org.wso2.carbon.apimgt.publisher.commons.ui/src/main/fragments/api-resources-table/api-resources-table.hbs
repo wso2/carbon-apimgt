@@ -1,0 +1,22 @@
+<div class="panel-group add-margin-bottom-2x" role="tablist" aria-multiselectable="false" id="swaggerTable">
+    <table class="resource-table-width">
+        {{#each @params.doc.paths}}
+            {{# each this}}
+                <tr class="resource_container" data-path="$.paths.{{ path }}.{{@key}}">
+                    <td class="resource-method-td resource_expand" data-path="$.paths.{{ path }}.{{ @key }}">
+                        <span class=" resource-method resource-method-{{ @key }}">{{ @key }}</span>
+                    </td>
+                    <td class="resource_expand"><a class="resource-path" title="resource-path">{{ path }}</a></td>
+                    <td><span class="operation-summary change_summary" data-path="$.paths.{{ path }}.{{@key}}" data-attr="summary" >{{#if summary}}{{ summary }}{{/if}}</span></td>
+                    <td class="delete_resource_td "><a class='operation-summary delete_resource' data-operation="{{ @key }}" data-path-name="{{ path }}" data-path="$.paths.{{ path }}.{{@key}}" data-index="{{ index }}">
+		<span class="fw-stack resource-font">
+                                <i class="fw fw-delete fw-stack-1x"></i>
+                                <i class="fw fw-circle-outline fw-stack-2x"></i>
+                </span>
+                    </a></td>
+                </tr>
+                <tr><td colspan="4" class="resource_body resource-less" data-path="$.paths.{{ path }}.{{@key}}"></td></tr>
+            {{/each}}
+        {{/each}}
+    </table>
+</div>
