@@ -92,11 +92,11 @@ public interface APISubscriptionDAO {
      *
      * @param offset   The number of results from the beginning that is to be ignored
      * @param limit    The maximum number of results to be returned after the offset
-     * @param userName The username to filter results by
+     * @param username The username to filter results by
      * @return {@link APISubscriptionResults} matching results
      * @throws APIMgtDAOException   If failed to get subscriptions.
      */
-    APISubscriptionResults getAPISubscriptionsForUser(int offset, int limit, String userName) throws APIMgtDAOException;
+    List<Subscription> getAPISubscriptionsForUser(int offset, int limit, String username) throws APIMgtDAOException;
 
     /**
      * Retrieves all available API Subscriptions. This method supports result pagination and
@@ -118,12 +118,12 @@ public interface APISubscriptionDAO {
      * @param searchString    The search string provided
      * @param offset          The number of results from the beginning that is to be ignored
      * @param limit           The maximum number of results to be returned after the offset
-     * @param userName        The username to filter results by
+     * @param username        The username to filter results by
      * @return {@link APISubscriptionResults} matching results
      * @throws APIMgtDAOException   If failed to get subscriptions.
      */
     APISubscriptionResults searchApplicationsForUser(String searchAttribute, String searchString, int offset,
-                                                     int limit, String userName) throws APIMgtDAOException;
+                                                     int limit, String username) throws APIMgtDAOException;
 
     /**
      * Retrieves all available API Subscriptions that match the given search criteria. This method supports
@@ -208,4 +208,22 @@ public interface APISubscriptionDAO {
      */
     SubscriptionValidationResult validateSubscription(String apiContext, String apiVersion, String consumerKey)
             throws APIMgtDAOException;
+
+    /**
+     * Retrieves the last updated time of the subscription
+     *
+     * @param subscriptionId UUID of the subscription
+     * @return  Last updated time of the resource
+     * @throws APIMgtDAOException if DB level exception occurred
+     */
+    String getLastUpdatedTimeOfSubscription(String subscriptionId) throws APIMgtDAOException;
+
+    /**
+     * Retrieve the list of subscriptions of an Application which are in pending state
+     *
+     * @param applicationId The UUID of Application
+     * @return A list of {@link Subscription} objects which has pending status
+     * @throws APIMgtDAOException   If failed to get subscriptions.
+     */
+    List<Subscription> getPendingAPISubscriptionsByApplication(String applicationId) throws APIMgtDAOException;
 }

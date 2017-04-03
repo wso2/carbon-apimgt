@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.TestUtil;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.util.ETagUtils;
 
 import java.time.Duration;
 import java.util.List;
@@ -31,7 +32,7 @@ import java.util.List;
 public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
-    public void testAddAndGetApplication( ) throws Exception {
+    public void testAddAndGetApplication() throws Exception {
 
         //add new app
         Application app = TestUtil.addTestApplication();
@@ -45,7 +46,7 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testUpdateApplication( ) throws Exception {
+    public void testUpdateApplication() throws Exception {
 
         //add new app
         Application currentApp = TestUtil.addTestApplication();
@@ -64,7 +65,7 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testDeleteApplication( ) throws Exception {
+    public void testDeleteApplication() throws Exception {
 
         // add app
         Application app = TestUtil.addTestApplication();
@@ -76,7 +77,7 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testIsApplicationNameExists( ) throws Exception {
+    public void testIsApplicationNameExists() throws Exception {
 
         ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
         //check for a non-existing application
@@ -88,7 +89,7 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testGetAllApplications( ) throws Exception {
+    public void testGetAllApplications() throws Exception {
 
         //add 4 apps
         String username = "admin";
@@ -122,25 +123,49 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testGetApplicationsForUser( ) throws Exception {
+    public void testFingerprintAfterUpdatingApplication() throws Exception {
+        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
+
+        //add new app
+        Application currentApp = TestUtil.addTestApplication();
+        String fingerprintBeforeUpdate = ETagUtils
+                .generateETag(applicationDAO.getLastUpdatedTimeOfApplication(currentApp.getId()));
+        Assert.assertNotNull(fingerprintBeforeUpdate);
+        Thread.sleep(1);
+
+        Application newApp = SampleTestObjectCreator.createAlternativeApplication();
+        newApp.setId(currentApp.getId());
+        newApp.setCreatedTime(currentApp.getCreatedTime());
+        //update app
+        applicationDAO.updateApplication(currentApp.getId(), newApp);
+        String fingerprintAfterUpdate = ETagUtils
+                .generateETag(applicationDAO.getLastUpdatedTimeOfApplication(currentApp.getId()));
+        Assert.assertNotNull(fingerprintAfterUpdate);
+
+        //compare
+        Assert.assertNotEquals(fingerprintBeforeUpdate, fingerprintAfterUpdate);
+    }
+
+    @Test
+    public void testGetApplicationsForUser() throws Exception {
 
 
     }
 
     @Test
-    public void testGetApplicationsForGroup( ) throws Exception {
+    public void testGetApplicationsForGroup() throws Exception {
 
 
     }
 
     @Test
-    public void testSearchApplicationsForUser( ) throws Exception {
+    public void testSearchApplicationsForUser() throws Exception {
 
 
     }
 
     @Test
-    public void testSearchApplicationsForGroup( ) throws Exception {
+    public void testSearchApplicationsForGroup() throws Exception {
 
     }
 

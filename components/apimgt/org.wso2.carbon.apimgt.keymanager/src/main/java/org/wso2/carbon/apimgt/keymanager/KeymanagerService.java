@@ -139,6 +139,12 @@ public class KeymanagerService implements Microservice {
     }
 
     @POST
+    @Path ("/oauth2/revoke")
+    public Response revokeAccessToken() {
+        return Response.ok().build();
+    }
+
+    @POST
     @Path("/identity/connect/register")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -215,7 +221,6 @@ public class KeymanagerService implements Microservice {
     private static void getData() {
         applications = KeyManagerUtil.getBackedUpData("applications.data");
         appsByClientId = KeyManagerUtil.getBackedUpData("appsByClientId.data");
-        KeyManagerUtil.getBackedUpTokenData("token.data");
-        KeyManagerUtil.getBackedUpTokenData("refresh.data");
+        KeyManagerUtil.getBackedUpTokenData();
     }
 }

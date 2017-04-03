@@ -15,11 +15,15 @@ import java.util.List;
 
 public class PolicyMappingUtil {
 
+    public static final String QUOTA_TYPE = "requestCount";
+
     public static TierDTO fromPolicyToDTO(Policy policy)    {
         TierDTO tierDTO = new TierDTO();
         if (policy != null) {
             tierDTO.setName(policy.getPolicyName());
             tierDTO.setDescription(policy.getDescription());
+            tierDTO.setTimeUnit(policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+            tierDTO.setUnitTime(policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
         } else {
             tierDTO.setName("DummyPolicy");
             tierDTO.setDescription("Testing Policy");
@@ -31,30 +35,34 @@ public class PolicyMappingUtil {
     public static List<TierDTO> fromPoliciesToDTOs(List<Policy> policies)   {
         List<TierDTO> tiers = new ArrayList();
 
-        for (Policy policy : policies)  {
-            tiers.add(fromPolicyToDTO(policy));
+        if (policies != null)   {
+            for (Policy policy : policies)  {
+                tiers.add(fromPolicyToDTO(policy));
+            }
         }
+
         return tiers;
     }
 
     public static Policy toPolicy(String tierLevel, TierDTO tierDTO) {
 
-        Policy policy = null;
+        Policy policy;
         if (APIMgtConstants.ThrottlePolicyConstants.API_LEVEL.equals(tierLevel))    {
             policy = new APIPolicy(tierDTO.getName());
-            policy.setDescription(tierDTO.getDescription());
-            QuotaPolicy quotaPolicy = new QuotaPolicy();
-            Limit limit = new Limit();
-            limit.setTimeUnit(tierDTO.getTimeUnit());
-            limit.setUnitTime(tierDTO.getUnitTime());
-            quotaPolicy.setLimit(limit);
-            quotaPolicy.setType("request");
-            policy.setDefaultQuotaPolicy(quotaPolicy);
         } else if (APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL.equals(tierLevel)) {
             policy = new ApplicationPolicy(tierDTO.getName());
-        } else if (APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL.equals(tierLevel)){
+        } else {
             policy = new SubscriptionPolicy(tierDTO.getName());
         }
+        policy.setDescription(tierDTO.getDescription());
+        QuotaPolicy quotaPolicy = new QuotaPolicy();
+        Limit limit = new Limit();
+        limit.setTimeUnit(tierDTO.getTimeUnit());
+        limit.setUnitTime(tierDTO.getUnitTime());
+        quotaPolicy.setLimit(limit);
+        quotaPolicy.setType(QUOTA_TYPE);  // Hard coded as request count. Rest api should support bandwidth type as
+        // well.
+        policy.setDefaultQuotaPolicy(quotaPolicy);
 
         return policy;
     }

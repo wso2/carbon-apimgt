@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
+import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
@@ -37,9 +38,12 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.models.Workflow;
 
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 /**
@@ -56,9 +60,12 @@ public abstract class AbstractAPIManager implements APIManager {
     private String username;
     private APILifecycleManager apiLifecycleManager;
     private LabelDAO labelDAO;
+    private WorkflowDAO workflowDAO;
 
-    public AbstractAPIManager(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
-            apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager apiLifecycleManager, LabelDAO labelDAO)  {
+    public AbstractAPIManager(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
+            APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager apiLifecycleManager,
+            LabelDAO labelDAO, WorkflowDAO workflowDAO) {
+
         this.username = username;
         this.apiDAO = apiDAO;
         this.applicationDAO = applicationDAO;
@@ -66,7 +73,10 @@ public abstract class AbstractAPIManager implements APIManager {
         this.policyDAO = policyDAO;
         this.apiLifecycleManager = apiLifecycleManager;
         this.labelDAO = labelDAO;
+        this.workflowDAO = workflowDAO;
     }
+
+
 
     /**
      * Returns a list of all existing APIs by all providers. The API objects returned by this
@@ -92,16 +102,54 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return An API object related to the given artifact id or null
      * @throws APIManagementException if failed get API from String
      */
-    @Override public API getAPIbyUUID(String uuid) throws APIManagementException {
+    @Override
+    public API getAPIbyUUID(String uuid) throws APIManagementException {
         API api = null;
         try {
             api = apiDAO.getAPI(uuid);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while retrieving API with id " + uuid;
             log.error(errorMsg, e);
-            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return api;
+    }
+
+    /**
+     * @see APIManager#getLastUpdatedTimeOfAPI(java.lang.String)
+     */
+    @Override
+    public String getLastUpdatedTimeOfAPI(String apiId) throws APIManagementException {
+        String lastUpdatedTime;
+        try {
+            lastUpdatedTime = apiDAO.getLastUpdatedTimeOfAPI(apiId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while retrieving the last update time of API with id " + apiId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+
+        return lastUpdatedTime;
+    }
+
+
+    /**
+     * @see APIManager#getLastUpdatedTimeOfSwaggerDefinition(java.lang.String)
+     */
+    @Override
+    public String getLastUpdatedTimeOfSwaggerDefinition(String apiId) throws APIManagementException {
+        String lastUpdatedTime;
+        try {
+            lastUpdatedTime = apiDAO.getLastUpdatedTimeOfSwaggerDefinition(apiId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg =
+                    "Error occurred while retrieving the last update time of the swagger definition of API with id "
+                            + apiId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+
+        return lastUpdatedTime;
     }
 
     /**
@@ -131,7 +179,7 @@ public abstract class AbstractAPIManager implements APIManager {
             } catch (APIMgtDAOException e) {
                 String errorMsg = "Couldn't check API Context " + context + "Exists";
                 log.error(errorMsg, e);
-                throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+                throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
             }
         } else {
             return false;
@@ -152,7 +200,7 @@ public abstract class AbstractAPIManager implements APIManager {
         } catch (APIMgtDAOException e) {
             String errorMsg = "Couldn't check API Name " + apiName + "Exists";
             log.error(errorMsg, e);
-            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -183,7 +231,7 @@ public abstract class AbstractAPIManager implements APIManager {
         } catch (APIMgtDAOException e) {
             String errorMsg = "Couldn't retrieve swagger definition for apiId " + api;
             log.error(errorMsg + api, e);
-            throw new APIMgtDAOException(errorMsg + api, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(errorMsg + api, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
 
     }
@@ -203,7 +251,7 @@ public abstract class AbstractAPIManager implements APIManager {
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while retrieving documents";
             log.error(errorMsg, e);
-            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -261,7 +309,7 @@ public abstract class AbstractAPIManager implements APIManager {
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while retrieving document content";
             log.error(errorMsg, e);
-            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -280,7 +328,7 @@ public abstract class AbstractAPIManager implements APIManager {
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while retrieving application - ";
             log.error(errorMsg, e);
-            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return application;
     }
@@ -303,6 +351,107 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
+     * @see APIManager#getLastUpdatedTimeOfDocument(String)
+     */
+    @Override
+    public String getLastUpdatedTimeOfDocument(String documentId) throws APIManagementException {
+        String lastUpdatedTime;
+        try {
+            lastUpdatedTime = apiDAO.getLastUpdatedTimeOfDocument(documentId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while retrieving the last updated time of document " + documentId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return lastUpdatedTime;
+    }
+
+    /**
+     * @see APIManager#getLastUpdatedTimeOfDocumentContent(String, String)
+     */
+    @Override
+    public String getLastUpdatedTimeOfDocumentContent(String apiId, String documentId) throws APIManagementException {
+        String lastUpdatedTime;
+        try {
+            lastUpdatedTime = apiDAO.getLastUpdatedTimeOfDocumentContent(apiId, documentId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg =
+                    "Error occurred while retrieving the last updated time of the document's content " + documentId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return lastUpdatedTime;
+    }
+
+    /**
+     * @see APIManager#getLastUpdatedTimeOfAPIThumbnailImage(String)
+     */
+    @Override
+    public String getLastUpdatedTimeOfAPIThumbnailImage(String apiId) throws APIManagementException {
+        String lastUpdatedTime;
+        try {
+            lastUpdatedTime = apiDAO.getLastUpdatedTimeOfAPIThumbnailImage(apiId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg =
+                    "Error occurred while retrieving the last updated time of the thumbnail image of the API " + apiId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return lastUpdatedTime;
+    }
+
+    /**
+     * @see APIManager#getLastUpdatedTimeOfApplication(String)
+     */
+    @Override
+    public String getLastUpdatedTimeOfApplication(String applicationId) throws APIManagementException {
+        String lastUpdatedTime;
+        try {
+            lastUpdatedTime = applicationDAO.getLastUpdatedTimeOfApplication(applicationId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg =
+                    "Error occurred while retrieving the last updated time of the application " + applicationId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return lastUpdatedTime;
+    }
+
+    /**
+     * @see APIManager#getLastUpdatedTimeOfSubscription(String)
+     */
+    @Override
+    public String getLastUpdatedTimeOfSubscription(String subscriptionId) throws APIManagementException {
+        String lastUpdatedTime;
+        try {
+            lastUpdatedTime = apiSubscriptionDAO.getLastUpdatedTimeOfSubscription(subscriptionId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg =
+                    "Error occurred while retrieving the last updated time of the subscription " + subscriptionId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return lastUpdatedTime;
+    }
+
+    /**
+     * @see APIManager#getLastUpdatedTimeOfThrottlingPolicy(String, String)
+     */
+    @Override
+    public String getLastUpdatedTimeOfThrottlingPolicy(String policyLevel, String policyName)
+            throws APIManagementException {
+        String lastUpdatedTime;
+        try {
+            lastUpdatedTime = getPolicyDAO().getLastUpdatedTimeOfThrottlingPolicy(policyLevel, policyName);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error while retrieving last updated time of policy :" + policyLevel + "/" + policyName;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return lastUpdatedTime;
+    }
+
+    /**
      * Returns the subscriptions for api
      *
      * @param apiId UUID of the API.
@@ -316,7 +465,7 @@ public abstract class AbstractAPIManager implements APIManager {
         } catch (APIMgtDAOException e) {
             String errorMsg = "Couldn't find subscriptions for apiId " + apiId;
             log.error(errorMsg, e);
-            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -340,6 +489,10 @@ public abstract class AbstractAPIManager implements APIManager {
         return labelDAO;
     }
 
+    protected WorkflowDAO getWorkflowDAO() {
+        return workflowDAO;
+    }
+
     protected String getUsername() {
         return username;
     }
@@ -355,5 +508,47 @@ public abstract class AbstractAPIManager implements APIManager {
     protected final void handleResourceAlreadyExistsException(String msg) throws APIMgtResourceAlreadyExistsException {
         log.error(msg);
         throw new APIMgtResourceAlreadyExistsException(msg);
+    }
+    
+    @Override
+    public Workflow retrieveWorkflow(String workflowRefId) throws APIMgtDAOException {        
+        return workflowDAO.retrieveWorkflow(workflowRefId);
+    }
+    
+    protected void updateWorkflowEntries(Workflow workflow) throws APIManagementException {
+        workflow.setUpdatedTime(LocalDateTime.now());
+        try {
+            getWorkflowDAO().updateWorkflowStatus(workflow);
+            // TODO stats stuff
+        } catch (APIMgtDAOException e) {
+            String message = "Error while updating workflow entry";
+            log.error(message);
+            throw new APIManagementException(message, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+
+    }
+
+    protected void addWorkflowEntries(Workflow workflow) throws APIManagementException {
+
+        try {
+            getWorkflowDAO().addWorkflowEntry(workflow);
+            // TODO stats publish
+        } catch (APIMgtDAOException e) {
+            String message = "Error while adding workflow entry";
+            log.error(message);
+            throw new APIManagementException(message, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+
+    }
+    
+    @Override
+    public Label getLabelByName(String labelName) throws APIManagementException {
+        try {
+            return labelDAO.getLabelByName(labelName);
+        } catch (APIMgtDAOException e) {
+            String message = "Error occured while retrieving Label information for " + labelName;
+            log.error(message);
+            throw new APIManagementException(message, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
     }
 }

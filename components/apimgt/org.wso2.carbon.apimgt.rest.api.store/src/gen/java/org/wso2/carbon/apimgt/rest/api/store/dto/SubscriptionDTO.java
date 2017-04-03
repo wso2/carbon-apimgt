@@ -6,11 +6,12 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
 
 /**
  * SubscriptionDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-08T11:10:07.219+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-31T11:27:01.517+05:30")
 public class SubscriptionDTO   {
   @JsonProperty("subscriptionId")
   private String subscriptionId = null;
@@ -35,13 +36,13 @@ public class SubscriptionDTO   {
    */
   public enum LifeCycleStatusEnum {
     BLOCKED("BLOCKED"),
-
+    
     PROD_ONLY_BLOCKED("PROD_ONLY_BLOCKED"),
-
+    
     ACTIVE("ACTIVE"),
-
+    
     ON_HOLD("ON_HOLD"),
-
+    
     REJECTED("REJECTED");
 
     private String value;
@@ -69,6 +70,9 @@ public class SubscriptionDTO   {
 
   @JsonProperty("lifeCycleStatus")
   private LifeCycleStatusEnum lifeCycleStatus = null;
+
+  @JsonProperty("workflowResponse")
+  private WorkflowResponseDTO workflowResponse = null;
 
   public SubscriptionDTO subscriptionId(String subscriptionId) {
     this.subscriptionId = subscriptionId;
@@ -196,6 +200,24 @@ public class SubscriptionDTO   {
     this.lifeCycleStatus = lifeCycleStatus;
   }
 
+  public SubscriptionDTO workflowResponse(WorkflowResponseDTO workflowResponse) {
+    this.workflowResponse = workflowResponse;
+    return this;
+  }
+
+   /**
+   * Get workflowResponse
+   * @return workflowResponse
+  **/
+  @ApiModelProperty(value = "")
+  public WorkflowResponseDTO getWorkflowResponse() {
+    return workflowResponse;
+  }
+
+  public void setWorkflowResponse(WorkflowResponseDTO workflowResponse) {
+    this.workflowResponse = workflowResponse;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -212,19 +234,20 @@ public class SubscriptionDTO   {
         Objects.equals(this.apiName, subscription.apiName) &&
         Objects.equals(this.apiVersion, subscription.apiVersion) &&
         Objects.equals(this.policy, subscription.policy) &&
-        Objects.equals(this.lifeCycleStatus, subscription.lifeCycleStatus);
+        Objects.equals(this.lifeCycleStatus, subscription.lifeCycleStatus) &&
+        Objects.equals(this.workflowResponse, subscription.workflowResponse);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(subscriptionId, applicationId, apiIdentifier, apiName, apiVersion, policy, lifeCycleStatus);
+    return Objects.hash(subscriptionId, applicationId, apiIdentifier, apiName, apiVersion, policy, lifeCycleStatus, workflowResponse);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class SubscriptionDTO {\n");
-
+    
     sb.append("    subscriptionId: ").append(toIndentedString(subscriptionId)).append("\n");
     sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
     sb.append("    apiIdentifier: ").append(toIndentedString(apiIdentifier)).append("\n");
@@ -232,6 +255,7 @@ public class SubscriptionDTO   {
     sb.append("    apiVersion: ").append(toIndentedString(apiVersion)).append("\n");
     sb.append("    policy: ").append(toIndentedString(policy)).append("\n");
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
+    sb.append("    workflowResponse: ").append(toIndentedString(workflowResponse)).append("\n");
     sb.append("}");
     return sb.toString();
   }

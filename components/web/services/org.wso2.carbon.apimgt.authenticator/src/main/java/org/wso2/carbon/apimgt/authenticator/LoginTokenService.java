@@ -62,17 +62,26 @@ public class LoginTokenService {
      *
      */
     public String getTokens(AuthResponseBean authResponseBean, String appName, String userName, String password,
-            String grantType, String refreshToken, String[] scopes, Long validityPeriod) throws KeyManagementException {
+            String grantType, String refreshToken, String[] scopes, long validityPeriod) throws KeyManagementException {
         //TODO - call method which provides client id and secret.
         Map<String, String> consumerKeySecretMap = getConsumerKeySecret(appName);
         AccessTokenRequest accessTokenRequest = AuthUtil
-                .createAccessTokenRequest(userName, password, grantType, refreshToken, validityPeriod, scopes,
+                .createAccessTokenRequest(userName, password, grantType, refreshToken, null, validityPeriod, scopes,
                         consumerKeySecretMap.get("CONSUMER_KEY"), consumerKeySecretMap.get("CONSUMER_SECRET"));
         KeyManager keyManager = KeyManagerHolder.getAMLoginKeyManagerInstance();
         AccessTokenInfo accessTokenInfo = keyManager.getNewApplicationAccessToken(accessTokenRequest);
         setAccessTokenData(authResponseBean, accessTokenInfo);
         authResponseBean.setAuthUser(userName);
         return accessTokenInfo.getAccessToken() + ":" + accessTokenInfo.getRefreshToken();
+    }
+
+    public void revokeAccessToken (String appName, String accessToken) throws KeyManagementException {
+        Map<String, String> consumerKeySecretMap = getConsumerKeySecret(appName);
+        AccessTokenRequest accessTokenRequest = AuthUtil
+                .createAccessTokenRequest("", "", "", "", accessToken, 0 , new String[0],
+                        consumerKeySecretMap.get("CONSUMER_KEY"), consumerKeySecretMap.get("CONSUMER_SECRET"));
+        KeyManager keyManager = KeyManagerHolder.getAMLoginKeyManagerInstance();
+        keyManager.revokeLogInAccessToken(accessTokenRequest);
     }
 
     private Map<String, String> getConsumerKeySecret(String appName) throws KeyManagementException {

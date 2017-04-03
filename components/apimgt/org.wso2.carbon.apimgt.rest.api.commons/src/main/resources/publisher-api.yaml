@@ -497,6 +497,8 @@ paths:
         This operation can be used to retrieve the swagger definition of an API.
       parameters:
         - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/labelName'
+        - $ref: '#/parameters/scheme'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
@@ -2809,6 +2811,27 @@ parameters:
       - resource
     required: true
 
+# Label name of the gateway
+# Specified as part of the query string
+  labelName:
+    name: labelName
+    in: query
+    description: |
+      Label name of the gateway
+    required: false
+    type: string
+    
+# Protocol of the gateway access URL
+# Specified as part of the query string
+  scheme:
+    name: scheme
+    in: query
+    description: |
+      Protocol of the gateway access URL.
+      Value should be either "http" or "https"
+    required: false
+    type: string
+
 # Used for pagination:
 # The maximum number of resoures to be returned by a GET
   limit:
@@ -2896,6 +2919,7 @@ parameters:
       Validator for API Minor Version
     type: string
     default: 1.0
+
 ######################################################
 # The resources used by some of the APIs above within the message body
 ######################################################
@@ -2958,6 +2982,9 @@ definitions:
       lifeCycleStatus:
         type: string
         example: CREATED
+      workflowStatus:
+        type: string
+        example: APPROVED
 
 #-----------------------------------------------------
 # The API resource
@@ -3003,6 +3030,9 @@ definitions:
       lifeCycleStatus:
         type: string
         example: CREATED
+      workflowStatus:
+        type: string
+        example: APPROVED
       createdTime:
         type: string
         example: 2017-02-20T13:57:16.229
@@ -3033,6 +3063,11 @@ definitions:
         items:
           type: string
         example: ["substract","add"]
+      labels:
+        type: array
+        items:
+          type: string
+        example: ["public","private"]
       policies:
         type: array
         items:
@@ -3258,6 +3293,16 @@ definitions:
           - PRIVATE
           - API_LEVEL
         example: API_LEVEL
+      createdTime:
+        type: string
+        example: 2017-02-20T13:57:16.229
+      createdBy:
+        type: string
+      lastUpdatedTime:
+        type: string
+        example: 2017-02-20T13:57:16.229
+      lastUpdatedBy:
+        type: string
 
 #-----------------------------------------------------
 # The Tier List resource
@@ -3402,31 +3447,31 @@ definitions:
   Subscription:
     title: Subscription
     required:
-      - applicationId
-      - apiIdentifier
-      - policy
+      - subscriptionId
+      - applicationInfo
+      - apiInfo
+      - subscriptionTier
+      - status
     properties:
       subscriptionId:
         type: string
         example: 01234567-0123-0123-0123-012345678901
-      applicationId:
-        type: string
-        example: 01234567-0123-0123-0123-012345678901
-      apiIdentifier:
-        type: string
-        example: 01234567-0123-0123-0123-012345678901
-      policy:
+      applicationInfo:
+        type: Application
+        $ref: '#/definitions/Application'
+      subscriptionTier:
         type: string
         example: Unlimited
-      lifeCycleStatus:
+      subscriptionStatus:
         type: string
         enum:
           - BLOCKED
           - PROD_ONLY_BLOCKED
-          - UNBLOCKED
+          - SANDBOX_ONLY_BLOCKED
+          - ACTIVE
           - ON_HOLD
           - REJECTED
-        example: UNBLOCKED
+        example: BLOCKED
 
 #-----------------------------------------------------
 # The Sequence resource
@@ -3620,12 +3665,16 @@ definitions:
     title: Label
     required:
       - name
-      - access_url
+      - access_urls
     properties:
+      labelId:
+        type: string
       name:
         type: string
-      access_url:
-        type: string
+      access_urls:
+        type: array
+        items:
+          type: string
 
 #-----------------------------------------------------
 # The Label List resource
@@ -3758,3 +3807,5 @@ definitions:
                 type: string
             forTarget:
               type: string
+
+

@@ -12,7 +12,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.dto.TierDTO;
 /**
  * TierListDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-08T15:53:45.426+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-22T12:24:12.664+05:30")
 public class TierListDTO   {
   @JsonProperty("count")
   private Integer count = null;

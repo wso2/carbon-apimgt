@@ -65,6 +65,7 @@ public class APIMgtConstants {
     public static final String SUPPORTED_HTTP_VERBS = "GET,POST,PUT,DELETE,PATCH,HEAD,OPTIONS";
 
     public static final String HTTP_GET = "GET";
+    public static final String OVERWRITE_LABELS = "overwrite_labels";
     /**
      * Application statuses.
      */
@@ -91,6 +92,7 @@ public class APIMgtConstants {
     public enum SubscriptionStatus {
         BLOCKED,
         PROD_ONLY_BLOCKED,
+        SANDBOX_ONLY_BLOCKED,
         ACTIVE,
         ON_HOLD,
         REJECTED
@@ -104,6 +106,15 @@ public class APIMgtConstants {
         UN_SUBSCRIBE
     }
 
+
+    /**
+     * API workflow statuses.
+     */
+    public enum APILCWorkflowStatus {
+        APPROVED,
+        REJECTED,
+        PENDING
+    }
     /**
      * Throttle policy related constants
      */
@@ -196,8 +207,6 @@ public class APIMgtConstants {
         public static final String API_LEVEL = "api";
         public static final String APPLICATION_LEVEL = "application";
         public static final String SUBSCRIPTION_LEVEL = "subscription";
-        public static final String RESOURCE_LEVEL = "resource";
-
     }
 
     /**
@@ -219,6 +228,7 @@ public class APIMgtConstants {
         public static final String TIER_LEVEL = "TIER_LEVEL";
         public static final String ENDPOINT_ID = "ENDPOINT_ID";
         public static final String LIFECYCLE_ID = "LIFECYCLE_ID";
+        public static final String WORKFLOW_REF_ID = "WORKFLOW_REFERENCE_ID";
     }
 
     /**
@@ -267,4 +277,28 @@ public class APIMgtConstants {
         public static final String SET_COOKIE = "Set-Cookie";
         public static final String COOKIE = "Cookie";
     }
+    
+    /**
+     * Workflow related constants
+     */
+    public static class WorkflowConstants {
+        public static final String WF_TYPE_AM_USER_SIGNUP = "AM_USER_SIGNUP";
+        public static final String WF_TYPE_AM_SUBSCRIPTION_CREATION = "AM_SUBSCRIPTION_CREATION";
+        public static final String WF_TYPE_AM_SUBSCRIPTION_DELETION = "AM_SUBSCRIPTION_DELETION";
+        public static final String WF_TYPE_AM_APPLICATION_CREATION = "AM_APPLICATION_CREATION";
+        public static final String WF_TYPE_AM_APPLICATION_DELETION = "AM_APPLICATION_DELETION";
+        public static final String WF_TYPE_AM_API_STATE = "AM_API_STATE";
+        public static final String WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION = 
+                "AM_APPLICATION_REGISTRATION_PRODUCTION";
+        public static final String WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX = "AM_APPLICATION_REGISTRATION_SANDBOX";
+
+    }
+
+    /**
+     * ETags related constants
+     */
+    public static class ETagConstants {
+        public static final String MESSAGE_DIGEST_ALGORITHM_MD5 = "MD5";
+    }
+    
 }

@@ -5,15 +5,40 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * LabelDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-28T15:06:55.065+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-27T23:07:48.004+05:30")
 public class LabelDTO   {
+  @JsonProperty("labelId")
+  private String labelId = null;
+
+  @JsonProperty("name")
   private String name = null;
 
-  private String accessUrl = null;
+  @JsonProperty("access_urls")
+  private List<String> accessUrls = new ArrayList<String>();
+
+  public LabelDTO labelId(String labelId) {
+    this.labelId = labelId;
+    return this;
+  }
+
+   /**
+   * Get labelId
+   * @return labelId
+  **/
+  @ApiModelProperty(value = "")
+  public String getLabelId() {
+    return labelId;
+  }
+
+  public void setLabelId(String labelId) {
+    this.labelId = labelId;
+  }
 
   public LabelDTO name(String name) {
     this.name = name;
@@ -33,22 +58,27 @@ public class LabelDTO   {
     this.name = name;
   }
 
-  public LabelDTO accessUrl(String accessUrl) {
-    this.accessUrl = accessUrl;
+  public LabelDTO accessUrls(List<String> accessUrls) {
+    this.accessUrls = accessUrls;
+    return this;
+  }
+
+  public LabelDTO addAccessUrlsItem(String accessUrlsItem) {
+    this.accessUrls.add(accessUrlsItem);
     return this;
   }
 
    /**
-   * Get accessUrl
-   * @return accessUrl
+   * Get accessUrls
+   * @return accessUrls
   **/
   @ApiModelProperty(required = true, value = "")
-  public String getAccessUrl() {
-    return accessUrl;
+  public List<String> getAccessUrls() {
+    return accessUrls;
   }
 
-  public void setAccessUrl(String accessUrl) {
-    this.accessUrl = accessUrl;
+  public void setAccessUrls(List<String> accessUrls) {
+    this.accessUrls = accessUrls;
   }
 
 
@@ -61,13 +91,14 @@ public class LabelDTO   {
       return false;
     }
     LabelDTO label = (LabelDTO) o;
-    return Objects.equals(this.name, label.name) &&
-        Objects.equals(this.accessUrl, label.accessUrl);
+    return Objects.equals(this.labelId, label.labelId) &&
+        Objects.equals(this.name, label.name) &&
+        Objects.equals(this.accessUrls, label.accessUrls);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, accessUrl);
+    return Objects.hash(labelId, name, accessUrls);
   }
 
   @Override
@@ -75,8 +106,9 @@ public class LabelDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class LabelDTO {\n");
     
+    sb.append("    labelId: ").append(toIndentedString(labelId)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    accessUrl: ").append(toIndentedString(accessUrl)).append("\n");
+    sb.append("    accessUrls: ").append(toIndentedString(accessUrls)).append("\n");
     sb.append("}");
     return sb.toString();
   }

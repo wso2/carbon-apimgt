@@ -25,9 +25,33 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
     @Override
     public Response policiesTierLevelDelete(String tierName, String tierLevel, String ifMatch, String ifUnmodifiedSince,
                                             String minorVersion) throws NotFoundException {
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        log.info("Received Policy DELETE request with tierName = " + tierName);
+
+        try {
+            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
+            apiMgtAdminService.deletePolicy(tierName, tierLevel);
+            return Response.ok().build();
+        } catch (APIManagementException e) {
+            String msg = "Error occurred while deleting a Policy [" + tierName + "]";
+            RestApiUtil.handleInternalServerError(msg, e, log);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            log.error(msg, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
     }
 
+    /**
+     * Retrieve a list of tiers for a particular tier level
+     *
+     * @param tierLevel Tier level
+     * @param limit maximum number of tiers to return
+     * @param offset starting position of the pagination
+     * @param accept accept header value
+     * @param ifNoneMatch If-Non-Match header value
+     * @param minorVersion minor version
+     * @return A list of qualifying tiers
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
     public Response policiesTierLevelGet(String tierLevel, Integer limit, Integer offset, String accept,
                                          String ifNoneMatch, String minorVersion) throws NotFoundException {
@@ -47,6 +71,16 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         }
     }
 
+    /**
+     * Add a new policy
+     * 
+     * @param body Details of the policy to be added 
+     * @param tierLevel Tier level
+     * @param contentType Content-Type header
+     * @param minorVersion minor version
+     * @return Newly added policy as the response
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
     public Response policiesTierLevelPost(TierDTO body, String tierLevel, String contentType, String minorVersion)
             throws NotFoundException {

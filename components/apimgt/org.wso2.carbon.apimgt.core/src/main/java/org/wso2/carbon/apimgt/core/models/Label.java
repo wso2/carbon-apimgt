@@ -1,7 +1,8 @@
 package org.wso2.carbon.apimgt.core.models;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
-
+import org.wso2.carbon.apimgt.core.util.APIUtils;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -9,20 +10,26 @@ import java.util.Objects;
  * categorizing sets of entities against a given label. When starting up gateway, label can be given.
  */
 public final class Label {
+    private final String id;
     private final String name;
-    private final String accessUrl;
+    private final List<String> accessUrls;
 
     private Label(Builder builder) {
+        id = builder.id;
         name = builder.name;
-        accessUrl = builder.accessUrl;
+        accessUrls = builder.accessUrls;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getName() {
         return name;
     }
 
-    public String getAccessUrl() {
-        return accessUrl;
+    public List<String> getAccessUrls() {
+        return accessUrls;
     }
 
     @Override
@@ -36,20 +43,22 @@ public final class Label {
         }
 
         Label label = (Label) o;
-        return Objects.equals(name, label.name) &&
-                Objects.equals(accessUrl, label.accessUrl);
+        return Objects.equals(id, label.id) &&
+                Objects.equals(name, label.name) &&
+                APIUtils.isListsEqualIgnoreOrder(accessUrls, label.accessUrls);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, accessUrl);
+        return Objects.hash(id, name, accessUrls);
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
+                .append("id", id)
                 .append("name", name)
-                .append("accessUrl", accessUrl)
+                .append("accessUrls", accessUrls)
                 .toString();
     }
 
@@ -57,15 +66,28 @@ public final class Label {
      * {@code Label} builder static inner class.
      */
     public static final class Builder {
+        private String id;
         private String name;
-        private String accessUrl;
+        private List<String> accessUrls;
 
         public Builder() {
         }
 
         public Builder(Label label) {
+            this.id = label.id;
             this.name = label.name;
-            this.accessUrl = label.accessUrl;
+            this.accessUrls = label.accessUrls;
+        }
+
+        /**
+         * Sets the {@code id} and returns a reference to this Builder so that the methods can be chained together.
+         *
+         * @param id the {@code id} to set
+         * @return a reference to this Builder
+         */
+        public Builder id(String id) {
+            this.id = id;
+            return this;
         }
 
         /**
@@ -80,14 +102,14 @@ public final class Label {
         }
 
         /**
-         * Sets the {@code accessUrl} and returns a reference to this Builder so that the methods can be chained
+         * Sets the {@code accessUrls} and returns a reference to this Builder so that the methods can be chained
          * together.
          *
-         * @param accessUrl the {@code accessUrl} to set
+         * @param accessUrls the {@code accessUrls} to set
          * @return a reference to this Builder
          */
-        public Builder accessUrl(String accessUrl) {
-            this.accessUrl = accessUrl;
+        public Builder accessUrls(List<String> accessUrls) {
+            this.accessUrls = accessUrls;
             return this;
         }
 

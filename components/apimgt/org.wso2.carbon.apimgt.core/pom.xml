@@ -264,34 +264,6 @@
     </dependencies>
     <build>
         <plugins>
-            <plugin><!-- Overridden from parent pom to exclude generated sources -->
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>validate</id>
-                        <phase>validate</phase>
-                        <configuration>
-                            <configLocation>
-                                https://raw.githubusercontent.com/wso2/code-quality-tools/master/checkstyle/checkstyle.xml
-                            </configLocation>
-                            <suppressionsLocation>
-                                https://raw.githubusercontent.com/wso2/code-quality-tools/master/checkstyle/suppressions.xml
-                            </suppressionsLocation>
-                            <encoding>UTF-8</encoding>
-                            <consoleOutput>true</consoleOutput>
-                            <failsOnError>true</failsOnError>
-                            <includeTestSourceDirectory>false</includeTestSourceDirectory>
-                            <!--Exclude generated sources-->
-                            <excludes>**/gen/**/*</excludes>
-                            <!--skip for generated resources-->
-                        </configuration>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -308,6 +280,18 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>                
+                <configuration>
+                    <systemProperties>                        
+                        <property>
+                            <name>carbon.home</name>
+                            <value>${basedir}/src/test/resources/</value>
+                        </property>
+                    </systemProperties>
+                </configuration>
+			</plugin>
         </plugins>
         <resources>
             <resource>
@@ -380,7 +364,6 @@
                     <plugin>
                         <groupId>io.fabric8</groupId>
                         <artifactId>docker-maven-plugin</artifactId>
-                        <version>0.18.1</version>
                         <executions>
                             <execution>
                                 <id>start-docker-for-mysql</id>
@@ -409,6 +392,9 @@
                                             <MYSQL_DATABASE>testamdb</MYSQL_DATABASE>
                                             <MYSQL_ROOT_PASSWORD>root</MYSQL_ROOT_PASSWORD>
                                         </env>
+                                        <ports>
+                                            <port>${apim-mysql.port}:3306</port>
+                                        </ports>
                                         <wait>
                                             <tcp>
                                                 <ports>
@@ -445,6 +431,7 @@
                         <configuration>
                             <environmentVariables>
                                 <DATABASE_TYPE>mysql</DATABASE_TYPE>
+                                <PORT>${apim-mysql.port}</PORT>
                             </environmentVariables>
                         </configuration>
                     </plugin>
@@ -458,7 +445,6 @@
                     <plugin>
                         <groupId>io.fabric8</groupId>
                         <artifactId>docker-maven-plugin</artifactId>
-                        <version>0.18.1</version>
                         <executions>
                             <execution>
                                 <id>start-docker-for-db2</id>
@@ -537,7 +523,6 @@
                     <plugin>
                         <groupId>io.fabric8</groupId>
                         <artifactId>docker-maven-plugin</artifactId>
-                        <version>0.18.1</version>
                         <executions>
                             <execution>
                                 <id>start-docker-for-mssql</id>
@@ -566,6 +551,9 @@
                                             <ACCEPT_EULA>Y</ACCEPT_EULA>
                                             <SA_PASSWORD>wso2apim123#</SA_PASSWORD>
                                         </env>
+                                        <ports>
+                                            <port>${apim-mssql.port}:1433</port>
+                                        </ports>
                                         <wait>
                                             <tcp>
                                                 <ports>
@@ -621,6 +609,7 @@
                         <configuration>
                             <environmentVariables>
                                 <DATABASE_TYPE>mssql</DATABASE_TYPE>
+                                <PORT>${apim-mssql.port}</PORT>
                             </environmentVariables>
                         </configuration>
                     </plugin>
@@ -664,7 +653,6 @@
                     <plugin>
                         <groupId>io.fabric8</groupId>
                         <artifactId>docker-maven-plugin</artifactId>
-                        <version>0.18.1</version>
                         <executions>
                             <execution>
                                 <id>start-docker-for-postgres</id>
@@ -694,6 +682,9 @@
                                             <POSTGRES_USER>root</POSTGRES_USER>
                                             <POSTGRES_DB>testamdb</POSTGRES_DB>
                                         </env>
+                                        <ports>
+                                            <port>${apim-postgres.port}:5432</port>
+                                        </ports>
                                         <wait>
                                             <tcp>
                                                 <ports>
@@ -730,6 +721,7 @@
                         <configuration>
                             <environmentVariables>
                                 <DATABASE_TYPE>postgres</DATABASE_TYPE>
+                                <PORT>${apim-postgres.port}</PORT>
                             </environmentVariables>
                         </configuration>
                     </plugin>
@@ -743,7 +735,6 @@
                     <plugin>
                         <groupId>io.fabric8</groupId>
                         <artifactId>docker-maven-plugin</artifactId>
-                        <version>0.18.1</version>
                         <executions>
                             <execution>
                                 <id>start-docker-for-oracle</id>
@@ -771,6 +762,9 @@
                                         <env>
                                             <DB_NAME>testamdb</DB_NAME>
                                         </env>
+                                        <ports>
+                                            <port>${apim-oracle.port}:1521</port>
+                                        </ports>
                                         <wait>
                                             <log>DATABASE IS READY TO USE!</log>
                                             <time>400000</time>
@@ -804,6 +798,7 @@
                         <configuration>
                             <environmentVariables>
                                 <DATABASE_TYPE>oracle</DATABASE_TYPE>
+                                <PORT>${apim-oracle.port}</PORT>
                             </environmentVariables>
                         </configuration>
                     </plugin>
@@ -822,6 +817,8 @@
             org.osgi.util.tracker; version="${osgi.service.tracker.package.import.version.range}",
             org.wso2.carbon.datasource.core.*;version="${datasources.core.package.import.version.range}",
             com.zaxxer.hikari.*; version="${hikari.package.import.version.range}",
+            org.yaml.snakeyaml.*;version="${snakeyaml.version.range}",
+            org.wso2.carbon.kernel.*;version="${carbon.kernel.package.import.version.range}",
             org.wso2.carbon.lcm.*,
             org.wso2.carbon.lcm.sql.*,
             io.swagger.models.*,

@@ -29,12 +29,12 @@ import javax.ws.rs.*;
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the policies API")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-08T15:53:45.426+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-22T12:24:12.664+05:30")
 public class PoliciesApi implements Microservice  {
    private final PoliciesApiService delegate = PoliciesApiServiceFactory.getPoliciesApi();
 
     @DELETE
-    @Path("/{tierLevel}")
+    @Path("/tierLevel/{tierLevel}/tierName/{tierName}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Delete a Tier", notes = "This operation can be used to delete an existing policy. The only supported policy level is `api` policies. `DELETE https://127.0.0.1:9443/api/am/admin/v1/policies/api/Low`  **IMPORTANT:** * This is only effective when Advanced Throttling is disabled in the Server. If enabled, we need to use Admin REST API for throttling policies modification related operations. ", response = void.class, tags={ "Throttling Tier (Individual)", })
@@ -54,10 +54,10 @@ public class PoliciesApi implements Microservice  {
         return delegate.policiesTierLevelDelete(tierName,tierLevel,ifMatch,ifUnmodifiedSince,minorVersion);
     }
     @GET
-    @Path("/{tierLevel}")
+    @Path("/tierLevel/{tierLevel}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Get all policies", notes = "This operation can be used to list the available policies for a given policy level. Tier level should be specified as a path parameter and should be one of `api`, `application` and `resource`. ", response = TierListDTO.class, tags={ "Throttling Tier (Collection)", })
+    @io.swagger.annotations.ApiOperation(value = "Get all policies", notes = "This operation can be used to list the available policies for a given policy level. Tier level should be specified as a path parameter and should be one of `api`, `application` and `resource`. ", response = TierListDTO.class, tags={ "Retrieve", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. List of policies returned. ", response = TierListDTO.class),
         
@@ -75,10 +75,10 @@ public class PoliciesApi implements Microservice  {
         return delegate.policiesTierLevelGet(tierLevel,limit,offset,accept,ifNoneMatch,minorVersion);
     }
     @POST
-    @Path("/{tierLevel}")
+    @Path("/tierLevel/{tierLevel}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Create a Tier", notes = "This operation can be used to create a new throttling policy. The only supported policy level is `api` policies. `POST https://127.0.0.1:9443/api/am/admin/v1/policies/api`  **IMPORTANT:** * This is only effective when Advanced Throttling is disabled in the Server. If enabled, we need to use Admin REST API for throttling policies modification related operations. ", response = TierDTO.class, tags={ "Throttling Tier (Collection)", })
+    @io.swagger.annotations.ApiOperation(value = "Create a Tier", notes = "This operation can be used to create a new throttling policy. The only supported policy level is `api` policies. `POST https://127.0.0.1:9443/api/am/admin/v1/policies/api`  **IMPORTANT:** * This is only effective when Advanced Throttling is disabled in the Server. If enabled, we need to use Admin REST API for throttling policies modification related operations. ", response = TierDTO.class, tags={ "Create", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = TierDTO.class),
         
@@ -94,10 +94,10 @@ public class PoliciesApi implements Microservice  {
         return delegate.policiesTierLevelPost(body,tierLevel,contentType,minorVersion);
     }
     @PUT
-    @Path("/{tierLevel}")
+    @Path("/tierLevel/{tierLevel}/tierName/{tierName}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Update a Tier", notes = "This operation can be used to update an existing policy. The only supported policy level is `api` policies. `PUT https://127.0.0.1:9443/api/am/admin/v1/policies/api/Low`  **IMPORTANT:** * This is only effective when Advanced Throttling is disabled in the Server. If enabled, we need to use Admin REST API for throttling policies modification related operations. ", response = TierDTO.class, tags={ "Throttling Tier (Individual)", })
+    @io.swagger.annotations.ApiOperation(value = "Update a Tier", notes = "This operation can be used to update an existing policy. The only supported policy level is `api` policies. `PUT https://127.0.0.1:9443/api/am/admin/v1/policies/api/Low`  **IMPORTANT:** * This is only effective when Advanced Throttling is disabled in the Server. If enabled, we need to use Admin REST API for throttling policies modification related operations. ", response = TierDTO.class, tags={ "Update", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Subscription updated. ", response = TierDTO.class),
         

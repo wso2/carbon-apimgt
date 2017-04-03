@@ -110,7 +110,7 @@ public class RESTAPISecurityInterceptor implements Interceptor {
                     swagger.setHost(RestApiUtil.getHost(protocol.toLowerCase(Locale.ENGLISH)));
 
                 } catch (APIManagementException e) {
-                    log.error("Couldn't find swagger.json for publisher", e);
+                    log.error("Couldn't find swagger.json for store", e);
                 }
                 response.setStatus(javax.ws.rs.core.Response.Status.OK.getStatusCode()).setEntity(Json.pretty
                         (swagger)).setMediaType(MediaType.APPLICATION_JSON).send();
@@ -118,6 +118,21 @@ public class RESTAPISecurityInterceptor implements Interceptor {
             }
         } else if (requestURI.contains("/editor") || requestURI.contains("keyserver")) {
             return true;
+        } else if (requestURI.contains("/admin"))   {
+            if (requestURI.contains("swagger.json")) {
+                try {
+                    yamlContent = RestApiUtil.getAdminRestAPIResource();
+                    swagger = new SwaggerParser().parse(yamlContent);
+                    swagger.setBasePath(RestApiUtil.getContext(RestApiConstants.APPType.ADMIN));
+                    swagger.setHost(RestApiUtil.getHost(protocol.toLowerCase(Locale.ENGLISH)));
+
+                } catch (APIManagementException e) {
+                    log.error("Couldn't find swagger.json for admin", e);
+                }
+                response.setStatus(javax.ws.rs.core.Response.Status.OK.getStatusCode()).setEntity(Json.pretty
+                        (swagger)).setMediaType(MediaType.APPLICATION_JSON).send();
+                return false;
+            }
         }
         try {
             if (authenticatorImplClass == null) {

@@ -20,6 +20,16 @@ public class LabelsApiServiceImpl extends LabelsApiService {
 
     private static final Logger log = LoggerFactory.getLogger(LabelsApiServiceImpl.class);
 
+    /**
+     * Get all the labels.
+     *
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param minorVersion    Minor ersion header value
+     * @return Lable List
+     * @throws NotFoundException If failed to get the label values
+     */
     @Override
     public Response labelsGet(String accept
             , String ifNoneMatch

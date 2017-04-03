@@ -16,22 +16,30 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.LifecycleState_validationBe
 /**
  * LifecycleStateDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-28T15:06:55.065+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-19T18:14:01.803+05:30")
 public class LifecycleStateDTO   {
+  @JsonProperty("lcName")
   private String lcName = null;
 
+  @JsonProperty("state")
   private String state = null;
 
+  @JsonProperty("lifecyelId")
   private String lifecyelId = null;
 
+  @JsonProperty("checkItemBeanList")
   private List<LifecycleState_checkItemBeanListDTO> checkItemBeanList = new ArrayList<LifecycleState_checkItemBeanListDTO>();
 
+  @JsonProperty("inputBeanList")
   private List<LifecycleState_inputBeanListDTO> inputBeanList = new ArrayList<LifecycleState_inputBeanListDTO>();
 
+  @JsonProperty("customCodeBeanList")
   private List<LifecycleState_validationBeansDTO> customCodeBeanList = new ArrayList<LifecycleState_validationBeansDTO>();
 
+  @JsonProperty("availableTransitionBeanList")
   private List<LifecycleState_availableTransitionBeanListDTO> availableTransitionBeanList = new ArrayList<LifecycleState_availableTransitionBeanListDTO>();
 
+  @JsonProperty("permissionBeanList")
   private List<LifecycleState_permissionBeansDTO> permissionBeanList = new ArrayList<LifecycleState_permissionBeansDTO>();
 
   public LifecycleStateDTO lcName(String lcName) {

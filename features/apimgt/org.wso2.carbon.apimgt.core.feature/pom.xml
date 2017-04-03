@@ -231,6 +231,7 @@
                                         <include>dbscripts/**</include>
                                         <include>database/**</include>
                                         <include>template/**</include>
+					<include>conf/**</include>
                                         <include>p2.inf</include>
                                     </includes>
                                 </resource>
@@ -344,12 +345,6 @@
                                     <version>${lucene.bundle.version}</version>
                                 </bundle>
                             </bundles>
-                            <importFeatures>
-                                <feature>
-                                    <id>org.wso2.carbon.lcm.core.feature</id>
-                                    <version>${carbon.lcm.version}</version>
-                                </feature>
-                            </importFeatures>
                         </configuration>
                     </execution>
                 </executions>

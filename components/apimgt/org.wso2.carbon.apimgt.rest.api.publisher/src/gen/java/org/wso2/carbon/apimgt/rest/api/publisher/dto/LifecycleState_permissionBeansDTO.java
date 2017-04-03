@@ -11,10 +11,12 @@ import java.util.List;
 /**
  * LifecycleState_permissionBeansDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-28T15:06:55.065+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-19T18:14:01.803+05:30")
 public class LifecycleState_permissionBeansDTO   {
+  @JsonProperty("roles")
   private List<String> roles = new ArrayList<String>();
 
+  @JsonProperty("forTarget")
   private String forTarget = null;
 
   public LifecycleState_permissionBeansDTO roles(List<String> roles) {

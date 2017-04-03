@@ -89,7 +89,7 @@ x-wso2-security:
 # The "Tier Collection" resource APIs
 ######################################################
 paths:
-  '/policies/{tierLevel}':
+  '/policies/tierLevel/{tierLevel}':
 
 #-----------------------------------------------------
 # Retrieve the list of all available policies
@@ -112,7 +112,8 @@ paths:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/Minor-Version'
       tags:
-        - Throttling Tier (Collection)
+        - Throttling Tier Collection
+        - Retrieve
       responses:
         200:
           description: |
@@ -167,7 +168,8 @@ paths:
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/Minor-Version'
       tags:
-        - Throttling Tier (Collection)
+        - Throttling Tier (individual)
+        - Create
       responses:
         201:
           description: |
@@ -200,6 +202,8 @@ paths:
           description: |
             Unsupported media type.
             The entity of the request was in a not supported format.
+
+  '/policies/tierLevel/{tierLevel}/tierName/{tierName}':
 #-----------------------------------------------------
 # Update a certain policy
 #-----------------------------------------------------
@@ -231,6 +235,7 @@ paths:
         - $ref: '#/parameters/Minor-Version'
       tags:
         - Throttling Tier (Individual)
+        - Update
       responses:
         200:
           description: |
@@ -587,7 +592,7 @@ definitions:
         enum:
           - api
           - application
-          - resource
+          - subscription
         example: api
       attributes:
         description: |

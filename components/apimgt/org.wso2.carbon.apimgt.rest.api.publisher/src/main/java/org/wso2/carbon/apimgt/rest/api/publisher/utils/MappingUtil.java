@@ -77,7 +77,9 @@ public class MappingUtil {
         apidto.setProvider(api.getProvider());
         apidto.setPermission(api.getApiPermission());
         apidto.setLifeCycleStatus(api.getLifeCycleStatus());
+        apidto.setWorkflowStatus(api.getWorkflowStatus());
         apidto.setTags(api.getTags());
+        apidto.setLabels(api.getLabels());
         apidto.setTransport(api.getTransport());
         api.getPolicies().forEach(apidto::addPoliciesItem);
         BusinessInformation businessInformation = api.getBusinessInformation();
@@ -178,6 +180,7 @@ public class MappingUtil {
                 policies(apidto.getPolicies()).
                 permission(apidto.getPermission()).
                 tags(apidto.getTags()).
+                labels(apidto.getLabels()).
                 transport(apidto.getTransport()).
                 isResponseCachingEnabled(Boolean.valueOf(apidto.getResponseCaching())).
                 policies(apidto.getPolicies()).
@@ -221,6 +224,7 @@ public class MappingUtil {
             apiInfo.setProvider(apiSummary.getProvider());
             apiInfo.setLifeCycleStatus(apiSummary.getLifeCycleStatus());
             apiInfo.setVersion(apiSummary.getVersion());
+            apiInfo.setWorkflowStatus(apiSummary.getWorkflowStatus());
             apiInfoList.add(apiInfo);
         }
         return apiInfoList;
@@ -261,7 +265,7 @@ public class MappingUtil {
     }
 
     /**
-     * This mrthod convert the Dto object into Model
+     * This method convert the Dto object into Model
      *
      * @param documentDTO Contains data of a document
      * @return DocumentInfo model instance with document data
@@ -336,12 +340,11 @@ public class MappingUtil {
      */
     public static SubscriptionDTO fromSubscription(Subscription subscription) {
         SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
-        subscriptionDTO.setApplicationId(subscription.getId());
-        subscriptionDTO.setLifeCycleStatus(
-                SubscriptionDTO.LifeCycleStatusEnum.fromValue(subscription.getStatus().toString()));
-        subscriptionDTO.setApplicationId(subscription.getApplication().getId());
-        subscriptionDTO.setApiIdentifier(subscription.getApi().getId());
-        subscriptionDTO.setPolicy(subscription.getSubscriptionTier());
+        subscriptionDTO.setSubscriptionId(subscription.getId());
+        subscriptionDTO.setSubscriptionStatus(
+                SubscriptionDTO.SubscriptionStatusEnum.fromValue(subscription.getStatus().toString()));
+        subscriptionDTO.setApplicationInfo(toApplicationDto(subscription.getApplication()));
+        subscriptionDTO.setSubscriptionTier(subscription.getSubscriptionTier());
         return subscriptionDTO;
     }
 
@@ -401,8 +404,9 @@ public class MappingUtil {
         List<LabelDTO> labelDTOs = new ArrayList<>();
         for (Label label : labels) {
             LabelDTO labelDTO = new LabelDTO();
+            labelDTO.setLabelId(label.getId());
             labelDTO.setName(label.getName());
-            labelDTO.setAccessUrl(label.getAccessUrl());
+            labelDTO.setAccessUrls(label.getAccessUrls());
             labelDTOs.add(labelDTO);
         }
         return labelDTOs;
