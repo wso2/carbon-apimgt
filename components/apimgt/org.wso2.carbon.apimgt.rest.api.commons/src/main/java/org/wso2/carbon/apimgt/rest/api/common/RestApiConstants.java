@@ -84,6 +84,7 @@ public class RestApiConstants {
     public static final String SCOPE = "scope";
     public static final String PUBLISHER_API = "/publisher-api.yaml";
     public static final String STORE_API = "/store-api.yaml";
+    public static final String ADMIN_API = "/admin-api.yaml";
     public static final String AUTH_TYPE_BASIC = "Basic";
     public static final String CHARSET_UTF_8 = "UTF-8";
 
