@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
+import org.wso2.carbon.apimgt.core.models.APIStateChangeWorkflow;
 import org.wso2.carbon.apimgt.core.models.ApplicationCreationWorkflow;
 import org.wso2.carbon.apimgt.core.models.SubscriptionWorkflow;
 import org.wso2.carbon.apimgt.core.models.Workflow;
@@ -65,24 +66,18 @@ public class WorkflowExecutorFactory {
      */
     public Workflow createWorkflow(String workflowType) {
         Workflow workflow = null;
-        if (WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION.equals(workflowType)) {
+        if (WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION.equals(workflowType)
+                || WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION.equals(workflowType)) {
             workflow = new ApplicationCreationWorkflow();
             workflow.setWorkflowType(workflowType);
-        } else if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION.equals(workflowType)) {
+        } else if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION.equals(workflowType)
+                || WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION.equals(workflowType)) {
             workflow = new SubscriptionWorkflow();
             workflow.setWorkflowType(workflowType);
-        } else if (WorkflowConstants.WF_TYPE_AM_USER_SIGNUP.equals(workflowType)) {
-            //workflowDTO = new WorkflowDTO();
-            //workflowDTO.setWorkflowType(wfType);
-            workflow = new Workflow(); //TODO use correct workflow when implementing
-            workflow.setWorkflowType(workflowType);
         } else if (WorkflowConstants.WF_TYPE_AM_API_STATE.equals(workflowType)) {
-            //workflowDTO = new APIStateWorkflowDTO();
-            //workflowDTO.setWorkflowType(wfType);
-            workflow = new Workflow();  //TODO use correct workflow when implementing
+            workflow = new APIStateChangeWorkflow();
             workflow.setWorkflowType(workflowType);
         }
-        
         return workflow;
     }
 

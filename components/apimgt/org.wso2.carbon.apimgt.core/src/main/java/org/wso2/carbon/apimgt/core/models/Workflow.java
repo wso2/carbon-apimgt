@@ -50,7 +50,7 @@ public class Workflow {
     private String createdBy;
     
     //to pass any additional parameters. This can be used to pass parameters to the executor's complete() method
-    private Map<String, String> attributes = new HashMap<String, String>();
+    private Map<String, String> attributes = new HashMap<>();
 
     public String getCallBack() {
         return callbackURL;
@@ -136,6 +136,15 @@ public class Workflow {
     public void setAttributes(Map<String, String> attributes) {
         this.attributes = attributes;
     }
+    
+    public String getAttribute(String key) {
+        return attributes.get(key);
+    }
+
+    public void setAttribute(String key, String value) {
+        this.attributes.put(key, value);
+    }
+
 
     public String getCreatedBy() {
         return createdBy;

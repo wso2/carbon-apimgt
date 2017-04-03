@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
+import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
@@ -558,17 +559,23 @@ public class APIPublisherImplTestCase {
     @Test(description = "Update api status")
     public void testUpdateAPIStatus() throws APIManagementException, LifecycleException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
-        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null,
-                null);
+        APIPublisherImpl apiPublisher = newAPIPublisherImplForWorkflowFDAOAPIDAOLCManager(apiLifecycleManager, apiDAO,
+                workflowDAO); 
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
         String lifecycleId = api.getLifecycleInstanceId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
         LifecycleState lifecycleState = SampleTestObjectCreator.getMockLifecycleStateObject(lifecycleId);
+        Mockito.when(apiLifecycleManager.getCurrentLifecycleState(lifecycleId)).thenReturn(lifecycleState);       
         Mockito.when(apiLifecycleManager
                 .executeLifecycleEvent(APIStatus.CREATED.getStatus(), APIStatus.PUBLISHED.getStatus(), lifecycleId,
                         user, api)).thenReturn(lifecycleState);
+        API.APIBuilder apiBuilder = new API.APIBuilder(api);
+        apiBuilder.lifecycleState(lifecycleState);
+        apiBuilder.updatedBy(user);
+        api = apiBuilder.build();        
         lifecycleState.setState(APIStatus.PUBLISHED.getStatus());
         apiPublisher.updateAPIStatus(uuid, APIStatus.PUBLISHED.getStatus(), new HashMap<>());
         Mockito.verify(apiLifecycleManager, Mockito.times(1))
@@ -615,11 +622,12 @@ public class APIPublisherImplTestCase {
     public void testUpdateAPIStatusDeprecatePreviousVersionsAndNotRequireReSubscription()
             throws APIManagementException, LifecycleException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, applicationDAO, apiSubscriptionDAO, null,
-                apiLifecycleManager, null, null);
+                apiLifecycleManager, null, workflowDAO);
 
         API previousApi = SampleTestObjectCreator.createDefaultAPI().build();
         String previousApiUUID = previousApi.getId();
@@ -643,10 +651,15 @@ public class APIPublisherImplTestCase {
         String lifecycleId = api.getLifecycleInstanceId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
         LifecycleState lifecycleState = SampleTestObjectCreator.getMockLifecycleStateObject(lifecycleId);
+        Mockito.when(apiLifecycleManager.getCurrentLifecycleState(lifecycleId)).thenReturn(lifecycleState);
         Mockito.when(apiLifecycleManager
                 .executeLifecycleEvent(APIStatus.CREATED.getStatus(), APIStatus.PUBLISHED.getStatus(), lifecycleId,
                         user, api)).thenReturn(lifecycleState);
         lifecycleState.setState(APIStatus.PUBLISHED.getStatus());
+        API.APIBuilder apiBuilder = new API.APIBuilder(api); 
+        apiBuilder.lifecycleState(lifecycleState); 
+        apiBuilder.updatedBy(user); 
+        api = apiBuilder.build(); 
 
         Mockito.when(apiDAO.getAPI(previousApiUUID)).thenReturn(previousApi);
         Map<String, Boolean> checklist = new HashMap<>();
@@ -667,19 +680,25 @@ public class APIPublisherImplTestCase {
     @Test(description = "Update api status with re-subscriptions")
     public void testUpdateAPIStatusRequireReSubscription() throws APIManagementException, LifecycleException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, applicationDAO, apiSubscriptionDAO, null,
-                apiLifecycleManager, null, null);
+                apiLifecycleManager, null, workflowDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
         String lifecycleId = api.getLifecycleInstanceId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
         LifecycleState lifecycleState = SampleTestObjectCreator.getMockLifecycleStateObject(lifecycleId);
+        Mockito.when(apiLifecycleManager.getCurrentLifecycleState(lifecycleId)).thenReturn(lifecycleState);
         Mockito.when(apiLifecycleManager
                 .executeLifecycleEvent(APIStatus.CREATED.getStatus(), APIStatus.PUBLISHED.getStatus(), lifecycleId,
                         user, api)).thenReturn(lifecycleState);
+        API.APIBuilder apiBuilder = new API.APIBuilder(api);
+        apiBuilder.lifecycleState(lifecycleState);
+        apiBuilder.updatedBy(user);
+        api = apiBuilder.build();       
         lifecycleState.setState(APIStatus.PUBLISHED.getStatus());
         Map<String, Boolean> checklist = new HashMap<>();
         checklist.put(APIMgtConstants.REQUIRE_RE_SUBSCRIPTIONS, true);
@@ -978,13 +997,20 @@ public class APIPublisherImplTestCase {
     @Test(description = "Exception when updating api status", expectedExceptions = APIManagementException.class)
     public void testUpdateAPIStatusException() throws APIManagementException, LifecycleException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
-        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null,
-                null);
+        APIPublisherImpl apiPublisher = newAPIPublisherImplForWorkflowFDAOAPIDAOLCManager(apiLifecycleManager, apiDAO,
+                workflowDAO);      
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
         String lifecycleId = api.getLifecycleInstanceId();
+        LifecycleState lifecycleState = SampleTestObjectCreator.getMockLifecycleStateObject(lifecycleId);
+        Mockito.when(apiLifecycleManager.getCurrentLifecycleState(lifecycleId)).thenReturn(lifecycleState); 
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+        API.APIBuilder apiBuilder = new API.APIBuilder(api); 
+        apiBuilder.lifecycleState(lifecycleState); 
+        apiBuilder.updatedBy(user); 
+        api = apiBuilder.build(); 
         Mockito.when(apiLifecycleManager
                 .executeLifecycleEvent(APIStatus.CREATED.getStatus(), APIStatus.PUBLISHED.getStatus(), lifecycleId,
                         user, api)).thenThrow(new LifecycleException("Couldn't change the status of api ID " + uuid));
@@ -1434,4 +1460,15 @@ public class APIPublisherImplTestCase {
         Mockito.verify(apiLifecycleManager, Mockito.times(0)).addLifecycle(APIMgtConstants.API_LIFECYCLE, user);
     }
 
+    /**
+     * Return APIPublisherImpl for api lc state change tasks
+     * @param apiLifecycleManager apiLifecycleManager 
+     * @param apiDAO ApiDAO impl
+     * @param workflowDAO WorkflowDAO imple
+     * @return APIPublisherImpl implementation that can be used for api lc state change
+     */
+    private APIPublisherImpl newAPIPublisherImplForWorkflowFDAOAPIDAOLCManager(APILifecycleManager apiLifecycleManager,
+            ApiDAO apiDAO, WorkflowDAO workflowDAO) {
+        return new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null, workflowDAO);
+    }
 }
