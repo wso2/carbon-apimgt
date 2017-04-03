@@ -36,10 +36,6 @@ public class WorkflowExecutorFactoryTestCase {
                 .createWorkflow(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
         Assert.assertEquals(subcreation.getWorkflowType(), WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
 
-        Workflow signup = WorkflowExecutorFactory.getInstance()
-                .createWorkflow(WorkflowConstants.WF_TYPE_AM_USER_SIGNUP);
-        Assert.assertEquals(signup.getWorkflowType(), WorkflowConstants.WF_TYPE_AM_USER_SIGNUP);
-
         Workflow apistate = WorkflowExecutorFactory.getInstance()
                 .createWorkflow(WorkflowConstants.WF_TYPE_AM_API_STATE);
         Assert.assertEquals(apistate.getWorkflowType(), WorkflowConstants.WF_TYPE_AM_API_STATE);

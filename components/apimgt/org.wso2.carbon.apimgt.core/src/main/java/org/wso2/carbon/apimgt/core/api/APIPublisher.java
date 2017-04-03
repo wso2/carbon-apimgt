@@ -135,9 +135,10 @@ public interface APIPublisher extends APIManager {
      * @param api              API UUID
      * @param status           New lifecycle status
      * @param checkListItemMap Map containing values of check list items.
+     * @return WorkflowResponse workflow response related to LC state change.
      * @throws APIManagementException If failed to update API lifecycle status
      */
-    void updateAPIStatus(String api, String status, Map<String, Boolean> checkListItemMap)
+    WorkflowResponse updateAPIStatus(String api, String status, Map<String, Boolean> checkListItemMap)
             throws APIManagementException;
 
 

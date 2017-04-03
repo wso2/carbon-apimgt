@@ -17,12 +17,19 @@
 */
 package org.wso2.carbon.apimgt.core.models;
 
+import org.wso2.carbon.kernel.annotations.Configuration;
+import org.wso2.carbon.kernel.annotations.Element;
+
 /**
  * WorkflowConfigProperties is used to map the properties related to a specific workflow executor configuration
  */
+@Configuration(description = "Property for a workflow executor")
 public class WorkflowConfigProperties {
 
+    @Element(description = "property name")
     private String name;
+    
+    @Element(description = "property value")
     private String value;
 
     public String getName() {
