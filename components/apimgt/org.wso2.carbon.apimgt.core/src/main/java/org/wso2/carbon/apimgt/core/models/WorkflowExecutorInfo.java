@@ -16,13 +16,22 @@
 * under the License.
 */
 package org.wso2.carbon.apimgt.core.models;
+import org.wso2.carbon.kernel.annotations.Configuration;
+import org.wso2.carbon.kernel.annotations.Element;
+
 import java.util.List;
 /**
  * WorkflowExecutorInfo contains the configurations related to a specific workflow type
  */
+@Configuration(description = "Workflow executor info")
 public class WorkflowExecutorInfo {
+    
+    @Element(description = "executor name")
     private String executor;
+    
+    @Element(description = "property list")
     private List<WorkflowConfigProperties> property;
+    
     public String getExecutor() {
         return executor;
     }
@@ -38,9 +47,6 @@ public class WorkflowExecutorInfo {
     @Override
     public String toString() {
         return "WFExecutorInfo [executor=" + executor + ", property=" + property + "]";
-    }
-    
-    
-    
+    }    
 
 }

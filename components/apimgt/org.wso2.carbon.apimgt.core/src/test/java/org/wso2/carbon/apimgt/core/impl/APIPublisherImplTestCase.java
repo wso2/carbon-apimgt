@@ -47,9 +47,13 @@ import org.wso2.carbon.apimgt.core.models.Event;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
+import org.wso2.carbon.apimgt.core.models.WorkflowConfig;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
+import org.wso2.carbon.apimgt.core.workflow.WorkflowExtensionsConfigBuilder;
+import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
+import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 import org.wso2.carbon.lcm.core.beans.AvailableTransitionBean;
 import org.wso2.carbon.lcm.core.exception.LifecycleException;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
@@ -87,6 +91,20 @@ public class APIPublisherImplTestCase {
         System.setProperty("gwHome", temp.getAbsolutePath());
         //Set the resource path, where contain composer test JS
         System.setProperty("carbon.home", new File("src/test/resources").getAbsolutePath());
+        
+        WorkflowExtensionsConfigBuilder.build(new ConfigProvider() {
+
+            @Override
+            public <T> T getConfigurationObject(Class<T> configClass) throws CarbonConfigurationException {
+                T workflowConfig = (T) new WorkflowConfig();
+                return workflowConfig;
+            }
+
+            @Override
+            public Map getConfigurationMap(String namespace) throws CarbonConfigurationException {                
+                return null;
+            }
+        });
     }
 
     @Test(description = "Test add api with production endpoint")

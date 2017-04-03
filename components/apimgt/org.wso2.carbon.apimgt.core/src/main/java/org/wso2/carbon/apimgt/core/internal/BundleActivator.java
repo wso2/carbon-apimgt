@@ -33,7 +33,9 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOUtil;
 import org.wso2.carbon.apimgt.core.dao.impl.DataSource;
 import org.wso2.carbon.apimgt.core.dao.impl.DataSourceImpl;
+import org.wso2.carbon.apimgt.core.workflow.WorkflowExtensionsConfigBuilder;
 import org.wso2.carbon.datasource.core.api.DataSourceService;
+import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
@@ -50,6 +52,7 @@ public class BundleActivator {
 
     private static final Logger log = LoggerFactory.getLogger(BundleActivator.class);
     private JNDIContextManager jndiContextManager;
+    private ConfigProvider configProvider;
 
     @Activate
     protected void start(BundleContext bundleContext) {
@@ -57,6 +60,7 @@ public class BundleActivator {
             Context ctx = jndiContextManager.newInitialContext();
             DataSource dataSource = new DataSourceImpl((HikariDataSource) ctx.lookup("java:comp/env/jdbc/WSO2AMDB"));
             DAOUtil.initialize(dataSource);
+            WorkflowExtensionsConfigBuilder.build(configProvider);
         } catch (NamingException e) {
             log.error("Error occurred while jndi lookup", e);
         }
@@ -92,6 +96,30 @@ public class BundleActivator {
 
     protected void unregisterDataSourceService(DataSourceService dataSourceService) {
         log.debug("Un registering apim data source");
+    }
+    /**
+     * Get the ConfigProvider service.
+     *
+     * @param configProvider the ConfigProvider service that is registered as a service.
+     */
+    @Reference(
+            name = "carbon.config.provider",
+            service = ConfigProvider.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unregisterConfigProvider"
+    )
+    protected void registerConfigProvider(ConfigProvider configProvider) {
+        this.configProvider = configProvider;
+    }
+
+    /**
+     * This is the unbind method, which gets called for ConfigProvider instance un-registrations.
+     *
+     * @param configProvider the ConfigProvider service that get unregistered.
+     */
+    protected void unregisterConfigProvider(ConfigProvider configProvider) {
+        this.configProvider = null;
     }
 
 }

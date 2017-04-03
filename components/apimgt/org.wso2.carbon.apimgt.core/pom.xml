@@ -817,7 +817,6 @@
             org.osgi.util.tracker; version="${osgi.service.tracker.package.import.version.range}",
             org.wso2.carbon.datasource.core.*;version="${datasources.core.package.import.version.range}",
             com.zaxxer.hikari.*; version="${hikari.package.import.version.range}",
-            org.yaml.snakeyaml.*;version="${snakeyaml.version.range}",
             org.wso2.carbon.kernel.*;version="${carbon.kernel.package.import.version.range}",
             org.wso2.carbon.lcm.*,
             org.wso2.carbon.lcm.sql.*,
