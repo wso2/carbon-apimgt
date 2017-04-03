@@ -35,8 +35,8 @@ public class APIStateChangeSimpleWorkflowExecutor implements WorkflowExecutor {
     /**
      * Execute the workflow executor
      *
-     * @param workFlow
-     * @throws WorkflowException
+     * @param workFlow workflow object containing properties for this task
+     * @throws WorkflowException exception for workflow task fails
      */
 
     public WorkflowResponse execute(Workflow workFlow) throws WorkflowException {
@@ -53,7 +53,7 @@ public class APIStateChangeSimpleWorkflowExecutor implements WorkflowExecutor {
     /**
      * Complete the external process status 
      *
-     * @param workFlow - Workflow
+     * @param workFlow  workflow object containing properties for this task
      */
     public WorkflowResponse complete(Workflow workFlow) throws WorkflowException {
         if (log.isDebugEnabled()) {

@@ -28,7 +28,15 @@ import javax.ws.rs.core.Response;
 
 public class WorkflowsApiServiceImpl extends WorkflowsApiService {
     private static final Logger log = LoggerFactory.getLogger(WorkflowsApiServiceImpl.class);
-
+    
+    /**
+     * Workflow callback rest api to complete workflow task.
+     * 
+     * @param workflowReferenceId workflow reference id
+     * @param body WorkflowDTO object
+     * @return the DTO object representing the workflwow response as the response payload
+     * @throws NotFoundException When the particular resource does not exist in the system 
+     */
     @Override
     public Response workflowsUpdateWorkflowStatusPost(String workflowReferenceId, WorkflowDTO body)
             throws NotFoundException {

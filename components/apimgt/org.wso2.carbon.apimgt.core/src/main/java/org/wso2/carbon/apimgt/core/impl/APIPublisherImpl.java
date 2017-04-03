@@ -555,13 +555,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     /**
-     * This method used to Update the status of API
-     *
-     * @param apiId            UUID of the API.
-     * @param status           Target life cycle status.
-     * @param checkListItemMap Map of check list items.
-     * @return WorkflowResponse workflow response related to LC state change.
-     * @throws APIManagementException If failed to update API lifecycle status..
+     * @see org.wso2.carbon.apimgt.core.api.APIPublisher#updateAPIStatus(String, String, Map)
      */
     @Override
     public WorkflowResponse updateAPIStatus(String apiId, String status, Map<String, Boolean> checkListItemMap) throws

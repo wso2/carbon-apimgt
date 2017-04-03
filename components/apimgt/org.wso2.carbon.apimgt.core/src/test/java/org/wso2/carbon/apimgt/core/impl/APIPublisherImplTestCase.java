@@ -561,8 +561,8 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
-        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null,
-                workflowDAO);
+        APIPublisherImpl apiPublisher = newAPIPublisherImplForWorkflowFDAOAPIDAOLCManager(apiLifecycleManager, apiDAO,
+                workflowDAO); 
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
         String lifecycleId = api.getLifecycleInstanceId();
@@ -999,8 +999,8 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
-        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null,
-                workflowDAO);
+        APIPublisherImpl apiPublisher = newAPIPublisherImplForWorkflowFDAOAPIDAOLCManager(apiLifecycleManager, apiDAO,
+                workflowDAO);      
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
         String lifecycleId = api.getLifecycleInstanceId();
@@ -1460,4 +1460,15 @@ public class APIPublisherImplTestCase {
         Mockito.verify(apiLifecycleManager, Mockito.times(0)).addLifecycle(APIMgtConstants.API_LIFECYCLE, user);
     }
 
+    /**
+     * Return APIPublisherImpl for api lc state change tasks
+     * @param apiLifecycleManager apiLifecycleManager 
+     * @param apiDAO ApiDAO impl
+     * @param workflowDAO WorkflowDAO imple
+     * @return APIPublisherImpl implementation that can be used for api lc state change
+     */
+    private APIPublisherImpl newAPIPublisherImplForWorkflowFDAOAPIDAOLCManager(APILifecycleManager apiLifecycleManager,
+            ApiDAO apiDAO, WorkflowDAO workflowDAO) {
+        return new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null, workflowDAO);
+    }
 }
