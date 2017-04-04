@@ -50,7 +50,6 @@ var _renderApplicationAddPage = function(){
                     "Content-Type": "application/json"
                 },
                 function (data) {
-                    debugger;
                     for(var i=0; i<data.obj.count;i++) {
                         var tier = {};
                         tier.name = data.obj.list[i].name;
@@ -96,6 +95,7 @@ var addApplication = function () {
                     "Content-Type": "application/json"
                 },
                 function (data) {
+                	var jsonPayload = data.obj.workflowResponse.jsonPayload;
                     if(goBack == "yes") {
                         noty({
                             text : "Return back to API detail page",
@@ -116,10 +116,30 @@ var addApplication = function () {
                                 }
                             ]
                         });
+                    } else if (jsonPayload != null && jsonPayload != "") {
+                        var jsonResponse = JSON.parse(jsonPayload);
+                        noty({
+                            text : jsonResponse.redirectConfirmationMsg,
+                            type : "alert",
+                            dismissQueue: true,
+                            layout : "topCenter",
+                            theme : 'relax',
+                            buttons : [
+                                {addClass: 'btn btn-primary', text: 'Ok', onClick: function ($noty) {
+                                    $noty.close();
+                                    window.location = jsonResponse.redirectUrl;
+                                }
+                                },
+                                {addClass: 'btn btn-danger', text: 'Cancel', onClick: function ($noty) {
+                                    $noty.close();
+                                    window.location = "/store/applications/" + data.obj.applicationId;
+                                }
+                                }
+                            ]
+                        });
                     } else {
                         window.location = "/store/applications/" + data.obj.applicationId;
-                    }
-                },
+                    }                },
                 function (error) {
                     if(error.status==401){
                         redirectToLogin(contextPath);
