@@ -781,7 +781,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             // setting the workflow status from the one getting from the executor. this gives the executor developer
             // to change the state as well.
             workflow.setStatus(response.getWorkflowStatus());
-            updateWorkflowEntries(workflow);
+          
             String applicationState = "";
             if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
                 if (log.isDebugEnabled()) {
@@ -796,11 +796,12 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 applicationState = APIMgtConstants.ApplicationStatus.APPLICATION_REJECTED;
             }
             getApplicationDAO().updateApplicationState(workflow.getWorkflowReference(), applicationState);
+            updateWorkflowEntries(workflow);
 
         } else if (workflow instanceof ApplicationCreationWorkflow
                 && WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION.equals(workflow.getWorkflowType())) {
             response = workflowExecutor.complete(workflow);
-
+            workflow.setStatus(response.getWorkflowStatus());
             if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
                 if (log.isDebugEnabled()) {
                     log.debug("Application Deletion workflow complete: Approved");
@@ -812,10 +813,11 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                     log.debug("Subscription Creation workflow complete: Rejected");
                 }
             }
-
+            updateWorkflowEntries(workflow);
         } else if (workflow instanceof SubscriptionWorkflow
                 && WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION.equals(workflow.getWorkflowType())) {
             response = workflowExecutor.complete(workflow);
+            workflow.setStatus(response.getWorkflowStatus());
             SubscriptionStatus subscriptionState = null;
             if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
                 if (log.isDebugEnabled()) {
@@ -832,9 +834,11 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             }
 
             getApiSubscriptionDAO().updateSubscriptionStatus(workflow.getWorkflowReference(), subscriptionState);
+            updateWorkflowEntries(workflow);
         } else if (workflow instanceof SubscriptionWorkflow
                 && WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION.equals(workflow.getWorkflowType())) {
             response = workflowExecutor.complete(workflow);
+            workflow.setStatus(response.getWorkflowStatus());
             if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
                 if (log.isDebugEnabled()) {
                     log.debug("Subscription deletion workflow complete: Approved");
@@ -846,7 +850,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                     log.debug("Subscription deletion workflow complete: Rejected");
                 }
             }
-
+            updateWorkflowEntries(workflow);
         } else {
             String message = "Invalid workflow type:  " + workflow.getWorkflowType();
             log.error(message);

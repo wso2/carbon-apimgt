@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
+import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
@@ -11,8 +12,11 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Label;
+import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
+import org.wso2.carbon.apimgt.core.util.WorkflowUtils;
+import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -23,6 +27,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
@@ -1047,6 +1053,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         Map<String, Boolean> lifecycleChecklistMap = new HashMap<>();
+        WorkflowResponseDTO response = null;
         try {
             if (lifecycleChecklist != null) {
                 String[] checkList = lifecycleChecklist.split(",");
@@ -1058,11 +1065,18 @@ public class ApisApiServiceImpl extends ApisApiService {
                 }
             }
             if (action.trim().equals(APIMgtConstants.CHECK_LIST_ITEM_CHANGE_EVENT)) {
-                RestAPIPublisherUtil.getApiPublisher(username).updateCheckListItem(apiId, action, lifecycleChecklistMap);
+                RestAPIPublisherUtil.getApiPublisher(username).updateCheckListItem(apiId, action,
+                        lifecycleChecklistMap);
+                WorkflowResponse workflowResponse = new GeneralWorkflowResponse();
+                //since workflows are not defined for checklist items
+                workflowResponse.setWorkflowStatus(WorkflowStatus.APPROVED);
+                response = MappingUtil.toWorkflowResponseDTO(workflowResponse);
             } else {
-                RestAPIPublisherUtil.getApiPublisher(username).updateAPIStatus(apiId, action, lifecycleChecklistMap);
+                WorkflowResponse workflowResponse = RestAPIPublisherUtil.getApiPublisher(username)
+                        .updateAPIStatus(apiId, action, lifecycleChecklistMap);
+                response = MappingUtil.toWorkflowResponseDTO(workflowResponse);
             }
-            return Response.ok().build();
+            return Response.ok().entity(response).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while updating lifecycle of API" + apiId + " to " + action;
             HashMap<String, String> paramList = new HashMap<String, String>();

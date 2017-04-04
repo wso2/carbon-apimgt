@@ -18,24 +18,26 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.UUID;
 
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-19T18:39:38.447+05:30") public class ImportApiServiceImpl
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
+        "2017-01-19T18:39:38.447+05:30")
+public class ImportApiServiceImpl
         extends ImportApiService {
 
     private static final Logger log = LoggerFactory.getLogger(ImportApiServiceImpl.class);
 
     /**
      * Imports a set of new APIs which have been exported as a zip file
-     * 
+     *
      * @param fileInputStream content stream of the zip file which contains exported API(s)
-     * @param fileDetail meta information of the zip file
-     * @param contentType Content-Type header
-     * @param provider provider of the API (if it needs to be updated)
+     * @param fileDetail      meta information of the zip file
+     * @param contentType     Content-Type header
+     * @param provider        provider of the API (if it needs to be updated)
      * @return List of APIs that were imported
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response importApisPost(InputStream fileInputStream, FileInfo fileDetail,String contentType
-            ,String provider) throws NotFoundException {
+    public Response importApisPost(InputStream fileInputStream, FileInfo fileDetail, String contentType, String
+            provider) throws NotFoundException {
 
         APIPublisher publisher = null;
 
@@ -58,17 +60,17 @@ import java.util.UUID;
 
     /**
      * Imports an updates a set of existing APIs which have been exported as a zip file
-     * 
+     *
      * @param fileInputStream content stream of the zip file which contains exported API(s)
-     * @param fileDetail meta information of the zip file
-     * @param contentType Content-Type header
-     * @param provider provider of the API (if it needs to be updated)
+     * @param fileDetail      meta information of the zip file
+     * @param contentType     Content-Type header
+     * @param provider        provider of the API (if it needs to be updated)
      * @return List of APIs that were imported
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response importApisPut(InputStream fileInputStream, FileInfo fileDetail, String contentType,
-            String provider) throws NotFoundException {
+    public Response importApisPut(InputStream fileInputStream, FileInfo fileDetail, String contentType, String
+            provider) throws NotFoundException {
 
         APIPublisher publisher = null;
 

@@ -58,6 +58,24 @@ public class APIMgtConstants {
     public static final String AUTH_APPLICATION_USER_LEVEL_TOKEN = "Application_User";
     public static final String AUTH_APPLICATION_OR_USER_LEVEL_TOKEN = "Any";
     public static final String DEFAULT_API_POLICY = "Unlimited";
+    
+    //workflow executor default executors
+    public static final String WF_DEFAULT_APPCREATION_EXEC = 
+            "org.wso2.carbon.apimgt.core.workflow.ApplicationCreationSimpleWorkflowExecutor";
+    public static final String WF_DEFAULT_APISTATE_EXEC = 
+            "org.wso2.carbon.apimgt.core.workflow.APIStateChangeSimpleWorkflowExecutor";
+    public static final String WF_DEFAULT_PRODAPP_EXEC = 
+            "org.wso2.carbon.apimgt.core.workflow.ApplicationRegistrationSimpleWorkflowExecutor";
+    public static final String WF_DEFAULT_SANDBOXAPP_EXEC = 
+            "org.wso2.carbon.apimgt.core.workflow.ApplicationRegistrationSimpleWorkflowExecutor";
+    public static final String WF_DEFAULT_APPDELETE_EXEC = 
+            "org.wso2.carbon.apimgt.core.workflow.ApplicationDeletionSimpleWorkflowExecutor";
+    public static final String WF_DEFAULT_SUBCREATION_EXEC = 
+            "org.wso2.carbon.apimgt.core.workflow.SubscriptionCreationSimpleWorkflowExecutor";
+    public static final String WF_DEFAULT_SUBDELETE_EXEC = 
+            "org.wso2.carbon.apimgt.core.workflow.SubscriptionDeletionSimpleWorkflowExecutor";
+    public static final String WF_DEFAULT_SIGNUP_EXEC = 
+            "org.wso2.carbon.apimgt.core.workflow.UserSignUpSimpleWorkflowExecutor";
 
     //Store constants
     public static final String DEFAULT_APPLICATION_NAME = "DefaultApplication";
@@ -291,6 +309,10 @@ public class APIMgtConstants {
         public static final String WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION = 
                 "AM_APPLICATION_REGISTRATION_PRODUCTION";
         public static final String WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX = "AM_APPLICATION_REGISTRATION_SANDBOX";
+        public static final String ATTRIBUTE_API_CUR_STATE = "apiCurrentState";
+        public static final String ATTRIBUTE_API_TARGET_STATE = "apiTargetState";
+        public static final String ATTRIBUTE_API_LC_INVOKER = "lcStateChangeInvoker";
+        public static final String ATTRIBUTE_API_LAST_UPTIME = "lastUpdatedTime";        
 
     }
 

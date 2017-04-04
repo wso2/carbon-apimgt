@@ -1035,6 +1035,8 @@ paths:
           description: |
             OK.
             Lifecycle changed successfully.
+          schema:
+            $ref: '#/definitions/WorkflowResponse'
           headers:
             ETag:
               description: |
@@ -1055,6 +1057,12 @@ paths:
           description: |
             Not Found.
             Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        409:
+          description: |
+            Conflict.
+            Pending workflow task exists.
           schema:
             $ref: '#/definitions/Error'
         412:
@@ -1752,6 +1760,8 @@ paths:
           required: true
           type: string
         - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
       tags:
         - Export Configuration
       responses:
@@ -1845,6 +1855,60 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+    post:
+          consumes:
+            - multipart/form-data
+          summary: Imports API(s).
+          description: |
+            This operation can be used to import one or more existing APIs.
+          parameters:
+            - name: file
+              in: formData
+              description: |
+                Zip archive consisting on exported api configuration
+              required: true
+              type: file
+            - name: provider
+              in: query
+              description: |
+                If defined, updates the existing provider of each API with the specified provider.
+                This is to cater scenarios where the current API provider does not exist in the environment
+                that the API is imported to.
+              required: false
+              type: string
+            - $ref: '#/parameters/Content-Type'
+          tags:
+            - Import Configuration
+          responses:
+            200:
+              description: |
+                OK.
+                Successful response with the updated object as entity in the body.
+              schema:
+                $ref: '#/definitions/APIList'
+              headers:
+                Content-Type:
+                  description: |
+                    The content type of the body.
+                  type: string
+            400:
+              description: |
+                Bad Request.
+                Invalid request or validation error
+              schema:
+                $ref: '#/definitions/Error'
+            406:
+              description: |
+                Not Acceptable.
+                The requested media type is not supported
+              schema:
+                $ref: '#/definitions/Error'
+            412:
+              description: |
+                Precondition Failed.
+                The request has not been performed because one of the preconditions is not met.
+              schema:
+                $ref: '#/definitions/Error'
 ######################################################
 # The "Individual Application" resource APIs
 ######################################################
@@ -2665,6 +2729,55 @@ paths:
             Requested API does not exist.
           schema:
             $ref: '#/definitions/Error'
+            
+######################################################
+# The "Workflow approval" resource API
+######################################################
+  /workflows/update-workflow-status:
+
+#-------------------------------------------------------------------
+# Resume the workflow by approving or rejecting the workflow request
+#-------------------------------------------------------------------
+    post:
+      x-scope: apim:api_workflow
+      summary: Update workflow status
+      description: |
+        This operation can be used to approve or reject a workflow task. .
+      parameters:
+       - $ref: '#/parameters/workflowReferenceId-Q'
+       - in: body
+         name: body
+         description: |
+            Workflow event that need to be updated
+         required: true
+         schema:
+           $ref: '#/definitions/Workflow'
+      tags:
+        - Workflows (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Workflow request information is returned.
+          schema:
+            $ref: '#/definitions/WorkflowResponse'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Workflow for the given reference in not found.
+          schema:
+            $ref: '#/definitions/Error'
 
 ######################################################
 # Parameters - required by some of the APIs above
@@ -2919,6 +3032,16 @@ parameters:
       Validator for API Minor Version
     type: string
     default: 1.0
+    
+# Workflow reference ID
+# Specified as part of the path expression
+  workflowReferenceId-Q:
+    name: workflowReferenceId
+    in: query
+    description: |
+      Workflow reference id
+    required: true
+    type: string
 
 ######################################################
 # The resources used by some of the APIs above within the message body
@@ -3807,5 +3930,57 @@ definitions:
                 type: string
             forTarget:
               type: string
+
+#-----------------------------------------------------
+# The workflow response resource
+#-----------------------------------------------------
+  Workflow:
+    title: workflow
+    required:
+      - status
+    properties:
+      status:
+        description: |
+          This attribute declares whether this workflow task is approved or rejected.
+        type: string
+        enum:
+          - APPROVED
+          - REJECTED
+        example: APPROVED
+      attributes:
+        description: |
+          Custom attributes to complete the workflow task
+        type: object
+        additionalProperties:
+          type: string
+        example: {}
+      description:
+        type: string
+        example: "Approve workflow request."
+
+#-----------------------------------------------------
+# The workflow executor's response resource
+#-----------------------------------------------------
+  WorkflowResponse:
+    title: workflow Response
+    required:
+      - workflowStatus
+    properties:
+      workflowStatus:
+        description: |
+          This attribute declares whether this workflow task is approved or rejected.
+        type: string
+        enum:
+          - CREATED
+          - APPROVED
+          - REJECTED
+          - REGISTERED
+        example: APPROVED
+      jsonPayload:
+        description: |
+          Attributes that returned after the workflow execution
+        type: string
+       
+
 
 

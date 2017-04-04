@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>7.0.3-SNAPSHOT</version>
+        <version>7.0.4-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -200,7 +200,7 @@
             org.wso2.carbon.apimgt.rest.api.publisher.*; version="${carbon.apimgt.version}",
         </export.package>
         <carbon.component>
-            osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="9"
+            osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="10"
         </carbon.component>
     </properties>
 </project>

@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.core.impl;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.testng.Assert;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.api.APIStore;
@@ -50,6 +51,7 @@ import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
 import org.wso2.carbon.apimgt.core.models.SubscriptionWorkflow;
 import org.wso2.carbon.apimgt.core.models.Workflow;
+import org.wso2.carbon.apimgt.core.models.WorkflowConfig;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
@@ -58,6 +60,9 @@ import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationSimpleWorkflowExecutor;
 import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
 import org.wso2.carbon.apimgt.core.workflow.SubscriptionCreationSimpleWorkflowExecutor;
+import org.wso2.carbon.apimgt.core.workflow.WorkflowExtensionsConfigBuilder;
+import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
+import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -84,6 +89,24 @@ public class APIStoreImplTestCase {
     private static final String APPLICATION_POLICY_LEVEL = "application";
     private static final String POLICY_NAME = "gold";
 
+    @BeforeTest
+    public void setup() throws Exception {
+        WorkflowExtensionsConfigBuilder.build(new ConfigProvider() {
+
+            @Override
+            public <T> T getConfigurationObject(Class<T> configClass) throws CarbonConfigurationException {
+                T workflowConfig = (T) new WorkflowConfig();
+                return workflowConfig;
+            }
+
+            @Override
+            public Map getConfigurationMap(String namespace) throws CarbonConfigurationException {
+                // TODO Auto-generated method stub
+                return null;
+            }
+        });
+    }
+    
     @Test(description = "Search APIs with a search query")
     public void searchAPIs() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
