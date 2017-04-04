@@ -1,10 +1,14 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.UUID;
+import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.exception.APIMgtEntityImportExportException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.APIDetails;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
@@ -12,33 +16,28 @@ import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ExportApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.FileBasedApiImportExportManager;
-import org.wso2.carbon.apimgt.rest.api.publisher.utils.ImportExportUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 
-import javax.ws.rs.core.Response;
-import java.io.File;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.UUID;
-
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-13T09:50:10.416+05:30") public class ExportApiServiceImpl
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
+        "2017-01-13T09:50:10.416+05:30")
+public class ExportApiServiceImpl
         extends ExportApiService {
 
     private static final Logger log = LoggerFactory.getLogger(ExportApiServiceImpl.class);
 
     /**
      * Exports an existing API
-     * 
+     *
      * @param contentType Content-Type header value
-     * @param query Search query
-     * @param limit maximum APIs to export
-     * @param offset Starting position of the search
+     * @param query       Search query
+     * @param limit       maximum APIs to export
+     * @param offset      Starting position of the search
      * @return Zip file containing the exported APIs
      * @throws NotFoundException When the particular resource does not exist in the system
      */
-    @Override 
-    public Response exportApisGet(String contentType, String query, Integer limit, Integer offset)
-            throws NotFoundException {
+    @Override
+    public Response exportApisGet(String query, String contentType, Integer limit, Integer offset) throws
+            NotFoundException {
 
         APIPublisher publisher = null;
         String exportedFilePath, zippedFilePath = null;
