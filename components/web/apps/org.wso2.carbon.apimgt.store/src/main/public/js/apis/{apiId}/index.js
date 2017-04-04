@@ -520,7 +520,7 @@ $(function () {
                             var subscription = jsonData.obj;
                             var jsonPayload = subscription.workflowResponse.jsonPayload;
                             
-                            if(jsonPayload != null && jsonPayload != "") {
+                            if(jsonPayload) {
                                 var jsonResponse = JSON.parse(jsonPayload);
                                 var message = jsonResponse.redirectConfirmationMsg;
                                 noty({

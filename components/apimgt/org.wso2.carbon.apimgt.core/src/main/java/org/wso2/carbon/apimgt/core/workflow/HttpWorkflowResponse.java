@@ -31,6 +31,9 @@ public class HttpWorkflowResponse extends AbstractWorkflowResponse {
     private String redirectConfirmationMsg = "";
     private JSONObject jsonPayloadObj = new JSONObject();
     private Map<String, String> additionalParameters = new HashMap<>();
+    
+    private static final String REDIRECT_URL = "redirectUrl";
+    private static final String CONF_MSG = "redirectConfirmationMsg";
 
     @Override
     @SuppressWarnings("unchecked")
@@ -44,8 +47,8 @@ public class HttpWorkflowResponse extends AbstractWorkflowResponse {
             redirectUrl = redirectUrl.substring(0, redirectUrl.length() - 1);
         }
 
-        jsonPayloadObj.put("redirectUrl", redirectUrl);
-        jsonPayloadObj.put("redirectConfirmationMsg", redirectConfirmationMsg);
+        jsonPayloadObj.put(REDIRECT_URL, redirectUrl);
+        jsonPayloadObj.put(CONF_MSG, redirectConfirmationMsg);
 
         return jsonPayloadObj.toJSONString();
     }

@@ -116,7 +116,7 @@ var addApplication = function () {
                                 }
                             ]
                         });
-                    } else if (jsonPayload != null && jsonPayload != "") {
+                    } else if (jsonPayload) {
                         var jsonResponse = JSON.parse(jsonPayload);
                         noty({
                             text : jsonResponse.redirectConfirmationMsg,

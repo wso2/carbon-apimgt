@@ -305,12 +305,11 @@ function updateLifecycleHandler(event) {
         }
     };
     promised_update.then(
-        (response, event = event_data) => {
-            console.log(JSON.stringify(response))
+        (response, event = event_data) => {     
             var lcResponse = response.obj;
             var jsonPayload = lcResponse.jsonPayload;
                             
-            if(jsonPayload != null && jsonPayload != "") {
+            if(jsonPayload) {
                 var jsonResponse = JSON.parse(jsonPayload);
                 var message = jsonResponse.redirectConfirmationMsg;
                 noty({
