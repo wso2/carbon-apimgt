@@ -483,13 +483,6 @@ public interface APIPublisher extends APIManager {
     List<Label> getAllLabels() throws APIManagementException;
 
     /**
-     * Register gateway labels in the system
-     *
-     * @param labels List of labels
-     * @throws APIManagementException If failed to register labels.
-     */
-    void registerGatewayLabels(List<Label> labels) throws APIManagementException;
-    /**
      * Retrieves the last updated time of the endpoint given its endpointId
      * 
      * @param endpointId Id of the endpoint

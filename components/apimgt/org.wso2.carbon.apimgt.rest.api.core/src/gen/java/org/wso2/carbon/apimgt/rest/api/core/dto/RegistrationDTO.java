@@ -5,39 +5,32 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.ArrayList;
-import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.core.dto.APISummaryDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.LabelInfoDTO;
 
 /**
- * APISummaryListDTO
+ * RegistrationDTO
  */
 @javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-31T16:40:30.481+05:30")
-public class APISummaryListDTO   {
-  @JsonProperty("list")
-  private List<APISummaryDTO> list = new ArrayList<APISummaryDTO>();
+public class RegistrationDTO   {
+  @JsonProperty("LabelInfo")
+  private LabelInfoDTO labelInfo = null;
 
-  public APISummaryListDTO list(List<APISummaryDTO> list) {
-    this.list = list;
-    return this;
-  }
-
-  public APISummaryListDTO addListItem(APISummaryDTO listItem) {
-    this.list.add(listItem);
+  public RegistrationDTO labelInfo(LabelInfoDTO labelInfo) {
+    this.labelInfo = labelInfo;
     return this;
   }
 
    /**
-   * List of apis summery. 
-   * @return list
+   * Get labelInfo
+   * @return labelInfo
   **/
-  @ApiModelProperty(value = "List of apis summery. ")
-  public List<APISummaryDTO> getList() {
-    return list;
+  @ApiModelProperty(required = true, value = "")
+  public LabelInfoDTO getLabelInfo() {
+    return labelInfo;
   }
 
-  public void setList(List<APISummaryDTO> list) {
-    this.list = list;
+  public void setLabelInfo(LabelInfoDTO labelInfo) {
+    this.labelInfo = labelInfo;
   }
 
 
@@ -49,21 +42,21 @@ public class APISummaryListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    APISummaryListDTO apISummaryList = (APISummaryListDTO) o;
-    return Objects.equals(this.list, apISummaryList.list);
+    RegistrationDTO registration = (RegistrationDTO) o;
+    return Objects.equals(this.labelInfo, registration.labelInfo);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(list);
+    return Objects.hash(labelInfo);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APISummaryListDTO {\n");
+    sb.append("class RegistrationDTO {\n");
     
-    sb.append("    list: ").append(toIndentedString(list)).append("\n");
+    sb.append("    labelInfo: ").append(toIndentedString(labelInfo)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -4,7 +4,7 @@ import org.wso2.carbon.apimgt.rest.api.core.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.core.impl.SubscriptionsApiServiceImpl;
 
 public class SubscriptionsApiServiceFactory {
-    private final static SubscriptionsApiService service = new SubscriptionsApiServiceImpl();
+    private static final SubscriptionsApiService service = new SubscriptionsApiServiceImpl();
 
     public static SubscriptionsApiService getSubscriptionsApi() {
         return service;
