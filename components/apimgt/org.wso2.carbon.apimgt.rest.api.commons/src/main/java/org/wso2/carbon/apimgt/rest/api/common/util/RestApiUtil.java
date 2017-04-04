@@ -560,7 +560,7 @@ public class RestApiUtil {
             //this is store API and pick resources accordingly
             try {
                 publisherRestAPIDefinition = IOUtils
-                        .toString(RestApiUtil.class.getResourceAsStream("/publisher-api.yaml"), "UTF-8");
+                        .toString(RestApiUtil.class.getResourceAsStream(RestApiConstants.PUBLISHER_API_YAML), "UTF-8");
             } catch (IOException e) {
                 String message = "Error while reading the swagger definition of Publisher Rest API";
                 log.error(message, e);
@@ -586,7 +586,7 @@ public class RestApiUtil {
             //this is store API and pick resources accordingly
             try {
                 storeRestAPIDefinition = IOUtils
-                        .toString(RestApiUtil.class.getResourceAsStream("/store-api.yaml"), "UTF-8");
+                        .toString(RestApiUtil.class.getResourceAsStream(RestApiConstants.STORE_API_YAML), "UTF-8");
             } catch (IOException e) {
                 String message = "Error while reading the swagger definition of Store Rest API";
                 log.error(message, e);
@@ -609,7 +609,7 @@ public class RestApiUtil {
             // this is admin API and pick resources accordingly
             try {
                 adminRestAPIDefinition = IOUtils
-                        .toString(RestApiUtil.class.getResourceAsStream("/admin-api.yaml"), "UTF-8");
+                        .toString(RestApiUtil.class.getResourceAsStream(RestApiConstants.ADMIN_API_YAML), "UTF-8");
             } catch (IOException e) {
                 String message = "Error while reading the swagger definition of Admin Rest API";
                 log.error(message, e);
