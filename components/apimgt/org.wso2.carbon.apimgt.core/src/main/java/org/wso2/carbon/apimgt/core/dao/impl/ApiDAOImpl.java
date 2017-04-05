@@ -246,31 +246,36 @@ public class ApiDAOImpl implements ApiDAO {
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     public List<API> getAPIsByStatus(List<String> roles, List<String> statuses) throws APIMgtDAOException {
 
-        //the below query will be used to retrieve,
+        //the below query will be used to retrieve the union of,
         //published/prototyped APIs (statuses) with public visibility and
         //published/prototyped APIs with restricted visibility where APIs are restricted based on roles of the user
-        final String query = API_SUMMARY_SELECT + " API " +
-                "LEFT JOIN AM_API_VISIBLE_ROLES ROLES ON API.UUID=ROLES.API_ID " +
-                "WHERE (" +
+        final String query = API_SUMMARY_SELECT + " WHERE " +
                 "VISIBILITY = '" + API.Visibility.PUBLIC + "' " +
-                "OR " +
-                "UUID IN (SELECT API_ID FROM AM_API_VISIBLE_ROLES WHERE (ROLE IN (" +
-                DAOUtil.getParameterString(roles.size()) + ")))) " +
                 "AND " +
-                "CURRENT_LC_STATUS  IN (" +
-                DAOUtil.getParameterString(statuses.size()) + ")";
+                "CURRENT_LC_STATUS  IN (" + DAOUtil.getParameterString(statuses.size()) + ") " +
+                "UNION " +
+                API_SUMMARY_SELECT +
+                " WHERE " +
+                "VISIBILITY = '" + API.Visibility.RESTRICTED + "' " +
+                "AND " +
+                "UUID IN (SELECT API_ID FROM AM_API_VISIBLE_ROLES WHERE ROLE IN " +
+                "(" + DAOUtil.getParameterString(roles.size()) + ")) " +
+                "AND " + "CURRENT_LC_STATUS  IN (" + DAOUtil.getParameterString(statuses.size()) + ")";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
-            int i;
-            //put desired roles into the query
-            for (i = 0; i < roles.size(); ++i) {
-                statement.setString(i + 1, roles.get(i));
+            int i, j;
+            //put desired API status into the query (to get APIs with public visibility)
+            for (i = 0; i < statuses.size(); ++i) {
+                statement.setString(i + 1, statuses.get(i));
             }
-            //put desired API status into the query
-            //this will be inserted after the roles, so we start after the roles
-            for (int j = i; j < roles.size() + statuses.size(); ++j) {
-                statement.setString(j + 1, statuses.get(j - i));
+            //put desired roles into the query
+            for (j = i; j < statuses.size() + roles.size(); ++j) {
+                statement.setString(j + 1, roles.get(j - i));
+            }
+            //put desired API status into the query (to get APIs with restricted visibility)
+            for (int k = j; k < statuses.size() + roles.size() + statuses.size(); ++k) {
+                statement.setString(k + 1, statuses.get(k - j));
             }
             return constructAPISummaryList(statement);
         } catch (SQLException e) {
