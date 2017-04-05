@@ -47,6 +47,19 @@ public class CommentMappingUtil {
         return commentDTO;
     }
 
+    /**
+     * @param body
+     * @param username
+     * @return
+     */
+    public static Comment fromDTOToComment(CommentDTO body, String username) {
 
+        Comment comment = new Comment();
+        comment.setApiId(body.getApiId());
+        comment.setCommentedUser(body.getSubscriberName());
+        comment.setCommentText(body.getCommentText());
+        comment.setCreatedUser(body.getCreatedBy());
 
+        return comment;
+    }
 }

@@ -242,5 +242,12 @@ public interface APIStore extends APIManager {
      */
     List<Rating> getUserRatingDTOList(String apiId) throws APIManagementException;
 
-
+    /**
+     * Add comment for an API
+     *
+     * @param comment the comment text
+     * @param apiId UUID of the API
+     * @return UUID of the created comment
+     */
+    String addComment(Comment comment, String apiId) throws APIManagementException;
 }

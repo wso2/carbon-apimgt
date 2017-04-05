@@ -767,6 +767,35 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
+     * @see ApiDAO#addComment(Comment, String)
+     */
+    @Override
+    public void addComment(Comment comment, String apiId) throws APIMgtDAOException {
+        final String addCommentQuery =
+                "INSERT INTO AM_API_COMMENTS (COMMENT_ID, COMMENT_TEXT, USER_IDENTIFIER, API_ID, " +
+                        "CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME" + ") VALUES (?,?,?,?,?,?,?,?)";
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(addCommentQuery)) {
+            try {
+                connection.setAutoCommit(false);
+
+                statement.setString(2, comment.getCommentText());
+                statement.setString(3, comment.getCommentedUser());
+                statement.setString(4, apiId);
+                statement.setString(5, comment.getCreatedUser());
+                statement.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now()));
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new APIMgtDAOException(e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    /**
      * Get image of a given API
      *
      * @param apiID The UUID of the respective API

@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
@@ -109,7 +111,33 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdCommentsPost(String apiId, CommentDTO body, String contentType, Request request)
             throws NotFoundException {
-        return null;
+        CommentDTO createdCommentDTO = null;
+        URI location = null;
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIStore apiStore = RestApiUtil.getConsumer(username);
+            Comment comment = CommentMappingUtil.fromDTOToComment(body, username);
+            String createdCommentId = apiStore.addComment(comment, apiId);
+
+            Comment createdComment = apiStore.getCommentByUUID(createdCommentId, apiId);
+            createdCommentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
+            location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/");
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while adding comment to api : " + body.getApiId();
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_NAME, body.getApiId());
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while adding location header in response for comment";
+            ErrorHandler errorHandler = ExceptionCodes.LOCATION_HEADER_INCORRECT;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorHandler);
+            log.error(errorMessage, e);
+            return Response.status(errorHandler.getHttpStatusCode()).entity(errorDTO).build();
+        }
+
+        return Response.ok().header("Location", location).entity(createdCommentDTO).build();
     }
 
     /**

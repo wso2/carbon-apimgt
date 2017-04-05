@@ -503,6 +503,20 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
     @Override
+    public String addComment(Comment comment, String apiId) throws APIManagementException {
+        String generatedUuid = UUID.randomUUID().toString();
+        comment.setUuid(generatedUuid);
+        try {
+            getApiDAO().addComment(comment, apiId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while adding comment for api - " + apiId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return comment.getUuid();
+    }
+
+    @Override
     public List<API> searchAPIs(String query, int offset, int limit) throws APIManagementException {
 
         List<API> apiResults = null;
