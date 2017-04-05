@@ -43,15 +43,18 @@ public class ConfigurationActivator {
             unbind = "unregisterConfigProvider")
     protected void registerConfigProvider(ConfigProvider configProvider) {
         ServiceReferenceHolder.getInstance().setConfigProvider(configProvider);
-
+        AnalyticsConfiguration analyticsConfiguration = null;
         try {
-           AnalyticsConfiguration analyticsConfiguration = ServiceReferenceHolder.getInstance().getConfigProvider()
+            analyticsConfiguration = ServiceReferenceHolder.getInstance().getConfigProvider()
                     .getConfigurationObject(AnalyticsConfiguration.class);
         } catch (CarbonConfigurationException e) {
             log.error("error getting config", e);
         }
+        if (analyticsConfiguration == null) {
+            analyticsConfiguration = new AnalyticsConfiguration();
+            log.info("Setting default configurations");
+        }
 
-        AnalyticsConfiguration analyticsConfiguration = new AnalyticsConfiguration();
         log.info("Setting default analytics configurations");
         log.debug("Analytics enabled = " + analyticsConfiguration.isEnabled());
         ServiceReferenceHolder.getInstance().setAnalyticsConfiguration(analyticsConfiguration);

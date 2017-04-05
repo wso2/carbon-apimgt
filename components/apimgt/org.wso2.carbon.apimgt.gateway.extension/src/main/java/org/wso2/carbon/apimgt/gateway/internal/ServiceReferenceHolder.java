@@ -31,7 +31,7 @@ public class ServiceReferenceHolder {
     private static ServiceReferenceHolder instance = new ServiceReferenceHolder();
     private ConfigProvider configProvider;
     private EventPublisher publisher;
-    private AnalyticsConfiguration analyticsConfiguration = new AnalyticsConfiguration(); //TODO remove instance
+    private AnalyticsConfiguration analyticsConfiguration;
 
     private ServiceReferenceHolder() {
 
