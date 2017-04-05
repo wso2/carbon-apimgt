@@ -25,6 +25,7 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.TestUtil;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.Label;
 
 import java.util.ArrayList;
@@ -62,7 +63,13 @@ public class LabelDAOImplIT extends DAOIntegrationTestBase {
         Label label2 = SampleTestObjectCreator.createLabel("public").build();
         labelList.add(label2);
 
-        labelDAO.addLabels(labelList);
+        try {
+            labelDAO.addLabels(labelList);
+            Assert.fail("Exception not thrown for adding duplicate labels");
+        } catch (APIMgtDAOException e) {
+            // Just catch the exception so that we can continue execution
+        }
+
         List<Label> labelsFromDb = labelDAO.getLabels();
         Assert.assertNotNull(labelsFromDb);
         Assert.assertEquals(labelsFromDb.size(), 1);

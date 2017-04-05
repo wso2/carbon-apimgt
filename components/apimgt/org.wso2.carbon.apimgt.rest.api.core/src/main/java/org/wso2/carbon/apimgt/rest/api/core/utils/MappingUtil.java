@@ -23,19 +23,23 @@
 package org.wso2.carbon.apimgt.rest.api.core.utils;
 
 
+import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
+import org.wso2.carbon.apimgt.rest.api.core.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.SubscriptionListDTO;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class MappingUtil {
 
     /**
-     * This method converts List<SubscriptionValidationData> into SubscriptionListDTO object.
+     * This method converts List of SubscriptionValidationData into SubscriptionListDTO object.
      *
-     * @param api
-     * @return
+     * @param subscriptionValidationData List of Subscription Validation Data
+     * @return subscriptionListDTO
      */
     public static SubscriptionListDTO convertToSubscriptionListDto(
             List<SubscriptionValidationData> subscriptionValidationData) {
@@ -56,4 +60,20 @@ public class MappingUtil {
         return subscriptionListDTO;
     }
 
+    /**
+     * Converts labelDTOs into labels
+     *
+     * @param labelDTOs List of LabelDTOs
+     * @return List of Labels
+     */
+    public static List<Label> convertToLabels(List<LabelDTO> labelDTOs) {
+        List<Label> labels = new ArrayList<>();
+        for (LabelDTO labelDTO : labelDTOs) {
+            String labelId = UUID.randomUUID().toString();
+            Label label = new Label.Builder().id(labelId).name(labelDTO.getName()).accessUrls(labelDTO.getAccessUrls())
+                    .build();
+            labels.add(label);
+        }
+        return labels;
+    }
 }

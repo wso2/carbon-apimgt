@@ -12,6 +12,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummary;
+import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 
@@ -39,7 +40,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     }
 
     /**
-     * @see #getAPISubscriptions(int)
+     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#getAPISubscriptions(int)
      */
     @Override
     public List<SubscriptionValidationData> getAPISubscriptions(int limit) throws APIManagementException {
@@ -47,7 +48,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     }
 
     /**
-     * @see #getAPISubscriptionsOfApi(String, String)
+     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#getAPISubscriptionsOfApi(String, String)
      */
     @Override
     public List<SubscriptionValidationData> getAPISubscriptionsOfApi(String apiContext, String apiVersion)
@@ -56,7 +57,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     }
 
     /**
-     * @see #getAPIInfo()
+     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#getAPIInfo()
      */
     @Override
     public List<APISummary> getAPIInfo() throws APIManagementException {
@@ -74,7 +75,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     }
 
     /**
-     * @see #addPolicy(String, Policy)
+     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#addPolicy(String, Policy)
      */
     @Override
     public void addPolicy(String policyLevel, Policy policy) throws APIManagementException {
@@ -82,7 +83,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     }
 
     /**
-     * @see #updatePolicy(Policy)
+     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#updatePolicy(Policy)
      */
     @Override
     public void updatePolicy(Policy policy) throws APIManagementException {
@@ -90,7 +91,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     }
 
     /**
-     * @see #deletePolicy(String policyName, String policyLevel)
+     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#deletePolicy(String, String)
      */
     @Override
     public void deletePolicy(String policyName, String policyLevel) throws APIManagementException {
@@ -98,7 +99,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     }
 
     /**
-     * @see #getPolicy(String, String)
+     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#getPolicy(String, String)
      */
     @Override
     public Policy getPolicy(String policyLevel, String policyName) throws APIManagementException {
@@ -106,7 +107,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     }
 
     /**
-     * @see #getAllPoliciesByLevel(String)
+     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#getAllPoliciesByLevel(String)
      */
     @Override
     public List<Policy> getAllPoliciesByLevel(String policyLevel) throws APIManagementException {
@@ -114,7 +115,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     }
 
     /**
-     * @see #deleteLabel(String)
+     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#deleteLabel(String)
      */
     @Override
     public void deleteLabel(String labelId) throws APIManagementException {
@@ -126,5 +127,48 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
             log.error(msg, e);
             throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
+    }
+
+    /**
+     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#registerGatewayLabels(List, String)
+     */
+    @Override
+    public void registerGatewayLabels(List<Label> labels, String overwriteLabels) throws APIManagementException {
+
+        if (!labels.isEmpty()) {
+            List<String> labelNames = new ArrayList<>();
+            boolean overwriteValues = Boolean.parseBoolean(overwriteLabels);
+
+            for (Label label : labels) {
+                labelNames.add(label.getName());
+            }
+
+            try {
+                List<Label> existingLabels = labelDAO.getLabelsByName(labelNames);
+
+                if (!existingLabels.isEmpty()) {
+                    List<Label> labelsToRemove = new ArrayList<>();
+
+                    for (Label existingLabel : existingLabels) {
+                        if (overwriteValues) {
+                            labelDAO.updateLabel(existingLabel);
+                        }
+
+                        for (Label label : labels) {
+                            if (existingLabel.getName().equals(label.getName())) {
+                                labelsToRemove.add(label);
+                            }
+                        }
+                    }
+                    labels.removeAll(labelsToRemove);    // Remove already existing labels from the list
+                }
+                labelDAO.addLabels(labels);
+            } catch (APIMgtDAOException e) {
+                String msg = "Error occurred while registering gateway labels";
+                log.error(msg, e);
+                throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            }
+        }
+
     }
 }

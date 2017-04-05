@@ -1310,38 +1310,6 @@ public class APIPublisherImplTestCase {
         apiPublisher.getLastUpdatedTimeOfThrottlingPolicy(POLICY_LEVEL, POLICY_NAME);
     }
 
-    @Test(description = "Register gateway labels")
-    public void testRegisterGatewayLabels() throws APIManagementException {
-        LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
-        System.setProperty(APIMgtConstants.OVERWRITE_LABELS, "true");
-        List<Label> labels = new ArrayList<>();
-        Label label1 = SampleTestObjectCreator.createLabel("testLabel1").build();
-        Label label2 = SampleTestObjectCreator.createLabel("testLabel2").build();
-        labels.add(label1);
-        List<String> labelNames = new ArrayList<>();
-        labelNames.add(label1.getName());
-        List<Label> existingLabels = new ArrayList<>();
-        existingLabels.add(label1);
-        existingLabels.add(label2);
-        Mockito.when(labelDAO.getLabelsByName(labelNames)).thenReturn(existingLabels);
-        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, null, null, null, null, null, labelDAO, null);
-        apiPublisher.registerGatewayLabels(labels);
-        Mockito.verify(labelDAO, Mockito.times(1)).addLabels(labels);
-    }
-
-    @Test(description = "Exception when registering gateway labels", expectedExceptions = APIManagementException.class)
-    public void testRegisterGatewayLabelsException() throws APIManagementException {
-        LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
-        System.setProperty(APIMgtConstants.OVERWRITE_LABELS, "false");
-        List<Label> labels = new ArrayList<>();
-        Label label = SampleTestObjectCreator.createLabel("testLabel1").build();
-        labels.add(label);
-        APIPublisherImpl apiPublisher = new APIPublisherImpl(user, null, null, null, null, null, labelDAO, null);
-        Mockito.doThrow(new APIMgtDAOException("Error occurred while adding label information")).when(labelDAO)
-                .addLabels(labels);
-        apiPublisher.registerGatewayLabels(labels);
-    }
-
     @Test(description = "Get all policies by level")
     public void testGetAllPoliciesByLevel() throws APIManagementException {
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);

@@ -3787,6 +3787,7 @@ definitions:
   Label:
     title: Label
     required:
+      - labelId
       - name
       - access_urls
     properties:
