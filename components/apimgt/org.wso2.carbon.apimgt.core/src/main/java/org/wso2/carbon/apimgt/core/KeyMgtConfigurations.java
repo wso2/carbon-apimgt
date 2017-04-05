@@ -18,25 +18,25 @@ package org.wso2.carbon.apimgt.core;
  */
 
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
-//import org.wso2.carbon.kernel.annotations.Configuration;
-//import org.wso2.carbon.kernel.annotations.Element;
+import org.wso2.carbon.kernel.annotations.Configuration;
+import org.wso2.carbon.kernel.annotations.Element;
 
 /**
  * Class to hold APIM configuration parameters and generate yaml file
  * TODO refactor class when kernal is updated to 5.2.0
  */
-//@Configuration(namespace = "wso2.carbon.kmgt", description = "Key Management Configuration Parameters")
+@Configuration(namespace = "wso2.carbon.kmgt", description = "Key Management Configuration Parameters")
 public class KeyMgtConfigurations {
 
-//    @Element(description = "DCR Endpoint URL")
+    @Element(description = "DCR Endpoint URL")
     private String dcrEndpoint;
-//    @Element(description = "Token Endpoint URL")
+    @Element(description = "Token Endpoint URL")
     private String tokenEndpoint;
-//    @Element(description = "Revoke Endpoint URL")
+    @Element(description = "Revoke Endpoint URL")
     private String revokeEndpoint;
-//    @Element(description = "Introspect Endpoint URL")
+    @Element(description = "Introspect Endpoint URL")
     private String introspectEndpoint;
-//    @Element(description = "OAuth app validity period")
+    @Element(description = "OAuth app validity period")
     private String validityPeriod;
 
     public KeyMgtConfigurations() {
@@ -52,7 +52,7 @@ public class KeyMgtConfigurations {
                 .DEFAULT_VALIDITY_PERIOD);
     }
 
-//    @Element(description = "Key Management Implementation class")
+    @Element(description = "Key Management Implementation class")
     private String keyManagerClientImpl = "org.wso2.carbon.apimgt.core.impl.AMDefaultKeyManagerImpl";
 
     public String getKeyManagerClientImpl() {

@@ -23,11 +23,11 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.gateway.analytics.AnalyticsConfiguration;
-//import org.wso2.carbon.kernel.configprovider.ConfigProvider;
+import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
+import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 
 /**
  * Class used to activate configuration loading
- * TODO refactor class when kernal is updated to 5.2.0
  */
 public class ConfigurationActivator {
     private static Logger log = LoggerFactory.getLogger(ConfigurationActivator.class);
@@ -44,12 +44,12 @@ public class ConfigurationActivator {
     protected void registerConfigProvider(ConfigProvider configProvider) {
         ServiceReferenceHolder.getInstance().setConfigProvider(configProvider);
 
-        /*try {
+        try {
            AnalyticsConfiguration analyticsConfiguration = ServiceReferenceHolder.getInstance().getConfigProvider()
                     .getConfigurationObject(AnalyticsConfiguration.class);
         } catch (CarbonConfigurationException e) {
             log.error("error getting config", e);
-        }*/
+        }
 
         AnalyticsConfiguration analyticsConfiguration = new AnalyticsConfiguration();
         log.info("Setting default analytics configurations");

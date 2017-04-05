@@ -21,10 +21,11 @@ package org.wso2.carbon.apimgt.gateway.internal;
 
 import org.wso2.carbon.apimgt.gateway.analytics.AnalyticsConfiguration;
 import org.wso2.carbon.apimgt.gateway.analytics.EventPublisher;
+import org.wso2.carbon.kernel.configprovider.ConfigProvider;
+
 
 /**
  * Class used to hold the APIM configuration
- * TODO refactor class when kernal is updated to 5.2.0
  */
 public class ServiceReferenceHolder {
     private static ServiceReferenceHolder instance = new ServiceReferenceHolder();

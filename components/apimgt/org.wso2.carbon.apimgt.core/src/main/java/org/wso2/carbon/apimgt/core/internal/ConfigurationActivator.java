@@ -22,11 +22,10 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-//import org.wso2.carbon.kernel.configprovider.ConfigProvider;
+import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 
 /**
  * Class used to activate configuration loading
- * TODO refactor class when kernal is updated to 5.2.0
  */
 public class ConfigurationActivator {
     private static final Logger log = LoggerFactory.getLogger(ServiceReferenceHolder.class);
