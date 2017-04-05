@@ -20,8 +20,8 @@ package org.wso2.carbon.apimgt.core.internal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.APIMConfigurations;
-//import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
-//import org.wso2.carbon.kernel.configprovider.ConfigProvider;
+import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
+import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 
 /**
  * Class used to hold the APIM configuration
@@ -50,12 +50,12 @@ public class ServiceReferenceHolder {
     }
 
     public APIMConfigurations getAPIMConfiguration() {
-        /*try {
+        try {
             config = ServiceReferenceHolder.getInstance().getConfigProvider()
                     .getConfigurationObject(APIMConfigurations.class);
         } catch (CarbonConfigurationException e) {
             log.error("error getting config", e);
-        }*/
+        }
 
         if (config == null) {
             config = new APIMConfigurations();

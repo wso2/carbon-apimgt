@@ -23,8 +23,8 @@ import org.slf4j.LoggerFactory;
 import org.wso2.andes.client.AMQConnectionFactory;
 import org.wso2.andes.url.URLSyntaxException;
 import org.wso2.carbon.apimgt.gateway.APIMConfigurations;
-//import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-//import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -53,7 +53,7 @@ public class APITopicSubscriber {
     private APIMConfigurations config = null;
 
     APITopicSubscriber() {
-        /*try {
+        try {
             config = ServiceReferenceHolder.getInstance().getConfigProvider()
                     .getConfigurationObject(APIMConfigurations.class);
         } catch (CarbonConfigurationException e) {
@@ -63,9 +63,8 @@ public class APITopicSubscriber {
         if (config == null) {
             config = new APIMConfigurations();
             log.info("Setting default configurations");
-        }*/
+        }
 
-        config = new APIMConfigurations();
     }
     /**
      * Subscribe to the topic
