@@ -305,18 +305,46 @@ function updateLifecycleHandler(event) {
         }
     };
     promised_update.then(
-        (response, event = event_data) => {
-            var message = "Life cycle state updated successfully!";
-            noty({
-                text: message,
-                type: 'success',
-                dismissQueue: true,
-                progressBar: true,
-                timeout: 5000,
-                layout: 'topCenter',
-                theme: 'relax',
-                maxVisible: 10,
-            });
+        (response, event = event_data) => {     
+            var lcResponse = response.obj;
+            var jsonPayload = lcResponse.jsonPayload;
+                            
+            if(jsonPayload) {
+                var jsonResponse = JSON.parse(jsonPayload);
+                var message = jsonResponse.redirectConfirmationMsg;
+                noty({
+                    text: message,
+                    layout: "top",
+                    theme: 'relax',
+                    dismissQueue: true,
+                    type: "alert",
+                    buttons: [
+                        {addClass: 'btn btn-primary', text: 'Leave page', onClick: function($noty) {
+                            $noty.close();
+                             location.href = jsonResponse.redirectUrl;
+                            }
+                        },
+                        {addClass: 'btn btn-default', text: 'Stay on this page', onClick: function($noty) {
+                            $noty.close();
+                            location.href = contextPath + "/apis/" + event_data.obj.api_id;
+                            }
+                         }
+                        ]
+                });
+            } else {
+                var message = "Life cycle state updated successfully!";
+                noty({
+                    text: message,
+                    type: 'success',
+                    dismissQueue: true,
+                    progressBar: true,
+                    timeout: 5000,
+                    layout: 'topCenter',
+                    theme: 'relax',
+                    maxVisible: 10,
+                });
+            }
+ 
             lifecycleTabHandler(event);
         }
     ).catch((response, event = event_data) => {
