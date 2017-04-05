@@ -28,6 +28,9 @@ public class LabelDAOImpl implements LabelDAO {
     LabelDAOImpl() {
     }
 
+    /**
+     * @see LabelDAO#getLabels()
+     */
     @Override
     public List<Label> getLabels() throws APIMgtDAOException {
 
@@ -57,39 +60,11 @@ public class LabelDAOImpl implements LabelDAO {
         return labels;
     }
 
+    /**
+     * @see LabelDAO#addLabels(List)
+     */
     @Override
     public void addLabels(List<Label> labels) throws APIMgtDAOException {
-
-        if (!labels.isEmpty()) {
-
-            List<String> labelNames = new ArrayList<>();
-
-            for (Label label : labels) {
-                labelNames.add(label.getName());
-            }
-            List<Label> existingLabels = getLabelsByName(labelNames);
-
-            if (!existingLabels.isEmpty()) {
-
-                List<Label> labelsToRemove = new ArrayList<>();
-
-                for (Label existingLabel : existingLabels) {
-                    for (Label label : labels) {
-                        if (existingLabel.getName().equals(label.getName())) {
-                            labelsToRemove.add(label);
-                        }
-                    }
-                }
-                labels.removeAll(labelsToRemove);    // Remove already existing labels from the list
-            }
-
-            if (!labels.isEmpty()) { // Add labels that don't already exist
-                insertNewLabels(labels);
-            }
-        }
-    }
-
-    private void insertNewLabels(List<Label> labels) throws APIMgtDAOException {
 
         if (!labels.isEmpty()) {
 
@@ -106,21 +81,27 @@ public class LabelDAOImpl implements LabelDAO {
                     urlMap.put(label.getId(), label.getAccessUrls());
                 }
                 statement.executeBatch();
-            } catch (SQLException e) {
-                String message = "Error while adding label data";
-                log.error(message, e);
-                throw new APIMgtDAOException(e);
-            } finally {
 
                 if (!urlMap.isEmpty()) {
                     for (Map.Entry<String, List<String>> entry : urlMap.entrySet()) {
                         insertAccessUrlMappings(entry.getKey(), entry.getValue());
                     }
                 }
+            } catch (SQLException e) {
+                String message = "Error while adding label data";
+                log.error(message, e);
+                throw new APIMgtDAOException(e);
             }
         }
     }
 
+    /**
+     * Add access url mappings
+     *
+     * @param labelId    Id of the label
+     * @param accessUrls List of access urls
+     * @throws APIMgtDAOException if error occurs while adding access url mappings
+     */
     private void insertAccessUrlMappings(String labelId, List<String> accessUrls) throws APIMgtDAOException {
 
         if (!accessUrls.isEmpty()) {
@@ -150,6 +131,13 @@ public class LabelDAOImpl implements LabelDAO {
         }
     }
 
+    /**
+     * Retrieve access urls of a label by label Id
+     *
+     * @param labelId Id of the label
+     * @return List of access urls of the label
+     * @throws APIMgtDAOException if error occurs while retrieving access urls
+     */
     private List<String> getLabelAccessUrls(String labelId) throws APIMgtDAOException {
 
         final String query = "SELECT ACCESS_URL FROM AM_LABEL_ACCESS_URL_MAPPING WHERE LABEL_ID = ?";
@@ -173,6 +161,9 @@ public class LabelDAOImpl implements LabelDAO {
         return accessUrls;
     }
 
+    /**
+     * @see LabelDAO#getLabelByName(String)
+     */
     @Override
     public Label getLabelByName(String labelName) throws APIMgtDAOException {
 
@@ -199,6 +190,9 @@ public class LabelDAOImpl implements LabelDAO {
 
     }
 
+    /**
+     * @see LabelDAO#getLabelsByName(List)
+     */
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     @Override
     public List<Label> getLabelsByName(List<String> labelNames) throws APIMgtDAOException {
@@ -236,6 +230,13 @@ public class LabelDAOImpl implements LabelDAO {
         return matchingLabels;
     }
 
+    /**
+     * Retrieve label names by label ids
+     *
+     * @param labelIDs List of label ids
+     * @return List of label names
+     * @throws SQLException if error occurs while retrieving label names
+     */
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     static List<String> getLabelNamesByIDs(List<String> labelIDs) throws SQLException {
         List<String> labelNames = new ArrayList<>();
@@ -261,6 +262,13 @@ public class LabelDAOImpl implements LabelDAO {
         return labelNames;
     }
 
+    /**
+     * Retrieve label id by label name
+     *
+     * @param labelName Name of the label
+     * @return Id of the label
+     * @throws SQLException if error occurs while retrieving label id
+     */
     static String getLabelID(String labelName) throws SQLException {
 
         final String query = "SELECT LABEL_ID from AM_LABELS where NAME=?";
@@ -279,6 +287,9 @@ public class LabelDAOImpl implements LabelDAO {
         throw new SQLException("Label " + labelName + ", does not exist");
     }
 
+    /**
+     * @see LabelDAO#deleteLabel(String)
+     */
     @Override
     public void deleteLabel(String labelId) throws APIMgtDAOException {
 
@@ -305,6 +316,9 @@ public class LabelDAOImpl implements LabelDAO {
 
     }
 
+    /**
+     * @see LabelDAO#updateLabel(Label)
+     */
     @Override
     public void updateLabel(Label updatedLabel) throws APIMgtDAOException {
 
@@ -320,6 +334,12 @@ public class LabelDAOImpl implements LabelDAO {
 
     }
 
+    /**
+     * Delete access urls of a label by label id
+     *
+     * @param labelId Id of the label
+     * @throws APIMgtDAOException if error occurs while deleting label access urls
+     */
     private void deleteLabelAccessUrlMappings(String labelId) throws APIMgtDAOException {
 
         final String query = "DELETE FROM AM_LABEL_ACCESS_URL_MAPPING WHERE LABEL_ID = ?";

@@ -1513,36 +1513,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
     }
 
-    @Override
-    public void registerGatewayLabels(List<Label> labels) throws APIManagementException {
-
-        String overwriteLabels = System.getProperty(APIMgtConstants.OVERWRITE_LABELS, "false");
-        List<String> labelNames = new ArrayList<>();
-        for (Label label : labels) {
-            labelNames.add(label.getName());
-        }
-
-        try {
-            List<Label> existingLabels = getLabelDAO().getLabelsByName(labelNames);
-            if (!existingLabels.isEmpty()) {
-                labels.removeAll(existingLabels); // Remove already existing labels from the list
-            }
-
-            if (Boolean.parseBoolean(overwriteLabels)) {
-                for (Label label : existingLabels) {
-                    getLabelDAO().updateLabel(label);
-                }
-            }
-            getLabelDAO().addLabels(labels);
-
-        } catch (APIMgtDAOException e) {
-            String errorMsg = "Error occurred while adding label information";
-            log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
-        }
-    }
-
-
     /**
      * @see APIPublisher#getLastUpdatedTimeOfEndpoint(String)
      */

@@ -518,26 +518,54 @@ $(function () {
                             $("#subscribe-button").html('Subscribe');
                             $("#subscribe-button").removeAttr('disabled');
                             var subscription = jsonData.obj;
-                            var message = "You have successfully subscribed to the API.";
-                            noty({
-                                text: message,
-                                layout: "top",
-                                theme: 'relax',
-                                dismissQueue: true,
-                                type: "alert",
-                                buttons: [
-                                    {addClass: 'btn btn-primary', text: 'View Subscriptions', onClick: function($noty) {
-                                        $noty.close();
-                                        location.href = contextPath + "/applications/" + applicationId + "#subscription";
-                                      }
-                                    },
-                                    {addClass: 'btn btn-default', text: 'Stay on this page', onClick: function($noty) {
-                                        $noty.close();
-                                        location.href = contextPath + "/apis/" + apiId;
-                                      }
-                                    }
-                                  ]
-                            });
+                            var jsonPayload = subscription.workflowResponse.jsonPayload;
+                            
+                            if(jsonPayload) {
+                                var jsonResponse = JSON.parse(jsonPayload);
+                                var message = jsonResponse.redirectConfirmationMsg;
+                                noty({
+                                    text: message,
+                                    layout: "top",
+                                    theme: 'relax',
+                                    dismissQueue: true,
+                                    type: "alert",
+                                    buttons: [
+                                        {addClass: 'btn btn-primary', text: 'Leave page', onClick: function($noty) {
+                                            $noty.close();
+                                            location.href = jsonResponse.redirectUrl;
+                                          }
+                                        },
+                                        {addClass: 'btn btn-default', text: 'Stay on this page', onClick: function($noty) {
+                                            $noty.close();
+                                            location.href = contextPath + "/apis/" + apiId;
+                                          }
+                                        }
+                                      ]
+                                });
+
+                            } else {
+                                var message = "You have successfully subscribed to the API.";
+                                noty({
+                                    text: message,
+                                    layout: "top",
+                                    theme: 'relax',
+                                    dismissQueue: true,
+                                    type: "alert",
+                                    buttons: [
+                                        {addClass: 'btn btn-primary', text: 'View Subscriptions', onClick: function($noty) {
+                                            $noty.close();
+                                            location.href = contextPath + "/applications/" + applicationId + "#subscription";
+                                          }
+                                        },
+                                        {addClass: 'btn btn-default', text: 'Stay on this page', onClick: function($noty) {
+                                            $noty.close();
+                                            location.href = contextPath + "/apis/" + apiId;
+                                          }
+                                        }
+                                      ]
+                                });
+                            }
+                            
 
                             //TODO : Embedding message model
 
