@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
+import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Application;
@@ -49,6 +50,7 @@ import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
+import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 import org.wso2.carbon.lcm.core.beans.AvailableTransitionBean;
 import org.wso2.carbon.lcm.core.exception.LifecycleException;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
@@ -86,6 +88,9 @@ public class APIPublisherImplTestCase {
         System.setProperty("gwHome", temp.getAbsolutePath());
         //Set the resource path, where contain composer test JS
         System.setProperty("carbon.home", new File("src/test/resources").getAbsolutePath());
+        ConfigProvider configProvider = Mockito.mock(ConfigProvider.class);
+        ServiceReferenceHolder.getInstance().setConfigProvider(configProvider);
+
     }
 
     @Test(description = "Test add api with production endpoint")
@@ -191,6 +196,7 @@ public class APIPublisherImplTestCase {
     @Test(description = "Exception updating Gateway Config for API", expectedExceptions = APIManagementException.class)
     public void testUpdateApiGatewayConfigException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
         String configString = SampleTestObjectCreator.createSampleGatewayConfig();

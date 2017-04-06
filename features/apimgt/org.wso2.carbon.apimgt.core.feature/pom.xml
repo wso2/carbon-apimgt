@@ -350,6 +350,11 @@
                 </executions>
             </plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>${project.build.directory}/docs/</directory>
+            </resource>
+        </resources>
     </build>
 
 </project>

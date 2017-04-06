@@ -23,7 +23,6 @@ import org.wso2.carbon.kernel.annotations.Element;
 
 /**
  * Class to hold APIM configuration parameters and generate yaml file
- * TODO refactor class when kernal is updated to 5.2.0
  */
 @Configuration(namespace = "wso2.carbon.kmgt", description = "Key Management Configuration Parameters")
 public class KeyMgtConfigurations {

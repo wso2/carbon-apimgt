@@ -44,7 +44,6 @@ import javax.naming.NamingException;
 
 /**
  * This class is used to subscribe to the jms topic and save the read configuration to the file system
- * TODO refactor class when kernal is updated to 5.2.0
  */
 public class APITopicSubscriber {
     private static final Logger log = LoggerFactory.getLogger(APITopicSubscriber.class);

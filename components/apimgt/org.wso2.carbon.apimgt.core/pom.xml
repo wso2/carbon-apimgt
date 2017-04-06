@@ -260,7 +260,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.core</artifactId>
+            <version>${carbon.kernel.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -293,12 +297,12 @@
                 </configuration>
 			</plugin>
         </plugins>
-        <resources>
+<!--        <resources>
             <resource>
                 <directory>${project.build.directory}/classes/config-docs</directory>
                 <targetPath>config-docs</targetPath>
             </resource>
-        </resources>
+        </resources>-->
     </build>
     <profiles>
         <profile>

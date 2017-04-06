@@ -25,7 +25,6 @@ import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 
 /**
  * Class used to hold the APIM configuration
- * TODO refactor class when kernal is updated to 5.2.0
  */
 public class ServiceReferenceHolder {
     private static final Logger log = LoggerFactory.getLogger(ServiceReferenceHolder.class);
