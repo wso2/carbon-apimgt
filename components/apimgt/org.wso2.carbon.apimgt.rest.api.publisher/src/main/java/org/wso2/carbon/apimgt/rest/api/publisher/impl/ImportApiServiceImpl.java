@@ -11,6 +11,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.FileBasedApiImportExportManager;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
+import org.wso2.msf4j.Request;
 import org.wso2.msf4j.formparam.FileInfo;
 
 import javax.ws.rs.core.Response;
@@ -20,8 +21,7 @@ import java.util.UUID;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
         "2017-01-19T18:39:38.447+05:30")
-public class ImportApiServiceImpl
-        extends ImportApiService {
+public class ImportApiServiceImpl extends ImportApiService {
 
     private static final Logger log = LoggerFactory.getLogger(ImportApiServiceImpl.class);
 
@@ -32,12 +32,13 @@ public class ImportApiServiceImpl
      * @param fileDetail      meta information of the zip file
      * @param contentType     Content-Type header
      * @param provider        provider of the API (if it needs to be updated)
+     * @param request         ms4j request object
      * @return List of APIs that were imported
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response importApisPost(InputStream fileInputStream, FileInfo fileDetail, String contentType, String
-            provider) throws NotFoundException {
+            provider, Request request) throws NotFoundException {
 
         APIPublisher publisher = null;
 
@@ -65,12 +66,13 @@ public class ImportApiServiceImpl
      * @param fileDetail      meta information of the zip file
      * @param contentType     Content-Type header
      * @param provider        provider of the API (if it needs to be updated)
+     * @param request         ms4j request object
      * @return List of APIs that were imported
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response importApisPut(InputStream fileInputStream, FileInfo fileDetail, String contentType, String
-            provider) throws NotFoundException {
+            provider, Request request) throws NotFoundException {
 
         APIPublisher publisher = null;
 

@@ -2,22 +2,30 @@ package org.wso2.carbon.apimgt.rest.api.publisher;
 
 import io.swagger.annotations.ApiParam;
 import java.io.File;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.rest.api.publisher.factories.ExportApiServiceFactory;
 import org.wso2.msf4j.Microservice;
+import org.wso2.msf4j.Request;
 
 @Component(
     name = "org.wso2.carbon.apimgt.rest.api.publisher.ExportApi",
     service = Microservice.class,
     immediate = true
 )
-@Path("/api/am/publisher/v1/export")
+@Path("/api/am/publisher/v1.[\\d]+/export")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the export API")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-04T15:48:35.633+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-06T17:02:03.158+05:30")
 public class ExportApi implements Microservice  {
    private final ExportApiService delegate = ExportApiServiceFactory.getExportApi();
 
@@ -38,8 +46,8 @@ public class ExportApi implements Microservice  {
 ,@ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType
 ,@ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit
 ,@ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
-)
+, @Context Request request)
     throws NotFoundException {
-        return delegate.exportApisGet(query,contentType,limit,offset);
+        return delegate.exportApisGet(query,contentType,limit,offset, request);
     }
 }
