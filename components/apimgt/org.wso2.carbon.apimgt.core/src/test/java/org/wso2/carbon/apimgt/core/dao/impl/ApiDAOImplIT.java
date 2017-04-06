@@ -517,7 +517,8 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         documentInfoList.add(documentInfo1);
         documentInfoList.add(documentInfo2);
         List<DocumentInfo> documentInfoListFromDB = apiDAO.getDocumentsInfoList(api.getId());
-        Assert.assertEquals(documentInfoList, documentInfoListFromDB);
+        Assert.assertTrue(documentInfoListFromDB.containsAll(documentInfoList));
+        Assert.assertTrue(documentInfoList.size() == documentInfoListFromDB.size());
     }
 
     @Test(description = "Getting document info for an API")
