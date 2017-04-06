@@ -52,7 +52,7 @@ public class ConfigurationActivator {
         }
         if (analyticsConfiguration == null) {
             analyticsConfiguration = new AnalyticsConfiguration();
-            log.info("org.wso2.carbon.apimgt.gateway.interna.ConfigurationActivator : Setting default configurations");
+            log.info("Setting default configurations");
         }
         log.info("Setting default analytics configurations");
         log.debug("Analytics enabled = " + analyticsConfiguration.isEnabled());

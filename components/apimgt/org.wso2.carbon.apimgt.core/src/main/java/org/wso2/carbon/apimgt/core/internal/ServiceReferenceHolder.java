@@ -58,7 +58,7 @@ public class ServiceReferenceHolder {
 
         if (config == null) {
             config = new APIMConfigurations();
-            log.info("org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder : Setting default configurations");
+            log.info("Setting default configurations");
         }
 
         return config;

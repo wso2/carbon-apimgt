@@ -61,7 +61,7 @@ public class APITopicSubscriber {
 
         if (config == null) {
             config = new APIMConfigurations();
-            log.info("org.wso2.carbon.apimgt.gateway.jms.APITopicSubscriber : Setting default configurations");
+            log.info("Setting default configurations");
         }
 
         config = new APIMConfigurations();
