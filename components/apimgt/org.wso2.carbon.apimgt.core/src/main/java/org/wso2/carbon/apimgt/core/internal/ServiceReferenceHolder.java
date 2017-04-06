@@ -20,12 +20,11 @@ package org.wso2.carbon.apimgt.core.internal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.APIMConfigurations;
-//import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
-//import org.wso2.carbon.kernel.configprovider.ConfigProvider;
+import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
+import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 
 /**
  * Class used to hold the APIM configuration
- * TODO refactor class when kernal is updated to 5.2.0
  */
 public class ServiceReferenceHolder {
     private static final Logger log = LoggerFactory.getLogger(ServiceReferenceHolder.class);
@@ -50,16 +49,16 @@ public class ServiceReferenceHolder {
     }
 
     public APIMConfigurations getAPIMConfiguration() {
-        /*try {
+        try {
             config = ServiceReferenceHolder.getInstance().getConfigProvider()
                     .getConfigurationObject(APIMConfigurations.class);
         } catch (CarbonConfigurationException e) {
-            log.error("error getting config", e);
-        }*/
+            log.error("error getting config : org.wso2.carbon.apimgt.core.internal.APIMConfiguration", e);
+        }
 
         if (config == null) {
             config = new APIMConfigurations();
-            log.info("Setting default configurations");
+            log.info("org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder : Setting default configurations");
         }
 
         return config;

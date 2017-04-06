@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
+import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Application;
@@ -91,7 +92,6 @@ public class APIPublisherImplTestCase {
         System.setProperty("gwHome", temp.getAbsolutePath());
         //Set the resource path, where contain composer test JS
         System.setProperty("carbon.home", new File("src/test/resources").getAbsolutePath());
-        
         WorkflowExtensionsConfigBuilder.build(new ConfigProvider() {
 
             @Override
@@ -99,12 +99,13 @@ public class APIPublisherImplTestCase {
                 T workflowConfig = (T) new WorkflowConfig();
                 return workflowConfig;
             }
-
             @Override
             public Map getConfigurationMap(String namespace) throws CarbonConfigurationException {                
                 return null;
             }
         });
+        ConfigProvider configProvider = Mockito.mock(ConfigProvider.class);
+        ServiceReferenceHolder.getInstance().setConfigProvider(configProvider);
     }
 
     @Test(description = "Test add api with production endpoint")

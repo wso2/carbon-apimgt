@@ -23,8 +23,8 @@ import org.slf4j.LoggerFactory;
 import org.wso2.andes.client.AMQConnectionFactory;
 import org.wso2.andes.url.URLSyntaxException;
 import org.wso2.carbon.apimgt.gateway.APIMConfigurations;
-//import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-//import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -44,7 +44,6 @@ import javax.naming.NamingException;
 
 /**
  * This class is used to subscribe to the jms topic and save the read configuration to the file system
- * TODO refactor class when kernal is updated to 5.2.0
  */
 public class APITopicSubscriber {
     private static final Logger log = LoggerFactory.getLogger(APITopicSubscriber.class);
@@ -53,17 +52,17 @@ public class APITopicSubscriber {
     private APIMConfigurations config = null;
 
     APITopicSubscriber() {
-        /*try {
+        try {
             config = ServiceReferenceHolder.getInstance().getConfigProvider()
                     .getConfigurationObject(APIMConfigurations.class);
         } catch (CarbonConfigurationException e) {
-            log.error("error getting config", e);
+            log.error("error getting config : org.wso2.carbon.apimgt.gateway.APIMConfigurations", e);
         }
 
         if (config == null) {
             config = new APIMConfigurations();
-            log.info("Setting default configurations");
-        }*/
+            log.info("org.wso2.carbon.apimgt.gateway.jms.APITopicSubscriber : Setting default configurations");
+        }
 
         config = new APIMConfigurations();
     }
