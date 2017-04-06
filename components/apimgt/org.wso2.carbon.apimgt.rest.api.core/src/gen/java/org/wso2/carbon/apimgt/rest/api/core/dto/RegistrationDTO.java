@@ -10,9 +10,9 @@ import org.wso2.carbon.apimgt.rest.api.core.dto.LabelInfoDTO;
 /**
  * RegistrationDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-31T16:40:30.481+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-05T17:44:49.483+05:30")
 public class RegistrationDTO   {
-  @JsonProperty("LabelInfo")
+  @JsonProperty("labelInfo")
   private LabelInfoDTO labelInfo = null;
 
   public RegistrationDTO labelInfo(LabelInfoDTO labelInfo) {

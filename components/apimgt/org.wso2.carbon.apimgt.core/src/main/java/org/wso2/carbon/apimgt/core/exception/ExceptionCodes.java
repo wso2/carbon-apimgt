@@ -91,7 +91,9 @@ public enum ExceptionCodes implements ErrorHandler {
     ROLES_CANNOT_BE_EMPTY(900328, "Role list cannot be empty", 400, " Role list cannot be empty"),
     ROLES_CANNOT_BE_NULL(900329, "Role list cannot be null", 400, " Role list cannot be null"),
     UNSUPPORTED_ROLE(900330, "Non existing roles cannot be added to an API", 400,
-            " Non existing roles cannot be added to an API");
+            " Non existing roles cannot be added to an API"),
+    LABEL_INFORMATION_CANNOT_BE_NULL(900331, "Label information cannot be null", 400, "Label information cannot be " +
+            "null");
 
 
     private final long errorCode;

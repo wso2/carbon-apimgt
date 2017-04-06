@@ -416,9 +416,9 @@ definitions:
   Registration:
     title: Registration related details
     required:
-      - LabelInfo
+      - labelInfo
     properties:
-      LabelInfo:
+      labelInfo:
         $ref: '#/definitions/LabelInfo'
 
 #-----------------------------------------------------

@@ -150,12 +150,11 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
                     List<Label> labelsToRemove = new ArrayList<>();
 
                     for (Label existingLabel : existingLabels) {
-                        if (overwriteValues) {
-                            labelDAO.updateLabel(existingLabel);
-                        }
-
                         for (Label label : labels) {
                             if (existingLabel.getName().equals(label.getName())) {
+                                if (overwriteValues) {
+                                    labelDAO.updateLabel(label);
+                                }
                                 labelsToRemove.add(label);
                             }
                         }
