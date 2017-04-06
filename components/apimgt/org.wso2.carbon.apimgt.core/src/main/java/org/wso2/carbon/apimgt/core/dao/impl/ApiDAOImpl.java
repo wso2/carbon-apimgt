@@ -246,6 +246,12 @@ public class ApiDAOImpl implements ApiDAO {
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     public List<API> getAPIsByStatus(List<String> roles, List<String> statuses) throws APIMgtDAOException {
 
+        //check for null at the beginning before constructing the query to retrieve APIs from database
+        if (roles == null || statuses == null) {
+            String errorMessage = "Role list or API status list should not be null to retrieve APIs.";
+            log.error(errorMessage);
+            throw new APIMgtDAOException(errorMessage);
+        }
         //the below query will be used to retrieve the union of,
         //published/prototyped APIs (statuses) with public visibility and
         //published/prototyped APIs with restricted visibility where APIs are restricted based on roles of the user
