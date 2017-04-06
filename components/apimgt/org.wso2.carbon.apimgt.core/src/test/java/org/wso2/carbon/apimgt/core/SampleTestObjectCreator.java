@@ -469,7 +469,7 @@ public class SampleTestObjectCreator {
         APIPolicy apiPolicy = new APIPolicy(SAMPLE_API_POLICY);
         apiPolicy.setDisplayName(SAMPLE_API_POLICY);
         apiPolicy.setDescription(SAMPLE_API_POLICY_DESCRIPTION);
-        apiPolicy.setUserLevel(APIMgtConstants.API);
+        apiPolicy.setUserLevel(APIMgtConstants.ThrottlePolicyConstants.API_LEVEL);
         QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
         defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
         RequestCountLimit requestCountLimit = new RequestCountLimit();
