@@ -53,12 +53,12 @@ public class ServiceReferenceHolder {
             config = ServiceReferenceHolder.getInstance().getConfigProvider()
                     .getConfigurationObject(APIMConfigurations.class);
         } catch (CarbonConfigurationException e) {
-            log.error("error getting config", e);
+            log.error("error getting config : org.wso2.carbon.apimgt.core.internal.APIMConfiguration", e);
         }
 
         if (config == null) {
             config = new APIMConfigurations();
-            log.info("Setting default configurations");
+            log.info("org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder : Setting default configurations");
         }
 
         return config;

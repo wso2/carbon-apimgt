@@ -48,11 +48,11 @@ public class ConfigurationActivator {
             analyticsConfiguration = ServiceReferenceHolder.getInstance().getConfigProvider()
                     .getConfigurationObject(AnalyticsConfiguration.class);
         } catch (CarbonConfigurationException e) {
-            log.error("error getting config", e);
+            log.error("error getting config : AnalyticsConfiguration", e);
         }
         if (analyticsConfiguration == null) {
             analyticsConfiguration = new AnalyticsConfiguration();
-            log.info("Setting default configurations");
+            log.info("org.wso2.carbon.apimgt.gateway.interna.ConfigurationActivator : Setting default configurations");
         }
 
         log.info("Setting default analytics configurations");

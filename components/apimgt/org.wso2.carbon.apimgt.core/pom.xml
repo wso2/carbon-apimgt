@@ -297,12 +297,12 @@
                 </configuration>
 			</plugin>
         </plugins>
-<!--        <resources>
+        <resources>
             <resource>
                 <directory>${project.build.directory}/classes/config-docs</directory>
                 <targetPath>config-docs</targetPath>
             </resource>
-        </resources>-->
+        </resources>
     </build>
     <profiles>
         <profile>

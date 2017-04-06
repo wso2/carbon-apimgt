@@ -56,12 +56,12 @@ public class APITopicSubscriber {
             config = ServiceReferenceHolder.getInstance().getConfigProvider()
                     .getConfigurationObject(APIMConfigurations.class);
         } catch (CarbonConfigurationException e) {
-            log.error("error getting config", e);
+            log.error("error getting config : org.wso2.carbon.apimgt.gateway.APIMConfigurations", e);
         }
 
         if (config == null) {
             config = new APIMConfigurations();
-            log.info("Setting default configurations");
+            log.info("org.wso2.carbon.apimgt.gateway.jms.APITopicSubscriber : Setting default configurations");
         }
 
     }
