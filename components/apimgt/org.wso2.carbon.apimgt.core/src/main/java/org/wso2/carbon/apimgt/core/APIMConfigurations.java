@@ -46,7 +46,7 @@ public class APIMConfigurations {
     //    @Element(description = "hostname")
     private String hostname = "localhost";
     //    @Element(description = "context for publisher")
-    private String publisherContext = "/api/am/publisher/v1";
+    private String publisherContext = "/api/am/publisher/v1.0";
     //    @Element(description = "context for store")
     private String storeContext = "/api/am/store/v1";
     //    @Element(description = "context for admin")
