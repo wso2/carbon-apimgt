@@ -632,7 +632,7 @@ public class APIPublisherImplTestCase {
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, applicationDAO, apiSubscriptionDAO,
-                apiLifecycleManager, gatewaySourceGenerator,workflowDAO);
+                apiLifecycleManager, gatewaySourceGenerator, workflowDAO);
         API previousApi = SampleTestObjectCreator.createDefaultAPI().build();
         String previousApiUUID = previousApi.getId();
         String lifecycleIdPrevious = previousApi.getLifecycleInstanceId();
@@ -690,7 +690,7 @@ public class APIPublisherImplTestCase {
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, applicationDAO, apiSubscriptionDAO,
-                apiLifecycleManager,gatewaySourceGenerator,workflowDAO);
+                apiLifecycleManager, gatewaySourceGenerator, workflowDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
         String lifecycleId = api.getLifecycleInstanceId();
@@ -1490,15 +1490,18 @@ public class APIPublisherImplTestCase {
         return new APIPublisherImpl(user, apiDAO, applicationDAO, apiSubscriptionDAO, null, apiLifecycleManager,
                 null, null, gatewaySourceGenerator, null);
     }
+
     private APIPublisherImpl getApiPublisherImpl(String user, ApiDAO apiDAO, APILifecycleManager apiLifecycleManager,
                                                  GatewaySourceGenerator gatewaySourceGenerator) {
         return new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null, null,
                 gatewaySourceGenerator, null);
     }
+
     private APIPublisherImpl getApiPublisherImpl(APILifecycleManager apiLifecycleManager,
                                                  ApiDAO apiDAO, WorkflowDAO workflowDAO) {
-        return new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null, workflowDAO,null,null);
+        return new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null, workflowDAO, null, null);
     }
+
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
             apiSubscriptionDAO, APILifecycleManager apiLifecycleManager, GatewaySourceGenerator
                                                          gatewaySourceGenerator, WorkflowDAO workflowDAO) {
