@@ -18,6 +18,7 @@
 */
 package org.wso2.carbon.apimgt.core.api;
 
+import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.template.APITemplateException;
 import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
@@ -63,4 +64,10 @@ public interface GatewaySourceGenerator {
      * @throws APITemplateException throws if an error occurred
      */
     String getSwaggerFromGatewayConfig(String gatewayConfig) throws APITemplateException;
+
+    /**
+     * Used to set API Object.
+     * @param api
+     */
+    public void setAPI(API api);
 }
