@@ -108,10 +108,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     private Map<String, EventObserver> eventObservers = new HashMap<>();
 
     public APIPublisherImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
-            APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager apiLifecycleManager,
-            LabelDAO labelDAO, WorkflowDAO workflowDAO) {
+                            APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager
+                                    apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO,
+                            GatewaySourceGenerator gatewaySourceGenerator, APIGatewayPublisher apiGatewayPublisher) {
         super(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, apiLifecycleManager, labelDAO,
-                workflowDAO);
+                workflowDAO, gatewaySourceGenerator, apiGatewayPublisher);
     }
 
     /**
@@ -284,7 +285,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     }
                     resourceList.add(dto);
                 }
-                GatewaySourceGenerator gatewaySourceGenerator = new GatewaySourceGeneratorImpl(apiBuilder.build());
+                GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
+                gatewaySourceGenerator.setAPI(apiBuilder.build());
                 String gatewayConfig = gatewaySourceGenerator.getConfigStringFromTemplate(resourceList);
                 if (log.isDebugEnabled()) {
                     log.debug("API " + apiBuilder.getName() + "gateway config: " + gatewayConfig);
@@ -397,7 +399,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
                     String updatedSwagger = apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder);
                     String gatewayConfig = getApiGatewayConfig(apiBuilder.getId());
-                    GatewaySourceGenerator gatewaySourceGenerator = new GatewaySourceGeneratorImpl(apiBuilder.build());
+                    GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
+                    gatewaySourceGenerator.setAPI(apiBuilder.build());
                     String updatedGatewayConfig = gatewaySourceGenerator
                             .getGatewayConfigFromSwagger(gatewayConfig, updatedSwagger);
 
@@ -1181,7 +1184,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             apiBuilder.lastUpdatedTime(localDateTime);
 
             api = apiBuilder.build();
-            GatewaySourceGenerator gatewaySourceGenerator = new GatewaySourceGeneratorImpl(api);
+            GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
+            gatewaySourceGenerator.setAPI(api);
             String existingGatewayConfig = getApiGatewayConfig(apiId);
             String updatedGatewayConfig = gatewaySourceGenerator
                     .getGatewayConfigFromSwagger(existingGatewayConfig, jsonText);
@@ -1289,8 +1293,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public void updateApiGatewayConfig(String apiId, String configString) throws APIManagementException {
         API api = getAPIbyUUID(apiId);
-        GatewaySourceGenerator gatewaySourceGenerator = new GatewaySourceGeneratorImpl(api);
-
+        GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
+        gatewaySourceGenerator.setAPI(api);
         try {
             String swagger = gatewaySourceGenerator.getSwaggerFromGatewayConfig(configString);
             getApiDAO().updateSwaggerDefinition(apiId, swagger, getUsername());
@@ -1555,7 +1559,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @throws APIManagementException If failed to publish endpoint to gateway.
      */
     private void publishEndpointConfigToGateway() throws APIManagementException {
-        GatewaySourceGenerator template = new GatewaySourceGeneratorImpl();
+        GatewaySourceGenerator template = getGatewaySourceGenerator();
         String endpointConfig = template.getEndpointConfigStringFromTemplate(getAllEndpoints());
         APIGatewayPublisher publisher = APIManagerFactory.getInstance().getGateway();
         boolean status = publisher.publishEndpointConfigToGateway(endpointConfig);

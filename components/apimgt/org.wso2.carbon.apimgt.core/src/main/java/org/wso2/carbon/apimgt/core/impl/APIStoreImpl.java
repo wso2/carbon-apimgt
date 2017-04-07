@@ -109,8 +109,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
      * @param workflowDAO WorkFlow Data Access Object
      */
     public APIStoreImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
-            APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, TagDAO tagDAO, LabelDAO labelDAO,
-            WorkflowDAO workflowDAO) {
+                        APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, TagDAO tagDAO, LabelDAO labelDAO,
+                        WorkflowDAO workflowDAO) {
         super(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, new APILifeCycleManagerImpl(), labelDAO,
                 workflowDAO);
         this.tagDAO = tagDAO;
