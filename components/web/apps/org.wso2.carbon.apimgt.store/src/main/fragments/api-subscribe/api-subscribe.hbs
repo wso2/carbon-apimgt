@@ -1,12 +1,12 @@
 <div class="col-xs-12 col-sm-12 col-md-8 col-lg-5 col-md-height col-md-top">
     <form class="form-api-subscription add-padding-4x">
         <div class="form-group" id="applications-list">
-            <label for="application-list">Applications</label>
+            <label for="application-list">{{i18n "Applications"}}</label>
             <select id="application-list" class="form-control" onchange="applicationSelectionChange()">
-                <option value="-">Select Application...</option>
-                <option value="createNewApp">New Application...</option>
+                <option value="-">{{ i18n "Select Application..."}}</option>
+                <option value="createNewApp">{{i18n "New Application..."}}</option>
                 {{#if @params.applications}}
-                    <optgroup label="My Applications">
+                    <optgroup label="{{i18n "My Applications"}}">
                         {{#each @params.applications}}
                             {{#if isDefault}}
                                 <option selected value="{{applicationId}}" data-applicationId>{{name}}</option>
