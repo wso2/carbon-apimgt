@@ -18,9 +18,9 @@ import java.io.InputStream;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-31T16:40:30.481+05:30")
-public abstract class RegisterApiService {
-    public abstract Response registerPost(RegistrationDTO body
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-06T17:56:22.612+05:30")
+public abstract class GatewaysApiService {
+    public abstract Response gatewaysRegisterPost(RegistrationDTO body
  ,String contentType
  ) throws NotFoundException;
 }

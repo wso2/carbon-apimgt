@@ -153,7 +153,7 @@ paths:
 #  Register a Gateway
 #-----------------------------------------------------
 
-  /register:
+  /gateways/register:
     post:
       summary: Register a Gateway
       description: |

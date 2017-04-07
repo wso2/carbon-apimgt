@@ -7,17 +7,15 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.Label;
-import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.core.GatewaysApiService;
+import org.wso2.carbon.apimgt.rest.api.core.NotFoundException;
 
 import java.util.HashMap;
 import java.util.List;
 
-import org.wso2.carbon.apimgt.rest.api.core.NotFoundException;
-
 import java.io.InputStream;
 
-import org.wso2.carbon.apimgt.rest.api.core.RegisterApiService;
 import org.wso2.carbon.apimgt.rest.api.core.dto.LabelInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.RegistrationDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.RegistrationSummaryDTO;
@@ -28,9 +26,9 @@ import org.wso2.msf4j.formparam.FileInfo;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-public class RegisterApiServiceImpl extends RegisterApiService {
+public class GatewaysApiServiceImpl extends GatewaysApiService {
 
-    private static final Logger log = LoggerFactory.getLogger(RegisterApiServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(GatewaysApiServiceImpl.class);
 
     /**
      * Register gateway
@@ -41,7 +39,7 @@ public class RegisterApiServiceImpl extends RegisterApiService {
      * @throws NotFoundException If failed to register gateway
      */
     @Override
-    public Response registerPost(RegistrationDTO body, String contentType) throws NotFoundException {
+    public Response gatewaysRegisterPost(RegistrationDTO body, String contentType) throws NotFoundException {
 
         try {
             LabelInfoDTO labelInfoDTO = body.getLabelInfo();
@@ -59,7 +57,7 @@ public class RegisterApiServiceImpl extends RegisterApiService {
                 APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
                         ExceptionCodes.LABEL_INFORMATION_CANNOT_BE_NULL);
                 HashMap<String, String> paramList = new HashMap<String, String>();
-                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
                 log.error(errorMessage, e);
                 return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
             }
@@ -67,10 +65,9 @@ public class RegisterApiServiceImpl extends RegisterApiService {
         } catch (APIManagementException e) {
             String errorMessage = "Error while registering the gateway";
             HashMap<String, String> paramList = new HashMap<String, String>();
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-
     }
 }

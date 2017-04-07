@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.Label;
+import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.LabelsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
@@ -44,8 +45,7 @@ public class LabelsApiServiceImpl extends LabelsApiService {
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while retrieving Labels";
             HashMap<String, String> paramList = new HashMap<String, String>();
-            org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler
-                    (), paramList);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
