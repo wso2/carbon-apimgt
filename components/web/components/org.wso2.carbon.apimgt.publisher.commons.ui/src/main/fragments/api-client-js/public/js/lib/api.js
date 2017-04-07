@@ -656,7 +656,7 @@ class API {
 
     addDocument(api_id,body) {
 
-            var promised_addEndpoint = this.client.then(
+            var promised_addDocument = this.client.then(
                 (client) => {
                     let payload = {apiId: api_id, body:body,"Content-Type": "application/json"};
                     return client["Document (Collection)"].post_apis_apiId_documents(
@@ -664,21 +664,33 @@ class API {
                 }
             ).catch(AuthClient.unauthorizedErrorHandler);
 
-            return promised_addEndpoint;
+            return promised_addDocument;
         }
 
-    addFileToDocument(api_id,docId,file) {
-
-            var promised_addEndpoint = this.client.then(
+    addFileToDocument(api_id,docId,fileToDocument) {
+            var promised_addFileToDocument = this.client.then(
                 (client) => {
-                    let payload = {apiId: api_id, documentId: docId, file:file, "Content-Type": "application/json"};
+                    let payload = {apiId: api_id, documentId: docId, file:fileToDocument, "Content-Type": "application/json"};
                     return client["Document (Individual)"].post_apis_apiId_documents_documentId_content(
                         payload, this._requestMetaData({"Content-Type": "multipart/form-data"}));
                 }
             ).catch(AuthClient.unauthorizedErrorHandler);
 
-            return promised_addEndpoint;
+            return promised_addFileToDocument;
      }
+
+    getFileForDocument(api_id,docId){
+            var promised_getDocContent = this.client.then(
+                (client) => {
+                    let payload = {apiId: api_id, documentId: docId, "Accept":"application/octet-stream"};
+                    return client["Document (Individual)"].get_apis_apiId_documents_documentId_content(
+                        payload, this._requestMetaData({"Content-Type": "multipart/form-data"}));
+                }
+            ).catch(AuthClient.unauthorizedErrorHandler);
+
+            return promised_getDocContent;
+
+    }
 
 
     getDocuments(api_id, callback) {
@@ -696,35 +708,35 @@ class API {
     }
 
     updateDocument(api_id, docId, body) {
-            var promised_addEndpoint = this.client.then(
+            var promised_updateDocument = this.client.then(
                 (client) => {
                    let payload = {apiId: api_id, body:body, documentId:$('#docId').val(),"Content-Type": "application/json"};
                        return client["Document (Individual)"].put_apis_apiId_documents_documentId(
                             payload, this._requestMetaData());
                    }
                 ).catch(AuthClient.unauthorizedErrorHandler);
-                return promised_addEndpoint;
+                return promised_updateDocument;
             }
 
     getDocument(api_id, docId, callback) {
-            var promise_get_all = this.client.then(
+            var promise_get = this.client.then(
                 (client) => {
                     return client["Document (Individual)"].get_apis_apiId_documents_documentId({apiId: api_id, documentId: docId},
                     this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
                 }
             );
-            return promise_get_all;
+            return promise_get;
     }
 
 
     deleteDocument(api_id,document_id) {
-            var promise_get_all = this.client.then(
+            var promise_deleteDocument = this.client.then(
                 (client) => {
                     return client["Document (Individual)"].delete_apis_apiId_documents_documentId({apiId: api_id, documentId:document_id},
                     this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
                 }
             );
-            return promise_get_all;
+            return promise_deleteDocument;
     }
     /**
      * Get the available labels.
