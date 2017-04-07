@@ -1,24 +1,30 @@
 package org.wso2.carbon.apimgt.rest.api.publisher;
 
 import io.swagger.annotations.ApiParam;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.EnvironmentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.factories.EnvironmentsApiServiceFactory;
 import org.wso2.msf4j.Microservice;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
+import org.wso2.msf4j.Request;
 
 @Component(
     name = "org.wso2.carbon.apimgt.rest.api.publisher.EnvironmentsApi",
     service = Microservice.class,
     immediate = true
 )
-@Path("/api/am/publisher/v1/environments")
+@Path("/api/am/publisher/v1.[\\d]+/environments")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the environments API")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-19T18:14:01.803+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-06T17:02:03.158+05:30")
 public class EnvironmentsApi implements Microservice  {
    private final EnvironmentsApiService delegate = EnvironmentsApiServiceFactory.getEnvironmentsApi();
 
@@ -37,9 +43,8 @@ public class EnvironmentsApi implements Microservice  {
 ,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
-,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
-)
+, @Context Request request)
     throws NotFoundException {
-        return delegate.environmentsGet(apiId,accept,ifNoneMatch,ifModifiedSince,minorVersion);
+        return delegate.environmentsGet(apiId,accept,ifNoneMatch,ifModifiedSince, request);
     }
 }

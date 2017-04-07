@@ -42,6 +42,7 @@ import javax.ws.rs.core.Response;
 public class KeymanagerService implements Microservice {
 
     private static final Logger log = LoggerFactory.getLogger(KeymanagerService.class);
+    private static final String DEFAULT_TOKEN_VALIDITY = "3600";
 
     private static Map<String, OAuthApplication> applications = new HashMap<>();
     private static Map<String, OAuthApplication> appsByClientId = new HashMap<>();
@@ -96,7 +97,12 @@ public class KeymanagerService implements Microservice {
         decoded = KeyManagerUtil.extractCredentialsFromAuthzHeader(authzHeader);
         String clientId = decoded[0];
         String clientSecret = decoded[1];
-        Long validPeriod = Long.parseLong(validityPeriod);
+        Long validPeriod;
+        if (validityPeriod == null) {
+            validPeriod = Long.parseLong(DEFAULT_TOKEN_VALIDITY);
+        } else {
+            validPeriod = Long.parseLong(validityPeriod);
+        }
 
         if (!appsByClientId.containsKey(clientId) ||
                 !appsByClientId.get(clientId).getClientSecret().equals(clientSecret)) {

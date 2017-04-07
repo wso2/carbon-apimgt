@@ -17,11 +17,11 @@ import org.wso2.carbon.apimgt.rest.api.publisher.ExportApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.FileBasedApiImportExportManager;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
+import org.wso2.msf4j.Request;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
         "2017-01-13T09:50:10.416+05:30")
-public class ExportApiServiceImpl
-        extends ExportApiService {
+public class ExportApiServiceImpl extends ExportApiService {
 
     private static final Logger log = LoggerFactory.getLogger(ExportApiServiceImpl.class);
 
@@ -32,11 +32,13 @@ public class ExportApiServiceImpl
      * @param query       Search query
      * @param limit       maximum APIs to export
      * @param offset      Starting position of the search
+     * @param request     ms4j request object
      * @return Zip file containing the exported APIs
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response exportApisGet(String query, String contentType, Integer limit, Integer offset) throws
+    public Response exportApisGet(String query, String contentType, Integer limit, Integer offset, Request request)
+            throws
             NotFoundException {
 
         APIPublisher publisher = null;

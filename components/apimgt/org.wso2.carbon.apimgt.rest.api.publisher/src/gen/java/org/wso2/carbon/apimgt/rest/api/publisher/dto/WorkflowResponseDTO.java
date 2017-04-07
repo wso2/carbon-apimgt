@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * WorkflowResponseDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-02T13:40:47.496+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-06T17:02:03.158+05:30")
 public class WorkflowResponseDTO   {
   /**
    * This attribute declares whether this workflow task is approved or rejected. 
