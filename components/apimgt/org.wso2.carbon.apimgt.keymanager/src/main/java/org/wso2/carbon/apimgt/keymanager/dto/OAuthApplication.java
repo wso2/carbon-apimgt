@@ -49,6 +49,10 @@ public class OAuthApplication implements Serializable {
 
     @SerializedName("refresh_token")
     private String refresh_token;
+    
+    @SerializedName("app_owner")
+    private String app_owner;
+
 
     private static final long serialVersionUID = 1;
 
@@ -97,6 +101,14 @@ public class OAuthApplication implements Serializable {
     }
 
 
+    public String getAppOwner() {
+        return app_owner;
+    }
+
+    public void setAppOwner(String app_owner) {
+        this.app_owner = app_owner;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -107,6 +119,7 @@ public class OAuthApplication implements Serializable {
         sb.append("    client_secret: ").append(toIndentedString(client_secret)).append("\n");
         sb.append("    redirect_uris: ").append(toIndentedString(redirect_uris)).append("\n");
         sb.append("    grant_types: ").append(toIndentedString(grant_types)).append("\n");
+        sb.append("    app_owner: ").append(toIndentedString(app_owner)).append("\n");
         sb.append("}");
         return sb.toString();
     }

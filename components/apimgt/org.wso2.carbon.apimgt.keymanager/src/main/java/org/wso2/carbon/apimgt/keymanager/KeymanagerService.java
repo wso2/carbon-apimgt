@@ -118,6 +118,13 @@ public class KeymanagerService implements Microservice {
             } else {
                 return Response.status(Response.Status.UNAUTHORIZED).build();
             }
+        } else if ("client_credentials".equals(grantType)) {
+            OAuthApplication app = appsByClientId.get(clientId);
+            if (KeyManagerUtil.getAccessTokenForClientCredentials(oAuthTokenResponse, app.getAppOwner(), validPeriod)) {
+                return Response.status(Response.Status.OK).entity(oAuthTokenResponse).build();
+            } else {
+                return Response.status(Response.Status.UNAUTHORIZED).build();
+            }
         } else if ("refresh_token".equals(grantType)) {
             if (KeyManagerUtil.getRefreshedAccessToken(oAuthTokenResponse, refreshToken, validPeriod)) {
                 return Response.status(Response.Status.OK).entity(oAuthTokenResponse).build();
@@ -185,6 +192,7 @@ public class KeymanagerService implements Microservice {
 
         body.setClientId(clientId);
         body.setClientSecret(clientSecret);
+        body.setAppOwner(userName);
         applications.put(body.getClientName(), body);
         appsByClientId.put(clientId, body);
 
