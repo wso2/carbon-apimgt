@@ -195,11 +195,11 @@ public class DAOFactory {
             } else if (driverName.contains(DB2)) {
 
             } else if (driverName.contains(MS_SQL) || driverName.contains(MICROSOFT)) {
-
+                tagDAO = new TagDAOImpl();
             } else if (driverName.contains(POSTGRE)) {
-
+                tagDAO = new TagDAOImpl();
             } else if (driverName.contains(ORACLE)) {
-
+                tagDAO = new TagDAOImpl();
             } else {
                 throw new APIMgtDAOException("Unhandled DB Type detected");
             }

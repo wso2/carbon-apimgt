@@ -71,6 +71,14 @@ public class TestUtil {
         return api;
     }
 
+    public static API addAlternativeAPI() throws APIManagementException {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        apiDAO.addEndpoint(SampleTestObjectCreator.createAlternativeEndpoint());
+        API api = SampleTestObjectCreator.createAlternativeAPI().build();
+        apiDAO.addAPI(api);
+        return api;
+    }
+
     public static API addCustomAPI(String name, String version, String context) throws APIManagementException {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API api = SampleTestObjectCreator.createCustomAPI(name, version, context).build();
