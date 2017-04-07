@@ -19,7 +19,10 @@
 package org.wso2.carbon.apimgt.core.dao.impl;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 
 import java.io.File;
@@ -30,6 +33,7 @@ import java.sql.SQLException;
 public class DAOIntegrationTestBase {
     protected DataSource dataSource;
     String database;
+    private static final Logger log = LoggerFactory.getLogger(DAOIntegrationTestBase.class);
 
     public DAOIntegrationTestBase() {
         database = System.getenv("DATABASE_TYPE");
@@ -38,39 +42,71 @@ public class DAOIntegrationTestBase {
         }
     }
 
+    @BeforeClass
+    public void init() throws Exception {
+        // This used to check connection healthy
+        if ("h2".equals(database)) {
+            dataSource = new H2DataSource();
+        } else if ("mysql".contains(database)) {
+            dataSource = new MySQLDataSource();
+        } else if ("postgres".contains(database)) {
+            dataSource = new PostgreDataSource();
+        } else if ("mssql".contains(database)) {
+            dataSource = new MSSQLDataSource();
+        } else if ("oracle".contains(database)) {
+            dataSource = new OracleDataSource();
+        }
+        int maxRetries = 5;
+        long maxWait = 5000;
+        while (maxRetries > 0) {
+            try {
+                dataSource.getConnection();
+                log.warn("Database Connection Successful");
+                break;
+            } catch (Exception e) {
+                if (maxRetries > 0) {
+                    log.warn("Couldn't connect into database retrying after next 5 seconds");
+                    maxRetries--;
+                    try {
+                        Thread.sleep(maxWait);
+                    } catch (InterruptedException e1) {
+                    }
+                } else {
+                    log.error("Max tries 5 exceed to connect");
+                    throw e;
+                }
+            }
+        }
+    }
+
     @BeforeMethod
     public void setUp() throws Exception {
         String sqlFilePath = null;
         if ("h2".equals(database)) {
-            dataSource = new H2DataSource();
             ((H2DataSource) dataSource).resetDB();
             sqlFilePath = ".." + File.separator + ".." + File.separator + ".." + File.separator
                     + "features" + File.separator + "apimgt" + File.separator
                     + "org.wso2.carbon.apimgt.core.feature" + File.separator + "resources"
                     + File.separator + "dbscripts" + File.separator + "h2.sql";
         } else if ("mysql".contains(database)) {
-            dataSource = new MySQLDataSource();
             ((MySQLDataSource) dataSource).resetDB();
             sqlFilePath = ".." + File.separator + ".." + File.separator + ".." + File.separator
                     + "features" + File.separator + "apimgt" + File.separator
                     + "org.wso2.carbon.apimgt.core.feature" + File.separator + "resources"
                     + File.separator + "dbscripts" + File.separator + "mysql.sql";
         } else if ("postgres".contains(database)) {
-            dataSource = new PostgreDataSource();
             ((PostgreDataSource) dataSource).resetDB();
             sqlFilePath = ".." + File.separator + ".." + File.separator + ".." + File.separator
                     + "features" + File.separator + "apimgt" + File.separator
                     + "org.wso2.carbon.apimgt.core.feature" + File.separator + "resources"
                     + File.separator + "dbscripts" + File.separator + "postgres.sql";
         } else if ("mssql".contains(database)) {
-            dataSource = new MSSQLDataSource();
             ((MSSQLDataSource) dataSource).resetDB();
             sqlFilePath = ".." + File.separator + ".." + File.separator + ".." + File.separator
                     + "features" + File.separator + "apimgt" + File.separator
                     + "org.wso2.carbon.apimgt.core.feature" + File.separator + "resources"
                     + File.separator + "dbscripts" + File.separator + "mssql.sql";
         } else if ("oracle".contains(database)) {
-            dataSource = new OracleDataSource();
             ((OracleDataSource) dataSource).resetDB();
             sqlFilePath = ".." + File.separator + ".." + File.separator + ".." + File.separator
                     + "features" + File.separator + "apimgt" + File.separator
