@@ -800,6 +800,7 @@
                                 <DATABASE_TYPE>oracle</DATABASE_TYPE>
                                 <PORT>${apim-oracle.port}</PORT>
                             </environmentVariables>
+                            <argLine>-Duser.timezone=GMT</argLine>
                         </configuration>
                     </plugin>
                 </plugins>
