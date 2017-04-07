@@ -103,8 +103,10 @@ public class KeyManagerUtil {
 
     /**
      * Generate access token for client_credentials.
-     *
-     *
+     * @param oAuthTokenResponse OAuthTokenResponse data
+     * @param username app user
+     * @param validityPeriod token validity period
+     * @return
      */
     public static boolean getAccessTokenForClientCredentials(OAuthTokenResponse oAuthTokenResponse, String username,
             Long validityPeriod) {
