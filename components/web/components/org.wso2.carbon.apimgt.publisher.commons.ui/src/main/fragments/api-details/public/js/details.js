@@ -740,6 +740,16 @@ function createDocHandler(event) {
               var name = dt_data.name;
               var sourceType = dt_data.sourceType;
               var docId = dt_data.documentId;
+
+              if(sourceType == "FILE"){
+                var file_input = $('#doc-file');
+                var file = file_input[0].files[0];
+                var promised_add_file = api_client.addFileToDocument(api_id,docId,file);
+                promised_add_file.catch(function(error) {}).then(function(done){
+                 var addedFile = done;
+                });
+              }
+
               var data_table = $('#doc-table').DataTable();
               data_table.row.add({documentId,name,sourceType, _renderActionButtons}).draw();
             });
@@ -800,6 +810,14 @@ function createDocHandler(event) {
                    if (!response) {
                   return;
                  }
+
+             let promised_get_content = api_client.getFileForDocument(api_id,documentId);
+                promised_get_content.catch(function(error) {
+                var error_data = JSON.parse(error.data);
+             }).then(function(done) {
+
+             })
+
              loadDocumentDataToForm(response);
              }
          );
