@@ -121,6 +121,11 @@ public class GatewaySourceGeneratorImpl implements GatewaySourceGenerator {
     }
 
     @Override
+    public void setAPI(API api) {
+        this.api = api;
+    }
+
+    @Override
     public String getEndpointConfigStringFromTemplate(List<Endpoint> endpoints) throws APITemplateException {
         StringWriter writer = new StringWriter();
         String templatePath = "resources" + File.separator + "template" + File.separator + "endpoint.xml";
@@ -143,5 +148,9 @@ public class GatewaySourceGeneratorImpl implements GatewaySourceGenerator {
             throw new APITemplateException("Syntax error in " + templatePath, ExceptionCodes.TEMPLATE_EXCEPTION);
         }
         return writer.toString();
+    }
+
+    public void setApi(API api) {
+        this.api = api;
     }
 }

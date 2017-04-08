@@ -17,44 +17,45 @@ package org.wso2.carbon.apimgt.core;
  * under the License.
  */
 
-import org.wso2.carbon.kernel.annotations.Configuration;
-import org.wso2.carbon.kernel.annotations.Element;
+//import org.wso2.carbon.kernel.annotations.Configuration;
+//import org.wso2.carbon.kernel.annotations.Element;
 
 import java.io.File;
 
 /**
  * Class to hold APIM configuration parameters and generate yaml file
+ * TODO refactor class when kernal is updated to 5.2.0
  */
-@Configuration(namespace = "wso2.carbon.apim", description = "APIM Configuration Parameters")
+//@Configuration(namespace = "wso2.carbon.apim", description = "APIM Configuration Parameters")
 public class APIMConfigurations {
     private String carbonClientId = "carbon";
-        @Element(description = "server version")
+    //    @Element(description = "server version")
     private String carbonVirtualHostName = "carbon";
-        @Element(description = "topic server host")
+    //    @Element(description = "topic server host")
     private String topicServerHost = "localhost";
-        @Element(description = "topic server port")
+    //    @Element(description = "topic server port")
     private String topicServerPort = "5672";
-        @Element(description = "topic name")
+    //    @Element(description = "topic name")
     private String topicName = "MYTopic";
-        @Element(description = "username for topic")
+    //    @Element(description = "username for topic")
     private String username = "admin";
-        @Element(description = "password for topic")
+    //    @Element(description = "password for topic")
     private String password = "admin";
-        @Element(description = "password for topic")
+    //    @Element(description = "password for topic")
     private boolean reverseProxyEnabled = false;
-        @Element(description = "hostname")
+    //    @Element(description = "hostname")
     private String hostname = "localhost";
-        @Element(description = "context for publisher")
-    private String publisherContext = "/api/am/publisher/v1";
-        @Element(description = "context for store")
+    //    @Element(description = "context for publisher")
+    private String publisherContext = "/api/am/publisher/v1.0";
+    //    @Element(description = "context for store")
     private String storeContext = "/api/am/store/v1";
-        @Element(description = "context for admin")
+    //    @Element(description = "context for admin")
     private String adminContext = "/api/am/admin/v1";
 
-        @Element(description = "package name for gateway configs")
+    //    @Element(description = "package name for gateway configs")
     private String gatewayPackageName = "deployment.org.wso2.apim";
 
-        @Element(description = "package name path for gateway configs")
+    //    @Element(description = "package name path for gateway configs")
     private String gatewayPackageNamePath =
             "deployment" + File.separator + "org" + File.separator + "wso2" + File.separator + "apim";
 

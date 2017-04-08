@@ -101,6 +101,28 @@ public class KeyManagerUtil {
         return false;
     }
 
+    /**
+     * Generate access token for client_credentials.
+     * @param oAuthTokenResponse OAuthTokenResponse data
+     * @param username app user
+     * @param validityPeriod token validity period
+     * @return
+     */
+    public static boolean getAccessTokenForClientCredentials(OAuthTokenResponse oAuthTokenResponse, String username,
+            Long validityPeriod) {
+        if (userMap.containsKey(username)) {
+            oAuthTokenResponse.setExpiresTimestamp(getExpiresTime(validityPeriod));
+            oAuthTokenResponse.setExpiresIn(validityPeriod);
+            oAuthTokenResponse.setToken(UUID.randomUUID().toString());
+            oAuthTokenResponse.setRefreshToken(UUID.randomUUID().toString());
+            oAuthTokenResponse.setScopes(userScopesMap.get(username));
+            tokenMap.put(oAuthTokenResponse.getToken(), oAuthTokenResponse);
+            refreshTokenMap.put(oAuthTokenResponse.getRefreshToken(), oAuthTokenResponse);
+            return true;
+        }
+        return false;
+    }
+
     public static boolean getRefreshedAccessToken (OAuthTokenResponse oAuthTokenResponse, String refreshToken, long
             validityPeriod) {
         if (refreshTokenMap.containsKey(refreshToken)) {
