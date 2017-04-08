@@ -17,6 +17,7 @@ package org.wso2.carbon.apimgt.core.internal;
  * under the License.
  */
 
+import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -27,6 +28,10 @@ import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 /**
  * Class used to activate configuration loading
  */
+@Component (
+        name = "org.wso2.carbon.apimgt.core",
+        immediate = true
+)
 public class ConfigurationActivator {
     private static final Logger log = LoggerFactory.getLogger(ServiceReferenceHolder.class);
     /**
