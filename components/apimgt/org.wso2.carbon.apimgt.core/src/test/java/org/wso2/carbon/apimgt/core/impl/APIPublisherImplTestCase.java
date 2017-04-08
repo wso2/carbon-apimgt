@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
+import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Application;
@@ -106,6 +107,8 @@ public class APIPublisherImplTestCase {
                 return null;
             }
         });
+        ConfigProvider configProvider = Mockito.mock(ConfigProvider.class);
+        ServiceReferenceHolder.getInstance().setConfigProvider(configProvider);
     }
 
     @Test(description = "Test add api with production endpoint")
