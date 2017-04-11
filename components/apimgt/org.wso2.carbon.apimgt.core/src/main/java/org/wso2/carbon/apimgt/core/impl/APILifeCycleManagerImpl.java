@@ -30,16 +30,10 @@ import org.wso2.carbon.lcm.sql.beans.LifecycleHistoryBean;
 import java.util.List;
 
 class APILifeCycleManagerImpl implements APILifecycleManager {
+
     /**
-     * This method need to call for each and event life cycle state changes.
-     *
-     * @param targetState {@code String} Required target state.
-     * @param uuid        {@code String} Lifecycle id that maps with the asset.
-     * @param user        The user who invoked the action. This will be used for auditing
-     *                    purposes.
-     * @param resource    {@code Object} The current object to which lifecycle is attached to.
-     * @return {@code LifecycleState} object of updated life cycle state.
-     * @throws LifecycleException If exception occurred while execute life cycle state change.
+     * @see APILifecycleManager#executeLifecycleEvent(String currentState, String targetState, String uuid, String user,
+            Object resource)
      */
     @Override
     public LifecycleState executeLifecycleEvent(String currentState, String targetState, String uuid, String user,
@@ -48,13 +42,8 @@ class APILifeCycleManagerImpl implements APILifecycleManager {
     }
 
     /**
-     * This method need to call for each check list item operation.
-     *
-     * @param uuid              Object that can use to uniquely identify resource.
-     * @param currentState      The state which the checklist item is associated with.
-     * @param checkListItemName Name of the check list item as specified in the lc config.
-     * @param value             Value of the check list item. Either selected or not.
-     * @throws LifecycleException If exception occurred while execute life cycle update.
+     * @see APILifecycleManager#checkListItemEvent(String uuid, String currentState, String checkListItemName, boolean
+            value)
      */
     @Override
     public LifecycleState checkListItemEvent(String uuid, String currentState, String checkListItemName, boolean
@@ -63,12 +52,7 @@ class APILifeCycleManagerImpl implements APILifecycleManager {
     }
 
     /**
-     * This method is used to associate a lifecycle with an asset.
-     *
-     * @param lcName LC name which associates with the resource.
-     * @param user   The user who invoked the action. This will be used for auditing purposes.
-     * @return Object of added life cycle state.
-     * @throws LifecycleException If failed to associate life cycle with asset.
+     * @see APILifecycleManager#addLifecycle(String lcName, String user)
      */
     @Override
     public LifecycleState addLifecycle(String lcName, String user) throws LifecycleException {
@@ -76,10 +60,7 @@ class APILifeCycleManagerImpl implements APILifecycleManager {
     }
 
     /**
-     * This method is used to detach a lifecycle from an asset.
-     *
-     * @param uuid Lifecycle id that maps with the asset.
-     * @throws LifecycleException If failed to associate life cycle with asset.
+     * @see APILifecycleManager#removeLifecycle(String uuid)
      */
     @Override
     public void removeLifecycle(String uuid) throws LifecycleException {
@@ -87,10 +68,7 @@ class APILifeCycleManagerImpl implements APILifecycleManager {
     }
 
     /**
-     * Get current life cycle state object.
-     *
-     * @param uuid
-     * @return {@code LifecycleState} object represent current life cycle.
+     * @see APILifecycleManager#getCurrentLifecycleState(String uuid)
      */
     @Override
     public LifecycleState getCurrentLifecycleState(String uuid) throws LifecycleException {
@@ -98,12 +76,7 @@ class APILifeCycleManagerImpl implements APILifecycleManager {
     }
 
     /**
-     * Get  life cycle state meta data when state is provided.
-     * @param uuid                      Lifecycle id that maps with the asset.
-     * @param lcState                   State which meta data is required
-     *
-     * @return                          {@code LifecycleState} object represent current life cycle.
-     * @throws LifecycleException       If failed to get life cycle state data.
+     * @see APILifecycleManager#getLifecycleDataForState(String uuid, String lcState)
      */
     @Override
     public LifecycleState getLifecycleDataForState(String uuid, String lcState) throws LifecycleException {
@@ -111,11 +84,7 @@ class APILifeCycleManagerImpl implements APILifecycleManager {
     }
 
     /**
-     * Get Current Lifecycle History for uuid
-     *
-     * @param uuid uuid of lifecycle instance
-     * @return
-     * @throws LifecycleException
+     * @see APILifecycleManager#getLifecycleHistory(String uuid)
      */
     @Override
     public List<LifecycleHistoryBean> getLifecycleHistory(String uuid) throws LifecycleException {
