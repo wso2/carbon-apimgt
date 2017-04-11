@@ -574,10 +574,11 @@ public class APIPublisherImplTestCase {
                 workflowDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
+        String lcState = api.getLifeCycleStatus();
         String lifecycleId = api.getLifecycleInstanceId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
         LifecycleState lifecycleState = SampleTestObjectCreator.getMockLifecycleStateObject(lifecycleId);
-        Mockito.when(apiLifecycleManager.getCurrentLifecycleState(lifecycleId)).thenReturn(lifecycleState);
+        Mockito.when(apiLifecycleManager.getLifecycleDataForState(lifecycleId, lcState)).thenReturn(lifecycleState);
         Mockito.when(apiLifecycleManager
                 .executeLifecycleEvent(APIStatus.CREATED.getStatus(), APIStatus.PUBLISHED.getStatus(), lifecycleId,
                         user, api)).thenReturn(lifecycleState);
@@ -639,13 +640,14 @@ public class APIPublisherImplTestCase {
         API previousApi = SampleTestObjectCreator.createDefaultAPI().build();
         String previousApiUUID = previousApi.getId();
         String lifecycleIdPrevious = previousApi.getLifecycleInstanceId();
+        String lcStatePrevious = previousApi.getLifeCycleStatus();
         LifecycleState previousLifecycleState = SampleTestObjectCreator
                 .getMockLifecycleStateObject(lifecycleIdPrevious);
         List<AvailableTransitionBean> list = new ArrayList<>();
         AvailableTransitionBean bean = new AvailableTransitionBean("Deprecate", APIStatus.DEPRECATED.getStatus());
         list.add(bean);
         previousLifecycleState.setAvailableTransitionBeanList(list);
-        Mockito.when(apiLifecycleManager.getCurrentLifecycleState(lifecycleIdPrevious))
+        Mockito.when(apiLifecycleManager.getLifecycleDataForState(lifecycleIdPrevious, lcStatePrevious))
                 .thenReturn(previousLifecycleState);
         Mockito.when(apiLifecycleManager
                 .executeLifecycleEvent(APIStatus.PUBLISHED.getStatus(), APIStatus.DEPRECATED.getStatus(),
@@ -654,11 +656,12 @@ public class APIPublisherImplTestCase {
 
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
+        String lcState = api.getLifeCycleStatus();
         api.setCopiedFromApiId(previousApiUUID);
         String lifecycleId = api.getLifecycleInstanceId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
         LifecycleState lifecycleState = SampleTestObjectCreator.getMockLifecycleStateObject(lifecycleId);
-        Mockito.when(apiLifecycleManager.getCurrentLifecycleState(lifecycleId)).thenReturn(lifecycleState);
+        Mockito.when(apiLifecycleManager.getLifecycleDataForState(lifecycleId, lcState)).thenReturn(lifecycleState);
         Mockito.when(apiLifecycleManager
                 .executeLifecycleEvent(APIStatus.CREATED.getStatus(), APIStatus.PUBLISHED.getStatus(), lifecycleId,
                         user, api)).thenReturn(lifecycleState);
@@ -696,10 +699,11 @@ public class APIPublisherImplTestCase {
                 apiLifecycleManager, gatewaySourceGenerator, workflowDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
+        String lcState = api.getLifeCycleStatus();
         String lifecycleId = api.getLifecycleInstanceId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
         LifecycleState lifecycleState = SampleTestObjectCreator.getMockLifecycleStateObject(lifecycleId);
-        Mockito.when(apiLifecycleManager.getCurrentLifecycleState(lifecycleId)).thenReturn(lifecycleState);
+        Mockito.when(apiLifecycleManager.getLifecycleDataForState(lifecycleId, lcState)).thenReturn(lifecycleState);
         Mockito.when(apiLifecycleManager
                 .executeLifecycleEvent(APIStatus.CREATED.getStatus(), APIStatus.PUBLISHED.getStatus(), lifecycleId,
                         user, api)).thenReturn(lifecycleState);
@@ -1002,9 +1006,10 @@ public class APIPublisherImplTestCase {
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiLifecycleManager, apiDAO, workflowDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
+        String lcState = api.getLifeCycleStatus();
         String lifecycleId = api.getLifecycleInstanceId();
         LifecycleState lifecycleState = SampleTestObjectCreator.getMockLifecycleStateObject(lifecycleId);
-        Mockito.when(apiLifecycleManager.getCurrentLifecycleState(lifecycleId)).thenReturn(lifecycleState);
+        Mockito.when(apiLifecycleManager.getLifecycleDataForState(lifecycleId, lcState)).thenReturn(lifecycleState);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
         API.APIBuilder apiBuilder = new API.APIBuilder(api);
         apiBuilder.lifecycleState(lifecycleState);
@@ -1087,10 +1092,11 @@ public class APIPublisherImplTestCase {
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
         String lifecycleId = api.getLifecycleInstanceId();
+        String lcState = api.getLifeCycleStatus();
         LifecycleState bean = new LifecycleState();
         bean.setState(APIStatus.CREATED.getStatus());
         Mockito.when(apiDAO.getAPISummary(uuid)).thenReturn(api);
-        Mockito.doReturn(bean).when(apiLifecycleManager).getCurrentLifecycleState(lifecycleId);
+        Mockito.doReturn(bean).when(apiLifecycleManager).getLifecycleDataForState(lifecycleId, lcState);
         apiPublisher.getAPILifeCycleData(uuid);
     }
 
@@ -1123,10 +1129,11 @@ public class APIPublisherImplTestCase {
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
+        String lcState = api.getLifeCycleStatus();
         String lifecycleId = api.getLifecycleInstanceId();
         Mockito.when(apiDAO.getAPISummary(uuid)).thenReturn(api);
         Mockito.doThrow(new LifecycleException("Couldn't retrieve API Lifecycle for " + uuid)).when(apiLifecycleManager)
-                .getCurrentLifecycleState(lifecycleId);
+                .getLifecycleDataForState(lifecycleId, lcState);
         apiPublisher.getAPILifeCycleData(uuid);
     }
 

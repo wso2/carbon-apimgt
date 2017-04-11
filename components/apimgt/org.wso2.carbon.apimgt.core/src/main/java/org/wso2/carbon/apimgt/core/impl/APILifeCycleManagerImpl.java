@@ -98,6 +98,19 @@ class APILifeCycleManagerImpl implements APILifecycleManager {
     }
 
     /**
+     * Get  life cycle state meta data when state is provided.
+     * @param uuid                      Lifecycle id that maps with the asset.
+     * @param lcState                   State which meta data is required
+     *
+     * @return                          {@code LifecycleState} object represent current life cycle.
+     * @throws LifecycleException       If failed to get life cycle state data.
+     */
+    @Override
+    public LifecycleState getLifecycleDataForState(String uuid, String lcState) throws LifecycleException {
+        return LifecycleOperationManager.getLifecycleDataForState(uuid, lcState);
+    }
+
+    /**
      * Get Current Lifecycle History for uuid
      *
      * @param uuid uuid of lifecycle instance
