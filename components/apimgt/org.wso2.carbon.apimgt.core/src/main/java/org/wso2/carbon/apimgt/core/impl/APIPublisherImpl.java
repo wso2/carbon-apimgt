@@ -570,8 +570,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 API.APIBuilder apiBuilder = new API.APIBuilder(api);
                 apiBuilder.lastUpdatedTime(LocalDateTime.now());
                 apiBuilder.updatedBy(getUsername());
-                LifecycleState currentState = getApiLifecycleManager().getCurrentLifecycleState(apiBuilder
-                        .getLifecycleInstanceId());
+                LifecycleState currentState = getApiLifecycleManager().getLifecycleDataForState(apiBuilder
+                        .getLifecycleInstanceId(), apiBuilder.getLifeCycleStatus());
                 apiBuilder.lifecycleState(currentState);
                 for (Map.Entry<String, Boolean> checkListItem : checkListItemMap.entrySet()) {
                     getApiLifecycleManager().checkListItemEvent(api.getLifecycleInstanceId
@@ -642,7 +642,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 apiBuilder.lastUpdatedTime(time);
                 apiBuilder.updatedBy(updatedBy);
                 LifecycleState currentState = getApiLifecycleManager()
-                        .getCurrentLifecycleState(apiBuilder.getLifecycleInstanceId());
+                        .getLifecycleDataForState(apiBuilder.getLifecycleInstanceId(), apiBuilder.getLifeCycleStatus());
                 apiBuilder.lifecycleState(currentState);
                 List<CheckItemBean> list = currentState.getCheckItemBeanList();
                 for (Iterator iterator = list.iterator(); iterator.hasNext();) {
@@ -663,7 +663,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         if (oldAPI != null) {
                             API.APIBuilder previousAPI = new API.APIBuilder(oldAPI);
                             previousAPI.setLifecycleStateInfo(getApiLifecycleManager()
-                                    .getCurrentLifecycleState(previousAPI.getLifecycleInstanceId()));
+                                    .getLifecycleDataForState(previousAPI.getLifecycleInstanceId(),
+                                            previousAPI.getLifeCycleStatus())
+                                   );
                             if (APIUtils.validateTargetState(previousAPI.getLifecycleState(),
                                     APIStatus.DEPRECATED.getStatus())) {
                                 getApiLifecycleManager().executeLifecycleEvent(previousAPI.getLifeCycleStatus(),
@@ -721,8 +723,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 API.APIBuilder apiBuilder = new API.APIBuilder(api);
                 apiBuilder.lastUpdatedTime(LocalDateTime.now());
                 apiBuilder.updatedBy(getUsername());
-                apiBuilder.lifecycleState(getApiLifecycleManager().getCurrentLifecycleState(
-                        apiBuilder.getLifecycleInstanceId()));
+                apiBuilder.lifecycleState(getApiLifecycleManager()
+                        .getLifecycleDataForState(apiBuilder.getLifecycleInstanceId(),
+                                apiBuilder.getLifeCycleStatus()));
                 for (Map.Entry<String, Boolean> checkListItem : checkListItemMap.entrySet()) {
                     getApiLifecycleManager().checkListItemEvent(api.getLifecycleInstanceId
                                     (), api.getLifeCycleStatus(),
@@ -1212,7 +1215,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         try {
             API api = getApiDAO().getAPISummary(apiId);
             if (api != null) {
-                return getApiLifecycleManager().getCurrentLifecycleState(api.getLifecycleInstanceId());
+                return getApiLifecycleManager()
+                        .getLifecycleDataForState(api.getLifecycleInstanceId(), api.getLifeCycleStatus());
             } else {
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve API Summary for " + apiId);
             }

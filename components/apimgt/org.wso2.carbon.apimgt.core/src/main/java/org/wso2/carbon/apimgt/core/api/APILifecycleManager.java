@@ -89,6 +89,16 @@ public interface APILifecycleManager {
     LifecycleState getCurrentLifecycleState(String uuid) throws LifecycleException;
 
     /**
+     * Get  life cycle state meta data when state is provided.
+     * @param uuid                      Lifecycle id that maps with the asset.
+     * @param lcState                   State which meta data is required
+     *
+     * @return                          {@code LifecycleState} object represent current life cycle.
+     * @throws LifecycleException       If failed to get life cycle state data.
+     */
+    LifecycleState getLifecycleDataForState(String uuid, String lcState) throws LifecycleException;
+
+    /**
      * Get Current Lifecycle History for uuid
      *
      * @param uuid                  uuid of lifecycle instance

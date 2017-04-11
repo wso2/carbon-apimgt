@@ -1,4 +1,3 @@
-{{log this}}
 <div class="row">
     <div class="col-md-8 col-sm-8 col-md-offset-2 col-sm-offset-2">
         <object type="image/svg+xml" data="{{public "images/API_LIFECYCLE.svg"}}" id="lifecycle-svg">
@@ -38,7 +37,7 @@
                     {{#each @params.lcState.availableTransitionBeanList}}
                     <div class="btn-group" role="group">
                         <input type="button"
-                               class="btn btn-primary lc-state-btn" data-lcstate="{{this.targetState}}" value="{{this.targetState}}">
+                               class="btn btn-primary lc-state-btn" data-lcstate="{{this.targetState}}" value="{{this.event}}">
                     </div>
 
                     {{/each}}
