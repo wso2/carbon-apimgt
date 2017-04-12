@@ -29,9 +29,7 @@ import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtAuthorizationFailedException;
-import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
-import org.wso2.carbon.apimgt.core.exception.DuplicateAPIException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
@@ -41,8 +39,6 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
 import org.wso2.carbon.apimgt.rest.api.common.exception.BadRequestException;
-import org.wso2.carbon.apimgt.rest.api.common.exception.ConflictException;
-import org.wso2.carbon.apimgt.rest.api.common.exception.ForbiddenException;
 import org.wso2.carbon.apimgt.rest.api.common.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.common.exception.NotFoundException;
 import org.wso2.carbon.transport.http.netty.config.ListenerConfiguration;
@@ -111,38 +107,6 @@ public class RestApiUtil {
     }
 
     /**
-     * Logs the error, builds a ForbiddenException with specified details and throws it
-     *
-     * @param resource requested resource
-     * @param id       id of resource
-     * @param log      Log instance
-     * @throws ForbiddenException   If failed to handle authorization
-     */
-    public static void handleAuthorizationFailure(String resource, String id, Logger log) throws ForbiddenException {
-        ForbiddenException forbiddenException = buildForbiddenException(resource, id);
-        log.error(forbiddenException.getMessage());
-        throw forbiddenException;
-    }
-
-    /**
-     * Returns a new ForbiddenException
-     *
-     * @param resource Resource type
-     * @param id       identifier of the resource
-     * @return a new ForbiddenException with the specified details as a response DTO
-     */
-    public static ForbiddenException buildForbiddenException(String resource, String id) {
-        String description;
-        if (!StringUtils.isEmpty(id)) {
-            description = "You don't have permission to access the " + resource + " with Id " + id;
-        } else {
-            description = "You don't have permission to access the " + resource;
-        }
-        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT, 403L, description);
-        return new ForbiddenException(errorDTO);
-    }
-
-    /**
      * Logs the error, builds a NotFoundException with specified details and throws it
      *
      * @param resource requested resource
@@ -200,29 +164,6 @@ public class RestApiUtil {
         return new InternalServerErrorException(errorDTO);
     }
 
-    /**
-     * Returns a new InternalServerErrorException
-     *
-     * @param errorMessage error message
-     * @return InternalServerErrorException object
-     */
-    public static InternalServerErrorException buildInternalServerErrorException(String errorMessage) {
-        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_INTERNAL_SERVER_ERROR_MESSAGE_DEFAULT, 500L,
-                errorMessage);
-        return new InternalServerErrorException(errorDTO);
-    }
-
-    /**
-     * Returns a new NotFoundException
-     *
-     * @param errorMessage error message
-     * @return NotFoundException object
-     */
-    public static NotFoundException buildNotFoundErrorException(String errorMessage) {
-        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_NOT_FOUND_MESSAGE_DEFAULT, 404L,
-                errorMessage);
-        return new NotFoundException(errorDTO);
-    }
 
     /**
      * Logs the error, builds a BadRequestException with specified details and throws it
@@ -248,48 +189,6 @@ public class RestApiUtil {
         return new BadRequestException(errorDTO);
     }
 
-    /**
-     * Logs the error, builds a ConflictException with specified details and throws it
-     *
-     * @param description description of the error
-     * @param t           Throwable instance
-     * @param log         Log instance
-     * @throws ConflictException    If resource already exists.
-     */
-    public static void handleResourceAlreadyExistsError(String description, Throwable t, Logger log)
-            throws ConflictException {
-        ConflictException conflictException = buildConflictException(
-                RestApiConstants.STATUS_CONFLICT_MESSAGE_RESOURCE_ALREADY_EXISTS, description);
-        log.error(description, t);
-        throw conflictException;
-    }
-
-    /**
-     * Returns a new ConflictException
-     *
-     * @param message     summary of the error
-     * @param description description of the exception
-     * @return a new ConflictException with the specified details as a response DTO
-     */
-    public static ConflictException buildConflictException(String message, String description) {
-        ErrorDTO errorDTO = getErrorDTO(message, 409L, description);
-        return new ConflictException(errorDTO);
-    }
-
-    /**
-     * Check if the specified throwable e is happened as the updated/new resource conflicting with an already existing
-     * resource
-     *
-     * @param e throwable to check
-     * @return true if the specified throwable e is happened as the updated/new resource conflicting with an already
-     * existing resource, false otherwise
-     */
-    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-    public static boolean isDueToResourceAlreadyExists(
-            Throwable e) {
-        Throwable rootCause = getPossibleErrorCause(e);
-        return rootCause instanceof APIMgtResourceAlreadyExistsException || rootCause instanceof DuplicateAPIException;
-    }
 
     /**
      * Check if the specified throwable e is happened as the required resource cannot be found
