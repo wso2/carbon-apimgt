@@ -763,7 +763,46 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public Comment getCommentByUUID(String commentId, String apiId) throws APIMgtDAOException {
+        final String query = "SELECT COMMENT_ID, COMMENT_TEXT, USER_IDENTIFIER, API_ID, "
+                + "CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME "
+                + "FROM AM_API_COMMENTS WHERE COMMENT_ID = ? AND API_id = ?";
+
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(query)) {
+            try {
+                statement.setString(1, commentId);
+                statement.setString(2, apiId);
+                statement.execute();
+                try (ResultSet rs = statement.getResultSet()) {
+                    if (rs.next()) {
+                        return constructCommentFromResultSet(rs);
+                    }
+                }
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new APIMgtDAOException(e);
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
         return null;
+    }
+
+    private Comment constructCommentFromResultSet(ResultSet rs) throws APIMgtDAOException {
+        Comment comment = new Comment();
+        try {
+            comment.setUuid(rs.getString("COMMENT_ID"));
+            comment.setCommentText(rs.getString("COMMENT_TEXT"));
+            comment.setCommentedUser(rs.getString("USER_IDENTIFIER"));
+            comment.setApiId(rs.getString("API_ID"));
+            comment.setCreatedUser(rs.getString("CREATED_BY"));
+            comment.setCreatedTime(rs.getTimestamp("CREATED_TIME").toLocalDateTime());
+            comment.setUpdatedUser(rs.getString("UPDATED_BY"));
+            comment.setUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toLocalDateTime());
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+        return comment;
     }
 
     /**
@@ -777,18 +816,18 @@ public class ApiDAOImpl implements ApiDAO {
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(addCommentQuery)) {
             try {
-                connection.setAutoCommit(false);
-
+                statement.setString(1, comment.getUuid());
                 statement.setString(2, comment.getCommentText());
                 statement.setString(3, comment.getCommentedUser());
                 statement.setString(4, apiId);
                 statement.setString(5, comment.getCreatedUser());
                 statement.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now()));
+                statement.setString(7, comment.getUpdatedUser());
+                statement.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now()));
+                statement.execute();
             } catch (SQLException e) {
                 connection.rollback();
                 throw new APIMgtDAOException(e);
-            } finally {
-                connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);

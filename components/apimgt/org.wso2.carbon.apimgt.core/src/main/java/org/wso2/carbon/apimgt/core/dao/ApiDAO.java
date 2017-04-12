@@ -487,7 +487,6 @@ public interface ApiDAO {
      *
      * @param comment the comment text
      * @param apiId UUID of the Api
-     * @return
      * @throws APIMgtDAOException
      */
     void addComment(Comment comment, String apiId) throws APIMgtDAOException;

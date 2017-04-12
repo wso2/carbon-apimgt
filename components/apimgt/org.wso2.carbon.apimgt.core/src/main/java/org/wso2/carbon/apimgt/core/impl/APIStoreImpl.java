@@ -516,6 +516,10 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         return comment.getUuid();
     }
 
+    @Override public void deleteComment(String commentId, String apiId) {
+
+    }
+
     @Override
     public List<API> searchAPIs(String query, int offset, int limit) throws APIManagementException {
 

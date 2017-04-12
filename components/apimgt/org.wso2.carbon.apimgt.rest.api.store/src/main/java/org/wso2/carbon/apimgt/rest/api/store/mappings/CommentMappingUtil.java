@@ -27,7 +27,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.CommentDTO;
  */
 public class CommentMappingUtil {
 
-    /** Converts an ArtifactResource object into corresponding REST API Comment DTO object
+    /** Converts an Comment object into corresponding REST API Comment DTO object
      *
      * @param comment Comment object
      * @return a new Comment object corresponding to given ArtifactResource object
@@ -39,26 +39,25 @@ public class CommentMappingUtil {
         commentDTO.setApiId(comment.getApiId());
         commentDTO.setSubscriberName(comment.getCommentedUser());
         commentDTO.setCommentText(comment.getCommentText());
-        commentDTO.setCreatedTime(comment.getCreatedTime().toString());
-        commentDTO.setCreatedBy(comment.getCreatedUser());
-        commentDTO.setLastUpdatedTime(comment.getUpdatedTime().toString());
-        commentDTO.setLastUpdatedBy(comment.getUpdatedUser());
-        
+
         return commentDTO;
     }
 
     /**
-     * @param body
+     * Converts a CommentDTO to a Comment object
+     *
+     * @param body the request body
      * @param username
      * @return
      */
     public static Comment fromDTOToComment(CommentDTO body, String username) {
 
         Comment comment = new Comment();
-        comment.setApiId(body.getApiId());
-        comment.setCommentedUser(body.getSubscriberName());
         comment.setCommentText(body.getCommentText());
-        comment.setCreatedUser(body.getCreatedBy());
+        comment.setCommentedUser(username);
+        comment.setApiId(body.getApiId());
+        comment.setCreatedUser(username);
+        comment.setUpdatedUser(username);
 
         return comment;
     }

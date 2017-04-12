@@ -58,9 +58,21 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdCommentsCommentIdDelete(String commentId, String apiId, String ifMatch,
-                                                     String ifUnmodifiedSince, Request request) throws
-            NotFoundException {
-        return null;
+                                            String ifUnmodifiedSince, String minorVersion) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIStore apiStore = RestApiUtil.getConsumer(username);
+            apiStore.deleteComment(commentId, apiId);
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while deleting comment with commentId: " + commentId + " of apiID :" + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            paramList.put(APIMgtConstants.ExceptionsConstants.COMMENT_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+        return Response.ok().build();
     }
 
     /**
@@ -85,8 +97,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             Comment comment = apiStore.getCommentByUUID(commentId, apiId);
             commentDTO = CommentMappingUtil.fromCommentToDTO(comment);
         } catch (APIManagementException e) {
-            String errorMessage =
-                    "Error while retrieving Comment for given API " + apiId + "with commentId " + commentId;
+            String errorMessage = "Error while retrieving comment with commentId: " + commentId + " of apiID :" + apiId;
             HashMap<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
             paramList.put(APIMgtConstants.ExceptionsConstants.COMMENT_ID, commentId);
@@ -356,6 +367,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
+
         return Response.ok().entity(documentListDTO).build();
     }
 
@@ -439,6 +451,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
+
     }
 
     /**
