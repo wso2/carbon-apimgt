@@ -17,7 +17,6 @@ package org.wso2.carbon.apimgt.rest.api.common.util;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -28,8 +27,6 @@ import org.wso2.carbon.apimgt.core.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.exception.APIMgtAuthorizationFailedException;
-import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
@@ -106,37 +103,6 @@ public class RestApiUtil {
         //       }
     }
 
-    /**
-     * Logs the error, builds a NotFoundException with specified details and throws it
-     *
-     * @param resource requested resource
-     * @param id       id of resource
-     * @param log      Log instance
-     * @throws NotFoundException    If failed to found the resource.
-     */
-    public static void handleResourceNotFoundError(String resource, String id, Logger log) throws NotFoundException {
-        NotFoundException notFoundException = buildNotFoundException(resource, id);
-        log.error(notFoundException.getMessage());
-        throw notFoundException;
-    }
-
-    /**
-     * Returns a new NotFoundException
-     *
-     * @param resource Resource type
-     * @param id       identifier of the resource
-     * @return a new NotFoundException with the specified details as a response DTO
-     */
-    public static NotFoundException buildNotFoundException(String resource, String id) {
-        String description;
-        if (!StringUtils.isEmpty(id)) {
-            description = "Requested " + resource + " with Id '" + id + "' not found";
-        } else {
-            description = "Requested " + resource + " not found";
-        }
-        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_NOT_FOUND_MESSAGE_DEFAULT, 404L, description);
-        return new NotFoundException(errorDTO);
-    }
 
     /**
      * Logs the error, builds a internalServerErrorException with specified details and throws it
@@ -189,43 +155,6 @@ public class RestApiUtil {
         return new BadRequestException(errorDTO);
     }
 
-
-    /**
-     * Check if the specified throwable e is happened as the required resource cannot be found
-     *
-     * @param e throwable to check
-     * @return true if the specified throwable e is happened as the required resource cannot be found, false otherwise
-     */
-    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-    public static boolean isDueToResourceNotFound(Throwable e) {
-        Throwable rootCause = getPossibleErrorCause(e);
-        return rootCause instanceof APIMgtResourceNotFoundException;
-    }
-
-    /**
-     * Check if the specified throwable e is due to an authorization failure
-     *
-     * @param e throwable to check
-     * @return true if the specified throwable e is due to an authorization failure, false otherwise
-     */
-    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-    public static boolean isDueToAuthorizationFailure(
-            Throwable e) {
-        Throwable rootCause = getPossibleErrorCause(e);
-        return rootCause instanceof APIMgtAuthorizationFailedException;
-    }
-
-    /**
-     * Attempts to find the actual cause of the throwable 'e'
-     *
-     * @param e throwable
-     * @return the root cause of 'e' if the root cause exists, otherwise returns 'e' itself
-     */
-    private static Throwable getPossibleErrorCause(Throwable e) {
-        Throwable rootCause = ExceptionUtils.getRootCause(e);
-        rootCause = rootCause == null ? e : rootCause;
-        return rootCause;
-    }
 
     /**
      * Returns a generic errorDTO
@@ -393,34 +322,7 @@ public class RestApiUtil {
         return path;
     }
 
-    /**
-     * Check if the message of the root cause message of 'e' matches with the specified message
-     *
-     * @param e       throwable to check
-     * @param message error message
-     * @return true if the message of the root cause of 'e' matches with 'message'
-     */
-    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-    public static boolean rootCauseMessageMatches(Throwable e, String message) {
-        Throwable rootCause = getPossibleErrorCause(e);
-        return rootCause.getMessage().contains(message);
-    }
 
-    /**
-     * Logs the error, builds a NotFoundException with specified details and throws it
-     *
-     * @param resource requested resource
-     * @param id       id of resource
-     * @param t        Throwable instance
-     * @param log      Log instance
-     * @throws NotFoundException    If resource not found.
-     */
-    public static void handleResourceNotFoundError(String resource, String id, Throwable t, Logger log)
-            throws NotFoundException {
-        NotFoundException notFoundException = buildNotFoundException(resource, id);
-        log.error(notFoundException.getMessage(), t);
-        throw notFoundException;
-    }
 
     /**
      * Search the Policy in the given collection of Policies. Returns it if it is included there. Otherwise return null
