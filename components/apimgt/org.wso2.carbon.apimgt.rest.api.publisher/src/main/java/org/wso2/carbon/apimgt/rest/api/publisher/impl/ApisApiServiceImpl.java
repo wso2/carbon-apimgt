@@ -1208,9 +1208,11 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
         } catch (APIManagementException e) {
             String errorMessage = "Error while checking status.";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList, e);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-        return null;
     }
 
     /**
@@ -1287,10 +1289,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             String errorMessage = "Error while adding new API : " + body.getProvider() + "-" +
                     body.getName() + "-" + body.getVersion();
             HashMap<String, String> paramList = new HashMap<String, String>();
-
             paramList.put(APIMgtConstants.ExceptionsConstants.API_NAME, body.getName());
             paramList.put(APIMgtConstants.ExceptionsConstants.API_VERSION, body.getVersion());
-
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();

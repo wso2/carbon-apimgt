@@ -54,10 +54,13 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             SubscriptionDTO subscriptionDTO = MappingUtil.fromSubscription(newSubscription);
             return Response.ok().entity(subscriptionDTO).build();
         } catch (APIManagementException e) {
-            String msg = "Error while blocking the subscription " + subscriptionId;
-            RestApiUtil.handleInternalServerError(msg, e, log);
+            String errorMessage = "Error while blocking the subscription " + subscriptionId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.SUBSCRIPTION_ID, subscriptionId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-        return null;
     }
 
     /**
@@ -139,10 +142,13 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(subscriptionDTO)
                     .build();
         } catch (APIManagementException e) {
-            String msg = "Error while getting the subscription " + subscriptionId;
-            RestApiUtil.handleInternalServerError(msg, e, log);
+            String errorMessage = "Error while getting the subscription " + subscriptionId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.SUBSCRIPTION_ID, subscriptionId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-        return null;
     }
 
     /**
@@ -190,9 +196,12 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             SubscriptionDTO subscriptionDTO = MappingUtil.fromSubscription(newSubscription);
             return Response.ok().entity(subscriptionDTO).build();
         } catch (APIManagementException e) {
-            String msg = "Error while unblocking the subscription " + subscriptionId;
-            RestApiUtil.handleInternalServerError(msg, e, log);
+            String errorMessage = "Error while unblocking the subscription " + subscriptionId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.SUBSCRIPTION_ID, subscriptionId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-        return null;
     }
 }

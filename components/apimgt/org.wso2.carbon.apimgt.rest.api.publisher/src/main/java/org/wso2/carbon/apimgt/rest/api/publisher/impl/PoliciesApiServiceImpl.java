@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
+import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.publisher.PoliciesApiService;
@@ -43,10 +44,9 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             List<Policy> policies = RestAPIPublisherUtil.getApiPublisher(username).getAllPoliciesByLevel(tierLevel);
             return Response.ok().entity(policies).build();
         } catch (APIManagementException e) {
-            String msg = "Error occurred while retrieving Policies";
-            RestApiUtil.handleInternalServerError(msg, e, log);
-            org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
-            log.error(msg, e);
+            String errorMessage = "Error occurred while retrieving Policies";
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
 
@@ -79,10 +79,9 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             Policy policy = RestAPIPublisherUtil.getApiPublisher(username).getPolicyByName(tierLevel, tierName);
             return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(policy).build();
         } catch (APIManagementException e) {
-            String msg = "Error occurred while retrieving Policy";
-            RestApiUtil.handleInternalServerError(msg, e, log);
-            org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
-            log.error(msg, e);
+            String errorMessage = "Error occurred while retrieving Policy";
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
     }

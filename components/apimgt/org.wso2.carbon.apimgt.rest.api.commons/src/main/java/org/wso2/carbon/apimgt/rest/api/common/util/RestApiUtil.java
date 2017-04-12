@@ -104,32 +104,6 @@ public class RestApiUtil {
     }
 
 
-    /**
-     * Logs the error, builds a internalServerErrorException with specified details and throws it
-     *
-     * @param msg error message
-     * @param t   Throwable instance
-     * @param log Log instance
-     * @throws InternalServerErrorException     If exception occurs in the server.
-     */
-    public static void handleInternalServerError(String msg, Throwable t, Logger log)
-            throws InternalServerErrorException {
-        InternalServerErrorException internalServerErrorException = buildInternalServerErrorException();
-        log.error(msg, t);
-        throw internalServerErrorException;
-    }
-
-    /**
-     * Returns a new InternalServerErrorException
-     *
-     * @return a new InternalServerErrorException with default details as a response DTO
-     */
-    public static InternalServerErrorException buildInternalServerErrorException() {
-        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_INTERNAL_SERVER_ERROR_MESSAGE_DEFAULT, 500L,
-                RestApiConstants.STATUS_INTERNAL_SERVER_ERROR_DESCRIPTION_DEFAULT);
-        return new InternalServerErrorException(errorDTO);
-    }
-
 
     /**
      * Logs the error, builds a BadRequestException with specified details and throws it
