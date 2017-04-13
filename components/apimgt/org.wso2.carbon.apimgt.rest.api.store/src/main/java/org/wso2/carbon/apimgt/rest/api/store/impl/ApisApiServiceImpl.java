@@ -59,9 +59,15 @@ public class ApisApiServiceImpl extends ApisApiService {
             Comment comment = apiStore.getCommentByUUID(commentId, apiId);
             commentDTO = CommentMappingUtil.fromCommentToDTO(comment);
         } catch (APIManagementException e) {
-            RestApiUtil
-                    .handleInternalServerError("Error while retrieving Comment for given API " + apiId
-                            + "with commentId " + commentId, e, log);
+            String errorMessage =
+                    "Error while retrieving Comment for given API " + apiId + "with commentId " + commentId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            paramList.put(APIMgtConstants.ExceptionsConstants.COMMENT_ID, commentId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+
         }
         return Response.ok().entity(commentDTO).build();
     }
@@ -202,12 +208,15 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.ok().entity(documentDTO)
                     .header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").build();
         } catch (APIManagementException e) {
-            RestApiUtil
-                    .handleInternalServerError(
-                            "Error while retrieving documentation for given apiId " + apiId + "with docId "
-                                    + documentId, e, log);
+            String errorMessage =
+                    "Error while retrieving documentation for given apiId " + apiId + "with docId " + documentId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            paramList.put(APIMgtConstants.ExceptionsConstants.DOC_ID, documentId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-        return null;
     }
 
     /**
@@ -264,10 +273,13 @@ public class ApisApiServiceImpl extends ApisApiService {
             documentListDTO = DocumentationMappingUtil
                     .fromDocumentationListToDTO(documentInfoResults, offset, limit);
         } catch (APIManagementException e) {
-            RestApiUtil
-                    .handleInternalServerError("Error while retrieving documentation for given apiId " + apiId, e, log);
+            String errorMessage = "Error while retrieving documentation for given apiId " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-
         return Response.ok().entity(documentListDTO).build();
     }
 
@@ -334,11 +346,13 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.ok().entity(ratingListDTO).build();
 
         } catch (APIManagementException e) {
-            RestApiUtil
-                    .handleInternalServerError("Error while retrieving Rating for given API " + apiId, e, log);
-            return null;
+            String errorMessage = "Error while retrieving Rating for given API " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-
     }
 
     @Override

@@ -5,11 +5,12 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.admin.*;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.*;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 
-
+import java.util.HashMap;
 import java.util.List;
 
 import org.wso2.carbon.apimgt.rest.api.admin.NotFoundException;
@@ -32,10 +33,11 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             apiMgtAdminService.deletePolicy(tierName, tierLevel);
             return Response.ok().build();
         } catch (APIManagementException e) {
-            String msg = "Error occurred while deleting a Policy [" + tierName + "]";
-            RestApiUtil.handleInternalServerError(msg, e, log);
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
-            log.error(msg, e);
+            String errorMessage = "Error occurred while deleting a Policy [" + tierName + "]";
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.TIER, tierName);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
     }
@@ -63,10 +65,9 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             List<TierDTO> tiers = PolicyMappingUtil.fromPoliciesToDTOs(policies);
             return Response.ok().entity(tiers).build();
         } catch (APIManagementException e) {
-            String msg = "Error occurred while retrieving Policy";
-            RestApiUtil.handleInternalServerError(msg, e, log);
+            String errorMessage = "Error occurred while retrieving Policy";
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
-            log.error(msg, e);
+            log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
     }
@@ -92,10 +93,9 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             apiMgtAdminService.addPolicy(tierLevel, policy);
             return Response.status(Response.Status.CREATED).entity(policy).build();
         } catch (APIManagementException e) {
-            String msg = "Error occurred while adding Policy ";
-            RestApiUtil.handleInternalServerError(msg, e, log);
+            String errorMessage = "Error occurred while adding Policy ";
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
-            log.error(msg, e);
+            log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
     }
