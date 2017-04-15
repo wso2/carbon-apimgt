@@ -891,6 +891,7 @@
             org.ballerinalang.composer.service.workspace.swagger.generators.*,
             <!--com.fasterxml.jackson.core.*,-->
         </export.package>
+        <dynamic.import.package>*</dynamic.import.package>
     </properties>
 
 </project>
