@@ -295,6 +295,12 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             workflow.setApplicationName(application.getName());
             workflow.setApplicationId(applicationId);
             workflow.setSubscriber(getUsername());
+            
+            String workflowDescription = "Subscription creation workflow for the subscription to api "
+                    + workflow.getApiName() + ":" + workflow.getApiVersion() + ":" + workflow.getApiProvider()
+                    + " using application " + workflow.getApplicationName() + " with tier " + workflow.getTierName()
+                    + " by " + getUsername();
+            workflow.setWorkflowDescription(workflowDescription);
 
             WorkflowResponse response = addSubscriptionWFExecutor.execute(workflow);
             workflow.setStatus(response.getWorkflowStatus());
@@ -369,6 +375,12 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 workflow.setApplicationName(subscription.getApplication().getName());
                 workflow.setApplicationId(subscription.getApplication().getId());
 
+                String workflowDescription = "Subscription deletion workflow for the subscription to api "
+                        + workflow.getApiName() + ":" + workflow.getApiVersion() + ":" + workflow.getApiProvider()
+                        + " using application " + workflow.getApplicationName() + " with tier " + workflow.getTierName()
+                        + " by " + getUsername();
+                workflow.setWorkflowDescription(workflowDescription);
+                
                 WorkflowResponse response = removeSubscriptionWFExecutor.execute(workflow);
                 workflow.setStatus(response.getWorkflowStatus());
 
@@ -575,6 +587,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             workflow.setWorkflowReference(application.getId());
             workflow.setExternalWorkflowReference(UUID.randomUUID().toString());
             workflow.setCreatedTime(LocalDateTime.now());
+            String workflowDescription = "Application deletion workflow for " + application.getName() + " by "
+                    + getUsername();
+            workflow.setWorkflowDescription(workflowDescription);
             WorkflowResponse response = removeApplicationWFExecutor.execute(workflow);
             workflow.setStatus(response.getWorkflowStatus());
             addWorkflowEntries(workflow);
@@ -635,9 +650,14 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             ApplicationCreationWorkflow workflow = new ApplicationCreationWorkflow();
 
             workflow.setApplication(application);
+            workflow.setCreatedBy(getUsername());
             workflow.setWorkflowReference(application.getId());
             workflow.setExternalWorkflowReference(UUID.randomUUID().toString());
             workflow.setCreatedTime(LocalDateTime.now());
+            
+            String workflowDescription = "Application creation workflow for " + application.getName() + " with tier "
+                    + tierName + " by " + getUsername();
+            workflow.setWorkflowDescription(workflowDescription);
             WorkflowResponse response = appCreationWFExecutor.execute(workflow);
             workflow.setStatus(response.getWorkflowStatus());
             addWorkflowEntries(workflow);
