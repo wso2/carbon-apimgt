@@ -554,37 +554,15 @@
                                         <env>
                                             <ACCEPT_EULA>Y</ACCEPT_EULA>
                                             <SA_PASSWORD>wso2apim123#</SA_PASSWORD>
+                                            <MSSQL_DB>testamdb</MSSQL_DB>
                                         </env>
                                         <ports>
                                             <port>${apim-mssql.port}:1433</port>
                                         </ports>
                                         <wait>
-                                            <tcp>
-                                                <ports>
-                                                    <port>1433</port>
-                                                </ports>
-                                            </tcp>
+                                            <log>MSSQL SERVER SUCCESSFULLY STARTED</log>
                                             <time>60000</time>
                                         </wait>
-                                    </run>
-                                </image>
-                                <image>
-                                    <name>tharindu1st/mssql-client</name>
-                                    <alias>apim-mssql-client</alias>
-                                    <run>
-                                        <namingStrategy>alias</namingStrategy>
-                                        <env>
-                                            <MSSQL_SERVER_HOST>apim-mssql</MSSQL_SERVER_HOST>
-                                            <MSSQL_USERNAME>SA</MSSQL_USERNAME>
-                                            <MSSQL_PASSWORD>wso2apim123#</MSSQL_PASSWORD>
-                                            <MSSQL_DATABASE_NAME>testamdb</MSSQL_DATABASE_NAME>
-                                        </env>
-                                        <links>
-                                            <link>apim-mssql:apim-mssql</link>
-                                        </links>
-                                        <dependsOn>
-                                            <dependsOn>apim-mssql</dependsOn>
-                                        </dependsOn>
                                     </run>
                                 </image>
                             </images>
