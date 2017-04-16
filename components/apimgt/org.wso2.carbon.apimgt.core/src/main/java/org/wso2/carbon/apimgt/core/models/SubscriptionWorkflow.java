@@ -113,4 +113,11 @@ public class SubscriptionWorkflow extends Workflow {
         this.apiId = apiId;
     }
 
+    @Override
+    public String toString() {
+        return "SubscriptionWorkflow [apiName=" + apiName + ", apiVersion=" + apiVersion + ", apiContext=" + apiContext
+                + ", apiId=" + apiId + ", apiProvider=" + apiProvider + ", subscriber=" + subscriber
+                + ", applicationName=" + applicationName + ", applicationId=" + applicationId + ", tierName=" + tierName
+                + ", toString()=" + super.toString() + "]";
+    }    
 }

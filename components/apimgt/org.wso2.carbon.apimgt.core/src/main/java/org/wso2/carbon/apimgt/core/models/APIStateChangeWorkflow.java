@@ -82,7 +82,7 @@ public class APIStateChangeWorkflow extends Workflow {
     public String toString() {
         return "APIStateChangeWorkflow [currentState=" + currentState + ", transitionState=" + transitionState
                 + ", apiName=" + apiName + ", apiProvider=" + apiProvider + ", apiVersion=" + apiVersion + ", invoker="
-                + invoker + "]";
-    }
+                + invoker + ", toString()=" + super.toString() + "]";
+    }   
 
 }

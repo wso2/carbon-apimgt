@@ -601,7 +601,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_API_LC_INVOKER, getUsername());
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_API_LAST_UPTIME,
                         originalAPI.getLastUpdatedTime().toString());
-                
+                String workflowDescription = "API state change workflow for " + workflow.getApiName() + ":"
+                        + workflow.getApiVersion() + ":" + workflow.getApiProvider() + " from "
+                        + workflow.getCurrentState() + " to " + workflow.getTransitionState() + " state by "
+                        + getUsername();
+                workflow.setWorkflowDescription(workflowDescription);
                 workflowResponse = executor.execute(workflow);             
                 workflow.setStatus(workflowResponse.getWorkflowStatus());
 
