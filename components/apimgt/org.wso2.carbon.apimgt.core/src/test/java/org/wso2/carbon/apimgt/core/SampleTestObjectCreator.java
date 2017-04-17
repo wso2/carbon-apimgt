@@ -447,11 +447,29 @@ public class SampleTestObjectCreator {
         return application;
     }
 
+    public static Application createApplicationWithPermissions() {
+        //created by admin
+        HashMap permissionMap = new HashMap();
+        permissionMap.put(APIMgtConstants.Permission.UPDATE, APIMgtConstants.Permission.UPDATE_PERMISSION);
+        Application application = new Application(TEST_APP_1, ADMIN);
+        application.setId(UUID.randomUUID().toString());
+        application.setCallbackUrl(CALLBACK_URL_1);
+        application.setDescription("This is a test application");
+        application.setGroupId(GROUP_1);
+        application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
+        application.setTier(FIFTY_PER_MIN_TIER);
+        application.setPermissionMap(permissionMap);
+        application.setCreatedTime(LocalDateTime.now());
+        application.setUpdatedUser(ADMIN);
+        application.setUpdatedTime(LocalDateTime.now());
+        return application;
+    }
+
     public static APIPolicy createDefaultAPIPolicy() {
         APIPolicy apiPolicy = new APIPolicy(SAMPLE_API_POLICY);
         apiPolicy.setDisplayName(SAMPLE_API_POLICY);
         apiPolicy.setDescription(SAMPLE_API_POLICY_DESCRIPTION);
-        apiPolicy.setUserLevel(APIMgtConstants.API);
+        apiPolicy.setUserLevel(APIMgtConstants.ThrottlePolicyConstants.API_LEVEL);
         QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
         defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
         RequestCountLimit requestCountLimit = new RequestCountLimit();
