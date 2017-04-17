@@ -38,6 +38,12 @@ import java.util.List;
 public class ApisSummaryApiServiceImpl extends ApisSummaryApiService {
     private static final Logger log = LoggerFactory.getLogger(ApisSummaryApiServiceImpl.class);
 
+    /**
+     * Retrieve API summary
+     *
+     * @return API summary details
+     * @throws NotFoundException If failed to retrieve api summary
+     */
     @Override
     public Response apisSummaryGet() throws NotFoundException {
         List<APISummary> apisSummary = new ArrayList<APISummary>();

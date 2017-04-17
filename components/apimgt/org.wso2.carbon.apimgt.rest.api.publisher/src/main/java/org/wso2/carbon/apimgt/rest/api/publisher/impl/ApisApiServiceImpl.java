@@ -1240,7 +1240,6 @@ public class ApisApiServiceImpl extends ApisApiService {
                 String msg = "Only one of 'file' and 'url' should be specified";
                 log.error(msg);
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
-                log.error(msg);
                 return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
             }
 
