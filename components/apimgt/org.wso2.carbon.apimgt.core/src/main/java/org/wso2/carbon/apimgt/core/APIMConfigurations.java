@@ -25,12 +25,12 @@ import java.io.File;
 
 /**
  * Class to hold APIM configuration parameters and generate yaml file
- * */
+ */
 
-@Configuration (namespace = "wso2.carbon.apim", description = "APIM Configuration Parameters")
+@Configuration(namespace = "wso2.carbon.apim", description = "APIM Configuration Parameters")
 public class APIMConfigurations {
     private String carbonClientId = "carbon";
-    @Element (description = "server version")
+    @Element(description = "server version")
     private String carbonVirtualHostName = "carbon";
     @Element(description = "topic server host")
     private String topicServerHost = "localhost";
