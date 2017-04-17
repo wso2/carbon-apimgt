@@ -52,6 +52,9 @@ $(function () {
                                         for (var i = 0; i < applications.length; i++) {
                                                subscribedApp = false;
                                                 application = applications[i];
+                                                if (application.lifeCycleStatus != "APPROVED") {
+                                                    continue;
+                                                }
                                                 for (var j = 0; j < subscriptions.length; j++) {
                                                     subscription = subscriptions[j];
                                                     if (subscription.applicationId === application.applicationId) {

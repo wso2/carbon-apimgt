@@ -93,7 +93,8 @@ public enum ExceptionCodes implements ErrorHandler {
     UNSUPPORTED_ROLE(900330, "Non existing roles cannot be added to an API", 400,
             " Non existing roles cannot be added to an API"),
     LABEL_INFORMATION_CANNOT_BE_NULL(900331, "Label information cannot be null", 400, "Label information cannot be " +
-            "null");
+            "null"),
+    APPLICATION_INACTIVE(900332, "Application is not active", 400, "Application is not active");
 
 
     private final long errorCode;

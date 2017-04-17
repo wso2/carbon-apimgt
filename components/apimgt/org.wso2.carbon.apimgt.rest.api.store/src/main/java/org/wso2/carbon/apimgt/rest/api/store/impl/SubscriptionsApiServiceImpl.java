@@ -17,6 +17,7 @@ import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ApplicationStatus;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
@@ -126,6 +127,16 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             String tier = body.getPolicy();
 
             Application application = apiStore.getApplicationByUuid(applicationId);
+            if (application != null && !ApplicationStatus.APPLICATION_APPROVED.equals(application.getStatus())) {
+                String errorMessage = "Application " + applicationId + " is not active";
+                ExceptionCodes exceptionCode = ExceptionCodes.APPLICATION_INACTIVE;
+                APIManagementException e = new APIManagementException(errorMessage, exceptionCode);
+                HashMap<String, String> paramList = new HashMap<String, String>();
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                log.error(errorMessage, e);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+                
+            }
             API api = apiStore.getAPIbyUUID(apiId);
             if (application != null && api != null) {
                 SubscriptionResponse addSubResponse = apiStore.addApiSubscription(apiId, applicationId, tier);
