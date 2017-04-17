@@ -4,12 +4,14 @@ $(function () {
     var swaggerClient = new SwaggerClient({
         url: swaggerURL,
         success: function (swaggerData) {
-        	
+            var policies = [];
+
             setAuthHeader(swaggerClient);
             swaggerClient["API (individual)"].get_apis_apiId({"apiId": apiId},
                 {"responseContentType": 'application/json'},
                 function (jsonData) {
                     var api = jsonData.obj;
+                    policies = api.policies;
                     var callbacks = {onSuccess: function () {},onFailure: function (message, e) {}};
                     var mode = "OVERWRITE";
 
@@ -31,14 +33,11 @@ $(function () {
                                 });
                             });
                         },onFailure: function (message, e) {}});
-                    UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.tier-list",api,
-                        "tier-list", mode, callbacks);
 
                     //Get application details
                     setAuthHeader(swaggerClient);
                     swaggerClient["Application Collection"].get_applications({},
                         function (jsonData) {
-                            var context = {};
                             var applications = jsonData.obj.list;
                                 swaggerClient["Subscription Collection"].get_subscriptions({
                                         "apiId": apiId,
@@ -66,12 +65,11 @@ $(function () {
                                             }
                                         var context = {};
                                         context.applications = availableApplications;
+                                        context.policies = policies;
 
-                                        //Render application list drop-down
-                                        UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.application-list",context,
-                                            "application-list", mode, callbacks);
-
-
+                                        //Render api subscribe pane
+                                        UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.api-subscribe",context,
+                                            "api-subscribe", mode, callbacks);
                                     },
                                     function (error) {
                                         var message = "Error occurred while retrieve Applications";
@@ -242,10 +240,10 @@ $(function () {
                                 var doc_instance = new DOC();
                                 var docs = doc_instance.getAll(getDOCsCallback,apiId);
                             }
-                            
+
                             if (tab.id == "api-swagger") {
                             	var bearerToken = "Bearer " + getCookie("WSO2_AM_TOKEN_1");
-                            	setAuthHeader(swaggerClient);                          
+                            	setAuthHeader(swaggerClient);
                             	//Get Swagger definition of the API
                                 swaggerClient["API (individual)"].get_apis_apiId_swagger({"apiId": apiId},
                                     function (jsonData) {
@@ -296,8 +294,8 @@ $(function () {
 		                                        });
 		                        			}
                                 		});
-                                		
-                                		
+
+
                                 		//Retrieve API subscriptions and keys for API Console
                                 		swaggerClient["Application Collection"].get_applications({},
 	                                        function (jsonData) {
@@ -320,7 +318,7 @@ $(function () {
 	                                                                    	subscribedApplications.push(application);
 	                                                                        continue;
 	                                                                    }
-	                                                                }                                                           
+	                                                                }
 	                                                            }
 	                                                        for (var i =0; i<subscribedApplications.length; i++) {
 	                                                        	var app = subscribedApplications[i];
@@ -328,7 +326,7 @@ $(function () {
 	                                                                "applicationId": app.applicationId,
 	                                                                "responseContentType": 'application/json'
 	                                                            }, requestMetaData(),
-	                                                            function (jsonData) {                                                                                                            
+	                                                            function (jsonData) {
 	                                                            	var app = jsonData.obj;
 	                                                            	var keys = jsonData.obj.keys;
 	                                                            	for (var j = 0; j < keys.length; j++) {
@@ -341,7 +339,7 @@ $(function () {
 	                                                            	subscribedAppsAndKeys.push(app);
 	                                                            	context.subscribedAppsAndKeys = subscribedAppsAndKeys;
 	                                                            	context.label_data = label_data;
-	    	                                                        
+
 	    	                                                        UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.api-console-auth",context, {
 	    	                                                			onSuccess: function (renderedData) {
 	    	                                                				$("#authorizations").html(renderedData);
@@ -382,8 +380,8 @@ $(function () {
 	                                                                    redirectToLogin(contextPath);
 	                                                                }
 	                                                            });
-	                                                        }	                                                        
-	                                                      
+	                                                        }
+
 	                                        },
 	                                        function (error) {
 	                                            var message = "Error occurred while retrieving Subscriptions";
@@ -402,8 +400,8 @@ $(function () {
 	                                                redirectToLogin(contextPath);
 	                                            }
 	                                        });
-	
-	                            		
+
+
 	                              },
 	                              function (error) {
 	                            	  var message = "Error occurred while retrieving Applications";
@@ -519,7 +517,7 @@ $(function () {
                             $("#subscribe-button").removeAttr('disabled');
                             var subscription = jsonData.obj;
                             var jsonPayload = subscription.workflowResponse.jsonPayload;
-                            
+
                             if(jsonPayload) {
                                 var jsonResponse = JSON.parse(jsonPayload);
                                 var message = jsonResponse.redirectConfirmationMsg;
@@ -565,7 +563,7 @@ $(function () {
                                       ]
                                 });
                             }
-                            
+
 
                             //TODO : Embedding message model
 
@@ -724,11 +722,11 @@ var change_token = function() {
 var select_environment = function(){
     var selectedEnvironment = $("#environment_name");
     var name = selectedEnvironment.val();
-    
+
     //Token to load the swagger definition
     var bearerToken = "Bearer " + getCookie("WSO2_AM_TOKEN_1");
     swaggerUi.api.clientAuthorizations.add("key", new SwaggerClient.ApiKeyAuthorization("Authorization", bearerToken, "header"));
-    
+
     //Set Swagger URL
     if (window.swaggerUi.api.url.indexOf("?") != -1) {
     	if (window.swaggerUi.api.url.indexOf("labelName") != -1) {
