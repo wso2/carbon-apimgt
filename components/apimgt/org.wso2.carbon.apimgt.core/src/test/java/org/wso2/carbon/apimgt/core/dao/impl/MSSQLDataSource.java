@@ -77,6 +77,21 @@ public class MSSQLDataSource implements DataSource {
                 }
             }
             for (String table : tables) {
+                // drop full text indexes
+                try (ResultSet resultSet = statement.executeQuery("SELECT object_id, property_list_id, stoplist_id " +
+                        "FROM sys.fulltext_indexes where object_id = object_id('" + table + "')")) {
+                    if (resultSet.next()) {
+                        statement.addBatch("DROP FULLTEXT INDEX ON " + table);
+                    }
+                }
+                // drop full text catalogues
+                try (ResultSet resultSet = statement.executeQuery("SELECT fts.name as name FROM sys.fulltext_indexes " +
+                        "as fis, sys.fulltext_catalogs as fts where object_id = object_id('" + table + "') and fis" +
+                        ".fulltext_catalog_id=fts.fulltext_catalog_id")) {
+                    while (resultSet.next()) {
+                        statement.addBatch("DROP FULLTEXT CATALOG " + resultSet.getString("name"));
+                    }
+                }
                 try (ResultSet resultSet = statement.executeQuery("SELECT name as ForeignKey_Name,OBJECT_SCHEMA_NAME" +
                         "(parent_object_id) as Schema_Name,OBJECT_NAME(parent_object_id) as Table_Name FROM sys" +
                         ".foreign_keys " +

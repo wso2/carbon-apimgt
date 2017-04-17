@@ -333,7 +333,6 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         final String lowerCaseString = "lower case";
         final String upperCaseString = "UPPER CASE";
         final String charSymbolNumString = "mi ##symbol 12num";
-        final String spaceDelimitingString = " S p ace ";
         final String symbolSpaceString = "_under & Score_";
 
         // Search string cases
@@ -342,7 +341,6 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         final String commonUpperCaseSearchString = "CASE";
         final String symbolSearchString = "##symbol";
         final String numberSearchString = "12n";                 // In some databases numbers are not used in indexing
-        final String spaceIncludedSearchString = " S p ace";
 
         // Create test data
         Map<String, API> apis = new HashMap<>();
@@ -350,7 +348,6 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         apis.put(lowerCaseString, SampleTestObjectCreator.createUniqueAPI().name(lowerCaseString).build());
         apis.put(upperCaseString, SampleTestObjectCreator.createUniqueAPI().name(upperCaseString).build());
         apis.put(charSymbolNumString, SampleTestObjectCreator.createUniqueAPI().name(charSymbolNumString).build());
-        apis.put(spaceDelimitingString, SampleTestObjectCreator.createUniqueAPI().name(spaceDelimitingString).build());
         apis.put(symbolSpaceString, SampleTestObjectCreator.createUniqueAPI().name(symbolSpaceString).build());
 
         // Add APIs
@@ -361,7 +358,8 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
             // Replace with summary object for validation
             apis.put(entry.getKey(), SampleTestObjectCreator.getSummaryFromAPI(api));
         }
-
+        // Sleep for indexing
+        Thread.sleep(5000);
         // Expected common string search result
         List<API> commonStringResult = new ArrayList<>();
         commonStringResult.add(apis.get(mixedCaseString));
@@ -398,13 +396,6 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertEquals(apiList.size(), 1);
         actualAPI = apiList.get(0);
         expectedAPI = apis.get(charSymbolNumString);
-        Assert.assertEquals(actualAPI, expectedAPI, TestUtil.printDiff(actualAPI, expectedAPI));
-
-        // Search with spaces
-        apiList = apiDAO.searchAPIs(new ArrayList<>(), "", spaceIncludedSearchString, 0, 10);
-        Assert.assertEquals(apiList.size(), 1);
-        actualAPI = apiList.get(0);
-        expectedAPI = apis.get(spaceDelimitingString);
         Assert.assertEquals(actualAPI, expectedAPI, TestUtil.printDiff(actualAPI, expectedAPI));
     }
 
