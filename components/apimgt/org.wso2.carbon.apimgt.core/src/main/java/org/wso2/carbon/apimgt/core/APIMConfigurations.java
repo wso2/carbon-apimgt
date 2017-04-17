@@ -51,7 +51,7 @@ public class APIMConfigurations {
     @Element(description = "context for store")
     private String storeContext = "/api/am/store/v1";
     @Element(description = "context for admin")
-    private String adminContext = "/api/am/admin/v1";
+    private String adminContext = "/api/am/admin/v1.0";
 
     @Element(description = "package name for gateway configs")
     private String gatewayPackageName = "deployment.org.wso2.apim";

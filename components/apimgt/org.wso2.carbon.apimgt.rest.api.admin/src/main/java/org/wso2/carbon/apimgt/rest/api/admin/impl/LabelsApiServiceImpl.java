@@ -1,27 +1,18 @@
 package org.wso2.carbon.apimgt.rest.api.admin.impl;
 
+import java.util.HashMap;
+import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
-
-import java.util.HashMap;
-import java.util.List;
-
 import org.wso2.carbon.apimgt.rest.api.admin.LabelsApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.NotFoundException;
-
-import java.io.InputStream;
-
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
-import org.wso2.msf4j.formparam.FormDataParam;
-import org.wso2.msf4j.formparam.FileInfo;
-
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
+import org.wso2.msf4j.Request;
 
 public class LabelsApiServiceImpl extends LabelsApiService {
 
@@ -33,12 +24,12 @@ public class LabelsApiServiceImpl extends LabelsApiService {
      * @param labelId           Id of the label
      * @param ifMatch           if-Match header value
      * @param ifUnmodifiedSince if-Unmodified-Since header value
-     * @param minorVersion      Minor ersion header value
+     * @param request           msf4j request object
      * @return 200 OK if the operation is successful
      * @throws NotFoundException If failed to find the particular resource
      */
     @Override
-    public Response labelsLabelIdDelete(String labelId, String ifMatch, String ifUnmodifiedSince, String minorVersion
+    public Response labelsLabelIdDelete(String labelId, String ifMatch, String ifUnmodifiedSince, Request request
     ) throws NotFoundException {
 
         try {
