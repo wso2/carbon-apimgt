@@ -38,11 +38,7 @@ public class WorkflowExtensionsConfigBuilderTestCase {
         Assert.assertNotNull(config.getApplicationCreation(), "Default application creation workflow not set");
         Assert.assertNotNull(config.getSubscriptionCreation(), "Default subscription creation workflow not set");
         Assert.assertNotNull(config.getApplicationDeletion(), "Default application deletion workflow not set");
-        Assert.assertNotNull(config.getSubscriptionDeletion(), "Default subscription deletion workflow not set");
-        Assert.assertNotNull(config.getProductionApplicationRegistration(), 
-                "Default production app creation workflow not set");
-        Assert.assertNotNull(config.getProductionApplicationRegistration(), 
-                "Default sandbox app creation workflow not set");
+        Assert.assertNotNull(config.getSubscriptionDeletion(), "Default subscription deletion workflow not set");     
         
         WorkflowExtensionsConfigBuilder obj = new WorkflowExtensionsConfigBuilder();
         Assert.assertNotNull(obj);

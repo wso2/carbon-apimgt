@@ -27,21 +27,17 @@ import org.wso2.carbon.kernel.annotations.Element;
  */
 @Configuration (namespace = "wso2.workflowextensions", description = "workflow executor configurations")
 public class WorkflowConfig {
-    @Element (description = "executor for application creation")
+    @Element (description = "executor for application creation workflow")
     private WorkflowExecutorInfo applicationCreation;
-    @Element (description = "executor for production app")
-    private WorkflowExecutorInfo productionApplicationRegistration;
-    @Element (description = "executor for sandbox app")
-    private WorkflowExecutorInfo sandboxApplicationRegistration;
-    @Element (description = "executor for application creation")
+    @Element (description = "executor for subscription creation workflow")
     private WorkflowExecutorInfo subscriptionCreation;
-    @Element (description = "executor for signup")
+    @Element (description = "executor for signup workflow")
     private WorkflowExecutorInfo userSignUp;
-    @Element (description = "executor for subscription deletion")
+    @Element (description = "executor for subscription deletion workflow")
     private WorkflowExecutorInfo subscriptionDeletion;
-    @Element (description = "executor for application deletion")
+    @Element (description = "executor for application deletion workflow")
     private WorkflowExecutorInfo applicationDeletion;
-    @Element (description = "executor for state change")
+    @Element (description = "executor for state change workflow")
     private WorkflowExecutorInfo apiStateChange;
     
     public WorkflowConfig() {
@@ -52,14 +48,8 @@ public class WorkflowConfig {
         apiStateChange = new WorkflowExecutorInfo();
         apiStateChange.setExecutor(APIMgtConstants.WF_DEFAULT_APISTATE_EXEC);
 
-        productionApplicationRegistration = new WorkflowExecutorInfo();
-        productionApplicationRegistration.setExecutor(APIMgtConstants.WF_DEFAULT_PRODAPP_EXEC);
-
         applicationDeletion = new WorkflowExecutorInfo();
         applicationDeletion.setExecutor(APIMgtConstants.WF_DEFAULT_APPDELETE_EXEC);
-
-        sandboxApplicationRegistration = new WorkflowExecutorInfo();
-        sandboxApplicationRegistration.setExecutor(APIMgtConstants.WF_DEFAULT_SANDBOXAPP_EXEC);
 
         subscriptionCreation = new WorkflowExecutorInfo();
         subscriptionCreation.setExecutor(APIMgtConstants.WF_DEFAULT_SUBCREATION_EXEC);
@@ -78,22 +68,6 @@ public class WorkflowConfig {
 
     public void setApplicationCreation(WorkflowExecutorInfo applicationCreation) {
         this.applicationCreation = applicationCreation;
-    }
-
-    public WorkflowExecutorInfo getProductionApplicationRegistration() {
-        return productionApplicationRegistration;
-    }
-
-    public void setProductionApplicationRegistration(WorkflowExecutorInfo productionApplicationRegistration) {
-        this.productionApplicationRegistration = productionApplicationRegistration;
-    }
-
-    public WorkflowExecutorInfo getSandboxApplicationRegistration() {
-        return sandboxApplicationRegistration;
-    }
-
-    public void setSandboxApplicationRegistration(WorkflowExecutorInfo sandboxApplicationRegistration) {
-        this.sandboxApplicationRegistration = sandboxApplicationRegistration;
     }
 
     public WorkflowExecutorInfo getSubscriptionCreation() {
@@ -138,11 +112,9 @@ public class WorkflowConfig {
 
     @Override
     public String toString() {
-        return "WorkflowConfig [applicationCreation=" + applicationCreation + ", productionApplicationRegistration="
-                + productionApplicationRegistration + ", sandboxApplicationRegistration="
-                + sandboxApplicationRegistration + ", subscriptionCreation=" + subscriptionCreation + ", userSignUp="
-                + userSignUp + ", subscriptionDeletion=" + subscriptionDeletion + ", applicationDeletion="
-                + applicationDeletion + ", apiStateChange=" + apiStateChange + "]";
-    }
+        return "WorkflowConfig [applicationCreation=" + applicationCreation + ", subscriptionCreation="
+                + subscriptionCreation + ", userSignUp=" + userSignUp + ", subscriptionDeletion=" + subscriptionDeletion
+                + ", applicationDeletion=" + applicationDeletion + ", apiStateChange=" + apiStateChange + "]";
+    }   
 
 }
