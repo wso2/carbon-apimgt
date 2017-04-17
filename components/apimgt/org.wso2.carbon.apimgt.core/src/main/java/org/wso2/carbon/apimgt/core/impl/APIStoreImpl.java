@@ -67,6 +67,7 @@ import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ApplicationStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.SubscriptionStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
@@ -551,18 +552,26 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             List<Subscription> pendingSubscriptions = getApiSubscriptionDAO()
                     .getPendingAPISubscriptionsByApplication(appId);
             String pendingExtReference;
+            String applicationStatus = application.getStatus();
+           
             if (pendingSubscriptions == null || pendingSubscriptions.isEmpty()) {
-                pendingExtReference = getWorkflowDAO().getExternalWorkflowReferenceForApplication(appId);
-                try {
-                    createApplicationWFExecutor.cleanUpPendingTask(pendingExtReference);
-                } catch (WorkflowException e) {
-                    String warn = "Failed to clean pending application approval task for " + appId;
-                    // failed cleanup processes are ignored to prevent failing the deletion process
-                    log.warn(warn, e.getLocalizedMessage());
+                //check whether application is on hold state
+                if (ApplicationStatus.APPLICATION_ONHOLD.equals(applicationStatus)) {
+                    pendingExtReference = getWorkflowDAO().getExternalWorkflowReferenceForApplication(appId);
+                    try {
+                        if (pendingExtReference != null) {
+                            createApplicationWFExecutor.cleanUpPendingTask(pendingExtReference);
+                        }                        
+                    } catch (WorkflowException e) {
+                        String warn = "Failed to clean pending application approval task for " + appId;
+                        // failed cleanup processes are ignored to prevent failing the deletion process
+                        log.warn(warn, e.getLocalizedMessage());
+                    }
                 }
+
             } else {
 
-                // this means there are pending subsriptions. It also implies that there cannot be pending application
+                // this means there are pending subscriptions. It also implies that there cannot be pending application
                 // approvals (cannot subscribe to a pending application)
                 for (Iterator iterator = pendingSubscriptions.iterator(); iterator.hasNext();) {
                     Subscription pendingSubscription = (Subscription) iterator.next();
