@@ -1,23 +1,31 @@
 package org.wso2.carbon.apimgt.rest.api.store;
 
 import io.swagger.annotations.ApiParam;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TagListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.factories.TagsApiServiceFactory;
 import org.wso2.msf4j.Microservice;
+import org.wso2.msf4j.Request;
 
 @Component(
     name = "org.wso2.carbon.apimgt.rest.api.store.TagsApi",
     service = Microservice.class,
     immediate = true
 )
-@Path("/api/am/store/v1/tags")
+@Path("/api/am/store/v1.[\\d]+/tags")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the tags API")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-28T22:39:18.827+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-07T10:04:16.863+05:30")
 public class TagsApi implements Microservice  {
    private final TagsApiService delegate = TagsApiServiceFactory.getTagsApi();
 
@@ -38,9 +46,8 @@ public class TagsApi implements Microservice  {
 ,@ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
 ,@ApiParam(value = "Media types acceptable for the response. Default is JSON. " , defaultValue="JSON")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
-,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
-)
+, @Context Request request)
     throws NotFoundException {
-        return delegate.tagsGet(limit,offset,accept,ifNoneMatch,minorVersion);
+        return delegate.tagsGet(limit,offset,accept,ifNoneMatch, request);
     }
 }

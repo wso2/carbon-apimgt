@@ -18,8 +18,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import javax.ws.rs.core.Response;
+import org.wso2.msf4j.Request;
 
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-09T12:36:56.084+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
+        "2017-02-09T12:36:56.084+05:30")
 public class LabelInfoApiServiceImpl extends LabelInfoApiService {
 
     private static final Logger log = LoggerFactory.getLogger(LabelInfoApiServiceImpl.class);
@@ -31,13 +33,13 @@ public class LabelInfoApiServiceImpl extends LabelInfoApiService {
      * @param accept          Accept header value
      * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
-     * @param minorVersion    Minor ersion header value
-     * @return Lable List
+     * @param request         msf4j request object
+     * @return Label List
      * @throws NotFoundException If failed to get the label values
      */
     @Override
     public Response labelInfoGet(String labels, String accept, String ifNoneMatch, String ifModifiedSince,
-                                 String minorVersion) throws NotFoundException {
+                                 Request request) throws NotFoundException {
 
         String username = RestApiUtil.getLoggedInUsername();
         LabelListDTO labelListDTO;
