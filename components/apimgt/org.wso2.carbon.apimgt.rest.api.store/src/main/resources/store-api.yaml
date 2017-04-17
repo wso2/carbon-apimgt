@@ -3,7 +3,7 @@ swagger: '2.0'
 # Prolog
 ######################################################
 info:
-  version: "v1"
+  version: "v1.0"
   title: "WSO2 API Manager - Store"
   description: |
     This document specifies a **RESTful API** for WSO2 **API Manager** - Store.
@@ -34,7 +34,7 @@ host: apis.wso2.com
 
 # The base path of the API.
 # Will be prefixed to all paths.
-basePath: /api/am/store/v1
+basePath: /api/am/store/v1.0
 
 # The following media types can be passed as input in message bodies of the API.
 # The actual media type must be specified in the Content-Type header field of the request.
@@ -101,7 +101,6 @@ paths:
           type: string
         - $ref : "#/parameters/Accept"
         - $ref : "#/parameters/If-None-Match"
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - API Collection
         - Retrieve
@@ -146,8 +145,7 @@ paths:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
-        - $ref: '#/parameters/If-Modified-Since'
-        - $ref: '#/parameters/Minor-Version'
+        - $ref: '#/parameters/If-Modified-Since' 
       tags:
         - API (individual)
         - Retrieve
@@ -204,7 +202,6 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - API (individual)
         - Retrieve
@@ -261,7 +258,6 @@ paths:
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - API (individual)
         - Retrieve Documents
@@ -315,7 +311,6 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - API (individual)
         - Retrieve Document
@@ -377,7 +372,6 @@ paths:
           - $ref: '#/parameters/Accept'
           - $ref: '#/parameters/If-None-Match'
           - $ref: '#/parameters/If-Modified-Since'
-          - $ref: '#/parameters/Minor-Version'
         tags:
           - API (individual)
           - Retrieve Document
@@ -443,7 +437,6 @@ paths:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/Accept'
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - API (individual)
         - Retrieve Rating
@@ -489,7 +482,6 @@ paths:
           schema:
             $ref: '#/definitions/Rating'
         - $ref: '#/parameters/Content-Type'
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - API (individual)
         - Create
@@ -543,7 +535,6 @@ paths:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/Accept'
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - Comments Collection
         - Retrieve
@@ -583,7 +574,6 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - API (individual)
         - Retrieve Comment
@@ -638,7 +628,6 @@ paths:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - API (individual)
         - Delete
@@ -675,7 +664,6 @@ paths:
           schema:
             $ref: '#/definitions/Comment'
         - $ref: '#/parameters/Content-Type'
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - API (individual)
         - Create
@@ -733,7 +721,6 @@ paths:
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - API (individual)
         - Update
@@ -810,7 +797,6 @@ paths:
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - Application Collection
         - Retrieve
@@ -864,7 +850,6 @@ paths:
           schema:
             $ref: '#/definitions/Application'
         - $ref: '#/parameters/Content-Type'
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - Application (individual)
         - Create
@@ -925,7 +910,6 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - Application (individual)
         - Retrieve
@@ -986,7 +970,6 @@ paths:
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - Application (individual)
         - Update
@@ -1045,7 +1028,6 @@ paths:
         - $ref: '#/parameters/applicationId'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - Application (individual)
         - Delete
@@ -1091,7 +1073,6 @@ paths:
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - Application (individual)
         - Generate Keys
@@ -1157,7 +1138,6 @@ paths:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - Subscription Collection
         - Retrieve
@@ -1204,7 +1184,6 @@ paths:
           schema:
             $ref: '#/definitions/Subscription'
         - $ref: '#/parameters/Content-Type'
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - Subscription (individual)
         - Create
@@ -1257,7 +1236,6 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - Subscription (individual)
         - Retrieve
@@ -1300,7 +1278,6 @@ paths:
         - $ref: '#/parameters/subscriptionId'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - Subscription (individual)
         - Delete
@@ -1339,7 +1316,6 @@ paths:
         - $ref: '#/parameters/tierLevel'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - Tier Collection
         - Retrieve
@@ -1389,7 +1365,6 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - Tier (individual)
         - Retrieve
@@ -1448,7 +1423,6 @@ paths:
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - Tag Collection
         - Retrieve
@@ -1501,7 +1475,6 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - Label (Collection)
       responses:
@@ -1801,16 +1774,6 @@ parameters:
     description: |
       Validator for conditional requests; based on Last Modified header.
     type: string
-
-# The HTTP Minor-Version header
-# Used to validate the minor version of API
-  Minor-Version:
-    name: Minor-Version
-    in: header
-    description: |
-      Validator for API Minor Version
-    type: string
-    default: 1.0
 
 # Workflow reference ID
 # Specified as part of the path expression

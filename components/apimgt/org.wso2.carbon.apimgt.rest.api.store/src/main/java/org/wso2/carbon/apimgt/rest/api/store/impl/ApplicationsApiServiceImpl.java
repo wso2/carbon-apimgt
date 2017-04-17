@@ -1,5 +1,13 @@
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,17 +40,10 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.WorkflowMappintUtil;
+import org.wso2.msf4j.Request;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:48:55.078+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
+        "2016-11-01T13:48:55.078+05:30")
 public class ApplicationsApiServiceImpl
         extends ApplicationsApiService {
 
@@ -50,22 +51,22 @@ public class ApplicationsApiServiceImpl
 
     /**
      * Deletes an existing application
-     * 
-     * @param applicationId ID of the application
-     * @param ifMatch If-Match header value
+     *
+     * @param applicationId     ID of the application
+     * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @param minorVersion minor version header
+     * @param request           msf4j request object
      * @return 200 response if the deletion was successful
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response applicationsApplicationIdDelete(String applicationId, String ifMatch, String ifUnmodifiedSince,
-                                                    String minorVersion) throws NotFoundException {
+                                                    Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
             String existingFingerprint = applicationsApplicationIdGetFingerprint(applicationId, null, null, null,
-                    minorVersion);
+                    request);
             if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
                     .contains(existingFingerprint)) {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
@@ -85,24 +86,24 @@ public class ApplicationsApiServiceImpl
 
     /**
      * Retrives an existing application
-     * 
-     * @param applicationId application Id
-     * @param accept Accept header value
-     * @param ifNoneMatch If-None-Match header value
+     *
+     * @param applicationId   application Id
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
-     * @param minorVersion minor version
+     * @param request         msf4j request object
      * @return Requested application detials as the response
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response applicationsApplicationIdGet(String applicationId, String accept, String ifNoneMatch,
-                                                 String ifModifiedSince, String minorVersion) throws NotFoundException {
+                                                 String ifModifiedSince, Request request) throws NotFoundException {
         ApplicationDTO applicationDTO = null;
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
             String existingFingerprint = applicationsApplicationIdGetFingerprint(applicationId, accept, ifNoneMatch,
-                    ifModifiedSince, minorVersion);
+                    ifModifiedSince, request);
             if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
                     .contains(existingFingerprint)) {
                 return Response.notModified().build();
@@ -159,16 +160,16 @@ public class ApplicationsApiServiceImpl
 
     /**
      * Retrieves the fingerprint of a application given its UUID
-     * 
-     * @param applicationId application Id
-     * @param accept Accept header value
-     * @param ifNoneMatch If-None-Match header value
+     *
+     * @param applicationId   application Id
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
-     * @param minorVersion minor version
+     * @param request         msf4j request object
      * @return Retrieves the fingerprint of a application
      */
     public String applicationsApplicationIdGetFingerprint(String applicationId, String accept, String ifNoneMatch,
-            String ifModifiedSince, String minorVersion) {
+                                                          String ifModifiedSince, Request request) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             String lastUpdatedTime = RestApiUtil.getConsumer(username).getLastUpdatedTimeOfApplication(applicationId);
@@ -183,26 +184,26 @@ public class ApplicationsApiServiceImpl
 
     /**
      * Updates an existing application
-     * 
-     * @param applicationId application Id
-     * @param body Application details to be updated
-     * @param contentType Content-Type header
-     * @param ifMatch If-Match header value
+     *
+     * @param applicationId     application Id
+     * @param body              Application details to be updated
+     * @param contentType       Content-Type header
+     * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @param minorVersion minor version
+     * @param request           msf4j request object
      * @return Updated application details as the response
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body,
                                                  String contentType, String ifMatch, String ifUnmodifiedSince,
-                                                 String minorVersion) throws NotFoundException {
+                                                 Request request) throws NotFoundException {
         ApplicationDTO updatedApplicationDTO = null;
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
             String existingFingerprint = applicationsApplicationIdGetFingerprint(applicationId, null, null, null,
-                    minorVersion);
+                    request);
             if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
                     .contains(existingFingerprint)) {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
@@ -215,8 +216,9 @@ public class ApplicationsApiServiceImpl
             Application updatedApplication = apiConsumer.getApplication(applicationId, username, null);
             updatedApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(updatedApplication);
             String newFingerprint = applicationsApplicationIdGetFingerprint(applicationId, null, null, null,
-                    minorVersion);
-            return Response.ok().entity(updatedApplicationDTO).header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"").build();
+                    request);
+            return Response.ok().entity(updatedApplicationDTO).header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"")
+                    .build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while updating application: " + body.getName();
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -229,20 +231,20 @@ public class ApplicationsApiServiceImpl
 
     /**
      * Generates keys for the application
-     * 
-     * @param applicationId application Id
-     * @param body Key generation request details 
-     * @param contentType Content-Type header
-     * @param ifMatch If-Match header value
+     *
+     * @param applicationId     application Id
+     * @param body              Key generation request details
+     * @param contentType       Content-Type header
+     * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @param minorVersion minor version
+     * @param request           msf4j request object
      * @return Generated application key details
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response applicationsGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO body,
                                                  String contentType, String ifMatch, String ifUnmodifiedSince,
-                                                 String minorVersion) throws NotFoundException {
+                                                 Request request) throws NotFoundException {
         ApplicationKeyDTO applicationKeyDTO = null;
         String username = RestApiUtil.getLoggedInUsername();
         try {
@@ -253,7 +255,8 @@ public class ApplicationsApiServiceImpl
                 String tokenScopes = StringUtils.join(body.getScopes(), " ");
 
                 Map<String, Object> keyDetails = apiConsumer
-                        .generateApplicationKeys(username, application.getName(), applicationId, body.getKeyType().toString(),
+                        .generateApplicationKeys(username, application.getName(), applicationId, body.getKeyType()
+                                        .toString(),
                                 body.getCallbackUrl(), accessAllowDomainsArray, body.getValidityTime(), tokenScopes,
                                 application.getGroupId());
                 applicationKeyDTO = ApplicationKeyMappingUtil
@@ -281,19 +284,19 @@ public class ApplicationsApiServiceImpl
 
     /**
      * Retrieves all applications that qualifies for the search query
-     * 
-     * @param query Search query
-     * @param limit Max number of applications to return
-     * @param offset Starting position of pagination
-     * @param accept Accept header value
+     *
+     * @param query       Search query
+     * @param limit       Max number of applications to return
+     * @param offset      Starting position of pagination
+     * @param accept      Accept header value
      * @param ifNoneMatch If-None-Match header value
-     * @param minorVersion minor version
+     * @param request     msf4j request object
      * @return A list of qualifying application DTOs as the response
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response applicationsGet(String query, Integer limit, Integer offset, String accept,
-                                    String ifNoneMatch, String minorVersion) throws NotFoundException {
+                                    String ifNoneMatch, Request request) throws NotFoundException {
 
         ApplicationListDTO applicationListDTO = null;
         String username = RestApiUtil.getLoggedInUsername();
@@ -331,15 +334,15 @@ public class ApplicationsApiServiceImpl
 
     /**
      * Adds a new application
-     * 
-     * @param body Application details to be added
+     *
+     * @param body        Application details to be added
      * @param contentType Content-Type header
-     * @param minorVersion minor version
-     * @return
+     * @param request     msf4j request object
+     * @return 201 Response if successful
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response applicationsPost(ApplicationDTO body, String contentType, String minorVersion)
+    public Response applicationsPost(ApplicationDTO body, String contentType, Request request)
             throws NotFoundException {
         URI location = null;
         ApplicationDTO createdApplicationDTO = null;
@@ -358,7 +361,7 @@ public class ApplicationsApiServiceImpl
             createdApplicationDTO.setWorkflowResponse(workflowResponse);
 
             location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" +
-                                createdApplicationDTO.getApplicationId());
+                    createdApplicationDTO.getApplicationId());
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new application : " + body.getName();
             HashMap<String, String> paramList = new HashMap<String, String>();

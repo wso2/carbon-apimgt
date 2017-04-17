@@ -43,13 +43,23 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.ws.rs.core.Response;
+import org.wso2.msf4j.Request;
 
 public class WorkflowsApiServiceImpl extends WorkflowsApiService {
 
     private static final Logger log = LoggerFactory.getLogger(WorkflowsApiServiceImpl.class);
 
+    /**
+     * Update workflow status
+     *
+     * @param workflowReferenceId Workflow reference ID
+     * @param body                Workflow information
+     * @param request             msf4j request object
+     * @return 200 response if successful
+     * @throws NotFoundException If workflow not found
+     */
     @Override
-    public Response workflowsUpdateWorkflowStatusPost(String workflowReferenceId, WorkflowDTO body)
+    public Response workflowsUpdateWorkflowStatusPost(String workflowReferenceId, WorkflowDTO body, Request request)
             throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
@@ -100,7 +110,7 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
                     } else {
                         newAttributes.forEach(existingAttributs::putIfAbsent);
                         workflow.setAttributes(existingAttributs);
-                    }                
+                    }
                 }
 
                 WorkflowResponse response = apiStore.completeWorkflow(workflowExecutor, workflow);
@@ -116,5 +126,5 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-    }    
+    }
 }

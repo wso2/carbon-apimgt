@@ -49,7 +49,7 @@ public class APIMConfigurations {
     @Element(description = "context for publisher")
     private String publisherContext = "/api/am/publisher/v1.0";
     @Element(description = "context for store")
-    private String storeContext = "/api/am/store/v1";
+    private String storeContext = "/api/am/store/v1.0";
     @Element(description = "context for admin")
     private String adminContext = "/api/am/admin/v1.0";
 
