@@ -47,7 +47,7 @@ public class LabelInfoApiServiceImpl extends LabelInfoApiService {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             if (labels != null) {
                 List<String> labelNames = Arrays.asList(labels.split(","));
-                List<Label> labelList = apiStore.getLabelInfo(labelNames);
+                List<Label> labelList = apiStore.getLabelInfo(labelNames, username);
                 labelListDTO = LabelMappingUtil.toLabelListDTO(labelList);
             } else {
                 //mandatory parameters not provided
