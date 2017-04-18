@@ -474,7 +474,7 @@ public class APIStoreImplTestCase {
         labelList.add(label);
         labelNames.add(label.getName());
         Mockito.when(labelDAO.getLabelsByName(labelNames)).thenReturn(labelList);
-        List<Label> returnedLabels = apiStore.getLabelInfo(labelNames);
+        List<Label> returnedLabels = apiStore.getLabelInfo(labelNames, USER_NAME);
         Assert.assertEquals(returnedLabels, labelList);
         Mockito.verify(labelDAO, Mockito.times(1)).getLabelsByName(labelNames);
     }
@@ -644,7 +644,7 @@ public class APIStoreImplTestCase {
         labels.add("label");
         Mockito.when(labelDAO.getLabelsByName(labels))
                 .thenThrow(new APIMgtDAOException("Error occurred while retrieving label information"));
-        apiStore.getLabelInfo(labels);
+        apiStore.getLabelInfo(labels, USER_NAME);
     }
 
 

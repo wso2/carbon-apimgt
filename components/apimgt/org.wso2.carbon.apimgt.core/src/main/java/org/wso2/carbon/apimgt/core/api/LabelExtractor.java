@@ -31,10 +31,10 @@ public interface LabelExtractor {
     /**
      * Return List of filtered labels based on the filtering.
      *
-     * @param roles  List of roles
+     * @param username  Username of the user
      * @param labels List of labels
      * @return {@code List<Label>}
      * @throws APIManagementException if failed to filter labels
      */
-    List<Label> filterLabels(List<String> roles, List<Label> labels) throws APIManagementException;
+    List<Label> filterLabels(String username, List<Label> labels) throws APIManagementException;
 }

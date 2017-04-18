@@ -443,21 +443,14 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
     @Override
-    public List<Label> getLabelInfo(List<String> labels) throws APIManagementException {
+    public List<Label> getLabelInfo(List<String> labels, String username) throws APIManagementException {
 
         List<Label> filteredLabels;
         String labelExtractorClassName = config.getLabelExtractor();
         try {
             List<Label> availableLabels = getLabelDAO().getLabelsByName(labels);
-
-            // TODO: Need to update this based on the roles impl.
-            // Logged in user
-            String user = "admin";
-            // List of roles of the current user
-            List<String> roles = APIUtils.getAllRolesOfUser(user);
-
             LabelExtractor labelExtractor = (LabelExtractor) Class.forName(labelExtractorClassName).newInstance();
-            filteredLabels = labelExtractor.filterLabels(roles, availableLabels);
+            filteredLabels = labelExtractor.filterLabels(username, availableLabels);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while retrieving label information";
             log.error(errorMsg, e);

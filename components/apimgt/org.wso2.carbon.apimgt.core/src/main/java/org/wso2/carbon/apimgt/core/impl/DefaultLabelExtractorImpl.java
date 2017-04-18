@@ -32,11 +32,10 @@ import java.util.List;
 public class DefaultLabelExtractorImpl implements LabelExtractor {
 
     /**
-     * @see LabelExtractor#filterLabels(List, List)
+     * @see LabelExtractor#filterLabels(String, List)
      */
     @Override
-    public List<Label> filterLabels(List<String> roles, List<Label> labels) throws APIManagementException {
-
+    public List<Label> filterLabels(String username, List<Label> labels) throws APIManagementException {
         return labels;
     }
 }
