@@ -22,6 +22,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +84,7 @@ public class APIFileUtils {
     /**
      * Creates a file writing the content of the object as json.
      *
-     * @param object    object to be written as JSON.
+     * @param object   object to be written as JSON.
      * @param filePath full path to create the file
      * @throws APIMgtDAOException if an error occurs while writing the object as json to file.
      */
@@ -91,8 +92,8 @@ public class APIFileUtils {
         Gson gson = new Gson();
 
         try (FileOutputStream fileOutputStream = new FileOutputStream(filePath);
-                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream,
-                        StandardCharsets.UTF_8)) {
+             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream,
+                     StandardCharsets.UTF_8)) {
             gson.toJson(object, outputStreamWriter);
         } catch (IOException e) {
             String msg = "Error while writing the object to the file path " + filePath;
@@ -104,7 +105,7 @@ public class APIFileUtils {
     /**
      * Creates a file writing the content of the string as json.
      *
-     * @param content    string content to be written as JSON.
+     * @param content  string content to be written as JSON.
      * @param filePath full path to create the file
      * @throws APIMgtDAOException if an error occurs while writing the string as json to file.
      */
@@ -125,8 +126,8 @@ public class APIFileUtils {
     public static void writeToFile(String path, String content) throws APIMgtDAOException {
 
         try (FileOutputStream fileOutStream = new FileOutputStream(path);
-                StringReader stringReader = new StringReader(content);
-                OutputStreamWriter writer = new OutputStreamWriter(fileOutStream, StandardCharsets.UTF_8);) {
+             StringReader stringReader = new StringReader(content);
+             OutputStreamWriter writer = new OutputStreamWriter(fileOutStream, StandardCharsets.UTF_8);) {
             IOUtils.copy(stringReader, writer);
         } catch (IOException e) {
             String msg = "I/O error while writing to file at: " + path;
@@ -154,6 +155,13 @@ public class APIFileUtils {
         }
     }
 
+    /**
+     * Find a file in file system
+     *
+     * @param file File to start searching
+     * @param name File name to search
+     * @return absolute path of the file
+     */
     public static String findInFileSystem(File file, String name) {
         if (file.isDirectory()) {
             File[] files = file.listFiles();
@@ -171,5 +179,39 @@ public class APIFileUtils {
             }
         }
         return null;
+    }
+
+    /**
+     * Delete a given directory
+     *
+     * @param path Path to the directory to be deleted
+     * @throws APIMgtDAOException if an error occurs while deleting the directory
+     */
+    public static void deleteDirectory(String path) throws APIMgtDAOException {
+
+        try {
+            FileUtils.deleteDirectory(new File(path));
+        } catch (IOException e) {
+            String msg = "Error while deleting directory : " + path;
+            log.error(msg, e);
+            throw new APIMgtDAOException(msg, e);
+        }
+    }
+
+    /**
+     * Delete a given file
+     *
+     * @param path Path to the file to be deleted
+     * @throws APIMgtDAOException if an error occurs while deleting the directory
+     */
+    public static void deleteFile(String path) throws APIMgtDAOException {
+
+        try {
+            Files.delete(Paths.get(path));
+        } catch (IOException e) {
+            String msg = "Error while deleting file : " + path;
+            log.error(msg, e);
+            throw new APIMgtDAOException(msg, e);
+        }
     }
 }
