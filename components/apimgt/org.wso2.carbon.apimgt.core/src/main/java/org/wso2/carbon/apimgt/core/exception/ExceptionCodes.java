@@ -94,7 +94,8 @@ public enum ExceptionCodes implements ErrorHandler {
             " Non existing roles cannot be added to an API"),
     LABEL_INFORMATION_CANNOT_BE_NULL(900331, "Label information cannot be null", 400, "Label information cannot be " +
             "null"),
-    APPLICATION_INACTIVE(900332, "Application is not active", 400, "Application is not active");
+    APPLICATION_INACTIVE(900332, "Application is not active", 400, "Application is not active"),
+    LABEL_INFORMATION_EXCEPTION(900332, "Label Info error", 500, "Error occurred while retrieving label information");
 
 
     private final long errorCode;

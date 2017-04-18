@@ -60,12 +60,19 @@ public class APIMConfigurations {
     private String gatewayPackageNamePath =
             "deployment" + File.separator + "org" + File.separator + "wso2" + File.separator + "apim";
 
+    @Element(description = "label extractor")
+    private String labelExtractor = "org.wso2.carbon.apimgt.core.impl.DefaultLabelExtractorImpl";
+
     public String getHostname() {
         return hostname;
     }
 
     public boolean isReverseProxyEnabled() {
         return reverseProxyEnabled;
+    }
+
+    public String getLabelExtractor() {
+        return labelExtractor;
     }
 
     public String getPublisherContext() {
