@@ -103,10 +103,28 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 
     @Override
     public Response policiesTierLevelTierLevelTierNameTierNamePut(String tierName, TierDTO body, String tierLevel,
-                                                                  String contentType, String ifMatch, String
-                                                                              ifUnmodifiedSince, Request request)
-            throws NotFoundException {
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+            String contentType, String ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
+
+        if (log.isDebugEnabled()) {
+            log.info("Received Policy POST request " + body + " with tierLevel = " + tierLevel);
+        }
+        Policy policy = null;
+        try {
+            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
+            policy = PolicyMappingUtil.toPolicy(tierLevel, body);
+            apiMgtAdminService.updatePolicy(policy);
+            return Response.status(Response.Status.OK).entity(policy).build();
+        } catch (APIManagementException e) {
+            String errorMessage;
+            if (policy != null) {
+                errorMessage = "Error occurred while updating Policy. policy name: " + policy.getPolicyName();
+            } else {
+                errorMessage = "Error occurred while updating Policy.";
+            }
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
     }
 
     @Override

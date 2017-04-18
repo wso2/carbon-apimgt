@@ -62,6 +62,14 @@ public interface PolicyDAO {
     void addPolicy(String policyLevel, Policy policy) throws APIMgtDAOException;
 
     /**
+     * Updates a Policy belongs to a level
+     *
+     * @param policy Policy to update
+     * @throws APIMgtDAOException If failed to add a Policy
+     */
+    void updatePolicy(Policy policy) throws APIMgtDAOException;
+
+    /**
      * Deletes a Policy by Name and Level
      *
      * @param policyName Policy Name to delete

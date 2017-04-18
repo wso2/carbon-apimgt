@@ -87,7 +87,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
      */
     @Override
     public void updatePolicy(Policy policy) throws APIManagementException {
-
+        policyDAO.updatePolicy(policy);
     }
 
     /**
