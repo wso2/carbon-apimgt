@@ -437,6 +437,9 @@
                                 <DATABASE_TYPE>mysql</DATABASE_TYPE>
                                 <PORT>${apim-mysql.port}</PORT>
                             </environmentVariables>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                            </suiteXmlFiles>
                         </configuration>
                     </plugin>
                 </plugins>
