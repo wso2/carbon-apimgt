@@ -29,9 +29,6 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -173,35 +170,7 @@ public class TestUtil {
         return ip;
     }
 
-    /**
-     * Used to check content of two streams equal
-     * @param input1
-     * @param input2
-     * @return
-     * @throws IOException
-     */
-    public static boolean contentEquals(InputStream input1, InputStream input2) throws IOException {
-        if (!(input1 instanceof BufferedInputStream)) {
-            input1 = new BufferedInputStream(input1);
-        }
-        if (!(input2 instanceof BufferedInputStream)) {
-            input2 = new BufferedInputStream(input2);
-        }
-
-        int ch = input1.read();
-        while (-1 != ch) {
-            int ch2 = input2.read();
-            if (ch != ch2) {
-                return false;
-            }
-            ch = input1.read();
-        }
-
-        int ch2 = input2.read();
-        return (ch2 == -1);
-    }
-
-    public static TestUtil getInstance() {
+       public static TestUtil getInstance() {
         return instance;
     }
 }

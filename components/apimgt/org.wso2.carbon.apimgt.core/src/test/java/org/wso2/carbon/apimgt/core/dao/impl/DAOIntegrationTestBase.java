@@ -65,9 +65,8 @@ public class DAOIntegrationTestBase {
         int maxRetries = 5;
         long maxWait = 5000;
         while (maxRetries > 0) {
-            try {
-                dataSource.getConnection();
-                log.warn("Database Connection Successful");
+            try (Connection connection = dataSource.getConnection()) {
+                log.info("Database Connection Successful");
                 break;
             } catch (Exception e) {
                 if (maxRetries > 0) {

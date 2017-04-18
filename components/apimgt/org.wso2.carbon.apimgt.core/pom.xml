@@ -518,6 +518,9 @@
                             <environmentVariables>
                                 <DATABASE_TYPE>db2</DATABASE_TYPE>
                             </environmentVariables>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                            </suiteXmlFiles>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -596,6 +599,9 @@
                                 <DATABASE_TYPE>mssql</DATABASE_TYPE>
                                 <PORT>${apim-mssql.port}</PORT>
                             </environmentVariables>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                            </suiteXmlFiles>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -708,6 +714,9 @@
                                 <DATABASE_TYPE>postgres</DATABASE_TYPE>
                                 <PORT>${apim-postgres.port}</PORT>
                             </environmentVariables>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                            </suiteXmlFiles>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -786,6 +795,9 @@
                                 <PORT>${apim-oracle.port}</PORT>
                             </environmentVariables>
                             <argLine>-Duser.timezone=GMT</argLine>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                            </suiteXmlFiles>
                         </configuration>
                     </plugin>
                 </plugins>

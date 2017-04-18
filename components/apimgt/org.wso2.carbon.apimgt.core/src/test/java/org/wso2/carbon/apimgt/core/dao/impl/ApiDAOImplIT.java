@@ -948,17 +948,6 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testGetSwaggerDefinition() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
-        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI().apiDefinition(SampleTestObjectCreator
-                .apiDefinition);
-        API api = builder.build();
-        testAddGetEndpoint();
-        apiDAO.addAPI(api);
-        Assert.assertEquals(SampleTestObjectCreator.apiDefinition, apiDAO.getSwaggerDefinition(api.getId()));
-    }
-
-    @Test
     public void testCheckContextExist() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI().apiDefinition(SampleTestObjectCreator
