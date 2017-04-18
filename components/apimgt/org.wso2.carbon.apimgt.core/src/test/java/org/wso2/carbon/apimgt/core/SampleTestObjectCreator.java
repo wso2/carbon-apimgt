@@ -602,4 +602,19 @@ public class SampleTestObjectCreator {
         
         return workflow;
     }
+    public static DocumentInfo createDefaultFileDocumentationInfo() {
+        //created by admin
+        DocumentInfo.Builder builder = new DocumentInfo.Builder();
+        builder.id(UUID.randomUUID().toString());
+        builder.name(SAMPLE_DOC_NAME);
+        builder.type(DocumentInfo.DocType.HOWTO);
+        builder.summary("Summary of Calculator Documentation");
+        builder.sourceType(DocumentInfo.SourceType.FILE);
+        builder.sourceURL(EMPTY_STRING);
+        builder.otherType(EMPTY_STRING);
+        builder.visibility(DocumentInfo.Visibility.API_LEVEL);
+        builder.createdTime(LocalDateTime.now());
+        builder.lastUpdatedTime(LocalDateTime.now());
+        return builder.build();
+    }
 }

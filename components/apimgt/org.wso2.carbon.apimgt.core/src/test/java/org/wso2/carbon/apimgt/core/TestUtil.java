@@ -170,7 +170,7 @@ public class TestUtil {
         return ip;
     }
 
-    public static TestUtil getInstance() {
+       public static TestUtil getInstance() {
         return instance;
     }
 }

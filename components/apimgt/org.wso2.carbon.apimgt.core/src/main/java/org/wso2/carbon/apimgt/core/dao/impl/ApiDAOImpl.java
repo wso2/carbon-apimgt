@@ -1053,8 +1053,8 @@ public class ApiDAOImpl implements ApiDAO {
                 .prepareStatement(query)) {
             preparedStatement.setString(1, apiId);
             preparedStatement.setString(2, documentInfo.getName());
-            preparedStatement.setString(3, documentInfo.getType().getType());
-            preparedStatement.setString(4, documentInfo.getSourceType().getType());
+            preparedStatement.setString(3, documentInfo.getType().toString());
+            preparedStatement.setString(4, documentInfo.getSourceType().toString());
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     exist = true;
