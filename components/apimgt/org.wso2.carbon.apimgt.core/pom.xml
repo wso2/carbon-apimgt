@@ -294,6 +294,7 @@
                             <value>${basedir}/src/test/resources/</value>
                         </property>
                     </systemProperties>
+                    <skip>${skip.surefire.test}</skip>
                 </configuration>
 			</plugin>
         </plugins>
