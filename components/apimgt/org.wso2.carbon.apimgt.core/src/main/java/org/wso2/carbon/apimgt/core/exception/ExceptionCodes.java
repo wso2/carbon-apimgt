@@ -70,12 +70,14 @@ public enum ExceptionCodes implements ErrorHandler {
     WORKFLOW_EXCEPTION(900550, "Workflow error", 500,
             "Error occurred while executing workflow task"),
     WORKFLOW_NOT_FOUND(900551, "Workflow error", 500,
-            "Error while retrieving worklow task for the reference id"),
+            "Workflow entry cannot be found for the given reference id"),
     WORKFLOW_COMPLETED(900552, "Workflow error", 500,
             "Workflow is already completed"),
     WORKFLOW_PENDING(900553, "Workflow exception", 409,
             "Pending workflow task exists for the seleted API"),
-
+    WORKFLOW_INV_PUBLISHER_WFTYPE(900554, "Workflow error", 500, "Invalid workflow type for publisher workflows"),
+    WORKFLOW_INV_STORE_WFTYPE(900555, "Workflow error", 500, "Invalid workflow type for store workflows"),
+    WORKFLOW_STATE_MISSING(900556, "Workflow error", 400, "Workflow status is not defined"),
 
     // Auth related codes
     ROLES_CANNOT_BE_EMPTY(900600, "Role list cannot be empty", 400, " Role list cannot be empty"),

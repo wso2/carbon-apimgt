@@ -898,9 +898,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             }
             updateWorkflowEntries(workflow);
         } else {
-            String message = "Invalid workflow type:  " + workflow.getWorkflowType();
+            String message = "Invalid workflow type for store workflows:  " + workflow.getWorkflowType();
             log.error(message);
-            throw new APIManagementException(message, ExceptionCodes.WORKFLOW_EXCEPTION);
+            throw new APIManagementException(message, ExceptionCodes.WORKFLOW_INV_STORE_WFTYPE);
         }
 
         return response;

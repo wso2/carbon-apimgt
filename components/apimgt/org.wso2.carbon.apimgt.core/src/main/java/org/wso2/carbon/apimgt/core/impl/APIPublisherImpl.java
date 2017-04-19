@@ -1663,6 +1663,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 }              
             }
             updateWorkflowEntries(workflow); 
+        } else {
+            String message = "Invalid workflow type for publisher workflows:  " + workflow.getWorkflowType();
+            log.error(message);
+            throw new APIManagementException(message, ExceptionCodes.WORKFLOW_INV_PUBLISHER_WFTYPE);
         }
         return response;
     }
