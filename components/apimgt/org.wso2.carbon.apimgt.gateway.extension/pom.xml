@@ -44,7 +44,7 @@
     </build>
     <profiles>
         <profile>
-            <id>default</id>
+            <id>integration-tests</id>
             <build>
                 <plugins>
                     <plugin>
