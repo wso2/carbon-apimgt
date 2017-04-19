@@ -135,7 +135,7 @@ public class RestApiUtil {
      * @param paramList map of parameters specific to the error.
      * @return A generic errorDTO with the specified details
      */
-    public static ErrorDTO getErrorDTO(ErrorHandler errorHandler, HashMap<String, String> paramList) {
+    public static ErrorDTO getErrorDTO(ErrorHandler errorHandler, Map<String, String> paramList) {
         ErrorDTO errorDTO = new ErrorDTO();
         errorDTO.setCode(errorHandler.getErrorCode());
         errorDTO.setMoreInfo(paramList);
