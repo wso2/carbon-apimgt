@@ -197,11 +197,12 @@ public interface APIStore extends APIManager {
     /**
      * Retrieve Label information based on the label name
      *
-     * @param labels List of label names
+     * @param labels    List of label names
+     * @param username  Username of the user
      * @return {@code List<Label>} List of Labels
      * @throws APIManagementException if failed to get labels
      */
-    List<Label> getLabelInfo(List<String> labels) throws APIManagementException;
+    List<Label> getLabelInfo(List<String> labels, String username) throws APIManagementException;
 
     /**
      * Retrieve Individual Comment based on Comment ID

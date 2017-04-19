@@ -273,8 +273,8 @@
                 <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.plugins.configuration</artifactId>
+                <groupId>org.wso2.carbon.config</groupId>
+                <artifactId>org.wso2.carbon.config.maven.plugin</artifactId>
                 <executions>
                     <execution>
                         <goals>
@@ -437,6 +437,9 @@
                                 <DATABASE_TYPE>mysql</DATABASE_TYPE>
                                 <PORT>${apim-mysql.port}</PORT>
                             </environmentVariables>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                            </suiteXmlFiles>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -515,6 +518,9 @@
                             <environmentVariables>
                                 <DATABASE_TYPE>db2</DATABASE_TYPE>
                             </environmentVariables>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                            </suiteXmlFiles>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -593,6 +599,9 @@
                                 <DATABASE_TYPE>mssql</DATABASE_TYPE>
                                 <PORT>${apim-mssql.port}</PORT>
                             </environmentVariables>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                            </suiteXmlFiles>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -705,6 +714,9 @@
                                 <DATABASE_TYPE>postgres</DATABASE_TYPE>
                                 <PORT>${apim-postgres.port}</PORT>
                             </environmentVariables>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                            </suiteXmlFiles>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -783,6 +795,9 @@
                                 <PORT>${apim-oracle.port}</PORT>
                             </environmentVariables>
                             <argLine>-Duser.timezone=GMT</argLine>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                            </suiteXmlFiles>
                         </configuration>
                     </plugin>
                 </plugins>

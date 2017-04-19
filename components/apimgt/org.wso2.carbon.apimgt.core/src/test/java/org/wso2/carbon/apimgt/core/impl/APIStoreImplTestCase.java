@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.API.APIBuilder;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
@@ -47,6 +48,7 @@ import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.ApplicationCreationResponse;
 import org.wso2.carbon.apimgt.core.models.ApplicationCreationWorkflow;
 import org.wso2.carbon.apimgt.core.models.Event;
+import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
 import org.wso2.carbon.apimgt.core.models.SubscriptionWorkflow;
@@ -105,6 +107,9 @@ public class APIStoreImplTestCase {
                 return null;
             }
         });
+
+        ConfigProvider configProvider = Mockito.mock(ConfigProvider.class);
+        ServiceReferenceHolder.getInstance().setConfigProvider(configProvider);
     }
     
     @Test(description = "Search APIs with a search query")
@@ -463,10 +468,15 @@ public class APIStoreImplTestCase {
     public void testGetLabelInfo() throws APIManagementException {
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
         APIStore apiStore = new APIStoreImpl(USER_NAME, null, null, null, null, null, labelDAO, null);
-        List<String> labels = new ArrayList<>();
-        labels.add("label");
-        apiStore.getLabelInfo(labels);
-        Mockito.verify(labelDAO, Mockito.times(1)).getLabelsByName(labels);
+        List<Label> labelList = new ArrayList<>();
+        List<String> labelNames = new ArrayList<>();
+        Label label = SampleTestObjectCreator.createLabel("Public").build();
+        labelList.add(label);
+        labelNames.add(label.getName());
+        Mockito.when(labelDAO.getLabelsByName(labelNames)).thenReturn(labelList);
+        List<Label> returnedLabels = apiStore.getLabelInfo(labelNames, USER_NAME);
+        Assert.assertEquals(returnedLabels, labelList);
+        Mockito.verify(labelDAO, Mockito.times(1)).getLabelsByName(labelNames);
     }
 
     /**
@@ -634,7 +644,7 @@ public class APIStoreImplTestCase {
         labels.add("label");
         Mockito.when(labelDAO.getLabelsByName(labels))
                 .thenThrow(new APIMgtDAOException("Error occurred while retrieving label information"));
-        apiStore.getLabelInfo(labels);
+        apiStore.getLabelInfo(labels, USER_NAME);
     }
 
 

@@ -20,6 +20,7 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
+import org.apache.commons.io.IOUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
@@ -945,4 +946,39 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNotNull(apiFromDB);
         Assert.assertNotEquals(api.getLastUpdatedTime(), apiFromDB.getLastUpdatedTime());
     }
+
+    @Test
+    public void testCheckContextExist() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI().apiDefinition(SampleTestObjectCreator
+                .apiDefinition);
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+        apiDAO.changeLifeCycleStatus(api.getId(), APIStatus.PUBLISHED.getStatus());
+        Assert.assertTrue(apiDAO.isAPIContextExists(api.getContext()));
+        Assert.assertFalse(apiDAO.isAPIContextExists("/abc"));
+    }
+
+
+    @Test
+    public void testDocumentAdd() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI().apiDefinition(SampleTestObjectCreator
+                .apiDefinition);
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultFileDocumentationInfo();
+        Assert.assertFalse(apiDAO.isDocumentExist(api.getId(), documentInfo));
+        apiDAO.addDocumentInfo(api.getId(), documentInfo);
+        apiDAO.addDocumentFileContent(documentInfo.getId(), IOUtils.toInputStream(SampleTestObjectCreator
+                .createDefaultInlineDocumentationContent()), "inline1.txt", documentInfo.getCreatedBy());
+        Assert.assertTrue(apiDAO.isDocumentExist(api.getId(), documentInfo));
+        List<DocumentInfo> documentInfoList = apiDAO.getDocumentsInfoList(api.getId());
+        Assert.assertEquals(documentInfoList.get(0), documentInfo);
+        apiDAO.deleteDocument(documentInfo.getId());
+        Assert.assertFalse(apiDAO.isDocumentExist(api.getId(), documentInfo));
+    }
+
 }

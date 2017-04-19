@@ -26,10 +26,12 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.api.APIMObservable;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
+import org.wso2.carbon.apimgt.core.api.LabelExtractor;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
@@ -46,6 +48,7 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
 import org.wso2.carbon.apimgt.core.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
@@ -96,6 +99,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
     private static final Logger log = LoggerFactory.getLogger(APIStoreImpl.class);
     private TagDAO tagDAO;
+    private APIMConfigurations config;
 
     /**
      * Constructor.
@@ -115,6 +119,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         super(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, new APILifeCycleManagerImpl(), labelDAO,
                 workflowDAO);
         this.tagDAO = tagDAO;
+        config = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
     }
 
     @Override
@@ -438,17 +443,29 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
     @Override
-    public List<Label> getLabelInfo(List<String> labels) throws APIManagementException {
+    public List<Label> getLabelInfo(List<String> labels, String username) throws APIManagementException {
 
-        List<Label> labelList;
+        List<Label> filteredLabels;
+        String labelExtractorClassName = config.getLabelExtractor();
         try {
-            labelList = getLabelDAO().getLabelsByName(labels);
+            List<Label> availableLabels = getLabelDAO().getLabelsByName(labels);
+            LabelExtractor labelExtractor = (LabelExtractor) Class.forName(labelExtractorClassName).newInstance();
+            filteredLabels = labelExtractor.filterLabels(username, availableLabels);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while retrieving label information";
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        } catch (ClassNotFoundException e) {
+            String errorMsg = "Error occurred while loading the class [class name] " + labelExtractorClassName;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.LABEL_INFORMATION_EXCEPTION);
+        } catch (IllegalAccessException | InstantiationException e) {
+            String errorMsg = "Error occurred while creating an instance of the class [class name] " +
+                    labelExtractorClassName;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.LABEL_INFORMATION_EXCEPTION);
         }
-        return labelList;
+        return filteredLabels;
     }
 
     @Override
