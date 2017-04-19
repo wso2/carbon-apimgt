@@ -23,7 +23,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
@@ -32,7 +31,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -124,17 +122,13 @@ public class APIFileUtils {
      * @throws APIMgtDAOException if an error occurs while writing to file
      */
     public static void writeToFile(String path, String content) throws APIMgtDAOException {
-
-        try (FileOutputStream fileOutStream = new FileOutputStream(path);
-             StringReader stringReader = new StringReader(content);
-             OutputStreamWriter writer = new OutputStreamWriter(fileOutStream, StandardCharsets.UTF_8);) {
-            IOUtils.copy(stringReader, writer);
+        try {
+            Files.write(Paths.get(path), content.getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             String msg = "I/O error while writing to file at: " + path;
             log.error(msg, e);
             throw new APIMgtDAOException(msg, e);
         }
-
     }
 
     /**
@@ -145,7 +139,6 @@ public class APIFileUtils {
      * @throws APIMgtDAOException if an error occurs while reading the file
      */
     public static String readFileContentAsText(String path) throws APIMgtDAOException {
-
         try {
             return new String(Files.readAllBytes(Paths.get(path)), StandardCharsets.UTF_8);
         } catch (IOException e) {
@@ -188,7 +181,6 @@ public class APIFileUtils {
      * @throws APIMgtDAOException if an error occurs while deleting the directory
      */
     public static void deleteDirectory(String path) throws APIMgtDAOException {
-
         try {
             FileUtils.deleteDirectory(new File(path));
         } catch (IOException e) {
@@ -205,7 +197,6 @@ public class APIFileUtils {
      * @throws APIMgtDAOException if an error occurs while deleting the directory
      */
     public static void deleteFile(String path) throws APIMgtDAOException {
-
         try {
             Files.delete(Paths.get(path));
         } catch (IOException e) {

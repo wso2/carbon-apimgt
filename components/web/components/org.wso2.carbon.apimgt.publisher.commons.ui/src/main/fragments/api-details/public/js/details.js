@@ -272,6 +272,9 @@ function subscriptionsTabHandler(event) {
     var mode = "OVERWRITE"; // Available modes [OVERWRITE,APPEND, PREPEND]
     var callbacks = {
         onSuccess: function (data) {
+            var api_client = new API();
+            var api_id = $("#apiId").val();
+            api_client.subscriptions(api_id, getSubscriptionsCallback);
         },
         onFailure: function (data) {
         }
