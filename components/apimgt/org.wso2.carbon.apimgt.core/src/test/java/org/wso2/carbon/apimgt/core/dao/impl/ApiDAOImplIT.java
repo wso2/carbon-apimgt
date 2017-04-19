@@ -1028,5 +1028,48 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Comment commentFromDB = apiDAO.getCommentByUUID(comment1.getUuid(), api.getId());
         Assert.assertNotNull(commentFromDB);
         Assert.assertEquals(newCommentText, commentFromDB.getCommentText());
+
+    }
+
+    @Test(expectedExceptions = APIMgtDAOException.class)
+    public void testGetAPIByStatus() throws APIMgtDAOException {
+        final String publishedStatus = "PUBLISHED";
+        final String createdStatus = "CREATED";
+
+        final String adminRole = "ADMIN";
+        final String creatorRole = "CREATOR";
+
+        List<String> role = new ArrayList<>();
+        List<String> statuses = new ArrayList<>();
+
+        role.add(adminRole);
+        role.add(creatorRole);
+        statuses.add(publishedStatus);
+        statuses.add(createdStatus);
+
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        apiDAO.getAPIsByStatus(role, statuses);
+
+    }
+    @Test(expectedExceptions = APIMgtDAOException.class)
+    public void testGetAPIByStatusRolesORStatusNullException() throws APIMgtDAOException {
+
+        List<String> role = null;
+        List<String> statuses = null;
+
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        apiDAO.getAPIsByStatus(role, statuses);
+
+    }
+
+    @Test(expectedExceptions = APIMgtDAOException.class)
+    public void testGetAPIByStatusException() throws APIMgtDAOException {
+
+        List<String> role = new ArrayList<>();
+        List<String> statuses = new ArrayList<>();
+
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        apiDAO.getAPIsByStatus(role, statuses);
+
     }
 }
