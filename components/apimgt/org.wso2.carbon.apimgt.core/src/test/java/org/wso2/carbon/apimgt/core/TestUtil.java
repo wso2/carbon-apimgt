@@ -170,15 +170,15 @@ public class TestUtil {
         return ip;
     }
 
-       public static TestUtil getInstance() {
+    public static TestUtil getInstance() {
         return instance;
     }
 
-    public static int getRestApiPort(){
+    public static int getRestApiPort() {
         return 9292 + 500;
     }
 
-    public static int getIdentityServerPort(){
+    public static int getIdentityServerPort() {
         return 9443 + 500;
     }
 }

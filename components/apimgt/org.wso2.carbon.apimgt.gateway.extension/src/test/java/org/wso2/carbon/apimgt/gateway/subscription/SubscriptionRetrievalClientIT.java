@@ -137,7 +137,8 @@ public class SubscriptionRetrievalClientIT {
     @Test
     public void testLoadSubscriptionsOfApi() {
         //load all subscriptions of api test/1.0.0
-        SubscriptionListDTO subsList = new SubscriptionRetrievalClient(apimCoreBaseUrl).loadSubscriptionsOfApi("/test", "1.0.0");
+        SubscriptionListDTO subsList = new SubscriptionRetrievalClient(apimCoreBaseUrl)
+                .loadSubscriptionsOfApi("/test", "1.0.0");
         for (SubscriptionDTO subscriptionDTO : subsList.getSubscriptions()) {
             Assert.assertEquals(subscriptionDTO, new Gson().fromJson(subscription, SubscriptionDTO.class));
         }

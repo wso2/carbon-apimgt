@@ -33,22 +33,17 @@ public final class SubscriptionRetrievalClient {
 
     private static final String DEFAULT_APIM_CORE_BASE_URL = "https://localhost:9292";
 
-    private SubscriptionRetrievalService subscriptionRetrievalService;
+    private SubscriptionRetrievalService subscriptionRetrievalService = null;
 
-    SubscriptionRetrievalClient(String apimCoreBaseUrl) {
-        this.subscriptionRetrievalService = Feign.builder()
+    public SubscriptionRetrievalClient(String apimCoreBaseUrl) {
+        subscriptionRetrievalService = Feign.builder()
                 .encoder(new GsonEncoder())
                 .decoder(new GsonDecoder())
                 .target(SubscriptionRetrievalService.class, apimCoreBaseUrl);
     }
 
     public SubscriptionRetrievalClient() {
-        if (subscriptionRetrievalService == null) {
-            this.subscriptionRetrievalService = Feign.builder()
-                    .encoder(new GsonEncoder())
-                    .decoder(new GsonDecoder())
-                    .target(SubscriptionRetrievalService.class, DEFAULT_APIM_CORE_BASE_URL);
-        }
+        this(DEFAULT_APIM_CORE_BASE_URL);
     }
 
     private interface SubscriptionRetrievalService {
