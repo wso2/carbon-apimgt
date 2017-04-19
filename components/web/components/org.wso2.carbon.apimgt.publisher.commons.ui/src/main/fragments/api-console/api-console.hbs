@@ -2,7 +2,20 @@
 <div class="row">
 
 	<div id="authorizations" class="col-md-12 col-lg-12">
-	
+		<form class="form-horizontal">
+			{{#if @params.labels}}
+				<div class="form-group">
+					<label for="" class="col-sm-6 control-label OnEnvironment">{{i18n "On Environment"}}</label>
+					<div class="col-sm-6">
+						<select id="environment_name" class="env_name">
+							{{#each @params.labels}}
+								<option value="{{this}}">{{this}}</option>
+							{{/each}}
+				  		</select>
+					</div>
+				</div>
+			{{/if}}
+		</form>
 	</div>
 	
 	<div class="col-md-12 col-lg-12 panel-group accordion" role="tablist">
