@@ -3,7 +3,7 @@ swagger: '2.0'
 # Prolog
 ######################################################
 info:
-  version: "v1.0"
+  version: "v1"
   title: "WSO2 API Manager - Store"
   description: |
     This document specifies a **RESTful API** for WSO2 **API Manager** - Store.
@@ -34,7 +34,7 @@ host: apis.wso2.com
 
 # The base path of the API.
 # Will be prefixed to all paths.
-basePath: /api/am/store/v1.0
+basePath: /api/am/store/v1
 
 # The following media types can be passed as input in message bodies of the API.
 # The actual media type must be specified in the Content-Type header field of the request.
@@ -60,10 +60,6 @@ x-wso2-security:
         roles: Internal/subscriber
         name: apim:subscribe
         key: apim:subscribe
-      - description: ""
-        roles: admin
-        name: apim:workflow_approve
-        key: apim:workflow_approve 
 
 ######################################################
 # The "API Collection" resource APIs
@@ -105,6 +101,7 @@ paths:
           type: string
         - $ref : "#/parameters/Accept"
         - $ref : "#/parameters/If-None-Match"
+        - $ref: '#/parameters/Minor-Version'
       tags:
         - API Collection
         - Retrieve
@@ -149,7 +146,8 @@ paths:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
-        - $ref: '#/parameters/If-Modified-Since' 
+        - $ref: '#/parameters/If-Modified-Since'
+        - $ref: '#/parameters/Minor-Version'
       tags:
         - API (individual)
         - Retrieve
@@ -206,6 +204,7 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
+        - $ref: '#/parameters/Minor-Version'
       tags:
         - API (individual)
         - Retrieve
@@ -262,6 +261,7 @@ paths:
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/Minor-Version'
       tags:
         - API (individual)
         - Retrieve Documents
@@ -315,6 +315,7 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
+        - $ref: '#/parameters/Minor-Version'
       tags:
         - API (individual)
         - Retrieve Document
@@ -376,6 +377,7 @@ paths:
           - $ref: '#/parameters/Accept'
           - $ref: '#/parameters/If-None-Match'
           - $ref: '#/parameters/If-Modified-Since'
+          - $ref: '#/parameters/Minor-Version'
         tags:
           - API (individual)
           - Retrieve Document
@@ -441,6 +443,7 @@ paths:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/Minor-Version'
       tags:
         - API (individual)
         - Retrieve Rating
@@ -486,6 +489,7 @@ paths:
           schema:
             $ref: '#/definitions/Rating'
         - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/Minor-Version'
       tags:
         - API (individual)
         - Create
@@ -527,10 +531,11 @@ paths:
 # The "Comments Collection" resource API
 ######################################################
   '/apis/{apiId}/comments':
+
 #-----------------------------------------------------
 # Retrieve a list of all comments of a certain API
 #-----------------------------------------------------
-    get:
+   get:
       description: |
         Get a list of Comments that are already added to APIs
       parameters:
@@ -538,6 +543,7 @@ paths:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/Minor-Version'
       tags:
         - Comments Collection
         - Retrieve
@@ -559,60 +565,6 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Add a new Comment
-#-----------------------------------------------------
-    post:
-      x-scope: apim:subscribe
-      parameters:
-        - $ref: '#/parameters/apiId'
-        - in: body
-          name: body
-          description: |
-            Comment object that should to be added
-          required: true
-          schema:
-            $ref: '#/definitions/Comment'
-        - $ref: '#/parameters/Content-Type'
-      tags:
-        - API (individual)
-        - Create
-      responses:
-        201:
-          description: |
-            Created.
-            Successful response with the newly created object as entity in the body.
-            Location header contains URL of newly created entity.
-          schema:
-            $ref: '#/definitions/Comment'
-          headers:
-            Location:
-              description: |
-                Location to the newly created Comment.
-              type: string
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-            ETag:
-              description: |
-                Entity Tag of the response resource. Used by caches, or in conditional request.
-              type: string
-        400:
-          description: |
-            Bad Request.
-            Invalid request or validation error.
-          schema:
-            $ref: '#/definitions/Error'
-        415:
-          description: |
-            Unsupported media type.
-            The entity of the request was in a not supported format.
-          schema:
-            $ref: '#/definitions/Error'
-
-
-
 #########################################################
 # "Individual API comment" resource APIs
 #########################################################
@@ -631,6 +583,7 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
+        - $ref: '#/parameters/Minor-Version'
       tags:
         - API (individual)
         - Retrieve Comment
@@ -685,6 +638,7 @@ paths:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
+        - $ref: '#/parameters/Minor-Version'
       tags:
         - API (individual)
         - Delete
@@ -700,7 +654,64 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-
+#########################################################
+# "Add API comment" resource APIs
+#########################################################
+  '/apis/{apiId}/comments':
+#-----------------------------------------------------
+# Add a new Comment
+#-----------------------------------------------------
+    post:
+      x-scope: apim:subscribe
+      description: |
+        Add a new Comment
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - in: body
+          name: body
+          description: |
+            Comment object that should to be added
+          required: true
+          schema:
+            $ref: '#/definitions/Comment'
+        - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/Minor-Version'
+      tags:
+        - API (individual)
+        - Create
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created object as entity in the body.
+            Location header contains URL of newly created entity.
+          schema:
+            $ref: '#/definitions/Comment'
+          headers:
+            Location:
+              description: |
+                Location to the newly created Comment.
+              type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional request.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        415:
+          description: |
+            Unsupported media type.
+            The entity of the request was in a not supported format.
+          schema:
+            $ref: '#/definitions/Error'
 
 #-----------------------------------------------------
 # Update a particular Comment
@@ -722,6 +733,7 @@ paths:
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
+        - $ref: '#/parameters/Minor-Version'
       tags:
         - API (individual)
         - Update
@@ -1271,6 +1283,7 @@ paths:
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/Minor-Version'
       tags:
         - Application Collection
         - Retrieve
@@ -1324,6 +1337,7 @@ paths:
           schema:
             $ref: '#/definitions/Application'
         - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/Minor-Version'
       tags:
         - Application (individual)
         - Create
@@ -1348,17 +1362,6 @@ paths:
               description: |
                 Entity Tag of the response resource. Used by caches, or in conditional request
               type: string
-        202:
-          description: |
-            Accepted.
-            The request has been accepted.  
-          schema:
-            $ref: '#/definitions/WorkflowResponse'
-          headers:
-            Location:
-              description: |
-                Location of the newly created Application.
-              type: string    
         400:
           description: |
             Bad Request.
@@ -1395,6 +1398,7 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
+        - $ref: '#/parameters/Minor-Version'
       tags:
         - Application (individual)
         - Retrieve
@@ -1455,6 +1459,7 @@ paths:
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
+        - $ref: '#/parameters/Minor-Version'
       tags:
         - Application (individual)
         - Update
@@ -1513,6 +1518,7 @@ paths:
         - $ref: '#/parameters/applicationId'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
+        - $ref: '#/parameters/Minor-Version'
       tags:
         - Application (individual)
         - Delete
@@ -1521,17 +1527,6 @@ paths:
           description: |
             OK.
             Resource successfully deleted.
-        202:
-          description: |
-            Accepted.
-            The request has been accepted.  
-          schema:
-            $ref: '#/definitions/WorkflowResponse'
-          headers:
-            Location:
-              description: |
-                Location of the existing Application.
-              type: string    
         404:
           description: |
             Not Found.
@@ -1569,6 +1564,7 @@ paths:
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
+        - $ref: '#/parameters/Minor-Version'
       tags:
         - Application (individual)
         - Generate Keys
@@ -1634,6 +1630,7 @@ paths:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/Minor-Version'
       tags:
         - Subscription Collection
         - Retrieve
@@ -1680,6 +1677,7 @@ paths:
           schema:
             $ref: '#/definitions/Subscription'
         - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/Minor-Version'
       tags:
         - Subscription (individual)
         - Create
@@ -1704,17 +1702,6 @@ paths:
               description: |
                 Entity Tag of the response resource. Used by caches, or in conditional request.
               type: string
-        202:
-          description: |
-            Accepted.
-            The request has been accepted.  
-          schema:
-            $ref: '#/definitions/WorkflowResponse'
-          headers:
-            Location:
-              description: |
-                Location of the newly created subscription.
-              type: string    
         400:
           description: |
             Bad Request.
@@ -1743,6 +1730,7 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
+        - $ref: '#/parameters/Minor-Version'
       tags:
         - Subscription (individual)
         - Retrieve
@@ -1785,6 +1773,7 @@ paths:
         - $ref: '#/parameters/subscriptionId'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
+        - $ref: '#/parameters/Minor-Version'
       tags:
         - Subscription (individual)
         - Delete
@@ -1793,17 +1782,6 @@ paths:
           description: |
             OK.
             Resource successfully deleted.
-        202:
-          description: |
-            Accepted.
-            The request has been accepted.  
-          schema:
-            $ref: '#/definitions/WorkflowResponse'
-          headers:
-            Location:
-              description: |
-                Location of the existing subscription.
-              type: string    
         404:
           description: |
             Not Found.
@@ -1834,6 +1812,7 @@ paths:
         - $ref: '#/parameters/tierLevel'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/Minor-Version'
       tags:
         - Tier Collection
         - Retrieve
@@ -1883,6 +1862,7 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
+        - $ref: '#/parameters/Minor-Version'
       tags:
         - Tier (individual)
         - Retrieve
@@ -1941,6 +1921,7 @@ paths:
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/Minor-Version'
       tags:
         - Tag Collection
         - Retrieve
@@ -1993,6 +1974,7 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
+        - $ref: '#/parameters/Minor-Version'
       tags:
         - Label (Collection)
       responses:
@@ -2026,18 +2008,18 @@ paths:
 ######################################################
 # The "Workflow approval" resource API
 ######################################################
-  /workflows/{workflowReferenceId}:
+  /workflows/update-workflow-status:
 
 #-------------------------------------------------------------------
 # Resume the workflow by approving or rejecting the workflow request
 #-------------------------------------------------------------------
-    put:
-      x-scope: apim:workflow_approve
+    post:
+      x-scope: apim:api_workflow
       summary: Update workflow status
       description: |
         This operation can be used to approve or reject a workflow task. .
       parameters:
-       - $ref: '#/parameters/workflowReferenceId'
+       - $ref: '#/parameters/workflowReferenceId-Q'
        - in: body
          name: body
          description: |
@@ -2053,7 +2035,7 @@ paths:
             OK.
             Workflow request information is returned.
           schema:
-            $ref: '#/definitions/WorkflowResponse'
+            $ref: '#/definitions/Workflow'
           headers:
             Content-Type:
               description: |
@@ -2193,17 +2175,17 @@ parameters:
       - api
       - application
     required: true
-
+    
 # Label name of the gateway
 # Specified as part of the query string
   labelName:
     name: labelName
     in: query
     description: |
-      Label name
+      Label name 
     required: false
     type: string
-
+    
 # Protocol of the gateway access URL
 # Specified as part of the query string
   scheme:
@@ -2293,11 +2275,21 @@ parameters:
       Validator for conditional requests; based on Last Modified header.
     type: string
 
+# The HTTP Minor-Version header
+# Used to validate the minor version of API
+  Minor-Version:
+    name: Minor-Version
+    in: header
+    description: |
+      Validator for API Minor Version
+    type: string
+    default: 1.0
+
 # Workflow reference ID
 # Specified as part of the path expression
-  workflowReferenceId:
+  workflowReferenceId-Q:
     name: workflowReferenceId
-    in: path
+    in: query
     description: |
       Workflow reference id
     required: true
@@ -2700,6 +2692,10 @@ definitions:
         type: string
       policy:
         type: string
+      apiName:
+        type: string
+      apiVersion:
+        type: string
       lifeCycleStatus:
         type: string
         enum:
@@ -2992,7 +2988,6 @@ definitions:
   Label:
     title: Label
     required:
-      - labelId
       - name
       - access_urls
     properties:
@@ -3056,30 +3051,7 @@ definitions:
       description:
         type: string
         example: "Approve workflow request."
-
-#-----------------------------------------------------
-# The workflow executor's response resource
-#-----------------------------------------------------
-  WorkflowResponse:
-    title: workflow Response
-    required:
-      - workflowStatus
-    properties:
-      workflowStatus:
-        description: |
-          This attribute declares whether this workflow task is approved or rejected.
-        type: string
-        enum:
-          - CREATED
-          - APPROVED
-          - REJECTED
-          - REGISTERED
-        example: APPROVED
-      jsonPayload:
-        description: |
-          Attributes that returned after the workflow execution
-        type: string
-       
+        
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------
