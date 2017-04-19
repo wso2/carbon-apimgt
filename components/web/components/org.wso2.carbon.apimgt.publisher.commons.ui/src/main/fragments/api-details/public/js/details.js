@@ -936,16 +936,15 @@ function createDocHandler(event) {
     	   var data = {};
     	   api_client.get(api_id).then(
     		        function (response) {
-    		            var context = response.obj;
-    		            
-    		      	  var callbacks = {
+    		        	var context = response.obj;
+    		        	var callbacks = {
     		    	          onSuccess: function (data) {
     		    	                 api_client.getSwagger(api_id).then(
-    		    	                		 function (jsonData) {        		    	                		 
+    		    	                		 function (jsonData) {
     		    	                			 var swaggerURL = jsonData.url;
     		    	                			 if (context.labels.length > 0) {
-    		    	                     			swaggerURL = jsonData.url + "?labelName=" + context.labels[0] + "&scheme=" + location.protocol;
-    		    	                     			}
+    		    	                				 swaggerURL = jsonData.url + "?labelName=" + context.labels[0] + "&scheme=" + location.protocol;
+    		    	                				 }
     		    	                			 var bearerToken = "Bearer " + getCookie("WSO2_AM_TOKEN_1");
     		    	                			 $(document).ready(function() {
     		    	         		    	        window.swaggerUi = new SwaggerUi({
