@@ -31,12 +31,25 @@ import feign.gson.GsonEncoder;
  */
 public final class SubscriptionRetrievalClient {
 
-    private static final String apimCoreBaseUrl = "http://localhost:9090";
+    private static final String DEFAULT_APIM_CORE_BASE_URL = "https://localhost:9292";
 
-    private static SubscriptionRetrievalService subscriptionRetrievalService = Feign.builder()
-            .encoder(new GsonEncoder())
-            .decoder(new GsonDecoder())
-            .target(SubscriptionRetrievalService.class, apimCoreBaseUrl);
+    private SubscriptionRetrievalService subscriptionRetrievalService;
+
+    SubscriptionRetrievalClient(String apimCoreBaseUrl) {
+        this.subscriptionRetrievalService = Feign.builder()
+                .encoder(new GsonEncoder())
+                .decoder(new GsonDecoder())
+                .target(SubscriptionRetrievalService.class, apimCoreBaseUrl);
+    }
+
+    public SubscriptionRetrievalClient() {
+        if (subscriptionRetrievalService == null) {
+            this.subscriptionRetrievalService = Feign.builder()
+                    .encoder(new GsonEncoder())
+                    .decoder(new GsonDecoder())
+                    .target(SubscriptionRetrievalService.class, DEFAULT_APIM_CORE_BASE_URL);
+        }
+    }
 
     private interface SubscriptionRetrievalService {
         @RequestLine("GET /subscriptions?limit={limit}")
@@ -46,11 +59,11 @@ public final class SubscriptionRetrievalClient {
         SubscriptionListDTO getSubscriptions(@Param("context") String context, @Param("version") String version);
     }
 
-    public static SubscriptionListDTO loadSubscriptions(int limit) {
+    SubscriptionListDTO loadSubscriptions(int limit) {
         return subscriptionRetrievalService.getSubscriptions(limit);
     }
 
-    public static SubscriptionListDTO loadSubscriptionsOfApi(String apiContext, String apiVersion) {
+    SubscriptionListDTO loadSubscriptionsOfApi(String apiContext, String apiVersion) {
         return subscriptionRetrievalService.getSubscriptions(apiContext, apiVersion);
     }
 

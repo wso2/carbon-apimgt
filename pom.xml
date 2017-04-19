@@ -177,6 +177,12 @@
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.core</artifactId>
+                <type>test-jar</type>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.gateway.extension</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>

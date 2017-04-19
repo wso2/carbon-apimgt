@@ -166,4 +166,12 @@ public class TestUtil {
     public static TestUtil getInstance() {
         return instance;
     }
+
+    public static int getRestApiPort(){
+        return 9292 + 500;
+    }
+
+    public static int getIdentityServerPort(){
+        return 9443 + 500;
+    }
 }
