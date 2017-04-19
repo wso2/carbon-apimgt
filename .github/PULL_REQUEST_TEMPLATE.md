@@ -25,7 +25,7 @@ environments.]
 #### General
 
 - [ ] **Is this PR explained thoroughly?** All code changes must be accounted for in the PR description.
-- [ ] **Is the PR labeled correctly?
+- [ ] **Is the PR labeled correctly?**
 
 #### Functionality
 
@@ -46,12 +46,12 @@ environments.]
 
 #### Security
 
-- [ ] ** Confirm this PR doesn't commit any keys, passwords, tokens, usernames, or other secrets.**
-- [ ] ** Are all UI and API inputs run through forms or serializers?**
-- [ ] ** Are all external inputs validated and sanitized appropriately?**
-- [ ] ** Does all branching logic have a default case?**
-- [ ] ** Does this solution handle outliers and edge cases gracefully?**
-- [ ] ** Are all external communications secured and restricted to SSL?**
+- [ ] **Confirm this PR doesn't commit any keys, passwords, tokens, usernames, or other secrets.**
+- [ ] **Are all UI and API inputs run through forms or serializers?**
+- [ ] **Are all external inputs validated and sanitized appropriately?**
+- [ ] **Does all branching logic have a default case?**
+- [ ] **Does this solution handle outliers and edge cases gracefully?**
+- [ ] **Are all external communications secured and restricted to SSL?**
 
 #### Documentation
 
