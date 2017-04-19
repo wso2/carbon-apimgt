@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * LabelDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-04T15:22:18.597+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-06T17:02:03.158+05:30")
 public class LabelDTO   {
   @JsonProperty("labelId")
   private String labelId = null;

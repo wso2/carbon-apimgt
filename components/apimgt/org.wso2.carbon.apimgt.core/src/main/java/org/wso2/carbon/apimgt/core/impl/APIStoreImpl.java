@@ -26,10 +26,12 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.api.APIMObservable;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
+import org.wso2.carbon.apimgt.core.api.LabelExtractor;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
@@ -46,6 +48,7 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
 import org.wso2.carbon.apimgt.core.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
@@ -67,6 +70,7 @@ import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ApplicationStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.SubscriptionStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
@@ -95,6 +99,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
     private static final Logger log = LoggerFactory.getLogger(APIStoreImpl.class);
     private TagDAO tagDAO;
+    private APIMConfigurations config;
 
     /**
      * Constructor.
@@ -109,11 +114,12 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
      * @param workflowDAO WorkFlow Data Access Object
      */
     public APIStoreImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
-            APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, TagDAO tagDAO, LabelDAO labelDAO,
-            WorkflowDAO workflowDAO) {
+                        APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, TagDAO tagDAO, LabelDAO labelDAO,
+                        WorkflowDAO workflowDAO) {
         super(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, new APILifeCycleManagerImpl(), labelDAO,
                 workflowDAO);
         this.tagDAO = tagDAO;
+        config = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
     }
 
     @Override
@@ -295,6 +301,12 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             workflow.setApplicationName(application.getName());
             workflow.setApplicationId(applicationId);
             workflow.setSubscriber(getUsername());
+            
+            String workflowDescription = "Subscription creation workflow for the subscription to api "
+                    + workflow.getApiName() + ":" + workflow.getApiVersion() + ":" + workflow.getApiProvider()
+                    + " using application " + workflow.getApplicationName() + " with tier " + workflow.getTierName()
+                    + " by " + getUsername();
+            workflow.setWorkflowDescription(workflowDescription);
 
             WorkflowResponse response = addSubscriptionWFExecutor.execute(workflow);
             workflow.setStatus(response.getWorkflowStatus());
@@ -369,6 +381,12 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 workflow.setApplicationName(subscription.getApplication().getName());
                 workflow.setApplicationId(subscription.getApplication().getId());
 
+                String workflowDescription = "Subscription deletion workflow for the subscription to api "
+                        + workflow.getApiName() + ":" + workflow.getApiVersion() + ":" + workflow.getApiProvider()
+                        + " using application " + workflow.getApplicationName() + " with tier " + workflow.getTierName()
+                        + " by " + getUsername();
+                workflow.setWorkflowDescription(workflowDescription);
+                
                 WorkflowResponse response = removeSubscriptionWFExecutor.execute(workflow);
                 workflow.setStatus(response.getWorkflowStatus());
 
@@ -425,17 +443,29 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
     @Override
-    public List<Label> getLabelInfo(List<String> labels) throws APIManagementException {
+    public List<Label> getLabelInfo(List<String> labels, String username) throws APIManagementException {
 
-        List<Label> labelList;
+        List<Label> filteredLabels;
+        String labelExtractorClassName = config.getLabelExtractor();
         try {
-            labelList = getLabelDAO().getLabelsByName(labels);
+            List<Label> availableLabels = getLabelDAO().getLabelsByName(labels);
+            LabelExtractor labelExtractor = (LabelExtractor) Class.forName(labelExtractorClassName).newInstance();
+            filteredLabels = labelExtractor.filterLabels(username, availableLabels);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while retrieving label information";
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        } catch (ClassNotFoundException e) {
+            String errorMsg = "Error occurred while loading the class [class name] " + labelExtractorClassName;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.LABEL_INFORMATION_EXCEPTION);
+        } catch (IllegalAccessException | InstantiationException e) {
+            String errorMsg = "Error occurred while creating an instance of the class [class name] " +
+                    labelExtractorClassName;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.LABEL_INFORMATION_EXCEPTION);
         }
-        return labelList;
+        return filteredLabels;
     }
 
     @Override
@@ -539,18 +569,26 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             List<Subscription> pendingSubscriptions = getApiSubscriptionDAO()
                     .getPendingAPISubscriptionsByApplication(appId);
             String pendingExtReference;
+            String applicationStatus = application.getStatus();
+           
             if (pendingSubscriptions == null || pendingSubscriptions.isEmpty()) {
-                pendingExtReference = getWorkflowDAO().getExternalWorkflowReferenceForApplication(appId);
-                try {
-                    createApplicationWFExecutor.cleanUpPendingTask(pendingExtReference);
-                } catch (WorkflowException e) {
-                    String warn = "Failed to clean pending application approval task for " + appId;
-                    // failed cleanup processes are ignored to prevent failing the deletion process
-                    log.warn(warn, e.getLocalizedMessage());
+                //check whether application is on hold state
+                if (ApplicationStatus.APPLICATION_ONHOLD.equals(applicationStatus)) {
+                    pendingExtReference = getWorkflowDAO().getExternalWorkflowReferenceForApplication(appId);
+                    try {
+                        if (pendingExtReference != null) {
+                            createApplicationWFExecutor.cleanUpPendingTask(pendingExtReference);
+                        }                        
+                    } catch (WorkflowException e) {
+                        String warn = "Failed to clean pending application approval task for " + appId;
+                        // failed cleanup processes are ignored to prevent failing the deletion process
+                        log.warn(warn, e.getLocalizedMessage());
+                    }
                 }
+
             } else {
 
-                // this means there are pending subsriptions. It also implies that there cannot be pending application
+                // this means there are pending subscriptions. It also implies that there cannot be pending application
                 // approvals (cannot subscribe to a pending application)
                 for (Iterator iterator = pendingSubscriptions.iterator(); iterator.hasNext();) {
                     Subscription pendingSubscription = (Subscription) iterator.next();
@@ -575,6 +613,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             workflow.setWorkflowReference(application.getId());
             workflow.setExternalWorkflowReference(UUID.randomUUID().toString());
             workflow.setCreatedTime(LocalDateTime.now());
+            String workflowDescription = "Application deletion workflow for " + application.getName() + " by "
+                    + getUsername();
+            workflow.setWorkflowDescription(workflowDescription);
             WorkflowResponse response = removeApplicationWFExecutor.execute(workflow);
             workflow.setStatus(response.getWorkflowStatus());
             addWorkflowEntries(workflow);
@@ -635,9 +676,14 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             ApplicationCreationWorkflow workflow = new ApplicationCreationWorkflow();
 
             workflow.setApplication(application);
+            workflow.setCreatedBy(getUsername());
             workflow.setWorkflowReference(application.getId());
             workflow.setExternalWorkflowReference(UUID.randomUUID().toString());
             workflow.setCreatedTime(LocalDateTime.now());
+            
+            String workflowDescription = "Application creation workflow for " + application.getName() + " with tier "
+                    + tierName + " by " + getUsername();
+            workflow.setWorkflowDescription(workflowDescription);
             WorkflowResponse response = appCreationWFExecutor.execute(workflow);
             workflow.setStatus(response.getWorkflowStatus());
             addWorkflowEntries(workflow);
@@ -852,9 +898,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             }
             updateWorkflowEntries(workflow);
         } else {
-            String message = "Invalid workflow type:  " + workflow.getWorkflowType();
+            String message = "Invalid workflow type for store workflows:  " + workflow.getWorkflowType();
             log.error(message);
-            throw new APIManagementException(message, ExceptionCodes.WORKFLOW_EXCEPTION);
+            throw new APIManagementException(message, ExceptionCodes.WORKFLOW_INV_STORE_WFTYPE);
         }
 
         return response;

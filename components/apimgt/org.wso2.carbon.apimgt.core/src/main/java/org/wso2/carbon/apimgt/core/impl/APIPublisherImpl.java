@@ -108,10 +108,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     private Map<String, EventObserver> eventObservers = new HashMap<>();
 
     public APIPublisherImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
-            APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager apiLifecycleManager,
-            LabelDAO labelDAO, WorkflowDAO workflowDAO) {
+                            APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager
+                                    apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO,
+                            GatewaySourceGenerator gatewaySourceGenerator, APIGatewayPublisher apiGatewayPublisher) {
         super(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, apiLifecycleManager, labelDAO,
-                workflowDAO);
+                workflowDAO, gatewaySourceGenerator, apiGatewayPublisher);
     }
 
     /**
@@ -284,7 +285,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     }
                     resourceList.add(dto);
                 }
-                GatewaySourceGenerator gatewaySourceGenerator = new GatewaySourceGeneratorImpl(apiBuilder.build());
+                GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
+                gatewaySourceGenerator.setAPI(apiBuilder.build());
                 String gatewayConfig = gatewaySourceGenerator.getConfigStringFromTemplate(resourceList);
                 if (log.isDebugEnabled()) {
                     log.debug("API " + apiBuilder.getName() + "gateway config: " + gatewayConfig);
@@ -397,7 +399,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
                     String updatedSwagger = apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder);
                     String gatewayConfig = getApiGatewayConfig(apiBuilder.getId());
-                    GatewaySourceGenerator gatewaySourceGenerator = new GatewaySourceGeneratorImpl(apiBuilder.build());
+                    GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
+                    gatewaySourceGenerator.setAPI(apiBuilder.build());
                     String updatedGatewayConfig = gatewaySourceGenerator
                             .getGatewayConfigFromSwagger(gatewayConfig, updatedSwagger);
 
@@ -567,8 +570,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 API.APIBuilder apiBuilder = new API.APIBuilder(api);
                 apiBuilder.lastUpdatedTime(LocalDateTime.now());
                 apiBuilder.updatedBy(getUsername());
-                LifecycleState currentState = getApiLifecycleManager().getCurrentLifecycleState(apiBuilder
-                        .getLifecycleInstanceId());
+                LifecycleState currentState = getApiLifecycleManager().getLifecycleDataForState(apiBuilder
+                        .getLifecycleInstanceId(), apiBuilder.getLifeCycleStatus());
                 apiBuilder.lifecycleState(currentState);
                 for (Map.Entry<String, Boolean> checkListItem : checkListItemMap.entrySet()) {
                     getApiLifecycleManager().checkListItemEvent(api.getLifecycleInstanceId
@@ -598,7 +601,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_API_LC_INVOKER, getUsername());
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_API_LAST_UPTIME,
                         originalAPI.getLastUpdatedTime().toString());
-                
+                String workflowDescription = "API state change workflow for " + workflow.getApiName() + ":"
+                        + workflow.getApiVersion() + ":" + workflow.getApiProvider() + " from "
+                        + workflow.getCurrentState() + " to " + workflow.getTransitionState() + " state by "
+                        + getUsername();
+                workflow.setWorkflowDescription(workflowDescription);
                 workflowResponse = executor.execute(workflow);             
                 workflow.setStatus(workflowResponse.getWorkflowStatus());
 
@@ -639,7 +646,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 apiBuilder.lastUpdatedTime(time);
                 apiBuilder.updatedBy(updatedBy);
                 LifecycleState currentState = getApiLifecycleManager()
-                        .getCurrentLifecycleState(apiBuilder.getLifecycleInstanceId());
+                        .getLifecycleDataForState(apiBuilder.getLifecycleInstanceId(), apiBuilder.getLifeCycleStatus());
                 apiBuilder.lifecycleState(currentState);
                 List<CheckItemBean> list = currentState.getCheckItemBeanList();
                 for (Iterator iterator = list.iterator(); iterator.hasNext();) {
@@ -660,7 +667,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         if (oldAPI != null) {
                             API.APIBuilder previousAPI = new API.APIBuilder(oldAPI);
                             previousAPI.setLifecycleStateInfo(getApiLifecycleManager()
-                                    .getCurrentLifecycleState(previousAPI.getLifecycleInstanceId()));
+                                    .getLifecycleDataForState(previousAPI.getLifecycleInstanceId(),
+                                            previousAPI.getLifeCycleStatus())
+                                   );
                             if (APIUtils.validateTargetState(previousAPI.getLifecycleState(),
                                     APIStatus.DEPRECATED.getStatus())) {
                                 getApiLifecycleManager().executeLifecycleEvent(previousAPI.getLifeCycleStatus(),
@@ -718,8 +727,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 API.APIBuilder apiBuilder = new API.APIBuilder(api);
                 apiBuilder.lastUpdatedTime(LocalDateTime.now());
                 apiBuilder.updatedBy(getUsername());
-                apiBuilder.lifecycleState(getApiLifecycleManager().getCurrentLifecycleState(
-                        apiBuilder.getLifecycleInstanceId()));
+                apiBuilder.lifecycleState(getApiLifecycleManager()
+                        .getLifecycleDataForState(apiBuilder.getLifecycleInstanceId(),
+                                apiBuilder.getLifeCycleStatus()));
                 for (Map.Entry<String, Boolean> checkListItem : checkListItemMap.entrySet()) {
                     getApiLifecycleManager().checkListItemEvent(api.getLifecycleInstanceId
                                     (), api.getLifeCycleStatus(),
@@ -1181,7 +1191,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             apiBuilder.lastUpdatedTime(localDateTime);
 
             api = apiBuilder.build();
-            GatewaySourceGenerator gatewaySourceGenerator = new GatewaySourceGeneratorImpl(api);
+            GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
+            gatewaySourceGenerator.setAPI(api);
             String existingGatewayConfig = getApiGatewayConfig(apiId);
             String updatedGatewayConfig = gatewaySourceGenerator
                     .getGatewayConfigFromSwagger(existingGatewayConfig, jsonText);
@@ -1208,7 +1219,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         try {
             API api = getApiDAO().getAPISummary(apiId);
             if (api != null) {
-                return getApiLifecycleManager().getCurrentLifecycleState(api.getLifecycleInstanceId());
+                return getApiLifecycleManager()
+                        .getLifecycleDataForState(api.getLifecycleInstanceId(), api.getLifeCycleStatus());
             } else {
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve API Summary for " + apiId);
             }
@@ -1289,8 +1301,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public void updateApiGatewayConfig(String apiId, String configString) throws APIManagementException {
         API api = getAPIbyUUID(apiId);
-        GatewaySourceGenerator gatewaySourceGenerator = new GatewaySourceGeneratorImpl(api);
-
+        GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
+        gatewaySourceGenerator.setAPI(api);
         try {
             String swagger = gatewaySourceGenerator.getSwaggerFromGatewayConfig(configString);
             getApiDAO().updateSwaggerDefinition(apiId, swagger, getUsername());
@@ -1555,7 +1567,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @throws APIManagementException If failed to publish endpoint to gateway.
      */
     private void publishEndpointConfigToGateway() throws APIManagementException {
-        GatewaySourceGenerator template = new GatewaySourceGeneratorImpl();
+        GatewaySourceGenerator template = getGatewaySourceGenerator();
         String endpointConfig = template.getEndpointConfigStringFromTemplate(getAllEndpoints());
         APIGatewayPublisher publisher = APIManagerFactory.getInstance().getGateway();
         boolean status = publisher.publishEndpointConfigToGateway(endpointConfig);
@@ -1651,6 +1663,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 }              
             }
             updateWorkflowEntries(workflow); 
+        } else {
+            String message = "Invalid workflow type for publisher workflows:  " + workflow.getWorkflowType();
+            log.error(message);
+            throw new APIManagementException(message, ExceptionCodes.WORKFLOW_INV_PUBLISHER_WFTYPE);
         }
         return response;
     }

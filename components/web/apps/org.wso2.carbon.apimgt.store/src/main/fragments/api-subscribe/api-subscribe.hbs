@@ -1,0 +1,46 @@
+<div class="col-xs-12 col-sm-12 col-md-8 col-lg-5 col-md-height col-md-top">
+    <form class="form-api-subscription add-padding-4x">
+        <div class="form-group" id="applications-list">
+            <label for="application-list">{{i18n "Applications"}}</label>
+            <select id="application-list" class="form-control" onchange="applicationSelectionChange()">
+                <option value="-">{{ i18n "Select Application..."}}</option>
+                <option value="createNewApp">{{i18n "New Application..."}}</option>
+                {{#if @params.applications}}
+                    <optgroup label="{{i18n "My Applications"}}">
+                        {{#each @params.applications}}
+                            {{#if isDefault}}
+                                <option selected value="{{applicationId}}" data-applicationId>{{name}}</option>
+                            {{else}}
+                                <option value="{{applicationId}}">{{name}}</option>
+                            {{/if}}
+                        {{/each}}
+                    </optgroup>
+                {{/if}}
+            </select>
+        </div>
+
+        <div class="form-group" id="tier-list">
+            <label for="tiers-list" class="hidden-xs">{{i18n "Tiers"}}</label>
+            <select id="tiers-list" name="tiers-list" class="form-control">
+                {{#each @params.policies}}
+                    <option title="{{this}}"
+                            data-content="<span><strong>{{this}}</strong><br />{{this}}</span>"
+                            value="{{this}}">{{this}}
+                    </option>
+                {{/each}}
+            </select>
+        </div>
+        <button type="button" id="subscribe-button" {{#unless @params.policies}} disabled="disabled" {{/unless}}
+                class="btn btn-primary btn-mobile">
+                                                           <span class="icon fw-stack">
+                                                               <i class="fw fw-subscribe fw-stack-1x"></i>
+                                                               <i class="fw fw-circle-outline fw-stack-2x"></i>
+                                                           </span>
+            {{i18n "Subscribe"}}
+            {{#unless @params.policies}}
+                <span id="subsBtnDesc"
+                      class="help-block">{{i18n "You may not be entitled to any of the available tiers"}}</span>
+            {{/unless}}
+        </button>
+    </form>
+</div>

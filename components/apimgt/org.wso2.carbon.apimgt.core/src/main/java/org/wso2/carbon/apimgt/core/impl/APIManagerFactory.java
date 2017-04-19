@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.core.api.APIGatewayPublisher;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.api.APIStore;
+import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
@@ -87,7 +88,8 @@ public class APIManagerFactory {
         try {
             UserAwareAPIPublisher userAwareAPIPublisher = new UserAwareAPIPublisher(username, DAOFactory.getApiDAO(),
                     DAOFactory.getApplicationDAO(), DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO(),
-                    DAOFactory.getLabelDAO(), DAOFactory.getWorkflowDAO());
+                    DAOFactory.getLabelDAO(), DAOFactory.getWorkflowDAO(), instance.getGatewaySourceGenerator(),
+                    getGateway());
 
             // Register all the observers which need to observe 'Publisher' component
             userAwareAPIPublisher.registerObserver(new EventLogger());
@@ -183,5 +185,9 @@ public class APIManagerFactory {
 
     public APIGatewayPublisher getGateway() {
         return new APIGatewayPublisherImpl();
+    }
+
+    public GatewaySourceGenerator getGatewaySourceGenerator() {
+        return new GatewaySourceGeneratorImpl();
     }
 }

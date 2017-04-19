@@ -121,6 +121,18 @@ public class APIMgtAdminServiceImplTestCase {
         Mockito.verify(labelDAO, Mockito.times(1)).deleteLabel(labelId);
     }
 
+    @Test(description = "Exception when deleting a label", expectedExceptions = APIManagementException.class)
+    public void testDeleteLabelException() throws APIManagementException {
+        LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforLabelDAO(labelDAO);
+        Label label = SampleTestObjectCreator.createLabel("Public").build();
+        String labelId = label.getId();
+        Mockito.doThrow(new APIMgtDAOException("Error occurred while deleting label [labelId] " + labelId))
+                .when(labelDAO).deleteLabel(labelId);
+        adminService.deleteLabel(labelId);
+        Mockito.verify(labelDAO, Mockito.times(1)).deleteLabel(labelId);
+    }
+
     @Test(description = "Register gateway labels")
     public void testRegisterGatewayLabels() throws APIManagementException {
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
@@ -160,6 +172,23 @@ public class APIMgtAdminServiceImplTestCase {
         APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforLabelDAO(labelDAO);
         adminService.registerGatewayLabels(labels, null);
         Mockito.verify(labelDAO, Mockito.times(1)).addLabels(labels);
+    }
+
+    @Test(description = "Register gateway labels when overwriteLabels value is true")
+    public void testRegisterGatewayLabelsWhenOverwriteLabelsTrue() throws APIManagementException {
+        LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
+        List<Label> labels = new ArrayList<>();
+        Label label1 = SampleTestObjectCreator.createLabel("testLabel1").build();
+        labels.add(label1);
+        List<String> labelNames = new ArrayList<>();
+        labelNames.add(label1.getName());
+        List<Label> existingLabels = new ArrayList<>();
+        existingLabels.add(label1);
+        Mockito.when(labelDAO.getLabelsByName(labelNames)).thenReturn(existingLabels);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforLabelDAO(labelDAO);
+        adminService.registerGatewayLabels(labels, "true");
+        Mockito.verify(labelDAO, Mockito.times(1)).addLabels(labels);
+        Mockito.verify(labelDAO, Mockito.times(1)).updateLabel(label1);
     }
 
     private APIMgtAdminServiceImpl newAPIMgtAdminServiceImplforApiDAO(ApiDAO apiDAO) {

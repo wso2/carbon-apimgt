@@ -2,23 +2,25 @@ package org.wso2.carbon.apimgt.rest.api.store;
 
 import io.swagger.annotations.ApiParam;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.factories.SubscriptionsApiServiceFactory;
 import org.wso2.msf4j.Microservice;
+import org.wso2.msf4j.Request;
 
 @Component(
     name = "org.wso2.carbon.apimgt.rest.api.store.SubscriptionsApi",
     service = Microservice.class,
     immediate = true
 )
-@Path("/api/am/store/v1/subscriptions")
+@Path("/api/am/store/v1.[\\d]+/subscriptions")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the subscriptions API")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-28T22:28:05.676+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-07T10:04:16.863+05:30")
 public class SubscriptionsApi implements Microservice  {
    private final SubscriptionsApiService delegate = SubscriptionsApiServiceFactory.getSubscriptionsApi();
 
@@ -39,10 +41,9 @@ public class SubscriptionsApi implements Microservice  {
 ,@ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit
 ,@ApiParam(value = "Media types acceptable for the response. Default is JSON. " , defaultValue="JSON")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
-,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
-)
+, @Context Request request)
     throws NotFoundException {
-        return delegate.subscriptionsGet(apiId,applicationId,offset,limit,accept,ifNoneMatch,minorVersion);
+        return delegate.subscriptionsGet(apiId,applicationId,offset,limit,accept,ifNoneMatch, request);
     }
     @POST
     
@@ -57,10 +58,9 @@ public class SubscriptionsApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format. ", response = SubscriptionDTO.class) })
     public Response subscriptionsPost(@ApiParam(value = "Subscription object that should to be added " ,required=true) SubscriptionDTO body
 ,@ApiParam(value = "Media type of the entity in the body. Default is JSON. " ,required=true, defaultValue="JSON")@HeaderParam("Content-Type") String contentType
-,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
-)
+, @Context Request request)
     throws NotFoundException {
-        return delegate.subscriptionsPost(body,contentType,minorVersion);
+        return delegate.subscriptionsPost(body,contentType, request);
     }
     @DELETE
     @Path("/{subscriptionId}")
@@ -76,10 +76,9 @@ public class SubscriptionsApi implements Microservice  {
     public Response subscriptionsSubscriptionIdDelete(@ApiParam(value = "Subscription Id ",required=true) @PathParam("subscriptionId") String subscriptionId
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
-,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
-)
+, @Context Request request)
     throws NotFoundException {
-        return delegate.subscriptionsSubscriptionIdDelete(subscriptionId,ifMatch,ifUnmodifiedSince,minorVersion);
+        return delegate.subscriptionsSubscriptionIdDelete(subscriptionId,ifMatch,ifUnmodifiedSince, request);
     }
     @GET
     @Path("/{subscriptionId}")
@@ -96,9 +95,8 @@ public class SubscriptionsApi implements Microservice  {
 ,@ApiParam(value = "Media types acceptable for the response. Default is JSON. " , defaultValue="JSON")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
-,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
-)
+, @Context Request request)
     throws NotFoundException {
-        return delegate.subscriptionsSubscriptionIdGet(subscriptionId,accept,ifNoneMatch,ifModifiedSince,minorVersion);
+        return delegate.subscriptionsSubscriptionIdGet(subscriptionId,accept,ifNoneMatch,ifModifiedSince, request);
     }
 }

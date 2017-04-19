@@ -153,7 +153,7 @@ paths:
 #  Register a Gateway
 #-----------------------------------------------------
 
-  /register:
+  /gateways/register:
     post:
       summary: Register a Gateway
       description: |
@@ -416,9 +416,9 @@ definitions:
   Registration:
     title: Registration related details
     required:
-      - LabelInfo
+      - labelInfo
     properties:
-      LabelInfo:
+      labelInfo:
         $ref: '#/definitions/LabelInfo'
 
 #-----------------------------------------------------

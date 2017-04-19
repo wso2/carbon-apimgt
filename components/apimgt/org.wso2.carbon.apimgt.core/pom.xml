@@ -260,7 +260,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.core</artifactId>
+            <version>${carbon.kernel.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -269,8 +273,8 @@
                 <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.plugins.configuration</artifactId>
+                <groupId>org.wso2.carbon.config</groupId>
+                <artifactId>org.wso2.carbon.config.maven.plugin</artifactId>
                 <executions>
                     <execution>
                         <goals>
@@ -290,6 +294,7 @@
                             <value>${basedir}/src/test/resources/</value>
                         </property>
                     </systemProperties>
+                    <skip>${skip.surefire.test}</skip>
                 </configuration>
 			</plugin>
         </plugins>
@@ -433,6 +438,9 @@
                                 <DATABASE_TYPE>mysql</DATABASE_TYPE>
                                 <PORT>${apim-mysql.port}</PORT>
                             </environmentVariables>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                            </suiteXmlFiles>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -511,6 +519,9 @@
                             <environmentVariables>
                                 <DATABASE_TYPE>db2</DATABASE_TYPE>
                             </environmentVariables>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                            </suiteXmlFiles>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -543,44 +554,22 @@
                         <configuration>
                             <images>
                                 <image>
-                                    <name>microsoft/mssql-server-linux</name>
+                                    <name>tharindu1st/mssql-server-linux</name>
                                     <alias>apim-mssql</alias>
                                     <run>
                                         <namingStrategy>alias</namingStrategy>
                                         <env>
                                             <ACCEPT_EULA>Y</ACCEPT_EULA>
                                             <SA_PASSWORD>wso2apim123#</SA_PASSWORD>
+                                            <MSSQL_DB>testamdb</MSSQL_DB>
                                         </env>
                                         <ports>
                                             <port>${apim-mssql.port}:1433</port>
                                         </ports>
                                         <wait>
-                                            <tcp>
-                                                <ports>
-                                                    <port>1433</port>
-                                                </ports>
-                                            </tcp>
+                                            <log>MSSQL SERVER SUCCESSFULLY STARTED</log>
                                             <time>60000</time>
                                         </wait>
-                                    </run>
-                                </image>
-                                <image>
-                                    <name>tharindu1st/mssql-client</name>
-                                    <alias>apim-mssql-client</alias>
-                                    <run>
-                                        <namingStrategy>alias</namingStrategy>
-                                        <env>
-                                            <MSSQL_SERVER_HOST>apim-mssql</MSSQL_SERVER_HOST>
-                                            <MSSQL_USERNAME>SA</MSSQL_USERNAME>
-                                            <MSSQL_PASSWORD>wso2apim123#</MSSQL_PASSWORD>
-                                            <MSSQL_DATABASE_NAME>testamdb</MSSQL_DATABASE_NAME>
-                                        </env>
-                                        <links>
-                                            <link>apim-mssql:apim-mssql</link>
-                                        </links>
-                                        <dependsOn>
-                                            <dependsOn>apim-mssql</dependsOn>
-                                        </dependsOn>
                                     </run>
                                 </image>
                             </images>
@@ -611,6 +600,9 @@
                                 <DATABASE_TYPE>mssql</DATABASE_TYPE>
                                 <PORT>${apim-mssql.port}</PORT>
                             </environmentVariables>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                            </suiteXmlFiles>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -723,6 +715,9 @@
                                 <DATABASE_TYPE>postgres</DATABASE_TYPE>
                                 <PORT>${apim-postgres.port}</PORT>
                             </environmentVariables>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                            </suiteXmlFiles>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -800,6 +795,10 @@
                                 <DATABASE_TYPE>oracle</DATABASE_TYPE>
                                 <PORT>${apim-oracle.port}</PORT>
                             </environmentVariables>
+                            <argLine>-Duser.timezone=GMT</argLine>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                            </suiteXmlFiles>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -886,6 +885,7 @@
             org.ballerinalang.composer.service.workspace.swagger.generators.*,
             <!--com.fasterxml.jackson.core.*,-->
         </export.package>
+        <dynamic.import.package>*</dynamic.import.package>
     </properties>
 
 </project>

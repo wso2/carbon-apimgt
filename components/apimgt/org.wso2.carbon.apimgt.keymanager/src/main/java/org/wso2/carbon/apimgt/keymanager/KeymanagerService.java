@@ -42,6 +42,7 @@ import javax.ws.rs.core.Response;
 public class KeymanagerService implements Microservice {
 
     private static final Logger log = LoggerFactory.getLogger(KeymanagerService.class);
+    private static final String DEFAULT_TOKEN_VALIDITY = "3600";
 
     private static Map<String, OAuthApplication> applications = new HashMap<>();
     private static Map<String, OAuthApplication> appsByClientId = new HashMap<>();
@@ -96,7 +97,12 @@ public class KeymanagerService implements Microservice {
         decoded = KeyManagerUtil.extractCredentialsFromAuthzHeader(authzHeader);
         String clientId = decoded[0];
         String clientSecret = decoded[1];
-        Long validPeriod = Long.parseLong(validityPeriod);
+        Long validPeriod;
+        if (validityPeriod == null) {
+            validPeriod = Long.parseLong(DEFAULT_TOKEN_VALIDITY);
+        } else {
+            validPeriod = Long.parseLong(validityPeriod);
+        }
 
         if (!appsByClientId.containsKey(clientId) ||
                 !appsByClientId.get(clientId).getClientSecret().equals(clientSecret)) {
@@ -108,6 +114,13 @@ public class KeymanagerService implements Microservice {
         OAuthTokenResponse oAuthTokenResponse = new OAuthTokenResponse();
         if ("password".equals(grantType)) {
             if (KeyManagerUtil.getLoginAccessToken(oAuthTokenResponse, username, password, validPeriod)) {
+                return Response.status(Response.Status.OK).entity(oAuthTokenResponse).build();
+            } else {
+                return Response.status(Response.Status.UNAUTHORIZED).build();
+            }
+        } else if ("client_credentials".equals(grantType)) {
+            OAuthApplication app = appsByClientId.get(clientId);
+            if (KeyManagerUtil.getAccessTokenForClientCredentials(oAuthTokenResponse, app.getAppOwner(), validPeriod)) {
                 return Response.status(Response.Status.OK).entity(oAuthTokenResponse).build();
             } else {
                 return Response.status(Response.Status.UNAUTHORIZED).build();
@@ -179,6 +192,7 @@ public class KeymanagerService implements Microservice {
 
         body.setClientId(clientId);
         body.setClientSecret(clientSecret);
+        body.setAppOwner(userName);
         applications.put(body.getClientName(), body);
         appsByClientId.put(clientId, body);
 

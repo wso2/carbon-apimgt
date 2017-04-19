@@ -49,6 +49,13 @@ public class TestUtil {
         return application;
     }
 
+    public static Application addTestApplicationWithPermissions() throws APIMgtDAOException {
+        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
+        Application application = SampleTestObjectCreator.createApplicationWithPermissions();
+        applicationDAO.addApplication(application);
+        return application;
+    }
+
     public static Application addCustomApplication(String applicationName, String owner) throws APIMgtDAOException {
         ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
         Application application = SampleTestObjectCreator.createCustomApplication(applicationName, owner);
@@ -163,7 +170,7 @@ public class TestUtil {
         return ip;
     }
 
-    public static TestUtil getInstance() {
+       public static TestUtil getInstance() {
         return instance;
     }
 

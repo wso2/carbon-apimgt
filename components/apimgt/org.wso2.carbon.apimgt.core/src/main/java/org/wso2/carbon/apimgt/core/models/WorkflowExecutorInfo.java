@@ -26,10 +26,10 @@ import java.util.List;
 @Configuration(description = "Workflow executor info")
 public class WorkflowExecutorInfo {
     
-    @Element(description = "executor name")
+    @Element(description = "executor class name")
     private String executor;
     
-    @Element(description = "property list")
+    @Element(description = "properties passed to the executor")
     private List<WorkflowConfigProperties> property;
     
     public String getExecutor() {

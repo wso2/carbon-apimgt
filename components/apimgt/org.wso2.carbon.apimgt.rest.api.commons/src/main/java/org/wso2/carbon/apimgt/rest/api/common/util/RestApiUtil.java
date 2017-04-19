@@ -17,7 +17,6 @@ package org.wso2.carbon.apimgt.rest.api.common.util;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -28,10 +27,6 @@ import org.wso2.carbon.apimgt.core.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.exception.APIMgtAuthorizationFailedException;
-import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
-import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
-import org.wso2.carbon.apimgt.core.exception.DuplicateAPIException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
@@ -41,10 +36,6 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
 import org.wso2.carbon.apimgt.rest.api.common.exception.BadRequestException;
-import org.wso2.carbon.apimgt.rest.api.common.exception.ConflictException;
-import org.wso2.carbon.apimgt.rest.api.common.exception.ForbiddenException;
-import org.wso2.carbon.apimgt.rest.api.common.exception.InternalServerErrorException;
-import org.wso2.carbon.apimgt.rest.api.common.exception.NotFoundException;
 import org.wso2.carbon.transport.http.netty.config.ListenerConfiguration;
 import org.wso2.carbon.transport.http.netty.config.TransportsConfiguration;
 import org.wso2.carbon.transport.http.netty.config.YAMLTransportConfigurationBuilder;
@@ -110,119 +101,7 @@ public class RestApiUtil {
         //       }
     }
 
-    /**
-     * Logs the error, builds a ForbiddenException with specified details and throws it
-     *
-     * @param resource requested resource
-     * @param id       id of resource
-     * @param log      Log instance
-     * @throws ForbiddenException   If failed to handle authorization
-     */
-    public static void handleAuthorizationFailure(String resource, String id, Logger log) throws ForbiddenException {
-        ForbiddenException forbiddenException = buildForbiddenException(resource, id);
-        log.error(forbiddenException.getMessage());
-        throw forbiddenException;
-    }
 
-    /**
-     * Returns a new ForbiddenException
-     *
-     * @param resource Resource type
-     * @param id       identifier of the resource
-     * @return a new ForbiddenException with the specified details as a response DTO
-     */
-    public static ForbiddenException buildForbiddenException(String resource, String id) {
-        String description;
-        if (!StringUtils.isEmpty(id)) {
-            description = "You don't have permission to access the " + resource + " with Id " + id;
-        } else {
-            description = "You don't have permission to access the " + resource;
-        }
-        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT, 403L, description);
-        return new ForbiddenException(errorDTO);
-    }
-
-    /**
-     * Logs the error, builds a NotFoundException with specified details and throws it
-     *
-     * @param resource requested resource
-     * @param id       id of resource
-     * @param log      Log instance
-     * @throws NotFoundException    If failed to found the resource.
-     */
-    public static void handleResourceNotFoundError(String resource, String id, Logger log) throws NotFoundException {
-        NotFoundException notFoundException = buildNotFoundException(resource, id);
-        log.error(notFoundException.getMessage());
-        throw notFoundException;
-    }
-
-    /**
-     * Returns a new NotFoundException
-     *
-     * @param resource Resource type
-     * @param id       identifier of the resource
-     * @return a new NotFoundException with the specified details as a response DTO
-     */
-    public static NotFoundException buildNotFoundException(String resource, String id) {
-        String description;
-        if (!StringUtils.isEmpty(id)) {
-            description = "Requested " + resource + " with Id '" + id + "' not found";
-        } else {
-            description = "Requested " + resource + " not found";
-        }
-        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_NOT_FOUND_MESSAGE_DEFAULT, 404L, description);
-        return new NotFoundException(errorDTO);
-    }
-
-    /**
-     * Logs the error, builds a internalServerErrorException with specified details and throws it
-     *
-     * @param msg error message
-     * @param t   Throwable instance
-     * @param log Log instance
-     * @throws InternalServerErrorException     If exception occurs in the server.
-     */
-    public static void handleInternalServerError(String msg, Throwable t, Logger log)
-            throws InternalServerErrorException {
-        InternalServerErrorException internalServerErrorException = buildInternalServerErrorException();
-        log.error(msg, t);
-        throw internalServerErrorException;
-    }
-
-    /**
-     * Returns a new InternalServerErrorException
-     *
-     * @return a new InternalServerErrorException with default details as a response DTO
-     */
-    public static InternalServerErrorException buildInternalServerErrorException() {
-        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_INTERNAL_SERVER_ERROR_MESSAGE_DEFAULT, 500L,
-                RestApiConstants.STATUS_INTERNAL_SERVER_ERROR_DESCRIPTION_DEFAULT);
-        return new InternalServerErrorException(errorDTO);
-    }
-
-    /**
-     * Returns a new InternalServerErrorException
-     *
-     * @param errorMessage error message
-     * @return InternalServerErrorException object
-     */
-    public static InternalServerErrorException buildInternalServerErrorException(String errorMessage) {
-        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_INTERNAL_SERVER_ERROR_MESSAGE_DEFAULT, 500L,
-                errorMessage);
-        return new InternalServerErrorException(errorDTO);
-    }
-
-    /**
-     * Returns a new NotFoundException
-     *
-     * @param errorMessage error message
-     * @return NotFoundException object
-     */
-    public static NotFoundException buildNotFoundErrorException(String errorMessage) {
-        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_NOT_FOUND_MESSAGE_DEFAULT, 404L,
-                errorMessage);
-        return new NotFoundException(errorDTO);
-    }
 
     /**
      * Logs the error, builds a BadRequestException with specified details and throws it
@@ -248,85 +127,6 @@ public class RestApiUtil {
         return new BadRequestException(errorDTO);
     }
 
-    /**
-     * Logs the error, builds a ConflictException with specified details and throws it
-     *
-     * @param description description of the error
-     * @param t           Throwable instance
-     * @param log         Log instance
-     * @throws ConflictException    If resource already exists.
-     */
-    public static void handleResourceAlreadyExistsError(String description, Throwable t, Logger log)
-            throws ConflictException {
-        ConflictException conflictException = buildConflictException(
-                RestApiConstants.STATUS_CONFLICT_MESSAGE_RESOURCE_ALREADY_EXISTS, description);
-        log.error(description, t);
-        throw conflictException;
-    }
-
-    /**
-     * Returns a new ConflictException
-     *
-     * @param message     summary of the error
-     * @param description description of the exception
-     * @return a new ConflictException with the specified details as a response DTO
-     */
-    public static ConflictException buildConflictException(String message, String description) {
-        ErrorDTO errorDTO = getErrorDTO(message, 409L, description);
-        return new ConflictException(errorDTO);
-    }
-
-    /**
-     * Check if the specified throwable e is happened as the updated/new resource conflicting with an already existing
-     * resource
-     *
-     * @param e throwable to check
-     * @return true if the specified throwable e is happened as the updated/new resource conflicting with an already
-     * existing resource, false otherwise
-     */
-    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-    public static boolean isDueToResourceAlreadyExists(
-            Throwable e) {
-        Throwable rootCause = getPossibleErrorCause(e);
-        return rootCause instanceof APIMgtResourceAlreadyExistsException || rootCause instanceof DuplicateAPIException;
-    }
-
-    /**
-     * Check if the specified throwable e is happened as the required resource cannot be found
-     *
-     * @param e throwable to check
-     * @return true if the specified throwable e is happened as the required resource cannot be found, false otherwise
-     */
-    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-    public static boolean isDueToResourceNotFound(Throwable e) {
-        Throwable rootCause = getPossibleErrorCause(e);
-        return rootCause instanceof APIMgtResourceNotFoundException;
-    }
-
-    /**
-     * Check if the specified throwable e is due to an authorization failure
-     *
-     * @param e throwable to check
-     * @return true if the specified throwable e is due to an authorization failure, false otherwise
-     */
-    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-    public static boolean isDueToAuthorizationFailure(
-            Throwable e) {
-        Throwable rootCause = getPossibleErrorCause(e);
-        return rootCause instanceof APIMgtAuthorizationFailedException;
-    }
-
-    /**
-     * Attempts to find the actual cause of the throwable 'e'
-     *
-     * @param e throwable
-     * @return the root cause of 'e' if the root cause exists, otherwise returns 'e' itself
-     */
-    private static Throwable getPossibleErrorCause(Throwable e) {
-        Throwable rootCause = ExceptionUtils.getRootCause(e);
-        rootCause = rootCause == null ? e : rootCause;
-        return rootCause;
-    }
 
     /**
      * Returns a generic errorDTO
@@ -335,7 +135,7 @@ public class RestApiUtil {
      * @param paramList map of parameters specific to the error.
      * @return A generic errorDTO with the specified details
      */
-    public static ErrorDTO getErrorDTO(ErrorHandler errorHandler, HashMap<String, String> paramList) {
+    public static ErrorDTO getErrorDTO(ErrorHandler errorHandler, Map<String, String> paramList) {
         ErrorDTO errorDTO = new ErrorDTO();
         errorDTO.setCode(errorHandler.getErrorCode());
         errorDTO.setMoreInfo(paramList);
@@ -494,34 +294,7 @@ public class RestApiUtil {
         return path;
     }
 
-    /**
-     * Check if the message of the root cause message of 'e' matches with the specified message
-     *
-     * @param e       throwable to check
-     * @param message error message
-     * @return true if the message of the root cause of 'e' matches with 'message'
-     */
-    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-    public static boolean rootCauseMessageMatches(Throwable e, String message) {
-        Throwable rootCause = getPossibleErrorCause(e);
-        return rootCause.getMessage().contains(message);
-    }
 
-    /**
-     * Logs the error, builds a NotFoundException with specified details and throws it
-     *
-     * @param resource requested resource
-     * @param id       id of resource
-     * @param t        Throwable instance
-     * @param log      Log instance
-     * @throws NotFoundException    If resource not found.
-     */
-    public static void handleResourceNotFoundError(String resource, String id, Throwable t, Logger log)
-            throws NotFoundException {
-        NotFoundException notFoundException = buildNotFoundException(resource, id);
-        log.error(notFoundException.getMessage(), t);
-        throw notFoundException;
-    }
 
     /**
      * Search the Policy in the given collection of Policies. Returns it if it is included there. Otherwise return null

@@ -17,17 +17,21 @@ package org.wso2.carbon.apimgt.core.internal;
  * under the License.
  */
 
+import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-//import org.wso2.carbon.kernel.configprovider.ConfigProvider;
+import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 
 /**
  * Class used to activate configuration loading
- * TODO refactor class when kernal is updated to 5.2.0
  */
+@Component (
+        name = "org.wso2.carbon.apimgt.core",
+        immediate = true
+)
 public class ConfigurationActivator {
     private static final Logger log = LoggerFactory.getLogger(ServiceReferenceHolder.class);
     /**

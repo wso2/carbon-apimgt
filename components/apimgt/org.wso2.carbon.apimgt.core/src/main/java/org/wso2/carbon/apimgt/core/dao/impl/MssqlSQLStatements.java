@@ -73,7 +73,7 @@ public class MssqlSQLStatements implements ApiDAOVendorSpecificStatements {
             }
             statement.setString(queryIndex, EVERYONE_ROLE);
             statement.setString(++queryIndex, user);
-            statement.setInt(++queryIndex, --offset);
+            statement.setInt(++queryIndex, offset);
             statement.setInt(++queryIndex, limit);
             return statement;
         } catch (SQLException e) {

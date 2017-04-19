@@ -246,26 +246,42 @@ public class ApiDAOImpl implements ApiDAO {
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     public List<API> getAPIsByStatus(List<String> roles, List<String> statuses) throws APIMgtDAOException {
 
-        final String query = API_SUMMARY_SELECT +
-                " WHERE UUID IN (SELECT API_ID FROM AM_API_VISIBLE_ROLES WHERE ROLE IN (" +
-                DAOUtil.getParameterString(roles.size()) + "))" +
-                " AND" +
-                " CURRENT_LC_STATUS  IN (" +
-                DAOUtil.getParameterString(statuses.size()) + ")" +
-                " OR " +
-                "VISIBILITY = '" + API.Visibility.PUBLIC + "'";
+        //check for null at the beginning before constructing the query to retrieve APIs from database
+        if (roles == null || statuses == null) {
+            String errorMessage = "Role list or API status list should not be null to retrieve APIs.";
+            log.error(errorMessage);
+            throw new APIMgtDAOException(errorMessage);
+        }
+        //the below query will be used to retrieve the union of,
+        //published/prototyped APIs (statuses) with public visibility and
+        //published/prototyped APIs with restricted visibility where APIs are restricted based on roles of the user
+        final String query = API_SUMMARY_SELECT + " WHERE " +
+                "VISIBILITY = '" + API.Visibility.PUBLIC + "' " +
+                "AND " +
+                "CURRENT_LC_STATUS  IN (" + DAOUtil.getParameterString(statuses.size()) + ") " +
+                "UNION " +
+                API_SUMMARY_SELECT +
+                " WHERE " +
+                "VISIBILITY = '" + API.Visibility.RESTRICTED + "' " +
+                "AND " +
+                "UUID IN (SELECT API_ID FROM AM_API_VISIBLE_ROLES WHERE ROLE IN " +
+                "(" + DAOUtil.getParameterString(roles.size()) + ")) " +
+                "AND " + "CURRENT_LC_STATUS  IN (" + DAOUtil.getParameterString(statuses.size()) + ")";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
-            int i;
-            //put desired roles into the query
-            for (i = 0; i < roles.size(); ++i) {
-                statement.setString(i + 1, roles.get(i));
+            int i, j;
+            //put desired API status into the query (to get APIs with public visibility)
+            for (i = 0; i < statuses.size(); ++i) {
+                statement.setString(i + 1, statuses.get(i));
             }
-            //put desired API status into the query
-            //this will be inserted after the roles, so we start after the roles
-            for (int j = i; j < roles.size() + statuses.size(); ++j) {
-                statement.setString(j + 1, statuses.get(j - i));
+            //put desired roles into the query
+            for (j = i; j < statuses.size() + roles.size(); ++j) {
+                statement.setString(j + 1, roles.get(j - i));
+            }
+            //put desired API status into the query (to get APIs with restricted visibility)
+            for (int k = j; k < statuses.size() + roles.size() + statuses.size(); ++k) {
+                statement.setString(k + 1, statuses.get(k - j));
             }
             return constructAPISummaryList(statement);
         } catch (SQLException e) {
@@ -1037,8 +1053,8 @@ public class ApiDAOImpl implements ApiDAO {
                 .prepareStatement(query)) {
             preparedStatement.setString(1, apiId);
             preparedStatement.setString(2, documentInfo.getName());
-            preparedStatement.setString(3, documentInfo.getType().getType());
-            preparedStatement.setString(4, documentInfo.getSourceType().getType());
+            preparedStatement.setString(3, documentInfo.getType().toString());
+            preparedStatement.setString(4, documentInfo.getSourceType().toString());
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     exist = true;

@@ -17,28 +17,27 @@ package org.wso2.carbon.apimgt.gateway;
  * under the License.
  */
 
-//import org.wso2.carbon.kernel.annotations.Configuration;
-//import org.wso2.carbon.kernel.annotations.Element;
+import org.wso2.carbon.kernel.annotations.Configuration;
+import org.wso2.carbon.kernel.annotations.Element;
 
 /**
  * Class to hold APIM configuration parameters and generate yaml file
- * TODO refactor class when kernal is updated to 5.2.0
  */
-//@Configuration(namespace = "wso2.carbon.apim", description = "APIM Configuration Parameters")
+@Configuration(namespace = "wso2.carbon.apim", description = "APIM Configuration Parameters")
 public class APIMConfigurations {
 
     private String carbonClientId = "carbon";
-//    @Element(description = "server version")
+    @Element(description = "server version")
     private String carbonVirtualHostName = "carbon";
-//    @Element(description = "topic server host")
+    @Element(description = "topic server host")
     private String topicServerHost = "localhost";
-//    @Element(description = "topic server port")
+    @Element(description = "topic server port")
     private String topicServerPort = "5672";
-//    @Element(description = "topic name")
+    @Element(description = "topic name")
     private String topicName = "MYTopic";
-//    @Element(description = "username for topic")
+    @Element(description = "username for topic")
     private String username = "admin";
-//    @Element(description = "password for topic")
+    @Element(description = "password for topic")
     private String password = "admin";
 
     public String getCarbonClientId() {
