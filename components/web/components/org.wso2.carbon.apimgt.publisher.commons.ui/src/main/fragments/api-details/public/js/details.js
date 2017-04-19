@@ -947,42 +947,42 @@ function createDocHandler(event) {
     		    	                				 }
     		    	                			 var bearerToken = "Bearer " + getCookie("WSO2_AM_TOKEN_1");
     		    	                			 $(document).ready(function() {
-    		    	         		    	        window.swaggerUi = new SwaggerUi({
-    		    	         		    	                url: swaggerURL,
-    		    	         		    	                dom_id: "swagger-ui-container",
-    		    	         		    	                authorizations: {
-    		    	         		    	                        key: new SwaggerClient.ApiKeyAuthorization("Authorization", bearerToken, "header")
-    		    	         		    	                },
-    		    	         		    	                supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch', 'head'],
-    		    	         		    	                onComplete: function(swaggerApi, swaggerUi){
-    		    	         		    	                        console.log("Loaded SwaggerUI");
-    		    	         		    	                },
-    		    	         		    	                onFailure: function(data) {
-    		    	         		    	                        console.log("Unable to Load SwaggerUI");
-    		    	         		    	                },
-    		    	         		    	                docExpansion: "list",
-    		    	         		    	                jsonEditor: false,
-    		    	         		    	                defaultModelRendering: 'schema',
-    		    	         		    	                showRequestHeaders: true,
-    		    	         		    	                validatorUrl: null
-    		    	         		    	        });
-    		    	         		    	        window.swaggerUi.load();
-    		    	         		            });
-    		    	                		 }   		    	                		 
-    		    	                     		    	                 
-    		    	                 ).catch(apiGetErrorHandler);
+    		    	                				 window.swaggerUi = new SwaggerUi({
+    		    	                					 url: swaggerURL,
+    		    	                					 dom_id: "swagger-ui-container",
+    		    	                					 authorizations: {
+    		    	                						 key: new SwaggerClient.ApiKeyAuthorization("Authorization", bearerToken, "header")
+    		    	                					 },
+    		    	                					 supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch', 'head'],
+    		    	                					 onComplete: function(swaggerApi, swaggerUi){
+    		    	                						 console.log("Loaded SwaggerUI");
+    		    	                					 },
+    		    	                					 onFailure: function(data) {
+    		    	                						 console.log("Unable to Load SwaggerUI");
+    		    	                						 },
+    		    	                					 docExpansion: "list",
+    		    	                					 jsonEditor: false,
+    		    	                					 defaultModelRendering: 'schema',
+    		    	                					 showRequestHeaders: true,
+    		    	                					 validatorUrl: null
+    		    	                					 });
+    		    	                				 window.swaggerUi.load();
+    		    	                				 });
+    		    	                			 }
+    		    	                		 ).catch(apiGetErrorHandler);
     		    	                 $(".env_name").change(select_environment);
-    		    	          }, onFailure: function (data) {
-    		    	         }
+    		    	              }, onFailure: function (data) {
+    		    	            	  
+    		    	              }
     		    	        };
-    		            var data = {
-    		                labels: context.labels
-    		            };    		            
-    		            UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-console", data, 
+    		        	var data = {
+    		        			labels: context.labels
+    		        			};
+    		        	UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-console", data, 
     		     			   "api-console-content", mode, callbacks);
-    		        }
-    		    ).catch(apiGetErrorHandler);
-    	  }
+    		        	}
+    		        ).catch(apiGetErrorHandler);
+    	   }
 
 
 /**
