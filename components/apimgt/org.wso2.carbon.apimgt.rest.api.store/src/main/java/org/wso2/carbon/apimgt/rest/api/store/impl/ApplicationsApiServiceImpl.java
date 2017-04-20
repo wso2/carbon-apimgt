@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ApplicationStatus;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -210,6 +211,16 @@ public class ApplicationsApiServiceImpl
             }
 
             Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
+            if (!ApplicationStatus.APPLICATION_APPROVED.equals(application.getStatus())) {
+                String errorMessage = "Application " + applicationId + " is not active";
+                ExceptionCodes exceptionCode = ExceptionCodes.APPLICATION_INACTIVE;
+                APIManagementException e = new APIManagementException(errorMessage, exceptionCode);
+                HashMap<String, String> paramList = new HashMap<String, String>();
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                log.error(errorMessage, e);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+                
+            }
             apiConsumer.updateApplication(applicationId, application);
 
             //retrieves the updated application and send as the response
@@ -250,6 +261,16 @@ public class ApplicationsApiServiceImpl
         try {
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
             Application application = apiConsumer.getApplication(applicationId, username, null);
+            if (application != null && !ApplicationStatus.APPLICATION_APPROVED.equals(application.getStatus())) {
+                String errorMessage = "Application " + applicationId + " is not active";
+                ExceptionCodes exceptionCode = ExceptionCodes.APPLICATION_INACTIVE;
+                APIManagementException e = new APIManagementException(errorMessage, exceptionCode);
+                HashMap<String, String> paramList = new HashMap<String, String>();
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                log.error(errorMessage, e);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+                
+            }
             if (application != null) {
                 String[] accessAllowDomainsArray = body.getAccessAllowDomains().toArray(new String[1]);
                 String tokenScopes = StringUtils.join(body.getScopes(), " ");
