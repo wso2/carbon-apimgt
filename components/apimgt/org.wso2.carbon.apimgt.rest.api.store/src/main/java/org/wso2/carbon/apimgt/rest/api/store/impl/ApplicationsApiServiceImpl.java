@@ -215,7 +215,8 @@ public class ApplicationsApiServiceImpl
                 String errorMessage = "Application " + applicationId + " is not active";
                 ExceptionCodes exceptionCode = ExceptionCodes.APPLICATION_INACTIVE;
                 APIManagementException e = new APIManagementException(errorMessage, exceptionCode);
-                HashMap<String, String> paramList = new HashMap<String, String>();
+                Map<String, String> paramList = new HashMap<String, String>();
+                paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
                 log.error(errorMessage, e);
                 return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
@@ -266,6 +267,7 @@ public class ApplicationsApiServiceImpl
                 ExceptionCodes exceptionCode = ExceptionCodes.APPLICATION_INACTIVE;
                 APIManagementException e = new APIManagementException(errorMessage, exceptionCode);
                 HashMap<String, String> paramList = new HashMap<String, String>();
+                paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
                 log.error(errorMessage, e);
                 return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();

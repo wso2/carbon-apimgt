@@ -5,11 +5,11 @@
 <!-- Nav tabs -->
 <div class="white-wrapper">
     <ul class="nav nav-tabs" role="tablist" id="tabs">
-        <li role="presentation" id="details-tab" class="active"><a title="Details" href="#appdetails" aria-controls="profile" role="tab" data-toggle="tab">Details</a></li>
+        <li role="presentation" id="details-tab" class="active"><a title="Details" href="#appdetails" aria-controls="profile" role="tab" data-toggle="tab">{{i18n "Details"}}</a></li>
         {{#if @params.isApplicationActive}}
-        <li role="presentation" id="production-keys-tab"><a title="Production Keys>" href="#production" aria-controls="profile" role="tab" data-toggle="tab">Production Keys</a></li>
-        <li role="presentation" id="sandbox-keys-tab"><a title="Sandbox Keys" href="#sandbox" aria-controls="profile" role="tab" data-toggle="tab">Sandbox Keys</a></li>
-        <li role="presentation" id="subscriptions-tab"><a title="Subscriptions" href="#subscription" aria-controls="profile" role="tab" data-toggle="tab">Subscriptions</a></li>
+        <li role="presentation" id="production-keys-tab"><a title="Production Keys>" href="#production" aria-controls="profile" role="tab" data-toggle="tab">{{i18n "Production Keys"}}</a></li>
+        <li role="presentation" id="sandbox-keys-tab"><a title="Sandbox Keys" href="#sandbox" aria-controls="profile" role="tab" data-toggle="tab">{{i18n "Sandbox Keys"}}</a></li>
+        <li role="presentation" id="subscriptions-tab"><a title="Subscriptions" href="#subscription" aria-controls="profile" role="tab" data-toggle="tab">{{i18n "Subscriptions"}}</a></li>
         {{/if}}
     </ul>
 
