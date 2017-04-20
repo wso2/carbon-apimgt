@@ -109,63 +109,28 @@ public class ApisApiServiceImpl extends ApisApiService {
         return Response.ok().entity(commentDTO).build();
     }
 
-    /**
-     * Post a commet to API
-     *
-     * @param apiId       API ID
-     * @param body        comment body
-     * @param contentType content-type header
-     * @param request     msf4j request
-     * @return 201 response if sucessfully posted
-     * @throws NotFoundException if API not found
-     */
-    @Override
-    public Response apisApiIdCommentsPost(String apiId, CommentDTO body, String contentType, Request request)
-            throws NotFoundException {
-        CommentDTO createdCommentDTO = null;
-        URI location = null;
-        String username = RestApiUtil.getLoggedInUsername();
-        try {
-            APIStore apiStore = RestApiUtil.getConsumer(username);
-            Comment comment = CommentMappingUtil.fromDTOToComment(body, username);
-            String createdCommentId = apiStore.addComment(comment, apiId);
 
-            Comment createdComment = apiStore.getCommentByUUID(createdCommentId, apiId);
-            createdCommentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
-            location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/");
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while adding comment to api : " + body.getApiId();
-            HashMap<String, String> paramList = new HashMap<String, String>();
-            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, body.getApiId());
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
-            log.error(errorMessage, e);
-            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-        } catch (URISyntaxException e) {
-            String errorMessage = "Error while adding location header in response for comment";
-            ErrorHandler errorHandler = ExceptionCodes.LOCATION_HEADER_INCORRECT;
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorHandler);
-            log.error(errorMessage, e);
-            return Response.status(errorHandler.getHttpStatusCode()).entity(errorDTO).build();
-        }
-        return Response.ok().header("Location", location).entity(createdCommentDTO).build();
+    @Override public Response apisApiIdCommentsGet(String apiId, Integer limit, Integer offset, String accept,
+            Request request) throws NotFoundException {
+        return null;
     }
 
+
+
     /**
-     * Update a comment
-     *
-     * @param commentId         Comment ID
-     * @param apiId             API ID
-     * @param body              comment body
-     * @param contentType       content-type header
-     * @param ifMatch           If-Match header value
+     * @param commentId Comment ID
+     * @param apiId API ID
+     * @param body comment body
+     * @param contentType  content-type header
+     * @param ifMatch  If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @param request           msf4j request object
+     * @param request msf4j request object
      * @return comment update response
      * @throws NotFoundException if comment or API not found
      */
     @Override
-    public Response apisApiIdCommentsPut(String commentId, String apiId, CommentDTO body, String contentType, String
-            ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
+    public Response apisApiIdCommentsCommentIdPut(String commentId, String apiId, CommentDTO body,
+            String contentType, String ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
@@ -186,6 +151,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
     }
+
 
     /**
      * Retrieves the content of the document
