@@ -36,10 +36,13 @@ import java.util.List;
 import java.util.Objects;
 
 public class TestUtil {
+
+    private static final int APIM_REST_API_PORT = 9292;
+    private static final int IDP_REST_API_PORT = 9443;
+    private static final int TEST_PORT_OFFSET = 500;
     private static TestUtil instance = new TestUtil();
 
     private TestUtil() {
-
     }
 
     public static Application addTestApplication() throws APIMgtDAOException {
@@ -170,7 +173,15 @@ public class TestUtil {
         return ip;
     }
 
-       public static TestUtil getInstance() {
+    public static TestUtil getInstance() {
         return instance;
+    }
+
+    public static int getRestApiPort() {
+        return APIM_REST_API_PORT + TEST_PORT_OFFSET;
+    }
+
+    public static int getIdentityServerPort() {
+        return IDP_REST_API_PORT + TEST_PORT_OFFSET;
     }
 }
