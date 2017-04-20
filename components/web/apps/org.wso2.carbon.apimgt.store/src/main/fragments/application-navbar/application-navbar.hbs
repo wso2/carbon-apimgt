@@ -1,0 +1,11 @@
+{{#if @params.isApplicationActive}}
+<li>
+     <a title="Edit Applications" href="{{@contextPath}}/applications/{{@params.applicationId}}/edit">
+         <span class="icon fw-stack">
+            <i class="fw fw-edit fw-stack-1x"></i>
+            <i class="fw fw-circle-outline fw-stack-2x"></i>
+         </span>
+        {{i18n "Edit"}}
+    </a>
+</li>
+{{/if}}
