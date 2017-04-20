@@ -422,6 +422,30 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
+     * @see ApiDAO#addComment(Comment , String)
+     */
+    @Override
+    public void addComment(Comment comment, String apiId) throws APIMgtDAOException {
+
+    }
+
+    /**
+     * @see ApiDAO#deleteComment(String, String)
+     */
+    @Override
+    public void deleteComment(String commentId, String apiId) throws APIMgtDAOException {
+
+    }
+
+    /**
+     * @see ApiDAO#updateComment(Comment, String, String)
+     */
+    @Override
+    public void updateComment(Comment comment, String commentId, String apiId) throws APIMgtDAOException {
+
+    }
+
+    /**
      * @see ApiDAO#getAPIs()
      */
     @Override

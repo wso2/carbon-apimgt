@@ -490,4 +490,21 @@ public interface ApiDAO {
      * @throws APIMgtDAOException
      */
     void addComment(Comment comment, String apiId) throws APIMgtDAOException;
+
+    /**
+     *  Deletes a comment
+     *
+     * @param commentId UUID of the comment
+     * @param apiId UUID of the api
+     */
+    void deleteComment(String commentId, String apiId) throws APIMgtDAOException;
+
+    /**
+     *  Updates an already existing comment
+     *
+     * @param comment new comment
+     * @param commentId old comment uuid
+     * @param apiId uuid of the api associated with the comment
+     */
+    void updateComment(Comment comment, String commentId, String apiId) throws APIMgtDAOException;
 }

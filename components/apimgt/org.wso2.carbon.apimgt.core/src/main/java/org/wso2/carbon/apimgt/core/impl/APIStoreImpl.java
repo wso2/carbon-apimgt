@@ -516,7 +516,33 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         return comment.getUuid();
     }
 
-    @Override public void deleteComment(String commentId, String apiId) {
+    @Override
+    public void deleteComment(String commentId, String apiId) throws APIManagementException {
+        try {
+            getApiDAO().deleteComment(commentId, apiId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while deleting comment " + commentId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    @Override
+    public void updateComment(Comment comment, String commentId, String apiId) throws APIManagementException {
+        try {
+            Comment oldComment = getApiDAO().getCommentByUUID(commentId, apiId);
+            if (oldComment != null) {
+                getApiDAO().updateComment(comment, commentId, apiId);
+            } else {
+                String errorMsg = "Couldn't find comment with comment_id : " + commentId + "and api_id : " + apiId;
+                log.error(errorMsg);
+                throw new APIManagementException(errorMsg, ExceptionCodes.COMMENT_NOT_FOUND);
+            }
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while updating comment " + commentId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
 
     }
 
@@ -858,7 +884,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             // setting the workflow status from the one getting from the executor. this gives the executor developer
             // to change the state as well.
             workflow.setStatus(response.getWorkflowStatus());
-          
+
             String applicationState = "";
             if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
                 if (log.isDebugEnabled()) {
@@ -937,5 +963,5 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         return response;
     }
 
-    
+
 }

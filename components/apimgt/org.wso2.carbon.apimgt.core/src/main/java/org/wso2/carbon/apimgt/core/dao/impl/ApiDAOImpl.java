@@ -765,7 +765,7 @@ public class ApiDAOImpl implements ApiDAO {
     public Comment getCommentByUUID(String commentId, String apiId) throws APIMgtDAOException {
         final String query = "SELECT COMMENT_ID, COMMENT_TEXT, USER_IDENTIFIER, API_ID, "
                 + "CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME "
-                + "FROM AM_API_COMMENTS WHERE COMMENT_ID = ? AND API_id = ?";
+                + "FROM AM_API_COMMENTS WHERE COMMENT_ID = ? AND API_ID = ?";
 
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(query)) {
@@ -832,6 +832,47 @@ public class ApiDAOImpl implements ApiDAO {
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
         }
+    }
+
+    @Override
+    public void deleteComment(String commentId, String apiId) throws APIMgtDAOException {
+        final String deleteCommentQuery = "DELETE FROM AM_API_COMMENTS WHERE COMMENT_ID = ? AND API_ID = ?";
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(deleteCommentQuery)) {
+            try {
+                statement.execute();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new APIMgtDAOException(e);
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    @Override
+    public void updateComment(Comment comment, String commentId, String apiId) throws APIMgtDAOException {
+        final String updateCommentQuery = "UPDATE AM_API_COMMENTS SET COMMENT_TEXT = ? , USER_IDENTIFIER = ? ,"
+                + "CREATED_BY = ? , CREATED_TIME = ?, UPDATED_BY = ? , LAST_UPDATED_TIME = ?"
+                + "WHERE COMMENT_ID = ? AND API_ID = ?";
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(updateCommentQuery)) {
+            try {
+                statement.setString(1, comment.getCommentText());
+                statement.setString(2, comment.getCommentedUser());
+                statement.setString(3, comment.getCreatedUser());
+                statement.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
+                statement.setString(5, comment.getUpdatedUser());
+                statement.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now()));
+                statement.execute();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new APIMgtDAOException(e);
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+
     }
 
     /**

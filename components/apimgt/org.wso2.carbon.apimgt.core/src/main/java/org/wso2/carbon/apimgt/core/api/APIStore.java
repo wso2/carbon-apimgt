@@ -257,5 +257,13 @@ public interface APIStore extends APIManager {
      * @param commentId UUID of the comment to be deleted
      * @param apiId UUID of the api
      */
-    void deleteComment(String commentId, String apiId);
+    void deleteComment(String commentId, String apiId) throws APIManagementException;
+
+    /**
+     *  Update a comment
+     *  @param comment new Comment object
+     * @param commentId the id of the comment which needs to be updated
+     * @param apiId UUID of the api the comment belongs to
+     */
+    void updateComment(Comment comment, String commentId, String apiId) throws APIManagementException;
 }

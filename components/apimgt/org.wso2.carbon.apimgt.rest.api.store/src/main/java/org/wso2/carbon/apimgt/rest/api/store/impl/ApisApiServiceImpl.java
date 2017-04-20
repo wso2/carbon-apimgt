@@ -58,7 +58,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdCommentsCommentIdDelete(String commentId, String apiId, String ifMatch,
-                                            String ifUnmodifiedSince, String minorVersion) throws NotFoundException {
+            String ifUnmodifiedSince, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
@@ -67,7 +67,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             String errorMessage = "Error while deleting comment with commentId: " + commentId + " of apiID :" + apiId;
             HashMap<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
-            paramList.put(APIMgtConstants.ExceptionsConstants.COMMENT_ID, apiId);
+            paramList.put(APIMgtConstants.ExceptionsConstants.COMMENT_ID, commentId);
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
@@ -136,7 +136,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding comment to api : " + body.getApiId();
             HashMap<String, String> paramList = new HashMap<String, String>();
-            paramList.put(APIMgtConstants.ExceptionsConstants.API_NAME, body.getApiId());
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, body.getApiId());
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
@@ -147,7 +147,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             log.error(errorMessage, e);
             return Response.status(errorHandler.getHttpStatusCode()).entity(errorDTO).build();
         }
-
         return Response.ok().header("Location", location).entity(createdCommentDTO).build();
     }
 
@@ -167,7 +166,25 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdCommentsPut(String commentId, String apiId, CommentDTO body, String contentType, String
             ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
-        return null;
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIStore apiStore = RestApiUtil.getConsumer(username);
+            Comment comment = CommentMappingUtil.fromDTOToComment(body, username);
+            apiStore.updateComment(comment, commentId, apiId);
+
+            Comment updatedComment = apiStore.getCommentByUUID(commentId, apiId);
+            CommentDTO updatedCommentDTO = CommentMappingUtil.fromCommentToDTO(updatedComment);
+
+            return Response.ok().entity(updatedCommentDTO).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while updating comment : " + commentId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, body.getApiId());
+            paramList.put(APIMgtConstants.ExceptionsConstants.COMMENT_ID, commentId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
     }
 
     /**
