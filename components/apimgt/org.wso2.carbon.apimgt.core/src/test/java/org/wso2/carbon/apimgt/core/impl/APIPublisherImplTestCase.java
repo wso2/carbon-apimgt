@@ -76,6 +76,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -391,7 +392,7 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
         List<API> apimResultsFromDAO = new ArrayList<>();
-        Mockito.when(apiDAO.searchAPIs(new ArrayList<>(), user, QUERY_STRING, 1, 2)).thenReturn(apimResultsFromDAO);
+        Mockito.when(apiDAO.searchAPIs(new HashSet<>(), user, QUERY_STRING, 1, 2)).thenReturn(apimResultsFromDAO);
         List<API> apis = apiPublisher.searchAPIs(2, 1, QUERY_STRING);
         Assert.assertNotNull(apis);
         Mockito.verify(apiDAO, Mockito.atLeastOnce()).searchAPIs(APIUtils.getAllRolesOfUser(user),
@@ -403,7 +404,7 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
         List<API> apimResultsFromDAO = new ArrayList<>();
-        Mockito.when(apiDAO.searchAPIs(new ArrayList<>(), user, null, 1, 2)).thenReturn(apimResultsFromDAO);
+        Mockito.when(apiDAO.searchAPIs(new HashSet<>(), user, null, 1, 2)).thenReturn(apimResultsFromDAO);
         apiPublisher.searchAPIs(2, 1, null);
         Mockito.verify(apiDAO, Mockito.times(1)).getAPIs();
     }

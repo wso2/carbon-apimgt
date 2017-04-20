@@ -35,6 +35,7 @@ class CommonQueryConstants {
             "CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME, COPIED_FROM_API, UPDATED_BY, LC_WORKFLOW_STATUS FROM AM_API";
 
     static final String COMPOSITE_API_TYPE = "'COMPOSITE'";
+    static final String STANDARD_API_TYPE = "'STANDARD'";
 
 
 }

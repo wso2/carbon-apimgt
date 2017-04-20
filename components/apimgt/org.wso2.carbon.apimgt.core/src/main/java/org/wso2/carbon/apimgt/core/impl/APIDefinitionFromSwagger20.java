@@ -215,6 +215,11 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
             APIManagementException {
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(apiDefinition);
+
+        if (swagger == null) {
+            throw new APIManagementException("Swagger could not be generated from provided API definition");
+        }
+
         Info apiInfo = swagger.getInfo();
         if (apiInfo == null) {
             throw new APIManagementException("Swagger doesn't contains the info");

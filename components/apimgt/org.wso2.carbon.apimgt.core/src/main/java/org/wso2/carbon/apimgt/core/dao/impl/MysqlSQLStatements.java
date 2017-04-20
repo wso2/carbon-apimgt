@@ -25,9 +25,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * SQL Statements that are specific to MySQL Database.
@@ -52,7 +52,7 @@ public class MysqlSQLStatements implements ApiDAOVendorSpecificStatements {
     @Override
     @SuppressFBWarnings({"SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
             "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE"})
-    public PreparedStatement search(Connection connection, List<String> roles, String user, String searchString,
+    public PreparedStatement search(Connection connection, Set<String> roles, String user, String searchString,
                                     int offset, int limit) throws APIMgtDAOException {
         StringBuilder roleListBuilder = new StringBuilder();
 
@@ -95,7 +95,7 @@ public class MysqlSQLStatements implements ApiDAOVendorSpecificStatements {
     @SuppressFBWarnings({"SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
             "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE"})
     public PreparedStatement attributeSearch(
-            Connection connection, List<String> roles, String user, Map<String, String> attributeMap, int offset, int
+            Connection connection, Set<String> roles, String user, Map<String, String> attributeMap, int offset, int
             limit)
             throws APIMgtDAOException {
         StringBuilder roleListBuilder = new StringBuilder();

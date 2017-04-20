@@ -60,8 +60,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class SampleTestObjectCreator {
@@ -132,14 +134,14 @@ public class SampleTestObjectCreator {
     }
 
     public static API.APIBuilder createDefaultAPI() {
-        List<String> transport = new ArrayList<>();
+        Set<String> transport = new HashSet<>();
         transport.add(HTTP);
         transport.add(HTTPS);
 
-        List<String> tags = new ArrayList<>();
+        Set<String> tags = new HashSet<>();
         tags.add(TAG_CLIMATE);
 
-        List<String> policies = new ArrayList<>();
+        Set<String> policies = new HashSet<>();
         policies.add(GOLD_TIER);
         policies.add(SILVER_TIER);
         policies.add(BRONZE_TIER);
@@ -165,7 +167,7 @@ public class SampleTestObjectCreator {
                 tags(tags).
                 policies(policies).
                 visibility(API.Visibility.PUBLIC).
-                visibleRoles(new ArrayList<>()).
+                visibleRoles(new HashSet<>()).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
                 createdTime(LocalDateTime.now()).
@@ -220,14 +222,14 @@ public class SampleTestObjectCreator {
     }
 
     public static API.APIBuilder createAlternativeAPI() {
-        List<String> transport = new ArrayList<>();
+        Set<String> transport = new HashSet<>();
         transport.add(HTTP);
 
-        List<String> tags = new ArrayList<>();
+        Set<String> tags = new HashSet<>();
         tags.add(TAG_FOOD);
         tags.add(TAG_BEVERAGE);
 
-        List<String> policies = new ArrayList<>();
+        Set<String> policies = new HashSet<>();
         policies.add(SILVER_TIER);
         policies.add(BRONZE_TIER);
 
@@ -261,7 +263,7 @@ public class SampleTestObjectCreator {
                 tags(tags).
                 policies(policies).
                 visibility(API.Visibility.RESTRICTED).
-                visibleRoles(Arrays.asList(CUSTOMER_ROLE, MANAGER_ROLE, EMPLOYEE_ROLE)).
+                visibleRoles(new HashSet<>(Arrays.asList(CUSTOMER_ROLE, MANAGER_ROLE, EMPLOYEE_ROLE))).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
                 createdTime(LocalDateTime.now()).
@@ -273,14 +275,14 @@ public class SampleTestObjectCreator {
     }
 
     public static API.APIBuilder createUniqueAPI() {
-        List<String> transport = new ArrayList<>();
+        Set<String> transport = new HashSet<>();
         transport.add(HTTP);
 
-        List<String> tags = new ArrayList<>();
+        Set<String> tags = new HashSet<>();
         tags.add(TAG_FOOD);
         tags.add(TAG_BEVERAGE);
 
-        List<String> policies = new ArrayList<>();
+        Set<String> policies = new HashSet<>();
         policies.add(SILVER_TIER);
         policies.add(BRONZE_TIER);
 
@@ -315,7 +317,7 @@ public class SampleTestObjectCreator {
                 tags(tags).
                 policies(policies).
                 visibility(API.Visibility.RESTRICTED).
-                visibleRoles(Arrays.asList(CUSTOMER_ROLE, MANAGER_ROLE, EMPLOYEE_ROLE)).
+                visibleRoles(new HashSet<>(Arrays.asList(CUSTOMER_ROLE, MANAGER_ROLE, EMPLOYEE_ROLE))).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
                 createdTime(LocalDateTime.now()).

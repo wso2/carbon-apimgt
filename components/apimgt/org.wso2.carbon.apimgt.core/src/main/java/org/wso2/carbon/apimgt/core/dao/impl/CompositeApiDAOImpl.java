@@ -22,10 +22,14 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 
 import org.wso2.carbon.apimgt.core.dao.CompositeApiDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
+import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
@@ -47,9 +51,8 @@ public class CompositeApiDAOImpl implements CompositeApiDAO {
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, apiID);
 
-            //return constructAPIFromResultSet(connection, statement);
-            return null;
-        } catch (SQLException /*| IOException*/ e) {
+            return constructAPIFromResultSet(connection, statement);
+        } catch (SQLException | IOException e) {
             throw new APIMgtDAOException(e);
         }
     }
@@ -146,7 +149,6 @@ public class CompositeApiDAOImpl implements CompositeApiDAO {
 
     }
 
-    /*
     private CompositeAPI constructAPIFromResultSet(Connection connection, PreparedStatement statement)
             throws SQLException, IOException {
         try (ResultSet rs = statement.executeQuery()) {
@@ -181,12 +183,8 @@ public class CompositeApiDAOImpl implements CompositeApiDAO {
                         description(rs.getString("DESCRIPTION")).
                         isResponseCachingEnabled(rs.getBoolean("IS_RESPONSE_CACHED")).
                         cacheTimeout(rs.getInt("CACHE_TIMEOUT")).
-                        labels(getLabelNames(connection, apiPrimaryKey)).
-                        wsdlUri(ApiResourceDAO.
-                                getTextValueForCategory(connection, apiPrimaryKey,
-                                        ResourceCategory.WSDL_URI)).
-                        transport(getTransports(connection, apiPrimaryKey)).
-                        endpoint(getEndPointsForApi(connection, apiPrimaryKey)).
+                        labels(ApiMetaInfoDAO.getLabelNames(connection, apiPrimaryKey)).
+                        transport(ApiMetaInfoDAO.getTransports(connection, apiPrimaryKey)).
                         businessInformation(businessInformation).
                         lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
@@ -195,8 +193,8 @@ public class CompositeApiDAOImpl implements CompositeApiDAO {
                         updatedBy(rs.getString("UPDATED_BY")).
                         createdTime(rs.getTimestamp("CREATED_TIME").toLocalDateTime()).
                         lastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toLocalDateTime()).
-                        uriTemplates(getUriTemplates(connection, apiPrimaryKey)).
-                        policies(getSubscripitonPolciesByAPIId(connection, apiPrimaryKey)).copiedFromApiId(rs.getString
+                        uriTemplates(ApiMetaInfoDAO.getUriTemplates(connection, apiPrimaryKey)).
+                        copiedFromApiId(rs.getString
                         ("COPIED_FROM_API")).
                         workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).build();
             }
@@ -204,5 +202,4 @@ public class CompositeApiDAOImpl implements CompositeApiDAO {
 
         return null;
     }
-    */
 }

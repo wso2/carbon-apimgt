@@ -668,7 +668,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             //this should be current logged in user
             String user = "admin";
             //role list of current user
-            List<String> roles = APIUtils.getAllRolesOfUser(user);
+            Set<String> roles = APIUtils.getAllRolesOfUser(user);
             if (query != null && !query.isEmpty()) {
                 String[] attributes = query.split(",");
                 Map<String, String> attributeMap = new HashMap<>();

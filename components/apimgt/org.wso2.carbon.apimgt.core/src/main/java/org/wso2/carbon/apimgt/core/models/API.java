@@ -29,9 +29,9 @@ import org.wso2.carbon.lcm.core.impl.LifecycleState;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Representation of an API object. Only immutable instances of this class can be created via the provided inner static
@@ -139,19 +139,19 @@ public final class API {
         return isDefaultVersion;
     }
 
-    public List<String> getTransport() {
+    public Set<String> getTransport() {
         return transport;
     }
 
-    public List<String> getTags() {
+    public Set<String> getTags() {
         return tags;
     }
 
-    public List<String> getLabels() {
+    public Set<String> getLabels() {
         return labels;
     }
 
-    public List<String> getPolicies() {
+    public Set<String> getPolicies() {
         return policies;
     }
 
@@ -159,7 +159,7 @@ public final class API {
         return visibility;
     }
 
-    public List<String> getVisibleRoles() {
+    public Set<String> getVisibleRoles() {
         return visibleRoles;
     }
 
@@ -224,12 +224,12 @@ public final class API {
                 Objects.equals(endpoint, api.endpoint) &&
                 Objects.equals(gatewayConfig, api.gatewayConfig) &&
                 Objects.equals(wsdlUri, api.wsdlUri) &&
-                APIUtils.isListsEqualIgnoreOrder(transport, api.transport) &&
-                APIUtils.isListsEqualIgnoreOrder(tags, api.tags) &&
-                APIUtils.isListsEqualIgnoreOrder(labels, api.labels) &&
-                APIUtils.isListsEqualIgnoreOrder(policies, api.policies) &&
+                Objects.equals(transport, api.transport) &&
+                Objects.equals(tags, api.tags) &&
+                Objects.equals(labels, api.labels) &&
+                Objects.equals(policies, api.policies) &&
                 visibility == api.visibility &&
-                APIUtils.isListsEqualIgnoreOrder(visibleRoles, api.visibleRoles) &&
+                Objects.equals(visibleRoles, api.visibleRoles) &&
                 Objects.equals(businessInformation, api.businessInformation) &&
                 Objects.equals(corsConfiguration, api.corsConfiguration) &&
                 APIUtils.isTimeStampsEquals(createdTime, api.createdTime) &&
@@ -273,12 +273,12 @@ public final class API {
     private final boolean isResponseCachingEnabled;
     private final int cacheTimeout;
     private final boolean isDefaultVersion;
-    private final List<String> transport;
-    private final List<String> tags;
-    private final List<String> labels;
-    private final List<String> policies;
+    private final Set<String> transport;
+    private final Set<String> tags;
+    private final Set<String> labels;
+    private final Set<String> policies;
     private final Visibility visibility;
-    private final List<String> visibleRoles;
+    private final Set<String> visibleRoles;
     private final BusinessInformation businessInformation;
     private final CorsConfiguration corsConfiguration;
     private final LocalDateTime createdTime;
@@ -367,19 +367,19 @@ public final class API {
             return apiPolicy;
         }
 
-        public List<String> getTransport() {
+        public Set<String> getTransport() {
             return transport;
         }
 
-        public List<String> getTags() {
+        public Set<String> getTags() {
             return tags;
         }
 
-        public List<String> getLabels() {
+        public Set<String> getLabels() {
             return labels;
         }
 
-        public List<String> getPolicies() {
+        public Set<String> getPolicies() {
             return policies;
         }
 
@@ -387,7 +387,7 @@ public final class API {
             return visibility;
         }
 
-        public List<String> getVisibleRoles() {
+        public Set<String> getVisibleRoles() {
             return visibleRoles;
         }
 
@@ -409,12 +409,12 @@ public final class API {
         private int cacheTimeout;
         private boolean isDefaultVersion;
         private String apiPolicy;
-        private List<String> transport = Collections.emptyList();
-        private List<String> tags = Collections.emptyList();
-        private List<String> labels = Collections.emptyList();
-        private List<String> policies = Collections.EMPTY_LIST;
+        private Set<String> transport = Collections.emptySet();
+        private Set<String> tags = Collections.emptySet();
+        private Set<String> labels = Collections.emptySet();
+        private Set<String> policies = Collections.emptySet();
         private Visibility visibility = Visibility.PUBLIC;
-        private List<String> visibleRoles = Collections.emptyList();
+        private Set<String> visibleRoles = Collections.emptySet();
         private BusinessInformation businessInformation;
         private CorsConfiguration corsConfiguration;
         private LocalDateTime createdTime;
@@ -672,7 +672,7 @@ public final class API {
          * @param transport the {@code transport} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder transport(List<String> transport) {
+        public APIBuilder transport(Set<String> transport) {
             this.transport = transport;
             return this;
         }
@@ -683,7 +683,7 @@ public final class API {
          * @param tags the {@code tags} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder tags(List<String> tags) {
+        public APIBuilder tags(Set<String> tags) {
             this.tags = tags;
             return this;
         }
@@ -695,7 +695,7 @@ public final class API {
          * @param labels the {@code labels} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder labels(List<String> labels) {
+        public APIBuilder labels(Set<String> labels) {
             this.labels = labels;
             return this;
         }
@@ -707,7 +707,7 @@ public final class API {
          * @param policies the {@code policies} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder policies(List<String> policies) {
+        public APIBuilder policies(Set<String> policies) {
             this.policies = policies;
             return this;
         }
@@ -754,7 +754,7 @@ public final class API {
          * @param visibleRoles the {@code visibleRoles} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder visibleRoles(List<String> visibleRoles) {
+        public APIBuilder visibleRoles(Set<String> visibleRoles) {
             this.visibleRoles = visibleRoles;
             return this;
         }

@@ -75,6 +75,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -121,7 +122,7 @@ public class APIStoreImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIStore apiStore = getApiStoreImpl(apiDAO);
         List<API> apimResultsFromDAO = new ArrayList<>();
-        Mockito.when(apiDAO.searchAPIs(new ArrayList<>(), "admin", "pizza", 1, 2)).thenReturn(apimResultsFromDAO);
+        Mockito.when(apiDAO.searchAPIs(new HashSet<>(), "admin", "pizza", 1, 2)).thenReturn(apimResultsFromDAO);
         List<API> apis = apiStore.searchAPIs("pizza", 1, 2);
         Assert.assertNotNull(apis);
         Mockito.verify(apiDAO, Mockito.atLeastOnce()).searchAPIs(APIUtils.getAllRolesOfUser("admin"),

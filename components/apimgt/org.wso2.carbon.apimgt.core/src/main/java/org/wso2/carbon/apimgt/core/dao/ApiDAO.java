@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants.APILCWorkflowStatus;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.annotation.CheckForNull;
 
 /**
@@ -118,7 +119,7 @@ public interface ApiDAO {
      * @return API list
      * @throws APIMgtDAOException if failed to fetch APIs from database
      */
-    List<API> getAPIsByStatus(List<String> roles, List<String> statuses) throws APIMgtDAOException;
+    List<API> getAPIsByStatus(Set<String> roles, List<String> statuses) throws APIMgtDAOException;
 
     /**
      * Retrieves summary of paginated data of all available APIs that match the given search criteria. This will use
@@ -132,7 +133,7 @@ public interface ApiDAO {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    List<API> searchAPIs(List<String> roles, String user, String searchString, int offset, int limit) throws
+    List<API> searchAPIs(Set<String> roles, String user, String searchString, int offset, int limit) throws
             APIMgtDAOException;
 
     /**
@@ -146,7 +147,7 @@ public interface ApiDAO {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    List<API> attributeSearchAPIs(List<String> roles, String user, Map<String, String> attributeMap, int offset, int
+    List<API> attributeSearchAPIs(Set<String> roles, String user, Map<String, String> attributeMap, int offset, int
             limit) throws
             APIMgtDAOException;
 

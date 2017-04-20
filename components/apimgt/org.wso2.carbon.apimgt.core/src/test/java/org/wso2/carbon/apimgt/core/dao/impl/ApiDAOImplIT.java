@@ -43,9 +43,11 @@ import org.wso2.carbon.apimgt.core.util.EndPointComparator;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 public class ApiDAOImplIT extends DAOIntegrationTestBase {
     private static final String ADMIN = "admin";
@@ -374,32 +376,32 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         commonStringResult.add(apis.get(upperCaseString));
 
         // Search by common mixed case
-        List<API> apiList = apiDAO.searchAPIs(new ArrayList<>(), "", commonMixedCaseSearchString, 0, 10);
+        List<API> apiList = apiDAO.searchAPIs(new HashSet<>(), "", commonMixedCaseSearchString, 0, 10);
         Assert.assertEquals(apiList.size(), 3);
         Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, commonStringResult, new APIComparator()),
                 TestUtil.printListDiff(apiList, commonStringResult));
 
         // Search by common lower case
-        apiList = apiDAO.searchAPIs(new ArrayList<>(), "", commonLowerCaseSearchString, 0, 10);
+        apiList = apiDAO.searchAPIs(new HashSet<>(), "", commonLowerCaseSearchString, 0, 10);
         Assert.assertEquals(apiList.size(), 3);
         Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, commonStringResult, new APIComparator()),
                 TestUtil.printListDiff(apiList, commonStringResult));
 
         // Search by common upper case
-        apiList = apiDAO.searchAPIs(new ArrayList<>(), "", commonUpperCaseSearchString, 0, 10);
+        apiList = apiDAO.searchAPIs(new HashSet<>(), "", commonUpperCaseSearchString, 0, 10);
         Assert.assertEquals(apiList.size(), 3);
         Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, commonStringResult, new APIComparator()),
                 TestUtil.printListDiff(apiList, commonStringResult));
 
         // Search by symbol
-        apiList = apiDAO.searchAPIs(new ArrayList<>(), "", symbolSearchString, 0, 10);
+        apiList = apiDAO.searchAPIs(new HashSet<>(), "", symbolSearchString, 0, 10);
         Assert.assertEquals(apiList.size(), 1);
         API actualAPI = apiList.get(0);
         API expectedAPI = apis.get(charSymbolNumString);
         Assert.assertEquals(actualAPI, expectedAPI, TestUtil.printDiff(actualAPI, expectedAPI));
 
         // Search by number
-        apiList = apiDAO.searchAPIs(new ArrayList<>(), "", numberSearchString, 0, 10);
+        apiList = apiDAO.searchAPIs(new HashSet<>(), "", numberSearchString, 0, 10);
         Assert.assertEquals(apiList.size(), 1);
         actualAPI = apiList.get(0);
         expectedAPI = apis.get(charSymbolNumString);
@@ -563,7 +565,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         testAddGetEndpoint();
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         apiDAO.addAPI(api);
-        List<String> roles = new ArrayList<>();
+        Set<String> roles = new HashSet<>();
         Map<String, String> attributeMap = new HashMap<>();
         attributeMap.put("name", api.getName());
         List<API> apiList = apiDAO.attributeSearchAPIs(roles, ADMIN, attributeMap, 1, 2);
@@ -798,7 +800,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         labelDAO.addLabels(labelList);
 
         ApiDAO apiDAO = DAOFactory.getApiDAO();
-        List<String> labelNames = new ArrayList<>();
+        Set<String> labelNames = new HashSet<>();
         labelNames.add(label1.getName());
         labelNames.add(label2.getName());
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
@@ -816,7 +818,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     public void testAddAPIWithoutAddingLabels() throws Exception {
 
         ApiDAO apiDAO = DAOFactory.getApiDAO();
-        List<String> labelNames = new ArrayList<>();
+        Set<String> labelNames = new HashSet<>();
         labelNames.add("public");
         labelNames.add("private");
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
@@ -846,7 +848,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         labelDAO.addLabels(labelList);
 
         ApiDAO apiDAO = DAOFactory.getApiDAO();
-        List<String> labelNames = new ArrayList<>();
+        Set<String> labelNames = new HashSet<>();
         labelNames.add(label1.getName());
         API.APIBuilder builder1 = SampleTestObjectCreator.createDefaultAPI();
         API api = builder1.labels(labelNames).build();
@@ -860,8 +862,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         API expectedAPI = SampleTestObjectCreator.copyAPIIgnoringNonEditableFields(api, substituteAPI);
         Assert.assertNotNull(apiFromDB);
-        Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiFromDB.getLabels(), expectedAPI.getLabels()),
-                TestUtil.printDiff(apiFromDB, expectedAPI));
+        Assert.assertEquals(apiFromDB.getLabels(), expectedAPI.getLabels());
 
     }
 
