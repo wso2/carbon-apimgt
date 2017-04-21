@@ -44,13 +44,12 @@
     </build>
     <profiles>
         <profile>
-            <id>local-all</id>
+            <id>integration-tests</id>
             <build>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>2.19.1</version>
                         <executions>
                             <execution>
                                 <id>integration-test-for-subscription-loading</id>
@@ -61,14 +60,12 @@
                             </execution>
                             <execution>
                                 <id>verify-for-subscription-loading</id>
-                                <phase>integration-test</phase>
+                                <phase>verify</phase>
                                 <goals>
                                     <goal>verify</goal>
                                 </goals>
                             </execution>
                         </executions>
-                        <configuration>
-                        </configuration>
                     </plugin>
                 </plugins>
             </build>
@@ -128,6 +125,11 @@
             <artifactId>org.wso2.carbon.apimgt.core</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.core</artifactId>
+            <type>test-jar</type>
+        </dependency>
+        <dependency>
             <groupId>io.github.openfeign</groupId>
             <artifactId>feign-core</artifactId>
         </dependency>
@@ -138,6 +140,7 @@
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock</artifactId>
+            <scope>test</scope>
             <exclusions>
                 <exclusion>
                     <groupId>com.fasterxml.jackson.core</groupId>

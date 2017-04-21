@@ -177,6 +177,12 @@
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.core</artifactId>
+                <type>test-jar</type>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.gateway.extension</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
@@ -650,7 +656,7 @@
                                             <limit>
                                                 <counter>INSTRUCTION</counter>
                                                 <value>COVEREDRATIO</value>
-                                                <minimum>0.14</minimum>
+                                                <minimum>0.20</minimum>
                                             </limit>
                                         </limits>
                                     </rule>

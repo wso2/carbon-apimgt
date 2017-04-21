@@ -609,11 +609,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 workflowResponse = executor.execute(workflow);             
                 workflow.setStatus(workflowResponse.getWorkflowStatus());
 
-                addWorkflowEntries(workflow);
-
                 if (WorkflowStatus.APPROVED == workflowResponse.getWorkflowStatus()) {
                     completeWorkflow(executor, workflow);
                 } else {
+                    //add entry to workflow table if it is only in pending state
+                    addWorkflowEntries(workflow);
                     getApiDAO().updateAPIWorkflowStatus(api.getId(), APILCWorkflowStatus.PENDING);
                 }
             } else if (api != null && APILCWorkflowStatus.PENDING.toString().equals(api.getWorkflowStatus())) {
@@ -1663,6 +1663,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 }              
             }
             updateWorkflowEntries(workflow); 
+        } else {
+            String message = "Invalid workflow type for publisher workflows:  " + workflow.getWorkflowType();
+            log.error(message);
+            throw new APIManagementException(message, ExceptionCodes.WORKFLOW_INV_PUBLISHER_WFTYPE);
         }
         return response;
     }

@@ -23,9 +23,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.wso2.carbon.apimgt.core.TestUtil;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
@@ -37,15 +38,17 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 
 public class SubscriptionRetrievalClientIT {
 
-    WireMockServer wireMockServer;
-    JsonArray subscriptions;
-    JsonObject subscription;
+    private WireMockServer wireMockServer;
+    private JsonArray subscriptions;
+    private JsonObject subscription;
+    private String apimCoreBaseUrl;
 
-    @BeforeMethod
+    @BeforeClass
     public void init() {
-        wireMockServer = new WireMockServer(options().port(9090));
+        apimCoreBaseUrl = "http://localhost:" + TestUtil.getRestApiPort();
+        wireMockServer = new WireMockServer(options().port(TestUtil.getRestApiPort()));
         wireMockServer.start();
-        configureFor("127.0.0.1", 9090);
+        configureFor("127.0.0.1", TestUtil.getRestApiPort());
 
         subscriptions = new JsonArray();
         for (int i = 0; i < 3; i++) {
@@ -102,7 +105,7 @@ public class SubscriptionRetrievalClientIT {
     @Test
     public void testLoadAllSubscriptions() {
         //load all subscriptions (limit = -1)
-        SubscriptionListDTO subscriptionList = new SubscriptionRetrievalClient().loadSubscriptions(-1);
+        SubscriptionListDTO subscriptionList = new SubscriptionRetrievalClient(apimCoreBaseUrl).loadSubscriptions(-1);
         for (SubscriptionDTO subscriptionDTO : subscriptionList.getSubscriptions()) {
             Gson gson = new Gson();
             if (subscriptionDTO.getApiName().equals(
@@ -125,7 +128,7 @@ public class SubscriptionRetrievalClientIT {
     public void testLoadSubscriptionsWithLimit0() {
 
         //load n subscriptions (limit = n). Currently, this only supports 0
-        SubscriptionListDTO subscriptionList = new SubscriptionRetrievalClient().loadSubscriptions(0);
+        SubscriptionListDTO subscriptionList = new SubscriptionRetrievalClient(apimCoreBaseUrl).loadSubscriptions(0);
         Assert.assertEquals(subscriptionList.getSubscriptions().size(), 0, "Subscription count should be zero, " +
                 "but received " + subscriptions.size());
 
@@ -134,13 +137,14 @@ public class SubscriptionRetrievalClientIT {
     @Test
     public void testLoadSubscriptionsOfApi() {
         //load all subscriptions of api test/1.0.0
-        SubscriptionListDTO subsList = new SubscriptionRetrievalClient().loadSubscriptionsOfApi("/test", "1.0.0");
+        SubscriptionListDTO subsList = new SubscriptionRetrievalClient(apimCoreBaseUrl)
+                .loadSubscriptionsOfApi("/test", "1.0.0");
         for (SubscriptionDTO subscriptionDTO : subsList.getSubscriptions()) {
             Assert.assertEquals(subscriptionDTO, new Gson().fromJson(subscription, SubscriptionDTO.class));
         }
     }
 
-    @AfterMethod
+    @AfterClass
     public void clean() {
         wireMockServer.resetAll();
         wireMockServer.stop();
