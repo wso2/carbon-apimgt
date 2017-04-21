@@ -522,7 +522,7 @@ public class PolicyDAOImpl implements PolicyDAO {
     @Override
     public SubscriptionPolicy getSubscriptionPolicy(String policyName) throws APIMgtDAOException {
         final String query = "SELECT UUID, NAME, DISPLAY_NAME, DESCRIPTION, IS_DEPLOYED, CUSTOM_ATTRIBUTES " +
-                "FROM AM_SUBSCRIPTION_POLICY WHERE UUID = ?";
+                "FROM AM_SUBSCRIPTION_POLICY WHERE NAME = ?";
         SubscriptionPolicy subscriptionPolicy;
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement statement = conn.prepareStatement(query)) {
@@ -556,7 +556,7 @@ public class PolicyDAOImpl implements PolicyDAO {
     @Override
     public SubscriptionPolicy getSubscriptionPolicyById(String policyId) throws APIMgtDAOException {
         final String query = "SELECT UUID, NAME, DISPLAY_NAME, DESCRIPTION, IS_DEPLOYED, CUSTOM_ATTRIBUTES " +
-                "FROM AM_SUBSCRIPTION_POLICY WHERE NAME = ?";
+                "FROM AM_SUBSCRIPTION_POLICY WHERE ID = ?";
         SubscriptionPolicy subscriptionPolicy;
         try (Connection conn = DAOUtil.getConnection();
                 PreparedStatement statement = conn.prepareStatement(query)) {

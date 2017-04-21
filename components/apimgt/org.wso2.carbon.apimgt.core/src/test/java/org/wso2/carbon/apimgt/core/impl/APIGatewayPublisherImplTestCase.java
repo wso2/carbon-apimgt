@@ -89,15 +89,33 @@ public class APIGatewayPublisherImplTestCase {
         Assert.assertEquals(state, Boolean.TRUE);
     }
 
-    @Test(description = "Publish API artifacts with API in defaulVersion and gwHome = null")
-    public void testPublishToGatewayWithDefaultVersionWithNogwHome() throws GatewayException {
-        System.clearProperty("gwHome");
-        System.clearProperty("carbon.home");
-        String configString = SampleTestObjectCreator.createSampleGatewayConfig();
-        API api = SampleTestObjectCreator.createUniqueAPI().gatewayConfig(configString).build();
-        APIGatewayPublisherImpl apiGatewayPublisher = new APIGatewayPublisherImpl();
-        Boolean state = apiGatewayPublisher.publishToGateway(api);
-        Assert.assertEquals(state, Boolean.TRUE);
-    }
+//    @Test(description = "Publish API artifacts with API in defaultVersion and gwHome = null")
+//    public void testPublishToGatewayWithDefaultVersionWithNogwHome() throws GatewayException {
+//        System.clearProperty("gwHome");
+//        System.clearProperty("carbon.home");
+//        String configString = SampleTestObjectCreator.createSampleGatewayConfig();
+//        API api = SampleTestObjectCreator.createUniqueAPI().gatewayConfig(configString).build();
+//        APIGatewayPublisherImpl apiGatewayPublisher = new APIGatewayPublisherImpl();
+//        Boolean state = apiGatewayPublisher.publishToGateway(api);
+//        Assert.assertEquals(state, Boolean.TRUE);
+//    }
+
+    /**
+     *
+     *Test cases for exceptions
+     */
+//    @Test(description = "Exception deploying API Configuration for API", expectedExceptions = GatewayException.class)
+//    public void testPublishToGatewayDeployAPIConfigException() throws GatewayException {
+//        System.clearProperty("gwHome");
+//        System.clearProperty("carbon.home");
+//        String configString = SampleTestObjectCreator.createSampleGatewayConfig();
+//        API api = SampleTestObjectCreator.createUniqueAPI().gatewayConfig(configString).build();
+//        APIGatewayPublisherImpl apiGatewayPublisher = new APIGatewayPublisherImpl();
+//        Mockito.when(apiGatewayPublisher).thenThrow(new
+//                GatewayException("Error deploying API configuration for API " + api.getName(),
+//                ExceptionCodes.GATEWAY_EXCEPTION));
+//        apiGatewayPublisher.publishToGateway(api);
+//    }
+
 
 }
