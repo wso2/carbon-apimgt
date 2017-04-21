@@ -547,39 +547,6 @@ public class PolicyDAOImpl implements PolicyDAO {
     }
 
     /**
-     * Retrieves Subscription Policy by UUID
-     *
-     * @param policyId Subscription policy ID
-     * @return {@link SubscriptionPolicy} of given UUID
-     * @throws APIMgtDAOException   If failed to get subscription policy.
-     */
-    @Override
-    public SubscriptionPolicy getSubscriptionPolicyById(String policyId) throws APIMgtDAOException {
-        final String query = "SELECT UUID, NAME, DISPLAY_NAME, DESCRIPTION, IS_DEPLOYED, CUSTOM_ATTRIBUTES " +
-                "FROM AM_SUBSCRIPTION_POLICY WHERE ID = ?";
-        SubscriptionPolicy subscriptionPolicy;
-        try (Connection conn = DAOUtil.getConnection();
-                PreparedStatement statement = conn.prepareStatement(query)) {
-            statement.setString(1, policyId);
-            statement.execute();
-            try (ResultSet rs = statement.getResultSet()) {
-                if (rs.next()) {
-                    subscriptionPolicy = new SubscriptionPolicy(rs.getString("NAME"));
-                    subscriptionPolicy.setUuid(rs.getString("UUID"));
-                    subscriptionPolicy.setDisplayName(rs.getString("DISPLAY_NAME"));
-                    subscriptionPolicy.setDescription(rs.getString("DESCRIPTION"));
-                    subscriptionPolicy.setDeployed(rs.getBoolean("IS_DEPLOYED"));
-                    subscriptionPolicy.setCustomAttributes(rs.getString("CUSTOM_ATTRIBUTES"));
-                    return subscriptionPolicy;
-                }
-            }
-        } catch (SQLException e) {
-            throw new APIMgtDAOException("Couldn't retrieve subscription tier for id : " + policyId, e);
-        }
-        return null;
-    }
-
-    /**
      * Retrieves Application Policy by UUID
      *
      * @param policyId Application policy ID
@@ -750,6 +717,7 @@ public class PolicyDAOImpl implements PolicyDAO {
             statement.execute();
         }
     }
+
 
     private static void addSubscriptionPolicy(Connection connection, String name, String displayName,
             String description, String quotaType, int quota, String quotaUnit, int unitTime, String timeUnit)
