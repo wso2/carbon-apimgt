@@ -31,8 +31,6 @@ public class WorkflowConfig {
     private WorkflowExecutorInfo applicationCreation;
     @Element (description = "executor for subscription creation workflow")
     private WorkflowExecutorInfo subscriptionCreation;
-    @Element (description = "executor for signup workflow")
-    private WorkflowExecutorInfo userSignUp;
     @Element (description = "executor for subscription deletion workflow")
     private WorkflowExecutorInfo subscriptionDeletion;
     @Element (description = "executor for application deletion workflow")
@@ -57,9 +55,6 @@ public class WorkflowConfig {
         subscriptionDeletion = new WorkflowExecutorInfo();
         subscriptionDeletion.setExecutor(APIMgtConstants.WF_DEFAULT_SUBDELETE_EXEC);
 
-        userSignUp = new WorkflowExecutorInfo();
-        userSignUp.setExecutor(APIMgtConstants.WF_DEFAULT_SIGNUP_EXEC);
-
     }
 
     public WorkflowExecutorInfo getApplicationCreation() {
@@ -76,14 +71,6 @@ public class WorkflowConfig {
 
     public void setSubscriptionCreation(WorkflowExecutorInfo subscriptionCreation) {
         this.subscriptionCreation = subscriptionCreation;
-    }
-
-    public WorkflowExecutorInfo getUserSignUp() {
-        return userSignUp;
-    }
-
-    public void setUserSignUp(WorkflowExecutorInfo userSignUp) {
-        this.userSignUp = userSignUp;
     }
 
     public WorkflowExecutorInfo getSubscriptionDeletion() {
@@ -113,8 +100,8 @@ public class WorkflowConfig {
     @Override
     public String toString() {
         return "WorkflowConfig [applicationCreation=" + applicationCreation + ", subscriptionCreation="
-                + subscriptionCreation + ", userSignUp=" + userSignUp + ", subscriptionDeletion=" + subscriptionDeletion
-                + ", applicationDeletion=" + applicationDeletion + ", apiStateChange=" + apiStateChange + "]";
+                + subscriptionCreation + ", subscriptionDeletion=" + subscriptionDeletion + ", applicationDeletion="
+                + applicationDeletion + ", apiStateChange=" + apiStateChange + "]";
     }   
 
 }
