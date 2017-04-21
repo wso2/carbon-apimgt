@@ -80,19 +80,18 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
         boolean isTenantFlowStarted = false;
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         try {
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
-
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                PrivilegedCarbonContext.startTenantFlow();
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
+            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             Tenant tenant = APIKeyMgtDataHolder.getRealmService().getTenantManager().getTenant(tenantId);
             if(tenant == null && MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
                 tenant = new org.wso2.carbon.user.core.tenant.Tenant();
                 tenant.setDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                 tenant.setId(MultitenantConstants.SUPER_TENANT_ID);
+            } else {
+                // Add tenant domain to the username if user is not from super tenant domain.
+                // When adding a user, tenant domain is appended to workflow reference only if that user
+                // is from a different tenant domain(not carbon.super).
+                username = UserCoreUtil.addTenantDomainToEntry(username, tenantDomain);
             }
             Map<String, String> userStoreProperties = userStoreManager.getProperties(tenant);
             String userDomain = userStoreProperties.get(UserCoreConstants.RealmConfig.PROPERTY_DOMAIN_NAME);
@@ -118,10 +117,6 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
         } catch (UserStoreException e) {
             // exception is not thrown to the caller since this is a event Identity(IS) listener
             log.error("Error while cleaning up workflow task for the user: " + username, e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
         }
         return !isEnable() || removeGatewayKeyCache(username, userStoreManager);
     }
