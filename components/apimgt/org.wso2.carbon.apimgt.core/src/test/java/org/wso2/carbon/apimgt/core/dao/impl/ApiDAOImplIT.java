@@ -1088,6 +1088,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertTrue(apiList.isEmpty());
 
     }
+
     @Test(expectedExceptions = APIMgtDAOException.class)
     public void testGetAPIByStatusRolesORStatusNullException() throws APIMgtDAOException {
 
@@ -1121,5 +1122,15 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         Assert.assertNotNull(apiFromDB);
         Assert.assertEquals(apiFromDB, expectedAPI, TestUtil.printDiff(apiFromDB, expectedAPI));
+    }
+
+    @Test(expectedExceptions = APIMgtDAOException.class)
+    public void testGetAPIByStatusException() throws APIMgtDAOException {
+
+        List<String> role = new ArrayList<>();
+        List<String> statuses = new ArrayList<>();
+
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        apiDAO.getAPIsByStatus(role, statuses);
     }
 }
