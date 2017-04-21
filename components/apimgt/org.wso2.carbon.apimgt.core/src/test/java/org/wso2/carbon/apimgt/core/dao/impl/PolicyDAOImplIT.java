@@ -132,4 +132,33 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNotNull(policyList);
     }
 
+    @Test(description = "Add,Get and Delete Subscription Policies")
+    public void testAddGetDeleteSubscriptionPolicies() throws Exception {
+        SubscriptionPolicy policy = SampleTestObjectCreator.createDefaultSubscriptionPolicy();
+        policy.setUuid("3d253272-25b3-11e7-93ae-92361f002671");
+        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        //add policy
+        policyDAO.addPolicy(APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL, policy);
+        //get added policy
+        Policy addedPolicy = policyDAO.
+                getPolicy(APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL, policy.getPolicyName());
+        Assert.assertNotNull(addedPolicy);
+        Assert.assertEquals(addedPolicy.getPolicyName(), policy.getPolicyName());
+//        //get subscription policy by id
+//        Policy policyById = policyDAO.getSubscriptionPolicyById(policy.getUuid());
+//        Assert.assertNotNull(policyById);
+//        Assert.assertEquals(policyById.getPolicyName(), policy.getPolicyName());
+//        //delete policy
+        policyDAO.deletePolicy(policy.getPolicyName(),
+                APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL);
+        //get policy after deletion
+        Policy policyAfterDeletion = policyDAO.getPolicy(
+                APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL, policy.getPolicyName());
+        Assert.assertNull(policyAfterDeletion);
+
+
+    }
+
+
+
 }
