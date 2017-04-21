@@ -80,15 +80,6 @@ public interface PolicyDAO {
     SubscriptionPolicy getSubscriptionPolicy(String policyName) throws APIMgtDAOException;
 
     /**
-     * Retrieves Subscription Policy by UUID
-     *
-     * @param policyId  Subscription policy ID
-     * @return {@link SubscriptionPolicy} of given UUID
-     * @throws APIMgtDAOException   If failed to get subscription policy.
-     */
-    SubscriptionPolicy getSubscriptionPolicyById(String policyId) throws APIMgtDAOException;
-
-    /**
      * Retrieves Application Policy by UUID
      *
      * @param policyId  Application policy ID
