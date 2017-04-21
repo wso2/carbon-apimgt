@@ -311,10 +311,13 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             WorkflowResponse response = addSubscriptionWFExecutor.execute(workflow);
             workflow.setStatus(response.getWorkflowStatus());
 
-            addWorkflowEntries(workflow);
+            
 
             if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
                 completeWorkflow(addSubscriptionWFExecutor, workflow);
+            } else {
+                //only add entry to workflow table if it is a pending task
+                addWorkflowEntries(workflow);
             }
 
             subScriptionResponse = new SubscriptionResponse(subscriptionId, response);
@@ -389,11 +392,13 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 
                 WorkflowResponse response = removeSubscriptionWFExecutor.execute(workflow);
                 workflow.setStatus(response.getWorkflowStatus());
-
-                addWorkflowEntries(workflow);
+                
 
                 if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
                     completeWorkflow(removeSubscriptionWFExecutor, workflow);
+                } else {
+                    //add entry to workflow table if it is only in pending state
+                    addWorkflowEntries(workflow);
                 }
             }
         } catch (APIMgtDAOException e) {
@@ -618,11 +623,13 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             workflow.setWorkflowDescription(workflowDescription);
             WorkflowResponse response = removeApplicationWFExecutor.execute(workflow);
             workflow.setStatus(response.getWorkflowStatus());
-            addWorkflowEntries(workflow);
 
             if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
                 completeWorkflow(removeApplicationWFExecutor, workflow);
-            }          
+            } else {
+                //add entry to workflow table if it is only in pending state
+                addWorkflowEntries(workflow);
+            }
          
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while deleting the application - " + appId;
@@ -686,13 +693,13 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             workflow.setWorkflowDescription(workflowDescription);
             WorkflowResponse response = appCreationWFExecutor.execute(workflow);
             workflow.setStatus(response.getWorkflowStatus());
-            addWorkflowEntries(workflow);
 
             if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
                 completeWorkflow(appCreationWFExecutor, workflow);
             } else {
                 getApplicationDAO().updateApplicationState(generatedUuid,
                         APIMgtConstants.ApplicationStatus.APPLICATION_ONHOLD);
+                addWorkflowEntries(workflow);
             }
 
             APIUtils.logDebug("successfully added application with appId " + application.getId(), log);

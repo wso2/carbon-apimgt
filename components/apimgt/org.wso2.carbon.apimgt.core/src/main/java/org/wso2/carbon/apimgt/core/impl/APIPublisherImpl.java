@@ -609,11 +609,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 workflowResponse = executor.execute(workflow);             
                 workflow.setStatus(workflowResponse.getWorkflowStatus());
 
-                addWorkflowEntries(workflow);
-
                 if (WorkflowStatus.APPROVED == workflowResponse.getWorkflowStatus()) {
                     completeWorkflow(executor, workflow);
                 } else {
+                    //add entry to workflow table if it is only in pending state
+                    addWorkflowEntries(workflow);
                     getApiDAO().updateAPIWorkflowStatus(api.getId(), APILCWorkflowStatus.PENDING);
                 }
             } else if (api != null && APILCWorkflowStatus.PENDING.toString().equals(api.getWorkflowStatus())) {
