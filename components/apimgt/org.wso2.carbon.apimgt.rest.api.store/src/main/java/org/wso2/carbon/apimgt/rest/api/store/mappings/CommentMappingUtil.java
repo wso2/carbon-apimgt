@@ -20,6 +20,10 @@ package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CommentDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.CommentListDTO;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Mapping class for Comment Object and Comment List object to DTO and vise-versa
@@ -60,5 +64,28 @@ public class CommentMappingUtil {
         comment.setUpdatedUser(username);
 
         return comment;
+    }
+
+    /**
+     *  Wraps a List of Comments to a CommentListDTO
+     *
+     * @param commentList list of comments
+     * @param limit
+     * @param offset
+     * @return
+     */
+    public static CommentListDTO fromCommentListToDTO(List<Comment> commentList, int limit, int offset) {
+        CommentListDTO commentListDTO = new CommentListDTO();
+        List<CommentDTO> listOfCommentDTOs = new ArrayList<>();
+        commentListDTO.setCount(commentList.size());
+
+        int start = offset < commentList.size() && offset >= 0 ? offset : Integer.MAX_VALUE;
+        int end = offset + limit - 1 <= commentList.size() - 1 ? offset + limit - 1 : commentList.size() - 1;
+
+        for (int i = start; i <= end; i++) {
+            listOfCommentDTOs.add(fromCommentToDTO(commentList.get(i)));
+        }
+        commentListDTO.setList(listOfCommentDTOs);
+        return commentListDTO;
     }
 }

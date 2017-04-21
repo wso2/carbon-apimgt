@@ -523,11 +523,10 @@ paths:
 # The "Comments Collection" resource API
 ######################################################
   '/apis/{apiId}/comments':
-
 #-----------------------------------------------------
 # Retrieve a list of all comments of a certain API
 #-----------------------------------------------------
-   get:
+    get:
       description: |
         Get a list of Comments that are already added to APIs
       parameters:
@@ -555,6 +554,60 @@ paths:
             Not Acceptable. The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# Add a new Comment
+#-----------------------------------------------------
+    post:
+      x-scope: apim:subscribe
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - in: body
+          name: body
+          description: |
+            Comment object that should to be added
+          required: true
+          schema:
+            $ref: '#/definitions/Comment'
+        - $ref: '#/parameters/Content-Type'
+      tags:
+        - API (individual)
+        - Create
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created object as entity in the body.
+            Location header contains URL of newly created entity.
+          schema:
+            $ref: '#/definitions/Comment'
+          headers:
+            Location:
+              description: |
+                Location to the newly created Comment.
+              type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional request.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        415:
+          description: |
+            Unsupported media type.
+            The entity of the request was in a not supported format.
+          schema:
+            $ref: '#/definitions/Error'
+
+
 
 #########################################################
 # "Individual API comment" resource APIs
@@ -643,63 +696,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#########################################################
-# "Add API comment" resource APIs
-#########################################################
-  '/apis/{apiId}/comments':
-#-----------------------------------------------------
-# Add a new Comment
-#-----------------------------------------------------
-    post:
-      x-scope: apim:subscribe
-      description: |
-        Add a new Comment
-      parameters:
-        - $ref: '#/parameters/apiId'
-        - in: body
-          name: body
-          description: |
-            Comment object that should to be added
-          required: true
-          schema:
-            $ref: '#/definitions/Comment'
-        - $ref: '#/parameters/Content-Type'
-      tags:
-        - API (individual)
-        - Create
-      responses:
-        201:
-          description: |
-            Created.
-            Successful response with the newly created object as entity in the body.
-            Location header contains URL of newly created entity.
-          schema:
-            $ref: '#/definitions/Comment'
-          headers:
-            Location:
-              description: |
-                Location to the newly created Comment.
-              type: string
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-            ETag:
-              description: |
-                Entity Tag of the response resource. Used by caches, or in conditional request.
-              type: string
-        400:
-          description: |
-            Bad Request.
-            Invalid request or validation error.
-          schema:
-            $ref: '#/definitions/Error'
-        415:
-          description: |
-            Unsupported media type.
-            The entity of the request was in a not supported format.
-          schema:
-            $ref: '#/definitions/Error'
+
 
 #-----------------------------------------------------
 # Update a particular Comment
@@ -1719,17 +1716,17 @@ parameters:
       - api
       - application
     required: true
-    
+
 # Label name of the gateway
 # Specified as part of the query string
   labelName:
     name: labelName
     in: query
     description: |
-      Label name 
+      Label name
     required: false
     type: string
-    
+
 # Protocol of the gateway access URL
 # Specified as part of the query string
   scheme:
@@ -2225,10 +2222,6 @@ definitions:
       apiVersion:
         type: string
       policy:
-        type: string
-      apiName:
-        type: string
-      apiVersion:
         type: string
       lifeCycleStatus:
         type: string

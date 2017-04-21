@@ -507,4 +507,12 @@ public interface ApiDAO {
      * @param apiId uuid of the api associated with the comment
      */
     void updateComment(Comment comment, String commentId, String apiId) throws APIMgtDAOException;
+
+    /**
+     * Retrieves all comments for an api
+     *
+     * @param apiId UUID of the api
+     * @return
+     */
+    List<Comment> getCommentsForApi(String apiId) throws APIMgtDAOException;
 }

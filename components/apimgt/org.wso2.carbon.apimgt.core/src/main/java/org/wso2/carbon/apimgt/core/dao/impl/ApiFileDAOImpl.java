@@ -446,6 +446,14 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
+     * @see ApiDAO#getCommentsForApi(String)
+     */
+    @Override
+    public List<Comment> getCommentsForApi(String apiId) throws APIMgtDAOException {
+        return null;
+    }
+
+    /**
      * @see ApiDAO#getAPIs()
      */
     @Override

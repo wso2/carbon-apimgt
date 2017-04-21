@@ -25,7 +25,7 @@ import java.io.InputStream;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-20T14:05:40.633+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-20T15:44:24.778+05:30")
 public abstract class ApisApiService {
     public abstract Response apisApiIdCommentsCommentIdDelete(String commentId
  ,String apiId
@@ -49,6 +49,10 @@ public abstract class ApisApiService {
  ,Integer limit
  ,Integer offset
  ,String accept
+ , Request request) throws NotFoundException;
+    public abstract Response apisApiIdCommentsPost(String apiId
+ ,CommentDTO body
+ ,String contentType
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdDocumentsDocumentIdContentGet(String apiId
  ,String documentId

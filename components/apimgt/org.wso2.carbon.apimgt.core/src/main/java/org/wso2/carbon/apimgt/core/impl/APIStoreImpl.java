@@ -547,6 +547,18 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
     @Override
+    public List<Comment> getCommentsForApi(String apiId) throws APIManagementException {
+        try {
+            List<Comment> commentList = getApiDAO().getCommentsForApi(apiId);
+            return  commentList;
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while retrieving comments for api " + apiId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    @Override
     public List<API> searchAPIs(String query, int offset, int limit) throws APIManagementException {
 
         List<API> apiResults = null;

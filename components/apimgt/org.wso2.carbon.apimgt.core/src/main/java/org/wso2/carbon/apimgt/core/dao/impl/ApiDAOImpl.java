@@ -864,6 +864,8 @@ public class ApiDAOImpl implements ApiDAO {
                 statement.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
                 statement.setString(5, comment.getUpdatedUser());
                 statement.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now()));
+                statement.setString(7, commentId);
+                statement.setString(8, apiId);
                 statement.execute();
             } catch (SQLException e) {
                 connection.rollback();
@@ -873,6 +875,32 @@ public class ApiDAOImpl implements ApiDAO {
             throw new APIMgtDAOException(e);
         }
 
+    }
+
+    @Override
+    public List<Comment> getCommentsForApi(String apiId) throws APIMgtDAOException {
+        List<Comment> commentList = new ArrayList<>();
+        final String getCommentsQuery = "SELECT COMMENT_ID, COMMENT_TEXT, USER_IDENTIFIER, API_ID, "
+                + "CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME "
+                + "FROM AM_API_COMMENTS WHERE AND API_ID = ?";
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(getCommentsQuery)) {
+            try {
+                statement.setString(1, apiId);
+                statement.execute();
+                try (ResultSet rs = statement.getResultSet()) {
+                    while (rs.next()) {
+                        commentList.add(constructCommentFromResultSet(rs));
+                    }
+                }
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new APIMgtDAOException(e);
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+        return  commentList;
     }
 
     /**

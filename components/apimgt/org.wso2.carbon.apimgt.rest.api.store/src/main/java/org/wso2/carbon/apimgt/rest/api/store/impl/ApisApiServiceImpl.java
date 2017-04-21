@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CommentDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.CommentListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.RatingDTO;
@@ -90,12 +91,12 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdCommentsCommentIdGet(String commentId, String apiId, String accept, String ifNoneMatch,
                                                   String ifModifiedSince, Request request) throws NotFoundException {
-        CommentDTO commentDTO = null;
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             Comment comment = apiStore.getCommentByUUID(commentId, apiId);
-            commentDTO = CommentMappingUtil.fromCommentToDTO(comment);
+            CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(comment);
+            return Response.ok().entity(commentDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving comment with commentId: " + commentId + " of apiID :" + apiId;
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -104,18 +105,58 @@ public class ApisApiServiceImpl extends ApisApiService {
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-
         }
-        return Response.ok().entity(commentDTO).build();
+
     }
 
-
-    @Override public Response apisApiIdCommentsGet(String apiId, Integer limit, Integer offset, String accept,
+    @Override
+    public Response apisApiIdCommentsGet(String apiId, Integer limit, Integer offset, String accept,
             Request request) throws NotFoundException {
-        return null;
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIStore apiStore = RestApiUtil.getConsumer(username);
+            List<Comment> commentList = apiStore.getCommentsForApi(apiId);
+            CommentListDTO commentListDTO = CommentMappingUtil.fromCommentListToDTO(commentList, limit, offset);
+            return Response.ok().entity(commentListDTO).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving comments for api : " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
     }
 
+    @Override
+    public Response apisApiIdCommentsPost(String apiId, CommentDTO body, String contentType, Request request)
+            throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIStore apiStore = RestApiUtil.getConsumer(username);
+            Comment comment = CommentMappingUtil.fromDTOToComment(body, username);
+            String createdCommentId = apiStore.addComment(comment, apiId);
 
+            Comment createdComment = apiStore.getCommentByUUID(createdCommentId, apiId);
+            CommentDTO createdCommentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
+            URI location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/");
+            return Response.ok().header("Location", location).entity(createdCommentDTO).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while adding comment to api : " + body.getApiId();
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, body.getApiId());
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while adding location header in response for comment";
+            ErrorHandler errorHandler = ExceptionCodes.LOCATION_HEADER_INCORRECT;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorHandler);
+            log.error(errorMessage, e);
+            return Response.status(errorHandler.getHttpStatusCode()).entity(errorDTO).build();
+        }
+
+    }
 
     /**
      * @param commentId Comment ID
