@@ -125,9 +125,10 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 					String modifiedUri = uri.replaceFirst("/t/", "-t/");
 					req.setUri(modifiedUri);
 					msg = req;
+				} else {
+					req.setUri(uri); // Setting Endpoint appended URI
 				}
 				ctx.fireChannelRead(msg);
-				req.setUri(uri); // Setting back original URI from the request.
 
 				// publish google analytics data
 				GoogleAnalyticsData.DataBuilder gaData = new GoogleAnalyticsData.DataBuilder(null, null, null, null)
