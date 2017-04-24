@@ -208,11 +208,13 @@ public class WorkflowDAOImpl implements WorkflowDAO {
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
+                log.error("Error while executing sql query", e);
                 throw new APIMgtDAOException(e);
             } finally {
                 connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
+            log.error("Error while executing sql query", e);
             throw new APIMgtDAOException(e);
         }
     }   

@@ -1737,8 +1737,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 throw new APIManagementException(msg, ExceptionCodes.WORKFLOW_NO_PENDING_TASK);
             }
         } else {
-            log.error("Couldn't found API with ID " + apiId);
-            throw new APIManagementException("Couldn't find API with ID " + apiId, ExceptionCodes.API_NOT_FOUND);
+            String msg = "Couldn't found API with ID " + apiId;
+            log.error(msg);
+            throw new APIManagementException(msg, ExceptionCodes.API_NOT_FOUND);
         }      
     }
 }
