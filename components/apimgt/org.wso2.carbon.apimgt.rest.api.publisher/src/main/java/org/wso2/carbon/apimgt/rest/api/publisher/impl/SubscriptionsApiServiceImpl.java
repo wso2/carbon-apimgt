@@ -48,6 +48,26 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            Subscription subscription = apiPublisher.getSubscriptionByUUID(subscriptionId);
+            if (subscription == null) {
+                String errorMessage = "Subscription not found : " + subscriptionId;
+                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
+                        ExceptionCodes.SUBSCRIPTION_NOT_FOUND);
+                HashMap<String, String> paramList = new HashMap<String, String>();
+                paramList.put(APIMgtConstants.ExceptionsConstants.SUBSCRIPTION_ID, subscriptionId);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                log.error(errorMessage, e);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+            } else if (subscription.getStatus().equals(APIMgtConstants.SubscriptionStatus.REJECTED)
+                    || subscription.getStatus().equals(APIMgtConstants.SubscriptionStatus.ON_HOLD)) {
+                String errorMessage = "Cannot update subcription from " + subscription.getStatus() + "to " +
+                        blockState;
+                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
+                        ExceptionCodes.SUBSCRIPTION_STATE_INVALID);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+                log.error(errorMessage, e);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+            }
             apiPublisher.updateSubscriptionStatus(subscriptionId, APIMgtConstants.SubscriptionStatus.valueOf
                     (blockState));
             Subscription newSubscription = apiPublisher.getSubscriptionByUUID(subscriptionId);
@@ -191,6 +211,26 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            Subscription subscription = apiPublisher.getSubscriptionByUUID(subscriptionId);
+            if (subscription == null) {
+                String errorMessage = "Subscription not found : " + subscriptionId;
+                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
+                        ExceptionCodes.SUBSCRIPTION_NOT_FOUND);
+                HashMap<String, String> paramList = new HashMap<String, String>();
+                paramList.put(APIMgtConstants.ExceptionsConstants.SUBSCRIPTION_ID, subscriptionId);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                log.error(errorMessage, e);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+            } else if (subscription.getStatus().equals(APIMgtConstants.SubscriptionStatus.REJECTED)
+                    || subscription.getStatus().equals(APIMgtConstants.SubscriptionStatus.ON_HOLD)) {
+                String errorMessage = "Cannot update subcription from " + subscription.getStatus() + "to " +
+                        APIMgtConstants.SubscriptionStatus.ACTIVE;
+                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
+                        ExceptionCodes.SUBSCRIPTION_STATE_INVALID);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+                log.error(errorMessage, e);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+            }
             apiPublisher.updateSubscriptionStatus(subscriptionId, APIMgtConstants.SubscriptionStatus.ACTIVE);
             Subscription newSubscription = apiPublisher.getSubscriptionByUUID(subscriptionId);
             SubscriptionDTO subscriptionDTO = MappingUtil.fromSubscription(newSubscription);
