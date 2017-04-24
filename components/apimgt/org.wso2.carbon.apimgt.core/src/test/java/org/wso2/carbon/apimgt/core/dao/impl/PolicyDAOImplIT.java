@@ -144,11 +144,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
                 getPolicy(APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL, policy.getPolicyName());
         Assert.assertNotNull(addedPolicy);
         Assert.assertEquals(addedPolicy.getPolicyName(), policy.getPolicyName());
-//        //get subscription policy by id
-//        Policy policyById = policyDAO.getSubscriptionPolicyById(policy.getUuid());
-//        Assert.assertNotNull(policyById);
-//        Assert.assertEquals(policyById.getPolicyName(), policy.getPolicyName());
-//        //delete policy
+        //delete policy
         policyDAO.deletePolicy(policy.getPolicyName(),
                 APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL);
         //get policy after deletion
@@ -156,6 +152,19 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
                 APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL, policy.getPolicyName());
         Assert.assertNull(policyAfterDeletion);
 
+
+    }
+
+    @Test(description = "Get API Policies with bandwidth limit")
+    public void testGetAPIPolicyWithBandwidthLimit() throws Exception {
+        APIPolicy policy = SampleTestObjectCreator.createDefaultAPIPolicyWithBandwidthLimit();
+        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        //add policy
+        policyDAO.addPolicy(APIMgtConstants.ThrottlePolicyConstants.API_LEVEL, policy);
+        Policy policyAdded = policyDAO.getPolicy(APIMgtConstants.ThrottlePolicyConstants.API_LEVEL,
+                policy.getPolicyName());
+        Assert.assertNotNull(policyAdded);
+        Assert.assertEquals(policyAdded.getPolicyName(), policy.getPolicyName());
 
     }
 
