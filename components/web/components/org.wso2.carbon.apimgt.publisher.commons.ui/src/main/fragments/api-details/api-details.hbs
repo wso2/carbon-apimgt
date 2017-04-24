@@ -25,46 +25,56 @@
                     <li id="tab-1" role="presentation"><a href="#overview-tab"
                                                           aria-controls="overview-tab"
                                                           role="tab" data-toggle="tab">
-                        &nbsp;Overview</a>
+                        <i class="fw fw-view"></i>
+                        &nbsp;{{i18n "Overview"}}</a>
                     </li>
-                    <li id="tab-2" role="presentation"><a href="#lc-tab" aria-controls="lc-tab" role="tab"
-                                                          data-toggle="tab"><i
-                            class="fw fw-lifecycle"></i>&nbsp;
-                        Life-Cycle</a>
-                    </li>
+                    {{#if @params.publisher_app}}
+                        <li id="tab-2" role="presentation"><a href="#lc-tab" aria-controls="lc-tab" role="tab"
+                                                              data-toggle="tab"><i
+                                class="fw fw-lifecycle"></i>&nbsp;
+                            {{i18n "Life-Cycle"}}</a>
+                        </li>
+                    {{/if}}
                     <li id="tab-3" role="presentation"><a href="#endpoints-tab" role="tab" aria-controls="endpoints-tab"
                                                           data-toggle="tab"><i
-                            class="fw fw-endpoint"></i>&nbsp; Endpoints</a>
+                            class="fw fw-endpoint"></i>&nbsp; {{i18n "Endpoints"}}</a>
                     </li>
                     <li id="tab-4" role="presentation"><a href="#resources-tab" role="tab" aria-controls="resources-tab"
                                                           data-toggle="tab"><i
-                            class="fw fw-tabesource"></i>&nbsp;
-                        Resources</a></li>
-                    <li id="tab-5" role="presentation"><a href="#documents-tab" role="tab" aria-controls="documents-tab"
-                                                          data-toggle="tab"><i
-                            class="fw fw-document"></i>&nbsp; Documents</a>
-                    </li>
+                            class="fw fw-resource"></i>&nbsp;
+                    {{i18n "Resources"}}</a></li>
+                    {{#if @params.publisher_app}}
+                        <li id="tab-5" role="presentation"><a href="#documents-tab" role="tab"
+                                                              aria-controls="documents-tab"
+                                                              data-toggle="tab"><i
+                                class="fw fw-document"></i>&nbsp; {{i18n "Documents"}}</a>
+                        </li>
+                    {{/if}}
                     <li id="tab-6" role="presentation"><a href="#actrl-tab" role="tab" aria-controls="actrl-tab"
                                                           data-toggle="tab"><i
-                            class="fw fw-contract"></i>&nbsp; Access Control</a>
+                            class="fw fw-contract"></i>&nbsp; {{i18n "Access Control"}}</a>
                     </li>
                     <li id="tab-7" role="presentation"><a href="#mediation-tab" role="tab" aria-controls="mediation-tab"
                                                           data-toggle="tab"><i
                             class="fw fw-sequence"></i>&nbsp;
-                        Mediation</a>
+                    {{i18n "Mediation"}}</a>
                     </li>
                     <li id="tab-8" role="presentation"><a href="#scripting-tab" role="tab" aria-controls="scripting-tab"
                                                           data-toggle="tab"><i
-                            class="fw fw-prototype"></i>&nbsp; Scripting</a>
+                            class="fw fw-prototype"></i>&nbsp; {{i18n "Scripting"}}</a>
                     </li>
-                    <li id="tab-9" role="presentation"><a href="#subscriptions-tab" role="tab" aria-controls="subscriptions-tab"
-                                                          data-toggle="tab"><i
-                            class="fw fw-subscribe"></i>&nbsp; {{i18n "Subscriptions"}}</a>
+                    {{#if @params.publisher_app}}
+                        <li id="tab-9" role="presentation"><a href="#subscriptions-tab" role="tab"
+                                                              aria-controls="subscriptions-tab"
+                                                              data-toggle="tab"><i
+                                class="fw fw-subscribe"></i>&nbsp; {{i18n "Subscriptions"}}</a>
+                        </li>
+                    {{/if}}
+                    <li id="tab-10" role="presentation"><a href="#apiconsole-tab" role="tab"
+                                                           aria-controls="apiconsole-tab"
+                                                           data-toggle="tab"><i
+                            class="fw fw-document"></i>&nbsp; {{i18n "API Console"}}</a>
                     </li>
-                    <li id="tab-10" role="presentation"><a href="#apiconsole-tab" role="tab" aria-controls="apiconsole-tab" 
-                    									  data-toggle="tab"><i
-                 			class="fw fw-document"></i>&nbsp; {{i18n "API Console"}}</a>
-                    </li> 
                 </ul>
             </div>
         </div>
@@ -112,14 +122,14 @@
                 </div>
             </div>
             <div role="tabpanel" class="tab-pane fade" id="subscriptions-tab">
-              <div class="card">
-                  {{defineZone "subscriptions-tab-content"}}
-              </div>
+                <div class="card">
+                    {{defineZone "subscriptions-tab-content"}}
+                </div>
             </div>
             <div role="tabpanel" class="tab-pane fade" id="apiconsole-tab">
-              <div class="card">
-            	  {{defineZone "api-console-content"}}
-              </div>
+                <div class="card">
+                    {{defineZone "api-console-content"}}
+                </div>
             </div>
         </div>
     </div>

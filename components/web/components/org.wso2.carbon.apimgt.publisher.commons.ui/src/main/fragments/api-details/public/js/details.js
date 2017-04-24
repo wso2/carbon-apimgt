@@ -277,7 +277,6 @@ function subscriptionsTabHandler(event) {
             api_client.subscriptions(api_id, getSubscriptionsCallback);
         },
         onFailure: function (data) {
-            console.debug("Failed");
         }
     };
     UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-subscriptions", {}, "subscriptions-tab-content", mode, callbacks);
