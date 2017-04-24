@@ -38,6 +38,11 @@ import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.BandwidthLimit;
+import org.wso2.carbon.apimgt.core.models.policy.Condition;
+import org.wso2.carbon.apimgt.core.models.policy.HeaderCondition;
+import org.wso2.carbon.apimgt.core.models.policy.IPCondition;
+import org.wso2.carbon.apimgt.core.models.policy.Pipeline;
 import org.wso2.carbon.apimgt.core.models.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.core.models.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
@@ -85,6 +90,7 @@ public class SampleTestObjectCreator {
     private static final String FIFTY_PER_MIN_TIER = "50PerMin";
     private static final String TWENTY_PER_MIN_TIER = "20PerMin";
     private static final String TIME_UNIT_SECONDS = "s";
+    private static final String TIME_UNIT_MONTH = "Month";
     private static final String CUSTOMER_ROLE = "customer";
     private static final String EMPLOYEE_ROLE = "employee";
     private static final String MANAGER_ROLE = "manager";
@@ -478,6 +484,72 @@ public class SampleTestObjectCreator {
         requestCountLimit.setRequestCount(10000);
         requestCountLimit.setUnitTime(1000);
         defaultQuotaPolicy.setLimit(requestCountLimit);
+        apiPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+        apiPolicy.setPipelines(createDefaultPipelines());
+        return apiPolicy;
+    }
+
+    public static List<Pipeline> createDefaultPipelines() {
+        List<Pipeline> pipelineList = new ArrayList<>();    //contains all the default pipelines
+        List<Condition> conditionsList = new ArrayList<>(); //contains conditions for each pipeline
+        //Pipeline 1
+        QuotaPolicy quotaPolicy1 = new QuotaPolicy();
+        quotaPolicy1.setType(PolicyConstants.BANDWIDTH_TYPE);
+        BandwidthLimit bandwidthLimit = new BandwidthLimit();
+        IPCondition ipCondition = new IPCondition("IP");
+        ipCondition.setSpecificIP("192. 68.2.19");
+        ipCondition.setStartingIP("20.23.1.3");
+        ipCondition.setEndingIP("30.23.1.4");
+
+        Pipeline pipeline1 = new Pipeline();
+        pipeline1.setId(1);
+        conditionsList.add(ipCondition);
+        pipeline1.setConditions(conditionsList);
+        bandwidthLimit.setDataAmount(1000);
+        bandwidthLimit.setDataUnit("MB");
+        bandwidthLimit.setUnitTime(1);
+        bandwidthLimit.setTimeUnit(TIME_UNIT_MONTH);
+
+        quotaPolicy1.setLimit(bandwidthLimit);
+        pipeline1.setQuotaPolicy(quotaPolicy1);
+        pipelineList.add(pipeline1);
+
+        //End of pipeline 1 -> Beginning of pipeline 2
+        Pipeline pipeline2 = new Pipeline();
+        pipeline1.setId(2);
+        QuotaPolicy quotaPolicy2 = new QuotaPolicy();
+        quotaPolicy2.setType(PolicyConstants.REQUEST_COUNT_TYPE);
+        HeaderCondition headerCondition = new HeaderCondition();
+        headerCondition.setHeader("Browser");
+        headerCondition.setValue("Chrome");
+
+        RequestCountLimit requestCountLimit = new RequestCountLimit();
+        requestCountLimit.setRequestCount(1000);
+        requestCountLimit.setUnitTime(1);
+        requestCountLimit.setTimeUnit(TIME_UNIT_SECONDS);
+        quotaPolicy2.setLimit(requestCountLimit);
+
+        conditionsList = new ArrayList<>();
+        conditionsList.add(headerCondition);
+        pipeline2.setConditions(conditionsList);
+        pipeline2.setQuotaPolicy(quotaPolicy2);
+        pipelineList.add(pipeline2);
+
+        return pipelineList;
+    }
+    public static APIPolicy createDefaultAPIPolicyWithBandwidthLimit() {
+        APIPolicy apiPolicy = new APIPolicy(SAMPLE_API_POLICY);
+        apiPolicy.setDisplayName(SAMPLE_API_POLICY);
+        apiPolicy.setDescription(SAMPLE_API_POLICY_DESCRIPTION);
+        apiPolicy.setUserLevel(APIMgtConstants.ThrottlePolicyConstants.API_LEVEL);
+        QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+        defaultQuotaPolicy.setType(PolicyConstants.BANDWIDTH_TYPE);
+        BandwidthLimit bandwidthLimit = new BandwidthLimit();
+        bandwidthLimit.setDataAmount(1000);
+        bandwidthLimit.setDataUnit(PolicyConstants.MB);
+        bandwidthLimit.setUnitTime(1);
+        bandwidthLimit.setTimeUnit(TIME_UNIT_MONTH);
+        defaultQuotaPolicy.setLimit(bandwidthLimit);
         apiPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
         return apiPolicy;
     }
