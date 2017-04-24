@@ -5,7 +5,6 @@ $.file_input();
  */
 $(function() {
     var client = new API();
-    var client = new API();
     /* Re-use same api client in all the tab show events */
     var api_id = $('input[name="apiId"]').val(); // Constant(immutable) over
     // all the tabs since
