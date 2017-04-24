@@ -48,7 +48,8 @@ public enum ExceptionCodes implements ErrorHandler {
     DOCUMENT_NOT_FOUND(900315, "Document not found", 404, "Document not found"),
     API_EXPORT_ERROR(900316, "API export Error", 500, "Error while exporting the given APIs"),
     API_IMPORT_ERROR(900317, "API import Error", 500, "Error while importing the given APIs"),
-
+    SUBSCRIPTION_STATE_INVALID(900318, "Invalid state change for subscription", 400, "Invalid state change for " +
+            "subscription"),
 
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),
