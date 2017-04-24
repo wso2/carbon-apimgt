@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
-import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.WorkflowUtils;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExecutorFactory;
 
@@ -168,57 +167,53 @@ public class WorkflowDAOImpl implements WorkflowDAO {
     }
 
     /**
-     * Get the exernal reference id for a given subsription id. 
-     * @param subscriptionId subscription id
-     * @return String external reference id
-     * @throws APIMgtDAOException if API Manager core level exception occurred
+     * @see WorkflowDAO#getExternalWorkflowReferenceForPendingTask(String, String)
      */
     @Override
-    public String getExternalWorkflowReferenceForSubscription(String subscriptionId) throws APIMgtDAOException {
-        final String getworkflowQuery = "SELECT * FROM AM_WORKFLOWS WHERE WF_REFERENCE=? AND WF_TYPE=?";
-  
-        Workflow workflow;
+    public String getExternalWorkflowReferenceForPendingTask(String wfReference, String workflowType)
+            throws APIMgtDAOException {
+        final String getworkflowQuery = "SELECT WF_EXTERNAL_REFERENCE FROM AM_WORKFLOWS WHERE "
+                + "WF_REFERENCE=? AND WF_TYPE=? AND WF_STATUS=?";
+ 
+        String externalReferenceId = null;
         try (Connection conn = DAOUtil.getConnection();
                 PreparedStatement ps = conn.prepareStatement(getworkflowQuery)) {
-            ps.setString(1, subscriptionId);
-            ps.setString(2, APIMgtConstants.WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+            ps.setString(1, wfReference);
+            ps.setString(2, workflowType);
+            ps.setString(3, WorkflowStatus.CREATED.toString());
             try (ResultSet rs = ps.executeQuery()) {
-                workflow = this.createWorkflowFromResultSet(rs);                
-            } catch (ParseException e) {
-                throw new APIMgtDAOException(e);
-            }
+                if (rs.next()) {
+                    externalReferenceId = rs.getString("WF_EXTERNAL_REFERENCE");         
+                }
+            } 
         } catch (SQLException ex) {
             log.error("Error while executing sql query", ex);
             throw new APIMgtDAOException(ex);
         }
-        return workflow.getExternalWorkflowReference();  
+        return externalReferenceId;  
     }
-
+    
     /**
-     * Get the external reference id for a given application id. 
-     * @param appId application id
-     * @return String external reference id
-     * @throws APIMgtDAOException if API Manager core level exception occurred
+     * @see WorkflowDAO#deleteWorkflowEntryforExternalReference(String)
      */
-    public String getExternalWorkflowReferenceForApplication(String appId) throws APIMgtDAOException {
-        final String getworkflowQuery = "SELECT * FROM AM_WORKFLOWS WHERE WF_REFERENCE=? AND WF_TYPE=?";
-        
-        Workflow workflow;
-        try (Connection conn = DAOUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(getworkflowQuery)) {
-            ps.setString(1, appId);
-            ps.setString(2, APIMgtConstants.WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
-            try (ResultSet rs = ps.executeQuery()) {
-                workflow = this.createWorkflowFromResultSet(rs);                
-            } catch (ParseException e) {
-                log.error("Error while parsing json string", e);
+    @Override
+    public void deleteWorkflowEntryforExternalReference(String externalReferenceId) throws APIMgtDAOException {
+        final String query = "DELETE FROM AM_WORKFLOWS WHERE WF_EXTERNAL_REFERENCE = ?";
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            try {
+                connection.setAutoCommit(false);
+                statement.setString(1, externalReferenceId);
+                statement.execute();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
                 throw new APIMgtDAOException(e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
-        } catch (SQLException ex) {
-            log.error("Error while executing sql query", ex);
-            throw new APIMgtDAOException(ex);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
         }
-        return workflow.getExternalWorkflowReference();  
-    }
-
+    }   
 }
