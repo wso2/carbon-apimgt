@@ -70,11 +70,13 @@
                                 class="fw fw-subscribe"></i>&nbsp; {{i18n "Subscriptions"}}</a>
                         </li>
                     {{/if}}
-                    <li id="tab-10" role="presentation"><a href="#apiconsole-tab" role="tab"
-                                                           aria-controls="apiconsole-tab"
-                                                           data-toggle="tab"><i
-                            class="fw fw-document"></i>&nbsp; {{i18n "API Console"}}</a>
-                    </li>
+                    {{#unless @params.publisher_app}}
+	                    <li id="tab-10" role="presentation"><a href="#apiconsole-tab" role="tab"
+	                                                           aria-controls="apiconsole-tab"
+	                                                           data-toggle="tab"><i
+	                            class="fw fw-document"></i>&nbsp; {{i18n "API Console"}}</a>
+	                    </li>                    
+                    {{#unless}}
                 </ul>
             </div>
         </div>
