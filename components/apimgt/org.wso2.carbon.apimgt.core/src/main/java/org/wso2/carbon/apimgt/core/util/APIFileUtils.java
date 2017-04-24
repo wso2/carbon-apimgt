@@ -34,6 +34,7 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
 /**
  * Util class for API file based operations.
@@ -123,7 +124,9 @@ public class APIFileUtils {
      */
     public static void writeToFile(String path, String content) throws APIMgtDAOException {
         try {
-            Files.write(Paths.get(path), content.getBytes(StandardCharsets.UTF_8));
+            Files.write(Paths.get(path), content.getBytes(StandardCharsets.UTF_8),
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
             String msg = "I/O error while writing to file at: " + path;
             log.error(msg, e);

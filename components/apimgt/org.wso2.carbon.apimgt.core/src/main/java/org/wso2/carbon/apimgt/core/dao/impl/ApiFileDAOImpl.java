@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
@@ -93,7 +94,28 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public void updateAPI(String apiID, API substituteAPI) throws APIMgtDAOException {
-        throw new UnsupportedOperationException();
+        API oldAPI = getAPI(apiID);
+        if (oldAPI == null) {
+            String errorMsg = "Error while updating API. Unable to find API with Id: " + apiID;
+            log.error(errorMsg);
+            throw new APIMgtDAOException(errorMsg, ExceptionCodes.API_NOT_FOUND);
+        }
+
+        // set immutable properties from old API
+        API updatedAPI = new API.APIBuilder(substituteAPI).
+                id(apiID).
+                provider(oldAPI.getProvider()).
+                name(oldAPI.getName()).
+                version(oldAPI.getVersion()).
+                context(oldAPI.getContext()).
+                createdTime(oldAPI.getCreatedTime()).
+                createdBy(oldAPI.getCreatedBy()).
+                lifecycleInstanceId(oldAPI.getLifecycleInstanceId()).
+                lifeCycleStatus(oldAPI.getLifeCycleStatus()).
+                copiedFromApiId(oldAPI.getCopiedFromApiId()).build();
+
+        // Adding the API override the existing files.
+        addAPI(updatedAPI);
     }
 
     /**
@@ -105,7 +127,7 @@ public class ApiFileDAOImpl implements ApiDAO {
         if (api == null) {
             String errorMsg = "API with Id " + apiID + " not found";
             log.error(errorMsg);
-            throw new APIMgtDAOException(errorMsg);
+            throw new APIMgtDAOException(errorMsg, ExceptionCodes.API_NOT_FOUND);
         }
         String apiDirectoryPath = storagePath + File.separator +
                 api.getProvider() + "-" + api.getName() + "-" + api.getVersion();
@@ -590,7 +612,6 @@ public class ApiFileDAOImpl implements ApiDAO {
         }
 
         String gatewayConfigLocation = exportLocation + File.separator + GATEWAY_CONFIGURATION_DEFINITION_FILE;
-        APIFileUtils.createFile(gatewayConfigLocation);
         APIFileUtils.writeToFile(gatewayConfigLocation, config);
         if (log.isDebugEnabled()) {
             log.debug("Successfully exported gateway configuration for api: " + api.getName() + ", version: " + api
@@ -610,7 +631,6 @@ public class ApiFileDAOImpl implements ApiDAO {
             throws APIMgtDAOException {
         String swaggerDefinitionLocation =
                 exportLocation + File.separator + SWAGGER_DEFINITION_FILE_NAME + api.getId() + JSON_EXTENSION;
-        APIFileUtils.createFile(swaggerDefinitionLocation);
         APIFileUtils.writeStringAsJsonToFile(swaggerDefinition, swaggerDefinitionLocation);
 
         if (log.isDebugEnabled()) {

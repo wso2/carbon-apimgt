@@ -20,28 +20,33 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
+import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.TestUtil;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 
 
 public class ApiFileDAOImplIT {
     private static final String EDITOR_SAVE_PATH = "editorSavePath";
     private static final String EDITOR_MODE = "editorMode";
+    File tempWorkspace = null;
 
     @BeforeClass
     public void setup() throws IOException {
         //create a temp folder to save files.
-        File tempWorkspace = File.createTempFile("editorWorkspace", "");
+        tempWorkspace = File.createTempFile("editorWorkspace", "");
         tempWorkspace.delete();
         tempWorkspace.mkdir();
         tempWorkspace.deleteOnExit();
@@ -56,6 +61,12 @@ public class ApiFileDAOImplIT {
         //unset system properties
         System.clearProperty(EDITOR_MODE);
         System.clearProperty(EDITOR_SAVE_PATH);
+    }
+
+    @BeforeMethod
+    public void cleanTempDirectory() throws IOException {
+        // Clean temp directory before each test
+        FileUtils.cleanDirectory(tempWorkspace);
     }
 
     @Test
@@ -113,5 +124,27 @@ public class ApiFileDAOImplIT {
 
         API deletedAPI = apiDAO.getAPI(api.getId());
         Assert.assertNull(deletedAPI);
+    }
+
+    @Test
+    public void testUpdateAPI() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+
+        HashMap permissionMap = new HashMap();
+        permissionMap.put(APIMgtConstants.Permission.UPDATE, APIMgtConstants.Permission.UPDATE_PERMISSION);
+        builder = SampleTestObjectCreator.createAlternativeAPI().permissionMap(permissionMap);
+        API substituteAPI = builder.build();
+
+        apiDAO.updateAPI(api.getId(), substituteAPI);
+        API apiFromFile = apiDAO.getAPI(api.getId());
+
+        API expectedAPI = SampleTestObjectCreator.copyAPIIgnoringNonEditableFields(api, substituteAPI);
+
+        Assert.assertNotNull(apiFromFile);
+        Assert.assertEquals(apiFromFile, expectedAPI, TestUtil.printDiff(apiFromFile, expectedAPI));
     }
 }
