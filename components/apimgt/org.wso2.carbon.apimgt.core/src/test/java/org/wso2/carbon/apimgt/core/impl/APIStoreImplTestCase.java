@@ -58,6 +58,7 @@ import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.SubscriptionStatus;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationSimpleWorkflowExecutor;
 import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
@@ -352,6 +353,30 @@ public class APIStoreImplTestCase {
         apiStore.deleteAPISubscription(UUID);
         Mockito.verify(apiSubscriptionDAO, Mockito.times(1)).deleteAPISubscription(UUID);
     }
+    
+    @Test(description = "Delete subscription with on_hold state")
+    public void testDeleteSubscriptionWithOnholdState() throws APIManagementException {
+        ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
+        APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
+        WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
+        APIStore apiStore = getApiStoreImpl(applicationDAO, apiSubscriptionDAO, workflowDAO);
+
+        Application application = SampleTestObjectCreator.createDefaultApplication();
+        APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
+        API api = builder.build();
+        Subscription subscription = new Subscription(UUID, application, api, "Gold");
+        subscription.setStatus(SubscriptionStatus.ON_HOLD);
+        
+        String externalRef = java.util.UUID.randomUUID().toString();
+        Mockito.when(workflowDAO.getExternalWorkflowReferenceForPendingTask(subscription.getId(),
+                WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION)).thenReturn(externalRef);
+        
+        Mockito.when(apiSubscriptionDAO.getAPISubscription(UUID)).thenReturn(subscription);
+        apiStore.deleteAPISubscription(UUID);
+        Mockito.verify(apiSubscriptionDAO, Mockito.times(1)).deleteAPISubscription(UUID);
+        Mockito.verify(workflowDAO, Mockito.times(1)).getExternalWorkflowReferenceForPendingTask(subscription.getId(),
+                WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+    }
 
     @Test(description = "Get API subscriptions by application")
     public void testGetAPISubscriptionsByApplication() throws APIManagementException {
@@ -413,6 +438,24 @@ public class APIStoreImplTestCase {
         Mockito.when(applicationDAO.getApplication(UUID)).thenReturn(application);
         apiStore.deleteApplication(UUID);
         Mockito.verify(applicationDAO, Mockito.times(1)).deleteApplication(UUID);
+    }
+    @Test(description = "Delete application which is in on_hold state")
+    public void testDeleteApplicationWithOnHoldState() throws APIManagementException {
+        ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
+        APISubscriptionDAO subscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
+        WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
+        APIStore apiStore = getApiStoreImpl(applicationDAO, subscriptionDAO, workflowDAO);
+        Application application = SampleTestObjectCreator.createDefaultApplication();
+        application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_ONHOLD);
+        application.setId(UUID);
+        String externalRef = java.util.UUID.randomUUID().toString();
+        Mockito.when(applicationDAO.getApplication(UUID)).thenReturn(application);
+        Mockito.when(workflowDAO.getExternalWorkflowReferenceForPendingTask(application.getId(),
+                WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION)).thenReturn(externalRef);
+        apiStore.deleteApplication(UUID);
+        Mockito.verify(applicationDAO, Mockito.times(1)).deleteApplication(UUID);
+        Mockito.verify(workflowDAO, Mockito.times(1)).getExternalWorkflowReferenceForPendingTask(application.getId(),
+                WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
     }
 
     @Test(description = "Update an application")

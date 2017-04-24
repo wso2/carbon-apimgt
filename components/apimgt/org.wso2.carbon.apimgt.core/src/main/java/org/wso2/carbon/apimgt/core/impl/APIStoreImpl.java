@@ -354,8 +354,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 throw new APIManagementException(errorMsg, ExceptionCodes.SUBSCRIPTION_NOT_FOUND);
             } else {
                 if (APIMgtConstants.SubscriptionStatus.ON_HOLD == subscription.getStatus()) {
-                    String pendingRefForSubscription = getWorkflowDAO()
-                            .getExternalWorkflowReferenceForSubscription(subscriptionId);
+                    String pendingRefForSubscription = getWorkflowDAO().getExternalWorkflowReferenceForPendingTask(
+                            subscriptionId, WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
                     if (pendingRefForSubscription != null) {
                         try {
                             createSubscriptionWFExecutor.cleanUpPendingTask(pendingRefForSubscription);
@@ -364,6 +364,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                             // failed cleanup processes are ignored to prevent failing the deletion process
                             log.warn(warn, e.getLocalizedMessage());
                         }
+                        getWorkflowDAO().deleteWorkflowEntryforExternalReference(pendingRefForSubscription);
                     }
                 }
 
@@ -579,15 +580,18 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             if (pendingSubscriptions == null || pendingSubscriptions.isEmpty()) {
                 //check whether application is on hold state
                 if (ApplicationStatus.APPLICATION_ONHOLD.equals(applicationStatus)) {
-                    pendingExtReference = getWorkflowDAO().getExternalWorkflowReferenceForApplication(appId);
-                    try {
-                        if (pendingExtReference != null) {
+                    pendingExtReference = getWorkflowDAO().getExternalWorkflowReferenceForPendingTask(appId,
+                            WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+                   
+                    if (pendingExtReference != null) {
+                        try {
                             createApplicationWFExecutor.cleanUpPendingTask(pendingExtReference);
-                        }                        
-                    } catch (WorkflowException e) {
-                        String warn = "Failed to clean pending application approval task for " + appId;
-                        // failed cleanup processes are ignored to prevent failing the deletion process
-                        log.warn(warn, e.getLocalizedMessage());
+                        } catch (WorkflowException e) {
+                            String warn = "Failed to clean pending application approval task for " + appId;
+                            // failed cleanup processes are ignored to prevent failing the deletion process
+                            log.warn(warn, e.getLocalizedMessage());
+                        }
+                        getWorkflowDAO().deleteWorkflowEntryforExternalReference(pendingExtReference);
                     }
                 }
 
@@ -597,18 +601,20 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 // approvals (cannot subscribe to a pending application)
                 for (Iterator iterator = pendingSubscriptions.iterator(); iterator.hasNext();) {
                     Subscription pendingSubscription = (Subscription) iterator.next();
-                    pendingExtReference = getWorkflowDAO()
-                            .getExternalWorkflowReferenceForSubscription(pendingSubscription.getId());
+                    pendingExtReference = getWorkflowDAO().getExternalWorkflowReferenceForPendingTask(
+                            pendingSubscription.getId(), WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
                     createSubscriptionWFExecutor.cleanUpPendingTask(pendingExtReference);
-
-                    try {
-                        createSubscriptionWFExecutor.cleanUpPendingTask(pendingExtReference);
-                    } catch (WorkflowException e) {
-                        String warn = "Failed to clean pending subscription approval task for "
-                                + pendingSubscription.getId();
-                        // failed cleanup processes are ignored to prevent failing the deletion process
-                        log.warn(warn, e.getLocalizedMessage());
-                    }
+                    if (pendingExtReference != null) {
+                        try {
+                            createSubscriptionWFExecutor.cleanUpPendingTask(pendingExtReference);
+                        } catch (WorkflowException e) {
+                            String warn = "Failed to clean pending subscription approval task for "
+                                    + pendingSubscription.getId();
+                            // failed cleanup processes are ignored to prevent failing the deletion process
+                            log.warn(warn, e.getLocalizedMessage());
+                        }
+                        getWorkflowDAO().deleteWorkflowEntryforExternalReference(pendingExtReference);
+                    }                    
                 }
             }
             

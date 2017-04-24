@@ -28,7 +28,7 @@ import org.wso2.msf4j.formparam.FormDataParam;
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the apis API")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-06T17:02:03.158+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-23T09:26:18.875+05:30")
 public class ApisApi implements Microservice  {
    private final ApisApiService delegate = ApisApiServiceFactory.getApisApi();
 
@@ -315,6 +315,22 @@ public class ApisApi implements Microservice  {
 , @Context Request request)
     throws NotFoundException {
         return delegate.apisApiIdLifecycleHistoryGet(apiId,accept,ifNoneMatch,ifModifiedSince, request);
+    }
+    @DELETE
+    @Path("/{apiId}/lifecycle/lifecycle-pending-task")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Delete pending lifecycle state change tasks.", notes = "This operation can be used to remove pending lifecycle state change requests that are in pending state ", response = void.class, tags={ "API (Individual)", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Lifecycle state change pending task removed successfully. ", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = void.class) })
+    public Response apisApiIdLifecycleLifecyclePendingTaskDelete(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
+, @Context Request request)
+    throws NotFoundException {
+        return delegate.apisApiIdLifecycleLifecyclePendingTaskDelete(apiId, request);
     }
     @PUT
     @Path("/{apiId}")

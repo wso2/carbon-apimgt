@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -82,5 +83,95 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
 
         Assert.assertEquals(retrieveWorflow.getStatus(), WorkflowStatus.APPROVED);
     }
+    
+    @Test 
+    public void testUpdateWorkflowStatusWithoutAddingEntry() throws Exception {
+        WorkflowDAO workflowDAO = DAOFactory.getWorkflowDAO();
+        String workflowRefId = UUID.randomUUID().toString();
+        Workflow workflow = SampleTestObjectCreator.createWorkflow(workflowRefId);
+        workflow.setStatus(WorkflowStatus.APPROVED);
+        workflow.setUpdatedTime(LocalDateTime.now());
+        workflowDAO.updateWorkflowStatus(workflow);
+        Workflow retrieveWorflow = workflowDAO.retrieveWorkflow(workflow.getExternalWorkflowReference());
 
+        Assert.assertNull(retrieveWorflow, "workflow entry is in the database");
+    }
+
+    @Test
+    public void testGetExternalWorkflowReferenceForAPIStateChange() throws Exception {
+        WorkflowDAO workflowDAO = DAOFactory.getWorkflowDAO();
+        String workflowExtRefId = UUID.randomUUID().toString();
+        String apiId = UUID.randomUUID().toString();
+        Workflow workflow = SampleTestObjectCreator.createWorkflow(workflowExtRefId);
+        workflow.setWorkflowReference(apiId);
+        workflow.setStatus(WorkflowStatus.CREATED);
+        workflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_API_STATE);
+        workflowDAO.addWorkflowEntry(workflow);
+        String externalRefFromDb = workflowDAO.getExternalWorkflowReferenceForPendingTask(apiId,
+                WorkflowConstants.WF_TYPE_AM_API_STATE);
+
+        Assert.assertEquals(externalRefFromDb, workflowExtRefId);
+    }
+
+    @Test
+    public void testGetExternalWorkflowReferenceForSubscription() throws Exception {
+        WorkflowDAO workflowDAO = DAOFactory.getWorkflowDAO();
+        String workflowExtRefId = UUID.randomUUID().toString();
+        String subscriptionId = UUID.randomUUID().toString();
+        Workflow workflow = SampleTestObjectCreator.createWorkflow(workflowExtRefId);
+        workflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+        workflow.setWorkflowReference(subscriptionId);
+        workflow.setStatus(WorkflowStatus.CREATED);
+        workflowDAO.addWorkflowEntry(workflow);
+        String externalRefFromDb = workflowDAO.getExternalWorkflowReferenceForPendingTask(subscriptionId,
+                WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+
+        Assert.assertEquals(externalRefFromDb, workflowExtRefId);
+    }
+
+    @Test
+    public void testGetExternalWorkflowReferenceForApplication() throws Exception {
+        WorkflowDAO workflowDAO = DAOFactory.getWorkflowDAO();
+        String workflowExtRefId = UUID.randomUUID().toString();
+        String applicationId = UUID.randomUUID().toString();
+        Workflow workflow = SampleTestObjectCreator.createWorkflow(workflowExtRefId);
+        workflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+        workflow.setWorkflowReference(applicationId);
+        workflow.setStatus(WorkflowStatus.CREATED);
+        workflowDAO.addWorkflowEntry(workflow);
+        String externalRefFromDb = workflowDAO.getExternalWorkflowReferenceForPendingTask(applicationId,
+                WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+
+        Assert.assertEquals(externalRefFromDb, workflowExtRefId);
+    }
+    
+    @Test
+    public void testGetPendinExternalWorkflowReferenceForApprovedasks() throws Exception {
+        WorkflowDAO workflowDAO = DAOFactory.getWorkflowDAO();
+        String workflowExtRefId = UUID.randomUUID().toString();
+        String applicationId = UUID.randomUUID().toString();
+        Workflow workflow = SampleTestObjectCreator.createWorkflow(workflowExtRefId);
+        workflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+        workflow.setWorkflowReference(applicationId);
+        workflow.setStatus(WorkflowStatus.APPROVED);
+        workflowDAO.addWorkflowEntry(workflow);
+        String externalRefFromDb = workflowDAO.getExternalWorkflowReferenceForPendingTask(applicationId,
+                WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+
+        Assert.assertNull(externalRefFromDb, "Should return only if the wf task is in CREATED state");
+    }
+
+    @Test
+    public void testremoveWorkflowEntry() throws Exception {
+
+        String workflowRefId = UUID.randomUUID().toString();
+        WorkflowDAO workflowDAO = DAOFactory.getWorkflowDAO();
+        Workflow workflow = SampleTestObjectCreator.createWorkflow(workflowRefId);
+        workflowDAO.addWorkflowEntry(workflow);
+        workflowDAO.deleteWorkflowEntryforExternalReference(workflow.getExternalWorkflowReference());
+        
+        Workflow retrieveWorflow = workflowDAO.retrieveWorkflow(workflow.getExternalWorkflowReference());
+        Assert.assertNull(retrieveWorflow, "Workflow entry still exists");
+
+    }
 }

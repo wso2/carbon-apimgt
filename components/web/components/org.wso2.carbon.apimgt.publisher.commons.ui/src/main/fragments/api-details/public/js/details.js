@@ -200,6 +200,7 @@ function lifecycleTabHandler(event) {
         var data = {
             lifeCycleStatus: api_data.lifeCycleStatus,
             isPublished: api_data.lifeCycleStatus.toLowerCase() === "published",
+            isWorkflowPending: api_data.workflowStatus.toLowerCase() === "pending",
             policies: policies_data,
             lcState: lcState.obj,
             lcHistory: lcHistory.obj,
@@ -330,6 +331,18 @@ function updateLifecycleHandler(event) {
                             }
                          }
                         ]
+                });
+            } else if (lcResponse.workflowStatus == 'CREATED') {
+                var message = "Lifecycle state change request has been submitted.";
+                noty({
+                    text: message,
+                    type: 'information',
+                    dismissQueue: true,
+                    progressBar: true,
+                    timeout: 5000,
+                    layout: 'topCenter',
+                    theme: 'relax',
+                    maxVisible: 10,
                 });
             } else {
                 var message = "Life cycle state updated successfully!";
@@ -580,6 +593,47 @@ function updateLabelsHandler(event) {
         }.bind(data));
 }
 
+/**
+ * Do the workflow cleanup for pending task
+ * @param event {object} click event of the wf clean up button
+ */
+function cleanupWorkflowHandler(event) {
+    var api_client = event.data.api_client;
+    var api_id = event.data.api_id;
+    var checked_items = getCheckListItems();
+    var promised_update = api_client.cleanupPendingTask(api_id);
+    var event_data = {
+        data: {
+            api_client: api_client,
+            api_id: api_id
+        }
+    };
+    promised_update.then(
+        (response, event = event_data) => {     
+
+            var message = "Life cycle state change request removed successfully!";
+                noty({
+                    text: message,
+                    type: 'success',
+                    dismissQueue: true,
+                    progressBar: true,
+                    timeout: 5000,
+                    layout: 'topCenter',
+                    theme: 'relax',
+                    maxVisible: 10,
+                });
+ 
+            lifecycleTabHandler(event);
+        }
+    ).catch((response, event = event_data) => {
+            let message_element = $("#general-alerts").find(".alert-danger");
+            message_element.find(".alert-message").html(response.statusText);
+            message_element.fadeIn("slow");
+            lifecycleTabHandler(event);
+        }
+    );
+}
+
 function showTab(tab_name) {
     $('.nav a[href="#' + tab_name + '"]').tab('show');
 }
@@ -761,6 +815,7 @@ $(function () {
     $('#tab-9').bind('show.bs.tab', {api_client: client, api_id: api_id}, subscriptionsTabHandler);
     $('#tab-10').bind('show.bs.tab', {api_client: client, api_id: api_id}, apiConsoleTabHandler);
     $(document).on('click', ".lc-state-btn", {api_client: client, api_id: api_id}, updateLifecycleHandler);
+    $(document).on('click', ".wf-cleanup-btn", {api_client: client, api_id: api_id}, cleanupWorkflowHandler);
     $(document).on('click', "#checkItem", {api_client: client, api_id: api_id}, updateLifecycleCheckListHandler);
     $(document).on('click', "#update-labels-button", {api_client: client, api_id: api_id}, updateLabelsHandler);
     loadFromHash();

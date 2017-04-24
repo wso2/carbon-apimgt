@@ -1187,6 +1187,48 @@ paths:
             $ref: '#/definitions/Error'
 
 ######################################################
+#  The "API Lifecycle State Data"  resource API
+######################################################
+  /apis/{apiId}/lifecycle/lifecycle-pending-task:
+
+#--------------------------------------------
+# Delete API LIfecycle state change pending task
+#--------------------------------------------
+    delete:
+      x-scope: apim:api_publish
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer f8828f52-175a-4cb2-b246-02b1e6054f97\" -X DELETE http://127.0.0.1:9090/api/am/publisher/v1.0/apis/0527a55e-8dcf-4ce5-bddf-c77e8418be8a/lifecycle/lifecycle-pending-task"
+
+      x-wso2-request: |
+            DELETE http://127.0.0.1:9090/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle/lifecycle-pending-task
+            Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK"
+      summary: Delete pending lifecycle state change tasks.
+      description: |
+            This operation can be used to remove pending lifecycle state change requests that are in pending state
+      parameters:
+        - $ref: '#/parameters/apiId'
+      tags:
+        - API (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Lifecycle state change pending task removed successfully.
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+
+######################################################
 # The "Import API from API Definition"  resource API
 ######################################################
 

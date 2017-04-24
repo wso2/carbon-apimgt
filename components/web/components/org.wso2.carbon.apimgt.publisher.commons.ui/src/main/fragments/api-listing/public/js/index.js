@@ -139,7 +139,14 @@ function initDataTable(raw_data) {
             var status_element = $('<span>')
                 .text(data.lifeCycleStatus)
                 .addClass("label label-success");
-            return $('<h4>').append(status_element).html();
+            if(data.workflowStatus === "PENDING") {
+                var wf_element = $('<span>')
+                    .text("Pending")
+                    .addClass("label label-pending");
+                return $('<h4>').append(status_element).append("&nbsp;").append(wf_element).html();
+            } else {
+                return $('<h4>').append(status_element).html();
+            }   
         } else if (type === "filter") {
             return data.lifeCycleStatus;
         } else {

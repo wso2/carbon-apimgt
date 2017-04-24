@@ -21,6 +21,7 @@
 package org.wso2.carbon.apimgt.core.impl;
 
 import com.google.common.io.Files;
+
 import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -41,6 +42,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.API.APIBuilder;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
@@ -52,6 +54,8 @@ import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.WorkflowConfig;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.APILCWorkflowStatus;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExtensionsConfigBuilder;
 import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
@@ -321,6 +325,33 @@ public class APIPublisherImplTestCase {
         Mockito.verify(apiDAO, Mockito.times(1)).getAPI(uuid);
         Mockito.verify(apiLifecycleManager, Mockito.times(1)).removeLifecycle(lifecycleId);
         Mockito.verify(apiDAO, Mockito.times(1)).deleteAPI(uuid);
+    }
+    
+    @Test(description = "Delete API with zero Subscriptions and pending wf state change")
+    public void testDeleteApiWithZeroSubscriptionsAndPendingStateChange()
+            throws APIManagementException, LifecycleException, SQLException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
+        APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
+        APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
+        builder.workflowStatus(APILCWorkflowStatus.PENDING.toString());
+        API api = builder.build();
+        String uuid = api.getId();
+        String lifecycleId = api.getLifecycleInstanceId();
+        Mockito.when(apiSubscriptionDAO.getSubscriptionCountByAPI(uuid)).thenReturn(0L);
+        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiSubscriptionDAO, apiLifecycleManager,
+                workflowDAO);
+        String externalRef = UUID.randomUUID().toString();
+        Mockito.when(workflowDAO.getExternalWorkflowReferenceForPendingTask(uuid,
+                WorkflowConstants.WF_TYPE_AM_API_STATE)).thenReturn(externalRef);
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+        apiPublisher.deleteAPI(uuid);
+        Mockito.verify(apiDAO, Mockito.times(1)).getAPI(uuid);
+        Mockito.verify(apiLifecycleManager, Mockito.times(1)).removeLifecycle(lifecycleId);
+        Mockito.verify(apiDAO, Mockito.times(1)).deleteAPI(uuid);
+        Mockito.verify(workflowDAO, Mockito.times(1)).getExternalWorkflowReferenceForPendingTask(uuid,
+                WorkflowConstants.WF_TYPE_AM_API_STATE);
     }
 
     @Test(description = "Exception when getting api subscription count by API",
@@ -852,6 +883,86 @@ public class APIPublisherImplTestCase {
                         APIMgtConstants.DEPRECATE_PREVIOUS_VERSIONS, true);
     }
 
+    @Test(description = "Remove api pending lc status change request")
+    public void testRemovePendingLifecycleWorkflowTaskForAPI() throws APIManagementException, LifecycleException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
+        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiLifecycleManager, apiDAO,
+                workflowDAO);
+        APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
+        builder.workflowStatus(APILCWorkflowStatus.PENDING.toString());
+        API api = builder.build();       
+        String uuid = api.getId();
+        String externalRef = UUID.randomUUID().toString();
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+        Mockito.when(workflowDAO.getExternalWorkflowReferenceForPendingTask(uuid,
+                WorkflowConstants.WF_TYPE_AM_API_STATE)).thenReturn(externalRef);
+        
+        apiPublisher.removePendingLifecycleWorkflowTaskForAPI(uuid);
+        Mockito.verify(apiDAO, Mockito.times(1)).updateAPIWorkflowStatus(uuid, APILCWorkflowStatus.APPROVED);
+        Mockito.verify(workflowDAO, Mockito.times(1)).getExternalWorkflowReferenceForPendingTask(uuid,
+                WorkflowConstants.WF_TYPE_AM_API_STATE);
+    }
+    
+    @Test(description = "Remove api pending lc status change request for an api whithout a pending task", 
+            expectedExceptions = APIManagementException.class)
+    public void testRemovePendingLifecycleWorkflowTaskForAPIForAPIWithoutPendingLCState()
+            throws APIManagementException, LifecycleException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
+        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiLifecycleManager, apiDAO,
+                workflowDAO);
+        APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
+        builder.workflowStatus(APILCWorkflowStatus.APPROVED.toString());
+        API api = builder.build();       
+        String uuid = api.getId();
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);        
+        apiPublisher.removePendingLifecycleWorkflowTaskForAPI(uuid);
+      
+    } 
+   
+    @Test(description = "Exception when removing api pending lc status change request for an api", 
+            expectedExceptions = APIManagementException.class)
+    public void testTemovePendingLifecycleWorkflowTaskForAPIForAPIWithoutPendingLCState()
+            throws APIManagementException, LifecycleException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
+        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiLifecycleManager, apiDAO,
+                workflowDAO);
+        APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
+        builder.workflowStatus(APILCWorkflowStatus.PENDING.toString());
+        API api = builder.build();       
+        String uuid = api.getId();
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api); /*         
+        Mockito.doThrow(new APIMgtDAOException("Error while executing sql query")).when(workflowDAO)
+        .getExternalWorkflowReferenceForPendingTask(uuid, WorkflowConstants.WF_TYPE_AM_API_STATE);
+        */
+        Mockito.when(
+                workflowDAO.getExternalWorkflowReferenceForPendingTask(uuid, WorkflowConstants.WF_TYPE_AM_API_STATE))
+                .thenThrow(new APIMgtDAOException("Error occurred while changing api lifecycle workflow status"));
+        apiPublisher.removePendingLifecycleWorkflowTaskForAPI(uuid);      
+        Mockito.verify(workflowDAO, Mockito.times(1)).getExternalWorkflowReferenceForPendingTask(uuid,
+                WorkflowConstants.WF_TYPE_AM_API_STATE);
+    } 
+    
+   @Test(description = "Remove api pending lc status change request for an invalid", 
+            expectedExceptions = APIManagementException.class)
+    public void testRemovePendingLifecycleWorkflowTaskForInvalidAPI()
+            throws APIManagementException, LifecycleException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
+        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiLifecycleManager, apiDAO,
+                workflowDAO);
+        API api = null;       
+        String uuid = UUID.randomUUID().toString();;
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);        
+        apiPublisher.removePendingLifecycleWorkflowTaskForAPI(uuid);
+      
+    } 
     @Test(description = "Create new  API version with valid APIID")
     public void testCreateNewAPIVersion() throws APIManagementException, LifecycleException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
@@ -1626,6 +1737,13 @@ public class APIPublisherImplTestCase {
         return new APIPublisherImpl(user, apiDAO, null, apiSubscriptionDAO, null, apiLifecycleManager, null, null,
                 null, null);
     }
+
+    private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APISubscriptionDAO apiSubscriptionDAO,
+            APILifecycleManager apiLifecycleManager, WorkflowDAO workfloDAO) {
+        return new APIPublisherImpl(user, apiDAO, null, apiSubscriptionDAO, null, apiLifecycleManager, null, workfloDAO,
+                null, null);
+    }
+
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APISubscriptionDAO apiSubscriptionDAO) {
         return new APIPublisherImpl(user, apiDAO, null, apiSubscriptionDAO, null, null, null, null,

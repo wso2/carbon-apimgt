@@ -51,18 +51,18 @@ public interface WorkflowDAO {
     public Workflow retrieveWorkflow(String workflowReference) throws APIMgtDAOException;
 
     /**
-     * Get the external reference id for a given subscription id. 
-     * @param subscriptionId subscription id
+     * Get the external reference id for tasks in Created state for a given workflow reference id. 
+     * @param wfReference internal wfReference id 
      * @return String external reference id
      * @throws APIMgtDAOException if API Manager core level exception occurred
      */
-    String getExternalWorkflowReferenceForSubscription(String subscriptionId) throws APIMgtDAOException;
+    String getExternalWorkflowReferenceForPendingTask(String wfReference, String workflowType)
+            throws APIMgtDAOException;
 
     /**
-     * Get the external reference id for a given application id. 
-     * @param appId application id
-     * @return String external reference id
-     * @throws APIMgtDAOException if API Manager core level exception occurred
+     * Remove workflow entry related to the provided external ref from the database 
+     * @param externalReferenceId
+     * @throws APIMgtDAOException
      */
-    String getExternalWorkflowReferenceForApplication(String appId) throws APIMgtDAOException;
+    void deleteWorkflowEntryforExternalReference(String externalReferenceId) throws APIMgtDAOException;
 }
