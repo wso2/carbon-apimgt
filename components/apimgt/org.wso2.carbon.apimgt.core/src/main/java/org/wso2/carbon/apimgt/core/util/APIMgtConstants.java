@@ -74,8 +74,6 @@ public class APIMgtConstants {
             "org.wso2.carbon.apimgt.core.workflow.SubscriptionCreationSimpleWorkflowExecutor";
     public static final String WF_DEFAULT_SUBDELETE_EXEC = 
             "org.wso2.carbon.apimgt.core.workflow.SubscriptionDeletionSimpleWorkflowExecutor";
-    public static final String WF_DEFAULT_SIGNUP_EXEC = 
-            "org.wso2.carbon.apimgt.core.workflow.UserSignUpSimpleWorkflowExecutor";
 
     //Store constants
     public static final String DEFAULT_APPLICATION_NAME = "DefaultApplication";
@@ -301,7 +299,6 @@ public class APIMgtConstants {
      * Workflow related constants
      */
     public static class WorkflowConstants {
-        public static final String WF_TYPE_AM_USER_SIGNUP = "AM_USER_SIGNUP";
         public static final String WF_TYPE_AM_SUBSCRIPTION_CREATION = "AM_SUBSCRIPTION_CREATION";
         public static final String WF_TYPE_AM_SUBSCRIPTION_DELETION = "AM_SUBSCRIPTION_DELETION";
         public static final String WF_TYPE_AM_APPLICATION_CREATION = "AM_APPLICATION_CREATION";

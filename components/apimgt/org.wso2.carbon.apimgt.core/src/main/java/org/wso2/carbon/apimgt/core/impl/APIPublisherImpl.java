@@ -48,6 +48,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
+import org.wso2.carbon.apimgt.core.exception.WorkflowException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIResource;
 import org.wso2.carbon.apimgt.core.models.APIStateChangeWorkflow;
@@ -387,6 +388,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             API originalAPI = getAPIbyUUID(apiBuilder.getId());
             if (originalAPI != null) {
                 apiBuilder.createdTime(originalAPI.getCreatedTime());
+                //workflow status is an internal property and shouldn't be allowed to update externally
+                apiBuilder.workflowStatus(originalAPI.getWorkflowStatus());
                 if ((originalAPI.getName().equals(apiBuilder.getName())) && (originalAPI.getVersion().equals
                         (apiBuilder.getVersion())) && (originalAPI.getProvider().equals(apiBuilder.getProvider())) &&
                         originalAPI.getLifeCycleStatus().equalsIgnoreCase(apiBuilder.getLifeCycleStatus())) {
@@ -648,6 +651,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 LifecycleState currentState = getApiLifecycleManager()
                         .getLifecycleDataForState(apiBuilder.getLifecycleInstanceId(), apiBuilder.getLifeCycleStatus());
                 apiBuilder.lifecycleState(currentState);
+                if (APILCWorkflowStatus.PENDING.toString().equals(api.getWorkflowStatus())) {
+                    apiBuilder.workflowStatus(APILCWorkflowStatus.APPROVED.toString());
+                    getApiDAO().updateAPIWorkflowStatus(apiId, APILCWorkflowStatus.APPROVED);
+                }
                 List<CheckItemBean> list = currentState.getCheckItemBeanList();
                 for (Iterator iterator = list.iterator(); iterator.hasNext();) {
                     CheckItemBean checkItemBean = (CheckItemBean) iterator.next();
@@ -1071,10 +1078,28 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             if (getAPISubscriptionCountByAPI(identifier) == 0) {
                 API api = getApiDAO().getAPI(identifier);
                 if (api != null) {
-                    API.APIBuilder apiBuilder = new API.APIBuilder(api);
+                    String apiWfStatus = api.getWorkflowStatus();
+                    API.APIBuilder apiBuilder = new API.APIBuilder(api);                   
                     getApiDAO().deleteAPI(identifier);
                     getApiLifecycleManager().removeLifecycle(apiBuilder.getLifecycleInstanceId());
                     APIUtils.logDebug("API with id " + identifier + " was deleted successfully.", log);
+                    
+                    if (APILCWorkflowStatus.PENDING.toString().equals(apiWfStatus)) {
+                        String wfReferenceId = getWorkflowDAO().getExternalWorkflowReferenceForPendingTask(identifier,
+                                WorkflowConstants.WF_TYPE_AM_API_STATE);
+                        if (wfReferenceId != null) {
+                            WorkflowExecutor executor = WorkflowExecutorFactory.getInstance()
+                                    .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
+
+                            try {
+                                executor.cleanUpPendingTask(wfReferenceId);
+                            } catch (WorkflowException e) {
+                                String warn = "Failed to clean pending subscription approval task for " + identifier;
+                                // failed cleanup processes are ignored to prevent failing the deletion process
+                                log.warn(warn, e.getLocalizedMessage());
+                            }
+                        }
+                    }
                     // 'API_M Functions' related code
                     //Create a payload with event specific details
                     Map<String, String> eventPayload = new HashMap<>();
@@ -1650,7 +1675,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
             if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Application Creation workflow complete: Approved");
+                    log.debug("API state change workflow complete: Approved");
                 }             
                 String invoker = workflow.getAttribute(WorkflowConstants.ATTRIBUTE_API_LC_INVOKER);
                 String targetState = workflow.getAttribute(WorkflowConstants.ATTRIBUTE_API_TARGET_STATE);
@@ -1659,8 +1684,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 updateAPIStatusForWorkflowComplete(workflow.getWorkflowReference(), targetState, invoker, time);
             } else if (WorkflowStatus.REJECTED == response.getWorkflowStatus()) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Application Creation workflow complete: Rejected");
+                    log.debug("API state change workflow complete: Rejected");
                 }              
+                getApiDAO().updateAPIWorkflowStatus(workflow.getWorkflowReference(), APILCWorkflowStatus.REJECTED);
             }
             updateWorkflowEntries(workflow); 
         } else {
@@ -1669,5 +1695,51 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             throw new APIManagementException(message, ExceptionCodes.WORKFLOW_INV_PUBLISHER_WFTYPE);
         }
         return response;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void removePendingLifecycleWorkflowTaskForAPI(String apiId) throws APIManagementException {
+        
+        API api = getApiDAO().getAPI(apiId);
+        if (api != null) {
+            if (APILCWorkflowStatus.PENDING.toString().equals(api.getWorkflowStatus())) {
+                try {
+                    //change the state back
+                    getApiDAO().updateAPIWorkflowStatus(apiId, APILCWorkflowStatus.APPROVED);
+                    
+                    // call executor's cleanup task
+                    String workflowExtRef = getWorkflowDAO().getExternalWorkflowReferenceForPendingTask(apiId,
+                            WorkflowConstants.WF_TYPE_AM_API_STATE);
+                    if (workflowExtRef != null) {
+                        WorkflowExecutor executor = WorkflowExecutorFactory.getInstance()
+                                .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
+                        try {
+                            executor.cleanUpPendingTask(workflowExtRef);
+                        } catch (WorkflowException e) {
+                            String warn = "Failed to clean pending api state change task for " + apiId;
+                            // failed cleanup processes are ignored to prevent failing the deletion process
+                            log.warn(warn, e.getLocalizedMessage());
+                        }
+                        getWorkflowDAO().deleteWorkflowEntryforExternalReference(workflowExtRef);
+                    }
+                    
+                } catch (APIMgtDAOException e) {
+                    String msg = "Error occurred while changing api lifecycle workflow status";
+                    log.error(msg, e);
+                    throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+                }
+            } else {
+                String msg = "API does not have a pending lifecycle state change.";
+                log.error(msg);
+                throw new APIManagementException(msg, ExceptionCodes.WORKFLOW_NO_PENDING_TASK);
+            }
+        } else {
+            String msg = "Couldn't found API with ID " + apiId;
+            log.error(msg);
+            throw new APIManagementException(msg, ExceptionCodes.API_NOT_FOUND);
+        }      
     }
 }

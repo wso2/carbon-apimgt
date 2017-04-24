@@ -450,7 +450,7 @@
                                 <PORT>${apim-mysql.port}</PORT>
                             </environmentVariables>
                             <suiteXmlFiles>
-                                <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                                <suiteXmlFile>src/test/resources/testngDAO.xml</suiteXmlFile>
                             </suiteXmlFiles>
                         </configuration>
                     </plugin>
@@ -531,7 +531,7 @@
                                 <DATABASE_TYPE>db2</DATABASE_TYPE>
                             </environmentVariables>
                             <suiteXmlFiles>
-                                <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                                <suiteXmlFile>src/test/resources/testngDAO.xml</suiteXmlFile>
                             </suiteXmlFiles>
                         </configuration>
                     </plugin>
@@ -612,7 +612,7 @@
                                 <PORT>${apim-mssql.port}</PORT>
                             </environmentVariables>
                             <suiteXmlFiles>
-                                <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                                <suiteXmlFile>src/test/resources/testngDAO.xml</suiteXmlFile>
                             </suiteXmlFiles>
                         </configuration>
                     </plugin>
@@ -637,13 +637,16 @@
                             </execution>
                             <execution>
                                 <id>verify-for-h2</id>
-                                <phase>integration-test</phase>
+                                <phase>verify</phase>
                                 <goals>
                                     <goal>verify</goal>
                                 </goals>
                             </execution>
                         </executions>
                         <configuration>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>src/test/resources/testngDAO.xml</suiteXmlFile>
+                            </suiteXmlFiles>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -727,7 +730,7 @@
                                 <PORT>${apim-postgres.port}</PORT>
                             </environmentVariables>
                             <suiteXmlFiles>
-                                <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                                <suiteXmlFile>src/test/resources/testngDAO.xml</suiteXmlFile>
                             </suiteXmlFiles>
                         </configuration>
                     </plugin>
@@ -807,6 +810,39 @@
                                 <PORT>${apim-oracle.port}</PORT>
                             </environmentVariables>
                             <argLine>-Duser.timezone=GMT</argLine>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>src/test/resources/testngDAO.xml</suiteXmlFile>
+                            </suiteXmlFiles>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>integration-tests</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.19.1</version>
+                        <executions>
+                            <execution>
+                                <id>integration-for-generic-tests</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>verify-for-generic-tests</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
                             <suiteXmlFiles>
                                 <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
                             </suiteXmlFiles>

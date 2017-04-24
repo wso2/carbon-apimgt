@@ -78,6 +78,8 @@ public enum ExceptionCodes implements ErrorHandler {
     WORKFLOW_INV_PUBLISHER_WFTYPE(900554, "Workflow error", 500, "Invalid workflow type for publisher workflows"),
     WORKFLOW_INV_STORE_WFTYPE(900555, "Workflow error", 500, "Invalid workflow type for store workflows"),
     WORKFLOW_STATE_MISSING(900556, "Workflow error", 400, "Workflow status is not defined"),
+    WORKFLOW_NO_PENDING_TASK(900557, "Workflow error", 412,
+            "Requested resource does not have a pending workflow task"),
 
     // Auth related codes
     ROLES_CANNOT_BE_EMPTY(900600, "Role list cannot be empty", 400, " Role list cannot be empty"),

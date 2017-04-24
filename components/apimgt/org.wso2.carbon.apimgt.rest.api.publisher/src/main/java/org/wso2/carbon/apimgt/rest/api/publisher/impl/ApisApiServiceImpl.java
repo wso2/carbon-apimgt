@@ -1295,4 +1295,30 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
     }
+
+    /**
+     * Remove pending lifecycle state change workflow tasks.
+     * 
+     * @param apiId api id
+     * @param request     msf4j request object
+     * @return Empty payload
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
+    @Override
+    public Response apisApiIdLifecycleLifecyclePendingTaskDelete(String apiId, Request request)
+            throws NotFoundException {
+        try {
+            String username = RestApiUtil.getLoggedInUsername();
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            apiPublisher.removePendingLifecycleWorkflowTaskForAPI(apiId);
+            return Response.ok().build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while removing pending task for API state change for api " + apiId;
+            Map<String, String> paramList = new HashMap<>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
 }

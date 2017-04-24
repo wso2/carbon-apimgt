@@ -12,6 +12,10 @@
     padding-bottom: 100px;
 }
 
+.api-listing-delete {
+    padding-left: 1em;
+}
+
 input.ep-field{
     min-width: 50%;
 }

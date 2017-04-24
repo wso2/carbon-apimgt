@@ -94,7 +94,6 @@ function unblockSubscriptionsHandler(event) {
 }
 
 $(function () {
-    //TODO: Remove this to a function and invoke from onSuccess method renderFragment; after UUF-common M7 release. ~AnuruddhaL
     var api_client = new API();
     var api_id = $("#apiId").val();
     api_client.subscriptions(api_id, getSubscriptionsCallback);
