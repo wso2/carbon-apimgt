@@ -46,13 +46,11 @@ public class APIGatewayPublisherImplTestCase {
         System.setProperty("carbon.home", new File("src/test/resources").getAbsolutePath());
 
         WorkflowExtensionsConfigBuilder.build(new ConfigProvider() {
-
             @Override
             public <T> T getConfigurationObject(Class<T> configClass) throws CarbonConfigurationException {
                 T workflowConfig = (T) new WorkflowConfig();
                 return workflowConfig;
             }
-
             @Override
             public Map getConfigurationMap(String namespace) throws CarbonConfigurationException {
                 return null;
@@ -67,9 +65,8 @@ public class APIGatewayPublisherImplTestCase {
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         APIGatewayPublisherImpl apiGatewayPublisher = new APIGatewayPublisherImpl();
         Boolean state = apiGatewayPublisher.publishToGateway(api);
-        Assert.assertEquals(state , Boolean.TRUE);
+        Assert.assertEquals(state, Boolean.TRUE);
     }
-
 
     @Test(description = "Publish API artifacts with gwHome == null")
     public void testPublishToGatewayWithNogwHome() throws GatewayException {
@@ -81,41 +78,13 @@ public class APIGatewayPublisherImplTestCase {
     }
 
     @Test(description = "Publish API artifacts with API in defaultVerison")
-    public void testPublishToGatewayWithDefaultVersion() throws GatewayException {
+    public void testPublishToGatewayWithDefaultVersion()
+            throws GatewayException {
         String configString = SampleTestObjectCreator.createSampleGatewayConfig();
         API api = SampleTestObjectCreator.createUniqueAPI().gatewayConfig(configString).build();
         APIGatewayPublisherImpl apiGatewayPublisher = new APIGatewayPublisherImpl();
         Boolean state = apiGatewayPublisher.publishToGateway(api);
         Assert.assertEquals(state, Boolean.TRUE);
     }
-
-//    @Test(description = "Publish API artifacts with API in defaultVersion and gwHome = null")
-//    public void testPublishToGatewayWithDefaultVersionWithNogwHome() throws GatewayException {
-//        System.clearProperty("gwHome");
-//        System.clearProperty("carbon.home");
-//        String configString = SampleTestObjectCreator.createSampleGatewayConfig();
-//        API api = SampleTestObjectCreator.createUniqueAPI().gatewayConfig(configString).build();
-//        APIGatewayPublisherImpl apiGatewayPublisher = new APIGatewayPublisherImpl();
-//        Boolean state = apiGatewayPublisher.publishToGateway(api);
-//        Assert.assertEquals(state, Boolean.TRUE);
-//    }
-
-    /**
-     *
-     *Test cases for exceptions
-     */
-//    @Test(description = "Exception deploying API Configuration for API", expectedExceptions = GatewayException.class)
-//    public void testPublishToGatewayDeployAPIConfigException() throws GatewayException {
-//        System.clearProperty("gwHome");
-//        System.clearProperty("carbon.home");
-//        String configString = SampleTestObjectCreator.createSampleGatewayConfig();
-//        API api = SampleTestObjectCreator.createUniqueAPI().gatewayConfig(configString).build();
-//        APIGatewayPublisherImpl apiGatewayPublisher = new APIGatewayPublisherImpl();
-//        Mockito.when(apiGatewayPublisher).thenThrow(new
-//                GatewayException("Error deploying API configuration for API " + api.getName(),
-//                ExceptionCodes.GATEWAY_EXCEPTION));
-//        apiGatewayPublisher.publishToGateway(api);
-//    }
-
 
 }
