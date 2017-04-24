@@ -68,13 +68,6 @@ public class ApplicationsApiServiceImpl
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
-            String existingFingerprint = applicationsApplicationIdGetFingerprint(applicationId, null, null, null,
-                    request);
-            if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
-                    .contains(existingFingerprint)) {
-                return Response.status(Response.Status.PRECONDITION_FAILED).build();
-            }
-
             apiConsumer.deleteApplication(applicationId);
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting application: " + applicationId;

@@ -29,7 +29,7 @@ public enum ExceptionCodes implements ErrorHandler {
     // API, Application related codes
     API_ALREADY_EXISTS(900300, "The API already exists.", 409, " The API already exists"),
     APPLICATION_ALREADY_EXISTS(900301, "The application already exists.", 409, " The application already exists"),
-    APIMGT_DAO_EXCEPTION(900302, "Internal server error.", 500, " Error occurred while persisting data"),
+    APIMGT_DAO_EXCEPTION(900302, "Internal server error.", 500, " Error occurred while persisting/retrieving data"),
     APIMGT_LIFECYCLE_EXCEPTION(900303, "Lifecycle exception occurred", 500, " Error occurred while changing " +
             "lifecycle state"),
     TIER_CANNOT_BE_NULL(900304, "The tier cannot be null.", 400, " The tier cannot be null"),

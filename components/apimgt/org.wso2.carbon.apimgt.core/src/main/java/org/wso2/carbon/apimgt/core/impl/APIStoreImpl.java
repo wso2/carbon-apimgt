@@ -478,13 +478,25 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     public Comment getCommentByUUID(String commentId, String apiId) throws APIManagementException {
         Comment comment;
         try {
+            ApiDAO apiDAO = getApiDAO();
+            API api = apiDAO.getAPI(apiId);
+            if (api == null) {
+                String errorMsg = "Couldn't find api with api_id : " + apiId;
+                log.error(errorMsg);
+                throw new APIManagementException(errorMsg, ExceptionCodes.API_NOT_FOUND);
+            }
             comment = getApiDAO().getCommentByUUID(commentId, apiId);
+            if (comment == null) {
+                String errorMsg = "Couldn't find comment with comment_id - " + apiId;
+                log.error(errorMsg);
+                throw new APIManagementException(errorMsg, ExceptionCodes.API_NOT_FOUND);
+            }
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while retrieving Comment + " + commentId + " for API " + apiId;
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
-            return comment;
+        return comment;
     }
 
     @Override
@@ -507,6 +519,13 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         String generatedUuid = UUID.randomUUID().toString();
         comment.setUuid(generatedUuid);
         try {
+            ApiDAO apiDAO = getApiDAO();
+            API api = apiDAO.getAPI(apiId);
+            if (api == null) {
+                String errorMsg = "Couldn't find api with api_id : " + apiId;
+                log.error(errorMsg);
+                throw new APIManagementException(errorMsg, ExceptionCodes.API_NOT_FOUND);
+            }
             getApiDAO().addComment(comment, apiId);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while adding comment for api - " + apiId;
@@ -519,7 +538,21 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     @Override
     public void deleteComment(String commentId, String apiId) throws APIManagementException {
         try {
-            getApiDAO().deleteComment(commentId, apiId);
+            ApiDAO apiDAO = getApiDAO();
+            API api = apiDAO.getAPI(apiId);
+            if (api == null) {
+                String errorMsg = "Couldn't find api with api_id : " + apiId;
+                log.error(errorMsg);
+                throw new APIManagementException(errorMsg, ExceptionCodes.API_NOT_FOUND);
+            }
+            Comment comment = apiDAO.getCommentByUUID(commentId, apiId);
+            if (comment == null) {
+                String errorMsg = "Couldn't find comment with comment_id : " + commentId;
+                log.error(errorMsg);
+                throw new APIManagementException(errorMsg, ExceptionCodes.COMMENT_NOT_FOUND);
+            } else {
+                apiDAO.deleteComment(commentId, apiId);
+            }
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while deleting comment " + commentId;
             log.error(errorMsg, e);
@@ -549,8 +582,15 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     @Override
     public List<Comment> getCommentsForApi(String apiId) throws APIManagementException {
         try {
+            ApiDAO apiDAO = getApiDAO();
+            API api = apiDAO.getAPI(apiId);
+            if (api == null) {
+                String errorMsg = "api not found for the id : " + apiId;
+                log.error(errorMsg);
+                throw new APIManagementException(errorMsg, ExceptionCodes.API_NOT_FOUND);
+            }
             List<Comment> commentList = getApiDAO().getCommentsForApi(apiId);
-            return  commentList;
+            return commentList;
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while retrieving comments for api " + apiId;
             log.error(errorMsg, e);

@@ -840,6 +840,8 @@ public class ApiDAOImpl implements ApiDAO {
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(deleteCommentQuery)) {
             try {
+                statement.setString(1, commentId);
+                statement.setString(2, apiId);
                 statement.execute();
             } catch (SQLException e) {
                 connection.rollback();
@@ -882,7 +884,7 @@ public class ApiDAOImpl implements ApiDAO {
         List<Comment> commentList = new ArrayList<>();
         final String getCommentsQuery = "SELECT COMMENT_ID, COMMENT_TEXT, USER_IDENTIFIER, API_ID, "
                 + "CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME "
-                + "FROM AM_API_COMMENTS WHERE AND API_ID = ?";
+                + "FROM AM_API_COMMENTS WHERE API_ID = ?";
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(getCommentsQuery)) {
             try {
