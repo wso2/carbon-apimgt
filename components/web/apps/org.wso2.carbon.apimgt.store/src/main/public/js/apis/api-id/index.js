@@ -519,31 +519,56 @@ $(function () {
                             $("#subscribe-button").html('Subscribe');
                             $("#subscribe-button").removeAttr('disabled');
                             var subscription = jsonData.obj;
-                            var jsonPayload = subscription.workflowResponse.jsonPayload;
 
-                            if(jsonPayload) {
-                                var jsonResponse = JSON.parse(jsonPayload);
-                                var message = jsonResponse.redirectConfirmationMsg;
-                                noty({
-                                    text: message,
-                                    layout: "top",
-                                    theme: 'relax',
-                                    dismissQueue: true,
-                                    type: "alert",
-                                    buttons: [
-                                        {addClass: 'btn btn-primary', text: 'Leave page', onClick: function($noty) {
-                                            $noty.close();
-                                            location.href = jsonResponse.redirectUrl;
-                                          }
-                                        },
-                                        {addClass: 'btn btn-default', text: 'Stay on this page', onClick: function($noty) {
-                                            $noty.close();
-                                            location.href = contextPath + "/apis/" + apiId;
-                                          }
-                                        }
-                                      ]
-                                });
-
+                            if (jsonData.status == 202) {
+                                //workflow related code
+                                var jsonResponse;
+                                if (subscription.jsonPayload) {                                 
+                                    jsonResponse = JSON.parse(subscription.jsonPayload);
+                                }                          
+                                if (jsonResponse && jsonResponse.redirectUrl) {
+                                    var message = jsonResponse.redirectConfirmationMsg;
+                                    noty({
+                                        text: message,
+                                        layout: "top",
+                                        theme: 'relax',
+                                        dismissQueue: true,
+                                        type: "alert",
+                                        buttons: [
+                                            {addClass: 'btn btn-primary', text: 'Leave page', onClick: function($noty) {
+                                                $noty.close();
+                                                location.href = jsonResponse.redirectUrl;
+                                              }
+                                            },
+                                            {addClass: 'btn btn-default', text: 'Stay on this page', onClick: function($noty) {
+                                                $noty.close();
+                                                location.href = contextPath + "/apis/" + apiId;
+                                              }
+                                            }
+                                          ]
+                                    });
+                                } else {
+                                    var message = "Request has been submitted and is now awaiting approval.";
+                                    noty({
+                                        text: message,
+                                        layout: "top",
+                                        theme: 'relax',
+                                        dismissQueue: true,
+                                        type: "alert",
+                                        buttons: [
+                                            {addClass: 'btn btn-primary', text: 'View Subscriptions', onClick: function($noty) {
+                                                $noty.close();
+                                                location.href = contextPath + "/applications/" + applicationId + "#subscription";
+                                              }
+                                            },
+                                            {addClass: 'btn btn-default', text: 'Stay on this page', onClick: function($noty) {
+                                                $noty.close();
+                                                location.href = contextPath + "/apis/" + apiId;
+                                              }
+                                            }
+                                          ]
+                                    });
+                                }
                             } else {
                                 var message = "You have successfully subscribed to the API.";
                                 noty({
