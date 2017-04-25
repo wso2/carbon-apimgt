@@ -15,38 +15,38 @@ node("openstack-apim") {
     stage('Building carbon-apimgt with unit test') {
         // Run the maven build
         withEnv(["JAVA_HOME=${tool 'Oracle-JDK-1.8.0_45'}", "PATH+MAVEN=${mvnHome}/bin:${env.JAVA_HOME}/bin"]) {
-            sh "'${mvnHome}/bin/mvn' clean install -Dmaven.test.failure.ignore clean package"
+            sh "'${mvnHome}/bin/mvn' clean install -Dmaven.test.failure.ignore "
         }
     }
     stage('Running Test on H2 database') {
         withEnv(["JAVA_HOME=${tool 'Oracle-JDK-1.8.0_45'}", "PATH+MAVEN=${mvnHome}/bin:${env.JAVA_HOME}/bin",
                  "DOCKER_HOST=${dockerHost}"]) {
-                    sh "'${mvnHome}/bin/mvn' clean install -P local-h2 -f components/apimgt/org.wso2.carbon.apimgt.core/pom.xml -Dmaven.test.failure.ignore clean package -Dskip.surefire.test=true"
+            sh "'${mvnHome}/bin/mvn' verify -P local-h2 -f components/apimgt/org.wso2.carbon.apimgt.core/pom.xml -Dmaven.test.failure.ignore -Dskip.surefire.test=true"
         }
     }
     stage('Running Test on Mysql database') {
         withEnv(["JAVA_HOME=${tool 'Oracle-JDK-1.8.0_45'}", "PATH+MAVEN=${mvnHome}/bin:${env.JAVA_HOME}/bin",
                  "DOCKER_HOST=${dockerHost}"]) {
-            sh "'${mvnHome}/bin/mvn' clean install -P local-mysql -f components/apimgt/org.wso2.carbon.apimgt.core/pom.xml -Dmaven.test.failure.ignore clean package -Dskip.surefire.test=true"
+            sh "'${mvnHome}/bin/mvn' verify -P local-mysql -f components/apimgt/org.wso2.carbon.apimgt.core/pom.xml -Dmaven.test.failure.ignore -Dskip.surefire.test=true"
         }
     }
     stage('Running Test on Oracle database') {
         withEnv(["JAVA_HOME=${tool 'Oracle-JDK-1.8.0_45'}", "PATH+MAVEN=${mvnHome}/bin:${env.JAVA_HOME}/bin",
                  "DOCKER_HOST=${dockerHost}"]) {
-            sh "'${mvnHome}/bin/mvn' clean install -P local-oracle -f components/apimgt/org.wso2.carbon.apimgt.core/pom.xml -Dmaven.test.failure.ignore clean package -Dskip.surefire.test=true"
+            sh "'${mvnHome}/bin/mvn' verify -P local-oracle -f components/apimgt/org.wso2.carbon.apimgt.core/pom.xml -Dmaven.test.failure.ignore -Dskip.surefire.test=true"
         }
     }
     stage('Running Test on PostgreSql database') {
         withEnv(["JAVA_HOME=${tool 'Oracle-JDK-1.8.0_45'}", "PATH+MAVEN=${mvnHome}/bin:${env.JAVA_HOME}/bin",
                  "DOCKER_HOST=${dockerHost}"]) {
-            sh "'${mvnHome}/bin/mvn' clean install -P local-postgres -f components/apimgt/org.wso2.carbon.apimgt.core/pom.xml -Dmaven.test.failure.ignore clean package -Dskip.surefire.test=true"
+            sh "'${mvnHome}/bin/mvn' verify -P local-postgres -f components/apimgt/org.wso2.carbon.apimgt.core/pom.xml -Dmaven.test.failure.ignore -Dskip.surefire.test=true"
         }
     }
     stage('Running Test on Mssql database') {
         withEnv(["JAVA_HOME=${tool 'Oracle-JDK-1.8.0_45'}", "PATH+MAVEN=${mvnHome}/bin:${env.JAVA_HOME}/bin",
                  "DOCKER_HOST=${dockerHost}"]) {
-            sh "'${mvnHome}/bin/mvn' clean install -P local-mssql -f components/apimgt/org.wso2.carbon.apimgt.core/pom.xml -Dmaven.test.failure.ignore clean package -Dskip.surefire.test=true"
+            sh "'${mvnHome}/bin/mvn' verify -P local-mssql -f components/apimgt/org.wso2.carbon.apimgt.core/pom.xml -Dmaven.test.failure.ignore -Dskip.surefire.test=true"
         }
     }
-
+    step([$class: 'JacocoPublisher'])
 }
