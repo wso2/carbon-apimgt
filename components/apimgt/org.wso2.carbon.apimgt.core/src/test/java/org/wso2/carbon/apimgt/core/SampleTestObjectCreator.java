@@ -41,8 +41,10 @@ import org.wso2.carbon.apimgt.core.models.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.core.models.policy.Condition;
 import org.wso2.carbon.apimgt.core.models.policy.HeaderCondition;
 import org.wso2.carbon.apimgt.core.models.policy.IPCondition;
+import org.wso2.carbon.apimgt.core.models.policy.JWTClaimsCondition;
 import org.wso2.carbon.apimgt.core.models.policy.Pipeline;
 import org.wso2.carbon.apimgt.core.models.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.core.models.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.core.models.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
@@ -495,14 +497,16 @@ public class SampleTestObjectCreator {
         QuotaPolicy quotaPolicy1 = new QuotaPolicy();
         quotaPolicy1.setType(PolicyConstants.BANDWIDTH_TYPE);
         BandwidthLimit bandwidthLimit = new BandwidthLimit();
-        IPCondition ipCondition = new IPCondition("IP");
-        ipCondition.setSpecificIP("192. 68.2.19");
+        IPCondition ipCondition = new IPCondition(PolicyConstants.IP_RANGE_TYPE);
         ipCondition.setStartingIP("20.23.1.3");
         ipCondition.setEndingIP("30.23.1.4");
 
+        IPCondition ipConditionSpecific = new IPCondition(PolicyConstants.IP_SPECIFIC_TYPE);
+        ipCondition.setStartingIP("192.34.21.1");
+
         Pipeline pipeline1 = new Pipeline();
-        pipeline1.setId(1);
         conditionsList.add(ipCondition);
+        conditionsList.add(ipConditionSpecific);
         pipeline1.setConditions(conditionsList);
         bandwidthLimit.setDataAmount(1000);
         bandwidthLimit.setDataUnit("MB");
@@ -515,12 +519,19 @@ public class SampleTestObjectCreator {
 
         //End of pipeline 1 -> Beginning of pipeline 2
         Pipeline pipeline2 = new Pipeline();
-        pipeline1.setId(2);
         QuotaPolicy quotaPolicy2 = new QuotaPolicy();
         quotaPolicy2.setType(PolicyConstants.REQUEST_COUNT_TYPE);
         HeaderCondition headerCondition = new HeaderCondition();
         headerCondition.setHeader("Browser");
         headerCondition.setValue("Chrome");
+
+        JWTClaimsCondition jwtClaimsCondition = new JWTClaimsCondition();
+        jwtClaimsCondition.setClaimUrl("/path/path");
+        jwtClaimsCondition.setAttribute("attribute");
+
+        QueryParameterCondition queryParameterCondition = new QueryParameterCondition();
+        queryParameterCondition.setParameter("Location");
+        queryParameterCondition.setValue("Colombo");
 
         RequestCountLimit requestCountLimit = new RequestCountLimit();
         requestCountLimit.setRequestCount(1000);
@@ -530,6 +541,9 @@ public class SampleTestObjectCreator {
 
         conditionsList = new ArrayList<>();
         conditionsList.add(headerCondition);
+        conditionsList.add(jwtClaimsCondition);
+        conditionsList.add(queryParameterCondition);
+
         pipeline2.setConditions(conditionsList);
         pipeline2.setQuotaPolicy(quotaPolicy2);
         pipelineList.add(pipeline2);

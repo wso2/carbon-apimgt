@@ -121,7 +121,6 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         List<Policy> policyList = policyDAO.getPolicies(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL);
         Assert.assertNotNull(policyList);
     }
-
     @Test(description = "Get Subscription Policies")
     public void testGetSubscriptionPolicies() throws Exception {
         SubscriptionPolicy policy = SampleTestObjectCreator.createDefaultSubscriptionPolicy();
@@ -167,7 +166,4 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertEquals(policyAdded.getPolicyName(), policy.getPolicyName());
 
     }
-
-
-
 }
