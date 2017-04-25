@@ -780,9 +780,13 @@ public class ApiDAOImpl implements ApiDAO {
                 }
             } catch (SQLException e) {
                 connection.rollback();
+                String errorMessage =
+                        "Error while retrieving comment for comment id: " + commentId + " and api id: " + apiId;
+                log.error(errorMessage, e);
                 throw new APIMgtDAOException(e);
             }
         } catch (SQLException e) {
+            log.error("Error while creating database connection/prepared-statement", e);
             throw new APIMgtDAOException(e);
         }
         return null;
@@ -827,9 +831,13 @@ public class ApiDAOImpl implements ApiDAO {
                 statement.execute();
             } catch (SQLException e) {
                 connection.rollback();
+                String errorMessage =
+                        "Error while adding comment for api id: " + apiId;
+                log.error(errorMessage, e);
                 throw new APIMgtDAOException(e);
             }
         } catch (SQLException e) {
+            log.error("Error while creating database connection/prepared-statement", e);
             throw new APIMgtDAOException(e);
         }
     }
@@ -845,9 +853,13 @@ public class ApiDAOImpl implements ApiDAO {
                 statement.execute();
             } catch (SQLException e) {
                 connection.rollback();
+                String errorMessage =
+                        "Error while deleting comment for api id: " + apiId + " and comment id: " + commentId;
+                log.error(errorMessage, e);
                 throw new APIMgtDAOException(e);
             }
         } catch (SQLException e) {
+            log.error("Error while creating database connection/prepared-statement", e);
             throw new APIMgtDAOException(e);
         }
     }
@@ -871,9 +883,13 @@ public class ApiDAOImpl implements ApiDAO {
                 statement.execute();
             } catch (SQLException e) {
                 connection.rollback();
+                String errorMessage =
+                        "Error while updating comment for api id: " + apiId + " and comment id: " + commentId;
+                log.error(errorMessage, e);
                 throw new APIMgtDAOException(e);
             }
         } catch (SQLException e) {
+            log.error("Error while creating database connection/prepared-statement", e);
             throw new APIMgtDAOException(e);
         }
 
@@ -897,9 +913,13 @@ public class ApiDAOImpl implements ApiDAO {
                 }
             } catch (SQLException e) {
                 connection.rollback();
+                String errorMessage =
+                        "Error while retrieving all comments for api id: " + apiId;
+                log.error(errorMessage, e);
                 throw new APIMgtDAOException(e);
             }
         } catch (SQLException e) {
+            log.error("Error while creating database connection/prepared-statement", e);
             throw new APIMgtDAOException(e);
         }
         return  commentList;

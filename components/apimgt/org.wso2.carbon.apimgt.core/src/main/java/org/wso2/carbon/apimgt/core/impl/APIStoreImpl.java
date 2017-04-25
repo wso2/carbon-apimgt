@@ -487,12 +487,13 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             }
             comment = getApiDAO().getCommentByUUID(commentId, apiId);
             if (comment == null) {
-                String errorMsg = "Couldn't find comment with comment_id - " + apiId;
+                String errorMsg = "Couldn't find comment with comment_id - " + commentId + " for api_id " + apiId;
                 log.error(errorMsg);
                 throw new APIManagementException(errorMsg, ExceptionCodes.API_NOT_FOUND);
             }
         } catch (APIMgtDAOException e) {
-            String errorMsg = "Error occurred while retrieving Comment + " + commentId + " for API " + apiId;
+            String errorMsg =
+                    "Error occurred while retrieving comment for comment_id " + commentId + " for api_id " + apiId;
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
@@ -563,7 +564,14 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     @Override
     public void updateComment(Comment comment, String commentId, String apiId) throws APIManagementException {
         try {
-            Comment oldComment = getApiDAO().getCommentByUUID(commentId, apiId);
+            ApiDAO apiDAO = getApiDAO();
+            API api = apiDAO.getAPI(apiId);
+            if (api == null) {
+                String errorMsg = "Couldn't find api with api_id : " + apiId;
+                log.error(errorMsg);
+                throw new APIManagementException(errorMsg, ExceptionCodes.API_NOT_FOUND);
+            }
+            Comment oldComment = apiDAO.getCommentByUUID(commentId, apiId);
             if (oldComment != null) {
                 getApiDAO().updateComment(comment, commentId, apiId);
             } else {

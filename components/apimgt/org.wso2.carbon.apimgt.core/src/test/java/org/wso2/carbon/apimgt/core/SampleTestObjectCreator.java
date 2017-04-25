@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
+import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
@@ -616,5 +617,16 @@ public class SampleTestObjectCreator {
         builder.createdTime(LocalDateTime.now());
         builder.lastUpdatedTime(LocalDateTime.now());
         return builder.build();
+    }
+
+    public static Comment createDefaultComment(String apiId) {
+        Comment comment = new Comment();
+        comment.setUuid(UUID.randomUUID().toString());
+        comment.setApiId(apiId);
+        comment.setCommentText("this is a sample comment");
+        comment.setCommentedUser("admin");
+        comment.setCreatedTime(LocalDateTime.now());
+        comment.setUpdatedTime(LocalDateTime.now());
+        return comment;
     }
 }
