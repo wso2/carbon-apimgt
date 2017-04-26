@@ -52,15 +52,6 @@ public class ApiFileDAOImpl implements ApiDAO {
 
     private static final Logger log = LoggerFactory.getLogger(ApiFileDAOImpl.class);
     private String storagePath;
-    private static final String API_DEFINITION_FILE_NAME = "api-";
-    private static final String JSON_EXTENSION = ".json";
-    private static final String DOCUMENTATION_DEFINITION_FILE = "doc.json";
-    private static final String SWAGGER_DEFINITION_FILE_NAME = "swagger-";
-    private static final String THUMBNAIL_FILE_NAME = "thumbnail";
-    private static final String GATEWAY_CONFIGURATION_DEFINITION_FILE = "gateway-configuration";
-    private static final String DOCUMENTS_ROOT_DIRECTORY = "Documents";
-    private static final String ENDPOINTS_ROOT_DIRECTORY = "Endpoints";
-    private static final String IMPORTED_APIS_DIRECTORY_NAME = "imported-apis";
 
     public ApiFileDAOImpl(String storagePath) {
         this.storagePath = storagePath;
@@ -71,24 +62,28 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public void addAPI(API api) throws APIMgtDAOException {
-        String apiExportDirectory = storagePath + File.separator +
-                api.getProvider() + "-" + api.getName() + "-" + api.getVersion();
+        //Save API definition
+        String apiExportDirectory = APIFileUtils.getAPIBaseDirectory(storagePath, api);
         APIFileUtils.createDirectory(apiExportDirectory);
-        exportApiDefinitionToFileSystem(api, apiExportDirectory);
-        APIFileUtils.createDirectory(apiExportDirectory + File.separator + ENDPOINTS_ROOT_DIRECTORY);
-        // Export endpoints to file system.
+        APIFileUtils.exportApiDefinitionToFileSystem(api, apiExportDirectory);
+        //Save API Endpoints
+        APIFileUtils.createDirectory(apiExportDirectory + File.separator + APIMgtConstants.APIFileUtilConstants
+                .ENDPOINTS_ROOT_DIRECTORY);
         api.getEndpoint().forEach((key, value) -> {
             try {
-                exportEndpointToFileSystem(getEndpoint(value),
-                        apiExportDirectory + File.separator + ENDPOINTS_ROOT_DIRECTORY);
+                APIFileUtils.exportEndpointToFileSystem(getEndpoint(value),
+                        apiExportDirectory + File.separator +
+                                APIMgtConstants.APIFileUtilConstants.ENDPOINTS_ROOT_DIRECTORY);
             } catch (APIMgtDAOException e) {
                 throw new RuntimeException("Error while saving endpoint with id : " + value + " to file system", e);
             }
         });
+
         //Export gateway config to file system
-        exportGatewayConfigToFileSystem(api.getGatewayConfig(), api, apiExportDirectory);
+        APIFileUtils.exportGatewayConfigToFileSystem(api.getGatewayConfig(), api, apiExportDirectory);
+
         //Export swagger definition to file system.
-        exportSwaggerDefinitionToFileSystem(api.getApiDefinition(), api, apiExportDirectory);
+        APIFileUtils.exportSwaggerDefinitionToFileSystem(api.getApiDefinition(), api, apiExportDirectory);
     }
 
     /**
@@ -131,9 +126,7 @@ public class ApiFileDAOImpl implements ApiDAO {
             log.error(errorMsg);
             throw new APIMgtDAOException(errorMsg, ExceptionCodes.API_NOT_FOUND);
         }
-        String apiDirectoryPath = storagePath + File.separator +
-                api.getProvider() + "-" + api.getName() + "-" + api.getVersion();
-        APIFileUtils.deleteDirectory(apiDirectoryPath);
+        APIFileUtils.deleteDirectory(APIFileUtils.getAPIBaseDirectory(storagePath, api));
     }
 
     /**
@@ -141,7 +134,8 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public String getSwaggerDefinition(String apiID) throws APIMgtDAOException {
-        String swaggerFileName = SWAGGER_DEFINITION_FILE_NAME + apiID + JSON_EXTENSION;
+        String swaggerFileName = APIMgtConstants.APIFileUtilConstants.SWAGGER_DEFINITION_FILE_PREFIX + apiID +
+                APIMgtConstants.APIFileUtilConstants.JSON_EXTENSION;
         String swaggerFilepath = APIFileUtils.findInFileSystem(new File(storagePath), swaggerFileName);
         if (swaggerFilepath != null) {
             return APIFileUtils.readFileContentAsText(swaggerFilepath);
@@ -154,7 +148,15 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public InputStream getImage(String apiID) throws APIMgtDAOException {
-        throw new UnsupportedOperationException();
+        API api = getAPI(apiID);
+        if (api == null) {
+            String errorMsg = "Unable to find API with Id: " + apiID;
+            log.error(errorMsg);
+            throw new APIMgtDAOException(errorMsg, ExceptionCodes.API_NOT_FOUND);
+        }
+        String thumbnailPath = APIFileUtils.getAPIBaseDirectory(storagePath, api) + File.separator + APIMgtConstants
+                .APIFileUtilConstants.THUMBNAIL_FILE_NAME;
+        return APIFileUtils.getThumbnailImage(thumbnailPath);
     }
 
     /**
@@ -163,7 +165,10 @@ public class ApiFileDAOImpl implements ApiDAO {
     @Override
     public void updateImage(String apiID, InputStream image, String dataType, String updatedBy)
             throws APIMgtDAOException {
-        throw new UnsupportedOperationException();
+        API api = getAPI(apiID);
+        if (api != null) {
+            APIFileUtils.exportThumbnailToFileSystem(image, APIFileUtils.getAPIBaseDirectory(storagePath, api));
+        }
     }
 
     /**
@@ -225,7 +230,7 @@ public class ApiFileDAOImpl implements ApiDAO {
 
     /**
      * @see ApiDAO#addDocumentFileContent(String resourceID, InputStream content, String fileName,
-     *      String updatedBy)
+     * String updatedBy)
      */
     @Override
     public void addDocumentFileContent(String resourceID, InputStream content, String fileName,
@@ -271,9 +276,10 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public void addEndpoint(Endpoint endpoint) throws APIMgtDAOException {
-        String endpointExportDirectory = storagePath + File.separator + ENDPOINTS_ROOT_DIRECTORY;
+        String endpointExportDirectory = storagePath + File.separator + APIMgtConstants.APIFileUtilConstants
+                .ENDPOINTS_ROOT_DIRECTORY;
         APIFileUtils.createDirectory(endpointExportDirectory);
-        exportEndpointToFileSystem(endpoint, endpointExportDirectory);
+        APIFileUtils.exportEndpointToFileSystem(endpoint, endpointExportDirectory);
     }
 
     /**
@@ -281,7 +287,18 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public boolean deleteEndpoint(String endpointId) throws APIMgtDAOException {
-        throw new UnsupportedOperationException();
+        String endpointPartialName = endpointId + APIMgtConstants.APIFileUtilConstants.JSON_EXTENSION;
+        String endpointFilePath = APIFileUtils
+                .findInFileSystem(new File(storagePath + File.separator + APIMgtConstants.APIFileUtilConstants
+                                .ENDPOINTS_ROOT_DIRECTORY),
+                        endpointPartialName);
+        if (endpointFilePath == null) {
+            String errorMsg = "Endpoint with Id" + endpointId + " not found.";
+            log.error(errorMsg);
+            throw new APIMgtDAOException(errorMsg);
+        }
+        APIFileUtils.deleteFile(endpointFilePath);
+        return true;
     }
 
     /**
@@ -289,8 +306,9 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public boolean updateEndpoint(Endpoint endpoint) throws APIMgtDAOException {
-        String endpointExportDirectory = storagePath + File.separator + ENDPOINTS_ROOT_DIRECTORY;
-        exportEndpointToFileSystem(endpoint, endpointExportDirectory);
+        String endpointExportDirectory = storagePath + File.separator + APIMgtConstants.APIFileUtilConstants
+                .ENDPOINTS_ROOT_DIRECTORY;
+        APIFileUtils.exportEndpointToFileSystem(endpoint, endpointExportDirectory);
         return true;
     }
 
@@ -299,9 +317,10 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public Endpoint getEndpoint(String endpointId) throws APIMgtDAOException {
-        String endpointPartialName = endpointId + JSON_EXTENSION;
+        String endpointPartialName = endpointId + APIMgtConstants.APIFileUtilConstants.JSON_EXTENSION;
         String endpointFilePath = APIFileUtils
-                .findInFileSystem(new File(storagePath + File.separator + ENDPOINTS_ROOT_DIRECTORY),
+                .findInFileSystem(new File(storagePath + File.separator + APIMgtConstants.APIFileUtilConstants
+                                .ENDPOINTS_ROOT_DIRECTORY),
                         endpointPartialName);
         if (endpointFilePath != null) {
             return (Endpoint) constructObjectSummaryFromFile(endpointFilePath, Endpoint.class);
@@ -326,7 +345,8 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public List<Endpoint> getEndpoints() throws APIMgtDAOException {
-        File[] files = new File(storagePath + File.separator + ENDPOINTS_ROOT_DIRECTORY).listFiles();
+        File[] files = new File(storagePath + File.separator + APIMgtConstants.APIFileUtilConstants
+                .ENDPOINTS_ROOT_DIRECTORY).listFiles();
         List<Endpoint> endpointList = new ArrayList<>();
         if (files != null) {
             for (File file : files) {
@@ -414,7 +434,7 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#addComment(Comment , String)
+     * @see ApiDAO#addComment(Comment, String)
      */
     @Override
     public void addComment(Comment comment, String apiId) throws APIMgtDAOException {
@@ -458,8 +478,10 @@ public class ApiFileDAOImpl implements ApiDAO {
 
         File[] files = new File(storagePath).listFiles();
         List<API> apiList = new ArrayList<>();
-        final FilenameFilter filenameFilter = (dir, name) -> (name.endsWith(JSON_EXTENSION) && name
-                .contains(API_DEFINITION_FILE_NAME) && !dir.isHidden());
+        final FilenameFilter filenameFilter = (dir, name) ->
+                (name.endsWith(APIMgtConstants.APIFileUtilConstants.JSON_EXTENSION) &&
+                        name.contains(APIMgtConstants.APIFileUtilConstants.API_DEFINITION_FILE_PREFIX) &&
+                        !dir.isHidden());
         if (files != null) {
             for (File file : files) {
                 apiList.add((API) fetchObject(file, API.class, filenameFilter));
@@ -552,7 +574,8 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public API getAPI(String apiID) throws APIMgtDAOException {
-        String apiFileName = API_DEFINITION_FILE_NAME + apiID + JSON_EXTENSION;
+        String apiFileName = APIMgtConstants.APIFileUtilConstants.API_DEFINITION_FILE_PREFIX + apiID + APIMgtConstants
+                .APIFileUtilConstants.JSON_EXTENSION;
         String apiFilePath = APIFileUtils.findInFileSystem(new File(storagePath), apiFileName);
         if (apiFilePath != null) {
             return (API) constructObjectSummaryFromFile(apiFilePath, API.class);
@@ -565,7 +588,8 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public API getAPISummary(String apiID) throws APIMgtDAOException {
-        String apiFileName = API_DEFINITION_FILE_NAME + apiID + JSON_EXTENSION;
+        String apiFileName = APIMgtConstants.APIFileUtilConstants.API_DEFINITION_FILE_PREFIX + apiID + APIMgtConstants
+                .APIFileUtilConstants.JSON_EXTENSION;
         String apiFilePath = APIFileUtils.findInFileSystem(new File(storagePath), apiFileName);
         if (apiFilePath != null) {
             return (API) constructObjectSummaryFromFile(apiFilePath, API.class);
@@ -597,96 +621,10 @@ public class ApiFileDAOImpl implements ApiDAO {
         return null;
     }
 
-    /**
-     * write the given API definition to file system
-     *
-     * @param api {@link API} object to be exported
-     * @param exportLocation file system location to write the API definition
-     * @throws APIMgtDAOException if an error occurs while writing the API definition
-     */
-    private void exportApiDefinitionToFileSystem(API api, String exportLocation) throws APIMgtDAOException {
-
-        String apiFileLocation =
-                exportLocation + File.separator + API_DEFINITION_FILE_NAME + api.getId() + JSON_EXTENSION;
-        APIFileUtils.writeObjectAsJsonToFile(api, apiFileLocation);
-
-        if (log.isDebugEnabled()) {
-            log.debug("Successfully saved API definition for api: " + api.getName() + ", version: " + api
-                    .getVersion());
-        }
-    }
-
-    /**
-     * write the given Endpoint definition to file system
-     *
-     * @param endpoint {@link Endpoint} object to be exported
-     * @param exportLocation file system location to write the Endpoint
-     * @throws APIMgtDAOException if an error occurs while writing the Endpoint
-     */
-    private void exportEndpointToFileSystem (Endpoint endpoint, String exportLocation) throws APIMgtDAOException {
-        String endpointFileLocation =
-                exportLocation + File.separator  + endpoint.getName() + "-" + endpoint.getId() + JSON_EXTENSION;
-        APIFileUtils.writeObjectAsJsonToFile(endpoint, endpointFileLocation);
-
-        if (log.isDebugEnabled()) {
-            log.debug("Successfully saved endpoint  definition for endpoint: " + endpoint.getName());
-        }
-    }
-
-    /**
-     * write the given API gateway config to file system
-     *
-     * @param config gateway config of the api
-     * @param api {@link API} instance
-     * @param exportLocation file system location to write the API gateway config.
-     * @throws APIMgtDAOException if an error occurs while writing the API definition
-     */
-    private void exportGatewayConfigToFileSystem(String config, API api, String exportLocation)
-            throws APIMgtDAOException {
-
-        if (config == null) {
-            // not gateway config found, return
-            log.warn("No gateway configuration found for API with api: " + api.getName() + ", version: " + api
-                    .getVersion());
-            return;
-        }
-
-        String gatewayConfigLocation = exportLocation + File.separator + GATEWAY_CONFIGURATION_DEFINITION_FILE;
-        APIFileUtils.createFile(gatewayConfigLocation);
-        APIFileUtils.writeToFile(gatewayConfigLocation, config);
-        if (log.isDebugEnabled()) {
-            log.debug("Successfully exported gateway configuration for api: " + api.getName() + ", version: " + api
-                    .getVersion());
-        }
-    }
-
-    /**
-     * write the given Endpoint definition to file system
-     *
-     * @param swaggerDefinition swagger definition
-     * @param api {@link API} instance relevant to the swagger definition
-     * @param exportLocation file system location to which the swagger definition will be written
-     * @throws APIMgtDAOException if an error occurs while writing the Endpoint
-     */
-    private void exportSwaggerDefinitionToFileSystem(String swaggerDefinition, API api, String exportLocation)
-            throws APIMgtDAOException {
-        String swaggerDefinitionLocation =
-                exportLocation + File.separator + SWAGGER_DEFINITION_FILE_NAME + api.getId() + JSON_EXTENSION;
-        APIFileUtils.createFile(swaggerDefinitionLocation);
-        APIFileUtils.writeStringAsJsonToFile(swaggerDefinition, swaggerDefinitionLocation);
-
-        if (log.isDebugEnabled()) {
-            log.debug("Successfully exported Swagger definition for api: " + api.getName() + ", version: " + api
-                    .getVersion());
-        }
-    }
-
     private Object fetchObject(File file, Class c, FilenameFilter filenameFilter) {
         File[] files = (filenameFilter != null) ? file.listFiles(filenameFilter) : file.listFiles();
         if (files != null && files.length > 0) {
             return constructObjectSummaryFromFile(files[0].getAbsolutePath(), c);
-        } else if (!file.isDirectory()) {
-            return constructObjectSummaryFromFile(file.getAbsolutePath(), c);
         }
         return null;
     }
@@ -694,7 +632,7 @@ public class ApiFileDAOImpl implements ApiDAO {
     private Object constructObjectSummaryFromFile(String filePath, Class c) {
         Gson gson = new Gson();
         try (FileInputStream fileInputStream = new FileInputStream(filePath);
-                InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8)) {
+             InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8)) {
             JsonReader reader = new JsonReader(inputStreamReader);
             return gson.fromJson(reader, c);
         } catch (IOException e) {
