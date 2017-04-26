@@ -108,6 +108,17 @@ public class ApisApiServiceImpl extends ApisApiService {
         }
     }
 
+    /**
+     *  Retrives A list of comments for a given API ID
+     *
+     * @param apiId API ID
+     * @param limit Max number of comments to return
+     * @param offset Starting point of pagination
+     * @param accept accept header value
+     * @param request msf4j request object
+     * @return CommentListDTO object
+     * @throws NotFoundException
+     */
     @Override
     public Response apisApiIdCommentsGet(String apiId, Integer limit, Integer offset, String accept,
             Request request) throws NotFoundException {
@@ -127,6 +138,20 @@ public class ApisApiServiceImpl extends ApisApiService {
         }
     }
 
+
+    /**
+     * Update a comment
+     *
+     * @param commentId         Comment ID
+     * @param apiId             API ID
+     * @param body              comment body
+     * @param contentType       content-type header
+     * @param ifMatch           If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param request           msf4j request object
+     * @return comment update response
+     * @throws NotFoundException if comment or API not found
+     */
     @Override
     public Response apisApiIdCommentsPost(String apiId, CommentDTO body, String contentType, Request request)
             throws NotFoundException {
