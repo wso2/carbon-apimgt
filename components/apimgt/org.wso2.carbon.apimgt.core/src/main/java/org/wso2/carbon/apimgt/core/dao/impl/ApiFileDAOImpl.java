@@ -426,7 +426,7 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public void addComment(Comment comment, String apiId) throws APIMgtDAOException {
-
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -434,7 +434,7 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public void deleteComment(String commentId, String apiId) throws APIMgtDAOException {
-
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -442,7 +442,7 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public void updateComment(Comment comment, String commentId, String apiId) throws APIMgtDAOException {
-
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -450,7 +450,7 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public List<Comment> getCommentsForApi(String apiId) throws APIMgtDAOException {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**

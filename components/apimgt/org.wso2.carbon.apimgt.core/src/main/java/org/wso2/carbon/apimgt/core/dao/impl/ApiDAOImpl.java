@@ -851,6 +851,9 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
+    /**
+     * @see ApiDAO#deleteComment(String, String)
+     */
     @Override
     public void deleteComment(String commentId, String apiId) throws APIMgtDAOException {
         final String deleteCommentQuery = "DELETE FROM AM_API_COMMENTS WHERE COMMENT_ID = ? AND API_ID = ?";
@@ -873,6 +876,9 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
+    /**
+     * @see ApiDAO#updateComment(Comment, String, String)
+     */
     @Override
     public void updateComment(Comment comment, String commentId, String apiId) throws APIMgtDAOException {
         final String updateCommentQuery = "UPDATE AM_API_COMMENTS SET COMMENT_TEXT = ? , USER_IDENTIFIER = ? ,"

@@ -117,7 +117,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param accept accept header value
      * @param request msf4j request object
      * @return CommentListDTO object
-     * @throws NotFoundException
+     * @throws NotFoundException if api not found
      */
     @Override
     public Response apisApiIdCommentsGet(String apiId, Integer limit, Integer offset, String accept,
