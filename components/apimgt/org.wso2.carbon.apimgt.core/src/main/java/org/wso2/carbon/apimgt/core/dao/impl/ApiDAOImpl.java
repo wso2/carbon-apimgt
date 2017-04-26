@@ -910,6 +910,9 @@ public class ApiDAOImpl implements ApiDAO {
 
     }
 
+    /**
+     * @see ApiDAO#getCommentsForApi(String)
+     */
     @Override
     public List<Comment> getCommentsForApi(String apiId) throws APIMgtDAOException {
         List<Comment> commentList = new ArrayList<>();
