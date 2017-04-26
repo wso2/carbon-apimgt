@@ -142,12 +142,9 @@ public class ApisApiServiceImpl extends ApisApiService {
     /**
      * Update a comment
      *
-     * @param commentId         Comment ID
      * @param apiId             API ID
      * @param body              comment body
      * @param contentType       content-type header
-     * @param ifMatch           If-Match header value
-     * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param request           msf4j request object
      * @return comment update response
      * @throws NotFoundException if comment or API not found
@@ -468,7 +465,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param accept  accept header value
      * @param request msf4j request object
      * @return List of Ratings for API
-     * @throws NotFoundException
+     * @throws NotFoundException If failed to get Ratings
      */
     @Override
     public Response apisApiIdRatingGet(String apiId, Integer limit, Integer offset, String accept, Request request)
