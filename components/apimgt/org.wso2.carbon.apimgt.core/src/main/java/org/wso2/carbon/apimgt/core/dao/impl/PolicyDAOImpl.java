@@ -12,6 +12,7 @@ import org.wso2.carbon.apimgt.core.models.policy.Condition;
 import org.wso2.carbon.apimgt.core.models.policy.HeaderCondition;
 import org.wso2.carbon.apimgt.core.models.policy.IPCondition;
 import org.wso2.carbon.apimgt.core.models.policy.JWTClaimsCondition;
+import org.wso2.carbon.apimgt.core.models.policy.Limit;
 import org.wso2.carbon.apimgt.core.models.policy.Pipeline;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.PolicyConstants;
@@ -94,22 +95,41 @@ public class PolicyDAOImpl implements PolicyDAO {
             connection = DAOUtil.getConnection();
 
             //TODO : instead of checking policyLevel, check class type, and remove passing policy level to here
+            if (policy instanceof APIPolicy) {
+                String type = policy.getDefaultQuotaPolicy().getType();
+                Limit limit = policy.getDefaultQuotaPolicy().getLimit();
+                if (type.equals(PolicyConstants.REQUEST_COUNT_TYPE)) {
+                    if (limit instanceof RequestCountLimit) {
+                        addAPIPolicy(connection, policy.getPolicyName(), policy.getDisplayName(),
+                                policy.getDescription(),
+                                policy.getDefaultQuotaPolicy().getType(),
+                                10,
+                                policy.getDefaultQuotaPolicy().getLimit().getUnitTime(),
+                                policy.getDefaultQuotaPolicy().getLimit().getTimeUnit(),
+                                ((APIPolicy) policy).getPipelines(), API_TIER_LEVEL);
+                    }
+                } else if (type.equals(PolicyConstants.BANDWIDTH_TYPE)) {
+                    if (limit instanceof BandwidthLimit) {
+                        addAPIPolicy(connection, policy.getPolicyName(), policy.getDisplayName(),
+                                policy.getDescription(), policy.getDefaultQuotaPolicy().getType(),
+                                0,
+                                limit.getUnitTime(), limit.getTimeUnit(),
+                                ((APIPolicy) policy).getPipelines(), API_TIER_LEVEL);
 
-            if (APIMgtConstants.ThrottlePolicyConstants.API_LEVEL.equals(policyLevel))  {
-                addAPIPolicy(connection, policy.getPolicyName(), policy.getDisplayName(), policy.getDescription(),
-                             policy.getDefaultQuotaPolicy().getType(), 0,
-                             policy.getDefaultQuotaPolicy().getLimit().getUnitTime(),
-                             policy.getDefaultQuotaPolicy().getLimit().getTimeUnit(), API_TIER_LEVEL);
-            } else if (APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL.equals(policyLevel))   {
-                addApplicationPolicy(connection, policy.getPolicyName(), policy.getDisplayName(),
-                        policy.getDescription(), policy.getDefaultQuotaPolicy().getType(), 0, "",
-                        (int) policy.getDefaultQuotaPolicy().getLimit().getUnitTime(),
-                        policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
-            } else if (APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL.equals(policyLevel))   {
-                addSubscriptionPolicy(connection, policy.getPolicyName(), policy.getDisplayName(),
-                        policy.getDescription(), policy.getDefaultQuotaPolicy().getType(), 0, "",
-                        (int) policy.getDefaultQuotaPolicy().getLimit().getUnitTime(),
-                        policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+                    }
+                }
+            } else {
+                if (APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL.equals(policyLevel)) {
+                    addApplicationPolicy(connection, policy.getPolicyName(), policy.getDisplayName(),
+                            policy.getDescription(), policy.getDefaultQuotaPolicy().getType(), 0, "",
+                            (int) policy.getDefaultQuotaPolicy().getLimit().getUnitTime(),
+                            policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+                } else if (APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL.equals(policyLevel)) {
+                    addSubscriptionPolicy(connection, policy.getPolicyName(), policy.getDisplayName(),
+                            policy.getDescription(), policy.getDefaultQuotaPolicy().getType(), 0, "",
+                            (int) policy.getDefaultQuotaPolicy().getLimit().getUnitTime(),
+                            policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+                }
             }
         } catch (SQLException e) {
             log.error(e.getMessage(), e);
@@ -372,10 +392,21 @@ public class PolicyDAOImpl implements PolicyDAO {
      * @throws SQLException
      */
     private ArrayList<Condition> getConditions(int pipelineId, Connection connection) throws SQLException {
+        ArrayList<Condition> conditions = new ArrayList<>();
+        setIPCondition(pipelineId, conditions, connection);
+        setHeaderConditions(pipelineId, conditions, connection);
+        setQueryParameterConditions(pipelineId, conditions, connection);
+        setJWTClaimConditions(pipelineId, conditions, connection);
+
+        return conditions;
+    }
+
+
+    private void setIPCondition(int pipelineId, ArrayList<Condition> conditions,
+                                Connection connection) throws SQLException {
         final String sqlQuery = "SELECT " + "STARTING_IP, " + "ENDING_IP, " + "SPECIFIC_IP,WITHIN_IP_RANGE " + "FROM " +
                 "" + "AM_IP_CONDITION " + "WHERE " + "CONDITION_GROUP_ID = ? ";
 
-        ArrayList<Condition> conditions = new ArrayList<>();
         String startingIP;
         String endingIP;
         String specificIP;
@@ -408,12 +439,8 @@ public class PolicyDAOImpl implements PolicyDAO {
                         conditions.add(ipRangeCondition);
                     }
                 }
-                setHeaderConditions(pipelineId, conditions, connection);
-                setQueryParameterConditions(pipelineId, conditions, connection);
-                setJWTClaimConditions(pipelineId, conditions, connection);
             }
         }
-        return conditions;
     }
 
     /**
@@ -425,8 +452,8 @@ public class PolicyDAOImpl implements PolicyDAO {
      * @param conditions condition array to populate
      * @throws SQLException
      */
-    private void setHeaderConditions(int pipelineId, ArrayList<Condition> conditions, Connection connection) throws
-            SQLException {
+    private void setHeaderConditions(int pipelineId, ArrayList<Condition> conditions,
+                                     Connection connection) throws SQLException {
         final String query = "SELECT " + "HEADER_FIELD_NAME, " + "HEADER_FIELD_VALUE , IS_HEADER_FIELD_MAPPING "
                 + " FROM " + "AM_HEADER_FIELD_CONDITION " + "WHERE " + "CONDITION_GROUP_ID =?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
@@ -522,7 +549,7 @@ public class PolicyDAOImpl implements PolicyDAO {
     @Override
     public SubscriptionPolicy getSubscriptionPolicy(String policyName) throws APIMgtDAOException {
         final String query = "SELECT UUID, NAME, DISPLAY_NAME, DESCRIPTION, IS_DEPLOYED, CUSTOM_ATTRIBUTES " +
-                "FROM AM_SUBSCRIPTION_POLICY WHERE UUID = ?";
+                "FROM AM_SUBSCRIPTION_POLICY WHERE NAME = ?";
         SubscriptionPolicy subscriptionPolicy;
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement statement = conn.prepareStatement(query)) {
@@ -542,39 +569,6 @@ public class PolicyDAOImpl implements PolicyDAO {
         } catch (SQLException e) {
             log.error("An Error occurred while retrieving Policy with name [" + policyName + "], " , e);
             throw new APIMgtDAOException("Couldn't retrieve subscription tier for name : " + policyName, e);
-        }
-        return null;
-    }
-
-    /**
-     * Retrieves Subscription Policy by UUID
-     *
-     * @param policyId Subscription policy ID
-     * @return {@link SubscriptionPolicy} of given UUID
-     * @throws APIMgtDAOException   If failed to get subscription policy.
-     */
-    @Override
-    public SubscriptionPolicy getSubscriptionPolicyById(String policyId) throws APIMgtDAOException {
-        final String query = "SELECT UUID, NAME, DISPLAY_NAME, DESCRIPTION, IS_DEPLOYED, CUSTOM_ATTRIBUTES " +
-                "FROM AM_SUBSCRIPTION_POLICY WHERE NAME = ?";
-        SubscriptionPolicy subscriptionPolicy;
-        try (Connection conn = DAOUtil.getConnection();
-                PreparedStatement statement = conn.prepareStatement(query)) {
-            statement.setString(1, policyId);
-            statement.execute();
-            try (ResultSet rs = statement.getResultSet()) {
-                if (rs.next()) {
-                    subscriptionPolicy = new SubscriptionPolicy(rs.getString("NAME"));
-                    subscriptionPolicy.setUuid(rs.getString("UUID"));
-                    subscriptionPolicy.setDisplayName(rs.getString("DISPLAY_NAME"));
-                    subscriptionPolicy.setDescription(rs.getString("DESCRIPTION"));
-                    subscriptionPolicy.setDeployed(rs.getBoolean("IS_DEPLOYED"));
-                    subscriptionPolicy.setCustomAttributes(rs.getString("CUSTOM_ATTRIBUTES"));
-                    return subscriptionPolicy;
-                }
-            }
-        } catch (SQLException e) {
-            throw new APIMgtDAOException("Couldn't retrieve subscription tier for id : " + policyId, e);
         }
         return null;
     }
@@ -667,18 +661,15 @@ public class PolicyDAOImpl implements PolicyDAO {
                 if (!isDefaultPoliciesExist(connection)) {
                     connection.setAutoCommit(false);
 
-                    addAPIPolicy(connection, UNLIMITED_TIER, UNLIMITED_TIER, UNLIMITED_TIER, REQUEST_COUNT_TYPE, 1, 60,
-                            SECONDS_TIMUNIT,
-                            API_TIER_LEVEL);
-                    addAPIPolicy(connection, GOLD_TIER, GOLD_TIER, GOLD_TIER, REQUEST_COUNT_TYPE, 1, 60,
-                            SECONDS_TIMUNIT,
-                            API_TIER_LEVEL);
-                    addAPIPolicy(connection, SILVER_TIER, SILVER_TIER, SILVER_TIER, REQUEST_COUNT_TYPE, 1, 60,
-                            SECONDS_TIMUNIT,
-                            API_TIER_LEVEL);
-                    addAPIPolicy(connection, BRONZE_TIER, BRONZE_TIER, BRONZE_TIER, REQUEST_COUNT_TYPE, 1, 60,
-                            SECONDS_TIMUNIT,
-                            API_TIER_LEVEL);
+                    addAPIPolicy(connection, UNLIMITED_TIER, UNLIMITED_TIER, UNLIMITED_TIER,
+                            REQUEST_COUNT_TYPE, 1, 60,
+                            SECONDS_TIMUNIT, null, API_TIER_LEVEL);
+                    addAPIPolicy(connection, GOLD_TIER, GOLD_TIER, GOLD_TIER, REQUEST_COUNT_TYPE,
+                            1, 60, SECONDS_TIMUNIT, null, API_TIER_LEVEL);
+                    addAPIPolicy(connection, SILVER_TIER, SILVER_TIER, SILVER_TIER, REQUEST_COUNT_TYPE,
+                            1, 60, SECONDS_TIMUNIT, null, API_TIER_LEVEL);
+                    addAPIPolicy(connection, BRONZE_TIER, BRONZE_TIER, BRONZE_TIER, REQUEST_COUNT_TYPE,
+                            1, 60, SECONDS_TIMUNIT, null, API_TIER_LEVEL);
 
                     addSubscriptionPolicy(connection, UNLIMITED_TIER, UNLIMITED_TIER, UNLIMITED_TIER,
                             REQUEST_COUNT_TYPE,
@@ -729,28 +720,185 @@ public class PolicyDAOImpl implements PolicyDAO {
         return false;
     }
 
-    private static void addAPIPolicy(Connection connection, String name, String displayName, String description,
-                              String quotaType, int quota, long unitTime, String timeUnit, String applicableLevel)
-                                                                                                throws SQLException {
-        final String query = "INSERT INTO AM_API_POLICY (UUID, NAME, DISPLAY_NAME, DESCRIPTION, " +
-                "DEFAULT_QUOTA_TYPE, DEFAULT_QUOTA, DEFAULT_UNIT_TIME, DEFAULT_TIME_UNIT, APPLICABLE_LEVEL) " +
-                "VALUES (?,?,?,?,?,?,?,?,?)";
+    private static void addAPIPolicy(Connection connection, String name, String displayName,
+                                     String description, String quotaType, int quota, long unitTime,
+                                     String timeUnit, List<Pipeline> pipelines,
+                                     String applicableLevel) throws SQLException {
 
+        final String query = "INSERT INTO AM_API_POLICY (UUID, NAME, DISPLAY_NAME, DESCRIPTION, " +
+                "DEFAULT_QUOTA_TYPE, DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME," +
+                " DEFAULT_TIME_UNIT, APPLICABLE_LEVEL) " +
+                "VALUES (?,?,?,?,?,?,?,?,?,?)";
+        String policyID = UUID.randomUUID().toString();
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, UUID.randomUUID().toString());
+            statement.setString(1, policyID);
             statement.setString(2, name);
             statement.setString(3, displayName);
             statement.setString(4, description);
             statement.setString(5, quotaType);
             statement.setInt(6, quota);
-            statement.setLong(7, unitTime);
-            statement.setString(8, timeUnit);
-            statement.setString(9, applicableLevel);
+            statement.setString(7, "MB");
+            statement.setLong(8, unitTime);
+            statement.setString(9, timeUnit);
+            statement.setString(10, applicableLevel);
+
+            statement.execute();
+
+            if (pipelines != null) {
+                addAPIPipeline(connection, pipelines, policyID);
+            }
+        }
+    }
+
+    /**
+     * Adding pipelines for API policy
+     * @param connection
+     * @param pipelines
+     * @param uuid
+     * @throws SQLException*/
+
+    private static void addAPIPipeline(Connection connection, List<Pipeline> pipelines, String uuid)
+            throws SQLException {
+
+        final String query = "INSERT INTO AM_CONDITION_GROUP (UUID, " +
+                "QUOTA_TYPE, QUOTA, QUOTA_UNIT, UNIT_TIME, TIME_UNIT) " +
+                "VALUES (?,?,?,?,?,?)";
+        final String conIDquery = "SELECT CONDITION_GROUP_ID FROM AM_CONDITION_GROUP WHERE UUID = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            for (Pipeline pipeline : pipelines) {
+                statement.setString(1, uuid);
+                statement.setString(2, pipeline.getQuotaPolicy().getType());
+                Limit limit = pipeline.getQuotaPolicy().getLimit();
+
+                if (pipeline.getQuotaPolicy().getType().equals(PolicyConstants.BANDWIDTH_TYPE)) {
+                    if (limit instanceof BandwidthLimit) {
+                        statement.setLong(3, ((BandwidthLimit) limit).getDataAmount());
+                        statement.setString(4, ((BandwidthLimit) limit).getDataUnit());
+                    }
+                } else if (pipeline.getQuotaPolicy().getType().equals(PolicyConstants.REQUEST_COUNT_TYPE)) {
+                    if (limit instanceof RequestCountLimit) {
+                        statement.setLong(3, ((RequestCountLimit) limit).getRequestCount());
+                        statement.setString(4, "");
+                    }
+                }
+                statement.setLong(5, pipeline.getQuotaPolicy().getLimit().getUnitTime());
+                statement.setString(6, pipeline.getQuotaPolicy().getLimit().getTimeUnit());
+                statement.execute();
+
+                try (PreparedStatement statement1 = connection.prepareStatement(conIDquery)) {
+                    statement1.setString(1, uuid);
+                    try (ResultSet resultSet = statement1.executeQuery()) {
+                        while (resultSet.next()) {
+                            if (resultSet.last()) {
+                                int conID = resultSet.getInt(APIMgtConstants.ThrottlePolicyConstants.
+                                        COLUMN_CONDITION_ID);
+                                List<Condition> conditionList = pipeline.getConditions();
+                                for (Condition condition : conditionList) {
+                                    if (condition instanceof IPCondition) {
+                                        addIPCondition(connection, (IPCondition) condition, conID);
+                                    } else if (condition instanceof HeaderCondition) {
+                                        addHeaderCondition(connection,
+                                                (HeaderCondition) condition, conID);
+                                    } else if (condition instanceof JWTClaimsCondition) {
+                                        addJWTClaimCondition(connection,
+                                                (JWTClaimsCondition) condition, conID);
+                                    } else if (condition instanceof QueryParameterCondition) {
+                                        addParamCondition(connection,
+                                                (QueryParameterCondition) condition, conID);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Adding IP Condition to DB
+     * @param connection
+     * @param ipCondition
+     * @param conId
+     * @throws SQLException
+     */
+    private static void addIPCondition(Connection connection, IPCondition ipCondition, int conId)
+            throws SQLException {
+        String query = "INSERT INTO AM_IP_CONDITION (STARTING_IP, ENDING_IP, SPECIFIC_IP, " +
+                "CONDITION_GROUP_ID) VALUES (?,?,?,?)";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, ipCondition.getStartingIP());
+            statement.setString(2, ipCondition.getEndingIP());
+            statement.setString(3, ipCondition.getSpecificIP());
+            statement.setInt(4, conId);         //Con id represents condition group id
 
             statement.execute();
         }
     }
 
+    /**
+     * Adding header conditions to DB
+     * @param connection
+     * @param headerCondition
+     * @param conId
+     * @throws SQLException
+     */
+    private static void addHeaderCondition(Connection connection, HeaderCondition headerCondition,
+                                           int conId) throws SQLException {
+        String query = "INSERT INTO AM_HEADER_FIELD_CONDITION (HEADER_FIELD_NAME, HEADER_FIELD_VALUE, " +
+                "CONDITION_GROUP_ID) VALUES (?,?,?)";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, headerCondition.getHeaderName());
+            statement.setString(2, headerCondition.getValue());
+            statement.setInt(3, conId);         //Con id represents condition group id
+
+            statement.execute();
+        }
+    }
+
+    /**
+     * adding jwt claim condition to DB
+     * @param connection
+     * @param jwtClaimsCondition
+     * @param conID
+     * @throws SQLException
+     */
+    private static void addJWTClaimCondition(Connection connection,
+                                             JWTClaimsCondition jwtClaimsCondition, int conID)
+            throws SQLException {
+        String query = "INSERT INTO AM_JWT_CLAIM_CONDITION (CLAIM_URI, CLAIM_ATTRIB, " +
+                "CONDITION_GROUP_ID) VALUES (?,?,?)";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, jwtClaimsCondition.getClaimUrl());
+            statement.setString(2, jwtClaimsCondition.getAttribute());
+            statement.setInt(3, conID);         //Con id represents condition group id
+
+            statement.execute();
+        }
+    }
+
+    /**
+     * Adding query parameter condition to DB
+     * @param connection
+     * @param queryParamCondition
+     * @param conID
+     * @throws SQLException
+     */
+    private static void addParamCondition(Connection connection,
+                                             QueryParameterCondition queryParamCondition, int conID)
+            throws SQLException {
+        String query = "INSERT INTO AM_QUERY_PARAMETER_CONDITION (PARAMETER_NAME, " +
+                "PARAMETER_VALUE,CONDITION_GROUP_ID) VALUES (?,?,?)";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, queryParamCondition.getParameter());
+            statement.setString(2, queryParamCondition.getValue());
+            statement.setInt(3, conID);         //Con id represents condition group id
+
+            statement.execute();
+        }
+    }
     private static void addSubscriptionPolicy(Connection connection, String name, String displayName,
             String description, String quotaType, int quota, String quotaUnit, int unitTime, String timeUnit)
             throws SQLException {
@@ -800,11 +948,79 @@ public class PolicyDAOImpl implements PolicyDAO {
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery))    {
+            deletePipelines(connection, policyName);
             preparedStatement.setString(1, policyName);
             preparedStatement.execute();
         } catch (SQLException e)    {
             log.error("An Error occurred while deleting Policy with name [" + policyName + "], " , e);
             throw new APIMgtDAOException("Error occurred while deleting Policy with name : " + policyName, e);
+        }
+    }
+
+    /**
+     * to delete pipelines of api policy
+     * @param connection
+     * @param policyName
+     * @throws APIMgtDAOException
+     */
+    private void deletePipelines(Connection connection, String policyName) throws
+            APIMgtDAOException, SQLException {
+        String queryUUID = "SELECT UUID FROM AM_API_POLICY WHERE NAME = ?";
+        String query = "SELECT CONDITION_GROUP_ID FROM AM_CONDITION_GROUP WHERE UUID = ?";
+        String deleteQuery = "DELETE FROM AM_CONDITION_GROUP WHERE UUID =?";
+        try (PreparedStatement statement = connection.prepareStatement(queryUUID)) {
+            statement.setString(1, policyName);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    String uuid = resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_UUID);
+                    try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                        //get pipeline ids from condition_group
+                        preparedStatement.setString(1, uuid);
+                        try (ResultSet rs = preparedStatement.executeQuery()) {
+                            if (rs.next()) {
+                                //delete conditions
+                                int policyID = rs.getInt
+                                        (APIMgtConstants.ThrottlePolicyConstants.COLUMN_CONDITION_ID);
+                                deleteConditions(connection, policyID);
+                            }
+                        }
+                    }
+                    try (PreparedStatement preparedStatement = connection.prepareStatement(deleteQuery)) {
+                        preparedStatement.setString(1, uuid);
+                        preparedStatement.execute();
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * delete condition of a particular pipeline
+     * @param connection
+     * @param conID
+     * @throws SQLException
+     */
+    private void deleteConditions(Connection connection, int conID) throws SQLException {
+        String query1 = "DELETE FROM AM_IP_CONDITION WHERE CONDITION_GROUP_ID = ?";
+        String query2 = "DELETE FROM AM_HEADER_FIELD_CONDITION WHERE CONDITION_GROUP_ID = ?";
+        String query3 = "DELETE FROM AM_JWT_CLAIM_CONDITION WHERE CONDITION_GROUP_ID = ?";
+        String query4 = "DELETE FROM AM_QUERY_PARAMETER_CONDITION WHERE CONDITION_GROUP_ID = ?";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query1)) {
+            preparedStatement.setInt(1, conID);
+            preparedStatement.execute();
+        }
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query2)) {
+            preparedStatement.setInt(1, conID);
+            preparedStatement.execute();
+        }
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query3)) {
+            preparedStatement.setInt(1, conID);
+            preparedStatement.execute();
+        }
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query4)) {
+            preparedStatement.setInt(1, conID);
+            preparedStatement.execute();
         }
     }
 
