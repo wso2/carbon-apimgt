@@ -28,6 +28,8 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ApplicationStatus;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.SubscriptionStatus;
+import org.wso2.carbon.apimgt.core.workflow.HttpWorkflowResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -379,12 +381,21 @@ public class ApplicationsApiServiceImpl
             String applicationUUID = applicationResponse.getApplicationUUID();
             Application createdApplication = apiConsumer.getApplication(applicationUUID, username, groupId);
             createdApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(createdApplication);
-            WorkflowResponseDTO workflowResponse = WorkflowMappintUtil
-                    .fromWorkflowResponsetoDTO(applicationResponse.getWorkflowResponse());
-            createdApplicationDTO.setWorkflowResponse(workflowResponse);
-
+           
             location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" +
                     createdApplicationDTO.getApplicationId());
+
+            //if workflow is in pending state or if the executor sends any httpworklfowresponse (workflow state can 
+            //be in either pending or approved state) send back the workflow response 
+            if (ApplicationStatus.APPLICATION_ONHOLD.equals(createdApplication.getStatus())
+                    || applicationResponse.getWorkflowResponse() instanceof HttpWorkflowResponse) {
+                
+                WorkflowResponseDTO workflowResponse = WorkflowMappintUtil
+                        .fromWorkflowResponsetoDTO(applicationResponse.getWorkflowResponse());
+                return Response.status(Response.Status.ACCEPTED).header(RestApiConstants.LOCATION_HEADER, location)
+                        .entity(workflowResponse).build();
+            }    
+
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new application : " + body.getName();
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -403,6 +414,7 @@ public class ApplicationsApiServiceImpl
         }
         // TODO: set location header once msf4j is updates : Response.created(location).entity(createdApplicationDTO)
         // .build()
-        return Response.ok().header("Location", location).entity(createdApplicationDTO).build();
+        return Response.status(Response.Status.CREATED).header(RestApiConstants.LOCATION_HEADER, location)
+                .entity(createdApplicationDTO).build();
     }
 }

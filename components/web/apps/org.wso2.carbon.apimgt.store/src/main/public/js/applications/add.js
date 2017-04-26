@@ -95,8 +95,51 @@ var addApplication = function () {
                     "Content-Type": "application/json"
                 },
                 function (data) {
-                	var jsonPayload = data.obj.workflowResponse.jsonPayload;
-                    if(goBack == "yes") {
+                    if (data.status == 202) {
+                    //workflow related code
+                        var jsonResponse
+                        if (data.obj.jsonPayload) {                         
+                            jsonResponse = JSON.parse(data.obj.jsonPayload);
+                        }
+                        if (jsonResponse && jsonResponse.redirectUrl) {
+                            
+                            noty({
+                                text : jsonResponse.redirectConfirmationMsg,
+                                type : "alert",
+                                dismissQueue: true,
+                                layout : "topCenter",
+                                theme : 'relax',
+                                buttons : [
+                                    {addClass: 'btn btn-primary', text: 'Ok', onClick: function ($noty) {
+                                        $noty.close();
+                                        window.location = jsonResponse.redirectUrl;
+                                    }
+                                    },
+                                    {addClass: 'btn btn-danger', text: 'Cancel', onClick: function ($noty) {
+                                        $noty.close();
+                                        window.location = contextPath + data.headers.location;
+                                    }
+                                    }
+                                ]
+                            });
+                        } else {
+                            noty({
+                                text : "Request has been submitted and is now awaiting approval.",
+                                type : "alert",
+                                dismissQueue: true,
+                                layout : "topCenter",
+                                theme : 'relax',
+                                buttons : [
+                                    {addClass: 'btn btn-primary', text: 'Ok', onClick: function ($noty) {
+                                        $noty.close();
+                                        window.location = contextPath + data.headers.location;
+                                    }
+                                    }
+                                    
+                                ]
+                            });
+                        }                   
+                    } else if (goBack == "yes") {
                         noty({
                             text : "Return back to API detail page",
                             type : "alert",
@@ -106,39 +149,18 @@ var addApplication = function () {
                             buttons : [
                                 {addClass: 'btn btn-primary', text: 'Ok', onClick: function ($noty) {
                                     $noty.close();
-                                    window.location = "/store/apis/" + apiId; //apiId from sentToClient
+                                    window.location = contextPath + "/apis/" + apiId; //apiId from sentToClient
                                 }
                                 },
                                 {addClass: 'btn btn-danger', text: 'Cancel', onClick: function ($noty) {
                                     $noty.close();
-                                    window.location = "/store/applications/" + data.obj.applicationId;
+                                    window.location = contextPath + "/applications/" + data.obj.applicationId;
                                 }
                                 }
                             ]
                         });
-                    } else if (jsonPayload) {
-                        var jsonResponse = JSON.parse(jsonPayload);
-                        noty({
-                            text : jsonResponse.redirectConfirmationMsg,
-                            type : "alert",
-                            dismissQueue: true,
-                            layout : "topCenter",
-                            theme : 'relax',
-                            buttons : [
-                                {addClass: 'btn btn-primary', text: 'Ok', onClick: function ($noty) {
-                                    $noty.close();
-                                    window.location = jsonResponse.redirectUrl;
-                                }
-                                },
-                                {addClass: 'btn btn-danger', text: 'Cancel', onClick: function ($noty) {
-                                    $noty.close();
-                                    window.location = "/store/applications/" + data.obj.applicationId;
-                                }
-                                }
-                            ]
-                        });
-                    } else {
-                        window.location = "/store/applications/" + data.obj.applicationId;
+                    }  else {
+                        window.location = contextPath + "/applications/" + data.obj.applicationId;
                     }                },
                 function (error) {
                     if(error.status==401){
