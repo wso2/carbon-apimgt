@@ -7,6 +7,7 @@ import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -17,6 +18,7 @@ import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
+import org.wso2.carbon.apimgt.core.workflow.HttpWorkflowResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -1091,19 +1093,38 @@ public class ApisApiServiceImpl extends ApisApiService {
                 //since workflows are not defined for checklist items
                 workflowResponse.setWorkflowStatus(WorkflowStatus.APPROVED);
                 response = MappingUtil.toWorkflowResponseDTO(workflowResponse);
+                return Response.ok().entity(response).build();
             } else {
                 WorkflowResponse workflowResponse = RestAPIPublisherUtil.getApiPublisher(username)
                         .updateAPIStatus(apiId, action, lifecycleChecklistMap);
                 response = MappingUtil.toWorkflowResponseDTO(workflowResponse);
+                //if workflow is in pending state or if the executor sends any httpworklfowresponse (workflow state can 
+                //be in either pending or approved state) send back the workflow response 
+                if (WorkflowStatus.CREATED == workflowResponse.getWorkflowStatus()
+                        || workflowResponse instanceof HttpWorkflowResponse) {
+                    URI location = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId);
+                    return Response.status(Response.Status.ACCEPTED).header(RestApiConstants.LOCATION_HEADER, location)
+                            .entity(response).build();
+                } else {                    
+                    return Response.ok().entity(response).build();
+                }                
             }
-            return Response.ok().entity(response).build();
+            
         } catch (APIManagementException e) {
             String errorMessage = "Error while updating lifecycle of API" + apiId + " to " + action;
-            HashMap<String, String> paramList = new HashMap<String, String>();
+            Map<String, String> paramList = new HashMap<>();
             paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while adding location header in response for api : " + apiId;
+            Map<String, String> paramList = new HashMap<>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorHandler errorHandler = ExceptionCodes.LOCATION_HEADER_INCORRECT;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorHandler, paramList);
+            log.error(errorMessage, e);
+            return Response.status(errorHandler.getHttpStatusCode()).entity(errorDTO).build();
         }
     }
 

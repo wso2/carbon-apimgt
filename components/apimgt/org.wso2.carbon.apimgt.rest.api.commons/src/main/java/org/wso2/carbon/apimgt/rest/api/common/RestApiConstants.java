@@ -100,7 +100,8 @@ public class RestApiConstants {
     
     public static final String WEB_PROTOCOL_SUFFIX = "://";
     public static final String SWAGGER_HOST_ELEMENT = "host";
-
+    public static final String RESOURCE_PATH_SUBSCRIPTION = "/subscriptions";
+    public static final String LOCATION_HEADER = "Location";
 
     /**
      * Type of UUF apps in system

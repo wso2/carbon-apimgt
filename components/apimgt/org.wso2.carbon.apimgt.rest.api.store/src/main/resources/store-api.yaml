@@ -874,6 +874,17 @@ paths:
               description: |
                 Entity Tag of the response resource. Used by caches, or in conditional request
               type: string
+        202:
+          description: |
+            Accepted.
+            The request has been accepted.  
+          schema:
+            $ref: '#/definitions/WorkflowResponse'
+          headers:
+            Location:
+              description: |
+                Location of the newly created Application.
+              type: string    
         400:
           description: |
             Bad Request.
@@ -1036,6 +1047,17 @@ paths:
           description: |
             OK.
             Resource successfully deleted.
+        202:
+          description: |
+            Accepted.
+            The request has been accepted.  
+          schema:
+            $ref: '#/definitions/WorkflowResponse'
+          headers:
+            Location:
+              description: |
+                Location of the existing Application.
+              type: string    
         404:
           description: |
             Not Found.
@@ -1208,6 +1230,17 @@ paths:
               description: |
                 Entity Tag of the response resource. Used by caches, or in conditional request.
               type: string
+        202:
+          description: |
+            Accepted.
+            The request has been accepted.  
+          schema:
+            $ref: '#/definitions/WorkflowResponse'
+          headers:
+            Location:
+              description: |
+                Location of the newly created subscription.
+              type: string    
         400:
           description: |
             Bad Request.
@@ -1286,6 +1319,17 @@ paths:
           description: |
             OK.
             Resource successfully deleted.
+        202:
+          description: |
+            Accepted.
+            The request has been accepted.  
+          schema:
+            $ref: '#/definitions/WorkflowResponse'
+          headers:
+            Location:
+              description: |
+                Location of the existing subscription.
+              type: string    
         404:
           description: |
             Not Found.
@@ -1973,8 +2017,6 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/ApplicationKey'
-      workflowResponse:
-        $ref: '#/definitions/WorkflowResponse'
 
 #-----------------------------------------------------
 # The Application Info resource
@@ -2196,8 +2238,6 @@ definitions:
           - ACTIVE
           - ON_HOLD
           - REJECTED
-      workflowResponse:
-        $ref: '#/definitions/WorkflowResponse'
 
 #-----------------------------------------------------
 # The Tag resource

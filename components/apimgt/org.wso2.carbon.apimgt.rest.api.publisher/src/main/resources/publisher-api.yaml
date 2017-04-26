@@ -1033,6 +1033,17 @@ paths:
                 Date and time the API lifecycle has been modified the last time.
                 Used by caches, or in conditional requests (Will be supported in future).
               type: string
+        202:
+          description: |
+            Accepted.
+            The request has been accepted.  
+          schema:
+            $ref: '#/definitions/WorkflowResponse'
+          headers:
+            Location:
+              description: |
+                Location of the newly created Application.
+              type: string    
         400:
           description: |
             Bad Request.

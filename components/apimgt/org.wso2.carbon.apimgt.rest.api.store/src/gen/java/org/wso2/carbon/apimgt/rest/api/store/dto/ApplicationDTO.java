@@ -8,12 +8,11 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
 
 /**
  * ApplicationDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-31T11:27:01.517+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-25T10:57:52.774+05:30")
 public class ApplicationDTO   {
   @JsonProperty("applicationId")
   private String applicationId = null;
@@ -44,9 +43,6 @@ public class ApplicationDTO   {
 
   @JsonProperty("keys")
   private List<ApplicationKeyDTO> keys = new ArrayList<ApplicationKeyDTO>();
-
-  @JsonProperty("workflowResponse")
-  private WorkflowResponseDTO workflowResponse = null;
 
   public ApplicationDTO applicationId(String applicationId) {
     this.applicationId = applicationId;
@@ -233,24 +229,6 @@ public class ApplicationDTO   {
     this.keys = keys;
   }
 
-  public ApplicationDTO workflowResponse(WorkflowResponseDTO workflowResponse) {
-    this.workflowResponse = workflowResponse;
-    return this;
-  }
-
-   /**
-   * Get workflowResponse
-   * @return workflowResponse
-  **/
-  @ApiModelProperty(value = "")
-  public WorkflowResponseDTO getWorkflowResponse() {
-    return workflowResponse;
-  }
-
-  public void setWorkflowResponse(WorkflowResponseDTO workflowResponse) {
-    this.workflowResponse = workflowResponse;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -270,13 +248,12 @@ public class ApplicationDTO   {
         Objects.equals(this.description, application.description) &&
         Objects.equals(this.lifeCycleStatus, application.lifeCycleStatus) &&
         Objects.equals(this.groupId, application.groupId) &&
-        Objects.equals(this.keys, application.keys) &&
-        Objects.equals(this.workflowResponse, application.workflowResponse);
+        Objects.equals(this.keys, application.keys);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, name, subscriber, throttlingTier, callbackUrl, permission, description, lifeCycleStatus, groupId, keys, workflowResponse);
+    return Objects.hash(applicationId, name, subscriber, throttlingTier, callbackUrl, permission, description, lifeCycleStatus, groupId, keys);
   }
 
   @Override
@@ -294,7 +271,6 @@ public class ApplicationDTO   {
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
     sb.append("    groupId: ").append(toIndentedString(groupId)).append("\n");
     sb.append("    keys: ").append(toIndentedString(keys)).append("\n");
-    sb.append("    workflowResponse: ").append(toIndentedString(workflowResponse)).append("\n");
     sb.append("}");
     return sb.toString();
   }
