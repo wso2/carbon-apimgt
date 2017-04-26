@@ -31,6 +31,7 @@ import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.*;
+import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.ApiImportExportManager;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.FileBasedApiImportExportManager;
@@ -151,8 +152,7 @@ public class APIImportExportTestCase {
         Mockito.when(apiPublisher.getDocumentationContent(api4Doc1Id)).thenReturn(api4Doc1Content);
         Mockito.when(apiPublisher.getDocumentationContent(api4Doc2Id)).thenReturn(api4Doc2Content);
         Mockito.when(apiPublisher.getDocumentationContent(api4Doc3Id)).thenReturn(api4Doc3Content);
-        Mockito.when(apiPublisher.getThumbnailImage(api4Id)).thenReturn(getClass().getClassLoader().getResourceAsStream
-                ("api1_thumbnail.png"));
+        Mockito.when(apiPublisher.getThumbnailImage(api4Id)).thenReturn(null);
 
         String api5Id = UUID.randomUUID().toString();
         String api5SandBoxEndpointId = UUID.randomUUID().toString();
@@ -568,6 +568,6 @@ public class APIImportExportTestCase {
 
     @AfterClass
     protected void tearDown () {
-        ImportExportUtils.deleteDirectory(importExportRootDirectory);
+        APIFileUtils.deleteDirectory(importExportRootDirectory);
     }
 }

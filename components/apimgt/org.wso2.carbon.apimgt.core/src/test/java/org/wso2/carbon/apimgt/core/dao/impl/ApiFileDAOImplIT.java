@@ -35,12 +35,14 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 
 
 public class ApiFileDAOImplIT {
     private static final String EDITOR_SAVE_PATH = "editorSavePath";
     private static final String EDITOR_MODE = "editorMode";
+    private static final String ADMIN = "admin";
     File tempWorkspace = null;
 
     @BeforeClass
@@ -146,5 +148,16 @@ public class ApiFileDAOImplIT {
 
         Assert.assertNotNull(apiFromFile);
         Assert.assertEquals(apiFromFile, expectedAPI, TestUtil.printDiff(apiFromFile, expectedAPI));
+    }
+
+    @Test(description = "Get image from API")
+    public void testGetImage() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        testAddGetEndpoint();
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        apiDAO.addAPI(api);
+        apiDAO.updateImage(api.getId(), SampleTestObjectCreator.createDefaultThumbnailImage(), "image/jpg", ADMIN);
+        InputStream image = apiDAO.getImage(api.getId());
+        Assert.assertNotNull(image);
     }
 }
