@@ -43,6 +43,10 @@ public class CommentMappingUtil {
         commentDTO.setApiId(comment.getApiId());
         commentDTO.setSubscriberName(comment.getCommentedUser());
         commentDTO.setCommentText(comment.getCommentText());
+        commentDTO.setCreatedBy(comment.getCreatedUser());
+        commentDTO.setLastUpdatedBy(comment.getUpdatedUser());
+        commentDTO.setCreatedTime(comment.getCreatedTime().toString());
+        commentDTO.setCreatedTime(comment.getUpdatedTime().toString());
 
         return commentDTO;
     }

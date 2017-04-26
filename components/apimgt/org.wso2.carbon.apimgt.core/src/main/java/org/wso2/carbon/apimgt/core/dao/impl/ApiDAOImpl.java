@@ -792,6 +792,13 @@ public class ApiDAOImpl implements ApiDAO {
         return null;
     }
 
+    /**
+     * Constructs a comment object from a resulset object
+     *
+     * @param rs result set object
+     * @return
+     * @throws APIMgtDAOException
+     */
     private Comment constructCommentFromResultSet(ResultSet rs) throws APIMgtDAOException {
         Comment comment = new Comment();
         try {
@@ -804,6 +811,8 @@ public class ApiDAOImpl implements ApiDAO {
             comment.setUpdatedUser(rs.getString("UPDATED_BY"));
             comment.setUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toLocalDateTime());
         } catch (SQLException e) {
+            String errorMessage = "Error while constructing comment object from resultset";
+            log.error(errorMessage, e);
             throw new APIMgtDAOException(e);
         }
         return comment;
