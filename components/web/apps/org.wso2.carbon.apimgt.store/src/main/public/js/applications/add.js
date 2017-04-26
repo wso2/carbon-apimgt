@@ -117,7 +117,7 @@ var addApplication = function () {
                                     },
                                     {addClass: 'btn btn-danger', text: 'Cancel', onClick: function ($noty) {
                                         $noty.close();
-                                        window.location = "/store" + data.headers.location;
+                                        window.location = contextPath + data.headers.location;
                                     }
                                     }
                                 ]
@@ -132,7 +132,7 @@ var addApplication = function () {
                                 buttons : [
                                     {addClass: 'btn btn-primary', text: 'Ok', onClick: function ($noty) {
                                         $noty.close();
-                                        window.location = "/store" + data.headers.location;
+                                        window.location = contextPath + data.headers.location;
                                     }
                                     }
                                     
@@ -149,18 +149,18 @@ var addApplication = function () {
                             buttons : [
                                 {addClass: 'btn btn-primary', text: 'Ok', onClick: function ($noty) {
                                     $noty.close();
-                                    window.location = "/store/apis/" + apiId; //apiId from sentToClient
+                                    window.location = contextPath + "/apis/" + apiId; //apiId from sentToClient
                                 }
                                 },
                                 {addClass: 'btn btn-danger', text: 'Cancel', onClick: function ($noty) {
                                     $noty.close();
-                                    window.location = "/store/applications/" + data.obj.applicationId;
+                                    window.location = contextPath + "/applications/" + data.obj.applicationId;
                                 }
                                 }
                             ]
                         });
                     }  else {
-                        window.location = "/store/applications/" + data.obj.applicationId;
+                        window.location = contextPath + "/applications/" + data.obj.applicationId;
                     }                },
                 function (error) {
                     if(error.status==401){
