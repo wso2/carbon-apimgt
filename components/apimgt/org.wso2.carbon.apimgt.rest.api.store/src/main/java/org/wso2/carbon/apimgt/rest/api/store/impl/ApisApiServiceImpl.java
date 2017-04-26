@@ -139,7 +139,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             Comment createdComment = apiStore.getCommentByUUID(createdCommentId, apiId);
             CommentDTO createdCommentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
             URI location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/");
-            return Response.ok().header("Location", location).entity(createdCommentDTO).build();
+            return Response.status(Response.Status.CREATED).header("Location", location).entity(createdCommentDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding comment to api : " + body.getApiId();
             HashMap<String, String> paramList = new HashMap<String, String>();
