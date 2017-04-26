@@ -763,7 +763,184 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public Comment getCommentByUUID(String commentId, String apiId) throws APIMgtDAOException {
+        final String query = "SELECT COMMENT_ID, COMMENT_TEXT, USER_IDENTIFIER, API_ID, "
+                + "CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME "
+                + "FROM AM_API_COMMENTS WHERE COMMENT_ID = ? AND API_ID = ?";
+
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(query)) {
+            try {
+                statement.setString(1, commentId);
+                statement.setString(2, apiId);
+                statement.execute();
+                try (ResultSet rs = statement.getResultSet()) {
+                    if (rs.next()) {
+                        return constructCommentFromResultSet(rs);
+                    }
+                }
+            } catch (SQLException e) {
+                connection.rollback();
+                String errorMessage =
+                        "Error while retrieving comment for comment id: " + commentId + " and api id: " + apiId;
+                log.error(errorMessage, e);
+                throw new APIMgtDAOException(e);
+            }
+        } catch (SQLException e) {
+            log.error("Error while creating database connection/prepared-statement", e);
+            throw new APIMgtDAOException(e);
+        }
         return null;
+    }
+
+    /**
+     * Constructs a comment object from a resulset object
+     *
+     * @param rs result set object
+     * @return
+     * @throws APIMgtDAOException
+     */
+    private Comment constructCommentFromResultSet(ResultSet rs) throws APIMgtDAOException {
+        Comment comment = new Comment();
+        try {
+            comment.setUuid(rs.getString("COMMENT_ID"));
+            comment.setCommentText(rs.getString("COMMENT_TEXT"));
+            comment.setCommentedUser(rs.getString("USER_IDENTIFIER"));
+            comment.setApiId(rs.getString("API_ID"));
+            comment.setCreatedUser(rs.getString("CREATED_BY"));
+            comment.setCreatedTime(rs.getTimestamp("CREATED_TIME").toLocalDateTime());
+            comment.setUpdatedUser(rs.getString("UPDATED_BY"));
+            comment.setUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toLocalDateTime());
+        } catch (SQLException e) {
+            String errorMessage = "Error while constructing comment object from resultset";
+            log.error(errorMessage, e);
+            throw new APIMgtDAOException(e);
+        }
+        return comment;
+    }
+
+    /**
+     * @see ApiDAO#addComment(Comment, String)
+     */
+    @Override
+    public void addComment(Comment comment, String apiId) throws APIMgtDAOException {
+        final String addCommentQuery =
+                "INSERT INTO AM_API_COMMENTS (COMMENT_ID, COMMENT_TEXT, USER_IDENTIFIER, API_ID, " +
+                        "CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME" + ") VALUES (?,?,?,?,?,?,?,?)";
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(addCommentQuery)) {
+            try {
+                statement.setString(1, comment.getUuid());
+                statement.setString(2, comment.getCommentText());
+                statement.setString(3, comment.getCommentedUser());
+                statement.setString(4, apiId);
+                statement.setString(5, comment.getCreatedUser());
+                statement.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now()));
+                statement.setString(7, comment.getUpdatedUser());
+                statement.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now()));
+                statement.execute();
+            } catch (SQLException e) {
+                connection.rollback();
+                String errorMessage =
+                        "Error while adding comment for api id: " + apiId;
+                log.error(errorMessage, e);
+                throw new APIMgtDAOException(e);
+            }
+        } catch (SQLException e) {
+            log.error("Error while creating database connection/prepared-statement", e);
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    /**
+     * @see ApiDAO#deleteComment(String, String)
+     */
+    @Override
+    public void deleteComment(String commentId, String apiId) throws APIMgtDAOException {
+        final String deleteCommentQuery = "DELETE FROM AM_API_COMMENTS WHERE COMMENT_ID = ? AND API_ID = ?";
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(deleteCommentQuery)) {
+            try {
+                statement.setString(1, commentId);
+                statement.setString(2, apiId);
+                statement.execute();
+            } catch (SQLException e) {
+                connection.rollback();
+                String errorMessage =
+                        "Error while deleting comment for api id: " + apiId + " and comment id: " + commentId;
+                log.error(errorMessage, e);
+                throw new APIMgtDAOException(e);
+            }
+        } catch (SQLException e) {
+            log.error("Error while creating database connection/prepared-statement", e);
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    /**
+     * @see ApiDAO#updateComment(Comment, String, String)
+     */
+    @Override
+    public void updateComment(Comment comment, String commentId, String apiId) throws APIMgtDAOException {
+        final String updateCommentQuery = "UPDATE AM_API_COMMENTS SET COMMENT_TEXT = ? , USER_IDENTIFIER = ? ,"
+                + "CREATED_BY = ? , CREATED_TIME = ?, UPDATED_BY = ? , LAST_UPDATED_TIME = ?"
+                + "WHERE COMMENT_ID = ? AND API_ID = ?";
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(updateCommentQuery)) {
+            try {
+                statement.setString(1, comment.getCommentText());
+                statement.setString(2, comment.getCommentedUser());
+                statement.setString(3, comment.getCreatedUser());
+                statement.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
+                statement.setString(5, comment.getUpdatedUser());
+                statement.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now()));
+                statement.setString(7, commentId);
+                statement.setString(8, apiId);
+                statement.execute();
+            } catch (SQLException e) {
+                connection.rollback();
+                String errorMessage =
+                        "Error while updating comment for api id: " + apiId + " and comment id: " + commentId;
+                log.error(errorMessage, e);
+                throw new APIMgtDAOException(e);
+            }
+        } catch (SQLException e) {
+            log.error("Error while creating database connection/prepared-statement", e);
+            throw new APIMgtDAOException(e);
+        }
+
+    }
+
+    /**
+     * @see ApiDAO#getCommentsForApi(String)
+     */
+    @Override
+    public List<Comment> getCommentsForApi(String apiId) throws APIMgtDAOException {
+        List<Comment> commentList = new ArrayList<>();
+        final String getCommentsQuery = "SELECT COMMENT_ID, COMMENT_TEXT, USER_IDENTIFIER, API_ID, "
+                + "CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME "
+                + "FROM AM_API_COMMENTS WHERE API_ID = ?";
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(getCommentsQuery)) {
+            try {
+                statement.setString(1, apiId);
+                statement.execute();
+                try (ResultSet rs = statement.getResultSet()) {
+                    while (rs.next()) {
+                        commentList.add(constructCommentFromResultSet(rs));
+                    }
+                }
+            } catch (SQLException e) {
+                connection.rollback();
+                String errorMessage =
+                        "Error while retrieving all comments for api id: " + apiId;
+                log.error(errorMessage, e);
+                throw new APIMgtDAOException(e);
+            }
+        } catch (SQLException e) {
+            log.error("Error while creating database connection/prepared-statement", e);
+            throw new APIMgtDAOException(e);
+        }
+        return  commentList;
     }
 
     /**

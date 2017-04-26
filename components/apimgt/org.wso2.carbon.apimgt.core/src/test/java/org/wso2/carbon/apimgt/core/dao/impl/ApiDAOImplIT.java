@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
+import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
@@ -981,4 +982,51 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertFalse(apiDAO.isDocumentExist(api.getId(), documentInfo));
     }
 
+    @Test
+    public void testAddGetComment() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
+                .apiDefinition(SampleTestObjectCreator.apiDefinition);
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
+        apiDAO.addComment(comment, api.getId());
+        Comment commentFromDB = apiDAO.getCommentByUUID(comment.getUuid(), api.getId());
+        Assert.assertNotNull(commentFromDB);
+    }
+
+    @Test
+    public void testDeleteComment() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
+                .apiDefinition(SampleTestObjectCreator.apiDefinition);
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
+        apiDAO.addComment(comment, api.getId());
+        apiDAO.deleteComment(comment.getUuid(), api.getId());
+        Comment commentFromDB = apiDAO.getCommentByUUID(comment.getUuid(), api.getId());
+        Assert.assertNull(commentFromDB);
+    }
+
+    @Test
+    public void testUpdateComment() throws Exception {
+        String newCommentText = "updated comment";
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
+                .apiDefinition(SampleTestObjectCreator.apiDefinition);
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+        Comment comment1 = SampleTestObjectCreator.createDefaultComment(api.getId());
+        apiDAO.addComment(comment1, api.getId());
+        Comment comment2 = SampleTestObjectCreator.createDefaultComment(api.getId());
+        comment2.setCommentText(newCommentText);
+        apiDAO.updateComment(comment2, comment1.getUuid(), api.getId());
+        Comment commentFromDB = apiDAO.getCommentByUUID(comment1.getUuid(), api.getId());
+        Assert.assertNotNull(commentFromDB);
+        Assert.assertEquals(newCommentText, commentFromDB.getCommentText());
+    }
 }

@@ -29,7 +29,7 @@ public enum ExceptionCodes implements ErrorHandler {
     // API, Application related codes
     API_ALREADY_EXISTS(900300, "The API already exists.", 409, " The API already exists"),
     APPLICATION_ALREADY_EXISTS(900301, "The application already exists.", 409, " The application already exists"),
-    APIMGT_DAO_EXCEPTION(900302, "Internal server error.", 500, " Error occurred while persisting data"),
+    APIMGT_DAO_EXCEPTION(900302, "Internal server error.", 500, " Error occurred while persisting/retrieving data"),
     APIMGT_LIFECYCLE_EXCEPTION(900303, "Lifecycle exception occurred", 500, " Error occurred while changing " +
             "lifecycle state"),
     TIER_CANNOT_BE_NULL(900304, "The tier cannot be null.", 400, " The tier cannot be null"),
@@ -50,6 +50,7 @@ public enum ExceptionCodes implements ErrorHandler {
     API_IMPORT_ERROR(900317, "API import Error", 500, "Error while importing the given APIs"),
     SUBSCRIPTION_STATE_INVALID(900318, "Invalid state change for subscription", 400, "Invalid state change for " +
             "subscription"),
+    COMMENT_NOT_FOUND(900319, "Comment not found", 404, "Couldn't retrieve comment"),
 
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),

@@ -20,6 +20,10 @@ package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CommentDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.CommentListDTO;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Mapping class for Comment Object and Comment List object to DTO and vise-versa
@@ -27,7 +31,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.CommentDTO;
  */
 public class CommentMappingUtil {
 
-    /** Converts an ArtifactResource object into corresponding REST API Comment DTO object
+    /** Converts an Comment object into corresponding REST API Comment DTO object
      *
      * @param comment Comment object
      * @return a new Comment object corresponding to given ArtifactResource object
@@ -39,14 +43,53 @@ public class CommentMappingUtil {
         commentDTO.setApiId(comment.getApiId());
         commentDTO.setSubscriberName(comment.getCommentedUser());
         commentDTO.setCommentText(comment.getCommentText());
-        commentDTO.setCreatedTime(comment.getCreatedTime().toString());
         commentDTO.setCreatedBy(comment.getCreatedUser());
-        commentDTO.setLastUpdatedTime(comment.getUpdatedTime().toString());
         commentDTO.setLastUpdatedBy(comment.getUpdatedUser());
-        
+        commentDTO.setCreatedTime(comment.getCreatedTime().toString());
+        commentDTO.setLastUpdatedTime(comment.getUpdatedTime().toString());
+
         return commentDTO;
     }
 
+    /**
+     * Converts a CommentDTO to a Comment object
+     *
+     * @param body the request body
+     * @param username
+     * @return
+     */
+    public static Comment fromDTOToComment(CommentDTO body, String username) {
 
+        Comment comment = new Comment();
+        comment.setCommentText(body.getCommentText());
+        comment.setCommentedUser(username);
+        comment.setApiId(body.getApiId());
+        comment.setCreatedUser(username);
+        comment.setUpdatedUser(username);
 
+        return comment;
+    }
+
+    /**
+     *  Wraps a List of Comments to a CommentListDTO
+     *
+     * @param commentList list of comments
+     * @param limit
+     * @param offset
+     * @return
+     */
+    public static CommentListDTO fromCommentListToDTO(List<Comment> commentList, int limit, int offset) {
+        CommentListDTO commentListDTO = new CommentListDTO();
+        List<CommentDTO> listOfCommentDTOs = new ArrayList<>();
+        commentListDTO.setCount(commentList.size());
+
+        int start = offset < commentList.size() && offset >= 0 ? offset : Integer.MAX_VALUE;
+        int end = offset + limit - 1 <= commentList.size() - 1 ? offset + limit - 1 : commentList.size() - 1;
+
+        for (int i = start; i <= end; i++) {
+            listOfCommentDTOs.add(fromCommentToDTO(commentList.get(i)));
+        }
+        commentListDTO.setList(listOfCommentDTOs);
+        return commentListDTO;
+    }
 }
