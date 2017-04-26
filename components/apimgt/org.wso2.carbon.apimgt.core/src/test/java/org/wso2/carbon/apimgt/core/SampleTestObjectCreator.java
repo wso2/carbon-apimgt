@@ -502,7 +502,7 @@ public class SampleTestObjectCreator {
         ipCondition.setEndingIP("30.23.1.4");
 
         IPCondition ipConditionSpecific = new IPCondition(PolicyConstants.IP_SPECIFIC_TYPE);
-        ipCondition.setStartingIP("192.34.21.1");
+        ipConditionSpecific.setSpecificIP("192.34.21.1");
 
         Pipeline pipeline1 = new Pipeline();
         conditionsList.add(ipCondition);

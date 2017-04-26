@@ -392,10 +392,21 @@ public class PolicyDAOImpl implements PolicyDAO {
      * @throws SQLException
      */
     private ArrayList<Condition> getConditions(int pipelineId, Connection connection) throws SQLException {
+        ArrayList<Condition> conditions = new ArrayList<>();
+        setIPCondition(pipelineId, conditions, connection);
+        setHeaderConditions(pipelineId, conditions, connection);
+        setQueryParameterConditions(pipelineId, conditions, connection);
+        setJWTClaimConditions(pipelineId, conditions, connection);
+
+        return conditions;
+    }
+
+
+    private void setIPCondition(int pipelineId, ArrayList<Condition> conditions,
+                                Connection connection) throws SQLException {
         final String sqlQuery = "SELECT " + "STARTING_IP, " + "ENDING_IP, " + "SPECIFIC_IP,WITHIN_IP_RANGE " + "FROM " +
                 "" + "AM_IP_CONDITION " + "WHERE " + "CONDITION_GROUP_ID = ? ";
 
-        ArrayList<Condition> conditions = new ArrayList<>();
         String startingIP;
         String endingIP;
         String specificIP;
@@ -428,12 +439,8 @@ public class PolicyDAOImpl implements PolicyDAO {
                         conditions.add(ipRangeCondition);
                     }
                 }
-                setHeaderConditions(pipelineId, conditions, connection);
-                setQueryParameterConditions(pipelineId, conditions, connection);
-                setJWTClaimConditions(pipelineId, conditions, connection);
             }
         }
-        return conditions;
     }
 
     /**
@@ -445,8 +452,8 @@ public class PolicyDAOImpl implements PolicyDAO {
      * @param conditions condition array to populate
      * @throws SQLException
      */
-    private void setHeaderConditions(int pipelineId, ArrayList<Condition> conditions, Connection connection) throws
-            SQLException {
+    private void setHeaderConditions(int pipelineId, ArrayList<Condition> conditions,
+                                     Connection connection) throws SQLException {
         final String query = "SELECT " + "HEADER_FIELD_NAME, " + "HEADER_FIELD_VALUE , IS_HEADER_FIELD_MAPPING "
                 + " FROM " + "AM_HEADER_FIELD_CONDITION " + "WHERE " + "CONDITION_GROUP_ID =?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
