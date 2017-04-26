@@ -31,10 +31,11 @@ import java.util.List;
  */
 public class CommentMappingUtil {
 
-    /** Converts an Comment object into corresponding REST API Comment DTO object
+    /**
+     * Converts an Comment object into corresponding REST API Comment DTO object
      *
-     * @param comment Comment object
-     * @return a new Comment object corresponding to given ArtifactResource object
+     * @param comment comment object
+     * @return CommentDTO
      */
     public static CommentDTO fromCommentToDTO(Comment comment) {
 
@@ -54,9 +55,9 @@ public class CommentMappingUtil {
     /**
      * Converts a CommentDTO to a Comment object
      *
-     * @param body the request body
-     * @param username
-     * @return
+     * @param body commentDTO body
+     * @param username username of the consumer
+     * @return Comment object
      */
     public static Comment fromDTOToComment(CommentDTO body, String username) {
 
@@ -71,12 +72,12 @@ public class CommentMappingUtil {
     }
 
     /**
-     *  Wraps a List of Comments to a CommentListDTO
+     * Wraps a List of Comments to a CommentListDTO
      *
      * @param commentList list of comments
-     * @param limit
-     * @param offset
-     * @return
+     * @param limit maximum comments to return
+     * @param offset  starting position of the pagination
+     * @return CommentListDTO
      */
     public static CommentListDTO fromCommentListToDTO(List<Comment> commentList, int limit, int offset) {
         CommentListDTO commentListDTO = new CommentListDTO();
