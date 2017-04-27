@@ -19,6 +19,7 @@
  */
 package org.wso2.carbon.apimgt.core.api;
 
+import org.wso2.carbon.apimgt.core.exception.APIConfigRetrievalException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.Label;
@@ -128,15 +129,8 @@ public interface APIMgtAdminService {
      *
      * @param apiId     UUID of the API
      * @return          The API gateway configuration
-     * @throws APIManagementException   If failed to retrive API gateway config
+     * @throws APIConfigRetrievalException   If failed to retrive API gateway config
      */
-    String getAPIGatewayServiceConfig(String apiId) throws APIManagementException;
+    String getAPIGatewayServiceConfig(String apiId) throws APIConfigRetrievalException;
 
-    /**
-     *
-     * @param apiId UUID of API
-     * @return Last updated time of gateway configuration of the API given its uuid
-     * @throws APIManagementException if API Manager core level exception occurred
-     */
-    String getLastUpdatedTimeOfGatewayConfig(String apiId) throws APIManagementException;
 }

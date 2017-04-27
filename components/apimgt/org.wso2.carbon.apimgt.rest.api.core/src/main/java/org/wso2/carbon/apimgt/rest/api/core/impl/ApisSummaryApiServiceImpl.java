@@ -46,8 +46,7 @@ public class ApisSummaryApiServiceImpl extends ApisSummaryApiService {
      * @throws NotFoundException If failed to retrieve api summary
      */
     @Override
-    public Response apisSummaryGet(String accept, String ifNoneMatch, String ifModifiedSince,
-                                   Request request) throws NotFoundException {
+    public Response apisSummaryGet(String accept, Request request) throws NotFoundException {
 
         List<APISummary> apisSummary = new ArrayList<APISummary>();
         Collections.sort(apisSummary, new APISummaryComparator());

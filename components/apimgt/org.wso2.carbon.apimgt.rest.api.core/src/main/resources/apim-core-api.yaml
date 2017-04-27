@@ -84,8 +84,6 @@ paths:
         - $ref : '#/parameters/apiVersion'
         - $ref : '#/parameters/limit'
         - $ref : '#/parameters/Accept'
-        - $ref : '#/parameters/If-None-Match'
-        - $ref : '#/parameters/If-Modified-Since'
       tags:
         - Subscriptions of API
       responses:
@@ -134,8 +132,6 @@ paths:
       description: Request summary of all available apis.
       parameters:
         - $ref : '#/parameters/Accept'
-        - $ref : '#/parameters/If-None-Match'
-        - $ref : '#/parameters/If-Modified-Since'
       responses:
         200:
           description: |
@@ -189,8 +185,6 @@ paths:
           schema:
             $ref: '#/definitions/Registration'
         - $ref: '#/parameters/Content-Type'
-        - $ref: '#/parameters/If-Match'
-        - $ref: '#/parameters/If-Unmodified-Since'
       tags:
         - Register Gateway
       responses:
@@ -234,13 +228,12 @@ paths:
       summary: Get gateway definition
       produces:
         - text/plain
+        - application/json
       description: |
         This operation can be used to retrieve the gateway configuration of an API.
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/Accept'
-        - $ref: '#/parameters/If-None-Match'
-        - $ref: '#/parameters/If-Modified-Since'
       tags:
         - API (Individual)
       responses:
@@ -338,44 +331,6 @@ parameters:
     description: |
       Media types acceptable for the response. Default is application/json.
     default: application/json
-    type: string
-
-# The HTTP If-None-Match header
-# Used to avoid retrieving data that are already cached
-  If-None-Match:
-    name: If-None-Match
-    in: header
-    description: |
-      Validator for conditional requests; based on the ETag of the formerly retrieved
-      variant of the resourec.
-    type : string
-
-# The HTTP If-Modified-Since header
-# Used to avoid retrieving data that are already cached
-  If-Modified-Since:
-    name: If-Modified-Since
-    in: header
-    description: |
-      Validator for conditional requests; based on Last Modified header of the
-      formerly retrieved variant of the resource.
-    type: string
-
-# The HTTP If-Match header
-# Used to avoid concurrent updates
-  If-Match:
-    name: If-Match
-    in: header
-    description: |
-      Validator for conditional requests; based on ETag.
-    type: string
-
-# The HTTP If-Unmodified-Since header
-# Used to avoid concurrent updates
-  If-Unmodified-Since:
-    name: If-Unmodified-Since
-    in: header
-    description: |
-      Validator for conditional requests; based on Last Modified header.
     type: string
 
 ######################################################

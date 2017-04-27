@@ -17,11 +17,9 @@ import java.io.InputStream;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-26T22:35:57.497+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-27T16:59:46.102+05:30")
 public abstract class ApisApiService {
     public abstract Response apisApiIdGatewayConfigGet(String apiId
  ,String accept
- ,String ifNoneMatch
- ,String ifModifiedSince
  , Request request) throws NotFoundException;
 }

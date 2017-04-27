@@ -40,8 +40,7 @@ public class GatewaysApiServiceImpl extends GatewaysApiService {
      * @throws NotFoundException If failed to register gateway
      */
     @Override
-    public Response gatewaysRegisterPost(RegistrationDTO body, String contentType, String ifMatch,
-                                         String ifUnmodifiedSince, Request request) throws NotFoundException {
+    public Response gatewaysRegisterPost(RegistrationDTO body, String contentType, Request request) throws NotFoundException {
 
         try {
             LabelInfoDTO labelInfoDTO = body.getLabelInfo();

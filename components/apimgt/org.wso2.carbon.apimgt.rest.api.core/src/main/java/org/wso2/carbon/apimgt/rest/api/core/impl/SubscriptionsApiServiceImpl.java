@@ -37,7 +37,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      */
     @Override
     public Response subscriptionsGet(String apiContext, String apiVersion,
-                                     Integer limit, String accept, String ifNoneMatch, String ifModifiedSince,
+                                     Integer limit, String accept,
                                      Request request) throws NotFoundException {
         try {
             APIMgtAdminService apiMgtAdminService = APIManagerFactory.getInstance().getAPIMgtAdminService();
