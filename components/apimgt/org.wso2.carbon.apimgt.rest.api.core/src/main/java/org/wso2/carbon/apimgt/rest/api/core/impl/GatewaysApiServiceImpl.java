@@ -20,6 +20,7 @@ import org.wso2.carbon.apimgt.rest.api.core.dto.LabelInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.RegistrationDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.RegistrationSummaryDTO;
 import org.wso2.carbon.apimgt.rest.api.core.utils.MappingUtil;
+import org.wso2.msf4j.Request;
 import org.wso2.msf4j.formparam.FormDataParam;
 import org.wso2.msf4j.formparam.FileInfo;
 
@@ -39,7 +40,8 @@ public class GatewaysApiServiceImpl extends GatewaysApiService {
      * @throws NotFoundException If failed to register gateway
      */
     @Override
-    public Response gatewaysRegisterPost(RegistrationDTO body, String contentType) throws NotFoundException {
+    public Response gatewaysRegisterPost(RegistrationDTO body, String contentType, String ifMatch,
+                                         String ifUnmodifiedSince, Request request) throws NotFoundException {
 
         try {
             LabelInfoDTO labelInfoDTO = body.getLabelInfo();

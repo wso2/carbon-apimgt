@@ -170,4 +170,35 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
 
     }
+
+    @Override
+    public String getAPIGatewayServiceConfig(String apiId) throws APIManagementException {
+        try {
+            return apiDAO.getGatewayConfig(apiId);
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't retrieve gateway configuration for apiId " + apiId;
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+
+    /**
+     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#getLastUpdatedTimeOfGatewayConfig(String)
+     */
+    @Override
+    public String getLastUpdatedTimeOfGatewayConfig(String apiId) throws APIManagementException {
+        String lastUpdatedTime;
+        try {
+            lastUpdatedTime = apiDAO.getLastUpdatedTimeOfGatewayConfig(apiId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg =
+                    "Error occurred while retrieving the last update time of the gateway configuration of API with id "
+                            + apiId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+
+        return lastUpdatedTime;
+    }
 }

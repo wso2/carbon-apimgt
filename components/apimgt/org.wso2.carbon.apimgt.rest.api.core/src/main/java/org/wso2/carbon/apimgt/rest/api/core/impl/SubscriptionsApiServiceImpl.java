@@ -15,6 +15,7 @@ import org.wso2.carbon.apimgt.rest.api.core.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.core.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.core.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.core.utils.MappingUtil;
+import org.wso2.msf4j.Request;
 
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +36,9 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      * @throws NotFoundException If failed to retrieve subscriptions
      */
     @Override
-    public Response subscriptionsGet(String apiContext, String apiVersion, Integer limit) throws NotFoundException {
+    public Response subscriptionsGet(String apiContext, String apiVersion,
+                                     Integer limit, String accept, String ifNoneMatch, String ifModifiedSince,
+                                     Request request) throws NotFoundException {
         try {
             APIMgtAdminService apiMgtAdminService = APIManagerFactory.getInstance().getAPIMgtAdminService();
             List<SubscriptionValidationData> subscriptionsOfApi;

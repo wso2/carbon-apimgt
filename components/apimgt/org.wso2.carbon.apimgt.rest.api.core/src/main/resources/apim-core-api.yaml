@@ -70,6 +70,10 @@ paths:
 # Retrieve all subscriptions of a certain API
 #-----------------------------------------------------
     get:
+      x-wso2-curl: "curl -k https://localhost:9292/api/am/core/v1/subscriptions"
+      x-wso2-request: |
+        GET https://localhost:9292/api/am/core/v1/subscriptions
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type:application/json"
       summary: |
         Return the list of subscriptions of an API
       description: |
@@ -79,6 +83,9 @@ paths:
         - $ref : '#/parameters/apiContext'
         - $ref : '#/parameters/apiVersion'
         - $ref : '#/parameters/limit'
+        - $ref : '#/parameters/Accept'
+        - $ref : '#/parameters/If-None-Match'
+        - $ref : '#/parameters/If-Modified-Since'
       tags:
         - Subscriptions of API
       responses:
@@ -117,8 +124,18 @@ paths:
 
   /apis-summary:
     get:
+      x-wso2-curl: "curl -k https://localhost:9292/api/am/core/v1/apis-summary"
+      x-wso2-request: |
+        GET https://localhost:9292/api/am/core/v1/apis-summary
+        Content-Type: application/json
+        {\r\n\"labelInfo\":{\r\n  \"overwriteLabels\":false,\r\n  \"labelList\":[\r\n     {\r\n        \"name\":\"Private\",\r\n        \"accessUrls\":[\r\n           \"https:\/\/local.privatfdsafe\"\r\n        ]\r\n     },\r\n     {\r\n        \"name\":\"Public\",\r\n        \"accessUrls\":[\r\n           \"http:\/\/local.private\",\r\n           \"https:\/\/local.public\"\r\n        ]\r\n     }\r\n  ]\r\
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type:application/json"
       summary: Summary of all available apis
       description: Request summary of all available apis.
+      parameters:
+        - $ref : '#/parameters/Accept'
+        - $ref : '#/parameters/If-None-Match'
+        - $ref : '#/parameters/If-Modified-Since'
       responses:
         200:
           description: |
@@ -155,6 +172,11 @@ paths:
 
   /gateways/register:
     post:
+      x-wso2-curl: "curl -k -H \"Content-Type: application/json\" -X POST -d @data.json \"https://localhost:9292/api/am/core/v1/gateway/register\""
+      x-wso2-request: |
+        GET https://localhost:9292/api/am/core/v1/gateway/register
+        {\r\n\"labelInfo\":{\r\n  \"overwriteLabels\":false,\r\n  \"labelList\":[\r\n     {\r\n        \"name\":\"Private\",\r\n        \"accessUrls\":[\r\n           \"https:\/\/local.privatfdsafe\"\r\n        ]\r\n     },\r\n     {\r\n        \"name\":\"Public\",\r\n        \"accessUrls\":[\r\n           \"http:\/\/local.private\",\r\n           \"https:\/\/local.public\"\r\n        ]\r\n     }\r\n  ]\r\n}}
+      x-wso2-response: ""
       summary: Register a Gateway
       description: |
         This operation can be used to register a gateway.
@@ -167,6 +189,8 @@ paths:
           schema:
             $ref: '#/definitions/Registration'
         - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
       tags:
         - Register Gateway
       responses:
@@ -194,10 +218,80 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+################################################################
+# The gateway config resource of "Individual API" resource APIs
+################################################################
+
+  /apis/{apiId}/gateway-config:
+#-----------------------------------------------------
+# Retrieve the API gateway configuration
+#-----------------------------------------------------
+    get:
+      x-wso2-curl: curl -k "https://localhost:9292/api/am/core/v1/apis/1461f570-1765-4467-aeb8-bc912833afaf/gateway-config"
+      x-wso2-request: |
+        GET https://localhost:9292/api/am/core/v1/apis/1461f570-1765-4467-aeb8-bc912833afaf/gateway-config
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 329\npackage deployment.org.wso2.apim;\r\nimport ballerina.net.http;\r\n\r\n@http:BasePath{value:\"/myYahoo\"}\r\nservice myYahoo_1493196161220 {\r\n\r\n\t    @http:POST{}\r\n        \t@http:Path{value:\"/*\"}\r\n    resource post_star_ (message m) {\r\n        http:ClientConnector productionEndpoint = create http:ClientConnector(getUrlFromKey(\"endpoint_myYahoo_v1\"));\r\n        http:ClientConnector sandboxEndpoint = create http:ClientConnector(getUrlFromKey(\"endpoint_myYahoo_v1\"));\r\n        message response;\r\n        string endpointType;\r\n        string productionType;\r\n\r\n\r\n        endpointType = \"production\";\r\n        productionType = \"production\";\r\n\r\n        if (endpointType == productionType) {\r\n            response = http:ClientConnector.execute(productionEndpoint, \"post\", \"\", m);\r\n        } else {\r\n            response = http:ClientConnector.execute(sandboxEndpoint, \"post\", \"\", m);\r\n        }\r\n\r\n        reply response;\r\n    }\r\n\t\t\t\t\t    @http:GET{}\r\n        \t@http:Path{value:\"/*\"}\r\n    resource get_star_ (message m) {\r\n        http:ClientConnector productionEndpoint = create http:ClientConnector(getUrlFromKey(\"endpoint_myYahoo_v1\"));\r\n        http:ClientConnector sandboxEndpoint = create http:ClientConnector(getUrlFromKey(\"endpoint_myYahoo_v1\"));\r\n        message response;\r\n        string endpointType;\r\n        string productionType;\r\n\r\n\r\n        endpointType = \"production\";\r\n        productionType = \"production\";\r\n\r\n        if (endpointType == productionType) {\r\n            response = http:ClientConnector.execute(productionEndpoint, \"get\", \"\", m);\r\n        } else {\r\n            response = http:ClientConnector.execute(sandboxEndpoint, \"get\", \"\", m);\r\n        }\r\n\r\n        reply response;\r\n    }\r\n}"
+      summary: Get gateway definition
+      produces:
+        - text/plain
+      description: |
+        This operation can be used to retrieve the gateway configuration of an API.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
+      tags:
+        - API (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Requested gateway configuration of the API is returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
 parameters:
+
+# API Identifier
+  apiId:
+    name: apiId
+    in: path
+    description: |
+      The UUID of an API
+    required: true
+    type: string
 
 # API Context
   apiContext:
@@ -236,6 +330,53 @@ parameters:
     default: JSON
     required: true
     type : string
+
+# The HTTP Accept header
+  Accept:
+    name: Accept
+    in: header
+    description: |
+      Media types acceptable for the response. Default is application/json.
+    default: application/json
+    type: string
+
+# The HTTP If-None-Match header
+# Used to avoid retrieving data that are already cached
+  If-None-Match:
+    name: If-None-Match
+    in: header
+    description: |
+      Validator for conditional requests; based on the ETag of the formerly retrieved
+      variant of the resourec.
+    type : string
+
+# The HTTP If-Modified-Since header
+# Used to avoid retrieving data that are already cached
+  If-Modified-Since:
+    name: If-Modified-Since
+    in: header
+    description: |
+      Validator for conditional requests; based on Last Modified header of the
+      formerly retrieved variant of the resource.
+    type: string
+
+# The HTTP If-Match header
+# Used to avoid concurrent updates
+  If-Match:
+    name: If-Match
+    in: header
+    description: |
+      Validator for conditional requests; based on ETag.
+    type: string
+
+# The HTTP If-Unmodified-Since header
+# Used to avoid concurrent updates
+  If-Unmodified-Since:
+    name: If-Unmodified-Since
+    in: header
+    description: |
+      Validator for conditional requests; based on Last Modified header.
+    type: string
 
 ######################################################
 # The resources used by some of the APIs above within the message body

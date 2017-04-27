@@ -9,13 +9,11 @@ import org.wso2.carbon.apimgt.rest.api.core.dto.RegistrationDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.RegistrationSummaryDTO;
 
 import org.wso2.msf4j.Microservice;
+import org.wso2.msf4j.Request;
 import org.osgi.service.component.annotations.Component;
 
 import java.io.InputStream;
-
-import org.wso2.msf4j.formparam.FormDataParam;
-import org.wso2.msf4j.formparam.FileInfo;
-
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.*;
 
@@ -24,11 +22,11 @@ import javax.ws.rs.*;
     service = Microservice.class,
     immediate = true
 )
-@Path("/api/am/core/v1/gateways")
+@Path("/api/am/core/v1.[\\d]+/gateways")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the gateways API")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-06T17:56:22.612+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-26T22:35:57.497+05:30")
 public class GatewaysApi implements Microservice  {
    private final GatewaysApiService delegate = GatewaysApiServiceFactory.getGatewaysApi();
 
@@ -45,8 +43,10 @@ public class GatewaysApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was in a not supported format. ", response = RegistrationSummaryDTO.class) })
     public Response gatewaysRegisterPost(@ApiParam(value = "Register object that needs to be added " ,required=true) RegistrationDTO body
 ,@ApiParam(value = "Media type of the entity in the body. Default is JSON. " ,required=true, defaultValue="JSON")@HeaderParam("Content-Type") String contentType
-)
+,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
+,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
+, @Context Request request)
     throws NotFoundException {
-        return delegate.gatewaysRegisterPost(body,contentType);
+        return delegate.gatewaysRegisterPost(body,contentType,ifMatch,ifUnmodifiedSince, request);
     }
 }

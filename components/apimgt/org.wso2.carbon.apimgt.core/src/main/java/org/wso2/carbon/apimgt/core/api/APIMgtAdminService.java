@@ -122,4 +122,21 @@ public interface APIMgtAdminService {
      * @throws APIManagementException If failed to register labels.
      */
     void registerGatewayLabels(List<Label> labels, String overwriteLabels) throws APIManagementException;
+
+    /**
+     * Retrieve API's gateway configuration
+     *
+     * @param apiId     UUID of the API
+     * @return          The API gateway configuration
+     * @throws APIManagementException   If failed to retrive API gateway config
+     */
+    String getAPIGatewayServiceConfig(String apiId) throws APIManagementException;
+
+    /**
+     *
+     * @param apiId UUID of API
+     * @return Last updated time of gateway configuration of the API given its uuid
+     * @throws APIManagementException if API Manager core level exception occurred
+     */
+    String getLastUpdatedTimeOfGatewayConfig(String apiId) throws APIManagementException;
 }
