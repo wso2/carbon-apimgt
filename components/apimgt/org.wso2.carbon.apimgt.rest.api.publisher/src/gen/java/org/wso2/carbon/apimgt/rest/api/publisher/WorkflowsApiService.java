@@ -21,7 +21,7 @@ import javax.ws.rs.core.SecurityContext;
 
 @javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-06T17:02:03.158+05:30")
 public abstract class WorkflowsApiService {
-    public abstract Response workflowsUpdateWorkflowStatusPost(String workflowReferenceId
+    public abstract Response workflowsWorkflowReferenceIdPut(String workflowReferenceId
  ,WorkflowDTO body
  , Request request) throws NotFoundException;
 }

@@ -40,7 +40,7 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response workflowsUpdateWorkflowStatusPost(String workflowReferenceId, WorkflowDTO body, Request request)
+    public Response workflowsWorkflowReferenceIdPut(String workflowReferenceId, WorkflowDTO body, Request request)
             throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {

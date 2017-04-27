@@ -751,7 +751,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     @Override
     public ApplicationCreationResponse addApplication(Application application) throws APIManagementException {
         ApplicationCreationResponse applicationResponse = null;
-        String applicationUuid = null;
+
         try {
             if (getApplicationDAO().isApplicationNameExists(application.getName())) {
                 String message = "An application already exists with a duplicate name - " + application.getName();

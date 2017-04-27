@@ -71,9 +71,9 @@ public enum ExceptionCodes implements ErrorHandler {
     // Workflow related codes
     WORKFLOW_EXCEPTION(900550, "Workflow error", 500,
             "Error occurred while executing workflow task"),
-    WORKFLOW_NOT_FOUND(900551, "Workflow error", 500,
+    WORKFLOW_NOT_FOUND(900551, "Workflow error", 404,
             "Workflow entry cannot be found for the given reference id"),
-    WORKFLOW_COMPLETED(900552, "Workflow error", 500,
+    WORKFLOW_COMPLETED(900552, "Workflow error", 404,
             "Workflow is already completed"),
     WORKFLOW_PENDING(900553, "Workflow exception", 409,
             "Pending workflow task exists for the seleted API"),
@@ -82,6 +82,8 @@ public enum ExceptionCodes implements ErrorHandler {
     WORKFLOW_STATE_MISSING(900556, "Workflow error", 400, "Workflow status is not defined"),
     WORKFLOW_NO_PENDING_TASK(900557, "Workflow error", 412,
             "Requested resource does not have a pending workflow task"),
+    WORKFLOW_APPROVED_UPDATE(900558, "Workflow error", 403,
+            "Cannot modify the resource since it is approved through a worklow process"),
 
     // Auth related codes
     ROLES_CANNOT_BE_EMPTY(900600, "Role list cannot be empty", 400, " Role list cannot be empty"),

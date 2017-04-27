@@ -1549,18 +1549,18 @@ paths:
 ######################################################
 # The "Workflow approval" resource API
 ######################################################
-  /workflows/update-workflow-status:
+  /workflows/{workflowReferenceId}:
 
 #-------------------------------------------------------------------
 # Resume the workflow by approving or rejecting the workflow request
 #-------------------------------------------------------------------
-    post:
+    put:
       x-scope: apim:api_workflow
       summary: Update workflow status
       description: |
         This operation can be used to approve or reject a workflow task. .
       parameters:
-       - $ref: '#/parameters/workflowReferenceId-Q'
+       - $ref: '#/parameters/workflowReferenceId'
        - in: body
          name: body
          description: |
@@ -1818,9 +1818,9 @@ parameters:
 
 # Workflow reference ID
 # Specified as part of the path expression
-  workflowReferenceId-Q:
+  workflowReferenceId:
     name: workflowReferenceId
-    in: query
+    in: path
     description: |
       Workflow reference id
     required: true
