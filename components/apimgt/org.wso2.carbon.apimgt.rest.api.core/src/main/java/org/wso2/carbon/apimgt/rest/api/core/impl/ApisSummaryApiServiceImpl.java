@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.core.*;
 import org.wso2.carbon.apimgt.rest.api.core.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.core.util.APISummaryComparator;
+import org.wso2.msf4j.Request;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -45,7 +46,8 @@ public class ApisSummaryApiServiceImpl extends ApisSummaryApiService {
      * @throws NotFoundException If failed to retrieve api summary
      */
     @Override
-    public Response apisSummaryGet() throws NotFoundException {
+    public Response apisSummaryGet(String accept, Request request) throws NotFoundException {
+
         List<APISummary> apisSummary = new ArrayList<APISummary>();
         Collections.sort(apisSummary, new APISummaryComparator());
         try {

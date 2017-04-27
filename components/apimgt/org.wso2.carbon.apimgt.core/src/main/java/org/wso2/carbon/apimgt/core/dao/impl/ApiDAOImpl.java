@@ -1441,7 +1441,10 @@ public class ApiDAOImpl implements ApiDAO {
         InputStream gatewayConfig = ApiResourceDAO
                 .getBinaryValueForCategory(connection, apiID, ResourceCategory.GATEWAY_CONFIG);
 
-        return IOUtils.toString(gatewayConfig, StandardCharsets.UTF_8);
+        if (gatewayConfig != null) {
+            return IOUtils.toString(gatewayConfig, StandardCharsets.UTF_8);
+        }
+        return null;
     }
 
     private void updateGatewayConfig(Connection connection, String apiID, String gatewayConfig, String updatedBy)

@@ -8,13 +8,11 @@ import org.wso2.carbon.apimgt.rest.api.core.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.SubscriptionListDTO;
 
 import org.wso2.msf4j.Microservice;
+import org.wso2.msf4j.Request;
 import org.osgi.service.component.annotations.Component;
 
 import java.io.InputStream;
-
-import org.wso2.msf4j.formparam.FormDataParam;
-import org.wso2.msf4j.formparam.FileInfo;
-
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.*;
 
@@ -23,11 +21,11 @@ import javax.ws.rs.*;
     service = Microservice.class,
     immediate = true
 )
-@Path("/api/am/core/v1/subscriptions")
+@Path("/api/am/core/v1.[\\d]+/subscriptions")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the subscriptions API")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-31T16:40:30.481+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-27T16:59:46.102+05:30")
 public class SubscriptionsApi implements Microservice  {
    private final SubscriptionsApiService delegate = SubscriptionsApiServiceFactory.getSubscriptionsApi();
 
@@ -47,8 +45,9 @@ public class SubscriptionsApi implements Microservice  {
     public Response subscriptionsGet(@ApiParam(value = "Context of the API. ") @QueryParam("apiContext") String apiContext
 ,@ApiParam(value = "Version of the API. ") @QueryParam("apiVersion") String apiVersion
 ,@ApiParam(value = "Number of entities that should be retrieved. ") @QueryParam("limit") Integer limit
-)
+,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
+, @Context Request request)
     throws NotFoundException {
-        return delegate.subscriptionsGet(apiContext,apiVersion,limit);
+        return delegate.subscriptionsGet(apiContext,apiVersion,limit,accept, request);
     }
 }
