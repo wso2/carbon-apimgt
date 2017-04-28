@@ -29,8 +29,8 @@ import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 /**
  * This is a simple work flow extension to have Application creation process
  */
-public class ApplicationCreationSimpleWorkflowExecutor implements WorkflowExecutor {
-    private static final Log log = LogFactory.getLog(ApplicationCreationSimpleWorkflowExecutor.class);
+public class DefaultWorkflowExecutor implements WorkflowExecutor {
+    private static final Log log = LogFactory.getLog(DefaultWorkflowExecutor.class);
 
     /**
      * Execute the workflow executor
@@ -41,7 +41,7 @@ public class ApplicationCreationSimpleWorkflowExecutor implements WorkflowExecut
 
     public WorkflowResponse execute(Workflow workFlow) throws WorkflowException {
         if (log.isDebugEnabled()) {
-            log.debug("Executing Application creation Workflow..");
+            log.debug("Executing execute() in Workflow for " + workFlow.getWorkflowType());
         }
     
         WorkflowResponse workflowResponse = new GeneralWorkflowResponse();
@@ -59,7 +59,7 @@ public class ApplicationCreationSimpleWorkflowExecutor implements WorkflowExecut
      */
     public WorkflowResponse complete(Workflow workFlow) throws WorkflowException {
         if (log.isDebugEnabled()) {
-            log.debug("Complete  Application creation Workflow..");
+            log.debug("Executing complete() in Workflow for " + workFlow.getWorkflowType());
         }
 
         WorkflowResponse workflowResponse = new GeneralWorkflowResponse();
@@ -69,6 +69,6 @@ public class ApplicationCreationSimpleWorkflowExecutor implements WorkflowExecut
 
     @Override
     public void cleanUpPendingTask(String workflowExtRef) throws WorkflowException {
-        
+        //default is left unimplimented
     }
 }

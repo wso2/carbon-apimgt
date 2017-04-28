@@ -311,10 +311,13 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             WorkflowResponse response = addSubscriptionWFExecutor.execute(workflow);
             workflow.setStatus(response.getWorkflowStatus());
 
-            addWorkflowEntries(workflow);
+            
 
             if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
                 completeWorkflow(addSubscriptionWFExecutor, workflow);
+            } else {
+                //only add entry to workflow table if it is a pending task
+                addWorkflowEntries(workflow);
             }
 
             subScriptionResponse = new SubscriptionResponse(subscriptionId, response);
@@ -351,8 +354,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 throw new APIManagementException(errorMsg, ExceptionCodes.SUBSCRIPTION_NOT_FOUND);
             } else {
                 if (APIMgtConstants.SubscriptionStatus.ON_HOLD == subscription.getStatus()) {
-                    String pendingRefForSubscription = getWorkflowDAO()
-                            .getExternalWorkflowReferenceForSubscription(subscriptionId);
+                    String pendingRefForSubscription = getWorkflowDAO().getExternalWorkflowReferenceForPendingTask(
+                            subscriptionId, WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
                     if (pendingRefForSubscription != null) {
                         try {
                             createSubscriptionWFExecutor.cleanUpPendingTask(pendingRefForSubscription);
@@ -361,6 +364,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                             // failed cleanup processes are ignored to prevent failing the deletion process
                             log.warn(warn, e.getLocalizedMessage());
                         }
+                        getWorkflowDAO().deleteWorkflowEntryforExternalReference(pendingRefForSubscription);
                     }
                 }
 
@@ -389,11 +393,13 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 
                 WorkflowResponse response = removeSubscriptionWFExecutor.execute(workflow);
                 workflow.setStatus(response.getWorkflowStatus());
-
-                addWorkflowEntries(workflow);
+                
 
                 if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
                     completeWorkflow(removeSubscriptionWFExecutor, workflow);
+                } else {
+                    //add entry to workflow table if it is only in pending state
+                    addWorkflowEntries(workflow);
                 }
             }
         } catch (APIMgtDAOException e) {
@@ -472,13 +478,26 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     public Comment getCommentByUUID(String commentId, String apiId) throws APIManagementException {
         Comment comment;
         try {
+            ApiDAO apiDAO = getApiDAO();
+            API api = apiDAO.getAPI(apiId);
+            if (api == null) {
+                String errorMsg = "Couldn't find api with api_id : " + apiId;
+                log.error(errorMsg);
+                throw new APIManagementException(errorMsg, ExceptionCodes.API_NOT_FOUND);
+            }
             comment = getApiDAO().getCommentByUUID(commentId, apiId);
+            if (comment == null) {
+                String errorMsg = "Couldn't find comment with comment_id - " + commentId + " for api_id " + apiId;
+                log.error(errorMsg);
+                throw new APIManagementException(errorMsg, ExceptionCodes.API_NOT_FOUND);
+            }
         } catch (APIMgtDAOException e) {
-            String errorMsg = "Error occurred while retrieving Comment + " + commentId + " for API " + apiId;
+            String errorMsg =
+                    "Error occurred while retrieving comment for comment_id " + commentId + " for api_id " + apiId;
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
-            return comment;
+        return comment;
     }
 
     @Override
@@ -494,6 +513,97 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     @Override
     public List<Rating> getUserRatingDTOList(String apiId) throws APIManagementException {
         return null;
+    }
+
+    @Override
+    public String addComment(Comment comment, String apiId) throws APIManagementException {
+        String generatedUuid = UUID.randomUUID().toString();
+        comment.setUuid(generatedUuid);
+        try {
+            ApiDAO apiDAO = getApiDAO();
+            API api = apiDAO.getAPI(apiId);
+            if (api == null) {
+                String errorMsg = "Couldn't find api with api_id : " + apiId;
+                log.error(errorMsg);
+                throw new APIManagementException(errorMsg, ExceptionCodes.API_NOT_FOUND);
+            }
+            getApiDAO().addComment(comment, apiId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while adding comment for api - " + apiId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return comment.getUuid();
+    }
+
+    @Override
+    public void deleteComment(String commentId, String apiId) throws APIManagementException {
+        try {
+            ApiDAO apiDAO = getApiDAO();
+            API api = apiDAO.getAPI(apiId);
+            if (api == null) {
+                String errorMsg = "Couldn't find api with api_id : " + apiId;
+                log.error(errorMsg);
+                throw new APIManagementException(errorMsg, ExceptionCodes.API_NOT_FOUND);
+            }
+            Comment comment = apiDAO.getCommentByUUID(commentId, apiId);
+            if (comment == null) {
+                String errorMsg = "Couldn't find comment with comment_id : " + commentId;
+                log.error(errorMsg);
+                throw new APIManagementException(errorMsg, ExceptionCodes.COMMENT_NOT_FOUND);
+            } else {
+                apiDAO.deleteComment(commentId, apiId);
+            }
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while deleting comment " + commentId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    @Override
+    public void updateComment(Comment comment, String commentId, String apiId) throws APIManagementException {
+        try {
+            ApiDAO apiDAO = getApiDAO();
+            API api = apiDAO.getAPI(apiId);
+            if (api == null) {
+                String errorMsg = "Couldn't find api with api_id : " + apiId;
+                log.error(errorMsg);
+                throw new APIManagementException(errorMsg, ExceptionCodes.API_NOT_FOUND);
+            }
+            Comment oldComment = apiDAO.getCommentByUUID(commentId, apiId);
+            if (oldComment != null) {
+                getApiDAO().updateComment(comment, commentId, apiId);
+            } else {
+                String errorMsg = "Couldn't find comment with comment_id : " + commentId + "and api_id : " + apiId;
+                log.error(errorMsg);
+                throw new APIManagementException(errorMsg, ExceptionCodes.COMMENT_NOT_FOUND);
+            }
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while updating comment " + commentId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+
+    }
+
+    @Override
+    public List<Comment> getCommentsForApi(String apiId) throws APIManagementException {
+        try {
+            ApiDAO apiDAO = getApiDAO();
+            API api = apiDAO.getAPI(apiId);
+            if (api == null) {
+                String errorMsg = "api not found for the id : " + apiId;
+                log.error(errorMsg);
+                throw new APIManagementException(errorMsg, ExceptionCodes.API_NOT_FOUND);
+            }
+            List<Comment> commentList = getApiDAO().getCommentsForApi(apiId);
+            return commentList;
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while retrieving comments for api " + apiId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
     }
 
     @Override
@@ -574,15 +684,18 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             if (pendingSubscriptions == null || pendingSubscriptions.isEmpty()) {
                 //check whether application is on hold state
                 if (ApplicationStatus.APPLICATION_ONHOLD.equals(applicationStatus)) {
-                    pendingExtReference = getWorkflowDAO().getExternalWorkflowReferenceForApplication(appId);
-                    try {
-                        if (pendingExtReference != null) {
+                    pendingExtReference = getWorkflowDAO().getExternalWorkflowReferenceForPendingTask(appId,
+                            WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+                   
+                    if (pendingExtReference != null) {
+                        try {
                             createApplicationWFExecutor.cleanUpPendingTask(pendingExtReference);
-                        }                        
-                    } catch (WorkflowException e) {
-                        String warn = "Failed to clean pending application approval task for " + appId;
-                        // failed cleanup processes are ignored to prevent failing the deletion process
-                        log.warn(warn, e.getLocalizedMessage());
+                        } catch (WorkflowException e) {
+                            String warn = "Failed to clean pending application approval task for " + appId;
+                            // failed cleanup processes are ignored to prevent failing the deletion process
+                            log.warn(warn, e.getLocalizedMessage());
+                        }
+                        getWorkflowDAO().deleteWorkflowEntryforExternalReference(pendingExtReference);
                     }
                 }
 
@@ -592,18 +705,20 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 // approvals (cannot subscribe to a pending application)
                 for (Iterator iterator = pendingSubscriptions.iterator(); iterator.hasNext();) {
                     Subscription pendingSubscription = (Subscription) iterator.next();
-                    pendingExtReference = getWorkflowDAO()
-                            .getExternalWorkflowReferenceForSubscription(pendingSubscription.getId());
+                    pendingExtReference = getWorkflowDAO().getExternalWorkflowReferenceForPendingTask(
+                            pendingSubscription.getId(), WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
                     createSubscriptionWFExecutor.cleanUpPendingTask(pendingExtReference);
-
-                    try {
-                        createSubscriptionWFExecutor.cleanUpPendingTask(pendingExtReference);
-                    } catch (WorkflowException e) {
-                        String warn = "Failed to clean pending subscription approval task for "
-                                + pendingSubscription.getId();
-                        // failed cleanup processes are ignored to prevent failing the deletion process
-                        log.warn(warn, e.getLocalizedMessage());
-                    }
+                    if (pendingExtReference != null) {
+                        try {
+                            createSubscriptionWFExecutor.cleanUpPendingTask(pendingExtReference);
+                        } catch (WorkflowException e) {
+                            String warn = "Failed to clean pending subscription approval task for "
+                                    + pendingSubscription.getId();
+                            // failed cleanup processes are ignored to prevent failing the deletion process
+                            log.warn(warn, e.getLocalizedMessage());
+                        }
+                        getWorkflowDAO().deleteWorkflowEntryforExternalReference(pendingExtReference);
+                    }                    
                 }
             }
             
@@ -618,11 +733,13 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             workflow.setWorkflowDescription(workflowDescription);
             WorkflowResponse response = removeApplicationWFExecutor.execute(workflow);
             workflow.setStatus(response.getWorkflowStatus());
-            addWorkflowEntries(workflow);
 
             if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
                 completeWorkflow(removeApplicationWFExecutor, workflow);
-            }          
+            } else {
+                //add entry to workflow table if it is only in pending state
+                addWorkflowEntries(workflow);
+            }
          
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while deleting the application - " + appId;
@@ -634,7 +751,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     @Override
     public ApplicationCreationResponse addApplication(Application application) throws APIManagementException {
         ApplicationCreationResponse applicationResponse = null;
-        String applicationUuid = null;
+
         try {
             if (getApplicationDAO().isApplicationNameExists(application.getName())) {
                 String message = "An application already exists with a duplicate name - " + application.getName();
@@ -686,13 +803,13 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             workflow.setWorkflowDescription(workflowDescription);
             WorkflowResponse response = appCreationWFExecutor.execute(workflow);
             workflow.setStatus(response.getWorkflowStatus());
-            addWorkflowEntries(workflow);
 
             if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
                 completeWorkflow(appCreationWFExecutor, workflow);
             } else {
                 getApplicationDAO().updateApplicationState(generatedUuid,
                         APIMgtConstants.ApplicationStatus.APPLICATION_ONHOLD);
+                addWorkflowEntries(workflow);
             }
 
             APIUtils.logDebug("successfully added application with appId " + application.getId(), log);
@@ -827,7 +944,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             // setting the workflow status from the one getting from the executor. this gives the executor developer
             // to change the state as well.
             workflow.setStatus(response.getWorkflowStatus());
-          
+
             String applicationState = "";
             if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
                 if (log.isDebugEnabled()) {
@@ -906,5 +1023,5 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         return response;
     }
 
-    
+
 }

@@ -491,4 +491,12 @@ public interface APIPublisher extends APIManager {
      */
     String getLastUpdatedTimeOfEndpoint(String endpointId) throws APIManagementException;
 
+    /**
+     * Remove pending lifecycle state change task for the given api. 
+     * 
+     * @param apiId apiId of api
+     * @throws APIManagementException if API Manager core level exception occurred
+     */
+    void removePendingLifecycleWorkflowTaskForAPI(String apiId) throws APIManagementException;
+
 }

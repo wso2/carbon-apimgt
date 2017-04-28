@@ -1,7 +1,11 @@
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
@@ -18,7 +22,9 @@ import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ApplicationStatus;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.SubscriptionStatus;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
+import org.wso2.carbon.apimgt.core.workflow.HttpWorkflowResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -120,6 +126,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         SubscriptionDTO subscriptionDTO = null;
+        URI location = null;
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             String applicationId = body.getApplicationId();
@@ -131,7 +138,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                 String errorMessage = "Application " + applicationId + " is not active";
                 ExceptionCodes exceptionCode = ExceptionCodes.APPLICATION_INACTIVE;
                 APIManagementException e = new APIManagementException(errorMessage, exceptionCode);
-                HashMap<String, String> paramList = new HashMap<String, String>();
+                Map<String, String> paramList = new HashMap<>();
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
                 log.error(errorMessage, e);
                 return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
@@ -142,11 +149,17 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                 SubscriptionResponse addSubResponse = apiStore.addApiSubscription(apiId, applicationId, tier);
                 String subscriptionId = addSubResponse.getSubscriptionUUID();
                 Subscription subscription = apiStore.getSubscriptionByUUID(subscriptionId);
+                location = new URI(RestApiConstants.RESOURCE_PATH_SUBSCRIPTION + "/" + subscriptionId);
                 subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscription);
-
-                WorkflowResponseDTO workflowResponse = WorkflowMappintUtil
-                        .fromWorkflowResponsetoDTO(addSubResponse.getWorkflowResponse());
-                subscriptionDTO.setWorkflowResponse(workflowResponse);
+                
+                //if workflow is in pending state or if the executor sends any httpworklfowresponse (workflow state can 
+                //be in either pending or approved state) send back the workflow response 
+                if (SubscriptionStatus.ON_HOLD == subscription.getStatus()) {
+                    WorkflowResponseDTO workflowResponse = WorkflowMappintUtil
+                            .fromWorkflowResponsetoDTO(addSubResponse.getWorkflowResponse());
+                    return Response.status(Response.Status.ACCEPTED).header(RestApiConstants.LOCATION_HEADER, location)
+                            .entity(workflowResponse).build();
+                }               
 
             } else {
                 String errorMessage = null;
@@ -160,7 +173,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                 }
                 APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
                         exceptionCode);
-                HashMap<String, String> paramList = new HashMap<String, String>();
+                Map<String, String> paramList = new HashMap<>();
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
                 log.error(errorMessage, e);
                 return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
@@ -168,16 +181,26 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding subscriptions";
-            HashMap<String, String> paramList = new HashMap<String, String>();
+            Map<String, String> paramList = new HashMap<>();
             paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, body.getApiIdentifier());
             paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, body.getApplicationId());
             paramList.put(APIMgtConstants.ExceptionsConstants.TIER, body.getPolicy());
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }  catch (URISyntaxException e) {
+            String errorMessage = "Error while adding location header in response for subscription : "
+                    + body.getSubscriptionId();
+            Map<String, String> paramList = new HashMap<>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.SUBSCRIPTION_ID, body.getSubscriptionId());
+            ErrorHandler errorHandler = ExceptionCodes.LOCATION_HEADER_INCORRECT;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorHandler, paramList);
+            log.error(errorMessage, e);
+            return Response.status(errorHandler.getHttpStatusCode()).entity(errorDTO).build();
         }
 
-        return Response.status(Response.Status.CREATED).entity(subscriptionDTO).build();
+        return Response.status(Response.Status.CREATED).header(RestApiConstants.LOCATION_HEADER, location)
+                .entity(subscriptionDTO).build();
     }
 
     /**

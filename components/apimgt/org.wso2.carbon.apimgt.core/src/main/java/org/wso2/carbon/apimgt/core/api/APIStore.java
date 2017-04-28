@@ -242,5 +242,41 @@ public interface APIStore extends APIManager {
      */
     List<Rating> getUserRatingDTOList(String apiId) throws APIManagementException;
 
+    /**
+     * Add comment for an API
+     *
+     * @param comment the comment text
+     * @param apiId UUID of the API
+     * @return String UUID of the created comment
+     * @throws APIManagementException if failed to add a comment
+     */
+    String addComment(Comment comment, String apiId) throws APIManagementException;
 
+    /**
+     * Delete a comment from an API given the commentId and apiId
+     *
+     * @param commentId UUID of the comment to be deleted
+     * @param apiId UUID of the api
+     * @throws APIManagementException if failed to delete a comment
+     */
+    void deleteComment(String commentId, String apiId) throws APIManagementException;
+
+    /**
+     * Update a comment
+     *
+     * @param comment new Comment object
+     * @param commentId the id of the comment which needs to be updated
+     * @param apiId UUID of the api the comment belongs to
+     * @throws APIManagementException if failed to update a comment
+     */
+    void updateComment(Comment comment, String commentId, String apiId) throws APIManagementException;
+
+    /**
+     * Retrieve list of comments for a given apiId
+     *
+     * @param apiId UUID of the api
+     * @throws APIManagementException if failed to retrieve all comments for an api
+     * @return a list of comments for the api
+     */
+    List<Comment> getCommentsForApi(String apiId) throws APIManagementException;
 }

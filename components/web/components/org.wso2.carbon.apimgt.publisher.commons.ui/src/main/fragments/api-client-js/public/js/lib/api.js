@@ -523,6 +523,21 @@ class API {
         }
     }
 
+     /**
+     * Cleanup pending workflow state change task for API given its id (UUID)
+     * @param id {string} UUID of the api
+     * @param callback {function} Callback function which needs to be executed in the success call
+     */
+    cleanupPendingTask(id, callback = null) {
+        var promise_deletePendingTask = this.client.then(
+                (client) => {
+                    return client["API (Individual)"].delete_apis_apiId_lifecycle_lifecycle_pending_task({apiId: id},
+                    this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+                }
+            );
+            return promise_deletePendingTask;   
+    }
+
     /**
      * Update an api via PUT HTTP method, Need to give the updated API object as the argument.
      * @param api {Object} Updated API object(JSON) which needs to be updated

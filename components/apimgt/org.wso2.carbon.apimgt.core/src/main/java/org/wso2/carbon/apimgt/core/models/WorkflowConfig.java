@@ -31,8 +31,6 @@ public class WorkflowConfig {
     private WorkflowExecutorInfo applicationCreation;
     @Element (description = "executor for subscription creation workflow")
     private WorkflowExecutorInfo subscriptionCreation;
-    @Element (description = "executor for signup workflow")
-    private WorkflowExecutorInfo userSignUp;
     @Element (description = "executor for subscription deletion workflow")
     private WorkflowExecutorInfo subscriptionDeletion;
     @Element (description = "executor for application deletion workflow")
@@ -43,22 +41,19 @@ public class WorkflowConfig {
     public WorkflowConfig() {
         
         applicationCreation = new WorkflowExecutorInfo();
-        applicationCreation.setExecutor(APIMgtConstants.WF_DEFAULT_APPCREATION_EXEC);
+        applicationCreation.setExecutor(APIMgtConstants.WF_DEFAULT_WF_EXEC);
 
         apiStateChange = new WorkflowExecutorInfo();
-        apiStateChange.setExecutor(APIMgtConstants.WF_DEFAULT_APISTATE_EXEC);
+        apiStateChange.setExecutor(APIMgtConstants.WF_DEFAULT_WF_EXEC);
 
         applicationDeletion = new WorkflowExecutorInfo();
-        applicationDeletion.setExecutor(APIMgtConstants.WF_DEFAULT_APPDELETE_EXEC);
+        applicationDeletion.setExecutor(APIMgtConstants.WF_DEFAULT_WF_EXEC);
 
         subscriptionCreation = new WorkflowExecutorInfo();
-        subscriptionCreation.setExecutor(APIMgtConstants.WF_DEFAULT_SUBCREATION_EXEC);
+        subscriptionCreation.setExecutor(APIMgtConstants.WF_DEFAULT_WF_EXEC);
 
         subscriptionDeletion = new WorkflowExecutorInfo();
-        subscriptionDeletion.setExecutor(APIMgtConstants.WF_DEFAULT_SUBDELETE_EXEC);
-
-        userSignUp = new WorkflowExecutorInfo();
-        userSignUp.setExecutor(APIMgtConstants.WF_DEFAULT_SIGNUP_EXEC);
+        subscriptionDeletion.setExecutor(APIMgtConstants.WF_DEFAULT_WF_EXEC);
 
     }
 
@@ -76,14 +71,6 @@ public class WorkflowConfig {
 
     public void setSubscriptionCreation(WorkflowExecutorInfo subscriptionCreation) {
         this.subscriptionCreation = subscriptionCreation;
-    }
-
-    public WorkflowExecutorInfo getUserSignUp() {
-        return userSignUp;
-    }
-
-    public void setUserSignUp(WorkflowExecutorInfo userSignUp) {
-        this.userSignUp = userSignUp;
     }
 
     public WorkflowExecutorInfo getSubscriptionDeletion() {
@@ -113,8 +100,8 @@ public class WorkflowConfig {
     @Override
     public String toString() {
         return "WorkflowConfig [applicationCreation=" + applicationCreation + ", subscriptionCreation="
-                + subscriptionCreation + ", userSignUp=" + userSignUp + ", subscriptionDeletion=" + subscriptionDeletion
-                + ", applicationDeletion=" + applicationDeletion + ", apiStateChange=" + apiStateChange + "]";
+                + subscriptionCreation + ", subscriptionDeletion=" + subscriptionDeletion + ", applicationDeletion="
+                + applicationDeletion + ", apiStateChange=" + apiStateChange + "]";
     }   
 
 }

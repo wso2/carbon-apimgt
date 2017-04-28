@@ -27,6 +27,9 @@ import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ApplicationStatus;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.SubscriptionStatus;
+import org.wso2.carbon.apimgt.core.workflow.HttpWorkflowResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -65,13 +68,6 @@ public class ApplicationsApiServiceImpl
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
-            String existingFingerprint = applicationsApplicationIdGetFingerprint(applicationId, null, null, null,
-                    request);
-            if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
-                    .contains(existingFingerprint)) {
-                return Response.status(Response.Status.PRECONDITION_FAILED).build();
-            }
-
             apiConsumer.deleteApplication(applicationId);
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting application: " + applicationId;
@@ -210,6 +206,17 @@ public class ApplicationsApiServiceImpl
             }
 
             Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
+            if (!ApplicationStatus.APPLICATION_APPROVED.equals(application.getStatus())) {
+                String errorMessage = "Application " + applicationId + " is not active";
+                ExceptionCodes exceptionCode = ExceptionCodes.APPLICATION_INACTIVE;
+                APIManagementException e = new APIManagementException(errorMessage, exceptionCode);
+                Map<String, String> paramList = new HashMap<String, String>();
+                paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                log.error(errorMessage, e);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+                
+            }
             apiConsumer.updateApplication(applicationId, application);
 
             //retrieves the updated application and send as the response
@@ -250,6 +257,17 @@ public class ApplicationsApiServiceImpl
         try {
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
             Application application = apiConsumer.getApplication(applicationId, username, null);
+            if (application != null && !ApplicationStatus.APPLICATION_APPROVED.equals(application.getStatus())) {
+                String errorMessage = "Application " + applicationId + " is not active";
+                ExceptionCodes exceptionCode = ExceptionCodes.APPLICATION_INACTIVE;
+                APIManagementException e = new APIManagementException(errorMessage, exceptionCode);
+                HashMap<String, String> paramList = new HashMap<String, String>();
+                paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                log.error(errorMessage, e);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+                
+            }
             if (application != null) {
                 String[] accessAllowDomainsArray = body.getAccessAllowDomains().toArray(new String[1]);
                 String tokenScopes = StringUtils.join(body.getScopes(), " ");
@@ -356,12 +374,20 @@ public class ApplicationsApiServiceImpl
             String applicationUUID = applicationResponse.getApplicationUUID();
             Application createdApplication = apiConsumer.getApplication(applicationUUID, username, groupId);
             createdApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(createdApplication);
-            WorkflowResponseDTO workflowResponse = WorkflowMappintUtil
-                    .fromWorkflowResponsetoDTO(applicationResponse.getWorkflowResponse());
-            createdApplicationDTO.setWorkflowResponse(workflowResponse);
-
+           
             location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" +
                     createdApplicationDTO.getApplicationId());
+
+            //if workflow is in pending state or if the executor sends any httpworklfowresponse (workflow state can 
+            //be in either pending or approved state) send back the workflow response 
+            if (ApplicationStatus.APPLICATION_ONHOLD.equals(createdApplication.getStatus())) {
+                
+                WorkflowResponseDTO workflowResponse = WorkflowMappintUtil
+                        .fromWorkflowResponsetoDTO(applicationResponse.getWorkflowResponse());
+                return Response.status(Response.Status.ACCEPTED).header(RestApiConstants.LOCATION_HEADER, location)
+                        .entity(workflowResponse).build();
+            }    
+
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new application : " + body.getName();
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -380,6 +406,7 @@ public class ApplicationsApiServiceImpl
         }
         // TODO: set location header once msf4j is updates : Response.created(location).entity(createdApplicationDTO)
         // .build()
-        return Response.ok().header("Location", location).entity(createdApplicationDTO).build();
+        return Response.status(Response.Status.CREATED).header(RestApiConstants.LOCATION_HEADER, location)
+                .entity(createdApplicationDTO).build();
     }
 }

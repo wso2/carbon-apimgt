@@ -137,7 +137,8 @@ $(function () {
                 .append(viewSpanIcon)
                 .append(viewSpanText);
 
-            var editIcon1 = $("<i>").addClass("fw fw-ring fw-stack-2x");
+            if ( row.lifeCycleStatus == "APPROVED" ) {
+                            var editIcon1 = $("<i>").addClass("fw fw-ring fw-stack-2x");
             var editIcon2 = $("<i>").addClass("fw fw-edit fw-stack-1x");
             var editSpanIcon = $("<span>").addClass("fw-stack").append(editIcon1).append(editIcon2);
             var editSpanText = $("<span>").addClass("hidden-xs").text("Edit");
@@ -149,6 +150,8 @@ $(function () {
                 .addClass("btn  btn-sm padding-reduce-on-grid-view")
                 .append(editSpanIcon)
                 .append(editSpanText);
+
+            }
 
             var deleteIcon1 = $("<i>").addClass("fw fw-ring fw-stack-2x");
             var deleteIcon2 = $("<i>").addClass("fw fw-delete fw-stack-1x");

@@ -198,12 +198,20 @@ $(function () {
             });
         }};
         var mode = "PREPEND";
+        var isApplicationActive = true;
+        if (data.obj.lifeCycleStatus != "APPROVED") {
+            isApplicationActive = false;
+        }
         var context = {
             "name": data.obj.name,
             "tier": data.obj.throttlingTier,
             "status": data.obj.lifeCycleStatus,
-            "description": data.obj.description
+            "description": data.obj.description,
+            "isApplicationActive": isApplicationActive,
+            "applicationId": data.obj.applicationId
         };
+        UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.application-navbar", context, 
+            "application-navbar", mode, callbacks);
         UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.application-details",context,
             "application-details", mode, callbacks);
     };

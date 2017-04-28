@@ -25,7 +25,7 @@ import java.io.InputStream;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-06T17:02:03.158+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-23T09:26:18.875+05:30")
 public abstract class ApisApiService {
     public abstract Response apisApiIdDelete(String apiId
  ,String ifMatch
@@ -100,6 +100,8 @@ public abstract class ApisApiService {
  ,String accept
  ,String ifNoneMatch
  ,String ifModifiedSince
+ , Request request) throws NotFoundException;
+    public abstract Response apisApiIdLifecycleLifecyclePendingTaskDelete(String apiId
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdPut(String apiId
  ,APIDTO body

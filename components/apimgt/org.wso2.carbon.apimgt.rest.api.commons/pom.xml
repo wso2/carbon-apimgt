@@ -41,6 +41,12 @@
                                         <include>store-api.yaml</include>
                                     </includes>
                                 </resource>
+                                <resource>
+                                    <directory>../org.wso2.carbon.apimgt.rest.api.admin/src/main/resources</directory>
+                                    <includes>
+                                        <include>admin-api.yaml</include>
+                                    </includes>
+                                </resource>
                             </resources>
                         </configuration>
                     </execution>
