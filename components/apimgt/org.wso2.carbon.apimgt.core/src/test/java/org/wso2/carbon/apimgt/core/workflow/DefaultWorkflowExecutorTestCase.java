@@ -29,12 +29,12 @@ import org.wso2.carbon.apimgt.core.models.SubscriptionWorkflow;
 import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 
-public class SubscriptionCreationSimpleWorkflowExecutorTestCase {
+public class DefaultWorkflowExecutorTestCase {
 
     @Test(description = "Test workflow responses")
     public void testWorkflowResponses() throws WorkflowException {
         
-        WorkflowExecutor executor = new SubscriptionCreationSimpleWorkflowExecutor();
+        WorkflowExecutor executor = new DefaultWorkflowExecutor();
         
         Workflow workflow = new SubscriptionWorkflow();
    

@@ -61,9 +61,8 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.SubscriptionStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
-import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationSimpleWorkflowExecutor;
+import org.wso2.carbon.apimgt.core.workflow.DefaultWorkflowExecutor;
 import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
-import org.wso2.carbon.apimgt.core.workflow.SubscriptionCreationSimpleWorkflowExecutor;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExtensionsConfigBuilder;
 import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
 import org.wso2.carbon.kernel.configprovider.ConfigProvider;
@@ -883,7 +882,7 @@ public class APIStoreImplTestCase {
 
         APIStore apiStore = getApiStoreImpl();
 
-        WorkflowExecutor executor = new ApplicationCreationSimpleWorkflowExecutor();
+        WorkflowExecutor executor = new DefaultWorkflowExecutor();
         Workflow workflow = new ApplicationCreationWorkflow();
         workflow.setWorkflowReference(null);
         apiStore.completeWorkflow(executor, workflow);
@@ -907,8 +906,7 @@ public class APIStoreImplTestCase {
         apiStore.addApplication(application);
 
 
-        ApplicationCreationSimpleWorkflowExecutor executor = Mockito.mock(ApplicationCreationSimpleWorkflowExecutor
-                .class);
+        DefaultWorkflowExecutor executor = Mockito.mock(DefaultWorkflowExecutor.class);
         Workflow workflow = new ApplicationCreationWorkflow();
         workflow.setWorkflowReference(application.getId());
 
@@ -940,8 +938,7 @@ public class APIStoreImplTestCase {
 
         SubscriptionResponse response = apiStore.addApiSubscription(apiId, UUID, TIER);
 
-        SubscriptionCreationSimpleWorkflowExecutor executor = Mockito.mock(SubscriptionCreationSimpleWorkflowExecutor
-                .class);
+        DefaultWorkflowExecutor executor = Mockito.mock(DefaultWorkflowExecutor.class);
         Workflow workflow = new SubscriptionWorkflow();
         workflow.setWorkflowType(APIMgtConstants.WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
         workflow.setWorkflowReference(response.getSubscriptionUUID());

@@ -41,19 +41,19 @@ public class WorkflowConfig {
     public WorkflowConfig() {
         
         applicationCreation = new WorkflowExecutorInfo();
-        applicationCreation.setExecutor(APIMgtConstants.WF_DEFAULT_APPCREATION_EXEC);
+        applicationCreation.setExecutor(APIMgtConstants.WF_DEFAULT_WF_EXEC);
 
         apiStateChange = new WorkflowExecutorInfo();
-        apiStateChange.setExecutor(APIMgtConstants.WF_DEFAULT_APISTATE_EXEC);
+        apiStateChange.setExecutor(APIMgtConstants.WF_DEFAULT_WF_EXEC);
 
         applicationDeletion = new WorkflowExecutorInfo();
-        applicationDeletion.setExecutor(APIMgtConstants.WF_DEFAULT_APPDELETE_EXEC);
+        applicationDeletion.setExecutor(APIMgtConstants.WF_DEFAULT_WF_EXEC);
 
         subscriptionCreation = new WorkflowExecutorInfo();
-        subscriptionCreation.setExecutor(APIMgtConstants.WF_DEFAULT_SUBCREATION_EXEC);
+        subscriptionCreation.setExecutor(APIMgtConstants.WF_DEFAULT_WF_EXEC);
 
         subscriptionDeletion = new WorkflowExecutorInfo();
-        subscriptionDeletion.setExecutor(APIMgtConstants.WF_DEFAULT_SUBDELETE_EXEC);
+        subscriptionDeletion.setExecutor(APIMgtConstants.WF_DEFAULT_WF_EXEC);
 
     }
 
