@@ -12,7 +12,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.dto.ErrorListItemDTO;
 /**
  * ErrorDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-22T12:24:12.664+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-28T14:28:58.278+05:30")
 public class ErrorDTO   {
   @JsonProperty("code")
   private Long code = null;

@@ -32,6 +32,8 @@ $(function () {
     });
 });
 
+$('#addThrottleBtn').on('click', addPolicyToBackend );
+
 var apiPolicy =
 {
     "policyName": "",
@@ -122,7 +124,7 @@ var addPolicy = function () {
 
 
 
-var addPolicyToBackend = function () {
+function addPolicyToBackend(e) {
     var apiPolicyString = JSON.stringify(apiPolicy);
     var apiPolicyNew = JSON.parse(apiPolicyString);
     var policyName = $('#policy-name').val();

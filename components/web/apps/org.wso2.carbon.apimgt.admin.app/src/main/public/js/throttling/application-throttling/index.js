@@ -2,7 +2,7 @@ $(function () {
 
     var policyInstance = new Policy();
 
-    var promised_get_tiers =  policyInstance.getAllPoliciesByTier("application");
+    var promised_get_tiers =  policyInstance.getAllApplicationPolicies();
 
     promised_get_tiers.then(function (response) {
         var raw_data = {
@@ -32,7 +32,7 @@ $(function () {
     })
 
         $(document).on('click', 'a.deletePolicy', function () {
-            var policyId = $(this).attr("data-id");
+            var uuid = $(this).attr("data-uuid");
             var type = "alert";
             var layout = "topCenter";
 
@@ -45,7 +45,7 @@ $(function () {
                      buttons : [
                          { addClass: 'btn btn-primary', text: 'Ok', onClick: function ($noty) {
                              $noty.close();
-                             var promised_delete_tier =  policyInstance.deletePolicy("application", policyId);
+                             var promised_delete_tier =  policyInstance.deletePolicyByUuid("application", uuid);
                              promised_delete_tier.then(deletePolicySuccessCallback)
                                      .catch(function (error) {
                                          var message = "Error occurred while deleting application";
@@ -113,6 +113,7 @@ $(function () {
             var deleteSpanIcon = $("<span>").addClass("fw-stack").append(deleteIcon1).append(deleteIcon2);
             var deleteSpanText = $("<span>").addClass("hidden-xs").text("delete");
             var delete_button = $('<a>', {id: data, href: '#', 'data-id': data, title: 'delete'})
+                    .attr("data-uuid", row.uuid)
                     .addClass("btn btn-sm padding-reduce-on-grid-view deletePolicy")
                     .append(deleteSpanIcon)
                     .append(deleteSpanText);

@@ -13,8 +13,11 @@ import java.util.Map;
 /**
  * TierDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-22T12:24:12.664+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-28T14:28:58.278+05:30")
 public class TierDTO   {
+  @JsonProperty("uuid")
+  private String uuid = null;
+
   @JsonProperty("name")
   private String name = null;
 
@@ -105,6 +108,24 @@ public class TierDTO   {
 
   @JsonProperty("stopOnQuotaReach")
   private Boolean stopOnQuotaReach = null;
+
+  public TierDTO uuid(String uuid) {
+    this.uuid = uuid;
+    return this;
+  }
+
+   /**
+   * Get uuid
+   * @return uuid
+  **/
+  @ApiModelProperty(example = "e2e72c72-2bf0-11e7-93ae-92361f002671", required = true, value = "")
+  public String getUuid() {
+    return uuid;
+  }
+
+  public void setUuid(String uuid) {
+    this.uuid = uuid;
+  }
 
   public TierDTO name(String name) {
     this.name = name;
@@ -283,7 +304,8 @@ public class TierDTO   {
       return false;
     }
     TierDTO tier = (TierDTO) o;
-    return Objects.equals(this.name, tier.name) &&
+    return Objects.equals(this.uuid, tier.uuid) &&
+        Objects.equals(this.name, tier.name) &&
         Objects.equals(this.description, tier.description) &&
         Objects.equals(this.tierLevel, tier.tierLevel) &&
         Objects.equals(this.attributes, tier.attributes) &&
@@ -296,7 +318,7 @@ public class TierDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, description, tierLevel, attributes, requestCount, unitTime, timeUnit, tierPlan, stopOnQuotaReach);
+    return Objects.hash(uuid, name, description, tierLevel, attributes, requestCount, unitTime, timeUnit, tierPlan, stopOnQuotaReach);
   }
 
   @Override
@@ -304,6 +326,7 @@ public class TierDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class TierDTO {\n");
     
+    sb.append("    uuid: ").append(toIndentedString(uuid)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    tierLevel: ").append(toIndentedString(tierLevel)).append("\n");
