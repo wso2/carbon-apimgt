@@ -20,19 +20,27 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.utils;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIMgtEntityImportExportException;
 
-import java.io.*;
-import java.nio.charset.Charset;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -43,50 +51,6 @@ import java.util.zip.ZipOutputStream;
 public class ImportExportUtils {
 
     private static final Logger log = LoggerFactory.getLogger(ImportExportUtils.class);
-
-    /**
-     * Deletes a directory if exists
-     *
-     * @param path path of the directory to delete
-     */
-    public static void deleteDirectory(String path) {
-        if (new File(path).isDirectory()) {
-            try {
-                FileUtils.deleteDirectory(new File(path));
-            } catch (IOException e) {
-                log.error("Error while deleting directory at " + path, e);
-            }
-        }
-    }
-
-    /**
-     * Deletes a file if exists
-     *
-     * @param path path of the file to delete
-     */
-    public static void deleteFile(String path) {
-        if (new File(path).exists()) {
-            try {
-                FileUtils.forceDelete(new File(path));
-            } catch (IOException e) {
-                log.error("Error while deleting file at " + path, e);
-            }
-        }
-    }
-
-    /**
-     * Creates a directory
-     *
-     * @param path path of the directory to create
-     * @throws APIMgtEntityImportExportException if an error occurs while creating the directory
-     */
-    static void createDirectory(String path) throws APIMgtEntityImportExportException {
-        try {
-            Files.createDirectories(Paths.get(path));
-        } catch (IOException e) {
-            throw new APIMgtEntityImportExportException("Error in creating directory at: " + path, e);
-        }
-    }
 
     /**
      * Creates a zip archive from the given {@link InputStream} inputStream
@@ -113,7 +77,7 @@ public class ImportExportUtils {
      * Extracts a a given zip archive
      *
      * @param archiveFilePath path of the zip archive
-     * @param destination extract location
+     * @param destination     extract location
      * @return name if the zip archive
      * @throws APIMgtEntityImportExportException if an error occurs while extracting the archive
      */
@@ -173,40 +137,6 @@ public class ImportExportUtils {
     }
 
     /**
-     * Creates a file
-     *
-     * @param location full path to create the file
-     * @throws APIMgtEntityImportExportException if an error occurs while extracting the file
-     */
-    public static void createFile(String location) throws APIMgtEntityImportExportException {
-        try {
-            Files.createFile(Paths.get(location));
-        } catch (IOException e) {
-            throw new APIMgtEntityImportExportException("Error in creating file at: " + location, e);
-        }
-    }
-
-    static void writeToFile(String path, String content) throws APIMgtEntityImportExportException {
-        OutputStreamWriter writer = null;
-        FileOutputStream fileOutStream = null;
-        StringReader stringReader = null;
-
-        try {
-            fileOutStream = new FileOutputStream(path);
-            stringReader = new StringReader(content);
-            writer = new OutputStreamWriter(fileOutStream, Charset.forName("UTF-8"));
-            IOUtils.copy(stringReader, writer);
-        } catch (IOException e) {
-            throw new APIMgtEntityImportExportException("I/O error while writing to file at: " + path, e);
-        } finally {
-            IOUtils.closeQuietly(writer);
-            IOUtils.closeQuietly(fileOutStream);
-            IOUtils.closeQuietly(stringReader);
-        }
-
-    }
-
-    /**
      * Read contents of a file as text
      *
      * @param path full path of the file to read
@@ -241,7 +171,7 @@ public class ImportExportUtils {
     /**
      * Writes date read from {@link InputStream} to a file
      *
-     * @param path full path of the file to write
+     * @param path        full path of the file to write
      * @param inputStream {@link InputStream} instance
      * @throws APIMgtEntityImportExportException if an error occurs while writing to the file
      */
@@ -269,7 +199,7 @@ public class ImportExportUtils {
      *
      * @param sourceDirectory directory to create zip archive from
      * @param archiveLocation path to the archive location, excluding archive name
-     * @param archiveName name of the archive to create
+     * @param archiveName     name of the archive to create
      * @throws APIMgtEntityImportExportException if an error occurs while creating the archive
      */
     static void archiveDirectory(String sourceDirectory, String archiveLocation, String archiveName)
@@ -312,7 +242,7 @@ public class ImportExportUtils {
      * Queries all files under a directory recursively
      *
      * @param sourceDirectory full path to the root directory
-     * @param fileList list containing the files
+     * @param fileList        list containing the files
      */
     private static void getAllFiles(File sourceDirectory, List<File> fileList) {
         File[] files = sourceDirectory.listFiles();
@@ -357,8 +287,9 @@ public class ImportExportUtils {
             // Get relative path from archive directory to the specific file
             String zipFilePath = file.getCanonicalPath()
                     .substring(directoryToZip.getCanonicalPath().length() + 1, file.getCanonicalPath().length());
-            if (File.separatorChar != '/')
+            if (File.separatorChar != '/') {
                 zipFilePath = zipFilePath.replace(File.separatorChar, '/');
+            }
             ZipEntry zipEntry = new ZipEntry(zipFilePath);
             zipOutputStream.putNextEntry(zipEntry);
 

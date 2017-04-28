@@ -58,9 +58,9 @@ public class APIMgtConstants {
     public static final String AUTH_APPLICATION_USER_LEVEL_TOKEN = "Application_User";
     public static final String AUTH_APPLICATION_OR_USER_LEVEL_TOKEN = "Any";
     public static final String DEFAULT_API_POLICY = "Unlimited";
-    
+
     //workflow executor default executor
-    public static final String WF_DEFAULT_WF_EXEC = 
+    public static final String WF_DEFAULT_WF_EXEC =
             "org.wso2.carbon.apimgt.core.workflow.DefaultWorkflowExecutor";
 
     //Store constants
@@ -70,15 +70,6 @@ public class APIMgtConstants {
 
     public static final String HTTP_GET = "GET";
     public static final String OVERWRITE_LABELS = "overwrite_labels";
-    /**
-     * Application statuses.
-     */
-    public static class ApplicationStatus {
-        public static final String APPLICATION_CREATED = "CREATED";
-        public static final String APPLICATION_APPROVED = "APPROVED";
-        public static final String APPLICATION_REJECTED = "REJECTED";
-        public static final String APPLICATION_ONHOLD = "ON_HOLD";
-    }
 
     /**
      * Application registration statuses.
@@ -119,6 +110,29 @@ public class APIMgtConstants {
         REJECTED,
         PENDING
     }
+
+    /**
+     * Application statuses.
+     */
+    public static class ApplicationStatus {
+        public static final String APPLICATION_CREATED = "CREATED";
+        public static final String APPLICATION_APPROVED = "APPROVED";
+        public static final String APPLICATION_REJECTED = "REJECTED";
+        public static final String APPLICATION_ONHOLD = "ON_HOLD";
+    }
+
+    /**
+     * API File Constants
+     */
+    public static class APIFileUtilConstants {
+        public static final String API_DEFINITION_FILE_PREFIX = "api-";
+        public static final String JSON_EXTENSION = ".json";
+        public static final String SWAGGER_DEFINITION_FILE_PREFIX = "swagger-";
+        public static final String GATEWAY_CONFIGURATION_DEFINITION_FILE = "gateway-configuration";
+        public static final String THUMBNAIL_FILE_NAME = "thumbnail";
+        public static final String ENDPOINTS_ROOT_DIRECTORY = "Endpoints";
+    }
+
     /**
      * Throttle policy related constants
      */
@@ -191,7 +205,7 @@ public class APIMgtConstants {
 
         public static final String COLUMN_SIDDHI_QUERY = "SIDDHI_QUERY";
 
-        public static final String COLUMN_KEY_TEMPLATE  = "KEY_TEMPLATE";
+        public static final String COLUMN_KEY_TEMPLATE = "KEY_TEMPLATE";
 
         public static final String COLUMN_DEPLOYED = "IS_DEPLOYED";
 
@@ -282,7 +296,7 @@ public class APIMgtConstants {
         public static final String SET_COOKIE = "Set-Cookie";
         public static final String COOKIE = "Cookie";
     }
-    
+
     /**
      * Workflow related constants
      */
@@ -292,13 +306,13 @@ public class APIMgtConstants {
         public static final String WF_TYPE_AM_APPLICATION_CREATION = "AM_APPLICATION_CREATION";
         public static final String WF_TYPE_AM_APPLICATION_DELETION = "AM_APPLICATION_DELETION";
         public static final String WF_TYPE_AM_API_STATE = "AM_API_STATE";
-        public static final String WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION = 
+        public static final String WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION =
                 "AM_APPLICATION_REGISTRATION_PRODUCTION";
         public static final String WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX = "AM_APPLICATION_REGISTRATION_SANDBOX";
         public static final String ATTRIBUTE_API_CUR_STATE = "apiCurrentState";
         public static final String ATTRIBUTE_API_TARGET_STATE = "apiTargetState";
         public static final String ATTRIBUTE_API_LC_INVOKER = "lcStateChangeInvoker";
-        public static final String ATTRIBUTE_API_LAST_UPTIME = "lastUpdatedTime";        
+        public static final String ATTRIBUTE_API_LAST_UPTIME = "lastUpdatedTime";
 
     }
 
@@ -308,5 +322,5 @@ public class APIMgtConstants {
     public static class ETagConstants {
         public static final String MESSAGE_DIGEST_ALGORITHM_MD5 = "MD5";
     }
-    
+
 }
