@@ -184,3 +184,6 @@ body {
     border-bottom: none;
     border-top: none;
 }
+.checkbox-font {
+    font-weight: 300;
+}

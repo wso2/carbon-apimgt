@@ -91,9 +91,11 @@ class KeyManager {
 class AuthClient {
 
     static refreshTokenOnExpire(){
+        var timestampSkew = 100;
         var currentTimestamp =  Math.floor(Date.now() / 1000);
         var tokenTimestamp = window.localStorage.getItem("expiresIn");
-        if(tokenTimestamp - currentTimestamp < 100) {
+        var rememberMe = (window.localStorage.getItem("rememberMe") == 'true');
+        if(rememberMe && (tokenTimestamp - currentTimestamp < timestampSkew)) {
             var bearerToken = "Bearer " + AuthClient.getCookie("WSO2_AM_REFRESH_TOKEN_1");
             var loginPromise = authManager.refresh(bearerToken);
             loginPromise.then(function(data,status,xhr){
