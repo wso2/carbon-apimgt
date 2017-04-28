@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.API.APIBuilder;
@@ -854,7 +855,7 @@ public class APIStoreImplTestCase {
         apiStore.addApplication(application);
     }
 
-    @Test(description = "Exception when retrieving labels", expectedExceptions = APIManagementException.class)
+    @Test(description = "Exception when retrieving labels", expectedExceptions = LabelException.class)
     public void testGetLabelInfoException() throws APIManagementException {
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
         APIStore apiStore = getApiStoreImpl(labelDAO);

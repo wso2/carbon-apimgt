@@ -21,6 +21,7 @@
 package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.ApplicationCreationResponse;
@@ -200,9 +201,9 @@ public interface APIStore extends APIManager {
      * @param labels    List of label names
      * @param username  Username of the user
      * @return {@code List<Label>} List of Labels
-     * @throws APIManagementException if failed to get labels
+     * @throws LabelException if failed to get labels
      */
-    List<Label> getLabelInfo(List<String> labels, String username) throws APIManagementException;
+    List<Label> getLabelInfo(List<String> labels, String username) throws LabelException;
 
     /**
      * Retrieve Individual Comment based on Comment ID

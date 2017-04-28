@@ -48,6 +48,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
+import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIResource;
@@ -1539,14 +1540,14 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     @Override
-    public List<Label> getAllLabels() throws APIManagementException {
+    public List<Label> getAllLabels() throws LabelException {
 
         try {
             return getLabelDAO().getLabels();
         } catch (APIMgtDAOException e) {
             String msg = "Error occurred while retrieving labels";
             log.error(msg, e);
-            throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new LabelException(msg, ExceptionCodes.LABEL_EXCEPTION);
         }
     }
 
