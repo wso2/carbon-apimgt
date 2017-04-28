@@ -78,7 +78,7 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
             } else if (WorkflowStatus.APPROVED == workflow.getStatus()) {
                 String errorMessage = "Workflow is already in complete state";
                 APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
-                        ExceptionCodes.WORKFLOW_COMPLETED);
+                        ExceptionCodes.WORKFLOW_ALREADY_COMPLETED);
                 Map<String, String> paramList = new HashMap<>();
                 paramList.put(APIMgtConstants.ExceptionsConstants.WORKFLOW_REF_ID, workflowReferenceId);
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);

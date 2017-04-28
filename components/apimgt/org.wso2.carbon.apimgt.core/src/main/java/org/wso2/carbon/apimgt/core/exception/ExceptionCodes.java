@@ -73,7 +73,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "Error occurred while executing workflow task"),
     WORKFLOW_NOT_FOUND(900551, "Workflow error", 404,
             "Workflow entry cannot be found for the given reference id"),
-    WORKFLOW_COMPLETED(900552, "Workflow error", 404,
+    WORKFLOW_ALREADY_COMPLETED(900552, "Workflow error", 400,
             "Workflow is already completed"),
     WORKFLOW_PENDING(900553, "Workflow exception", 409,
             "Pending workflow task exists for the seleted API"),
