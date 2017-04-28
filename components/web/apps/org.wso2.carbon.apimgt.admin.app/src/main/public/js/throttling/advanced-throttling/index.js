@@ -1,7 +1,7 @@
 $(function () {
     var policyInstance = new Policy();
 
-    var promised_get_tiers =  policyInstance.getAllPoliciesByTier("api");
+    var promised_get_tiers =  policyInstance.getAllAdvancePolicies();
 
     promised_get_tiers.then(function (response) {
         var raw_data = {
@@ -32,10 +32,10 @@ $(function () {
     );
 
     $(document).on('click', 'a.deletePolicy', function () {
-        var policyId = $(this).attr("data-id");
+        var uuid = $(this).attr("data-uuid");
         var type = "alert";
         var layout = "topCenter";
-
+        debugger;
         noty({
                  text : "Do you want to delete the policy",
                  type : type,
@@ -45,7 +45,7 @@ $(function () {
                  buttons : [
                      { addClass: 'btn btn-primary', text: 'Ok', onClick: function ($noty) {
                          $noty.close();
-                         var promised_delete_tier =  policyInstance.deletePolicy("api", policyId);
+                         var promised_delete_tier =  policyInstance.deletePolicyByUuid("api", uuid);
                          promised_delete_tier.then(deletePolicySuccessCallback)
                                  .catch(function (error) {
                                      var message = "Error occurred while deleting application";
@@ -101,18 +101,20 @@ $(function () {
             var editSpanText = $("<span>").addClass("hidden-xs").text("Edit");
             var edit_button = $('<a>', {
                 id: data.id,
-                href: contextPath + '/applications/' + data + '/edit',
+                href: "",
                 title: 'Edit'
             })
-                    .addClass("btn  btn-sm padding-reduce-on-grid-view")
-                    .append(editSpanIcon)
-                    .append(editSpanText);
+                .attr("data-uuid", row.uuid)
+                .addClass("btn btn-sm padding-reduce-on-grid-view tier-edit")
+                .append(editSpanIcon)
+                .append(editSpanText);
 
             var deleteIcon1 = $("<i>").addClass("fw fw-ring fw-stack-2x");
             var deleteIcon2 = $("<i>").addClass("fw fw-delete fw-stack-1x");
             var deleteSpanIcon = $("<span>").addClass("fw-stack").append(deleteIcon1).append(deleteIcon2);
             var deleteSpanText = $("<span>").addClass("hidden-xs").text("delete");
             var delete_button = $('<a>', {id: data, href: '#', 'data-id': data, title: 'delete'})
+                    .attr("data-uuid", row.uuid)
                     .addClass("btn btn-sm padding-reduce-on-grid-view deletePolicy")
                     .append(deleteSpanIcon)
                     .append(deleteSpanText);
@@ -142,5 +144,38 @@ $(function () {
                  }
              });
     }
+
+    $(document).on('click', ".tier-edit", function (e) {
+        e.preventDefault();
+        var uuid = $(this).data('uuid');
+        var policy_obj =  policyInstance.getPoliciesByUuid(uuid , "api");
+
+        policy_obj.then(function (response) {
+            var raw_data = {
+                data: response.obj
+            };
+            var callbacks = {
+                onSuccess: function () {
+
+                },
+                onFailure: function (message, e) {
+
+                }
+            };
+            var mode = "OVERWRITE";
+            var obj = {};
+            obj.list=response.obj;
+            UUFClient.renderFragment("org.wso2.carbon.apimgt.web.admin.feature.policy-add?api=true&update=true", obj,
+                "policy-view", mode, callbacks);
+        });
+        policy_obj.catch(
+            function (error) {
+                console.log("Error occurred while loading swagger definition");
+                if (error.status == 401) {
+                    redirectToLogin(contextPath);
+                }
+            }
+        );
+    });
 
 })

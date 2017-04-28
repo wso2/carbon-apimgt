@@ -99,11 +99,26 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     }
 
     /**
+     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#deletePolicyByUuid(String, String)
+     */
+    @Override public void deletePolicyByUuid(String uuid, String policyLevel) throws APIManagementException {
+        policyDAO.deletePolicyByUuid(uuid, policyLevel);
+    }
+
+    /**
      * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#getPolicy(String, String)
      */
     @Override
     public Policy getPolicy(String policyLevel, String policyName) throws APIManagementException {
         return policyDAO.getPolicy(policyLevel, policyName);
+    }
+
+    /**
+     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#getPolicyByUuid(String, String)
+     */
+    @Override
+    public Policy getPolicyByUuid(String uuid, String policyLevel) throws APIManagementException {
+        return policyDAO.getPolicyByUuid(uuid, policyLevel);
     }
 
     /**

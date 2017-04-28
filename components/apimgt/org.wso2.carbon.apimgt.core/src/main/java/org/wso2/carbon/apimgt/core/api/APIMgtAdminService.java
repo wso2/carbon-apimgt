@@ -88,6 +88,15 @@ public interface APIMgtAdminService {
 
 
     /**
+     * Delete existing @{@link Policy} in the system
+     *
+     * @param uuid    Policy uuid to be deleted.
+     * @param policyLevel Policy Level to which above Policy belongs to
+     * @throws APIManagementException   If failed to delete the policy.
+     */
+    void deletePolicyByUuid(String uuid, String policyLevel) throws APIManagementException;
+
+    /**
      * Get a @{@link Policy} by policy name
      *
      * @param policyLevel Tier level of the policy.
@@ -96,6 +105,16 @@ public interface APIMgtAdminService {
      * @throws APIManagementException If failed to get policy.
      */
     Policy getPolicy(String policyLevel, String policyName) throws APIManagementException;
+
+    /**
+     * Get a @{@link Policy} by policy uuid
+     *
+     * @param uuid Policy uuid
+     * @param policyLevel Tier level of the policy.
+     * @return Policy object.
+     * @throws APIManagementException If failed to get policy.
+     */
+    Policy getPolicyByUuid(String uuid, String policyLevel) throws APIManagementException;
 
     /**
      * Get a List of policies of a particular level
