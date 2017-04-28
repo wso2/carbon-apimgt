@@ -1100,8 +1100,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 response = MappingUtil.toWorkflowResponseDTO(workflowResponse);
                 //if workflow is in pending state or if the executor sends any httpworklfowresponse (workflow state can 
                 //be in either pending or approved state) send back the workflow response 
-                if (WorkflowStatus.CREATED == workflowResponse.getWorkflowStatus()
-                        || workflowResponse instanceof HttpWorkflowResponse) {
+                if (WorkflowStatus.CREATED == workflowResponse.getWorkflowStatus()) {
                     URI location = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId);
                     return Response.status(Response.Status.ACCEPTED).header(RestApiConstants.LOCATION_HEADER, location)
                             .entity(response).build();

@@ -533,9 +533,21 @@ public abstract class AbstractAPIManager implements APIManager {
         throw new APIMgtResourceAlreadyExistsException(msg);
     }
     
-    @Override
-    public Workflow retrieveWorkflow(String workflowRefId) throws APIMgtDAOException {        
-        return workflowDAO.retrieveWorkflow(workflowRefId);
+    /**
+     * Retrieve workflow for given internal ref id
+     * 
+     * @param workflowRefId workflow reference id
+     * @return Workflow workflow.
+     * @throws APIMgtDAOException  If failed to get list of subscriptions.
+     */
+    public Workflow retrieveWorkflow(String workflowRefId) throws APIMgtDAOException {       
+        try {
+            return workflowDAO.retrieveWorkflow(workflowRefId);    
+        } catch (APIMgtDAOException e) {
+            String message = "Error while updating workflow entry";
+            log.error(message);
+            throw new APIMgtDAOException(message, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }        
     }
     
     protected void updateWorkflowEntries(Workflow workflow) throws APIManagementException {

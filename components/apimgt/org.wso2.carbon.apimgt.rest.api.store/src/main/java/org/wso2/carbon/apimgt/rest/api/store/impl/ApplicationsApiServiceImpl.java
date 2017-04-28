@@ -380,8 +380,7 @@ public class ApplicationsApiServiceImpl
 
             //if workflow is in pending state or if the executor sends any httpworklfowresponse (workflow state can 
             //be in either pending or approved state) send back the workflow response 
-            if (ApplicationStatus.APPLICATION_ONHOLD.equals(createdApplication.getStatus())
-                    || applicationResponse.getWorkflowResponse() instanceof HttpWorkflowResponse) {
+            if (ApplicationStatus.APPLICATION_ONHOLD.equals(createdApplication.getStatus())) {
                 
                 WorkflowResponseDTO workflowResponse = WorkflowMappintUtil
                         .fromWorkflowResponsetoDTO(applicationResponse.getWorkflowResponse());
