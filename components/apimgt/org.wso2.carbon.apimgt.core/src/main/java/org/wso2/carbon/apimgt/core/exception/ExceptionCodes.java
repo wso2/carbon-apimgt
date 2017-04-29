@@ -95,7 +95,7 @@ public enum ExceptionCodes implements ErrorHandler {
     // Labels related codes
     LABEL_INFORMATION_CANNOT_BE_NULL(900650, "Label information cannot be null", 400, "Label information cannot be " +
             "null"),
-    LABEL_INFORMATION_EXCEPTION(900651, "Label Info error", 500, "Error occurred while retrieving label information"),
+    LABEL_EXCEPTION(900651, "Label Error", 500, "Error occurred while retrieving label information"),
 
 
     // REST API related codes

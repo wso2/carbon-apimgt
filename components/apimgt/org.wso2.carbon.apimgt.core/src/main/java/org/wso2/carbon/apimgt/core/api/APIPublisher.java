@@ -21,6 +21,7 @@
 package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
@@ -478,9 +479,9 @@ public interface APIPublisher extends APIManager {
      * Returns the list of Labels.
      *
      * @return List of labels
-     * @throws APIManagementException if failed to get labels
+     * @throws LabelException if failed to get labels
      */
-    List<Label> getAllLabels() throws APIManagementException;
+    List<Label> getAllLabels() throws LabelException;
 
     /**
      * Retrieves the last updated time of the endpoint given its endpointId

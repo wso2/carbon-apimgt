@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
+import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
 import org.wso2.carbon.apimgt.core.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
@@ -449,7 +450,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
     @Override
-    public List<Label> getLabelInfo(List<String> labels, String username) throws APIManagementException {
+    public List<Label> getLabelInfo(List<String> labels, String username) throws LabelException {
 
         List<Label> filteredLabels;
         String labelExtractorClassName = config.getLabelExtractor();
@@ -460,16 +461,16 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while retrieving label information";
             log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new LabelException(errorMsg, e, ExceptionCodes.LABEL_EXCEPTION);
         } catch (ClassNotFoundException e) {
             String errorMsg = "Error occurred while loading the class [class name] " + labelExtractorClassName;
             log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.LABEL_INFORMATION_EXCEPTION);
+            throw new LabelException(errorMsg, e, ExceptionCodes.LABEL_EXCEPTION);
         } catch (IllegalAccessException | InstantiationException e) {
             String errorMsg = "Error occurred while creating an instance of the class [class name] " +
                     labelExtractorClassName;
             log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.LABEL_INFORMATION_EXCEPTION);
+            throw new LabelException(errorMsg, e, ExceptionCodes.LABEL_EXCEPTION);
         }
         return filteredLabels;
     }
