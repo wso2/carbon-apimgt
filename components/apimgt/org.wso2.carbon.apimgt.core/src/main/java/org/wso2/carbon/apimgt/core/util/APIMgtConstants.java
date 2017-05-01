@@ -291,6 +291,7 @@ public class APIMgtConstants {
         public static final String WF_TYPE_AM_SUBSCRIPTION_DELETION = "AM_SUBSCRIPTION_DELETION";
         public static final String WF_TYPE_AM_APPLICATION_CREATION = "AM_APPLICATION_CREATION";
         public static final String WF_TYPE_AM_APPLICATION_DELETION = "AM_APPLICATION_DELETION";
+        public static final String WF_TYPE_AM_APPLICATION_UPDATE = "AM_APPLICATION_UPDATE";
         public static final String WF_TYPE_AM_API_STATE = "AM_API_STATE";
         public static final String WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION = 
                 "AM_APPLICATION_REGISTRATION_PRODUCTION";
@@ -298,7 +299,15 @@ public class APIMgtConstants {
         public static final String ATTRIBUTE_API_CUR_STATE = "apiCurrentState";
         public static final String ATTRIBUTE_API_TARGET_STATE = "apiTargetState";
         public static final String ATTRIBUTE_API_LC_INVOKER = "lcStateChangeInvoker";
-        public static final String ATTRIBUTE_API_LAST_UPTIME = "lastUpdatedTime";        
+        public static final String ATTRIBUTE_API_LAST_UPTIME = "lastUpdatedTime";
+        public static final String ATTRIBUTE_APPLICATION_NAME = "name";
+        public static final String ATTRIBUTE_APPLICATION_UPDATEDBY = "updatedUser";
+        public static final String ATTRIBUTE_APPLICATION_TIER = "tier";
+        public static final String ATTRIBUTE_APPLICATION_DESCRIPTION = "description";  
+        public static final String ATTRIBUTE_APPLICATION_CALLBACKURL = "callbackUrl";
+        public static final String ATTRIBUTE_APPLICATION_GROUPID = "groupId"; 
+        public static final String ATTRIBUTE_APPLICATION_PERMISSION = "permission";
+        public static final String ATTRIBUTE_APPLICATION_EXISTIN_APP_STATUS = "status";
 
     }
 
