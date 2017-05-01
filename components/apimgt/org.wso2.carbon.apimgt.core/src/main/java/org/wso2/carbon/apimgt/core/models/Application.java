@@ -195,4 +195,13 @@ public final class Application {
     public void setPermissionMap(HashMap permissionMap) {
         this.permissionMap = permissionMap;
     }
+
+    @Override
+    public String toString() {
+        return "Application [name=" + name + ", groupId=" + groupId + ", uuid=" + uuid + ", policyId=" + policyId
+                + ", description=" + description + ", tier=" + tier + ", status=" + status + ", callbackUrl="
+                + callbackUrl + ", createdUser=" + createdUser + ", createdTime=" + createdTime + ", updatedUser="
+                + updatedUser + ", updatedTime=" + updatedTime + ", keys=" + keys + ", permissionString="
+                + permissionString + ", permissionMap=" + permissionMap + "]";
+    }    
 }
