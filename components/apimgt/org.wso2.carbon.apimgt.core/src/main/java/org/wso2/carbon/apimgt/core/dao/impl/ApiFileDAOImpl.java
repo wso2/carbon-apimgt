@@ -22,7 +22,9 @@ import com.google.gson.stream.JsonReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
@@ -520,11 +522,11 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#isAPINameExists(String apiName, String providerName)
+     * @see ApiDAO#isAPINameExists(String apiName, String providerName, ApiType apiType)
      */
     @Override
     public
-    boolean isAPINameExists(String apiName, String providerName) throws APIMgtDAOException {
+    boolean isAPINameExists(String apiName, String providerName, ApiType apiType) throws APIMgtDAOException {
         return false;
     }
 
