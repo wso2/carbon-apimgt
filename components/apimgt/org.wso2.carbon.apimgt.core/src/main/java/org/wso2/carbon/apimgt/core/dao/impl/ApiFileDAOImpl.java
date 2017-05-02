@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * File based implementation of the ApiDAO interface.
@@ -278,17 +279,7 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public boolean deleteEndpoint(String endpointId) throws APIMgtDAOException {
-        String endpointPartialName = endpointId + JSON_EXTENSION;
-        String endpointFilePath = APIFileUtils
-                .findInFileSystem(new File(storagePath + File.separator + ENDPOINTS_ROOT_DIRECTORY),
-                        endpointPartialName);
-        if (endpointFilePath == null) {
-            String errorMsg = "Endpoint with Id" + endpointId + " not found.";
-            log.error(errorMsg);
-            throw new APIMgtDAOException(errorMsg);
-        }
-        APIFileUtils.deleteFile(endpointFilePath);
-        return true;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -458,10 +449,10 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#getAPIs()
+     * @see ApiDAO#getAPIs(ApiType)
      */
     @Override
-    public List<API> getAPIs() throws APIMgtDAOException {
+    public List<API> getAPIs(ApiType apiType) throws APIMgtDAOException {
 
         File[] files = new File(storagePath).listFiles();
         List<API> apiList = new ArrayList<>();
@@ -485,44 +476,45 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#getAPIsByStatus(List)
+     * @see ApiDAO#getAPIsByStatus(List, ApiType)
      */
     @Override
-    public List<API> getAPIsByStatus(List<String> statuses) throws APIMgtDAOException {
+    public List<API> getAPIsByStatus(List<String> statuses, ApiType apiType) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * @see ApiDAO#getAPIsByStatus(Set , List)
+     * @see ApiDAO#getAPIsByStatus(Set , List, ApiType)
      */
     @Override
-    public List<API> getAPIsByStatus(Set<String> roles, List<String> statuses) throws APIMgtDAOException {
+    public List<API> getAPIsByStatus(Set<String> roles, List<String> statuses, ApiType apiType)
+                                                                                throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * @see ApiDAO#searchAPIs(Set roles, String user, String searchString, int offset, int limit)
+     * @see ApiDAO#searchAPIs(Set roles, String user, String searchString, ApiType apiType, int offset, int limit)
      */
     @Override
-    public List<API> searchAPIs(Set<String> roles, String user, String searchString, int offset, int limit)
-            throws APIMgtDAOException {
+    public List<API> searchAPIs(Set<String> roles, String user, String searchString,
+                                ApiType apiType, int offset, int limit) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * @see ApiDAO#attributeSearchAPIs(Set roles, String user, Map attributeMap, int offset, int limit)
+     * @see ApiDAO#attributeSearchAPIs(Set roles, String user, Map attributeMap, ApiType apiType, int offset, int limit)
      */
     @Override
     public List<API> attributeSearchAPIs(Set<String> roles, String user, Map<String, String> attributeMap,
-            int offset, int limit) throws APIMgtDAOException {
+                                         ApiType apiType, int offset, int limit) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * @see ApiDAO#searchAPIsByStatus(String searchString, List statuses)
+     * @see ApiDAO#searchAPIsByStatus(String searchString, List statuses, ApiType apiType)
      */
     @Override
-    public List<API> searchAPIsByStatus(String searchString, List<String> statuses)
+    public List<API> searchAPIsByStatus(String searchString, List<String> statuses, ApiType apiType)
             throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }

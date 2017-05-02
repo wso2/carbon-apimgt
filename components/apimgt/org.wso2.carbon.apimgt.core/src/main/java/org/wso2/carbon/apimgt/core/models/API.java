@@ -21,6 +21,7 @@
 package org.wso2.carbon.apimgt.core.models;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.lcm.core.ManagedLifecycle;
 import org.wso2.carbon.lcm.core.exception.LifecycleException;
@@ -63,6 +64,7 @@ public final class API {
         businessInformation = builder.businessInformation;
         corsConfiguration = builder.corsConfiguration;
         createdTime = builder.createdTime;
+        apiType = builder.apiType;
         createdBy = builder.createdBy;
         updatedBy = builder.updatedBy;
         lastUpdatedTime = builder.lastUpdatedTime;
@@ -281,6 +283,7 @@ public final class API {
     private final Set<String> visibleRoles;
     private final BusinessInformation businessInformation;
     private final CorsConfiguration corsConfiguration;
+    private final ApiType apiType;
     private final LocalDateTime createdTime;
     private final String createdBy;
     private final String updatedBy;
@@ -417,6 +420,7 @@ public final class API {
         private Set<String> visibleRoles = Collections.emptySet();
         private BusinessInformation businessInformation;
         private CorsConfiguration corsConfiguration;
+        private ApiType apiType;
         private LocalDateTime createdTime;
         private String createdBy;
         private String updatedBy;
@@ -455,6 +459,7 @@ public final class API {
             this.visibleRoles = copy.visibleRoles;
             this.businessInformation = copy.businessInformation;
             this.corsConfiguration = copy.corsConfiguration;
+            this.apiType = copy.apiType;
             this.createdTime = copy.createdTime;
             this.createdBy = copy.createdBy;
             this.lastUpdatedTime = copy.lastUpdatedTime;
@@ -784,6 +789,18 @@ public final class API {
         }
 
         /**
+         * Sets the {@code apiType} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
+         *
+         * @param apiType the {@code apiType} to set
+         * @return a reference to this APIBuilder
+         */
+        public APIBuilder apiType(ApiType apiType) {
+            this.apiType = apiType;
+            return this;
+        }
+
+        /**
          * Sets the {@code createdTime} and returns a reference to this APIBuilder so that the methods can be chained
          * together.
          *
@@ -979,6 +996,10 @@ public final class API {
 
     public String getCopiedFromApiId() {
         return copiedFromApiId;
+    }
+
+    public ApiType getApiType() {
+        return apiType;
     }
 
     public void setCopiedFromApiId(String copiedFromApiId) {

@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
@@ -79,6 +80,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class APIPublisherImplTestCase {
@@ -243,7 +245,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user))
                 .thenReturn(new LifecycleState());
         Mockito.when(apiDAO.isAPIContextExists("weather")).thenReturn(true);
-        Mockito.when(apiDAO.isAPINameExists("WeatherAPI", user)).thenReturn(false);
+        Mockito.when(apiDAO.isAPINameExists("WeatherAPI", user, ApiType.STANDARD)).thenReturn(false);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager);
         apiPublisher.addAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
@@ -258,7 +260,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user))
                 .thenReturn(new LifecycleState());
         Mockito.when(apiDAO.isAPIContextExists("weather")).thenReturn(false);
-        Mockito.when(apiDAO.isAPINameExists("WeatherAPI", user)).thenReturn(true);
+        Mockito.when(apiDAO.isAPINameExists("WeatherAPI", user, ApiType.STANDARD)).thenReturn(true);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager);
         apiPublisher.addAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
@@ -281,7 +283,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Test add api with restricted visibility")
     public void testAddApiWithRestrictedVisibility() throws APIManagementException, LifecycleException {
-        List<String> visibleRoles = new ArrayList<>();
+        Set<String> visibleRoles = new HashSet<>();
         visibleRoles.add("admin");
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI()
                 .endpoint(SampleTestObjectCreator.getMockEndpointMap()).visibility(API.Visibility.RESTRICTED)
@@ -392,11 +394,12 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
         List<API> apimResultsFromDAO = new ArrayList<>();
-        Mockito.when(apiDAO.searchAPIs(new HashSet<>(), user, QUERY_STRING, 1, 2)).thenReturn(apimResultsFromDAO);
+        Mockito.when(apiDAO.searchAPIs(new HashSet<>(), user, QUERY_STRING, ApiType.STANDARD, 1, 2)).
+                                                                                thenReturn(apimResultsFromDAO);
         List<API> apis = apiPublisher.searchAPIs(2, 1, QUERY_STRING);
         Assert.assertNotNull(apis);
         Mockito.verify(apiDAO, Mockito.atLeastOnce()).searchAPIs(APIUtils.getAllRolesOfUser(user),
-                user, QUERY_STRING, 1, 2);
+                user, QUERY_STRING, ApiType.STANDARD, 1, 2);
     }
 
     @Test(description = "Search APIs with null query string")
@@ -404,23 +407,24 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
         List<API> apimResultsFromDAO = new ArrayList<>();
-        Mockito.when(apiDAO.searchAPIs(new HashSet<>(), user, null, 1, 2)).thenReturn(apimResultsFromDAO);
+        Mockito.when(apiDAO.searchAPIs(new HashSet<>(), user, null, ApiType.STANDARD, 1, 2)).
+                                                                                thenReturn(apimResultsFromDAO);
         apiPublisher.searchAPIs(2, 1, null);
-        Mockito.verify(apiDAO, Mockito.times(1)).getAPIs();
+        Mockito.verify(apiDAO, Mockito.times(1)).getAPIs(ApiType.STANDARD);
     }
 
     @Test(description = "Exception when searching APIs", expectedExceptions = APIManagementException.class)
     public void testSearchAPIsException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
-        Mockito.when(apiDAO.searchAPIs(APIUtils.getAllRolesOfUser(user), user, QUERY_STRING, 1, 2))
+        Mockito.when(apiDAO.searchAPIs(APIUtils.getAllRolesOfUser(user), user, QUERY_STRING, ApiType.STANDARD, 1, 2))
                 .thenThrow(new APIMgtDAOException("Error occurred while Searching the API with query pizza"));
         apiPublisher.searchAPIs(2, 1, QUERY_STRING);
     }
 
     @Test(description = "Get APIs by provider")
     public void testGetAPIsByProvider() throws APIManagementException {
-        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class); 
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
         Mockito.when(apiDAO.getAPIsForProvider(user)).thenReturn(new ArrayList<API>());
         apiPublisher.getAPIsByProvider(user);
@@ -646,7 +650,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Test UpdateAPI with restricted visibility")
     public void testUpdateAPIWithRestrictedVisibility() throws APIManagementException, LifecycleException {
-        List<String> visibleRoles = new ArrayList<>();
+        Set<String> visibleRoles = new HashSet<>();
         visibleRoles.add("admin");
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
@@ -668,7 +672,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Test UpdateAPI with restricted visibility but different context")
     public void testUpdateAPIWithRestrictedVisibilityButDifferentContext() throws APIManagementException {
-        List<String> visibleRoles = new ArrayList<>();
+        Set<String> visibleRoles = new HashSet<>();
         visibleRoles.add("admin");
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);

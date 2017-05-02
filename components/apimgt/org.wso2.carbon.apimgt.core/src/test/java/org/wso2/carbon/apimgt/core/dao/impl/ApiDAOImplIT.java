@@ -26,6 +26,7 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.TestUtil;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -89,7 +90,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API apiFromDB = apiDAO.getAPI(api.getId());
 
         Assert.assertNull(apiDAO.getAPI(duplicateAPI.getId()));
-        Assert.assertEquals(apiDAO.getAPIs().size(), 1);
+        Assert.assertEquals(apiDAO.getAPIs(ApiType.STANDARD).size(), 1);
         Assert.assertEquals(apiFromDB, api, TestUtil.printDiff(apiFromDB, api));
     }
 
@@ -111,7 +112,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         Assert.assertEquals(duplicateApiFromDB.getName(), api.getName());
         Assert.assertEquals(duplicateApiFromDB.getVersion(), api.getVersion());
-        Assert.assertEquals(apiDAO.getAPIs().size(), 2);
+        Assert.assertEquals(apiDAO.getAPIs(ApiType.STANDARD).size(), 2);
         Assert.assertEquals(apiFromDB, api, TestUtil.printDiff(apiFromDB, api));
         Assert.assertEquals(duplicateApiFromDB, duplicateAPI, TestUtil.printDiff(duplicateApiFromDB, duplicateAPI));
     }
@@ -137,7 +138,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API apiFromDB = apiDAO.getAPI(api.getId());
 
         Assert.assertNull(apiDAO.getAPI(duplicateAPI.getId()));
-        Assert.assertEquals(apiDAO.getAPIs().size(), 1);
+        Assert.assertEquals(apiDAO.getAPIs(ApiType.STANDARD).size(), 1);
         Assert.assertEquals(apiFromDB, api, TestUtil.printDiff(apiFromDB, api));
     }
 
@@ -161,7 +162,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     public void testGetAPIs() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
 
-        List<API> apiList = apiDAO.getAPIs();
+        List<API> apiList = apiDAO.getAPIs(ApiType.STANDARD);
         Assert.assertTrue(apiList.isEmpty());
 
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
@@ -174,7 +175,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         apiDAO.addAPI(api2);
 
-        apiList = apiDAO.getAPIs();
+        apiList = apiDAO.getAPIs(ApiType.STANDARD);
 
         List<API> expectedAPIs = new ArrayList<>();
         expectedAPIs.add(SampleTestObjectCreator.copyAPISummary(api1));
@@ -279,7 +280,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         List<String> singleStatus = new ArrayList<>();
         singleStatus.add(publishedStatus);
 
-        List<API> apiList = apiDAO.getAPIsByStatus(singleStatus);
+        List<API> apiList = apiDAO.getAPIsByStatus(singleStatus, ApiType.STANDARD);
 
         Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, publishedAPIsSummary, new APIComparator()));
 
@@ -288,7 +289,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         twoStatuses.add(publishedStatus);
         twoStatuses.add(blockedStatus);
 
-        apiList = apiDAO.getAPIsByStatus(twoStatuses);
+        apiList = apiDAO.getAPIsByStatus(twoStatuses, ApiType.STANDARD);
 
         Assert.assertEquals(apiList.size(), publishedAPIsSummary.size() + blockedAPIsSummary.size());
 
@@ -310,7 +311,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         multipleStatuses.add(createdStatus);
         multipleStatuses.add(blockedStatus);
 
-        apiList = apiDAO.getAPIsByStatus(multipleStatuses);
+        apiList = apiDAO.getAPIsByStatus(multipleStatuses, ApiType.STANDARD);
 
         Assert.assertEquals(apiList.size(), publishedAPIsSummary.size() + blockedAPIsSummary.size()
                 + createdAPIsSummary.size());
@@ -351,13 +352,21 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         final String symbolSearchString = "##symbol";
         final String numberSearchString = "12n";                 // In some databases numbers are not used in indexing
 
+        // API Provider, the person who owns the API
+        final String provider = "John";
+
         // Create test data
         Map<String, API> apis = new HashMap<>();
-        apis.put(mixedCaseString, SampleTestObjectCreator.createUniqueAPI().name(mixedCaseString).build());
-        apis.put(lowerCaseString, SampleTestObjectCreator.createUniqueAPI().name(lowerCaseString).build());
-        apis.put(upperCaseString, SampleTestObjectCreator.createUniqueAPI().name(upperCaseString).build());
-        apis.put(charSymbolNumString, SampleTestObjectCreator.createUniqueAPI().name(charSymbolNumString).build());
-        apis.put(symbolSpaceString, SampleTestObjectCreator.createUniqueAPI().name(symbolSpaceString).build());
+        apis.put(mixedCaseString,
+                SampleTestObjectCreator.createUniqueAPI().name(mixedCaseString).provider(provider).build());
+        apis.put(lowerCaseString,
+                SampleTestObjectCreator.createUniqueAPI().name(lowerCaseString).provider(provider).build());
+        apis.put(upperCaseString,
+                SampleTestObjectCreator.createUniqueAPI().name(upperCaseString).provider(provider).build());
+        apis.put(charSymbolNumString,
+                SampleTestObjectCreator.createUniqueAPI().name(charSymbolNumString).provider(provider).build());
+        apis.put(symbolSpaceString,
+                SampleTestObjectCreator.createUniqueAPI().name(symbolSpaceString).provider(provider).build());
 
         // Add APIs
         testAddGetEndpoint();
@@ -369,39 +378,40 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         }
         // Sleep for indexing
         Thread.sleep(5000);
-        // Expected common string search result
+        // Expected common string formatApiSearch result
         List<API> commonStringResult = new ArrayList<>();
         commonStringResult.add(apis.get(mixedCaseString));
         commonStringResult.add(apis.get(lowerCaseString));
         commonStringResult.add(apis.get(upperCaseString));
 
         // Search by common mixed case
-        List<API> apiList = apiDAO.searchAPIs(new HashSet<>(), "", commonMixedCaseSearchString, 0, 10);
+        List<API> apiList = apiDAO.searchAPIs(new HashSet<>(), provider, commonMixedCaseSearchString,
+                                                                            ApiType.STANDARD, 0, 10);
         Assert.assertEquals(apiList.size(), 3);
         Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, commonStringResult, new APIComparator()),
                 TestUtil.printListDiff(apiList, commonStringResult));
 
         // Search by common lower case
-        apiList = apiDAO.searchAPIs(new HashSet<>(), "", commonLowerCaseSearchString, 0, 10);
+        apiList = apiDAO.searchAPIs(new HashSet<>(), provider, commonLowerCaseSearchString, ApiType.STANDARD, 0, 10);
         Assert.assertEquals(apiList.size(), 3);
         Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, commonStringResult, new APIComparator()),
                 TestUtil.printListDiff(apiList, commonStringResult));
 
         // Search by common upper case
-        apiList = apiDAO.searchAPIs(new HashSet<>(), "", commonUpperCaseSearchString, 0, 10);
+        apiList = apiDAO.searchAPIs(new HashSet<>(), provider, commonUpperCaseSearchString, ApiType.STANDARD, 0, 10);
         Assert.assertEquals(apiList.size(), 3);
         Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, commonStringResult, new APIComparator()),
                 TestUtil.printListDiff(apiList, commonStringResult));
 
         // Search by symbol
-        apiList = apiDAO.searchAPIs(new HashSet<>(), "", symbolSearchString, 0, 10);
+        apiList = apiDAO.searchAPIs(new HashSet<>(), provider, symbolSearchString, ApiType.STANDARD, 0, 10);
         Assert.assertEquals(apiList.size(), 1);
         API actualAPI = apiList.get(0);
         API expectedAPI = apis.get(charSymbolNumString);
         Assert.assertEquals(actualAPI, expectedAPI, TestUtil.printDiff(actualAPI, expectedAPI));
 
         // Search by number
-        apiList = apiDAO.searchAPIs(new HashSet<>(), "", numberSearchString, 0, 10);
+        apiList = apiDAO.searchAPIs(new HashSet<>(), provider, numberSearchString, ApiType.STANDARD, 0, 10);
         Assert.assertEquals(apiList.size(), 1);
         actualAPI = apiList.get(0);
         expectedAPI = apis.get(charSymbolNumString);
@@ -415,8 +425,8 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API api = SampleTestObjectCreator.createUniqueAPI().build();
         apiDAO.addAPI(api);
 
-        Assert.assertTrue(apiDAO.isAPINameExists(api.getName(), api.getProvider()));
-        Assert.assertFalse(apiDAO.isAPINameExists("Not-Exists", api.getProvider()));
+        Assert.assertTrue(apiDAO.isAPINameExists(api.getName(), api.getProvider(), ApiType.STANDARD));
+        Assert.assertFalse(apiDAO.isAPINameExists("Not-Exists", api.getProvider(), ApiType.STANDARD));
 
         final String upperCaseName = "CAPITAL";
 
@@ -424,12 +434,13 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         api = SampleTestObjectCreator.createUniqueAPI().name(upperCaseName).build();
         apiDAO.addAPI(api);
         // Check with upper case format
-        Assert.assertTrue(apiDAO.isAPINameExists(upperCaseName, api.getProvider()));
+        Assert.assertTrue(apiDAO.isAPINameExists(upperCaseName, api.getProvider(), ApiType.STANDARD));
         // Check with lower case format
-        Assert.assertTrue(apiDAO.isAPINameExists(upperCaseName.toLowerCase(Locale.ENGLISH), api.getProvider()));
+        Assert.assertTrue(apiDAO.isAPINameExists(upperCaseName.toLowerCase(Locale.ENGLISH), api.getProvider(),
+                                                    ApiType.STANDARD));
         // Check with mixed case format
         Assert.assertTrue(apiDAO.isAPINameExists(upperCaseName.substring(0, 3) +
-                upperCaseName.substring(3).toLowerCase(Locale.ENGLISH), api.getProvider()));
+                upperCaseName.substring(3).toLowerCase(Locale.ENGLISH), api.getProvider(), ApiType.STANDARD));
 
         final String lowerCaseName = "simple";
 
@@ -437,12 +448,13 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         api = SampleTestObjectCreator.createUniqueAPI().name(lowerCaseName).build();
         apiDAO.addAPI(api);
         // Check with lower case format
-        Assert.assertTrue(apiDAO.isAPINameExists(lowerCaseName, api.getProvider()));
+        Assert.assertTrue(apiDAO.isAPINameExists(lowerCaseName, api.getProvider(), ApiType.STANDARD));
         // Check with upper case format
-        Assert.assertTrue(apiDAO.isAPINameExists(lowerCaseName.toUpperCase(Locale.ENGLISH), api.getProvider()));
+        Assert.assertTrue(apiDAO.isAPINameExists(lowerCaseName.toUpperCase(Locale.ENGLISH), api.getProvider(),
+                                                    ApiType.STANDARD));
         // Check with mixed case format
         Assert.assertTrue(apiDAO.isAPINameExists(lowerCaseName.substring(0, 3) +
-                lowerCaseName.substring(3).toUpperCase(Locale.ENGLISH), api.getProvider()));
+                lowerCaseName.substring(3).toUpperCase(Locale.ENGLISH), api.getProvider(), ApiType.STANDARD));
 
         // Create same API for different providers and check for existence
         final String sameName = "same";
@@ -453,9 +465,9 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API api2 = SampleTestObjectCreator.createUniqueAPI().name(sameName).build();
         apiDAO.addAPI(api2);
 
-        Assert.assertTrue(apiDAO.isAPINameExists(sameName, api1.getProvider()));
-        Assert.assertTrue(apiDAO.isAPINameExists(sameName, api2.getProvider()));
-        Assert.assertFalse(apiDAO.isAPINameExists(sameName, "no_such_provider"));
+        Assert.assertTrue(apiDAO.isAPINameExists(sameName, api1.getProvider(), ApiType.STANDARD));
+        Assert.assertTrue(apiDAO.isAPINameExists(sameName, api2.getProvider(), ApiType.STANDARD));
+        Assert.assertFalse(apiDAO.isAPINameExists(sameName, "no_such_provider", ApiType.STANDARD));
     }
 
     @Test
@@ -568,7 +580,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Set<String> roles = new HashSet<>();
         Map<String, String> attributeMap = new HashMap<>();
         attributeMap.put("name", api.getName());
-        List<API> apiList = apiDAO.attributeSearchAPIs(roles, ADMIN, attributeMap, 1, 2);
+        List<API> apiList = apiDAO.attributeSearchAPIs(roles, api.getProvider(), attributeMap, ApiType.STANDARD, 0, 2);
         Assert.assertTrue(apiList.size() > 0);
     }
 
@@ -581,7 +593,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         List<String> statuses = new ArrayList<>();
         statuses.add(api.getLifeCycleStatus());
         String searchString = api.getName();
-        List<API> apiList = apiDAO.searchAPIsByStatus(searchString, statuses);
+        List<API> apiList = apiDAO.searchAPIsByStatus(searchString, statuses, ApiType.STANDARD);
         Assert.assertTrue(apiList.size() > 0);
     }
 
