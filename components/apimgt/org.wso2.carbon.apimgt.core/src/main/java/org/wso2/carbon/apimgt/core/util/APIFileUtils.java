@@ -27,9 +27,11 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -38,9 +40,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Util class for API file based operations.
@@ -48,7 +60,6 @@ import java.nio.file.StandardOpenOption;
 public class APIFileUtils {
 
     private static final Logger log = LoggerFactory.getLogger(APIFileUtils.class);
-    private static final String ENDPOINT_DIRECTORY_NAME = "Endpoints";
 
     // Private constructor because this is a utility class with static methods. No point of initializing.
     private APIFileUtils() {
@@ -350,6 +361,90 @@ public class APIFileUtils {
     }
 
     /**
+     * Creates a zip archive from the given {@link InputStream} inputStream
+     *
+     * @param inputStream {@link InputStream} instance
+     * @param archivePath path to create the zip archive
+     * @throws APIMgtDAOException if an error occurs while creating the archive
+     */
+    public static void createArchiveFromInputStream(InputStream inputStream, String archivePath)
+            throws APIMgtDAOException {
+
+        FileOutputStream outFileStream = null;
+        try {
+            outFileStream = new FileOutputStream(new File(archivePath));
+            IOUtils.copy(inputStream, outFileStream);
+        } catch (IOException e) {
+            throw new APIMgtDAOException("Error in Creating archive from uploaded data", e);
+        } finally {
+            IOUtils.closeQuietly(outFileStream);
+        }
+    }
+
+    /**
+     * Extracts a a given zip archive
+     *
+     * @param archiveFilePath path of the zip archive
+     * @param destination     extract location
+     * @return name if the zip archive
+     * @throws APIMgtDAOException if an error occurs while extracting the archive
+     */
+    public static String extractArchive(String archiveFilePath, String destination)
+            throws APIMgtDAOException {
+
+        BufferedInputStream inputStream = null;
+        InputStream zipInputStream = null;
+        FileOutputStream outputStream = null;
+        ZipFile zip = null;
+        String archiveName = null;
+
+        try {
+            zip = new ZipFile(new File(archiveFilePath));
+            Enumeration zipFileEntries = zip.entries();
+            int index = 0;
+
+            // Process each entry
+            while (zipFileEntries.hasMoreElements()) {
+
+                // grab a zip file entry
+                ZipEntry entry = (ZipEntry) zipFileEntries.nextElement();
+                String currentEntry = entry.getName();
+
+                //This index variable is used to get the extracted folder name; that is root directory
+                if (index == 0) {
+                    archiveName = currentEntry.substring(0, currentEntry.indexOf('/'));
+                    --index;
+                }
+
+                File destinationFile = new File(destination, currentEntry);
+                File destinationParent = destinationFile.getParentFile();
+
+                // create the parent directory structure
+                if (destinationParent.mkdirs()) {
+                    log.debug("Creation of folder is successful. Directory Name : " + destinationParent.getName());
+                }
+
+                if (!entry.isDirectory()) {
+                    zipInputStream = zip.getInputStream(entry);
+                    inputStream = new BufferedInputStream(zipInputStream);
+
+                    // write the current file to the destination
+                    outputStream = new FileOutputStream(destinationFile);
+                    IOUtils.copy(inputStream, outputStream);
+                }
+            }
+            return archiveName;
+        } catch (IOException e) {
+            throw new APIMgtDAOException("Failed to extract archive file", e);
+        } finally {
+            IOUtils.closeQuietly(zipInputStream);
+            IOUtils.closeQuietly(inputStream);
+            IOUtils.closeQuietly(outputStream);
+            IOUtils.closeQuietly(zip);
+        }
+    }
+
+    /**
      * Retrieves thumbnail as a binary stream from the file
      *
      * @param thumbnailFilePath path to file
@@ -373,6 +468,153 @@ public class APIFileUtils {
      */
     public static String getAPIBaseDirectory(String basePath, API api) {
         return basePath + File.separator + api.getProvider() + "-" + api.getName() + "-" + api.getVersion();
+    }
+
+    /**
+     * Extracts the APIs to the file system by reading the incoming {@link InputStream} object
+     * uploadedApiArchiveInputStream
+     *
+     * @param uploadedApiArchiveInputStream Incoming {@link InputStream}
+     * @param importedDirectoryName         directory to extract the archive
+     * @param apiArchiveLocation            full path of the archive location
+     * @param extractLocation               full path to the location to which the archive will be written
+     * @return location to which APIs were extracted
+     * @throws APIMgtDAOException if an error occurs while extracting the archive
+     */
+    public static String extractUploadedArchive(InputStream uploadedApiArchiveInputStream, String importedDirectoryName,
+            String apiArchiveLocation, String extractLocation) throws APIMgtDAOException {
+        String archiveExtractLocation;
+        try {
+            // create api import directory structure
+            APIFileUtils.createDirectory(extractLocation);
+            // create archive
+            createArchiveFromInputStream(uploadedApiArchiveInputStream, apiArchiveLocation);
+            // extract the archive
+            archiveExtractLocation = extractLocation + File.separator + importedDirectoryName;
+            extractArchive(apiArchiveLocation, archiveExtractLocation);
+
+        } catch (APIMgtDAOException e) {
+            APIFileUtils.deleteDirectory(extractLocation);
+            String errorMsg = "Error in accessing uploaded API archive";
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.API_IMPORT_ERROR);
+        }
+        return archiveExtractLocation;
+    }
+
+
+    /**
+     * Creates a zip archive from of a directory
+     *
+     * @param sourceDirectory directory to create zip archive from
+     * @param archiveLocation path to the archive location, excluding archive name
+     * @param archiveName     name of the archive to create
+     * @throws APIMgtDAOException if an error occurs while creating the archive
+     */
+    public static void archiveDirectory(String sourceDirectory, String archiveLocation, String archiveName)
+            throws APIMgtDAOException {
+
+        File directoryToZip = new File(sourceDirectory);
+
+        List<File> fileList = new ArrayList<>();
+        getAllFiles(directoryToZip, fileList);
+        try {
+            writeArchiveFile(directoryToZip, fileList, archiveLocation, archiveName);
+
+        } catch (IOException e) {
+            String errorMsg = "Error while writing archive file " + directoryToZip.getPath() + " to archive " +
+                    archiveLocation;
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e);
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Archived API generated successfully" + archiveName);
+        }
+
+    }
+
+    /**
+     * Queries the list of directories available under a root directory path
+     *
+     * @param path full path of the root directory
+     * @return Set of directory path under the root directory given by path
+     * @throws APIMgtDAOException if an error occurs while listing directories
+     */
+    public static Set<String> getDirectoryList(String path) throws APIMgtDAOException {
+        Set<String> directoryNames = new HashSet<>();
+        try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(path))) {
+            for (Path directoryPath : directoryStream) {
+                directoryNames.add(directoryPath.toString());
+            }
+        } catch (IOException e) {
+            String errorMsg = "Error while listing directories under " + path;
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e);
+        }
+        return directoryNames;
+    }
+
+    /**
+     * Queries all files under a directory recursively
+     *
+     * @param sourceDirectory full path to the root directory
+     * @param fileList        list containing the files
+     */
+    private static void getAllFiles(File sourceDirectory, List<File> fileList) {
+        File[] files = sourceDirectory.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                fileList.add(file);
+                if (file.isDirectory()) {
+                    getAllFiles(file, fileList);
+                }
+            }
+        }
+    }
+
+    private static void writeArchiveFile(File directoryToZip, List<File> fileList, String archiveLocation,
+            String archiveName) throws IOException {
+
+        FileOutputStream fileOutputStream = null;
+        ZipOutputStream zipOutputStream = null;
+
+        try {
+            fileOutputStream = new FileOutputStream(archiveLocation + File.separator + archiveName + ".zip");
+            zipOutputStream = new ZipOutputStream(fileOutputStream);
+            for (File file : fileList) {
+                if (!file.isDirectory()) {
+                    addToArchive(directoryToZip, file, zipOutputStream);
+                }
+            }
+
+        } finally {
+            IOUtils.closeQuietly(zipOutputStream);
+            IOUtils.closeQuietly(fileOutputStream);
+        }
+    }
+
+    private static void addToArchive(File directoryToZip, File file, ZipOutputStream zipOutputStream)
+            throws IOException {
+
+        FileInputStream fileInputStream = null;
+        try {
+            fileInputStream = new FileInputStream(file);
+
+            // Get relative path from archive directory to the specific file
+            String zipFilePath = file.getCanonicalPath()
+                    .substring(directoryToZip.getCanonicalPath().length() + 1, file.getCanonicalPath().length());
+            if (File.separatorChar != '/') {
+                zipFilePath = zipFilePath.replace(File.separatorChar, '/');
+            }
+            ZipEntry zipEntry = new ZipEntry(zipFilePath);
+            zipOutputStream.putNextEntry(zipEntry);
+
+            IOUtils.copy(fileInputStream, zipOutputStream);
+            zipOutputStream.closeEntry();
+
+        } finally {
+            IOUtils.closeQuietly(fileInputStream);
+        }
     }
 
 
