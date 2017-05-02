@@ -381,7 +381,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param request         msf4j request object
      * @return Fingerprint of the document content
      */
-    private String apisApiIdDocumentsDocumentIdContentGetFingerprint(String apiId, String documentId, String accept,
+    public String apisApiIdDocumentsDocumentIdContentGetFingerprint(String apiId, String documentId, String accept,
                                                                     String ifNoneMatch, String ifModifiedSince,
                                                                     Request request) {
         String username = RestApiUtil.getLoggedInUsername();
@@ -455,7 +455,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return Fingerprint of the document
      */
 
-    private String apisApiIdDocumentsDocumentIdGetFingerprint(String apiId, String documentId, String accept, String
+    public String apisApiIdDocumentsDocumentIdGetFingerprint(String apiId, String documentId, String accept, String
             ifNoneMatch, String ifModifiedSince, Request request) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
@@ -617,7 +617,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param request         msf4j request object
      * @return Fingerprint of the API
      */
-    private String apisApiIdGetFingerprint(String apiId, String accept, String ifNoneMatch, String ifModifiedSince,
+    public String apisApiIdGetFingerprint(String apiId, String accept, String ifNoneMatch, String ifModifiedSince,
                                           Request request) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
@@ -689,7 +689,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param request         msf4j request object
      * @return Retrieves the fingerprint String of the swagger
      */
-    private String apisApiIdSwaggerGetFingerprint(String apiId, String accept, String ifNoneMatch,
+    public String apisApiIdSwaggerGetFingerprint(String apiId, String accept, String ifNoneMatch,
                                                  String ifModifiedSince, Request request) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
