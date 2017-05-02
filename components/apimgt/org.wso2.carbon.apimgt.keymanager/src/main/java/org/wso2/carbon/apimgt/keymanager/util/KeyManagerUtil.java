@@ -188,7 +188,7 @@ public class KeyManagerUtil {
         adminScopes.add("apim:subscription_view");
         adminScopes.add("apim:subscription_block");
         adminScopes.add("apim:subscribe");
-        adminScopes.add("apim:api_workflow");
+        adminScopes.add("apim:workflow_approve");
         List<String> subsciberScopes = new ArrayList<>();
         subsciberScopes.add("apim:subscribe");
         userMap.put("admin", "admin");
