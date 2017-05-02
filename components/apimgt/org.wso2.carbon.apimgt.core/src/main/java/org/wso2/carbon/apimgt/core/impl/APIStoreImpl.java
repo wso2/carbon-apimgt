@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
@@ -152,6 +153,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         }
         return application;
     }
+
 
     @Override
     public List<Application> getApplications(String subscriber, String groupId) throws APIManagementException {
@@ -508,6 +510,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         return filteredLabels;
     }
 
+    /**
+     * @see APIStore#getCommentByUUID(String, String)
+     */
     @Override
     public Comment getCommentByUUID(String commentId, String apiId) throws APIManagementException {
         Comment comment;
@@ -517,13 +522,13 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             if (api == null) {
                 String errorMsg = "Couldn't find api with api_id : " + apiId;
                 log.error(errorMsg);
-                throw new APIManagementException(errorMsg, ExceptionCodes.API_NOT_FOUND);
+                throw new APIMgtResourceNotFoundException(errorMsg, ExceptionCodes.API_NOT_FOUND);
             }
             comment = getApiDAO().getCommentByUUID(commentId, apiId);
             if (comment == null) {
                 String errorMsg = "Couldn't find comment with comment_id - " + commentId + " for api_id " + apiId;
                 log.error(errorMsg);
-                throw new APIManagementException(errorMsg, ExceptionCodes.API_NOT_FOUND);
+                throw new APIMgtResourceNotFoundException(errorMsg, ExceptionCodes.COMMENT_NOT_FOUND);
             }
         } catch (APIMgtDAOException e) {
             String errorMsg =
@@ -549,6 +554,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         return null;
     }
 
+    /**
+     * @see APIStore#addComment(Comment, String)
+     */
     @Override
     public String addComment(Comment comment, String apiId) throws APIManagementException {
         String generatedUuid = UUID.randomUUID().toString();
@@ -559,7 +567,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             if (api == null) {
                 String errorMsg = "Couldn't find api with api_id : " + apiId;
                 log.error(errorMsg);
-                throw new APIManagementException(errorMsg, ExceptionCodes.API_NOT_FOUND);
+                throw new APIMgtResourceNotFoundException(errorMsg, ExceptionCodes.API_NOT_FOUND);
             }
             getApiDAO().addComment(comment, apiId);
         } catch (APIMgtDAOException e) {
@@ -570,6 +578,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         return comment.getUuid();
     }
 
+    /**
+     * @see APIStore#deleteComment(String, String)
+     */
     @Override
     public void deleteComment(String commentId, String apiId) throws APIManagementException {
         try {
@@ -578,13 +589,13 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             if (api == null) {
                 String errorMsg = "Couldn't find api with api_id : " + apiId;
                 log.error(errorMsg);
-                throw new APIManagementException(errorMsg, ExceptionCodes.API_NOT_FOUND);
+                throw new APIMgtResourceNotFoundException(errorMsg, ExceptionCodes.API_NOT_FOUND);
             }
             Comment comment = apiDAO.getCommentByUUID(commentId, apiId);
             if (comment == null) {
                 String errorMsg = "Couldn't find comment with comment_id : " + commentId;
                 log.error(errorMsg);
-                throw new APIManagementException(errorMsg, ExceptionCodes.COMMENT_NOT_FOUND);
+                throw new APIMgtResourceNotFoundException(errorMsg, ExceptionCodes.COMMENT_NOT_FOUND);
             } else {
                 apiDAO.deleteComment(commentId, apiId);
             }
@@ -595,6 +606,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         }
     }
 
+    /**
+     * @see APIStore#updateComment(Comment, String, String)
+     */
     @Override
     public void updateComment(Comment comment, String commentId, String apiId) throws APIManagementException {
         try {
@@ -603,7 +617,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             if (api == null) {
                 String errorMsg = "Couldn't find api with api_id : " + apiId;
                 log.error(errorMsg);
-                throw new APIManagementException(errorMsg, ExceptionCodes.API_NOT_FOUND);
+                throw new APIMgtResourceNotFoundException(errorMsg, ExceptionCodes.API_NOT_FOUND);
             }
             Comment oldComment = apiDAO.getCommentByUUID(commentId, apiId);
             if (oldComment != null) {
@@ -611,7 +625,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             } else {
                 String errorMsg = "Couldn't find comment with comment_id : " + commentId + "and api_id : " + apiId;
                 log.error(errorMsg);
-                throw new APIManagementException(errorMsg, ExceptionCodes.COMMENT_NOT_FOUND);
+                throw new APIMgtResourceNotFoundException(errorMsg, ExceptionCodes.COMMENT_NOT_FOUND);
             }
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while updating comment " + commentId;
@@ -621,6 +635,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
     }
 
+    /**
+     * @see APIStore#getCommentsForApi(String)
+     */
     @Override
     public List<Comment> getCommentsForApi(String apiId) throws APIManagementException {
         try {
@@ -629,7 +646,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             if (api == null) {
                 String errorMsg = "api not found for the id : " + apiId;
                 log.error(errorMsg);
-                throw new APIManagementException(errorMsg, ExceptionCodes.API_NOT_FOUND);
+                throw new APIMgtResourceNotFoundException(errorMsg, ExceptionCodes.API_NOT_FOUND);
             }
             List<Comment> commentList = getApiDAO().getCommentsForApi(apiId);
             return commentList;

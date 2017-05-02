@@ -72,6 +72,7 @@ public class ApiDAOImpl implements ApiDAO {
     private static final String API_SUMMARY_SELECT = "SELECT UUID, PROVIDER, NAME, CONTEXT, VERSION, DESCRIPTION, " +
             "CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS FROM AM_API";
     private static final String AM_API_TABLE_NAME = "AM_API";
+    private static final String AM_API_COMMENTS_TABLE_NAME = "AM_API_COMMENTS";
     private static final String AM_ENDPOINT_TABLE_NAME = "AM_ENDPOINT";
     private static final Logger log = LoggerFactory.getLogger(ApiDAOImpl.class);
 
@@ -763,9 +764,9 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public Comment getCommentByUUID(String commentId, String apiId) throws APIMgtDAOException {
-        final String query = "SELECT COMMENT_ID, COMMENT_TEXT, USER_IDENTIFIER, API_ID, "
+        final String query = "SELECT UUID, COMMENT_TEXT, USER_IDENTIFIER, API_ID, "
                 + "CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME "
-                + "FROM AM_API_COMMENTS WHERE COMMENT_ID = ? AND API_ID = ?";
+                + "FROM AM_API_COMMENTS WHERE UUID = ? AND API_ID = ?";
 
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(query)) {
@@ -802,7 +803,7 @@ public class ApiDAOImpl implements ApiDAO {
     private Comment constructCommentFromResultSet(ResultSet rs) throws APIMgtDAOException {
         Comment comment = new Comment();
         try {
-            comment.setUuid(rs.getString("COMMENT_ID"));
+            comment.setUuid(rs.getString("UUID"));
             comment.setCommentText(rs.getString("COMMENT_TEXT"));
             comment.setCommentedUser(rs.getString("USER_IDENTIFIER"));
             comment.setApiId(rs.getString("API_ID"));
@@ -824,7 +825,7 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     public void addComment(Comment comment, String apiId) throws APIMgtDAOException {
         final String addCommentQuery =
-                "INSERT INTO AM_API_COMMENTS (COMMENT_ID, COMMENT_TEXT, USER_IDENTIFIER, API_ID, " +
+                "INSERT INTO AM_API_COMMENTS (UUID, COMMENT_TEXT, USER_IDENTIFIER, API_ID, " +
                         "CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME" + ") VALUES (?,?,?,?,?,?,?,?)";
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(addCommentQuery)) {
@@ -856,7 +857,7 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public void deleteComment(String commentId, String apiId) throws APIMgtDAOException {
-        final String deleteCommentQuery = "DELETE FROM AM_API_COMMENTS WHERE COMMENT_ID = ? AND API_ID = ?";
+        final String deleteCommentQuery = "DELETE FROM AM_API_COMMENTS WHERE UUID = ? AND API_ID = ?";
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(deleteCommentQuery)) {
             try {
@@ -883,7 +884,7 @@ public class ApiDAOImpl implements ApiDAO {
     public void updateComment(Comment comment, String commentId, String apiId) throws APIMgtDAOException {
         final String updateCommentQuery = "UPDATE AM_API_COMMENTS SET COMMENT_TEXT = ? , USER_IDENTIFIER = ? ,"
                 + "CREATED_BY = ? , CREATED_TIME = ?, UPDATED_BY = ? , LAST_UPDATED_TIME = ?"
-                + "WHERE COMMENT_ID = ? AND API_ID = ?";
+                + "WHERE UUID = ? AND API_ID = ?";
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(updateCommentQuery)) {
             try {
@@ -916,7 +917,7 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     public List<Comment> getCommentsForApi(String apiId) throws APIMgtDAOException {
         List<Comment> commentList = new ArrayList<>();
-        final String getCommentsQuery = "SELECT COMMENT_ID, COMMENT_TEXT, USER_IDENTIFIER, API_ID, "
+        final String getCommentsQuery = "SELECT UUID, COMMENT_TEXT, USER_IDENTIFIER, API_ID, "
                 + "CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME "
                 + "FROM AM_API_COMMENTS WHERE API_ID = ?";
         try (Connection connection = DAOUtil.getConnection();
@@ -941,6 +942,11 @@ public class ApiDAOImpl implements ApiDAO {
             throw new APIMgtDAOException(e);
         }
         return  commentList;
+    }
+
+    @Override
+    public String getLastUpdatedTimeOfComment(String commentId) throws APIMgtDAOException {
+        return EntityDAO.getLastUpdatedTimeOfResourceByUUID(AM_API_COMMENTS_TABLE_NAME, commentId);
     }
 
     /**
