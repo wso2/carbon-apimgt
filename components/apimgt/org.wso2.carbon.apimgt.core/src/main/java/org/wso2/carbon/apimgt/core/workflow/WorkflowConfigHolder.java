@@ -76,6 +76,10 @@ public class WorkflowConfigHolder {
             // Load api state change workflow configurations
             loadWorkflowConfigurations(config.getApiStateChange(), WorkflowConstants.WF_TYPE_AM_API_STATE);
 
+            // Load application update workflow configurations
+            loadWorkflowConfigurations(config.getApplicationUpdate(),
+                    WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);
+
         } catch (ClassNotFoundException e) {
             handleException("Unable to find class", e);
         } catch (InstantiationException e) {

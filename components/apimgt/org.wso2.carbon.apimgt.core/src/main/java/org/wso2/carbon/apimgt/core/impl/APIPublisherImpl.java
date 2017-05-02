@@ -613,7 +613,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 workflowResponse = executor.execute(workflow);             
                 workflow.setStatus(workflowResponse.getWorkflowStatus());
 
-                if (WorkflowStatus.APPROVED == workflowResponse.getWorkflowStatus()) {
+                if (WorkflowStatus.CREATED != workflowResponse.getWorkflowStatus()) {
                     completeWorkflow(executor, workflow);
                 } else {
                     //add entry to workflow table if it is only in pending state
@@ -1086,20 +1086,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     APIUtils.logDebug("API with id " + identifier + " was deleted successfully.", log);
                     
                     if (APILCWorkflowStatus.PENDING.toString().equals(apiWfStatus)) {
-                        String wfReferenceId = getWorkflowDAO().getExternalWorkflowReferenceForPendingTask(identifier,
-                                WorkflowConstants.WF_TYPE_AM_API_STATE);
-                        if (wfReferenceId != null) {
-                            WorkflowExecutor executor = WorkflowExecutorFactory.getInstance()
-                                    .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
-
-                            try {
-                                executor.cleanUpPendingTask(wfReferenceId);
-                            } catch (WorkflowException e) {
-                                String warn = "Failed to clean pending subscription approval task for " + identifier;
-                                // failed cleanup processes are ignored to prevent failing the deletion process
-                                log.warn(warn, e.getLocalizedMessage());
-                            }
-                        }
+                       cleanupPendingTaskForAPIStateChange(identifier);
                     }
                     // 'API_M Functions' related code
                     //Create a payload with event specific details
@@ -1712,20 +1699,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     getApiDAO().updateAPIWorkflowStatus(apiId, APILCWorkflowStatus.APPROVED);
                     
                     // call executor's cleanup task
-                    String workflowExtRef = getWorkflowDAO().getExternalWorkflowReferenceForPendingTask(apiId,
-                            WorkflowConstants.WF_TYPE_AM_API_STATE);
-                    if (workflowExtRef != null) {
-                        WorkflowExecutor executor = WorkflowExecutorFactory.getInstance()
-                                .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
-                        try {
-                            executor.cleanUpPendingTask(workflowExtRef);
-                        } catch (WorkflowException e) {
-                            String warn = "Failed to clean pending api state change task for " + apiId;
-                            // failed cleanup processes are ignored to prevent failing the deletion process
-                            log.warn(warn, e.getLocalizedMessage());
-                        }
-                        getWorkflowDAO().deleteWorkflowEntryforExternalReference(workflowExtRef);
-                    }
+                    cleanupPendingTaskForAPIStateChange(apiId);
                     
                 } catch (APIMgtDAOException e) {
                     String msg = "Error occurred while changing api lifecycle workflow status";
@@ -1742,5 +1716,22 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             log.error(msg);
             throw new APIManagementException(msg, ExceptionCodes.API_NOT_FOUND);
         }      
+    }
+    
+    private void cleanupPendingTaskForAPIStateChange(String apiId) throws APIManagementException {
+        String workflowExtRef = getWorkflowDAO().getExternalWorkflowReferenceForPendingTask(apiId,
+                WorkflowConstants.WF_TYPE_AM_API_STATE);
+        if (workflowExtRef != null) {
+            WorkflowExecutor executor = WorkflowExecutorFactory.getInstance()
+                    .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
+            try {
+                executor.cleanUpPendingTask(workflowExtRef);
+            } catch (WorkflowException e) {
+                String warn = "Failed to clean pending api state change task for " + apiId;
+                // failed cleanup processes are ignored to prevent failing the deletion process
+                log.warn(warn, e.getLocalizedMessage());
+            }
+            getWorkflowDAO().deleteWorkflowEntryforExternalReference(workflowExtRef);
+        }
     }
 }

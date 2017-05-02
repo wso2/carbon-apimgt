@@ -69,9 +69,10 @@ public interface APIStore extends APIManager {
      * Function to remove an Application from the API Store
      *
      * @param appId - The Application id of the Application
+     * @return WorkflowResponse workflow response
      * @throws APIManagementException   If failed to delete application.
      */
-    void deleteApplication(String appId) throws APIManagementException;
+    WorkflowResponse deleteApplication(String appId) throws APIManagementException;
 
     /**
      * Adds an application
@@ -109,9 +110,10 @@ public interface APIStore extends APIManager {
      * Updates the details of the specified user application.
      * @param uuid Uuid of the existing application
      * @param application Application object containing updated data
+     * @return WorkflowResponse workflow status
      * @throws APIManagementException If an error occurs while updating the application
      */
-    void updateApplication(String uuid, Application application) throws APIManagementException;
+    WorkflowResponse updateApplication(String uuid, Application application) throws APIManagementException;
 
     /**
      * Generates oAuth keys for an application.
@@ -166,9 +168,10 @@ public interface APIStore extends APIManager {
      * Delete an API subscription.
      *
      * @param subscriptionId    Id of the subscription to be deleted.
+     * @return WorkflowResponse  workflow response
      * @throws APIManagementException   If failed to delete the subscription.
      */
-    void deleteAPISubscription(String subscriptionId) throws APIManagementException;
+    WorkflowResponse deleteAPISubscription(String subscriptionId) throws APIManagementException;
 
     /**
      * Retrieve all tags
