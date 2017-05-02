@@ -96,7 +96,7 @@ public class LogInServiceTest {
                                         + "\"expires_in\":3600,\"scopes\":[\"apim:api_view\",\"apim:api_create\","
                                         + "\"apim:api_publish\",\"apim:tier_view\",\"apim:tier_manage\","
                                         + "\"apim:subscription_view\",\"apim:subscription_block\",\"apim:subscribe\","
-                                        + "\"apim:api_workflow\"],\"expiresTimestamp\":1490615736702}")));
+                                        + "\"apim:workflow_approve\"],\"expiresTimestamp\":1490615736702}")));
 
         // Mock service for key manager revoke endpoint
         wireMockRule.stubFor(post(urlEqualTo("/keyserver/oauth2/revoke")).willReturn(aResponse().withStatus(200)));
