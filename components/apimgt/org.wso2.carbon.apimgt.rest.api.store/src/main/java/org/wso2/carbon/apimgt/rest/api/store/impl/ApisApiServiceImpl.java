@@ -55,7 +55,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param request           msf4j request object
      * @return 200 response if the deletion was successful
-     * @throws NotFoundException
+     * @throws NotFoundException if this method is not defined in ApisApiServiceImpl
      */
     @Override
     public Response apisApiIdCommentsCommentIdDelete(String commentId, String apiId, String ifMatch,
@@ -92,7 +92,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifModifiedSince If-Modified-Since header value
      * @param request         msf4j request object
      * @return CommentDTO object
-     * @throws NotFoundException
+     * @throws NotFoundException if this method is not defined in ApisApiServiceImpl
      */
     @Override
     public Response apisApiIdCommentsCommentIdGet(String commentId, String apiId, String accept, String ifNoneMatch,
@@ -197,7 +197,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param accept accept header value
      * @param request msf4j request object
      * @return CommentListDTO object
-     * @throws NotFoundException
+     * @throws NotFoundException if this method is not defined in ApisApiServiceImpl
      */
     @Override
     public Response apisApiIdCommentsGet(String apiId, Integer limit, Integer offset, String accept,
@@ -227,7 +227,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param contentType       content-type header
      * @param request           msf4j request object
      * @return comment update response
-     * @throws NotFoundException
+     * @throws NotFoundException if this method is not defined in ApisApiServiceImpl
      */
     @Override
     public Response apisApiIdCommentsPost(String apiId, CommentDTO body, String contentType, Request request)
@@ -272,7 +272,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param request msf4j request object
      * @return comment update response
-     * @throws NotFoundException
+     * @throws NotFoundException if this method is not defined in ApisApiServiceImpl
      */
     @Override
     public Response apisApiIdCommentsCommentIdPut(String commentId, String apiId, CommentDTO body,

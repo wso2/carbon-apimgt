@@ -154,6 +154,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         return application;
     }
 
+
     @Override
     public List<Application> getApplications(String subscriber, String groupId) throws APIManagementException {
         List<Application> applicationList = null;
@@ -509,6 +510,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         return filteredLabels;
     }
 
+    /**
+     * @see APIStore#getCommentByUUID(String, String)
+     */
     @Override
     public Comment getCommentByUUID(String commentId, String apiId) throws APIManagementException {
         Comment comment;
@@ -550,6 +554,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         return null;
     }
 
+    /**
+     * @see APIStore#addComment(Comment, String)
+     */
     @Override
     public String addComment(Comment comment, String apiId) throws APIManagementException {
         String generatedUuid = UUID.randomUUID().toString();
@@ -571,6 +578,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         return comment.getUuid();
     }
 
+    /**
+     * @see APIStore#deleteComment(String, String)
+     */
     @Override
     public void deleteComment(String commentId, String apiId) throws APIManagementException {
         try {
@@ -596,6 +606,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         }
     }
 
+    /**
+     * @see APIStore#updateComment(Comment, String, String)
+     */
     @Override
     public void updateComment(Comment comment, String commentId, String apiId) throws APIManagementException {
         try {
@@ -622,6 +635,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
     }
 
+    /**
+     * @see APIStore#getCommentsForApi(String)
+     */
     @Override
     public List<Comment> getCommentsForApi(String apiId) throws APIManagementException {
         try {
