@@ -55,7 +55,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param request           msf4j request object
      * @return 200 response if the deletion was successful
-     * @throws NotFoundException If commment not found
+     * @throws NotFoundException
      */
     @Override
     public Response apisApiIdCommentsCommentIdDelete(String commentId, String apiId, String ifMatch,
@@ -63,6 +63,12 @@ public class ApisApiServiceImpl extends ApisApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
+            String existingFingerprint = apisApiIdCommentsCommentIdDeleteFingerprint(commentId, apiId, ifMatch,
+                    ifUnmodifiedSince, request);
+            if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
+                    .contains(existingFingerprint)) {
+                return Response.status(Response.Status.PRECONDITION_FAILED).build();
+            }
             apiStore.deleteComment(commentId, apiId);
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting comment with commentId: " + commentId + " of apiID :" + apiId;
@@ -86,7 +92,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifModifiedSince If-Modified-Since header value
      * @param request         msf4j request object
      * @return CommentDTO object
-     * @throws NotFoundException if comment or API not found
+     * @throws NotFoundException
      */
     @Override
     public Response apisApiIdCommentsCommentIdGet(String commentId, String apiId, String accept, String ifNoneMatch,
@@ -94,9 +100,16 @@ public class ApisApiServiceImpl extends ApisApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
+            String existingFingerprint = apisApiIdCommentsCommentIdGetFingerprint(commentId, apiId, accept, ifNoneMatch,
+                    ifModifiedSince, request);
+            if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
+                    .contains(existingFingerprint)) {
+                return Response.notModified().build();
+            }
             Comment comment = apiStore.getCommentByUUID(commentId, apiId);
             CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(comment);
-            return Response.ok().entity(commentDTO).build();
+            return Response.ok().header(HttpHeaders.ETAG,
+                    "\"" + existingFingerprint + "\"").entity(commentDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving comment with commentId: " + commentId + " of apiID :" + apiId;
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -109,6 +122,73 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     /**
+     * Retrieves the fingerprint of a comment for commentGet
+     *
+     * @param commentId       Comment ID
+     * @param apiId           API ID
+     * @param accept          accept header value
+     * @param ifNoneMatch     If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param request         msf4j request object
+     * @return Fingerprint of the comment
+     */
+    public String apisApiIdCommentsCommentIdGetFingerprint(String commentId, String apiId, String accept, String ifNoneMatch,
+            String ifModifiedSince, Request request) {
+       return getEtag(commentId);
+    }
+
+    /**
+     * Retrieves the fingerprint of a comment for commentPut
+     *
+     * @param commentId Comment ID
+     * @param apiId  API ID
+     * @param body body of the request
+     * @param contentType Content-Type header value
+     * @param ifMatch If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param request  msf4j request object
+     * @return Fingerprint of the comment
+     */
+    public String apisApiIdCommentsCommentIdPutFingerprint(String commentId, String apiId, CommentDTO body,
+            String contentType, String ifMatch, String ifUnmodifiedSince, Request request) {
+        return getEtag(commentId);
+    }
+
+    /**
+     * Retrieves the fingerprint of a comment for commentDelete
+     *
+     * @param commentId Comment ID
+     * @param apiId API ID
+     * @param ifMatch If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param request  msf4j request object
+     * @return  Fingerprint of the comment
+     */
+    public String apisApiIdCommentsCommentIdDeleteFingerprint(String commentId, String apiId, String ifMatch,
+            String ifUnmodifiedSince, Request request) {
+        return getEtag(commentId);
+    }
+
+    /**
+     * Retrieves last updatedtime for a comment given the comment id
+     *
+     * @param commentId Comment ID
+     * @return Last updated time
+     */
+    private String getEtag(String commentId){
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            String lastUpdatedTime = RestApiUtil.getConsumer(username).getLastUpdatedTimeOfComment(commentId);
+            return ETagUtils.generateETag(lastUpdatedTime);
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving last updated time of comment " + commentId;
+            log.error(errorMessage, e);
+            return null;
+        }
+    }
+
+
+    /**
      *  Retrives A list of comments for a given API ID
      *
      * @param apiId API ID
@@ -117,7 +197,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param accept accept header value
      * @param request msf4j request object
      * @return CommentListDTO object
-     * @throws NotFoundException if api not found
+     * @throws NotFoundException
      */
     @Override
     public Response apisApiIdCommentsGet(String apiId, Integer limit, Integer offset, String accept,
@@ -147,7 +227,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param contentType       content-type header
      * @param request           msf4j request object
      * @return comment update response
-     * @throws NotFoundException if comment or API not found
+     * @throws NotFoundException
      */
     @Override
     public Response apisApiIdCommentsPost(String apiId, CommentDTO body, String contentType, Request request)
@@ -161,7 +241,11 @@ public class ApisApiServiceImpl extends ApisApiService {
             Comment createdComment = apiStore.getCommentByUUID(createdCommentId, apiId);
             CommentDTO createdCommentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
             URI location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/");
-            return Response.status(Response.Status.CREATED).header("Location", location).entity(createdCommentDTO).build();
+
+            String fingerprint = getEtag(comment.getUuid());
+            return Response.status(Response.Status.CREATED).header("Location", location).header(HttpHeaders.ETAG,
+                    "\"" + fingerprint + "\"").entity(createdCommentDTO)
+                    .build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding comment to api : " + body.getApiId();
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -188,7 +272,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param request msf4j request object
      * @return comment update response
-     * @throws NotFoundException if comment or API not found
+     * @throws NotFoundException
      */
     @Override
     public Response apisApiIdCommentsCommentIdPut(String commentId, String apiId, CommentDTO body,
@@ -196,13 +280,21 @@ public class ApisApiServiceImpl extends ApisApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
+            String existingFingerprint = apisApiIdCommentsCommentIdPutFingerprint(commentId, apiId, body, contentType,
+                    ifMatch, ifUnmodifiedSince, request);
+            if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
+                    .contains(existingFingerprint)) {
+                return Response.status(Response.Status.PRECONDITION_FAILED).build();
+            }
             Comment comment = CommentMappingUtil.fromDTOToComment(body, username);
             apiStore.updateComment(comment, commentId, apiId);
 
             Comment updatedComment = apiStore.getCommentByUUID(commentId, apiId);
             CommentDTO updatedCommentDTO = CommentMappingUtil.fromCommentToDTO(updatedComment);
 
-            return Response.ok().entity(updatedCommentDTO).build();
+            String newFingerprint = getEtag(commentId);
+            return Response.ok().header(HttpHeaders.ETAG,
+                    "\"" + newFingerprint + "\"").entity(updatedCommentDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while updating comment : " + commentId;
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -289,7 +381,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param request         msf4j request object
      * @return Fingerprint of the document content
      */
-    public String apisApiIdDocumentsDocumentIdContentGetFingerprint(String apiId, String documentId, String accept,
+    private String apisApiIdDocumentsDocumentIdContentGetFingerprint(String apiId, String documentId, String accept,
                                                                     String ifNoneMatch, String ifModifiedSince,
                                                                     Request request) {
         String username = RestApiUtil.getLoggedInUsername();
@@ -363,7 +455,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return Fingerprint of the document
      */
 
-    public String apisApiIdDocumentsDocumentIdGetFingerprint(String apiId, String documentId, String accept, String
+    private String apisApiIdDocumentsDocumentIdGetFingerprint(String apiId, String documentId, String accept, String
             ifNoneMatch, String ifModifiedSince, Request request) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
@@ -525,7 +617,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param request         msf4j request object
      * @return Fingerprint of the API
      */
-    public String apisApiIdGetFingerprint(String apiId, String accept, String ifNoneMatch, String ifModifiedSince,
+    private String apisApiIdGetFingerprint(String apiId, String accept, String ifNoneMatch, String ifModifiedSince,
                                           Request request) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
@@ -538,6 +630,10 @@ public class ApisApiServiceImpl extends ApisApiService {
             return null;
         }
     }
+
+
+
+
 
     /**
      * Retrieves the swagger definition of an API
@@ -593,7 +689,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param request         msf4j request object
      * @return Retrieves the fingerprint String of the swagger
      */
-    public String apisApiIdSwaggerGetFingerprint(String apiId, String accept, String ifNoneMatch,
+    private String apisApiIdSwaggerGetFingerprint(String apiId, String accept, String ifNoneMatch,
                                                  String ifModifiedSince, Request request) {
         String username = RestApiUtil.getLoggedInUsername();
         try {

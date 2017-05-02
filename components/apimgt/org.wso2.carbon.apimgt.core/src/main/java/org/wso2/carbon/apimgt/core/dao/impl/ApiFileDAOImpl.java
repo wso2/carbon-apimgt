@@ -453,6 +453,11 @@ public class ApiFileDAOImpl implements ApiDAO {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public String getLastUpdatedTimeOfComment(String commentId) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * @see ApiDAO#getAPIs()
      */

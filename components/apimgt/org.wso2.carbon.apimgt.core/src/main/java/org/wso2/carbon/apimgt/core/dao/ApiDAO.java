@@ -515,4 +515,6 @@ public interface ApiDAO {
      * @return
      */
     List<Comment> getCommentsForApi(String apiId) throws APIMgtDAOException;
+
+    String getLastUpdatedTimeOfComment(String commentId) throws APIMgtDAOException;
 }

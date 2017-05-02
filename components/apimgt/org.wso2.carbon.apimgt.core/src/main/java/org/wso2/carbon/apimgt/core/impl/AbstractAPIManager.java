@@ -442,6 +442,20 @@ public abstract class AbstractAPIManager implements APIManager {
         return lastUpdatedTime;
     }
 
+    @Override
+    public String getLastUpdatedTimeOfComment(String commentId) throws APIManagementException {
+        String lastUpdatedTime;
+        try {
+            lastUpdatedTime = apiDAO.getLastUpdatedTimeOfComment(commentId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg =
+                    "Error occurred while retrieving the last updated time of the comment " + commentId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return lastUpdatedTime;
+    }
+
     /**
      * @see APIManager#getLastUpdatedTimeOfSubscription(String)
      */
