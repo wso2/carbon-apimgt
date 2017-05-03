@@ -82,8 +82,9 @@ public class RestApiConstants {
     public static final String AUTH_SERVER_URL_KEY = "AUTH_SERVER_URL";
     public static final String AUTH_SERVER_URL = "http://localhost:9090/keyserver/introspect";
     public static final String SCOPE = "scope";
-    public static final String PUBLISHER_API = "/publisher-api.yaml";
-    public static final String STORE_API = "/store-api.yaml";
+    public static final String PUBLISHER_API_YAML = "/publisher-api.yaml";
+    public static final String STORE_API_YAML = "/store-api.yaml";
+    public static final String ADMIN_API_YAML = "/admin-api.yaml";
     public static final String AUTH_TYPE_BASIC = "Basic";
     public static final String CHARSET_UTF_8 = "UTF-8";
 
@@ -99,7 +100,8 @@ public class RestApiConstants {
     
     public static final String WEB_PROTOCOL_SUFFIX = "://";
     public static final String SWAGGER_HOST_ELEMENT = "host";
-
+    public static final String RESOURCE_PATH_SUBSCRIPTION = "/subscriptions";
+    public static final String LOCATION_HEADER = "Location";
 
     /**
      * Type of UUF apps in system

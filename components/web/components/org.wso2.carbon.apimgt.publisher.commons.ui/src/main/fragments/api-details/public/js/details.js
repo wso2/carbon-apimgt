@@ -200,6 +200,7 @@ function lifecycleTabHandler(event) {
         var data = {
             lifeCycleStatus: api_data.lifeCycleStatus,
             isPublished: api_data.lifeCycleStatus.toLowerCase() === "published",
+            isWorkflowPending: api_data.workflowStatus.toLowerCase() === "pending",
             policies: policies_data,
             lcState: lcState.obj,
             lcHistory: lcHistory.obj,
@@ -276,7 +277,6 @@ function subscriptionsTabHandler(event) {
             api_client.subscriptions(api_id, getSubscriptionsCallback);
         },
         onFailure: function (data) {
-            console.debug("Failed");
         }
     };
     UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-subscriptions", {}, "subscriptions-tab-content", mode, callbacks);
@@ -305,18 +305,58 @@ function updateLifecycleHandler(event) {
         }
     };
     promised_update.then(
-        (response, event = event_data) => {
-            var message = "Life cycle state updated successfully!";
-            noty({
-                text: message,
-                type: 'success',
-                dismissQueue: true,
-                progressBar: true,
-                timeout: 5000,
-                layout: 'topCenter',
-                theme: 'relax',
-                maxVisible: 10,
-            });
+        (response, event = event_data) => {     
+            var lcResponse = response.obj;
+            var jsonPayload = lcResponse.jsonPayload;
+                            
+            if(jsonPayload) {
+                var jsonResponse = JSON.parse(jsonPayload);
+                var message = jsonResponse.redirectConfirmationMsg;
+                noty({
+                    text: message,
+                    layout: "top",
+                    theme: 'relax',
+                    dismissQueue: true,
+                    type: "alert",
+                    buttons: [
+                        {addClass: 'btn btn-primary', text: 'Leave page', onClick: function($noty) {
+                            $noty.close();
+                             location.href = jsonResponse.redirectUrl;
+                            }
+                        },
+                        {addClass: 'btn btn-default', text: 'Stay on this page', onClick: function($noty) {
+                            $noty.close();
+                            location.href = contextPath + "/apis/" + event_data.obj.api_id;
+                            }
+                         }
+                        ]
+                });
+            } else if (lcResponse.workflowStatus == 'CREATED') {
+                var message = "Lifecycle state change request has been submitted.";
+                noty({
+                    text: message,
+                    type: 'information',
+                    dismissQueue: true,
+                    progressBar: true,
+                    timeout: 5000,
+                    layout: 'topCenter',
+                    theme: 'relax',
+                    maxVisible: 10,
+                });
+            } else {
+                var message = "Life cycle state updated successfully!";
+                noty({
+                    text: message,
+                    type: 'success',
+                    dismissQueue: true,
+                    progressBar: true,
+                    timeout: 5000,
+                    layout: 'topCenter',
+                    theme: 'relax',
+                    maxVisible: 10,
+                });
+            }
+ 
             lifecycleTabHandler(event);
         }
     ).catch((response, event = event_data) => {
@@ -552,59 +592,61 @@ function updateLabelsHandler(event) {
         }.bind(data));
 }
 
+/**
+ * Do the workflow cleanup for pending task
+ * @param event {object} click event of the wf clean up button
+ */
+function cleanupWorkflowHandler(event) {
+    var api_client = event.data.api_client;
+    var api_id = event.data.api_id;
+    var checked_items = getCheckListItems();
+    var promised_update = api_client.cleanupPendingTask(api_id);
+    var event_data = {
+        data: {
+            api_client: api_client,
+            api_id: api_id
+        }
+    };
+    promised_update.then(
+        (response, event = event_data) => {     
+
+            var message = "Life cycle state change request removed successfully!";
+                noty({
+                    text: message,
+                    type: 'success',
+                    dismissQueue: true,
+                    progressBar: true,
+                    timeout: 5000,
+                    layout: 'topCenter',
+                    theme: 'relax',
+                    maxVisible: 10,
+                });
+ 
+            lifecycleTabHandler(event);
+        }
+    ).catch((response, event = event_data) => {
+            let message_element = $("#general-alerts").find(".alert-danger");
+            message_element.find(".alert-message").html(response.statusText);
+            message_element.fadeIn("slow");
+            lifecycleTabHandler(event);
+        }
+    );
+}
+
 function showTab(tab_name) {
     $('.nav a[href="#' + tab_name + '"]').tab('show');
 }
 
-  function _renderActionButtons(data, type, row) {
-        if (type === "display") {
-            var icon = $("<i>").addClass("fw");
-            var edit_button = $('<a>', {id: data.id, href: data.id})
-                .text('Edit ')
-                .addClass("cu-reg-btn btn-edit text-warning doc-listing-update")
-                .append(icon.addClass("fw-edit"));
-            var delete_button = $('<a>', {id: data.id})
-                .text('Delete ')
-                .addClass("cu-reg-btn btn-delete text-danger doc-listing-delete")
-                .append(icon.clone().removeClass("fw-edit").addClass("fw-delete"));
-            return $('<div></div>').append(edit_button).append(delete_button).html();
-        } else {
-            return data;
-        }
-    }
-
-function initDataTable(raw_data) {
-    $('#doc-table').DataTable({
-        ajax: function (data, callback, settings) {
-            callback(raw_data);
-        },
-        columns: [
-            {'data': 'documentId'},
-            {'data': 'name'},
-            {'data': 'sourceType'},
-            {'data': null}
-            //TODO add modified date column once the service implementation is completed.
-        ],
-                columnDefs: [
-                    {
-                        "targets": [ 0 ],
-                        "visible": false,
-                        "searchable": false
-                    },
-                    {
-                        targets: ["doc-listing-action"], //class name will be matched on the TH for the column
-                        searchable: false,
-                        sortable: false,
-                        render: _renderActionButtons // Method to render the action buttons per row
-                    }
-                ]
-    })
-   }
-
 
 function getDocsCallback(response) {
     var dt_data = apiResponseToData(response);
+    $('#no-docs-div').show();
+    $('.doc-content').hide();
     initDataTable(dt_data);
+    if (dt_data.data.length > 0) {
+    	$('.doc-content').show();
+    	$('#no-docs-div').hide();
+    }
 }
 
 function apiResponseToData(response) {
@@ -667,221 +709,28 @@ function documentTabHandler(event) {
      var data = {};
      UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-documents", data, "api-tab-doc-content", mode, callbacks);
     }
-
-/**
- * Jquery event handler on click event for api create submit button
- * @param event
- */
-function createDocHandler(event) {
-            var api_id = event.data.api_id;
-            var api_client = event.data.api_client;
-            var api_documents_data = {
-                 documentId: "",
-                 name: $('#docName').val(),
-                 type: "HOWTO",
-                 summary: $('#summary').val(),
-                 sourceType: $('input[name=optionsRadios1]:checked').val(),
-                 sourceUrl: $('#docUrl').val(),
-                 inlineContent: "string",
-                 otherTypeName: $('#specifyBox').val(),
-                 permission: '[{"groupId" : "1000", "permission" : ["READ","UPDATE"]},{"groupId" : "1001", "permission" : ["READ","UPDATE"]}]',
-                 visibility: "API_LEVEL"
-                 };
-            var promised_add = api_client.addDocument(api_id, api_documents_data);
-
-      promised_add.catch(function(error) {
-             var error_data = JSON.parse(error_response.data);
-             var message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
-             noty({
-                text: message,
-                type: 'error',
-                dismissQueue: true,
-                modal: true,
-                closeWith: ['click', 'backdrop'],
-                progressBar: true,
-                timeout: 5000,
-                layout: 'top',
-                theme: 'relax',
-                maxVisible: 10
-                });
-             $('[data-toggle="loading"]').loading('hide');
-             console.debug(error_response);
-            }).then(function(done) {
-              var dt_data = done.obj;
-              var documentId = dt_data.documentId;
-              var name = dt_data.name;
-              var sourceType = dt_data.sourceType;
-              var docId = dt_data.documentId;
-              var data_table = $('#doc-table').DataTable();
-              data_table.row.add({documentId,name,sourceType, _renderActionButtons}).draw();
-            });
- }
-
-
-    function deleteDocHandler(event) {
-        var data_table = $('#doc-table').DataTable();
-        var current_row = data_table.row($(this).parents('tr'));
-        var documentId = current_row.data().documentId;
-        var doc_name = current_row.data().name;
-        var api_client = event.data.api_client;
-        var api_id = event.data.api_id;
-        noty({
-            text: 'Do you want to delete <span class="text-info">' + doc_name + '</span> ?',
-            type: 'alert',
-            dismissQueue: true,
-            layout: "topCenter",
-            modal: true,
-            theme: 'relax',
-            buttons: [
-                {
-                    addClass: 'btn btn-danger', text: 'Ok', onClick: function ($noty) {
-                    $noty.close();
-                    let promised_delete = api_client.deleteDocument(api_id,documentId);
-                    promised_delete.then(
-                        function (response) {
-                            if (!response) {
-                                return;
-                            }
-                            current_row.remove();
-                            data_table.draw();
-                        }
-                    );
-                }
-                },
-                {
-                    addClass: 'btn btn-info', text: 'Cancel', onClick: function ($noty) {
-                    $noty.close();
-                }
-                }
-            ]
-        });
-    }
-
-    function getAPIDocumentByDocId(event){
-        var data_table = $('#doc-table').DataTable();
-        var current_row = data_table.row($(this).parents('tr'));
-        var documentId = current_row.data().documentId;
-        $('#docId').val(documentId);
-        var doc_name = current_row.data().name;
-        var api_client = event.data.api_client;
-        var api_id = event.data.api_id;
-
-        let promised_update = api_client.getDocument(api_id,documentId);
-           promised_update.then(
-             function (response) {
-                   if (!response) {
-                  return;
-                 }
-             loadDocumentDataToForm(response);
-             }
-         );
-    }
-
-    function updateAPIDocument(event){
-           var api_id = event.data.api_id;
-           var api_client = event.data.api_client;
-           var documentId = $('#docId').val();
-           var update_documents_data = {
-                 documentId: $('#docId').val(),
-                 name: $('#docName').val(),
-                 type: "HOWTO",
-                 summary: $('#summary').val(),
-                 sourceType: $('input[name=optionsRadios1]:checked').val(),
-                 sourceUrl: $('#docUrl').val(),
-                 inlineContent: "",
-                 otherTypeName: $('#specifyBox').val(),
-                 permission: '[{"groupId" : "1000", "permission" : ["READ","UPDATE"]},{"groupId" : "1001", "permission" : ["READ","UPDATE"]}]',
-                 visibility: "API_LEVEL"
-                 };
-           var promised_update = api_client.updateDocument(api_id, documentId, update_documents_data);
-
-
-        promised_update.catch(function(error) {
-             var error_data = JSON.parse(error_response.data);
-             var message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
-             noty({
-                text: message,
-                type: 'error',
-                dismissQueue: true,
-                modal: true,
-                closeWith: ['click', 'backdrop'],
-                progressBar: true,
-                timeout: 5000,
-                layout: 'top',
-                theme: 'relax',
-                maxVisible: 10
-                });
-             $('[data-toggle="loading"]').loading('hide');
-             console.debug(error_response);
-             }).then(function(done) {
-             var dt_data = done.obj;
-             var name = dt_data.name;
-             var type = dt_data.type;
-             var docId = dt_data.documentId;
-
-             var data_table = $('#doc-table').DataTable();
-             var current_row = data_table.cell(documentId, 0).row();
-             current_row.invalidate();
-             current_row.data(dt_data);
-             data_table.draw();
-             $('#newDoc').fadeOut();
-            });
-    }
-
-    function loadDocumentDataToForm(response){
-         $('#add-doc-submit').hide();
-         $('#newDoc').fadeIn();
-         $('#add-new-doc').hide();
-         $('#doc-header').html("<h4> Update Document - "+ response.obj.name +"</h4>");
-         $('#docName').val(response.obj.name);
-         $('#summary').val(response.obj.summary);
-         $("input[value='"+response.obj.sourceType+"']").prop("checked",true);
-         if(response.obj.sourceType == "URL"){
-            $('#sourceUrlDoc').show("slow");
-            $('#docUrl').val(response.obj.sourceUrl);
-         }else if(response.obj.sourceType == "FILE"){
-            $('#fileNameDiv').show("slow");
-            $('#docUrl').val(response.obj.sourceUrl);
-         }else{
-            $('#sourceUrlDoc').fadeOut("slow");
-            $('#fileNameDiv').fadeOut("slow");
-         }
-            $('#fileNameDiv').fadeOut("slow");
-            $('#update-doc-submit').fadeIn("slow");
-         $('#docName').disabled = true;
-    }
-
-
-    function toggleDocAdder() {
-        $('#newDoc').toggle();
-    }
     
     
-    function loadSwaggerUI(response) {
+    var select_environment = function(){
+        var selectedEnvironment = $("#environment_name");
+        var name = selectedEnvironment.val();
+
+        //Token to load the swagger definition
         var bearerToken = "Bearer " + getCookie("WSO2_AM_TOKEN_1");
-        $(document).ready(function() {
-	        window.swaggerUi = new SwaggerUi({
-	                url: response.url,
-	                dom_id: "swagger-ui-container",
-	                authorizations: {
-	                        key: new SwaggerClient.ApiKeyAuthorization("Authorization", bearerToken, "header")
-	                },
-	                supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch', 'head'],
-	                onComplete: function(swaggerApi, swaggerUi){
-	                        console.log("Loaded SwaggerUI");
-	                },
-	                onFailure: function(data) {
-	                        console.log("Unable to Load SwaggerUI");
-	                },
-	                docExpansion: "list",
-	                jsonEditor: false,
-	                defaultModelRendering: 'schema',
-	                showRequestHeaders: true,
-	                validatorUrl: null
-	        });
-	        window.swaggerUi.load();
-        });
-    }
+        swaggerUi.api.clientAuthorizations.add("key", new SwaggerClient.ApiKeyAuthorization("Authorization", bearerToken, "header"));
+
+        //Set Swagger URL
+        if (window.swaggerUi.api.url.indexOf("?") != -1) {
+        	if (window.swaggerUi.api.url.indexOf("labelName") != -1) {
+        		window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url.split("labelName")[0] + "labelName=" + name + "&scheme=" + location.protocol});
+        	} else {
+                window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "&labelName=" + name + "&scheme=" + location.protocol});
+        	}
+        } else {
+        	window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "?labelName=" + name + "&scheme=" + location.protocol});
+        }
+        //change_token();
+      };
     
     /**
      * Event handler for API Console tab onclick event;Get the API swagger definition and display in Swagger UI
@@ -890,17 +739,58 @@ function createDocHandler(event) {
     function apiConsoleTabHandler(event) {
     	  var api_client = event.data.api_client;
     	  var api_id = event.data.api_id;
-    	  var callbacks = {
-    	          onSuccess: function (data) {
-    	                 api_client.getSwagger(api_id, loadSwaggerUI);
-    	          }, onFailure: function (data) {
-    	         }
-    	        };
+
     	   var mode = "OVERWRITE";
     	   var data = {};
-    	   UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-console", data, 
-    			   "api-console-content", mode, callbacks);
-    	  }
+    	   api_client.get(api_id).then(
+    		        function (response) {
+    		        	var context = response.obj;
+    		        	var callbacks = {
+    		    	          onSuccess: function (data) {
+    		    	                 api_client.getSwagger(api_id).then(
+    		    	                		 function (jsonData) {
+    		    	                			 var swaggerURL = jsonData.url;
+    		    	                			 if (context.labels.length > 0) {
+    		    	                				 swaggerURL = jsonData.url + "?labelName=" + context.labels[0] + "&scheme=" + location.protocol;
+    		    	                				 }
+    		    	                			 var bearerToken = "Bearer " + getCookie("WSO2_AM_TOKEN_1");
+    		    	                			 $(document).ready(function() {
+    		    	                				 window.swaggerUi = new SwaggerUi({
+    		    	                					 url: swaggerURL,
+    		    	                					 dom_id: "swagger-ui-container",
+    		    	                					 authorizations: {
+    		    	                						 key: new SwaggerClient.ApiKeyAuthorization("Authorization", bearerToken, "header")
+    		    	                					 },
+    		    	                					 supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch', 'head'],
+    		    	                					 onComplete: function(swaggerApi, swaggerUi){
+    		    	                						 console.log("Loaded SwaggerUI");
+    		    	                					 },
+    		    	                					 onFailure: function(data) {
+    		    	                						 console.log("Unable to Load SwaggerUI");
+    		    	                						 },
+    		    	                					 docExpansion: "list",
+    		    	                					 jsonEditor: false,
+    		    	                					 defaultModelRendering: 'schema',
+    		    	                					 showRequestHeaders: true,
+    		    	                					 validatorUrl: null
+    		    	                					 });
+    		    	                				 window.swaggerUi.load();
+    		    	                				 });
+    		    	                			 }
+    		    	                		 ).catch(apiGetErrorHandler);
+    		    	                 $(".env_name").change(select_environment);
+    		    	              }, onFailure: function (data) {
+    		    	            	  
+    		    	              }
+    		    	        };
+    		        	var data = {
+    		        			labels: context.labels
+    		        			};
+    		        	UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-console", data, 
+    		     			   "api-console-content", mode, callbacks);
+    		        	}
+    		        ).catch(apiGetErrorHandler);
+    	   }
 
 
 /**
@@ -924,12 +814,8 @@ $(function () {
     $('#tab-9').bind('show.bs.tab', {api_client: client, api_id: api_id}, subscriptionsTabHandler);
     $('#tab-10').bind('show.bs.tab', {api_client: client, api_id: api_id}, apiConsoleTabHandler);
     $(document).on('click', ".lc-state-btn", {api_client: client, api_id: api_id}, updateLifecycleHandler);
+    $(document).on('click', ".wf-cleanup-btn", {api_client: client, api_id: api_id}, cleanupWorkflowHandler);
     $(document).on('click', "#checkItem", {api_client: client, api_id: api_id}, updateLifecycleCheckListHandler);
-    $(document).on('click', ".doc-listing-delete", {api_client: client,api_id: api_id}, deleteDocHandler);
-    $(document).on('click', ".doc-listing-update", {api_client: client,api_id: api_id}, getAPIDocumentByDocId);
-    $(document).on('click', "#add-doc-submit", {api_client: client, api_id: api_id}, createDocHandler);
-    $(document).on('click', "#update-doc-submit", {api_client: client, api_id: api_id}, updateAPIDocument);
-    $(document).on('click', "#add-new-doc", {}, toggleDocAdder);
     $(document).on('click', "#update-labels-button", {api_client: client, api_id: api_id}, updateLabelsHandler);
     loadFromHash();
 });

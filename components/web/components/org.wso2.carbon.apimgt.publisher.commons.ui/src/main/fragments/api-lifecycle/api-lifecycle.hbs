@@ -1,4 +1,3 @@
-{{log this}}
 <div class="row">
     <div class="col-md-8 col-sm-8 col-md-offset-2 col-sm-offset-2">
         <object type="image/svg+xml" data="{{public "images/API_LIFECYCLE.svg"}}" id="lifecycle-svg">
@@ -17,12 +16,18 @@
                     <label class="control-label col-xs-12 col-sm-4 col-md-3 col-lg-2 text-center-xs" name="state"><h4>
                         {{i18n "Current.State"}}:</h4></label>
                     <div class="controls col-xs-12 col-sm-8 col-md-9 col-lg-10 text-center-xs">
+                    {{#if @params.isWorkflowPending}}
+                        <h4><p class="form-control-static" name="stateValue"><strong>{{i18n "Pending lifecycle state change"}}</strong>
+                        </p></h4>
+                    {{else}}
                         <h4><p class="form-control-static" name="stateValue"><strong>{{@params.lifeCycleStatus}}</strong>
                         </p></h4>
+                    {{/if}}
                     </div>
                 </div>
 
             </div>
+            {{#unless @params.isWorkflowPending}}
             {{#each @params.lcState.checkItemBeanList}}
             <div class="form-actions">
                 <label class="control-label col-sm-2"></label>
@@ -32,16 +37,24 @@
                 </label>
             </div>
             {{/each}}
+            {{/unless}}
 
             <div class="form-actions">
                 <div class="btn-group btn-group-justified" role="group" aria-label="btn">
+                {{#if @params.isWorkflowPending}}
+                     <div class="btn-group" role="group">
+                        <input type="button"
+                               class="btn btn-primary wf-cleanup-btn" data-lcstate="" value="{{i18n "Delete pending lifecycle state change request"}}">
+                    </div>
+                {{else}}
                     {{#each @params.lcState.availableTransitionBeanList}}
                     <div class="btn-group" role="group">
                         <input type="button"
-                               class="btn btn-primary lc-state-btn" data-lcstate="{{this.targetState}}" value="{{this.targetState}}">
+                               class="btn btn-primary lc-state-btn" data-lcstate="{{this.targetState}}" value="{{this.event}}">
                     </div>
 
                     {{/each}}
+                  {{/if}}
                 </div>
                 <div class="page-header">
                     <h4 class="lead">{{i18n "Lifecycle.History"}}</h4>

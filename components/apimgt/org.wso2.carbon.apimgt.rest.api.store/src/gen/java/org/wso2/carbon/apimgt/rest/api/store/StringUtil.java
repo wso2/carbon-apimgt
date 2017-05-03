@@ -1,6 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.store;
 
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-28T22:39:18.827+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-07T10:04:16.863+05:30")
 public class StringUtil {
   /**
    * Check if the given array contains the given value (with case-insensitive comparison).

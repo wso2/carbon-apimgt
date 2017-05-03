@@ -65,7 +65,12 @@ public class AuthenticatorAPI implements Microservice {
             LoginTokenService loginTokenService = new LoginTokenService();
             AuthResponseBean authResponseBean = new AuthResponseBean();
             String appContext = AuthUtil.getAppContext(request);
-            String restAPIContext = AuthenticatorConstants.REST_CONTEXT + appContext;
+            String restAPIContext;
+            if (appContext.contains("editor")) {
+                restAPIContext = AuthenticatorConstants.REST_CONTEXT + "/publisher";
+            } else {
+                restAPIContext = AuthenticatorConstants.REST_CONTEXT + appContext;
+            }
             String refToken = null;
             if (AuthenticatorConstants.REFRESH_GRANT.equals(grantType)) {
                 refToken = AuthUtil
@@ -145,7 +150,12 @@ public class AuthenticatorAPI implements Microservice {
     @Path ("/revoke")
     public Response logout(@Context Request request) {
         String appContext = AuthUtil.getAppContext(request);
-        String restAPIContext = AuthenticatorConstants.REST_CONTEXT + appContext;
+        String restAPIContext;
+        if (appContext.contains("editor")) {
+            restAPIContext = AuthenticatorConstants.REST_CONTEXT + "/publisher";
+        } else {
+            restAPIContext = AuthenticatorConstants.REST_CONTEXT + appContext;
+        }
         String accessToken = AuthUtil
                 .extractTokenFromHeaders(request.getHeaders(), AuthenticatorConstants.ACCESS_TOKEN_2);
         if (accessToken != null) {

@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -15,8 +17,8 @@ import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
-import org.wso2.carbon.apimgt.core.util.WorkflowUtils;
 import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
+import org.wso2.carbon.apimgt.core.workflow.HttpWorkflowResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -27,13 +29,16 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
+import org.wso2.msf4j.Request;
 import org.wso2.msf4j.formparam.FileInfo;
 
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -42,10 +47,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
         "2016-11-01T13:47:43.416+05:30")
 public class ApisApiServiceImpl extends ApisApiService {
@@ -53,22 +54,22 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Deletes a particular API
-     * 
-     * @param apiId UUID of API
-     * @param ifMatch If-Match header value
+     *
+     * @param apiId             UUID of API
+     * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @param minorVersion minor version header
+     * @param request           msf4j request object
      * @return 200 OK if the opration was successful
      * @throws NotFoundException when the particular resource does not exist
      */
     @Override
-    public Response apisApiIdDelete(String apiId, String ifMatch, String ifUnmodifiedSince, String minorVersion)
+    public Response apisApiIdDelete(String apiId, String ifMatch, String ifUnmodifiedSince, Request request)
             throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String existingFingerprint = apisApiIdGetFingerprint(apiId, null, null, null,
-                    minorVersion);
+                    request);
             if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
                     .contains(existingFingerprint)) {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
@@ -88,24 +89,25 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Retrieves the content of a particular document
-     * 
-     * @param apiId UUID of API
-     * @param documentId UUID of the document
-     * @param accept Accept header value
-     * @param ifNoneMatch If-None-Match header value
+     *
+     * @param apiId           UUID of API
+     * @param documentId      UUID of the document
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
-     * @param minorVersion minor version header
+     * @param request         msf4j request object
      * @return Content of the document
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String accept,
-            String ifNoneMatch, String ifModifiedSince, String minorVersion) throws NotFoundException {
+                                                           String ifNoneMatch, String ifModifiedSince, Request
+                                                                   request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String existingFingerprint = apisApiIdDocumentsDocumentIdContentGetFingerprint(apiId, documentId, accept,
-                    ifNoneMatch, ifModifiedSince, minorVersion);
+                    ifNoneMatch, ifModifiedSince, request);
             if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
                     .contains(existingFingerprint)) {
                 return Response.notModified().build();
@@ -150,17 +152,18 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Retrives the fingerprint of a particular document content
-     * 
-     * @param apiId UUID of API
-     * @param documentId UUID of the document
-     * @param accept Accept header value
-     * @param ifNoneMatch If-None-Match header value
+     *
+     * @param apiId           UUID of API
+     * @param documentId      UUID of the document
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
-     * @param minorVersion minor version header
+     * @param request         msf4j request object
      * @return fingerprint of a particular document content
      */
     public String apisApiIdDocumentsDocumentIdContentGetFingerprint(String apiId, String documentId, String accept,
-            String ifNoneMatch, String ifModifiedSince, String minorVersion) {
+                                                                    String ifNoneMatch, String ifModifiedSince,
+                                                                    Request request) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username)
@@ -178,28 +181,30 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Uploads a document's content and attach to particular document
-     * 
-     * @param apiId UUID of API
-     * @param documentId UUID of the document
-     * @param contentType Content-Type header value
-     * @param fileInputStream file content stream
-     * @param fileDetail meta infomation about the file
-     * @param inlineContent inline documentation content
-     * @param ifMatch If-Match header value
+     *
+     * @param apiId             UUID of API
+     * @param documentId        UUID of the document
+     * @param contentType       Content-Type header value
+     * @param fileInputStream   file content stream
+     * @param fileDetail        meta infomation about the file
+     * @param inlineContent     inline documentation content
+     * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @param minorVersion minor version header
+     * @param request           msf4j request object
      * @return updated document meta information
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdContentPost(String apiId, String documentId, String contentType,
-            InputStream fileInputStream, FileInfo fileDetail, String inlineContent, String ifMatch,
-            String ifUnmodifiedSince, String minorVersion) throws NotFoundException {
+                                                            InputStream fileInputStream, FileInfo fileDetail, String
+                                                                    inlineContent, String ifMatch,
+                                                            String ifUnmodifiedSince, Request request) throws
+            NotFoundException {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIPublisher apiProvider = RestAPIPublisherUtil.getApiPublisher(username);
             String existingFingerprint = apisApiIdDocumentsDocumentIdContentGetFingerprint(apiId, documentId, null,
-                    null, null, minorVersion);
+                    null, null, request);
             if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
                     .contains(existingFingerprint)) {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
@@ -250,7 +255,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             //retrieving the updated doc and the URI
             DocumentInfo updatedDoc = apiProvider.getDocumentationSummary(documentId);
             String newFingerprint = apisApiIdDocumentsDocumentIdContentGetFingerprint(apiId, documentId, null,
-                    null, null, minorVersion);
+                    null, null, request);
             DocumentDTO documentDTO = MappingUtil.toDocumentDTO(updatedDoc);
             return Response.status(Response.Status.CREATED)
                     .header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"").entity(documentDTO).build();
@@ -267,23 +272,24 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Delete an API's document
-     * 
-     * @param apiId UUID of API
-     * @param documentId UUID of the document
-     * @param ifMatch If-Match header value
+     *
+     * @param apiId             UUID of API
+     * @param documentId        UUID of the document
+     * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @param minorVersion minor version header
+     * @param request           msf4j request object
      * @return 200 OK response if the deletion was successful
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdDelete(String apiId, String documentId, String ifMatch,
-            String ifUnmodifiedSince, String minorVersion) throws NotFoundException {
+                                                       String ifUnmodifiedSince, Request request) throws
+            NotFoundException {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String existingFingerprint = apisApiIdDocumentsDocumentIdGetFingerprint(apiId, documentId, null, null, null,
-                    minorVersion);
+                    request);
             if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
                     .contains(existingFingerprint)) {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
@@ -303,25 +309,25 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Retrives the document identified by the API's ID and the document's ID
-     * 
-     * @param apiId UUID of API
-     * @param documentId UUID of the document
-     * @param accept Accept header value
-     * @param ifNoneMatch If-None-Match header value
+     *
+     * @param apiId           UUID of API
+     * @param documentId      UUID of the document
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
-     * @param minorVersion minor version header
+     * @param request         msf4j request object
      * @return the document qualifying for the provided IDs
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String accept, String ifNoneMatch,
-            String ifModifiedSince, String minorVersion) throws NotFoundException {
+                                                    String ifModifiedSince, Request request) throws NotFoundException {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
 
             String existingFingerprint = apisApiIdDocumentsDocumentIdGetFingerprint(apiId, documentId, accept,
-                    ifNoneMatch, ifModifiedSince, minorVersion);
+                    ifNoneMatch, ifModifiedSince, request);
             if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
                     .contains(existingFingerprint)) {
                 return Response.notModified().build();
@@ -351,17 +357,18 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Retrieves the fingerprint of a document
-     * 
-     * @param apiId UUID of API
-     * @param documentId UUID of the document
-     * @param accept Accept header value
-     * @param ifNoneMatch If-None-Match header value
+     *
+     * @param apiId           UUID of API
+     * @param documentId      UUID of the document
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
-     * @param minorVersion minor version header
+     * @param request         msf4j request object
      * @return fingerprint of the document
      */
     public String apisApiIdDocumentsDocumentIdGetFingerprint(String apiId, String documentId, String accept,
-            String ifNoneMatch, String ifModifiedSince, String minorVersion) {
+                                                             String ifNoneMatch, String ifModifiedSince, Request
+                                                                     request) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username)
@@ -378,27 +385,28 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Updates an API's document
-     * 
-     * @param apiId UUID of API
-     * @param documentId UUID of the document
-     * @param body DTO object including the document's meta information
-     * @param contentType Content-Type header value
-     * @param ifMatch If-Match header value
+     *
+     * @param apiId             UUID of API
+     * @param documentId        UUID of the document
+     * @param body              DTO object including the document's meta information
+     * @param contentType       Content-Type header value
+     * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @param minorVersion minor version header
+     * @param request           msf4j request object
      * @return updated document meta info DTO as the response
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdPut(String apiId, String documentId, DocumentDTO body,
-            String contentType, String ifMatch, String ifUnmodifiedSince, String minorVersion)
+                                                    String contentType, String ifMatch, String ifUnmodifiedSince,
+                                                    Request request)
             throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
 
             String existingFingerprint = apisApiIdDocumentsDocumentIdGetFingerprint(apiId, documentId, null, null, null,
-                    minorVersion);
+                    request);
             if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
                     .contains(existingFingerprint)) {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
@@ -443,7 +451,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             //retrieve the updated documentation
             DocumentInfo newDocumentation = apiPublisher.getDocumentationSummary(documentId);
             String newFingerprint = apisApiIdDocumentsDocumentIdGetFingerprint(apiId, documentId, null, null, null,
-                    minorVersion);
+                    request);
             return Response.ok().header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"")
                     .entity(MappingUtil.toDocumentDTO(newDocumentation)).build();
         } catch (APIManagementException e) {
@@ -460,19 +468,19 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Retrieves a list of documents of an API
-     * 
-     * @param apiId UUID of API
-     * @param limit maximum documents to return
-     * @param offset starting position of the pagination
-     * @param accept Accept header value
+     *
+     * @param apiId       UUID of API
+     * @param limit       maximum documents to return
+     * @param offset      starting position of the pagination
+     * @param accept      Accept header value
      * @param ifNoneMatch If-None-Match header value
-     * @param minorVersion minor version header
+     * @param request     msf4j request object
      * @return a list of document DTOs
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String accept,
-            String ifNoneMatch, String minorVersion) throws NotFoundException {
+                                          String ifNoneMatch, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -491,19 +499,19 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Adds new document to an API
-     * 
-     * @param apiId UUID of API
-     * @param body DTO object including the document's meta information
-     * @param contentType Content-Type header value
-     * @param ifMatch If-Match header value
+     *
+     * @param apiId             UUID of API
+     * @param body              DTO object including the document's meta information
+     * @param contentType       Content-Type header value
+     * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @param minorVersion minor version header
+     * @param request           msf4j request object
      * @return newly added document meta info object
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdDocumentsPost(String apiId, DocumentDTO body, String contentType, String ifMatch,
-            String ifUnmodifiedSince, String minorVersion) throws NotFoundException {
+                                           String ifUnmodifiedSince, Request request) throws NotFoundException {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIPublisher apiProvider = RestAPIPublisherUtil.getApiPublisher(username);
@@ -534,55 +542,54 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Retrieve the gateway configuration of an API
-     * 
-     * @param apiId UUID of API
-     * @param accept Accept header value
-     * @param ifNoneMatch If-None-Match header value
+     *
+     * @param apiId           UUID of API
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
-     * @param minorVersion minor version header
+     * @param request         msf4j request object
      * @return gateway configuration
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdGatewayConfigGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince,
-            String minorVersion)
+                                              Request request)
             throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String existingFingerprint = apisApiIdGatewayConfigGetFingerprint(apiId, accept, ifNoneMatch,
-                    ifModifiedSince, minorVersion);
+                    ifModifiedSince, request);
             if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
                     .contains(existingFingerprint)) {
                 return Response.notModified().build();
             }
             String gatewayConfig = apiPublisher.getApiGatewayConfig(apiId);
-            return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(gatewayConfig).build();
+            return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(gatewayConfig)
+                    .build();
         } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
-            // existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                String errorMessage = "Error while retrieving gateway config of API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
+            String errorMessage = "Error while retrieving gateway config of API : " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+
         }
-        return null;
     }
 
     /**
      * Retrieves the fingerprint of a gateway config provided its API's UUID
-     * 
-     * @param apiId UUID of API
-     * @param accept Accept header value
-     * @param ifNoneMatch If-None-Match header value
+     *
+     * @param apiId           UUID of API
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
-     * @param minorVersion minor version header
+     * @param request         msf4j request object
      * @return fingerprint of the gateaway config
      */
     public String apisApiIdGatewayConfigGetFingerprint(String apiId, String accept, String ifNoneMatch,
-            String ifModifiedSince, String minorVersion) {
+                                                       String ifModifiedSince, Request request) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username).getLastUpdatedTimeOfGatewayConfig(
@@ -597,24 +604,24 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     /**
-     * Update an API's gateway configuration by its UUID 
-     * 
-     * @param apiId UUID of API
-     * @param gatewayConfig gateway configuration
-     * @param contentType Content-Type header value
-     * @param ifMatch If-Match header value
+     * Update an API's gateway configuration by its UUID
+     *
+     * @param apiId             UUID of API
+     * @param gatewayConfig     gateway configuration
+     * @param contentType       Content-Type header value
+     * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @param minorVersion minor version header
+     * @param request           msf4j request object
      * @return Updated gateway configuration
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdGatewayConfigPut(String apiId, String gatewayConfig, String contentType, String ifMatch,
-                                              String ifUnmodifiedSince, String minorVersion) throws NotFoundException {
+                                              String ifUnmodifiedSince, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            String existingFingerprint = apisApiIdGatewayConfigGetFingerprint(apiId, null, null, null, minorVersion);
+            String existingFingerprint = apisApiIdGatewayConfigGetFingerprint(apiId, null, null, null, request);
             if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
                     .contains(existingFingerprint)) {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
@@ -622,44 +629,50 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             apiPublisher.updateApiGatewayConfig(apiId, gatewayConfig);
             String apiGatewayConfig = apiPublisher.getApiGatewayConfig(apiId);
-            String newFingerprint = apisApiIdGatewayConfigGetFingerprint(apiId, null, null, null, minorVersion);
-            return Response.ok().header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"").entity(apiGatewayConfig).build();
+            String newFingerprint = apisApiIdGatewayConfigGetFingerprint(apiId, null, null, null, request);
+            return Response.ok().header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"").entity(apiGatewayConfig)
+                    .build();
         } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
-            // existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                String errorMessage = "Error while retrieving API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
+            String errorMessage = "Error while gateway configuration update for api : " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+
         }
-        return null;
     }
 
     /**
      * Retrives an API by UUID
-     * 
-     * @param apiId UUID of API
-     * @param accept Accept header value
-     * @param ifNoneMatch If-None-Match header value
+     *
+     * @param apiId           UUID of API
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
-     * @param minorVersion minor version header
+     * @param request         msf4j request object
      * @return API which is identified by the given UUID
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince,
-            String minorVersion
+                                 Request request
     ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             if (!RestAPIPublisherUtil.getApiPublisher(username).checkIfAPIExists(apiId)) {
-                RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+                String errorMessage = "API not found : " + apiId;
+                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
+                        ExceptionCodes.API_NOT_FOUND);
+                HashMap<String, String> paramList = new HashMap<String, String>();
+                paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                log.error(errorMessage, e);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
             }
 
             String existingFingerprint = apisApiIdGetFingerprint(apiId, accept, ifNoneMatch, ifModifiedSince,
-                    minorVersion);
+                    request);
             if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
                     .contains(existingFingerprint)) {
                 return Response.notModified().build();
@@ -680,16 +693,16 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Returns the fingerprint of an API
-     * 
-     * @param apiId UUID of API
-     * @param accept Accept header value
-     * @param ifNoneMatch If-None-Match header value
+     *
+     * @param apiId           UUID of API
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
-     * @param minorVersion minor version header
+     * @param request         msf4j request object
      * @return fingerprint of the given API
      */
     public String apisApiIdGetFingerprint(String apiId, String accept, String ifNoneMatch, String ifModifiedSince,
-            String minorVersion) {
+                                          Request request) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username).getLastUpdatedTimeOfAPI(apiId);
@@ -704,18 +717,18 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Retrieves the possible lifecycle states of a given API
-     * 
-     * @param apiId UUID of API
-     * @param accept Accept header value
-     * @param ifNoneMatch If-None-Match header value
+     *
+     * @param apiId           UUID of API
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
-     * @param minorVersion minor version header
+     * @param request         msf4j request object
      * @return possible lifecycle states of a given API
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdLifecycleGet(String apiId, String accept, String ifNoneMatch,
-            String ifModifiedSince, String minorVersion) throws NotFoundException {
+                                          String ifModifiedSince, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             LifecycleState lifecycleState = RestAPIPublisherUtil.getApiPublisher(username).getAPILifeCycleData(apiId);
@@ -733,35 +746,43 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Retrieves the lifecycle history of the API
-     * 
-     * @param apiId UUID of the API
-     * @param accept Accept header value
-     * @param ifNoneMatch If-None-Match header value
+     *
+     * @param apiId           UUID of the API
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
-     * @param minorVersion minor version header
+     * @param request         msf4j request object
      * @return lifecycle history of the API
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdLifecycleHistoryGet(String apiId, String accept, String ifNoneMatch,
-            String ifModifiedSince, String minorVersion) throws NotFoundException {
+                                                 String ifModifiedSince, Request request) throws NotFoundException {
 
         String username = RestApiUtil.getLoggedInUsername();
         try {
             if (RestAPIPublisherUtil.getApiPublisher(username).checkIfAPIExists(apiId)) {
                 String lifecycleInstanceId =
                         RestAPIPublisherUtil.getApiPublisher(username).getAPIbyUUID(apiId).getLifecycleInstanceId();
-                if(lifecycleInstanceId != null) {
+                if (lifecycleInstanceId != null) {
                     List lifecyclestatechangehistory =
                             RestAPIPublisherUtil.getApiPublisher(username)
                                     .getLifeCycleHistoryFromUUID(lifecycleInstanceId);
                     return Response.ok().entity(lifecyclestatechangehistory).build();
                 } else {
                     throw new APIManagementException("Could not find lifecycle information for the requested API"
-                            + apiId, ExceptionCodes. APIMGT_LIFECYCLE_EXCEPTION);
+                            + apiId, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
                 }
-           } else {
-                RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            } else {
+                String errorMessage = "API Not found : " + apiId;
+                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
+                        ExceptionCodes.API_NOT_FOUND);
+                HashMap<String, String> paramList = new HashMap<String, String>();
+                paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                log.error(errorMessage, e);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+
             }
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving API : " + apiId;
@@ -772,29 +793,28 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
 
         }
-        return null;
     }
 
     /**
      * Updates an API by UUID
-     * 
-     * @param apiId UUID of API
-     * @param body Updated API details
-     * @param contentType Content-Type header value
-     * @param ifMatch If-Match header value
+     *
+     * @param apiId             UUID of API
+     * @param body              Updated API details
+     * @param contentType       Content-Type header value
+     * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @param minorVersion minor version header
+     * @param request           msf4j request object
      * @return Updated API
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdPut(String apiId, APIDTO body, String contentType, String ifMatch,
-            String ifUnmodifiedSince, String minorVersion
+                                 String ifUnmodifiedSince, Request request
     ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            String existingFingerprint = apisApiIdGetFingerprint(apiId, null, null, null, minorVersion);
+            String existingFingerprint = apisApiIdGetFingerprint(apiId, null, null, null, request);
             if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
                     .contains(existingFingerprint)) {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
@@ -803,7 +823,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             API.APIBuilder api = MappingUtil.toAPI(body).id(apiId);
             apiPublisher.updateAPI(api);
 
-            String newFingerprint = apisApiIdGetFingerprint(apiId, null, null, null, minorVersion);
+            String newFingerprint = apisApiIdGetFingerprint(apiId, null, null, null, request);
             APIDTO apidto = MappingUtil.toAPIDto(apiPublisher.getAPIbyUUID(apiId));
             return Response.ok().header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"").entity(apidto).build();
         } catch (APIManagementException e) {
@@ -819,25 +839,26 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Retrieves the swagger definition of an API
-     * 
-     * @param apiId UUID of API
-     * @param labelName Label name of the gateway
-     * @param scheme Transport scheme (http | https)
-     * @param accept Accept header value
-     * @param ifNoneMatch If-None-Match header value
+     *
+     * @param apiId           UUID of API
+     * @param labelName       Label name of the gateway
+     * @param scheme          Transport scheme (http | https)
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
-     * @param minorVersion minor version header
+     * @param request         msf4j request object
      * @return swagger definition of an API
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response apisApiIdSwaggerGet(String apiId, String labelName, String scheme, String accept, 
-    		String ifNoneMatch, String ifModifiedSince, String minorVersion) throws NotFoundException {
+    public Response apisApiIdSwaggerGet(String apiId, String labelName, String scheme, String accept,
+                                        String ifNoneMatch, String ifModifiedSince, Request request) throws
+            NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String existingFingerprint = apisApiIdSwaggerGetFingerprint(apiId, accept, ifNoneMatch, ifModifiedSince,
-                    minorVersion);
+                    request);
             if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
                     .contains(existingFingerprint) && StringUtils.isEmpty(labelName)) {
                 return Response.notModified().build();
@@ -861,16 +882,16 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Retrieves the fingerprint of a swagger definition of an API
-     * 
-     * @param apiId UUID of API
-     * @param accept Accept header value
-     * @param ifNoneMatch If-None-Match header value
+     *
+     * @param apiId           UUID of API
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
-     * @param minorVersion minor version header
+     * @param request         msf4j request object
      * @return fingerprint of a swagger definition of an API
      */
     public String apisApiIdSwaggerGetFingerprint(String apiId, String accept, String ifNoneMatch,
-            String ifModifiedSince, String minorVersion) {
+                                                 String ifModifiedSince, Request request) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username).getLastUpdatedTimeOfAPI(apiId);
@@ -885,31 +906,31 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Updates the swagger defnition of an API
-     * 
-     * @param apiId UUID of API
-     * @param apiDefinition updated swagger defintion
-     * @param contentType Content-Type header value
-     * @param ifMatch If-Match header value
+     *
+     * @param apiId             UUID of API
+     * @param apiDefinition     updated swagger defintion
+     * @param contentType       Content-Type header value
+     * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @param minorVersion minor version header
+     * @param request           msf4j request object
      * @return Updated swagger definition
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String contentType, String ifMatch,
-            String ifUnmodifiedSince, String minorVersion
+                                        String ifUnmodifiedSince, Request request
     ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            String existingFingerprint = apisApiIdSwaggerGetFingerprint(apiId, null, null, null, minorVersion);
+            String existingFingerprint = apisApiIdSwaggerGetFingerprint(apiId, null, null, null, request);
             if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
                     .contains(existingFingerprint)) {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
             }
             apiPublisher.saveSwagger20Definition(apiId, apiDefinition);
             String apiSwagger = apiPublisher.getSwagger20Definition(apiId);
-            String newFingerprint = apisApiIdSwaggerGetFingerprint(apiId, null, null, null, minorVersion);
+            String newFingerprint = apisApiIdSwaggerGetFingerprint(apiId, null, null, null, request);
             return Response.ok().header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"").entity(apiSwagger).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while put swagger for API : " + apiId;
@@ -923,24 +944,24 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Retrives the thumbnail of an API
-     * 
-     * @param apiId UUID of API
-     * @param accept Accept header value
-     * @param ifNoneMatch If-None-Match header value
+     *
+     * @param apiId           UUID of API
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
-     * @param minorVersion minor version header
+     * @param request         msf4j request object
      * @return the thumbnail image of an API
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdThumbnailGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince,
-            String minorVersion
+                                          Request request
     ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String existingFingerprint = apisApiIdThumbnailGetFingerprint(apiId, accept, ifNoneMatch, ifModifiedSince,
-                    minorVersion);
+                    request);
             if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
                     .contains(existingFingerprint)) {
                 return Response.notModified().build();
@@ -966,16 +987,17 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Retrives the current fingerprint of the thumbnail image of an API
-     * 
-     * @param apiId UUID of API
-     * @param accept Accept header value
-     * @param ifNoneMatch If-None-Match header value
+     *
+     * @param apiId           UUID of API
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
-     * @param minorVersion minor version header
+     * @param request         msf4j request object
      * @return current fingerprint of the thumbnail image of the API
      */
-    public String apisApiIdThumbnailGetFingerprint(String apiId, String accept, String ifNoneMatch, String ifModifiedSince,
-            String minorVersion) {
+    public String apisApiIdThumbnailGetFingerprint(String apiId, String accept, String ifNoneMatch, String
+            ifModifiedSince,
+                                                   Request request) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username)
@@ -991,25 +1013,25 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Updates the thumbnail image of an API
-     * 
-     * @param apiId UUID of API
-     * @param fileInputStream Image data stream
-     * @param fileDetail meta information of the image
-     * @param contentType Content-Type header value
-     * @param ifMatch If-Match header value
+     *
+     * @param apiId             UUID of API
+     * @param fileInputStream   Image data stream
+     * @param fileDetail        meta information of the image
+     * @param contentType       Content-Type header value
+     * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @param minorVersion minor version header
+     * @param request           msf4j request object
      * @return meta info about the updated thumbnail image
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisApiIdThumbnailPost(String apiId, InputStream fileInputStream, FileInfo fileDetail,
-            String contentType, String ifMatch, String ifUnmodifiedSince, String minorVersion
+                                           String contentType, String ifMatch, String ifUnmodifiedSince, Request request
     ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = APIManagerFactory.getInstance().getAPIProvider(username);
-            String existingFingerprint = apisApiIdThumbnailGetFingerprint(apiId, null, null, null, minorVersion);
+            String existingFingerprint = apisApiIdThumbnailGetFingerprint(apiId, null, null, null, request);
             if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
                     .contains(existingFingerprint)) {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
@@ -1022,7 +1044,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             FileInfoDTO infoDTO = new FileInfoDTO();
             infoDTO.setRelativePath(uriString);
             infoDTO.setMediaType(MediaType.APPLICATION_OCTET_STREAM);
-            String newFingerprint = apisApiIdThumbnailGetFingerprint(apiId, null, null, null, minorVersion);
+            String newFingerprint = apisApiIdThumbnailGetFingerprint(apiId, null, null, null, request);
             return Response.status(Response.Status.CREATED).entity(infoDTO)
                     .header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"").build();
         } catch (APIManagementException e) {
@@ -1037,19 +1059,19 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Change the lifecycle state of an API
-     * 
-     * @param action lifecycle action
-     * @param apiId UUID of API
+     *
+     * @param action             lifecycle action
+     * @param apiId              UUID of API
      * @param lifecycleChecklist lifecycle check list items
-     * @param ifMatch If-Match header value
-     * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @param minorVersion minor version header
+     * @param ifMatch            If-Match header value
+     * @param ifUnmodifiedSince  If-Unmodified-Since header value
+     * @param request            msf4j request object
      * @return 200 OK if the operation is succesful
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisChangeLifecyclePost(String action, String apiId, String lifecycleChecklist, String ifMatch,
-            String ifUnmodifiedSince, String minorVersion
+                                            String ifUnmodifiedSince, Request request
     ) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         Map<String, Boolean> lifecycleChecklistMap = new HashMap<>();
@@ -1071,33 +1093,51 @@ public class ApisApiServiceImpl extends ApisApiService {
                 //since workflows are not defined for checklist items
                 workflowResponse.setWorkflowStatus(WorkflowStatus.APPROVED);
                 response = MappingUtil.toWorkflowResponseDTO(workflowResponse);
+                return Response.ok().entity(response).build();
             } else {
                 WorkflowResponse workflowResponse = RestAPIPublisherUtil.getApiPublisher(username)
                         .updateAPIStatus(apiId, action, lifecycleChecklistMap);
                 response = MappingUtil.toWorkflowResponseDTO(workflowResponse);
+                //if workflow is in pending state or if the executor sends any httpworklfowresponse (workflow state can 
+                //be in either pending or approved state) send back the workflow response 
+                if (WorkflowStatus.CREATED == workflowResponse.getWorkflowStatus()) {
+                    URI location = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId);
+                    return Response.status(Response.Status.ACCEPTED).header(RestApiConstants.LOCATION_HEADER, location)
+                            .entity(response).build();
+                } else {                    
+                    return Response.ok().entity(response).build();
+                }                
             }
-            return Response.ok().entity(response).build();
+            
         } catch (APIManagementException e) {
             String errorMessage = "Error while updating lifecycle of API" + apiId + " to " + action;
-            HashMap<String, String> paramList = new HashMap<String, String>();
+            Map<String, String> paramList = new HashMap<>();
             paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while adding location header in response for api : " + apiId;
+            Map<String, String> paramList = new HashMap<>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorHandler errorHandler = ExceptionCodes.LOCATION_HEADER_INCORRECT;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorHandler, paramList);
+            log.error(errorMessage, e);
+            return Response.status(errorHandler.getHttpStatusCode()).entity(errorDTO).build();
         }
     }
 
     /**
      * Creates a new version of an API
-     * 
+     *
      * @param newVersion new version
-     * @param apiId UUID of API
-     * @param minorVersion minor version header
+     * @param apiId      UUID of API
+     * @param request    msf4j request object
      * @return created new API
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response apisCopyApiPost(String newVersion, String apiId, String minorVersion) throws NotFoundException {
+    public Response apisCopyApiPost(String newVersion, String apiId, Request request) throws NotFoundException {
         APIDTO newVersionedApi;
         String username = RestApiUtil.getLoggedInUsername();
         try {
@@ -1118,19 +1158,19 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Retrives all APIs that qualifies for the given fitering attributes
-     * 
-     * @param limit maximum APIs to return
-     * @param offset starting position of the pagination
-     * @param query search query
-     * @param accept Accept header value
+     *
+     * @param limit       maximum APIs to return
+     * @param offset      starting position of the pagination
+     * @param query       search query
+     * @param accept      Accept header value
      * @param ifNoneMatch If-None-Match header value
-     * @param minorVersion minor version header
+     * @param request     msf4j request object
      * @return a list of qualifying APIs
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch,
-            String minorVersion) throws NotFoundException {
+                            Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         APIListDTO apiListDTO = null;
         try {
@@ -1148,16 +1188,16 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Check if an API available for the given query
-     * 
-     * @param query search query
-     * @param accept Accept header value
+     *
+     * @param query       search query
+     * @param accept      Accept header value
      * @param ifNoneMatch If-None-Match header value
-     * @param minorVersion minor version header
+     * @param request     msf4j request object
      * @return 200 if an API is found for the query, 404 otherwise
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response apisHead(String query, String accept, String ifNoneMatch, String minorVersion)
+    public Response apisHead(String query, String accept, String ifNoneMatch, Request request)
             throws NotFoundException {
         //TODO improve the query parameters searching options
         String username = RestApiUtil.getLoggedInUsername();
@@ -1188,27 +1228,30 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
         } catch (APIManagementException e) {
             String errorMessage = "Error while checking status.";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList, e);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-        return null;
     }
 
     /**
      * Import an API from from a swagger definition
-     * 
-     * @param fileInputStream file content stream
-     * @param fileDetail meta infomation about the file
-     * @param url swagger url
-     * @param contentType Content-Type header value
-     * @param ifMatch If-Match header value
+     *
+     * @param fileInputStream   file content stream
+     * @param fileDetail        meta infomation about the file
+     * @param url               swagger url
+     * @param contentType       Content-Type header value
+     * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @param minorVersion minor version header
+     * @param request           msf4j request object
      * @return Imported API
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response apisImportDefinitionPost(String contentType, InputStream fileInputStream, FileInfo fileDetail, String url,
-            String ifMatch, String ifUnmodifiedSince, String minorVersion)
+    public Response apisImportDefinitionPost(String contentType, InputStream fileInputStream, FileInfo fileDetail,
+                                             String url,
+                                             String ifMatch, String ifUnmodifiedSince, Request request)
             throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
@@ -1217,15 +1260,14 @@ public class ApisApiServiceImpl extends ApisApiService {
                 String msg = "Only one of 'file' and 'url' should be specified";
                 log.error(msg);
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
-                log.error(msg);
                 return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
             }
 
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String uuid = "";
-            if(fileInputStream != null) {
+            if (fileInputStream != null) {
                 uuid = apiPublisher.addApiFromDefinition(fileInputStream);
-            } else if(url != null) {
+            } else if (url != null) {
                 uuid = apiPublisher.addApiFromDefinition(url);
             } else {
                 String msg = "Either 'file' or 'inlineContent' should be specified";
@@ -1246,15 +1288,15 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Creates a new API
-     * 
-     * @param body DTO model including the API details
+     *
+     * @param body        DTO model including the API details
      * @param contentType Content-Type header value
-     * @param minorVersion minor version header
+     * @param request     msf4j request object
      * @return Newly created API
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response apisPost(APIDTO body, String contentType, String minorVersion) throws NotFoundException {
+    public Response apisPost(APIDTO body, String contentType, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         API.APIBuilder apiBuilder = MappingUtil.toAPI(body);
         try {
@@ -1266,10 +1308,34 @@ public class ApisApiServiceImpl extends ApisApiService {
             String errorMessage = "Error while adding new API : " + body.getProvider() + "-" +
                     body.getName() + "-" + body.getVersion();
             HashMap<String, String> paramList = new HashMap<String, String>();
-
             paramList.put(APIMgtConstants.ExceptionsConstants.API_NAME, body.getName());
             paramList.put(APIMgtConstants.ExceptionsConstants.API_VERSION, body.getVersion());
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
 
+    /**
+     * Remove pending lifecycle state change workflow tasks.
+     * 
+     * @param apiId api id
+     * @param request     msf4j request object
+     * @return Empty payload
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
+    @Override
+    public Response apisApiIdLifecycleLifecyclePendingTaskDelete(String apiId, Request request)
+            throws NotFoundException {
+        try {
+            String username = RestApiUtil.getLoggedInUsername();
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            apiPublisher.removePendingLifecycleWorkflowTaskForAPI(apiId);
+            return Response.ok().build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while removing pending task for API state change for api " + apiId;
+            Map<String, String> paramList = new HashMap<>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();

@@ -8,7 +8,7 @@ bindings:
   - zoneName: topbar
     mode: prepend
     fragments:
-      - org.wso2.carbon.apimgt.publisher.commons.ui.globalNavigation
+      - org.wso2.carbon.apimgt.publisher.commons.ui.global-navigation
 
 config:
   appName : Publisher Commons
@@ -16,5 +16,5 @@ config:
   scopes: "apim:api_view"
   tokenEndpoint: "https://localhost:8243/token"
   keyAndSecret: "dmRNdk05d1R4NkZ5NjNXa2xfb0FEaTdMQXZnYTp3UHNIQkJFS1FPbWU0bGZxYlJRZW1GY3ZqSUlh=="
-  swaggerURL: "/api/am/publisher/v1/apis/swagger.json"
+  swaggerURL: "/api/am/publisher/v1.0/apis/swagger.json"
   nonSecureUrl: "/test1,/test2"

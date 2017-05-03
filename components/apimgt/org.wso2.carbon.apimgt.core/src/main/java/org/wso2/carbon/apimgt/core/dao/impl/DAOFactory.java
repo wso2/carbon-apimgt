@@ -39,6 +39,7 @@ import java.sql.SQLException;
  * Constructs DB vendor specific DAO implementations in a transparent manner.
  */
 public class DAOFactory {
+
     private static final Logger log = LoggerFactory.getLogger(DAOFactory.class);
     
     private static final String MYSQL = "MySQL";
@@ -48,9 +49,22 @@ public class DAOFactory {
     private static final String MS_SQL = "MS SQL";
     private static final String POSTGRE = "PostgreSQL";
     private static final String ORACLE = "Oracle";
+    private static final String EDITOR_SAVE_PATH = "editorSavePath";
+    private static final String EDITOR_MODE = "editorMode";
 
     public static ApiDAO getApiDAO() throws APIMgtDAOException {
         ApiDAO apiDAO = null;
+
+        if (System.getProperty(EDITOR_MODE) != null) {
+            String filePath;
+            if ((filePath = System.getProperty(EDITOR_SAVE_PATH)) != null) {
+                apiDAO = new ApiFileDAOImpl(filePath);
+                return apiDAO;
+
+            } else {
+                throw new APIMgtDAOException("Editor archive storage path not provided");
+            }
+        }
 
         try (Connection connection = DAOUtil.getConnection()) {
             String driverName = connection.getMetaData().getDriverName();
@@ -181,11 +195,11 @@ public class DAOFactory {
             } else if (driverName.contains(DB2)) {
 
             } else if (driverName.contains(MS_SQL) || driverName.contains(MICROSOFT)) {
-
+                tagDAO = new TagDAOImpl();
             } else if (driverName.contains(POSTGRE)) {
-
+                tagDAO = new TagDAOImpl();
             } else if (driverName.contains(ORACLE)) {
-
+                tagDAO = new TagDAOImpl();
             } else {
                 throw new APIMgtDAOException("Unhandled DB Type detected");
             }

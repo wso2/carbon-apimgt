@@ -482,4 +482,49 @@ public interface ApiDAO {
      */
     Comment getCommentByUUID(String commentId, String apiId) throws APIMgtDAOException;
 
+    /**
+     * Adds comment for a specific Api
+     *
+     * @param comment the comment text
+     * @param apiId UUID of the Api
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    void addComment(Comment comment, String apiId) throws APIMgtDAOException;
+
+    /**
+     *  Deletes a comment
+     *
+     * @param commentId UUID of the comment
+     * @param apiId UUID of the api
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    void deleteComment(String commentId, String apiId) throws APIMgtDAOException;
+
+    /**
+     *  Updates an already existing comment
+     *
+     * @param comment new comment
+     * @param commentId old comment uuid
+     * @param apiId uuid of the api associated with the comment
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    void updateComment(Comment comment, String commentId, String apiId) throws APIMgtDAOException;
+
+    /**
+     * Retrieves all comments for an api
+     *
+     * @param apiId UUID of the api
+     * @return List of comments for the api
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    List<Comment> getCommentsForApi(String apiId) throws APIMgtDAOException;
+
+    /**
+     * Retrieves last updated time of comment
+     *
+     * @param commentId UUID of the comment
+     * @return Last updated time of comment
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    String getLastUpdatedTimeOfComment(String commentId) throws APIMgtDAOException;
 }

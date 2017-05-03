@@ -25,13 +25,13 @@
                     <div class="control-group">
                         <label class="control-label" for="docName">Name<span class="requiredAstrix">*</span></label>
                         <div class="form-group">
-                            <input type="text" class="form-control required validInput" id="docName" style="width:100%"/>
+                            <input type="text" class="form-control required validInput" id="docName"/>
                         </div>
                     </div>
                     <div class="control-group">
-                        <label class="control-label">{{i18n "Summary"}}<span class="requiredAstrix">*</span></label>
+                        <label class="control-label">{{i18n "Summary"}}</label>
                         <div class="controls form-group">
-                            <textarea  id="summary" class="required form-control" rows="3" style="width:100%" title="summary"></textarea>
+                            <textarea  id="summary" class="form-control" rows="3" title="summary"></textarea>
                         </div>
                     </div>
                 </div>
@@ -60,7 +60,7 @@
                                     </label>
 
                                     <div id="sourceUrlDoc" class="controls" style="display:none;">
-                                        <span class="requiredAstrix">*</span> <input type="text" class="form-control required" style="width:98%" title="docUrl" id="docUrl">
+                                        <span class="requiredAstrix">*</span> <input type="text" class="form-control required" title="docUrl" id="docUrl">
                                     </div>
                                 </li>
                                 <li>
@@ -96,29 +96,32 @@
                     <div class="form-group">
                         <button type="button" class="btn btn-primary" id="add-doc-submit">{{i18n "Add"}}</button>
                         <button type="button" class="btn btn-primary" id="update-doc-submit">{{i18n "Update"}}</button>
-                        <button type="button" class="btn btn-secondary" onclick="javascript:$('#newDoc').fadeOut('slow');" id='clear-doc-form' >{{i18n "Cancel"}}</button>
+                        <button type="button" class="btn btn-secondary" onclick="cancelDocForm()" id='clear-doc-form' >{{i18n "Cancel"}}</button>
                     </div>
                 </div>
 
             </div><!-- Enod of row -->
         </div>
-    </div>
 
-
-
-    <table class="table table-striped table-hover table-bordered display data-table" id="doc-table">
-        <thead>
-        <tr>
-            <th class="doc-listing-Id">Id</th>
-            <th class="doc-listing-name">Name</th>
-            <th>{{i18n "Source"}}</th>
-            <!-- TODO add Modified Date column once the service implementation is completed. -->
-            <th class="doc-listing-action">{{i18n "Actions"}}</th>
-        </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
-
-
+	<div class="doc-content">
+		<table class="table table-striped table-hover table-bordered display data-table" id="doc-table">
+	    	<thead>
+			    <tr>
+			        <th class="doc-listing-Id">Id</th>
+			        <th class="doc-listing-name">{{i18n "Name"}}</th>
+			        <th>{{i18n "Source"}}</th>
+			        <!-- TODO add Modified Date column once the service implementation is completed. -->
+			        <th class="doc-listing-action">{{i18n "Actions"}}</th>
+			    </tr>
+	    	</thead>
+		    <tbody>
+		    </tbody>
+		</table>
+	</div>
+	<div id="no-docs-div" class="message message-info" style="display:none">
+		<h4><i class="icon fw fw-info"></i>{{i18n "No documentation associated with the API"}}</h4>
+		<p>{{i18n "There is no documentation created for this API. You can add new documentation to this API by clicking the \"Add New Document\" button."}}</p>
+	</div>
 </div>
+
+

@@ -1,5 +1,13 @@
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +21,10 @@ import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ApplicationStatus;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.SubscriptionStatus;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
+import org.wso2.carbon.apimgt.core.workflow.HttpWorkflowResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -24,13 +35,10 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.SubscriptionMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.WorkflowMappintUtil;
+import org.wso2.msf4j.Request;
 
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import java.util.HashMap;
-import java.util.List;
-
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2016-11-01T13:48:55.078+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
+        "2016-11-01T13:48:55.078+05:30")
 public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
     private static final Logger log = LoggerFactory.getLogger(SubscriptionsApiServiceImpl.class);
@@ -47,12 +55,13 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      * @param limit         limit value
      * @param accept        accept header value
      * @param ifNoneMatch   If-None-Match header value
+     * @param request       msf4j request object
      * @return Subscription List
      * @throws NotFoundException If failed to get the subscription
      */
     @Override
     public Response subscriptionsGet(String apiId, String applicationId, Integer offset, Integer limit,
-                                     String accept, String ifNoneMatch, String minorVersion) throws NotFoundException {
+                                     String accept, String ifNoneMatch, Request request) throws NotFoundException {
 
         List<Subscription> subscribedApiList = null;
         SubscriptionListDTO subscriptionListDTO = null;
@@ -105,18 +114,19 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
     /**
      * Adds a new subscription
-     * 
-     * @param body Subscription details to be added
+     *
+     * @param body        Subscription details to be added
      * @param contentType Content-Type header value
-     * @param minorVersion minor version
+     * @param request     msf4j request object
      * @return Newly added subscription as the response
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response subscriptionsPost(SubscriptionDTO body, String contentType, String minorVersion)
+    public Response subscriptionsPost(SubscriptionDTO body, String contentType, Request request)
             throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         SubscriptionDTO subscriptionDTO = null;
+        URI location = null;
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             String applicationId = body.getApplicationId();
@@ -124,16 +134,32 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             String tier = body.getPolicy();
 
             Application application = apiStore.getApplicationByUuid(applicationId);
+            if (application != null && !ApplicationStatus.APPLICATION_APPROVED.equals(application.getStatus())) {
+                String errorMessage = "Application " + applicationId + " is not active";
+                ExceptionCodes exceptionCode = ExceptionCodes.APPLICATION_INACTIVE;
+                APIManagementException e = new APIManagementException(errorMessage, exceptionCode);
+                Map<String, String> paramList = new HashMap<>();
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                log.error(errorMessage, e);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+                
+            }
             API api = apiStore.getAPIbyUUID(apiId);
             if (application != null && api != null) {
                 SubscriptionResponse addSubResponse = apiStore.addApiSubscription(apiId, applicationId, tier);
                 String subscriptionId = addSubResponse.getSubscriptionUUID();
                 Subscription subscription = apiStore.getSubscriptionByUUID(subscriptionId);
+                location = new URI(RestApiConstants.RESOURCE_PATH_SUBSCRIPTION + "/" + subscriptionId);
                 subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscription);
                 
-                WorkflowResponseDTO workflowResponse = WorkflowMappintUtil
-                        .fromWorkflowResponsetoDTO(addSubResponse.getWorkflowResponse());
-                subscriptionDTO.setWorkflowResponse(workflowResponse);
+                //if workflow is in pending state or if the executor sends any httpworklfowresponse (workflow state can 
+                //be in either pending or approved state) send back the workflow response 
+                if (SubscriptionStatus.ON_HOLD == subscription.getStatus()) {
+                    WorkflowResponseDTO workflowResponse = WorkflowMappintUtil
+                            .fromWorkflowResponsetoDTO(addSubResponse.getWorkflowResponse());
+                    return Response.status(Response.Status.ACCEPTED).header(RestApiConstants.LOCATION_HEADER, location)
+                            .entity(workflowResponse).build();
+                }               
 
             } else {
                 String errorMessage = null;
@@ -147,7 +173,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                 }
                 APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
                         exceptionCode);
-                HashMap<String, String> paramList = new HashMap<String, String>();
+                Map<String, String> paramList = new HashMap<>();
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
                 log.error(errorMessage, e);
                 return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
@@ -155,37 +181,48 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding subscriptions";
-            HashMap<String, String> paramList = new HashMap<String, String>();
+            Map<String, String> paramList = new HashMap<>();
             paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, body.getApiIdentifier());
             paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, body.getApplicationId());
             paramList.put(APIMgtConstants.ExceptionsConstants.TIER, body.getPolicy());
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }  catch (URISyntaxException e) {
+            String errorMessage = "Error while adding location header in response for subscription : "
+                    + body.getSubscriptionId();
+            Map<String, String> paramList = new HashMap<>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.SUBSCRIPTION_ID, body.getSubscriptionId());
+            ErrorHandler errorHandler = ExceptionCodes.LOCATION_HEADER_INCORRECT;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorHandler, paramList);
+            log.error(errorMessage, e);
+            return Response.status(errorHandler.getHttpStatusCode()).entity(errorDTO).build();
         }
 
-        return Response.status(Response.Status.CREATED).entity(subscriptionDTO).build();
+        return Response.status(Response.Status.CREATED).header(RestApiConstants.LOCATION_HEADER, location)
+                .entity(subscriptionDTO).build();
     }
 
     /**
      * Delete a subscription
-     * 
-     * @param subscriptionId Id of the subscription
-     * @param ifMatch If-Match header value
+     *
+     * @param subscriptionId    Id of the subscription
+     * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @param minorVersion minor version
+     * @param request           msf4j request object
      * @return 200 OK response if the deletion was successful
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response subscriptionsSubscriptionIdDelete(String subscriptionId, String ifMatch,
-            String ifUnmodifiedSince, String minorVersion) throws NotFoundException {
+                                                      String ifUnmodifiedSince, Request request) throws
+            NotFoundException {
 
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             String existingFingerprint = subscriptionsSubscriptionIdGetFingerprint(subscriptionId, null, null, null,
-                    minorVersion);
+                    request);
             if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
                     .contains(existingFingerprint)) {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
@@ -205,25 +242,25 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
     /**
      * Retrieves a single subscription
-     * 
-     * @param subscriptionId Id of the subscription
-     * @param accept accept header value
-     * @param ifNoneMatch If-None-Match header value
+     *
+     * @param subscriptionId  Id of the subscription
+     * @param accept          accept header value
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
-     * @param minorVersion minor version
+     * @param request         msf4j request object
      * @return Requested subscription DTO as the payload
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response subscriptionsSubscriptionIdGet(String subscriptionId, String accept, String ifNoneMatch,
-                                                   String ifModifiedSince, String minorVersion)
+                                                   String ifModifiedSince, Request request)
             throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         SubscriptionDTO subscriptionDTO = null;
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             String existingFingerprint = subscriptionsSubscriptionIdGetFingerprint(subscriptionId, accept, ifNoneMatch,
-                    ifModifiedSince, minorVersion);
+                    ifModifiedSince, request);
             if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
                     .contains(existingFingerprint)) {
                 return Response.notModified().build();
@@ -246,16 +283,16 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
     /**
      * Retrieves the fingerprint of a subscription given its UUID
-     * 
-     * @param subscriptionId Id of the subscription
-     * @param accept Accept header value
-     * @param ifNoneMatch If-None-Match header value
+     *
+     * @param subscriptionId  Id of the subscription
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
-     * @param minorVersion minor version
+     * @param request         msf4j request object
      * @return the fingerprint of the subscription
      */
     public String subscriptionsSubscriptionIdGetFingerprint(String subscriptionId, String accept, String ifNoneMatch,
-            String ifModifiedSince, String minorVersion) {
+                                                            String ifModifiedSince, Request request) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             String lastUpdatedTime = RestApiUtil.getConsumer(username).getLastUpdatedTimeOfSubscription(subscriptionId);

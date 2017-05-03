@@ -9,4 +9,5 @@ bindings:
 config:
   title : "API Editor Tool"
   appName : API Editor
-  loginRedirectUri: "/api"
+  loginRedirectUri: "/apis"
+  loginPageUri : "https://localhost:9292/editor/auth/login"

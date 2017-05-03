@@ -1,5 +1,9 @@
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
+import java.util.HashMap;
+import java.util.List;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,32 +19,29 @@ import org.wso2.carbon.apimgt.rest.api.store.PoliciesApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TierDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TierListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.TierMappingUtil;
+import org.wso2.msf4j.Request;
 
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import java.util.HashMap;
-import java.util.List;
-
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-09T12:36:56.084+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
+        "2017-02-09T12:36:56.084+05:30")
 public class PoliciesApiServiceImpl extends PoliciesApiService {
 
     private static final Logger log = LoggerFactory.getLogger(PoliciesApiServiceImpl.class);
 
     /**
      * Retrieve a list of tiers for a particular tier level
-     * 
-     * @param tierLevel Tier level
-     * @param limit maximum number of tiers to return
-     * @param offset starting position of the pagination
-     * @param accept accept header value
+     *
+     * @param tierLevel   Tier level
+     * @param limit       maximum number of tiers to return
+     * @param offset      starting position of the pagination
+     * @param accept      accept header value
      * @param ifNoneMatch If-Non-Match header value
-     * @param minorVersion minor version
+     * @param request     msf4j request object
      * @return A list of qualifying tiers
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response policiesTierLevelGet(String tierLevel, Integer limit, Integer offset, String accept,
-                                         String ifNoneMatch, String minorVersion) throws NotFoundException {
+                                         String ifNoneMatch, Request request) throws NotFoundException {
         TierListDTO tierListDTO = null;
         String username = RestApiUtil.getLoggedInUsername();
         try {
@@ -60,25 +61,25 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 
     /**
      * Retrieves a tier by tier name and level
-     * 
-     * @param tierName Name of the tier
-     * @param tierLevel Level of the tier
-     * @param accept accept header value
-     * @param ifNoneMatch If-Non-Match header value
+     *
+     * @param tierName        Name of the tier
+     * @param tierLevel       Level of the tier
+     * @param accept          accept header value
+     * @param ifNoneMatch     If-Non-Match header value
      * @param ifModifiedSince If-Modified-Since header value
-     * @param minorVersion minor version
+     * @param request         msf4j request object
      * @return The requested tier as the response
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response policiesTierLevelTierNameGet(String tierName, String tierLevel, String accept, String ifNoneMatch,
-                                                 String ifModifiedSince, String minorVersion) throws NotFoundException {
+                                                 String ifModifiedSince, Request request) throws NotFoundException {
         TierDTO tierDTO = null;
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             String existingFingerprint = policiesTierLevelTierNameGetFingerprint(tierName, tierLevel, accept,
-                    ifNoneMatch, ifModifiedSince, minorVersion);
+                    ifNoneMatch, ifModifiedSince, request);
             if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
                     .contains(existingFingerprint)) {
                 return Response.notModified().build();
@@ -101,17 +102,17 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 
     /**
      * Retrieves the fingerprint of a throttling policy given its UUID
-     * 
-     * @param policyName name of the policy
-     * @param policyLevel level of the policy
-     * @param accept accept header value
-     * @param ifNoneMatch If-Non-Match header value
+     *
+     * @param policyName      name of the policy
+     * @param policyLevel     level of the policy
+     * @param accept          accept header value
+     * @param ifNoneMatch     If-Non-Match header value
      * @param ifModifiedSince If-Modified-Since header value
-     * @param minorVersion minor version
+     * @param request         msf4j request object
      * @return fingerprint of a throttling policy
      */
     public String policiesTierLevelTierNameGetFingerprint(String policyName, String policyLevel, String accept,
-            String ifNoneMatch, String ifModifiedSince, String minorVersion) {
+                                                          String ifNoneMatch, String ifModifiedSince, Request request) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             String lastUpdatedTime = RestApiUtil.getConsumer(username)
@@ -119,7 +120,8 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             return ETagUtils.generateETag(lastUpdatedTime);
         } catch (APIManagementException e) {
             //gives a warning and let it continue the execution
-            String errorMessage = "Error while retrieving last updated time of policy :" + policyLevel + "/" + policyName;
+            String errorMessage = "Error while retrieving last updated time of policy :" + policyLevel + "/" +
+                    policyName;
             log.error(errorMessage, e);
             return null;
         }

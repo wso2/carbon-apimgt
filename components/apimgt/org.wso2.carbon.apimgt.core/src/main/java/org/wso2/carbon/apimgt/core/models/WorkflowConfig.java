@@ -27,48 +27,38 @@ import org.wso2.carbon.kernel.annotations.Element;
  */
 @Configuration (namespace = "wso2.workflowextensions", description = "workflow executor configurations")
 public class WorkflowConfig {
-    @Element (description = "executor for application creation")
+    @Element (description = "executor for application creation workflow")
     private WorkflowExecutorInfo applicationCreation;
-    @Element (description = "executor for production app")
-    private WorkflowExecutorInfo productionApplicationRegistration;
-    @Element (description = "executor for sandbox app")
-    private WorkflowExecutorInfo sandboxApplicationRegistration;
-    @Element (description = "executor for application creation")
+    @Element (description = "executor for subscription creation workflow")
     private WorkflowExecutorInfo subscriptionCreation;
-    @Element (description = "executor for signup")
-    private WorkflowExecutorInfo userSignUp;
-    @Element (description = "executor for subscription deletion")
+    @Element (description = "executor for subscription deletion workflow")
     private WorkflowExecutorInfo subscriptionDeletion;
-    @Element (description = "executor for application deletion")
+    @Element (description = "executor for application deletion workflow")
     private WorkflowExecutorInfo applicationDeletion;
-    @Element (description = "executor for state change")
+    @Element (description = "executor for state change workflow")
     private WorkflowExecutorInfo apiStateChange;
+    @Element (description = "executor for application update workflow")
+    private WorkflowExecutorInfo applicationUpdate;
     
     public WorkflowConfig() {
         
         applicationCreation = new WorkflowExecutorInfo();
-        applicationCreation.setExecutor(APIMgtConstants.WF_DEFAULT_APPCREATION_EXEC);
+        applicationCreation.setExecutor(APIMgtConstants.WF_DEFAULT_WF_EXEC);
 
         apiStateChange = new WorkflowExecutorInfo();
-        apiStateChange.setExecutor(APIMgtConstants.WF_DEFAULT_APISTATE_EXEC);
-
-        productionApplicationRegistration = new WorkflowExecutorInfo();
-        productionApplicationRegistration.setExecutor(APIMgtConstants.WF_DEFAULT_PRODAPP_EXEC);
+        apiStateChange.setExecutor(APIMgtConstants.WF_DEFAULT_WF_EXEC);
 
         applicationDeletion = new WorkflowExecutorInfo();
-        applicationDeletion.setExecutor(APIMgtConstants.WF_DEFAULT_APPDELETE_EXEC);
-
-        sandboxApplicationRegistration = new WorkflowExecutorInfo();
-        sandboxApplicationRegistration.setExecutor(APIMgtConstants.WF_DEFAULT_SANDBOXAPP_EXEC);
+        applicationDeletion.setExecutor(APIMgtConstants.WF_DEFAULT_WF_EXEC);
 
         subscriptionCreation = new WorkflowExecutorInfo();
-        subscriptionCreation.setExecutor(APIMgtConstants.WF_DEFAULT_SUBCREATION_EXEC);
+        subscriptionCreation.setExecutor(APIMgtConstants.WF_DEFAULT_WF_EXEC);
 
         subscriptionDeletion = new WorkflowExecutorInfo();
-        subscriptionDeletion.setExecutor(APIMgtConstants.WF_DEFAULT_SUBDELETE_EXEC);
-
-        userSignUp = new WorkflowExecutorInfo();
-        userSignUp.setExecutor(APIMgtConstants.WF_DEFAULT_SIGNUP_EXEC);
+        subscriptionDeletion.setExecutor(APIMgtConstants.WF_DEFAULT_WF_EXEC);
+        
+        applicationUpdate = new WorkflowExecutorInfo();
+        applicationUpdate.setExecutor(APIMgtConstants.WF_DEFAULT_WF_EXEC);
 
     }
 
@@ -80,36 +70,12 @@ public class WorkflowConfig {
         this.applicationCreation = applicationCreation;
     }
 
-    public WorkflowExecutorInfo getProductionApplicationRegistration() {
-        return productionApplicationRegistration;
-    }
-
-    public void setProductionApplicationRegistration(WorkflowExecutorInfo productionApplicationRegistration) {
-        this.productionApplicationRegistration = productionApplicationRegistration;
-    }
-
-    public WorkflowExecutorInfo getSandboxApplicationRegistration() {
-        return sandboxApplicationRegistration;
-    }
-
-    public void setSandboxApplicationRegistration(WorkflowExecutorInfo sandboxApplicationRegistration) {
-        this.sandboxApplicationRegistration = sandboxApplicationRegistration;
-    }
-
     public WorkflowExecutorInfo getSubscriptionCreation() {
         return subscriptionCreation;
     }
 
     public void setSubscriptionCreation(WorkflowExecutorInfo subscriptionCreation) {
         this.subscriptionCreation = subscriptionCreation;
-    }
-
-    public WorkflowExecutorInfo getUserSignUp() {
-        return userSignUp;
-    }
-
-    public void setUserSignUp(WorkflowExecutorInfo userSignUp) {
-        this.userSignUp = userSignUp;
     }
 
     public WorkflowExecutorInfo getSubscriptionDeletion() {
@@ -136,13 +102,19 @@ public class WorkflowConfig {
         this.apiStateChange = apiStateChange;
     }
 
-    @Override
-    public String toString() {
-        return "WorkflowConfig [applicationCreation=" + applicationCreation + ", productionApplicationRegistration="
-                + productionApplicationRegistration + ", sandboxApplicationRegistration="
-                + sandboxApplicationRegistration + ", subscriptionCreation=" + subscriptionCreation + ", userSignUp="
-                + userSignUp + ", subscriptionDeletion=" + subscriptionDeletion + ", applicationDeletion="
-                + applicationDeletion + ", apiStateChange=" + apiStateChange + "]";
+    public WorkflowExecutorInfo getApplicationUpdate() {
+        return applicationUpdate;
     }
 
+    public void setApplicationUpdate(WorkflowExecutorInfo applicationUpdate) {
+        this.applicationUpdate = applicationUpdate;
+    }
+
+    @Override
+    public String toString() {
+        return "WorkflowConfig [applicationCreation=" + applicationCreation + ", subscriptionCreation="
+                + subscriptionCreation + ", subscriptionDeletion=" + subscriptionDeletion + ", applicationDeletion="
+                + applicationDeletion + ", apiStateChange=" + apiStateChange + ", applicationUpdate="
+                + applicationUpdate + "]";
+    }    
 }

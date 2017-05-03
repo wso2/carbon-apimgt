@@ -10,7 +10,7 @@ function getSubscriptionsCallback(response) {
 
 function blockSubscriptionsHandler(event) {
     var subscription_id = this.id;
-    var key_type = $('#key_types').val();
+    var key_type = $('#' + subscription_id).val();
     var api_client = event.data.api_instance;
     var data_table = $('#subscriptions-listing').DataTable();
     var current_row = data_table.row($(this).parents('tr'));
@@ -94,12 +94,12 @@ function unblockSubscriptionsHandler(event) {
 }
 
 $(function () {
-    //TODO: Remove this to a function and invoke from onSuccess method renderFragment; after UUF-common M7 release. ~AnuruddhaL
     var api_client = new API();
     var api_id = $("#apiId").val();
     api_client.subscriptions(api_id, getSubscriptionsCallback);
-    $(document).on('click', ".block-subscription", {api_instance: api_client}, blockSubscriptionsHandler); // Event-type, Selector, data, method
-    $(document).on('click', ".unblock-subscription", {api_instance: api_client}, unblockSubscriptionsHandler); // Event-type, Selector, data, method
+    // Event-type, Selector, data, method
+    $(document).on('click', ".block-subscription", {api_instance: api_client}, blockSubscriptionsHandler);
+    $(document).on('click', ".unblock-subscription", {api_instance: api_client}, unblockSubscriptionsHandler);
 });
 
 
@@ -138,73 +138,73 @@ function initDataTable(raw_data) {
             }
         ]
     });
-}
 
-function _renderActionButtons(data, type, row) {
-    if (type === "display") {
-        var status = data.subscriptionStatus;
-        var icon = $("<i>").addClass("fw");
-        var action_button;
-        if (status === "ACTIVE") {
-            action_button = $('<a>', {id: data.subscriptionId})
-                .text('BLOCK ')
-                .addClass("cu-reg-btn btn-edit text-danger block-subscription")
-                .append(icon.addClass("fw-block"));
+    function _renderActionButtons(data, type, row) {
+        if (type === "display") {
+            var status = data.subscriptionStatus;
+            var icon = $("<i>").addClass("fw");
+            var action_button;
+            if (status === "ACTIVE") {
+                action_button = $('<a>', {id: data.subscriptionId})
+                    .text('BLOCK ')
+                    .addClass("cu-reg-btn btn-edit text-danger block-subscription")
+                    .append(icon.addClass("fw-block"));
+            } else {
+                action_button = $('<a>', {id: data.subscriptionId})
+                    .text('UNBLOCK ')
+                    .addClass("cu-reg-btn btn-edit text-success unblock-subscription")
+                    .append(icon.clone().removeClass("fw-block").addClass("fw-activate"));
+            }
+            return $('<div></div>').append(action_button).html();
         } else {
-            action_button = $('<a>', {id: data.subscriptionId})
-                .text('UNBLOCK ')
-                .addClass("cu-reg-btn btn-edit text-success unblock-subscription")
-                .append(icon.clone().removeClass("fw-block").addClass("fw-activate"));
+            return data;
         }
-        return $('<div></div>').append(action_button).html();
-    } else {
-        return data;
     }
-}
 
-function _renderKeyTypes(data, type, row) {
-    if (type === "display") {
-        var key_types = $('<select  id="key_types"></select>');
-        var status = data.subscriptionStatus;
-        var options;
-        if (status === "ACTIVE") {
-            options = '<option value="PROD_ONLY_BLOCKED">PRODUCTION</option>' +
-                '<option value="SANDBOX_ONLY_BLOCKED">SANDBOX</option>' +
-                '<option value="BLOCKED">PRODUCTION & SANDBOX</option>';
-        } else if (status === "BLOCKED") {
-            options = '<option value="BLOCKED" selected="selected" disabled>PRODUCTION & SANDBOX</option>';
-        } else if (status === "PROD_ONLY_BLOCKED") {
-            options = '<option value="PROD_ONLY_BLOCKED" selected="selected" disabled>PRODUCTION</option>';
-        } else if (status === "SANDBOX_ONLY_BLOCKED") {
-            options = '<option value="SANDBOX_ONLY_BLOCKED" selected="selected" disabled>SANDBOX</option>';
-        }
-        key_types.append(options);
-        return $('<div></div>').append(key_types).html();
-    } else if (type === "filter") {
-        return data.subscriptionStatus;
-    } else {
-        return data;
-    }
-}
-
-function _renderStatus(data, type, row) {
-    if (type === "display") {
-        var status = data.subscriptionStatus;
-        var status_element;
-        if (status === "ACTIVE") {
-            status_element = $('<span>')
-                .text(data.subscriptionStatus)
-                .addClass("label label-success");
+    function _renderKeyTypes(data, type, row) {
+        if (type === "display") {
+            var key_types = $('<select  id="' + data.subscriptionId + '"></select>');
+            var status = data.subscriptionStatus;
+            var options;
+            if (status === "ACTIVE") {
+                options = '<option value="PROD_ONLY_BLOCKED">PRODUCTION</option>' +
+                    '<option value="SANDBOX_ONLY_BLOCKED">SANDBOX</option>' +
+                    '<option value="BLOCKED">PRODUCTION & SANDBOX</option>';
+            } else if (status === "BLOCKED") {
+                options = '<option value="BLOCKED" selected="selected" disabled>PRODUCTION & SANDBOX</option>';
+            } else if (status === "PROD_ONLY_BLOCKED") {
+                options = '<option value="PROD_ONLY_BLOCKED" selected="selected" disabled>PRODUCTION</option>';
+            } else if (status === "SANDBOX_ONLY_BLOCKED") {
+                options = '<option value="SANDBOX_ONLY_BLOCKED" selected="selected" disabled>SANDBOX</option>';
+            }
+            key_types.append(options);
+            return $('<div></div>').append(key_types).html();
+        } else if (type === "filter") {
+            return data.subscriptionStatus;
         } else {
-            status_element = $('<span>')
-                .text(data.subscriptionStatus)
-                .addClass("label label-danger");
+            return data;
         }
-        return $('<h4>').append(status_element).html();
-    } else if (type === "filter") {
-        return data.subscriptionStatus;
-    } else {
-        return data;
+    }
+
+    function _renderStatus(data, type, row) {
+        if (type === "display") {
+            var status = data.subscriptionStatus;
+            var status_element;
+            if (status === "ACTIVE") {
+                status_element = $('<span>')
+                    .text(data.subscriptionStatus)
+                    .addClass("label label-success");
+            } else {
+                status_element = $('<span>')
+                    .text(data.subscriptionStatus)
+                    .addClass("label label-danger");
+            }
+            return $('<h4>').append(status_element).html();
+        } else if (type === "filter") {
+            return data.subscriptionStatus;
+        } else {
+            return data;
+        }
     }
 }
 

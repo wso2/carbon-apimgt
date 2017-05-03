@@ -72,6 +72,7 @@ public class ApiDAOImpl implements ApiDAO {
     private static final String API_SUMMARY_SELECT = "SELECT UUID, PROVIDER, NAME, CONTEXT, VERSION, DESCRIPTION, " +
             "CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS FROM AM_API";
     private static final String AM_API_TABLE_NAME = "AM_API";
+    private static final String AM_API_COMMENTS_TABLE_NAME = "AM_API_COMMENTS";
     private static final String AM_ENDPOINT_TABLE_NAME = "AM_ENDPOINT";
     private static final Logger log = LoggerFactory.getLogger(ApiDAOImpl.class);
 
@@ -246,26 +247,42 @@ public class ApiDAOImpl implements ApiDAO {
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     public List<API> getAPIsByStatus(List<String> roles, List<String> statuses) throws APIMgtDAOException {
 
-        final String query = API_SUMMARY_SELECT +
-                " WHERE UUID IN (SELECT API_ID FROM AM_API_VISIBLE_ROLES WHERE ROLE IN (" +
-                DAOUtil.getParameterString(roles.size()) + "))" +
-                " AND" +
-                " CURRENT_LC_STATUS  IN (" +
-                DAOUtil.getParameterString(statuses.size()) + ")" +
-                " OR " +
-                "VISIBILITY = '" + API.Visibility.PUBLIC + "'";
+        //check for null at the beginning before constructing the query to retrieve APIs from database
+        if (roles == null || statuses == null) {
+            String errorMessage = "Role list or API status list should not be null to retrieve APIs.";
+            log.error(errorMessage);
+            throw new APIMgtDAOException(errorMessage);
+        }
+        //the below query will be used to retrieve the union of,
+        //published/prototyped APIs (statuses) with public visibility and
+        //published/prototyped APIs with restricted visibility where APIs are restricted based on roles of the user
+        final String query = API_SUMMARY_SELECT + " WHERE " +
+                "VISIBILITY = '" + API.Visibility.PUBLIC + "' " +
+                "AND " +
+                "CURRENT_LC_STATUS  IN (" + DAOUtil.getParameterString(statuses.size()) + ") " +
+                "UNION " +
+                API_SUMMARY_SELECT +
+                " WHERE " +
+                "VISIBILITY = '" + API.Visibility.RESTRICTED + "' " +
+                "AND " +
+                "UUID IN (SELECT API_ID FROM AM_API_VISIBLE_ROLES WHERE ROLE IN " +
+                "(" + DAOUtil.getParameterString(roles.size()) + ")) " +
+                "AND " + "CURRENT_LC_STATUS  IN (" + DAOUtil.getParameterString(statuses.size()) + ")";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
-            int i;
-            //put desired roles into the query
-            for (i = 0; i < roles.size(); ++i) {
-                statement.setString(i + 1, roles.get(i));
+            int i, j;
+            //put desired API status into the query (to get APIs with public visibility)
+            for (i = 0; i < statuses.size(); ++i) {
+                statement.setString(i + 1, statuses.get(i));
             }
-            //put desired API status into the query
-            //this will be inserted after the roles, so we start after the roles
-            for (int j = i; j < roles.size() + statuses.size(); ++j) {
-                statement.setString(j + 1, statuses.get(j - i));
+            //put desired roles into the query
+            for (j = i; j < statuses.size() + roles.size(); ++j) {
+                statement.setString(j + 1, roles.get(j - i));
+            }
+            //put desired API status into the query (to get APIs with restricted visibility)
+            for (int k = j; k < statuses.size() + roles.size() + statuses.size(); ++k) {
+                statement.setString(k + 1, statuses.get(k - j));
             }
             return constructAPISummaryList(statement);
         } catch (SQLException e) {
@@ -747,7 +764,189 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public Comment getCommentByUUID(String commentId, String apiId) throws APIMgtDAOException {
+        final String query = "SELECT UUID, COMMENT_TEXT, USER_IDENTIFIER, API_ID, "
+                + "CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME "
+                + "FROM AM_API_COMMENTS WHERE UUID = ? AND API_ID = ?";
+
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(query)) {
+            try {
+                statement.setString(1, commentId);
+                statement.setString(2, apiId);
+                statement.execute();
+                try (ResultSet rs = statement.getResultSet()) {
+                    if (rs.next()) {
+                        return constructCommentFromResultSet(rs);
+                    }
+                }
+            } catch (SQLException e) {
+                connection.rollback();
+                String errorMessage =
+                        "Error while retrieving comment for comment id: " + commentId + " and api id: " + apiId;
+                log.error(errorMessage, e);
+                throw new APIMgtDAOException(e);
+            }
+        } catch (SQLException e) {
+            log.error("Error while creating database connection/prepared-statement", e);
+            throw new APIMgtDAOException(e);
+        }
         return null;
+    }
+
+    /**
+     * Constructs a comment object from a resulset object
+     *
+     * @param rs result set object
+     * @return
+     * @throws APIMgtDAOException
+     */
+    private Comment constructCommentFromResultSet(ResultSet rs) throws APIMgtDAOException {
+        Comment comment = new Comment();
+        try {
+            comment.setUuid(rs.getString("UUID"));
+            comment.setCommentText(rs.getString("COMMENT_TEXT"));
+            comment.setCommentedUser(rs.getString("USER_IDENTIFIER"));
+            comment.setApiId(rs.getString("API_ID"));
+            comment.setCreatedUser(rs.getString("CREATED_BY"));
+            comment.setCreatedTime(rs.getTimestamp("CREATED_TIME").toLocalDateTime());
+            comment.setUpdatedUser(rs.getString("UPDATED_BY"));
+            comment.setUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toLocalDateTime());
+        } catch (SQLException e) {
+            String errorMessage = "Error while constructing comment object from resultset";
+            log.error(errorMessage, e);
+            throw new APIMgtDAOException(e);
+        }
+        return comment;
+    }
+
+    /**
+     * @see ApiDAO#addComment(Comment, String)
+     */
+    @Override
+    public void addComment(Comment comment, String apiId) throws APIMgtDAOException {
+        final String addCommentQuery =
+                "INSERT INTO AM_API_COMMENTS (UUID, COMMENT_TEXT, USER_IDENTIFIER, API_ID, " +
+                        "CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME" + ") VALUES (?,?,?,?,?,?,?,?)";
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(addCommentQuery)) {
+            try {
+                statement.setString(1, comment.getUuid());
+                statement.setString(2, comment.getCommentText());
+                statement.setString(3, comment.getCommentedUser());
+                statement.setString(4, apiId);
+                statement.setString(5, comment.getCreatedUser());
+                statement.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now()));
+                statement.setString(7, comment.getUpdatedUser());
+                statement.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now()));
+                statement.execute();
+            } catch (SQLException e) {
+                connection.rollback();
+                String errorMessage =
+                        "Error while adding comment for api id: " + apiId;
+                log.error(errorMessage, e);
+                throw new APIMgtDAOException(e);
+            }
+        } catch (SQLException e) {
+            log.error("Error while creating database connection/prepared-statement", e);
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    /**
+     * @see ApiDAO#deleteComment(String, String)
+     */
+    @Override
+    public void deleteComment(String commentId, String apiId) throws APIMgtDAOException {
+        final String deleteCommentQuery = "DELETE FROM AM_API_COMMENTS WHERE UUID = ? AND API_ID = ?";
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(deleteCommentQuery)) {
+            try {
+                statement.setString(1, commentId);
+                statement.setString(2, apiId);
+                statement.execute();
+            } catch (SQLException e) {
+                connection.rollback();
+                String errorMessage =
+                        "Error while deleting comment for api id: " + apiId + " and comment id: " + commentId;
+                log.error(errorMessage, e);
+                throw new APIMgtDAOException(e);
+            }
+        } catch (SQLException e) {
+            log.error("Error while creating database connection/prepared-statement", e);
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    /**
+     * @see ApiDAO#updateComment(Comment, String, String)
+     */
+    @Override
+    public void updateComment(Comment comment, String commentId, String apiId) throws APIMgtDAOException {
+        final String updateCommentQuery = "UPDATE AM_API_COMMENTS SET COMMENT_TEXT = ? , USER_IDENTIFIER = ? ,"
+                + "CREATED_BY = ? , CREATED_TIME = ?, UPDATED_BY = ? , LAST_UPDATED_TIME = ?"
+                + "WHERE UUID = ? AND API_ID = ?";
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(updateCommentQuery)) {
+            try {
+                statement.setString(1, comment.getCommentText());
+                statement.setString(2, comment.getCommentedUser());
+                statement.setString(3, comment.getCreatedUser());
+                statement.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
+                statement.setString(5, comment.getUpdatedUser());
+                statement.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now()));
+                statement.setString(7, commentId);
+                statement.setString(8, apiId);
+                statement.execute();
+            } catch (SQLException e) {
+                connection.rollback();
+                String errorMessage =
+                        "Error while updating comment for api id: " + apiId + " and comment id: " + commentId;
+                log.error(errorMessage, e);
+                throw new APIMgtDAOException(e);
+            }
+        } catch (SQLException e) {
+            log.error("Error while creating database connection/prepared-statement", e);
+            throw new APIMgtDAOException(e);
+        }
+
+    }
+
+    /**
+     * @see ApiDAO#getCommentsForApi(String)
+     */
+    @Override
+    public List<Comment> getCommentsForApi(String apiId) throws APIMgtDAOException {
+        List<Comment> commentList = new ArrayList<>();
+        final String getCommentsQuery = "SELECT UUID, COMMENT_TEXT, USER_IDENTIFIER, API_ID, "
+                + "CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME "
+                + "FROM AM_API_COMMENTS WHERE API_ID = ?";
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(getCommentsQuery)) {
+            try {
+                statement.setString(1, apiId);
+                statement.execute();
+                try (ResultSet rs = statement.getResultSet()) {
+                    while (rs.next()) {
+                        commentList.add(constructCommentFromResultSet(rs));
+                    }
+                }
+            } catch (SQLException e) {
+                connection.rollback();
+                String errorMessage =
+                        "Error while retrieving all comments for api id: " + apiId;
+                log.error(errorMessage, e);
+                throw new APIMgtDAOException(e);
+            }
+        } catch (SQLException e) {
+            log.error("Error while creating database connection/prepared-statement", e);
+            throw new APIMgtDAOException(e);
+        }
+        return  commentList;
+    }
+
+    @Override
+    public String getLastUpdatedTimeOfComment(String commentId) throws APIMgtDAOException {
+        return EntityDAO.getLastUpdatedTimeOfResourceByUUID(AM_API_COMMENTS_TABLE_NAME, commentId);
     }
 
     /**
@@ -1037,8 +1236,8 @@ public class ApiDAOImpl implements ApiDAO {
                 .prepareStatement(query)) {
             preparedStatement.setString(1, apiId);
             preparedStatement.setString(2, documentInfo.getName());
-            preparedStatement.setString(3, documentInfo.getType().getType());
-            preparedStatement.setString(4, documentInfo.getSourceType().getType());
+            preparedStatement.setString(3, documentInfo.getType().toString());
+            preparedStatement.setString(4, documentInfo.getSourceType().toString());
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     exist = true;
@@ -1248,7 +1447,10 @@ public class ApiDAOImpl implements ApiDAO {
         InputStream gatewayConfig = ApiResourceDAO
                 .getBinaryValueForCategory(connection, apiID, ResourceCategory.GATEWAY_CONFIG);
 
-        return IOUtils.toString(gatewayConfig, StandardCharsets.UTF_8);
+        if (gatewayConfig != null) {
+            return IOUtils.toString(gatewayConfig, StandardCharsets.UTF_8);
+        }
+        return null;
     }
 
     private void updateGatewayConfig(Connection connection, String apiID, String gatewayConfig, String updatedBy)

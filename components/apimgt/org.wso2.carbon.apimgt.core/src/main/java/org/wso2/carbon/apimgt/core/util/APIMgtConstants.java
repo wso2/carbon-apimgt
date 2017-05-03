@@ -59,23 +59,9 @@ public class APIMgtConstants {
     public static final String AUTH_APPLICATION_OR_USER_LEVEL_TOKEN = "Any";
     public static final String DEFAULT_API_POLICY = "Unlimited";
     
-    //workflow executor default executors
-    public static final String WF_DEFAULT_APPCREATION_EXEC = 
-            "org.wso2.carbon.apimgt.core.workflow.ApplicationCreationSimpleWorkflowExecutor";
-    public static final String WF_DEFAULT_APISTATE_EXEC = 
-            "org.wso2.carbon.apimgt.core.workflow.APIStateChangeSimpleWorkflowExecutor";
-    public static final String WF_DEFAULT_PRODAPP_EXEC = 
-            "org.wso2.carbon.apimgt.core.workflow.ApplicationRegistrationSimpleWorkflowExecutor";
-    public static final String WF_DEFAULT_SANDBOXAPP_EXEC = 
-            "org.wso2.carbon.apimgt.core.workflow.ApplicationRegistrationSimpleWorkflowExecutor";
-    public static final String WF_DEFAULT_APPDELETE_EXEC = 
-            "org.wso2.carbon.apimgt.core.workflow.ApplicationDeletionSimpleWorkflowExecutor";
-    public static final String WF_DEFAULT_SUBCREATION_EXEC = 
-            "org.wso2.carbon.apimgt.core.workflow.SubscriptionCreationSimpleWorkflowExecutor";
-    public static final String WF_DEFAULT_SUBDELETE_EXEC = 
-            "org.wso2.carbon.apimgt.core.workflow.SubscriptionDeletionSimpleWorkflowExecutor";
-    public static final String WF_DEFAULT_SIGNUP_EXEC = 
-            "org.wso2.carbon.apimgt.core.workflow.UserSignUpSimpleWorkflowExecutor";
+    //workflow executor default executor
+    public static final String WF_DEFAULT_WF_EXEC = 
+            "org.wso2.carbon.apimgt.core.workflow.DefaultWorkflowExecutor";
 
     //Store constants
     public static final String DEFAULT_APPLICATION_NAME = "DefaultApplication";
@@ -247,6 +233,7 @@ public class APIMgtConstants {
         public static final String ENDPOINT_ID = "ENDPOINT_ID";
         public static final String LIFECYCLE_ID = "LIFECYCLE_ID";
         public static final String WORKFLOW_REF_ID = "WORKFLOW_REFERENCE_ID";
+        public static final String COMMENT_ID = "COMMENT_ID";
     }
 
     /**
@@ -300,11 +287,11 @@ public class APIMgtConstants {
      * Workflow related constants
      */
     public static class WorkflowConstants {
-        public static final String WF_TYPE_AM_USER_SIGNUP = "AM_USER_SIGNUP";
         public static final String WF_TYPE_AM_SUBSCRIPTION_CREATION = "AM_SUBSCRIPTION_CREATION";
         public static final String WF_TYPE_AM_SUBSCRIPTION_DELETION = "AM_SUBSCRIPTION_DELETION";
         public static final String WF_TYPE_AM_APPLICATION_CREATION = "AM_APPLICATION_CREATION";
         public static final String WF_TYPE_AM_APPLICATION_DELETION = "AM_APPLICATION_DELETION";
+        public static final String WF_TYPE_AM_APPLICATION_UPDATE = "AM_APPLICATION_UPDATE";
         public static final String WF_TYPE_AM_API_STATE = "AM_API_STATE";
         public static final String WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION = 
                 "AM_APPLICATION_REGISTRATION_PRODUCTION";
@@ -312,7 +299,15 @@ public class APIMgtConstants {
         public static final String ATTRIBUTE_API_CUR_STATE = "apiCurrentState";
         public static final String ATTRIBUTE_API_TARGET_STATE = "apiTargetState";
         public static final String ATTRIBUTE_API_LC_INVOKER = "lcStateChangeInvoker";
-        public static final String ATTRIBUTE_API_LAST_UPTIME = "lastUpdatedTime";        
+        public static final String ATTRIBUTE_API_LAST_UPTIME = "lastUpdatedTime";
+        public static final String ATTRIBUTE_APPLICATION_NAME = "name";
+        public static final String ATTRIBUTE_APPLICATION_UPDATEDBY = "updatedUser";
+        public static final String ATTRIBUTE_APPLICATION_TIER = "tier";
+        public static final String ATTRIBUTE_APPLICATION_DESCRIPTION = "description";  
+        public static final String ATTRIBUTE_APPLICATION_CALLBACKURL = "callbackUrl";
+        public static final String ATTRIBUTE_APPLICATION_GROUPID = "groupId"; 
+        public static final String ATTRIBUTE_APPLICATION_PERMISSION = "permission";
+        public static final String ATTRIBUTE_APPLICATION_EXISTIN_APP_STATUS = "status";
 
     }
 

@@ -1,57 +1,38 @@
 package org.wso2.carbon.apimgt.rest.api.admin;
 
-import org.wso2.carbon.apimgt.rest.api.admin.*;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.*;
-
-import org.wso2.msf4j.formparam.FormDataParam;
-import org.wso2.msf4j.formparam.FileInfo;
-
-import org.wso2.carbon.apimgt.rest.api.admin.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.TierDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.TierListDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.TierPermissionDTO;
-
-import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.admin.NotFoundException;
-
-import java.io.InputStream;
-
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.TierDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.TierPermissionDTO;
+import org.wso2.msf4j.Request;
 
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-22T12:24:12.664+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-07T14:13:41.057+05:30")
 public abstract class PoliciesApiService {
-    public abstract Response policiesTierLevelDelete(String tierName
- ,String tierLevel
- ,String ifMatch
- ,String ifUnmodifiedSince
- ,String minorVersion
- ) throws NotFoundException;
-    public abstract Response policiesTierLevelGet(String tierLevel
+    public abstract Response policiesTierLevelTierLevelGet(String tierLevel
  ,Integer limit
  ,Integer offset
  ,String accept
  ,String ifNoneMatch
- ,String minorVersion
- ) throws NotFoundException;
-    public abstract Response policiesTierLevelPost(TierDTO body
+ , Request request) throws NotFoundException;
+    public abstract Response policiesTierLevelTierLevelPost(TierDTO body
  ,String tierLevel
  ,String contentType
- ,String minorVersion
- ) throws NotFoundException;
-    public abstract Response policiesTierLevelPut(String tierName
+ , Request request) throws NotFoundException;
+    public abstract Response policiesTierLevelTierLevelTierNameTierNameDelete(String tierName
+ ,String tierLevel
+ ,String ifMatch
+ ,String ifUnmodifiedSince
+ , Request request) throws NotFoundException;
+    public abstract Response policiesTierLevelTierLevelTierNameTierNamePut(String tierName
  ,TierDTO body
  ,String tierLevel
  ,String contentType
  ,String ifMatch
  ,String ifUnmodifiedSince
- ,String minorVersion
- ) throws NotFoundException;
+ , Request request) throws NotFoundException;
     public abstract Response policiesUpdatePermissionPost(String tierName
  ,String tierLevel
  ,String ifMatch
  ,String ifUnmodifiedSince
- ,String minorVersion
  ,TierPermissionDTO permissions
- ) throws NotFoundException;
+ , Request request) throws NotFoundException;
 }

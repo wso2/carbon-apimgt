@@ -2,7 +2,7 @@
 {{favicon "images/favicon.png" type="image/png"}}
 {{title "Login | " @config.appName}}
 {{fragment "org.wso2.carbon.uuf.common.foundation.ui.noty"}}
-{{fragment "authManager"}}
+{{fragment "auth-manager"}}
 {{css "css/login.css"}}
 {{js "js/login.js"}}
 {{#fillZone "content"}}
@@ -36,7 +36,7 @@
                     <div class="col-xs-12 col-sm-12 col-md-9 col-lg-9 login">
                         <div class="data-container">
                             <form class="form-horizontal" method="post" id="loginForm">
-                                <h3>Sign in to your account</h3>
+                                <h3>{{i18n "Sign in to your account"}}</h3>
                                 <div class="form-group">
                                     <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
                                         <div class="input-group input-wrap">
@@ -55,20 +55,26 @@
                                 </div>
                                 <div class="form-group">
                                     <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
+                                            <input type="checkbox" id="rememberMe" name="rememberMe">
+                                            <span class="checkbox-font">{{i18n "Remember Me"}}</span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
                                         <button type="button" id="loginButton"  class="btn btn-default btn-primary add-margin-right-2x">
-                                            Sign In
+                                            {{i18n "Sign In"}}
                                         </button>
                                     </div>
                                 </div>
                                 <a href=""
-                                   class="add-margin-bottom-5x remove-margin-lg remove-margin-md">Forgot
-                                    Password</a>
-                                <p class="hidden-xs hidden-sm">Don't have an account? <a
-                                        href="">Register Now</a></p>
+                                   class="add-margin-bottom-5x remove-margin-lg remove-margin-md">{{i18n "Forgot Password"}}</a>
+
+                                <p class="hidden-xs hidden-sm">{{i18n "Don't have an account?"}} <a
+                                        href="">{{i18n "Register Now"}}</a></p>
                             </form>
                         </div>
-                        <p class="visible-xs visible-sm add-margin-2x text-center">Don't have an account? <a href="#">
-                            Register Now</a>
+                        <p class="visible-xs visible-sm add-margin-2x text-center">{{i18n "Don't have an account"}}?
+                            <a href="#">{{i18n "Register Now"}}</a>
                         </p>
                     </div>
                 </div>

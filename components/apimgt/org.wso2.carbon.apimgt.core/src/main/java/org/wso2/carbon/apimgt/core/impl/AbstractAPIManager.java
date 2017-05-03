@@ -22,8 +22,11 @@ package org.wso2.carbon.apimgt.core.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.APIGatewayPublisher;
 import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
 import org.wso2.carbon.apimgt.core.api.APIManager;
+import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
+import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
@@ -34,6 +37,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.exception.WorkflowException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
@@ -61,10 +65,31 @@ public abstract class AbstractAPIManager implements APIManager {
     private APILifecycleManager apiLifecycleManager;
     private LabelDAO labelDAO;
     private WorkflowDAO workflowDAO;
+    private GatewaySourceGenerator gatewaySourceGenerator;
+    private APIGatewayPublisher apiGatewayPublisher;
 
     public AbstractAPIManager(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
-            APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager apiLifecycleManager,
-            LabelDAO labelDAO, WorkflowDAO workflowDAO) {
+                              APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager
+                                      apiLifecycleManager,
+                              LabelDAO labelDAO, WorkflowDAO workflowDAO, GatewaySourceGenerator
+                                      gatewaySourceGenerator, APIGatewayPublisher apiGatewayPublisher) {
+
+        this.username = username;
+        this.apiDAO = apiDAO;
+        this.applicationDAO = applicationDAO;
+        this.apiSubscriptionDAO = apiSubscriptionDAO;
+        this.policyDAO = policyDAO;
+        this.apiLifecycleManager = apiLifecycleManager;
+        this.labelDAO = labelDAO;
+        this.workflowDAO = workflowDAO;
+        this.gatewaySourceGenerator = gatewaySourceGenerator;
+        this.apiGatewayPublisher = apiGatewayPublisher;
+    }
+
+    public AbstractAPIManager(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
+                              APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager
+                                      apiLifecycleManager,
+                              LabelDAO labelDAO, WorkflowDAO workflowDAO) {
 
         this.username = username;
         this.apiDAO = apiDAO;
@@ -417,6 +442,20 @@ public abstract class AbstractAPIManager implements APIManager {
         return lastUpdatedTime;
     }
 
+    @Override
+    public String getLastUpdatedTimeOfComment(String commentId) throws APIManagementException {
+        String lastUpdatedTime;
+        try {
+            lastUpdatedTime = apiDAO.getLastUpdatedTimeOfComment(commentId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg =
+                    "Error occurred while retrieving the last updated time of the comment " + commentId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return lastUpdatedTime;
+    }
+
     /**
      * @see APIManager#getLastUpdatedTimeOfSubscription(String)
      */
@@ -510,9 +549,21 @@ public abstract class AbstractAPIManager implements APIManager {
         throw new APIMgtResourceAlreadyExistsException(msg);
     }
     
-    @Override
-    public Workflow retrieveWorkflow(String workflowRefId) throws APIMgtDAOException {        
-        return workflowDAO.retrieveWorkflow(workflowRefId);
+    /**
+     * Retrieve workflow for given internal ref id
+     * 
+     * @param workflowRefId workflow reference id
+     * @return Workflow workflow.
+     * @throws APIMgtDAOException  If failed to get list of subscriptions.
+     */
+    public Workflow retrieveWorkflow(String workflowRefId) throws APIMgtDAOException {       
+        try {
+            return workflowDAO.retrieveWorkflow(workflowRefId);    
+        } catch (APIMgtDAOException e) {
+            String message = "Error while updating workflow entry";
+            log.error(message);
+            throw new APIMgtDAOException(message, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }        
     }
     
     protected void updateWorkflowEntries(Workflow workflow) throws APIManagementException {
@@ -541,6 +592,22 @@ public abstract class AbstractAPIManager implements APIManager {
 
     }
     
+    protected void cleanupPendingTask(WorkflowExecutor executor, String internalWFReference, String workflowType)
+            throws APIMgtDAOException {
+        String externalWfReferenceId = getWorkflowDAO().getExternalWorkflowReferenceForPendingTask(internalWFReference,
+                workflowType);
+        if (externalWfReferenceId != null) {
+            try {
+                executor.cleanUpPendingTask(externalWfReferenceId);
+            } catch (WorkflowException e) {
+                String warn = "Failed to clean pending task for " + internalWFReference + " of " + workflowType;
+                // failed cleanup processes are ignored to prevent failing the deletion process
+                log.warn(warn, e.getLocalizedMessage());
+            }
+            getWorkflowDAO().deleteWorkflowEntryforExternalReference(externalWfReferenceId);
+        }
+    }
+    
     @Override
     public Label getLabelByName(String labelName) throws APIManagementException {
         try {
@@ -550,5 +617,13 @@ public abstract class AbstractAPIManager implements APIManager {
             log.error(message);
             throw new APIManagementException(message, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
+    }
+
+    public GatewaySourceGenerator getGatewaySourceGenerator() {
+        return gatewaySourceGenerator;
+    }
+
+    public APIGatewayPublisher getApiGatewayPublisher() {
+        return apiGatewayPublisher;
     }
 }

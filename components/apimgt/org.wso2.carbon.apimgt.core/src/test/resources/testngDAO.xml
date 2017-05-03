@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="Database Integration test suite">
+
+    <test name="org.wso2.am">
+        <classes>
+            <class name="org.wso2.carbon.apimgt.core.dao.impl.ApiDAOImplIT" />
+            <class name="org.wso2.carbon.apimgt.core.dao.impl.ApplicationDAOImplIT" />
+            <class name="org.wso2.carbon.apimgt.core.dao.impl.SubscriptionDAOImplIT" />
+            <class name="org.wso2.carbon.apimgt.core.dao.impl.LabelDAOImplIT" />
+            <class name="org.wso2.carbon.apimgt.core.dao.impl.WorkflowDAOIT" />
+            <class name="org.wso2.carbon.apimgt.core.dao.impl.PolicyDAOImplIT" />
+        </classes>
+    </test>
+</suite>

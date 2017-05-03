@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
@@ -50,11 +51,11 @@ public class UserAwareAPIStore extends APIStoreImpl {
     }
 
     @Override
-    public void deleteApplication(String appId) throws APIManagementException {
+    public WorkflowResponse deleteApplication(String appId) throws APIManagementException {
         try {
             Application application = getApplicationDAO().getApplication(appId);
             if (application != null && application.getCreatedUser().equals(getUsername())) {
-                super.deleteApplication(appId);
+                return super.deleteApplication(appId);
             } else {
                 String errorMsg = "Could not find application - " + appId;
                 log.error(errorMsg);
@@ -68,11 +69,11 @@ public class UserAwareAPIStore extends APIStoreImpl {
     }
 
     @Override
-    public void updateApplication(String uuid, Application application) throws APIManagementException {
+    public WorkflowResponse updateApplication(String uuid, Application application) throws APIManagementException {
         try {
             Application oldApplication = getApplicationDAO().getApplication(uuid);
             if (oldApplication != null && oldApplication.getCreatedUser().equals(getUsername())) {
-                super.updateApplication(uuid, application);
+                return super.updateApplication(uuid, application);
             } else {
                 String errorMsg = "Could not find application - " + uuid;
                 log.error(errorMsg);

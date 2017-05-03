@@ -26,6 +26,9 @@ import java.util.Comparator;
  * Comparator class for APISummary object
  */
 public class APISummaryComparator implements Comparator<APISummary>, Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     @Override
     public int compare(APISummary o1, APISummary o2) {
         return (o1.getContext() + o1.getContextWithVersion()).compareTo(o2.getContext() + o2.getContextWithVersion());

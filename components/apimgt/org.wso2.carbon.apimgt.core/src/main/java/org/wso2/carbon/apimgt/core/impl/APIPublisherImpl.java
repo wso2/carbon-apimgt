@@ -48,6 +48,8 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
+import org.wso2.carbon.apimgt.core.exception.LabelException;
+import org.wso2.carbon.apimgt.core.exception.WorkflowException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIResource;
 import org.wso2.carbon.apimgt.core.models.APIStateChangeWorkflow;
@@ -108,10 +110,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     private Map<String, EventObserver> eventObservers = new HashMap<>();
 
     public APIPublisherImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
-            APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager apiLifecycleManager,
-            LabelDAO labelDAO, WorkflowDAO workflowDAO) {
+                            APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager
+                                    apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO,
+                            GatewaySourceGenerator gatewaySourceGenerator, APIGatewayPublisher apiGatewayPublisher) {
         super(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, apiLifecycleManager, labelDAO,
-                workflowDAO);
+                workflowDAO, gatewaySourceGenerator, apiGatewayPublisher);
     }
 
     /**
@@ -284,7 +287,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     }
                     resourceList.add(dto);
                 }
-                GatewaySourceGenerator gatewaySourceGenerator = new GatewaySourceGeneratorImpl(apiBuilder.build());
+                GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
+                gatewaySourceGenerator.setAPI(apiBuilder.build());
                 String gatewayConfig = gatewaySourceGenerator.getConfigStringFromTemplate(resourceList);
                 if (log.isDebugEnabled()) {
                     log.debug("API " + apiBuilder.getName() + "gateway config: " + gatewayConfig);
@@ -385,6 +389,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             API originalAPI = getAPIbyUUID(apiBuilder.getId());
             if (originalAPI != null) {
                 apiBuilder.createdTime(originalAPI.getCreatedTime());
+                //workflow status is an internal property and shouldn't be allowed to update externally
+                apiBuilder.workflowStatus(originalAPI.getWorkflowStatus());
                 if ((originalAPI.getName().equals(apiBuilder.getName())) && (originalAPI.getVersion().equals
                         (apiBuilder.getVersion())) && (originalAPI.getProvider().equals(apiBuilder.getProvider())) &&
                         originalAPI.getLifeCycleStatus().equalsIgnoreCase(apiBuilder.getLifeCycleStatus())) {
@@ -397,7 +403,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
                     String updatedSwagger = apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder);
                     String gatewayConfig = getApiGatewayConfig(apiBuilder.getId());
-                    GatewaySourceGenerator gatewaySourceGenerator = new GatewaySourceGeneratorImpl(apiBuilder.build());
+                    GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
+                    gatewaySourceGenerator.setAPI(apiBuilder.build());
                     String updatedGatewayConfig = gatewaySourceGenerator
                             .getGatewayConfigFromSwagger(gatewayConfig, updatedSwagger);
 
@@ -567,8 +574,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 API.APIBuilder apiBuilder = new API.APIBuilder(api);
                 apiBuilder.lastUpdatedTime(LocalDateTime.now());
                 apiBuilder.updatedBy(getUsername());
-                LifecycleState currentState = getApiLifecycleManager().getCurrentLifecycleState(apiBuilder
-                        .getLifecycleInstanceId());
+                LifecycleState currentState = getApiLifecycleManager().getLifecycleDataForState(apiBuilder
+                        .getLifecycleInstanceId(), apiBuilder.getLifeCycleStatus());
                 apiBuilder.lifecycleState(currentState);
                 for (Map.Entry<String, Boolean> checkListItem : checkListItemMap.entrySet()) {
                     getApiLifecycleManager().checkListItemEvent(api.getLifecycleInstanceId
@@ -598,15 +605,19 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_API_LC_INVOKER, getUsername());
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_API_LAST_UPTIME,
                         originalAPI.getLastUpdatedTime().toString());
-                
+                String workflowDescription = "API state change workflow for " + workflow.getApiName() + ":"
+                        + workflow.getApiVersion() + ":" + workflow.getApiProvider() + " from "
+                        + workflow.getCurrentState() + " to " + workflow.getTransitionState() + " state by "
+                        + getUsername();
+                workflow.setWorkflowDescription(workflowDescription);
                 workflowResponse = executor.execute(workflow);             
                 workflow.setStatus(workflowResponse.getWorkflowStatus());
 
-                addWorkflowEntries(workflow);
-
-                if (WorkflowStatus.APPROVED == workflowResponse.getWorkflowStatus()) {
+                if (WorkflowStatus.CREATED != workflowResponse.getWorkflowStatus()) {
                     completeWorkflow(executor, workflow);
                 } else {
+                    //add entry to workflow table if it is only in pending state
+                    addWorkflowEntries(workflow);
                     getApiDAO().updateAPIWorkflowStatus(api.getId(), APILCWorkflowStatus.PENDING);
                 }
             } else if (api != null && APILCWorkflowStatus.PENDING.toString().equals(api.getWorkflowStatus())) {
@@ -639,8 +650,12 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 apiBuilder.lastUpdatedTime(time);
                 apiBuilder.updatedBy(updatedBy);
                 LifecycleState currentState = getApiLifecycleManager()
-                        .getCurrentLifecycleState(apiBuilder.getLifecycleInstanceId());
+                        .getLifecycleDataForState(apiBuilder.getLifecycleInstanceId(), apiBuilder.getLifeCycleStatus());
                 apiBuilder.lifecycleState(currentState);
+                if (APILCWorkflowStatus.PENDING.toString().equals(api.getWorkflowStatus())) {
+                    apiBuilder.workflowStatus(APILCWorkflowStatus.APPROVED.toString());
+                    getApiDAO().updateAPIWorkflowStatus(apiId, APILCWorkflowStatus.APPROVED);
+                }
                 List<CheckItemBean> list = currentState.getCheckItemBeanList();
                 for (Iterator iterator = list.iterator(); iterator.hasNext();) {
                     CheckItemBean checkItemBean = (CheckItemBean) iterator.next();
@@ -660,7 +675,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         if (oldAPI != null) {
                             API.APIBuilder previousAPI = new API.APIBuilder(oldAPI);
                             previousAPI.setLifecycleStateInfo(getApiLifecycleManager()
-                                    .getCurrentLifecycleState(previousAPI.getLifecycleInstanceId()));
+                                    .getLifecycleDataForState(previousAPI.getLifecycleInstanceId(),
+                                            previousAPI.getLifeCycleStatus())
+                                   );
                             if (APIUtils.validateTargetState(previousAPI.getLifecycleState(),
                                     APIStatus.DEPRECATED.getStatus())) {
                                 getApiLifecycleManager().executeLifecycleEvent(previousAPI.getLifeCycleStatus(),
@@ -718,8 +735,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 API.APIBuilder apiBuilder = new API.APIBuilder(api);
                 apiBuilder.lastUpdatedTime(LocalDateTime.now());
                 apiBuilder.updatedBy(getUsername());
-                apiBuilder.lifecycleState(getApiLifecycleManager().getCurrentLifecycleState(
-                        apiBuilder.getLifecycleInstanceId()));
+                apiBuilder.lifecycleState(getApiLifecycleManager()
+                        .getLifecycleDataForState(apiBuilder.getLifecycleInstanceId(),
+                                apiBuilder.getLifeCycleStatus()));
                 for (Map.Entry<String, Boolean> checkListItem : checkListItemMap.entrySet()) {
                     getApiLifecycleManager().checkListItemEvent(api.getLifecycleInstanceId
                                     (), api.getLifeCycleStatus(),
@@ -1061,10 +1079,15 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             if (getAPISubscriptionCountByAPI(identifier) == 0) {
                 API api = getApiDAO().getAPI(identifier);
                 if (api != null) {
-                    API.APIBuilder apiBuilder = new API.APIBuilder(api);
+                    String apiWfStatus = api.getWorkflowStatus();
+                    API.APIBuilder apiBuilder = new API.APIBuilder(api);                   
                     getApiDAO().deleteAPI(identifier);
                     getApiLifecycleManager().removeLifecycle(apiBuilder.getLifecycleInstanceId());
                     APIUtils.logDebug("API with id " + identifier + " was deleted successfully.", log);
+                    
+                    if (APILCWorkflowStatus.PENDING.toString().equals(apiWfStatus)) {
+                       cleanupPendingTaskForAPIStateChange(identifier);
+                    }
                     // 'API_M Functions' related code
                     //Create a payload with event specific details
                     Map<String, String> eventPayload = new HashMap<>();
@@ -1181,7 +1204,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             apiBuilder.lastUpdatedTime(localDateTime);
 
             api = apiBuilder.build();
-            GatewaySourceGenerator gatewaySourceGenerator = new GatewaySourceGeneratorImpl(api);
+            GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
+            gatewaySourceGenerator.setAPI(api);
             String existingGatewayConfig = getApiGatewayConfig(apiId);
             String updatedGatewayConfig = gatewaySourceGenerator
                     .getGatewayConfigFromSwagger(existingGatewayConfig, jsonText);
@@ -1208,7 +1232,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         try {
             API api = getApiDAO().getAPISummary(apiId);
             if (api != null) {
-                return getApiLifecycleManager().getCurrentLifecycleState(api.getLifecycleInstanceId());
+                return getApiLifecycleManager()
+                        .getLifecycleDataForState(api.getLifecycleInstanceId(), api.getLifeCycleStatus());
             } else {
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve API Summary for " + apiId);
             }
@@ -1289,8 +1314,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public void updateApiGatewayConfig(String apiId, String configString) throws APIManagementException {
         API api = getAPIbyUUID(apiId);
-        GatewaySourceGenerator gatewaySourceGenerator = new GatewaySourceGeneratorImpl(api);
-
+        GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
+        gatewaySourceGenerator.setAPI(api);
         try {
             String swagger = gatewaySourceGenerator.getSwaggerFromGatewayConfig(configString);
             getApiDAO().updateSwaggerDefinition(apiId, swagger, getUsername());
@@ -1502,46 +1527,16 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     @Override
-    public List<Label> getAllLabels() throws APIManagementException {
+    public List<Label> getAllLabels() throws LabelException {
 
         try {
             return getLabelDAO().getLabels();
         } catch (APIMgtDAOException e) {
             String msg = "Error occurred while retrieving labels";
             log.error(msg, e);
-            throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new LabelException(msg, ExceptionCodes.LABEL_EXCEPTION);
         }
     }
-
-    @Override
-    public void registerGatewayLabels(List<Label> labels) throws APIManagementException {
-
-        String overwriteLabels = System.getProperty(APIMgtConstants.OVERWRITE_LABELS, "false");
-        List<String> labelNames = new ArrayList<>();
-        for (Label label : labels) {
-            labelNames.add(label.getName());
-        }
-
-        try {
-            List<Label> existingLabels = getLabelDAO().getLabelsByName(labelNames);
-            if (!existingLabels.isEmpty()) {
-                labels.removeAll(existingLabels); // Remove already existing labels from the list
-            }
-
-            if (Boolean.parseBoolean(overwriteLabels)) {
-                for (Label label : existingLabels) {
-                    getLabelDAO().updateLabel(label);
-                }
-            }
-            getLabelDAO().addLabels(labels);
-
-        } catch (APIMgtDAOException e) {
-            String errorMsg = "Error occurred while adding label information";
-            log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
-        }
-    }
-
 
     /**
      * @see APIPublisher#getLastUpdatedTimeOfEndpoint(String)
@@ -1585,7 +1580,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @throws APIManagementException If failed to publish endpoint to gateway.
      */
     private void publishEndpointConfigToGateway() throws APIManagementException {
-        GatewaySourceGenerator template = new GatewaySourceGeneratorImpl();
+        GatewaySourceGenerator template = getGatewaySourceGenerator();
         String endpointConfig = template.getEndpointConfigStringFromTemplate(getAllEndpoints());
         APIGatewayPublisher publisher = APIManagerFactory.getInstance().getGateway();
         boolean status = publisher.publishEndpointConfigToGateway(endpointConfig);
@@ -1668,7 +1663,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
             if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Application Creation workflow complete: Approved");
+                    log.debug("API state change workflow complete: Approved");
                 }             
                 String invoker = workflow.getAttribute(WorkflowConstants.ATTRIBUTE_API_LC_INVOKER);
                 String targetState = workflow.getAttribute(WorkflowConstants.ATTRIBUTE_API_TARGET_STATE);
@@ -1677,11 +1672,66 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 updateAPIStatusForWorkflowComplete(workflow.getWorkflowReference(), targetState, invoker, time);
             } else if (WorkflowStatus.REJECTED == response.getWorkflowStatus()) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Application Creation workflow complete: Rejected");
+                    log.debug("API state change workflow complete: Rejected");
                 }              
+                getApiDAO().updateAPIWorkflowStatus(workflow.getWorkflowReference(), APILCWorkflowStatus.REJECTED);
             }
             updateWorkflowEntries(workflow); 
+        } else {
+            String message = "Invalid workflow type for publisher workflows:  " + workflow.getWorkflowType();
+            log.error(message);
+            throw new APIManagementException(message, ExceptionCodes.WORKFLOW_INV_PUBLISHER_WFTYPE);
         }
         return response;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void removePendingLifecycleWorkflowTaskForAPI(String apiId) throws APIManagementException {
+        
+        API api = getApiDAO().getAPI(apiId);
+        if (api != null) {
+            if (APILCWorkflowStatus.PENDING.toString().equals(api.getWorkflowStatus())) {
+                try {
+                    //change the state back
+                    getApiDAO().updateAPIWorkflowStatus(apiId, APILCWorkflowStatus.APPROVED);
+                    
+                    // call executor's cleanup task
+                    cleanupPendingTaskForAPIStateChange(apiId);
+                    
+                } catch (APIMgtDAOException e) {
+                    String msg = "Error occurred while changing api lifecycle workflow status";
+                    log.error(msg, e);
+                    throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+                }
+            } else {
+                String msg = "API does not have a pending lifecycle state change.";
+                log.error(msg);
+                throw new APIManagementException(msg, ExceptionCodes.WORKFLOW_NO_PENDING_TASK);
+            }
+        } else {
+            String msg = "Couldn't found API with ID " + apiId;
+            log.error(msg);
+            throw new APIManagementException(msg, ExceptionCodes.API_NOT_FOUND);
+        }      
+    }
+    
+    private void cleanupPendingTaskForAPIStateChange(String apiId) throws APIManagementException {
+        String workflowExtRef = getWorkflowDAO().getExternalWorkflowReferenceForPendingTask(apiId,
+                WorkflowConstants.WF_TYPE_AM_API_STATE);
+        if (workflowExtRef != null) {
+            WorkflowExecutor executor = WorkflowExecutorFactory.getInstance()
+                    .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
+            try {
+                executor.cleanUpPendingTask(workflowExtRef);
+            } catch (WorkflowException e) {
+                String warn = "Failed to clean pending api state change task for " + apiId;
+                // failed cleanup processes are ignored to prevent failing the deletion process
+                log.warn(warn, e.getLocalizedMessage());
+            }
+            getWorkflowDAO().deleteWorkflowEntryforExternalReference(workflowExtRef);
+        }
     }
 }

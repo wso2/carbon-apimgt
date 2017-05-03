@@ -1,34 +1,33 @@
 package org.wso2.carbon.apimgt.rest.api.publisher;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.factories.PoliciesApiServiceFactory;
-
 import io.swagger.annotations.ApiParam;
-
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierDTO;
-
-import org.wso2.msf4j.Microservice;
-import org.osgi.service.component.annotations.Component;
-
-import java.io.InputStream;
-
-import org.wso2.msf4j.formparam.FormDataParam;
-import org.wso2.msf4j.formparam.FileInfo;
-
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.*;
+import org.osgi.service.component.annotations.Component;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.factories.PoliciesApiServiceFactory;
+import org.wso2.msf4j.Microservice;
+import org.wso2.msf4j.Request;
 
 @Component(
     name = "org.wso2.carbon.apimgt.rest.api.publisher.PoliciesApi",
     service = Microservice.class,
     immediate = true
 )
-@Path("/api/am/publisher/v1/policies")
+@Path("/api/am/publisher/v1.[\\d]+/policies")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the policies API")
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-28T15:06:55.065+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-06T17:02:03.158+05:30")
 public class PoliciesApi implements Microservice  {
    private final PoliciesApiService delegate = PoliciesApiServiceFactory.getPoliciesApi();
 
@@ -48,10 +47,9 @@ public class PoliciesApi implements Microservice  {
 ,@ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
 ,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
-,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
-)
+, @Context Request request)
     throws NotFoundException {
-        return delegate.policiesTierLevelGet(tierLevel,limit,offset,accept,ifNoneMatch,minorVersion);
+        return delegate.policiesTierLevelGet(tierLevel,limit,offset,accept,ifNoneMatch, request);
     }
     @GET
     @Path("/{tierLevel}/{tierName}")
@@ -71,9 +69,8 @@ public class PoliciesApi implements Microservice  {
 ,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
-,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
-)
+, @Context Request request)
     throws NotFoundException {
-        return delegate.policiesTierLevelTierNameGet(tierName,tierLevel,accept,ifNoneMatch,ifModifiedSince,minorVersion);
+        return delegate.policiesTierLevelTierNameGet(tierName,tierLevel,accept,ifNoneMatch,ifModifiedSince, request);
     }
 }

@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>7.0.0-SNAPSHOT</version>
+        <version>7.0.4-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>org.wso2.carbon.apimgt.rest.api.core</artifactId>
@@ -141,7 +141,7 @@
 
     <properties>
         <microservice.mainClass>org.wso2.carbon.apimgt.rest.api.core.Application</microservice.mainClass>
-        <private.package>org.wso2.carbon.apimgt.rest.api.publisher.internal</private.package>
+        <private.package>org.wso2.carbon.apimgt.rest.api.core.internal</private.package>
         <import.package>
             org.wso2.carbon.datasource.core.*; version="${datasources.core.package.import.version.range}",
             com.zaxxer.hikari.*; version="${hikari.package.import.version.range}",
@@ -157,7 +157,7 @@
             org.wso2.carbon.apimgt.rest.api.core.*; version="${carbon.apimgt.version}"
         </export.package>
         <carbon.component>
-            osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="5"
+            osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="4"
         </carbon.component>
     </properties>
 </project>

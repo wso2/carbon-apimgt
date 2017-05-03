@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ApplicationStatus;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -77,10 +78,15 @@ public class UserAwareAPIStoreTestCase {
     @Test(description = "Update application")
     public void testUpdateApplication() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        APIStore apiStore = new UserAwareAPIStore(USER_NAME, null, applicationDAO, null, null, null, null, null);
+        WorkflowDAO workflowDAO = mock(WorkflowDAO.class);
+        APIStore apiStore = new UserAwareAPIStore(USER_NAME, null, applicationDAO, null, null, null, null, workflowDAO);
         Application applicationFromDAO = new Application(APP_NAME, null);
-        Application newApplication = new Application("NEW_APP", null);
+        applicationFromDAO.setId(UUID);
         applicationFromDAO.setCreatedUser(USER_NAME);
+        applicationFromDAO.setStatus(ApplicationStatus.APPLICATION_APPROVED);        
+        //updated app
+        Application newApplication = applicationFromDAO;
+        newApplication.setDescription("update description");  
         when(applicationDAO.getApplication(UUID)).thenReturn(applicationFromDAO);
         apiStore.updateApplication(UUID, newApplication);
         verify(applicationDAO, times(1)).updateApplication(UUID, newApplication);

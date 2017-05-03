@@ -40,4 +40,9 @@ public class ApplicationCreationWorkflow extends Workflow {
         this.application = application;
     }
 
+    @Override
+    public String toString() {
+        return "ApplicationCreationWorkflow [application=" + application + ", toString()=" + super.toString() + "]";
+    }
+    
 }

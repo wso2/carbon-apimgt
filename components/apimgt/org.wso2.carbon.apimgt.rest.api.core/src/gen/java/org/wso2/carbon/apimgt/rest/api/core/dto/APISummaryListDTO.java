@@ -1,19 +1,21 @@
 package org.wso2.carbon.apimgt.rest.api.core.dto;
 
+import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import org.wso2.carbon.apimgt.rest.api.core.dto.APISummaryDTO;
 
 /**
  * APISummaryListDTO
  */
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-02-09T14:55:54.962+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-31T16:40:30.481+05:30")
 public class APISummaryListDTO   {
-    @JsonProperty("list")
-    private List<APISummaryDTO> list = new ArrayList<APISummaryDTO>();
+  @JsonProperty("list")
+  private List<APISummaryDTO> list = new ArrayList<APISummaryDTO>();
 
   public APISummaryListDTO list(List<APISummaryDTO> list) {
     this.list = list;
@@ -47,8 +49,8 @@ public class APISummaryListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    APISummaryListDTO aPISummaryList = (APISummaryListDTO) o;
-    return Objects.equals(this.list, aPISummaryList.list);
+    APISummaryListDTO apISummaryList = (APISummaryListDTO) o;
+    return Objects.equals(this.list, apISummaryList.list);
   }
 
   @Override

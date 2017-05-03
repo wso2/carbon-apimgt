@@ -50,6 +50,8 @@ public class LogInServiceTest {
     private MicroservicesRunner microservicesRunner;
     public static final String HOSTNAME = "localhost";
     public static final int PORT = 8094;
+    public static final int HTTP_PORT = 9090;
+    public static final int HTTPS_PORT = 9292;
     public static final String HEADER_KEY_CONNECTION = "CONNECTION";
     public static final String HEADER_VAL_CLOSE = "CLOSE";
     protected static URI baseURI;
@@ -72,7 +74,7 @@ public class LogInServiceTest {
     @BeforeClass
     public void setup() throws Exception {
 
-        wireMockRule = new WireMockRule(wireMockConfig().httpsPort(9292));
+        wireMockRule = new WireMockRule(wireMockConfig().port(HTTP_PORT).httpsPort(HTTPS_PORT));
         wireMockRule.start();
 
         // Mock service for key manager DCR endpoint
@@ -94,7 +96,7 @@ public class LogInServiceTest {
                                         + "\"expires_in\":3600,\"scopes\":[\"apim:api_view\",\"apim:api_create\","
                                         + "\"apim:api_publish\",\"apim:tier_view\",\"apim:tier_manage\","
                                         + "\"apim:subscription_view\",\"apim:subscription_block\",\"apim:subscribe\","
-                                        + "\"apim:api_workflow\"],\"expiresTimestamp\":1490615736702}")));
+                                        + "\"apim:workflow_approve\"],\"expiresTimestamp\":1490615736702}")));
 
         // Mock service for key manager revoke endpoint
         wireMockRule.stubFor(post(urlEqualTo("/keyserver/oauth2/revoke")).willReturn(aResponse().withStatus(200)));
@@ -110,6 +112,8 @@ public class LogInServiceTest {
     @AfterClass
     public void teardown() throws Exception {
         microservicesRunner.stop();
+        wireMockRule.resetAll();
+        wireMockRule.stop();
     }
 
     protected HttpURLConnection request(String path, String method, boolean keepAlive) throws IOException {

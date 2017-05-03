@@ -8,3 +8,6 @@
 #general-alerts .alert {
     display: none;
 }
+
+.label-pending {
+  background-color: #aba59d; }

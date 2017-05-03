@@ -23,8 +23,8 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.plugins.configuration</artifactId>
+                <groupId>org.wso2.carbon.config</groupId>
+                <artifactId>org.wso2.carbon.config.maven.plugin</artifactId>
                 <executions>
                     <execution>
                         <goals>
@@ -35,16 +35,21 @@
                 </executions>
             </plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>${project.build.directory}/classes/config-docs</directory>
+                <targetPath>config-docs</targetPath>
+            </resource>
+        </resources>
     </build>
     <profiles>
         <profile>
-            <id>local-all</id>
+            <id>integration-tests</id>
             <build>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>2.19.1</version>
                         <executions>
                             <execution>
                                 <id>integration-test-for-subscription-loading</id>
@@ -55,14 +60,12 @@
                             </execution>
                             <execution>
                                 <id>verify-for-subscription-loading</id>
-                                <phase>integration-test</phase>
+                                <phase>verify</phase>
                                 <goals>
                                     <goal>verify</goal>
                                 </goals>
                             </execution>
                         </executions>
-                        <configuration>
-                        </configuration>
                     </plugin>
                 </plugins>
             </build>
@@ -132,6 +135,7 @@
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock</artifactId>
+            <scope>test</scope>
             <exclusions>
                 <exclusion>
                     <groupId>com.fasterxml.jackson.core</groupId>
@@ -147,6 +151,10 @@
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.core</artifactId>
         </dependency>
     </dependencies>
 

@@ -25,16 +25,22 @@ import org.json.simple.JSONObject;
 public class HttpWorkflowResponse extends AbstractWorkflowResponse {
 
     private String redirectUrl = "";
-    private String redirectConfirmationMsg = null;
+    private String redirectConfirmationMsg = "";
     private JSONObject jsonPayloadObj = new JSONObject();
     private JSONObject additionalParameters = new JSONObject();
+    
+    private static final String REDIRECT_URL = "redirectUrl";
+    private static final String CONF_MSG = "redirectConfirmationMsg";
+    private static final String ADDITIONAL_PARAM = "additionalParameters";
 
     @Override
     @SuppressWarnings("unchecked")
     public String getJSONPayload() {
-        jsonPayloadObj.put("redirectUrl", redirectUrl);
-        jsonPayloadObj.put("redirectConfirmationMsg", redirectConfirmationMsg);
-        jsonPayloadObj.put("additionalParameters", additionalParameters);
+
+        jsonPayloadObj.put(REDIRECT_URL, redirectUrl);
+        jsonPayloadObj.put(CONF_MSG, redirectConfirmationMsg);
+        jsonPayloadObj.put(ADDITIONAL_PARAM, additionalParameters);
+
         return jsonPayloadObj.toJSONString();
     }
 
@@ -61,5 +67,5 @@ public class HttpWorkflowResponse extends AbstractWorkflowResponse {
 
     public JSONObject getAdditionalParameterss() {
         return additionalParameters;
-    }
+    }    
 }

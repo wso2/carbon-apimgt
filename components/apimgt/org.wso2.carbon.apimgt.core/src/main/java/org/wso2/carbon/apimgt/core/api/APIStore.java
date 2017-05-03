@@ -21,6 +21,7 @@
 package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.ApplicationCreationResponse;
@@ -68,9 +69,10 @@ public interface APIStore extends APIManager {
      * Function to remove an Application from the API Store
      *
      * @param appId - The Application id of the Application
+     * @return WorkflowResponse workflow response
      * @throws APIManagementException   If failed to delete application.
      */
-    void deleteApplication(String appId) throws APIManagementException;
+    WorkflowResponse deleteApplication(String appId) throws APIManagementException;
 
     /**
      * Adds an application
@@ -108,9 +110,10 @@ public interface APIStore extends APIManager {
      * Updates the details of the specified user application.
      * @param uuid Uuid of the existing application
      * @param application Application object containing updated data
+     * @return WorkflowResponse workflow status
      * @throws APIManagementException If an error occurs while updating the application
      */
-    void updateApplication(String uuid, Application application) throws APIManagementException;
+    WorkflowResponse updateApplication(String uuid, Application application) throws APIManagementException;
 
     /**
      * Generates oAuth keys for an application.
@@ -165,9 +168,10 @@ public interface APIStore extends APIManager {
      * Delete an API subscription.
      *
      * @param subscriptionId    Id of the subscription to be deleted.
+     * @return WorkflowResponse  workflow response
      * @throws APIManagementException   If failed to delete the subscription.
      */
-    void deleteAPISubscription(String subscriptionId) throws APIManagementException;
+    WorkflowResponse deleteAPISubscription(String subscriptionId) throws APIManagementException;
 
     /**
      * Retrieve all tags
@@ -197,11 +201,12 @@ public interface APIStore extends APIManager {
     /**
      * Retrieve Label information based on the label name
      *
-     * @param labels List of label names
+     * @param labels    List of label names
+     * @param username  Username of the user
      * @return {@code List<Label>} List of Labels
-     * @throws APIManagementException if failed to get labels
+     * @throws LabelException if failed to get labels
      */
-    List<Label> getLabelInfo(List<String> labels) throws APIManagementException;
+    List<Label> getLabelInfo(List<String> labels, String username) throws LabelException;
 
     /**
      * Retrieve Individual Comment based on Comment ID
@@ -241,5 +246,41 @@ public interface APIStore extends APIManager {
      */
     List<Rating> getUserRatingDTOList(String apiId) throws APIManagementException;
 
+    /**
+     * Add comment for an API
+     *
+     * @param comment the comment text
+     * @param apiId UUID of the API
+     * @return String UUID of the created comment
+     * @throws APIManagementException if failed to add a comment
+     */
+    String addComment(Comment comment, String apiId) throws APIManagementException;
 
+    /**
+     * Delete a comment from an API given the commentId and apiId
+     *
+     * @param commentId UUID of the comment to be deleted
+     * @param apiId UUID of the api
+     * @throws APIManagementException if failed to delete a comment
+     */
+    void deleteComment(String commentId, String apiId) throws APIManagementException;
+
+    /**
+     * Update a comment
+     *
+     * @param comment new Comment object
+     * @param commentId the id of the comment which needs to be updated
+     * @param apiId UUID of the api the comment belongs to
+     * @throws APIManagementException if failed to update a comment
+     */
+    void updateComment(Comment comment, String commentId, String apiId) throws APIManagementException;
+
+    /**
+     * Retrieve list of comments for a given apiId
+     *
+     * @param apiId UUID of the api
+     * @throws APIManagementException if failed to retrieve all comments for an api
+     * @return a list of comments for the api
+     */
+    List<Comment> getCommentsForApi(String apiId) throws APIManagementException;
 }

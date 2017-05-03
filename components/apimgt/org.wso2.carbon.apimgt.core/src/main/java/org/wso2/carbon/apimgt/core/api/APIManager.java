@@ -233,6 +233,15 @@ public interface APIManager {
      * @throws APIManagementException if API Manager core level exception occurred
      */
     String getLastUpdatedTimeOfApplication(String applicationId) throws APIManagementException;
+
+    /**
+     * Retrieves the last updated time of the comment
+     *
+     * @param commentId UUID of the comment
+     * @return Last updated time of the comment
+     * @throws APIManagementException if API Manager core level exception occurred
+     */
+    String  getLastUpdatedTimeOfComment(String commentId) throws APIManagementException;
     
     /**
      * Retrieve workflow for the given workflow reference ID

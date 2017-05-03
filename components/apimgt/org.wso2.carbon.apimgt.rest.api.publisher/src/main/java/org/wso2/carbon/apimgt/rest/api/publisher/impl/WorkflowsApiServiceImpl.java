@@ -25,20 +25,22 @@ import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
 
 import javax.ws.rs.core.Response;
+import org.wso2.msf4j.Request;
 
 public class WorkflowsApiServiceImpl extends WorkflowsApiService {
     private static final Logger log = LoggerFactory.getLogger(WorkflowsApiServiceImpl.class);
-    
+
     /**
      * Workflow callback rest api to complete workflow task.
-     * 
+     *
      * @param workflowReferenceId workflow reference id
-     * @param body WorkflowDTO object
+     * @param body                WorkflowDTO object
+     * @param request             ms4j request object
      * @return the DTO object representing the workflwow response as the response payload
-     * @throws NotFoundException When the particular resource does not exist in the system 
+     * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response workflowsUpdateWorkflowStatusPost(String workflowReferenceId, WorkflowDTO body)
+    public Response workflowsWorkflowReferenceIdPut(String workflowReferenceId, WorkflowDTO body, Request request)
             throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
@@ -49,7 +51,7 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
                 String errorMessage = "Workflow entry not found for: " + workflowReferenceId;
                 APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
                         ExceptionCodes.WORKFLOW_NOT_FOUND);
-                HashMap<String, String> paramList = new HashMap<>();
+                Map<String, String> paramList = new HashMap<>();
                 paramList.put(APIMgtConstants.ExceptionsConstants.WORKFLOW_REF_ID, workflowReferenceId);
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
                 log.error(errorMessage, e);
@@ -57,8 +59,8 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
             } else if (WorkflowStatus.APPROVED == workflow.getStatus()) {
                 String errorMessage = "Workflow is already in complete state";
                 APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
-                        ExceptionCodes.WORKFLOW_COMPLETED);
-                HashMap<String, String> paramList = new HashMap<>();
+                        ExceptionCodes.WORKFLOW_ALREADY_COMPLETED);
+                Map<String, String> paramList = new HashMap<>();
                 paramList.put(APIMgtConstants.ExceptionsConstants.WORKFLOW_REF_ID, workflowReferenceId);
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
                 log.error(errorMessage, e);
@@ -76,7 +78,14 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
                 }
 
                 if (body.getStatus() == null) {
-                    RestApiUtil.handleBadRequest("Workflow status is not defined", log);
+                    String errorMessage = "Workflow status is not defined";
+                    APIManagementException e = new APIManagementException(errorMessage,
+                            ExceptionCodes.WORKFLOW_STATE_MISSING);
+                    Map<String, String> paramList = new HashMap<>();
+                    paramList.put(APIMgtConstants.ExceptionsConstants.WORKFLOW_REF_ID, workflowReferenceId);
+                    ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                    log.error(errorMessage, e);
+                    return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
                 } else {
                     workflow.setStatus(WorkflowStatus.valueOf(body.getStatus().toString()));
                 }
@@ -98,8 +107,9 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
             }
 
         } catch (APIManagementException e) {
-            String errorMessage = "Error while completing workflow for reference : " + workflowReferenceId;
-            HashMap<String, String> paramList = new HashMap<>();
+            String errorMessage = "Error while completing workflow for reference : " + workflowReferenceId + ". "
+                    + e.getMessage();
+            Map<String, String> paramList = new HashMap<>();
             paramList.put(APIMgtConstants.ExceptionsConstants.WORKFLOW_REF_ID, workflowReferenceId);
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);

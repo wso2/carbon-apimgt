@@ -19,8 +19,10 @@
  */
 package org.wso2.carbon.apimgt.core.api;
 
+import org.wso2.carbon.apimgt.core.exception.APIConfigRetrievalException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.APISummary;
+import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 
@@ -112,4 +114,23 @@ public interface APIMgtAdminService {
      * @throws APIManagementException If failed to delete the label.
      */
     void deleteLabel(String labelId) throws APIManagementException;
+
+    /**
+     * Register gateway labels in the system
+     *
+     * @param labels List of labels
+     * @param overwriteLabels Flag to overwrite gateway labels
+     * @throws APIManagementException If failed to register labels.
+     */
+    void registerGatewayLabels(List<Label> labels, String overwriteLabels) throws APIManagementException;
+
+    /**
+     * Retrieve API's gateway configuration
+     *
+     * @param apiId     UUID of the API
+     * @return          The API gateway configuration
+     * @throws APIConfigRetrievalException   If failed to retrive API gateway config
+     */
+    String getAPIGatewayServiceConfig(String apiId) throws APIConfigRetrievalException;
+
 }

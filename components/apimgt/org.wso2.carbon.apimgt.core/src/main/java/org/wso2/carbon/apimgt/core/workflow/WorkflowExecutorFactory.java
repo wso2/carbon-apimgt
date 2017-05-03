@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
 import org.wso2.carbon.apimgt.core.models.APIStateChangeWorkflow;
 import org.wso2.carbon.apimgt.core.models.ApplicationCreationWorkflow;
+import org.wso2.carbon.apimgt.core.models.ApplicationUpdateWorkflow;
 import org.wso2.carbon.apimgt.core.models.SubscriptionWorkflow;
 import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
@@ -38,6 +39,8 @@ public class WorkflowExecutorFactory {
     private static final Logger log = LoggerFactory.getLogger(WorkflowExecutorFactory.class);
 
     private static final WorkflowExecutorFactory instance = new WorkflowExecutorFactory();
+    
+    private  WorkflowConfigHolder holder = null;
 
     private WorkflowExecutorFactory() {
     }
@@ -49,9 +52,12 @@ public class WorkflowExecutorFactory {
 
     public WorkflowExecutor getWorkflowExecutor(String workflowExecutorType)
             throws WorkflowException {
-        WorkflowConfigHolder holder = null;
+
         try {
-            holder = this.getWorkflowConfigurations();
+            if (holder == null) {
+                holder = new WorkflowConfigHolder();
+                holder.load();
+            }
             return holder.getWorkflowExecutor(workflowExecutorType);
         } catch (WorkflowException e) {
             handleException("Error while creating WorkFlowDTO for " + workflowExecutorType, e);
@@ -77,17 +83,11 @@ public class WorkflowExecutorFactory {
         } else if (WorkflowConstants.WF_TYPE_AM_API_STATE.equals(workflowType)) {
             workflow = new APIStateChangeWorkflow();
             workflow.setWorkflowType(workflowType);
+        } else if (WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE.equals(workflowType)) {
+            workflow = new ApplicationUpdateWorkflow();
+            workflow.setWorkflowType(workflowType);
         }
         return workflow;
-    }
-
-    public WorkflowConfigHolder getWorkflowConfigurations() throws WorkflowException {
-
-        // TODO stop loading every time and move it to a static variable and do a check
-        WorkflowConfigHolder workflowConfig = new WorkflowConfigHolder();
-        workflowConfig.load();
-        return workflowConfig;
-
     }
 
     private void handleException(String msg, Exception e) throws WorkflowException {

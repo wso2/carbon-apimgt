@@ -21,6 +21,7 @@
 package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
@@ -478,17 +479,10 @@ public interface APIPublisher extends APIManager {
      * Returns the list of Labels.
      *
      * @return List of labels
-     * @throws APIManagementException if failed to get labels
+     * @throws LabelException if failed to get labels
      */
-    List<Label> getAllLabels() throws APIManagementException;
+    List<Label> getAllLabels() throws LabelException;
 
-    /**
-     * Register gateway labels in the system
-     *
-     * @param labels List of labels
-     * @throws APIManagementException If failed to register labels.
-     */
-    void registerGatewayLabels(List<Label> labels) throws APIManagementException;
     /**
      * Retrieves the last updated time of the endpoint given its endpointId
      * 
@@ -497,5 +491,13 @@ public interface APIPublisher extends APIManager {
      * @throws APIManagementException if API Manager core level exception occurred
      */
     String getLastUpdatedTimeOfEndpoint(String endpointId) throws APIManagementException;
+
+    /**
+     * Remove pending lifecycle state change task for the given api. 
+     * 
+     * @param apiId apiId of api
+     * @throws APIManagementException if API Manager core level exception occurred
+     */
+    void removePendingLifecycleWorkflowTaskForAPI(String apiId) throws APIManagementException;
 
 }

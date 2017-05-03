@@ -20,6 +20,7 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
+import org.apache.commons.io.IOUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
@@ -28,15 +29,18 @@ import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.APIStatus;
+import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.util.APIComparator;
-import org.wso2.carbon.apimgt.core.util.APIMgtConstants.APILCWorkflowStatus;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.core.util.EndPointComparator;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,6 +48,8 @@ import java.util.Locale;
 import java.util.Map;
 
 public class ApiDAOImplIT extends DAOIntegrationTestBase {
+    private static final String ADMIN = "admin";
+
     @Test
     public void testAddGetAPI() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
@@ -333,7 +339,6 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         final String lowerCaseString = "lower case";
         final String upperCaseString = "UPPER CASE";
         final String charSymbolNumString = "mi ##symbol 12num";
-        final String spaceDelimitingString = " S p ace ";
         final String symbolSpaceString = "_under & Score_";
 
         // Search string cases
@@ -342,7 +347,6 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         final String commonUpperCaseSearchString = "CASE";
         final String symbolSearchString = "##symbol";
         final String numberSearchString = "12n";                 // In some databases numbers are not used in indexing
-        final String spaceIncludedSearchString = " S p ace";
 
         // Create test data
         Map<String, API> apis = new HashMap<>();
@@ -350,7 +354,6 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         apis.put(lowerCaseString, SampleTestObjectCreator.createUniqueAPI().name(lowerCaseString).build());
         apis.put(upperCaseString, SampleTestObjectCreator.createUniqueAPI().name(upperCaseString).build());
         apis.put(charSymbolNumString, SampleTestObjectCreator.createUniqueAPI().name(charSymbolNumString).build());
-        apis.put(spaceDelimitingString, SampleTestObjectCreator.createUniqueAPI().name(spaceDelimitingString).build());
         apis.put(symbolSpaceString, SampleTestObjectCreator.createUniqueAPI().name(symbolSpaceString).build());
 
         // Add APIs
@@ -361,7 +364,8 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
             // Replace with summary object for validation
             apis.put(entry.getKey(), SampleTestObjectCreator.getSummaryFromAPI(api));
         }
-
+        // Sleep for indexing
+        Thread.sleep(5000);
         // Expected common string search result
         List<API> commonStringResult = new ArrayList<>();
         commonStringResult.add(apis.get(mixedCaseString));
@@ -398,13 +402,6 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertEquals(apiList.size(), 1);
         actualAPI = apiList.get(0);
         expectedAPI = apis.get(charSymbolNumString);
-        Assert.assertEquals(actualAPI, expectedAPI, TestUtil.printDiff(actualAPI, expectedAPI));
-
-        // Search with spaces
-        apiList = apiDAO.searchAPIs(new ArrayList<>(), "", spaceIncludedSearchString, 0, 10);
-        Assert.assertEquals(apiList.size(), 1);
-        actualAPI = apiList.get(0);
-        expectedAPI = apis.get(spaceDelimitingString);
         Assert.assertEquals(actualAPI, expectedAPI, TestUtil.printDiff(actualAPI, expectedAPI));
     }
 
@@ -459,6 +456,144 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
+    public void testIsAPIContextExists() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        testAddGetEndpoint();
+        API api = SampleTestObjectCreator.createUniqueAPI().build();
+        apiDAO.addAPI(api);
+        Assert.assertTrue(apiDAO.isAPIContextExists(api.getContext()));
+    }
+
+    @Test
+    public void testGetSwaggerDefinition() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        testAddGetEndpoint();
+        API api = SampleTestObjectCreator.createUniqueAPI().build();
+        apiDAO.addAPI(api);
+        Assert.assertNotNull(apiDAO.getSwaggerDefinition(api.getId()));
+    }
+
+    @Test
+    public void testGetGatewayConfig() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        testAddGetEndpoint();
+        String configString = SampleTestObjectCreator.createSampleGatewayConfig();
+        API api = SampleTestObjectCreator.createUniqueAPI().gatewayConfig(configString).build();
+        apiDAO.addAPI(api);
+        Assert.assertNotNull(apiDAO.getGatewayConfig(api.getId()));
+    }
+
+    @Test(description = "Changing the Lifecycle status of a given API")
+    public void testChangeLifeCycleStatus() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        testAddGetEndpoint();
+        API api = SampleTestObjectCreator.createUniqueAPI().build();
+        apiDAO.addAPI(api);
+        apiDAO.changeLifeCycleStatus(api.getId(), APIStatus.PUBLISHED.getStatus());
+        API apiFromDB = apiDAO.getAPI(api.getId());
+        Assert.assertEquals(apiFromDB.getLifeCycleStatus(), APIStatus.PUBLISHED.getStatus());
+        Assert.assertNotEquals(api.getLifeCycleStatus(), apiFromDB.getLifeCycleStatus());
+
+    }
+
+    @Test(description = "Getting document info list for an API")
+    public void testGetDocumentInfoList() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        testAddGetEndpoint();
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        apiDAO.addAPI(api);
+        DocumentInfo documentInfo1 = SampleTestObjectCreator.createDefaultDocumentationInfo();
+        apiDAO.addDocumentInfo(api.getId(), documentInfo1);
+        DocumentInfo documentInfo2 = SampleTestObjectCreator.createDefaultDocumentationInfo();
+        apiDAO.addDocumentInfo(api.getId(), documentInfo2);
+        List<DocumentInfo> documentInfoList = new ArrayList<>();
+        documentInfoList.add(documentInfo1);
+        documentInfoList.add(documentInfo2);
+        List<DocumentInfo> documentInfoListFromDB = apiDAO.getDocumentsInfoList(api.getId());
+        Assert.assertTrue(documentInfoListFromDB.containsAll(documentInfoList));
+        Assert.assertTrue(documentInfoList.size() == documentInfoListFromDB.size());
+    }
+
+    @Test(description = "Getting document info for an API")
+    public void testGetDocumentInfo() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        testAddGetEndpoint();
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        apiDAO.addAPI(api);
+        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo();
+        apiDAO.addDocumentInfo(api.getId(), documentInfo);
+        DocumentInfo documentInfoFromDB = apiDAO.getDocumentInfo(documentInfo.getId());
+        Assert.assertEquals(documentInfo, documentInfoFromDB);
+    }
+
+    @Test(description = "Getting document inline content for an API")
+    public void testGetDocumentInlineContent() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        testAddGetEndpoint();
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        apiDAO.addAPI(api);
+        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo();
+        apiDAO.addDocumentInfo(api.getId(), documentInfo);
+        String inlineDocContent = SampleTestObjectCreator.createDefaultInlineDocumentationContent();
+        apiDAO.addDocumentInlineContent(documentInfo.getId(), inlineDocContent, ADMIN);
+        String inlineDocContentFromDB = apiDAO.getDocumentInlineContent(documentInfo.getId());
+        Assert.assertEquals(inlineDocContent, inlineDocContentFromDB);
+    }
+
+    @Test(description = "Delete documentation for an API")
+    public void testDeleteDocumentation() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        testAddGetEndpoint();
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        apiDAO.addAPI(api);
+        //adding documentation
+        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo();
+        String docId = documentInfo.getId();
+        apiDAO.addDocumentInfo(api.getId(), documentInfo);
+        //delete documentation
+        apiDAO.deleteDocument(docId);
+        DocumentInfo documentInfoFromDB = apiDAO.getDocumentInfo(docId);
+        Assert.assertNull(documentInfoFromDB);
+    }
+
+    @Test(description = "Retrieve summary of paginated data of all available APIs that match the given search criteria")
+    public void testAttributeSearchAPIs() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        testAddGetEndpoint();
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        apiDAO.addAPI(api);
+        List<String> roles = new ArrayList<>();
+        Map<String, String> attributeMap = new HashMap<>();
+        attributeMap.put("name", api.getName());
+        List<API> apiList = apiDAO.attributeSearchAPIs(roles, ADMIN, attributeMap, 1, 2);
+        Assert.assertTrue(apiList.size() > 0);
+    }
+
+    @Test(description = "Search APIs by status")
+    public void testSearchAPIsByStatus() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        testAddGetEndpoint();
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        apiDAO.addAPI(api);
+        List<String> statuses = new ArrayList<>();
+        statuses.add(api.getLifeCycleStatus());
+        String searchString = api.getName();
+        List<API> apiList = apiDAO.searchAPIsByStatus(searchString, statuses);
+        Assert.assertTrue(apiList.size() > 0);
+    }
+
+    @Test(description = "Get image from API")
+    public void testGetImage() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        testAddGetEndpoint();
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        apiDAO.addAPI(api);
+        apiDAO.updateImage(api.getId(), SampleTestObjectCreator.createDefaultThumbnailImage(), "image/jpg", ADMIN);
+        InputStream image = apiDAO.getImage(api.getId());
+        Assert.assertNotNull(image);
+    }
+
+    @Test
     public void testDeleteAPI() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
@@ -480,7 +615,9 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         testAddGetEndpoint();
         apiDAO.addAPI(api);
 
-        builder = SampleTestObjectCreator.createAlternativeAPI();
+        HashMap permissionMap = new HashMap();
+        permissionMap.put(APIMgtConstants.Permission.UPDATE, APIMgtConstants.Permission.UPDATE_PERMISSION);
+        builder = SampleTestObjectCreator.createAlternativeAPI().permissionMap(permissionMap);
         API substituteAPI = builder.build();
 
         apiDAO.updateAPI(api.getId(), substituteAPI);
@@ -528,7 +665,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Thread.sleep(1);
 
         String swagger = SampleTestObjectCreator.createAlternativeSwaggerDefinition();
-        apiDAO.updateSwaggerDefinition(api.getId(), swagger, "admin");
+        apiDAO.updateSwaggerDefinition(api.getId(), swagger, ADMIN);
         String fingerprintAfterUpdate = ETagUtils
                 .generateETag(apiDAO.getLastUpdatedTimeOfSwaggerDefinition(api.getId()));
         Assert.assertNotNull(fingerprintAfterUpdate);
@@ -551,7 +688,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Thread.sleep(1);
 
         String gwConfig = SampleTestObjectCreator.createAlternativeGatewayConfig();
-        apiDAO.updateGatewayConfig(api.getId(), gwConfig, "admin");
+        apiDAO.updateGatewayConfig(api.getId(), gwConfig, ADMIN);
         String fingerprintAfterUpdate = ETagUtils
                 .generateETag(apiDAO.getLastUpdatedTimeOfGatewayConfig(api.getId()));
         Assert.assertNotNull(fingerprintAfterUpdate);
@@ -566,7 +703,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API api = builder.build();
         testAddGetEndpoint();
         apiDAO.addAPI(api);
-        apiDAO.updateImage(api.getId(), SampleTestObjectCreator.createDefaultThumbnailImage(), "image/jpg", "admin");
+        apiDAO.updateImage(api.getId(), SampleTestObjectCreator.createDefaultThumbnailImage(), "image/jpg", ADMIN);
 
         String fingerprintBeforeUpdate = ETagUtils.generateETag(apiDAO.getLastUpdatedTimeOfAPIThumbnailImage(
                 api.getId()));
@@ -574,7 +711,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Thread.sleep(1);
 
         apiDAO.updateImage(api.getId(), SampleTestObjectCreator.createAlternativeThumbnailImage(), "image/jpg",
-                "admin");
+                ADMIN);
         String fingerprintAfterUpdate = ETagUtils
                 .generateETag(apiDAO.getLastUpdatedTimeOfAPIThumbnailImage(api.getId()));
         Assert.assertNotNull(fingerprintAfterUpdate);
@@ -589,6 +726,29 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         apiDAO.addEndpoint(endpoint);
         Endpoint retrieved = apiDAO.getEndpoint(endpoint.getId());
         Assert.assertEquals(endpoint, retrieved);
+    }
+
+    @Test(description = "Test getting endpoint by name")
+    public void testGetEndpointByName() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        Endpoint endpoint = SampleTestObjectCreator.createMockEndpoint();
+        apiDAO.addEndpoint(endpoint);
+        Endpoint retrieved = apiDAO.getEndpointByName(endpoint.getName());
+        Assert.assertEquals(endpoint, retrieved);
+    }
+
+    @Test(description = "Test adding API with endpointMap")
+    public void testAddEndPointsForApi() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        Map<String, String> endpointMap = SampleTestObjectCreator.getMockEndpointMap();
+        API api = SampleTestObjectCreator.createDefaultAPI().endpoint(endpointMap).build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+
+        API apiFromDB = apiDAO.getAPI(api.getId());
+
+        Assert.assertNotNull(apiFromDB);
+        Assert.assertTrue(api.equals(apiFromDB), TestUtil.printDiff(api, apiFromDB));
     }
 
     @Test
@@ -738,7 +898,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Thread.sleep(1);
 
         DocumentInfo updateDocument = SampleTestObjectCreator.createAlternativeDocumentationInfo(documentInfo.getId());
-        apiDAO.updateDocumentInfo(api.getId(), updateDocument, "admin");
+        apiDAO.updateDocumentInfo(api.getId(), updateDocument, ADMIN);
         String fingerprintAfterUpdate = ETagUtils
                 .generateETag(apiDAO.getLastUpdatedTimeOfDocument(documentInfo.getId()));
         Assert.assertNotNull(fingerprintBeforeUpdate);
@@ -756,7 +916,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo();
         apiDAO.addDocumentInfo(api.getId(), documentInfo);
         apiDAO.addDocumentInlineContent(documentInfo.getId(),
-                SampleTestObjectCreator.createDefaultInlineDocumentationContent(), "admin");
+                SampleTestObjectCreator.createDefaultInlineDocumentationContent(), ADMIN);
 
         String fingerprintBeforeUpdate = ETagUtils
                 .generateETag(apiDAO.getLastUpdatedTimeOfDocumentContent(api.getId(), documentInfo.getId()));
@@ -764,7 +924,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Thread.sleep(1);
 
         apiDAO.addDocumentInlineContent(documentInfo.getId(),
-                SampleTestObjectCreator.createAlternativeInlineDocumentationContent(), "admin");
+                SampleTestObjectCreator.createAlternativeInlineDocumentationContent(), ADMIN);
         String fingerprintAfterUpdate = ETagUtils
                 .generateETag(apiDAO.getLastUpdatedTimeOfDocumentContent(api.getId(), documentInfo.getId()));
         Assert.assertNotNull(fingerprintBeforeUpdate);
@@ -780,11 +940,93 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         testAddGetEndpoint();
         apiDAO.addAPI(api);        
         Thread.sleep(10);
-        apiDAO.updateAPIWorkflowStatus(api.getId(), APILCWorkflowStatus.PENDING);
+        apiDAO.updateAPIWorkflowStatus(api.getId(), APIMgtConstants.APILCWorkflowStatus.PENDING);
         
         API apiFromDB = apiDAO.getAPI(api.getId());
 
         Assert.assertNotNull(apiFromDB);
         Assert.assertNotEquals(api.getLastUpdatedTime(), apiFromDB.getLastUpdatedTime());
+    }
+
+    @Test
+    public void testCheckContextExist() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI().apiDefinition(SampleTestObjectCreator
+                .apiDefinition);
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+        apiDAO.changeLifeCycleStatus(api.getId(), APIStatus.PUBLISHED.getStatus());
+        Assert.assertTrue(apiDAO.isAPIContextExists(api.getContext()));
+        Assert.assertFalse(apiDAO.isAPIContextExists("/abc"));
+    }
+
+
+    @Test
+    public void testDocumentAdd() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI().apiDefinition(SampleTestObjectCreator
+                .apiDefinition);
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultFileDocumentationInfo();
+        Assert.assertFalse(apiDAO.isDocumentExist(api.getId(), documentInfo));
+        apiDAO.addDocumentInfo(api.getId(), documentInfo);
+        apiDAO.addDocumentFileContent(documentInfo.getId(), IOUtils.toInputStream(SampleTestObjectCreator
+                .createDefaultInlineDocumentationContent()), "inline1.txt", documentInfo.getCreatedBy());
+        Assert.assertTrue(apiDAO.isDocumentExist(api.getId(), documentInfo));
+        List<DocumentInfo> documentInfoList = apiDAO.getDocumentsInfoList(api.getId());
+        Assert.assertEquals(documentInfoList.get(0), documentInfo);
+        apiDAO.deleteDocument(documentInfo.getId());
+        Assert.assertFalse(apiDAO.isDocumentExist(api.getId(), documentInfo));
+    }
+
+    @Test
+    public void testAddGetComment() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
+                .apiDefinition(SampleTestObjectCreator.apiDefinition);
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
+        apiDAO.addComment(comment, api.getId());
+        Comment commentFromDB = apiDAO.getCommentByUUID(comment.getUuid(), api.getId());
+        Assert.assertNotNull(commentFromDB);
+    }
+
+    @Test
+    public void testDeleteComment() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
+                .apiDefinition(SampleTestObjectCreator.apiDefinition);
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
+        apiDAO.addComment(comment, api.getId());
+        apiDAO.deleteComment(comment.getUuid(), api.getId());
+        Comment commentFromDB = apiDAO.getCommentByUUID(comment.getUuid(), api.getId());
+        Assert.assertNull(commentFromDB);
+    }
+
+    @Test
+    public void testUpdateComment() throws Exception {
+        String newCommentText = "updated comment";
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
+                .apiDefinition(SampleTestObjectCreator.apiDefinition);
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+        Comment comment1 = SampleTestObjectCreator.createDefaultComment(api.getId());
+        apiDAO.addComment(comment1, api.getId());
+        Comment comment2 = SampleTestObjectCreator.createDefaultComment(api.getId());
+        comment2.setCommentText(newCommentText);
+        apiDAO.updateComment(comment2, comment1.getUuid(), api.getId());
+        Comment commentFromDB = apiDAO.getCommentByUUID(comment1.getUuid(), api.getId());
+        Assert.assertNotNull(commentFromDB);
+        Assert.assertEquals(newCommentText, commentFromDB.getCommentText());
     }
 }
