@@ -283,3 +283,9 @@ body.modal-open {
 .icon-implement{
     padding:13px 0 0 10px;
 }
+
+.not-active {
+   pointer-events: none;
+   cursor: default;
+   tabindex="-1";
+}

@@ -181,6 +181,7 @@ function lifecycleTabHandler(event) {
                     animateElement.setAttribute("repeatCount", "indefinite");
                     state_rectangle.appendChild(animateElement);
                 }, false);
+                validateActionButtons('#update-tiers-button', '#update-labels-button');
 
             }, onFailure: function (data) {
             }
@@ -256,6 +257,7 @@ function endpointsTabHandler(event) {
                     }
                     var callbacks = {
                         onSuccess: function (data) {
+                            validateActionButtons('#update-endpoints-configuration');
                         }, onFailure: function (data) {
                         }
                     };
@@ -702,6 +704,9 @@ function documentTabHandler(event) {
     var callbacks = {
             onSuccess: function (data) {
             api_client.getDocuments(api_id,getDocsCallback);
+            if(!hasValidScopes("/apis/{apiId}/documents", "post")) {
+              $('#add-new-doc').addClass('not-active');
+            }
             }, onFailure: function (data) {
            }
           };
@@ -710,7 +715,7 @@ function documentTabHandler(event) {
      UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-documents", data, "api-tab-doc-content", mode, callbacks);
     }
     
-    
+
     var select_environment = function(){
         var selectedEnvironment = $("#environment_name");
         var name = selectedEnvironment.val();

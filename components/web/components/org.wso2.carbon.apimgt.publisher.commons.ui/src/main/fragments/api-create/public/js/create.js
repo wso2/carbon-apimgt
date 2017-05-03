@@ -19,6 +19,7 @@ $(
         $('#api-create-submit').on('click', createAPIHandler);
         $('input[type=radio][name=implementation-options]').on('change', implementationOptionsHandler);
         $('input[type=radio][name=import-definition]').on('change', importDefinitionOptionsHandler);
+        validateActionButtons('#api-create-submit');
     }
 );
 
