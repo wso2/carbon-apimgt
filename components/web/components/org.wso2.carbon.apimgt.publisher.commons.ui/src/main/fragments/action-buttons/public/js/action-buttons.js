@@ -45,7 +45,7 @@ function validateActionButtons() {
 /**
  * This function validates Buttons based on the logged in user scopes against scopes defined for rest api call
  * @param  {string} - restApiResourcePath
- * @param  {string] - restApiResourceMethod
+ * @param  {string} - restApiResourceMethod
  * @return {boolean} - Returns whether user has the required scope to access the <restApiResourcePath> <restApiResourceMethod>
  *
  */
@@ -75,15 +75,15 @@ function loadSwaggerJson() {
     if (publisherSwaggerJson === null || publisherSwaggerJson === undefined) {
         var request = new XMLHttpRequest();
         request.overrideMimeType("application/json");
-        request.open('GET', '/publisher/api/am/publisher/v1.0/apis/swagger.json', true);
+        request.open('GET', swaggerURL, true);
         request.onreadystatechange = function() {
-            if (request.readyState == 4 && request.status == "200") {
+            if (request.readyState == 4 && request.status == 200) {
                 //                     Put the object into storage
                 localStorage.setItem('publisherSwaggerJson', request.responseText);
                 //                    Required use of an anonymous callback as .open will NOT return a value but simply returns
                 //                    undefined in asynchronous mode
                 return request.responseText;
-            } else {
+            } else if (request.status !== 200) {
                 console.warn('warning: publisher SwaggerJson could not be loaded for scope validaation.');
             }
         };
