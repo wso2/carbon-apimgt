@@ -24,18 +24,21 @@ import org.slf4j.LoggerFactory;
 import org.wso2.andes.client.AMQConnectionFactory;
 import org.wso2.andes.url.URLSyntaxException;
 import org.wso2.carbon.apimgt.core.APIMConfigurations;
-import org.wso2.carbon.apimgt.core.api.APIGatewayPublisher;
+import org.wso2.carbon.apimgt.core.api.APIGatewayEventPublisher;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.template.dto.GatewayConfigDTO;
+import org.wso2.carbon.apimgt.core.models.APIGatewayEvent;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
+
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
@@ -47,27 +50,24 @@ import javax.jms.TopicSession;
 /**
  * API gateway related functions
  */
-public class APIGatewayPublisherImpl implements APIGatewayPublisher {
-    private static final Logger log = LoggerFactory.getLogger(APIGatewayPublisherImpl.class);
+public class APIGatewayEventPublisherImpl implements APIGatewayEventPublisher {
+    private static final Logger log = LoggerFactory.getLogger(APIGatewayEventPublisherImpl.class);
     private APIMConfigurations config;
     private String gatewayFileExtension = ".bal";
     private String endpointConfigName = "endpoint";
 
-    public APIGatewayPublisherImpl() {
+    public APIGatewayEventPublisherImpl() {
         config = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
     }
 
     /**
-     * Publishing API configuration artifacts to the gateway
-     *
-     * @param api API model
-     * @return is publishing success
+     * @see APIGatewayEventPublisher#publishAPICreateEventToGateway(API)
      */
     @Override
-    public boolean publishToGateway(API api) throws GatewayException {
+    public boolean publishAPICreateEventToGateway(API api) throws GatewayException {
         try {
             String gatewayConfig = api.getGatewayConfig();
-            String gwHome = System.getProperty("gwHome");
+            String gwHome = System.getProperty(APIMgtConstants.GW_HOME);
             //TODO: remove temp fix to ignore gateway home
             if (gwHome == null) {
                 gwHome = System.getProperty("carbon.home");
@@ -84,18 +84,12 @@ public class APIGatewayPublisherImpl implements APIGatewayPublisher {
             }
             if (gwHome == null) {
                 // create the message to send
-                GatewayConfigDTO dto = new GatewayConfigDTO();
-                dto.setType("api");
-                dto.setApiName(api.getName());
-                dto.setContext(api.getContext());
-                dto.setVersion(api.getVersion());
-                dto.setCreator(api.getCreatedBy());
-                dto.setConfig(gatewayConfig);
-                publishMessage(dto); //publishing versioned API
-                if (api.isDefaultVersion()) {
-                    //publishing default API
-                    publishMessage(dto);
-                }
+                APIGatewayEvent apiCreateEvent = new APIGatewayEvent(APIMgtConstants.
+                        APIGatewayEventTypes.API_GW_EVENT_TYPE_API_CREATE);
+                apiCreateEvent.setGatewayLabels(api.getLabels());
+                apiCreateEvent.addEventDetail("apiId", api.getId());
+                //publishing default API
+                publishMessage(apiCreateEvent, config.getTopicName());
             } else {
                 saveApi(api, gwHome, gatewayConfig, false);
                 if (api.isDefaultVersion()) {
@@ -115,13 +109,28 @@ public class APIGatewayPublisherImpl implements APIGatewayPublisher {
     }
 
     /**
-     * Publishing the API config to gateway
-     *
-     * @param dto GatewayConfigDTO to be published
-     * @throws JMSException       if JMS issue is occurred
+     * @see APIGatewayEventPublisher#publishAPIUpdateEventToGateway(API)
+     */
+    @Override
+    public boolean publishAPIUpdateEventToGateway(API api) throws GatewayException {
+        return false;
+    }
+
+    /**
+     * @see APIGatewayEventPublisher#publishAPIDeleteEventToGateway(API)
+     */
+    @Override
+    public boolean publishAPIDeleteEventToGateway(API api) throws GatewayException {
+        return false;
+    }
+
+    /**
+     * @param apiGatewayEvent API gatewat event
+     * @throws JMSException       If JMS issue is occurred
      * @throws URLSyntaxException If connection String is invalid
      */
-    private void publishMessage(GatewayConfigDTO dto) throws JMSException, URLSyntaxException {
+    private void publishMessage(APIGatewayEvent apiGatewayEvent, String topicName)
+            throws JMSException, URLSyntaxException {
         // create connection factory
         TopicConnectionFactory connFactory = new AMQConnectionFactory(
                 getTCPConnectionURL(config.getUsername(), config.getPassword()));
@@ -129,9 +138,9 @@ public class APIGatewayPublisherImpl implements APIGatewayPublisher {
         topicConnection.start();
         TopicSession topicSession = topicConnection.createTopicSession(false, TopicSession.AUTO_ACKNOWLEDGE);
         // Send message
-        Topic topic = topicSession.createTopic(config.getTopicName());
+        Topic topic = topicSession.createTopic(topicName);
 
-        TextMessage textMessage = topicSession.createTextMessage(new Gson().toJson(dto));
+        TextMessage textMessage = topicSession.createTextMessage(new Gson().toJson(apiGatewayEvent));
         TopicPublisher topicPublisher = topicSession.createPublisher(topic);
         topicPublisher.publish(textMessage);
 
@@ -205,13 +214,10 @@ public class APIGatewayPublisherImpl implements APIGatewayPublisher {
     }
 
     /**
-     * Publishing Endpoint configuration artifacts to the gateway
-     *
-     * @param config endpoint config
-     * @return is publishing success
+     * @see APIGatewayEventPublisher#publishEndpointCreateEventToGateway(String)
      */
     @Override
-    public boolean publishEndpointConfigToGateway(String config) throws GatewayException {
+    public boolean publishEndpointCreateEventToGateway(String endpointConfig) throws GatewayException {
         try {
             String gwHome = System.getProperty("gwHome");
 
@@ -221,13 +227,12 @@ public class APIGatewayPublisherImpl implements APIGatewayPublisher {
             }
 
             if (gwHome == null) {
-                GatewayConfigDTO dto = new GatewayConfigDTO();
-                dto.setType("endpoint");
-                dto.setApiName(endpointConfigName);
-                dto.setConfig(config);
-                publishMessage(dto); //TODO publish endpoint configs correctly
+                APIGatewayEvent endpointCreateEvent = new APIGatewayEvent(APIMgtConstants.
+                        APIGatewayEventTypes.API_GW_EVENT_TYPE_ENDPOINT_CREATE);
+
+                publishMessage(endpointCreateEvent, config.getTopicName()); //TODO publish endpoint configs correctly
             } else {
-                saveEndpointConfig(gwHome, config);
+                saveEndpointConfig(gwHome, endpointConfig);
             }
             return true;
         } catch (JMSException e) {

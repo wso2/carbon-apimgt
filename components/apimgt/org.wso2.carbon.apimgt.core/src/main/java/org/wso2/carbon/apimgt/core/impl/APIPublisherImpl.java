@@ -28,7 +28,7 @@ import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIDefinition;
-import org.wso2.carbon.apimgt.core.api.APIGatewayPublisher;
+import org.wso2.carbon.apimgt.core.api.APIGatewayEventPublisher;
 import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
 import org.wso2.carbon.apimgt.core.api.APIMObservable;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
@@ -112,7 +112,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public APIPublisherImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
                             APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager
                                     apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO,
-                            GatewaySourceGenerator gatewaySourceGenerator, APIGatewayPublisher apiGatewayPublisher) {
+                            GatewaySourceGenerator gatewaySourceGenerator,
+                            APIGatewayEventPublisher apiGatewayPublisher) {
         super(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, apiLifecycleManager, labelDAO,
                 workflowDAO, gatewaySourceGenerator, apiGatewayPublisher);
     }
@@ -320,8 +321,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         getApiDAO().addAPI(createdAPI);
                     }
                 }
+
+
                 //publishing config to gateway
-                publishToGateway(createdAPI);
+                publishAPICreateEventToGateway(createdAPI);
+
                 APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
                         "successfully.", log);
                 // 'API_M Functions' related code
@@ -1557,20 +1561,17 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     /**
-     * Publishing new API configurations to the subscribers
+     * Publishing created API to Gateway
      *
      * @param api API object
      * @throws GatewayException If failed to publish to gateways.
      */
-    private void publishToGateway(API api) throws GatewayException {
-        APIGatewayPublisher gateway = APIManagerFactory.getInstance().getGateway();
-        boolean isPublished = gateway.publishToGateway(api);
+    private void publishAPICreateEventToGateway(API api) throws GatewayException {
+        APIGatewayEventPublisher gateway = APIManagerFactory.getInstance().getGateway();
+        boolean isPublished = gateway.publishAPICreateEventToGateway(api);
         if (isPublished) {
             APIUtils.logDebug(
-                    "API " + api.getName() + "-" + api.getVersion() + " was published to gateway successfully.", log);
-        } else {
-            APIUtils.logDebug("Error when publishing API " + api.getName() + "-" + api.getVersion() + " to gateway.",
-                    log);
+                    "API " + api.getName() + "-" + api.getVersion() + " is published to gateway successfully.", log);
         }
     }
 
@@ -1582,8 +1583,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     private void publishEndpointConfigToGateway() throws APIManagementException {
         GatewaySourceGenerator template = getGatewaySourceGenerator();
         String endpointConfig = template.getEndpointConfigStringFromTemplate(getAllEndpoints());
-        APIGatewayPublisher publisher = APIManagerFactory.getInstance().getGateway();
-        boolean status = publisher.publishEndpointConfigToGateway(endpointConfig);
+        APIGatewayEventPublisher publisher = APIManagerFactory.getInstance().getGateway();
+        boolean status = publisher.publishEndpointCreateEventToGateway(endpointConfig);
         if (status) {
             log.info("Endpoint configuration published successfully");
         } else {

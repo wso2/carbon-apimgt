@@ -17,7 +17,7 @@
  */
 package org.wso2.carbon.apimgt.core.impl;
 
-import org.wso2.carbon.apimgt.core.api.APIGatewayPublisher;
+import org.wso2.carbon.apimgt.core.api.APIGatewayEventPublisher;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
@@ -34,8 +34,8 @@ import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
     public UserAwareAPIPublisher(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
                                  APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, LabelDAO labelDAO,
                                  WorkflowDAO workflowDAO, GatewaySourceGenerator gatewaySourceGenerator,
-                                 APIGatewayPublisher apiGatewayPublisher) {
+                                 APIGatewayEventPublisher apiBrokerEventPublisher) {
         super(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, new APILifeCycleManagerImpl(), labelDAO,
-                workflowDAO, gatewaySourceGenerator, apiGatewayPublisher);
+                workflowDAO, gatewaySourceGenerator, apiBrokerEventPublisher);
     }
 }
