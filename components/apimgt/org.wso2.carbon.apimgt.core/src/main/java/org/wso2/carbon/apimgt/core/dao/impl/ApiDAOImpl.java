@@ -1516,7 +1516,14 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    private void addAPIPermission(Connection connection, HashMap permissionMap, String apiId) throws SQLException {
+    /**
+     * Adding API permission to database
+     * @param connection connection to database
+     * @param permissionMap permission map
+     * @param apiId id of the API
+     * @throws SQLException if error occurred when adding API permission to database
+     */
+    private void addAPIPermission(Connection connection, Map permissionMap, String apiId) throws SQLException {
         final String query = "INSERT INTO AM_API_GROUP_PERMISSION (API_ID, GROUP_ID, PERMISSION) VALUES (?, ?, ?)";
         Map<String, Integer> map = permissionMap;
         if (permissionMap != null) {
@@ -1547,7 +1554,14 @@ public class ApiDAOImpl implements ApiDAO {
 
     }
 
-    private void updateApiPermission(Connection connection, HashMap permissionMap, String apiId) throws SQLException {
+    /**
+     * Update API permission
+     * @param connection connection to database
+     * @param permissionMap updated permission map
+     * @param apiId id of API to be updated permission
+     * @throws SQLException if error occurred when updating api permission
+     */
+    private void updateApiPermission(Connection connection, Map permissionMap, String apiId) throws SQLException {
         final String query = "INSERT INTO AM_API_GROUP_PERMISSION (API_ID, GROUP_ID, PERMISSION) VALUES (?, ?, ?)";
         Map<String, Integer> map = permissionMap;
         if (permissionMap != null) {
