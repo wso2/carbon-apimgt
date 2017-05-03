@@ -20,7 +20,7 @@ var queryParamTables =[];
 var claimsTables = [];
 $(function () {
     $('.help_popup').popover({ trigger: "hover" });
-    $('#addThrottleBtn').on('click', addPolicyToBackend);
+    //$('#addThrottleBtn').on('click', addPolicyToBackend);
 
     $('#cancel-tier-btn').on('click', function () {
         window.location = contextPath + "/throttling/advanced-throttling"

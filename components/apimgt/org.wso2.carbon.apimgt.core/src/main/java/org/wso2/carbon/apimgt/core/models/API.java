@@ -80,7 +80,7 @@ public final class API {
         workflowStatus = builder.workflowStatus;
     }
 
-    public HashMap getPermissionMap() {
+    public Map getPermissionMap() {
         return permissionMap;
     }
     public String getId() {
@@ -289,7 +289,7 @@ public final class API {
     private final Map<String, UriTemplate> uriTemplates;
     private String copiedFromApiId;
     private final String apiDefinition;
-    private final HashMap permissionMap;
+    private final Map permissionMap;
     private final String apiPermission;
     private final String workflowStatus; 
     
@@ -400,7 +400,7 @@ public final class API {
         private String description;
         private String lifeCycleStatus;
         private String lifecycleInstanceId;
-        private HashMap permissionMap;
+        private Map permissionMap;
         private StringBuilder apiPermission;
         private Map<String, String> endpoint = Collections.EMPTY_MAP;
         private String gatewayConfig;
@@ -730,7 +730,7 @@ public final class API {
             return this;
         }
 
-        public APIBuilder permissionMap(HashMap map) {
+        public APIBuilder permissionMap(Map map) {
             this.permissionMap = map;
             return this;
         }

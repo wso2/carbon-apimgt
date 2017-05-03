@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
+import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.API.APIBuilder;
@@ -1411,7 +1412,7 @@ public class APIPublisherImplTestCase {
         Mockito.verify(labelDAO, Mockito.times(1)).getLabels();
     }
 
-    @Test(description = "Exception when retrieving all labels", expectedExceptions = APIManagementException.class)
+    @Test(description = "Exception when retrieving all labels", expectedExceptions = LabelException.class)
     public void testGetAllLabelsException() throws APIManagementException {
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(labelDAO);

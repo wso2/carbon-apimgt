@@ -88,10 +88,39 @@ $(function () {
                 "Content-Type": "application/json"
             },
             function (jsonData) {
-                window.location = "/store/applications/" + jsonData.obj.applicationId;
+                if (jsonData.status == 202) {
+                    noty({
+                                text : "Request has been submitted and is now awaiting approval.",
+                                type : "alert",
+                                dismissQueue: true,
+                                layout : "topCenter",
+                                theme : 'relax',
+                                buttons : [
+                                    {addClass: 'btn btn-primary', text: 'Ok', onClick: function ($noty) {
+                                        $noty.close();
+                                        window.location = contextPath + jsonData.headers.location;
+                                    }
+                                    }
+                                    
+                                ]
+                            });
+                } else {
+                    window.location = contextPath + "/applications/" + jsonData.obj.applicationId;
+                }
+                
             },
             function (error) {
-                console.log('Failed with the following: ' + error.statusText);
+                noty({
+                        text: error.obj.description,
+                        type: 'error',
+                        dismissQueue: true,
+                        modal: true,
+                        progressBar: true,
+                        timeout: 2000,
+                        layout: 'top',
+                        theme: 'relax',
+                        maxVisible: 10,
+                    });
             }
         );
     };

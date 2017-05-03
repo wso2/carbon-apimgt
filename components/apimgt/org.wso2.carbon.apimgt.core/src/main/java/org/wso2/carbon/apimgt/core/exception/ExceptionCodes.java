@@ -82,8 +82,7 @@ public enum ExceptionCodes implements ErrorHandler {
     WORKFLOW_STATE_MISSING(900556, "Workflow error", 400, "Workflow status is not defined"),
     WORKFLOW_NO_PENDING_TASK(900557, "Workflow error", 412,
             "Requested resource does not have a pending workflow task"),
-    WORKFLOW_APPROVED_UPDATE(900558, "Workflow error", 403,
-            "Cannot modify the resource since it is approved through a worklow process"),
+    WORKFLOW_REJCECTED(900558, "Workflow error", 403, "Requested action is rejected"),
 
     // Auth related codes
     ROLES_CANNOT_BE_EMPTY(900600, "Role list cannot be empty", 400, " Role list cannot be empty"),
@@ -95,7 +94,7 @@ public enum ExceptionCodes implements ErrorHandler {
     // Labels related codes
     LABEL_INFORMATION_CANNOT_BE_NULL(900650, "Label information cannot be null", 400, "Label information cannot be " +
             "null"),
-    LABEL_INFORMATION_EXCEPTION(900651, "Label Info error", 500, "Error occurred while retrieving label information"),
+    LABEL_EXCEPTION(900651, "Label Error", 500, "Error occurred while retrieving label information"),
 
 
     // REST API related codes

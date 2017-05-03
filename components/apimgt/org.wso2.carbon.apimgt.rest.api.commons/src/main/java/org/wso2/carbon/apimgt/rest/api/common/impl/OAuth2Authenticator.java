@@ -78,7 +78,8 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
         ErrorHandler errorHandler = null;
         boolean isTokenValid = false;
         Headers headers = request.getHeaders();
-        if (headers != null && headers.contains(RestApiConstants.COOKIE_HEADER)) {
+        if (headers != null && headers.contains(RestApiConstants.COOKIE_HEADER) && isCookieExists(headers,
+                APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J)) {
             String accessToken = null;
             String cookies = headers.get(RestApiConstants.COOKIE_HEADER);
             String partialTokenFromCookie = extractPartialAccessTokenFromCookie(cookies);
@@ -160,6 +161,16 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
             return token2.split("=")[1];
         }
         return null;
+    }
+
+    private boolean isCookieExists (Headers headers, String cookieName) {
+        String cookie = headers.get(RestApiConstants.COOKIE_HEADER);
+        cookie = cookie.trim();
+        String[] cookies = cookie.split(";");
+        String token2 = Arrays.stream(cookies)
+                .filter(name -> name.contains(cookieName))
+                .findFirst().orElse(null);
+        return (token2 != null);
     }
 
     /*
