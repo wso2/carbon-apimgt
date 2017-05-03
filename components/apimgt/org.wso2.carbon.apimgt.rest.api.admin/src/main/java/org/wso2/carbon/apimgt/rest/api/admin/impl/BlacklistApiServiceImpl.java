@@ -15,9 +15,9 @@ import org.wso2.msf4j.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-public class BlacklistConditionsApiServiceImpl extends BlacklistConditionsApiService {
+public class BlacklistApiServiceImpl extends BlacklistApiService {
     @Override
-    public Response blacklistConditionsConditionIdDelete(String conditionId
+    public Response blacklistConditionIdDelete(String conditionId
 , String ifMatch
 , String ifUnmodifiedSince
  , Request request) throws NotFoundException {
@@ -25,7 +25,7 @@ public class BlacklistConditionsApiServiceImpl extends BlacklistConditionsApiSer
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response blacklistConditionsConditionIdGet(String conditionId
+    public Response blacklistConditionIdGet(String conditionId
 , String ifNoneMatch
 , String ifModifiedSince
  , Request request) throws NotFoundException {
@@ -33,7 +33,7 @@ public class BlacklistConditionsApiServiceImpl extends BlacklistConditionsApiSer
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response blacklistConditionsGet(String accept
+    public Response blacklistGet(String accept
 , String ifNoneMatch
 , String ifModifiedSince
  , Request request) throws NotFoundException {
@@ -41,7 +41,7 @@ public class BlacklistConditionsApiServiceImpl extends BlacklistConditionsApiSer
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response blacklistConditionsPost(BlockingConditionDTO body
+    public Response blacklistPost(BlockingConditionDTO body
 , String contentType
  , Request request) throws NotFoundException {
         // do some magic!

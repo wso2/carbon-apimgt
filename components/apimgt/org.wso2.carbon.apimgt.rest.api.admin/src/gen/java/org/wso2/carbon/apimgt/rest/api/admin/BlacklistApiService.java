@@ -19,21 +19,21 @@ import java.io.InputStream;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-28T14:28:58.278+05:30")
-public abstract class BlacklistConditionsApiService {
-    public abstract Response blacklistConditionsConditionIdDelete(String conditionId
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-05-03T09:48:03.292+05:30")
+public abstract class BlacklistApiService {
+    public abstract Response blacklistConditionIdDelete(String conditionId
  ,String ifMatch
  ,String ifUnmodifiedSince
  , Request request) throws NotFoundException;
-    public abstract Response blacklistConditionsConditionIdGet(String conditionId
+    public abstract Response blacklistConditionIdGet(String conditionId
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
-    public abstract Response blacklistConditionsGet(String accept
+    public abstract Response blacklistGet(String accept
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
-    public abstract Response blacklistConditionsPost(BlockingConditionDTO body
+    public abstract Response blacklistPost(BlockingConditionDTO body
  ,String contentType
  , Request request) throws NotFoundException;
 }

@@ -76,7 +76,7 @@ x-wso2-security:
 # The "API Collection" resource APIs
 ######################################################
 paths:
-  '/throttling-policies/application':
+  '/policies/throttling/application':
 
 #-----------------------------------------------------
 # Retrieve all Application level policies
@@ -180,7 +180,7 @@ paths:
 ######################################################
 # The "Individual Application Throttle Policy" resource API
 ######################################################
-  '/throttling-policies/application/{policyId}':
+  '/policies/throttling/application/{policyId}':
 
 #-----------------------------------------------------
 # Retrieve a certain Application Policy
@@ -337,7 +337,7 @@ paths:
 ######################################################
 # The "Subscription Throttle Policy Collection" resource API
 ######################################################
-  '/throttling-policies/subscription':
+  '/policies/throttling/subscription':
 
 #-----------------------------------------------------
 # Retrieve all Subscription level policies
@@ -441,7 +441,7 @@ paths:
 ######################################################
 # The "Individual Subscription Throttle Policy" resource API
 ######################################################
-  '/throttling-policies/subscription/{policyId}':
+  '/policies/throttling/subscription/{policyId}':
 
 #-----------------------------------------------------
 # Retrieve a certain Subscription Policy
@@ -598,7 +598,7 @@ paths:
 ######################################################
 # The "Custom Rule Collection" resource API
 ######################################################
-  '/throttling-policies/custom':
+  '/policies/throttling/custom':
 
 #-----------------------------------------------------
 # Retrieve all Custom Rules
@@ -702,7 +702,7 @@ paths:
 ######################################################
 # The "Individual Custom Rule" resource API
 ######################################################
-  '/throttling-policies/custom/{ruleId}':
+  '/policies/throttling/custom/{ruleId}':
 
 #-----------------------------------------------------
 # Retrieve a certain Custom Rule
@@ -860,7 +860,7 @@ paths:
 ######################################################
 # The "Advanced Throttle Policy Collection" resource API
 ######################################################
-  '/throttling-policies/advanced':
+  '/policies/throttling/advanced':
 
 #-----------------------------------------------------
 # Retrieve all Advanced level policies
@@ -964,7 +964,7 @@ paths:
 ######################################################
 # The "Individual Advanced Throttle Policy" resource API
 ######################################################
-  '/throttling-policies/advanced/{policyId}':
+  '/policies/throttling/advanced/{policyId}':
 
 #-----------------------------------------------------
 # Retrieve a certain Advanced Throttling Policy
@@ -1121,7 +1121,7 @@ paths:
 ######################################################
 # The "Blocking Condition Collection" resource API
 ######################################################
-  '/blacklist-conditions':
+  '/blacklist':
 
 #-----------------------------------------------------
 # Retrieve all Blocking conditions
@@ -1225,7 +1225,7 @@ paths:
 ######################################################
 # The "Individual Blocking Condition" resource API
 ######################################################
-  '/blacklist-conditions/{conditionId}':
+  '/blacklist/{conditionId}':
 
 #-----------------------------------------------------
 # Retrieve a Blocking condition

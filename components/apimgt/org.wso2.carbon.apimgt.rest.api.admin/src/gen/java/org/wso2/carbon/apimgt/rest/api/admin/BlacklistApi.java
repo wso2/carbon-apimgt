@@ -1,6 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.admin;
 
-import org.wso2.carbon.apimgt.rest.api.admin.factories.ThrottlingApiServiceFactory;
+import org.wso2.carbon.apimgt.rest.api.admin.factories.BlacklistApiServiceFactory;
 
 import io.swagger.annotations.ApiParam;
 
@@ -18,20 +18,20 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.*;
 
 @Component(
-    name = "org.wso2.carbon.apimgt.rest.api.admin.ThrottlingApi",
+    name = "org.wso2.carbon.apimgt.rest.api.admin.BlacklistApi",
     service = Microservice.class,
     immediate = true
 )
-@Path("/api/am/admin/v1.[\\d]+/throttling")
+@Path("/api/am/admin/v1.[\\d]+/blacklist")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
-@io.swagger.annotations.Api(description = "the throttling API")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-26T12:30:42.663+05:30")
-public class ThrottlingApi implements Microservice  {
-   private final ThrottlingApiService delegate = ThrottlingApiServiceFactory.getThrottlingApi();
+@io.swagger.annotations.Api(description = "the blacklist API")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-05-03T09:48:03.292+05:30")
+public class BlacklistApi implements Microservice  {
+   private final BlacklistApiService delegate = BlacklistApiServiceFactory.getBlacklistApi();
 
     @DELETE
-    @Path("/blacklist/{conditionId}")
+    @Path("/{conditionId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Delete a Blocking condition", notes = "Delete a Blocking condition ", response = void.class, tags={ "Blacklist", })
@@ -41,15 +41,15 @@ public class ThrottlingApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Resource to be deleted does not exist. ", response = void.class),
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = void.class) })
-    public Response throttlingBlacklistConditionIdDelete(@ApiParam(value = "Blocking condition identifier  ",required=true) @PathParam("conditionId") String conditionId
+    public Response blacklistConditionIdDelete(@ApiParam(value = "Blocking condition identifier ",required=true) @PathParam("conditionId") String conditionId
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
 , @Context Request request)
     throws NotFoundException {
-        return delegate.throttlingBlacklistConditionIdDelete(conditionId,ifMatch,ifUnmodifiedSince, request);
+        return delegate.blacklistConditionIdDelete(conditionId,ifMatch,ifUnmodifiedSince, request);
     }
     @GET
-    @Path("/blacklist/{conditionId}")
+    @Path("/{conditionId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Retrieve a Blocking Condition", notes = "Retrieve a Blocking Condition providing the condition Id ", response = BlockingConditionDTO.class, tags={ "Blacklist", })
@@ -61,15 +61,15 @@ public class ThrottlingApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested Condition does not exist. ", response = BlockingConditionDTO.class),
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported. ", response = BlockingConditionDTO.class) })
-    public Response throttlingBlacklistConditionIdGet(@ApiParam(value = "Blocking condition identifier  ",required=true) @PathParam("conditionId") String conditionId
+    public Response blacklistConditionIdGet(@ApiParam(value = "Blocking condition identifier ",required=true) @PathParam("conditionId") String conditionId
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
 , @Context Request request)
     throws NotFoundException {
-        return delegate.throttlingBlacklistConditionIdGet(conditionId,ifNoneMatch,ifModifiedSince, request);
+        return delegate.blacklistConditionIdGet(conditionId,ifNoneMatch,ifModifiedSince, request);
     }
     @GET
-    @Path("/blacklist")
+    
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Get all blocking condtions", notes = "Get all blocking condtions ", response = BlockingConditionListDTO.class, tags={ "Blacklist", })
@@ -79,15 +79,15 @@ public class ThrottlingApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource. ", response = BlockingConditionListDTO.class),
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported. ", response = BlockingConditionListDTO.class) })
-    public Response throttlingBlacklistGet(@ApiParam(value = "Media types acceptable for the response. Default is JSON. " , defaultValue="JSON")@HeaderParam("Accept") String accept
+    public Response blacklistGet(@ApiParam(value = "Media types acceptable for the response. Default is JSON. " , defaultValue="JSON")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
 , @Context Request request)
     throws NotFoundException {
-        return delegate.throttlingBlacklistGet(accept,ifNoneMatch,ifModifiedSince, request);
+        return delegate.blacklistGet(accept,ifNoneMatch,ifModifiedSince, request);
     }
     @POST
-    @Path("/blacklist")
+    
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Add a Blocking condition", notes = "Add a Blocking condition ", response = BlockingConditionDTO.class, tags={ "Blacklist", })
@@ -97,10 +97,10 @@ public class ThrottlingApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = BlockingConditionDTO.class),
         
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format. ", response = BlockingConditionDTO.class) })
-    public Response throttlingBlacklistPost(@ApiParam(value = "Blocking condition object that should to be added " ,required=true) BlockingConditionDTO body
+    public Response blacklistPost(@ApiParam(value = "Blocking condition object that should to be added " ,required=true) BlockingConditionDTO body
 ,@ApiParam(value = "Media type of the entity in the body. Default is JSON. " ,required=true, defaultValue="JSON")@HeaderParam("Content-Type") String contentType
 , @Context Request request)
     throws NotFoundException {
-        return delegate.throttlingBlacklistPost(body,contentType, request);
+        return delegate.blacklistPost(body,contentType, request);
     }
 }

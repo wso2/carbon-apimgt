@@ -11,7 +11,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.dto.ThrottleConditionDTO;
 /**
  * QueryParameterConditionDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-28T14:28:58.278+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-05-03T09:48:03.292+05:30")
 public class QueryParameterConditionDTO extends ThrottleConditionDTO  {
   @JsonProperty("parameterName")
   private String parameterName = null;

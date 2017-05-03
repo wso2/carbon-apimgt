@@ -69,7 +69,7 @@ Policy.prototype.getAllAdvancePolicies = function (callback) {
     let param = {};
     let promise_create = this.client.then(
         (client) => {
-            return client["Advanced Policies"].get_throttling_policies_advanced(
+            return client["Advanced Policies"].get_policies_throttling_advanced(
                 param, this._requestMetaData()).catch(unauthorizedErrorHandler)
         })
     if (callback) {
@@ -84,7 +84,7 @@ Policy.prototype.getAllApplicationPolicies = function (callback) {
     let param = {};
     let promise_create = this.client.then(
         (client) => {
-            return client["Application Policies"].get_throttling_policies_application(
+            return client["Application Policies"].get_policies_throttling_application(
                 param, this._requestMetaData()).catch(unauthorizedErrorHandler)
         })
     if (callback) {
@@ -98,7 +98,7 @@ Policy.prototype.getAllSubscriptionPolicies = function (callback) {
     let param = {};
     let promise_create = this.client.then(
         (client) => {
-            return client["Subscription Policies"].get_throttling_policies_subscription(
+            return client["Subscription Policies"].get_policies_throttling_subscription(
                 param, this._requestMetaData()).catch(unauthorizedErrorHandler)
         })
     if (callback) {
@@ -116,19 +116,19 @@ Policy.prototype.getPoliciesByUuid = function (uuid, tierLevel, callback) {
     if (param.tierLevel == "api") {
         promised_get = this.client.then(
             (client) => {
-                return client["Advanced Policies"].get_throttling_policies_advanced_policyId(
+                return client["Advanced Policies"].get_policies_throttling_advanced_policyId(
                     param, this._requestMetaData()).catch(unauthorizedErrorHandler);
             })
     } else if (param.tierLevel == "application") {
         promised_get = this.client.then(
             (client) => {
-                return client["Application Policies"].get_throttling_policies_application_policyId(
+                return client["Application Policies"].get_policies_throttling_application_policyId(
                     param, this._requestMetaData()).catch(unauthorizedErrorHandler);
             })
     } else if (param.tierLevel == "subscription") {
         promised_get = this.client.then(
             (client) => {
-                return client["Subscription Policies"].get_throttling_policies_subscription_policyId(
+                return client["Subscription Policies"].get_policies_throttling_subscription_policyId(
                     param, this._requestMetaData()).catch(unauthorizedErrorHandler);
             })
     }
@@ -154,19 +154,19 @@ Policy.prototype.deletePolicyByUuid = function (policyTier, uuid, callback) {
     if (param.tierLevel == "api") {
         promised_delete = this.client.then(
             (client) => {
-                return client["Advanced Policies"].delete_throttling_policies_advanced_policyId(
+                return client["Advanced Policies"].delete_policies_throttling_advanced_policyId(
                     param, this._requestMetaData()).catch(unauthorizedErrorHandler);
             })
     } else if (param.tierLevel == "application") {
         promised_delete = this.client.then(
             (client) => {
-                return client["Application Policies"].delete_throttling_policies_application_policyId(
+                return client["Application Policies"].delete_policies_throttling_application_policyId(
                     param, this._requestMetaData()).catch(unauthorizedErrorHandler);
             })
     } else if (param.tierLevel == "subscription") {
         promised_delete = this.client.then(
             (client) => {
-                return client["Subscription Policies"].delete_throttling_policies_subscription_policyId(
+                return client["Subscription Policies"].delete_policies_throttling_subscription_policyId(
                     param, this._requestMetaData()).catch(unauthorizedErrorHandler);
             })
     }
@@ -187,19 +187,19 @@ Policy.prototype.create = function (policy, callback) {
     if (payload.tierLevel == "api") {
         promise_create = this.client.then(
             (client) => {
-                return client["Advanced Policies"].post_throttling_policies_advanced(
+                return client["Advanced Policies"].post_policies_throttling_advanced(
                     payload, this._requestMetaData()).catch(unauthorizedErrorHandler);
             })
     } else if (payload.tierLevel == "application") {
         promise_create = this.client.then(
             (client) => {
-                return client["Application Policies"].post_throttling_policies_application(
+                return client["Application Policies"].post_policies_throttling_application(
                     payload, this._requestMetaData()).catch(unauthorizedErrorHandler);
             })
     } else if (payload.tierLevel == "subscription") {
         promise_create = this.client.then(
             (client) => {
-                return client["Subscription Policies"].post_throttling_policies_subscription(
+                return client["Subscription Policies"].post_policies_throttling_subscription(
                     payload, this._requestMetaData()).catch(unauthorizedErrorHandler);
             })
     }

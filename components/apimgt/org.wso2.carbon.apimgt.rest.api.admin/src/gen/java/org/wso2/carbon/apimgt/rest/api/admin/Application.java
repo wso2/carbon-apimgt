@@ -12,7 +12,7 @@ public class Application {
 
 System.out.println("starting=========================================================");
         new MicroservicesRunner()
-                .deploy(new ThrottlingPoliciesApi())
+                .deploy(new PoliciesApi())
                 .start();
     }
 }

@@ -8,11 +8,10 @@ import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.admin.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.admin.NotFoundException;
-import org.wso2.carbon.apimgt.rest.api.admin.ThrottlingPoliciesApiService;
+import org.wso2.carbon.apimgt.rest.api.admin.PoliciesApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomRuleDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.TierDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.mappings.PolicyMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.msf4j.Request;
 
@@ -20,11 +19,20 @@ import javax.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.List;
 
-public class ThrottlingPoliciesApiServiceImpl extends ThrottlingPoliciesApiService {
+public class PoliciesApiServiceImpl extends PoliciesApiService {
 
-    private static final Logger log = LoggerFactory.getLogger(ThrottlingPoliciesApiServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(PoliciesApiServiceImpl.class);
 
-    @Override public Response throttlingPoliciesAdvancedGet(String accept, String ifNoneMatch, String ifModifiedSince,
+    /**
+     *
+     * @param accept
+     * @param ifNoneMatch
+     * @param ifModifiedSince
+     * @param request
+     * @return
+     * @throws NotFoundException
+     */
+    @Override public Response policiesThrottlingAdvancedGet(String accept, String ifNoneMatch, String ifModifiedSince,
             Request request) throws NotFoundException {
         String tierLevel = APIMgtConstants.ThrottlePolicyConstants.API_LEVEL;
         if (log.isDebugEnabled()) {
@@ -33,7 +41,16 @@ public class ThrottlingPoliciesApiServiceImpl extends ThrottlingPoliciesApiServi
         return getAllThrottlePolicyByTier(tierLevel);
     }
 
-    @Override public Response throttlingPoliciesAdvancedPolicyIdDelete(String policyId, String ifMatch,
+    /**
+     *
+     * @param policyId
+     * @param ifMatch
+     * @param ifUnmodifiedSince
+     * @param request
+     * @return
+     * @throws NotFoundException
+     */
+    @Override public Response policiesThrottlingAdvancedPolicyIdDelete(String policyId, String ifMatch,
             String ifUnmodifiedSince, Request request) throws NotFoundException {
         String tierLevel = APIMgtConstants.ThrottlePolicyConstants.API_LEVEL;
         if (log.isDebugEnabled()) {
@@ -42,7 +59,16 @@ public class ThrottlingPoliciesApiServiceImpl extends ThrottlingPoliciesApiServi
         return deletePolicy(policyId, tierLevel);
     }
 
-    @Override public Response throttlingPoliciesAdvancedPolicyIdGet(String policyId, String ifNoneMatch,
+    /**
+     *
+     * @param policyId
+     * @param ifNoneMatch
+     * @param ifModifiedSince
+     * @param request
+     * @return
+     * @throws NotFoundException
+     */
+    @Override public Response policiesThrottlingAdvancedPolicyIdGet(String policyId, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
         String tierLevel = APIMgtConstants.ThrottlePolicyConstants.API_LEVEL;
         if (log.isDebugEnabled()) {
@@ -51,7 +77,18 @@ public class ThrottlingPoliciesApiServiceImpl extends ThrottlingPoliciesApiServi
         return getPolicyByUuid(policyId, tierLevel);
     }
 
-    @Override public Response throttlingPoliciesAdvancedPolicyIdPut(String policyId, TierDTO body, String contentType,
+    /**
+     *
+     * @param policyId
+     * @param body
+     * @param contentType
+     * @param ifMatch
+     * @param ifUnmodifiedSince
+     * @param request
+     * @return
+     * @throws NotFoundException
+     */
+    @Override public Response policiesThrottlingAdvancedPolicyIdPut(String policyId, TierDTO body, String contentType,
             String ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
         String tierLevel = APIMgtConstants.ThrottlePolicyConstants.API_LEVEL;
         if (log.isDebugEnabled()) {
@@ -60,7 +97,15 @@ public class ThrottlingPoliciesApiServiceImpl extends ThrottlingPoliciesApiServi
         return updatePolicy(tierLevel, body);
     }
 
-    @Override public Response throttlingPoliciesAdvancedPost(TierDTO body, String contentType, Request request)
+    /**
+     *
+     * @param body
+     * @param contentType
+     * @param request
+     * @return
+     * @throws NotFoundException
+     */
+    @Override public Response policiesThrottlingAdvancedPost(TierDTO body, String contentType, Request request)
             throws NotFoundException {
         String tierLevel = APIMgtConstants.ThrottlePolicyConstants.API_LEVEL;
         if (log.isDebugEnabled()) {
@@ -69,125 +114,260 @@ public class ThrottlingPoliciesApiServiceImpl extends ThrottlingPoliciesApiServi
         return createPolicy(tierLevel, body);
     }
 
-    @Override public Response throttlingPoliciesApplicationGet(String accept, String ifNoneMatch,
+    /**
+     *
+     * @param accept
+     * @param ifNoneMatch
+     * @param ifModifiedSince
+     * @param request
+     * @return
+     * @throws NotFoundException
+     */
+    @Override public Response policiesThrottlingApplicationGet(String accept, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
-
         String tierLevel = APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL;
         if (log.isDebugEnabled()) {
-            log.debug("Received all Application Throttle Policy GET request");
+            log.debug("Received Advance Throttle Policy GET request");
         }
         return getAllThrottlePolicyByTier(tierLevel);
     }
 
-    @Override public Response throttlingPoliciesApplicationPolicyIdDelete(String policyId, String ifMatch,
+    /**
+     *
+     * @param policyId
+     * @param ifMatch
+     * @param ifUnmodifiedSince
+     * @param request
+     * @return
+     * @throws NotFoundException
+     */
+    @Override public Response policiesThrottlingApplicationPolicyIdDelete(String policyId, String ifMatch,
             String ifUnmodifiedSince, Request request) throws NotFoundException {
         String tierLevel = APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL;
         if (log.isDebugEnabled()) {
-            log.info("Received Application Policy DELETE request with uuid: " + policyId);
+            log.info("Received Advance Policy DELETE request with uuid: " + policyId);
         }
         return deletePolicy(policyId, tierLevel);
     }
 
-    @Override public Response throttlingPoliciesApplicationPolicyIdGet(String policyId, String ifNoneMatch,
+    /**
+     *
+     * @param policyId
+     * @param ifNoneMatch
+     * @param ifModifiedSince
+     * @param request
+     * @return
+     * @throws NotFoundException
+     */
+    @Override public Response policiesThrottlingApplicationPolicyIdGet(String policyId, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
         String tierLevel = APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL;
         if (log.isDebugEnabled()) {
-            log.info("Received Application Policy Get request. Policy uuid: " + policyId);
+            log.info("Received Advanced Policy Get request. Policy uuid: " + policyId);
         }
         return getPolicyByUuid(policyId, tierLevel);
     }
 
-    @Override public Response throttlingPoliciesApplicationPolicyIdPut(String policyId, TierDTO body,
+    /**
+     *
+     * @param policyId
+     * @param body
+     * @param contentType
+     * @param ifMatch
+     * @param ifUnmodifiedSince
+     * @param request
+     * @return
+     * @throws NotFoundException
+     */
+    @Override public Response policiesThrottlingApplicationPolicyIdPut(String policyId, TierDTO body,
             String contentType, String ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
         String tierLevel = APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL;
         if (log.isDebugEnabled()) {
-            log.info("Received Application Policy POST request " + body + " with tierLevel = " + tierLevel);
+            log.info("Received Advance Policy POST request " + body + " with tierLevel = " + tierLevel);
         }
         return updatePolicy(tierLevel, body);
     }
 
-    @Override public Response throttlingPoliciesApplicationPost(TierDTO body, String contentType, Request request)
+    /**
+     *
+     * @param body
+     * @param contentType
+     * @param request
+     * @return
+     * @throws NotFoundException
+     */
+    @Override public Response policiesThrottlingApplicationPost(TierDTO body, String contentType, Request request)
             throws NotFoundException {
-
         String tierLevel = APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL;
         if (log.isDebugEnabled()) {
-            log.info("Received Application Policy POST request " + body + " with tierLevel = " + tierLevel);
+            log.info("Received Advance Policy POST request " + body + " with tierLevel = " + tierLevel);
         }
         return createPolicy(tierLevel, body);
     }
 
-    @Override public Response throttlingPoliciesCustomGet(String accept, String ifNoneMatch, String ifModifiedSince,
+    /**
+     *
+     * @param accept
+     * @param ifNoneMatch
+     * @param ifModifiedSince
+     * @param request
+     * @return
+     * @throws NotFoundException
+     */
+    @Override public Response policiesThrottlingCustomGet(String accept, String ifNoneMatch, String ifModifiedSince,
             Request request) throws NotFoundException {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override public Response throttlingPoliciesCustomPost(CustomRuleDTO body, String contentType, Request request)
+    /**
+     *
+     * @param body
+     * @param contentType
+     * @param request
+     * @return
+     * @throws NotFoundException
+     */
+    @Override public Response policiesThrottlingCustomPost(CustomRuleDTO body, String contentType, Request request)
             throws NotFoundException {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override public Response throttlingPoliciesCustomRuleIdDelete(String ruleId, String ifMatch,
+    /**
+     *
+     * @param ruleId
+     * @param ifMatch
+     * @param ifUnmodifiedSince
+     * @param request
+     * @return
+     * @throws NotFoundException
+     */
+    @Override public Response policiesThrottlingCustomRuleIdDelete(String ruleId, String ifMatch,
             String ifUnmodifiedSince, Request request) throws NotFoundException {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override public Response throttlingPoliciesCustomRuleIdGet(String ruleId, String ifNoneMatch,
+    /**
+     *
+     * @param ruleId
+     * @param ifNoneMatch
+     * @param ifModifiedSince
+     * @param request
+     * @return
+     * @throws NotFoundException
+     */
+    @Override public Response policiesThrottlingCustomRuleIdGet(String ruleId, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override public Response throttlingPoliciesCustomRuleIdPut(String ruleId, CustomRuleDTO body, String contentType,
+    /**
+     *
+     * @param ruleId
+     * @param body
+     * @param contentType
+     * @param ifMatch
+     * @param ifUnmodifiedSince
+     * @param request
+     * @return
+     * @throws NotFoundException
+     */
+    @Override public Response policiesThrottlingCustomRuleIdPut(String ruleId, CustomRuleDTO body, String contentType,
             String ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
-    @Override public Response throttlingPoliciesSubscriptionGet(String accept, String ifNoneMatch,
+    /**
+     *
+     * @param accept
+     * @param ifNoneMatch
+     * @param ifModifiedSince
+     * @param request
+     * @return
+     * @throws NotFoundException
+     */
+    @Override public Response policiesThrottlingSubscriptionGet(String accept, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
         String tierLevel = APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL;
         if (log.isDebugEnabled()) {
-            log.debug("Received all Subscription Throttle Policy GET request");
+            log.debug("Received Advance Throttle Policy GET request");
         }
         return getAllThrottlePolicyByTier(tierLevel);
     }
 
-    @Override public Response throttlingPoliciesSubscriptionPolicyIdDelete(String policyId, String ifMatch,
+    /**
+     *
+     * @param policyId
+     * @param ifMatch
+     * @param ifUnmodifiedSince
+     * @param request
+     * @return
+     * @throws NotFoundException
+     */
+    @Override public Response policiesThrottlingSubscriptionPolicyIdDelete(String policyId, String ifMatch,
             String ifUnmodifiedSince, Request request) throws NotFoundException {
         String tierLevel = APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL;
         if (log.isDebugEnabled()) {
-            log.info("Received Subscription Policy DELETE request with uuid: " + policyId);
+            log.info("Received Advance Policy DELETE request with uuid: " + policyId);
         }
         return deletePolicy(policyId, tierLevel);
     }
 
-    @Override public Response throttlingPoliciesSubscriptionPolicyIdGet(String policyId, String ifNoneMatch,
+    /**
+     *
+     * @param policyId
+     * @param ifNoneMatch
+     * @param ifModifiedSince
+     * @param request
+     * @return
+     * @throws NotFoundException
+     */
+    @Override public Response policiesThrottlingSubscriptionPolicyIdGet(String policyId, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
         String tierLevel = APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL;
         if (log.isDebugEnabled()) {
-            log.info("Received Subscription Policy Get request. Policy uuid: " + policyId);
+            log.info("Received Advanced Policy Get request. Policy uuid: " + policyId);
         }
         return getPolicyByUuid(policyId, tierLevel);
     }
 
-    @Override public Response throttlingPoliciesSubscriptionPolicyIdPut(String policyId, TierDTO body,
+    /**
+     *
+     * @param policyId
+     * @param body
+     * @param contentType
+     * @param ifMatch
+     * @param ifUnmodifiedSince
+     * @param request
+     * @return
+     * @throws NotFoundException
+     */
+    @Override public Response policiesThrottlingSubscriptionPolicyIdPut(String policyId, TierDTO body,
             String contentType, String ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
         String tierLevel = APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL;
         if (log.isDebugEnabled()) {
-            log.info("Received Subscription Policy POST request " + body + " with tierLevel = " + tierLevel);
+            log.info("Received Advance Policy POST request " + body + " with tierLevel = " + tierLevel);
         }
         return updatePolicy(tierLevel, body);
     }
 
-    @Override public Response throttlingPoliciesSubscriptionPost(TierDTO body, String contentType, Request request)
+    /**
+     *
+     * @param body
+     * @param contentType
+     * @param request
+     * @return
+     * @throws NotFoundException
+     */
+    @Override public Response policiesThrottlingSubscriptionPost(TierDTO body, String contentType, Request request)
             throws NotFoundException {
         String tierLevel = APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL;
-
         if (log.isDebugEnabled()) {
-            log.info("Received Subscription Policy POST request " + body + " with tierLevel = " + tierLevel);
+            log.info("Received Advance Policy POST request " + body + " with tierLevel = " + tierLevel);
         }
         return createPolicy(tierLevel, body);
     }
@@ -199,7 +379,7 @@ public class ThrottlingPoliciesApiServiceImpl extends ThrottlingPoliciesApiServi
             return Response.status(Response.Status.OK).entity(policy).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while getting Policy. policy uuid: " + policyId;
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
@@ -213,7 +393,7 @@ public class ThrottlingPoliciesApiServiceImpl extends ThrottlingPoliciesApiServi
             return Response.ok().entity(tiers).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while retrieving Policy";
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
@@ -227,7 +407,7 @@ public class ThrottlingPoliciesApiServiceImpl extends ThrottlingPoliciesApiServi
             return Response.status(Response.Status.CREATED).entity(policy).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while adding Policy ";
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
@@ -241,7 +421,7 @@ public class ThrottlingPoliciesApiServiceImpl extends ThrottlingPoliciesApiServi
             return Response.status(Response.Status.CREATED).entity(policy).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while adding Policy ";
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
@@ -256,7 +436,8 @@ public class ThrottlingPoliciesApiServiceImpl extends ThrottlingPoliciesApiServi
             String errorMessage = "Error occurred while deleting a Policy uuid : " + policyId;
             HashMap<String, String> paramList = new HashMap<>();
             paramList.put(APIMgtConstants.ExceptionsConstants.TIER, policyId);
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil
+                    .getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
