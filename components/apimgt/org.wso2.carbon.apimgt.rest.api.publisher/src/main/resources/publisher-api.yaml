@@ -84,6 +84,10 @@ x-wso2-security:
         roles: admin
         name: apim:subscription_block
         key: apim:subscription_block
+      - description: ""
+        roles: admin
+        name: apim:workflow_approve
+        key: apim:workflow_approve 
 
 ######################################################
 # The "API Collection" resource APIs
@@ -2754,7 +2758,7 @@ paths:
 # Resume the workflow by approving or rejecting the workflow request
 #-------------------------------------------------------------------
     put:
-      x-scope: apim:api_workflow
+      x-scope: apim:workflow_approve
       summary: Update workflow status
       description: |
         This operation can be used to approve or reject a workflow task. .

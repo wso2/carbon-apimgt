@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
+import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
@@ -24,6 +25,7 @@ import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.ApplicationCreationResponse;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
@@ -68,6 +70,12 @@ public class ApplicationsApiServiceImpl
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
+            String existingFingerprint = applicationsApplicationIdGetFingerprint(applicationId, null, null, null,
+                    request);
+            if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
+                    .contains(existingFingerprint)) {
+                return Response.status(Response.Status.PRECONDITION_FAILED).build();
+            }
             apiConsumer.deleteApplication(applicationId);
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting application: " + applicationId;
@@ -210,20 +218,41 @@ public class ApplicationsApiServiceImpl
                 String errorMessage = "Application " + applicationId + " is not active";
                 ExceptionCodes exceptionCode = ExceptionCodes.APPLICATION_INACTIVE;
                 APIManagementException e = new APIManagementException(errorMessage, exceptionCode);
-                Map<String, String> paramList = new HashMap<String, String>();
+                Map<String, String> paramList = new HashMap<>();
                 paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
                 log.error(errorMessage, e);
                 return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
                 
             }
-            apiConsumer.updateApplication(applicationId, application);
+            WorkflowResponse updateResponse = apiConsumer.updateApplication(applicationId, application);
+            if (WorkflowStatus.REJECTED == updateResponse.getWorkflowStatus()) {
+                String errorMessage = "Update request for application " + applicationId + " is rejected";
+                ExceptionCodes exceptionCode = ExceptionCodes.WORKFLOW_REJCECTED;
+                APIManagementException e = new APIManagementException(errorMessage, exceptionCode);
+                Map<String, String> paramList = new HashMap<>();
+                paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+            }
 
             //retrieves the updated application and send as the response
             Application updatedApplication = apiConsumer.getApplication(applicationId, username, null);
             updatedApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(updatedApplication);
             String newFingerprint = applicationsApplicationIdGetFingerprint(applicationId, null, null, null,
                     request);
+            
+            
+            //if workflow is in pending state or if the executor sends any httpworklfowresponse (workflow state can 
+            //be in either pending or approved state) send back the workflow response 
+            if (ApplicationStatus.APPLICATION_ONHOLD.equals(updatedApplication.getStatus())) {
+                
+                WorkflowResponseDTO workflowResponse = WorkflowMappintUtil
+                        .fromWorkflowResponsetoDTO(updateResponse);
+                URI location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" + applicationId);
+                return Response.status(Response.Status.ACCEPTED).header(RestApiConstants.LOCATION_HEADER, location)
+                        .entity(workflowResponse).build();
+            }    
             return Response.ok().entity(updatedApplicationDTO).header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"")
                     .build();
         } catch (APIManagementException e) {
@@ -233,6 +262,14 @@ public class ApplicationsApiServiceImpl
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while adding location header in response for application : " + body.getName();
+            Map<String, String> paramList = new HashMap<>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_NAME, body.getName());
+            ErrorHandler errorHandler = ExceptionCodes.LOCATION_HEADER_INCORRECT;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorHandler, paramList);
+            log.error(errorMessage, e);
+            return Response.status(errorHandler.getHttpStatusCode()).entity(errorDTO).build();
         }
     }
 

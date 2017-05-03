@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.API.APIBuilder;
@@ -47,6 +48,7 @@ import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.ApplicationCreationResponse;
 import org.wso2.carbon.apimgt.core.models.ApplicationCreationWorkflow;
+import org.wso2.carbon.apimgt.core.models.ApplicationUpdateWorkflow;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.Event;
 import org.wso2.carbon.apimgt.core.models.Label;
@@ -58,6 +60,7 @@ import org.wso2.carbon.apimgt.core.models.WorkflowConfig;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ApplicationStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.SubscriptionStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
@@ -74,7 +77,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * Test class for APIStore
@@ -465,7 +467,14 @@ public class APIStoreImplTestCase {
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APIStore apiStore = getApiStoreImpl(applicationDAO, workflowDAO);
         Application application = new Application(APP_NAME, USER_NAME);
-        apiStore.updateApplication(UUID, application);
+        application.setId(UUID);
+        application.setStatus(ApplicationStatus.APPLICATION_APPROVED);
+        Mockito.when(applicationDAO.getApplication(UUID)).thenReturn(application);
+        
+        //update application's description
+        application.setDescription("updated description");
+        
+        apiStore.updateApplication(UUID, application);        
         Mockito.verify(applicationDAO, Mockito.times(1)).updateApplication(UUID, application);
     }
 
@@ -854,7 +863,7 @@ public class APIStoreImplTestCase {
         apiStore.addApplication(application);
     }
 
-    @Test(description = "Exception when retrieving labels", expectedExceptions = APIManagementException.class)
+    @Test(description = "Exception when retrieving labels", expectedExceptions = LabelException.class)
     public void testGetLabelInfoException() throws APIManagementException {
         LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
         APIStore apiStore = getApiStoreImpl(labelDAO);
@@ -917,6 +926,61 @@ public class APIStoreImplTestCase {
         apiStore.completeWorkflow(executor, workflow);
 
         Mockito.verify(applicationDAO, Mockito.times(1)).updateApplicationState(application.getId(), "REJECTED");
+    }
+    
+    @Test(description = "Test Application update workflow reject")
+    public void testAddApplicationUpdateWorkflowReject() throws APIManagementException {
+        /*
+         * This test is to validate the rollback the application to its previous state for application
+         * update request rejection
+         */
+        ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
+        Policy policy = Mockito.mock(Policy.class);
+        APIStore apiStore = getApiStoreImpl(applicationDAO, policyDAO, workflowDAO);
+        Application application = new Application(APP_NAME, USER_NAME);
+        application.setStatus(ApplicationStatus.APPLICATION_APPROVED);
+        application.setTier(TIER);
+        application.setId(UUID);
+        application.setPermissionString(
+                "[{\"groupId\": \"testGroup\",\"permission\":[\"READ\",\"UPDATE\",\"DELETE\",\"SUBSCRIPTION\"]}]");
+        Mockito.when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
+        Mockito.when(policyDAO.getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, TIER)).thenReturn
+                (policy);
+
+
+        //following section mock the workflow callback api
+        DefaultWorkflowExecutor executor = Mockito.mock(DefaultWorkflowExecutor.class);
+        Workflow workflow = new ApplicationUpdateWorkflow();
+        workflow.setWorkflowReference(application.getId());
+        workflow.setExternalWorkflowReference(UUID);
+        
+        //validate the rejection flow
+        
+        //here we assume the application is an approve state before update
+        //this attribute is set internally based on the workflow data
+        workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_EXISTIN_APP_STATUS,
+                ApplicationStatus.APPLICATION_APPROVED);
+        
+        WorkflowResponse response = new GeneralWorkflowResponse();        
+        response.setWorkflowStatus(WorkflowStatus.REJECTED);
+
+        Mockito.when(executor.complete(workflow)).thenReturn(response);
+        apiStore.completeWorkflow(executor, workflow);
+
+        Mockito.verify(applicationDAO, Mockito.times(1)).updateApplicationState(application.getId(),
+                ApplicationStatus.APPLICATION_APPROVED);
+       
+        //here we assume the application is an rejected state before update. 
+        workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_EXISTIN_APP_STATUS,
+                ApplicationStatus.APPLICATION_REJECTED);
+        
+        apiStore.completeWorkflow(executor, workflow);
+        Mockito.verify(applicationDAO, Mockito.times(1)).updateApplicationState(application.getId(),
+                ApplicationStatus.APPLICATION_REJECTED);             
+
+        
     }
 
     @Test(description = "Test Subscription workflow rejection")

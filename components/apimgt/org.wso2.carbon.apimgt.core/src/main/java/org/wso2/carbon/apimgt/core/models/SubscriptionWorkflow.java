@@ -23,47 +23,9 @@ package org.wso2.carbon.apimgt.core.models;
  */
 public class SubscriptionWorkflow extends Workflow {
 
-    private String apiName;
-
-    private String apiVersion;
-
-    private String apiContext;
-
-    private String apiId;
-
-    private String apiProvider;
+    private Subscription subscription;
 
     private String subscriber;
-
-    private String applicationName;
-
-    private String applicationId;
-
-    private String tierName;
-
-    public String getApiName() {
-        return apiName;
-    }
-
-    public void setApiName(String apiName) {
-        this.apiName = apiName;
-    }
-
-    public String getApiVersion() {
-        return apiVersion;
-    }
-
-    public void setApiVersion(String apiVersion) {
-        this.apiVersion = apiVersion;
-    }
-
-    public String getApiContext() {
-        return apiContext;
-    }
-
-    public void setApiContext(String apiContext) {
-        this.apiContext = apiContext;
-    }
 
     public String getSubscriber() {
         return subscriber;
@@ -73,51 +35,17 @@ public class SubscriptionWorkflow extends Workflow {
         this.subscriber = subscriber;
     }
 
-    public String getApplicationName() {
-        return applicationName;
+    public Subscription getSubscription() {
+        return subscription;
     }
 
-    public void setApplicationName(String applicationName) {
-        this.applicationName = applicationName;
-    }
-
-    public String getTierName() {
-        return tierName;
-    }
-
-    public void setTierName(String tierName) {
-        this.tierName = tierName;
-    }
-
-    public String getApiProvider() {
-        return apiProvider;
-    }
-
-    public void setApiProvider(String apiProvider) {
-        this.apiProvider = apiProvider;
-    }
-
-    public String getApplicationId() {
-        return applicationId;
-    }
-
-    public void setApplicationId(String applicationId) {
-        this.applicationId = applicationId;
-    }
-
-    public String getApiId() {
-        return apiId;
-    }
-
-    public void setApiId(String apiId) {
-        this.apiId = apiId;
+    public void setSubscription(Subscription subscription) {
+        this.subscription = subscription;
     }
 
     @Override
     public String toString() {
-        return "SubscriptionWorkflow [apiName=" + apiName + ", apiVersion=" + apiVersion + ", apiContext=" + apiContext
-                + ", apiId=" + apiId + ", apiProvider=" + apiProvider + ", subscriber=" + subscriber
-                + ", applicationName=" + applicationName + ", applicationId=" + applicationId + ", tierName=" + tierName
-                + ", toString()=" + super.toString() + "]";
-    }    
+        return "SubscriptionWorkflow [subscription=" + subscription + ", subscriber=" + subscriber + "]";
+    }
+
 }

@@ -21,7 +21,7 @@
 package org.wso2.carbon.apimgt.core.impl;
 
 import org.wso2.carbon.apimgt.core.api.LabelExtractor;
-import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.models.Label;
 
 import java.util.List;
@@ -35,7 +35,7 @@ public class DefaultLabelExtractorImpl implements LabelExtractor {
      * @see LabelExtractor#filterLabels(String, List)
      */
     @Override
-    public List<Label> filterLabels(String username, List<Label> labels) throws APIManagementException {
+    public List<Label> filterLabels(String username, List<Label> labels) throws LabelException {
         return labels;
     }
 }
