@@ -112,7 +112,11 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
                 log.error("Error in exporting API: " + exportAPI.getName() + ", version: " + apiDetails
                         .getApi().getVersion(), e);
                 // cleanup the API directory
-                APIFileUtils.deleteDirectory(apiExportDirectory);
+                try {
+                    APIFileUtils.deleteDirectory(path);
+                } catch (APIMgtDAOException e1) {
+                    log.warn("Unable to remove directory " + path);
+                }
                 // skip this API
                 continue;
             }
@@ -156,7 +160,11 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
 
         } catch (APIMgtDAOException e) {
             // cleanup the archive root directory
-            APIFileUtils.deleteDirectory(path);
+            try {
+                APIFileUtils.deleteDirectory(path);
+            } catch (APIMgtDAOException e1) {
+                log.warn("Unable to remove directory " + path);
+            }
             String errorMsg = "Error while archiving directory " + sourceDirectory;
             throw new APIMgtEntityImportExportException(errorMsg, e, ExceptionCodes.API_EXPORT_ERROR);
         }
@@ -204,7 +212,11 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
                     .getVersion());
         }
 
-        APIFileUtils.deleteDirectory(path);
+        try {
+            APIFileUtils.deleteDirectory(path);
+        } catch (APIMgtDAOException e) {
+            log.warn("Unable to remove directory " + path);
+        }
         // if no APIs are corrected exported, throw an error
         if (apis.isEmpty()) {
             String errorMsg = "No APIs imported successfully";
@@ -254,7 +266,11 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
                     .getVersion());
         }
 
-        APIFileUtils.deleteDirectory(path);
+        try {
+            APIFileUtils.deleteDirectory(path);
+        } catch (APIMgtDAOException e) {
+            log.warn("Unable to remove directory " + path);
+        }
         // if no APIs are corrected exported, throw an error
         if (apis.isEmpty()) {
             String errorMsg = "No APIs imported successfully";
@@ -284,7 +300,11 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
             throw new APIMgtEntityImportExportException(errorMsg, ExceptionCodes.API_IMPORT_ERROR);
         }
         if (apiDefinitionsRootDirectoryPaths.isEmpty()) {
-            APIFileUtils.deleteDirectory(path);
+            try {
+                APIFileUtils.deleteDirectory(path);
+            } catch (APIMgtDAOException e) {
+                log.warn("Unable to remove directory " + path);
+            }
             String errorMsg = "Unable to find API definitions at: " + apiArtifactsBasePath;
             throw new APIMgtEntityImportExportException(errorMsg, ExceptionCodes.API_IMPORT_ERROR);
         }
@@ -586,7 +606,11 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
             log.error("Error in exporting documents to file system for api: " + apiDetails.getApi().getName() +
                     ", version: " + apiDetails.getApi().getVersion());
             // cleanup
-            APIFileUtils.deleteDirectory(documentsBaseDirectory);
+            try {
+                APIFileUtils.deleteDirectory(path);
+            } catch (APIMgtDAOException ignore) {
+                log.warn("Unable to remove directory " + path);
+            }
         }
 
         if (log.isDebugEnabled()) {

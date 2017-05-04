@@ -30,6 +30,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIDetails;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
@@ -583,6 +584,10 @@ public class APIImportExportTestCase {
 
     @AfterClass
     protected void tearDown () {
-        APIFileUtils.deleteDirectory(importExportRootDirectory);
+        try {
+            APIFileUtils.deleteDirectory(importExportRootDirectory);
+        } catch (APIMgtDAOException e) {
+            log.warn("Unable to delete directory "+importExportRootDirectory);
+        }
     }
 }

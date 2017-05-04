@@ -27,7 +27,6 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
-import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 
@@ -200,11 +199,13 @@ public class APIFileUtils {
      *
      * @param path Path to the directory to be deleted
      */
-    public static void deleteDirectory(String path) {
+    public static void deleteDirectory(String path) throws APIMgtDAOException {
         try {
             FileUtils.deleteDirectory(new File(path));
         } catch (IOException e) {
-            log.error("Error while deleting directory : " + path, e);
+            String errorMsg = "Error while deleting directory : " + path;
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e);
         }
     }
 
@@ -218,7 +219,9 @@ public class APIFileUtils {
         try {
             Files.delete(Paths.get(path));
         } catch (IOException e) {
-            log.error("Error while deleting file : " + path, e);
+            String errorMsg = "Error while deleting file : " + path;
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e);
         }
     }
 
@@ -497,7 +500,7 @@ public class APIFileUtils {
             APIFileUtils.deleteDirectory(extractLocation);
             String errorMsg = "Error in accessing uploaded API archive";
             log.error(errorMsg, e);
-            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.API_IMPORT_ERROR);
+            throw new APIMgtDAOException(errorMsg, e);
         }
         return archiveExtractLocation;
     }
