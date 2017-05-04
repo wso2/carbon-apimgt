@@ -33,7 +33,6 @@ import org.wso2.carbon.apimgt.core.models.Endpoint;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -319,6 +318,8 @@ public class APIFileUtils {
             APIFileUtils.writeStreamToFile(thumbnailFileLocation, thumbnailInputStream);
 
         } catch (APIMgtDAOException e) {
+            String errorMsg = "Unable to export the thumbnail to file " + exportLocation;
+            log.error(errorMsg, e);
             APIFileUtils.deleteFile(thumbnailFileLocation);
             throw (e);
         }
@@ -332,19 +333,14 @@ public class APIFileUtils {
      * @throws APIMgtDAOException if an error occurs while writing to the file
      */
     public static void writeStreamToFile(String path, InputStream inputStream) throws APIMgtDAOException {
-        FileOutputStream outputStream = null;
-        try {
-            outputStream = new FileOutputStream(path);
+        try (FileOutputStream outputStream = new FileOutputStream(path)) {
             IOUtils.copy(inputStream, outputStream);
-        } catch (FileNotFoundException e) {
-            throw new APIMgtDAOException(e);
-
         } catch (IOException e) {
-            throw new APIMgtDAOException("Unable to write to file at path: " + path, e);
-
+            String errorMsg = "Unable to write to file at path: " + path;
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e);
         } finally {
             IOUtils.closeQuietly(inputStream);
-            IOUtils.closeQuietly(outputStream);
         }
     }
 
@@ -359,7 +355,9 @@ public class APIFileUtils {
         try {
             return new FileInputStream(path);
         } catch (IOException e) {
-            throw new APIMgtDAOException("Error while reading file " + path, e);
+            String errorMsg = "Error while reading file " + path;
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e);
         }
     }
 
@@ -372,16 +370,14 @@ public class APIFileUtils {
      */
     public static void createArchiveFromInputStream(InputStream inputStream, String archivePath)
             throws APIMgtDAOException {
-
-        FileOutputStream outFileStream = null;
-        try {
-            outFileStream = new FileOutputStream(new File(archivePath));
+        try (FileOutputStream outFileStream = new FileOutputStream(new File(archivePath))) {
             IOUtils.copy(inputStream, outFileStream);
         } catch (IOException e) {
-            throw new APIMgtDAOException("Error in Creating archive from uploaded data", e);
-        } finally {
-            IOUtils.closeQuietly(outFileStream);
+            String errorMsg = "Error in Creating archive from data.";
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e);
         }
+
     }
 
     /**
@@ -389,20 +385,14 @@ public class APIFileUtils {
      *
      * @param archiveFilePath path of the zip archive
      * @param destination     extract location
-     * @return name if the zip archive
+     * @return name of the extracted zip archive
      * @throws APIMgtDAOException if an error occurs while extracting the archive
      */
     public static String extractArchive(String archiveFilePath, String destination)
             throws APIMgtDAOException {
-
-        BufferedInputStream inputStream = null;
-        InputStream zipInputStream = null;
-        FileOutputStream outputStream = null;
-        ZipFile zip = null;
         String archiveName = null;
 
-        try {
-            zip = new ZipFile(new File(archiveFilePath));
+        try (ZipFile zip = new ZipFile(new File(archiveFilePath))) {
             Enumeration zipFileEntries = zip.entries();
             int index = 0;
 
@@ -428,22 +418,14 @@ public class APIFileUtils {
                 }
 
                 if (!entry.isDirectory()) {
-                    zipInputStream = zip.getInputStream(entry);
-                    inputStream = new BufferedInputStream(zipInputStream);
-
-                    // write the current file to the destination
-                    outputStream = new FileOutputStream(destinationFile);
-                    IOUtils.copy(inputStream, outputStream);
+                    writeFileToDestination(zip, entry, destinationFile);
                 }
             }
             return archiveName;
         } catch (IOException e) {
-            throw new APIMgtDAOException("Failed to extract archive file", e);
-        } finally {
-            IOUtils.closeQuietly(zipInputStream);
-            IOUtils.closeQuietly(inputStream);
-            IOUtils.closeQuietly(outputStream);
-            IOUtils.closeQuietly(zip);
+            String errorMsg = "Failed to extract archive file: " + archiveFilePath + " to destination: " + destination;
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e);
         }
     }
 
@@ -504,7 +486,6 @@ public class APIFileUtils {
         }
         return archiveExtractLocation;
     }
-
 
     /**
      * Creates a zip archive from of a directory
@@ -578,30 +559,20 @@ public class APIFileUtils {
     private static void writeArchiveFile(File directoryToZip, List<File> fileList, String archiveLocation,
             String archiveName) throws IOException {
 
-        FileOutputStream fileOutputStream = null;
-        ZipOutputStream zipOutputStream = null;
-
-        try {
-            fileOutputStream = new FileOutputStream(archiveLocation + File.separator + archiveName + ".zip");
-            zipOutputStream = new ZipOutputStream(fileOutputStream);
+        try (FileOutputStream fileOutputStream = new FileOutputStream(archiveLocation + File.separator + archiveName
+                + ".zip");
+             ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream)) {
             for (File file : fileList) {
                 if (!file.isDirectory()) {
                     addToArchive(directoryToZip, file, zipOutputStream);
                 }
             }
-
-        } finally {
-            IOUtils.closeQuietly(zipOutputStream);
-            IOUtils.closeQuietly(fileOutputStream);
         }
     }
 
     private static void addToArchive(File directoryToZip, File file, ZipOutputStream zipOutputStream)
             throws IOException {
-
-        FileInputStream fileInputStream = null;
-        try {
-            fileInputStream = new FileInputStream(file);
+        try (FileInputStream fileInputStream = new FileInputStream(file)) {
 
             // Get relative path from archive directory to the specific file
             String zipFilePath = file.getCanonicalPath()
@@ -614,11 +585,16 @@ public class APIFileUtils {
 
             IOUtils.copy(fileInputStream, zipOutputStream);
             zipOutputStream.closeEntry();
-
-        } finally {
-            IOUtils.closeQuietly(fileInputStream);
         }
     }
 
+    private static void writeFileToDestination(ZipFile zip, ZipEntry entry, File destinationFile) throws IOException {
+        try (InputStream zipInputStream = zip.getInputStream(entry);
+             BufferedInputStream inputStream = new BufferedInputStream(zipInputStream);
+             // write the current file to the destination
+             FileOutputStream outputStream = new FileOutputStream(destinationFile)) {
+            IOUtils.copy(inputStream, outputStream);
+        }
+    }
 
 }
