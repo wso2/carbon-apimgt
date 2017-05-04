@@ -41,5 +41,7 @@ public interface ApiDAOVendorSpecificStatements {
     PreparedStatement attributeSearch(Connection connection, List<String> roles, String user,
             Map<String, String> attributeMap, int offset, int limit) throws APIMgtDAOException;
 
+    PreparedStatement attributeSearchStore(Connection connection, List<String> roles, Map<String,
+            String> attributeMap, int offset, int limit) throws APIMgtDAOException;
 
 }

@@ -141,4 +141,13 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
             throw new APIMgtDAOException(e);
         }
     }
+
+    @Override
+    @SuppressFBWarnings({"SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
+            "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE"})
+    public PreparedStatement attributeSearchStore(Connection connection, List<String> roles,
+                                                  Map<String, String> attributeMap, int offset,
+                                                  int limit) throws APIMgtDAOException {
+        return null;
+    }
 }
