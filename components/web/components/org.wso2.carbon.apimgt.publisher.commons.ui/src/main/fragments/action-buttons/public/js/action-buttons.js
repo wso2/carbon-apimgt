@@ -17,15 +17,19 @@
 
 /**
  * This function validates Buttons based on the logged in user scopes against scopes defined for rest api call
- * @param Button ids
+ * @param {String} Array of Button ids
  *
  */
 function validateActionButtons() {
-   var bearerToken = "Bearer " + getCookie("WSO2_AM_TOKEN_1");
+    var bearerToken = "Bearer " + getCookie("WSO2_AM_TOKEN_1");
 
     var loggedInUserScopes = localStorage.getItem('userScopes');
 
     var response = loadSwaggerJson();
+    if (response === undefined) {
+        console.warn("Publisher swagger definition could not be loaded.");
+        return;
+    }
     var publisherSwaggerJson = JSON.parse(response);
 
 
@@ -52,8 +56,9 @@ function validateActionButtons() {
 function hasValidScopes(restApiResourcePath, restApiResourceMethod) {
         var loggedInUserScopes = localStorage.getItem('userScopes');
 
-        if(loggedInUserScopes !== null) {
-            var response = loadSwaggerJson();
+    if (loggedInUserScopes !== null) {
+        var response = loadSwaggerJson();
+        if (response !== undefined) {
             var publisherSwaggerJson = JSON.parse(response);
             if (restApiResourcePath !== undefined && restApiResourceMethod !== undefined) {
                 var scopesToValidate = publisherSwaggerJson["paths"][restApiResourcePath][restApiResourceMethod]["x-scope"];
@@ -61,7 +66,12 @@ function hasValidScopes(restApiResourcePath, restApiResourceMethod) {
                     return true;
                 }
             }
+        } else {
+            console.warn("Publisher swagger definition could not be loaded.");
+            return true;
         }
+
+    }
     return false;
 }
 
