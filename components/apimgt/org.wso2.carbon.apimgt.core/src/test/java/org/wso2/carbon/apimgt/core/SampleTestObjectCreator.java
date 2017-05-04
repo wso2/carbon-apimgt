@@ -729,6 +729,7 @@ public class SampleTestObjectCreator {
         comment.setApiId(apiId);
         comment.setCommentText("this is a sample comment");
         comment.setCommentedUser("admin");
+        comment.setUpdatedUser("admin");
         comment.setCreatedTime(LocalDateTime.now());
         comment.setUpdatedTime(LocalDateTime.now());
         return comment;

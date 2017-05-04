@@ -780,7 +780,6 @@ public class ApiDAOImpl implements ApiDAO {
                     }
                 }
             } catch (SQLException e) {
-                connection.rollback();
                 String errorMessage =
                         "Error while retrieving comment for comment id: " + commentId + " and api id: " + apiId;
                 log.error(errorMessage, e);
@@ -830,6 +829,7 @@ public class ApiDAOImpl implements ApiDAO {
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(addCommentQuery)) {
             try {
+                connection.setAutoCommit(false);
                 statement.setString(1, comment.getUuid());
                 statement.setString(2, comment.getCommentText());
                 statement.setString(3, comment.getCommentedUser());
@@ -839,12 +839,15 @@ public class ApiDAOImpl implements ApiDAO {
                 statement.setString(7, comment.getUpdatedUser());
                 statement.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now()));
                 statement.execute();
+                connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
                 String errorMessage =
                         "Error while adding comment for api id: " + apiId;
                 log.error(errorMessage, e);
                 throw new APIMgtDAOException(e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
             log.error("Error while creating database connection/prepared-statement", e);
@@ -861,15 +864,19 @@ public class ApiDAOImpl implements ApiDAO {
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(deleteCommentQuery)) {
             try {
+                connection.setAutoCommit(false);
                 statement.setString(1, commentId);
                 statement.setString(2, apiId);
                 statement.execute();
+                connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
                 String errorMessage =
                         "Error while deleting comment for api id: " + apiId + " and comment id: " + commentId;
                 log.error(errorMessage, e);
                 throw new APIMgtDAOException(e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
             log.error("Error while creating database connection/prepared-statement", e);
@@ -883,11 +890,12 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     public void updateComment(Comment comment, String commentId, String apiId) throws APIMgtDAOException {
         final String updateCommentQuery = "UPDATE AM_API_COMMENTS SET COMMENT_TEXT = ? , USER_IDENTIFIER = ? ,"
-                + "CREATED_BY = ? , CREATED_TIME = ?, UPDATED_BY = ? , LAST_UPDATED_TIME = ?"
-                + "WHERE UUID = ? AND API_ID = ?";
+                + " CREATED_BY = ? , CREATED_TIME = ?, UPDATED_BY = ? , LAST_UPDATED_TIME = ?"
+                + " WHERE UUID = ? AND API_ID = ?";
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(updateCommentQuery)) {
             try {
+                connection.setAutoCommit(false);
                 statement.setString(1, comment.getCommentText());
                 statement.setString(2, comment.getCommentedUser());
                 statement.setString(3, comment.getCreatedUser());
@@ -897,12 +905,15 @@ public class ApiDAOImpl implements ApiDAO {
                 statement.setString(7, commentId);
                 statement.setString(8, apiId);
                 statement.execute();
+                connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
                 String errorMessage =
                         "Error while updating comment for api id: " + apiId + " and comment id: " + commentId;
                 log.error(errorMessage, e);
                 throw new APIMgtDAOException(e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
             log.error("Error while creating database connection/prepared-statement", e);
