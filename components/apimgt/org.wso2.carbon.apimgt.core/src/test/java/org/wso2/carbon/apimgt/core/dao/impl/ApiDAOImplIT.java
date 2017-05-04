@@ -33,21 +33,231 @@ import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
-import org.wso2.carbon.apimgt.core.util.APIComparator;
+import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.APIComparator;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.core.util.EndPointComparator;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 public class ApiDAOImplIT extends DAOIntegrationTestBase {
     private static final String ADMIN = "admin";
+    private static final String CUSTOMER_ROLE = "customer";
+    private static final String EMPLOYEE_ROLE = "employee";
+    private static final String MANAGER_ROLE = "manager";
+
+
+    private Map<String, UriTemplate> getUriTemplateMap(String[] resourceArray) {
+
+        Map<String, UriTemplate> uriTemplateMap = new HashMap<>();
+        UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
+
+        for (String resource : resourceArray) {
+            String randomIdString = UUID.randomUUID().toString();
+            Map<String, String> endpointMap = new HashMap<>();
+            endpointMap.put("production", randomIdString);
+            uriTemplateBuilder.endpoint(endpointMap).
+                    templateId(randomIdString).uriTemplate(resource).
+                    authType(APIMgtConstants.AUTH_APPLICATION_LEVEL_TOKEN).policy("Unlimited").
+                    httpVerb(APIMgtConstants.FunctionsConstants.GET);
+            uriTemplateMap.put(randomIdString, uriTemplateBuilder.build());
+        }
+        return uriTemplateMap;
+    }
+
+    @Test
+    public void testAttributeSearchAPIsStore() throws Exception {
+
+        List<String> visibleRoles = new ArrayList<>();
+        List<String> apiTags = new ArrayList<>();
+        Map<String, UriTemplate> uriTemplateMap;
+
+        //Construct an API which has public visibility
+        apiTags.add("Car");
+        apiTags.add("Van");
+        //uriTemplateMap = getUriTemplateMap(new String[]{"/toyota", "/nissan"});
+        uriTemplateMap = new HashMap<>();
+        addAPIWithGivenData("PublicAPI", "1.2.3", "PublicContext", "Paul", API.Visibility.PUBLIC,
+                null, APIStatus.CREATED.getStatus(), "This is a public API, visible to all.",
+                apiTags, uriTemplateMap, APIStatus.PUBLISHED.getStatus());
+        visibleRoles.clear();
+        apiTags.clear();
+        uriTemplateMap.clear();
+
+        //Construct an API which is visible to manager role only
+        apiTags.add("Pizza");
+        apiTags.add("Cake");
+        //uriTemplateMap = getUriTemplateMap(new String[]{"/pizzahut", "/dominos"});
+        visibleRoles.add(MANAGER_ROLE);
+        addAPIWithGivenData("ManagerOnlyAPI", "2.3.4", "managerContext", "Mark",
+                API.Visibility.RESTRICTED, visibleRoles, APIStatus.CREATED.getStatus(),
+                "Users with manager role can view this API.", apiTags, uriTemplateMap,
+                APIStatus.PUBLISHED.getStatus());
+        visibleRoles.clear();
+        apiTags.clear();
+        uriTemplateMap.clear();
+
+        //Construct an API which is visible to admin and manager roles
+        apiTags.add("Java");
+        //uriTemplateMap = getUriTemplateMap(new String[]{"/desktop", "/laptop"});
+        visibleRoles.add(ADMIN);
+        visibleRoles.add(MANAGER_ROLE);
+        addAPIWithGivenData("AdminManagerAPI", "3.4.5", "adminManager", "Alex",
+                API.Visibility.RESTRICTED, visibleRoles, APIStatus.CREATED.getStatus(),
+                "Admin and manager can see this API.", apiTags, uriTemplateMap,
+                APIStatus.PUBLISHED.getStatus());
+        visibleRoles.clear();
+        apiTags.clear();
+        uriTemplateMap.clear();
+
+        //Construct an API in created state, this should not be shown in store
+        apiTags.add("Movie");
+        apiTags.add("TV");
+        //uriTemplateMap = getUriTemplateMap(new String[]{"/cnn", "/bbc"});
+        addAPIWithGivenData("CreatedStateAPI", "4.5.6", "createdContext", "Colin",
+                API.Visibility.PUBLIC, null, APIStatus.CREATED.getStatus(),
+                "This API is in created state. Should not be shown in store.", apiTags,
+                uriTemplateMap, APIStatus.CREATED.getStatus());
+        visibleRoles.clear();
+        apiTags.clear();
+        uriTemplateMap.clear();
+
+        //Construct an API which is visible to employee role only
+        apiTags.add("Salary");
+        apiTags.add("Bonus");
+        //uriTemplateMap = getUriTemplateMap(new String[]{"/cash", "/cheque"});
+        visibleRoles.add(EMPLOYEE_ROLE);
+        addAPIWithGivenData("EmployeeAPI", "5.6.7", "employeeCtx", "Emma",
+                API.Visibility.RESTRICTED, visibleRoles, APIStatus.CREATED.getStatus(),
+                "API for Employees.", apiTags, uriTemplateMap, APIStatus.PUBLISHED.getStatus());
+        visibleRoles.clear();
+        apiTags.clear();
+        uriTemplateMap.clear();
+
+        //Construct an API which is visible to all roles, except admin role
+        apiTags.add("Science");
+        apiTags.add("Technology");
+        //uriTemplateMap = getUriTemplateMap(new String[]{"/velocity", "/distance"});
+        visibleRoles.add(EMPLOYEE_ROLE);
+        visibleRoles.add(MANAGER_ROLE);
+        visibleRoles.add(CUSTOMER_ROLE);
+        addAPIWithGivenData("NonAdminAPI", "6.7.8", "nonAdmin", "Nancy", API.Visibility.RESTRICTED,
+                visibleRoles, APIStatus.CREATED.getStatus(),
+                "This API should be visible to all roles, except admin role.", apiTags,
+                uriTemplateMap, APIStatus.PROTOTYPED.getStatus());
+        visibleRoles.clear();
+        apiTags.clear();
+        uriTemplateMap.clear();
+
+        //Asserting results for different search queries
+        List<String> userRoles = new ArrayList<>();
+        Map<String, String> attributeMap = new HashMap<>();
+        String[] expectedAPINames;
+
+        //Attribute search for "provider", for "admin" role
+        userRoles.add(ADMIN);
+        attributeMap.put("provider", "a");
+        expectedAPINames = new String[]{"PublicAPI", "AdminManagerAPI"};
+        compareResults(userRoles, attributeMap, expectedAPINames);
+        userRoles.clear();
+        attributeMap.clear();
+
+        //Attribute search for "version", for "manager" role
+        userRoles.add(MANAGER_ROLE);
+        attributeMap.put("version", "2");
+        expectedAPINames = new String[]{""};
+        compareResults(userRoles, attributeMap, expectedAPINames);
+        userRoles.clear();
+        attributeMap.clear();
+
+        //Attribute search for "context", for "manager", "employee" and "customer" roles
+        userRoles.add(MANAGER_ROLE);
+        userRoles.add(EMPLOYEE_ROLE);
+        userRoles.add(CUSTOMER_ROLE);
+        attributeMap.put("context", "ctx");
+        expectedAPINames = new String[]{""};
+        compareResults(userRoles, attributeMap, expectedAPINames);
+        userRoles.clear();
+        attributeMap.clear();
+
+        //Attribute search for "description", for "admin" role
+        userRoles.add(ADMIN);
+        attributeMap.put("description", "e");
+        expectedAPINames = new String[]{""};
+        compareResults(userRoles, attributeMap, expectedAPINames);
+        userRoles.clear();
+        attributeMap.clear();
+
+        //Attribute search for "tags", for "manager", "employee" and "customer" roles
+        userRoles.add(MANAGER_ROLE);
+        userRoles.add(EMPLOYEE_ROLE);
+        userRoles.add(CUSTOMER_ROLE);
+        attributeMap.put("tags", "tag1");
+        expectedAPINames = new String[]{""};
+        compareResults(userRoles, attributeMap, expectedAPINames);
+        userRoles.clear();
+        attributeMap.clear();
+
+        //Attribute search for "subcontext", for "manager", "employee" and "customer" roles
+        userRoles.add(MANAGER_ROLE);
+        userRoles.add(EMPLOYEE_ROLE);
+        userRoles.add(CUSTOMER_ROLE);
+        attributeMap.put("subcontext", "subctx");
+        expectedAPINames = new String[]{""};
+        compareResults(userRoles, attributeMap, expectedAPINames);
+        userRoles.clear();
+        attributeMap.clear();
+    }
+
+    private boolean compareResults(List<String> userRoles, Map<String, String> attributeMap,
+                                   String[] expectedAPINames) throws APIMgtDAOException {
+
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        List<API> apiList = apiDAO.attributeSearchAPIsStore(userRoles, attributeMap, 10, 0);
+        List<String> resultAPINameList = new ArrayList<>();
+        for (API api : apiList) {
+            resultAPINameList.add(api.getName());
+        }
+        List<String> expectedAPINameList = Arrays.asList(expectedAPINames);
+        return resultAPINameList.containsAll(expectedAPINameList) &&
+                expectedAPINameList.containsAll(resultAPINameList);
+    }
+
+    private void addAPIWithGivenData(String apiName, String apiVersion, String apiContext,
+                                     String apiProvider, API.Visibility apiVisibility,
+                                     List<String> visibleRoles, String initialLifecycleStatus,
+                                     String description, List<String> tags,
+                                     Map<String, UriTemplate> uriTemplates,
+                                     String finalLifecycleStatus) throws APIMgtDAOException {
+
+        API.APIBuilder builder;
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        builder = SampleTestObjectCreator.createCustomAPI(apiName, apiVersion, apiContext);
+        builder.createdBy(apiProvider);
+        builder.visibility(apiVisibility);
+        if (apiVisibility != null && API.Visibility.RESTRICTED.toString().
+                equalsIgnoreCase(apiVisibility.toString())) {
+            builder.visibleRoles(visibleRoles);
+        }
+        builder.lifeCycleStatus(initialLifecycleStatus);
+        builder.description(description);
+        builder.tags(tags);
+        builder.uriTemplates(uriTemplates);
+        builder.endpoint(Collections.emptyMap());
+        API api = builder.build();
+        apiDAO.addAPI(api);
+        apiDAO.changeLifeCycleStatus(api.getId(), finalLifecycleStatus);
+    }
 
     @Test
     public void testAddGetAPI() throws Exception {
