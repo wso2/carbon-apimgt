@@ -5,6 +5,7 @@ import org.wso2.carbon.apimgt.rest.api.core.dto.*;
 
 import org.wso2.msf4j.formparam.FormDataParam;
 import org.wso2.msf4j.formparam.FileInfo;
+import org.wso2.msf4j.Request;
 
 import org.wso2.carbon.apimgt.rest.api.core.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.RegistrationDTO;
@@ -18,9 +19,9 @@ import java.io.InputStream;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-06T17:56:22.612+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-27T16:59:46.102+05:30")
 public abstract class GatewaysApiService {
     public abstract Response gatewaysRegisterPost(RegistrationDTO body
  ,String contentType
- ) throws NotFoundException;
+ , Request request) throws NotFoundException;
 }

@@ -29,7 +29,7 @@ public enum ExceptionCodes implements ErrorHandler {
     // API, Application related codes
     API_ALREADY_EXISTS(900300, "The API already exists.", 409, " The API already exists"),
     APPLICATION_ALREADY_EXISTS(900301, "The application already exists.", 409, " The application already exists"),
-    APIMGT_DAO_EXCEPTION(900302, "Internal server error.", 500, " Error occurred while persisting data"),
+    APIMGT_DAO_EXCEPTION(900302, "Internal server error.", 500, " Error occurred while persisting/retrieving data"),
     APIMGT_LIFECYCLE_EXCEPTION(900303, "Lifecycle exception occurred", 500, " Error occurred while changing " +
             "lifecycle state"),
     TIER_CANNOT_BE_NULL(900304, "The tier cannot be null.", 400, " The tier cannot be null"),
@@ -50,6 +50,7 @@ public enum ExceptionCodes implements ErrorHandler {
     API_IMPORT_ERROR(900317, "API import Error", 500, "Error while importing the given APIs"),
     SUBSCRIPTION_STATE_INVALID(900318, "Invalid state change for subscription", 400, "Invalid state change for " +
             "subscription"),
+    COMMENT_NOT_FOUND(900319, "Comment not found", 404, "Couldn't retrieve comment"),
 
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),
@@ -70,9 +71,9 @@ public enum ExceptionCodes implements ErrorHandler {
     // Workflow related codes
     WORKFLOW_EXCEPTION(900550, "Workflow error", 500,
             "Error occurred while executing workflow task"),
-    WORKFLOW_NOT_FOUND(900551, "Workflow error", 500,
+    WORKFLOW_NOT_FOUND(900551, "Workflow error", 404,
             "Workflow entry cannot be found for the given reference id"),
-    WORKFLOW_COMPLETED(900552, "Workflow error", 500,
+    WORKFLOW_ALREADY_COMPLETED(900552, "Workflow error", 400,
             "Workflow is already completed"),
     WORKFLOW_PENDING(900553, "Workflow exception", 409,
             "Pending workflow task exists for the seleted API"),
@@ -81,6 +82,7 @@ public enum ExceptionCodes implements ErrorHandler {
     WORKFLOW_STATE_MISSING(900556, "Workflow error", 400, "Workflow status is not defined"),
     WORKFLOW_NO_PENDING_TASK(900557, "Workflow error", 412,
             "Requested resource does not have a pending workflow task"),
+    WORKFLOW_REJCECTED(900558, "Workflow error", 403, "Requested action is rejected"),
 
     // Auth related codes
     ROLES_CANNOT_BE_EMPTY(900600, "Role list cannot be empty", 400, " Role list cannot be empty"),
@@ -92,7 +94,7 @@ public enum ExceptionCodes implements ErrorHandler {
     // Labels related codes
     LABEL_INFORMATION_CANNOT_BE_NULL(900650, "Label information cannot be null", 400, "Label information cannot be " +
             "null"),
-    LABEL_INFORMATION_EXCEPTION(900651, "Label Info error", 500, "Error occurred while retrieving label information"),
+    LABEL_EXCEPTION(900651, "Label Error", 500, "Error occurred while retrieving label information"),
 
 
     // REST API related codes

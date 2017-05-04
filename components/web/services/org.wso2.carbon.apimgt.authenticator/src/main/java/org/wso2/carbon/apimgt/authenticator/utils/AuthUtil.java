@@ -143,14 +143,14 @@ public class AuthUtil {
      */
     public static String extractTokenFromHeaders(Headers headers, String cookieHeader) {
         String authHeader = headers.get(AuthenticatorConstants.AUTHORIZATION_HTTP_HEADER);
-        String refreshToken = "";
+        String token = "";
         if (authHeader != null) {
             authHeader = authHeader.trim();
             if (authHeader.toLowerCase(Locale.US).startsWith(AuthenticatorConstants.BEARER_PREFIX)) {
                 // Split the auth header to get the access token.
                 String[] authHeaderParts = authHeader.split(" ");
                 if (authHeaderParts.length == 2) {
-                    refreshToken = authHeaderParts[1];
+                    token = authHeaderParts[1];
                 } else if (authHeaderParts.length < 2) {
                     return null;
                 }
@@ -162,19 +162,14 @@ public class AuthUtil {
         if (cookie != null) {
             cookie = cookie.trim();
             String[] cookies = cookie.split(";");
-            String token = Arrays.stream(cookies).filter(name -> name.contains(cookieHeader))
-                    .findFirst().orElse("");
-            String[] tokenParts = token.split("=");
+            String tokenFromCookie = Arrays.stream(cookies).filter(name -> name.contains(cookieHeader)).findFirst()
+                    .orElse("");
+            String[] tokenParts = tokenFromCookie.split("=");
             if (tokenParts.length == 2) {
-                refreshToken += tokenParts[1];
-            } else {
-                return null;
+                token += tokenParts[1];
             }
-
-        } else {
-            return null;
         }
-        return refreshToken;
+        return token;
     }
 
     /**

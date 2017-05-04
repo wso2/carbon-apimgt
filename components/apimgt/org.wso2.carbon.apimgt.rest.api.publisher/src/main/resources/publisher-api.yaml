@@ -84,6 +84,10 @@ x-wso2-security:
         roles: admin
         name: apim:subscription_block
         key: apim:subscription_block
+      - description: ""
+        roles: admin
+        name: apim:workflow_approve
+        key: apim:workflow_approve 
 
 ######################################################
 # The "API Collection" resource APIs
@@ -2748,18 +2752,18 @@ paths:
 ######################################################
 # The "Workflow approval" resource API
 ######################################################
-  /workflows/update-workflow-status:
+  /workflows/{workflowReferenceId}:
 
 #-------------------------------------------------------------------
 # Resume the workflow by approving or rejecting the workflow request
 #-------------------------------------------------------------------
-    post:
-      x-scope: apim:api_workflow
+    put:
+      x-scope: apim:workflow_approve
       summary: Update workflow status
       description: |
         This operation can be used to approve or reject a workflow task. .
       parameters:
-       - $ref: '#/parameters/workflowReferenceId-Q'
+       - $ref: '#/parameters/workflowReferenceId'
        - in: body
          name: body
          description: |
@@ -3040,9 +3044,9 @@ parameters:
 
 # Workflow reference ID
 # Specified as part of the path expression
-  workflowReferenceId-Q:
+  workflowReferenceId:
     name: workflowReferenceId
-    in: query
+    in: path
     description: |
       Workflow reference id
     required: true

@@ -7,6 +7,7 @@ import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
+import org.wso2.carbon.apimgt.core.exception.APIConfigRetrievalException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
@@ -170,4 +171,19 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
 
     }
+
+    /**
+     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#getAPIGatewayServiceConfig(String) (String)
+     */
+    @Override
+    public String getAPIGatewayServiceConfig(String apiId) throws APIConfigRetrievalException {
+        try {
+            return apiDAO.getGatewayConfig(apiId);
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't retrieve gateway configuration for apiId " + apiId;
+            log.error(errorMessage, e);
+            throw new APIConfigRetrievalException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
 }

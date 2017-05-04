@@ -26,7 +26,6 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.carbon.apimgt.core.TestUtil;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
@@ -38,6 +37,9 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 
 public class SubscriptionRetrievalClientIT {
 
+    private static final int APIM_REST_API_PORT = 9292;
+    private static final int TEST_PORT_OFFSET = 500;
+
     private WireMockServer wireMockServer;
     private JsonArray subscriptions;
     private JsonObject subscription;
@@ -45,10 +47,10 @@ public class SubscriptionRetrievalClientIT {
 
     @BeforeClass
     public void init() {
-        apimCoreBaseUrl = "http://localhost:" + TestUtil.getRestApiPort();
-        wireMockServer = new WireMockServer(options().port(TestUtil.getRestApiPort()));
+        apimCoreBaseUrl = "http://localhost:" + getRestApiPort();
+        wireMockServer = new WireMockServer(options().port(getRestApiPort()));
         wireMockServer.start();
-        configureFor("127.0.0.1", TestUtil.getRestApiPort());
+        configureFor("127.0.0.1", getRestApiPort());
 
         subscriptions = new JsonArray();
         for (int i = 0; i < 3; i++) {
@@ -149,4 +151,9 @@ public class SubscriptionRetrievalClientIT {
         wireMockServer.resetAll();
         wireMockServer.stop();
     }
+
+    public static int getRestApiPort() {
+        return APIM_REST_API_PORT + TEST_PORT_OFFSET;
+    }
+
 }

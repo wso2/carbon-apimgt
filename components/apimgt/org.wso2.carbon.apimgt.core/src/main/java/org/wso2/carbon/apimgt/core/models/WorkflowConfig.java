@@ -37,23 +37,28 @@ public class WorkflowConfig {
     private WorkflowExecutorInfo applicationDeletion;
     @Element (description = "executor for state change workflow")
     private WorkflowExecutorInfo apiStateChange;
+    @Element (description = "executor for application update workflow")
+    private WorkflowExecutorInfo applicationUpdate;
     
     public WorkflowConfig() {
         
         applicationCreation = new WorkflowExecutorInfo();
-        applicationCreation.setExecutor(APIMgtConstants.WF_DEFAULT_APPCREATION_EXEC);
+        applicationCreation.setExecutor(APIMgtConstants.WF_DEFAULT_WF_EXEC);
 
         apiStateChange = new WorkflowExecutorInfo();
-        apiStateChange.setExecutor(APIMgtConstants.WF_DEFAULT_APISTATE_EXEC);
+        apiStateChange.setExecutor(APIMgtConstants.WF_DEFAULT_WF_EXEC);
 
         applicationDeletion = new WorkflowExecutorInfo();
-        applicationDeletion.setExecutor(APIMgtConstants.WF_DEFAULT_APPDELETE_EXEC);
+        applicationDeletion.setExecutor(APIMgtConstants.WF_DEFAULT_WF_EXEC);
 
         subscriptionCreation = new WorkflowExecutorInfo();
-        subscriptionCreation.setExecutor(APIMgtConstants.WF_DEFAULT_SUBCREATION_EXEC);
+        subscriptionCreation.setExecutor(APIMgtConstants.WF_DEFAULT_WF_EXEC);
 
         subscriptionDeletion = new WorkflowExecutorInfo();
-        subscriptionDeletion.setExecutor(APIMgtConstants.WF_DEFAULT_SUBDELETE_EXEC);
+        subscriptionDeletion.setExecutor(APIMgtConstants.WF_DEFAULT_WF_EXEC);
+        
+        applicationUpdate = new WorkflowExecutorInfo();
+        applicationUpdate.setExecutor(APIMgtConstants.WF_DEFAULT_WF_EXEC);
 
     }
 
@@ -97,11 +102,19 @@ public class WorkflowConfig {
         this.apiStateChange = apiStateChange;
     }
 
+    public WorkflowExecutorInfo getApplicationUpdate() {
+        return applicationUpdate;
+    }
+
+    public void setApplicationUpdate(WorkflowExecutorInfo applicationUpdate) {
+        this.applicationUpdate = applicationUpdate;
+    }
+
     @Override
     public String toString() {
         return "WorkflowConfig [applicationCreation=" + applicationCreation + ", subscriptionCreation="
                 + subscriptionCreation + ", subscriptionDeletion=" + subscriptionDeletion + ", applicationDeletion="
-                + applicationDeletion + ", apiStateChange=" + apiStateChange + "]";
-    }   
-
+                + applicationDeletion + ", apiStateChange=" + apiStateChange + ", applicationUpdate="
+                + applicationUpdate + "]";
+    }    
 }

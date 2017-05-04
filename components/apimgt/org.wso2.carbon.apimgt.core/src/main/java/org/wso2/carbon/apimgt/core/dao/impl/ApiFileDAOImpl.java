@@ -422,6 +422,43 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
+     * @see ApiDAO#addComment(Comment , String)
+     */
+    @Override
+    public void addComment(Comment comment, String apiId) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @see ApiDAO#deleteComment(String, String)
+     */
+    @Override
+    public void deleteComment(String commentId, String apiId) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @see ApiDAO#updateComment(Comment, String, String)
+     */
+    @Override
+    public void updateComment(Comment comment, String commentId, String apiId) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @see ApiDAO#getCommentsForApi(String)
+     */
+    @Override
+    public List<Comment> getCommentsForApi(String apiId) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getLastUpdatedTimeOfComment(String commentId) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * @see ApiDAO#getAPIs()
      */
     @Override

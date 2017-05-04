@@ -18,24 +18,31 @@
  *
  */
 
-package org.wso2.carbon.apimgt.core.impl;
-
-import org.wso2.carbon.apimgt.core.api.LabelExtractor;
-import org.wso2.carbon.apimgt.core.exception.LabelException;
-import org.wso2.carbon.apimgt.core.models.Label;
-
-import java.util.List;
+package org.wso2.carbon.apimgt.core.exception;
 
 /**
- * Default Implementation of Label Extractor.
+ * Exception class for API gateway configuration retrieval failures
  */
-public class DefaultLabelExtractorImpl implements LabelExtractor {
+public class APIConfigRetrievalException extends APIManagementException {
 
-    /**
-     * @see LabelExtractor#filterLabels(String, List)
-     */
-    @Override
-    public List<Label> filterLabels(String username, List<Label> labels) throws LabelException {
-        return labels;
+    public APIConfigRetrievalException(String msg, ExceptionCodes code) {
+        super(msg, code);
+    }
+
+    public APIConfigRetrievalException(String msg, Throwable e, ExceptionCodes code) {
+        super(msg, e, code);
+    }
+
+    public APIConfigRetrievalException(String msg) {
+        super(msg);
+    }
+
+    public APIConfigRetrievalException(String msg, Throwable e) {
+        super(msg, e);
+    }
+
+    public APIConfigRetrievalException(Throwable throwable) {
+        super(throwable);
     }
 }
+

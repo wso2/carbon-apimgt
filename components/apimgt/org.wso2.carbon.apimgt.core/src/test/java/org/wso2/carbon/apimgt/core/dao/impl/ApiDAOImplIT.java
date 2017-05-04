@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
+import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
@@ -52,6 +53,7 @@ import java.util.UUID;
 
 public class ApiDAOImplIT extends DAOIntegrationTestBase {
     private static final String ADMIN = "admin";
+    private static final String CREATOR = "creator";
     private static final String CUSTOMER_ROLE = "customer";
     private static final String EMPLOYEE_ROLE = "employee";
     private static final String MANAGER_ROLE = "manager";
@@ -1191,4 +1193,160 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertFalse(apiDAO.isDocumentExist(api.getId(), documentInfo));
     }
 
+    @Test
+    public void testAddGetComment() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
+                .apiDefinition(SampleTestObjectCreator.apiDefinition);
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
+        apiDAO.addComment(comment, api.getId());
+        Comment commentFromDB = apiDAO.getCommentByUUID(comment.getUuid(), api.getId());
+        Assert.assertNotNull(commentFromDB);
+    }
+
+    @Test
+    public void testDeleteComment() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
+                .apiDefinition(SampleTestObjectCreator.apiDefinition);
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
+        apiDAO.addComment(comment, api.getId());
+        apiDAO.deleteComment(comment.getUuid(), api.getId());
+        Comment commentFromDB = apiDAO.getCommentByUUID(comment.getUuid(), api.getId());
+        Assert.assertNull(commentFromDB);
+    }
+
+    @Test
+    public void testUpdateComment() throws Exception {
+        String newCommentText = "updated comment";
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
+                .apiDefinition(SampleTestObjectCreator.apiDefinition);
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+        Comment comment1 = SampleTestObjectCreator.createDefaultComment(api.getId());
+        apiDAO.addComment(comment1, api.getId());
+        Comment comment2 = SampleTestObjectCreator.createDefaultComment(api.getId());
+        comment2.setCommentText(newCommentText);
+        apiDAO.updateComment(comment2, comment1.getUuid(), api.getId());
+        Comment commentFromDB = apiDAO.getCommentByUUID(comment1.getUuid(), api.getId());
+        Assert.assertNotNull(commentFromDB);
+        Assert.assertEquals(newCommentText, commentFromDB.getCommentText());
+
+    }
+
+    @Test(expectedExceptions = APIMgtDAOException.class)
+    public void testGetAPIByStatus() throws Exception {
+
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        // Define statuses used in test
+        final String publishedStatus = "PUBLISHED";
+        final String createdStatus = "CREATED";
+        final String blockedStatus = "BLOCKED";
+        // Define number of APIs to be created for a given status by role
+        final int numberOfPublishedAdmin = 4;
+        final int numberOfCreatedAdmin = 2;
+        final int numberOfBlockedAdmin = 1;
+        final int numberOfPublishedCreator = 5;
+        final int numberOfCreatedCreator = 3;
+        final int numberOfBlockedCreator = 1;
+
+        List<String> singleRole = new ArrayList<>();
+        singleRole.add(ADMIN);
+        // Add APIs
+        List<API> publishedAPIsSummaryAdmin = new ArrayList<>();
+        testAddGetEndpoint();
+        for (int i = 0; i < numberOfPublishedAdmin; ++i) {
+            API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(publishedStatus).
+                    visibleRoles(singleRole).build();
+            publishedAPIsSummaryAdmin.add(SampleTestObjectCreator.getSummaryFromAPI(api));
+            apiDAO.addAPI(api);
+        }
+        List<API> createdAPIsSummaryAdmin = new ArrayList<>();
+        for (int i = 0; i < numberOfCreatedAdmin; ++i) {
+            API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(createdStatus).
+                    visibleRoles(singleRole).build();
+            createdAPIsSummaryAdmin.add(SampleTestObjectCreator.getSummaryFromAPI(api));
+            apiDAO.addAPI(api);
+        }
+        List<API> blockedAPIsSummaryAdmin = new ArrayList<>();
+        for (int i = 0; i < numberOfBlockedAdmin; ++i) {
+            API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(blockedStatus).
+                    visibleRoles(singleRole).build();
+            blockedAPIsSummaryAdmin.add(SampleTestObjectCreator.getSummaryFromAPI(api));
+            apiDAO.addAPI(api);
+        }
+        // Filter APIs by single status
+        List<String> singleStatus = new ArrayList<>();
+        singleStatus.add(publishedStatus);
+        List<API> apiList = apiDAO.getAPIsByStatus(singleRole, singleStatus);
+        Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, publishedAPIsSummaryAdmin, new APIComparator()));
+        List<String> twoStatus = new ArrayList<>();
+        twoStatus.add(createdStatus);
+        twoStatus.add(blockedStatus);
+        List<String> twoRoles = new ArrayList<>();
+        twoRoles.add(ADMIN);
+        twoRoles.add(CREATOR);
+        // Add APIs
+        List<API> publishedAPIsSummaryTwoRoles = new ArrayList<>();
+        testAddGetEndpoint();
+        for (int i = 0; i < numberOfPublishedCreator; ++i) {
+            API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(publishedStatus).
+                    visibleRoles(twoRoles).build();
+            publishedAPIsSummaryTwoRoles.add(SampleTestObjectCreator.getSummaryFromAPI(api));
+            apiDAO.addAPI(api);
+        }
+        List<API> createdAPIsSummaryTwoRoles = new ArrayList<>();
+        for (int i = 0; i < numberOfCreatedCreator; ++i) {
+            API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(createdStatus).
+                    visibleRoles(twoRoles).build();
+            createdAPIsSummaryTwoRoles.add(SampleTestObjectCreator.getSummaryFromAPI(api));
+            apiDAO.addAPI(api);
+        }
+        List<API> blockedAPIsSummaryTwoRoles = new ArrayList<>();
+        for (int i = 0; i < numberOfBlockedCreator; ++i) {
+            API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(blockedStatus).
+                    visibleRoles(twoRoles).build();
+            blockedAPIsSummaryTwoRoles.add(SampleTestObjectCreator.getSummaryFromAPI(api));
+            apiDAO.addAPI(api);
+        }
+        apiList = apiDAO.getAPIsByStatus(twoRoles, twoRoles);
+        Assert.assertEquals(apiList.size(), publishedAPIsSummaryTwoRoles.size() + blockedAPIsSummaryTwoRoles.size());
+        for (API api : publishedAPIsSummaryTwoRoles) {
+            Assert.assertTrue(apiList.contains(api));
+            apiList.remove(api);
+        }
+        for (API api : blockedAPIsSummaryTwoRoles) {
+            Assert.assertTrue(apiList.contains(api));
+            apiList.remove(api);
+        }
+        Assert.assertTrue(apiList.isEmpty());
+
+    }
+
+    @Test
+    public void testUpdateAPIWithBlankwsdlUri() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+        Map permissionMap = new HashMap();
+        permissionMap.put(APIMgtConstants.Permission.UPDATE, APIMgtConstants.Permission.UPDATE_PERMISSION);
+        builder = SampleTestObjectCreator.createAlternativeAPI().permissionMap(permissionMap).wsdlUri(null);
+        API substituteAPI = builder.build();
+        apiDAO.updateAPI(api.getId(), substituteAPI);
+        API apiFromDB = apiDAO.getAPI(api.getId());
+        API expectedAPI = SampleTestObjectCreator.copyAPIIgnoringNonEditableFields(api, substituteAPI);
+        Assert.assertNotNull(apiFromDB);
+        Assert.assertEquals(apiFromDB, expectedAPI, TestUtil.printDiff(apiFromDB, expectedAPI));
+
+    }
 }

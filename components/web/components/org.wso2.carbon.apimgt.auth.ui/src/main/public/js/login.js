@@ -29,6 +29,7 @@ $(function(){
             var expiresIn = data.validityPeriod + Math.floor(Date.now() / 1000);
             window.localStorage.setItem("expiresIn", expiresIn);
             window.localStorage.setItem("user", data.authUser);
+            window.localStorage.setItem("rememberMe", $("#rememberMe").is(':checked'));
             /*$.cookie('token', data.access_token, { path: '/' });
             $.cookie('user', 'admin', { path: '/' });
             $.cookie('userScope', data.scope, { path: '/' });*/

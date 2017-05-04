@@ -19,9 +19,6 @@ package org.wso2.carbon.apimgt.core.workflow;
 
 import org.json.simple.JSONObject;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * HTTP workflow response. Can be used to pass workflow complete redirections
  */
@@ -30,25 +27,19 @@ public class HttpWorkflowResponse extends AbstractWorkflowResponse {
     private String redirectUrl = "";
     private String redirectConfirmationMsg = "";
     private JSONObject jsonPayloadObj = new JSONObject();
-    private Map<String, String> additionalParameters = new HashMap<>();
+    private JSONObject additionalParameters = new JSONObject();
     
     private static final String REDIRECT_URL = "redirectUrl";
     private static final String CONF_MSG = "redirectConfirmationMsg";
+    private static final String ADDITIONAL_PARAM = "additionalParameters";
 
     @Override
     @SuppressWarnings("unchecked")
     public String getJSONPayload() {
-        if (additionalParameters != null && !additionalParameters.isEmpty()) {
-            redirectUrl = redirectUrl.concat("?");
-            for (Map.Entry<String, String> entry : additionalParameters.entrySet()) {
-                redirectUrl = redirectUrl.concat(((entry.getKey().concat("=")).concat(entry.getValue())).concat("&"));
-            }
-            //remove tailing "&"
-            redirectUrl = redirectUrl.substring(0, redirectUrl.length() - 1);
-        }
 
         jsonPayloadObj.put(REDIRECT_URL, redirectUrl);
         jsonPayloadObj.put(CONF_MSG, redirectConfirmationMsg);
+        jsonPayloadObj.put(ADDITIONAL_PARAM, additionalParameters);
 
         return jsonPayloadObj.toJSONString();
     }
@@ -74,7 +65,7 @@ public class HttpWorkflowResponse extends AbstractWorkflowResponse {
         additionalParameters.put(paramName, paramValue);
     }
 
-    public Map getAdditionalParameterss() {
+    public JSONObject getAdditionalParameterss() {
         return additionalParameters;
     }    
 }

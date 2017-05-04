@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
+import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
@@ -37,7 +38,14 @@ import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.BandwidthLimit;
+import org.wso2.carbon.apimgt.core.models.policy.Condition;
+import org.wso2.carbon.apimgt.core.models.policy.HeaderCondition;
+import org.wso2.carbon.apimgt.core.models.policy.IPCondition;
+import org.wso2.carbon.apimgt.core.models.policy.JWTClaimsCondition;
+import org.wso2.carbon.apimgt.core.models.policy.Pipeline;
 import org.wso2.carbon.apimgt.core.models.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.core.models.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.core.models.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
@@ -84,6 +92,7 @@ public class SampleTestObjectCreator {
     private static final String FIFTY_PER_MIN_TIER = "50PerMin";
     private static final String TWENTY_PER_MIN_TIER = "20PerMin";
     private static final String TIME_UNIT_SECONDS = "s";
+    private static final String TIME_UNIT_MONTH = "Month";
     private static final String CUSTOMER_ROLE = "customer";
     private static final String EMPLOYEE_ROLE = "employee";
     private static final String MANAGER_ROLE = "manager";
@@ -465,6 +474,11 @@ public class SampleTestObjectCreator {
         return application;
     }
 
+    /**
+     * create default api policy
+     *
+     * @return APIPolicy object is returned
+     */
     public static APIPolicy createDefaultAPIPolicy() {
         APIPolicy apiPolicy = new APIPolicy(SAMPLE_API_POLICY);
         apiPolicy.setDisplayName(SAMPLE_API_POLICY);
@@ -477,6 +491,97 @@ public class SampleTestObjectCreator {
         requestCountLimit.setRequestCount(10000);
         requestCountLimit.setUnitTime(1000);
         defaultQuotaPolicy.setLimit(requestCountLimit);
+        apiPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+        apiPolicy.setPipelines(createDefaultPipelines());
+        return apiPolicy;
+    }
+
+    /**
+     * create default pipeline for api policy
+     *
+     * @return list of Pipeline objects is returned
+     */
+    public static List<Pipeline> createDefaultPipelines() {
+        //Pipeline 1
+        IPCondition ipCondition = new IPCondition(PolicyConstants.IP_RANGE_TYPE);
+        ipCondition.setStartingIP("192.168.12.3");
+        ipCondition.setEndingIP("192.168.88.19");
+        IPCondition ipConditionSpecific = new IPCondition(PolicyConstants.IP_SPECIFIC_TYPE);
+        ipConditionSpecific.setSpecificIP("123.42.14.56");
+
+        //adding above conditions to condition list of pipeline 1
+        List<Condition> conditionsList = new ArrayList<>(); //contains conditions for each pipeline
+        conditionsList.add(ipCondition);
+        conditionsList.add(ipConditionSpecific);
+        //set quota policy with bandwidth limit
+        BandwidthLimit bandwidthLimit = new BandwidthLimit();
+        bandwidthLimit.setDataAmount(1000);
+        bandwidthLimit.setDataUnit(PolicyConstants.MB);
+        bandwidthLimit.setUnitTime(1);
+        bandwidthLimit.setTimeUnit(TIME_UNIT_MONTH);
+        QuotaPolicy quotaPolicy1 = new QuotaPolicy();
+        quotaPolicy1.setType(PolicyConstants.BANDWIDTH_TYPE);
+        quotaPolicy1.setLimit(bandwidthLimit);
+
+        Pipeline pipeline1 = new Pipeline();
+        pipeline1.setConditions(conditionsList);
+        pipeline1.setQuotaPolicy(quotaPolicy1);
+
+        //End of pipeline 1 -> Beginning of pipeline 2
+        HeaderCondition headerCondition = new HeaderCondition();
+        headerCondition.setHeader("Browser");
+        headerCondition.setValue("Chrome");
+        JWTClaimsCondition jwtClaimsCondition = new JWTClaimsCondition();
+        jwtClaimsCondition.setClaimUrl("/path/path2");
+        jwtClaimsCondition.setAttribute("attributed");
+        QueryParameterCondition queryParameterCondition = new QueryParameterCondition();
+        queryParameterCondition.setParameter("Location");
+        queryParameterCondition.setValue("Colombo");
+
+        //adding conditions to condition list of pipeline2
+        conditionsList = new ArrayList<>();
+        conditionsList.add(headerCondition);
+        conditionsList.add(jwtClaimsCondition);
+        conditionsList.add(queryParameterCondition);
+        //pipeline 2 with request count as quota policy
+        RequestCountLimit requestCountLimit = new RequestCountLimit();
+        requestCountLimit.setRequestCount(1000);
+        requestCountLimit.setUnitTime(1);
+        requestCountLimit.setTimeUnit(TIME_UNIT_SECONDS);
+        QuotaPolicy quotaPolicy2 = new QuotaPolicy();
+        quotaPolicy2.setType(PolicyConstants.REQUEST_COUNT_TYPE);
+        quotaPolicy2.setLimit(requestCountLimit);
+
+        Pipeline pipeline2 = new Pipeline();
+        pipeline2.setConditions(conditionsList);
+        pipeline2.setQuotaPolicy(quotaPolicy2);
+        //adding pipelines
+        List<Pipeline> pipelineList = new ArrayList<>();    //contains all the default pipelines
+        pipelineList.add(pipeline1);
+        pipelineList.add(pipeline2);
+
+        return pipelineList;
+    }
+
+    /**
+     * Create default api policy with bandwidth limit as quota policy
+     *
+     * @return APIPolicy object with bandwidth limit as quota policy is returned
+     */
+    public static APIPolicy createDefaultAPIPolicyWithBandwidthLimit() {
+        BandwidthLimit bandwidthLimit = new BandwidthLimit();
+        bandwidthLimit.setDataAmount(1000);
+        bandwidthLimit.setDataUnit(PolicyConstants.MB);
+        bandwidthLimit.setUnitTime(1);
+        bandwidthLimit.setTimeUnit(TIME_UNIT_MONTH);
+        QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+        defaultQuotaPolicy.setType(PolicyConstants.BANDWIDTH_TYPE);
+        defaultQuotaPolicy.setLimit(bandwidthLimit);
+        //set default API Policy
+        APIPolicy apiPolicy = new APIPolicy(SAMPLE_API_POLICY);
+        apiPolicy.setDisplayName(SAMPLE_API_POLICY);
+        apiPolicy.setDescription(SAMPLE_API_POLICY_DESCRIPTION);
+        apiPolicy.setUserLevel(APIMgtConstants.ThrottlePolicyConstants.API_LEVEL);
         apiPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
         return apiPolicy;
     }
@@ -616,5 +721,17 @@ public class SampleTestObjectCreator {
         builder.createdTime(LocalDateTime.now());
         builder.lastUpdatedTime(LocalDateTime.now());
         return builder.build();
+    }
+
+    public static Comment createDefaultComment(String apiId) {
+        Comment comment = new Comment();
+        comment.setUuid(UUID.randomUUID().toString());
+        comment.setApiId(apiId);
+        comment.setCommentText("this is a sample comment");
+        comment.setCommentedUser("admin");
+        comment.setUpdatedUser("admin");
+        comment.setCreatedTime(LocalDateTime.now());
+        comment.setUpdatedTime(LocalDateTime.now());
+        return comment;
     }
 }
