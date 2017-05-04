@@ -72,6 +72,8 @@ public class ApiDAOImpl implements ApiDAO {
     private static final String API_SUMMARY_SELECT = "SELECT UUID, PROVIDER, NAME, CONTEXT, VERSION, DESCRIPTION, " +
             "CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS FROM AM_API";
     private static final String AM_API_TABLE_NAME = "AM_API";
+    private static final String AM_TAGS_TABLE_NAME = "AM_TAGS";
+    private static final String AM_API_OPERATION_MAPPING_TABLE_NAME = "AM_API_OPERATION_MAPPING";
     private static final String AM_ENDPOINT_TABLE_NAME = "AM_ENDPOINT";
     private static final Logger log = LoggerFactory.getLogger(ApiDAOImpl.class);
 
@@ -348,6 +350,60 @@ public class ApiDAOImpl implements ApiDAO {
             }
             return constructAPISummaryList(statement);
 
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    /**
+     * @see ApiDAO#attributeSearchAPIsStore(List roles, Map attributeMap, int offset, int limit)
+     */
+    @Override
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
+    public List<API> attributeSearchAPIsStore(List<String> roles, Map<String, String> attributeMap,
+                                              int offset, int limit) throws APIMgtDAOException {
+
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = sqlStatements.attributeSearchStore
+                     (connection, roles, attributeMap, offset, limit)) {
+            DatabaseMetaData md = connection.getMetaData();
+            Iterator<Map.Entry<String, String>> entries = attributeMap.entrySet().iterator();
+
+            while (entries.hasNext()) {
+                Map.Entry<String, String> entry = entries.next();
+                String tableName = null, columnName = null;
+
+                if (APIMgtConstants.TAG_SEARCH_TYPE_PREFIX.equalsIgnoreCase(entry.getKey())) {
+                    tableName = connection.getMetaData().getDriverName().contains("PostgreSQL") ?
+                            AM_TAGS_TABLE_NAME.toLowerCase(Locale.ENGLISH) :
+                            AM_TAGS_TABLE_NAME;
+                    columnName = connection.getMetaData().getDriverName().contains("PostgreSQL") ?
+                            APIMgtConstants.TAG_NAME_COLUMN.toLowerCase(Locale.ENGLISH) :
+                            APIMgtConstants.TAG_NAME_COLUMN.toUpperCase(Locale.ENGLISH);
+                } else if (APIMgtConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX.equalsIgnoreCase
+                        (entry.getKey())) {
+                    tableName = connection.getMetaData().getDriverName().contains("PostgreSQL") ?
+                            AM_API_OPERATION_MAPPING_TABLE_NAME.toLowerCase(Locale.ENGLISH) :
+                            AM_API_OPERATION_MAPPING_TABLE_NAME;
+                    columnName = connection.getMetaData().getDriverName().contains("PostgreSQL") ?
+                            APIMgtConstants.URL_PATTERN_COLUMN.toLowerCase(Locale.ENGLISH) :
+                            APIMgtConstants.URL_PATTERN_COLUMN.toUpperCase(Locale.ENGLISH);
+                } else {
+                    tableName = connection.getMetaData().getDriverName().contains("PostgreSQL") ?
+                            AM_API_TABLE_NAME.toLowerCase(Locale.ENGLISH) :
+                            AM_API_TABLE_NAME;
+                    columnName = connection.getMetaData().getDriverName().contains("PostgreSQL") ?
+                            entry.getKey().toLowerCase(Locale.ENGLISH) :
+                            entry.getKey().toUpperCase(Locale.ENGLISH);
+                }
+
+                if (!checkTableColumnExists(md, tableName, columnName)) {
+                    throw new APIMgtDAOException(
+                            "Wrong search attribute. Attribute does not exist with name : " +
+                                    entry.getKey());
+                }
+            }
+            return constructAPISummaryList(statement);
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
         }
