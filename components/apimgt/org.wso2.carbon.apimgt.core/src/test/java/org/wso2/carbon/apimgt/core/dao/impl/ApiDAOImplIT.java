@@ -1061,7 +1061,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         final int numberOfCreatedCreator = 3;
         final int numberOfBlockedCreator = 1;
 
-        List<String> singleRole = new ArrayList<>();
+        Set<String> singleRole = new HashSet<>();
         singleRole.add(ADMIN);
         // Add APIs
         List<API> publishedAPIsSummaryAdmin = new ArrayList<>();
@@ -1089,12 +1089,12 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         // Filter APIs by single status
         List<String> singleStatus = new ArrayList<>();
         singleStatus.add(publishedStatus);
-        List<API> apiList = apiDAO.getAPIsByStatus(singleRole, singleStatus);
+        List<API> apiList = apiDAO.getAPIsByStatus(singleRole, singleStatus, ApiType.STANDARD);
         Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, publishedAPIsSummaryAdmin, new APIComparator()));
         List<String> twoStatus = new ArrayList<>();
         twoStatus.add(createdStatus);
         twoStatus.add(blockedStatus);
-        List<String> twoRoles = new ArrayList<>();
+        Set<String> twoRoles = new HashSet<>();
         twoRoles.add(ADMIN);
         twoRoles.add(CREATOR);
         // Add APIs
@@ -1120,7 +1120,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
             blockedAPIsSummaryTwoRoles.add(SampleTestObjectCreator.getSummaryFromAPI(api));
             apiDAO.addAPI(api);
         }
-        apiList = apiDAO.getAPIsByStatus(twoRoles, twoRoles);
+        apiList = apiDAO.getAPIsByStatus(twoRoles, twoStatus, ApiType.STANDARD);
         Assert.assertEquals(apiList.size(), publishedAPIsSummaryTwoRoles.size() + blockedAPIsSummaryTwoRoles.size());
         for (API api : publishedAPIsSummaryTwoRoles) {
             Assert.assertTrue(apiList.contains(api));
