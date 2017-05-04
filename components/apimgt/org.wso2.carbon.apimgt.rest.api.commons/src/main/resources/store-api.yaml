@@ -60,6 +60,10 @@ x-wso2-security:
         roles: Internal/subscriber
         name: apim:subscribe
         key: apim:subscribe
+      - description: ""
+        roles: admin
+        name: apim:workflow_approve
+        key: apim:workflow_approve 
 
 ######################################################
 # The "API Collection" resource APIs
@@ -523,11 +527,10 @@ paths:
 # The "Comments Collection" resource API
 ######################################################
   '/apis/{apiId}/comments':
-
 #-----------------------------------------------------
 # Retrieve a list of all comments of a certain API
 #-----------------------------------------------------
-   get:
+    get:
       description: |
         Get a list of Comments that are already added to APIs
       parameters:
@@ -555,6 +558,60 @@ paths:
             Not Acceptable. The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# Add a new Comment
+#-----------------------------------------------------
+    post:
+      x-scope: apim:subscribe
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - in: body
+          name: body
+          description: |
+            Comment object that should to be added
+          required: true
+          schema:
+            $ref: '#/definitions/Comment'
+        - $ref: '#/parameters/Content-Type'
+      tags:
+        - API (individual)
+        - Create
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created object as entity in the body.
+            Location header contains URL of newly created entity.
+          schema:
+            $ref: '#/definitions/Comment'
+          headers:
+            Location:
+              description: |
+                Location to the newly created Comment.
+              type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional request.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        415:
+          description: |
+            Unsupported media type.
+            The entity of the request was in a not supported format.
+          schema:
+            $ref: '#/definitions/Error'
+
+
 
 #########################################################
 # "Individual API comment" resource APIs
@@ -643,63 +700,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#########################################################
-# "Add API comment" resource APIs
-#########################################################
-  '/apis/{apiId}/comments':
-#-----------------------------------------------------
-# Add a new Comment
-#-----------------------------------------------------
-    post:
-      x-scope: apim:subscribe
-      description: |
-        Add a new Comment
-      parameters:
-        - $ref: '#/parameters/apiId'
-        - in: body
-          name: body
-          description: |
-            Comment object that should to be added
-          required: true
-          schema:
-            $ref: '#/definitions/Comment'
-        - $ref: '#/parameters/Content-Type'
-      tags:
-        - API (individual)
-        - Create
-      responses:
-        201:
-          description: |
-            Created.
-            Successful response with the newly created object as entity in the body.
-            Location header contains URL of newly created entity.
-          schema:
-            $ref: '#/definitions/Comment'
-          headers:
-            Location:
-              description: |
-                Location to the newly created Comment.
-              type: string
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-            ETag:
-              description: |
-                Entity Tag of the response resource. Used by caches, or in conditional request.
-              type: string
-        400:
-          description: |
-            Bad Request.
-            Invalid request or validation error.
-          schema:
-            $ref: '#/definitions/Error'
-        415:
-          description: |
-            Unsupported media type.
-            The entity of the request was in a not supported format.
-          schema:
-            $ref: '#/definitions/Error'
+
 
 #-----------------------------------------------------
 # Update a particular Comment
@@ -817,7 +818,6 @@ paths:
           type: string
         - $ref : "#/parameters/Accept"
         - $ref : "#/parameters/If-None-Match"
-        - $ref : '#/parameters/Minor-Version'
       tags:
         - API (Collection)
       responses:
@@ -868,7 +868,6 @@ paths:
           schema:
             $ref: '#/definitions/API'
         - $ref: '#/parameters/Content-Type'
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - API (Collection)
       responses:
@@ -929,7 +928,6 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - API (Individual)
       responses:
@@ -994,7 +992,6 @@ paths:
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - API (Individual)
       responses:
@@ -1064,7 +1061,6 @@ paths:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - API (Individual)
       responses:
@@ -1117,7 +1113,6 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - API (Individual)
       responses:
@@ -1189,7 +1184,6 @@ paths:
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
-        - $ref: '#/parameters/Minor-Version'
       tags:
         - API (Individual)
       responses:
@@ -1347,6 +1341,17 @@ paths:
               description: |
                 Entity Tag of the response resource. Used by caches, or in conditional request
               type: string
+        202:
+          description: |
+            Accepted.
+            The request has been accepted.  
+          schema:
+            $ref: '#/definitions/WorkflowResponse'
+          headers:
+            Location:
+              description: |
+                Location of the newly created Application.
+              type: string    
         400:
           description: |
             Bad Request.
@@ -1509,6 +1514,17 @@ paths:
           description: |
             OK.
             Resource successfully deleted.
+        202:
+          description: |
+            Accepted.
+            The request has been accepted.  
+          schema:
+            $ref: '#/definitions/WorkflowResponse'
+          headers:
+            Location:
+              description: |
+                Location of the existing Application.
+              type: string    
         404:
           description: |
             Not Found.
@@ -1681,6 +1697,17 @@ paths:
               description: |
                 Entity Tag of the response resource. Used by caches, or in conditional request.
               type: string
+        202:
+          description: |
+            Accepted.
+            The request has been accepted.  
+          schema:
+            $ref: '#/definitions/WorkflowResponse'
+          headers:
+            Location:
+              description: |
+                Location of the newly created subscription.
+              type: string    
         400:
           description: |
             Bad Request.
@@ -1759,6 +1786,17 @@ paths:
           description: |
             OK.
             Resource successfully deleted.
+        202:
+          description: |
+            Accepted.
+            The request has been accepted.  
+          schema:
+            $ref: '#/definitions/WorkflowResponse'
+          headers:
+            Location:
+              description: |
+                Location of the existing subscription.
+              type: string    
         404:
           description: |
             Not Found.
@@ -1981,18 +2019,18 @@ paths:
 ######################################################
 # The "Workflow approval" resource API
 ######################################################
-  /workflows/update-workflow-status:
+  /workflows/{workflowReferenceId}:
 
 #-------------------------------------------------------------------
 # Resume the workflow by approving or rejecting the workflow request
 #-------------------------------------------------------------------
-    post:
-      x-scope: apim:api_workflow
+    put:
+      x-scope: apim:workflow_approve
       summary: Update workflow status
       description: |
         This operation can be used to approve or reject a workflow task. .
       parameters:
-       - $ref: '#/parameters/workflowReferenceId-Q'
+       - $ref: '#/parameters/workflowReferenceId'
        - in: body
          name: body
          description: |
@@ -2148,17 +2186,17 @@ parameters:
       - api
       - application
     required: true
-    
+
 # Label name of the gateway
 # Specified as part of the query string
   labelName:
     name: labelName
     in: query
     description: |
-      Label name 
+      Label name
     required: false
     type: string
-    
+
 # Protocol of the gateway access URL
 # Specified as part of the query string
   scheme:
@@ -2250,9 +2288,9 @@ parameters:
 
 # Workflow reference ID
 # Specified as part of the path expression
-  workflowReferenceId-Q:
+  workflowReferenceId:
     name: workflowReferenceId
-    in: query
+    in: path
     description: |
       Workflow reference id
     required: true
@@ -2446,8 +2484,6 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/ApplicationKey'
-      workflowResponse:
-        $ref: '#/definitions/WorkflowResponse'
 
 #-----------------------------------------------------
 # The Application Info resource
@@ -2657,10 +2693,6 @@ definitions:
         type: string
       policy:
         type: string
-      apiName:
-        type: string
-      apiVersion:
-        type: string
       lifeCycleStatus:
         type: string
         enum:
@@ -2669,8 +2701,6 @@ definitions:
           - ACTIVE
           - ON_HOLD
           - REJECTED
-      workflowResponse:
-        $ref: '#/definitions/WorkflowResponse'
 
 #-----------------------------------------------------
 # The Tag resource
