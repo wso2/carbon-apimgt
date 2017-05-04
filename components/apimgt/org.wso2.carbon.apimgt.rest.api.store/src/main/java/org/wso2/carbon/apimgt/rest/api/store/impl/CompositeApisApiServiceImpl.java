@@ -4,6 +4,7 @@ import org.wso2.carbon.apimgt.rest.api.store.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.store.CompositeApisApiService;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
+import org.wso2.msf4j.Request;
 
 import javax.ws.rs.core.Response;
 
@@ -13,7 +14,7 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
     public Response compositeApisApiIdDelete(String apiId
 , String ifMatch
 , String ifUnmodifiedSince
-, String minorVersion
+, Request request
  ) throws NotFoundException {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
@@ -23,7 +24,7 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
 , String accept
 , String ifNoneMatch
 , String ifModifiedSince
-, String minorVersion
+, Request request
  ) throws NotFoundException {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
@@ -34,7 +35,7 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
 , String contentType
 , String ifMatch
 , String ifUnmodifiedSince
-, String minorVersion
+, Request request
  ) throws NotFoundException {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
@@ -46,7 +47,7 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
 , String accept
 , String ifNoneMatch
 , String ifModifiedSince
-, String minorVersion
+, Request request
  ) throws NotFoundException {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
@@ -57,7 +58,7 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
 , String contentType
 , String ifMatch
 , String ifUnmodifiedSince
-, String minorVersion
+, Request request
  ) throws NotFoundException {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
@@ -68,7 +69,7 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
 , String query
 , String accept
 , String ifNoneMatch
-, String minorVersion
+, Request request
  ) throws NotFoundException {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
@@ -76,7 +77,7 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
     @Override
     public Response compositeApisPost(APIDTO body
 , String contentType
-, String minorVersion
+, Request request
  ) throws NotFoundException {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();

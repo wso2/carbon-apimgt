@@ -6,6 +6,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.factories.CompositeApisApiServiceFactory;
 import org.wso2.msf4j.Microservice;
+import org.wso2.msf4j.Request;
 import org.wso2.msf4j.formparam.FormDataParam;
 
 import javax.ws.rs.Consumes;
@@ -19,6 +20,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 @Component(
@@ -26,11 +28,11 @@ import javax.ws.rs.core.Response;
     service = Microservice.class,
     immediate = true
 )
-@Path("/api/am/store/v1/composite-apis")
+@Path("/api/am/store/v1.[\\d]+/composite-apis")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the composite-apis API")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-03T16:10:24.266+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-05-04T11:58:27.638+05:30")
 public class CompositeApisApi implements Microservice  {
    private final CompositeApisApiService delegate = CompositeApisApiServiceFactory.getCompositeApisApi();
 
@@ -50,10 +52,9 @@ public class CompositeApisApi implements Microservice  {
     public Response compositeApisApiIdDelete(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
-,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
-)
+, @Context Request request)
     throws NotFoundException {
-        return delegate.compositeApisApiIdDelete(apiId,ifMatch,ifUnmodifiedSince,minorVersion);
+        return delegate.compositeApisApiIdDelete(apiId,ifMatch,ifUnmodifiedSince, request);
     }
     @GET
     @Path("/{apiId}")
@@ -72,10 +73,9 @@ public class CompositeApisApi implements Microservice  {
 ,@ApiParam(value = "Media types acceptable for the response. Default is JSON. " , defaultValue="JSON")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
-,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
-)
+, @Context Request request)
     throws NotFoundException {
-        return delegate.compositeApisApiIdGet(apiId,accept,ifNoneMatch,ifModifiedSince,minorVersion);
+        return delegate.compositeApisApiIdGet(apiId,accept,ifNoneMatch,ifModifiedSince, request);
     }
     @PUT
     @Path("/{apiId}")
@@ -97,10 +97,9 @@ public class CompositeApisApi implements Microservice  {
 ,@ApiParam(value = "Media type of the entity in the body. Default is JSON. " ,required=true, defaultValue="JSON")@HeaderParam("Content-Type") String contentType
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
-,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
-)
+, @Context Request request)
     throws NotFoundException {
-        return delegate.compositeApisApiIdPut(apiId,body,contentType,ifMatch,ifUnmodifiedSince,minorVersion);
+        return delegate.compositeApisApiIdPut(apiId,body,contentType,ifMatch,ifUnmodifiedSince, request);
     }
     @GET
     @Path("/{apiId}/swagger")
@@ -116,15 +115,14 @@ public class CompositeApisApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = void.class) })
     public Response compositeApisApiIdSwaggerGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
-,@ApiParam(value = "Label name  ") @QueryParam("labelName") String labelName
+,@ApiParam(value = "Label name ") @QueryParam("labelName") String labelName
 ,@ApiParam(value = "Protocol of the gateway access URL. Value should be either \"http\" or \"https\" ") @QueryParam("scheme") String scheme
 ,@ApiParam(value = "Media types acceptable for the response. Default is JSON. " , defaultValue="JSON")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
-,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
-)
+, @Context Request request)
     throws NotFoundException {
-        return delegate.compositeApisApiIdSwaggerGet(apiId,labelName,scheme,accept,ifNoneMatch,ifModifiedSince,minorVersion);
+        return delegate.compositeApisApiIdSwaggerGet(apiId,labelName,scheme,accept,ifNoneMatch,ifModifiedSince, request);
     }
     @PUT
     @Path("/{apiId}/swagger")
@@ -146,10 +144,9 @@ public class CompositeApisApi implements Microservice  {
 ,@ApiParam(value = "Media type of the entity in the body. Default is JSON. " ,required=true, defaultValue="JSON")@HeaderParam("Content-Type") String contentType
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
-,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
-)
+, @Context Request request)
     throws NotFoundException {
-        return delegate.compositeApisApiIdSwaggerPut(apiId,endpointId,contentType,ifMatch,ifUnmodifiedSince,minorVersion);
+        return delegate.compositeApisApiIdSwaggerPut(apiId,endpointId,contentType,ifMatch,ifUnmodifiedSince, request);
     }
     @GET
     
@@ -167,10 +164,9 @@ public class CompositeApisApi implements Microservice  {
 ,@ApiParam(value = "**Search condition**.  You can search in attributes by using an **\"<attribute>:\"** modifier.  Eg. \"provider:wso2\" will match a Composite API if the provider of the Composite API is exactly \"wso2\".  Additionally you can use wildcards.  Eg. \"provider:wso2*\" will match a Composite API if the provider of the Composite API starts with \"wso2\".  Supported attribute modifiers are [**version, context, lifeCycleStatus, description, subcontext, doc, provider**]  If no advanced attribute modifier has been specified, search will match the given query string against Composite API Name. ") @QueryParam("query") String query
 ,@ApiParam(value = "Media types acceptable for the response. Default is JSON. " , defaultValue="JSON")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
-,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
-)
+, @Context Request request)
     throws NotFoundException {
-        return delegate.compositeApisGet(limit,offset,query,accept,ifNoneMatch,minorVersion);
+        return delegate.compositeApisGet(limit,offset,query,accept,ifNoneMatch, request);
     }
     @POST
     
@@ -185,9 +181,8 @@ public class CompositeApisApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was in a not supported format. ", response = APIDTO.class) })
     public Response compositeApisPost(@ApiParam(value = "API object that needs to be added " ,required=true) APIDTO body
 ,@ApiParam(value = "Media type of the entity in the body. Default is JSON. " ,required=true, defaultValue="JSON")@HeaderParam("Content-Type") String contentType
-,@ApiParam(value = "Validator for API Minor Version " , defaultValue="1.0")@HeaderParam("Minor-Version") String minorVersion
-)
+, @Context Request request)
     throws NotFoundException {
-        return delegate.compositeApisPost(body,contentType,minorVersion);
+        return delegate.compositeApisPost(body,contentType, request);
     }
 }
