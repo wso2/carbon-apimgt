@@ -57,6 +57,9 @@ public class PolicyDAOImpl implements PolicyDAO {
     public static final String FIFTY_PER_MIN_TIER_DESCRIPTION = "50PerMin Tier";
     public static final String TWENTY_PER_MIN_TIER_DESCRIPTION = "20PerMin Tier";
 
+    /**
+     *@see PolicyDAO#addPolicy(String, Policy)
+     */
     @Override
     public Policy getPolicy(String policyLevel, String policyName) throws APIMgtDAOException {
         try {
@@ -184,10 +187,7 @@ public class PolicyDAOImpl implements PolicyDAO {
     }
 
     /**
-     * This method is used to delete policy by its uuid
-     * @param uuid Policy uuid to delete
-     * @param policyLevel Policy Level to which the policy belongs to
-     * @throws APIMgtDAOException Occurs if an error occurred while policy delete operation happens.
+     *@see PolicyDAO#deletePolicy(String, String)
      */
     @Override
     public void deletePolicyByUuid(String uuid, String policyLevel) throws APIMgtDAOException {

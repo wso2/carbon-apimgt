@@ -36,6 +36,7 @@ $('#addThrottleBtn').on('click', addPolicyToBackend );
 
 var apiPolicy =
 {
+    "policyId" : "",
     "policyName": "",
     "policyLevel": "",
     "policyDescription": "",

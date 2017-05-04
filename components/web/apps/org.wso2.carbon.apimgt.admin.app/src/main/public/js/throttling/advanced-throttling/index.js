@@ -3,6 +3,8 @@ $(function () {
 
     var promised_get_tiers =  policyInstance.getAllAdvancePolicies();
 
+    var API = "api";
+
     promised_get_tiers.then(function (response) {
         var raw_data = {
             data: response.obj
@@ -18,6 +20,7 @@ $(function () {
         };
         var mode = "OVERWRITE";
         var obj = {};
+        obj.apiTier = true;
         obj.list=response.obj;
         UUFClient.renderFragment("org.wso2.carbon.apimgt.web.admin.feature.policy-view", obj,
                                  "policy-view", mode, callbacks);
@@ -35,7 +38,6 @@ $(function () {
         var uuid = $(this).attr("data-uuid");
         var type = "alert";
         var layout = "topCenter";
-        debugger;
         noty({
                  text : "Do you want to delete the policy",
                  type : type,
@@ -45,7 +47,7 @@ $(function () {
                  buttons : [
                      { addClass: 'btn btn-primary', text: 'Ok', onClick: function ($noty) {
                          $noty.close();
-                         var promised_delete_tier =  policyInstance.deletePolicyByUuid("api", uuid);
+                         var promised_delete_tier =  policyInstance.deletePolicyByUuid(API, uuid);
                          promised_delete_tier.then(deletePolicySuccessCallback)
                                  .catch(function (error) {
                                      var message = "Error occurred while deleting application";
@@ -148,7 +150,7 @@ $(function () {
     $(document).on('click', ".tier-edit", function (e) {
         e.preventDefault();
         var uuid = $(this).data('uuid');
-        var policy_obj =  policyInstance.getPoliciesByUuid(uuid , "api");
+        var policy_obj =  policyInstance.getPoliciesByUuid(uuid , API);
 
         policy_obj.then(function (response) {
             var raw_data = {
@@ -178,4 +180,111 @@ $(function () {
         );
     });
 
+    $(document).on('click', "#addThrottleBtn", function (e) {
+        var apiPolicyString = JSON.stringify(apiPolicy);
+        var apiPolicyNew = JSON.parse(apiPolicyString);
+        var policyId = $('#policy-id').val();
+        var policyName = $('#policy-name').val();
+        var policyDescription = htmlEscape($('#policy-description').val());
+        var policyLevel = $("#policy-level option:selected").val();
+        var defaultPolicyType = $('input[name=select-quota-type]:checked').val();
+        var defaultPolicyLimit;
+        var defaultPolicyUnit;
+        var defaultPolicyUnitTime;
+        var requiredMsg = $('#errorMsgRequired').val();
+        var errorHasSpacesMsg = $('#errorMessageSpaces').val();
+
+        apiPolicyNew.policyId = policyId;
+        apiPolicyNew.policyName = policyName;
+
+        if(!validateInput(policyName, $('#policy-name'), requiredMsg)) {
+            return false;
+        }
+
+        if (!validateForSpaces(policyName, $('#policy-name'), errorHasSpacesMsg)) {
+            return false;
+        }
+
+        apiPolicyNew.policyDescription = policyDescription;
+        apiPolicyNew.policyLevel = policyLevel;
+        apiPolicyNew.defaultQuotaPolicy.type = defaultPolicyType;
+
+        var defaultPolicyDataUnit;
+        if (defaultPolicyType == 'requestCount') {
+            defaultPolicyLimit = $('#request-count').val();
+            defaultPolicyUnit = $("#request-count-unit option:selected").val();
+            defaultPolicyUnitTime = $("#unit-time-count").val();
+            apiPolicyNew.defaultQuotaPolicy.limit.requestCount = defaultPolicyLimit;
+            apiPolicyNew.defaultQuotaPolicy.limit.unitTime = defaultPolicyUnitTime;
+            apiPolicyNew.defaultQuotaPolicy.limit.timeUnit = defaultPolicyUnit;
+
+            if (!validateInput(defaultPolicyLimit, $('#request-count'), requiredMsg)) {
+                return false;
+            }
+            if (!validateInput(defaultPolicyUnitTime, $('#unit-time-count'), requiredMsg)) {
+                return false;
+            }
+            if (!validateInput(defaultPolicyUnit, $("#request-count-unit option:selected"), requiredMsg)) {
+                return false;
+            }
+        } else {
+            defaultPolicyLimit = $('#bandwidth').val();
+            defaultPolicyDataUnit = $("#bandwidth-unit option:selected").val();
+            defaultPolicyUnitTime = $("#unit-time-count").val();
+            defaultPolicyUnit = $("#request-count-unit option:selected").val();
+            apiPolicyNew.defaultQuotaPolicy.limit.dataAmount = defaultPolicyLimit;
+            apiPolicyNew.defaultQuotaPolicy.limit.unitTime = defaultPolicyUnitTime;
+            apiPolicyNew.defaultQuotaPolicy.limit.dataUnit = defaultPolicyDataUnit;
+            apiPolicyNew.defaultQuotaPolicy.limit.timeUnit = defaultPolicyUnit;
+
+            if (!validateInput(defaultPolicyLimit, $('#bandwidth'), requiredMsg)) {
+                return false;
+            }
+
+            if (!validateInput(defaultPolicyDataUnit, $("#bandwidth-unit option:selected"), requiredMsg)) {
+                return false;
+            }
+
+            if (!validateInput(defaultPolicyUnitTime, $("#unit-time-count"), requiredMsg)) {
+                return false;
+            }
+
+            if (!validateInput(defaultPolicyUnit, $("#request-count-unit option:selected"), requiredMsg)) {
+                return false;
+            }
+        }
+        var policy = {};
+        policy.policyId = apiPolicyNew.policyId;
+        policy.name = apiPolicyNew.policyName;
+        policy.name = apiPolicyNew.policyName;
+        policy.description = apiPolicyNew.policyDescription;
+        policy.tierLevel = "api" ; // from send to client.
+        policy.unitTime = parseInt(apiPolicyNew.defaultQuotaPolicy.limit.unitTime);
+        policy.timeUnit = apiPolicyNew.defaultQuotaPolicy.limit.timeUnit;
+        policy.stopOnQuotaReach = true;
+
+        var policyInstance = new Policy();
+        var promised_update =  policyInstance.update(policy);
+        promised_update
+            .then(createPolicyCallback)
+            .catch(
+            function (error_response) {
+                var error_data = JSON.parse(error_response.data);
+                var message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+                noty({
+                    text: message,
+                    type: 'error',
+                    dismissQueue: true,
+                    modal: true,
+                    closeWith: ['click', 'backdrop'],
+                    progressBar: true,
+                    timeout: 5000,
+                    layout: 'top',
+                    theme: 'relax',
+                    maxVisible: 10
+                });
+                $('[data-toggle="loading"]').loading('hide');
+                console.debug(error_response);
+            });
+    });
 })

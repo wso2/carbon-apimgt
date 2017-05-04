@@ -110,7 +110,7 @@ Policy.prototype.getAllSubscriptionPolicies = function (callback) {
 
 
 Policy.prototype.getPoliciesByUuid = function (uuid, tierLevel, callback) {
-    let param = { "uuid": uuid,"tierLevel": tierLevel};
+    let param = { "policyId": uuid,"tierLevel": tierLevel};
 
     let promised_get;
     if (param.tierLevel == "api") {
@@ -209,6 +209,44 @@ Policy.prototype.create = function (policy, callback) {
         return promise_create;
     }
 };
+
+
+Policy.prototype.update = function (policy, callback) {
+    let payload;
+    let promise_create;
+    payload = {
+        policyId: policy.policyId,
+        tierLevel: policy.tierLevel,
+        body: policy,
+        "Content-Type": "application/json"
+    };
+
+    if (payload.tierLevel == "api") {
+        promise_create = this.client.then(
+            (client) => {
+                return client["Advanced Policies"].put_policies_throttling_advanced_policyId(
+                    payload, this._requestMetaData()).catch(unauthorizedErrorHandler);
+            })
+    } else if (payload.tierLevel == "application") {
+        promise_create = this.client.then(
+            (client) => {
+                return client["Application Policies"].put_policies_throttling_application_policyId(
+                    payload, this._requestMetaData()).catch(unauthorizedErrorHandler);
+            })
+    } else if (payload.tierLevel == "subscription") {
+        promise_create = this.client.then(
+            (client) => {
+                return client["Subscription Policies"].put_policies_throttling_subscription_policyId(
+                    payload, this._requestMetaData()).catch(unauthorizedErrorHandler);
+            })
+    }
+    if (callback) {
+        return promise_create.then(callback);
+    } else {
+        return promise_create;
+    }
+};
+
 
 function getCookie(name) {
     var value = "; " + document.cookie;

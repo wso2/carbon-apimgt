@@ -12,10 +12,14 @@
     <p class="lead"></p>
 </div>
 
-<form class="form-horizontal" method="" id="" action="">
+<form class="form-horizontal" method="" id="add-update-tier" action="">
     <div class="page-header">
         <p class="lead">{{i18n "General.Details"}}</p>
     </div>
+    {{#if @params.list.uuid}}
+        <input type="hidden" id="policy-id" name="policy-id"
+               value="{{#if @params.list.uuid}}{{@params.list.uuid}}{{/if}}"/>
+    {{/if}}
     <div class="form-group">
         <label class="control-label col-xs-3 col-sm-3 col-md-3 col-lg-3">{{i18n "Tier.Name"}}: <span
                 class="required-astrix">*</span>

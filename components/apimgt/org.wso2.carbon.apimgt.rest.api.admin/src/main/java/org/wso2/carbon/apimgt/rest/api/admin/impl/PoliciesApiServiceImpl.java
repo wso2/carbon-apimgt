@@ -25,12 +25,12 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 
     /**
      *
-     * @param accept
-     * @param ifNoneMatch
-     * @param ifModifiedSince
-     * @param request
-     * @return
-     * @throws NotFoundException
+     * @param accept            Accept header value
+     * @param ifNoneMatch       If-None-Match header value
+     * @param ifModifiedSince   If-Modified-Since header value
+     * @param request           msf4j request object
+     * @return Response object
+     * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
     @Override public Response policiesThrottlingAdvancedGet(String accept, String ifNoneMatch, String ifModifiedSince,
             Request request) throws NotFoundException {
@@ -43,12 +43,12 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 
     /**
      *
-     * @param policyId
-     * @param ifMatch
-     * @param ifUnmodifiedSince
-     * @param request
-     * @return
-     * @throws NotFoundException
+     * @param policyId          Uuid of the Advanced policy.
+     * @param ifMatch           If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param request           msf4j request object
+     * @return Response object
+     * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
     @Override public Response policiesThrottlingAdvancedPolicyIdDelete(String policyId, String ifMatch,
             String ifUnmodifiedSince, Request request) throws NotFoundException {
@@ -61,12 +61,12 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 
     /**
      *
-     * @param policyId
-     * @param ifNoneMatch
-     * @param ifModifiedSince
-     * @param request
-     * @return
-     * @throws NotFoundException
+     * @param policyId          Uuid of the Advanced policy.
+     * @param ifNoneMatch       If-None-Match header value
+     * @param ifModifiedSince   If-Modified-Since header value
+     * @param request           msf4j request object
+     * @return Response object
+     * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
     @Override public Response policiesThrottlingAdvancedPolicyIdGet(String policyId, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
@@ -79,14 +79,14 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 
     /**
      *
-     * @param policyId
-     * @param body
-     * @param contentType
-     * @param ifMatch
-     * @param ifUnmodifiedSince
-     * @param request
-     * @return
-     * @throws NotFoundException
+     * @param policyId          Uuid of the Advanced policy.
+     * @param body              DTO object including the Policy meta information
+     * @param contentType       Content-Type header value
+     * @param ifMatch           If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param request           msf4j request object
+     * @return Response object
+     * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
     @Override public Response policiesThrottlingAdvancedPolicyIdPut(String policyId, TierDTO body, String contentType,
             String ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
@@ -94,16 +94,16 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         if (log.isDebugEnabled()) {
             log.info("Received Advance Policy POST request " + body + " with tierLevel = " + tierLevel);
         }
-        return updatePolicy(tierLevel, body);
+        return updatePolicy(policyId, tierLevel, body);
     }
 
     /**
      *
-     * @param body
-     * @param contentType
-     * @param request
-     * @return
-     * @throws NotFoundException
+     * @param body              DTO object including the Policy meta information
+     * @param contentType       Content-Type header value
+     * @param request           msf4j request object
+     * @return Response object
+     * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
     @Override public Response policiesThrottlingAdvancedPost(TierDTO body, String contentType, Request request)
             throws NotFoundException {
@@ -115,13 +115,12 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
     }
 
     /**
-     *
-     * @param accept
-     * @param ifNoneMatch
-     * @param ifModifiedSince
-     * @param request
-     * @return
-     * @throws NotFoundException
+     * @param accept            Accept header value
+     * @param ifNoneMatch       If-None-Match header value
+     * @param ifModifiedSince   If-Modified-Since header value
+     * @param request           msf4j request object
+     * @return Response object
+     * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
     @Override public Response policiesThrottlingApplicationGet(String accept, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
@@ -134,12 +133,12 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 
     /**
      *
-     * @param policyId
-     * @param ifMatch
-     * @param ifUnmodifiedSince
-     * @param request
-     * @return
-     * @throws NotFoundException
+     * @param policyId          Uuid of the Application policy.
+     * @param ifMatch           If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param request           msf4j request object
+     * @return Response object
+     * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
     @Override public Response policiesThrottlingApplicationPolicyIdDelete(String policyId, String ifMatch,
             String ifUnmodifiedSince, Request request) throws NotFoundException {
@@ -152,12 +151,12 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 
     /**
      *
-     * @param policyId
-     * @param ifNoneMatch
-     * @param ifModifiedSince
-     * @param request
-     * @return
-     * @throws NotFoundException
+     * @param policyId          Uuid of the Application policy
+     * @param ifNoneMatch       If-None-Match header value
+     * @param ifModifiedSince   If-Modified-Since header value
+     * @param request           msf4j request object
+     * @return Response object
+     * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
     @Override public Response policiesThrottlingApplicationPolicyIdGet(String policyId, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
@@ -170,14 +169,14 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 
     /**
      *
-     * @param policyId
-     * @param body
-     * @param contentType
-     * @param ifMatch
-     * @param ifUnmodifiedSince
-     * @param request
-     * @return
-     * @throws NotFoundException
+     * @param policyId          Uuid of the policy.
+     * @param body              DTO object including the Policy meta information
+     * @param contentType       Content-Type header value
+     * @param ifMatch           If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param request           msf4j request object
+     * @return Response object
+     * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
     @Override public Response policiesThrottlingApplicationPolicyIdPut(String policyId, TierDTO body,
             String contentType, String ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
@@ -185,16 +184,16 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         if (log.isDebugEnabled()) {
             log.info("Received Advance Policy POST request " + body + " with tierLevel = " + tierLevel);
         }
-        return updatePolicy(tierLevel, body);
+        return updatePolicy(policyId, tierLevel, body);
     }
 
     /**
      *
-     * @param body
-     * @param contentType
-     * @param request
-     * @return
-     * @throws NotFoundException
+     * @param body              DTO object including the Policy meta information
+     * @param contentType       Content-Type header value
+     * @param request           msf4j request object
+     * @return Response object
+     * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
     @Override public Response policiesThrottlingApplicationPost(TierDTO body, String contentType, Request request)
             throws NotFoundException {
@@ -207,12 +206,12 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 
     /**
      *
-     * @param accept
-     * @param ifNoneMatch
-     * @param ifModifiedSince
-     * @param request
-     * @return
-     * @throws NotFoundException
+     * @param accept            Accept header value
+     * @param ifNoneMatch       If-None-Match header value
+     * @param ifModifiedSince   If-Modified-Since header value
+     * @param request           msf4j request object
+     * @return Response object
+     * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
     @Override public Response policiesThrottlingCustomGet(String accept, String ifNoneMatch, String ifModifiedSince,
             Request request) throws NotFoundException {
@@ -222,11 +221,11 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 
     /**
      *
-     * @param body
-     * @param contentType
-     * @param request
-     * @return
-     * @throws NotFoundException
+     * @param body              DTO object including the Policy meta information
+     * @param contentType       Content-Type header value
+     * @param request           msf4j request object
+     * @return Response object
+     * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
     @Override public Response policiesThrottlingCustomPost(CustomRuleDTO body, String contentType, Request request)
             throws NotFoundException {
@@ -236,12 +235,12 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 
     /**
      *
-     * @param ruleId
-     * @param ifMatch
-     * @param ifUnmodifiedSince
-     * @param request
-     * @return
-     * @throws NotFoundException
+     * @param ruleId            Uuid of the custom rule.
+     * @param ifMatch           If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param request           msf4j request object
+     * @return Response object
+     * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
     @Override public Response policiesThrottlingCustomRuleIdDelete(String ruleId, String ifMatch,
             String ifUnmodifiedSince, Request request) throws NotFoundException {
@@ -251,12 +250,12 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 
     /**
      *
-     * @param ruleId
-     * @param ifNoneMatch
-     * @param ifModifiedSince
-     * @param request
-     * @return
-     * @throws NotFoundException
+     * @param ruleId            Uuid of the custom rule
+     * @param ifNoneMatch       If-None-Match header value
+     * @param ifModifiedSince   If-Modified-Since header value
+     * @param request           msf4j request object
+     * @return Response object
+     * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
     @Override public Response policiesThrottlingCustomRuleIdGet(String ruleId, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
@@ -266,14 +265,14 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 
     /**
      *
-     * @param ruleId
-     * @param body
-     * @param contentType
-     * @param ifMatch
-     * @param ifUnmodifiedSince
-     * @param request
-     * @return
-     * @throws NotFoundException
+     * @param ruleId            Uuid of the custom rule
+     * @param body              DTO object including the Policy meta information
+     * @param contentType       Content-Type header value
+     * @param ifMatch           If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param request           msf4j request object
+     * @return Response object
+     * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
     @Override public Response policiesThrottlingCustomRuleIdPut(String ruleId, CustomRuleDTO body, String contentType,
             String ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
@@ -283,12 +282,12 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 
     /**
      *
-     * @param accept
-     * @param ifNoneMatch
-     * @param ifModifiedSince
-     * @param request
-     * @return
-     * @throws NotFoundException
+     * @param accept            Accept header value
+     * @param ifNoneMatch       If-None-Match header value
+     * @param ifModifiedSince   If-Modified-Since header value
+     * @param request           msf4j request object
+     * @return Response object
+     * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
     @Override public Response policiesThrottlingSubscriptionGet(String accept, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
@@ -301,12 +300,12 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 
     /**
      *
-     * @param policyId
-     * @param ifMatch
-     * @param ifUnmodifiedSince
-     * @param request
-     * @return
-     * @throws NotFoundException
+     * @param policyId          Uuid of the Subscription policy.
+     * @param ifMatch           If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param request           msf4j request object
+     * @return Response object
+     * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
     @Override public Response policiesThrottlingSubscriptionPolicyIdDelete(String policyId, String ifMatch,
             String ifUnmodifiedSince, Request request) throws NotFoundException {
@@ -319,12 +318,12 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 
     /**
      *
-     * @param policyId
-     * @param ifNoneMatch
-     * @param ifModifiedSince
-     * @param request
-     * @return
-     * @throws NotFoundException
+     * @param policyId          Uuid of the Subscription policy
+     * @param ifNoneMatch       If-None-Match header value
+     * @param ifModifiedSince   If-Modified-Since header value
+     * @param request           msf4j request object
+     * @return Response object
+     * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
     @Override public Response policiesThrottlingSubscriptionPolicyIdGet(String policyId, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
@@ -337,14 +336,14 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 
     /**
      *
-     * @param policyId
-     * @param body
-     * @param contentType
-     * @param ifMatch
-     * @param ifUnmodifiedSince
-     * @param request
-     * @return
-     * @throws NotFoundException
+     * @param policyId          Uuid of the Subscription policy.
+     * @param body              DTO object including the Policy meta information
+     * @param contentType       Content-Type header value
+     * @param ifMatch           If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param request           msf4j request object
+     * @return Response object
+     * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
     @Override public Response policiesThrottlingSubscriptionPolicyIdPut(String policyId, TierDTO body,
             String contentType, String ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
@@ -352,16 +351,16 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         if (log.isDebugEnabled()) {
             log.info("Received Advance Policy POST request " + body + " with tierLevel = " + tierLevel);
         }
-        return updatePolicy(tierLevel, body);
+        return updatePolicy(policyId, tierLevel, body);
     }
 
     /**
      *
-     * @param body
-     * @param contentType
-     * @param request
-     * @return
-     * @throws NotFoundException
+     * @param body              DTO object including the Policy meta information
+     * @param contentType       Content-Type header value
+     * @param request           msf4j request object
+     * @return Response object
+     * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
     @Override public Response policiesThrottlingSubscriptionPost(TierDTO body, String contentType, Request request)
             throws NotFoundException {
@@ -413,10 +412,11 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         }
     }
 
-    private Response updatePolicy(String tierLevel, TierDTO body) {
+    private Response updatePolicy(String policyId, String tierLevel, TierDTO body) {
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             Policy policy = PolicyMappingUtil.toPolicy(tierLevel, body);
+            policy.setUuid(policyId);
             apiMgtAdminService.updatePolicy(policy);
             return Response.status(Response.Status.CREATED).entity(policy).build();
         } catch (APIManagementException e) {
