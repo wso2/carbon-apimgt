@@ -82,6 +82,12 @@ public class APIMgtConstants {
 
     public static final String HTTP_GET = "GET";
     public static final String OVERWRITE_LABELS = "overwrite_labels";
+
+    public static final String TAG_SEARCH_TYPE_PREFIX = "tags";
+    public static final String SUBCONTEXT_SEARCH_TYPE_PREFIX = "subcontext";
+    public static final String TAG_NAME_COLUMN = "NAME";
+    public static final String URL_PATTERN_COLUMN = "URL_PATTERN";
+
     /**
      * Application statuses.
      */
