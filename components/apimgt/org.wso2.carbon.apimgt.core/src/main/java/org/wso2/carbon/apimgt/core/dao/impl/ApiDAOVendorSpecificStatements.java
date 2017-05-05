@@ -41,6 +41,17 @@ public interface ApiDAOVendorSpecificStatements {
     PreparedStatement attributeSearch(Connection connection, List<String> roles, String user,
             Map<String, String> attributeMap, int offset, int limit) throws APIMgtDAOException;
 
+    /**
+     * Creates attribute search query in API store, specific to database
+     *
+     * @param connection DB connection
+     * @param roles user roles
+     * @param attributeMap map containing the attributes and search queries for those attributes
+     * @param offset the starting point of the search results.
+     * @param limit number of search results that will be returned.
+     * @return statement build for specific database type.
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
     PreparedStatement attributeSearchStore(Connection connection, List<String> roles, Map<String,
             String> attributeMap, int offset, int limit) throws APIMgtDAOException;
 
