@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants.APILCWorkflowStatus;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.annotation.CheckForNull;
 
 /**
@@ -85,11 +86,13 @@ public interface ApiDAO {
 
     /**
      * Retrieves summary data of all available APIs.
+     *
+     * @param apiType Type of API
      * @return {@code List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    List<API> getAPIs() throws APIMgtDAOException;
+    List<API> getAPIs(ApiType apiType) throws APIMgtDAOException;
 
     /**
      * Retrieves summary data of all available APIs of a given provider.
@@ -103,11 +106,12 @@ public interface ApiDAO {
     /**
      * Retrieves summary data of all available APIs with life cycle status that matches the status list provided
      * @param statuses A list of matching life cycle statuses
+     * @param apiType Type of API
      * @return {@code List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    List<API> getAPIsByStatus(List<String> statuses) throws APIMgtDAOException;
+    List<API> getAPIsByStatus(List<String> statuses, ApiType apiType) throws APIMgtDAOException;
 
     /**
      * Retrieves summary data of all available APIs with life cycle status that matches the status list provided
@@ -115,10 +119,11 @@ public interface ApiDAO {
      *
      * @param roles    role list of current user
      * @param statuses status of APIs to be returned
+     * @param apiType Type of API
      * @return API list
      * @throws APIMgtDAOException if failed to fetch APIs from database
      */
-    List<API> getAPIsByStatus(List<String> roles, List<String> statuses) throws APIMgtDAOException;
+    List<API> getAPIsByStatus(Set<String> roles, List<String> statuses, ApiType apiType) throws APIMgtDAOException;
 
     /**
      * Retrieves summary of paginated data of all available APIs that match the given search criteria. This will use
@@ -126,29 +131,30 @@ public interface ApiDAO {
      * @param roles     List of the roles of the user.
      * @param user      Current user.
      * @param searchString The search string provided
-     * @param offset  The starting point of the search results.
-     * @param limit   Number of search results that will be returned.
+     * @param apiType Type of API
+     * @param offset  The starting point of the formatApiSearch results.
+     * @param limit   Number of formatApiSearch results that will be returned.
      * @return {@code List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    List<API> searchAPIs(List<String> roles, String user, String searchString, int offset, int limit) throws
-            APIMgtDAOException;
+    List<API> searchAPIs(Set<String> roles, String user, String searchString, ApiType apiType, int offset, int limit)
+            throws APIMgtDAOException;
 
     /**
      * Retrieves summary of paginated data of all available APIs that match the given search criteria.
      * @param roles     List of the roles of the user.
      * @param user      Current user.
      * @param attributeMap Map containing the attributes and search queries for those attributes
-     * @param offset  The starting point of the search results.
-     * @param limit   Number of search results that will be returned.
+     * @param apiType Type of API
+     * @param offset  The starting point of the formatApiSearch results.
+     * @param limit   Number of formatApiSearch results that will be returned.
      * @return {@code List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    List<API> attributeSearchAPIs(List<String> roles, String user, Map<String, String> attributeMap, int offset, int
-            limit) throws
-            APIMgtDAOException;
+    List<API> attributeSearchAPIs(Set<String> roles, String user, Map<String, String> attributeMap, ApiType apiType,
+                                  int offset, int limit) throws APIMgtDAOException;
 
     /**
      * Retrieves summary of paginated data of APIs based on visibility (in store), that match the
@@ -165,24 +171,26 @@ public interface ApiDAO {
 
     /**
      * Retrieves summary data of all available APIs with life cycle status that matches the status list provided
-     * and matches the given search criteria.
+     * and matches the given formatApiSearch criteria.
      * @param searchString The search string provided
      * @param statuses A list of matching life cycle statuses
+     * @param apiType Type of API
      * @return {@code List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    List<API> searchAPIsByStatus(String searchString, List<String> statuses) throws APIMgtDAOException;
+    List<API> searchAPIsByStatus(String searchString, List<String> statuses, ApiType apiType) throws APIMgtDAOException;
 
     /**
      * Checks if a given API which is uniquely identified by the Provider, API Name and Version combination already
      * exists
      * @param apiName Name of API
      * @param providerName Provider of the API.
+     * @param apiType Type of API
      * @return true if providerName, apiName, version combination already exists else false
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    boolean isAPINameExists(String apiName, String providerName) throws APIMgtDAOException;
+    boolean isAPINameExists(String apiName, String providerName, ApiType apiType) throws APIMgtDAOException;
 
     /**
      * Checks if a given API Context already exists

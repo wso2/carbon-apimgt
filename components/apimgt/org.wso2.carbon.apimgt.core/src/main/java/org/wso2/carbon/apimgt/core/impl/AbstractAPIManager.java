@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
@@ -220,7 +221,7 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     @Override public boolean isApiNameExist(String apiName) throws APIManagementException {
         try {
-            return getApiDAO().isAPINameExists(apiName, username);
+            return getApiDAO().isAPINameExists(apiName, username, ApiType.STANDARD);
 
         } catch (APIMgtDAOException e) {
             String errorMsg = "Couldn't check API Name " + apiName + "Exists";

@@ -468,15 +468,15 @@ public class APIImportExportTestCase {
     private static API.APIBuilder createApi(String provider, String apiId, String name, String version, String
             description, Map<String, String> endpointTypeToIdMap)
             throws APIManagementException {
-        List<String> transport = new ArrayList<>();
+        Set<String> transport = new HashSet<>();
         transport.add("http");
 
 
-        List<String> policies = new ArrayList<>();
+        Set<String> policies = new HashSet<>();
         policies.add("Silver");
         policies.add("Bronze");
 
-        List<String> tags = new ArrayList<>();
+        Set<String> tags = new HashSet<>();
         tags.add("food");
         tags.add("beverage");
 
@@ -508,7 +508,7 @@ public class APIImportExportTestCase {
                 tags(tags).
                 policies(policies).
                 visibility(API.Visibility.RESTRICTED).
-                visibleRoles(Arrays.asList("customer", "manager", "employee")).
+                visibleRoles(new HashSet<>(Arrays.asList("customer", "manager", "employee"))).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
                 createdTime(LocalDateTime.now()).

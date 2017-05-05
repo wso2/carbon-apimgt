@@ -82,8 +82,8 @@ public class APIMappingUtil {
         apiDTO.setVersion(api.getVersion());
         apiDTO.setContext(api.getContext());
         apiDTO.setDescription(api.getDescription());
-        apiDTO.setPolicies(api.getPolicies());
-        apiDTO.setLabels(api.getLabels());
+        apiDTO.setPolicies(new ArrayList<>(api.getPolicies()));
+        apiDTO.setLabels(new ArrayList<>(api.getLabels()));
         return apiDTO;
     }
 

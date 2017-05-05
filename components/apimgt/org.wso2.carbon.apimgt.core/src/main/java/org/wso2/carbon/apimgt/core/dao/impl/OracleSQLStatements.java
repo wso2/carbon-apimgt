@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -33,6 +34,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * SQL Statements that are specific to Oracle Database.
@@ -44,7 +46,7 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
     private static final String API_SUMMARY_SELECT =
             "SELECT A.*, rownum rnum from (SELECT  DISTINCT API.UUID, API.PROVIDER, API.NAME, API.CONTEXT, API"
                     + ".VERSION, API.DESCRIPTION,"
-                    + "API.CURRENT_LC_STATUS, API.LIFECYCLE_INSTANCE_ID, API.LC_WORKFLOW_STATUS "
+                    + "API.CURRENT_LC_STATUS, API.LIFECYCLE_INSTANCE_ID, API.LC_WORKFLOW_STATUS, API.API_TYPE_ID "
                     + "FROM AM_API API LEFT JOIN AM_API_GROUP_PERMISSION PERMISSION ON UUID = API_ID ";
 
     private static final String API_SUMMARY_SELECT_STORE = "SELECT UUID, PROVIDER, NAME, " +
@@ -52,68 +54,62 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
             "LC_WORKFLOW_STATUS FROM AM_API ";
 
     /**
-     * Creates full text search query specific to database.
-     *
-     * @param connection  Database connection.
-     * @param searchString The search string provided
-     * @param offset  The starting point of the search results.
-     * @param limit   Number of search results that will be returned.
-     * @return {@link   PreparedStatement} Statement build for specific database type.
-     * @throws APIMgtDAOException if error occurs while accessing data layer
+     * @see ApiDAOVendorSpecificStatements#getApiSearchQuery(int)
      */
     @Override
-    @SuppressFBWarnings ({ "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
-            "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE" })
-    public PreparedStatement search(Connection connection, List<String> roles, String user, String searchString, int
-            offset, int
-            limit) throws
-            APIMgtDAOException {
-        StringBuilder roleListBuilder = new StringBuilder();
-        roles.forEach(item -> roleListBuilder.append("?,"));
-        roleListBuilder.append("?");
-        final String query =
-                " SELECT * FROM (" + API_SUMMARY_SELECT + " WHERE (CONTAINS(INDEXER, ?, 1) > 0) AND ((GROUP_ID IN ("
-                        + roleListBuilder.toString() + ")) OR (PROVIDER = ?)) ORDER BY NAME ) A WHERE "
-                        + "rownum <= ?) where rnum >= ?";
-        int queryIndex = 1;
-        try {
-            PreparedStatement statement = connection.prepareStatement(query);
-            statement.setString(queryIndex, '%' + searchString.toLowerCase(Locale.ENGLISH) + '%');
-            queryIndex++;
-            for (String role : roles) {
-                statement.setString(queryIndex, role);
-                queryIndex++;
-            }
-            statement.setString(queryIndex, EVERYONE_ROLE);
-            statement.setString(++queryIndex, user);
-            statement.setInt(++queryIndex, (offset + limit - 1));
-            statement.setInt(++queryIndex, offset);
-            return statement;
-        } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+    public String getApiSearchQuery(int roleCount) {
+        if (roleCount > 0) {
+            return "SELECT * FROM (" +
+                    API_SUMMARY_SELECT +
+                    " WHERE (CONTAINS(INDEXER, ?, 1) > 0)" +
+                    " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
+                    " AND ((GROUP_ID IN (" + DAOUtil.getParameterString(roleCount) + ")) OR (PROVIDER = ?))" +
+                    " ORDER BY NAME " +
+                    ") A WHERE rownum <= ?) where rnum >= ?";
+        } else {
+            return "SELECT * FROM (" +
+                    API_SUMMARY_SELECT +
+                    " WHERE (CONTAINS(INDEXER, ?, 1) > 0)" +
+                    " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
+                    " AND PROVIDER = ?" +
+                    " ORDER BY NAME " +
+                    ") A WHERE rownum <= ?) where rnum >= ?";
         }
     }
 
+
     /**
-     * Creates attribute search query specific to database.
-     *
-     * @param connection  Database connection.
-     * @param attributeMap Map containing the attributes and search queries for those attributes
-     * @param offset  The starting point of the search results.
-     * @param limit   Number of search results that will be returned.
-     * @return {@link   PreparedStatement} Statement build for specific database type.
-     * @throws APIMgtDAOException if error occurs while accessing data layer
+     * @see ApiDAOVendorSpecificStatements#setApiSearchStatement(PreparedStatement, Set, String, String, ApiType,
+     * int, int)
      */
     @Override
     @SuppressFBWarnings ({ "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
             "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE" })
-    public PreparedStatement attributeSearch(
-            Connection connection, List<String> roles, String user, Map<String, String> attributeMap, int offset,
-            int limit) throws APIMgtDAOException {
-        StringBuilder roleListBuilder = new StringBuilder();
-        roles.forEach(item -> roleListBuilder.append("?,"));
-        roleListBuilder.append("?");
-        StringBuffer searchQuery = new StringBuffer();
+    public void setApiSearchStatement(PreparedStatement statement, Set<String> roles, String user,
+                                      String searchString, ApiType apiType,
+                                      int offset, int limit) throws SQLException {
+        int index = 0;
+
+        // Replacing special characters and allowing only alphabetical letters, numbers and space
+        statement.setString(++index, '%' + searchString.toLowerCase(Locale.ENGLISH) + '%');
+        statement.setString(++index, apiType.toString());
+
+        for (String role : roles) {
+            statement.setString(++index, role);
+        }
+
+        statement.setString(++index, user);
+        statement.setInt(++index, limit);
+        statement.setInt(++index, offset);
+    }
+
+
+    /**
+     * @see ApiDAOVendorSpecificStatements#getApiAttributeSearchQuery(Map, int)
+     */
+    @Override
+    public String getApiAttributeSearchQuery(Map<String, String> attributeMap, int roleCount) {
+        StringBuilder searchQuery = new StringBuilder();
         Iterator<Map.Entry<String, String>> entries = attributeMap.entrySet().iterator();
         while (entries.hasNext()) {
             Map.Entry<String, String> entry = entries.next();
@@ -125,27 +121,46 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
             }
         }
 
-        final String query = " SELECT * FROM (" + API_SUMMARY_SELECT + " WHERE " + searchQuery.toString() + " AND ("
-                + "(GROUP_ID IN (" + roleListBuilder.toString() + ")) OR  (PROVIDER = ?)) ORDER BY NAME)  A WHERE "
-                + "rownum <= ?) where rnum >= ?";
-        try {
-            int queryIndex = 1;
-            PreparedStatement statement = connection.prepareStatement(query);
-            for (Map.Entry<String, String> entry : attributeMap.entrySet()) {
-                statement.setString(queryIndex, '%' + entry.getValue().toLowerCase(Locale.ENGLISH) + '%');
-                queryIndex++;
-            }
-            for (String role : roles) {
-                statement.setString(queryIndex, role);
-                queryIndex++;
-            }
-            statement.setString(queryIndex, EVERYONE_ROLE);
-            statement.setString(++queryIndex, user);
-            statement.setInt(++queryIndex, (offset + limit - 1));
-            statement.setInt(++queryIndex, offset);
-            return statement;
-        } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+        if (roleCount > 0) {
+            return "SELECT * FROM (" +
+                    API_SUMMARY_SELECT +
+                    " WHERE " + searchQuery.toString() +
+                    " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
+                    " AND ((GROUP_ID IN (" + DAOUtil.getParameterString(roleCount) + ")) OR  (PROVIDER = ?))" +
+                    " ORDER BY NAME" +
+                    ")  A WHERE rownum <= ?) where rnum >= ?";
+        } else {
+            return "SELECT * FROM (" +
+                    API_SUMMARY_SELECT +
+                    " WHERE " + searchQuery.toString() +
+                    " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
+                    " AND PROVIDER = ?" +
+                    " ORDER BY NAME" +
+                    ")  A WHERE rownum <= ?) where rnum >= ?";
+        }
+    }
+
+    /**
+     * @see ApiDAOVendorSpecificStatements#setApiAttributeSearchStatement(PreparedStatement, Set, String, Map, ApiType,
+     * int, int)
+     */
+    @Override
+    @SuppressFBWarnings ({ "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
+            "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE" })
+    public void setApiAttributeSearchStatement(PreparedStatement statement, Set<String> roles, String user,
+                                               Map<String, String> attributeMap, ApiType apiType,
+                                               int offset, int limit) throws SQLException {
+        int index = 0;
+
+        for (Map.Entry<String, String> entry : attributeMap.entrySet()) {
+            entry.setValue('%' + entry.getValue().toLowerCase(Locale.ENGLISH) + '%');
+            statement.setString(++index, entry.getValue());
+        }
+
+        statement.setString(++index, apiType.toString());
+
+        for (String role : roles) {
+            statement.setString(++index, role);
         }
     }
 
