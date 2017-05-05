@@ -32,10 +32,10 @@ import org.wso2.carbon.lcm.core.impl.LifecycleState;
 
 import java.time.Duration;
 import java.time.temporal.Temporal;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -218,16 +218,16 @@ public class APIUtils {
      *
      * @return all available roles
      */
-    public static List<String> getAllAvailableRoles() {
+    public static Set<String> getAllAvailableRoles() {
 
         //this should be a call to IS endpoint and get all the roles, we are returning a dummy list till then
-        List<String> availableRoleList = new ArrayList<>();
-        availableRoleList.add("admin");
-        availableRoleList.add("subscriber");
-        availableRoleList.add("manager");
-        availableRoleList.add("developer");
-        availableRoleList.add("lead");
-        return availableRoleList;
+        Set<String> availableRoles = new HashSet<>();
+        availableRoles.add("admin");
+        availableRoles.add("subscriber");
+        availableRoles.add("manager");
+        availableRoles.add("developer");
+        availableRoles.add("lead");
+        return availableRoles;
     }
 
     /**
@@ -236,10 +236,10 @@ public class APIUtils {
      * @param username username of the person
      * @return role list of the user
      */
-    public static List<String> getAllRolesOfUser(String username) {
+    public static Set<String> getAllRolesOfUser(String username) {
 
         //this should be a call to IS endpoint and get roles of the user, we are returning a dummy list till then
-        List<String> userRoles = new ArrayList<>();
+        Set<String> userRoles = new HashSet<>();
         if ("admin".equalsIgnoreCase(username)) {
             userRoles.add("admin");
             userRoles.add(APIMgtConstants.Permission.EVERYONE_GROUP);
@@ -265,7 +265,7 @@ public class APIUtils {
      * @return true if all candidate roles are eligible
      * @throws APIManagementException if the check fails
      */
-    public static boolean checkAllowedRoles(List<String> availableRoleList, List<String> candidateRoleList)
+    public static boolean checkAllowedRoles(Set<String> availableRoleList, Set<String> candidateRoleList)
             throws APIManagementException {
 
         //check if availableRoleList and candidateRoleList is not null

@@ -24,6 +24,7 @@ import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Application;
@@ -60,8 +61,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class SampleTestObjectCreator {
@@ -132,14 +135,14 @@ public class SampleTestObjectCreator {
     }
 
     public static API.APIBuilder createDefaultAPI() {
-        List<String> transport = new ArrayList<>();
+        Set<String> transport = new HashSet<>();
         transport.add(HTTP);
         transport.add(HTTPS);
 
-        List<String> tags = new ArrayList<>();
+        Set<String> tags = new HashSet<>();
         tags.add(TAG_CLIMATE);
 
-        List<String> policies = new ArrayList<>();
+        Set<String> policies = new HashSet<>();
         policies.add(GOLD_TIER);
         policies.add(SILVER_TIER);
         policies.add(BRONZE_TIER);
@@ -165,9 +168,10 @@ public class SampleTestObjectCreator {
                 tags(tags).
                 policies(policies).
                 visibility(API.Visibility.PUBLIC).
-                visibleRoles(new ArrayList<>()).
+                visibleRoles(new HashSet<>()).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
+                apiType(ApiType.STANDARD).
                 createdTime(LocalDateTime.now()).
                 createdBy(ADMIN).
                 updatedBy(ADMIN).
@@ -187,6 +191,7 @@ public class SampleTestObjectCreator {
                 id(api.getId()).
                 context(api.getContext()).
                 description(api.getDescription()).
+                apiType(ApiType.STANDARD).
                 lifeCycleStatus(api.getLifeCycleStatus()).
                 lifecycleInstanceId(api.getLifecycleInstanceId()).build();
     }
@@ -199,6 +204,7 @@ public class SampleTestObjectCreator {
                 name(fromAPI.getName()).
                 version(fromAPI.getVersion()).
                 context(fromAPI.getContext()).
+                apiType(fromAPI.getApiType()).
                 createdTime(fromAPI.getCreatedTime()).
                 createdBy(fromAPI.getCreatedBy()).
                 lifecycleInstanceId(fromAPI.getLifecycleInstanceId()).
@@ -220,14 +226,14 @@ public class SampleTestObjectCreator {
     }
 
     public static API.APIBuilder createAlternativeAPI() {
-        List<String> transport = new ArrayList<>();
+        Set<String> transport = new HashSet<>();
         transport.add(HTTP);
 
-        List<String> tags = new ArrayList<>();
+        Set<String> tags = new HashSet<>();
         tags.add(TAG_FOOD);
         tags.add(TAG_BEVERAGE);
 
-        List<String> policies = new ArrayList<>();
+        Set<String> policies = new HashSet<>();
         policies.add(SILVER_TIER);
         policies.add(BRONZE_TIER);
 
@@ -245,6 +251,10 @@ public class SampleTestObjectCreator {
         corsConfiguration.setAllowHeaders(Arrays.asList(ALLOWED_HEADER_AUTHORIZATION, ALLOWED_HEADER_CUSTOM));
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.setAllowOrigins(Arrays.asList("*"));
+
+        HashMap permissionMap = new HashMap();
+        permissionMap.put("1000", 6);
+        permissionMap.put("1001", 4);
 
         API.APIBuilder apiBuilder = new API.APIBuilder("Adam", "restaurantAPI", "0.9").
                 id(UUID.randomUUID().toString()).
@@ -261,9 +271,11 @@ public class SampleTestObjectCreator {
                 tags(tags).
                 policies(policies).
                 visibility(API.Visibility.RESTRICTED).
-                visibleRoles(Arrays.asList(CUSTOMER_ROLE, MANAGER_ROLE, EMPLOYEE_ROLE)).
+                visibleRoles(new HashSet<>(Arrays.asList(CUSTOMER_ROLE, MANAGER_ROLE, EMPLOYEE_ROLE))).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
+                apiType(ApiType.STANDARD).
+                permissionMap(permissionMap).
                 createdTime(LocalDateTime.now()).
                 createdBy(API_CREATOR).
                 apiDefinition(apiDefinition).
@@ -273,14 +285,14 @@ public class SampleTestObjectCreator {
     }
 
     public static API.APIBuilder createUniqueAPI() {
-        List<String> transport = new ArrayList<>();
+        Set<String> transport = new HashSet<>();
         transport.add(HTTP);
 
-        List<String> tags = new ArrayList<>();
+        Set<String> tags = new HashSet<>();
         tags.add(TAG_FOOD);
         tags.add(TAG_BEVERAGE);
 
-        List<String> policies = new ArrayList<>();
+        Set<String> policies = new HashSet<>();
         policies.add(SILVER_TIER);
         policies.add(BRONZE_TIER);
 
@@ -298,6 +310,10 @@ public class SampleTestObjectCreator {
         corsConfiguration.setAllowHeaders(Arrays.asList(ALLOWED_HEADER_AUTHORIZATION, ALLOWED_HEADER_CUSTOM));
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.setAllowOrigins(Arrays.asList("*"));
+
+        HashMap permissionMap = new HashMap();
+        permissionMap.put("1000", 6);
+        permissionMap.put("1001", 4);
 
         API.APIBuilder apiBuilder = new API.APIBuilder(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
                 API_VERSION).
@@ -315,9 +331,11 @@ public class SampleTestObjectCreator {
                 tags(tags).
                 policies(policies).
                 visibility(API.Visibility.RESTRICTED).
-                visibleRoles(Arrays.asList(CUSTOMER_ROLE, MANAGER_ROLE, EMPLOYEE_ROLE)).
+                visibleRoles(new HashSet<>(Arrays.asList(CUSTOMER_ROLE, MANAGER_ROLE, EMPLOYEE_ROLE))).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
+                apiType(ApiType.STANDARD).
+                permissionMap(permissionMap).
                 createdTime(LocalDateTime.now()).
                 createdBy(API_CREATOR).
                 uriTemplates(Collections.emptyMap()).
@@ -342,6 +360,7 @@ public class SampleTestObjectCreator {
                 id(api.getId()).
                 context(api.getContext()).
                 description(api.getDescription()).
+                apiType(api.getApiType()).
                 lifeCycleStatus(api.getLifeCycleStatus()).
                 lifecycleInstanceId(api.getLifecycleInstanceId()).build();
     }

@@ -54,6 +54,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowResponseDTO.Workflo
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -76,14 +77,14 @@ public class MappingUtil {
         apidto.setVisibility(APIDTO.VisibilityEnum.valueOf(api.getVisibility().toString()));
         apidto.setResponseCaching(Boolean.toString(api.isResponseCachingEnabled()));
         apidto.setCacheTimeout(api.getCacheTimeout());
-        apidto.setVisibleRoles(api.getVisibleRoles());
+        apidto.setVisibleRoles(new ArrayList<>(api.getVisibleRoles()));
         apidto.setProvider(api.getProvider());
         apidto.setPermission(api.getApiPermission());
         apidto.setLifeCycleStatus(api.getLifeCycleStatus());
         apidto.setWorkflowStatus(api.getWorkflowStatus());
-        apidto.setTags(api.getTags());
-        apidto.setLabels(api.getLabels());
-        apidto.setTransport(api.getTransport());
+        apidto.setTags(new ArrayList<>(api.getTags()));
+        apidto.setLabels(new ArrayList<>(api.getLabels()));
+        apidto.setTransport(new ArrayList<>(api.getTransport()));
         api.getPolicies().forEach(apidto::addPoliciesItem);
         BusinessInformation businessInformation = api.getBusinessInformation();
         API_businessInformationDTO apiBusinessInformationDTO = new API_businessInformationDTO();
@@ -179,14 +180,14 @@ public class MappingUtil {
                 description(apidto.getDescription()).
                 lifeCycleStatus(apidto.getLifeCycleStatus()).
                 endpoint(fromEndpointListToMap(apidto.getEndpoint())).
-                visibleRoles(apidto.getVisibleRoles()).
-                policies(apidto.getPolicies()).
+                visibleRoles(new HashSet<>(apidto.getVisibleRoles())).
+                policies(new HashSet<>(apidto.getPolicies())).
                 permission(apidto.getPermission()).
-                tags(apidto.getTags()).
-                labels(apidto.getLabels()).
-                transport(apidto.getTransport()).
+                tags(new HashSet<>(apidto.getTags())).
+                labels(new HashSet<>(apidto.getLabels())).
+                transport(new HashSet<>(apidto.getTransport())).
                 isResponseCachingEnabled(Boolean.valueOf(apidto.getResponseCaching())).
-                policies(apidto.getPolicies()).
+                policies(new HashSet<>(apidto.getPolicies())).
                 businessInformation(businessInformation).
                 uriTemplates(uriTemplateList).
                 corsConfiguration(corsConfiguration);

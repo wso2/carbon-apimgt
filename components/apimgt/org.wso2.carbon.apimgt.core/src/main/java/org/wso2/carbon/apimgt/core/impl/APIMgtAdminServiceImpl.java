@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIConfigRetrievalException;
@@ -62,7 +63,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
      */
     @Override
     public List<APISummary> getAPIInfo() throws APIManagementException {
-        List<API> apiList = apiDAO.getAPIs();
+        List<API> apiList = apiDAO.getAPIs(ApiType.STANDARD);
         List<APISummary> apiSummaryList = new ArrayList<APISummary>();
         apiList.forEach(apiInfo -> {
             APISummary apiSummary = new APISummary(apiInfo.getId());

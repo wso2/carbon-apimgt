@@ -22,6 +22,7 @@ import com.google.gson.stream.JsonReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -42,6 +43,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * File based implementation of the ApiDAO interface.
@@ -49,6 +51,7 @@ import java.util.Objects;
 public class ApiFileDAOImpl implements ApiDAO {
 
     private static final Logger log = LoggerFactory.getLogger(ApiFileDAOImpl.class);
+    private String storagePath;
     private static final String API_DEFINITION_FILE_NAME = "api-";
     private static final String JSON_EXTENSION = ".json";
     private static final String DOCUMENTATION_DEFINITION_FILE = "doc.json";
@@ -58,7 +61,6 @@ public class ApiFileDAOImpl implements ApiDAO {
     private static final String DOCUMENTS_ROOT_DIRECTORY = "Documents";
     private static final String ENDPOINTS_ROOT_DIRECTORY = "Endpoints";
     private static final String IMPORTED_APIS_DIRECTORY_NAME = "imported-apis";
-    private String storagePath;
 
     public ApiFileDAOImpl(String storagePath) {
         this.storagePath = storagePath;
@@ -223,11 +225,11 @@ public class ApiFileDAOImpl implements ApiDAO {
 
     /**
      * @see ApiDAO#addDocumentFileContent(String resourceID, InputStream content, String fileName,
-     * String updatedBy)
+     *      String updatedBy)
      */
     @Override
     public void addDocumentFileContent(String resourceID, InputStream content, String fileName,
-                                       String updatedBy) throws APIMgtDAOException {
+            String updatedBy) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
@@ -279,17 +281,7 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public boolean deleteEndpoint(String endpointId) throws APIMgtDAOException {
-        String endpointPartialName = endpointId + JSON_EXTENSION;
-        String endpointFilePath = APIFileUtils
-                .findInFileSystem(new File(storagePath + File.separator + ENDPOINTS_ROOT_DIRECTORY),
-                        endpointPartialName);
-        if (endpointFilePath == null) {
-            String errorMsg = "Endpoint with Id" + endpointId + " not found.";
-            log.error(errorMsg);
-            throw new APIMgtDAOException(errorMsg);
-        }
-        APIFileUtils.deleteFile(endpointFilePath);
-        return true;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -459,10 +451,10 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#getAPIs()
+     * @see ApiDAO#getAPIs(ApiType)
      */
     @Override
-    public List<API> getAPIs() throws APIMgtDAOException {
+    public List<API> getAPIs(ApiType apiType) throws APIMgtDAOException {
 
         File[] files = new File(storagePath).listFiles();
         List<API> apiList = new ArrayList<>();
@@ -486,53 +478,55 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#getAPIsByStatus(List)
+     * @see ApiDAO#getAPIsByStatus(List, ApiType)
      */
     @Override
-    public List<API> getAPIsByStatus(List<String> statuses) throws APIMgtDAOException {
+    public List<API> getAPIsByStatus(List<String> statuses, ApiType apiType) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * @see ApiDAO#getAPIsByStatus(List, List)
+     * @see ApiDAO#getAPIsByStatus(Set , List, ApiType)
      */
     @Override
-    public List<API> getAPIsByStatus(List<String> roles, List<String> statuses) throws APIMgtDAOException {
+    public List<API> getAPIsByStatus(Set<String> roles, List<String> statuses, ApiType apiType)
+                                                                                throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * @see ApiDAO#searchAPIs(List roles, String user, String searchString, int offset, int limit)
+     * @see ApiDAO#searchAPIs(Set roles, String user, String searchString, ApiType apiType, int offset, int limit)
      */
     @Override
-    public List<API> searchAPIs(List<String> roles, String user, String searchString, int offset, int limit)
+    public List<API> searchAPIs(Set<String> roles, String user, String searchString,
+                                ApiType apiType, int offset, int limit) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @see ApiDAO#attributeSearchAPIs(Set roles, String user, Map attributeMap, ApiType apiType, int offset, int limit)
+     */
+    @Override
+    public List<API> attributeSearchAPIs(Set<String> roles, String user, Map<String, String> attributeMap,
+                                         ApiType apiType, int offset, int limit) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @see ApiDAO#searchAPIsByStatus(String searchString, List statuses, ApiType apiType)
+     */
+    @Override
+    public List<API> searchAPIsByStatus(String searchString, List<String> statuses, ApiType apiType)
             throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * @see ApiDAO#attributeSearchAPIs(List roles, String user, Map attributeMap, int offset, int limit)
+     * @see ApiDAO#isAPINameExists(String apiName, String providerName, ApiType apiType)
      */
     @Override
-    public List<API> attributeSearchAPIs(List<String> roles, String user, Map<String, String> attributeMap,
-                                         int offset, int limit) throws APIMgtDAOException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @see ApiDAO#searchAPIsByStatus(String searchString, List statuses)
-     */
-    @Override
-    public List<API> searchAPIsByStatus(String searchString, List<String> statuses)
-            throws APIMgtDAOException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @see ApiDAO#isAPINameExists(String apiName, String providerName)
-     */
-    @Override
-    public boolean isAPINameExists(String apiName, String providerName) throws APIMgtDAOException {
+    public
+    boolean isAPINameExists(String apiName, String providerName, ApiType apiType) throws APIMgtDAOException {
         return false;
     }
 
@@ -597,7 +591,7 @@ public class ApiFileDAOImpl implements ApiDAO {
     /**
      * write the given API definition to file system
      *
-     * @param api            {@link API} object to be exported
+     * @param api {@link API} object to be exported
      * @param exportLocation file system location to write the API definition
      * @throws APIMgtDAOException if an error occurs while writing the API definition
      */
@@ -616,13 +610,13 @@ public class ApiFileDAOImpl implements ApiDAO {
     /**
      * write the given Endpoint definition to file system
      *
-     * @param endpoint       {@link Endpoint} object to be exported
+     * @param endpoint {@link Endpoint} object to be exported
      * @param exportLocation file system location to write the Endpoint
      * @throws APIMgtDAOException if an error occurs while writing the Endpoint
      */
-    private void exportEndpointToFileSystem(Endpoint endpoint, String exportLocation) throws APIMgtDAOException {
+    private void exportEndpointToFileSystem (Endpoint endpoint, String exportLocation) throws APIMgtDAOException {
         String endpointFileLocation =
-                exportLocation + File.separator + endpoint.getName() + "-" + endpoint.getId() + JSON_EXTENSION;
+                exportLocation + File.separator  + endpoint.getName() + "-" + endpoint.getId() + JSON_EXTENSION;
         APIFileUtils.writeObjectAsJsonToFile(endpoint, endpointFileLocation);
 
         if (log.isDebugEnabled()) {
@@ -633,8 +627,8 @@ public class ApiFileDAOImpl implements ApiDAO {
     /**
      * write the given API gateway config to file system
      *
-     * @param config         gateway config of the api
-     * @param api            {@link API} instance
+     * @param config gateway config of the api
+     * @param api {@link API} instance
      * @param exportLocation file system location to write the API gateway config.
      * @throws APIMgtDAOException if an error occurs while writing the API definition
      */
@@ -649,6 +643,7 @@ public class ApiFileDAOImpl implements ApiDAO {
         }
 
         String gatewayConfigLocation = exportLocation + File.separator + GATEWAY_CONFIGURATION_DEFINITION_FILE;
+        APIFileUtils.createFile(gatewayConfigLocation);
         APIFileUtils.writeToFile(gatewayConfigLocation, config);
         if (log.isDebugEnabled()) {
             log.debug("Successfully exported gateway configuration for api: " + api.getName() + ", version: " + api
@@ -660,14 +655,15 @@ public class ApiFileDAOImpl implements ApiDAO {
      * write the given Endpoint definition to file system
      *
      * @param swaggerDefinition swagger definition
-     * @param api               {@link API} instance relevant to the swagger definition
-     * @param exportLocation    file system location to which the swagger definition will be written
+     * @param api {@link API} instance relevant to the swagger definition
+     * @param exportLocation file system location to which the swagger definition will be written
      * @throws APIMgtDAOException if an error occurs while writing the Endpoint
      */
     private void exportSwaggerDefinitionToFileSystem(String swaggerDefinition, API api, String exportLocation)
             throws APIMgtDAOException {
         String swaggerDefinitionLocation =
                 exportLocation + File.separator + SWAGGER_DEFINITION_FILE_NAME + api.getId() + JSON_EXTENSION;
+        APIFileUtils.createFile(swaggerDefinitionLocation);
         APIFileUtils.writeStringAsJsonToFile(swaggerDefinition, swaggerDefinitionLocation);
 
         if (log.isDebugEnabled()) {
@@ -680,6 +676,8 @@ public class ApiFileDAOImpl implements ApiDAO {
         File[] files = (filenameFilter != null) ? file.listFiles(filenameFilter) : file.listFiles();
         if (files != null && files.length > 0) {
             return constructObjectSummaryFromFile(files[0].getAbsolutePath(), c);
+        } else if (!file.isDirectory()) {
+            return constructObjectSummaryFromFile(file.getAbsolutePath(), c);
         }
         return null;
     }
@@ -687,7 +685,7 @@ public class ApiFileDAOImpl implements ApiDAO {
     private Object constructObjectSummaryFromFile(String filePath, Class c) {
         Gson gson = new Gson();
         try (FileInputStream fileInputStream = new FileInputStream(filePath);
-             InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8)) {
+                InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8)) {
             JsonReader reader = new JsonReader(inputStreamReader);
             return gson.fromJson(reader, c);
         } catch (IOException e) {

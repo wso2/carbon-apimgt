@@ -20,12 +20,12 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
-import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.util.List;
+import java.sql.SQLException;
 import java.util.Map;
+import java.util.Set;
 
 /**
  *  Interface for getting SQL Statement strings. Implementation of the interface could return different values based
@@ -35,11 +35,49 @@ public interface ApiDAOVendorSpecificStatements {
 
     String EVERYONE_ROLE = "EVERYONE";
 
-    PreparedStatement search(Connection connection, List<String> roles, String user, String query, int offset,
-            int limit) throws APIMgtDAOException;
+    /**
+     * Returns the query string to be used for the search query. This is required to construct the PreparedStatement
+     * which will be created externally
+     * @param roleCount Number of roles to be passed to query
+     * @return String
+     */
+    String getApiSearchQuery(int roleCount);
 
-    PreparedStatement attributeSearch(Connection connection, List<String> roles, String user,
-            Map<String, String> attributeMap, int offset, int limit) throws APIMgtDAOException;
+    /**
+     * Returns the query string to be used for the attribute search query. This is required to construct the
+     * PreparedStatement which will be created externally
+     * @param attributeMap Search attributes to be queried
+     * @param roleCount Number of roles to be passed to query
+     * @return String
+     */
+    String getApiAttributeSearchQuery(Map<String, String> attributeMap, int roleCount);
+
+    /**
+     * Format supplied search string to DB compatible value
+     * @param statement SQL PreparedStatement
+     * @param roles roles assigned to the user doing the search
+     * @param user user doing the search
+     * @param searchString search string supplied
+     * @param apiType API type to be considered for the search
+     * @param offset result pagination offset
+     * @param limit result pagination limit
+     */
+    void setApiSearchStatement(PreparedStatement statement, Set<String> roles, String user,
+                           String searchString, ApiType apiType, int offset, int limit) throws SQLException;
+
+    /**
+     * Set parameters of the PreparedStatement created for the attribute search query
+     * @param statement SQL PreparedStatement
+     * @param roles roles assigned to the user doing the search
+     * @param user user doing the search
+     * @param attributeMap Search attributes to be queried
+     * @param apiType API type to be considered for the search
+     * @param offset result pagination offset
+     * @param limit result pagination limit
+     */
+    void setApiAttributeSearchStatement(PreparedStatement statement, Set<String> roles, String user,
+                                        Map<String, String> attributeMap, ApiType apiType, int offset, int limit)
+                                        throws SQLException;
 
 
 }
