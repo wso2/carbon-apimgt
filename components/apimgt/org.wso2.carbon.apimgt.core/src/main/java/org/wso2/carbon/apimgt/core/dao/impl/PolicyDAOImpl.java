@@ -113,9 +113,7 @@ public class PolicyDAOImpl implements PolicyDAO {
      */
     @Override public void addPolicy(String policyLevel, Policy policy) throws APIMgtDAOException {
 
-        Connection connection;
-        try {
-            connection = DAOUtil.getConnection();
+        try (Connection connection = DAOUtil.getConnection()) {
             if (policy instanceof APIPolicy) {
                 addAPIPolicy(connection, policy.getPolicyName(), policy.getDisplayName(), policy.getDescription(),
                         policy.getDefaultQuotaPolicy().getType(), 0,
@@ -144,12 +142,10 @@ public class PolicyDAOImpl implements PolicyDAO {
 
         String uuid = policy.getUuid();
         if (StringUtils.isEmpty(uuid)) {
-            throw new APIMgtDAOException("Invalid argumants supplied. UUID is mandatory");
+            throw new APIMgtDAOException("Invalid arguments supplied. UUID is mandatory");
         }
 
-        Connection connection;
-        try {
-            connection = DAOUtil.getConnection();
+        try (Connection connection = DAOUtil.getConnection()) {
             if (policy instanceof APIPolicy) {
                 updateAPIPolicy(uuid, connection, policy.getPolicyName(), policy.getDisplayName(),
                         policy.getDescription(), policy.getDefaultQuotaPolicy().getType(), 0,
@@ -1279,8 +1275,9 @@ public class PolicyDAOImpl implements PolicyDAO {
             preparedStatement.setString(1, policyName);
             preparedStatement.execute();
         } catch (SQLException e)    {
-            log.error("An Error occurred while deleting Policy with name [" + policyName + "], " , e);
-            throw new APIMgtDAOException("Error occurred while deleting Policy with name : " + policyName, e);
+            String msg = "An Error occurred while deleting Policy with name [" + policyName + "], ";
+            log.error(msg, e);
+            throw new APIMgtDAOException(msg + policyName, e);
         }
     }
 
@@ -1293,8 +1290,9 @@ public class PolicyDAOImpl implements PolicyDAO {
             preparedStatement.setString(1, uuid);
             preparedStatement.execute();
         } catch (SQLException e)    {
-            log.error("An Error occurred while deleting Policy with uuid [" + uuid + "], " , e);
-            throw new APIMgtDAOException("Error occurred while deleting Policy with uuid : " + uuid, e);
+            String msg = "An Error occurred while deleting Policy with uuid [" + uuid + "], ";
+            log.error(msg, e);
+            throw new APIMgtDAOException(msg, e);
         }
     }
 
@@ -1306,8 +1304,9 @@ public class PolicyDAOImpl implements PolicyDAO {
             preparedStatement.setString(1, uuid);
             preparedStatement.execute();
         } catch (SQLException e)    {
-            log.error("An Error occurred while deleting Policy with uuid [" + uuid + "], " , e);
-            throw new APIMgtDAOException("Error occurred while deleting Policy with uuid : " + uuid, e);
+            String msg = "An Error occurred while deleting Policy with uuid [" + uuid + "], ";
+            log.error(msg, e);
+            throw new APIMgtDAOException(msg, e);
         }
     }
 
@@ -1319,8 +1318,9 @@ public class PolicyDAOImpl implements PolicyDAO {
             preparedStatement.setString(1, uuid);
             preparedStatement.execute();
         } catch (SQLException e)    {
-            log.error("An Error occurred while deleting Policy with uuid [" + uuid + "], " , e);
-            throw new APIMgtDAOException("Error occurred while deleting Policy with uuid : " + uuid, e);
+            String msg = "An Error occurred while deleting Policy with uuid [" + uuid + "], ";
+            log.error(msg, e);
+            throw new APIMgtDAOException(msg, e);
         }
     }
 
