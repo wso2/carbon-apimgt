@@ -66,7 +66,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         //Add few APIs with different attributes.
         List<String> apiIDList = createAPIsAndGetIDsOfAddedAPIs();
-        List<String> userRoles = new ArrayList<>();
+        Set<String> userRoles = new HashSet<>();
         List<String> statuses = new ArrayList<>();
         statuses.add(APIStatus.PUBLISHED.getStatus());
         statuses.add(APIStatus.PROTOTYPED.getStatus());
@@ -77,7 +77,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         //Asserting results for different search queries
         //Role based API retrieval for a user with "admin" role
         userRoles.add(ADMIN);
-        apiResults = apiDAO.getAPIsByStatus(userRoles, statuses);
+        apiResults = apiDAO.getAPIsByStatus(userRoles, statuses, ApiType.STANDARD);
         List<String> resultAPINameList = new ArrayList<>();
         for (API api : apiResults) {
             resultAPINameList.add(api.getName());
@@ -91,7 +91,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         //Role based API retrieval for a user with "manager" role
         userRoles.add(MANAGER_ROLE);
-        apiResults = apiDAO.getAPIsByStatus(userRoles, statuses);
+        apiResults = apiDAO.getAPIsByStatus(userRoles, statuses, ApiType.STANDARD);
         for (API api : apiResults) {
             resultAPINameList.add(api.getName());
         }
@@ -107,7 +107,8 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         userRoles.add(MANAGER_ROLE);
         userRoles.add(EMPLOYEE_ROLE);
         userRoles.add(CUSTOMER_ROLE);
-        apiResults = apiDAO.getAPIsByStatus(userRoles, statuses);
+        apiResults = apiDAO.getAPIsByStatus(userRoles, statuses, ApiType.STANDARD);
+
         for (API api : apiResults) {
             resultAPINameList.add(api.getName());
         }
@@ -203,8 +204,8 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
      */
     private List<String> createAPIsAndGetIDsOfAddedAPIs() throws APIMgtDAOException {
 
-        List<String> visibleRoles = new ArrayList<>();
-        List<String> apiTags = new ArrayList<>();
+        Set<String> visibleRoles = new HashSet<>();
+        Set<String> apiTags = new HashSet<>();
         List<String> apiIDList = new ArrayList<>();
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         Map<String, UriTemplate> uriTemplateMap;
@@ -219,7 +220,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         visibleRoles.clear();
         apiTags.clear();
         uriTemplateMap.clear();
-        apiIDList.add(apiDAO.getAPIs().get(0).getId());
+        apiIDList.add(apiDAO.getAPIs(ApiType.STANDARD).get(0).getId());
 
         //Construct an API which is visible to manager role only
         apiTags.add("Pizza");
@@ -233,7 +234,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         visibleRoles.clear();
         apiTags.clear();
         uriTemplateMap.clear();
-        apiIDList.add(apiDAO.getAPIs().get(1).getId());
+        apiIDList.add(apiDAO.getAPIs(ApiType.STANDARD).get(1).getId());
 
         //Construct an API which is visible to admin and manager roles
         apiTags.add("Java");
@@ -247,7 +248,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         visibleRoles.clear();
         apiTags.clear();
         uriTemplateMap.clear();
-        apiIDList.add(apiDAO.getAPIs().get(2).getId());
+        apiIDList.add(apiDAO.getAPIs(ApiType.STANDARD).get(2).getId());
 
         //Construct an API in created state, this should not be shown in store
         apiTags.add("Movie");
@@ -260,7 +261,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         visibleRoles.clear();
         apiTags.clear();
         uriTemplateMap.clear();
-        apiIDList.add(apiDAO.getAPIs().get(3).getId());
+        apiIDList.add(apiDAO.getAPIs(ApiType.STANDARD).get(3).getId());
 
         //Construct an API which is visible to employee role only
         apiTags.add("Salary");
@@ -273,7 +274,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         visibleRoles.clear();
         apiTags.clear();
         uriTemplateMap.clear();
-        apiIDList.add(apiDAO.getAPIs().get(4).getId());
+        apiIDList.add(apiDAO.getAPIs(ApiType.STANDARD).get(4).getId());
 
         //Construct an API which is visible to all roles, except admin role
         apiTags.add("Science");
@@ -289,7 +290,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         visibleRoles.clear();
         apiTags.clear();
         uriTemplateMap.clear();
-        apiIDList.add(apiDAO.getAPIs().get(5).getId());
+        apiIDList.add(apiDAO.getAPIs(ApiType.STANDARD).get(5).getId());
 
         return apiIDList;
     }
@@ -355,8 +356,8 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
      */
     private void addAPIWithGivenData(String apiName, String apiVersion, String apiContext,
                                      String apiProvider, API.Visibility apiVisibility,
-                                     List<String> visibleRoles, String initialLifecycleStatus,
-                                     String description, List<String> tags,
+                                     Set<String> visibleRoles, String initialLifecycleStatus,
+                                     String description, Set<String> tags,
                                      Map<String, UriTemplate> uriTemplates,
                                      String finalLifecycleStatus) throws APIMgtDAOException {
 
