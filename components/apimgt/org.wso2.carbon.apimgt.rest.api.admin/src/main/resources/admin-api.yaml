@@ -1425,16 +1425,6 @@ parameters:
     default: 0
     type: integer
 
-# Mediation policy identifier
-# Specified as part of the path expression
-  mediationPolicyId:
-    name: mediationPolicyId
-    in: path
-    description: |
-      Mediation policy Id
-    required: true
-    type: string
-
 ######################################################
 # The resources used by some of the APIs above within the message body
 ######################################################

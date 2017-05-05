@@ -13,7 +13,7 @@ import java.util.Map;
 /**
  * ThrottlePolicyDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-05-03T09:48:03.292+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-05-04T16:42:24.822+05:30")
 public class ThrottlePolicyDTO   {
   @JsonProperty("policyId")
   private String policyId = null;
