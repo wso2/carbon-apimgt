@@ -7,50 +7,50 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
- * ErrorListItemDTO
+ * CustomAttributeDTO
  */
 @javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-05-04T16:42:24.822+05:30")
-public class ErrorListItemDTO   {
-  @JsonProperty("code")
-  private String code = null;
+public class CustomAttributeDTO   {
+  @JsonProperty("name")
+  private String name = null;
 
-  @JsonProperty("message")
-  private String message = null;
+  @JsonProperty("value")
+  private String value = null;
 
-  public ErrorListItemDTO code(String code) {
-    this.code = code;
+  public CustomAttributeDTO name(String name) {
+    this.name = name;
     return this;
   }
 
    /**
-   * Get code
-   * @return code
+   * Get name
+   * @return name
   **/
   @ApiModelProperty(required = true, value = "")
-  public String getCode() {
-    return code;
+  public String getName() {
+    return name;
   }
 
-  public void setCode(String code) {
-    this.code = code;
+  public void setName(String name) {
+    this.name = name;
   }
 
-  public ErrorListItemDTO message(String message) {
-    this.message = message;
+  public CustomAttributeDTO value(String value) {
+    this.value = value;
     return this;
   }
 
    /**
-   * Description about individual errors occurred 
-   * @return message
+   * Get value
+   * @return value
   **/
-  @ApiModelProperty(required = true, value = "Description about individual errors occurred ")
-  public String getMessage() {
-    return message;
+  @ApiModelProperty(required = true, value = "")
+  public String getValue() {
+    return value;
   }
 
-  public void setMessage(String message) {
-    this.message = message;
+  public void setValue(String value) {
+    this.value = value;
   }
 
 
@@ -62,23 +62,23 @@ public class ErrorListItemDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ErrorListItemDTO errorListItem = (ErrorListItemDTO) o;
-    return Objects.equals(this.code, errorListItem.code) &&
-        Objects.equals(this.message, errorListItem.message);
+    CustomAttributeDTO customAttribute = (CustomAttributeDTO) o;
+    return Objects.equals(this.name, customAttribute.name) &&
+        Objects.equals(this.value, customAttribute.value);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(code, message);
+    return Objects.hash(name, value);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ErrorListItemDTO {\n");
+    sb.append("class CustomAttributeDTO {\n");
     
-    sb.append("    code: ").append(toIndentedString(code)).append("\n");
-    sb.append("    message: ").append(toIndentedString(message)).append("\n");
+    sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    value: ").append(toIndentedString(value)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * TierPermissionDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-22T12:24:12.664+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-28T10:42:38.625+05:30")
 public class TierPermissionDTO   {
   /**
    * Gets or Sets permissionType
