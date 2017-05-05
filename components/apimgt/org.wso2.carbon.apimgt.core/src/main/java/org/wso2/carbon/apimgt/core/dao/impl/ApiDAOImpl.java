@@ -375,6 +375,7 @@ public class ApiDAOImpl implements ApiDAO {
                 String tableName = null, columnName = null;
 
                 if (APIMgtConstants.TAG_SEARCH_TYPE_PREFIX.equalsIgnoreCase(entry.getKey())) {
+                    //if the search is related to tags, need to check NAME column in AM_TAGS table
                     tableName = connection.getMetaData().getDriverName().contains("PostgreSQL") ?
                             AM_TAGS_TABLE_NAME.toLowerCase(Locale.ENGLISH) :
                             AM_TAGS_TABLE_NAME;
@@ -383,6 +384,8 @@ public class ApiDAOImpl implements ApiDAO {
                             APIMgtConstants.TAG_NAME_COLUMN.toUpperCase(Locale.ENGLISH);
                 } else if (APIMgtConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX.equalsIgnoreCase
                         (entry.getKey())) {
+                    //if the search is related to subcontext, need to check URL_PATTERN column in
+                    //AM_API_OPERATION_MAPPING table
                     tableName = connection.getMetaData().getDriverName().contains("PostgreSQL") ?
                             AM_API_OPERATION_MAPPING_TABLE_NAME.toLowerCase(Locale.ENGLISH) :
                             AM_API_OPERATION_MAPPING_TABLE_NAME;
@@ -390,6 +393,8 @@ public class ApiDAOImpl implements ApiDAO {
                             APIMgtConstants.URL_PATTERN_COLUMN.toLowerCase(Locale.ENGLISH) :
                             APIMgtConstants.URL_PATTERN_COLUMN.toUpperCase(Locale.ENGLISH);
                 } else {
+                    //if the search is related to any other attribute, need to check that attribute
+                    //in AM_API table
                     tableName = connection.getMetaData().getDriverName().contains("PostgreSQL") ?
                             AM_API_TABLE_NAME.toLowerCase(Locale.ENGLISH) :
                             AM_API_TABLE_NAME;

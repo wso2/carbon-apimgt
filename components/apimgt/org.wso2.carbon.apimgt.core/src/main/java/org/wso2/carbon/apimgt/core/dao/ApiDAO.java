@@ -151,7 +151,8 @@ public interface ApiDAO {
             APIMgtDAOException;
 
     /**
-     * Retrieves summary of paginated data of APIs in store, that match the given search criteria.
+     * Retrieves summary of paginated data of APIs based on visibility (in store), that match the
+     * given search criteria.
      * @param roles List of the roles of the user.
      * @param attributeMap Map containing the attributes to be searched
      * @param offset The starting point of the search results.

@@ -497,7 +497,8 @@ public class ApiFileDAOImpl implements ApiDAO {
      * @see ApiDAO#getAPIsByStatus(List, List)
      */
     @Override
-    public List<API> getAPIsByStatus(List<String> roles, List<String> statuses) throws APIMgtDAOException {
+    public List<API> getAPIsByStatus(List<String> roles, List<String> statuses)
+            throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
