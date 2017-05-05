@@ -147,6 +147,10 @@ public class H2SQLStatements implements ApiDAOVendorSpecificStatements {
         }
     }
 
+    /**
+     * @see ApiDAOVendorSpecificStatements#attributeSearchStore(Connection connection, List,
+     * Map, int, int)
+     */
     @Override
     @SuppressFBWarnings({"SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
             "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE"})
@@ -182,6 +186,7 @@ public class H2SQLStatements implements ApiDAOVendorSpecificStatements {
         String query = null;
 
         if (attributeMap.containsKey(APIMgtConstants.TAG_SEARCH_TYPE_PREFIX)) {
+            //for tag search, need to check AM_API_TAG_MAPPING and AM_TAGS tables
             query = API_SUMMARY_SELECT_STORE + " WHERE CURRENT_LC_STATUS  IN ('" +
                     APIStatus.PUBLISHED.getStatus() + "','" +
                     APIStatus.PROTOTYPED.getStatus() + "') AND " +
@@ -199,6 +204,7 @@ public class H2SQLStatements implements ApiDAOVendorSpecificStatements {
                     "(SELECT TAG_ID FROM AM_TAGS WHERE " + searchQuery.toString() + ")) " +
                     "LIMIT ? OFFSET ?";
         } else if (attributeMap.containsKey(APIMgtConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX)) {
+            //for subcontext search, need to check AM_API_OPERATION_MAPPING table
             query = API_SUMMARY_SELECT_STORE + " WHERE CURRENT_LC_STATUS  IN ('" +
                     APIStatus.PUBLISHED.getStatus() + "','" +
                     APIStatus.PROTOTYPED.getStatus() + "') AND " +
@@ -216,6 +222,7 @@ public class H2SQLStatements implements ApiDAOVendorSpecificStatements {
                     searchQuery.toString() + ") " +
                     "LIMIT ? OFFSET ?";
         } else {
+            //for any other attribute search, need to check AM_API table
             query = API_SUMMARY_SELECT_STORE + " WHERE CURRENT_LC_STATUS  IN ('" +
                     APIStatus.PUBLISHED.getStatus() + "','" +
                     APIStatus.PROTOTYPED.getStatus() + "') AND " +
@@ -235,14 +242,17 @@ public class H2SQLStatements implements ApiDAOVendorSpecificStatements {
         try {
             int queryIndex = 1;
             PreparedStatement statement = connection.prepareStatement(query);
+            //include the attribute in the query (for APIs with public visibility)
             for (Map.Entry<String, String> entry : attributeMap.entrySet()) {
                 statement.setString(queryIndex, '%' + entry.getValue().toLowerCase(Locale.ENGLISH) + '%');
                 queryIndex++;
             }
+            //include user roles in the query
             for (String role : roles) {
                 statement.setString(queryIndex, role);
                 queryIndex++;
             }
+            //include the attribute in the query (for APIs with restricted visibility)
             for (Map.Entry<String, String> entry : attributeMap.entrySet()) {
                 statement.setString(queryIndex, '%' + entry.getValue().toLowerCase(Locale.ENGLISH) + '%');
                 queryIndex++;
