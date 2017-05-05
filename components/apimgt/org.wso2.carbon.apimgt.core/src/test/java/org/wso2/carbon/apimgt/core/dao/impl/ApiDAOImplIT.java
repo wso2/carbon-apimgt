@@ -36,8 +36,8 @@ import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
-import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIComparator;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.core.util.EndPointComparator;
@@ -51,8 +51,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
 import java.util.Set;
+import java.util.UUID;
 
 public class ApiDAOImplIT extends DAOIntegrationTestBase {
     private static final String ADMIN = "admin";

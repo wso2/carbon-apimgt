@@ -52,7 +52,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1385,8 +1384,7 @@ public class ApiDAOImpl implements ApiDAO {
                         description(rs.getString("DESCRIPTION")).
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
                         lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
-                        workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).
-                        apiType(getApiTypeById(connection, rs.getInt("API_TYPE_ID"))).build();
+                        workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).build();
 
                 apiList.add(apiSummary);
             }

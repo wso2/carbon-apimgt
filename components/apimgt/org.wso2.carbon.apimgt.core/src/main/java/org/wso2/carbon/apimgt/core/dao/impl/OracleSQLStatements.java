@@ -21,11 +21,11 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
-import org.wso2.carbon.apimgt.core.dao.ApiType;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
