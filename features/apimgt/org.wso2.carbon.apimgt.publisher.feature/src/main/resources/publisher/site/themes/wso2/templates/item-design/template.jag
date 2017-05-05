@@ -418,10 +418,15 @@
     			if (null != storeStep) {
         			localStorage.removeItem("storeStep");
     			}
-                runEnjoyHintScript(enjoyhint_instance, item_design_with_worldbank_api_script_data);
+                enjoyhint_instance = runEnjoyHintScript(enjoyhint_instance, item_design_with_worldbank_api_script_data);
             } else {
-                runEnjoyHintScript(enjoyhint_instance, item_design_script_data);
+                enjoyhint_instance = runEnjoyHintScript(enjoyhint_instance, item_design_script_data);
             }
+        }
+    });
+    $(window).resize(function(){
+    	if (isEnjoyHintEnabled()) {
+          	enjoyhint_instance.resume();
         }
     });
 

@@ -62,7 +62,7 @@ var api = outputs.api;%>
         if (isEnjoyHintEnabled()) {
             var isApiConsoleTabClicked = localStorage.getItem("isApiConsoleTabClicked");
 
-            if (isApiConsoleTabClicked === 'true') {
+            if (isApiConsoleTabClicked === 'true' && $('#tab1').is(':visible')) {
                 runEnjoyHintScript(enjoyhint_instance_swagger, swagger_script_data);
                 clearInterval(setIntervalId);
                 removeLocalStorageVariables();

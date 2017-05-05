@@ -391,6 +391,12 @@ var EnjoyHint = function (_options) {
                     that.options.onSkipClick();
                     // Show deploy sample button when closing the tutorial
                     $('#deploy_sample1').show();
+                    var $helpText = $('#api-create-button-details');
+                    if($helpText.length > 0 ){
+                        var prevText = $helpText.text();
+                        $helpText.text($helpText.attr('data-other'));
+                        $helpText.attr('data-other',prevText);
+                    }
                 });
 
                 // close tutorial for escape key press
@@ -400,6 +406,12 @@ var EnjoyHint = function (_options) {
                         that.hide();
                         that.options.onSkipClick();
                         $('#deploy_sample1').show();
+                        var $helpText = $('#api-create-button-details');
+                        if($helpText.length > 0 ){
+                            var prevText = $helpText.text();
+                            $helpText.text($helpText.attr('data-other'));
+                            $helpText.attr('data-other',prevText);
+                        }
                     }
                 });
 

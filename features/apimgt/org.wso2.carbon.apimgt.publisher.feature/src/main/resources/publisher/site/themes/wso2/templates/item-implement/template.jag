@@ -875,7 +875,12 @@
         }
 
         if (isEnjoyHintEnabled()) {
-            runEnjoyHintScript(enjoyhint_instance_implement, item_implement_script_data);
+            enjoyhint_instance_implement = runEnjoyHintScript(enjoyhint_instance_implement, item_implement_script_data);
+        }
+    });
+    $(window).resize(function(){
+    	if (isEnjoyHintEnabled()) {
+          	enjoyhint_instance_implement.resume();
         }
     });
 

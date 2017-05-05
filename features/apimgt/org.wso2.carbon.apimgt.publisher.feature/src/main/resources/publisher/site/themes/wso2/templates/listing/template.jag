@@ -67,6 +67,11 @@
                 localStorage.setItem("interactiveTutorialEnabled", true);
                 if (isEnjoyHintEnabled()) {
                     $('#deploy_sample1').hide();
+                    var $helpText = $('#api-create-button-details');
+                    var prevText = $helpText.text();
+                    $helpText.text($helpText.attr('data-other'));
+                    $helpText.attr('data-other',prevText);
+
                     runEnjoyHintScript(enjoyhint_instance, item_listing_script_data);
                 }
             } else if (apiCount > 0) {
@@ -315,14 +320,14 @@
     	<%if(outputs.isCreatePermitted){ %>
     	        <div class="message message-info">
                     <h4><i class="icon fw fw-info"></i><%=i18n.localize("No APIs created yet.")%></h4>
-                    <p><%=i18n.localize("Click one of the buttons below to get started.")%></p>
+                    <p><%=i18n.localize("Click the button below to get started.")%></p>
                 </div>
                 <div style="display: inline"><a title="<%=i18n.localize("Add New API")%>" class="btn btn-primary" id="btn-add-new-api"  href="<%=jagg.getMappedUrl("/add")%>" onclick="jagg.sessionAwareJS({redirect:'<%=jagg.getMappedUrl("/add")%><%=urlPrefix%>',e:event})" ><%=i18n.localize("New API...")%></a></div>
         		<div style="display: inline"><a title="<%=i18n.localize("Deploy Sample API")%>" class="btn btn-primary" href="#" id="deploy_sample1" onclick="deploySampleApi('<%=gatewayURL%>')" ><%=i18n.localize("Deploy Sample API")%></a></div>
         <%}else{%>
         		<div class="message message-info">
                     <h4><i class="icon fw fw-info"></i><%=i18n.localize("No APIs created yet.")%></h4>
-                    <p><%=i18n.localize("Click one of the buttons below to get started.")%></p>
+                    <p><%=i18n.localize("Click the button below to get started.")%></p>
                 </div>
         <%}%>
     <%
