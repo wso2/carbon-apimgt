@@ -1,6 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.admin.mappings;
 
-
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Limit;
@@ -20,6 +19,7 @@ public class PolicyMappingUtil {
     public static TierDTO fromPolicyToDTO(Policy policy)    {
         TierDTO tierDTO = new TierDTO();
         if (policy != null) {
+            tierDTO.setUuid(policy.getUuid());
             tierDTO.setName(policy.getPolicyName());
             tierDTO.setDescription(policy.getDescription());
             tierDTO.setTimeUnit(policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());

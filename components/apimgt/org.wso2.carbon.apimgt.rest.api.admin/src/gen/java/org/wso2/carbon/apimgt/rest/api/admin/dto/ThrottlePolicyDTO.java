@@ -11,54 +11,27 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * TierDTO
+ * ThrottlePolicyDTO
  */
 @javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-05-04T16:42:24.822+05:30")
-public class TierDTO   {
-  @JsonProperty("uuid")
-  private String uuid = null;
+public class ThrottlePolicyDTO   {
+  @JsonProperty("policyId")
+  private String policyId = null;
 
-  @JsonProperty("name")
-  private String name = null;
+  @JsonProperty("policyName")
+  private String policyName = null;
+
+  @JsonProperty("displayName")
+  private String displayName = null;
 
   @JsonProperty("description")
   private String description = null;
 
-  /**
-   * Gets or Sets tierLevel
-   */
-  public enum TierLevelEnum {
-    API("api"),
-    
-    APPLICATION("application"),
-    
-    SUBSCRIPTION("subscription");
+  @JsonProperty("isDeployed")
+  private Boolean isDeployed = false;
 
-    private String value;
-
-    TierLevelEnum(String value) {
-      this.value = value;
-    }
-
-    @Override
-    @JsonValue
-    public String toString() {
-      return String.valueOf(value);
-    }
-
-    @JsonCreator
-    public static TierLevelEnum fromValue(String text) {
-      for (TierLevelEnum b : TierLevelEnum.values()) {
-        if (String.valueOf(b.value).equals(text)) {
-          return b;
-        }
-      }
-      return null;
-    }
-  }
-
-  @JsonProperty("tierLevel")
-  private TierLevelEnum tierLevel = null;
+  @JsonProperty("name")
+  private String name = null;
 
   @JsonProperty("attributes")
   private Map<String, String> attributes = new HashMap<String, String>();
@@ -109,43 +82,61 @@ public class TierDTO   {
   @JsonProperty("stopOnQuotaReach")
   private Boolean stopOnQuotaReach = null;
 
-  public TierDTO uuid(String uuid) {
-    this.uuid = uuid;
+  public ThrottlePolicyDTO policyId(String policyId) {
+    this.policyId = policyId;
     return this;
   }
 
    /**
-   * Get uuid
-   * @return uuid
+   * Get policyId
+   * @return policyId
   **/
-  @ApiModelProperty(example = "e2e72c72-2bf0-11e7-93ae-92361f002671", required = true, value = "")
-  public String getUuid() {
-    return uuid;
+  @ApiModelProperty(value = "")
+  public String getPolicyId() {
+    return policyId;
   }
 
-  public void setUuid(String uuid) {
-    this.uuid = uuid;
+  public void setPolicyId(String policyId) {
+    this.policyId = policyId;
   }
 
-  public TierDTO name(String name) {
-    this.name = name;
+  public ThrottlePolicyDTO policyName(String policyName) {
+    this.policyName = policyName;
     return this;
   }
 
    /**
-   * Get name
-   * @return name
+   * Get policyName
+   * @return policyName
   **/
-  @ApiModelProperty(example = "Platinum", required = true, value = "")
-  public String getName() {
-    return name;
+  @ApiModelProperty(required = true, value = "")
+  public String getPolicyName() {
+    return policyName;
   }
 
-  public void setName(String name) {
-    this.name = name;
+  public void setPolicyName(String policyName) {
+    this.policyName = policyName;
   }
 
-  public TierDTO description(String description) {
+  public ThrottlePolicyDTO displayName(String displayName) {
+    this.displayName = displayName;
+    return this;
+  }
+
+   /**
+   * Get displayName
+   * @return displayName
+  **/
+  @ApiModelProperty(value = "")
+  public String getDisplayName() {
+    return displayName;
+  }
+
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
+  }
+
+  public ThrottlePolicyDTO description(String description) {
     this.description = description;
     return this;
   }
@@ -163,30 +154,48 @@ public class TierDTO   {
     this.description = description;
   }
 
-  public TierDTO tierLevel(TierLevelEnum tierLevel) {
-    this.tierLevel = tierLevel;
+  public ThrottlePolicyDTO isDeployed(Boolean isDeployed) {
+    this.isDeployed = isDeployed;
     return this;
   }
 
    /**
-   * Get tierLevel
-   * @return tierLevel
+   * Get isDeployed
+   * @return isDeployed
   **/
-  @ApiModelProperty(example = "api", value = "")
-  public TierLevelEnum getTierLevel() {
-    return tierLevel;
+  @ApiModelProperty(value = "")
+  public Boolean getIsDeployed() {
+    return isDeployed;
   }
 
-  public void setTierLevel(TierLevelEnum tierLevel) {
-    this.tierLevel = tierLevel;
+  public void setIsDeployed(Boolean isDeployed) {
+    this.isDeployed = isDeployed;
   }
 
-  public TierDTO attributes(Map<String, String> attributes) {
+  public ThrottlePolicyDTO name(String name) {
+    this.name = name;
+    return this;
+  }
+
+   /**
+   * Get name
+   * @return name
+  **/
+  @ApiModelProperty(example = "Platinum", value = "")
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public ThrottlePolicyDTO attributes(Map<String, String> attributes) {
     this.attributes = attributes;
     return this;
   }
 
-  public TierDTO putAttributesItem(String key, String attributesItem) {
+  public ThrottlePolicyDTO putAttributesItem(String key, String attributesItem) {
     this.attributes.put(key, attributesItem);
     return this;
   }
@@ -204,7 +213,7 @@ public class TierDTO   {
     this.attributes = attributes;
   }
 
-  public TierDTO requestCount(Long requestCount) {
+  public ThrottlePolicyDTO requestCount(Long requestCount) {
     this.requestCount = requestCount;
     return this;
   }
@@ -213,7 +222,7 @@ public class TierDTO   {
    * Maximum number of requests which can be sent within a provided unit time 
    * @return requestCount
   **/
-  @ApiModelProperty(example = "50", required = true, value = "Maximum number of requests which can be sent within a provided unit time ")
+  @ApiModelProperty(example = "50", value = "Maximum number of requests which can be sent within a provided unit time ")
   public Long getRequestCount() {
     return requestCount;
   }
@@ -222,7 +231,7 @@ public class TierDTO   {
     this.requestCount = requestCount;
   }
 
-  public TierDTO unitTime(Long unitTime) {
+  public ThrottlePolicyDTO unitTime(Long unitTime) {
     this.unitTime = unitTime;
     return this;
   }
@@ -231,7 +240,7 @@ public class TierDTO   {
    * Get unitTime
    * @return unitTime
   **/
-  @ApiModelProperty(example = "60000", required = true, value = "")
+  @ApiModelProperty(example = "60000", value = "")
   public Long getUnitTime() {
     return unitTime;
   }
@@ -240,7 +249,7 @@ public class TierDTO   {
     this.unitTime = unitTime;
   }
 
-  public TierDTO timeUnit(String timeUnit) {
+  public ThrottlePolicyDTO timeUnit(String timeUnit) {
     this.timeUnit = timeUnit;
     return this;
   }
@@ -258,7 +267,7 @@ public class TierDTO   {
     this.timeUnit = timeUnit;
   }
 
-  public TierDTO tierPlan(TierPlanEnum tierPlan) {
+  public ThrottlePolicyDTO tierPlan(TierPlanEnum tierPlan) {
     this.tierPlan = tierPlan;
     return this;
   }
@@ -267,7 +276,7 @@ public class TierDTO   {
    * This attribute declares whether this policy is available under commercial or free 
    * @return tierPlan
   **/
-  @ApiModelProperty(example = "FREE", required = true, value = "This attribute declares whether this policy is available under commercial or free ")
+  @ApiModelProperty(example = "FREE", value = "This attribute declares whether this policy is available under commercial or free ")
   public TierPlanEnum getTierPlan() {
     return tierPlan;
   }
@@ -276,7 +285,7 @@ public class TierDTO   {
     this.tierPlan = tierPlan;
   }
 
-  public TierDTO stopOnQuotaReach(Boolean stopOnQuotaReach) {
+  public ThrottlePolicyDTO stopOnQuotaReach(Boolean stopOnQuotaReach) {
     this.stopOnQuotaReach = stopOnQuotaReach;
     return this;
   }
@@ -285,7 +294,7 @@ public class TierDTO   {
    * By making this attribute to false, you are capabale of sending requests even if the request count exceeded within a unit time 
    * @return stopOnQuotaReach
   **/
-  @ApiModelProperty(example = "true", required = true, value = "By making this attribute to false, you are capabale of sending requests even if the request count exceeded within a unit time ")
+  @ApiModelProperty(example = "true", value = "By making this attribute to false, you are capabale of sending requests even if the request count exceeded within a unit time ")
   public Boolean getStopOnQuotaReach() {
     return stopOnQuotaReach;
   }
@@ -303,33 +312,37 @@ public class TierDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    TierDTO tier = (TierDTO) o;
-    return Objects.equals(this.uuid, tier.uuid) &&
-        Objects.equals(this.name, tier.name) &&
-        Objects.equals(this.description, tier.description) &&
-        Objects.equals(this.tierLevel, tier.tierLevel) &&
-        Objects.equals(this.attributes, tier.attributes) &&
-        Objects.equals(this.requestCount, tier.requestCount) &&
-        Objects.equals(this.unitTime, tier.unitTime) &&
-        Objects.equals(this.timeUnit, tier.timeUnit) &&
-        Objects.equals(this.tierPlan, tier.tierPlan) &&
-        Objects.equals(this.stopOnQuotaReach, tier.stopOnQuotaReach);
+    ThrottlePolicyDTO throttlePolicy = (ThrottlePolicyDTO) o;
+    return Objects.equals(this.policyId, throttlePolicy.policyId) &&
+        Objects.equals(this.policyName, throttlePolicy.policyName) &&
+        Objects.equals(this.displayName, throttlePolicy.displayName) &&
+        Objects.equals(this.description, throttlePolicy.description) &&
+        Objects.equals(this.isDeployed, throttlePolicy.isDeployed) &&
+        Objects.equals(this.name, throttlePolicy.name) &&
+        Objects.equals(this.attributes, throttlePolicy.attributes) &&
+        Objects.equals(this.requestCount, throttlePolicy.requestCount) &&
+        Objects.equals(this.unitTime, throttlePolicy.unitTime) &&
+        Objects.equals(this.timeUnit, throttlePolicy.timeUnit) &&
+        Objects.equals(this.tierPlan, throttlePolicy.tierPlan) &&
+        Objects.equals(this.stopOnQuotaReach, throttlePolicy.stopOnQuotaReach);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, name, description, tierLevel, attributes, requestCount, unitTime, timeUnit, tierPlan, stopOnQuotaReach);
+    return Objects.hash(policyId, policyName, displayName, description, isDeployed, name, attributes, requestCount, unitTime, timeUnit, tierPlan, stopOnQuotaReach);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class TierDTO {\n");
+    sb.append("class ThrottlePolicyDTO {\n");
     
-    sb.append("    uuid: ").append(toIndentedString(uuid)).append("\n");
-    sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    policyId: ").append(toIndentedString(policyId)).append("\n");
+    sb.append("    policyName: ").append(toIndentedString(policyName)).append("\n");
+    sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
-    sb.append("    tierLevel: ").append(toIndentedString(tierLevel)).append("\n");
+    sb.append("    isDeployed: ").append(toIndentedString(isDeployed)).append("\n");
+    sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    attributes: ").append(toIndentedString(attributes)).append("\n");
     sb.append("    requestCount: ").append(toIndentedString(requestCount)).append("\n");
     sb.append("    unitTime: ").append(toIndentedString(unitTime)).append("\n");
