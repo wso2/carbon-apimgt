@@ -279,7 +279,9 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
             statement.setInt(queryIndex, limit);
             return statement;
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            String errorMsg = "Error occurred while searching APIs for attributes in the database.";
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e);
         }
 
     }

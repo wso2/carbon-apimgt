@@ -55,7 +55,7 @@ public interface ApiDAO {
      */
     @CheckForNull
     API getAPISummary(String apiID) throws APIMgtDAOException;
-    
+
     /**
      * Retrieves the last updated time of an API
      *

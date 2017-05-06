@@ -19,6 +19,8 @@
 package org.wso2.carbon.apimgt.core.dao.impl;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -39,6 +41,7 @@ import java.util.Set;
  */
 public class MssqlSQLStatements implements ApiDAOVendorSpecificStatements {
 
+    private static final Logger log = LoggerFactory.getLogger(MssqlSQLStatements.class);
     private static final String API_SUMMARY_SELECT =
             "SELECT DISTINCT API.UUID, API.PROVIDER, API.NAME, API.CONTEXT, API.VERSION, API.DESCRIPTION,"
                     + "API.CURRENT_LC_STATUS, API.LIFECYCLE_INSTANCE_ID, API.LC_WORKFLOW_STATUS, API.API_TYPE_ID "
@@ -267,7 +270,9 @@ public class MssqlSQLStatements implements ApiDAOVendorSpecificStatements {
             statement.setInt(++queryIndex, limit);
             return statement;
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            String errorMsg = "Error occurred while searching APIs for attributes in the database.";
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e);
         }
     }
 }

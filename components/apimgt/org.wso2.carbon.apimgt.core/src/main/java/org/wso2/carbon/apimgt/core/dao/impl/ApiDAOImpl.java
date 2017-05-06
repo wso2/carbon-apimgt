@@ -264,8 +264,8 @@ public class ApiDAOImpl implements ApiDAO {
                 "AND " +
                 "UUID IN (SELECT API_ID FROM AM_API_VISIBLE_ROLES WHERE ROLE IN " +
                 "(" + DAOUtil.getParameterString(roles.size()) + ")) " +
-                "AND " + "CURRENT_LC_STATUS  IN (" + DAOUtil.getParameterString(statuses.size()) +
-                ") AND " +
+                "AND " + "CURRENT_LC_STATUS  IN (" +
+                DAOUtil.getParameterString(statuses.size()) + ") AND " +
                 "API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)";
 
         try (Connection connection = DAOUtil.getConnection();
@@ -408,7 +408,9 @@ public class ApiDAOImpl implements ApiDAO {
             }
             return constructAPISummaryList(connection, statement);
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            String errorMsg = "Error occurred while searching APIs for attributes, in Store.";
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e);
         }
     }
 
