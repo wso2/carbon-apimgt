@@ -82,6 +82,8 @@ public class ApiDAOImpl implements ApiDAO {
             "CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME, COPIED_FROM_API, UPDATED_BY, LC_WORKFLOW_STATUS FROM AM_API";
 
     private static final String AM_API_TABLE_NAME = "AM_API";
+    private static final String AM_TAGS_TABLE_NAME = "AM_TAGS";
+    private static final String AM_API_OPERATION_MAPPING_TABLE_NAME = "AM_API_OPERATION_MAPPING";
     private static final String AM_API_COMMENTS_TABLE_NAME = "AM_API_COMMENTS";
     private static final String AM_ENDPOINT_TABLE_NAME = "AM_ENDPOINT";
     private static final Logger log = LoggerFactory.getLogger(ApiDAOImpl.class);
@@ -262,7 +264,8 @@ public class ApiDAOImpl implements ApiDAO {
                 "AND " +
                 "UUID IN (SELECT API_ID FROM AM_API_VISIBLE_ROLES WHERE ROLE IN " +
                 "(" + DAOUtil.getParameterString(roles.size()) + ")) " +
-                "AND " + "CURRENT_LC_STATUS  IN (" + DAOUtil.getParameterString(statuses.size()) + ") AND " +
+                "AND " + "CURRENT_LC_STATUS  IN (" +
+                DAOUtil.getParameterString(statuses.size()) + ") AND " +
                 "API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)";
 
         try (Connection connection = DAOUtil.getConnection();
@@ -347,6 +350,67 @@ public class ApiDAOImpl implements ApiDAO {
 
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
+        }
+    }
+
+    /**
+     * @see ApiDAO#attributeSearchAPIsStore(List roles, Map attributeMap, int offset, int limit)
+     */
+    @Override
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
+    public List<API> attributeSearchAPIsStore(List<String> roles, Map<String, String> attributeMap,
+                                              int offset, int limit) throws APIMgtDAOException {
+
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = sqlStatements.attributeSearchStore
+                     (connection, roles, attributeMap, offset, limit)) {
+            DatabaseMetaData md = connection.getMetaData();
+            Iterator<Map.Entry<String, String>> entries = attributeMap.entrySet().iterator();
+
+            while (entries.hasNext()) {
+                Map.Entry<String, String> entry = entries.next();
+                String tableName = null, columnName = null;
+
+                if (APIMgtConstants.TAG_SEARCH_TYPE_PREFIX.equalsIgnoreCase(entry.getKey())) {
+                    //if the search is related to tags, need to check NAME column in AM_TAGS table
+                    tableName = connection.getMetaData().getDriverName().contains("PostgreSQL") ?
+                            AM_TAGS_TABLE_NAME.toLowerCase(Locale.ENGLISH) :
+                            AM_TAGS_TABLE_NAME;
+                    columnName = connection.getMetaData().getDriverName().contains("PostgreSQL") ?
+                            APIMgtConstants.TAG_NAME_COLUMN.toLowerCase(Locale.ENGLISH) :
+                            APIMgtConstants.TAG_NAME_COLUMN.toUpperCase(Locale.ENGLISH);
+                } else if (APIMgtConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX.equalsIgnoreCase
+                        (entry.getKey())) {
+                    //if the search is related to subcontext, need to check URL_PATTERN column in
+                    //AM_API_OPERATION_MAPPING table
+                    tableName = connection.getMetaData().getDriverName().contains("PostgreSQL") ?
+                            AM_API_OPERATION_MAPPING_TABLE_NAME.toLowerCase(Locale.ENGLISH) :
+                            AM_API_OPERATION_MAPPING_TABLE_NAME;
+                    columnName = connection.getMetaData().getDriverName().contains("PostgreSQL") ?
+                            APIMgtConstants.URL_PATTERN_COLUMN.toLowerCase(Locale.ENGLISH) :
+                            APIMgtConstants.URL_PATTERN_COLUMN.toUpperCase(Locale.ENGLISH);
+                } else {
+                    //if the search is related to any other attribute, need to check that attribute
+                    //in AM_API table
+                    tableName = connection.getMetaData().getDriverName().contains("PostgreSQL") ?
+                            AM_API_TABLE_NAME.toLowerCase(Locale.ENGLISH) :
+                            AM_API_TABLE_NAME;
+                    columnName = connection.getMetaData().getDriverName().contains("PostgreSQL") ?
+                            entry.getKey().toLowerCase(Locale.ENGLISH) :
+                            entry.getKey().toUpperCase(Locale.ENGLISH);
+                }
+
+                if (!checkTableColumnExists(md, tableName, columnName)) {
+                    throw new APIMgtDAOException(
+                            "Wrong search attribute. Attribute does not exist with name : " +
+                                    entry.getKey());
+                }
+            }
+            return constructAPISummaryList(connection, statement);
+        } catch (SQLException e) {
+            String errorMsg = "Error occurred while searching APIs for attributes, in Store.";
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e);
         }
     }
 
@@ -1322,8 +1386,7 @@ public class ApiDAOImpl implements ApiDAO {
                         description(rs.getString("DESCRIPTION")).
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
                         lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
-                        workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).
-                        apiType(getApiTypeById(connection, rs.getInt("API_TYPE_ID"))).build();
+                        workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).build();
 
                 apiList.add(apiSummary);
             }

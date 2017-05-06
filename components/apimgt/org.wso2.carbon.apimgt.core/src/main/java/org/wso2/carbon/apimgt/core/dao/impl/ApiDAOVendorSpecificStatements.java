@@ -21,9 +21,12 @@
 package org.wso2.carbon.apimgt.core.dao.impl;
 
 import org.wso2.carbon.apimgt.core.dao.ApiType;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -79,5 +82,18 @@ public interface ApiDAOVendorSpecificStatements {
                                         Map<String, String> attributeMap, ApiType apiType, int offset, int limit)
                                         throws SQLException;
 
+    /**
+     * Creates attribute search query in API store, specific to database
+     *
+     * @param connection DB connection
+     * @param roles user roles
+     * @param attributeMap map containing the attributes and search queries for those attributes
+     * @param offset the starting point of the search results.
+     * @param limit number of search results that will be returned.
+     * @return statement build for specific database type.
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    PreparedStatement attributeSearchStore(Connection connection, List<String> roles, Map<String,
+            String> attributeMap, int offset, int limit) throws APIMgtDAOException;
 
 }

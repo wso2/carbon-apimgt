@@ -688,8 +688,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 if (isFullTextSearch) {
                     apiResults = getApiDAO().searchAPIs(roles, user, query, ApiType.STANDARD, offset, limit);
                 } else {
-                    apiResults = getApiDAO().attributeSearchAPIs(roles, user, attributeMap,
-                                                                            ApiType.STANDARD, offset, limit);
+                    apiResults = getApiDAO().attributeSearchAPIsStore(new ArrayList<>(roles),
+                            attributeMap, offset, limit);
                 }
             } else {
                 List<String> statuses = new ArrayList<>();

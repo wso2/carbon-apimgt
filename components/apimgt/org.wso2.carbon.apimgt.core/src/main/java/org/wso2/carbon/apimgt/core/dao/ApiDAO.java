@@ -56,7 +56,6 @@ public interface ApiDAO {
     @CheckForNull
     API getAPISummary(String apiID) throws APIMgtDAOException;
 
-
     /**
      * Retrieves the last updated time of an API
      *
@@ -155,6 +154,19 @@ public interface ApiDAO {
      */
     List<API> attributeSearchAPIs(Set<String> roles, String user, Map<String, String> attributeMap, ApiType apiType,
                                   int offset, int limit) throws APIMgtDAOException;
+
+    /**
+     * Retrieves summary of paginated data of APIs based on visibility (in store), that match the
+     * given search criteria.
+     * @param roles List of the roles of the user.
+     * @param attributeMap Map containing the attributes to be searched
+     * @param offset The starting point of the search results.
+     * @param limit Number of search results that will be returned.
+     * @return {@code List<API>} matching results
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    List<API> attributeSearchAPIsStore(List<String> roles, Map<String, String> attributeMap,
+                                       int offset, int limit) throws APIMgtDAOException;
 
     /**
      * Retrieves summary data of all available APIs with life cycle status that matches the status list provided
