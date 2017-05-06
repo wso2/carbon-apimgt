@@ -288,4 +288,5 @@ body.modal-open {
    pointer-events: none;
    cursor: default;
    tabindex="-1";
+   color:#CCC;
 }

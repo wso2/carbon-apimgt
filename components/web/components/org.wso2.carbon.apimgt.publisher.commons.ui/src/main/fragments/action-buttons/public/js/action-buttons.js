@@ -21,6 +21,10 @@
  *
  */
 function validateActionButtons() {
+    // If not the publisher app, Load UI with buttons/links enabled (default case).
+    if(appName !== "API Publisher") {
+        return true;
+    }
     var bearerToken = "Bearer " + getCookie("WSO2_AM_TOKEN_1");
 
     var loggedInUserScopes = localStorage.getItem('userScopes');
@@ -31,7 +35,6 @@ function validateActionButtons() {
         return;
     }
     var publisherSwaggerJson = JSON.parse(response);
-
 
     for (var i = 0; i < arguments.length; i++) {
         var id = arguments[i];
@@ -54,7 +57,11 @@ function validateActionButtons() {
  *
  */
 function hasValidScopes(restApiResourcePath, restApiResourceMethod) {
-        var loggedInUserScopes = localStorage.getItem('userScopes');
+    // If not the publisher app, Load UI with buttons/links enabled (default case).
+    if(appName !== "API Publisher") {
+        return true;
+    }
+    var loggedInUserScopes = localStorage.getItem('userScopes');
 
     if (loggedInUserScopes !== null) {
         var response = loadSwaggerJson();
@@ -70,7 +77,6 @@ function hasValidScopes(restApiResourcePath, restApiResourceMethod) {
             console.warn("Publisher swagger definition could not be loaded.");
             return true;
         }
-
     }
     return false;
 }
@@ -98,7 +104,6 @@ function loadSwaggerJson() {
             }
         };
         request.send(null);
-
     } else {
         return publisherSwaggerJson;
     }
