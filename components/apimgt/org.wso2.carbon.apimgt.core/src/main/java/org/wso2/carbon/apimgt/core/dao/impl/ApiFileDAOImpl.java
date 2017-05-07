@@ -436,6 +436,30 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
+     * Check Endpoint is exist
+     *
+     * @param name name of endpoint
+     * @return existence of endpoint
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    @Override
+    public boolean isEndpointExist(String name) throws APIMgtDAOException {
+        return getEndpointByName(name) != null;
+    }
+
+    /**
+     * Check endpoint use in api or operation
+     *
+     * @param endpointId id of endpoint
+     * @return true if used
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    @Override
+    public boolean isEndpointAssociated(String endpointId) throws APIMgtDAOException {
+        return false;
+    }
+
+    /**
      * @see ApiDAO#addComment(Comment, String)
      */
     @Override

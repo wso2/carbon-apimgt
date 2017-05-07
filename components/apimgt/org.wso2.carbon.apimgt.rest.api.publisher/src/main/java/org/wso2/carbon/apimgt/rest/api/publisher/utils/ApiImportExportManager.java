@@ -72,24 +72,35 @@ public class ApiImportExportManager {
         // iterate and collect all information
         for (API api : apis) {
             api = apiPublisher.getAPIbyUUID(api.getId());
-            // get endpoints
-            Map<String, String> endpoints = api.getEndpoint();
+            // get endpoints at API Level
+            Map<String, Object> endpoints = api.getEndpoint();
             if (endpoints.isEmpty()) {
                 log.error("No Endpoints found for api: " + api.getName() + ", version: " + api.getVersion());
                 // skip this API
                 continue;
             }
             Set<Endpoint> endpointSet = new HashSet<>();
-            try {
-                for (Map.Entry<String, String> endpointEntry : endpoints.entrySet()) {
-                    endpointSet.add(apiPublisher.getEndpoint(endpointEntry.getValue()));
+            for (Map.Entry<String, Object> endpointEntry : endpoints.entrySet()) {
+                if (endpointEntry.getValue() instanceof Endpoint) {
+                    endpointSet.add((Endpoint) endpointEntry.getValue());
+                } else {
+                    endpointSet.add(apiPublisher.getEndpoint(String.valueOf(endpointEntry.getValue())));
                 }
-            } catch (APIManagementException e) {
-                log.error("Error in getting endpoints for api: " + api.getName() + ", version: " + api.getVersion(), e);
-                // skip this API
-                continue;
             }
-
+            // get Endpoints at Resource Level
+            api.getUriTemplates().forEach((k, v) -> {
+                v.getEndpoint().forEach((type, value) -> {
+                    if (value instanceof Endpoint) {
+                        endpointSet.add((Endpoint) value);
+                    } else {
+                        try {
+                            endpointSet.add(apiPublisher.getEndpoint(String.valueOf(value)));
+                        } catch (APIManagementException e) {
+                            log.error("Error in getting endpoints for Resource: " + v.getTemplateId(), e);
+                        }
+                    }
+                });
+            });
             // get swagger definition
             String swaggerDefinition;
             try {
@@ -175,7 +186,7 @@ public class ApiImportExportManager {
         // update everything
         String swaggerDefinition = apiDetails.getSwaggerDefinition();
         String gatewayConfig = apiDetails.getGatewayConfiguration();
-        Map<String, String> endpointTypeToIdMap = new HashMap<>();
+        Map<String, Object> endpointTypeToIdMap = new HashMap<>();
 
         // endpoints
         for (Endpoint endpoint : apiDetails.getEndpoints()) {
@@ -253,7 +264,7 @@ public class ApiImportExportManager {
         // update everything
         String swaggerDefinition = apiDetails.getSwaggerDefinition();
         String gatewayConfig = apiDetails.getGatewayConfiguration();
-        Map<String, String> endpointTypeToIdMap = new HashMap<>();
+        Map<String, Object> endpointTypeToIdMap = new HashMap<>();
 
         // endpoints
         for (Endpoint endpoint : apiDetails.getEndpoints()) {

@@ -1,9 +1,12 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +25,11 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPointListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 import org.wso2.msf4j.Request;
+
+import java.util.HashMap;
+import java.util.List;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
         "2017-01-03T15:53:15.692+05:30")
@@ -107,6 +115,11 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
                     (), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        } catch (IOException e) {
+            String errorMessage = "Error while Converting Endpoint Security Details in Endpoint :" + endpointId;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
         }
     }
 
@@ -180,6 +193,16 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
             org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        } catch (JsonProcessingException e) {
+            String errorMessage = "Error while Converting Endpoint Security Details in Endpoint :" + endpointId;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
+        } catch (IOException e) {
+            String errorMessage = "Error while Converting Endpoint Security Details in Endpoint :" + endpointId;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
         }
     }
 
@@ -209,6 +232,32 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
         } catch (APIManagementException e) {
             String errorMessage = "Error while get All Endpoint";
             org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        } catch (IOException e) {
+            String errorMessage = "Error while Converting Endpoint Security Details in Endpoint";
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
+        }
+    }
+
+    @Override
+    public Response endpointsHead(String name, String accept, String ifNoneMatch, Request request) throws
+            NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername();
+        boolean status;
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            if (apiPublisher.isEndpointExist(name)) {
+                return Response.status(Response.Status.OK).build();
+            } else {
+                return Response.status(Response.Status.NOT_FOUND).build();
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while checking status.";
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList, e);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
@@ -242,6 +291,16 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
             org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        } catch (JsonProcessingException e) {
+            String errorMessage = "Error while Converting Endpoint Security Details in Endpoint";
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
+        } catch (IOException e) {
+            String errorMessage = "Error while Converting Endpoint Security Details in Endpoint ";
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
         }
     }
 }

@@ -1,0 +1,240 @@
+{{fragment "org.wso2.carbon.uuf.common.foundation.ui.data-tables" }}
+{{js "js/common.js"}}
+{{#if editMode}}
+    {{#if globalLevel}}
+    {{js "js/edit.js"}}
+    <div class="page-header">
+        <h2 id="tierTopic">{{i18n "Edit.Global.Endpoint"}}</h2>
+        <p class="lead"></p>
+    </div>
+    {{else if }}
+        <div class="page-header">
+            <h2 id="tierTopic">{{i18n "Edit.Endpoint"}}</h2>
+            <p class="lead"></p>
+        </div>
+    {{/if}}
+    {{else if }}
+    {{#if globalLevel}}
+        {{js "js/index.js"}}
+    <div class="page-header">
+        <h2 id="tierTopic">{{i18n "Add.Global.Endpoint"}}</h2>
+        <p class="lead"></p>
+    </div>
+    {{else if }}
+    {{js "js/api-endpoint.js"}}
+    {{/if}}
+    {{/if}}
+    <div class="form-group">
+        <label class="control-label col-xs-3 col-sm-3 col-md-3 col-lg-3">{{i18n "Endpoint.Name"}}: <span
+                class="required-astrix">*</span>
+            <a class="help_popup" help_data="name_help" data-content="{{i18n "Name.of.Endpoint"}}"
+               data-trigger="hover" data-placement="bottom"
+               title="">
+							<span class="icon fw-stack fw-lg" style="font-size:6px">
+								<i class="fw fw-circle fw-stack-2x" data-original-title="" title=""></i>
+								<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"
+                                   data-original-title="" title=""></i>
+							</span>
+            </a>
+        </label>
+        <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+            <input class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace"
+                   type="text" id="endpoint-name-{{@params.type}}" autofocus="autofocus" value="" name="endpoint-name" onchange="checkEndpointExist(this)"/>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-3 col-sm-3 col-md-3 col-lg-3">{{i18n "Endpoint.Type"}}: <span
+                class="required-astrix">*</span>
+            <a class="help_popup" help_data="type_help" data-content="{{i18n "Endpoint.Type"}}"
+               data-trigger="hover" data-placement="bottom"
+               title="">
+							<span class="icon fw-stack fw-lg" style="font-size:6px">
+								<i class="fw fw-circle fw-stack-2x" data-original-title="" title=""></i>
+								<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"
+                                   data-original-title="" title=""></i>
+							</span>
+            </a>
+
+        </label>
+        <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+            <select id="endpoint-type-{{@params.type}}" class="form-control">
+                <option title="http"
+                        data-content="<span><strong>{{i18n "Endpoint.Http"}}</strong><br /></span>"
+                        value="http">{{i18n "Endpoint.Http"}}
+                </option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-3 col-sm-3 col-md-3 col-lg-3">{{i18n "Endpoint.ServiceUri"}}: <span
+                class="required-astrix">*</span>
+            <a class="help_popup" help_data="name_help" data-content="{{i18n "Endpoint.ServiceUri"}}"
+               data-trigger="hover" data-placement="bottom"
+               title="">
+							<span class="icon fw-stack fw-lg" style="font-size:6px">
+								<i class="fw fw-circle fw-stack-2x" data-original-title="" title=""></i>
+								<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"
+                                   data-original-title="" title=""></i>
+							</span>
+            </a>
+        </label>
+        <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+            <input class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace"
+                   type="text" id="endpoint-url-{{@params.type}}" autofocus="autofocus" value=""/>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-3 col-sm-3 col-md-3 col-lg-3">{{i18n "Endpoint.MaxTps"}}:
+            <a class="help_popup" help_data="name_help" data-content="{{i18n "MaxTps.of.Endpoint"}}"
+               data-trigger="hover" data-placement="bottom"
+               title="">
+							<span class="icon fw-stack fw-lg" style="font-size:6px">
+								<i class="fw fw-circle fw-stack-2x" data-original-title="" title=""></i>
+								<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"
+                                   data-original-title="" title=""></i>
+							</span>
+            </a>
+        </label>
+        <div>
+            <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+                <label class="control-label col-xs-3 col-sm-3 col-md-3 col-lg-3"></label>
+                <div class="radio radio-inline">
+                    <label class="checkbox-inline">
+                        <input type="radio" name="endpoint-maxtps-option-{{@params.type}}" value="unlimited" checked="checked"
+                               onchange="showHideEndpointMaxTps(this)"/>
+                        {{i18n "Endpoint.MaxTps.Unlimited"}}
+                    </label>
+                </div>
+                <div class="radio radio-inline">
+                    <label class="checkbox-inline">
+                        <input type="radio" name="endpoint-maxtps-option-{{@params.type}}" value="specific"
+                               onchange="showHideEndpointMaxTps(this)"/>
+                        {{i18n "Endpoint.MaxTps.Specific"}}
+                    </label>
+                </div>
+            </div>
+        </div>
+        </div>
+    <div class="form-group hidden" id="endpoint-maxtps-group-{{@params.type}}">
+        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3"></div>
+        <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+            <input class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace"
+                   type="text" id="endpoint-maxtps-{{@params.type}}" autofocus="autofocus" value=""/>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-3 col-sm-3 col-md-3 col-lg-3">{{i18n "Endpoint.Security"}}: <span
+                class="required-astrix">*</span>
+            <a class="help_popup" help_data="type_help" data-content="{{i18n "Endpoint.Security"}}"
+               data-trigger="hover" data-placement="bottom"
+               title="">
+							<span class="icon fw-stack fw-lg" style="font-size:6px">
+								<i class="fw fw-circle fw-stack-2x" data-original-title="" title=""></i>
+								<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"
+                                   data-original-title="" title=""></i>
+							</span>
+            </a>
+
+        </label>
+        <div id="endpoint-security-div-{{@params.type}}">
+            <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+                <label class="control-label col-xs-3 col-sm-3 col-md-3 col-lg-3"></label>
+                <div class="radio radio-inline">
+                    <label class="checkbox-inline">
+                        <input type="radio" name="endpoint-security-{{@params.type}}" value="false" checked="checked"
+                               onchange="showHideEndpointSecurity(this)"/>
+                        {{i18n "Endpoint.Security.Unsecured"}}
+                    </label>
+                </div>
+                <div class="radio radio-inline">
+                    <label class="checkbox-inline">
+                        <input type="radio" name="endpoint-security-{{@params.type}}" value="true"
+                               onchange="showHideEndpointSecurity(this)"/>
+                        {{i18n "Endpoint.Security.Secured"}}
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-group hidden" id="endpoint-security-group-{{@params.type}}">
+    <div class="form-group">
+        <label class="control-label col-xs-3 col-sm-3 col-md-3 col-lg-3">{{i18n "Endpoint.Type"}}: <span
+                class="required-astrix">*</span>
+            <a class="help_popup" help_data="type_help" data-content="{{i18n "Endpoint.Type"}}"
+               data-trigger="hover" data-placement="bottom"
+               title="">
+							<span class="icon fw-stack fw-lg" style="font-size:6px">
+								<i class="fw fw-circle fw-stack-2x" data-original-title="" title=""></i>
+								<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"
+                                   data-original-title="" title=""></i>
+							</span>
+            </a>
+
+        </label>
+        <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+            <select id="endpoint-security-type-{{@params.type}}" class="form-control">
+                <option title="basic"
+                        data-content="<span><strong>{{i18n "Endpoint.Security.Basic"}}</strong><br /></span>"
+                        value="basic">{{i18n "Endpoint.Security.Basic"}}
+                </option>
+                <option title="digest"
+                        data-content="<span><strong>{{i18n "Endpoint.Security.Digest"}}</strong><br /></span>"
+                        value="digest">{{i18n "Endpoint.Security.Digest"}}
+                </option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-3 col-xs-3">{{i18n "Endpoint.Security.Username"}}: <span
+                class="required-astrix">*</span>
+            <a class="help_popup" help_data="name_help" data-content="{{i18n "Endpoint.Security.Username"}}"
+               data-trigger="hover" data-placement="bottom"
+               title="">
+							<span class="icon fw-stack fw-lg" style="font-size:6px">
+								<i class="fw fw-circle fw-stack-2x" data-original-title="" title=""></i>
+								<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"
+                                   data-original-title="" title=""></i>
+							</span>
+            </a>
+        </label>
+        <div class="col-xs-3 col-xs-3">
+            <input class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace"
+                   type="text" id="endpoint-security-username-{{@params.type}}" autofocus="autofocus" value=""/>
+        </div>
+        <label class="control-label col-xs-3 col-xs-3">{{i18n "Endpoint.Security.Password"}}: <span
+                class="required-astrix">*</span>
+            <a class="help_popup" help_data="name_help" data-content="{{i18n "Endpoint.Security.Password"}}"
+               data-trigger="hover" data-placement="bottom"
+               title="">
+							<span class="icon fw-stack fw-lg" style="font-size:6px">
+								<i class="fw fw-circle fw-stack-2x" data-original-title="" title=""></i>
+								<i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"
+                                   data-original-title="" title=""></i>
+							</span>
+            </a>
+        </label>
+        <div class="col-xs-3 col-xs-3">
+            <input class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace"
+                   type="password" id="endpoint-security-password-{{@params.type}}" autofocus="autofocus" value=""/>
+        </div>
+    </div>
+    </div>
+
+{{#if globalLevel}}
+    <div id="add-endpoint-button" class="form-group">
+        <button type="button" id="addEndpointBtn" name="addEndpointBtn" class="btn btn-primary has-spinner">
+            <span class="icon fw-stack">
+                <i class="fw fw-save fw-stack-1x"></i>
+                <i class="fw fw-circle-outline fw-stack-2x"></i>
+            </span>
+            &nbsp;{{i18n "Save"}}
+        </button>
+        <button type="button" id="cancel-endpoint-btn" class="btn btn-secondary">
+            <span class="icon fw-stack">
+                <i class="fw fw-cancel fw-stack-1x"></i>
+                <i class="fw fw-circle-outline fw-stack-2x"></i>
+            </span>
+            {{i18n "Cancel"}}
+        </button>
+    </div>
+{{/if}}

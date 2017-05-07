@@ -20,18 +20,21 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
  * Endpoint specific information
  */
-public class Endpoint {
+public class Endpoint implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final String id;
     private final String endpointConfig;
     private final Long maxTps;
     private final String security;
     private final String name;
     private final String type;
+    private final String applicableLevel;
 
     public String getId() {
         return id;
@@ -57,6 +60,10 @@ public class Endpoint {
         return type;
     }
 
+    public String getApplicableLevel() {
+        return applicableLevel;
+    }
+
     private Endpoint(Builder builder) {
         id = builder.id;
         endpointConfig = builder.endpointConfig;
@@ -64,6 +71,7 @@ public class Endpoint {
         security = builder.security;
         name = builder.name;
         type = builder.type;
+        applicableLevel = builder.applicableLevel;
     }
 
     /**
@@ -76,6 +84,35 @@ public class Endpoint {
         private String security;
         public String name;
         public String type;
+        private String applicableLevel;
+
+        public String getId() {
+            return id;
+        }
+
+        public String getEndpointConfig() {
+            return endpointConfig;
+        }
+
+        public Long getMaxTps() {
+            return maxTps;
+        }
+
+        public String getSecurity() {
+            return security;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public String getApplicableLevel() {
+            return applicableLevel;
+        }
 
         public Builder() {
         }
@@ -87,6 +124,7 @@ public class Endpoint {
             this.maxTps = copy.maxTps;
             this.security = copy.security;
             this.type = copy.type;
+            this.applicableLevel = copy.applicableLevel;
         }
 
         /**
@@ -160,6 +198,18 @@ public class Endpoint {
         }
 
         /**
+         * Sets the {@code applicableLevel} and returns a reference to this Builder so that the methods can be chained
+         * together.
+         *
+         * @param applicableLevel the {@code applicableLevel} to set
+         * @return a reference to this Builder
+         */
+        public Builder applicableLevel(String applicableLevel) {
+            this.applicableLevel = applicableLevel;
+            return this;
+        }
+
+        /**
          * Returns a {@code Endpoint} built from the parameters previously set.
          *
          * @return a {@code Endpoint} built with parameters of this {@code Endpoint.Builder}
@@ -228,12 +278,15 @@ public class Endpoint {
                 Objects.equals(endpoint.endpointConfig, endpointConfig) &&
                 Objects.equals(endpoint.security, security) &&
                 Objects.equals(endpoint.maxTps, maxTps) &&
-                Objects.equals(endpoint.name, name);
+                Objects.equals(endpoint.name, name) &&
+                Objects.equals(endpoint.type, type) &&
+                Objects.equals(endpoint.applicableLevel, applicableLevel);
     }
 
     @Override
     public int hashCode() {
         int result = id.hashCode();
+        result = 31 * result + name.hashCode();
         result = 31 * result + endpointConfig.hashCode();
         result = 31 * result + maxTps.hashCode();
         result = 31 * result + security.hashCode();

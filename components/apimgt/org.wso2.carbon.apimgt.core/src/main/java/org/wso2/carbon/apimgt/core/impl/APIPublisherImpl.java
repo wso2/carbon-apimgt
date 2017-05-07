@@ -241,6 +241,35 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         apiBuilder.lastUpdatedTime(localDateTime);
         apiBuilder.createdBy(getUsername());
         apiBuilder.updatedBy(getUsername());
+        Map<String, Object> apiEndpointMap = apiBuilder.getEndpoint();
+        if (apiEndpointMap != null) {
+            for (Map.Entry<String, Object> entry : apiEndpointMap.entrySet()) {
+                if (entry.getValue() instanceof Endpoint) {
+                    Endpoint.Builder endpointBuilder = new Endpoint.Builder((Endpoint) entry.getValue());
+                    if (StringUtils.isEmpty(endpointBuilder.getId())) {
+                        endpointBuilder.id(UUID.randomUUID().toString());
+                    }
+                    if (StringUtils.isEmpty(endpointBuilder.getApplicableLevel())) {
+                        endpointBuilder.applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT);
+                    }
+                    Endpoint endpoint = endpointBuilder.build();
+                    try {
+                        if (getApiDAO().getEndpointByName(endpoint.getName()) != null) {
+                            String msg = "Endpoint Already Exist By Name : " + endpoint.getName();
+                            throw new APIManagementException(msg, ExceptionCodes
+                                    .ENDPOINT_ALREADY_EXISTS);
+                        } else {
+                            apiEndpointMap.replace(entry.getKey(), endpointBuilder.build());
+                        }
+                    } catch (APIMgtDAOException e) {
+                        String msg = "Couldn't find Endpoint By Name : " + endpoint.getName();
+                        log.error(msg, e);
+                        throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+                    }
+
+                }
+            }
+        }
         try {
             if (!isApiNameExist(apiBuilder.getName()) && !isContextExist(apiBuilder.getContext())) {
                 LifecycleState lifecycleState = getApiLifecycleManager().addLifecycle(APIMgtConstants.API_LIFECYCLE,
@@ -258,8 +287,33 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                             uriTemplateBuilder.templateId(APIUtils.generateOperationIdFromPath(uriTemplate
                                     .getUriTemplate(), uriTemplate.getHttpVerb()));
                         }
-                        if (uriTemplate.getEndpoint().isEmpty()) {
-                            uriTemplateBuilder.endpoint(apiBuilder.getEndpoint());
+                        if (uriTemplate.getEndpoint() != null && !uriTemplate.getEndpoint().isEmpty()) {
+                            for (Map.Entry<String, Object> entry : uriTemplate.getEndpoint().entrySet()) {
+                                if (entry.getValue() instanceof Endpoint) {
+                                    Endpoint.Builder endpointBuilder = new Endpoint.Builder((Endpoint) entry.getValue
+                                            ());
+                                    if (StringUtils.isEmpty(endpointBuilder.getId())) {
+                                        endpointBuilder.id(UUID.randomUUID().toString());
+                                    }
+                                    if (StringUtils.isEmpty(endpointBuilder.getApplicableLevel())) {
+                                        endpointBuilder.applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT);
+                                    }
+                                    Endpoint endpoint = endpointBuilder.build();
+                                    try {
+                                        if (getApiDAO().getEndpointByName(endpoint.getName()) != null) {
+                                            String msg = "Endpoint Already Exist By Name : " + endpoint.getName();
+                                            throw new APIManagementException(msg, ExceptionCodes
+                                                    .ENDPOINT_ALREADY_EXISTS);
+                                        } else {
+                                            uriTemplate.getEndpoint().replace(entry.getKey(), endpoint);
+                                        }
+                                    } catch (APIMgtDAOException e) {
+                                        String msg = "Couldn't find Endpoint By Name : " + endpoint.getName();
+                                        log.error(msg, e);
+                                        throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+                                    }
+                                }
+                            }
                         }
                         uriTemplateMap.put(uriTemplateBuilder.getTemplateId(), uriTemplateBuilder.build());
                     }
@@ -276,16 +330,26 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     dto.setHttpVerb(uriTemplate.getHttpVerb());
                     dto.setAuthType(uriTemplate.getAuthType());
                     dto.setPolicy(uriTemplate.getPolicy());
-                    Map<String, String> map = uriTemplate.getEndpoint();
-                    if (map.containsKey("production")) {
-                        String uuid = map.get("production");
-                        Endpoint endpoint = getEndpoint(uuid);
-                        dto.setProductionEndpoint(endpoint.getName());
+                    Map<String, Object> map = uriTemplate.getEndpoint();
+                    if (map.containsKey(APIMgtConstants.PRODUCTION_ENDPOINT)) {
+                        Object endpoint = map.get(APIMgtConstants.PRODUCTION_ENDPOINT);
+                        if (endpoint instanceof Endpoint) {
+                            Endpoint endpoint1 = (Endpoint) endpoint;
+                            dto.setProductionEndpoint(endpoint1.getName());
+                        } else {
+                            dto.setProductionEndpoint(getApiDAO().getEndpoint(String.valueOf(endpoint)).getName
+                                    ());
+                        }
                     }
-                    if (map.containsKey("sandbox")) {
-                        String uuid = map.get("sandbox");
-                        Endpoint endpoint = getEndpoint(uuid);
-                        dto.setSandboxEndpoint(endpoint.getName());
+                    if (map.containsKey(APIMgtConstants.SANDBOX_ENDPOINT)) {
+                        Object endpoint = map.get(APIMgtConstants.SANDBOX_ENDPOINT);
+                        if (endpoint instanceof Endpoint) {
+                            Endpoint endpoint1 = (Endpoint) endpoint;
+                            dto.setSandboxEndpoint(endpoint1.getName());
+                        } else {
+                            dto.setSandboxEndpoint(getApiDAO().getEndpoint(String.valueOf(endpoint)).getName
+                                    ());
+                        }
                     }
                     resourceList.add(dto);
                 }
@@ -1375,7 +1439,14 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public List<Endpoint> getAllEndpoints() throws APIManagementException {
-        return getApiDAO().getEndpoints();
+        try {
+            return getApiDAO().getEndpoints();
+        } catch (APIMgtDAOException e) {
+            String msg = "Failed to get all Endpoints";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+
     }
 
     /**
@@ -1387,12 +1458,24 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public Endpoint getEndpoint(String endpointId) throws APIManagementException {
-        return getApiDAO().getEndpoint(endpointId);
+        try {
+            return getApiDAO().getEndpoint(endpointId);
+        } catch (APIMgtDAOException e) {
+            String msg = "Failed to get Endpoint : " + endpointId;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
     }
 
     @Override
     public Endpoint getEndpointByName(String endpointName) throws APIManagementException {
-        return getApiDAO().getEndpointByName(endpointName);
+        try {
+            return getApiDAO().getEndpointByName(endpointName);
+        } catch (APIMgtDAOException e) {
+            String msg = "Failed to get Endpoint : " + endpointName;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
     }
 
     /**
@@ -1409,6 +1492,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
         Endpoint.Builder builder = new Endpoint.Builder(endpoint);
         builder.id(UUID.randomUUID().toString());
+        builder.applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT);
         Endpoint endpoint1 = builder.build();
         String key = endpoint.getName();
         if (key == null || StringUtils.isEmpty(key)) {
@@ -1421,10 +1505,16 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             throw new APIManagementException("Endpoint already exist with name " + key,
                     ExceptionCodes.ENDPOINT_ALREADY_EXISTS);
         }
-        //Add endpoint to gateway
         gateway.addEndpoint(endpoint1);
 
-        getApiDAO().addEndpoint(endpoint1);
+        try {
+
+            getApiDAO().addEndpoint(endpoint1);
+        } catch (APIMgtDAOException e) {
+            String msg = "Failed to add Endpoint : " + endpoint.getName();
+            log.error(msg, e);
+            throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
         //update endpoint config in gateway
         return endpoint1.getId();
 
@@ -1440,7 +1530,16 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public void updateEndpoint(Endpoint endpoint) throws APIManagementException {
         APIGateway gateway = getApiGateway();
         gateway.updateEndpoint(endpoint);
-        getApiDAO().updateEndpoint(endpoint);
+
+        try {
+            getApiDAO().updateEndpoint(endpoint);
+            publishEndpointConfigToGateway();
+        } catch (APIMgtDAOException e) {
+            String msg = "Failed to update Endpoint : " + endpoint.getName();
+            log.error(msg, e);
+            throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        //update endpoint config in gateway
     }
 
     /**
@@ -1452,10 +1551,26 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public void deleteEndpoint(String endpointId) throws APIManagementException {
         APIGateway gateway = getApiGateway();
+
         Endpoint endpoint = getEndpoint(endpointId);
-        //Delete endpoint in gateway
-        gateway.deleteEndpoint(endpoint);
-        getApiDAO().deleteEndpoint(endpointId);
+        if (!getApiDAO().isEndpointAssociated(endpointId)) {
+            try {
+
+                getApiDAO().deleteEndpoint(endpointId);
+            } catch (APIMgtDAOException e) {
+                String msg = "Failed to delete Endpoint : " + endpointId;
+                log.error(msg, e);
+                throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            }
+            gateway.deleteEndpoint(endpoint);
+
+        } else {
+            String msg = "Endpoint Already Have Associated With API";
+            log.error(msg);
+            throw new APIManagementException(msg, ExceptionCodes.ENDPOINT_DELETE_FAILED);
+        }
+        //update endpoint config in gateway
+        publishEndpointConfigToGateway();
     }
 
     /**
@@ -1730,6 +1845,19 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 log.warn(warn, e.getLocalizedMessage());
             }
             getWorkflowDAO().deleteWorkflowEntryforExternalReference(workflowExtRef);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isEndpointExist(String name) throws APIManagementException {
+        try {
+            return getApiDAO().isEndpointExist(name);
+        } catch (APIMgtDAOException e) {
+            String msg = "Couldn't find existence of endpoint :" + name;
+            throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 }

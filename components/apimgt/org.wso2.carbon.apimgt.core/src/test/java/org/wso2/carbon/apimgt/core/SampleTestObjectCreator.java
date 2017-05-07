@@ -667,23 +667,25 @@ public class SampleTestObjectCreator {
 
     public static Endpoint createMockEndpoint() {
         return new Endpoint.Builder().endpointConfig("{'type':'http','url':'http://localhost:8280'}").id(endpointId)
-                .maxTps(1000L).security("{'enabled':false}").name("Endpoint1").build();
+                .maxTps(1000L).security("{'enabled':false}").name("Endpoint1").applicableLevel(APIMgtConstants
+                        .GLOBAL_ENDPOINT).build();
     }
 
     public static Endpoint createUpdatedEndpoint() {
         return new Endpoint.Builder().endpointConfig("{'type':'soap','url':'http://localhost:8280'}").id(endpointId)
-                .maxTps(1000L).security("{'enabled':false}").name("Endpoint1").build();
+                .maxTps(1000L).security("{'enabled':false}").name("Endpoint1").applicableLevel(APIMgtConstants
+                        .GLOBAL_ENDPOINT).build();
     }
 
     public static Endpoint createAlternativeEndpoint() {
         String uuid = UUID.randomUUID().toString();
         return new Endpoint.Builder().endpointConfig("{'type':'soap','url':'http://localhost:8280'}").id(uuid)
-                .maxTps(1000L).security("{'enabled':false}").build();
+                .name("Endpoint2").maxTps(1000L).security("{'enabled':false}").build();
 
     }
 
-    public static Map<String, String> getMockEndpointMap() {
-        Map<String, String> endpointMap = new HashedMap();
+    public static Map<String, Object> getMockEndpointMap() {
+        Map<String, Object> endpointMap = new HashedMap();
         endpointMap.put(PRODUCTION_ENDPOINT, endpointId);
         return endpointMap;
     }
@@ -691,7 +693,6 @@ public class SampleTestObjectCreator {
     public static Map<String, UriTemplate> getMockUriTemplates() {
         Map<String, UriTemplate> uriTemplateMap = new HashMap();
         UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
-        uriTemplateBuilder.endpoint(getMockEndpointMap());
         uriTemplateBuilder.templateId(TEMPLATE_ID);
         uriTemplateBuilder.uriTemplate("/apis/");
         uriTemplateBuilder.authType(APIMgtConstants.AUTH_APPLICATION_LEVEL_TOKEN);

@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
@@ -56,6 +57,11 @@ public class ImportApiServiceImpl extends ImportApiService {
             log.error(errorMessage, e);
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        } catch (JsonProcessingException e) {
+            String errorMessage = "Error while importing the APIs";
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
         }
     }
 
@@ -90,6 +96,11 @@ public class ImportApiServiceImpl extends ImportApiService {
             log.error(errorMessage, e);
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        } catch (JsonProcessingException e) {
+            String errorMessage = "Error while importing the APIs";
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
         }
     }
 }

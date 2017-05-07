@@ -117,7 +117,7 @@ public final class API {
         return lifecycleInstanceId;
     }
 
-    public Map<String, String> getEndpoint() {
+    public Map<String, Object> getEndpoint() {
         return endpoint;
     }
 
@@ -269,7 +269,7 @@ public final class API {
     private final String description;
     private final String lifeCycleStatus;
     private final String lifecycleInstanceId;
-    private final Map<String, String> endpoint;
+    private final Map<String, Object> endpoint;
     private final String gatewayConfig;
     private final String wsdlUri;
     private final boolean isResponseCachingEnabled;
@@ -338,7 +338,7 @@ public final class API {
             return lifecycleInstanceId;
         }
 
-        public Map<String, String> getEndpoint() {
+        public Map<String, Object> getEndpoint() {
             return endpoint;
         }
 
@@ -405,7 +405,7 @@ public final class API {
         private String lifecycleInstanceId;
         private Map permissionMap;
         private StringBuilder apiPermission;
-        private Map<String, String> endpoint = Collections.EMPTY_MAP;
+        private Map<String, Object> endpoint = Collections.EMPTY_MAP;
         private String gatewayConfig;
         private String wsdlUri = "";
         private boolean isResponseCachingEnabled;
@@ -588,7 +588,7 @@ public final class API {
          * @param endpoint the {@code endpoint} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder endpoint(Map<String, String> endpoint) {
+        public APIBuilder endpoint(Map<String, Object> endpoint) {
             this.endpoint = endpoint;
             return this;
         }

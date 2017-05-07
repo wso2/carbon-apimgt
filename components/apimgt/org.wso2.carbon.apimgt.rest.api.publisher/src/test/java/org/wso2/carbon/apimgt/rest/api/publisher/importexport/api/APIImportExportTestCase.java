@@ -482,7 +482,7 @@ public class APIImportExportTestCase {
     }
 
     private static API.APIBuilder createApi(String provider, String apiId, String name, String version, String
-            description, Map<String, String> endpointTypeToIdMap)
+            description, Map<String, Object> endpointTypeToIdMap)
             throws APIManagementException {
         Set<String> transport = new HashSet<>();
         transport.add("http");
@@ -544,10 +544,10 @@ public class APIImportExportTestCase {
                 security(endpointSecurity).maxTps(maxTps).build();
     }
 
-    private static Map<String, String> createEndpointTypeToIdMap (String sandboxEndpointId, String
+    private static Map<String, Object> createEndpointTypeToIdMap (String sandboxEndpointId, String
             productionEndpointId) {
 
-        Map<String, String> endpointTypeToIdMap = new HashedMap();
+        Map<String, Object> endpointTypeToIdMap = new HashedMap();
         endpointTypeToIdMap.put("PRODUCTION", productionEndpointId);
         endpointTypeToIdMap.put("SANDBOX", sandboxEndpointId);
         return endpointTypeToIdMap;

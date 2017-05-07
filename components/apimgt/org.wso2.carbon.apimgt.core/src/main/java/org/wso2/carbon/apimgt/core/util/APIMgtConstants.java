@@ -58,6 +58,26 @@ public class APIMgtConstants {
     public static final String AUTH_APPLICATION_USER_LEVEL_TOKEN = "Application_User";
     public static final String AUTH_APPLICATION_OR_USER_LEVEL_TOKEN = "Any";
     public static final String DEFAULT_API_POLICY = "Unlimited";
+    public static final String GLOBAL_ENDPOINT = "GLOBAL";
+    public static final String API_SPECIFIC_ENDPOINT = "API";
+    public static final String RESOURCE_SPECIFIC_ENDPOINT = "RESOURCE";
+    public static final String PRODUCTION_ENDPOINT = "production";
+
+    //workflow executor default executors
+    public static final String WF_DEFAULT_APPCREATION_EXEC =
+            "org.wso2.carbon.apimgt.core.workflow.ApplicationCreationSimpleWorkflowExecutor";
+    public static final String WF_DEFAULT_APISTATE_EXEC =
+            "org.wso2.carbon.apimgt.core.workflow.APIStateChangeSimpleWorkflowExecutor";
+    public static final String WF_DEFAULT_PRODAPP_EXEC =
+            "org.wso2.carbon.apimgt.core.workflow.ApplicationRegistrationSimpleWorkflowExecutor";
+    public static final String WF_DEFAULT_SANDBOXAPP_EXEC =
+            "org.wso2.carbon.apimgt.core.workflow.ApplicationRegistrationSimpleWorkflowExecutor";
+    public static final String WF_DEFAULT_APPDELETE_EXEC =
+            "org.wso2.carbon.apimgt.core.workflow.ApplicationDeletionSimpleWorkflowExecutor";
+    public static final String WF_DEFAULT_SUBCREATION_EXEC =
+            "org.wso2.carbon.apimgt.core.workflow.SubscriptionCreationSimpleWorkflowExecutor";
+    public static final String WF_DEFAULT_SUBDELETE_EXEC =
+            "org.wso2.carbon.apimgt.core.workflow.SubscriptionDeletionSimpleWorkflowExecutor";
 
     //workflow executor default executor
     public static final String WF_DEFAULT_WF_EXEC =
@@ -75,6 +95,8 @@ public class APIMgtConstants {
     public static final String SUBCONTEXT_SEARCH_TYPE_PREFIX = "subcontext";
     public static final String TAG_NAME_COLUMN = "NAME";
     public static final String URL_PATTERN_COLUMN = "URL_PATTERN";
+
+    public static final String SANDBOX_ENDPOINT = "sandbox";
 
     /**
      * Application statuses.
