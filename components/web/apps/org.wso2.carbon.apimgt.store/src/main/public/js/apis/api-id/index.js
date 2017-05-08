@@ -735,11 +735,21 @@ $(function () {
                                                 }
                                             ]
                                         });
-
                                     });
                                     disableDelete();
                                 }, onFailure: function (data) {
-
+                                    var message = "Error occurred while viewing API comments";
+                                    noty({
+                                        text: message,
+                                        type: 'error',
+                                        dismissQueue: true,
+                                        modal: true,
+                                        progressBar: true,
+                                        timeout: 2000,
+                                        layout: 'top',
+                                        theme: 'relax',
+                                        maxVisible: 10
+                                    });
                                 }
                             };
                             //Render Api comments
