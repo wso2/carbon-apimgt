@@ -17,8 +17,8 @@ public class CommentDTO   {
   @JsonProperty("apiId")
   private String apiId = null;
 
-  @JsonProperty("subscriberName")
-  private String subscriberName = null;
+  @JsonProperty("userName")
+  private String userName = null;
 
   @JsonProperty("commentText")
   private String commentText = null;
@@ -71,22 +71,22 @@ public class CommentDTO   {
     this.apiId = apiId;
   }
 
-  public CommentDTO subscriberName(String subscriberName) {
-    this.subscriberName = subscriberName;
+  public CommentDTO userName(String userName) {
+    this.userName = userName;
     return this;
   }
 
    /**
-   * If subscriberName is not given user invoking the API will be taken as the subscriberName. 
-   * @return subscriberName
+   * If userName is not given user invoking the API will be taken as the userName. 
+   * @return userName
   **/
-  @ApiModelProperty(required = true, value = "If subscriberName is not given user invoking the API will be taken as the subscriberName. ")
-  public String getSubscriberName() {
-    return subscriberName;
+  @ApiModelProperty(required = true, value = "If userName is not given user invoking the API will be taken as the userName. ")
+  public String getUserName() {
+    return userName;
   }
 
-  public void setSubscriberName(String subscriberName) {
-    this.subscriberName = subscriberName;
+  public void setUserName(String userName) {
+    this.userName = userName;
   }
 
   public CommentDTO commentText(String commentText) {
@@ -191,7 +191,7 @@ public class CommentDTO   {
     CommentDTO comment = (CommentDTO) o;
     return Objects.equals(this.commentId, comment.commentId) &&
         Objects.equals(this.apiId, comment.apiId) &&
-        Objects.equals(this.subscriberName, comment.subscriberName) &&
+        Objects.equals(this.userName, comment.userName) &&
         Objects.equals(this.commentText, comment.commentText) &&
         Objects.equals(this.createdTime, comment.createdTime) &&
         Objects.equals(this.createdBy, comment.createdBy) &&
@@ -201,7 +201,7 @@ public class CommentDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(commentId, apiId, subscriberName, commentText, createdTime, createdBy, lastUpdatedTime, lastUpdatedBy);
+    return Objects.hash(commentId, apiId, userName, commentText, createdTime, createdBy, lastUpdatedTime, lastUpdatedBy);
   }
 
   @Override
@@ -211,7 +211,7 @@ public class CommentDTO   {
     
     sb.append("    commentId: ").append(toIndentedString(commentId)).append("\n");
     sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
-    sb.append("    subscriberName: ").append(toIndentedString(subscriberName)).append("\n");
+    sb.append("    userName: ").append(toIndentedString(userName)).append("\n");
     sb.append("    commentText: ").append(toIndentedString(commentText)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    createdBy: ").append(toIndentedString(createdBy)).append("\n");

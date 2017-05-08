@@ -17,8 +17,8 @@ public class RatingDTO   {
   @JsonProperty("apiId")
   private String apiId = null;
 
-  @JsonProperty("subscriberName")
-  private String subscriberName = null;
+  @JsonProperty("userName")
+  private String userName = null;
 
   @JsonProperty("rating")
   private Integer rating = null;
@@ -59,22 +59,22 @@ public class RatingDTO   {
     this.apiId = apiId;
   }
 
-  public RatingDTO subscriberName(String subscriberName) {
-    this.subscriberName = subscriberName;
+  public RatingDTO userName(String userName) {
+    this.userName = userName;
     return this;
   }
 
    /**
-   * If subscriberName is not given user invoking the API will be taken as the subscriberName. 
-   * @return subscriberName
+   * If userName is not given user invoking the API will be taken as the userName. 
+   * @return userName
   **/
-  @ApiModelProperty(required = true, value = "If subscriberName is not given user invoking the API will be taken as the subscriberName. ")
-  public String getSubscriberName() {
-    return subscriberName;
+  @ApiModelProperty(required = true, value = "If userName is not given user invoking the API will be taken as the userName. ")
+  public String getUserName() {
+    return userName;
   }
 
-  public void setSubscriberName(String subscriberName) {
-    this.subscriberName = subscriberName;
+  public void setUserName(String userName) {
+    this.userName = userName;
   }
 
   public RatingDTO rating(Integer rating) {
@@ -107,13 +107,13 @@ public class RatingDTO   {
     RatingDTO rating = (RatingDTO) o;
     return Objects.equals(this.ratingId, rating.ratingId) &&
         Objects.equals(this.apiId, rating.apiId) &&
-        Objects.equals(this.subscriberName, rating.subscriberName) &&
+        Objects.equals(this.userName, rating.userName) &&
         Objects.equals(this.rating, rating.rating);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(ratingId, apiId, subscriberName, rating);
+    return Objects.hash(ratingId, apiId, userName, rating);
   }
 
   @Override
@@ -123,7 +123,7 @@ public class RatingDTO   {
     
     sb.append("    ratingId: ").append(toIndentedString(ratingId)).append("\n");
     sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
-    sb.append("    subscriberName: ").append(toIndentedString(subscriberName)).append("\n");
+    sb.append("    userName: ").append(toIndentedString(userName)).append("\n");
     sb.append("    rating: ").append(toIndentedString(rating)).append("\n");
     sb.append("}");
     return sb.toString();

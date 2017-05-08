@@ -54,6 +54,13 @@ public enum ExceptionCodes implements ErrorHandler {
     APIM_DAO_EXCEPTION(900320, "Internal server error.", 500, " Error occurred while retrieving data"),
     GATEWAY_LABELS_CANNOT_BE_NULL(900321, "Gateway labels cannot be null.", 400, "Gateway labels cannot be null"),
     STATUS_CANNOT_BE_NULL(900322, "Status cannot be null.", 400, " Status cannot be null"),
+    NEED_COMMENT_MODERATOR_PERMISSION(900323, "Comment moderator permission needed", 403,
+            "This user is not a comment moderator"),
+    RATING_NOT_FOUND(900324, "Rating not found", 404, "Couldn't retrieve rating"),
+    RATING_VALUE_INVALID(900325, "Rating value invalid", 404, "Provided rating value does not fall in between min max "
+            + "values"),
+    COMMENT_LENGTH_EXCEEDED(900326, "Comment length exceeds max limit", 404, "Comment length exceeds allowed maximum "
+            + "number of characters"),
 
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),

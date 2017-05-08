@@ -27,48 +27,47 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.RatingDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.RatingListDTO;
 
 /**
- * Mapping class for Comment Object and Comment List object to DTO and vise-versa
+ * Mapping class for Rating Objects
  *
  */
 public class RatingMappingUtil {
 
-    /** Converts an ArtifactResource object into corresponding REST API Comment DTO object
+    /** Converts an Rating object into corresponding REST API RatingDTO object
      *
      * @param rating Comment object
-     * @return a new RatingDTO object corresponding to given ArtifactResource object
+     * @return a new RatingDTO object corresponding to given Rating object
      */
     public static RatingDTO fromRatingToDTO(Rating rating) {
 
         RatingDTO ratingDTO = new RatingDTO();
         ratingDTO.setRatingId(rating.getUuid());
-        ratingDTO.setApiId(rating.getApiId());
-        ratingDTO.setSubscriberName(rating.getSubscriber());
-        ratingDTO.setRating(Integer.parseInt(rating.getRating()));
+        ratingDTO.setRating(rating.getRating());
+        ratingDTO.setUserName(rating.getUsername());
 
         return ratingDTO;
     }
 
-    /** Converts an ArtifactResource object into corresponding REST API Rating List DTO object
+    /** Constructs a RatingListDTO from a list of RatingDTO objects and other information
      *
      * @param avgRating     Average Rating of the API
-     * @param userRating    User Rating of the API
+     * @param userRating    User Rating for the API
      * @param offset        starting index
-     * @param limit         maximum number of APIs returns
-     * @param ratingList    List of Rating Objects available for the API
-     * @return a new RatingLIstDTO object corresponding to given ArtifactResource object
+     * @param limit         maximum number of ratings to return
+     * @param ratingList    List of RatingDTO Objects available for the API
+     * @return a new RatingLIstDTO object
      */
-    public static RatingListDTO fromRatingListToDTO(double avgRating, double userRating, Integer offset, Integer limit,
+    public static RatingListDTO fromRatingDTOListToRatingListDTO(double avgRating, double userRating, Integer offset, Integer limit,
                                                     List<RatingDTO> ratingList) {
 
         RatingListDTO ratingListDTO = new RatingListDTO();
         List<RatingDTO> ratingDTOs = ratingListDTO.getList();
 
-        DecimalFormat decimalFormat = new DecimalFormat("###.#");
+
+        DecimalFormat decimalFormat = new DecimalFormat("#.#");
         ratingListDTO.setAvgRating(String.valueOf(decimalFormat.format(avgRating)));
         ratingListDTO.setUserRating(String.valueOf(decimalFormat.format(userRating)));
 
         if(ratingList == null){
-
             ratingList = new ArrayList<>();
             ratingListDTO.setList(ratingList);
         }
@@ -78,15 +77,37 @@ public class RatingMappingUtil {
         for (int i = start; i <= end; i++) {
             ratingDTOs.add(ratingList.get(i));
         }
+        ratingListDTO.setCount(ratingDTOs.size());
         return ratingListDTO;
     }
 
-    /** Converts a List of User Rating objects into User Rating DTO Object List
+    /** Converts a List of User Rating objects into a RatingDTO list
      *
-     * @param userRatingDTOList List of rating objects of the API
+     * @param userRatingList List of rating objects of the API
      * @return a new list object of ratingDTO objects
      */
-    public static List<RatingDTO> fromRatingListToDTOList(List<Rating> userRatingDTOList) {
-        return null;
+    public static List<RatingDTO> fromRatingListToDTOList(List<Rating> userRatingList) {
+        List<RatingDTO> ratingDTOList = new ArrayList<>();
+        for(Rating rating : userRatingList) {
+            ratingDTOList.add(fromRatingToDTO(rating));
+        }
+        return  ratingDTOList;
+    }
+
+    /**
+     * Converts a RatingDTO to a Rating
+     *
+     * @param username username of the invoked user
+     * @param apiId UUID of the api
+     * @param body request payload
+     * @return a new rating object
+     */
+    public static Rating fromDTOToRating(String username, String apiId, RatingDTO body) {
+        Rating rating = new Rating();
+        rating.setApiId(apiId);
+        rating.setRating(body.getRating());
+        rating.setUsername(username);
+
+        return rating;
     }
 }

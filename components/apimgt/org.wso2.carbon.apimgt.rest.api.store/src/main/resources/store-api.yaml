@@ -57,7 +57,7 @@ x-wso2-security:
   apim:
     x-wso2-scopes:
       - description: ""
-        roles: Internal/subscriber
+        roles: Internal/username
         name: apim:subscribe
         key: apim:subscribe
       - description: ""
@@ -426,10 +426,10 @@ paths:
 ######################################################
 # The "API Rating" resource APIs
 ######################################################
-  '/apis/{apiId}/rating':
+  '/apis/{apiId}/ratings':
 
 #-----------------------------------------------------
-# Retrieve the Rating of a certain API
+# Retrieve the Ratings of a certain API
 #-----------------------------------------------------
     get:
       description: |
@@ -468,12 +468,68 @@ paths:
             $ref: '#/definitions/Error'
 
 #-----------------------------------------------------
-# Add a new Rating
+# Retrieve a specific rating of an API
 #-----------------------------------------------------
-    post:
+  '/apis/{apiId}/ratings/{ratingId}':
+    get:
+      description: |
+            Get a specific rating of an API.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/ratingId'
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
+      tags:
+        - API (individual)
+        - Retrieve Rating
+      responses:
+        200:
+          description: |
+            OK.
+            Rating returned.
+          schema:
+            $ref: '#/definitions/Rating'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests.
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests.
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+        404:
+          description: |
+            Not Found.
+            Requested rating does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# Add or update rating
+#-----------------------------------------------------
+  '/apis/{apiId}/user-rating':
+    put:
       x-scope: apim:subscribe
       description: |
-        Add a new Rating
+        Adds or updates a rating
       parameters:
         - $ref: '#/parameters/apiId'
         - in: body
@@ -622,7 +678,7 @@ paths:
     get:
       x-scope: apim:subscribe
       description: |
-        Get the individual comment given by a subscriber for a certain API.
+        Get the individual comment given by a username for a certain API.
       parameters:
         - $ref: '#/parameters/commentId'
         - $ref: '#/parameters/apiId'
@@ -1237,7 +1293,7 @@ paths:
   /applications:
 
 #-----------------------------------------------------
-# Retrieve a list of all applications of a certain subscriber
+# Retrieve a list of all applications of a certain username
 #-----------------------------------------------------
     get:
       x-scope: apim:subscribe
@@ -2194,13 +2250,23 @@ parameters:
     required: true
     type: string
 
-# Subscriber Name
+# Rating Identifier
 # Specified as part of the path expression
-  subscriberName:
-    name: subscriberName
+  ratingId:
+    name: ratingId
     in: path
     description: |
-      subscriber Name
+      Rating Id
+    required: true
+    type: string
+
+# Subscriber Name
+# Specified as part of the path expression
+  username:
+    name: username
+    in: path
+    description: |
+      username of the invoker
     required: true
     type: string
 
@@ -2566,9 +2632,9 @@ definitions:
         type: string
       name:
         type: string
-      subscriber:
+      username:
         description: |
-          If subscriber is not given user invoking the API will be taken as the subscriber.
+          If username is not given user invoking the API will be taken as the username.
         type: string
       throttlingTier:
         type: string
@@ -2598,7 +2664,7 @@ definitions:
         type: string
       name:
         type: string
-      subscriber:
+      username:
         type: string
       throttlingTier:
         type: string
@@ -2852,17 +2918,17 @@ definitions:
     required:
       - ratingId
       - apiId
-      - subscriberName
+      - username
       - rating
     properties:
       ratingId:
         type: string
       apiId:
         type: string
-      subscriberName:
+      username:
         type: string
         description: |
-          If subscriberName is not given user invoking the API will be taken as the subscriberName.
+          If username is not given user invoking the API will be taken as the username.
       rating:
         type: integer
 
@@ -2907,17 +2973,17 @@ definitions:
     required:
       - commentId
       - apiId
-      - subscriberName
+      - username
       - commentText
     properties:
       commentId:
         type: string
       apiId:
         type: string
-      subscriberName:
+      username:
         type: string
         description: |
-          If subscriberName is not given user invoking the API will be taken as the subscriberName.
+          If username is not given user invoking the API will be taken as the username.
       commentText:
         type: string
       createdTime:

@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.APILCWorkflowStatus;
 
@@ -593,4 +594,60 @@ public interface ApiDAO {
      *
      */
     List<API> getAPIsByGatewayLabel(List<String> gatewayLabels) throws APIMgtDAOException;
+
+    /**
+     * Add a rating for an api
+     *
+     * @param apiId UUID of the api
+     * @param rating rating object
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    void addRating(String apiId, Rating rating) throws APIMgtDAOException;
+
+    /**
+     * Update an existing rating
+     *
+     * @param apiId  UUID of the api
+     * @param ratingId UUID of the rating
+     * @param ratingFromPayload Rating object from request payload
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    void updateRating(String apiId, String ratingId, Rating ratingFromPayload) throws APIMgtDAOException;
+
+    /**
+     * Retrieve user rating for a given api
+     *
+     * @param apiId UUID of the api
+     * @param userId unique userId of the user
+     * @return user rating for an api
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    Rating getUserRatingForApiFromUser(String apiId, String userId) throws APIMgtDAOException;
+
+    /**
+     * Retrieve rating given the uuid
+     *
+     * @param apiId  UUID of the api
+     * @param ratingId  UUID of the rating
+     * @return the rating object for a given uuid
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    Rating getRatingByUUID(String apiId, String ratingId) throws APIMgtDAOException;
+
+    /**
+     * Retrieve average rating for ana api
+     *
+     * @param apiId  UUID of the api
+     * @return average rating of the api
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    double getAverageRating(String apiId) throws APIMgtDAOException;
+
+    /**
+     * @param apiId  UUID of the api
+     * @return list of ratings for an api
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    List<Rating> getRatingsListForApi(String apiId) throws APIMgtDAOException;
+
 }

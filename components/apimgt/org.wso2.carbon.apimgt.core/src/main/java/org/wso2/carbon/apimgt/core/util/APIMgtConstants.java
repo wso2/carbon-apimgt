@@ -281,6 +281,7 @@ public class APIMgtConstants {
         public static final String WORKFLOW_REF_ID = "WORKFLOW_REFERENCE_ID";
         public static final String WORKFLOW_CATEGORY = "WORKFLOW_CATEGORY";
         public static final String COMMENT_ID = "COMMENT_ID";
+        public static final String RATING_ID = "RATING_ID";
         public static final String USERNAME = "USERNAME";
     }
 
