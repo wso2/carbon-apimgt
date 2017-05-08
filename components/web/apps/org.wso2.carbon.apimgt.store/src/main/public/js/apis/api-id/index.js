@@ -798,7 +798,7 @@ var change_token = function() {
   };
 
 
-var select_environment = function(event){
+var select_environment = function(event) {
     var label_data = event.data.label_data; 
     var selectedEnvironment = $("#environment_name");
     var name = selectedEnvironment.val();
