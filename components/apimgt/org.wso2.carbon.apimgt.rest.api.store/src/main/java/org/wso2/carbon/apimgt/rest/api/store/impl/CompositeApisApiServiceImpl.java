@@ -42,8 +42,6 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
     }
     @Override
     public Response compositeApisApiIdSwaggerGet(String apiId
-, String labelName
-, String scheme
 , String accept
 , String ifNoneMatch
 , String ifModifiedSince
