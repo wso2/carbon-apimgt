@@ -640,11 +640,8 @@ $(function () {
                                     maxVisible: 10
                                 });
                                 $("#comment-text").val("");
-
                                 renderCommentsView();
-
                             }
-
                         },
                         function (error) {
                             var message = "Error occurred while adding Comment";
@@ -661,11 +658,9 @@ $(function () {
                             });
                         });
                 }
-
             });
 
             var renderCommentsView = function () {
-
                 swaggerClient["Retrieve"].get_apis_apiId_comments({
                         "apiId": apiId
                     },
@@ -714,7 +709,6 @@ $(function () {
                                                                 });
                                                                 renderCommentsView();
                                                             }
-
                                                         },
                                                         function (error) {
                                                             var message = "Error occurred while retrieving Comment";
@@ -730,7 +724,6 @@ $(function () {
                                                                 maxVisible: 10
                                                             });
                                                         });
-
                                                     }
                                                 },
                                                 {
@@ -744,9 +737,7 @@ $(function () {
                                         });
 
                                     });
-
                                     disableDelete();
-
                                 }, onFailure: function (data) {
 
                                 }
@@ -754,7 +745,6 @@ $(function () {
                             //Render Api comments
                             UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.api-comments", comments, callbacks);
                         }
-
                     },
                     function (error) {
                         var message = "Error occurred while retrieving Comment";
@@ -801,7 +791,6 @@ $(function () {
                             });
                             renderCommentsView();
                         }
-
                     },
                     function (error) {
                         var message = "Error occurred while updating Comment";
