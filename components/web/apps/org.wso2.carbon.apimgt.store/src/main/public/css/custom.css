@@ -51,6 +51,10 @@ a.btn .icon-caret, .btn .icon-caret {
     background-color:#215080;
 }
 
+.navbar.affix, .navbar.affix-bottom {
+    z-index: 100000;
+}
+
 @media (max-width: 767px) {
     .navbar-right{
         margin-left:-15px;

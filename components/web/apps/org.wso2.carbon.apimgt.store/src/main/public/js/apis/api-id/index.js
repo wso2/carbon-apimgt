@@ -1,5 +1,5 @@
 $(function () {
-
+    $.fn.editable.defaults.mode = 'inline';
     var apiId = $("#apiId").val();
     var swaggerClient = new SwaggerClient({
         url: swaggerURL,
@@ -203,6 +203,7 @@ $(function () {
                                             onSuccess: function (renderedData) {
                                                 $("#api-overview").append(renderedData);
                                                 setOverviewTabData();
+                                                renderCommentsView();
 
                                             }.bind(context), onFailure: function (message, e) {
                                                 var message = "Error occurred while getting api overview details." + message;
@@ -611,9 +612,234 @@ $(function () {
                                 maxVisible: 10,
                             });
                         });
+                } else if (element.id == "comment-add-button") {
+                    var apiId = $("#apiId").val();
+                    var commentDetals = {};
+                    commentDetals.apiId = apiId;
+                    commentDetals.commentText = $("#comment-text").val();
+                    setAuthHeader(swaggerClient);
+                    swaggerClient["API (individual)"].post_apis_apiId_comments({
+                            "apiId": apiId,
+                            "body": commentDetals,
+                            "Content-Type": "application/json"
+                        },
+                        function (jsonData) {
+                            var comment = jsonData.obj;
+                            if (jsonData.status == 201) {
+                                console.log(comment);
+                                var message = "Comment added successfully.";
+                                noty({
+                                    text: message,
+                                    type: 'success',
+                                    dismissQueue: true,
+                                    modal: true,
+                                    progressBar: true,
+                                    timeout: 2000,
+                                    layout: 'top',
+                                    theme: 'relax',
+                                    maxVisible: 10
+                                });
+                                $("#comment-text").val("");
+
+                                renderCommentsView();
+
+                            }
+
+                        },
+                        function (error) {
+                            var message = "Error occurred while adding Comment";
+                            noty({
+                                text: message,
+                                type: 'error',
+                                dismissQueue: true,
+                                modal: true,
+                                progressBar: true,
+                                timeout: 2000,
+                                layout: 'top',
+                                theme: 'relax',
+                                maxVisible: 10
+                            });
+                        });
                 }
 
             });
+
+            var renderCommentsView = function () {
+
+                swaggerClient["Retrieve"].get_apis_apiId_comments({
+                        "apiId": apiId
+                    },
+                    function (jsonData) {
+                        var comments = jsonData.obj;
+                        if (jsonData.status == 200) {
+                            var callbacks = {
+                                onSuccess: function (data) {
+                                    $('#comment-list').html(data);
+                                    $('#comment-list').find('.comment-text').editable({
+                                        success: updateComment
+                                    });
+
+                                    disableComment();
+
+                                    $('.delete_comment').on('click', function (event) {
+                                        var commentId = $(this).attr("data-comment-id");
+                                        noty({
+                                            text: 'Do you want to delete the comment ?',
+                                            type: 'alert',
+                                            dismissQueue: true,
+                                            layout: "topCenter",
+                                            modal: true,
+                                            theme: 'relax',
+                                            buttons: [
+                                                {
+                                                    addClass: 'btn btn-danger', text: 'Ok', onClick: function ($noty) {
+                                                    $noty.close();
+                                                    swaggerClient["API (individual)"].delete_apis_apiId_comments_commentId({
+                                                            "apiId": apiId,
+                                                            "commentId": commentId
+                                                        },
+                                                        function (jsonData) {
+                                                            if (jsonData.status == 200) {
+                                                                var message = "Comment deleted successfully.";
+                                                                noty({
+                                                                    text: message,
+                                                                    type: 'success',
+                                                                    dismissQueue: true,
+                                                                    modal: true,
+                                                                    progressBar: true,
+                                                                    timeout: 2000,
+                                                                    layout: 'top',
+                                                                    theme: 'relax',
+                                                                    maxVisible: 10
+                                                                });
+                                                                renderCommentsView();
+                                                            }
+
+                                                        },
+                                                        function (error) {
+                                                            var message = "Error occurred while retrieving Comment";
+                                                            noty({
+                                                                text: message,
+                                                                type: 'error',
+                                                                dismissQueue: true,
+                                                                modal: true,
+                                                                progressBar: true,
+                                                                timeout: 2000,
+                                                                layout: 'top',
+                                                                theme: 'relax',
+                                                                maxVisible: 10
+                                                            });
+                                                        });
+
+                                                    }
+                                                },
+                                                {
+                                                    addClass: 'btn btn-info',
+                                                    text: 'Cancel',
+                                                    onClick: function ($noty) {
+                                                        $noty.close();
+                                                    }
+                                                }
+                                            ]
+                                        });
+
+                                    });
+
+                                    disableDelete();
+
+                                }, onFailure: function (data) {
+
+                                }
+                            };
+                            //Render Api comments
+                            UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.api-comments", comments, callbacks);
+                        }
+
+                    },
+                    function (error) {
+                        var message = "Error occurred while retrieving Comment";
+                        noty({
+                            text: message,
+                            type: 'error',
+                            dismissQueue: true,
+                            modal: true,
+                            progressBar: true,
+                            timeout: 2000,
+                            layout: 'top',
+                            theme: 'relax',
+                            maxVisible: 10
+                        });
+                    });
+            };
+
+            //Method to update a comment
+            var updateComment = function (resource, newValue) {
+                var commentId = $(this).attr("data-comment-id");
+                var updateBody = {};
+                updateBody.commentId = commentId;
+                updateBody.apiId = apiId;
+                updateBody.commentText = newValue;
+                swaggerClient["API (individual)"].put_apis_apiId_comments_commentId({
+                        "apiId": apiId,
+                        "commentId": commentId,
+                        "body": updateBody,
+                        "Content-Type": "application/json"
+                    },
+                    function (jsonData) {
+                        if (jsonData.status == 200) {
+                            var message = "Comment updated successfully.";
+                            noty({
+                                text: message,
+                                type: 'success',
+                                dismissQueue: true,
+                                modal: true,
+                                progressBar: true,
+                                timeout: 2000,
+                                layout: 'top',
+                                theme: 'relax',
+                                maxVisible: 10
+                            });
+                            renderCommentsView();
+                        }
+
+                    },
+                    function (error) {
+                        var message = "Error occurred while updating Comment";
+                        noty({
+                            text: message,
+                            type: 'error',
+                            dismissQueue: true,
+                            modal: true,
+                            progressBar: true,
+                            timeout: 2000,
+                            layout: 'top',
+                            theme: 'relax',
+                            maxVisible: 10
+                        });
+                    });
+            };
+
+            //Method to disable the comment to restrict other users from editing
+            var disableComment = function () {
+                var loggedInUser = window.localStorage.getItem("user");
+                $('.comment-text').each(function () {
+                    var commentOwner = $(this).attr("data-username");
+                    if (commentOwner != loggedInUser) {
+                        $(this).editable('toggleDisabled');
+                    }
+                });
+            };
+
+            //Method to remove the delete icons from other users
+            var disableDelete = function () {
+                var loggedInUser = window.localStorage.getItem("user");
+                $('.delete_comment').each(function () {
+                    var commentOwner = $(this).attr("data-username");
+                    if (commentOwner != loggedInUser) {
+                        $(this).remove();
+                    }
+                });
+            }
         },
         failure : function(error){
             console.log("Error occurred while loading swagger definition");
