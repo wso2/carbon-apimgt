@@ -218,7 +218,7 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
                     roleListBuilder.toString() + ")) AND " +
                     "UUID IN (SELECT API_ID FROM AM_API_TAG_MAPPING WHERE TAG_ID IN " +
                     "(SELECT TAG_ID FROM AM_TAGS WHERE " + searchQuery.toString() + ")) " +
-                    " ORDER BY NAME) A WHERE rownum <= ?) where rnum >= ?";
+                    " ORDER BY NAME) A WHERE rownum <= ?) WHERE rnum >= ?";
         } else if (attributeMap.containsKey(APIMgtConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX)) {
             //for subcontext search, need to check AM_API_OPERATION_MAPPING table
             query = "SELECT * FROM (SELECT A.*, rownum rnum FROM (" + API_SUMMARY_SELECT_STORE +
@@ -237,7 +237,7 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
                     roleListBuilder.toString() + ")) AND " +
                     "UUID IN (SELECT API_ID FROM AM_API_OPERATION_MAPPING WHERE " +
                     searchQuery.toString() + ") " +
-                    " ORDER BY NAME) A WHERE rownum <= ?) where rnum >= ?";
+                    " ORDER BY NAME) A WHERE rownum <= ?) WHERE rnum >= ?";
         } else {
             //for any other attribute search, need to check AM_API table
             query = "SELECT * FROM (SELECT A.*, rownum rnum FROM (" + API_SUMMARY_SELECT_STORE +
@@ -254,7 +254,7 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
                     "UUID IN (SELECT API_ID FROM AM_API_VISIBLE_ROLES WHERE ROLE IN (" +
                     roleListBuilder.toString() + ")) AND " +
                     searchQuery.toString() +
-                    " ORDER BY NAME) A WHERE rownum <= ?) where rnum >= ?";
+                    " ORDER BY NAME) A WHERE rownum <= ?) WHERE rnum >= ?";
         }
         try {
             int queryIndex = 1;
