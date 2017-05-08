@@ -33,171 +33,175 @@ $(function () {
                                 });
                             });
                         },onFailure: function (message, e) {}});
-
-                    //Get application details
+                    
+                    
+                    //Get Label Details
+                    var label_names = api.labels.join(',');
+                    var label_data = {};
                     setAuthHeader(swaggerClient);
-                    swaggerClient["Application Collection"].get_applications({},
-                        function (jsonData) {
-                            var applications = jsonData.obj.list;
-                                swaggerClient["Subscription Collection"].get_subscriptions({
-                                        "apiId": apiId,
-                                        "applicationId": "",
-                                        "responseContentType": 'application/json'
-                                    }, requestMetaData(),
-                                    function (jsonData) {
-                                        var availableApplications = [], subscription = {};
-                                        var subscriptions = jsonData.obj.list;
-                                        var application = {};
-                                        var subscribedApp = false;
-                                        for (var i = 0; i < applications.length; i++) {
-                                               subscribedApp = false;
-                                                application = applications[i];
-                                                if (application.lifeCycleStatus != "APPROVED") {
-                                                    continue;
-                                                }
-                                                for (var j = 0; j < subscriptions.length; j++) {
-                                                    subscription = subscriptions[j];
-                                                    if (subscription.applicationId === application.applicationId) {
-                                                        subscribedApp = true;
-                                                        continue;
-                                                    }
-                                                }
-                                                if(!subscribedApp) {
-                                                    availableApplications.push(application);
-                                                }
-                                            }
-                                        var context = {};
-                                        context.applications = availableApplications;
-                                        context.policies = policies;
-
-                                        //Render api subscribe pane
-                                        UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.api-subscribe",context,
-                                            "api-subscribe", mode, callbacks);
-                                    },
-                                    function (error) {
-                                        var message = "Error occurred while retrieve Applications";
-                                        noty({
-                                            text: message,
-                                            type: 'error',
-                                            dismissQueue: true,
-                                            modal: true,
-                                            progressBar: true,
-                                            timeout: 2000,
-                                            layout: 'top',
-                                            theme: 'relax',
-                                            maxVisible: 10,
-                                        });
-                                        if(error.status==401){
-                                            redirectToLogin(contextPath);
-                                        }
-                                    });
+                    swaggerClient["Label (Collection)"].get_label_info({
+                            "labels": label_names
                         },
-                        function (error) {
-                            var message = "Error occurred while retrieve Applications";
-                            noty({
-                                text: message,
-                                type: 'error',
-                                dismissQueue: true,
-                                modal: true,
-                                progressBar: true,
-                                timeout: 2000,
-                                layout: 'top',
-                                theme: 'relax',
-                                maxVisible: 10,
+                        function (jsonData) {
+                            label_data = jsonData.obj.list;
+                            
+                            console.log("label response");
+                            //Get application details
+                            setAuthHeader(swaggerClient);
+                            swaggerClient["Application Collection"].get_applications({},
+                                function (jsonData) {
+                                    var applications = jsonData.obj.list;
+                                        swaggerClient["Subscription Collection"].get_subscriptions({
+                                                "apiId": apiId,
+                                                "applicationId": "",
+                                                "responseContentType": 'application/json'
+                                            }, requestMetaData(),
+                                            function (jsonData) {
+                                                var availableApplications = [], subscription = {};
+                                                var subscriptions = jsonData.obj.list;
+                                                var application = {};
+                                                var subscribedApp = false;
+                                                for (var i = 0; i < applications.length; i++) {
+                                                       subscribedApp = false;
+                                                        application = applications[i];
+                                                        if (application.lifeCycleStatus != "APPROVED") {
+                                                            continue;
+                                                        }
+                                                        for (var j = 0; j < subscriptions.length; j++) {
+                                                            subscription = subscriptions[j];
+                                                            if (subscription.applicationId === application.applicationId) {
+                                                                subscribedApp = true;
+                                                                continue;
+                                                            }
+                                                        }
+                                                        if(!subscribedApp) {
+                                                            availableApplications.push(application);
+                                                        }
+                                                    }
+                                                var context = {};
+                                                context.applications = availableApplications;
+                                                context.policies = policies;
+
+                                                //Render api subscribe pane
+                                                UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.api-subscribe",context,
+                                                    "api-subscribe", mode, callbacks);
+                                            },
+                                            function (error) {
+                                                var message = "Error occurred while retrieve Applications";
+                                                noty({
+                                                    text: message,
+                                                    type: 'error',
+                                                    dismissQueue: true,
+                                                    modal: true,
+                                                    progressBar: true,
+                                                    timeout: 2000,
+                                                    layout: 'top',
+                                                    theme: 'relax',
+                                                    maxVisible: 10,
+                                                });
+                                                if(error.status==401){
+                                                    redirectToLogin(contextPath);
+                                                }
+                                            });
+                                },
+                                function (error) {
+                                    var message = "Error occurred while retrieve Applications";
+                                    noty({
+                                        text: message,
+                                        type: 'error',
+                                        dismissQueue: true,
+                                        modal: true,
+                                        progressBar: true,
+                                        timeout: 2000,
+                                        layout: 'top',
+                                        theme: 'relax',
+                                        maxVisible: 10,
+                                    });
+                                    if(error.status==401){
+                                        redirectToLogin(contextPath);
+                                    }
+                                });
+
+                            //TODO: Embed actual values
+                            var isAPIConsoleEnabled = true;
+                            var apiType = "REST";
+                            var isForumEnabled = true;
+
+                            var tabs = [];
+                            tabs.push({
+                                "title": "Overview",
+                                "id": "api-overview",
+                                "body": [
+                                    {
+                                        "inputs": {
+                                            "api": {},
+                                            "user": {}
+                                        }
+                                    }
+                                ]
                             });
-                            if(error.status==401){
-                                redirectToLogin(contextPath);
-                            }
-                        });
-
-                    //TODO: Embed actual values
-                    var isAPIConsoleEnabled = true;
-                    var apiType = "REST";
-                    var isForumEnabled = true;
-
-                    var tabs = [];
-                    tabs.push({
-                        "title": "Overview",
-                        "id": "api-overview",
-                        "body": [
-                            {
-                                "inputs": {
-                                    "api": {},
-                                    "user": {}
-                                }
-                            }
-                        ]
-                    });
-                    tabs.push({
-                        "title": "Documentation",
-                        "id": "api-documentation",
-                        "body": [
-                            {
-                                "inputs": {
-                                    "api": {}
-                                }
-                            }
-                        ]
-                    });
-                    if (isAPIConsoleEnabled && apiType.toUpperCase() != "WS") {
-                        tabs.push({
-                            "title": "API Console",
-                            "id": "api-swagger",
-                            "body": [
-                                {
-                                    "inputs": {
-                                        "api": {},
-                                        "subscriptions": []
+                            tabs.push({
+                                "title": "Documentation",
+                                "id": "api-documentation",
+                                "body": [
+                                    {
+                                        "inputs": {
+                                            "api": {}
+                                        }
                                     }
+                                ]
+                            });
+                            if (isAPIConsoleEnabled && apiType.toUpperCase() != "WS") {
+                                tabs.push({
+                                    "title": "API Console",
+                                    "id": "api-swagger",
+                                    "body": [
+                                        {
+                                            "inputs": {
+                                                "api": {},
+                                                "subscriptions": []
+                                            }
+                                        }
+                                    ]
+                                })
+
+                            }
+
+                            if (isForumEnabled) {
+                                tabs.push({
+                                    "title": "Forum",
+                                    "id": "forum-list",
+                                    "body": [
+                                        {
+                                            "inputs": {
+                                                "api": {},
+                                                "uriTemplates": {}
+                                            }
+                                        }
+                                    ]
+                                });
+                            }
+
+                            for (var i = 0; i < tabs.length; i++) {
+                                if (i == 0) {
+                                    tabs[i].tabClass = "first active";
+                                    tabs[i].contentClass = "in active";
+                                } else if (i == tabs.length - 1) {
+                                    tabs[tabs.length - 1].tabclass = "last"
                                 }
-                            ]
-                        })
+                            }
 
-                    }
-
-                    if (isForumEnabled) {
-                        tabs.push({
-                            "title": "Forum",
-                            "id": "forum-list",
-                            "body": [
-                                {
-                                    "inputs": {
-                                        "api": {},
-                                        "uriTemplates": {}
-                                    }
-                                }
-                            ]
-                        });
-                    }
-
-                    for (var i = 0; i < tabs.length; i++) {
-                        if (i == 0) {
-                            tabs[i].tabClass = "first active";
-                            tabs[i].contentClass = "in active";
-                        } else if (i == tabs.length - 1) {
-                            tabs[tabs.length - 1].tabclass = "last"
-                        }
-                    }
-
-                        var context = {};
-                        context.tabList = tabs;
-                    var callback = {onSuccess: function ( tabdata
-                    ) {
-                        $("#tab-list").append(tabdata);
-                        //Load each tab content
-                        for (var i = 0; i < tabs.length; i++) {
-                            var tab = tabs[i];
-                            if (tab.id == "api-overview") {
-
-                                var label_names = api.labels.join(',');
-                                var label_data = {};
-                                setAuthHeader(swaggerClient);
-                                swaggerClient["Label (Collection)"].get_label_info({
-                                        "labels": label_names
-                                    },
-                                    function (jsonData) {
-                                        label_data = jsonData.obj.list;
-                                        context.api = api;
+                            var context = {};
+                            context.tabList = tabs;
+                            var callback = {onSuccess: function ( tabdata
+                            ) {
+                                $("#tab-list").append(tabdata);
+                                //Load each tab content
+                                for (var i = 0; i < tabs.length; i++) {
+                                    var tab = tabs[i];
+                                    if (tab.id == "api-overview") {
+                                    	console.log("overview");
+                                    	context.api = api;
                                         context.labels = label_data;
                                         UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.api-overview", context, {
                                             onSuccess: function (renderedData) {
@@ -219,9 +223,216 @@ $(function () {
                                                 });
                                             }
                                         });
+                                    }
+
+                                    if (tab.id == "api-documentation") {
+                                        var doc_instance = new DOC();
+                                        var docs = doc_instance.getAll(getDOCsCallback,apiId);
+                                    }
+
+                                    if (tab.id == "api-swagger") {
+                                    	var swaggerJSON = {};
+                                    	var gw_host;
+                                    	setAuthHeader(swaggerClient);
+                                    	//Get Swagger definition of the API
+                                    	swaggerClient["API (individual)"].get_apis_apiId_swagger({"apiId": apiId},
+                                            function (jsonData) {
+                                        		swaggerJSON = JSON.parse(jsonData.data);
+                                        		var submitMethods = [];
+                                        		if (label_data && label_data.length > 0) {
+                                        			gw_host = getAccessURL(label_data);
+                                        			if (gw_host) {
+                                        				swaggerJSON["host"] = gw_host;
+                                        				swaggerJSON["schemes"] = [location.protocol.split(":")[0]];
+                                        				submitMethods = ['get', 'post', 'put', 'delete', 'patch', 'head'];
+                                        			} else {
+                                        				context.no_host = true;
+                                        				submitMethods = [];
+                                        			}
+                                        			context.scheme = location.protocol.split(":")[0];
+                                        			context.label_data = label_data;
+                                        		}                                      		
+                                        		$(document).ready(function(){
+                                        			window.swaggerUi = new SwaggerUi({
+        	                                			spec: swaggerJSON,
+        	                                			dom_id: "swagger-ui-container",        	                                			
+        	                                			supportedSubmitMethods: submitMethods,
+        	                                			onComplete: function(swaggerApi, swaggerUi){
+        	                                				console.log("Loaded SwaggerUI");
+        	                                			},
+        	                                			onFailure: function(data) {
+        	                                				console.log("Unable to Load SwaggerUI");
+        	                                			},
+        	                                			docExpansion: "list",
+        	                                			jsonEditor: false,
+        	                                			defaultModelRendering: 'schema',
+        	                                			showRequestHeaders: true,
+        	                                			validatorUrl: null
+                                        			});
+                                        			window.swaggerUi.load();
+                                        		});
+                                        		UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.api-console",context, {
+        		                        			onSuccess: function (renderedData) {
+        		                        				$("#api-swagger").append(renderedData);
+        		                        				$(".env_name").bind("change", {label_data: label_data, 
+                                        						                       swaggerJSON: swaggerJSON
+                                        						                       },
+                                        						                      select_environment);
+        		                        				setOverviewTabData();
+        		                        			}.bind(context), onFailure: function (message, e) {
+        		                        				var message = "Error occurred while loading API console." + message;
+        		                        				noty({
+        		                        					text: message,
+        		                        					type: 'error',
+        		                        					dismissQueue: true,
+        		                        					modal: true,
+        		                        					progressBar: true,
+        		                        					timeout: 2000,
+        		                        					layout: 'top',
+        		                        					theme: 'relax',
+        		                        					maxVisible: 10,
+        		                        				});
+        		                        			}
+        		                        		});
+                                        		
+                                        		if (label_data && label_data.length > 0) {
+                                        			console.log("XXX");
+                                            		//Retrieve API subscriptions and keys for API Console
+                                            		swaggerClient["Application Collection"].get_applications({},
+            	                                        function (jsonData) {
+            	                                            var context = {};
+            	                                            var applications = jsonData.obj.list;
+            	                                            swaggerClient["Subscription Collection"].get_subscriptions({
+            	                                                        "apiId": apiId,
+            	                                                        "applicationId": "",
+            	                                                        "responseContentType": 'application/json'
+            	                                                    }, requestMetaData(),
+            	                                                    function (jsonData) {
+            	                                                        var subscribedApplications = [], subscribedAppsAndKeys = [], subscription = {};
+            	                                                        var subscriptions = jsonData.obj.list;
+            	                                                        var application = {};
+            	                                                        for (var i = 0; i < applications.length; i++) {
+            	                                                                application = applications[i];
+            	                                                                for (var j = 0; j < subscriptions.length; j++) {
+            	                                                                    subscription = subscriptions[j];
+            	                                                                    if (subscription.applicationId === application.applicationId) {
+            	                                                                    	subscribedApplications.push(application);
+            	                                                                        continue;
+            	                                                                    }
+            	                                                                }
+            	                                                            }
+            	                                                        for (var i =0; i<subscribedApplications.length; i++) {
+            	                                                        	var app = subscribedApplications[i];
+            	                                                        	swaggerClient["Application (individual)"].get_applications_applicationId({
+            	                                                                "applicationId": app.applicationId,
+            	                                                                "responseContentType": 'application/json'
+            	                                                            }, requestMetaData(),
+            	                                                            function (jsonData) {
+            	                                                            	var app = jsonData.obj;
+            	                                                            	var keys = jsonData.obj.keys;
+            	                                                            	for (var j = 0; j < keys.length; j++) {
+            	                                                            		if (keys[j].keyType == "PRODUCTION") {
+            	                                                            			app["prodKey"] = keys[j].token.accessToken;
+            	                                                            		} else {
+            	                                                            			app["sandBKey"] = keys[j].token.accessToken;
+            	                                                            		}
+            	                                                            	}
+            	                                                            	subscribedAppsAndKeys.push(app);
+            	                                                            	context.subscribedAppsAndKeys = subscribedAppsAndKeys;
+            	                                                            	context.label_data = label_data;
+            	                                                            	context.scheme = location.protocol.split(":")[0];
+            	                                                            	if (!gw_host){
+            	                                                            		context.no_host = true; 
+            	                                                            	}
+
+            	    	                                                        UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.api-console",context, {
+            	    	                                                			onSuccess: function (renderedData) {
+            	    	                                                				$("#authorizations").html(renderedData);
+            	    	                                                				$(".subapp").change(change_token);
+            	    	                                                				$(".keytype").change(change_token);
+            	    	                                                				$(".env_name").bind("change", 
+            	    	                                                						{label_data: label_data, 
+            	    	                                                						 swaggerJSON: swaggerJSON},
+            	    	                                                						 select_environment);
+            	    	                                                				change_token();
+            	    	                                                			}.bind(context), onFailure: function (message, e) {
+            	    	                                                				var message = "Error occurred while loading API console." + message;
+            	    	                                                				noty({
+            	    	                                                					text: message,
+            	    	                                                					type: 'error',
+            	    	                                                					dismissQueue: true,
+            	    	                                                					modal: true,
+            	    	                                                					progressBar: true,
+            	    	                                                					timeout: 2000,
+            	    	                                                					layout: 'top',
+            	    	                                                					theme: 'relax',
+            	    	                                                					maxVisible: 10,
+            	    	                                                					});
+            	    	                                                				}
+            	    	                                                			});
+            	                                                            },
+            	                                                            function (error) {
+            	                                                                var message = "Error occurred while retrieving Application details";
+            	                                                                noty({
+            	                                                                    text: message,
+            	                                                                    type: 'error',
+            	                                                                    dismissQueue: true,
+            	                                                                    modal: true,
+            	                                                                    progressBar: true,
+            	                                                                    timeout: 2000,
+            	                                                                    layout: 'top',
+            	                                                                    theme: 'relax',
+            	                                                                    maxVisible: 10,
+            	                                                                });
+            	                                                                if(error.status==401){
+            	                                                                    redirectToLogin(contextPath);
+            	                                                                }
+            	                                                            });
+            	                                                        }
+
+            	                                        },
+            	                                        function (error) {
+            	                                            var message = "Error occurred while retrieving Subscriptions";
+            	                                            noty({
+                                                                text: message,
+                                                                type: 'error',
+                                                                dismissQueue: true,
+                                                                modal: true,
+                                                                progressBar: true,
+                                                                timeout: 2000,
+                                                                layout: 'top',
+                                                                theme: 'relax',
+                                                                maxVisible: 10,
+                                                            });
+            	                                            if(error.status==401){
+            	                                                redirectToLogin(contextPath);
+            	                                            }
+            	                                        });
+
+
+            	                              },
+            	                              function (error) {
+            	                            	  var message = "Error occurred while retrieving Applications";
+            	                            	  noty({
+                                                      text: message,
+                                                      type: 'error',
+                                                      dismissQueue: true,
+                                                      modal: true,
+                                                      progressBar: true,
+                                                      timeout: 2000,
+                                                      layout: 'top',
+                                                      theme: 'relax',
+                                                      maxVisible: 10,
+                                                  });
+            	                                  if(error.status==401){
+            	                                	  redirectToLogin(contextPath);
+            	                                  }
+            	                                });
+                                        		}
+
                                     },
                                     function (error) {
-                                        var message = "Error occurred while retrieving labels";
+                                        var message = "Error occurred while retrieving Swagger definition of the API";
                                         noty({
                                             text: message,
                                             type: 'error',
@@ -231,202 +442,17 @@ $(function () {
                                             timeout: 2000,
                                             layout: 'top',
                                             theme: 'relax',
-                                            maxVisible: 10
+                                            maxVisible: 10,
                                         });
                                         if(error.status==401){
                                             redirectToLogin(contextPath);
                                         }
                                     });
-                            }
+                                    }
 
-                            if (tab.id == "api-documentation") {
-                                var doc_instance = new DOC();
-                                var docs = doc_instance.getAll(getDOCsCallback,apiId);
-                            }
-
-                            if (tab.id == "api-swagger") {
-                            	var bearerToken = "Bearer " + getCookie("WSO2_AM_TOKEN_1");
-                            	setAuthHeader(swaggerClient);
-                            	//Get Swagger definition of the API
-                                swaggerClient["API (individual)"].get_apis_apiId_swagger({"apiId": apiId},
-                                    function (jsonData) {
-                                		//by default get the first label to load the swagger UI
-                                		var label = {};
-                                		var swaggerURL = jsonData.url;
-                                		if (label_data.length > 0) {
-                                			swaggerURL = jsonData.url + "?labelName=" + label_data[0].name + "&scheme=" + location.protocol;
-                                		}
-                                		$(document).ready(function(){
-                                			window.swaggerUi = new SwaggerUi({
-	                                			url: swaggerURL,
-	                                			dom_id: "swagger-ui-container",
-	                                			authorizations: {
-	                                				key: new SwaggerClient.ApiKeyAuthorization("Authorization", bearerToken, "header")
-	                                			},
-	                                			supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch', 'head'],
-	                                			onComplete: function(swaggerApi, swaggerUi){
-	                                				console.log("Loaded SwaggerUI");
-	                                			},
-	                                			onFailure: function(data) {
-	                                				console.log("Unable to Load SwaggerUI");
-	                                			},
-	                                			docExpansion: "list",
-	                                			jsonEditor: false,
-	                                			defaultModelRendering: 'schema',
-	                                			showRequestHeaders: true,
-	                                			validatorUrl: null
-                                			});
-                                			window.swaggerUi.load();
-                                		});
-                                		UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.api-console",context, {
-		                        			onSuccess: function (renderedData) {
-		                        				$("#api-swagger").append(renderedData);
-		                        				setOverviewTabData();
-		                        			}.bind(context), onFailure: function (message, e) {
-		                        				var message = "Error occurred while loading API console." + message;
-		                                        noty({
-		                                            text: message,
-		                                            type: 'error',
-		                                            dismissQueue: true,
-		                                            modal: true,
-		                                            progressBar: true,
-		                                            timeout: 2000,
-		                                            layout: 'top',
-		                                            theme: 'relax',
-		                                            maxVisible: 10,
-		                                        });
-		                        			}
-                                		});
-
-
-                                		//Retrieve API subscriptions and keys for API Console
-                                		swaggerClient["Application Collection"].get_applications({},
-	                                        function (jsonData) {
-	                                            var context = {};
-	                                            var applications = jsonData.obj.list;
-	                                            swaggerClient["Subscription Collection"].get_subscriptions({
-	                                                        "apiId": apiId,
-	                                                        "applicationId": "",
-	                                                        "responseContentType": 'application/json'
-	                                                    }, requestMetaData(),
-	                                                    function (jsonData) {
-	                                                        var subscribedApplications = [], subscribedAppsAndKeys = [], subscription = {};
-	                                                        var subscriptions = jsonData.obj.list;
-	                                                        var application = {};
-	                                                        for (var i = 0; i < applications.length; i++) {
-	                                                                application = applications[i];
-	                                                                for (var j = 0; j < subscriptions.length; j++) {
-	                                                                    subscription = subscriptions[j];
-	                                                                    if (subscription.applicationId === application.applicationId) {
-	                                                                    	subscribedApplications.push(application);
-	                                                                        continue;
-	                                                                    }
-	                                                                }
-	                                                            }
-	                                                        for (var i =0; i<subscribedApplications.length; i++) {
-	                                                        	var app = subscribedApplications[i];
-	                                                        	swaggerClient["Application (individual)"].get_applications_applicationId({
-	                                                                "applicationId": app.applicationId,
-	                                                                "responseContentType": 'application/json'
-	                                                            }, requestMetaData(),
-	                                                            function (jsonData) {
-	                                                            	var app = jsonData.obj;
-	                                                            	var keys = jsonData.obj.keys;
-	                                                            	for (var j = 0; j < keys.length; j++) {
-	                                                            		if (keys[j].keyType == "PRODUCTION") {
-	                                                            			app["prodKey"] = keys[j].token.accessToken;
-	                                                            		} else {
-	                                                            			app["sandBKey"] = keys[j].token.accessToken;
-	                                                            		}
-	                                                            	}
-	                                                            	subscribedAppsAndKeys.push(app);
-	                                                            	context.subscribedAppsAndKeys = subscribedAppsAndKeys;
-	                                                            	context.label_data = label_data;
-
-	    	                                                        UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.api-console-auth",context, {
-	    	                                                			onSuccess: function (renderedData) {
-	    	                                                				$("#authorizations").html(renderedData);
-	    	                                                				$(".subapp").change(change_token);
-	    	                                                				$(".keytype").change(change_token);
-	    	                                                				$(".env_name").change(select_environment);
-	    	                                                				change_token();
-	    	                                                			}.bind(context), onFailure: function (message, e) {
-	    	                                                				var message = "Error occurred while loading API console." + message;
-	    	                                                                noty({
-	    	                                                                    text: message,
-	    	                                                                    type: 'error',
-	    	                                                                    dismissQueue: true,
-	    	                                                                    modal: true,
-	    	                                                                    progressBar: true,
-	    	                                                                    timeout: 2000,
-	    	                                                                    layout: 'top',
-	    	                                                                    theme: 'relax',
-	    	                                                                    maxVisible: 10,
-	    	                                                                });
-	    	                                                			}
-	    	                                                		});
-	                                                            },
-	                                                            function (error) {
-	                                                                var message = "Error occurred while retrieving Application details";
-	                                                                noty({
-	                                                                    text: message,
-	                                                                    type: 'error',
-	                                                                    dismissQueue: true,
-	                                                                    modal: true,
-	                                                                    progressBar: true,
-	                                                                    timeout: 2000,
-	                                                                    layout: 'top',
-	                                                                    theme: 'relax',
-	                                                                    maxVisible: 10,
-	                                                                });
-	                                                                if(error.status==401){
-	                                                                    redirectToLogin(contextPath);
-	                                                                }
-	                                                            });
-	                                                        }
-
-	                                        },
-	                                        function (error) {
-	                                            var message = "Error occurred while retrieving Subscriptions";
-	                                            noty({
-                                                    text: message,
-                                                    type: 'error',
-                                                    dismissQueue: true,
-                                                    modal: true,
-                                                    progressBar: true,
-                                                    timeout: 2000,
-                                                    layout: 'top',
-                                                    theme: 'relax',
-                                                    maxVisible: 10,
-                                                });
-	                                            if(error.status==401){
-	                                                redirectToLogin(contextPath);
-	                                            }
-	                                        });
-
-
-	                              },
-	                              function (error) {
-	                            	  var message = "Error occurred while retrieving Applications";
-	                            	  noty({
-                                          text: message,
-                                          type: 'error',
-                                          dismissQueue: true,
-                                          modal: true,
-                                          progressBar: true,
-                                          timeout: 2000,
-                                          layout: 'top',
-                                          theme: 'relax',
-                                          maxVisible: 10,
-                                      });
-	                                  if(error.status==401){
-	                                	  redirectToLogin(contextPath);
-	                                  }
-	                                });
-
-                            },
-                            function (error) {
-                                var message = "Error occurred while retrieve Applications";
+                                }
+                            }.bind(context),onFailure: function (message, e) {
+                                var message = "Error occurred while viewing API details";
                                 noty({
                                     text: message,
                                     type: 'error',
@@ -438,30 +464,27 @@ $(function () {
                                     theme: 'relax',
                                     maxVisible: 10,
                                 });
-                                if(error.status==401){
-                                    redirectToLogin(contextPath);
-                                }
+                            }};
+                            UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.api-detail-tab-list",context,
+                                 callback);                            
+                        },
+                        function (error) {
+                            var message = "Error occurred while retrieving labels";
+                            noty({
+                                text: message,
+                                type: 'error',
+                                dismissQueue: true,
+                                modal: true,
+                                progressBar: true,
+                                timeout: 2000,
+                                layout: 'top',
+                                theme: 'relax',
+                                maxVisible: 10
                             });
+                            if(error.status==401){
+                                redirectToLogin(contextPath);
                             }
-
-                        }
-                    }.bind(context),onFailure: function (message, e) {
-                        var message = "Error occurred while viewing API details";
-                        noty({
-                            text: message,
-                            type: 'error',
-                            dismissQueue: true,
-                            modal: true,
-                            progressBar: true,
-                            timeout: 2000,
-                            layout: 'top',
-                            theme: 'relax',
-                            maxVisible: 10,
                         });
-                    }};
-                    UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.api-detail-tab-list",context,
-                         callback);
-
 
                 },
                 function (jqXHR, textStatus, errorThrown) {
@@ -704,6 +727,32 @@ function applicationSelectionChange() {
     }
 }
 
+//Filter label data and return accessUrl matched to given label and store scheme (http/https)
+function getAccessURL(label_data, label) {
+	var protocolPrefix = location.protocol + "//"
+	if (label) {
+		for (var i = 0; i < label_data.length; i++) {
+			if (label == label_data[i].name) {
+				var accessUrls = label_data[i].accessUrls;
+				for (var j = 0; j < accessUrls.length; j++) {
+					if (accessUrls[j].indexOf(location.protocol) == 0) {
+						return accessUrls[j].split(protocolPrefix)[1];
+					}
+				}
+			}
+		}
+	} else {
+		var accessUrls = label_data[0].accessUrls;
+		for (var j = 0; j < accessUrls.length; j++) {
+			if (accessUrls[j].indexOf(location.protocol) == 0) {
+				return accessUrls[j].split(protocolPrefix)[1];
+			}
+		}
+	}
+	
+	return null;
+}
+
 function setOverviewTabData() {
     var link = window.location+'';
     $('#api_mailto').on("click",function(){
@@ -739,32 +788,39 @@ var change_token = function() {
     	$("#access_token").val(key);
     	//Set changed token as the token for API calls
     	if(key && key.trim() != "") {
-    		swaggerUi.api.clientAuthorizations.add("key", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer "+ key, "header"));
+    		swaggerUi.api.clientAuthorizations.add("key", 
+    				new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer "+ key, "header"));
     	} else{
-    		swaggerUi.api.clientAuthorizations.add("key", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer ", "header"));
+    		swaggerUi.api.clientAuthorizations.add("key", 
+    				new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer ", "header"));
     	}
     }
   };
 
 
-var select_environment = function(){
+var select_environment = function(event){
+    var label_data = event.data.label_data; 
     var selectedEnvironment = $("#environment_name");
     var name = selectedEnvironment.val();
 
-    //Token to load the swagger definition
-    var bearerToken = "Bearer " + getCookie("WSO2_AM_TOKEN_1");
-    swaggerUi.api.clientAuthorizations.add("key", new SwaggerClient.ApiKeyAuthorization("Authorization", bearerToken, "header"));
-
-    //Set Swagger URL
-    if (window.swaggerUi.api.url.indexOf("?") != -1) {
-    	if (window.swaggerUi.api.url.indexOf("labelName") != -1) {
-    		window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url.split("labelName")[0] + "labelName=" + name + "&scheme=" + location.protocol});
-    	} else {
-            window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "&labelName=" + name + "&scheme=" + location.protocol});
-    	}
+    var gw_host = getAccessURL(label_data, name);
+    
+    //If no access URL available with the given scheme
+    if (!gw_host) {
+    	gw_host = "";
+    	window.swaggerUi.setOption("supportedSubmitMethods", []);
+    	$("#label-warn-div").show();
     } else {
-    	window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "?labelName=" + name + "&scheme=" + location.protocol});
+    	window.swaggerUi.setOption("supportedSubmitMethods", ['get', 'post', 'put', 'delete', 'patch', 'head']);
+    	$("#label-warn-div").hide();
     }
+    
+    var swaggerJSON = event.data.swaggerJSON;
+    swaggerJSON["host"] = gw_host;
+    
+    window.swaggerUi.setOption("spec", swaggerJSON);
+    window.swaggerUi.updateSwaggerUi({});
+
     change_token();
   };
 

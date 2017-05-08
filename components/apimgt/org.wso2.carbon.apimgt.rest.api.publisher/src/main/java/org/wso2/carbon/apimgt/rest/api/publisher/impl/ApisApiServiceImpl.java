@@ -841,8 +841,6 @@ public class ApisApiServiceImpl extends ApisApiService {
      * Retrieves the swagger definition of an API
      *
      * @param apiId           UUID of API
-     * @param labelName       Label name of the gateway
-     * @param scheme          Transport scheme (http | https)
      * @param accept          Accept header value
      * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
@@ -851,7 +849,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response apisApiIdSwaggerGet(String apiId, String labelName, String scheme, String accept,
+    public Response apisApiIdSwaggerGet(String apiId, String accept,
                                         String ifNoneMatch, String ifModifiedSince, Request request) throws
             NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
@@ -860,15 +858,10 @@ public class ApisApiServiceImpl extends ApisApiService {
             String existingFingerprint = apisApiIdSwaggerGetFingerprint(apiId, accept, ifNoneMatch, ifModifiedSince,
                     request);
             if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
-                    .contains(existingFingerprint) && StringUtils.isEmpty(labelName)) {
+                    .contains(existingFingerprint)) {
                 return Response.notModified().build();
             }
             String swagger = apiPublisher.getSwagger20Definition(apiId);
-            // Provide the swagger with label
-            if (!StringUtils.isEmpty(labelName)) {
-                Label label = apiPublisher.getLabelByName(labelName);
-                swagger = RestApiUtil.getSwaggerDefinitionWithLabel(swagger, label, scheme);
-            }
             return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(swagger).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving swagger definition of API : " + apiId;
