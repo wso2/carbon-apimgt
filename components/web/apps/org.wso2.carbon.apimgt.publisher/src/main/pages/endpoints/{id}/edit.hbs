@@ -7,6 +7,8 @@
     {{fragment "action-menu-endpoint-new"}}
 {{/fillZone}}
 {{#fillZone "content"}}
+    <form class="form-horizontal">
     {{fragment "org.wso2.carbon.apimgt.publisher.commons.ui.endpoint-create"  type="global"}}
     <input type="hidden" value="{{id}}" id="endpointId"/>
+    </form>
 {{/fillZone}}

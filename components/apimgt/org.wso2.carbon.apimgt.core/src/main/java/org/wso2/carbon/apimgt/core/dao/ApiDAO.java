@@ -561,5 +561,5 @@ public interface ApiDAO {
      * @return true if used
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    public boolean isEndpointAssociated(String endpointId) throws APIMgtDAOException;
+    boolean isEndpointAssociated(String endpointId) throws APIMgtDAOException;
 }

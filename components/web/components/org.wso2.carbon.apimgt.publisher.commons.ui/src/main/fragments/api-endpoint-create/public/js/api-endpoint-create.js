@@ -24,12 +24,23 @@ $(function () {
 
 function getEndpointsCallback(response){
     var data = response.obj.list;
-    for(var i in data){
-    var name = data[i].name;
-    var id = data[i].id;
-    var selectChild = "<option title='"+name+"' data-content='<span><strong>"+name+"</strong><br /></span>' value='"+id+"'>"+name+"</option>";
-    $('#global-endpoint-sandbox').append(selectChild);
-    $('#global-endpoint-production').append(selectChild);
+    if(data.length == 0){
+        $('#no-global-endpoint-message-production').removeClass('hidden');
+        $('#no-global-endpoint-message-sandbox').removeClass('hidden');
+        $('#global-endpoint-production').addClass('hidden');
+        $('#global-endpoint-sandbox').addClass('hidden');
+    }else{
+        $('#no-global-endpoint-message-production').addClass('hidden');
+        $('#no-global-endpoint-message-sandbox').addClass('hidden');
+        $('#global-endpoint-production').removeClass('hidden');
+        $('#global-endpoint-sandbox').removeClass('hidden');
+        for(var i in data){
+            var name = data[i].name;
+            var id = data[i].id;
+            var selectChild = "<option title='"+name+"' data-content='<span><strong>"+name+"</strong><br /></span>' value='"+id+"'>"+name+"</option>";
+            $('#global-endpoint-sandbox').append(selectChild);
+            $('#global-endpoint-production').append(selectChild);
+        }
     }
  }
 function fillApiLevelEndpointNames(){

@@ -1956,6 +1956,9 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
+    /**
+     * @see org.wso2.carbon.apimgt.core.dao.ApiDAO#isEndpointAssociated(String)
+     */
     public boolean isEndpointAssociated(String endpointId) throws APIMgtDAOException {
         final String apiLevelQuery = "Select 1 FROM AM_API_ENDPOINT_MAPPING WHERE ENDPOINT_ID = ?";
         try (Connection connection = DAOUtil.getConnection()) {

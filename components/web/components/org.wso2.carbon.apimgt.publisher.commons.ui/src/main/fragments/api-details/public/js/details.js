@@ -233,34 +233,7 @@ function endpointsTabHandler(event) {
     var api_id = event.data.api_id;
     api_client.get(api_id).then(
         function (response) {
-            var api = response.obj;
-            var data = {
-                name: api.name,
-                endpoints: {},
-            };
-            var promised_endpoints = [];
-            for (var endpoint_index in api.endpoint) {
-                if (api.endpoint.hasOwnProperty(endpoint_index)) {
-                    var id = api.endpoint[endpoint_index].id;
-                    promised_endpoints.push(api_client.getEndpoint(id));
-                    data.endpoints[id] = api.endpoint[endpoint_index];
-                }
-            }
-            var all_endpoints = Promise.all(promised_endpoints);
-            all_endpoints.then(
-                function (responses) {
-                    for (var endpoint_index in responses) {
-                        if (responses.hasOwnProperty(endpoint_index)) {
-                            var endpoint = responses[endpoint_index].obj;
-                            Object.assign(data.endpoints[endpoint.id], endpoint);
-                        }
-                    }
-                    var callbacks = {
-                        onSuccess: function (data) {
-                            validateActionButtons('#update-endpoints-configuration');
-                        }, onFailure: function (data) {
-                        }
-                    };
+                    var data = JSON.parse(response.data).endpoint;
                     var mode = "OVERWRITE"; // Available modes [OVERWRITE,APPEND, PREPEND]
                     UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-endpoints", data, "endpoints-tab-content", mode, callbacks);
                 }
@@ -715,7 +688,7 @@ function documentTabHandler(event) {
      UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-documents", data, "api-tab-doc-content", mode, callbacks);
     }
     
-    
+
     /**
      * Event handler for API Console tab onclick event;Get the API swagger definition and display in Swagger UI
      * @param event {object} Click event of the API Console tab
@@ -780,14 +753,14 @@ function documentTabHandler(event) {
     		    	            	  
     		    	              }
     		    	        };
-    		        	UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-console", 
+    		        	UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-console",
     		        			{"scheme": location.protocol.split(":")[0]}, "api-console-content", mode, callbacks);
     		        	}
     		        ).catch(apiGetErrorHandler);
     	   }
-    
+
     //Filter label data and return accessUrl matched to given label and editor app's scheme (http/https)
-    //Here label is the API published GW. 
+    //Here label is the API published GW.
     function getAccessURL(label_data, label) {
     	var protocolPrefix = location.protocol + "//";
     	if (label) {
@@ -801,7 +774,7 @@ function documentTabHandler(event) {
     				}
     			}
     		}
-    	}     	
+    	}
     	return null;
     }
 

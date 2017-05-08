@@ -125,16 +125,18 @@ public class MappingUtil {
 
     private static List<API_endpointDTO> fromEndpointToList(Map<String, Object> endpoint) throws IOException {
         List<API_endpointDTO> endpointDTOs = new ArrayList<>();
-        for (Map.Entry<String, Object> entry : endpoint.entrySet()) {
-            API_endpointDTO endpointDTO = new API_endpointDTO();
-            if (entry.getValue() instanceof Endpoint){
-                Endpoint entryValue = (Endpoint) entry.getValue();
-                endpointDTO.setInline(toEndPointDTO(entryValue));
-            }else{
-                endpointDTO.setKey(String.valueOf(entry.getValue()));
+        if (endpoint != null) {
+            for (Map.Entry<String, Object> entry : endpoint.entrySet()) {
+                API_endpointDTO endpointDTO = new API_endpointDTO();
+                if (entry.getValue() instanceof Endpoint) {
+                    Endpoint entryValue = (Endpoint) entry.getValue();
+                    endpointDTO.setInline(toEndPointDTO(entryValue));
+                } else {
+                    endpointDTO.setKey(String.valueOf(entry.getValue()));
+                }
+                endpointDTO.setType(entry.getKey());
+                endpointDTOs.add(endpointDTO);
             }
-            endpointDTO.setType(entry.getKey());
-            endpointDTOs.add(endpointDTO);
         }
         return endpointDTOs;
     }

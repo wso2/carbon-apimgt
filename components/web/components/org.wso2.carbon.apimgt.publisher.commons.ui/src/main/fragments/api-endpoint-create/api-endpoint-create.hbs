@@ -4,7 +4,7 @@
         <div class="panel-heading collapsed" role="tab" id="headingOne" data-toggle="collapse" data-parent=".accordion" href="#production-endpoint-create" aria-expanded="false" aria-controls="production-endpoint-create">
             <h4 class="panel-title">
                 <div>
-                    <div class="heading">Production Endpoint</div>
+                    <div class="heading">{{i18n "Production.Endpoint"}}</div>
                 </div>
             </h4>
         </div>
@@ -35,6 +35,11 @@
                     <div class="col-sm-9 hidden" id="select-global-endpoint-production">
                         <select id="global-endpoint-production" name="global-endpoint" class="form-control">
                         </select>
+                        <div id="no-global-endpoint-message-production" class="col-sm-9 hidden">
+                            <div class="message message-success">
+                                <h4><i class="icon fw fw-success"></i>No Endpoints to list</h4>
+                            </div>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -44,7 +49,7 @@
         <div class="panel-heading collapsed" role="tab" id="headingTwo" data-toggle="collapse" data-parent=".accordion" href="#sandbox-endpoint-create" aria-expanded="false" aria-controls="sandbox-endpoint-create">
             <h4 class="panel-title">
                 <div>
-                    <div class="heading">SandBox Endpoint</div>
+                    <div class="heading">{{i18n "SandBox.Endpoint"}}</div>
                 </div>
             </h4>
         </div>
@@ -74,6 +79,11 @@
                     <div class="col-sm-9 hidden" id="select-global-endpoint-sandbox">
                         <select id="global-endpoint-sandbox" name="global-endpoint" class="form-control">
                         </select>
+                    </div>
+                    <div id="no-global-endpoint-message-sandbox" class="col-sm-9 hidden">
+                        <div class="message message-success">
+                            <h4><i class="icon fw fw-success"></i>No Endpoints to list</h4>
+                        </div>
                     </div>
                 </form>
             </div>
