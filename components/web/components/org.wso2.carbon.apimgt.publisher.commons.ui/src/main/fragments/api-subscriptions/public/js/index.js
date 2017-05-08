@@ -143,16 +143,24 @@ function initDataTable(raw_data) {
         if (type === "display") {
             var status = data.subscriptionStatus;
             var icon = $("<i>").addClass("fw");
+            var cssBlock = "cu-reg-btn btn-edit text-danger block-subscription";
+            if(!hasValidScopes("/subscriptions/block-subscription", "post")) {
+                cssBlock = "cu-reg-btn btn-edit text-danger block-subscription not-active";
+            }
+            var cssUnblock = "cu-reg-btn btn-edit text-success unblock-subscription";
+            if(!hasValidScopes("/subscriptions/unblock-subscription", "post")) {
+                cssUnblock = "cu-reg-btn btn-edit text-success unblock-subscription not-active";
+            }
             var action_button;
             if (status === "ACTIVE") {
                 action_button = $('<a>', {id: data.subscriptionId})
                     .text('BLOCK ')
-                    .addClass("cu-reg-btn btn-edit text-danger block-subscription")
+                    .addClass(cssBlock)
                     .append(icon.addClass("fw-block"));
             } else {
                 action_button = $('<a>', {id: data.subscriptionId})
                     .text('UNBLOCK ')
-                    .addClass("cu-reg-btn btn-edit text-success unblock-subscription")
+                    .addClass(cssUnblock)
                     .append(icon.clone().removeClass("fw-block").addClass("fw-activate"));
             }
             return $('<div></div>').append(action_button).html();
