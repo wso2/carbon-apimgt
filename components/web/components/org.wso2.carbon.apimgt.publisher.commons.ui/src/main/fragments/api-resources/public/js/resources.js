@@ -407,6 +407,7 @@ APIDesigner.prototype.load_api_document = function(api_document){
                 });
             }).catch(apiGetErrorHandler);
     });
+    validateActionButtons('#add_resource', '#save_resources');
 };
 
 
@@ -504,6 +505,9 @@ APIDesigner.prototype.render_resources = function(){
                     ]
                 });
             });
+            if(!hasValidScopes("/apis/{apiId}", "put")) {
+                $(".delete_resource").addClass("not-active");
+            }
         }, onFailure: function (data) {
         }
     };
