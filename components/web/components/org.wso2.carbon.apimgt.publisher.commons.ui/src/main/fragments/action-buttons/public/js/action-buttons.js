@@ -26,16 +26,13 @@ function validateActionButtons() {
         return true;
     }
     var bearerToken = "Bearer " + getCookie("WSO2_AM_TOKEN_1");
-
     var loggedInUserScopes = localStorage.getItem('userScopes');
-
     var response = loadSwaggerJson();
     if (response === undefined) {
         console.warn("Publisher swagger definition could not be loaded.");
         return;
     }
     var publisherSwaggerJson = JSON.parse(response);
-
     for (var i = 0; i < arguments.length; i++) {
         var id = arguments[i];
         var restApiResourcePath = $(id).data('resource-path');
@@ -62,7 +59,6 @@ function hasValidScopes(restApiResourcePath, restApiResourceMethod) {
         return true;
     }
     var loggedInUserScopes = localStorage.getItem('userScopes');
-
     if (loggedInUserScopes !== null) {
         var response = loadSwaggerJson();
         if (response !== undefined) {
@@ -94,10 +90,10 @@ function loadSwaggerJson() {
         request.open('GET', swaggerURL, true);
         request.onreadystatechange = function() {
             if (request.readyState == 4 && request.status == 200) {
-                //                     Put the object into storage
+                // Put the object into storage
                 localStorage.setItem('publisherSwaggerJson', request.responseText);
-                //                    Required use of an anonymous callback as .open will NOT return a value but simply returns
-                //                    undefined in asynchronous mode
+                // Required use of an anonymous callback as .open will NOT return a value but simply returns
+                // undefined in asynchronous mode
                 return request.responseText;
             } else if (request.status !== 200) {
                 console.warn('warning: publisher SwaggerJson could not be loaded for scope validaation.');
