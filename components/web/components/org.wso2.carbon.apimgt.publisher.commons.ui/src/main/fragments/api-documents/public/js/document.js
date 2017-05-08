@@ -41,19 +41,26 @@ function _renderActionButtons(data, type, row) {
             .append(icon.clone()
                 .removeClass("fw-edit").addClass("fw-delete fw-stack-1x"))
             .append(icon_circle.clone());
+            var cssEdit = "cu-reg-btn btn-edit text-warning doc-listing-update btn-sm";
+            if(!hasValidScopes("/apis/{apiId}/documents/{documentId}", "put")) {
+                cssEdit = "cu-reg-btn btn-edit text-warning doc-listing-update btn-sm not-active";
+            }
         var edit_button = $('<a>', {
                 id: data.id,
                 href: data.id
             })
             .text('Edit ')
-            .addClass("cu-reg-btn btn-edit text-warning doc-listing-update btn-sm");
+            .addClass(cssEdit);
         edit_button = edit_button.prepend(icon_edit_span);
-
+            var cssDelete = "cu-reg-btn btn-delete text-danger doc-listing-delete btn-sm";
+            if(!hasValidScopes("/apis/{apiId}/documents/{documentId}", "delete")) {
+                cssDelete = "cu-reg-btn btn-delete text-danger doc-listing-delete btn-sm not-active";
+            }
         var delete_button = $('<a>', {
                 id: data.id
             })
             .text('Delete ')
-            .addClass("cu-reg-btn btn-delete text-danger doc-listing-delete btn-sm");
+            .addClass(cssDelete);
         // .append(icon.clone().removeClass("fw-edit").addClass("fw-delete"));
         delete_button = delete_button.prepend(icon_delete_span);
         return $('<div></div>').append(edit_button).append(delete_button).html();

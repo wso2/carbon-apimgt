@@ -5,7 +5,7 @@ import org.wso2.msf4j.Request;
 
 import javax.ws.rs.core.Response;
 
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-05-04T11:58:27.638+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-05-05T10:43:39.597+05:30")
 public abstract class CompositeApisApiService {
     public abstract Response compositeApisApiIdDelete(String apiId
  ,String ifMatch
@@ -23,8 +23,6 @@ public abstract class CompositeApisApiService {
  ,String ifUnmodifiedSince
  , Request request) throws NotFoundException;
     public abstract Response compositeApisApiIdSwaggerGet(String apiId
- ,String labelName
- ,String scheme
  ,String accept
  ,String ifNoneMatch
  ,String ifModifiedSince

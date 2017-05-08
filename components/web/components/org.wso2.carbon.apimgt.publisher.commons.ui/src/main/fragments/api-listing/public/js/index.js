@@ -98,13 +98,22 @@ function initDataTable(raw_data) {
     function _renderActionButtons(data, type, row) {
         if (type === "display") {
             var icon = $("<i>").addClass("fw");
+            var cssEdit = "cu-reg-btn btn-edit text-warning";
+            if(!hasValidScopes("/apis/{apiId}", "put")) {
+                cssEdit = "cu-reg-btn btn-edit text-warning not-active";
+            }
             var edit_button = $('<a>', {id: data.id, href: data.id})
                 .text('Edit ')
-                .addClass("cu-reg-btn btn-edit text-warning")
+                .addClass(cssEdit)
                 .append(icon.addClass("fw-edit"));
+
+            var cssDelete = "cu-reg-btn btn-delete text-danger api-listing-delete";
+            if(!hasValidScopes("/apis/{apiId}", "delete")) {
+                cssDelete = "cu-reg-btn btn-delete text-danger api-listing-delete not-active";
+            }
             var delete_button = $('<a>', {id: data.id})
                 .text('Delete ')
-                .addClass("cu-reg-btn btn-delete text-danger api-listing-delete")
+                .addClass(cssDelete)
                 .append(icon.clone().removeClass("fw-edit").addClass("fw-delete"));
             return $('<div></div>').append(edit_button).append(delete_button).html();
         } else {

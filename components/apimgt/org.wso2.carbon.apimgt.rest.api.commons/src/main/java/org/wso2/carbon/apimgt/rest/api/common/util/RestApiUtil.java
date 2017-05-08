@@ -16,10 +16,7 @@
 package org.wso2.carbon.apimgt.rest.api.common.util;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.APIMConfigurationService;
@@ -30,7 +27,6 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
@@ -44,7 +40,6 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -441,44 +436,5 @@ public class RestApiUtil {
             }
         }
         return host;
-    }
-    
-    /**
-     * This method modifies and returns the swagger definition by adding the
-     * host element with relevant access url of the provided gateway label and
-     * scheme.
-     * 
-     * @param swagger Swagger definition
-     * @param label Gateway label object
-     * @param scheme Transport scheme (http or https).
-     * @return Swagger definition
-     * @throws APIManagementException if error occurred while passing the swagger definition
-     */
-    public static String getSwaggerDefinitionWithLabel(String swagger, Label label, String scheme)
-            throws APIManagementException {
-        try {
-            JSONParser parser = new JSONParser();
-            JSONObject swaggerJSON = (JSONObject) parser.parse(swagger);
-            List<String> accessURLs = label.getAccessUrls();
-            if (StringUtils.isEmpty(scheme) || (!HTTPS.equals(scheme) && !HTTP.equals(scheme))) {
-                scheme = HTTPS;
-            }
-
-            // Find the access URL with the given scheme and set to swagger definition
-            String protocolPrefix = scheme + RestApiConstants.WEB_PROTOCOL_SUFFIX;
-            for (String accessURL : accessURLs) {
-                if (accessURL.contains(protocolPrefix)) {
-                    swaggerJSON.put(RestApiConstants.SWAGGER_HOST_ELEMENT, accessURL.split(protocolPrefix)[1]);
-                    return swaggerJSON.toJSONString();
-                }
-            }
-
-        } catch (ParseException e) {
-            String message = "Error while passing the swagger definition";
-            log.error(message, e);
-            throw new APIManagementException(message, ExceptionCodes.SWAGGER_PARSE_EXCEPTION);
-        }
-        return swagger;
-
     }
 }
