@@ -524,6 +524,18 @@ a.remove_rating:hover{
     font-weight:500;
 }
 
+.comment-table {
+    width: 100%;
+}
+
+.comment-table-text {
+    width: 95%;
+}
+
+.comment-table-icon {
+    width: 5%;
+}
+
 .requiredAstrix{
   color:red;
 }

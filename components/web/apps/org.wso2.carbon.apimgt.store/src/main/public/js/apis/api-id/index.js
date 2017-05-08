@@ -626,7 +626,6 @@ $(function () {
                         function (jsonData) {
                             var comment = jsonData.obj;
                             if (jsonData.status == 201) {
-                                console.log(comment);
                                 var message = "Comment added successfully.";
                                 noty({
                                     text: message,

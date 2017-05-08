@@ -1,30 +1,30 @@
 {{#if @params.list}}
     {{#each @params.list}}
-            <div class="comment-container">
-                <div class="comment-box">
-                    <div class="comment-body">
-                        <span class="tip tip-down"></span>
-                        <div class="comment-message">
-                            <table width="100%">
-                                <tr>
-                                    <td width="95%">
-                                        <span data-username="{{subscriberName}}" data-comment-id="{{commentId}}" class="comment-text word-break">{{commentText}}</span>
-                                    </td>
-                                    <td width="5%">
-                                        <a data-username="{{subscriberName}}" data-comment-id="{{commentId}}" class="delete_comment" title="index">
+        <div class="comment-container">
+            <div class="comment-box">
+                <div class="comment-body">
+                    <span class="tip tip-down"></span>
+                    <div class="comment-message">
+                        <table class="comment-table">
+                            <tr>
+                                <td class="comment-table-text">
+                                    <span data-username="{{subscriberName}}" data-comment-id="{{commentId}}" class="comment-text word-break">{{commentText}}</span>
+                                </td>
+                                <td class="comment-table-icon">
+                                    <a data-username="{{subscriberName}}" data-comment-id="{{commentId}}" class="delete_comment" title="index">
                                         <span class="fw-stack resource-font">
                                             <i class="fw fw-delete fw-stack-1x"></i>
                                             <i class="fw fw-circle-outline fw-stack-2x"></i>
                                         </span>
-                                        </a>
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
-                    <div class="comment-extra">{{i18n "Posted by"}} <strong>{{subscriberName}}</strong> {{i18n "on"}} <span class="dateFull">{{createdTime}}</span></div>
                 </div>
+                <div class="comment-extra">{{i18n "Posted by"}} <strong>{{subscriberName}}</strong> {{i18n "on"}} <span class="dateFull">{{createdTime}}</span></div>
             </div>
+        </div>
     {{/each}}
 {{else}}
     <p>{{i18n "No comments yet"}}</p>
