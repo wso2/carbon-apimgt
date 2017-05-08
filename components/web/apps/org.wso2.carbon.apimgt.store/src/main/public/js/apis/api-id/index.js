@@ -45,7 +45,6 @@ $(function () {
                         function (jsonData) {
                             label_data = jsonData.obj.list;
                             
-                            console.log("label response");
                             //Get application details
                             setAuthHeader(swaggerClient);
                             swaggerClient["Application Collection"].get_applications({},
@@ -200,7 +199,6 @@ $(function () {
                                 for (var i = 0; i < tabs.length; i++) {
                                     var tab = tabs[i];
                                     if (tab.id == "api-overview") {
-                                    	console.log("overview");
                                     	context.api = api;
                                         context.labels = label_data;
                                         UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.api-overview", context, {
@@ -296,7 +294,6 @@ $(function () {
         		                        		});
                                         		
                                         		if (label_data && label_data.length > 0) {
-                                        			console.log("XXX");
                                             		//Retrieve API subscriptions and keys for API Console
                                             		swaggerClient["Application Collection"].get_applications({},
             	                                        function (jsonData) {
