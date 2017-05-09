@@ -1,6 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
-import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
