@@ -572,6 +572,7 @@ public class APIFileUtils {
 
     private static void addToArchive(File directoryToZip, File file, ZipOutputStream zipOutputStream)
             throws IOException {
+        // Add a file to archive
         try (FileInputStream fileInputStream = new FileInputStream(file)) {
 
             // Get relative path from archive directory to the specific file

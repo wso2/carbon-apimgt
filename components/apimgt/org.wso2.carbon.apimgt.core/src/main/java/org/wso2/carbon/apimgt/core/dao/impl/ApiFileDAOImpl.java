@@ -75,7 +75,9 @@ public class ApiFileDAOImpl implements ApiDAO {
                         apiExportDirectory + File.separator +
                                 APIMgtConstants.APIFileUtilConstants.ENDPOINTS_ROOT_DIRECTORY);
             } catch (APIMgtDAOException e) {
-                throw new RuntimeException("Error while saving endpoint with id : " + value + " to file system", e);
+                String errorMsg = "Error while saving endpoint with id : " + value + " to file system";
+                log.error(errorMsg, e);
+                throw new RuntimeException(errorMsg, e);
             }
         });
 
@@ -508,11 +510,11 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#getAPIsByStatus(Set , List, ApiType)
+     * @see ApiDAO#getAPIsByStatus(Set, List, ApiType)
      */
     @Override
     public List<API> getAPIsByStatus(Set<String> roles, List<String> statuses, ApiType apiType)
-                                                                                throws APIMgtDAOException {
+            throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
@@ -521,7 +523,7 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public List<API> searchAPIs(Set<String> roles, String user, String searchString,
-                                ApiType apiType, int offset, int limit) throws APIMgtDAOException {
+            ApiType apiType, int offset, int limit) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
@@ -530,7 +532,7 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public List<API> attributeSearchAPIs(Set<String> roles, String user, Map<String, String> attributeMap,
-                                         ApiType apiType, int offset, int limit) throws APIMgtDAOException {
+            ApiType apiType, int offset, int limit) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
@@ -556,8 +558,7 @@ public class ApiFileDAOImpl implements ApiDAO {
      * @see ApiDAO#isAPINameExists(String apiName, String providerName, ApiType apiType)
      */
     @Override
-    public
-    boolean isAPINameExists(String apiName, String providerName, ApiType apiType) throws APIMgtDAOException {
+    public boolean isAPINameExists(String apiName, String providerName, ApiType apiType) throws APIMgtDAOException {
         return false;
     }
 
