@@ -202,7 +202,8 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
         String query = null;
         if (attributeMap.containsKey(APIMgtConstants.TAG_SEARCH_TYPE_PREFIX)) {
             //for tag search, need to check AM_API_TAG_MAPPING and AM_TAGS tables
-            query = API_SUMMARY_SELECT_STORE + " WHERE CURRENT_LC_STATUS  IN ('" +
+            query = "SELECT * FROM (SELECT A.*, rownum rnum FROM (" + API_SUMMARY_SELECT_STORE +
+                    " WHERE CURRENT_LC_STATUS  IN ('" +
                     APIStatus.PUBLISHED.getStatus() + "','" +
                     APIStatus.PROTOTYPED.getStatus() + "') AND " +
                     "VISIBILITY = '" + API.Visibility.PUBLIC + "' AND " +
@@ -217,10 +218,11 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
                     roleListBuilder.toString() + ")) AND " +
                     "UUID IN (SELECT API_ID FROM AM_API_TAG_MAPPING WHERE TAG_ID IN " +
                     "(SELECT TAG_ID FROM AM_TAGS WHERE " + searchQuery.toString() + ")) " +
-                    "A WHERE rownum <= ? WHERE rnum >= ?";
+                    " ORDER BY NAME) A WHERE rownum <= ?) WHERE rnum >= ?";
         } else if (attributeMap.containsKey(APIMgtConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX)) {
             //for subcontext search, need to check AM_API_OPERATION_MAPPING table
-            query = API_SUMMARY_SELECT_STORE + " WHERE CURRENT_LC_STATUS  IN ('" +
+            query = "SELECT * FROM (SELECT A.*, rownum rnum FROM (" + API_SUMMARY_SELECT_STORE +
+                    " WHERE CURRENT_LC_STATUS  IN ('" +
                     APIStatus.PUBLISHED.getStatus() + "','" +
                     APIStatus.PROTOTYPED.getStatus() + "') AND " +
                     "VISIBILITY = '" + API.Visibility.PUBLIC + "' AND " +
@@ -235,10 +237,11 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
                     roleListBuilder.toString() + ")) AND " +
                     "UUID IN (SELECT API_ID FROM AM_API_OPERATION_MAPPING WHERE " +
                     searchQuery.toString() + ") " +
-                    "A WHERE rownum <= ? WHERE rnum >= ?";
+                    " ORDER BY NAME) A WHERE rownum <= ?) WHERE rnum >= ?";
         } else {
             //for any other attribute search, need to check AM_API table
-            query = API_SUMMARY_SELECT_STORE + " WHERE CURRENT_LC_STATUS  IN ('" +
+            query = "SELECT * FROM (SELECT A.*, rownum rnum FROM (" + API_SUMMARY_SELECT_STORE +
+                    "WHERE CURRENT_LC_STATUS  IN ('" +
                     APIStatus.PUBLISHED.getStatus() + "','" +
                     APIStatus.PROTOTYPED.getStatus() + "') AND " +
                     "VISIBILITY = '" + API.Visibility.PUBLIC + "' AND " +
@@ -251,7 +254,7 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
                     "UUID IN (SELECT API_ID FROM AM_API_VISIBLE_ROLES WHERE ROLE IN (" +
                     roleListBuilder.toString() + ")) AND " +
                     searchQuery.toString() +
-                    " A WHERE rownum <= ? WHERE rnum >= ?";
+                    " ORDER BY NAME) A WHERE rownum <= ?) WHERE rnum >= ?";
         }
         try {
             int queryIndex = 1;
