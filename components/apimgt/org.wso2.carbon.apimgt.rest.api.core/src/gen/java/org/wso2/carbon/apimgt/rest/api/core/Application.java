@@ -12,7 +12,7 @@ public class Application {
 
 System.out.println("starting=========================================================");
         new MicroservicesRunner()
-                .deploy(new ApisSummaryApi())
+                .deploy(new ApisApi())
                 .start();
     }
 }
