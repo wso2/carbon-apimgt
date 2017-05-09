@@ -1607,6 +1607,8 @@ paths:
   # Downloads a FILE type document/get the inline content or source url of a certain document
   #-------------------------------------------------------------------------------------------------
       get:
+        produces:
+         - application/octet-stream
         x-scope: apim:api_view
         x-wso2-curl: "curl -k -H \"Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content\" > sample.pdf"
         x-wso2-request: |
@@ -3384,6 +3386,9 @@ definitions:
           - FILE
         example: INLINE
       sourceUrl:
+        type: string
+        example: ""
+      fileName:
         type: string
         example: ""
       inlineContent:

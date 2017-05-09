@@ -228,7 +228,7 @@ public class ApiFileDAOImpl implements ApiDAO {
      *      String updatedBy)
      */
     @Override
-    public void addDocumentFileContent(String resourceID, InputStream content, String fileName,
+    public void addDocumentFileContent(String resourceID, InputStream content, String dataType,
             String updatedBy) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }

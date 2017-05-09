@@ -26,6 +26,7 @@
                         <label class="control-label" for="docName">Name<span class="requiredAstrix">*</span></label>
                         <div class="form-group">
                             <input type="text" class="form-control required validInput" id="docName"/>
+                            <input type="hidden" id="rowId"/>
                         </div>
                     </div>
                     <div class="control-group">
@@ -43,7 +44,7 @@
                             <ul class="nav">
                                 <li>
                                     <label>
-                                        <input type="radio" name="optionsRadios1" id="optionsRadios6" value="INLINE" onclick="javascript:$('#sourceUrlDoc').hide('slow');$('#fileNameDiv').hide('slow')" checked="">{{i18n "Inline"}}
+                                        <input type="radio" name="optionsRadios1" id="optionsRadios1" value="INLINE" onclick="javascript:$('#sourceUrlDoc').hide('slow');$('#fileDiv').hide('slow')" checked="">{{i18n "Inline"}}
                                         <a class="icon-question-sign help_popup" help_data="inlineDoc_help" title="inlineDoc_help""></a>
                                         <p id="inlineDoc_help" class="hide">
                                                 {{i18n "Documentation that is hosted in the system and can be edited directly from the UI"}}
@@ -52,7 +53,7 @@
                                 </li>
                                 <li>
                                     <label>
-                                        <input type="radio" name="optionsRadios1" id="optionsRadios7" value="URL" onclick="javascript:$('#sourceUrlDoc').toggle('slow');$('#fileNameDiv').hide('slow')">{{i18n "URL"}}
+                                        <input type="radio" name="optionsRadios1" id="optionsRadios2" value="URL" onclick="javascript:$('#sourceUrlDoc').toggle('slow');$('#fileDiv').hide('slow')">{{i18n "URL"}}
                                         <a class="icon-question-sign help_popup" help_data="urlDoc_help" title=""urlDoc_help""></a>
                                         <p id="urlDoc_help" class="hide">
                                             {{i18n "Link to documentation is managed by an external configuration management system"}}
@@ -65,15 +66,16 @@
                                 </li>
                                 <li>
                                     <label>
-                                        <input type="radio" name="optionsRadios1" id="optionsRadios8" value="FILE" onclick="javascript:$('#fileNameDiv').toggle('slow');$('#sourceUrlDoc').hide('slow')">{{i18n "File"}}
+                                        <input type="radio" name="optionsRadios1" id="optionsRadios3" value="FILE" onclick="javascript:$('#fileDiv').toggle('slow');$('#sourceUrlDoc').hide('slow')">{{i18n "File"}}
                                         <a class="icon-question-sign help_popup" help_data="fileDoc_help" title="fileDoc_help"></a>
                                         <p id="fileDoc_help" class="hide">{{i18n "Upload a documentation file"}}</p>
                                     </label>
-                                    <div id="fileNameDiv" style="display:none;">
-                                    <button type="button" class="btn btn-secondary" id="toggleFileDoc" style="display:none;" onclick="javascript:$('#fileNameDiv').toggle('slow')">{{i18n "Change File"}}</button>
+                                    <div id="fileNameDiv" style="display:none;"></div>
+                                    <button type="button" class="btn btn-secondary" id="toggleFileDoc" style="display:none;" onclick="javascript:$('#fileDiv').toggle('slow')">{{i18n "Change File"}}</button>
+                                    <div id="fileDiv" style="display:none;">
                                     <form class="form-horizontal">
                                     <div class="input-group input-wrap file-upload-control">
-                                        <input type="text" placeholder="Click on brows to add a file" class="form-control" readonly="">
+                                        <input id="doc-file-text" type="text" placeholder="Click on brows to add a file" class="form-control" readonly="">
                                         <input name="doc-file" id="doc-file" type="file" class="form-control" multiple="">
                                         <div class="input-group-btn">
                                             <button class="btn browse" type="button" title="Browse File">

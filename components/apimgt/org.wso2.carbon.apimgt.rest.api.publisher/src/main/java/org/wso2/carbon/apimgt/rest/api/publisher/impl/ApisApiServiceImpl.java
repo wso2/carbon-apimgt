@@ -238,7 +238,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                     return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
                 }
                 docBuilder = docBuilder.fileName(fileDetail.getFileName());
-                apiProvider.uploadDocumentationFile(documentId, fileInputStream, fileDetail.getFileName());
+                apiProvider.uploadDocumentationFile(documentId, fileInputStream, fileDetail.getContentType());
             } else if (inlineContent != null) {
                 if (!documentation.getSourceType().equals(DocumentInfo.SourceType.INLINE)) {
                     String msg = "Source type of document " + documentId + " is not INLINE";
