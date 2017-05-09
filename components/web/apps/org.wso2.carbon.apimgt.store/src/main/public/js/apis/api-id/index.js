@@ -660,6 +660,16 @@ $(function () {
             });
 
             var renderCommentsView = function () {
+                $("#comment-add-button").attr('disabled', 'disabled');
+
+                $("#comment-text").on('keyup', function() {
+                    if($("#comment-text").val().trim()==""){
+                        $("#comment-add-button").attr('disabled', 'disabled');
+                    }else{
+                        $("#comment-add-button").removeAttr('disabled');
+                    }
+                });
+
                 swaggerClient["Retrieve"].get_apis_apiId_comments({
                         "apiId": apiId
                     },
