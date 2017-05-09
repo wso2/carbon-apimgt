@@ -63,6 +63,9 @@ public class APIMgtConstants {
     public static final String WF_DEFAULT_WF_EXEC = 
             "org.wso2.carbon.apimgt.core.workflow.DefaultWorkflowExecutor";
 
+    //API Gateway Home
+    public static final String GW_HOME = "gwHome";
+
     //Store constants
     public static final String DEFAULT_APPLICATION_NAME = "DefaultApplication";
     public static final String EMPTY_STRING_VALUE = " ";
@@ -323,5 +326,15 @@ public class APIMgtConstants {
     public static class ETagConstants {
         public static final String MESSAGE_DIGEST_ALGORITHM_MD5 = "MD5";
     }
-    
+
+    /**
+     * API Gateway event types
+     */
+    public static class APIGatewayEventTypes {
+        public static final String API_GW_EVENT_TYPE_API_CREATE = "API_CREATE";
+        public static final String API_GW_EVENT_TYPE_API_UPDATE = "API_UPDATE";
+        public static final String API_GW_EVENT_TYPE_API_DELETE = "API_DELETE";
+        public static final String API_GW_EVENT_TYPE_API_PUBLISH = "API_PUBLISH";
+        public static final String API_GW_EVENT_TYPE_ENDPOINT_CREATE = "ENDPOINT_CREATE";
+    }
 }
