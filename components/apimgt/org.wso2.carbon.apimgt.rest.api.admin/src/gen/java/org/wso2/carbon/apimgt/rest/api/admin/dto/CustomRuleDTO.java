@@ -1,6 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
-import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -10,11 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ThrottlePolicyDTO;
+import java.util.Objects;
 
 /**
  * CustomRuleDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-05-04T16:42:24.822+05:30")
 public class CustomRuleDTO   {
   @JsonProperty("policyId")
   private String policyId = null;

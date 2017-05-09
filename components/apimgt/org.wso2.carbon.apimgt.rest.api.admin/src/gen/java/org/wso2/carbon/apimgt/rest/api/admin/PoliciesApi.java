@@ -1,6 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.admin;
 
-import org.wso2.carbon.apimgt.rest.api.admin.factories.PoliciesApiServiceFactory;
 
 import io.swagger.annotations.ApiParam;
 
@@ -9,15 +8,29 @@ import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomRuleListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.TierDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.TierListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.factories.PoliciesApiServiceFactory;
 
 import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
+import org.wso2.msf4j.formparam.FileInfo;
+import org.wso2.msf4j.formparam.FormDataParam;
 import org.osgi.service.component.annotations.Component;
 
 import java.io.InputStream;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.HEAD;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.*;
 
 @Component(
     name = "org.wso2.carbon.apimgt.rest.api.admin.PoliciesApi",
@@ -28,7 +41,6 @@ import javax.ws.rs.*;
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the policies API")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-05-04T16:42:24.822+05:30")
 public class PoliciesApi implements Microservice  {
    private final PoliciesApiService delegate = PoliciesApiServiceFactory.getPoliciesApi();
 

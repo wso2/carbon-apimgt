@@ -1,18 +1,25 @@
 package org.wso2.carbon.apimgt.rest.api.store;
 
+
 import io.swagger.annotations.ApiParam;
-import org.osgi.service.component.annotations.Component;
+
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.store.factories.CompositeApisApiServiceFactory;
+
 import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
+import org.wso2.msf4j.formparam.FileInfo;
 import org.wso2.msf4j.formparam.FormDataParam;
+import org.osgi.service.component.annotations.Component;
 
+import java.io.InputStream;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.HEAD;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -32,7 +39,6 @@ import javax.ws.rs.core.Response;
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the composite-apis API")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-05-05T10:43:39.597+05:30")
 public class CompositeApisApi implements Microservice  {
    private final CompositeApisApiService delegate = CompositeApisApiServiceFactory.getCompositeApisApi();
 
