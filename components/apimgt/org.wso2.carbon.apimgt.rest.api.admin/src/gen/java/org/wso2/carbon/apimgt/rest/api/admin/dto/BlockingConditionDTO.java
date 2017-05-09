@@ -1,16 +1,16 @@
 package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
-import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.Objects;
 
 /**
  * Blocking Conditions
  */
 @ApiModel(description = "Blocking Conditions")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-05-04T16:42:24.822+05:30")
 public class BlockingConditionDTO   {
   @JsonProperty("conditionId")
   private String conditionId = null;
