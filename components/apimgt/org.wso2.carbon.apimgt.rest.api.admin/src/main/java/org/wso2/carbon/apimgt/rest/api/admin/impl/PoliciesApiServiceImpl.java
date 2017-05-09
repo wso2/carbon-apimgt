@@ -26,7 +26,10 @@ import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.msf4j.Request;
 
 import javax.ws.rs.core.Response;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PoliciesApiServiceImpl extends PoliciesApiService {
 
@@ -77,8 +80,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         if (log.isDebugEnabled()) {
             log.info("Received Advance Policy DELETE request with uuid: " + policyId);
         }
-//        return deletePolicy(policyId, tierLevel);
-        return null;
+        return deletePolicy(policyId, tierLevel);
     }
 
     /**
@@ -181,8 +183,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         if (log.isDebugEnabled()) {
             log.info("Received Advance Policy DELETE request with uuid: " + policyId);
         }
-//        return deletePolicy(policyId, tierLevel);
-        return null;
+        return deletePolicy(policyId, tierLevel);
     }
 
     /**
@@ -287,8 +288,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         if (log.isDebugEnabled()) {
             log.info("Received Advance Policy DELETE request with uuid: " + policyId);
         }
-//        return deletePolicy(policyId, tierLevel);
-        return null;
+        return deletePolicy(policyId, tierLevel);
     }
 
     /**
@@ -406,19 +406,20 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 //        }
 //    }
 //
-//    private Response deletePolicy(String policyId, String tierLevel) {
-//        try {
-//            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
-//            apiMgtAdminService.deletePolicyByUuid(policyId, tierLevel);
-//            return Response.ok().build();
-//        } catch (APIManagementException e) {
-//            String errorMessage = "Error occurred while deleting a Policy uuid : " + policyId;
-//            HashMap<String, String> paramList = new HashMap<>();
-//            paramList.put(APIMgtConstants.ExceptionsConstants.TIER, policyId);
-//            org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil
-//                    .getErrorDTO(e.getErrorHandler(), paramList);
-//            log.error(errorMessage, e);
-//            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-//        }
-//    }
+    private Response deletePolicy(String policyId, String tierLevel) {
+        try {
+            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
+            apiMgtAdminService.deletePolicyByUuid(policyId, tierLevel);
+            return Response.ok().build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error occurred while deleting a Policy uuid : " + policyId;
+            Map<String, String> paramList = new HashMap<>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.TIER, policyId);
+            org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil
+                    .getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
 }
