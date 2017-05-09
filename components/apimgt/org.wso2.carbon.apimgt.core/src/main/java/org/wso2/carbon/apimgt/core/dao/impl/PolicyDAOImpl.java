@@ -794,6 +794,77 @@ public class PolicyDAOImpl implements PolicyDAO {
         return EntityDAO.getLastUpdatedTimeOfResourceByName(AM_SUBSCRIPTION_POLICY_TABLE_NAME, policyName);
     }
 
+    @Override public List<APIPolicy> getAllAdvancePolicies() throws APIMgtDAOException {
+        List<APIPolicy> policyList = new ArrayList<>();
+        String sqlQuery = "SELECT * from AM_API_POLICY";
+
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    APIPolicy apiPolicy = new APIPolicy(
+                            resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_NAME));
+                    apiPolicy.setUuid(resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_UUID));
+                    setCommonPolicyDetails(apiPolicy, resultSet);
+                    apiPolicy.setUserLevel(
+                            resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_APPLICABLE_LEVEL));
+                    apiPolicy.setPipelines(getPipelines(apiPolicy.getUuid(), connection));
+
+                    policyList.add(apiPolicy);
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving Advance Policies from database";
+            log.error(msg, e);
+            throw new APIMgtDAOException(msg, e);
+        }
+        return policyList;
+    }
+
+    @Override public List<ApplicationPolicy> getAllApplicationPolicies() throws APIMgtDAOException {
+        List<ApplicationPolicy> policyList = new ArrayList<>();
+        String sqlQuery = "SELECT * from AM_APPLICATION_POLICY";
+
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    ApplicationPolicy applicationPolicy = new ApplicationPolicy(
+                            resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_NAME));
+                    setCommonPolicyDetails(applicationPolicy, resultSet);
+                    policyList.add(applicationPolicy);
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving Application Policies from database";
+            log.error(msg, e);
+            throw new APIMgtDAOException(msg, e);
+        }
+        return policyList;
+    }
+
+    @Override public List<SubscriptionPolicy> getAllSubscriptionPolicies() throws APIMgtDAOException {
+        List<SubscriptionPolicy> policyList = new ArrayList<>();
+        String sqlQuery = "SELECT * from AM_SUBSCRIPTION_POLICY";
+
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(
+                            resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_NAME));
+                    setCommonPolicyDetails(subscriptionPolicy, resultSet);
+                    policyList.add(subscriptionPolicy);
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while retrieving Subscription Policies from database";
+            log.error(msg, e);
+            throw new APIMgtDAOException(msg, e);
+        }
+        return policyList;
+    }
+
     static void initDefaultPolicies() throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
             try {

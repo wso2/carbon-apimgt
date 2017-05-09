@@ -1,16 +1,32 @@
 package org.wso2.carbon.apimgt.rest.api.admin.impl;
 
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.Policy;
+import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.admin.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.admin.PoliciesApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.AdvancedThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.AdvancedThrottlePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationThrottlePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.exceptions.SubscriptionThrottlePolicyException;
+import org.wso2.carbon.apimgt.rest.api.admin.mappings.AdvancedThrottlePolicyMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.mappings.ApplicationThrottlePolicyMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.mappings.SubscriptionThrottlePolicyMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.msf4j.Request;
 
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 public class PoliciesApiServiceImpl extends PoliciesApiService {
 
@@ -27,12 +43,23 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
      */
     @Override public Response policiesThrottlingAdvancedGet(String accept, String ifNoneMatch, String ifModifiedSince,
             Request request) throws NotFoundException {
-        String tierLevel = APIMgtConstants.ThrottlePolicyConstants.API_LEVEL;
         if (log.isDebugEnabled()) {
             log.debug("Received Advance Throttle Policy GET request");
         }
 //        return getAllThrottlePolicyByTier(tierLevel);
         return null;
+        try {
+            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
+            List<APIPolicy> policies = apiMgtAdminService.getAllAdvancePolicies();
+            AdvancedThrottlePolicyListDTO advancedThrottlePolicyListDTO = AdvancedThrottlePolicyMappingUtil
+                    .fromAPIPolicyArrayToListDTO(policies);
+            return Response.ok().entity(advancedThrottlePolicyListDTO).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error occurred while retrieving Advance Policies";
+            org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
     }
 
     /**
@@ -122,12 +149,21 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
      */
     @Override public Response policiesThrottlingApplicationGet(String accept, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
-        String tierLevel = APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL;
         if (log.isDebugEnabled()) {
-            log.debug("Received Advance Throttle Policy GET request");
+            log.debug("Received Application Throttle Policy GET request");
         }
-//        return getAllThrottlePolicyByTier(tierLevel);
-        return null;
+        try {
+            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
+            List<ApplicationPolicy> policies = apiMgtAdminService.getAllApplicationPolicies();
+            ApplicationThrottlePolicyListDTO applicationThrottlePolicyListDTO = ApplicationThrottlePolicyMappingUtil
+                    .fromApplicationPolicyArrayToListDTO(policies);
+            return Response.ok().entity(applicationThrottlePolicyListDTO).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error occurred while retrieving Application Policies";
+            org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
     }
 
     /**
@@ -219,12 +255,21 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
      */
     @Override public Response policiesThrottlingSubscriptionGet(String accept, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
-        String tierLevel = APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL;
         if (log.isDebugEnabled()) {
-            log.debug("Received Advance Throttle Policy GET request");
+            log.debug("Received Application Throttle Policy GET request");
         }
-//        return getAllThrottlePolicyByTier(tierLevel);
-        return null;
+        try {
+            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
+            List<SubscriptionPolicy> policies = apiMgtAdminService.getAllSubscriptionPolicies();
+            SubscriptionThrottlePolicyListDTO subscriptionThrottlePolicyListDTO = SubscriptionThrottlePolicyMappingUtil
+                    .fromSubscriptionPolicyArrayToListDTO(policies);
+            return Response.ok().entity(subscriptionThrottlePolicyListDTO).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error occurred while retrieving Application Policies";
+            org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
     }
 
     /**
