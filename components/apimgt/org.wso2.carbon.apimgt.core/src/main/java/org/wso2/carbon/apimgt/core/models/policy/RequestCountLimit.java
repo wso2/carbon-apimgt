@@ -23,13 +23,13 @@ package org.wso2.carbon.apimgt.core.models.policy;
  * Contains request CountLimit based attributes
  */
 public class RequestCountLimit extends Limit {
-    private long requestCount;
+    private int requestCount;
 
-    public long getRequestCount() {
+    public int getRequestCount() {
         return requestCount;
     }
 
-    public void setRequestCount(long requestCount) {
+    public void setRequestCount(int requestCount) {
         this.requestCount = requestCount;
     }
 

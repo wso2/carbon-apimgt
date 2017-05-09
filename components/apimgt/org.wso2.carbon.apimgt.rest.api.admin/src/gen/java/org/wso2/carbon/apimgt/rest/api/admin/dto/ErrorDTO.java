@@ -15,7 +15,7 @@ import java.util.Objects;
  */
 public class ErrorDTO   {
   @JsonProperty("code")
-  private Long code = null;
+  private Integer code = null;
 
   @JsonProperty("message")
   private String message = null;
@@ -29,7 +29,7 @@ public class ErrorDTO   {
   @JsonProperty("error")
   private List<ErrorListItemDTO> error = new ArrayList<ErrorListItemDTO>();
 
-  public ErrorDTO code(Long code) {
+  public ErrorDTO code(Integer code) {
     this.code = code;
     return this;
   }
@@ -39,11 +39,11 @@ public class ErrorDTO   {
    * @return code
   **/
   @ApiModelProperty(required = true, value = "")
-  public Long getCode() {
+  public Integer getCode() {
     return code;
   }
 
-  public void setCode(Long code) {
+  public void setCode(Integer code) {
     this.code = code;
   }
 

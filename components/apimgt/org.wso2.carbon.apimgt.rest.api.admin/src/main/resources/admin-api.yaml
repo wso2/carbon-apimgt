@@ -98,7 +98,7 @@ paths:
             OK.
             Policies returned
           schema:
-            $ref: '#/definitions/TierList'
+            $ref: '#/definitions/ApplicationThrottlePolicyList'
           headers:
             Content-Type:
               description: |
@@ -140,7 +140,7 @@ paths:
             Application level policy object that should to be added
           required: true
           schema:
-            $ref: '#/definitions/Tier'
+            $ref: '#/definitions/ApplicationThrottlePolicy'
         - $ref: '#/parameters/Content-Type'
       tags:
         - Application Policies
@@ -151,7 +151,7 @@ paths:
             Successful response with the newly created object as entity in the body.
             Location header contains URL of newly created entity.
           schema:
-            $ref: '#/definitions/Tier'
+            $ref: '#/definitions/ApplicationThrottlePolicy'
           headers:
             Location:
               description: |
@@ -202,7 +202,7 @@ paths:
             OK.
             Policy returned
           schema:
-            $ref: '#/definitions/Tier'
+            $ref: '#/definitions/ApplicationThrottlePolicy'
           headers:
             Content-Type:
               description: |
@@ -283,7 +283,7 @@ paths:
             Policy object that needs to be modified
           required: true
           schema:
-            $ref: '#/definitions/Tier'
+            $ref: '#/definitions/ApplicationThrottlePolicy'
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
@@ -295,7 +295,7 @@ paths:
             OK.
             Policy updated.
           schema:
-            $ref: '#/definitions/Tier'
+            $ref: '#/definitions/ApplicationThrottlePolicy'
           headers:
             Location:
               description: |
@@ -359,7 +359,7 @@ paths:
             OK.
             Policies returned
           schema:
-            $ref: '#/definitions/TierList'
+            $ref: '#/definitions/SubscriptionThrottlePolicyList'
           headers:
             Content-Type:
               description: |
@@ -401,7 +401,7 @@ paths:
             Subscripion level policy object that should to be added
           required: true
           schema:
-            $ref: '#/definitions/Tier'
+            $ref: '#/definitions/SubscriptionThrottlePolicy'
         - $ref: '#/parameters/Content-Type'
       tags:
         - Subscription Policies
@@ -412,7 +412,7 @@ paths:
             Successful response with the newly created object as entity in the body.
             Location header contains URL of newly created entity.
           schema:
-            $ref: '#/definitions/Tier'
+            $ref: '#/definitions/SubscriptionThrottlePolicy'
           headers:
             Location:
               description: |
@@ -463,7 +463,7 @@ paths:
             OK.
             Policy returned
           schema:
-            $ref: '#/definitions/Tier'
+            $ref: '#/definitions/SubscriptionThrottlePolicy'
           headers:
             Content-Type:
               description: |
@@ -544,7 +544,7 @@ paths:
             Policy object that needs to be modified
           required: true
           schema:
-            $ref: '#/definitions/Tier'
+            $ref: '#/definitions/SubscriptionThrottlePolicy'
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
@@ -556,7 +556,7 @@ paths:
             OK.
             Policy updated.
           schema:
-            $ref: '#/definitions/Tier'
+            $ref: '#/definitions/SubscriptionThrottlePolicy'
           headers:
             Location:
               description: |
@@ -595,269 +595,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# The "Custom Rule Collection" resource API
-######################################################
-  '/policies/throttling/custom':
-
-#-----------------------------------------------------
-# Retrieve all Custom Rules
-#-----------------------------------------------------
-    get:
-      x-scope: apim:tier_view
-      summary: Get all Custom Rules
-      description: |
-        Get all Custom Rules
-      parameters:
-        - $ref: '#/parameters/Accept'
-        - $ref: '#/parameters/If-None-Match'
-        - $ref: '#/parameters/If-Modified-Since'
-      tags:
-        - Custom Rules
-      responses:
-        200:
-          description: |
-            OK.
-            Policies returned
-          schema:
-            $ref: '#/definitions/CustomRuleList'
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests.
-              type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional reuquests.
-              type: string
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource.
-        406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported.
-          schema:
-            $ref: '#/definitions/Error'
-
-#-----------------------------------------------------
-# Add a Custom Rule
-#-----------------------------------------------------
-    post:
-      x-scope: apim:tier_manage
-      summary: Add a Custom Rule
-      description: |
-        Add a Custom Rule
-      parameters:
-        - in: body
-          name: body
-          description: |
-            Custom Rule object that should to be added
-          required: true
-          schema:
-            $ref: '#/definitions/CustomRule'
-        - $ref: '#/parameters/Content-Type'
-      tags:
-        - Custom Rules
-      responses:
-        201:
-          description: |
-            Created.
-            Successful response with the newly created object as entity in the body.
-            Location header contains URL of newly created entity.
-          schema:
-            $ref: '#/definitions/CustomRule'
-          headers:
-            Location:
-              description: |
-                Location of the newly created resource.
-              type: string
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional request'
-              type: string
-        400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
-        415:
-          description: |
-            Unsupported media type.
-            The entity of the request was in a not supported format.
-
-######################################################
-# The "Individual Custom Rule" resource API
-######################################################
-  '/policies/throttling/custom/{ruleId}':
-
-#-----------------------------------------------------
-# Retrieve a certain Custom Rule
-#-----------------------------------------------------
-    get:
-      x-scope: apim:tier_view
-      summary: Retrieve a Custom Rule
-      description: |
-        Retrieve a Custom Rule providing the policy name.
-      parameters:
-        - $ref: '#/parameters/ruleId'
-        - $ref: '#/parameters/If-None-Match'
-        - $ref: '#/parameters/If-Modified-Since'
-      tags:
-        - Custom Rules
-      responses:
-        200:
-          description: |
-            OK.
-            Policy returned
-          schema:
-            $ref: '#/definitions/CustomRule'
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests.
-              type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional reuquests.
-              type: string
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource.
-        404:
-          description: |
-            Not Found.
-            Requested Policy does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-        406:
-          description: |
-            Not Acceptable.
-            The requested media type is not supported.
-          schema:
-            $ref: '#/definitions/Error'
-
-#-----------------------------------------------------
-# Delete a Custom Rule
-#-----------------------------------------------------
-    delete:
-      x-scope: apim:tier_manage
-      summary: Delete a Custom Rule
-      description: |
-        Delete a Custom Rule
-      parameters:
-        - $ref: '#/parameters/ruleId'
-        - $ref: '#/parameters/If-Match'
-        - $ref: '#/parameters/If-Unmodified-Since'
-      tags:
-        - Custom Rules
-      responses:
-        200:
-          description: |
-            OK.
-            Resource successfully deleted.
-        404:
-          description: |
-            Not Found.
-            Resource to be deleted does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-        412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
-
-#-----------------------------------------------------
-# Update a Custom Rule
-#-----------------------------------------------------
-    put:
-      x-scope: apim:tier_manage
-      summary: Update a Custom Rule
-      description: |
-        Update a Custom Rule
-      parameters:
-        - $ref: '#/parameters/ruleId'
-        - in: body
-          name: body
-          description: |
-            Policy object that needs to be modified
-          required: true
-          schema:
-            $ref: '#/definitions/CustomRule'
-        - $ref: '#/parameters/Content-Type'
-        - $ref: '#/parameters/If-Match'
-        - $ref: '#/parameters/If-Unmodified-Since'
-      tags:
-        - Custom Rules
-      responses:
-        200:
-          description: |
-            OK.
-            Policy updated.
-          schema:
-            $ref: '#/definitions/CustomRule'
-          headers:
-            Location:
-              description: |
-                The URL of the newly created resource.
-              type: string
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional request.
-              type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional reuquests.
-              type: string
-        400:
-          description: |
-            Bad Request.
-            Invalid request or validation error.
-          schema:
-            $ref: '#/definitions/Error'
-        404:
-          description: |
-            Not Found.
-            The resource to be updated does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-        412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
-
-
-######################################################
+#################################
 # The "Advanced Throttle Policy Collection" resource API
 ######################################################
   '/policies/throttling/advanced':
@@ -882,7 +620,7 @@ paths:
             OK.
             Policies returned
           schema:
-            $ref: '#/definitions/TierList'
+            $ref: '#/definitions/AdvancedThrottlePolicyList'
           headers:
             Content-Type:
               description: |
@@ -924,7 +662,7 @@ paths:
             Advanced level policy object that should to be added
           required: true
           schema:
-            $ref: '#/definitions/Tier'
+            $ref: '#/definitions/AdvancedThrottlePolicy'
         - $ref: '#/parameters/Content-Type'
       tags:
         - Advanced Policies
@@ -935,7 +673,7 @@ paths:
             Successful response with the newly created object as entity in the body.
             Location header contains URL of newly created entity.
           schema:
-            $ref: '#/definitions/Tier'
+            $ref: '#/definitions/AdvancedThrottlePolicy'
           headers:
             Location:
               description: |
@@ -986,7 +724,7 @@ paths:
             OK.
             Policy returned
           schema:
-            $ref: '#/definitions/Tier'
+            $ref: '#/definitions/AdvancedThrottlePolicy'
           headers:
             Content-Type:
               description: |
@@ -1067,7 +805,7 @@ paths:
             Policy object that needs to be modified
           required: true
           schema:
-            $ref: '#/definitions/Tier'
+            $ref: '#/definitions/AdvancedThrottlePolicy'
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
@@ -1079,7 +817,7 @@ paths:
             OK.
             Policy updated.
           schema:
-            $ref: '#/definitions/Tier'
+            $ref: '#/definitions/AdvancedThrottlePolicy'
           headers:
             Location:
               description: |
@@ -1441,7 +1179,7 @@ definitions:
     properties:
       code:
         type: integer
-        format: int64
+        format: int32
       message:
         type: string
         description: Error message.
@@ -1481,6 +1219,7 @@ definitions:
 # The Throttle Policy resource
 #-----------------------------------------------------
   ThrottlePolicy :
+    discriminator: policyId
     title: Generic Throttle Policy
     required:
       - policyName
@@ -1496,170 +1235,129 @@ definitions:
       isDeployed:
         type: boolean
         default: false
-      name:
-        type: string
-        example: Platinum
-      description:
-        type: string
-        example: "Allows 50 request(s) per minute."
-      attributes:
-        description: |
-          Custom attributes added to the policy policy
-        type: object
-        additionalProperties:
-          type: string
-        example: {}
-      requestCount:
-        description: |
-          Maximum number of requests which can be sent within a provided unit time
-        type: integer
-        format: int64
-        example: 50
-      unitTime:
-        type: integer
-        format: int64
-        example: 60000
-      timeUnit:
-        type: string
-        example: "min"
-      tierPlan:
-        description: |
-          This attribute declares whether this policy is available under commercial or free
-        type: string
-        enum:
-          - FREE
-          - COMMERCIAL
-        example: FREE
-      stopOnQuotaReach:
-        description: |
-          By making this attribute to false, you are capabale of sending requests
-          even if the request count exceeded within a unit time
-        type: boolean
-        example: true
 
 #-----------------------------------------------------
-# The Tier List resource
+# The Advanced Throttle Policy Info resource
 #-----------------------------------------------------
-  TierList:
-    title: Tier List
-    properties:
-      count:
-        type: integer
-        description: |
-          Number of Tiers returned.
-        example: 1
-      next:
-        type: string
-        description: |
-          Link to the next subset of resources qualified.
-          Empty if no more resources are to be returned.
-        example: "/policies/api?limit=1&offset=2"
-      previous:
-        type: string
-        description: |
-          Link to the previous subset of resources qualified.
-          Empty if current subset is the first subset returned.
-        example: "/policies/api?limit=1&offset=0"
-      list:
-        type: array
-        items:
-          $ref: '#/definitions/Tier'
-
-#-----------------------------------------------------
-# The Tier resource
-#-----------------------------------------------------
-  Tier:
-    title: Tier
+  AdvancedThrottlePolicyInfo :
+    title: Advanced Throttling Policy
     required:
-      - uuid
-      - name
-      - tierPlan
-      - requestCount
-      - unitTime
-      - stopOnQuotaReach
-    properties:
-      uuid:
-        type: string
-        example: e2e72c72-2bf0-11e7-93ae-92361f002671
-      name:
-        type: string
-        example: Platinum
-      description:
-        type: string
-        example: "Allows 50 request(s) per minute."
-      tierLevel:
-        type: string
-        enum:
-          - api
-          - application
-          - subscription
-        example: api
-      attributes:
-        description: |
-          Custom attributes added to the policy policy
-        type: object
-        additionalProperties:
-          type: string
-        example: {}
-      requestCount:
-        description: |
-          Maximum number of requests which can be sent within a provided unit time
-        type: integer
-        format: int64
-        example: 50
-      unitTime:
-        type: integer
-        format: int64
-        example: 60000
-      timeUnit:
-        type: string
-        example: "min"
-      tierPlan:
-        description: |
-          This attribute declares whether this policy is available under commercial or free
-        type: string
-        enum:
-          - FREE
-          - COMMERCIAL
-        example: FREE
-      stopOnQuotaReach:
-        description: |
-          By making this attribute to false, you are capabale of sending requests
-          even if the request count exceeded within a unit time
-        type: boolean
-        example: true
-
-#-----------------------------------------------------
-# The Custom Rule resource
-#-----------------------------------------------------
-  CustomRule:
-    title: Custom Rule
-    required:
-      - siddhiQuery
-      - keyTemplate
+      - defaultLimit
     allOf:
       - $ref: '#/definitions/ThrottlePolicy'
       - properties:
-          siddhiQuery:
-            type: string
-          keyTemplate:
-            type: string
+          defaultLimit:
+            $ref: '#/definitions/ThrottleLimit'
 
 #-----------------------------------------------------
-# The Custom Rule List resource
+# The Advanced Throttle Policy resource
 #-----------------------------------------------------
-  CustomRuleList:
-    title: Custom Rule List
+  AdvancedThrottlePolicy :
+    title: Advanced Throttling Policy
+    required:
+      - defaultLimit
+    allOf:
+      - $ref: '#/definitions/ThrottlePolicy'
+      - properties:
+          defaultLimit:
+            $ref: '#/definitions/ThrottleLimit'
+          conditionalGroups:
+            type: array
+            items:
+              $ref: '#/definitions/ConditionalGroup'
+
+#-----------------------------------------------------
+# The Advanced Throttle Policy List resource
+#-----------------------------------------------------
+  AdvancedThrottlePolicyList:
+    title: Advanced Throttle Policy List
     properties:
       count:
         type: integer
         description: |
-          Number of Custom Rules returned.
+          Number of Advanced throttle policies returned.
         example: 1
       list:
         type: array
         items:
-          $ref: '#/definitions/CustomRule'
+          $ref: '#/definitions/AdvancedThrottlePolicyInfo'
+
+#-----------------------------------------------------
+# The Application Throttle Policy resource
+#-----------------------------------------------------
+  ApplicationThrottlePolicy:
+    title: Application Throttle Policy
+    required:
+      - defaultLimit
+    allOf:
+      - $ref: '#/definitions/ThrottlePolicy'
+      - properties:
+          defaultLimit:
+            $ref: '#/definitions/ThrottleLimit'
+
+#-----------------------------------------------------
+# The Advanced Throttle Policy List resource
+#-----------------------------------------------------
+  ApplicationThrottlePolicyList:
+    title: Application Level Throttle Policy List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of Application throttle policies returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/ApplicationThrottlePolicy'
+
+#-----------------------------------------------------
+# The Subscription Throttle Policy resource
+#-----------------------------------------------------
+  SubscriptionThrottlePolicy:
+    title: Subscription Throttle Policy
+    required:
+      - defaultLimit
+    allOf:
+      - $ref: '#/definitions/ThrottlePolicy'
+      - properties:
+          defaultLimit:
+            $ref: '#/definitions/ThrottleLimit'
+          rateLimitCount:
+            type: integer
+            default: 0
+          rateLimitTimeUnit:
+            type: string
+          customAttributes:
+            description: |
+              Custom attributes added to the Subscription Throttle policy
+            type: array
+            items:
+              $ref: '#/definitions/CustomAttribute'
+            additionalProperties:
+              type: string
+            example: {}
+          stopOnQuotaReach:
+            type: boolean
+            default: false
+          billingPlan:
+            type: string
+
+#-----------------------------------------------------
+# The Subscription Throttle Policy List resource
+#-----------------------------------------------------
+  SubscriptionThrottlePolicyList:
+    title: Subscription Level Throttle Policy List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of Subscription throttle policies returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/SubscriptionThrottlePolicy'
 
 #-----------------------------------------------------
 # The Conditional Group resource
@@ -1811,7 +1509,7 @@ definitions:
       - properties:
           dataAmount:
             type: integer
-            format: int64
+            format: int32
             default: 0
           dataUnit:
             type: string
@@ -1827,7 +1525,7 @@ definitions:
       - properties:
           requestCount:
             type: integer
-            format: int64
+            format: int32
             default: 0
 
 #-----------------------------------------------------

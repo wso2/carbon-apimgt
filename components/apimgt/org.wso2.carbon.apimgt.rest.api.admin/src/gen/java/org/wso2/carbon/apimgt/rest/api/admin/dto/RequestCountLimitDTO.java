@@ -14,9 +14,9 @@ import java.util.Objects;
  */
 public class RequestCountLimitDTO extends ThrottleLimitDTO  {
   @JsonProperty("requestCount")
-  private Long requestCount = 0l;
+  private Integer requestCount = 0;
 
-  public RequestCountLimitDTO requestCount(Long requestCount) {
+  public RequestCountLimitDTO requestCount(Integer requestCount) {
     this.requestCount = requestCount;
     return this;
   }
@@ -26,11 +26,11 @@ public class RequestCountLimitDTO extends ThrottleLimitDTO  {
    * @return requestCount
   **/
   @ApiModelProperty(value = "")
-  public Long getRequestCount() {
+  public Integer getRequestCount() {
     return requestCount;
   }
 
-  public void setRequestCount(Long requestCount) {
+  public void setRequestCount(Integer requestCount) {
     this.requestCount = requestCount;
   }
 

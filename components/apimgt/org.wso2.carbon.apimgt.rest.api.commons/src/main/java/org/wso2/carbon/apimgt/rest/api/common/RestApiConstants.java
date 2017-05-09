@@ -103,6 +103,9 @@ public class RestApiConstants {
     public static final String RESOURCE_PATH_SUBSCRIPTION = "/subscriptions";
     public static final String LOCATION_HEADER = "Location";
 
+    public static final String THROTTLING_CUSTOM_ATTRIBUTE_NAME = "name";
+    public static final String THROTTLING_CUSTOM_ATTRIBUTE_VALUE = "value";
+
     /**
      * Type of UUF apps in system
      */
