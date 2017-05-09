@@ -33,7 +33,10 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.utils.*;
+import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
+import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.impl.workflow.*;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -43,8 +46,8 @@ import org.wso2.carbon.governance.api.generic.GenericArtifactFilter;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
+import org.wso2.carbon.registry.common.TermData;
 import org.wso2.carbon.registry.core.*;
-import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.pagination.PaginationContext;
@@ -57,10 +60,7 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import org.wso2.carbon.registry.common.TermData;
-
 import javax.cache.Caching;
-
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -394,7 +394,16 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Deprecated
     public Map<String,Object> getAllPaginatedPublishedAPIs(String tenantDomain,int start,int end)
             throws APIManagementException {
-    	Boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
+        Boolean displayAPIsWithMultipleStatus = false;
+        try {
+            if (tenantDomain != null) {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
+        }finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
     	Map<String, List<String>> listMap = new HashMap<String, List<String>>();
         //Check the api-manager.xml config file entry <DisplayAllAPIs> value is false
         if (!displayAPIsWithMultipleStatus) {
@@ -671,6 +680,14 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Deprecated
 	public Map<String, Object> getAllPaginatedAPIsByStatus(String tenantDomain,
 			int start, int end, final String apiStatus, boolean returnAPITags) throws APIManagementException {
+        try {
+            if (tenantDomain != null) {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+        }finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
     	Boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
     	Map<String, List<String>> listMap = new HashMap<String, List<String>>();
         //Check the api-manager.xml config file entry <DisplayAllAPIs> value is false
@@ -862,6 +879,12 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             // Populating additional parameters.
             tokenRequest = ApplicationUtils.populateTokenRequest(jsonInput, tokenRequest);
             KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+
+            JSONObject appLogObject = new JSONObject();
+            appLogObject.put("Re-Generated Keys for application with client Id", clientId);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
+                    APIConstants.AuditLogConstants.UPDATED, this.username);
+
             return keyManager.getNewApplicationAccessToken(tokenRequest);
         } catch (APIManagementException e) {
             log.error("Error while re-generating AccessToken", e);
@@ -2808,6 +2831,12 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 keyDetails.put("tokenDetails", tokenInfo.getJSONString());
                 keyDetails.put("tokenScope", tokenInfo.getScopes());
             }
+
+            JSONObject appLogObject = new JSONObject();
+            appLogObject.put("Generated keys for application", application.getName());
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
+                    APIConstants.AuditLogConstants.UPDATED, this.username);
+
             return keyDetails;
         } catch (WorkflowException e) {
             log.error("Could not execute Workflow", e);
@@ -3174,7 +3203,17 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         //get key manager instant.
         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
         //call update method.
-        return keyManager.updateApplication(oauthAppRequest);
+
+        OAuthApplicationInfo updatedAppInfo = keyManager.updateApplication(oauthAppRequest);
+
+        JSONObject appLogObject = new JSONObject();
+        appLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, updatedAppInfo.getClientName());
+        appLogObject.put("Updated Oauth app with Call back URL", callbackUrl);
+        appLogObject.put("Updated Oauth app with grant types", jsonString);
+
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
+                APIConstants.AuditLogConstants.UPDATED, this.username);
+        return updatedAppInfo;
 
     }
 

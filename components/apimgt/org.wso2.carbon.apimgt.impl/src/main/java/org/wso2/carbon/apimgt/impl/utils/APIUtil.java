@@ -3620,27 +3620,95 @@ public final class APIUtil {
 
     }
 
-    public static boolean isAllowDisplayAPIsWithMultipleStatus() {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String displayAllAPIs = config.getFirstProperty(APIConstants.API_STORE_DISPLAY_ALL_APIS);
-        if (displayAllAPIs == null) {
-            log.warn("The configurations related to show deprecated APIs in APIStore " +
-                    "are missing in api-manager.xml.");
-            return false;
+    public static boolean isAllowDisplayAPIsWithMultipleStatus() throws APIManagementException{
+        String displayAllAPIs = "false";
+        Boolean configFileHasKey = false;
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
+        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain))
+        {
+            try {
+                String content = new APIMRegistryServiceImpl().getConfigRegistryResourceContent(tenantDomain,
+                        APIConstants.API_TENANT_CONF_LOCATION);
+
+                if (content != null) {
+                    JSONParser parser = new JSONParser();
+                    JSONObject apiTenantConfig = (JSONObject) parser.parse(content);
+                    if (apiTenantConfig != null) {
+                        configFileHasKey = apiTenantConfig.containsKey(APIConstants.API_TENANT_CONF_DISPLAY_ALL_APIS);
+                        if(configFileHasKey){
+                             Object value = apiTenantConfig.get(APIConstants.API_TENANT_CONF_DISPLAY_ALL_APIS);
+                                if(value != null) {
+                                    displayAllAPIs = value.toString();
+                                }
+                        }
+                    }
+                }
+            } catch (UserStoreException e) {
+                handleException("UserStoreException thrown when tenant-config.json", e);
+            } catch (RegistryException e) {
+                handleException("RegistryException thrown when getting tenant-config.json", e);
+            } catch (ParseException e) {
+                handleException("ParseException thrown when parsing the tenant-config.json content", e);
+            }
+        }
+        if(!configFileHasKey){
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            displayAllAPIs = config.getFirstProperty(APIConstants.API_STORE_DISPLAY_ALL_APIS);
+            if (displayAllAPIs == null) {
+                log.warn("The configurations related to show deprecated APIs in APIStore " +
+                        "are missing in api-manager.xml.");
+                return false;
+            }
         }
         return Boolean.parseBoolean(displayAllAPIs);
     }
 
-    public static boolean isAllowDisplayMultipleVersions() {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+    public static boolean isAllowDisplayMultipleVersions() throws APIManagementException {
+        String displayMultiVersions = "false";
+        Boolean configFileHasKey = false;
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
+        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain))
+        {
+            try {
+                String content = new APIMRegistryServiceImpl().getConfigRegistryResourceContent(tenantDomain,
+                        APIConstants.API_TENANT_CONF_LOCATION);
 
-        String displayMultiVersions = config.getFirstProperty(APIConstants.API_STORE_DISPLAY_MULTIPLE_VERSIONS);
-        if (displayMultiVersions == null) {
-            log.warn("The configurations related to show multiple versions of API in APIStore " +
-                    "are missing in api-manager.xml.");
-            return false;
+                if (content != null) {
+                    JSONParser parser = new JSONParser();
+                   JSONObject apiTenantConfig = (JSONObject) parser.parse(content);
+                    if (apiTenantConfig != null) {
+                        configFileHasKey = apiTenantConfig.containsKey(APIConstants.API_TENANT_CONF_DISPLAY_MULTIPLE_VERSIONS);
+                        if(configFileHasKey) {
+                            Object value = apiTenantConfig.get(APIConstants.API_TENANT_CONF_DISPLAY_MULTIPLE_VERSIONS);
+
+                            if (value != null) {
+                                displayMultiVersions = value.toString();
+                            }
+                        }
+                    }
+                }
+            } catch (UserStoreException e) {
+                handleException("UserStoreException thrown when tenant-config.json", e);
+            } catch (RegistryException e) {
+                handleException("RegistryException thrown when getting tenant-config.json", e);
+            } catch (ParseException e) {
+                handleException("ParseException thrown when parsing the tenant-config.json content", e);
+            }
+         }
+        if(!configFileHasKey){
+            System.out.println();
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
+
+            displayMultiVersions = config.getFirstProperty(APIConstants.API_STORE_DISPLAY_MULTIPLE_VERSIONS);
+            System.out.println("Getting frtom super tenant config = " + displayMultiVersions);
+
+            if (displayMultiVersions == null) {
+                log.warn("The configurations related to show multiple versions of API in APIStore " +
+                        "are missing in api-manager.xml.");
+                return false;
+            }
         }
         return Boolean.parseBoolean(displayMultiVersions);
     }
@@ -4402,7 +4470,7 @@ public final class APIUtil {
     /**
      * Get the cache key of the ResourceInfoDTO
      *
-     * @param apiContext  - Context of the API
+     * @param apiContext  - Context of the API.
      * @param apiVersion  - API Version
      * @param resourceUri - The resource uri Ex: /name/version
      * @param httpMethod  - The http method. Ex: GET, POST
@@ -6466,7 +6534,7 @@ public final class APIUtil {
      */
     public static void logAuditMessage(String entityType, String entityInfo, String action, String performedBy) {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("typ", entityType);
+        jsonObject.put("type", entityType);
         jsonObject.put("action", action);
         jsonObject.put("performedBy", performedBy);
         jsonObject.put("info", entityInfo);

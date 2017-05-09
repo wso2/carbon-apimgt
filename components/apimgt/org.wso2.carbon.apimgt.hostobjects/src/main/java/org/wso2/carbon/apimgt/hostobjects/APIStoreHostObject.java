@@ -1629,40 +1629,51 @@ public class APIStoreHostObject extends ScriptableObject {
         String tenantDomain;
         boolean retuenAPItags = false;
         String state = null;
-        
-        Boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
-               
-        
-        if (args[0] != null) {
-            tenantDomain = (String) args[0];
-        } else {
-            tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-        }
-            
-        int start = Integer.parseInt((String) args[1]);
-        int end = Integer.parseInt((String) args[2]);
-        
-        if (args.length > 3 && args[3] != null) {
-            retuenAPItags = Boolean.parseBoolean((String) args[3]);
-        }
+        boolean isTenantFlowStarted = false;
+        int start,end =0;
+        String[] statusList =  {APIConstants.PUBLISHED, APIConstants.PROTOTYPED};;
+                 
+        try {
+            if (args[0] != null) {
+                tenantDomain = (String) args[0];
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                isTenantFlowStarted = true;
+            } else {
+                tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            }
 
-        if (args.length > 4 && args[4] != null) {
-            state = (String) args[4];
-        }
+            Boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
+            start = Integer.parseInt((String) args[1]);
+            end = Integer.parseInt((String) args[2]);
 
-        String [] statusList = {APIConstants.PUBLISHED, APIConstants.PROTOTYPED};
-        if (displayAPIsWithMultipleStatus) {
-            statusList = new String[]{APIConstants.PUBLISHED, APIConstants.PROTOTYPED, APIConstants.DEPRECATED};
-        }
+            if (args.length > 3 && args[3] != null) {
+                retuenAPItags = Boolean.parseBoolean((String) args[3]);
+            }
 
-        // The following condition is used to support API category in store
-        if(null != state){
-            if(state == APIConstants.PUBLISHED && displayAPIsWithMultipleStatus) {
-                statusList = new String[]{APIConstants.PUBLISHED, APIConstants.DEPRECATED};
-            }else if(state == APIConstants.PUBLISHED ){
-                statusList = new String[]{APIConstants.PUBLISHED};
-            }else if(state == APIConstants.PROTOTYPED){
-                statusList = new String[]{APIConstants.PROTOTYPED};
+            if (args.length > 4 && args[4] != null) {
+                state = (String) args[4];
+            }
+
+            if (displayAPIsWithMultipleStatus) {
+                statusList = new String[]{APIConstants.PUBLISHED, APIConstants.PROTOTYPED, APIConstants.DEPRECATED};
+            }
+
+            // The following condition is used to support API category in store
+            if (null != state) {
+                if (state == APIConstants.PUBLISHED && displayAPIsWithMultipleStatus) {
+                    statusList = new String[]{APIConstants.PUBLISHED, APIConstants.DEPRECATED};
+                } else if (state == APIConstants.PUBLISHED) {
+                    statusList = new String[]{APIConstants.PUBLISHED};
+                } else if (state == APIConstants.PROTOTYPED) {
+                    statusList = new String[]{APIConstants.PROTOTYPED};
+                }
+            }
+        }finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
             }
         }
 

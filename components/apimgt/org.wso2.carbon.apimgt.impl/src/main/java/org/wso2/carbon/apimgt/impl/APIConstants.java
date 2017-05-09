@@ -108,6 +108,9 @@ public final class APIConstants {
     public static final String API_TENANT_CONF_DEFAULT_ROLES_SUBSCRIBER_ROLE = "SubscriberRole";
 
     public static final String API_TENANT_CONF_IS_UNLIMITED_TIER_PAID = "IsUnlimitedTierPaid";
+    public static final String API_TENANT_CONF_DISPLAY_MULTIPLE_VERSIONS = "DisplayMultipleVersions";
+    public static final String API_TENANT_CONF_DISPLAY_ALL_APIS = "DisplayAllAPIs";
+
 
     public static final String API_CATEGORY_FREE = "Free";
 
@@ -1244,6 +1247,7 @@ public final class APIConstants {
         public static final String API = "API";
         public static final String APPLICATION = "Application";
         public static final String SUBSCRIPTION = "Subscription";
+        public static final String POLICY = "policy";
 
         public static final String NAME = "name";
         public static final String VERSION = "version";
@@ -1255,6 +1259,10 @@ public final class APIConstants {
         public static final String API_NAME = "api_name";
         public static final String APPLICATION_NAME = "application_name";
         public static final String APPLICATION_ID = "application_id";
+        public static final String LIFE_CYCLE="lifecycle";
+
+        public static final String IS_API_DEFAULT_VERSION="isAPIDefaultVersion";
+
     }
 
     public static final String API_WORKFLOW_STATE_ATTR = "overview_workflowState";

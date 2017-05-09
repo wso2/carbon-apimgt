@@ -624,7 +624,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 throw new APIManagementException(
                         "Error in retrieving Tenant Information while adding api :" + api.getId().getApiName(), e);
             }
-            apiMgtDAO.addAPI(api,tenantId);
+            apiMgtDAO.addAPI(api, tenantId);
 
             JSONObject apiLogObject = new JSONObject();
             apiLogObject.put(APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
@@ -857,7 +857,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     throw new APIManagementException(
                             "Error in retrieving Tenant Information while updating api :" + api.getId().getApiName(), e);
                 }
-                apiMgtDAO.updateAPI(api,tenantId);
+                apiMgtDAO.updateAPI(api, tenantId);
+
                 if (log.isDebugEnabled()) {
                     log.debug("Successfully updated the API: " + api.getId() + " in the database");
                 }
@@ -867,7 +868,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, api.getContext());
             apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
             apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
+            JSONObject apiLogObjectAPIInfo = new JSONObject();
+            apiLogObjectAPIInfo.put("api level policy=", api.getApiLevelPolicy() );
+            apiLogObjectAPIInfo.put("api- is default version=", api.isDefaultVersion());
+            apiLogObjectAPIInfo.put("scopes=", api.getScopes());
 
+            apiLogObject.put("API Info: " , apiLogObjectAPIInfo.toString());
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
                     APIConstants.AuditLogConstants.UPDATED, this.username);
 
@@ -1180,7 +1186,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 APIStatus oldStatus = api.getStatus();
                 APIStatus newStatus = APIUtil.getApiStatus(status);
                 String currentUser = this.username;
-                changeAPIStatus(api, newStatus, APIUtil.appendDomainWithUser(currentUser,tenantDomain), publishToGateway);
+                changeAPIStatus(api, newStatus, APIUtil.appendDomainWithUser(currentUser, tenantDomain), publishToGateway);
 
                 if ((oldStatus.equals(APIStatus.CREATED) || oldStatus.equals(APIStatus.PROTOTYPED))
                         && newStatus.equals(APIStatus.PUBLISHED)) {
@@ -1988,6 +1994,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             registry.commitTransaction();
             transactionCommitted = true;
 
+            JSONObject apiLogObject = new JSONObject();
+            apiLogObject.put(APIConstants.AuditLogConstants.NAME, newAPI.getId().getApiName());
+            apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, newAPI.getContext());
+            apiLogObject.put(APIConstants.AuditLogConstants.VERSION, newAPI.getId().getVersion());
+            apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, newAPI.getId().getProviderName());
+            apiLogObject.put(APIConstants.AuditLogConstants.IS_API_DEFAULT_VERSION, api.isDefaultVersion());
+
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
+                    APIConstants.AuditLogConstants.CREATED, this.username);
+
+
             if(log.isDebugEnabled()) {
                 String logMessage = "Successfully created new version : " + newVersion + " of : " + api.getId().getApiName();
                 log.debug(logMessage);
@@ -2206,6 +2223,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             APIUtil.setResourcePermissions(api.getId().getProviderName(),visibility, authorizedRoles,contentPath);
+
+            JSONObject apiLogObject = new JSONObject();
+            apiLogObject.put(APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
+            apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, api.getContext());
+            apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
+            apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
+            apiLogObject.put("Added Documentation ", documentationName);
+
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
+                    APIConstants.AuditLogConstants.UPDATED, this.username);
+
         } catch (RegistryException e) {
             String msg = "Failed to add the documentation content of : "
                          + documentationName + " of API :" + identifier.getApiName();
@@ -2278,6 +2306,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String filePath = docFilePath.substring(startIndex, docFilePath.length());
                 APIUtil.setResourcePermissions(api.getId().getProviderName(), visibility, authorizedRoles, filePath);
             }
+
+            JSONObject apiLogObject = new JSONObject();
+            apiLogObject.put(APIConstants.AuditLogConstants.NAME, api.getId().getApiName());
+            apiLogObject.put(APIConstants.AuditLogConstants.CONTEXT, api.getContext());
+            apiLogObject.put(APIConstants.AuditLogConstants.VERSION, api.getId().getVersion());
+            apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, api.getId().getProviderName());
+            apiLogObject.put("Updated Documentation ", documentation.getName());
+
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
+                    APIConstants.AuditLogConstants.UPDATED, this.username);
 
         } catch (RegistryException e) {
             handleException("Failed to update documentation", e);
@@ -2552,6 +2590,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiArtifactResourceId);
             String inSequence = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_INSEQUENCE);
             String outSequence = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_OUTSEQUENCE);
+            String faultSequence =  apiArtifact.getAttribute(APIConstants.API_OVERVIEW_FAULTSEQUENCE);
             String environments = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             String type = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_TYPE);
             String context_val = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
@@ -2596,6 +2635,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 api.setInSequence(inSequence); // need to remove the custom sequences
                 api.setOutSequence(outSequence);
+                api.setFaultSequence(faultSequence);
 
                 api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments));
                 removeFromGateway(api);
@@ -3758,6 +3798,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         apiMgtDAO.recordAPILifeCycleEvent(apiIdentifier, currentStatus.toUpperCase(),
                                 targetStatus.toUpperCase(), this.username, this.tenantId);
                     }
+
+                    JSONObject apiLogObject = new JSONObject();
+                    apiLogObject.put(APIConstants.AuditLogConstants.NAME, apiIdentifier.getApiName());
+                    apiLogObject.put(APIConstants.AuditLogConstants.VERSION, apiIdentifier.getVersion());
+                    apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, apiIdentifier.getProviderName());
+                    apiLogObject.put("New life cycle status", targetStatus);
+
+                    APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
+                            APIConstants.AuditLogConstants.UPDATED, this.username);
+
                     if (log.isDebugEnabled()) {
                         String logMessage = "API Status changed successfully. API Name: " + apiIdentifier.getApiName()
                                 + ", API Version " + apiIdentifier.getVersion() + ", New Status : " + targetStatus;
@@ -3818,15 +3868,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
             GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);
+            String status = null;
             try {
                 if (apiArtifact != null) {
                     if (checkItemValue && !apiArtifact.isLCItemChecked(checkItem, APIConstants.API_LIFE_CYCLE)) {
                         apiArtifact.checkLCItem(checkItem, APIConstants.API_LIFE_CYCLE);
+                        status ="checked";
                     } else if (!checkItemValue && apiArtifact.isLCItemChecked(checkItem, APIConstants.API_LIFE_CYCLE)) {
                         apiArtifact.uncheckLCItem(checkItem, APIConstants.API_LIFE_CYCLE);
+                        status = "unchecked";
                     }
                     success = true;
                 }
+                String[] checkListItems = apiArtifact.getAllCheckListItemNames(APIConstants.API_LIFE_CYCLE);
+                String checkListItem = null;
+                if(checkListItems != null && checkItem >= 0 && checkItem < checkListItems.length) {
+                    checkListItem = checkListItems[checkItem];
+                }
+                JSONObject apiLogObject = new JSONObject();
+                apiLogObject.put(APIConstants.AuditLogConstants.NAME, apiIdentifier.getApiName());
+                apiLogObject.put(APIConstants.AuditLogConstants.VERSION, apiIdentifier.getVersion());
+                apiLogObject.put(APIConstants.AuditLogConstants.PROVIDER, apiIdentifier.getProviderName());
+                apiLogObject.put(checkListItem + " checkbox has been ", status);
+
+                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.LIFE_CYCLE, apiLogObject.toString(),
+                        APIConstants.AuditLogConstants.UPDATED, this.username);
             } catch (GovernanceException e) {
                 handleException("Error while setting registry lifecycle checklist items for the API: " +
                         apiIdentifier.getApiName(), e);
@@ -4192,6 +4258,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 manager.deployPolicyToGlobalCEP(flowString);
             }
             apiMgtDAO.setPolicyDeploymentStatus(policyLevel, policy.getPolicyName(), policy.getTenantId(), true);
+            JSONObject apiLogObject = new JSONObject();
+            apiLogObject.put(APIConstants.AuditLogConstants.NAME, policy.getPolicyName());
+            apiLogObject.put("Policy Level ", policyLevel);
+            apiLogObject.put("Tenant ID", policy.getTenantId());
+
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.POLICY, apiLogObject.toString(),
+                    APIConstants.AuditLogConstants.CREATED, this.username);
         } catch (APIManagementException e) {
             String msg = "Error while deploying policy";
             // Add deployment fail flag to database and throw the exception
@@ -4325,6 +4398,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             apiMgtDAO.setPolicyDeploymentStatus(policyLevel, policy.getPolicyName(), policy.getTenantId(), true);
+            JSONObject apiLogObject = new JSONObject();
+            apiLogObject.put(APIConstants.AuditLogConstants.NAME, policy.getPolicyName());
+            apiLogObject.put("Policy Level ", policyLevel);
+            apiLogObject.put("Tenant ID", policy.getTenantId());
+
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.POLICY, apiLogObject.toString(),
+                    APIConstants.AuditLogConstants.UPDATED, this.username);
         } catch (APIManagementException e) {
             String msg = "Error while deploying policy to gateway";
             // Add deployment fail flag to database and throw the exception
@@ -4406,6 +4486,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         //remove from database
         apiMgtDAO.removeThrottlePolicy(policyLevel, policyName, tenantID);
+
+        JSONObject apiLogObject = new JSONObject();
+        apiLogObject.put(APIConstants.AuditLogConstants.NAME, policyName);
+        apiLogObject.put("Policy Level ", policyLevel);
+        apiLogObject.put("Tenant ID", tenantID);
+
+        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.POLICY, apiLogObject.toString(),
+                APIConstants.AuditLogConstants.DELETED, this.username);
 
         if (globalPolicy != null) {
             publishKeyTemplateEvent(globalPolicy.getKeyTemplate(), "remove");
