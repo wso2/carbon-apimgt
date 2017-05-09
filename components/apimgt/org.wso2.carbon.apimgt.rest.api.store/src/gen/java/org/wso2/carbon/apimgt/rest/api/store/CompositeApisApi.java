@@ -32,7 +32,6 @@ import javax.ws.rs.core.Response;
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the composite-apis API")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-05-05T10:43:39.597+05:30")
 public class CompositeApisApi implements Microservice  {
    private final CompositeApisApiService delegate = CompositeApisApiServiceFactory.getCompositeApisApi();
 

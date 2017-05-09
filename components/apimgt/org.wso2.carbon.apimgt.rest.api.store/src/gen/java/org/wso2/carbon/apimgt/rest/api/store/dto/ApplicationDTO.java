@@ -12,7 +12,6 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 /**
  * ApplicationDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-25T10:57:52.774+05:30")
 public class ApplicationDTO   {
   @JsonProperty("applicationId")
   private String applicationId = null;
