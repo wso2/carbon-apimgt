@@ -51,9 +51,9 @@ function _renderActionButtons(data, type, row) {
             }
 	    var icon_view_span = $("<span>").addClass("fw-stack")
             .append(icon.clone()
-                .removeClass("fw-delete").addClass("fw-view fw-stack-1x"))
+            .removeClass("fw-delete").addClass("fw-view fw-stack-1x"))
             .append(icon_circle.clone());
-        var edit_button = $('<a>', {
+	    var edit_button = $('<a>', {
                 id: data.id,
                 href: data.id
             })
@@ -271,7 +271,6 @@ function viewDocContentHandler(event) {
             var error_data = JSON.parse(error.data);
         }).then(function(done) {
             downloadFile(done);
-
         });
     }
 }
