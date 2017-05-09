@@ -97,16 +97,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>org.wso2.carbon.apimgt.rest.api.core.Application</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
             <plugin><!-- Overridden from parent pom to exclude generated sources -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
@@ -140,7 +130,6 @@
     </build>
 
     <properties>
-        <microservice.mainClass>org.wso2.carbon.apimgt.rest.api.core.Application</microservice.mainClass>
         <private.package>org.wso2.carbon.apimgt.rest.api.core.internal</private.package>
         <import.package>
             org.wso2.carbon.datasource.core.*; version="${datasources.core.package.import.version.range}",
