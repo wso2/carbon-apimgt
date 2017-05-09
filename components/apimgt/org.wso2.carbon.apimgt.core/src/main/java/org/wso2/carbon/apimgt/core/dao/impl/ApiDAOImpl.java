@@ -1211,13 +1211,15 @@ public class ApiDAOImpl implements ApiDAO {
      * @see ApiDAO#addDocumentFileContent(String, InputStream, String, String)
      */
     @Override
-    public void addDocumentFileContent(String resourceID, InputStream content, String fileName, String updatedBy) throws
+    public void addDocumentFileContent(String resourceID, InputStream content, String dataType, String updatedBy) throws
             APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
             try {
                 connection.setAutoCommit(false);
-                if (ApiResourceDAO.updateBinaryResource(connection, resourceID, content, fileName, updatedBy) == 0) {
-                    throw new APIMgtDAOException("Cannot add file content for a document that does not exist");
+                if (ApiResourceDAO.updateBinaryResource(connection, resourceID, content, dataType, updatedBy) == 0) {
+                    String errorMessage = "Cannot add file content for a document that does not exist";
+                    log.error(errorMessage);
+                    throw new APIMgtDAOException(errorMessage);
                 }
                 connection.commit();
             } catch (SQLException e) {

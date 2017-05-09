@@ -28,7 +28,7 @@ import org.wso2.msf4j.formparam.FormDataParam;
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the apis API")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-05-05T10:56:54.866+05:30")
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-05-09T09:08:08.512+05:30")
 public class ApisApi implements Microservice  {
    private final ApisApiService delegate = ApisApiServiceFactory.getApisApi();
 
@@ -55,7 +55,7 @@ public class ApisApi implements Microservice  {
     @GET
     @Path("/{apiId}/documents/{documentId}/content")
     @Consumes({ "application/json" })
-    @Produces({ "application/json" })
+    @Produces({ "application/octet-stream" })
     @io.swagger.annotations.ApiOperation(value = "Get the content of an API document", notes = "This operation can be used to retrive the content of an API's document.  The document can be of 3 types. In each cases responses are different.  1. **Inline type**:    The content of the document will be retrieved in `text/plain` content type 2. **FILE type**:    The file will be downloaded with the related content type (eg. `application/pdf`) 3. **URL type**:     The client will recieve the URL of the document as the Location header with the response with - `303 See Other` ", response = void.class, tags={ "Document (Individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. File or inline content returned. ", response = void.class),

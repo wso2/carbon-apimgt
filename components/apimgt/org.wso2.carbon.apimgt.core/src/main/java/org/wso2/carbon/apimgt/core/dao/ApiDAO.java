@@ -323,11 +323,11 @@ public interface ApiDAO {
      *
      * @param resourceID UUID of resource
      * @param content    File content as an InputStream
-     * @param fileName
+     * @param dataType File mime type
      * @param updatedBy user who performs the action
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    void addDocumentFileContent(String resourceID, InputStream content, String fileName, String updatedBy) throws
+    void addDocumentFileContent(String resourceID, InputStream content, String dataType, String updatedBy) throws
             APIMgtDAOException;
 
     /**

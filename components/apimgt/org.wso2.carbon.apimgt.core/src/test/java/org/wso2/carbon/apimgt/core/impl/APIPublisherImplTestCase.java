@@ -1166,8 +1166,8 @@ public class APIPublisherImplTestCase {
     public void testUploadDocumentationFile() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
-        apiPublisher.uploadDocumentationFile(DOC_ID, null, "testDoc");
-        Mockito.verify(apiDAO, Mockito.times(1)).addDocumentFileContent(DOC_ID, null, "testDoc", user);
+        apiPublisher.uploadDocumentationFile(DOC_ID, null, "text/plain");
+        Mockito.verify(apiDAO, Mockito.times(1)).addDocumentFileContent(DOC_ID, null, "text/plain", user);
     }
 
     @Test(description = "Exception when uploading Documentation File",
@@ -1176,8 +1176,8 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
         Mockito.doThrow(new APIMgtDAOException("Unable to add documentation with file")).when(apiDAO)
-                .addDocumentFileContent(DOC_ID, null, "testDoc", user);
-        apiPublisher.uploadDocumentationFile(DOC_ID, null, "testDoc");
+                .addDocumentFileContent(DOC_ID, null, "text/plain", user);
+        apiPublisher.uploadDocumentationFile(DOC_ID, null, "text/plain");
     }
 
     @Test(description = "Add documentation inline content")
@@ -1195,16 +1195,17 @@ public class APIPublisherImplTestCase {
         DocumentInfo documentInfo = new DocumentInfo.Builder().fileName("sample_doc.pdf").name("howto_guide").id(DOC_ID)
                 .permission("[{\"groupId\": \"testGroup\",\"permission\":[\"READ\",\"UPDATE\",\"DELETE\"]}]").build();
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        Mockito.when(apiDAO.isDocumentExist(API_ID, documentInfo)).thenReturn(true);
         apiPublisher.updateDocumentation(API_ID, documentInfo);
         Mockito.verify(apiDAO, Mockito.times(1)).updateDocumentInfo(API_ID, documentInfo, user);
     }
 
-    @Test(description = "Documentation already exists error when updating Documentation Info",
+    @Test(description = "Documentation does not exists error when updating Documentation Info",
             expectedExceptions = APIManagementException.class)
-    public void testUpdateDocumentationDocAlreadyExists() throws APIManagementException {
+    public void testUpdateDocumentationDocNotExists() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo();
-        Mockito.when(apiDAO.isDocumentExist(API_ID, documentInfo)).thenReturn(true);
+        Mockito.when(apiDAO.isDocumentExist(API_ID, documentInfo)).thenReturn(false);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
         apiPublisher.updateDocumentation(API_ID, documentInfo);
     }
