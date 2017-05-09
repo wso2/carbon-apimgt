@@ -1217,7 +1217,9 @@ public class ApiDAOImpl implements ApiDAO {
             try {
                 connection.setAutoCommit(false);
                 if (ApiResourceDAO.updateBinaryResource(connection, resourceID, content, dataType, updatedBy) == 0) {
-                    throw new APIMgtDAOException("Cannot add file content for a document that does not exist");
+                    String errorMessage = "Cannot add file content for a document that does not exist";
+                    log.error(errorMessage);
+                    throw new APIMgtDAOException(errorMessage);
                 }
                 connection.commit();
             } catch (SQLException e) {
