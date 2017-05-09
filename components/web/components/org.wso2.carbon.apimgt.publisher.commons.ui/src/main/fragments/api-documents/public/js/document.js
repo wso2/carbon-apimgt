@@ -267,15 +267,12 @@ function viewDocContentHandler(event) {
 
     if (sourceType == 'FILE') {
         let promised_get_content = api_client.getFileForDocument(api_id, documentId);
-        console.log(current_row.data().documentId);
         promised_get_content.catch(function(error) {
             var error_data = JSON.parse(error.data);
         }).then(function(done) {
             downloadFile(done);
 
         });
-    } else if (sourceType == 'URL') {
-
     }
 }
 
