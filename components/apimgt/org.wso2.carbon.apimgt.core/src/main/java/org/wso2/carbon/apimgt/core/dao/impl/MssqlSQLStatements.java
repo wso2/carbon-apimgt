@@ -265,9 +265,9 @@ public class MssqlSQLStatements implements ApiDAOVendorSpecificStatements {
                         toLowerCase(Locale.ENGLISH) + '%');
                 queryIndex++;
             }
+            statement.setInt(queryIndex, limit);
             //setting 0 as the default offset based on store-api.yaml and MSSQL specifications
-            statement.setInt(queryIndex, (offset < 0) ? 0 : offset);
-            statement.setInt(++queryIndex, limit);
+            statement.setInt(++queryIndex, (offset < 0) ? 0 : offset);
             return statement;
         } catch (SQLException e) {
             String errorMsg = "Error occurred while searching APIs for attributes in the database.";
