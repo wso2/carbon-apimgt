@@ -20,8 +20,68 @@ $(
         $('input[type=radio][name=implementation-options]').on('change', implementationOptionsHandler);
         $('input[type=radio][name=import-definition]').on('change', importDefinitionOptionsHandler);
         validateActionButtons('#api-create-submit');
+        $('#api-create-advanced').on('click', showAdvancedDiv);
+        var roleIndex = 0;
+        $("[id=remove-2]").on('click',function(e){
+            e.preventDefault();
+            var par = $("[id=role-2]");
+            par.remove();
+        });
+        $('.add-role').on('click', function() {
+            var role = $('#role-name').val().trim();
+            if(role && role != ""){
+                roleIndex++;
+                var $permissionsTemplate = $('#permission-div'),
+                $clone = $permissionsTemplate.clone().removeClass('hide').attr('id','role-' + roleIndex).insertBefore($permissionsTemplate);
+                $clone
+                    .find('[id="remove"]').attr('id', 'remove-' + roleIndex ).end();
+                $clone.find('label[for="permissions-list-dropdown"]').html(role + '&nbsp; : &nbsp; &nbsp;');
+                $('#no-roles-msg').hide();
+                $('#role-name').val(null);
+            } else {
+                var message = "Please specify a role";
+                noty({
+                    text: message,
+                    type: 'warning',
+                    dismissQueue: true,
+                    progressBar: true,
+                    timeout: 5000,
+                    layout: 'topCenter',
+                    theme: 'relax',
+                    maxVisible: 10
+                });
+                return;
+            }
+        });
     }
 );
+
+/**
+ * This function is called to get the role permissions of an API as entered by the user
+ */
+function createRolePermissionJsonString() {
+    var permissionJson = [];
+    $(".well > .input-group").each(function(index) {
+        var jsonData = {};
+        var permissionArrayPerRole = [];
+        var obj = $(this);
+        var roleName = obj.find('label[for="permissions-list-dropdown"]').text();
+        jsonData["groupId"] = roleName.split(' :')[0];
+        obj.find(".permissionCheck:checked").each(function(){
+            permissionArrayPerRole.push($(this).val());
+        });
+        jsonData["permission"] = permissionArrayPerRole;
+        permissionJson.push(jsonData);
+    });
+    permissionJson.pop();
+    return JSON.stringify(permissionJson);
+}
+/**
+ * This function is called when advanced options for api creation is clicked
+ */
+function showAdvancedDiv() {
+    $('#api-create-advanced-div').toggle().toggleClass('selected');
+}
 
 /**
  * This callback function is called after the success response from API creation
@@ -52,6 +112,14 @@ function implementationOptionsHandler(event) {
         $('.basic-inputs :input').prop("disabled", true);
     } else {
         $('.basic-inputs :input').prop("disabled", false);
+    }
+
+    if (selected_value == 'mock-option' || selected_value == 'swagger-option') {
+        $('#api-create-advanced').hide();
+        $('#api-create-advanced-div').hide();
+    } else {
+        $('#api-create-advanced').show();
+        $('#api-create-advanced-div').show();
     }
 }
 /**
