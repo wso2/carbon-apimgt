@@ -45,16 +45,6 @@ public interface PolicyDAO {
     Policy getPolicy(String policyLevel, String policyName) throws APIMgtDAOException;
 
     /**
-     * Gets a Policy by uuid
-     *
-     * @param uuid Policy uuid
-     * @param policyLevel Policy level to which this policy belongs to
-     * @return {@link Policy} Gets a Policy by uuid
-     * @throws APIMgtDAOException If failed to get the Policy
-     */
-    Policy getPolicyByUuid(String uuid, String policyLevel) throws APIMgtDAOException;
-
-    /**
      * Gets all the Policies belongs to a level
      *
      * @param policyLevel Policy level
@@ -115,6 +105,33 @@ public interface PolicyDAO {
      * @throws APIMgtDAOException   If failed to get application policy.
      */
     ApplicationPolicy getApplicationPolicyById(String policyId) throws APIMgtDAOException;
+
+    /**
+     * Retrieves API Policy Policy by UUID
+     *
+     * @param policyId  Application policy ID
+     * @return {@link APIPolicy} of given UUID
+     * @throws APIMgtDAOException   If failed to get application policy.
+     */
+    APIPolicy getAPIPolicyById(String policyId) throws APIMgtDAOException;
+
+    /**
+     * Retrieves API Policy Policy by UUID
+     *
+     * @param policyId  Application policy ID
+     * @return {@link ApplicationPolicy} of given UUID
+     * @throws APIMgtDAOException   If failed to get application policy.
+     */
+    ApplicationPolicy getApplicationPolicyByUuid(String policyId) throws APIMgtDAOException;
+
+    /**
+     * Retrieves Subscription Policy by UUID
+     *
+     * @param policyId  Application policy ID
+     * @return {@link SubscriptionPolicy} of given UUID
+     * @throws APIMgtDAOException   If failed to get application policy.
+     */
+    SubscriptionPolicy getSubscriptionPolicyById(String policyId) throws APIMgtDAOException;
 
     /**
      * Retrieves the last updated time of a throttling policy given its policy level and policy name

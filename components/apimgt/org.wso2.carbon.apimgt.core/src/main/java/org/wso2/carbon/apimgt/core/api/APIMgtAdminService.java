@@ -116,11 +116,29 @@ public interface APIMgtAdminService {
      * Get a @{@link Policy} by policy uuid
      *
      * @param uuid Policy uuid
-     * @param policyLevel Tier level of the policy.
      * @return Policy object.
      * @throws APIManagementException If failed to get policy.
      */
-    Policy getPolicyByUuid(String uuid, String policyLevel) throws APIManagementException;
+    APIPolicy getAPIPolicyByUuid(String uuid) throws APIManagementException;
+
+    /**
+     * Get a @{@link Policy} by policy uuid
+     *
+     * @param uuid Policy uuid
+     * @return Policy object.
+     * @throws APIManagementException If failed to get policy.
+     */
+    ApplicationPolicy getApplicationPolicyByUuid(String uuid) throws APIManagementException;
+
+
+    /**
+     * Get a @{@link Policy} by policy uuid
+     *
+     * @param uuid Policy uuid
+     * @return Policy object.
+     * @throws APIManagementException If failed to get policy.
+     */
+    SubscriptionPolicy getSubscriptionPolicyByUuid(String uuid) throws APIManagementException;
 
     /**
      * Get a List of policies of a particular level

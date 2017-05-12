@@ -6,6 +6,7 @@ import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.admin.NotFoundException;
@@ -19,6 +20,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyListD
 import org.wso2.carbon.apimgt.rest.api.admin.mappings.AdvancedThrottlePolicyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.mappings.ApplicationThrottlePolicyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.mappings.SubscriptionThrottlePolicyMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.msf4j.Request;
 
@@ -91,12 +93,20 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
      */
     @Override public Response policiesThrottlingAdvancedPolicyIdGet(String policyId, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
-        String tierLevel = APIMgtConstants.ThrottlePolicyConstants.API_LEVEL;
         if (log.isDebugEnabled()) {
             log.info("Received Advanced Policy Get request. Policy uuid: " + policyId);
         }
-//        return getPolicyByUuid(policyId, tierLevel);
-        return null;
+        try {
+            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
+            APIPolicy apiPolicy = apiMgtAdminService.getAPIPolicyByUuid(policyId);
+            AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyToDTO(apiPolicy);
+            return Response.status(Response.Status.OK).entity(apiPolicy).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error occurred while getting Advanced Policy. policy uuid: " + policyId;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
     }
 
     /**
@@ -194,12 +204,20 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
      */
     @Override public Response policiesThrottlingApplicationPolicyIdGet(String policyId, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
-        String tierLevel = APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL;
         if (log.isDebugEnabled()) {
-            log.info("Received Advanced Policy Get request. Policy uuid: " + policyId);
+            log.info("Received Application Policy Get request. Policy uuid: " + policyId);
         }
-//        return getPolicyByUuid(policyId, tierLevel);
-        return null;
+        try {
+            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
+            ApplicationPolicy applicationPolicy = apiMgtAdminService.getApplicationPolicyByUuid(policyId);
+            ApplicationThrottlePolicyMappingUtil.fromApplicationThrottlePolicyToDTO(applicationPolicy);
+            return Response.status(Response.Status.OK).entity(applicationPolicy).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error occurred while getting Application Policy. policy uuid: " + policyId;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
     }
 
     /**
@@ -299,12 +317,20 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
      */
     @Override public Response policiesThrottlingSubscriptionPolicyIdGet(String policyId, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
-        String tierLevel = APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL;
         if (log.isDebugEnabled()) {
-            log.info("Received Advanced Policy Get request. Policy uuid: " + policyId);
+            log.info("Received Subscription Policy Get request. Policy uuid: " + policyId);
         }
-//        return getPolicyByUuid(policyId, tierLevel);
-        return null;
+        try {
+            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
+            SubscriptionPolicy subscriptionPolicy = apiMgtAdminService.getSubscriptionPolicyByUuid(policyId);
+            SubscriptionThrottlePolicyMappingUtil.fromSubscriptionThrottlePolicyToDTO(subscriptionPolicy);
+            return Response.status(Response.Status.OK).entity(subscriptionPolicy).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error occurred while getting Subscription Policy. policy uuid: " + policyId;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
     }
 
     /**
