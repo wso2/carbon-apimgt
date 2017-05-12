@@ -1,23 +1,40 @@
 package org.wso2.carbon.apimgt.rest.api.publisher;
 
+
 import io.swagger.annotations.ApiParam;
-import java.io.InputStream;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import org.osgi.service.component.annotations.Component;
+
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
+import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LifecycleStateDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.factories.ApisApiServiceFactory;
+
 import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.formparam.FileInfo;
 import org.wso2.msf4j.formparam.FormDataParam;
+import org.osgi.service.component.annotations.Component;
+
+import java.io.InputStream;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.HEAD;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 
 @Component(
     name = "org.wso2.carbon.apimgt.rest.api.publisher.ApisApi",
@@ -28,7 +45,6 @@ import org.wso2.msf4j.formparam.FormDataParam;
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the apis API")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-25T16:19:20.611+05:30")
 public class ApisApi implements Microservice  {
    private final ApisApiService delegate = ApisApiServiceFactory.getApisApi();
 
@@ -55,7 +71,7 @@ public class ApisApi implements Microservice  {
     @GET
     @Path("/{apiId}/documents/{documentId}/content")
     @Consumes({ "application/json" })
-    @Produces({ "application/json" })
+    @Produces({ "application/octet-stream" })
     @io.swagger.annotations.ApiOperation(value = "Get the content of an API document", notes = "This operation can be used to retrive the content of an API's document.  The document can be of 3 types. In each cases responses are different.  1. **Inline type**:    The content of the document will be retrieved in `text/plain` content type 2. **FILE type**:    The file will be downloaded with the related content type (eg. `application/pdf`) 3. **URL type**:     The client will recieve the URL of the document as the Location header with the response with - `303 See Other` ", response = void.class, tags={ "Document (Individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. File or inline content returned. ", response = void.class),
@@ -370,14 +386,12 @@ public class ApisApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = void.class) })
     public Response apisApiIdSwaggerGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
-,@ApiParam(value = "Label name of the gateway ") @QueryParam("labelName") String labelName
-,@ApiParam(value = "Protocol of the gateway access URL. Value should be either \"http\" or \"https\" ") @QueryParam("scheme") String scheme
 ,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
 , @Context Request request)
     throws NotFoundException {
-        return delegate.apisApiIdSwaggerGet(apiId,labelName,scheme,accept,ifNoneMatch,ifModifiedSince, request);
+        return delegate.apisApiIdSwaggerGet(apiId,accept,ifNoneMatch,ifModifiedSince, request);
     }
     @PUT
     @Path("/{apiId}/swagger")

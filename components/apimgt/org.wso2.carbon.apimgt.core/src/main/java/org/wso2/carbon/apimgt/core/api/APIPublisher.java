@@ -186,10 +186,10 @@ public interface APIPublisher extends APIManager {
      *
      * @param resourceId UUID of API
      * @param content    content of the file as an Input Stream
-     * @param fileName   Name for the document file.
+     * @param dataType   File mime type
      * @throws APIManagementException if failed to add the file
      */
-    void uploadDocumentationFile(String resourceId, InputStream content, String fileName) throws APIManagementException;
+    void uploadDocumentationFile(String resourceId, InputStream content, String dataType) throws APIManagementException;
 
     /**
      * Removes a given documentation

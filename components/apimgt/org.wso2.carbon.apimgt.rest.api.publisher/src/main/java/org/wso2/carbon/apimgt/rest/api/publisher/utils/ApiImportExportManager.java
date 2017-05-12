@@ -26,7 +26,9 @@ import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.*;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLConnection;
 import java.util.*;
 
 /**
@@ -212,7 +214,8 @@ public class ApiImportExportManager {
                 // add documentation
                 if (aDocContent.getDocumentInfo().getSourceType().equals(DocumentInfo.SourceType.FILE)) {
                     apiPublisher.uploadDocumentationFile(aDocContent.getDocumentInfo().getId(),
-                            aDocContent.getFileContent(), aDocContent.getDocumentInfo().getFileName());
+                            aDocContent.getFileContent(), 
+                            URLConnection.guessContentTypeFromStream(aDocContent.getFileContent()));
                 } else if (aDocContent.getDocumentInfo().getSourceType().equals(DocumentInfo.SourceType.INLINE)) {
                     apiPublisher.addDocumentationContent(aDocContent.getDocumentInfo().getId(),
                             aDocContent.getInlineContent());
@@ -223,6 +226,10 @@ public class ApiImportExportManager {
             // no need to throw, log and continue
             log.error("Error while adding Document details for API: " + apiDetails.getApi().getName() + ", version: " +
                     apiDetails.getApi().getVersion(), e);
+        } catch (IOException e) {
+            // no need to throw, log and continue
+            log.error("Error while retrieving content type of the File documentation of API : " 
+                    + apiDetails.getApi().getName() + ", version: " + apiDetails.getApi().getVersion(), e);
         }
 
         // add thumbnail
@@ -230,8 +237,8 @@ public class ApiImportExportManager {
             apiPublisher.saveThumbnailImage(apiDetails.getApi().getId(), apiDetails.getThumbnailStream(), "thumbnail");
         } catch (APIManagementException e) {
             // no need to throw, log and continue
-            log.error("Error while adding thumbnail for API: " + apiDetails.getApi().getName() + ", version: " +
-                    apiDetails.getApi().getVersion(), e);
+            log.error("Error while adding thumbnail for API: " + apiDetails.getApi().getName() + ", version: "
+                    + apiDetails.getApi().getVersion(), e);
         }
     }
 
@@ -279,7 +286,7 @@ public class ApiImportExportManager {
                 if (docContent.getDocumentInfo().getSourceType().equals(DocumentInfo.SourceType.FILE)) {
                     apiPublisher
                             .uploadDocumentationFile(docContent.getDocumentInfo().getId(), docContent.getFileContent(),
-                                    docContent.getDocumentInfo().getFileName());
+                                    URLConnection.guessContentTypeFromStream(docContent.getFileContent()));
                 } else if (docContent.getDocumentInfo().getSourceType().equals(DocumentInfo.SourceType.INLINE)) {
                     apiPublisher.addDocumentationContent(docContent.getDocumentInfo().getId(),
                             docContent.getInlineContent());
@@ -290,6 +297,10 @@ public class ApiImportExportManager {
             // no need to throw, log and continue
             log.error("Error while adding Document details for API: " + apiDetails.getApi().getName() + ", version: " +
                     apiDetails.getApi().getVersion(), e);
+        } catch (IOException e) {
+            // no need to throw, log and continue
+            log.error("Error while retrieving content type of the File documentation of API : "
+                    + apiDetails.getApi().getName() + ", version: " + apiDetails.getApi().getVersion(), e);
         }
 
         // update thumbnail

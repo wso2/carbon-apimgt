@@ -495,8 +495,6 @@ paths:
         This operation can be used to retrieve the swagger definition of an API.
       parameters:
         - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/labelName'
-        - $ref: '#/parameters/scheme'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
@@ -1609,6 +1607,8 @@ paths:
   # Downloads a FILE type document/get the inline content or source url of a certain document
   #-------------------------------------------------------------------------------------------------
       get:
+        produces:
+         - application/octet-stream
         x-scope: apim:api_view
         x-wso2-curl: "curl -k -H \"Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content\" > sample.pdf"
         x-wso2-request: |
@@ -2943,27 +2943,6 @@ parameters:
       - resource
     required: true
 
-# Label name of the gateway
-# Specified as part of the query string
-  labelName:
-    name: labelName
-    in: query
-    description: |
-      Label name of the gateway
-    required: false
-    type: string
-    
-# Protocol of the gateway access URL
-# Specified as part of the query string
-  scheme:
-    name: scheme
-    in: query
-    description: |
-      Protocol of the gateway access URL.
-      Value should be either "http" or "https"
-    required: false
-    type: string
-
 # Used for pagination:
 # The maximum number of resoures to be returned by a GET
   limit:
@@ -3407,6 +3386,9 @@ definitions:
           - FILE
         example: INLINE
       sourceUrl:
+        type: string
+        example: ""
+      fileName:
         type: string
         example: ""
       inlineContent:

@@ -1,16 +1,16 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
-import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.Objects;
 
 /**
  * DocumentDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-06T17:02:03.158+05:30")
 public class DocumentDTO   {
   @JsonProperty("documentId")
   private String documentId = null;
@@ -103,6 +103,9 @@ public class DocumentDTO   {
 
   @JsonProperty("sourceUrl")
   private String sourceUrl = null;
+
+  @JsonProperty("fileName")
+  private String fileName = null;
 
   @JsonProperty("inlineContent")
   private String inlineContent = null;
@@ -269,6 +272,24 @@ public class DocumentDTO   {
     this.sourceUrl = sourceUrl;
   }
 
+  public DocumentDTO fileName(String fileName) {
+    this.fileName = fileName;
+    return this;
+  }
+
+   /**
+   * Get fileName
+   * @return fileName
+  **/
+  @ApiModelProperty(example = "", value = "")
+  public String getFileName() {
+    return fileName;
+  }
+
+  public void setFileName(String fileName) {
+    this.fileName = fileName;
+  }
+
   public DocumentDTO inlineContent(String inlineContent) {
     this.inlineContent = inlineContent;
     return this;
@@ -429,6 +450,7 @@ public class DocumentDTO   {
         Objects.equals(this.summary, document.summary) &&
         Objects.equals(this.sourceType, document.sourceType) &&
         Objects.equals(this.sourceUrl, document.sourceUrl) &&
+        Objects.equals(this.fileName, document.fileName) &&
         Objects.equals(this.inlineContent, document.inlineContent) &&
         Objects.equals(this.otherTypeName, document.otherTypeName) &&
         Objects.equals(this.permission, document.permission) &&
@@ -441,7 +463,7 @@ public class DocumentDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(documentId, name, type, summary, sourceType, sourceUrl, inlineContent, otherTypeName, permission, visibility, createdTime, createdBy, lastUpdatedTime, lastUpdatedBy);
+    return Objects.hash(documentId, name, type, summary, sourceType, sourceUrl, fileName, inlineContent, otherTypeName, permission, visibility, createdTime, createdBy, lastUpdatedTime, lastUpdatedBy);
   }
 
   @Override
@@ -455,6 +477,7 @@ public class DocumentDTO   {
     sb.append("    summary: ").append(toIndentedString(summary)).append("\n");
     sb.append("    sourceType: ").append(toIndentedString(sourceType)).append("\n");
     sb.append("    sourceUrl: ").append(toIndentedString(sourceUrl)).append("\n");
+    sb.append("    fileName: ").append(toIndentedString(fileName)).append("\n");
     sb.append("    inlineContent: ").append(toIndentedString(inlineContent)).append("\n");
     sb.append("    otherTypeName: ").append(toIndentedString(otherTypeName)).append("\n");
     sb.append("    permission: ").append(toIndentedString(permission)).append("\n");

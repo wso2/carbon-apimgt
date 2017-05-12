@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
@@ -129,7 +130,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     public List<API> getAllAPIsByStatus(int offset, int limit, String[] statuses) throws APIManagementException {
         List<API> apiResults = null;
         try {
-            apiResults = getApiDAO().getAPIsByStatus(new ArrayList<>(Arrays.asList(statuses)));
+            apiResults = getApiDAO().getAPIsByStatus(new ArrayList<>(Arrays.asList(statuses)), ApiType.STANDARD);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while fetching APIs for the given statuses - "
                     + Arrays.toString(statuses);
@@ -668,7 +669,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             //this should be current logged in user
             String user = "admin";
             //role list of current user
-            List<String> roles = APIUtils.getAllRolesOfUser(user);
+            Set<String> roles = APIUtils.getAllRolesOfUser(user);
             if (query != null && !query.isEmpty()) {
                 String[] attributes = query.split(",");
                 Map<String, String> attributeMap = new HashMap<>();
@@ -685,15 +686,16 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
                 }
                 if (isFullTextSearch) {
-                    apiResults = getApiDAO().searchAPIs(roles, user, query, offset, limit);
+                    apiResults = getApiDAO().searchAPIs(roles, user, query, ApiType.STANDARD, offset, limit);
                 } else {
-                    apiResults = getApiDAO().attributeSearchAPIs(roles, user, attributeMap, offset, limit);
+                    apiResults = getApiDAO().attributeSearchAPIsStore(new ArrayList<>(roles),
+                            attributeMap, offset, limit);
                 }
             } else {
                 List<String> statuses = new ArrayList<>();
                 statuses.add(APIStatus.PUBLISHED.getStatus());
                 statuses.add(APIStatus.PROTOTYPED.getStatus());
-                apiResults = getApiDAO().getAPIsByStatus(roles, statuses);
+                apiResults = getApiDAO().getAPIsByStatus(roles, statuses, ApiType.STANDARD);
             }
 
         } catch (APIMgtDAOException e) {

@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIConfigRetrievalException;
@@ -62,7 +63,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
      */
     @Override
     public List<APISummary> getAPIInfo() throws APIManagementException {
-        List<API> apiList = apiDAO.getAPIs();
+        List<API> apiList = apiDAO.getAPIs(ApiType.STANDARD);
         List<APISummary> apiSummaryList = new ArrayList<APISummary>();
         apiList.forEach(apiInfo -> {
             APISummary apiSummary = new APISummary(apiInfo.getId());
@@ -88,7 +89,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
      */
     @Override
     public void updatePolicy(Policy policy) throws APIManagementException {
-
+        policyDAO.updatePolicy(policy);
     }
 
     /**
@@ -100,11 +101,26 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     }
 
     /**
+     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#deletePolicyByUuid(String, String)
+     */
+    @Override public void deletePolicyByUuid(String uuid, String policyLevel) throws APIManagementException {
+        policyDAO.deletePolicyByUuid(uuid, policyLevel);
+    }
+
+    /**
      * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#getPolicy(String, String)
      */
     @Override
     public Policy getPolicy(String policyLevel, String policyName) throws APIManagementException {
         return policyDAO.getPolicy(policyLevel, policyName);
+    }
+
+    /**
+     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#getPolicyByUuid(String, String)
+     */
+    @Override
+    public Policy getPolicyByUuid(String uuid, String policyLevel) throws APIManagementException {
+        return policyDAO.getPolicyByUuid(uuid, policyLevel);
     }
 
     /**

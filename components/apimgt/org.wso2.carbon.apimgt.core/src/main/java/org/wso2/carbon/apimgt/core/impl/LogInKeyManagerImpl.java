@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.core.impl;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
@@ -41,8 +42,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -442,9 +445,15 @@ public class LogInKeyManagerImpl implements KeyManager {
                 }
                 validityPeriod = Long.parseLong(obj.get(OAUTH_RESPONSE_EXPIRY_TIME).toString());
                 if (obj.has(KeyManagerConstants.OAUTH_CLIENT_SCOPE)) {
-                    tokenInfo.setScopes((obj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_SCOPE).getAsString()).
-                            split(" "));
+                    JsonArray scopes = obj.getAsJsonArray(KeyManagerConstants.OAUTH_CLIENT_SCOPE);
+                    List<String> scopesList = new ArrayList<String>();
+                    String[] scopesArr = new String[scopesList.size()];
+                    for (JsonElement scope: scopes) {
+                        scopesList.add(scope.getAsString());
+                    }
+                    tokenInfo.setScopes(scopesList.toArray(scopesArr));
                 }
+
                 tokenInfo.setAccessToken(newAccessToken);
                 tokenInfo.setValidityPeriod(validityPeriod);
                 tokenInfo.setRefreshToken(refreshToken);

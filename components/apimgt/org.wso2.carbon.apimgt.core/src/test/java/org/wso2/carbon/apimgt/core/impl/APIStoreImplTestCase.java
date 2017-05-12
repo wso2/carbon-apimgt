@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
@@ -75,6 +76,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -121,11 +123,12 @@ public class APIStoreImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIStore apiStore = getApiStoreImpl(apiDAO);
         List<API> apimResultsFromDAO = new ArrayList<>();
-        Mockito.when(apiDAO.searchAPIs(new ArrayList<>(), "admin", "pizza", 1, 2)).thenReturn(apimResultsFromDAO);
+        Mockito.when(apiDAO.searchAPIs(new HashSet<>(), "admin", "pizza", ApiType.STANDARD,
+                                                                    1, 2)).thenReturn(apimResultsFromDAO);
         List<API> apis = apiStore.searchAPIs("pizza", 1, 2);
         Assert.assertNotNull(apis);
         Mockito.verify(apiDAO, Mockito.atLeastOnce()).searchAPIs(APIUtils.getAllRolesOfUser("admin"),
-                "admin", "pizza", 1, 2);
+                "admin", "pizza", ApiType.STANDARD, 1, 2);
     }
 
     @Test(description = "Search APIs with an empty query")
@@ -136,10 +139,11 @@ public class APIStoreImplTestCase {
         List<String> statuses = new ArrayList<>();
         statuses.add(APIStatus.PUBLISHED.getStatus());
         statuses.add(APIStatus.PROTOTYPED.getStatus());
-        Mockito.when(apiDAO.getAPIsByStatus(statuses)).thenReturn(apimResultsFromDAO);
+        Mockito.when(apiDAO.getAPIsByStatus(statuses, ApiType.STANDARD)).thenReturn(apimResultsFromDAO);
         List<API> apis = apiStore.searchAPIs("", 1, 2);
         Assert.assertNotNull(apis);
-        Mockito.verify(apiDAO, Mockito.atLeastOnce()).getAPIsByStatus(APIUtils.getAllRolesOfUser("admin"), statuses);
+        Mockito.verify(apiDAO, Mockito.atLeastOnce()).getAPIsByStatus(APIUtils.getAllRolesOfUser("admin"),
+                                                                                    statuses, ApiType.STANDARD);
     }
 
     @Test(description = "Search API", expectedExceptions = APIManagementException.class)
@@ -148,7 +152,7 @@ public class APIStoreImplTestCase {
         APIStore apiStore = getApiStoreImpl(apiDAO);
         PowerMockito.mockStatic(APIUtils.class); // TODO
         Mockito.when(apiDAO.searchAPIs(APIUtils.getAllRolesOfUser("admin"), "admin",
-                "select *", 1, 2)).thenThrow(APIMgtDAOException
+                "select *", ApiType.STANDARD, 1, 2)).thenThrow(APIMgtDAOException
                 .class);
         //doThrow(new Exception()).when(APIUtils).logAndThrowException(null, null, null)).
         apiStore.searchAPIs("select *", 1, 2);
@@ -159,10 +163,12 @@ public class APIStoreImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIStore apiStore = getApiStoreImpl(apiDAO);
         List<API> expectedAPIs = new ArrayList<API>();
-        Mockito.when(apiDAO.getAPIsByStatus(Arrays.asList(STATUS_CREATED, STATUS_PUBLISHED))).thenReturn(expectedAPIs);
+        Mockito.when(apiDAO.getAPIsByStatus(Arrays.asList(STATUS_CREATED, STATUS_PUBLISHED), ApiType.STANDARD)).
+                                                                                        thenReturn(expectedAPIs);
         List<API> actualAPIs = apiStore.getAllAPIsByStatus(1, 2, new String[] {STATUS_CREATED, STATUS_PUBLISHED});
         Assert.assertNotNull(actualAPIs);
-        Mockito.verify(apiDAO, Mockito.times(1)).getAPIsByStatus(Arrays.asList(STATUS_CREATED, STATUS_PUBLISHED));
+        Mockito.verify(apiDAO, Mockito.times(1)).
+                getAPIsByStatus(Arrays.asList(STATUS_CREATED, STATUS_PUBLISHED), ApiType.STANDARD);
     }
 
     @Test(description = "Retrieve an application by name")
@@ -793,9 +799,9 @@ public class APIStoreImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIStore apiStore = getApiStoreImpl(apiDAO);
         String[] statuses = {STATUS_CREATED, STATUS_PUBLISHED};
-        Mockito.when(apiDAO.getAPIsByStatus(Arrays.asList(STATUS_CREATED, STATUS_PUBLISHED))).thenThrow(new
-                APIMgtDAOException(
-                "Error occurred while fetching APIs for the given statuses - " + Arrays.toString(statuses)));
+        Mockito.when(apiDAO.getAPIsByStatus(Arrays.asList(STATUS_CREATED, STATUS_PUBLISHED), ApiType.STANDARD)).
+                thenThrow(new APIMgtDAOException(
+                        "Error occurred while fetching APIs for the given statuses - " + Arrays.toString(statuses)));
         apiStore.getAllAPIsByStatus(1, 2, statuses);
     }
 

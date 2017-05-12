@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.core.models.Label;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class LabelDAOImplIT extends DAOIntegrationTestBase {
 
@@ -154,7 +155,7 @@ public class LabelDAOImplIT extends DAOIntegrationTestBase {
         labelIds.add(labelId1);
         labelIds.add(labelId2);
 
-        List<String> labelNamesFromDb = LabelDAOImpl.getLabelNamesByIDs(labelIds);
+        Set<String> labelNamesFromDb = LabelDAOImpl.getLabelNamesByIDs(labelIds);
         Assert.assertNotNull(labelNamesFromDb);
         Assert.assertEquals(labelNamesFromDb.size(), 2);
     }

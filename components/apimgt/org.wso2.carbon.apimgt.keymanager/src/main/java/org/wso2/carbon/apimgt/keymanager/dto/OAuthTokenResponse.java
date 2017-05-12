@@ -37,8 +37,8 @@ public class OAuthTokenResponse implements Serializable {
     @SerializedName("expires_in")
     private long expires_in;
 
-    @SerializedName("scopes")
-    private List<String> scopes;
+    @SerializedName("scope")
+    private List<String> scope;
 
     @SerializedName("expires_timestamp")
     private long expiresTimestamp;
@@ -78,10 +78,10 @@ public class OAuthTokenResponse implements Serializable {
     }
 
     public List<String> getScopes() {
-        return scopes;
+        return scope;
     }
 
     public void setScopes(List<String> scopes) {
-        this.scopes = scopes;
+        this.scope = scopes;
     }
 }

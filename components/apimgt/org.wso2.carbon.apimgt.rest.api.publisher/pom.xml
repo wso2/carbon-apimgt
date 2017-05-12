@@ -131,18 +131,6 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>org.wso2.carbon.apimgt.rest.api.publisher.Application</mainClass>
-                        </manifest>
-                        <!--<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>-->
-                    </archive>
-                </configuration>
-            </plugin>
-
 
             <plugin><!-- Overridden from parent pom to exclude generated sources -->
                 <groupId>org.apache.maven.plugins</groupId>
@@ -177,7 +165,6 @@
     </build>
 
     <properties>
-        <microservice.mainClass>org.wso2.carbon.apimgt.rest.api.publisher.Application</microservice.mainClass>
         <private.package>
             org.wso2.carbon.apimgt.rest.api.publisher.internal
         </private.package>

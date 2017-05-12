@@ -256,12 +256,12 @@ class ApiResourceDAO {
     }
 
     static int updateBinaryResource(Connection connection, String resourceID, InputStream resourceValue, String
-            fileName, String updatedBy) throws SQLException {
+            dataType, String updatedBy) throws SQLException {
         final String query = "UPDATE AM_API_RESOURCES SET RESOURCE_BINARY_VALUE = ?, DATA_TYPE = ?, UPDATED_BY = ?, " 
                 + "LAST_UPDATED_TIME = ? WHERE UUID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setBinaryStream(1, resourceValue);
-            statement.setString(2, fileName);
+            statement.setString(2, dataType);
             statement.setString(3, updatedBy);
             statement.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
             statement.setString(5, resourceID);

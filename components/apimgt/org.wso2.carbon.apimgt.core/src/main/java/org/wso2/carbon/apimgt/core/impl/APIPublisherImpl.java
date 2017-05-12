@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
@@ -306,17 +307,17 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
                 createdAPI = apiBuilder.build();
                 APIUtils.validate(createdAPI);
-                List<String> apiRoleList;
+                Set<String> apiRoleList;
                 //if the API has public visibility, add the API without any role checking
                 //if the API has role based visibility, add the API with role checking
                 if (API.Visibility.PUBLIC == createdAPI.getVisibility()) {
                     getApiDAO().addAPI(createdAPI);
                 } else if (API.Visibility.RESTRICTED == createdAPI.getVisibility()) {
                     //get all the roles in the system
-                    List<String> availableRoleList = APIUtils.getAllAvailableRoles();
+                    Set<String> allAvailableRoles = APIUtils.getAllAvailableRoles();
                     //get the roles needed to be associated with the API
                     apiRoleList = createdAPI.getVisibleRoles();
-                    if (APIUtils.checkAllowedRoles(availableRoleList, apiRoleList)) {
+                    if (APIUtils.checkAllowedRoles(allAvailableRoles, apiRoleList)) {
                         getApiDAO().addAPI(createdAPI);
                     }
                 }
@@ -416,11 +417,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                                 getApiDAO().updateAPI(api.getId(), api);
                             } else if (API.Visibility.RESTRICTED == api.getVisibility()) {
                                 //get all the roles in the system
-                                List<String> availableRoleList = APIUtils.getAllAvailableRoles();
+                                Set<String> availableRoles = APIUtils.getAllAvailableRoles();
                                 //get the roles needed to be associated with the API
-                                List<String> apiRoleList = api.getVisibleRoles();
+                                Set<String> apiRoleList = api.getVisibleRoles();
                                 //if the API has role based visibility, update the API with role checking
-                                if (APIUtils.checkAllowedRoles(availableRoleList, apiRoleList)) {
+                                if (APIUtils.checkAllowedRoles(availableRoles, apiRoleList)) {
                                     getApiDAO().updateAPI(api.getId(), api);
                                 }
                             }
@@ -436,11 +437,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                             getApiDAO().updateAPI(api.getId(), api);
                         } else if (API.Visibility.RESTRICTED == api.getVisibility()) {
                             //get all the roles in the system
-                            List<String> availableRoleList = APIUtils.getAllAvailableRoles();
+                            Set<String> allAvailableRoles = APIUtils.getAllAvailableRoles();
                             //get the roles needed to be associated with the API
-                            List<String> apiRoleList = api.getVisibleRoles();
+                            Set<String> apiRoleList = api.getVisibleRoles();
                             //if the API has role based visibility, update the API with role checking
-                            if (APIUtils.checkAllowedRoles(availableRoleList, apiRoleList)) {
+                            if (APIUtils.checkAllowedRoles(allAvailableRoles, apiRoleList)) {
                                 getApiDAO().updateAPI(api.getId(), api);
                             }
                         }
@@ -887,14 +888,14 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      *
      * @param resourceId UUID of API
      * @param content    content of the file as an Input Stream
-     * @param fileName   Name of the file.
+     * @param dataType   File mime type
      * @throws APIManagementException if failed to add the file
      */
     @Override
-    public void uploadDocumentationFile(String resourceId, InputStream content, String fileName) throws
+    public void uploadDocumentationFile(String resourceId, InputStream content, String dataType) throws
             APIManagementException {
         try {
-            getApiDAO().addDocumentFileContent(resourceId, content, fileName, getUsername());
+            getApiDAO().addDocumentFileContent(resourceId, content, dataType, getUsername());
         } catch (APIMgtDAOException e) {
             String errorMsg = "Unable to add documentation with file";
             log.error(errorMsg, e);
@@ -1003,20 +1004,20 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
             document = docBuilder.build();
 
-            if (!getApiDAO().isDocumentExist(apiId, document)) {
+            if (getApiDAO().isDocumentExist(apiId, document)) {
                 getApiDAO().updateDocumentInfo(apiId, document, getUsername());
                 return document.getId();
             } else {
-                String msg = "Document already exist for the api " + apiId;
+                String msg = "Document " + document.getName() + " not found for the api " + apiId;
                 log.error(msg);
-                throw new APIManagementException(msg, ExceptionCodes.DOCUMENT_ALREADY_EXISTS);
+                throw new APIManagementException(msg, ExceptionCodes.DOCUMENT_NOT_FOUND);
             }
         } catch (APIMgtDAOException e) {
-            String errorMsg = "Unable to add documentation";
+            String errorMsg = "Unable to update the documentation";
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } catch (ParseException e) {
-            String errorMsg = "Unable to add documentation due to json parse error";
+            String errorMsg = "Unable to update the documentation due to json parse error";
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.JSON_PARSE_ERROR);
         }
@@ -1120,7 +1121,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @param offset Offset
      * @param query  Search query
      * @return List of APIS.
-     * @throws APIManagementException If failed to search APIs.
+     * @throws APIManagementException If failed to formatApiSearch APIs.
      */
     @Override
     public List<API> searchAPIs(Integer limit, Integer offset, String query) throws APIManagementException {
@@ -1130,11 +1131,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             //TODO: Need to validate users roles against results returned
             if (query != null && !query.isEmpty()) {
                 String user = "admin";
-                List<String> roles = APIUtils.getAllRolesOfUser(user);
+                Set<String> roles = APIUtils.getAllRolesOfUser(user);
                 //TODO get the logged in user and user roles from key manager.
-                apiResults = getApiDAO().searchAPIs(roles, user, query, offset, limit);
+                apiResults = getApiDAO().searchAPIs(roles, user, query, ApiType.STANDARD, offset, limit);
             } else {
-                apiResults = getApiDAO().getAPIs();
+                apiResults = getApiDAO().getAPIs(ApiType.STANDARD);
             }
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while Searching the API with query " + query;

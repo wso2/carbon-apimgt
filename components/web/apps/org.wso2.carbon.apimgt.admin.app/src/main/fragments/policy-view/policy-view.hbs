@@ -1,6 +1,13 @@
 <div id="listing">
     <div class="page-header">
-        <h2>{{i18n "Advanced Throttling Policies"}}</h2>
+        {{#if @params.apiTier}}
+            <h2 id="tierTopic">{{i18n "Advanced Throttle Policies"}}</h2>
+        {{else if @params.applicationTier}}
+            <h2 id="tierTopic">{{i18n "Application Tiers"}}</h2>
+        {{else if @params.subscriptionTier}}
+            <h2 id="tierTopic">{{i18n "Subscription Tiers"}}</h2>
+        {{/if}}
+        <p class="lead"></p>
     </div>
     {{#if @params.list}}
         <div class="content-section shadow-up">
