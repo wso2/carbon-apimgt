@@ -205,16 +205,16 @@ $(function () {
 
         apiPolicyNew.policyDescription = policyDescription;
         apiPolicyNew.policyLevel = policyLevel;
-        apiPolicyNew.defaultQuotaPolicy.type = defaultPolicyType;
+        apiPolicyNew.defaultLimit.type = defaultPolicyType;
 
         var defaultPolicyDataUnit;
         if (defaultPolicyType == 'requestCount') {
             defaultPolicyLimit = $('#request-count').val();
             defaultPolicyUnit = $("#request-count-unit option:selected").val();
             defaultPolicyUnitTime = $("#unit-time-count").val();
-            apiPolicyNew.defaultQuotaPolicy.limit.requestCount = defaultPolicyLimit;
-            apiPolicyNew.defaultQuotaPolicy.limit.unitTime = defaultPolicyUnitTime;
-            apiPolicyNew.defaultQuotaPolicy.limit.timeUnit = defaultPolicyUnit;
+            apiPolicyNew.defaultLimit.limit.requestCount = defaultPolicyLimit;
+            apiPolicyNew.defaultLimit.limit.unitTime = defaultPolicyUnitTime;
+            apiPolicyNew.defaultLimit.limit.timeUnit = defaultPolicyUnit;
 
             if (!validateInput(defaultPolicyLimit, $('#request-count'), requiredMsg)) {
                 return false;
@@ -230,10 +230,10 @@ $(function () {
             defaultPolicyDataUnit = $("#bandwidth-unit option:selected").val();
             defaultPolicyUnitTime = $("#unit-time-count").val();
             defaultPolicyUnit = $("#request-count-unit option:selected").val();
-            apiPolicyNew.defaultQuotaPolicy.limit.dataAmount = defaultPolicyLimit;
-            apiPolicyNew.defaultQuotaPolicy.limit.unitTime = defaultPolicyUnitTime;
-            apiPolicyNew.defaultQuotaPolicy.limit.dataUnit = defaultPolicyDataUnit;
-            apiPolicyNew.defaultQuotaPolicy.limit.timeUnit = defaultPolicyUnit;
+            apiPolicyNew.defaultLimit.limit.dataAmount = defaultPolicyLimit;
+            apiPolicyNew.defaultLimit.limit.unitTime = defaultPolicyUnitTime;
+            apiPolicyNew.defaultLimit.limit.dataUnit = defaultPolicyDataUnit;
+            apiPolicyNew.defaultLimit.limit.timeUnit = defaultPolicyUnit;
 
             if (!validateInput(defaultPolicyLimit, $('#bandwidth'), requiredMsg)) {
                 return false;
@@ -251,18 +251,11 @@ $(function () {
                 return false;
             }
         }
-        var policy = {};
-        policy.policyId = apiPolicyNew.policyId;
-        policy.name = apiPolicyNew.policyName;
-        policy.name = apiPolicyNew.policyName;
-        policy.description = apiPolicyNew.policyDescription;
-        policy.tierLevel = "api" ; // from send to client.
-        policy.unitTime = parseInt(apiPolicyNew.defaultQuotaPolicy.limit.unitTime);
-        policy.timeUnit = apiPolicyNew.defaultQuotaPolicy.limit.timeUnit;
-        policy.stopOnQuotaReach = true;
+        
+        apiPolicyNew.tierLevel = "api";
 
         var policyInstance = new Policy();
-        var promised_update =  policyInstance.update(policy);
+        var promised_update =  policyInstance.update(apiPolicyNew);
         promised_update
             .then(createPolicyCallback)
             .catch(

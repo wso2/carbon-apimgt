@@ -78,10 +78,27 @@ public interface APIMgtAdminService {
     /**
      * Updates existing @{@link Policy} to the system
      *
-     * @param policy Policy object to be updated.
+     * @param apiPolicy Policy object to be updated.
      * @throws APIManagementException If failed to update the policy.
      */
-    void updatePolicy(Policy policy) throws APIManagementException;
+    void updateAPIPolicy(APIPolicy apiPolicy) throws APIManagementException;
+
+    /**
+     * Updates existing @{@link Policy} to the system
+     *
+     * @param applicationPolicy Policy object to be updated.
+     * @throws APIManagementException If failed to update the policy.
+     */
+    void updateApplicationPolicy(ApplicationPolicy applicationPolicy) throws APIManagementException;
+
+
+    /**
+     * Updates existing @{@link Policy} to the system
+     *
+     * @param subscriptionPolicy Policy object to be updated.
+     * @throws APIManagementException If failed to update the policy.
+     */
+    void updateSubscriptionPolicy(SubscriptionPolicy subscriptionPolicy) throws APIManagementException;
 
     /**
      * Delete existing @{@link Policy} in the system

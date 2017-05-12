@@ -65,10 +65,28 @@ public interface PolicyDAO {
     /**
      * Updates a Policy belongs to a level
      *
-     * @param policy Policy to update
+     * @param apiPolicy Policy to update
      * @throws APIMgtDAOException If failed to add a Policy
      */
-    void updatePolicy(Policy policy) throws APIMgtDAOException;
+    void updateAPIPolicy(APIPolicy apiPolicy) throws APIMgtDAOException;
+
+
+    /**
+     * Updates a Policy belongs to a level
+     *
+     * @param applicationPolicy Policy to update
+     * @throws APIMgtDAOException If failed to add a Policy
+     */
+    void updateApplicationPolicy(ApplicationPolicy applicationPolicy) throws APIMgtDAOException;
+
+
+    /**
+     * Updates a Policy belongs to a level
+     *
+     * @param subscriptionPolicy Policy to update
+     * @throws APIMgtDAOException If failed to add a Policy
+     */
+    void updateSubscriptionPolicy(SubscriptionPolicy subscriptionPolicy) throws APIMgtDAOException;
 
     /**
      * Deletes a Policy by Name and Level

@@ -89,12 +89,27 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     }
 
     /**
-     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#updatePolicy(Policy)
+     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#updateApplicationPolicy(ApplicationPolicy)
      */
-    @Override
-    public void updatePolicy(Policy policy) throws APIManagementException {
-        policyDAO.updatePolicy(policy);
+    @Override public void updateAPIPolicy(APIPolicy apiPolicy) throws APIManagementException {
+        policyDAO.updateAPIPolicy(apiPolicy);
     }
+
+    /**
+     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#updateApplicationPolicy(ApplicationPolicy)
+     */
+    @Override public void updateApplicationPolicy(ApplicationPolicy apiPolicy) throws APIManagementException {
+        policyDAO.updateApplicationPolicy(apiPolicy);
+    }
+
+    /**
+     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#updateSubscriptionPolicy(SubscriptionPolicy)
+     */
+    @Override public void updateSubscriptionPolicy(SubscriptionPolicy apiPolicy)
+            throws APIManagementException {
+        policyDAO.updateSubscriptionPolicy(apiPolicy);
+    }
+
 
     /**
      * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#deletePolicy(String, String)

@@ -120,14 +120,26 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
      * @return Response object
      * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
-    @Override public Response policiesThrottlingAdvancedPolicyIdPut(String policyId, AdvancedThrottlePolicyDTO body,
+    @Override
+    public Response policiesThrottlingAdvancedPolicyIdPut(String policyId, AdvancedThrottlePolicyDTO body,
             String contentType, String ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
         String tierLevel = APIMgtConstants.ThrottlePolicyConstants.API_LEVEL;
         if (log.isDebugEnabled()) {
-            log.info("Received Advance Policy POST request " + body + " with tierLevel = " + tierLevel);
+            log.info("Received Advance Policy PUT request " + body + " with tierLevel = " + tierLevel);
         }
-//        return updatePolicy(policyId, tierLevel, body);
-        return null;
+        try {
+            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
+            APIPolicy apiPolicy = AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyDTOToPolicy(body);
+            apiPolicy.setUuid(policyId);
+            apiMgtAdminService.updateAPIPolicy(apiPolicy);
+            return Response.status(Response.Status.CREATED).entity(apiPolicy).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error occurred while updating Advanced Policy. policy uuid: " + policyId;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+
+        }
     }
 
     /**
@@ -231,15 +243,28 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
      * @return Response object
      * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
-    @Override public Response policiesThrottlingApplicationPolicyIdPut(String policyId,
+    @Override
+    public Response policiesThrottlingApplicationPolicyIdPut(String policyId,
             ApplicationThrottlePolicyDTO body, String contentType, String ifMatch, String ifUnmodifiedSince,
             Request request) throws NotFoundException {
         String tierLevel = APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL;
         if (log.isDebugEnabled()) {
-            log.info("Received Advance Policy POST request " + body + " with tierLevel = " + tierLevel);
+            log.info("Received Application Policy PUT request " + body + " with tierLevel = " + tierLevel);
         }
-//        return updatePolicy(policyId, tierLevel, body);
-        return null;
+        try {
+            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
+            ApplicationPolicy applicationPolicy = ApplicationThrottlePolicyMappingUtil
+                    .fromApplicationThrottlePolicyDTOToModel(body);
+            applicationPolicy.setUuid(policyId);
+            apiMgtAdminService.updateApplicationPolicy(applicationPolicy);
+            return Response.status(Response.Status.CREATED).entity(applicationPolicy).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error occurred while updating Application Policy. policy uuid: " + policyId;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+
+        }
     }
 
     /**
@@ -344,15 +369,28 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
      * @return Response object
      * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
-    @Override public Response policiesThrottlingSubscriptionPolicyIdPut(String policyId,
+    @Override
+    public Response policiesThrottlingSubscriptionPolicyIdPut(String policyId,
             SubscriptionThrottlePolicyDTO body, String contentType, String ifMatch, String ifUnmodifiedSince,
             Request request) throws NotFoundException {
         String tierLevel = APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL;
         if (log.isDebugEnabled()) {
-            log.info("Received Advance Policy POST request " + body + " with tierLevel = " + tierLevel);
+            log.info("Received Subscription Policy PUT request " + body + " with tierLevel = " + tierLevel);
         }
-//        return updatePolicy(policyId, tierLevel, body);
-        return null;
+        try {
+            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
+            SubscriptionPolicy subscriptionPolicy = SubscriptionThrottlePolicyMappingUtil
+                    .fromSubscriptionThrottlePolicyDTOToModel(body);
+            subscriptionPolicy.setUuid(policyId);
+            apiMgtAdminService.updateSubscriptionPolicy(subscriptionPolicy);
+            return Response.status(Response.Status.CREATED).entity(subscriptionPolicy).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error occurred while updating Application Policy. policy uuid: " + policyId;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+
+        }
     }
 
     /**
