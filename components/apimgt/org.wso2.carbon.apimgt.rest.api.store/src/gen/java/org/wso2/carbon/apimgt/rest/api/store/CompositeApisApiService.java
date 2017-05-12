@@ -7,8 +7,8 @@ import org.wso2.msf4j.formparam.FormDataParam;
 import org.wso2.msf4j.formparam.FileInfo;
 import org.wso2.msf4j.Request;
 
-import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.CompositeAPIDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.CompositeAPIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
 
 import java.util.List;
@@ -30,7 +30,7 @@ public abstract class CompositeApisApiService {
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
     public abstract Response compositeApisApiIdPut(String apiId
- ,APIDTO body
+ ,CompositeAPIDTO body
  ,String contentType
  ,String ifMatch
  ,String ifUnmodifiedSince
@@ -52,7 +52,7 @@ public abstract class CompositeApisApiService {
  ,String accept
  ,String ifNoneMatch
  , Request request) throws NotFoundException;
-    public abstract Response compositeApisPost(APIDTO body
+    public abstract Response compositeApisPost(CompositeAPIDTO body
  ,String contentType
  , Request request) throws NotFoundException;
 }
