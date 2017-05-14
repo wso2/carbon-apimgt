@@ -19,7 +19,8 @@
   ~ *
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <parent>
         <artifactId>apimgt</artifactId>
@@ -129,6 +130,10 @@
             <artifactId>swagger-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
@@ -153,8 +158,8 @@
                     <artifactId>log4j</artifactId>
                 </exclusion>
                 <exclusion>
-                	<groupId>org.slf4j</groupId>
-                	<artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -219,8 +224,8 @@
                     <artifactId>log4j</artifactId>
                 </exclusion>
                 <exclusion>
-                	<groupId>org.slf4j</groupId>
-                	<artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -233,12 +238,12 @@
                     <artifactId>log4j</artifactId>
                 </exclusion>
                 <exclusion>
-                	<groupId>org.slf4j</groupId>
-                	<artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
                 </exclusion>
                 <exclusion>
-                	<groupId>org.slf4j</groupId>
-                	<artifactId>slf4j-log4j12</artifactId>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -265,6 +270,19 @@
             <artifactId>org.wso2.carbon.core</artifactId>
             <version>${carbon.kernel.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-gson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>1.2</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -286,9 +304,9 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>                
+                <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <systemProperties>                        
+                    <systemProperties>
                         <property>
                             <name>carbon.home</name>
                             <value>${basedir}/src/test/resources/</value>
@@ -503,7 +521,7 @@
                                             </tcp>
                                             <time>60000</time>
                                         </wait>
-                                        <cmd />
+                                        <cmd/>
                                     </run>
                                 </image>
                             </images>

@@ -50,7 +50,6 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
-import org.wso2.carbon.apimgt.core.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
@@ -246,7 +245,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 null); // for now tokenSope = null
         oauthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.VALIDITY_PERIOD, validityTime);
         oauthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.APP_KEY_TYPE, tokenType);
-        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+        KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();
         try {
             OAuthApplicationInfo oauthAppInfo = keyManager.createApplication(oauthAppRequest);
             Map<String, Object> keyDetails = new HashMap<>();

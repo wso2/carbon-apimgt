@@ -27,19 +27,22 @@ import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
+import org.wso2.carbon.apimgt.core.api.IdentityProvider;
+import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
+import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
+import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- *
  * Creates API Producers and API Consumers.
- *
  */
 public class APIManagerFactory {
 
@@ -50,6 +53,8 @@ public class APIManagerFactory {
     private static final APIManagerFactory instance = new APIManagerFactory();
 
     private APIMgtAdminService apiMgtAdminService;
+    private IdentityProvider identityProvider;
+    private KeyManager keyManager;
 
     private static final int MAX_PROVIDERS = 50;
     private static final int MAX_CONSUMERS = 500;
@@ -189,5 +194,31 @@ public class APIManagerFactory {
 
     public GatewaySourceGenerator getGatewaySourceGenerator() {
         return new GatewaySourceGeneratorImpl();
+    }
+
+    public IdentityProvider getIdentityProvider() throws IdentityProviderException {
+        if (identityProvider == null) {
+            try {
+                identityProvider = (IdentityProvider) Class.forName(ServiceReferenceHolder.getInstance()
+                        .getAPIMConfiguration().getIdpImplClass()).newInstance();
+            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+                throw new IdentityProviderException("Error occurred while initializing identity provider", e,
+                        ExceptionCodes.IDP_INITIALIZATION_FAILED);
+            }
+        }
+        return identityProvider;
+    }
+
+    public KeyManager getKeyManager() throws KeyManagementException {
+        if (keyManager == null) {
+            try {
+                keyManager = (KeyManager) Class.forName(ServiceReferenceHolder.getInstance().getAPIMConfiguration()
+                        .getKeyManagerImplClass()).newInstance();
+            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+                throw new KeyManagementException("Error occurred while initializing key manager", e,
+                        ExceptionCodes.KEY_MANAGER_INITIALIZATION_FAILED);
+            }
+        }
+        return keyManager;
     }
 }

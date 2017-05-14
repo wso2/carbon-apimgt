@@ -24,13 +24,11 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIDefinition;
-import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
-import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
-import org.wso2.carbon.apimgt.core.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.core.impl.APIDefinitionFromSwagger20;
+import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.rest.api.common.APIConstants;
@@ -292,8 +290,8 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
      */
     private AccessTokenInfo getValidatedTokenResponse(String accessToken) throws APIMgtSecurityException {
         try {
-            KeyManager loginKeyManager = KeyManagerHolder.getAMLoginKeyManagerInstance();
-            AccessTokenInfo accessTokenInfo = loginKeyManager.getTokenMetaData(accessToken);
+            AccessTokenInfo accessTokenInfo = APIManagerFactory.getInstance().getIdentityProvider()
+                    .getTokenMetaData(accessToken);
             return accessTokenInfo;
             /*
             url = new URL(authServerURL);
@@ -310,7 +308,7 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
             log.error("Error invoking Authorization Server", e);
             throw new APIMgtSecurityException("Error invoking Authorization Server", ExceptionCodes.AUTH_GENERAL_ERROR);
         */
-        } catch (KeyManagementException e) {
+        } catch (APIManagementException e) {
             log.error("Error while validating access token", e);
             throw new APIMgtSecurityException("Error while validating access token", ExceptionCodes.AUTH_GENERAL_ERROR);
         }
