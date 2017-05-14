@@ -28,23 +28,15 @@ import org.wso2.carbon.apimgt.core.auth.dto.SCIMUser;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
-import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
-import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
-import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
-import org.wso2.carbon.apimgt.core.models.KeyManagerConfiguration;
-import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
-import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.User;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * API Manager default implementation of {@link IdentityProvider}
  */
-public class DefaultIdentityProviderImpl implements IdentityProvider {
+public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implements IdentityProvider {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultIdentityProviderImpl.class);
 
@@ -101,78 +93,4 @@ public class DefaultIdentityProviderImpl implements IdentityProvider {
         }
     }
 
-    @Override
-    public OAuthApplicationInfo createApplication(OAuthAppRequest oauthAppRequest) throws KeyManagementException {
-        return APIManagerFactory.getInstance().getKeyManager().createApplication(oauthAppRequest);
-    }
-
-    @Override
-    public OAuthApplicationInfo updateApplication(OAuthAppRequest appInfoDTO) throws KeyManagementException {
-        return APIManagerFactory.getInstance().getKeyManager().updateApplication(appInfoDTO);
-    }
-
-    @Override
-    public void deleteApplication(String consumerKey) throws KeyManagementException {
-        APIManagerFactory.getInstance().getKeyManager().deleteApplication(consumerKey);
-    }
-
-    @Override
-    public OAuthApplicationInfo retrieveApplication(String consumerKey) throws KeyManagementException {
-        return APIManagerFactory.getInstance().getKeyManager().retrieveApplication(consumerKey);
-    }
-
-    @Override
-    public AccessTokenInfo getNewApplicationAccessToken(AccessTokenRequest tokenRequest) throws KeyManagementException {
-        return APIManagerFactory.getInstance().getKeyManager().getNewApplicationAccessToken(tokenRequest);
-    }
-
-    @Override
-    public AccessTokenInfo getTokenMetaData(String accessToken) throws KeyManagementException {
-        return APIManagerFactory.getInstance().getKeyManager().getTokenMetaData(accessToken);
-    }
-
-    @Override
-    public void revokeLogInAccessToken(AccessTokenRequest tokenRequest) throws KeyManagementException {
-        APIManagerFactory.getInstance().getKeyManager().revokeLogInAccessToken(tokenRequest);
-    }
-
-    @Override
-    public KeyManagerConfiguration getKeyManagerConfiguration() throws KeyManagementException {
-        return APIManagerFactory.getInstance().getKeyManager().getKeyManagerConfiguration();
-    }
-
-    @Override
-    public OAuthApplicationInfo mapOAuthApplication(OAuthAppRequest appInfoRequest) throws KeyManagementException {
-        return APIManagerFactory.getInstance().getKeyManager().mapOAuthApplication(appInfoRequest);
-    }
-
-    @Override
-    public void loadConfiguration(KeyManagerConfiguration configuration) throws KeyManagementException {
-        APIManagerFactory.getInstance().getKeyManager().loadConfiguration(configuration);
-    }
-
-    @Override
-    public boolean registerNewResource(API api, Map resourceAttributes) throws KeyManagementException {
-        return APIManagerFactory.getInstance().getKeyManager().registerNewResource(api, resourceAttributes);
-    }
-
-    @Override
-    public Map getResourceByApiId(String apiId) throws KeyManagementException {
-        return APIManagerFactory.getInstance().getKeyManager().getResourceByApiId(apiId);
-    }
-
-    @Override
-    public boolean updateRegisteredResource(API api, Map resourceAttributes) throws KeyManagementException {
-        return APIManagerFactory.getInstance().getKeyManager().updateRegisteredResource(api, resourceAttributes);
-    }
-
-    @Override
-    public void deleteRegisteredResourceByAPIId(String apiID) throws KeyManagementException {
-        APIManagerFactory.getInstance().getKeyManager().deleteRegisteredResourceByAPIId(apiID);
-    }
-
-    @Override
-    public void deleteMappedApplication(String consumerKey) throws KeyManagementException {
-        APIManagerFactory.getInstance().getKeyManager().deleteMappedApplication(consumerKey);
-    }
 }
