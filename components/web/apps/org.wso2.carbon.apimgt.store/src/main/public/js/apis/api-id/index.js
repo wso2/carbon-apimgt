@@ -12,7 +12,9 @@ $(function () {
                 function (jsonData) {
                     var api = jsonData.obj;
                     policies = api.policies;
-                    var callbacks = {onSuccess: function () {},onFailure: function (message, e) {}};
+                    var callbacks = {onSuccess: function () {
+                        validateActionButtons("#subscribe-button");
+                    },onFailure: function (message, e) {}};
                     var mode = "OVERWRITE";
 
                     //Render Api header
@@ -203,7 +205,7 @@ $(function () {
                                             onSuccess: function (renderedData) {
                                                 $("#api-overview").append(renderedData);
                                                 setOverviewTabData();
-
+                                                validateActionButtons("#comment-add-button");
                                             }.bind(context), onFailure: function (message, e) {
                                                 var message = "Error occurred while getting api overview details." + message;
                                                 noty({

@@ -8,7 +8,8 @@
     <td>{{subscriptions}}</td>
     <td>
         <a title="View" href="{{@contextPath}}/applications/{{applicationId}}"
-           class="btn  btn-sm padding-reduce-on-grid-view">
+           class="btn  btn-sm padding-reduce-on-grid-view"
+           data-resouce-path="/applications/{applicationId}" data-resource-method="get">
       <span class="fw-stack">
           <i class="fw fw-ring fw-stack-2x"></i>
           <i class="fw fw-view fw-stack-1x"></i>
@@ -16,7 +17,8 @@
             <span class="hidden-xs">View</span>
         </a>
         <a title="Edit" href="{{@contextPath}}/applications/{{applicationId}}/edit"
-           class="btn  btn-sm padding-reduce-on-grid-view">
+           class="btn  btn-sm padding-reduce-on-grid-view"
+           data-resouce-path="/applications/{applicationId}" data-resource-method="put">
       <span class="fw-stack">
           <i class="fw fw-ring fw-stack-2x"></i>
           <i class="fw fw-edit fw-stack-1x"></i>
@@ -24,7 +26,8 @@
             <span class="hidden-xs">Edit</span>
         </a>
         <a title="Delete" href="#" data-id="{{applicationId}}" data-count="1"
-           class="btn btn-sm padding-reduce-on-grid-view deleteApp">
+           class="btn btn-sm padding-reduce-on-grid-view deleteApp"
+           data-resouce-path="/applications/{applicationId}" data-resource-method="delete">
       <span class="fw-stack">
           <i class="fw fw-ring fw-stack-2x"></i>
           <i class="fw fw-delete fw-stack-1x"></i>

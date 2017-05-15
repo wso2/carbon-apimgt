@@ -59,6 +59,7 @@ var _renderApplicationAddPage = function(){
                     UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.application-add", {"list":list},
                         "application-add", mode, {
                             onSuccess: function () {
+                            validateActionButtons("#application-add-button");
                             }, onFailure: function (message, e) {
                                 console.debug(message);
                             }
