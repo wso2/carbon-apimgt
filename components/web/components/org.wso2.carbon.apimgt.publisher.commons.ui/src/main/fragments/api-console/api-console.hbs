@@ -1,21 +1,18 @@
 {{fragment "org.wso2.carbon.uuf.common.foundation.ui.swagger-ui"}}
 <div class="row">
 
-	<div id="authorizations" class="col-md-12 col-lg-12">
-		<form class="form-horizontal">
-			{{#if @params.labels}}
-				<div class="form-group">
-					<label for="" class="col-sm-6 control-label OnEnvironment">{{i18n "On Environment"}}</label>
-					<div class="col-sm-6">
-						<select id="environment_name" class="env_name">
-							{{#each @params.labels}}
-								<option value="{{this}}">{{this}}</option>
-							{{/each}}
-				  		</select>
-					</div>
-				</div>
-			{{/if}}
-		</form>
+	<div id="console-info-div" class="col-md-12 col-lg-12">
+		{{#if @params.scheme}}
+		      <div id="label-warn-div" class="alert alert-danger" role="alert" style="display:none">
+			      <i class="icon fw fw-success"></i>
+			      {{i18n "No Gateway Access URL found in "}} {{@params.scheme}} {{i18n " scheme. API try it is not possible due to mixed content blocking"}}
+			      <button type="button" class="close" aria-label="close" data-dismiss="alert">
+			      <span aria-hidden="true">
+			      <i class="fw fw-cancel"></i>
+			      </span>
+			      </button>
+		      </div>
+	   	{{/if}}
 	</div>
 	
 	<div class="col-md-12 col-lg-12 panel-group accordion" role="tablist">

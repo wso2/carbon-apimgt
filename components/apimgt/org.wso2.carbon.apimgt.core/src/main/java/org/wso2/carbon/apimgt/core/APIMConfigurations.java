@@ -27,7 +27,7 @@ import java.io.File;
  * Class to hold APIM configuration parameters and generate yaml file
  */
 
-@Configuration(namespace = "wso2.carbon.apim", description = "APIM Configuration Parameters")
+@Configuration(namespace = "wso2.carbon.apimgt", description = "APIM Configuration Parameters")
 public class APIMConfigurations {
     private String carbonClientId = "carbon";
     @Element(description = "server version")
@@ -62,6 +62,11 @@ public class APIMConfigurations {
 
     @Element(description = "label extractor")
     private String labelExtractor = "org.wso2.carbon.apimgt.core.impl.DefaultLabelExtractorImpl";
+
+    @Element(description = "Key Manager Implementation")
+    private String keyManagerImplClass = "org.wso2.carbon.apimgt.core.impl.DefaultKeyManagerImpl";
+    @Element(description = "Identity Provider Implementation")
+    private String idpImplClass = "org.wso2.carbon.apimgt.core.impl.DefaultIdentityProviderImpl";
 
     public String getHostname() {
         return hostname;
@@ -121,5 +126,13 @@ public class APIMConfigurations {
 
     public String getGatewayPackageNamePath() {
         return gatewayPackageNamePath;
+    }
+
+    public String getKeyManagerImplClass() {
+        return keyManagerImplClass;
+    }
+
+    public String getIdpImplClass() {
+        return idpImplClass;
     }
 }

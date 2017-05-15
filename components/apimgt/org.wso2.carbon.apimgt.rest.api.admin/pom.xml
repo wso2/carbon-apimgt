@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>7.0.4-SNAPSHOT</version>
+        <version>7.0.9-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -69,14 +69,14 @@
     </dependencies>
     <build>
         <plugins>
-            <plugin>
+            <!--<plugin>
                 <groupId>org.wso2.maven.plugins</groupId>
                 <artifactId>swagger2msf4j-maven-plugin</artifactId>
                 <version>1.0-SNAPSHOT</version>
                 <configuration>
                     <inputSpec>${project.basedir}/src/main/resources/admin-api.yaml</inputSpec>
                 </configuration>
-            </plugin>
+            </plugin>-->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
@@ -95,16 +95,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>org.wso2.carbon.apimgt.rest.api.admin.Application</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
             </plugin>
             <plugin><!-- Overridden from parent pom to exclude generated sources -->
                 <groupId>org.apache.maven.plugins</groupId>
@@ -139,7 +129,6 @@
     </build>
 
     <properties>
-        <microservice.mainClass>org.wso2.carbon.apimgt.rest.api.admin.Application</microservice.mainClass>
         <private.package>org.wso2.carbon.apimgt.rest.api.admin.internal</private.package>
         <import.package>
             org.wso2.carbon.datasource.core.*; version="${datasources.core.package.import.version.range}",
@@ -157,7 +146,7 @@
             org.wso2.carbon.apimgt.rest.api.admin.*; version="${carbon.apimgt.version}"
         </export.package>
         <carbon.component>
-            osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="2"
+            osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="3"
         </carbon.component>
     </properties>
 </project>

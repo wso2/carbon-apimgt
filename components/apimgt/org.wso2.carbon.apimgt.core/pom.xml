@@ -24,7 +24,7 @@
     <parent>
         <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>7.0.4-SNAPSHOT</version>
+        <version>7.0.9-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -129,6 +129,10 @@
             <artifactId>swagger-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
@@ -153,8 +157,8 @@
                     <artifactId>log4j</artifactId>
                 </exclusion>
                 <exclusion>
-                	<groupId>org.slf4j</groupId>
-                	<artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -219,8 +223,8 @@
                     <artifactId>log4j</artifactId>
                 </exclusion>
                 <exclusion>
-                	<groupId>org.slf4j</groupId>
-                	<artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -233,12 +237,12 @@
                     <artifactId>log4j</artifactId>
                 </exclusion>
                 <exclusion>
-                	<groupId>org.slf4j</groupId>
-                	<artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
                 </exclusion>
                 <exclusion>
-                	<groupId>org.slf4j</groupId>
-                	<artifactId>slf4j-log4j12</artifactId>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -265,6 +269,19 @@
             <artifactId>org.wso2.carbon.core</artifactId>
             <version>${carbon.kernel.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-gson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>1.2</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -286,9 +303,9 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>                
+                <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <systemProperties>                        
+                    <systemProperties>
                         <property>
                             <name>carbon.home</name>
                             <value>${basedir}/src/test/resources/</value>
@@ -354,6 +371,20 @@
                                     <arguments>
                                         <argument>verify</argument>
                                         <argument>-P local-postgres</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>run-integration-tests</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>mvn</executable>
+                                    <arguments>
+                                        <argument>verify</argument>
+                                        <argument>-P integration-tests</argument>
                                     </arguments>
                                 </configuration>
                             </execution>

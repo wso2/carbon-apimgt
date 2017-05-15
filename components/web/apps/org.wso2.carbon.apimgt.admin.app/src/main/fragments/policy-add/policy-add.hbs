@@ -12,10 +12,14 @@
     <p class="lead"></p>
 </div>
 
-<form class="form-horizontal" method="" id="" action="">
+<form class="form-horizontal" method="" id="add-update-tier" action="">
     <div class="page-header">
         <p class="lead">{{i18n "General.Details"}}</p>
     </div>
+    {{#if @params.list.uuid}}
+        <input type="hidden" id="policy-id" name="policy-id"
+               value="{{#if @params.list.uuid}}{{@params.list.uuid}}{{/if}}"/>
+    {{/if}}
     <div class="form-group">
         <label class="control-label col-xs-3 col-sm-3 col-md-3 col-lg-3">{{i18n "Tier.Name"}}: <span
                 class="required-astrix">*</span>
@@ -32,7 +36,8 @@
         </label>
         <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
             <input class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace"
-                   type="text" id="policy-name" name="policy-nam" autofocus="autofocus" value=""/>
+                   type="text" id="policy-name" name="policy-nam" autofocus="autofocus"
+                   value="{{#if @params.list.policyName}}{{@params.list.policyName}}{{/if}}"/>
         </div>
     </div>
     <div class="form-group">
@@ -50,7 +55,7 @@
         <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
             <textarea
                     class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace"
-                    id="policy-description" cols="40" rows="2" name="policy-description"></textarea>
+                    id="policy-description" cols="40" rows="2" name="policy-description">{{#if @params.list.description}}{{@params.list.description}}{{/if}}</textarea>
         </div>
     </div>
 
@@ -92,8 +97,11 @@
 							</span>
                 </a>
             </label>
+
             <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
-                <input class="form-control required validInput noSpace" type="text" id="request-count" name="request-count" autofocus="autofocus" value="" />
+                <input class="form-control required validInput noSpace" type="text" id="request-count"
+                       name="request-count" autofocus="autofocus"
+                       value="{{#if @params.list.defaultQuotaPolicy.limit}}{{@params.list.defaultQuotaPolicy.limit.requestCount}}{{/if}}"/>
             </div>
         </div>
     </div>
@@ -135,7 +143,8 @@
             <p id="unit_time_help" class="hide">{{i18n "Time.Configuration"}}</p>
         </label>
         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-            <input class="form-control" type="text" id="unit-time-count" name="unit-time-count" autofocus="autofocus" value="" />
+            <input class="form-control" type="text" id="unit-time-count" name="unit-time-count" autofocus="autofocus"
+                   value="{{#if @params.list.defaultQuotaPolicy.limit}}{{@params.list.defaultQuotaPolicy.limit.unitTime}}{{/if}}" />
         </div>
         <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
             <select class="form-control select required" id="request-count-unit" name="request-count-unit">

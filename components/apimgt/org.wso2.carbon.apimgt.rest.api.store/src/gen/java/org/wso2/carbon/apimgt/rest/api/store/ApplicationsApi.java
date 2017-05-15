@@ -1,17 +1,37 @@
 package org.wso2.carbon.apimgt.rest.api.store;
 
+
 import io.swagger.annotations.ApiParam;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import org.osgi.service.component.annotations.Component;
+
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.factories.ApplicationsApiServiceFactory;
+
 import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
+import org.wso2.msf4j.formparam.FileInfo;
+import org.wso2.msf4j.formparam.FormDataParam;
+import org.osgi.service.component.annotations.Component;
+
+import java.io.InputStream;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.HEAD;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 
 @Component(
     name = "org.wso2.carbon.apimgt.rest.api.store.ApplicationsApi",
@@ -22,7 +42,6 @@ import org.wso2.msf4j.Request;
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the applications API")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-25T10:57:52.774+05:30")
 public class ApplicationsApi implements Microservice  {
    private final ApplicationsApiService delegate = ApplicationsApiServiceFactory.getApplicationsApi();
 

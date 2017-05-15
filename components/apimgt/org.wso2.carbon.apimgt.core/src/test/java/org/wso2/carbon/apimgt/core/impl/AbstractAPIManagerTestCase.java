@@ -21,6 +21,7 @@ import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
@@ -312,7 +313,7 @@ public class AbstractAPIManagerTestCase {
     public void testIsApiNameExistException() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
         AbstractAPIManager apiPublisher = getApiPublisherImpl(apiDAO);
-        when(apiDAO.isAPINameExists(API_NAME, USER_NAME))
+        when(apiDAO.isAPINameExists(API_NAME, USER_NAME, ApiType.STANDARD))
                 .thenThrow(new APIMgtDAOException("Couldn't check API Name " + API_NAME + " Exists."));
         apiPublisher.isApiNameExist(API_NAME);
     }
@@ -469,40 +470,44 @@ public class AbstractAPIManagerTestCase {
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APILifecycleManager apiLifecycleManager) {
-        return new APIPublisherImpl(USER_NAME, apiDAO, null, null, null, apiLifecycleManager, null, null, null, null);
+        return new APIPublisherImpl(USER_NAME, apiDAO, null, null, null, apiLifecycleManager, null, null,
+                new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO) {
-        return new APIPublisherImpl(USER_NAME, apiDAO, null, null, null, null, null, null, null, null);
+        return new APIPublisherImpl(USER_NAME, apiDAO, null, null, null, null, null, null,
+                new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APISubscriptionDAO apiSubscriptionDAO,
                                                  APILifecycleManager apiLifecycleManager) {
         return new APIPublisherImpl(USER_NAME, apiDAO, null, apiSubscriptionDAO, null, apiLifecycleManager, null, null,
-                null, null);
+                new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APISubscriptionDAO apiSubscriptionDAO) {
         return new APIPublisherImpl(USER_NAME, apiDAO, null, apiSubscriptionDAO, null, null, null, null,
-                null, null);
+                new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
             apiSubscriptionDAO, APILifecycleManager apiLifecycleManager) {
         return new APIPublisherImpl(USER_NAME, apiDAO, applicationDAO, apiSubscriptionDAO, null, apiLifecycleManager,
-                null, null,
-                null, null);
+                null, null, new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(LabelDAO labelDAO) {
-        return new APIPublisherImpl(USER_NAME, null, null, null, null, null, labelDAO, null, null, null);
+        return new APIPublisherImpl(USER_NAME, null, null, null, null, null, labelDAO, null,
+                new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(PolicyDAO policyDAO) {
-        return new APIPublisherImpl(USER_NAME, null, null, null, policyDAO, null, null, null, null, null);
+        return new APIPublisherImpl(USER_NAME, null, null, null, policyDAO, null, null, null,
+                new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(APISubscriptionDAO apiSubscriptionDAO) {
-        return new APIPublisherImpl(USER_NAME, null, null, apiSubscriptionDAO, null, null, null, null, null, null);
+        return new APIPublisherImpl(USER_NAME, null, null, apiSubscriptionDAO, null, null, null, null,
+                new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 }

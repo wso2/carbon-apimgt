@@ -21,24 +21,41 @@ package org.wso2.carbon.apimgt.rest.api.publisher.importexport.api;
 
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.IOUtils;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.models.*;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.APIDetails;
+import org.wso2.carbon.apimgt.core.models.BusinessInformation;
+import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
+import org.wso2.carbon.apimgt.core.models.DocumentContent;
+import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.ApiImportExportManager;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.FileBasedApiImportExportManager;
-import org.wso2.carbon.apimgt.rest.api.publisher.utils.ImportExportUtils;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 public class APIImportExportTestCase {
 
@@ -151,8 +168,7 @@ public class APIImportExportTestCase {
         Mockito.when(apiPublisher.getDocumentationContent(api4Doc1Id)).thenReturn(api4Doc1Content);
         Mockito.when(apiPublisher.getDocumentationContent(api4Doc2Id)).thenReturn(api4Doc2Content);
         Mockito.when(apiPublisher.getDocumentationContent(api4Doc3Id)).thenReturn(api4Doc3Content);
-        Mockito.when(apiPublisher.getThumbnailImage(api4Id)).thenReturn(getClass().getClassLoader().getResourceAsStream
-                ("api1_thumbnail.png"));
+        Mockito.when(apiPublisher.getThumbnailImage(api4Id)).thenReturn(null);
 
         String api5Id = UUID.randomUUID().toString();
         String api5SandBoxEndpointId = UUID.randomUUID().toString();
@@ -442,8 +458,8 @@ public class APIImportExportTestCase {
 
         // check if two APIs are written to the file system
         String unzipPath = importExportRootDirectory + File.separator + "unzipped-export-archive";
-        ImportExportUtils.extractArchive(exportedApiArchiveFilePath, unzipPath);
-        Assert.assertEquals(ImportExportUtils.getDirectoryList(unzipPath).size() == 2, true,
+        APIFileUtils.extractArchive(exportedApiArchiveFilePath, unzipPath);
+        Assert.assertEquals(APIFileUtils.getDirectoryList(unzipPath).size() == 2, true,
                 "Exported API count is not equal to 2");
 
         Mockito.when(apiPublisher.checkIfAPIExists(api2Id)).thenReturn(true);
@@ -468,15 +484,15 @@ public class APIImportExportTestCase {
     private static API.APIBuilder createApi(String provider, String apiId, String name, String version, String
             description, Map<String, String> endpointTypeToIdMap)
             throws APIManagementException {
-        List<String> transport = new ArrayList<>();
+        Set<String> transport = new HashSet<>();
         transport.add("http");
 
 
-        List<String> policies = new ArrayList<>();
+        Set<String> policies = new HashSet<>();
         policies.add("Silver");
         policies.add("Bronze");
 
-        List<String> tags = new ArrayList<>();
+        Set<String> tags = new HashSet<>();
         tags.add("food");
         tags.add("beverage");
 
@@ -508,7 +524,7 @@ public class APIImportExportTestCase {
                 tags(tags).
                 policies(policies).
                 visibility(API.Visibility.RESTRICTED).
-                visibleRoles(Arrays.asList("customer", "manager", "employee")).
+                visibleRoles(new HashSet<>(Arrays.asList("customer", "manager", "employee"))).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
                 createdTime(LocalDateTime.now()).
@@ -568,6 +584,10 @@ public class APIImportExportTestCase {
 
     @AfterClass
     protected void tearDown () {
-        ImportExportUtils.deleteDirectory(importExportRootDirectory);
+        try {
+            APIFileUtils.deleteDirectory(importExportRootDirectory);
+        } catch (APIMgtDAOException e) {
+            log.warn("Unable to delete directory "+importExportRootDirectory);
+        }
     }
 }

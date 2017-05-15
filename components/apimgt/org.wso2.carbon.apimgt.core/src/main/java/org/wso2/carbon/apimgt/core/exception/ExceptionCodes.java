@@ -85,10 +85,16 @@ public enum ExceptionCodes implements ErrorHandler {
     WORKFLOW_REJCECTED(900558, "Workflow error", 403, "Requested action is rejected"),
 
     // Auth related codes
-    ROLES_CANNOT_BE_EMPTY(900600, "Role list cannot be empty", 400, " Role list cannot be empty"),
-    ROLES_CANNOT_BE_NULL(900601, "Role list cannot be null", 400, " Role list cannot be null"),
+    ROLES_CANNOT_BE_EMPTY(900600, "Role list cannot be empty", 400, "Role list cannot be empty"),
+    ROLES_CANNOT_BE_NULL(900601, "Role list cannot be null", 400, "Role list cannot be null"),
     UNSUPPORTED_ROLE(900602, "Non existing roles cannot be added to an API", 400,
-            " Non existing roles cannot be added to an API"),
+            "Non existing roles cannot be added to an API"),
+    USER_DOES_NOT_EXIST(900603, "User does not exist in the system", 404, "User does not exist in the system"),
+    USER_CREATION_FAILED(900604, "User creation failed", 500, "User creation failed"),
+    IDP_INITIALIZATION_FAILED(900605, "Identity Provider initialization failed", 500,
+            "Identity provider initialization failed"),
+    KEY_MANAGER_INITIALIZATION_FAILED(900606, "Key Manager initialization failed", 500,
+            "Key Manager initialization failed"),
 
 
     // Labels related codes

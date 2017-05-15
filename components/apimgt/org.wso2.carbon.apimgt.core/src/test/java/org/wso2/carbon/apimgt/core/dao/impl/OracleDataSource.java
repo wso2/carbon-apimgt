@@ -27,7 +27,9 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class OracleDataSource implements DataSource {
@@ -80,20 +82,46 @@ public class OracleDataSource implements DataSource {
             } catch (SQLException e) {
                 throw e;
             }
-            try (ResultSet resultSet = statement.executeQuery("SELECT object_name, object_type FROM user_objects " +
-                    "WHERE object_type IN ('TABLE','VIEW','PACKAGE','PROCEDURE','FUNCTION','SEQUENCE')")) {
-                while (resultSet.next()) {
-                    objectMap.put(resultSet.getString("object_name"), resultSet.getString("object_type"));
+
+            List<String> fullTestIndexes = new ArrayList<>();
+
+            try (ResultSet rs = statement.executeQuery("SELECT INDEX_NAME FROM DBA_INDEXES WHERE" +
+                    " ITYP_OWNER = 'CTXSYS' AND ITYP_NAME IN ('CONTEXT', 'CTXCAT', 'CTXRULE', 'CTXXPATH')")) {
+                while (rs.next()) {
+                    fullTestIndexes.add(rs.getString("INDEX_NAME"));
                 }
             }
-            for (Map.Entry<String, String> entry : objectMap.entrySet()) {
-                if ("TABLE".equals(entry.getValue())) {
-                    statement.addBatch("DROP TABLE " + entry.getKey() + " CASCADE CONSTRAINTS");
-                } else {
-                    statement.addBatch("DROP " + entry.getValue() + " " + entry.getKey() + "");
+
+            for (String fullTextIndex : fullTestIndexes) {
+                statement.execute("drop index " + fullTextIndex + " FORCE");
+            }
+
+            List<String> sequences = new ArrayList<>();
+            try (ResultSet rs = statement.executeQuery("SELECT sequence_name FROM USER_SEQUENCES")) {
+                while (rs.next()) {
+                    sequences.add(rs.getString("sequence_name"));
                 }
             }
-            statement.executeBatch();
+
+            List<String> tables = new ArrayList<>();
+            try (ResultSet rs = statement.executeQuery("SELECT table_name FROM USER_TABLES")) {
+                while (rs.next()) {
+                    tables.add(rs.getString("table_name"));
+                }
+            }
+
+            try {
+                for (String sequence : sequences) {
+                    statement.execute("DROP SEQUENCE " + sequence);
+                }
+
+                for (String table : tables) {
+                    statement.execute("DROP TABLE " + table + " CASCADE CONSTRAINTS");
+                }
+            } catch (SQLException e) {
+                e.getErrorCode();
+            }
+
         }
     }
 }

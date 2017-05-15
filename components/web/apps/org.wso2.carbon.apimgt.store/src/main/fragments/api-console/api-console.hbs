@@ -1,11 +1,89 @@
 {{fragment "org.wso2.carbon.uuf.common.foundation.ui.swagger-ui"}}
 <div class="row">
-<div id="authorizations" class="col-md-12 col-lg-12">
+   <div id="authorizations" class="col-md-12 col-lg-12">
+      {{#if @params.label_data}}
+	      <form class="form-horizontal">
+	         {{#if @params.subscribedAppsAndKeys}}
+		         <div class="form-group">
+		            <label for="" class="col-sm-3 control-label">{{i18n "Try"}}</label>
+		            <div class="col-sm-9">
+		               <select id="sub_app_list" class="form-control subapp">
+		               {{#each @params.subscribedAppsAndKeys}}
+		               <option value="" {{#if prodKey}}data-production="{{prodKey}}"{{/if}} {{#if sandBKey}}data-sandbox="{{sandBKey}}"{{/if}}>
+		               {{name}}
+		               </option>
+		               {{/each}}
+		               </select>
+		            </div>
+		         </div>
+		         <div class="form-group">
+		            <label for="" class="col-sm-3 control-label">{{i18n "Using"}}</label>
+		            <div class="col-sm-9">
+		               <div class="input-group">
+		                  <select id="key_type" class="form-control keytype">
+		                     <option value="production">{{i18n "Production"}}</option>
+		                     <option value="sandbox">{{i18n "Sandbox"}}</option>
+		                  </select>
+		                  <div class="input-group-addon">{{i18n "Key"}}</div>
+		               </div>
+		            </div>
+		         </div>
+	         {{else if user}}
+		         <div class="message message-info remove-margin-top">
+		            <h4><i class="icon fw fw-info"></i>{{i18n "Notice"}}</h4>
+		            <p>{{i18n "Please subscribe to the API to generate an access token."}} &nbsp; {{i18n "If you already have an access token please provide it below."}}</p>
+		         </div>
+	         {{else}}
+		         <div class="message message-info remove-margin-top">
+		            <h4><i class="icon fw fw-info"></i>{{i18n "Notice"}}</h4>
+		            <p>{{i18n "You require an access token to try the API. Please login and subscribe to the API to generate an access token."}} &nbsp; {{i18n "If you already have an access token please provide it below."}}</p>
+		         </div>
+	         {{/if}}
+	         <div class="form-group">
+	            <label for="" class="col-sm-3 control-label OnEnvironment">{{i18n "On Environment"}}</label>
+	            <div class="col-sm-9">
+	               <select id="environment_name" class="env_name" onchange="change_token()">
+	                  {{#each @params.label_data}}
+	                  <option value="{{name}}">{{name}}</option>
+	                  {{/each}}
+	               </select>
+	            </div>
+	         </div>
+	      </form>
+	      
+	      <form class="form-horizontal">
+	         <div class="form-group">
+	            <label class="col-sm-3 control-label">{{i18n "Set Request Header"}}</label>
+	            <div class=" col-sm-9">
+	               <div class="input-group">
+	                  <span class="input-group-addon" id="sizing-addon1">Authorization : Bearer</span>
+	                  <input type="text" id="access_token" name="access_token" title="access_token" placeholder="Access Token" class="form-control" onkeypress="return checkOnKeyPress(event)">
+	               </div>
+	            </div>
+	         </div>
+	      </form>
+	      {{#if @params.scheme}}
+		      <div id="label-warn-div" class="alert alert-danger" role="alert" {{#unless @params.no_host}}style="display:none"{{/unless}}>
+			      <i class="icon fw fw-success"></i>
+			      {{i18n "No Gateway Access URL found in "}} {{@params.scheme}} {{i18n " scheme for the selected environment. API try it is not possible due to mixed content blocking"}}
+			      <button type="button" class="close" aria-label="close" data-dismiss="alert">
+			      <span aria-hidden="true">
+			      <i class="fw fw-cancel"></i>
+			      </span>
+			      </button>
+		      </div>
+	   	  {{/if}}
+      {{else}}
+	   <div class="message message-info remove-margin-top">
+	      <h4><i class="icon fw fw-info"></i>{{i18n "Notice"}}</h4>
+	      <p>{{i18n "API is not exposed in any Gateway environment to try out."}}</p>
+	   </div>
+      {{/if}}
+</div>
 
-</div>
 <div class="col-md-12 col-lg-12 panel-group accordion" role="tablist">
-    <div class="swagger-section">
-    <div id="message-bar" class="swagger-ui-wrap">&nbsp;</div>
-    <div id="swagger-ui-container" class="swagger-ui-wrap"></div>
-</div>
+   <div class="swagger-section">
+      <div id="message-bar" class="swagger-ui-wrap">&nbsp;</div>
+      <div id="swagger-ui-container" class="swagger-ui-wrap"></div>
+   </div>
 </div>

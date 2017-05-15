@@ -80,10 +80,17 @@ public class DBScriptRunnerUtil {
         }
     }
 
-    private static void executeSQL(String sql, Connection connection) throws Exception {
+    private static void executeSQL(String sql, Connection connection) {
         // Check and ignore empty statements
         String delimiter = ";";
-        String dbType = connection.getMetaData().getDriverName();
+        String dbType;
+        try {
+            dbType = connection.getMetaData().getDriverName();
+        } catch (SQLException e) {
+            log.error("Could not get DB Type", e);
+            return;
+        }
+
         if (dbType.contains("Oracle")) {
             delimiter = "/";
         }
@@ -97,9 +104,10 @@ public class DBScriptRunnerUtil {
                     oraclePLSQL.add(query);
                     continue;
                 }
-                statement.addBatch(query);
+                statement.execute(query);
             }
-            statement.executeBatch();
+        } catch (SQLException e) {
+            log.error("Error when executing SQL statement", e);
         }
 
         // Special logic to execute oracle PL/SQL command
@@ -123,6 +131,8 @@ public class DBScriptRunnerUtil {
                         statement.execute(rebuild);
                     }
                 }
+            } catch (SQLException e) {
+                log.error("Error when rebuilding Oracle indexes", e);
             }
         }
     }

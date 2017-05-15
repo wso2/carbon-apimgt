@@ -20,7 +20,7 @@ var queryParamTables =[];
 var claimsTables = [];
 $(function () {
     $('.help_popup').popover({ trigger: "hover" });
-    $('#addThrottleBtn').on('click', addPolicyToBackend);
+    //$('#addThrottleBtn').on('click', addPolicyToBackend);
 
     $('#cancel-tier-btn').on('click', function () {
         window.location = contextPath + "/throttling/advanced-throttling"
@@ -32,8 +32,11 @@ $(function () {
     });
 });
 
+$('#addThrottleBtn').on('click', addPolicyToBackend );
+
 var apiPolicy =
 {
+    "policyId" : "",
     "policyName": "",
     "policyLevel": "",
     "policyDescription": "",
@@ -122,7 +125,7 @@ var addPolicy = function () {
 
 
 
-var addPolicyToBackend = function () {
+function addPolicyToBackend(e) {
     var apiPolicyString = JSON.stringify(apiPolicy);
     var apiPolicyNew = JSON.parse(apiPolicyString);
     var policyName = $('#policy-name').val();

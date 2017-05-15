@@ -1,15 +1,15 @@
 package org.wso2.carbon.apimgt.rest.api.core.dto;
 
-import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.Objects;
 
 /**
  * RegistrationSummaryDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-31T16:40:30.481+05:30")
 public class RegistrationSummaryDTO   {
   @JsonProperty("KeyManagerInfo")
   private String keyManagerInfo = null;

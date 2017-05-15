@@ -21,7 +21,6 @@
 package org.wso2.carbon.apimgt.core.impl;
 
 import com.google.common.io.Files;
-
 import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -32,6 +31,7 @@ import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
@@ -76,8 +76,10 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class APIPublisherImplTestCase {
@@ -242,7 +244,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user))
                 .thenReturn(new LifecycleState());
         Mockito.when(apiDAO.isAPIContextExists("weather")).thenReturn(true);
-        Mockito.when(apiDAO.isAPINameExists("WeatherAPI", user)).thenReturn(false);
+        Mockito.when(apiDAO.isAPINameExists("WeatherAPI", user, ApiType.STANDARD)).thenReturn(false);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager);
         apiPublisher.addAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
@@ -257,7 +259,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user))
                 .thenReturn(new LifecycleState());
         Mockito.when(apiDAO.isAPIContextExists("weather")).thenReturn(false);
-        Mockito.when(apiDAO.isAPINameExists("WeatherAPI", user)).thenReturn(true);
+        Mockito.when(apiDAO.isAPINameExists("WeatherAPI", user, ApiType.STANDARD)).thenReturn(true);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager);
         apiPublisher.addAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
@@ -280,7 +282,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Test add api with restricted visibility")
     public void testAddApiWithRestrictedVisibility() throws APIManagementException, LifecycleException {
-        List<String> visibleRoles = new ArrayList<>();
+        Set<String> visibleRoles = new HashSet<>();
         visibleRoles.add("admin");
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI()
                 .endpoint(SampleTestObjectCreator.getMockEndpointMap()).visibility(API.Visibility.RESTRICTED)
@@ -327,7 +329,7 @@ public class APIPublisherImplTestCase {
         Mockito.verify(apiLifecycleManager, Mockito.times(1)).removeLifecycle(lifecycleId);
         Mockito.verify(apiDAO, Mockito.times(1)).deleteAPI(uuid);
     }
-    
+
     @Test(description = "Delete API with zero Subscriptions and pending wf state change")
     public void testDeleteApiWithZeroSubscriptionsAndPendingStateChange()
             throws APIManagementException, LifecycleException, SQLException {
@@ -391,11 +393,12 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
         List<API> apimResultsFromDAO = new ArrayList<>();
-        Mockito.when(apiDAO.searchAPIs(new ArrayList<>(), user, QUERY_STRING, 1, 2)).thenReturn(apimResultsFromDAO);
+        Mockito.when(apiDAO.searchAPIs(new HashSet<>(), user, QUERY_STRING, ApiType.STANDARD, 1, 2)).
+                thenReturn(apimResultsFromDAO);
         List<API> apis = apiPublisher.searchAPIs(2, 1, QUERY_STRING);
         Assert.assertNotNull(apis);
         Mockito.verify(apiDAO, Mockito.atLeastOnce()).searchAPIs(APIUtils.getAllRolesOfUser(user),
-                user, QUERY_STRING, 1, 2);
+                user, QUERY_STRING, ApiType.STANDARD, 1, 2);
     }
 
     @Test(description = "Search APIs with null query string")
@@ -403,16 +406,17 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
         List<API> apimResultsFromDAO = new ArrayList<>();
-        Mockito.when(apiDAO.searchAPIs(new ArrayList<>(), user, null, 1, 2)).thenReturn(apimResultsFromDAO);
+        Mockito.when(apiDAO.searchAPIs(new HashSet<>(), user, null, ApiType.STANDARD, 1, 2)).
+                thenReturn(apimResultsFromDAO);
         apiPublisher.searchAPIs(2, 1, null);
-        Mockito.verify(apiDAO, Mockito.times(1)).getAPIs();
+        Mockito.verify(apiDAO, Mockito.times(1)).getAPIs(ApiType.STANDARD);
     }
 
     @Test(description = "Exception when searching APIs", expectedExceptions = APIManagementException.class)
     public void testSearchAPIsException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
-        Mockito.when(apiDAO.searchAPIs(APIUtils.getAllRolesOfUser(user), user, QUERY_STRING, 1, 2))
+        Mockito.when(apiDAO.searchAPIs(APIUtils.getAllRolesOfUser(user), user, QUERY_STRING, ApiType.STANDARD, 1, 2))
                 .thenThrow(new APIMgtDAOException("Error occurred while Searching the API with query pizza"));
         apiPublisher.searchAPIs(2, 1, QUERY_STRING);
     }
@@ -645,7 +649,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Test UpdateAPI with restricted visibility")
     public void testUpdateAPIWithRestrictedVisibility() throws APIManagementException, LifecycleException {
-        List<String> visibleRoles = new ArrayList<>();
+        Set<String> visibleRoles = new HashSet<>();
         visibleRoles.add("admin");
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
@@ -667,7 +671,7 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Test UpdateAPI with restricted visibility but different context")
     public void testUpdateAPIWithRestrictedVisibilityButDifferentContext() throws APIManagementException {
-        List<String> visibleRoles = new ArrayList<>();
+        Set<String> visibleRoles = new HashSet<>();
         visibleRoles.add("admin");
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
@@ -893,20 +897,20 @@ public class APIPublisherImplTestCase {
                 workflowDAO);
         APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         builder.workflowStatus(APILCWorkflowStatus.PENDING.toString());
-        API api = builder.build();       
+        API api = builder.build();
         String uuid = api.getId();
         String externalRef = UUID.randomUUID().toString();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
         Mockito.when(workflowDAO.getExternalWorkflowReferenceForPendingTask(uuid,
                 WorkflowConstants.WF_TYPE_AM_API_STATE)).thenReturn(externalRef);
-        
+
         apiPublisher.removePendingLifecycleWorkflowTaskForAPI(uuid);
         Mockito.verify(apiDAO, Mockito.times(1)).updateAPIWorkflowStatus(uuid, APILCWorkflowStatus.APPROVED);
         Mockito.verify(workflowDAO, Mockito.times(1)).getExternalWorkflowReferenceForPendingTask(uuid,
                 WorkflowConstants.WF_TYPE_AM_API_STATE);
     }
-    
-    @Test(description = "Remove api pending lc status change request for an api whithout a pending task", 
+
+    @Test(description = "Remove api pending lc status change request for an api whithout a pending task",
             expectedExceptions = APIManagementException.class)
     public void testRemovePendingLifecycleWorkflowTaskForAPIForAPIWithoutPendingLCState()
             throws APIManagementException, LifecycleException {
@@ -917,14 +921,14 @@ public class APIPublisherImplTestCase {
                 workflowDAO);
         APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         builder.workflowStatus(APILCWorkflowStatus.APPROVED.toString());
-        API api = builder.build();       
+        API api = builder.build();
         String uuid = api.getId();
-        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);        
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
         apiPublisher.removePendingLifecycleWorkflowTaskForAPI(uuid);
-      
-    } 
-   
-    @Test(description = "Exception when removing api pending lc status change request for an api", 
+
+    }
+
+    @Test(description = "Exception when removing api pending lc status change request for an api",
             expectedExceptions = APIManagementException.class)
     public void testTemovePendingLifecycleWorkflowTaskForAPIForAPIWithoutPendingLCState()
             throws APIManagementException, LifecycleException {
@@ -935,7 +939,7 @@ public class APIPublisherImplTestCase {
                 workflowDAO);
         APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         builder.workflowStatus(APILCWorkflowStatus.PENDING.toString());
-        API api = builder.build();       
+        API api = builder.build();
         String uuid = api.getId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api); /*         
         Mockito.doThrow(new APIMgtDAOException("Error while executing sql query")).when(workflowDAO)
@@ -944,12 +948,12 @@ public class APIPublisherImplTestCase {
         Mockito.when(
                 workflowDAO.getExternalWorkflowReferenceForPendingTask(uuid, WorkflowConstants.WF_TYPE_AM_API_STATE))
                 .thenThrow(new APIMgtDAOException("Error occurred while changing api lifecycle workflow status"));
-        apiPublisher.removePendingLifecycleWorkflowTaskForAPI(uuid);      
+        apiPublisher.removePendingLifecycleWorkflowTaskForAPI(uuid);
         Mockito.verify(workflowDAO, Mockito.times(1)).getExternalWorkflowReferenceForPendingTask(uuid,
                 WorkflowConstants.WF_TYPE_AM_API_STATE);
-    } 
-    
-   @Test(description = "Remove api pending lc status change request for an invalid", 
+    }
+
+    @Test(description = "Remove api pending lc status change request for an invalid",
             expectedExceptions = APIManagementException.class)
     public void testRemovePendingLifecycleWorkflowTaskForInvalidAPI()
             throws APIManagementException, LifecycleException {
@@ -958,12 +962,14 @@ public class APIPublisherImplTestCase {
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiLifecycleManager, apiDAO,
                 workflowDAO);
-        API api = null;       
-        String uuid = UUID.randomUUID().toString();;
-        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);        
+        API api = null;
+        String uuid = UUID.randomUUID().toString();
+        ;
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
         apiPublisher.removePendingLifecycleWorkflowTaskForAPI(uuid);
-      
-    } 
+
+    }
+
     @Test(description = "Create new  API version with valid APIID")
     public void testCreateNewAPIVersion() throws APIManagementException, LifecycleException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
@@ -1161,8 +1167,8 @@ public class APIPublisherImplTestCase {
     public void testUploadDocumentationFile() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
-        apiPublisher.uploadDocumentationFile(DOC_ID, null, "testDoc");
-        Mockito.verify(apiDAO, Mockito.times(1)).addDocumentFileContent(DOC_ID, null, "testDoc", user);
+        apiPublisher.uploadDocumentationFile(DOC_ID, null, "text/plain");
+        Mockito.verify(apiDAO, Mockito.times(1)).addDocumentFileContent(DOC_ID, null, "text/plain", user);
     }
 
     @Test(description = "Exception when uploading Documentation File",
@@ -1171,8 +1177,8 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
         Mockito.doThrow(new APIMgtDAOException("Unable to add documentation with file")).when(apiDAO)
-                .addDocumentFileContent(DOC_ID, null, "testDoc", user);
-        apiPublisher.uploadDocumentationFile(DOC_ID, null, "testDoc");
+                .addDocumentFileContent(DOC_ID, null, "text/plain", user);
+        apiPublisher.uploadDocumentationFile(DOC_ID, null, "text/plain");
     }
 
     @Test(description = "Add documentation inline content")
@@ -1190,16 +1196,17 @@ public class APIPublisherImplTestCase {
         DocumentInfo documentInfo = new DocumentInfo.Builder().fileName("sample_doc.pdf").name("howto_guide").id(DOC_ID)
                 .permission("[{\"groupId\": \"testGroup\",\"permission\":[\"READ\",\"UPDATE\",\"DELETE\"]}]").build();
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        Mockito.when(apiDAO.isDocumentExist(API_ID, documentInfo)).thenReturn(true);
         apiPublisher.updateDocumentation(API_ID, documentInfo);
         Mockito.verify(apiDAO, Mockito.times(1)).updateDocumentInfo(API_ID, documentInfo, user);
     }
 
-    @Test(description = "Documentation already exists error when updating Documentation Info",
+    @Test(description = "Documentation does not exists error when updating Documentation Info",
             expectedExceptions = APIManagementException.class)
-    public void testUpdateDocumentationDocAlreadyExists() throws APIManagementException {
+    public void testUpdateDocumentationDocNotExists() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo();
-        Mockito.when(apiDAO.isDocumentExist(API_ID, documentInfo)).thenReturn(true);
+        Mockito.when(apiDAO.isDocumentExist(API_ID, documentInfo)).thenReturn(false);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
         apiPublisher.updateDocumentation(API_ID, documentInfo);
     }
@@ -1726,82 +1733,88 @@ public class APIPublisherImplTestCase {
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APILifecycleManager apiLifecycleManager) {
-        return new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null, null, null, null);
+        return new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null, null,
+                new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO) {
-        return new APIPublisherImpl(user, apiDAO, null, null, null, null, null, null, null, null);
+        return new APIPublisherImpl(user, apiDAO, null, null, null, null, null, null,
+                new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APISubscriptionDAO apiSubscriptionDAO,
                                                  APILifecycleManager apiLifecycleManager) {
         return new APIPublisherImpl(user, apiDAO, null, apiSubscriptionDAO, null, apiLifecycleManager, null, null,
-                null, null);
+                new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APISubscriptionDAO apiSubscriptionDAO,
-            APILifecycleManager apiLifecycleManager, WorkflowDAO workfloDAO) {
+                                                 APILifecycleManager apiLifecycleManager, WorkflowDAO workfloDAO) {
         return new APIPublisherImpl(user, apiDAO, null, apiSubscriptionDAO, null, apiLifecycleManager, null, workfloDAO,
-                null, null);
+                new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APISubscriptionDAO apiSubscriptionDAO) {
         return new APIPublisherImpl(user, apiDAO, null, apiSubscriptionDAO, null, null, null, null,
-                null, null);
+                new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
             apiSubscriptionDAO, APILifecycleManager apiLifecycleManager) {
         return new APIPublisherImpl(user, apiDAO, applicationDAO, apiSubscriptionDAO, null, apiLifecycleManager,
-                null, null,
-                null, null);
+                null, null, new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(LabelDAO labelDAO) {
-        return new APIPublisherImpl(user, null, null, null, null, null, labelDAO, null, null, null);
+        return new APIPublisherImpl(user, null, null, null, null, null, labelDAO, null,
+                new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(PolicyDAO policyDAO) {
-        return new APIPublisherImpl(user, null, null, null, policyDAO, null, null, null, null, null);
+        return new APIPublisherImpl(user, null, null, null, policyDAO, null, null, null,
+                new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(APISubscriptionDAO apiSubscriptionDAO) {
-        return new APIPublisherImpl(user, null, null, apiSubscriptionDAO, null, null, null, null, null, null);
+        return new APIPublisherImpl(user, null, null, apiSubscriptionDAO, null, null, null, null,
+                new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APILifecycleManager apiLifecycleManager,
                                                  GatewaySourceGenerator gatewaySourceGenerator) {
         return new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null, null,
-                gatewaySourceGenerator, null);
+                gatewaySourceGenerator, new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, GatewaySourceGenerator gatewaySourceGenerator) {
-        return new APIPublisherImpl(user, apiDAO, null, null, null, null, null, null, gatewaySourceGenerator, null);
+        return new APIPublisherImpl(user, apiDAO, null, null, null, null, null, null, gatewaySourceGenerator,
+                new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
             apiSubscriptionDAO, APILifecycleManager apiLifecycleManager, GatewaySourceGenerator
                                                          gatewaySourceGenerator) {
         return new APIPublisherImpl(user, apiDAO, applicationDAO, apiSubscriptionDAO, null, apiLifecycleManager,
-                null, null, gatewaySourceGenerator, null);
+                null, null, gatewaySourceGenerator, new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(String user, ApiDAO apiDAO, APILifecycleManager apiLifecycleManager,
                                                  GatewaySourceGenerator gatewaySourceGenerator) {
         return new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null, null,
-                gatewaySourceGenerator, null);
+                gatewaySourceGenerator, new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(APILifecycleManager apiLifecycleManager,
                                                  ApiDAO apiDAO, WorkflowDAO workflowDAO) {
-        return new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null, workflowDAO, null, null);
+        return new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null, workflowDAO,
+                new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
             apiSubscriptionDAO, APILifecycleManager apiLifecycleManager, GatewaySourceGenerator
                                                          gatewaySourceGenerator, WorkflowDAO workflowDAO) {
         return new APIPublisherImpl(user, apiDAO, applicationDAO, apiSubscriptionDAO, null, apiLifecycleManager,
-                null, workflowDAO, gatewaySourceGenerator, null);
+                null, workflowDAO, gatewaySourceGenerator, new APIGatewayPublisherImpl());
     }
 }
