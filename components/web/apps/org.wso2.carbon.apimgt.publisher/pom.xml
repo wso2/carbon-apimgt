@@ -15,7 +15,8 @@
   ~ limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>org.wso2.carbon.apimgt.web.publisher.feature</artifactId>
@@ -63,6 +64,91 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.5.0</version>
+                <executions>
+                    <execution>
+                        <id>npm install (initialize)</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                        <configuration>
+                            <executable>${npm.executable}</executable>
+                            <arguments>
+                                <argument>install</argument>
+                                <argument>${npm.package.prefix}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <!-- 'npm run clean' which is run in clean lifecycle needs 'rimraf' node module.
+                     Make sure it is installed  -->
+                    <!--<execution>
+                        <id>npm install rimraf (clean)</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>pre-clean</phase>
+                        <configuration>
+                            <executable>${npm.executable}</executable>
+                            <arguments>
+                                <argument>${npm.package.prefix}</argument>
+                                <argument>install</argument>
+                                <argument>rimraf</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>-->
+                    <!--<execution>
+                        <id>npm run clean (clean)</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>clean</phase>
+                        <configuration>
+                            <executable>${npm.executable}</executable>
+                            <arguments>
+                                <argument>${npm.package.prefix}</argument>
+                                <argument>run</argument>
+                                <argument>clean</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>-->
+                    <execution>
+                        <id>npm run build (compile)</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>compile</phase>
+                        <configuration>
+                            <executable>${npm.executable}</executable>
+                            <arguments>
+                                <argument>${npm.package.prefix}</argument>
+                                <argument>run</argument>
+                                <argument>${npm.build.command}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <!--<execution>
+                        <id>npm run test (test)</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>test</phase>
+                        <configuration>
+                            <executable>${npm.executable}</executable>
+                            <arguments>
+                                <argument>${npm.package.prefix}</argument>
+                                <argument>run</argument>
+                                <argument>test</argument>
+                                <argument>&#45;&#45;</argument>
+                                <argument>&#45;&#45;skipTests=${maven.test.skip}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>-->
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.wso2.carbon.uuf.maven</groupId>
                 <artifactId>carbon-uuf-maven-plugin</artifactId>
                 <version>${carbon-uuf-maven-plugin.version}</version>
@@ -79,5 +165,10 @@
             </plugin>
         </plugins>
     </build>
-
+    <properties>
+        <maven.test.skip>false</maven.test.skip>
+        <npm.executable>npm</npm.executable>
+        <npm.build.command>build</npm.build.command>
+        <npm.package.prefix>--prefix=./src/main/</npm.package.prefix>
+    </properties>
 </project>
