@@ -285,6 +285,37 @@ function subscriptionsTabHandler(event) {
 
 }
 
+function accessControlTabHandler(event) {
+    var api_client = event.data.api_client;
+    var api_id = event.data.api_id;
+    api_client.get(api_id).then(
+        function (response) {
+            var api_data = JSON.parse(response.data);
+            var permission_data = api_data.permission;
+            var mode = "OVERWRITE"; // Available modes [OVERWRITE,APPEND, PREPEND]
+            var callbacks = {
+                onSuccess: function (data) {
+                    $('.selectPermissions').multiselect(
+                        {
+                            nonSelectedText: "No permissions set for role",
+                            includeSelectAllOption: true
+                        }
+                    );
+                },
+                onFailure: function (data) {
+                    console.debug("Failed");
+                }
+            };
+            var data = {
+                permissions: permission_data
+            };
+
+            UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-access-control", data, "api-access-control-tab-content", mode, callbacks);
+            $(document).on('click', "#update-api-permissions", {api_client: api_client, api_id: api_id}, updatePermissionsHandler);
+        }
+    );
+}
+
 /**
  * Do the life cycle update when user clicks on the relevant life cycle state button.
  * @param event {object} click event of the lc state button
@@ -594,6 +625,102 @@ function updateLabelsHandler(event) {
         }.bind(data));
 }
 
+//This variable contains the list of all valid roles
+var validRoleList = ["customer", "manager", "employee"];
+
+/**
+ * This function is called to get the role permissions of an API as entered by the user
+ */
+function createRolePermissionJsonString() {
+    var permissionJson = [];
+    var invalidRoles = [];
+    $(".well > .input-group").each(function(index) {
+        var jsonData = {};
+        var permissionArrayPerRole = [];
+        var obj = $(this);
+        var roleName = obj.find('label[for="permission-options"]').text().split(' :')[0].trim().toLowerCase();
+        if(isValidRole(roleName)) {
+            jsonData["groupId"] = roleName;
+            obj.find(".permissionCheck:checked").each(function(){
+                permissionArrayPerRole.push($(this).val());
+            });
+            jsonData["permission"] = permissionArrayPerRole;
+            permissionJson.push(jsonData);
+        } else {
+            invalidRoles.push(roleName);
+        }
+    });
+
+    if(invalidRoles.length > 1) {
+        invalidRoles.pop();
+        var invalidRolesList = invalidRoles.join();
+        var message = "The role(s) " + invalidRolesList + " is/are invalid and hence not assigned permissions.";
+        alert(message);
+//        noty({
+//            text: message,
+//            type: 'warning',
+//            dismissQueue: true,
+//            progressBar: true,
+//            timeout: 5000,
+//            layout: 'topCenter',
+//            theme: 'relax',
+//            maxVisible: 10
+//        });
+    }
+    return JSON.stringify(permissionJson);
+}
+
+function isValidRole(role) {
+    return validRoleList.includes(role);
+}
+
+function updatePermissionsHandler(event) {
+    var api_client = event.data.api_client;
+    var api_id = event.data.api_id;
+    var data = {
+        api_client: api_client,
+        api_id: api_id
+    };
+    //var selected_permissions = $('#permissions-list-dropdown').val();
+    api_client.get(api_id).then(
+        function (response) {
+            var api_data = JSON.parse(response.data);
+            api_data.permission = createRolePermissionJsonString();
+            var promised_update = this.api_client.update(api_data);
+            promised_update.then(
+                function () {
+                    var message = "Updated permissions successfully.";
+                    noty({
+                        text: message,
+                        type: 'success',
+                        dismissQueue: true,
+                        progressBar: true,
+                        timeout: 5000,
+                        layout: 'topCenter',
+                        theme: 'relax',
+                        maxVisible: 10,
+                    });
+                }
+            );
+            promised_update.catch(
+                function (error_response) {
+                    $('#permissions-list-dropdown').multiselect("deselectAll", false).multiselect("refresh");
+                    var message = "Error[" + error_response.status + "]: " + error_response.data;
+                    noty({
+                        text: message,
+                        type: 'error',
+                        dismissQueue: true,
+                        progressBar: true,
+                        timeout: 5000,
+                        layout: 'topCenter',
+                        theme: 'relax',
+                        maxVisible: 10,
+                    });
+                }
+            );
+        }.bind(data));
+}
+
 /**
  * Do the workflow cleanup for pending task
  * @param event {object} click event of the wf clean up button
@@ -824,6 +951,7 @@ $(function () {
     $('#tab-3').bind('show.bs.tab', {api_client: client, api_id: api_id}, endpointsTabHandler);
     $('#tab-4').bind('show.bs.tab', {api_client: client, api_id: api_id}, resourcesTabHandler);
     $('#tab-5').bind('show.bs.tab', {api_client: client, api_id: api_id}, documentTabHandler);
+    $('#tab-6').bind('show.bs.tab', {api_client: client, api_id: api_id}, accessControlTabHandler);
     $('#tab-9').bind('show.bs.tab', {api_client: client, api_id: api_id}, subscriptionsTabHandler);
     $('#tab-10').bind('show.bs.tab', {api_client: client, api_id: api_id}, apiConsoleTabHandler);
     $(document).on('click', ".lc-state-btn", {api_client: client, api_id: api_id}, updateLifecycleHandler);
