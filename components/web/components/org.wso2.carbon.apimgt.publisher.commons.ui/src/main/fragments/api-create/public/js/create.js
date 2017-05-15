@@ -22,11 +22,11 @@ $(
         validateActionButtons('#api-create-submit');
         $('#api-create-advanced').on('click', showAdvancedDiv);
         var roleIndex = 0;
-        $("[id=remove-2]").on('click',function(e){
-            e.preventDefault();
-            var par = $("[id=role-2]");
-            par.remove();
-        });
+//        $("[id=remove-2]").on('click',function(e){
+//            e.preventDefault();
+//            var par = $("[id=role-2]");
+//            par.remove();
+//        });
         $('.add-role').on('click', function() {
             var role = $('#role-name').val().trim();
             if(role && role != ""){
@@ -35,7 +35,7 @@ $(
                 $clone = $permissionsTemplate.clone().removeClass('hide').attr('id','role-' + roleIndex).insertBefore($permissionsTemplate);
                 $clone
                     .find('[id="remove"]').attr('id', 'remove-' + roleIndex ).end();
-                $clone.find('label[for="permissions-list-dropdown"]').html(role + '&nbsp; : &nbsp; &nbsp;');
+                $clone.find('label[for="permission-options"]').html(role + '&nbsp; : &nbsp; &nbsp;');
                 $('#no-roles-msg').hide();
                 $('#role-name').val(null);
             } else {
@@ -56,25 +56,53 @@ $(
     }
 );
 
+//This variable contains the list of all valid roles
+var validRoleList = ["customer", "manager", "employee"];
+
 /**
  * This function is called to get the role permissions of an API as entered by the user
  */
 function createRolePermissionJsonString() {
     var permissionJson = [];
+    var invalidRoles = [];
     $(".well > .input-group").each(function(index) {
         var jsonData = {};
         var permissionArrayPerRole = [];
         var obj = $(this);
-        var roleName = obj.find('label[for="permissions-list-dropdown"]').text();
-        jsonData["groupId"] = roleName.split(' :')[0];
-        obj.find(".permissionCheck:checked").each(function(){
-            permissionArrayPerRole.push($(this).val());
-        });
-        jsonData["permission"] = permissionArrayPerRole;
-        permissionJson.push(jsonData);
+        var roleName = obj.find('label[for="permission-options"]').text().split(' :')[0].trim().toLowerCase();
+        if(isValidRole(roleName)) {
+            jsonData["groupId"] = roleName;
+            obj.find(".permissionCheck:checked").each(function(){
+                permissionArrayPerRole.push($(this).val());
+            });
+            jsonData["permission"] = permissionArrayPerRole;
+            permissionJson.push(jsonData);
+        } else {
+            invalidRoles.push(roleName);
+        }
     });
-    permissionJson.pop();
+
+    if(invalidRoles.length > 1) {
+        invalidRoles.pop();
+        var invalidRolesList = invalidRoles.join();
+        var message = "The role(s) " + invalidRolesList + " is/are invalid and hence not assigned permissions.";
+        alert(message);
+//        noty({
+//            text: message,
+//            type: 'warning',
+//            dismissQueue: true,
+//            progressBar: true,
+//            timeout: 5000,
+//            layout: 'topCenter',
+//            theme: 'relax',
+//            maxVisible: 10
+//        });
+    }
     return JSON.stringify(permissionJson);
+}
+
+function isValidRole(role) {
+    return validRoleList.includes(role);
 }
 /**
  * This function is called when advanced options for api creation is clicked
