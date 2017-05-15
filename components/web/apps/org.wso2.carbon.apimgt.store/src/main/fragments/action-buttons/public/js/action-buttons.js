@@ -17,22 +17,18 @@
 
 /**
  * This function validates Buttons based on the logged in user scopes against scopes defined for rest api call
- * @param Button ids
+ * @param {String} Array of Button ids
  *
  */
 function validateActionButtons() {
     var bearerToken = "Bearer " + getCookie("WSO2_AM_TOKEN_1");
-
-//    var loggedInUserScopes = localStorage.getItem('userScopes');
-                var loggedInUserScopes = "";
+    var loggedInUserScopes = localStorage.getItem('userScopes');
     var response = loadSwaggerJson();
     if (response === undefined) {
         console.warn("Store swagger definition could not be loaded.");
         return;
     }
     var storeSwaggerJson = JSON.parse(response);
-
-
     for (var i = 0; i < arguments.length; i++) {
         var id = arguments[i];
         var restApiResourcePath = $(id).data('resource-path');
@@ -54,9 +50,7 @@ function validateActionButtons() {
  *
  */
 function hasValidScopes(restApiResourcePath, restApiResourceMethod) {
-        var loggedInUserScopes = localStorage.getItem('userScopes');
-//        var loggedInUserScopes = "";
-
+    var loggedInUserScopes = localStorage.getItem('userScopes');
     if (loggedInUserScopes !== null) {
         var response = loadSwaggerJson();
         if (response !== undefined) {
@@ -71,7 +65,6 @@ function hasValidScopes(restApiResourcePath, restApiResourceMethod) {
             console.warn("Store swagger definition could not be loaded.");
             return true;
         }
-
     }
     return false;
 }
@@ -99,75 +92,7 @@ function loadSwaggerJson() {
             }
         };
         request.send(null);
-
     } else {
         return storeSwaggerJson;
     }
-}
-
-function loadJSON(callback) {
-
-    // Retrieve the object from storage
-    var storeSwaggerJson = localStorage.getItem('storeSwaggerJson');
-    if(storeSwaggerJson === null || storeSwaggerJson === undefined) {
-            var request = new XMLHttpRequest();
-            request.overrideMimeType("application/json");
-            request.open('GET', 'https://localhost:9292/store/api/am/store/v1.0/apis/swagger.json', true);
-            request.onreadystatechange = function () {
-                  if (request.readyState == 4 && request.status == "200") {
-
-                      // Put the object into storage
-                      localStorage.setItem('storeSwaggerJson', request.responseText);
-                      // Required use of an anonymous callback as .open will NOT return a value but simply returns
-                      //undefined in asynchronous mode
-                      callback(request.responseText);
-                  }else {
-                      console.warn('warning: storeSwaggerJson could not be loaded');
-                  }
-            };
-            request.send(null);
-
-    } else {
-        callback(storeSwaggerJson);
-    }
-}
-
-//when browser closed clean from local storage
-//$(window).unload(function(){
-//    localStorage.removeItem("StoreSwaggerJson");
-//});
-
-
-function get(url) {
-  // Return a new promise.
-  return new Promise(function(resolve, reject) {
-    // Do the usual XHR stuff
-    var req = new XMLHttpRequest();
-    req.open('GET', url);
-    req.overrideMimeType("application/json");
-    req.onload = function() {
-      // This is called even on 404 etc
-      // so check the status
-      if (req.status == 200) {
-         // Put the object into storage
-         localStorage.setItem('StoreSwaggerJson', req.responseText);
-
-        // Resolve the promise with the response text
-        resolve(req.responseText);
-      }
-      else {
-        // Otherwise reject with the status text
-        // which will hopefully be a meaningful error
-        reject(Error(req.statusText));
-      }
-    };
-
-    // Handle network errors
-    req.onerror = function() {
-      reject(Error("Network Error"));
-    };
-
-    // Make the request
-    req.send(null);
-  });
 }
