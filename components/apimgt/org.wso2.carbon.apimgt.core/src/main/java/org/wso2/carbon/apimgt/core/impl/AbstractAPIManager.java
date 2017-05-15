@@ -70,10 +70,9 @@ public abstract class AbstractAPIManager implements APIManager {
     private APIGatewayPublisher apiGatewayPublisher;
 
     public AbstractAPIManager(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
-                              APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager
-                                      apiLifecycleManager,
-                              LabelDAO labelDAO, WorkflowDAO workflowDAO, GatewaySourceGenerator
-                                      gatewaySourceGenerator, APIGatewayPublisher apiGatewayPublisher) {
+                              APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO,
+                              APILifecycleManager apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO,
+                              GatewaySourceGenerator gatewaySourceGenerator, APIGatewayPublisher apiGatewayPublisher) {
 
         this.username = username;
         this.apiDAO = apiDAO;
@@ -88,18 +87,11 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     public AbstractAPIManager(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
-                              APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager
-                                      apiLifecycleManager,
-                              LabelDAO labelDAO, WorkflowDAO workflowDAO) {
+                              APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO,
+                              APILifecycleManager apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO) {
 
-        this.username = username;
-        this.apiDAO = apiDAO;
-        this.applicationDAO = applicationDAO;
-        this.apiSubscriptionDAO = apiSubscriptionDAO;
-        this.policyDAO = policyDAO;
-        this.apiLifecycleManager = apiLifecycleManager;
-        this.labelDAO = labelDAO;
-        this.workflowDAO = workflowDAO;
+        this(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, apiLifecycleManager, labelDAO,
+                workflowDAO, new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
 

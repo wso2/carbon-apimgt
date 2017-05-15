@@ -45,10 +45,10 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
     private static final String HOME_EMAIL = "home";
 
     public DefaultIdentityProviderImpl() throws APIManagementException {
-        scimServiceStub = SCIMServiceStubFactory.getSCIMServiceStub();
+        this(SCIMServiceStubFactory.getSCIMServiceStub());
     }
 
-    protected DefaultIdentityProviderImpl(SCIMServiceStub scimServiceStub) {
+    DefaultIdentityProviderImpl(SCIMServiceStub scimServiceStub) {
         this.scimServiceStub = scimServiceStub;
     }
 
@@ -57,7 +57,7 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
         List<String> roleNames = new ArrayList<>();
         SCIMUser scimUser = scimServiceStub.getUser(userId);
         if (scimUser != null) {
-            List<org.wso2.carbon.apimgt.core.auth.dto.SCIMUser.SCIMUserGroups> roles = scimUser.getGroups();
+            List<SCIMUser.SCIMUserGroups> roles = scimUser.getGroups();
             if (roles != null) {
                 roles.forEach(role -> roleNames.add(role.getDisplay()));
             }

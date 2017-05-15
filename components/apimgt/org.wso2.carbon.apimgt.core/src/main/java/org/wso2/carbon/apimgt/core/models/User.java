@@ -18,13 +18,16 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
+import java.util.Arrays;
+
 /**
  * This class contains the model of user
  */
 public class User {
 
+    private static final char[] EMPTY_CHAR_ARRAY = new char[0];
     private String username;
-    private String password;
+    private char[] password = EMPTY_CHAR_ARRAY;
     private String firstName;
     private String lastName;
     private String email;
@@ -37,12 +40,12 @@ public class User {
         this.username = username;
     }
 
-    public String getPassword() {
-        return password;
+    public char[] getPassword() {
+        return Arrays.copyOf(password, password.length);
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setPassword(char[] password) {
+        this.password = Arrays.copyOf(password, password.length);
     }
 
     public String getFirstName() {

@@ -22,11 +22,9 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.api.APIGatewayPublisher;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.api.APIStore;
-import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
@@ -62,8 +60,10 @@ public class APIManagerFactory {
     // Thread safe Cache for API Providers
     private static Map<String, APIPublisher> providers =
             Collections.synchronizedMap(new LinkedHashMap<String, APIPublisher>
-                                        (MAX_PROVIDERS + 1, 1, false) {
-        // This method is called just after a new entry has been added
+                                        (MAX_PROVIDERS + 1, 1.0F, false) {
+                private static final long serialVersionUID = -1801608393369727885L;
+
+                // This method is called just after a new entry has been added
         @Override
         public boolean removeEldestEntry(Map.Entry eldest) {
             return size() > MAX_PROVIDERS;
@@ -72,7 +72,9 @@ public class APIManagerFactory {
 
     // Thread safe Cache for API Consumers
     private static Map<String, APIStore> consumers = Collections.synchronizedMap(new LinkedHashMap<String, APIStore>
-            (MAX_CONSUMERS + 1, 1, false) {
+            (MAX_CONSUMERS + 1, 1.0F, false) {
+        private static final long serialVersionUID = -585394249992765367L;
+
         // This method is called just after a new entry has been added
         @Override
         public boolean removeEldestEntry(Map.Entry eldest) {
@@ -85,6 +87,11 @@ public class APIManagerFactory {
 
     }
 
+    /**
+     * Get APIManagerFactory instance
+     *
+     * @return APIManagerFactory object
+     */
     public static APIManagerFactory getInstance() {
         return instance;
     }
@@ -93,8 +100,8 @@ public class APIManagerFactory {
         try {
             UserAwareAPIPublisher userAwareAPIPublisher = new UserAwareAPIPublisher(username, DAOFactory.getApiDAO(),
                     DAOFactory.getApplicationDAO(), DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO(),
-                    DAOFactory.getLabelDAO(), DAOFactory.getWorkflowDAO(), instance.getGatewaySourceGenerator(),
-                    getGateway());
+                    DAOFactory.getLabelDAO(), DAOFactory.getWorkflowDAO(), new GatewaySourceGeneratorImpl(),
+                    new APIGatewayPublisherImpl());
 
             // Register all the observers which need to observe 'Publisher' component
             userAwareAPIPublisher.registerObserver(new EventLogger());
@@ -143,6 +150,13 @@ public class APIManagerFactory {
         }
     }
 
+    /**
+     * Get API Publisher object for a particular user
+     *
+     * @param username The username of user who's requesting the object
+     * @return APIPublisher object
+     * @throws APIManagementException if error occurred while initializing API Publisher
+     */
     public APIPublisher getAPIProvider(String username) throws APIManagementException {
         APIPublisher provider = providers.get(username);
         if (provider == null) {
@@ -159,6 +173,12 @@ public class APIManagerFactory {
         return provider;
     }
 
+    /**
+     * Get API Manager Admin Service object
+     *
+     * @return APIMgtAdminService object
+     * @throws APIManagementException if error occurred while initializing API Manager Admin Service
+     */
     public APIMgtAdminService getAPIMgtAdminService() throws APIManagementException {
         if (apiMgtAdminService == null) {
             synchronized (this) {
@@ -168,10 +188,23 @@ public class APIManagerFactory {
         return apiMgtAdminService;
     }
 
+    /**
+     * Get API Store object by anonymous user
+     *
+     * @return APIStore object
+     * @throws APIManagementException if error occurred while initializing API Store
+     */
     public APIStore getAPIConsumer() throws APIManagementException {
         return getAPIConsumer(ANONYMOUS_USER);
     }
 
+    /**
+     * Get API Store object for a particular user
+     *
+     * @param username The username of user who's requesting the object
+     * @return APIStore object
+     * @throws APIManagementException if error occurred while initializing API Store
+     */
     public APIStore getAPIConsumer(String username) throws APIManagementException {
         APIStore consumer = consumers.get(username);
         if (consumer == null) {
@@ -188,14 +221,12 @@ public class APIManagerFactory {
         return consumer;
     }
 
-    public APIGatewayPublisher getGateway() {
-        return new APIGatewayPublisherImpl();
-    }
-
-    public GatewaySourceGenerator getGatewaySourceGenerator() {
-        return new GatewaySourceGeneratorImpl();
-    }
-
+    /**
+     * Get Identity Provider object
+     *
+     * @return Identity Provider object
+     * @throws IdentityProviderException if error occurred while initializing Identity Provider
+     */
     public IdentityProvider getIdentityProvider() throws IdentityProviderException {
         if (identityProvider == null) {
             try {
@@ -209,6 +240,12 @@ public class APIManagerFactory {
         return identityProvider;
     }
 
+    /**
+     * Get Key Manager object
+     *
+     * @return Key Manager object
+     * @throws KeyManagementException if error occurred while initializing key manager
+     */
     public KeyManager getKeyManager() throws KeyManagementException {
         if (keyManager == null) {
             try {

@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.core.auth.dto;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -26,9 +27,10 @@ import java.util.Objects;
  */
 public class SCIMUser {
 
+    private static final char[] EMPTY_CHAR_ARRAY = new char[0];
     private List<String> schemas;
     private String userName;
-    private String password;
+    private char[] password = EMPTY_CHAR_ARRAY;
     private String id;
     private SCIMName name;
     private List<SCIMUserEmails> emails;
@@ -66,12 +68,12 @@ public class SCIMUser {
         this.userName = userName;
     }
 
-    public String getPassword() {
-        return password;
+    public char[] getPassword() {
+        return Arrays.copyOf(password, password.length);
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setPassword(char[] password) {
+        this.password = Arrays.copyOf(password, password.length);
     }
 
     public List<SCIMUserEmails> getEmails() {
@@ -100,7 +102,7 @@ public class SCIMUser {
         }
         SCIMUser scimUser = (SCIMUser) o;
         return Objects.equals(userName, scimUser.userName) &&
-                Objects.equals(password, scimUser.password) &&
+                Arrays.equals(password, scimUser.password) &&
                 Objects.equals(id, scimUser.id) &&
                 Objects.equals(name, scimUser.name);
     }
