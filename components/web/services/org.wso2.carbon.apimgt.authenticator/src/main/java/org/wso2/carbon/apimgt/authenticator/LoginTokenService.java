@@ -22,9 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.authenticator.utils.AuthUtil;
 import org.wso2.carbon.apimgt.authenticator.utils.bean.AuthResponseBean;
-import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
-import org.wso2.carbon.apimgt.core.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
@@ -68,8 +67,8 @@ public class LoginTokenService {
         AccessTokenRequest accessTokenRequest = AuthUtil
                 .createAccessTokenRequest(userName, password, grantType, refreshToken, null, validityPeriod, scopes,
                         consumerKeySecretMap.get("CONSUMER_KEY"), consumerKeySecretMap.get("CONSUMER_SECRET"));
-        KeyManager keyManager = KeyManagerHolder.getAMLoginKeyManagerInstance();
-        AccessTokenInfo accessTokenInfo = keyManager.getNewApplicationAccessToken(accessTokenRequest);
+        AccessTokenInfo accessTokenInfo = APIManagerFactory.getInstance().getKeyManager()
+                .getNewApplicationAccessToken(accessTokenRequest);
         setAccessTokenData(authResponseBean, accessTokenInfo);
         authResponseBean.setAuthUser(userName);
         return accessTokenInfo.getAccessToken() + ":" + accessTokenInfo.getRefreshToken();
@@ -80,8 +79,7 @@ public class LoginTokenService {
         AccessTokenRequest accessTokenRequest = AuthUtil
                 .createAccessTokenRequest("", "", "", "", accessToken, 0 , new String[0],
                         consumerKeySecretMap.get("CONSUMER_KEY"), consumerKeySecretMap.get("CONSUMER_SECRET"));
-        KeyManager keyManager = KeyManagerHolder.getAMLoginKeyManagerInstance();
-        keyManager.revokeLogInAccessToken(accessTokenRequest);
+        APIManagerFactory.getInstance().getKeyManager().revokeLogInAccessToken(accessTokenRequest);
     }
 
     private Map<String, String> getConsumerKeySecret(String appName) throws KeyManagementException {
@@ -89,7 +87,6 @@ public class LoginTokenService {
         HashMap<String, String> consumerKeySecretMap;
         if (!AuthUtil.getConsumerKeySecretMap().containsKey(appName)) {
             consumerKeySecretMap = new HashMap<>();
-            KeyManager keyManager = KeyManagerHolder.getAMLoginKeyManagerInstance();
             OAuthAppRequest oauthAppRequest = null;
 
                 oauthAppRequest = AuthUtil
@@ -99,7 +96,7 @@ public class LoginTokenService {
             oauthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.VALIDITY_PERIOD, 3600);
             oauthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.APP_KEY_TYPE, "application");
             OAuthApplicationInfo oAuthApplicationInfo;
-            oAuthApplicationInfo = keyManager.createApplication(oauthAppRequest);
+            oAuthApplicationInfo = APIManagerFactory.getInstance().getKeyManager().createApplication(oauthAppRequest);
 
             consumerKeySecretMap.put("CONSUMER_KEY", oAuthApplicationInfo.getClientId());
             consumerKeySecretMap.put("CONSUMER_SECRET", oAuthApplicationInfo.getClientSecret());

@@ -470,40 +470,44 @@ public class AbstractAPIManagerTestCase {
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APILifecycleManager apiLifecycleManager) {
-        return new APIPublisherImpl(USER_NAME, apiDAO, null, null, null, apiLifecycleManager, null, null, null, null);
+        return new APIPublisherImpl(USER_NAME, apiDAO, null, null, null, apiLifecycleManager, null, null,
+                new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO) {
-        return new APIPublisherImpl(USER_NAME, apiDAO, null, null, null, null, null, null, null, null);
+        return new APIPublisherImpl(USER_NAME, apiDAO, null, null, null, null, null, null,
+                new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APISubscriptionDAO apiSubscriptionDAO,
                                                  APILifecycleManager apiLifecycleManager) {
         return new APIPublisherImpl(USER_NAME, apiDAO, null, apiSubscriptionDAO, null, apiLifecycleManager, null, null,
-                null, null);
+                new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APISubscriptionDAO apiSubscriptionDAO) {
         return new APIPublisherImpl(USER_NAME, apiDAO, null, apiSubscriptionDAO, null, null, null, null,
-                null, null);
+                new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
             apiSubscriptionDAO, APILifecycleManager apiLifecycleManager) {
         return new APIPublisherImpl(USER_NAME, apiDAO, applicationDAO, apiSubscriptionDAO, null, apiLifecycleManager,
-                null, null,
-                null, null);
+                null, null, new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(LabelDAO labelDAO) {
-        return new APIPublisherImpl(USER_NAME, null, null, null, null, null, labelDAO, null, null, null);
+        return new APIPublisherImpl(USER_NAME, null, null, null, null, null, labelDAO, null,
+                new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(PolicyDAO policyDAO) {
-        return new APIPublisherImpl(USER_NAME, null, null, null, policyDAO, null, null, null, null, null);
+        return new APIPublisherImpl(USER_NAME, null, null, null, policyDAO, null, null, null,
+                new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(APISubscriptionDAO apiSubscriptionDAO) {
-        return new APIPublisherImpl(USER_NAME, null, null, apiSubscriptionDAO, null, null, null, null, null, null);
+        return new APIPublisherImpl(USER_NAME, null, null, apiSubscriptionDAO, null, null, null, null,
+                new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 }

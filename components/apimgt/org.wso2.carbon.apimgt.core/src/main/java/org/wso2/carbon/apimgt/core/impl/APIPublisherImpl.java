@@ -1564,8 +1564,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @throws GatewayException If failed to publish to gateways.
      */
     private void publishToGateway(API api) throws GatewayException {
-        APIGatewayPublisher gateway = APIManagerFactory.getInstance().getGateway();
-        boolean isPublished = gateway.publishToGateway(api);
+        boolean isPublished = getApiGatewayPublisher().publishToGateway(api);
         if (isPublished) {
             APIUtils.logDebug(
                     "API " + api.getName() + "-" + api.getVersion() + " was published to gateway successfully.", log);
@@ -1583,8 +1582,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     private void publishEndpointConfigToGateway() throws APIManagementException {
         GatewaySourceGenerator template = getGatewaySourceGenerator();
         String endpointConfig = template.getEndpointConfigStringFromTemplate(getAllEndpoints());
-        APIGatewayPublisher publisher = APIManagerFactory.getInstance().getGateway();
-        boolean status = publisher.publishEndpointConfigToGateway(endpointConfig);
+        boolean status = getApiGatewayPublisher().publishEndpointConfigToGateway(endpointConfig);
         if (status) {
             log.info("Endpoint configuration published successfully");
         } else {
