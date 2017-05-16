@@ -20,7 +20,6 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.utils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
@@ -41,7 +40,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -107,7 +105,9 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
                 //export gateway configs
                 APIFileUtils.exportGatewayConfigToFileSystem(apiDetails.getGatewayConfiguration(), exportAPI,
                         apiExportDirectory);
-                exportEndpointsToFileSystem(apiDetails.getEndpoints(), exportAPI, apiExportDirectory);
+                if (apiDetails.getEndpoints() != null && !apiDetails.getEndpoints().isEmpty()) {
+                    exportEndpointsToFileSystem(apiDetails.getEndpoints(), exportAPI, apiExportDirectory);
+                }
 
             } catch (APIMgtDAOException e) {
                 // no need to throw, log
@@ -125,12 +125,14 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
 
             // export docs and thumbnail - these are non critical; even if they fail the API is considered
             // as exported correctly.
-            try {
-                APIFileUtils.exportThumbnailToFileSystem(apiDetails.getThumbnailStream(), apiExportDirectory);
-            } catch (APIMgtDAOException warn) {
-                // log the warning without throwing
-                log.warn("Error in exporting thumbnail to file system for api: " + exportAPI.getName() + ", version: " +
-                        exportAPI.getVersion());
+            if (apiDetails.getThumbnailStream() != null){
+                try {
+                    APIFileUtils.exportThumbnailToFileSystem(apiDetails.getThumbnailStream(), apiExportDirectory);
+                } catch (APIMgtDAOException warn) {
+                    // log the warning without throwing
+                    log.warn("Error in exporting thumbnail to file system for api: " + exportAPI.getName() + ", version: " +
+                            exportAPI.getVersion());
+                }
             }
             exportDocumentationToFileSystem(apiDetails.getAllDocumentInformation(), apiDetails, apiExportDirectory);
             log.info("Successfully exported API: " + exportAPI.getName() + ", version: "
@@ -665,36 +667,30 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
     private Set<Endpoint> getEndpointsFromExtractedArchive(String endpointLocation, String apiName, String version)
             throws APIMgtEntityImportExportException {
         File endpointsRootDirectory = new File(endpointLocation);
-        if (!endpointsRootDirectory.isDirectory()) {
-            // no Endpoints, can't continue
-            String errorMsg = "Endpoints root directory " + endpointLocation + " not found for API name: " + apiName
-                    + ", version: " + version;
-            log.error(errorMsg);
-            throw new APIMgtEntityImportExportException(errorMsg);
-        }
-
-        File[] endpointFiles = endpointsRootDirectory.listFiles(File::isFile);
-        if (endpointFiles == null) {
-            // no endpoints in the given location, can't continue
-            String errorMsg = "No endpoints found at " + endpointsRootDirectory;
-            log.error(errorMsg);
-            throw new APIMgtEntityImportExportException(errorMsg);
-        }
-
-        Gson gson = new GsonBuilder().create();
         Set<Endpoint> endpoints = new HashSet<>();
-        for (File endpointFile : endpointFiles) {
-            // read everything
-            String content = null;
-            try {
-                content = APIFileUtils.readFileContentAsText(endpointFile.getPath());
-            } catch (APIMgtDAOException e) {
-                String errorMsg = "Unable to read endpoints from " + endpointFile.getPath();
-                log.error(errorMsg, e);
-                throw new APIMgtEntityImportExportException(errorMsg, e);
+        if (endpointsRootDirectory.isDirectory()) {
+            File[] endpointFiles = endpointsRootDirectory.listFiles(File::isFile);
+            if (endpointFiles == null) {
+                // no endpoints in the given location, can't continue
+                String errorMsg = "No endpoints found at " + endpointsRootDirectory;
+                log.error(errorMsg);
+                throw new APIMgtEntityImportExportException(errorMsg);
             }
-            endpoints.add(gson.fromJson(content, Endpoint.class));
+            Gson gson = new GsonBuilder().create();
+            for (File endpointFile : endpointFiles) {
+                // read everything
+                String content = null;
+                try {
+                    content = APIFileUtils.readFileContentAsText(endpointFile.getPath());
+                } catch (APIMgtDAOException e) {
+                    String errorMsg = "Unable to read endpoints from " + endpointFile.getPath();
+                    log.error(errorMsg, e);
+                    throw new APIMgtEntityImportExportException(errorMsg, e);
+                }
+                endpoints.add(gson.fromJson(content, Endpoint.class));
+            }
         }
+
 
         return endpoints;
     }

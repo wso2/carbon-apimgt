@@ -1085,7 +1085,9 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     @Test(description = "Test adding API with endpointMap")
     public void testAddEndPointsForApi() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
-        Map<String, Object> endpointMap = SampleTestObjectCreator.getMockEndpointMap();
+        Map<String, Endpoint> endpointMap = new HashMap<>();
+        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, new Endpoint.Builder().id(SampleTestObjectCreator
+                .endpointId).applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).build());
         API api = SampleTestObjectCreator.createDefaultAPI().endpoint(endpointMap).build();
         testAddGetEndpoint();
         apiDAO.addAPI(api);
@@ -1338,13 +1340,14 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Endpoint urlSpecificEndpoint = new Endpoint.Builder(SampleTestObjectCreator.createMockEndpoint()).id(UUID
                 .randomUUID().toString()).applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).name("URI1")
                 .build();
-        Endpoint globalEndpoint = new Endpoint.Builder(SampleTestObjectCreator.createAlternativeEndpoint())
-                .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).build();
-        Map<String, Object> apiEndpointMap = new HashMap();
+        Endpoint endpointToInsert = SampleTestObjectCreator.createAlternativeEndpoint();
+        Endpoint globalEndpoint = new Endpoint.Builder().applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).id
+                (endpointToInsert.getId()).build();
+        Map<String, Endpoint> apiEndpointMap = new HashMap();
 
         apiEndpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, apiSpecificEndpoint);
-        apiEndpointMap.put(APIMgtConstants.SANDBOX_ENDPOINT, globalEndpoint.getId());
-        Map<String, Object> uriTemplateEndpointMap = new HashMap();
+        apiEndpointMap.put(APIMgtConstants.SANDBOX_ENDPOINT, globalEndpoint);
+        Map<String, Endpoint> uriTemplateEndpointMap = new HashMap();
         uriTemplateEndpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, urlSpecificEndpoint);
         Map<String, UriTemplate> uriTemplateMap = SampleTestObjectCreator.getMockUriTemplates();
         uriTemplateMap.forEach((k, v) -> {
@@ -1354,15 +1357,15 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API api = SampleTestObjectCreator.createDefaultAPI().apiDefinition(SampleTestObjectCreator
                 .apiDefinition).endpoint(apiEndpointMap).uriTemplates(uriTemplateMap).build();
-        apiDAO.addEndpoint(globalEndpoint);
+        apiDAO.addEndpoint(endpointToInsert);
         apiDAO.addAPI(api);
-        Map<String, Object> retrievedApiEndpoint = apiDAO.getAPI(api.getId()).getEndpoint();
+        Map<String, Endpoint> retrievedApiEndpoint = apiDAO.getAPI(api.getId()).getEndpoint();
         Assert.assertTrue(apiDAO.isEndpointAssociated(globalEndpoint.getId()));
         Assert.assertEquals(apiEndpointMap, retrievedApiEndpoint);
         apiDAO.deleteAPI(api.getId());
         Endpoint retrievedGlobal = apiDAO.getEndpoint(globalEndpoint.getId());
         Assert.assertNotNull(retrievedGlobal);
-        Assert.assertEquals(globalEndpoint, retrievedGlobal);
+        Assert.assertEquals(endpointToInsert, retrievedGlobal);
     }
     @Test
     public void testAddGetComment() throws Exception {

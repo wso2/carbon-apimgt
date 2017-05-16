@@ -664,10 +664,10 @@ public class ApiDAOImpl implements ApiDAO {
                 deleteUrlMappings(connection, apiID);
                 addUrlMappings(connection, substituteAPI.getUriTemplates().values(), apiID);
                 connection.commit();
-            } catch (SQLException e) {
+            } catch (SQLException | IOException e) {
+                String msg = "Couldn't update api : " + substituteAPI.getName();
                 connection.rollback();
-                throw new APIMgtDAOException(e);
-            } catch (IOException e) {
+                log.error(msg, e);
                 throw new APIMgtDAOException(e);
             } finally {
                 connection.setAutoCommit(DAOUtil.isAutoCommit());
@@ -696,10 +696,10 @@ public class ApiDAOImpl implements ApiDAO {
                 statement.setString(1, apiID);
                 statement.execute();
                 connection.commit();
-            } catch (SQLException e) {
+            } catch (SQLException | IOException e) {
+                String msg = "Couldn't delete api : " + apiID;
+                log.error(msg, e);
                 connection.rollback();
-                throw new APIMgtDAOException(e);
-            } catch (IOException e) {
                 throw new APIMgtDAOException(e);
             } finally {
                 connection.setAutoCommit(DAOUtil.isAutoCommit());
@@ -1879,6 +1879,8 @@ public class ApiDAOImpl implements ApiDAO {
                 addEndpoint(connection, endpoint);
                 connection.commit();
             } catch (SQLException e) {
+                String msg = "Couldn't Add Endpoint " + endpoint.getName();
+                log.error(msg, e);
                 connection.rollback();
                 throw new APIMgtDAOException(e);
             } finally {
@@ -1938,6 +1940,8 @@ public class ApiDAOImpl implements ApiDAO {
                 connection.commit();
                 return true;
             } catch (SQLException e) {
+                String msg = "Couldn't Add Endpoint " + endpointId;
+                log.error(msg, e);
                 connection.rollback();
                 throw new APIMgtDAOException(e);
             } finally {
@@ -2019,6 +2023,8 @@ public class ApiDAOImpl implements ApiDAO {
                 connection.commit();
                 return true;
             } catch (SQLException e) {
+                String msg = "Couldn't Update Endpoint " + endpoint.getName();
+                log.error(msg, e);
                 connection.rollback();
                 throw new APIMgtDAOException(e);
             } finally {
@@ -2041,6 +2047,8 @@ public class ApiDAOImpl implements ApiDAO {
         try (Connection connection = DAOUtil.getConnection()) {
             return getEndpoint(connection, endpointId);
         } catch (SQLException | IOException e) {
+            String msg = "Couldn't Get Endpoint " + endpointId;
+            log.error(msg, e);
             throw new APIMgtDAOException(e);
         }
     }
@@ -2105,6 +2113,8 @@ public class ApiDAOImpl implements ApiDAO {
                 }
             }
         } catch (SQLException | IOException e) {
+            String msg = "Couldn't Get Endpoint By name" + name;
+            log.error(msg, e);
             throw new APIMgtDAOException(e);
         }
     }
@@ -2127,14 +2137,16 @@ public class ApiDAOImpl implements ApiDAO {
                 endpointList.add(constructEndPointDetails(resultSet));
             }
         } catch (SQLException | IOException e) {
+            String msg = "Couldn't Get Endpoints";
+            log.error(msg, e);
             throw new APIMgtDAOException(e);
         }
         return endpointList;
     }
 
-    private Map<String, Object> getEndPointsForApi(Connection connection, String apiId) throws SQLException,
+    private Map<String, Endpoint> getEndPointsForApi(Connection connection, String apiId) throws SQLException,
             IOException {
-        Map<String, Object> endpointMap = new HashMap();
+        Map<String, Endpoint> endpointMap = new HashMap();
         final String query = "SELECT AM_ENDPOINT.UUID,AM_ENDPOINT.NAME,AM_ENDPOINT.SECURITY_CONFIGURATION,AM_ENDPOINT" +
                 ".APPLICABLE_LEVEL,AM_ENDPOINT.ENDPOINT_CONFIGURATION,AM_ENDPOINT.TPS,AM_ENDPOINT.TYPE," +
                 "AM_API_ENDPOINT_MAPPING.TYPE AS ENDPOINT_LEVEL FROM AM_API_ENDPOINT_MAPPING INNER JOIN AM_ENDPOINT " +
@@ -2145,7 +2157,8 @@ public class ApiDAOImpl implements ApiDAO {
                 while (resultSet.next()) {
                     Endpoint endpoint = constructEndPointDetails(resultSet);
                     if (APIMgtConstants.GLOBAL_ENDPOINT.equals(endpoint.getApplicableLevel())) {
-                        endpointMap.put(resultSet.getString("ENDPOINT_LEVEL"), endpoint.getId());
+                        endpointMap.put(resultSet.getString("ENDPOINT_LEVEL"), new Endpoint.Builder().
+                                id(endpoint.getId()).applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).build());
                     } else {
                         endpointMap.put(resultSet.getString("ENDPOINT_LEVEL"), endpoint);
                     }
@@ -2155,20 +2168,18 @@ public class ApiDAOImpl implements ApiDAO {
         return endpointMap;
     }
 
-    private void addEndPointsForApi(Connection connection, String apiId, Map<String, Object> endpointMap) throws
+    private void addEndPointsForApi(Connection connection, String apiId, Map<String, Endpoint> endpointMap) throws
             SQLException, APIMgtDAOException {
         final String query = "INSERT INTO AM_API_ENDPOINT_MAPPING (API_ID,TYPE,ENDPOINT_ID) VALUES (?,?,?)";
         if (endpointMap != null && !endpointMap.isEmpty()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-                for (Map.Entry<String, Object> entry : endpointMap.entrySet()) {
+                for (Map.Entry<String, Endpoint> entry : endpointMap.entrySet()) {
                     String endpointId;
-                    if (entry.getValue() instanceof Endpoint) {
-                        Endpoint endpoint = (Endpoint) entry.getValue();
+                    Endpoint endpoint = entry.getValue();
+                    if (APIMgtConstants.API_SPECIFIC_ENDPOINT.equals(endpoint.getApplicableLevel())) {
                         addEndpoint(connection, endpoint);
-                        endpointId = endpoint.getId();
-                    } else {
-                        endpointId = (String) entry.getValue();
                     }
+                    endpointId = endpoint.getId();
                     preparedStatement.setString(1, apiId);
                     preparedStatement.setString(2, entry.getKey());
                     preparedStatement.setString(3, endpointId);
@@ -2182,14 +2193,13 @@ public class ApiDAOImpl implements ApiDAO {
     private void deleteEndPointsForApi(Connection connection, String apiId) throws SQLException, IOException {
         final String query = "DELETE FROM AM_API_ENDPOINT_MAPPING WHERE API_ID = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            Map<String, Object> apiEndPointMap = getEndPointsForApi(connection, apiId);
+            Map<String, Endpoint> apiEndPointMap = getEndPointsForApi(connection, apiId);
             preparedStatement.setString(1, apiId);
             preparedStatement.execute();
             apiEndPointMap.forEach((k, v) -> {
-                if (v instanceof Endpoint) {
-                    Endpoint endpoint = (Endpoint) v;
+                if (APIMgtConstants.API_SPECIFIC_ENDPOINT.equals(v.getApplicableLevel())) {
                     try {
-                        deleteEndpoint(connection, endpoint.getId());
+                        deleteEndpoint(connection, v.getId());
                     } catch (SQLException e) {
                         log.error("Endpoint Couldn't Delete", e);
                     }
@@ -2203,11 +2213,10 @@ public class ApiDAOImpl implements ApiDAO {
         Set<String> endpoints = new HashSet();
         getUriTemplates(connection, apiId).forEach((k, v) -> {
             try {
-                Map<String, Object> apiEndPointMap = getEndPointsForOperation(connection, apiId, v.getTemplateId());
+                Map<String, Endpoint> apiEndPointMap = getEndPointsForOperation(connection, apiId, v.getTemplateId());
                 apiEndPointMap.forEach((k1, v1) -> {
-                    if (v1 instanceof Endpoint) {
-                        Endpoint endpoint = (Endpoint) v1;
-                        endpoints.add(endpoint.getId());
+                    if (APIMgtConstants.API_SPECIFIC_ENDPOINT.equals(v1.getApplicableLevel())) {
+                        endpoints.add(v1.getId());
                     }
                 });
             } catch (SQLException | IOException e) {
@@ -2227,9 +2236,9 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    private Map<String, Object> getEndPointsForOperation(Connection connection, String apiId, String operationId)
+    private Map<String, Endpoint> getEndPointsForOperation(Connection connection, String apiId, String operationId)
             throws SQLException, IOException {
-        Map<String, Object> endpointMap = new HashMap();
+        Map<String, Endpoint> endpointMap = new HashMap();
         final String query = "SELECT AM_ENDPOINT.UUID,AM_ENDPOINT.NAME,AM_ENDPOINT.SECURITY_CONFIGURATION,AM_ENDPOINT" +
                 ".APPLICABLE_LEVEL,AM_ENDPOINT.ENDPOINT_CONFIGURATION,AM_ENDPOINT.TPS,AM_ENDPOINT.TYPE," +
                 "AM_API_RESOURCE_ENDPOINT.TYPE AS ENDPOINT_LEVEL FROM AM_API_RESOURCE_ENDPOINT INNER JOIN AM_ENDPOINT" +
@@ -2242,9 +2251,10 @@ public class ApiDAOImpl implements ApiDAO {
                 while (resultSet.next()) {
                     Endpoint endpoint = constructEndPointDetails(resultSet);
                     if (APIMgtConstants.API_SPECIFIC_ENDPOINT.equals(endpoint.getApplicableLevel())) {
-                        endpointMap.put(resultSet.getString("ENDPOINT_LEVEL"), endpoint);
+                        endpointMap.put(resultSet.getString("ENDPOINT_LEVEL"), new Endpoint.Builder().
+                                id(endpoint.getId()).applicableLevel(endpoint.getApplicableLevel()).build());
                     } else {
-                        endpointMap.put(resultSet.getString("ENDPOINT_LEVEL"), endpoint.getId());
+                        endpointMap.put(resultSet.getString("ENDPOINT_LEVEL"), endpoint);
                     }
                 }
             }
@@ -2253,20 +2263,18 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     private void addEndPointsForOperation(Connection connection, String apiId, String operationId, Map<String,
-            Object> endpointMap) throws SQLException, APIMgtDAOException {
+            Endpoint> endpointMap) throws SQLException, APIMgtDAOException {
         final String query = "INSERT INTO AM_API_RESOURCE_ENDPOINT (API_ID,OPERATION_ID,TYPE,ENDPOINT_ID) " +
                 "VALUES (?,?,?,?)";
         if (endpointMap != null && !endpointMap.isEmpty()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-                for (Map.Entry<String, Object> entry : endpointMap.entrySet()) {
+                for (Map.Entry<String, Endpoint> entry : endpointMap.entrySet()) {
                     String endpointId;
-                    if (entry.getValue() instanceof Endpoint) {
-                        Endpoint endpoint = (Endpoint) entry.getValue();
+                    Endpoint endpoint = entry.getValue();
+                    if (APIMgtConstants.API_SPECIFIC_ENDPOINT.equals(endpoint.getApplicableLevel())) {
                         addEndpoint(connection, endpoint);
-                        endpointId = endpoint.getId();
-                    } else {
-                        endpointId = String.valueOf(entry.getValue());
                     }
+                    endpointId = endpoint.getId();
                     preparedStatement.setString(1, apiId);
                     preparedStatement.setString(2, operationId);
                     preparedStatement.setString(3, entry.getKey());

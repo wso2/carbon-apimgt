@@ -122,7 +122,7 @@ public class SampleTestObjectCreator {
     public static String apiDefinition;
     public static InputStream inputStream;
     private static final Logger log = LoggerFactory.getLogger(SampleTestObjectCreator.class);
-    static String endpointId = UUID.randomUUID().toString();
+    public static String endpointId = UUID.randomUUID().toString();
 
     static {
         try {
@@ -668,25 +668,27 @@ public class SampleTestObjectCreator {
     public static Endpoint createMockEndpoint() {
         return new Endpoint.Builder().endpointConfig("{'type':'http','url':'http://localhost:8280'}").id(endpointId)
                 .maxTps(1000L).security("{'enabled':false}").name("Endpoint1").applicableLevel(APIMgtConstants
-                        .GLOBAL_ENDPOINT).build();
+                        .GLOBAL_ENDPOINT).type("http").build();
     }
 
     public static Endpoint createUpdatedEndpoint() {
         return new Endpoint.Builder().endpointConfig("{'type':'soap','url':'http://localhost:8280'}").id(endpointId)
                 .maxTps(1000L).security("{'enabled':false}").name("Endpoint1").applicableLevel(APIMgtConstants
-                        .GLOBAL_ENDPOINT).build();
+                        .GLOBAL_ENDPOINT).type("http").build();
     }
 
     public static Endpoint createAlternativeEndpoint() {
         String uuid = UUID.randomUUID().toString();
         return new Endpoint.Builder().endpointConfig("{'type':'soap','url':'http://localhost:8280'}").id(uuid)
-                .name("Endpoint2").maxTps(1000L).security("{'enabled':false}").build();
+                .name("Endpoint2").maxTps(1000L).security("{'enabled':false}").applicableLevel(APIMgtConstants
+                        .GLOBAL_ENDPOINT).build();
 
     }
 
-    public static Map<String, Object> getMockEndpointMap() {
-        Map<String, Object> endpointMap = new HashedMap();
-        endpointMap.put(PRODUCTION_ENDPOINT, endpointId);
+    public static Map<String, Endpoint> getMockEndpointMap() {
+        Map<String, Endpoint> endpointMap = new HashedMap();
+        endpointMap.put(PRODUCTION_ENDPOINT, new Endpoint.Builder().id(endpointId).applicableLevel(APIMgtConstants
+                .GLOBAL_ENDPOINT).build());
         return endpointMap;
     }
 

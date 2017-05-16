@@ -56,7 +56,7 @@ public class APIMgtAdminServiceImplTestCase {
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
         APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforAPISubscriptionDAO(apiSubscriptionDAO);
         when(apiSubscriptionDAO.getAPISubscriptionsOfAPIForValidation(LIMIT))
-                .thenReturn(new ArrayList<SubscriptionValidationData>());
+                .thenReturn(new ArrayList<>());
         adminService.getAPISubscriptions(LIMIT);
         verify(apiSubscriptionDAO, times(1)).getAPISubscriptionsOfAPIForValidation(LIMIT);
     }

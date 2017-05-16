@@ -66,7 +66,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
             String errorMessage = "Error while deleting  Endpoint : " + endpointId;
             HashMap<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.ENDPOINT_ID, endpointId);
-            org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler
                     (), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
@@ -111,7 +111,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
             String errorMessage = "Error while get  Endpoint : " + endpointId;
             HashMap<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.ENDPOINT_ID, endpointId);
-            org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler
                     (), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
@@ -190,7 +190,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
                     .entity(MappingUtil.toEndPointDTO(updatedEndpoint)).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while getting the endpoint :" + endpointId;
-            org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         } catch (JsonProcessingException e) {
@@ -231,7 +231,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
             return Response.ok().entity(endPointListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while get All Endpoint";
-            org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         } catch (IOException e) {
@@ -288,7 +288,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
                     .build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while get All Endpoint";
-            org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         } catch (JsonProcessingException e) {

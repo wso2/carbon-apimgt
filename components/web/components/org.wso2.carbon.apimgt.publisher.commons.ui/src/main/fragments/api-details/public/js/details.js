@@ -233,7 +233,34 @@ function endpointsTabHandler(event) {
     var api_id = event.data.api_id;
     api_client.get(api_id).then(
         function (response) {
-                    var data = JSON.parse(response.data).endpoint;
+            var api = response.obj;
+            var data = {
+                name: api.name,
+                endpoints: {},
+            };
+            var promised_endpoints = [];
+            for (var endpoint_index in api.endpoint) {
+                if (api.endpoint.hasOwnProperty(endpoint_index)) {
+                    var id = api.endpoint[endpoint_index].id;
+                    promised_endpoints.push(api_client.getEndpoint(id));
+                    data.endpoints[id] = api.endpoint[endpoint_index];
+                }
+            }
+            var all_endpoints = Promise.all(promised_endpoints);
+            all_endpoints.then(
+                function (responses) {
+                    for (var endpoint_index in responses) {
+                        if (responses.hasOwnProperty(endpoint_index)) {
+                            var endpoint = responses[endpoint_index].obj;
+                            Object.assign(data.endpoints[endpoint.id], endpoint);
+                        }
+                    }
+                    var callbacks = {
+                        onSuccess: function (data) {
+                            validateActionButtons('#update-endpoints-configuration');
+                        }, onFailure: function (data) {
+                        }
+                    };
                     var mode = "OVERWRITE"; // Available modes [OVERWRITE,APPEND, PREPEND]
                     UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-endpoints", data, "endpoints-tab-content", mode, callbacks);
                 }

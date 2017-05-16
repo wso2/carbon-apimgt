@@ -286,10 +286,6 @@ public class Endpoint implements Serializable {
     @Override
     public int hashCode() {
         int result = id.hashCode();
-        result = 31 * result + name.hashCode();
-        result = 31 * result + endpointConfig.hashCode();
-        result = 31 * result + maxTps.hashCode();
-        result = 31 * result + security.hashCode();
         return result;
     }
 }

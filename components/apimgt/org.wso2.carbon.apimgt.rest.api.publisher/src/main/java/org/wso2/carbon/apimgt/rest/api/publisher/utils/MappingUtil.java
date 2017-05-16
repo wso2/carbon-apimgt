@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
@@ -123,16 +124,15 @@ public class MappingUtil {
         return apidto;
     }
 
-    private static List<API_endpointDTO> fromEndpointToList(Map<String, Object> endpoint) throws IOException {
+    private static List<API_endpointDTO> fromEndpointToList(Map<String, Endpoint> endpoint) throws IOException {
         List<API_endpointDTO> endpointDTOs = new ArrayList<>();
         if (endpoint != null) {
-            for (Map.Entry<String, Object> entry : endpoint.entrySet()) {
+            for (Map.Entry<String, Endpoint> entry : endpoint.entrySet()) {
                 API_endpointDTO endpointDTO = new API_endpointDTO();
-                if (entry.getValue() instanceof Endpoint) {
-                    Endpoint entryValue = (Endpoint) entry.getValue();
-                    endpointDTO.setInline(toEndPointDTO(entryValue));
+                if (APIMgtConstants.API_SPECIFIC_ENDPOINT.equals(entry.getValue().getApplicableLevel())) {
+                    endpointDTO.setInline(toEndPointDTO(entry.getValue()));
                 } else {
-                    endpointDTO.setKey(String.valueOf(entry.getValue()));
+                    endpointDTO.setKey(entry.getValue().getId());
                 }
                 endpointDTO.setType(entry.getKey());
                 endpointDTOs.add(endpointDTO);
@@ -215,12 +215,13 @@ public class MappingUtil {
         return apiBuilder;
     }
 
-    private static Map<String, Object> fromEndpointListToMap(List<API_endpointDTO> endpoint) throws
+    private static Map<String, Endpoint> fromEndpointListToMap(List<API_endpointDTO> endpoint) throws
             JsonProcessingException {
-        Map<String, Object> endpointMap = new HashMap<>();
+        Map<String, Endpoint> endpointMap = new HashMap<>();
         for (API_endpointDTO endpointDTO : endpoint) {
             if (!StringUtils.isEmpty(endpointDTO.getKey())){
-                endpointMap.put(endpointDTO.getType(), endpointDTO.getKey());
+                endpointMap.put(endpointDTO.getType(), new Endpoint.Builder().id(endpointDTO.getKey())
+                        .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).build());
             }if (endpointDTO.getInline() != null){
                 endpointMap.put(endpointDTO.getType(), toEndpoint(endpointDTO.getInline()));
             }
@@ -409,6 +410,7 @@ public class MappingUtil {
         }
         endPointBuilder.security(mapper.writeValueAsString(endPointDTO.getEndpointSecurity()));
         endPointBuilder.type(endPointDTO.getType());
+        endPointBuilder.applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT);
         return endPointBuilder.build();
     }
 

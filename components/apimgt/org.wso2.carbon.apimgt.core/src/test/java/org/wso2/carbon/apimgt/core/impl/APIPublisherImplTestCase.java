@@ -131,7 +131,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user))
                 .thenReturn(new LifecycleState());
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator);
-        String endpointId = String.valueOf(apiBuilder.getEndpoint().get("production"));
+        String endpointId = apiBuilder.getEndpoint().get("production").getId();
         Endpoint endpoint = new Endpoint.Builder().id(endpointId).name("testEndpoint").build();
         Mockito.when(apiDAO.getEndpoint(endpointId)).thenReturn(endpoint);
         apiPublisher.addAPI(apiBuilder);
@@ -141,8 +141,8 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Test add api with sandbox endpoint")
     public void testAddApiSandboxEndpoint() throws APIManagementException, LifecycleException {
-        Map<String, Object> endpointMap = new HashMap<>();
-        Map<String, Object> resourceEndpointMap = new HashMap<>();
+        Map<String, Endpoint> endpointMap = new HashMap<>();
+        Map<String, Endpoint> resourceEndpointMap = new HashMap<>();
         Map<String, UriTemplate> uriTemplateMap = new HashMap();
         UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
         uriTemplateBuilder.endpoint(resourceEndpointMap);
@@ -293,7 +293,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user))
                 .thenReturn(new LifecycleState());
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator);
-        String endpointId = String.valueOf(apiBuilder.getEndpoint().get("production"));
+        String endpointId = apiBuilder.getEndpoint().get("production").getId();
         Endpoint endpoint = new Endpoint.Builder().id(endpointId).name("testEndpoint").build();
         Mockito.when(apiDAO.getEndpoint(endpointId)).thenReturn(endpoint);
         apiPublisher.addAPI(apiBuilder);
@@ -1746,8 +1746,8 @@ public class APIPublisherImplTestCase {
                 .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).build();
         Endpoint apiEndpoint = new Endpoint.Builder().id(UUID.randomUUID().toString()).name("apiEndpoint")
                 .applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build();
-        Map<String, Object> endpointMap = new HashMap();
-        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, globalEndpoint.getId());
+        Map<String, Endpoint> endpointMap = new HashMap();
+        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, globalEndpoint);
         endpointMap.put(APIMgtConstants.SANDBOX_ENDPOINT, apiEndpoint);
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().endpoint(endpointMap);
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user))
@@ -1777,8 +1777,8 @@ public class APIPublisherImplTestCase {
                 .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).build();
         Endpoint apiEndpoint = new Endpoint.Builder().id(UUID.randomUUID().toString()).name("apiEndpoint")
                 .applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build();
-        Map<String, Object> endpointMap = new HashMap();
-        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, globalEndpoint.getId());
+        Map<String, Endpoint> endpointMap = new HashMap();
+        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, globalEndpoint);
         endpointMap.put(APIMgtConstants.SANDBOX_ENDPOINT, apiEndpoint);
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().endpoint(endpointMap);
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user))
@@ -1806,8 +1806,8 @@ public class APIPublisherImplTestCase {
                 .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).build();
         Endpoint apiEndpoint = new Endpoint.Builder().id(UUID.randomUUID().toString()).name("apiEndpoint")
                 .applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build();
-        Map<String, Object> endpointMap = new HashMap();
-        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, globalEndpoint.getId());
+        Map<String, Endpoint> endpointMap = new HashMap();
+        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, globalEndpoint);
         endpointMap.put(APIMgtConstants.SANDBOX_ENDPOINT, apiEndpoint);
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().endpoint(endpointMap);
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user))
@@ -1836,10 +1836,10 @@ public class APIPublisherImplTestCase {
                 .applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build();
         Endpoint resourceEndpoint = new Endpoint.Builder().id(UUID.randomUUID().toString()).name("resourceEndpoint")
                 .applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build();
-        Map<String, Object> endpointMap = new HashMap();
-        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, globalEndpoint.getId());
+        Map<String, Endpoint> endpointMap = new HashMap();
+        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, globalEndpoint);
         endpointMap.put(APIMgtConstants.SANDBOX_ENDPOINT, apiEndpoint);
-        Map<String, Object> resourceEndpoints = new HashMap();
+        Map<String, Endpoint> resourceEndpoints = new HashMap();
         resourceEndpoints.put(APIMgtConstants.SANDBOX_ENDPOINT, resourceEndpoint);
         Map<String, UriTemplate> uriTemplateMap = SampleTestObjectCreator.getMockUriTemplates();
         uriTemplateMap.forEach((k, v) -> {
@@ -1878,10 +1878,10 @@ public class APIPublisherImplTestCase {
                 .applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build();
         Endpoint resourceEndpoint = new Endpoint.Builder().id(UUID.randomUUID().toString()).name("resourceEndpoint")
                 .applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build();
-        Map<String, Object> endpointMap = new HashMap();
-        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, globalEndpoint.getId());
+        Map<String, Endpoint> endpointMap = new HashMap();
+        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, globalEndpoint);
         endpointMap.put(APIMgtConstants.SANDBOX_ENDPOINT, apiEndpoint);
-        Map<String, Object> resourceEndpoints = new HashMap();
+        Map<String, Endpoint> resourceEndpoints = new HashMap();
         resourceEndpoints.put(APIMgtConstants.SANDBOX_ENDPOINT, resourceEndpoint);
         Map<String, UriTemplate> uriTemplateMap = SampleTestObjectCreator.getMockUriTemplates();
         uriTemplateMap.forEach((k, v) -> {
@@ -1919,10 +1919,10 @@ public class APIPublisherImplTestCase {
                 .applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build();
         Endpoint resourceEndpoint = new Endpoint.Builder().id(UUID.randomUUID().toString()).name("resourceEndpoint")
                 .applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build();
-        Map<String, Object> endpointMap = new HashMap();
-        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, globalEndpoint.getId());
+        Map<String, Endpoint> endpointMap = new HashMap();
+        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, globalEndpoint);
         endpointMap.put(APIMgtConstants.SANDBOX_ENDPOINT, apiEndpoint);
-        Map<String, Object> resourceEndpoints = new HashMap();
+        Map<String, Endpoint> resourceEndpoints = new HashMap();
         resourceEndpoints.put(APIMgtConstants.SANDBOX_ENDPOINT, resourceEndpoint);
         Map<String, UriTemplate> uriTemplateMap = SampleTestObjectCreator.getMockUriTemplates();
         uriTemplateMap.forEach((k, v) -> {
@@ -1962,10 +1962,10 @@ public class APIPublisherImplTestCase {
                 .applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build();
         Endpoint resourceEndpoint1 = new Endpoint.Builder().id(UUID.randomUUID().toString()).name("resourceEndpoint1")
                 .applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build();
-        Map<String, Object> endpointMap = new HashMap();
-        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, globalEndpoint.getId());
+        Map<String, Endpoint> endpointMap = new HashMap();
+        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, globalEndpoint);
         endpointMap.put(APIMgtConstants.SANDBOX_ENDPOINT, apiEndpoint);
-        Map<String, Object> resourceEndpoints = new HashMap();
+        Map<String, Endpoint> resourceEndpoints = new HashMap();
         resourceEndpoints.put(APIMgtConstants.SANDBOX_ENDPOINT, resourceEndpoint);
         resourceEndpoints.put(APIMgtConstants.PRODUCTION_ENDPOINT, resourceEndpoint1);
         Map<String, UriTemplate> uriTemplateMap = SampleTestObjectCreator.getMockUriTemplates();

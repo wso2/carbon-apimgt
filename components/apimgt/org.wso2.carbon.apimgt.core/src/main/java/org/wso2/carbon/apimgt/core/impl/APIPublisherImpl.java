@@ -241,11 +241,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         apiBuilder.lastUpdatedTime(localDateTime);
         apiBuilder.createdBy(getUsername());
         apiBuilder.updatedBy(getUsername());
-        Map<String, Object> apiEndpointMap = apiBuilder.getEndpoint();
+        Map<String, Endpoint> apiEndpointMap = apiBuilder.getEndpoint();
         if (apiEndpointMap != null) {
-            for (Map.Entry<String, Object> entry : apiEndpointMap.entrySet()) {
-                if (entry.getValue() instanceof Endpoint) {
-                    Endpoint.Builder endpointBuilder = new Endpoint.Builder((Endpoint) entry.getValue());
+            for (Map.Entry<String, Endpoint> entry : apiEndpointMap.entrySet()) {
+                if (APIMgtConstants.API_SPECIFIC_ENDPOINT.equals(entry.getValue().getApplicableLevel())) {
+                    Endpoint.Builder endpointBuilder = new Endpoint.Builder(entry.getValue());
                     if (StringUtils.isEmpty(endpointBuilder.getId())) {
                         endpointBuilder.id(UUID.randomUUID().toString());
                     }
@@ -288,9 +288,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                                     .getUriTemplate(), uriTemplate.getHttpVerb()));
                         }
                         if (uriTemplate.getEndpoint() != null && !uriTemplate.getEndpoint().isEmpty()) {
-                            for (Map.Entry<String, Object> entry : uriTemplate.getEndpoint().entrySet()) {
-                                if (entry.getValue() instanceof Endpoint) {
-                                    Endpoint.Builder endpointBuilder = new Endpoint.Builder((Endpoint) entry.getValue
+                            for (Map.Entry<String, Endpoint> entry : uriTemplate.getEndpoint().entrySet()) {
+                                if (APIMgtConstants.API_SPECIFIC_ENDPOINT.equals(entry.getValue().getApplicableLevel
+                                        ())) {
+                                    Endpoint.Builder endpointBuilder = new Endpoint.Builder(entry.getValue
                                             ());
                                     if (StringUtils.isEmpty(endpointBuilder.getId())) {
                                         endpointBuilder.id(UUID.randomUUID().toString());
@@ -330,25 +331,21 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     dto.setHttpVerb(uriTemplate.getHttpVerb());
                     dto.setAuthType(uriTemplate.getAuthType());
                     dto.setPolicy(uriTemplate.getPolicy());
-                    Map<String, Object> map = uriTemplate.getEndpoint();
+                    Map<String, Endpoint> map = uriTemplate.getEndpoint();
                     if (map.containsKey(APIMgtConstants.PRODUCTION_ENDPOINT)) {
-                        Object endpoint = map.get(APIMgtConstants.PRODUCTION_ENDPOINT);
-                        if (endpoint instanceof Endpoint) {
-                            Endpoint endpoint1 = (Endpoint) endpoint;
-                            dto.setProductionEndpoint(endpoint1.getName());
+                        Endpoint endpoint = map.get(APIMgtConstants.PRODUCTION_ENDPOINT);
+                        if (APIMgtConstants.API_SPECIFIC_ENDPOINT.equals(endpoint.getApplicableLevel())) {
+                            dto.setProductionEndpoint(endpoint.getName());
                         } else {
-                            dto.setProductionEndpoint(getApiDAO().getEndpoint(String.valueOf(endpoint)).getName
-                                    ());
+                            dto.setProductionEndpoint(getApiDAO().getEndpoint(endpoint.getId()).getName());
                         }
                     }
                     if (map.containsKey(APIMgtConstants.SANDBOX_ENDPOINT)) {
-                        Object endpoint = map.get(APIMgtConstants.SANDBOX_ENDPOINT);
-                        if (endpoint instanceof Endpoint) {
-                            Endpoint endpoint1 = (Endpoint) endpoint;
-                            dto.setSandboxEndpoint(endpoint1.getName());
+                        Endpoint endpoint = map.get(APIMgtConstants.SANDBOX_ENDPOINT);
+                        if (APIMgtConstants.API_SPECIFIC_ENDPOINT.equals(endpoint.getApplicableLevel())) {
+                            dto.setSandboxEndpoint(endpoint.getName());
                         } else {
-                            dto.setSandboxEndpoint(getApiDAO().getEndpoint(String.valueOf(endpoint)).getName
-                                    ());
+                            dto.setSandboxEndpoint(getApiDAO().getEndpoint(endpoint.getId()).getName());
                         }
                     }
                     resourceList.add(dto);
@@ -1533,7 +1530,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
         try {
             getApiDAO().updateEndpoint(endpoint);
-            publishEndpointConfigToGateway();
         } catch (APIMgtDAOException e) {
             String msg = "Failed to update Endpoint : " + endpoint.getName();
             log.error(msg, e);
@@ -1569,8 +1565,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             log.error(msg);
             throw new APIManagementException(msg, ExceptionCodes.ENDPOINT_DELETE_FAILED);
         }
-        //update endpoint config in gateway
-        publishEndpointConfigToGateway();
     }
 
     /**

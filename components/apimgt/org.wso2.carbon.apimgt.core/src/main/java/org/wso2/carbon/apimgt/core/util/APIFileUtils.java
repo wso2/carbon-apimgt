@@ -269,8 +269,8 @@ public class APIFileUtils {
      * @throws APIMgtDAOException if an error occurs while writing the Endpoint
      */
     public static void exportEndpointToFileSystem(Endpoint endpoint, String exportLocation) throws APIMgtDAOException {
-        String endpointFileLocation = exportLocation + File.separator + endpoint.getName() + "-" + endpoint.getId()
-                + APIMgtConstants.APIFileUtilConstants.JSON_EXTENSION;
+        String endpointFileLocation = exportLocation + File.separator + endpoint.getName() + APIMgtConstants
+                .APIFileUtilConstants.JSON_EXTENSION;
         APIFileUtils.writeObjectAsJsonToFile(endpoint, endpointFileLocation);
 
         if (log.isDebugEnabled()) {
