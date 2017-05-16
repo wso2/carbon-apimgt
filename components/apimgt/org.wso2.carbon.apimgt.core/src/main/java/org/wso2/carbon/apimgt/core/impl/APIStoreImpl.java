@@ -27,6 +27,7 @@ import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.APIMConfigurations;
+import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.api.APIMObservable;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.api.EventObserver;
@@ -104,6 +105,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     private static final Logger log = LoggerFactory.getLogger(APIStoreImpl.class);
     private TagDAO tagDAO;
     private APIMConfigurations config;
+    APIGateway gateway = APIManagerFactory.getInstance().getGateway();
 
     /**
      * Constructor.
@@ -367,6 +369,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             workflow.setStatus(response.getWorkflowStatus());            
 
             if (WorkflowStatus.CREATED != response.getWorkflowStatus()) {
+
                 completeWorkflow(addSubscriptionWFExecutor, workflow);
             } else {
                 //only add entry to workflow table if it is a pending task
@@ -1066,6 +1069,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 subscriptionState = APIMgtConstants.SubscriptionStatus.REJECTED;
             }
 
+            //Add subscription to gateway
+            gateway.addAPISubscription(((SubscriptionWorkflow) workflow).getSubscription());
             getApiSubscriptionDAO().updateSubscriptionStatus(workflow.getWorkflowReference(), subscriptionState);
             updateWorkflowEntries(workflow);
         } else if (workflow instanceof SubscriptionWorkflow
@@ -1082,6 +1087,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 if (log.isDebugEnabled()) {
                     log.debug("Subscription deletion workflow complete: Approved");
                 }
+                gateway.deleteAPISubscription(((SubscriptionWorkflow) workflow).getSubscription());
                 getApiSubscriptionDAO().deleteAPISubscription(workflow.getWorkflowReference());
 
             } else if (WorkflowStatus.REJECTED == response.getWorkflowStatus()) {

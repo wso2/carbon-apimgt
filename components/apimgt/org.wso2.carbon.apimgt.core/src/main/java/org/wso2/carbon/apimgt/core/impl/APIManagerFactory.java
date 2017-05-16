@@ -22,7 +22,7 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.api.APIGatewayPublisher;
+import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.api.APIStore;
@@ -183,7 +183,7 @@ public class APIManagerFactory {
         return consumer;
     }
 
-    public APIGatewayPublisher getGateway() {
+    public APIGateway getGateway() {
         return new APIGatewayPublisherImpl();
     }
 
