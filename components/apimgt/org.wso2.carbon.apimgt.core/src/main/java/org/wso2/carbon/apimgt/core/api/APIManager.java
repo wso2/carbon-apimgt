@@ -19,6 +19,7 @@
  */
 package org.wso2.carbon.apimgt.core.api;
 
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
@@ -28,6 +29,7 @@ import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.Workflow;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 
@@ -36,19 +38,6 @@ import java.util.Set;
  */
 public interface APIManager {
     /**
-     * Returns a list of all existing APIs by all providers. The API objects returned by this
-     * method may be partially initialized (due to performance reasons). Each API instance
-     * is guaranteed to have the API name, version, provider name, context, status and icon URL.
-     * All other fields may not be initialized. Therefore, the objects returned by this method
-     * must not be used to access any metadata item related to an API, other than the ones listed
-     * above. For that purpose a fully initialized API object instance should be acquired by
-     * calling the getAPI(String) method.
-     *
-     * @return a List of API objects (partially initialized), possibly empty
-     * @throws APIManagementException on error
-     */
-    List<API> getAllAPIs() throws APIManagementException;
-    /**
      * Returns details of an API
      *
      * @param uuid UUID of the API's registry artifact
@@ -56,6 +45,18 @@ public interface APIManager {
      * @throws APIManagementException if failed get API from String
      */
     API getAPIbyUUID(String uuid) throws APIManagementException;
+
+    /**
+     * Get a list of APIs published by the given provider. If a given API has multiple APIs,
+     * only the latest version will
+     * be included in this list.
+     *
+     * @param providerName username of the the user who created the API
+     * @param apiType Type of API
+     * @return set of APIs
+     * @throws APIManagementException if failed to get set of API
+     */
+    List<API> getAPIsByProvider(String providerName, ApiType apiType) throws APIManagementException;
 
     /**
      * Retrieves the last updated time of an API
@@ -186,6 +187,60 @@ public interface APIManager {
      * @throws APIManagementException   If failed to get subscription from UUID.
      */
     Subscription getSubscriptionByUUID(String subId) throws APIManagementException;
+
+    /**
+     * This method updates Swagger 2.0 resources in the registry
+     *
+     * @param apiId    id of the String
+     * @param jsonText json text to be saved in the registry
+     * @throws APIManagementException If failed to save swagger definition.
+     */
+    void saveSwagger20Definition(String apiId, String jsonText) throws APIManagementException;
+
+    /**
+     * Save the thumbnail icon for api
+     *
+     * @param apiId       apiId of api
+     * @param inputStream inputStream of image
+     * @param dataType    Data Type of image
+     * @throws APIManagementException If failed to save the thumbnail.
+     */
+    void saveThumbnailImage(String apiId, InputStream inputStream, String dataType) throws APIManagementException;
+
+    /**
+     * Get the thumbnail icon for api
+     *
+     * @param apiId apiId of api
+     * @return thumbnail as a stream
+     * @throws APIManagementException If failed to retrieve the thumbnail.
+     */
+    InputStream getThumbnailImage(String apiId) throws APIManagementException;
+
+    /**
+     * This method updates gateway config in the database
+     *
+     * @param apiId        id of the String
+     * @param configString text to be saved in the registry
+     * @throws APIManagementException If failed to update gateway config.
+     */
+    void updateApiGatewayConfig(String apiId, String configString) throws APIManagementException;
+
+    /**
+     * This method retrieve gateway config in the database
+     *
+     * @param apiId id of the String
+     * @return API gateway config as a string
+     * @throws APIManagementException If failed to get gateway config of the API.
+     */
+    String getApiGatewayConfig(String apiId) throws APIManagementException;
+
+    /**
+     *
+     * @param apiId UUID of API
+     * @return Last updated time of gateway configuration of the API given its uuid
+     * @throws APIManagementException if API Manager core level exception occurred
+     */
+    String getLastUpdatedTimeOfGatewayConfig(String apiId) throws APIManagementException;
 
     /**
      * Retrieves the last updated time of a document of an API

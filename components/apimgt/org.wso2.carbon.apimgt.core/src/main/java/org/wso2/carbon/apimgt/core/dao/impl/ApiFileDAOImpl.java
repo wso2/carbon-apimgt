@@ -510,10 +510,10 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#getAPIsForProvider(String providerName)
+     * {@inheritDoc}
      */
     @Override
-    public List<API> getAPIsForProvider(String providerName) throws APIMgtDAOException {
+    public List<API> getAPIsForProvider(String providerName, ApiType apiType) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
