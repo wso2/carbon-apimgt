@@ -54,6 +54,7 @@ public class APIManagerFactory {
     private APIMgtAdminService apiMgtAdminService;
     private IdentityProvider identityProvider;
     private KeyManager keyManager;
+    private APIGateway apiGateway;
 
     private static final int MAX_PROVIDERS = 50;
     private static final int MAX_CONSUMERS = 500;
@@ -241,8 +242,17 @@ public class APIManagerFactory {
         return identityProvider;
     }
 
+    /**
+     * Get API gateway object
+     *
+     * @return APIGateway impl object
+     */
     public APIGateway getGateway() {
-        return new APIGatewayPublisherImpl();
+
+        if (apiGateway == null) {
+            apiGateway = new APIGatewayPublisherImpl();
+        }
+        return apiGateway;
     }
 
     /**

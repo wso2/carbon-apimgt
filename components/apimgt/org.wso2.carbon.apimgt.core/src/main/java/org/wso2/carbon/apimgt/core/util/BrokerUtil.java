@@ -54,8 +54,10 @@ public class BrokerUtil {
     }
 
     /**
-     * @param topicName
-     * @param gatewayDTO
+     * Publish to broker topic
+     *
+     * @param topicName     publishing topic name
+     * @param gatewayDTO    topic message data object
      */
     public static void publishToTopic(String topicName, GatewayDTO gatewayDTO) throws GatewayException {
         TopicSession topicSession = null;
