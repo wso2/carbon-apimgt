@@ -43,6 +43,7 @@
         <module>components/apimgt</module>
         <module>components/web</module>
         <module>features/apimgt</module>
+        <module>gateway-modules</module>
     </modules>
 
     <profiles>
