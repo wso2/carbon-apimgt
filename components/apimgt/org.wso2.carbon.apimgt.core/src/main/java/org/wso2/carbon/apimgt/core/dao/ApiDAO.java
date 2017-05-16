@@ -97,11 +97,12 @@ public interface ApiDAO {
     /**
      * Retrieves summary data of all available APIs of a given provider.
      * @param providerName A given API Provider
+     * @param apiType Type of API
      * @return {@code List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    List<API> getAPIsForProvider(String providerName) throws APIMgtDAOException;
+    List<API> getAPIsForProvider(String providerName, ApiType apiType) throws APIMgtDAOException;
 
     /**
      * Retrieves summary data of all available APIs with life cycle status that matches the status list provided

@@ -52,17 +52,6 @@ public interface APIPublisher extends APIManager {
     Set<Provider> getAllProviders() throws APIManagementException;
 
     /**
-     * Get a list of APIs published by the given provider. If a given API has multiple APIs,
-     * only the latest version will
-     * be included in this list.
-     *
-     * @param providerName username of the the user who created the API
-     * @return set of APIs
-     * @throws APIManagementException if failed to get set of API
-     */
-    List<API> getAPIsByProvider(String providerName) throws APIManagementException;
-
-    /**
      * Get a list of subscriptions for provider's APIs
      *
      * @param offset Starting index of the search results
@@ -162,14 +151,6 @@ public interface APIPublisher extends APIManager {
      *                                the new version of the API
      */
     String createNewAPIVersion(String apiId, String newVersion) throws APIManagementException;
-
-    /**
-     *
-     * @param apiId UUID of API
-     * @return Last updated time of gateway configuration of the API given its uuid
-     * @throws APIManagementException if API Manager core level exception occurred
-     */
-    String getLastUpdatedTimeOfGatewayConfig(String apiId) throws APIManagementException;
 
     /**
      * Attach Documentation (without content) to an API
@@ -301,16 +282,6 @@ public interface APIPublisher extends APIManager {
 
 
     /**
-     * This method updates Swagger 2.0 resources in the registry
-     *
-     * @param apiId    id of the String
-     * @param jsonText json text to be saved in the registry
-     * @throws APIManagementException If failed to save swagger definition.
-     */
-    void saveSwagger20Definition(String apiId, String jsonText) throws APIManagementException;
-
-
-    /**
      * This method returns the lifecycle data for an API including current state,next states.
      *
      * @param apiId String
@@ -338,44 +309,6 @@ public interface APIPublisher extends APIManager {
      * @throws APIManagementException if failed to get Apis
      */
     Map<String, Object> getAllPaginatedAPIs(int start, int end) throws APIManagementException;
-
-    /**
-     * Save the thumbnail icon for api
-     *
-     * @param apiId       apiId of api
-     * @param inputStream inputStream of image
-     * @param dataType    Data Type of image
-     * @throws APIManagementException If failed to save the thumbnail.
-     */
-    void saveThumbnailImage(String apiId, InputStream inputStream, String dataType) throws APIManagementException;
-
-
-    /**
-     * Get the thumbnail icon for api
-     *
-     * @param apiId apiId of api
-     * @return thumbnail as a stream
-     * @throws APIManagementException If failed to retrieve the thumbnail.
-     */
-    InputStream getThumbnailImage(String apiId) throws APIManagementException;
-
-    /**
-     * This method updates gateway config in the database
-     *
-     * @param apiId        id of the String
-     * @param configString text to be saved in the registry
-     * @throws APIManagementException If failed to update gateway config.
-     */
-    void updateApiGatewayConfig(String apiId, String configString) throws APIManagementException;
-
-    /**
-     * This method retrieve gateway config in the database
-     *
-     * @param apiId id of the String
-     * @return API gateway config as a string
-     * @throws APIManagementException If failed to get gateway config of the API.
-     */
-    String getApiGatewayConfig(String apiId) throws APIManagementException;
 
     /**
      * Return list of endpoints
