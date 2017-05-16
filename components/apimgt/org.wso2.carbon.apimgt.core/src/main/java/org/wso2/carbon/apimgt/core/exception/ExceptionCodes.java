@@ -66,6 +66,7 @@ public enum ExceptionCodes implements ErrorHandler {
     API_DEFINITION_MALFORMED(900500, "ApiDefinition not found", 400, "Failed to retrieve API Definition"),
     TEMPLATE_EXCEPTION(900501, "Service configuration Error", 500, " Error generate service config"),
     GATEWAY_EXCEPTION(900502, "Gateway publishing Error", 500, " Error occurred while publishing to Gateway"),
+    BROKER_EXCEPTION(900503, "Broker Connection Error", 500, " Error occurred while obtaining broker connection"),
 
 
     // Workflow related codes
