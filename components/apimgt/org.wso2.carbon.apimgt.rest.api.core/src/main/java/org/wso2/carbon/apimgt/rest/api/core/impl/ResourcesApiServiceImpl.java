@@ -18,6 +18,7 @@ import org.wso2.msf4j.Request;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.ws.rs.core.Response;
 
 public class ResourcesApiServiceImpl extends ResourcesApiService {
@@ -25,9 +26,9 @@ public class ResourcesApiServiceImpl extends ResourcesApiService {
 
     @Override
     public Response resourcesGet(String apiContext
-, String apiVersion
-, String accept
- , Request request) throws NotFoundException {
+            , String apiVersion
+            , String accept
+            , Request request) throws NotFoundException {
         try {
             APIMgtAdminService apiMgtAdminService = APIManagerFactory.getInstance().getAPIMgtAdminService();
             List<UriTemplate> resourcesOfApi = new ArrayList<>();
@@ -38,14 +39,15 @@ public class ResourcesApiServiceImpl extends ResourcesApiService {
             return Response.ok(resourcesListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving resources.";
-            HashMap<String, String> paramList = new HashMap<String, String>();
+            Map<String, String> paramList = new HashMap<String, String>();
             if (!StringUtils.isEmpty(apiContext)) {
                 paramList.put(APIMgtConstants.ExceptionsConstants.API_CONTEXT, apiContext);
             }
             if (!StringUtils.isEmpty(apiVersion)) {
                 paramList.put(APIMgtConstants.ExceptionsConstants.API_VERSION, apiVersion);
             }
-            org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler
+                    (), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }

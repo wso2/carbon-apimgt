@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 
@@ -710,7 +711,7 @@ public class DefaultKeyManagerImpl implements KeyManager {
      */
     private static String getKeyManagerEndPoint(String context) {
 
-        String externalKeyManager = System.getProperty("IsExternalKeyManager");
+        String externalKeyManager = System.getProperty(APIMgtConstants.IS_EXTERNAL_KEYMANAGER);
         if (StringUtils.isNotEmpty(externalKeyManager)) {
             isExternalKeyManager = Boolean.valueOf(externalKeyManager);
         }

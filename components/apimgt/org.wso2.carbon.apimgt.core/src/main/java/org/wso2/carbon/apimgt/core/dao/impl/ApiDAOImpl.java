@@ -1054,7 +1054,7 @@ public class ApiDAOImpl implements ApiDAO {
                     });
                 }
             }
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             String msg = "Couldn't retrieve resources for Api Name: " + apiContext;
             log.error(msg, e);
             throw new APIMgtDAOException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
