@@ -22,6 +22,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
@@ -708,6 +709,11 @@ public class DefaultKeyManagerImpl implements KeyManager {
     This is a temp method to test with external IS 5.3.0
      */
     private static String getKeyManagerEndPoint(String context) {
+
+        String externalKeyManager = System.getProperty("IsExternalKeyManager");
+        if (StringUtils.isNotEmpty(externalKeyManager)) {
+            isExternalKeyManager = Boolean.valueOf(externalKeyManager);
+        }
         if (isExternalKeyManager) {
             return EXTERNEL_KEYMANAGER_ENDPOINT + context;
         }

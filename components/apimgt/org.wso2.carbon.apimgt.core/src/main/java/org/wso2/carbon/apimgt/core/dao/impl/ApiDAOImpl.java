@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.Comment;
@@ -1031,6 +1032,34 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     public String getLastUpdatedTimeOfComment(String commentId) throws APIMgtDAOException {
         return EntityDAO.getLastUpdatedTimeOfResourceByUUID(AM_API_COMMENTS_TABLE_NAME, commentId);
+    }
+
+    /**
+     * @see org.wso2.carbon.apimgt.core.dao.ApiDAO#getResourcesOfApi(String, String)
+     */
+    @Override
+    public List<UriTemplate> getResourcesOfApi(String apiContext, String apiVersion) throws APIMgtDAOException {
+        final String apiIdFromContextQuery = "SELECT UUID FROM AM_API WHERE CONTEXT = ? AND VERSION = ?";
+        List<UriTemplate> uriTemplates = new ArrayList<>();
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(apiIdFromContextQuery)) {
+            preparedStatement.setString(1, apiContext);
+            preparedStatement.setString(2, apiVersion);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    Map<String, UriTemplate> uriTemplateMap = getUriTemplates(connection,
+                            resultSet.getString("UUID"));
+                    uriTemplateMap.forEach((k, v) -> {
+                        uriTemplates.add(v);
+                    });
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Couldn't retrieve resources for Api Name: " + apiContext;
+            log.error(msg, e);
+            throw new APIMgtDAOException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return uriTemplates;
     }
 
     /**

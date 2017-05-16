@@ -16,6 +16,7 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
+import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 
 import java.util.ArrayList;
@@ -199,6 +200,20 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
             String errorMessage = "Couldn't retrieve gateway configuration for apiId " + apiId;
             log.error(errorMessage, e);
             throw new APIConfigRetrievalException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    /**
+     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#getAllResourcesForApi(String, String)
+     */
+    @Override
+    public List<UriTemplate> getAllResourcesForApi(String apiContext, String apiVersion) throws APIManagementException {
+        try {
+            return apiDAO.getResourcesOfApi(apiContext, apiVersion);
+        } catch (APIManagementException e) {
+            String msg = "Couldn't retrieve resources for Api Name: " + apiContext;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 

@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
+import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 
 import java.util.List;
@@ -152,4 +153,12 @@ public interface APIMgtAdminService {
      */
     String getAPIGatewayServiceConfig(String apiId) throws APIConfigRetrievalException;
 
+    /**
+     * Retrieve Resources for API
+     * @param apiContext Context of API
+     * @param apiVersion Version of API
+     * @return list of API Resources
+     * @throws APIManagementException if failed to retrieve resources
+     */
+    List<UriTemplate> getAllResourcesForApi(String apiContext, String apiVersion) throws APIManagementException;
 }
