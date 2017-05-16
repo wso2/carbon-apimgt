@@ -22,7 +22,7 @@ package org.wso2.carbon.apimgt.core.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.api.APIGatewayPublisher;
+import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
 import org.wso2.carbon.apimgt.core.api.APIManager;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
@@ -67,12 +67,12 @@ public abstract class AbstractAPIManager implements APIManager {
     private LabelDAO labelDAO;
     private WorkflowDAO workflowDAO;
     private GatewaySourceGenerator gatewaySourceGenerator;
-    private APIGatewayPublisher apiGatewayPublisher;
+    private APIGateway apiGatewayPublisher;
 
     public AbstractAPIManager(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
                               APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO,
                               APILifecycleManager apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO,
-                              GatewaySourceGenerator gatewaySourceGenerator, APIGatewayPublisher apiGatewayPublisher) {
+                              GatewaySourceGenerator gatewaySourceGenerator, APIGateway apiGatewayPublisher) {
 
         this.username = username;
         this.apiDAO = apiDAO;
@@ -616,7 +616,7 @@ public abstract class AbstractAPIManager implements APIManager {
         return gatewaySourceGenerator;
     }
 
-    public APIGatewayPublisher getApiGatewayPublisher() {
+    public APIGateway getApiGatewayPublisher() {
         return apiGatewayPublisher;
     }
 }

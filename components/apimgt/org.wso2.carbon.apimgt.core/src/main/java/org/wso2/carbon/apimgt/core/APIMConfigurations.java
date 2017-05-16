@@ -36,8 +36,10 @@ public class APIMConfigurations {
     private String topicServerHost = "localhost";
     @Element(description = "topic server port")
     private String topicServerPort = "5672";
-    @Element(description = "topic name")
-    private String topicName = "MYTopic";
+    @Element(description = "publisher topic name")
+    private String publisherTopic = "PublisherTopic";
+    @Element(description = "store topic name")
+    private String storeTopic = "StoreTopic";
     @Element(description = "username for topic")
     private String username = "admin";
     @Element(description = "password for topic")
@@ -108,8 +110,12 @@ public class APIMConfigurations {
         return topicServerPort;
     }
 
-    public String getTopicName() {
-        return topicName;
+    public String getPublisherTopic() {
+        return publisherTopic;
+    }
+
+    public String getStoreTopic() {
+        return storeTopic;
     }
 
     public String getUsername() {

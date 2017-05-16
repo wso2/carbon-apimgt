@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import com.google.common.io.Files;
 import org.mockito.Mockito;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
@@ -51,6 +50,7 @@ public class APIGatewayPublisherImplTestCase {
                 T workflowConfig = (T) new WorkflowConfig();
                 return workflowConfig;
             }
+
             @Override
             public Map getConfigurationMap(String namespace) throws CarbonConfigurationException {
                 return null;
@@ -64,8 +64,9 @@ public class APIGatewayPublisherImplTestCase {
     public void testPublishToGateway() throws GatewayException {
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         APIGatewayPublisherImpl apiGatewayPublisher = new APIGatewayPublisherImpl();
-        Boolean state = apiGatewayPublisher.publishToGateway(api);
-        Assert.assertEquals(state, Boolean.TRUE);
+
+        apiGatewayPublisher.addAPI(api);
+
     }
 
     @Test(description = "Publish API artifacts with gwHome == null")
@@ -73,8 +74,7 @@ public class APIGatewayPublisherImplTestCase {
         System.clearProperty("gwHome");
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         APIGatewayPublisherImpl apiGatewayPublisher = new APIGatewayPublisherImpl();
-        Boolean state = apiGatewayPublisher.publishToGateway(api);
-        Assert.assertEquals(state, Boolean.TRUE);
+        apiGatewayPublisher.addAPI(api);
     }
 
     @Test(description = "Publish API artifacts with API in defaultVerison")
@@ -83,8 +83,7 @@ public class APIGatewayPublisherImplTestCase {
         String configString = SampleTestObjectCreator.createSampleGatewayConfig();
         API api = SampleTestObjectCreator.createUniqueAPI().gatewayConfig(configString).build();
         APIGatewayPublisherImpl apiGatewayPublisher = new APIGatewayPublisherImpl();
-        Boolean state = apiGatewayPublisher.publishToGateway(api);
-        Assert.assertEquals(state, Boolean.TRUE);
+        apiGatewayPublisher.addAPI(api);
     }
 
 }

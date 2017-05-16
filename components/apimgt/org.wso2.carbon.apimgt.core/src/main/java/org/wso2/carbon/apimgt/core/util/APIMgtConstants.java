@@ -337,4 +337,19 @@ public class APIMgtConstants {
         public static final String MESSAGE_DIGEST_ALGORITHM_MD5 = "MD5";
     }
 
+    /**
+     * Gateway event types
+     */
+    public static class GatewayEventTypes {
+        public static final String API_CREATE = "API_CREATE";
+        public static final String API_UPDATE = "API_UPDATE";
+        public static final String API_DELETE = "API_DELETE";
+        public static final String API_PUBLISH = "API_PUBLISH";
+        public static final String ENDPOINT_CREATE = "ENDPOINT_CREATE";
+        public static final String ENDPOINT_UPDATE = "ENDPOINT_UPDATE";
+        public static final String ENDPOINT_DELETE = "ENDPOINT_DELETE";
+        public static final String SUBSCRIPTION_CREATE = "SUBSCRIPTION_CREATE";
+        public static final String SUBSCRIPTION_DELETE = "SUBSCRIPTION_DELETE";
+    }
+
 }

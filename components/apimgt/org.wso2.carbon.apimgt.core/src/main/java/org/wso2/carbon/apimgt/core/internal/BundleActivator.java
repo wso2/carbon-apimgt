@@ -30,9 +30,12 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.jndi.JNDIContextManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.Broker;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOUtil;
 import org.wso2.carbon.apimgt.core.dao.impl.DataSource;
 import org.wso2.carbon.apimgt.core.dao.impl.DataSourceImpl;
+import org.wso2.carbon.apimgt.core.impl.BrokerImpl;
+import org.wso2.carbon.apimgt.core.util.BrokerUtil;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExtensionsConfigBuilder;
 import org.wso2.carbon.datasource.core.api.DataSourceService;
 import org.wso2.carbon.kernel.configprovider.ConfigProvider;
@@ -61,6 +64,8 @@ public class BundleActivator {
             DataSource dataSource = new DataSourceImpl((HikariDataSource) ctx.lookup("java:comp/env/jdbc/WSO2AMDB"));
             DAOUtil.initialize(dataSource);
             WorkflowExtensionsConfigBuilder.build(configProvider);
+            Broker broker = new BrokerImpl();
+            BrokerUtil.initialize(broker);
         } catch (NamingException e) {
             log.error("Error occurred while jndi lookup", e);
         }
