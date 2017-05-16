@@ -593,8 +593,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         .getLifecycleInstanceId(), apiBuilder.getLifeCycleStatus());
                 apiBuilder.lifecycleState(currentState);
                 for (Map.Entry<String, Boolean> checkListItem : checkListItemMap.entrySet()) {
-                    getApiLifecycleManager().checkListItemEvent(api.getLifecycleInstanceId
-                                    (), api.getLifeCycleStatus(),
+                    getApiLifecycleManager().checkListItemEvent(api.getLifecycleInstanceId(), api.getLifeCycleStatus(),
                             checkListItem.getKey(), checkListItem.getValue());
                 }
                 API originalAPI = apiBuilder.build();
