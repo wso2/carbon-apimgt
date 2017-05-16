@@ -518,14 +518,14 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testGetAPIsForProvider() throws Exception {
+    public void testGetStandardAPIsForProvider() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         String provider1 = "Watson";
         String provider2 = "Holmes";
 
-        List<API> apiList = apiDAO.getAPIsForProvider(provider1);
+        List<API> apiList = apiDAO.getAPIsForProvider(provider1, ApiType.STANDARD);
         Assert.assertTrue(apiList.isEmpty());
-        apiList = apiDAO.getAPIsForProvider(provider2);
+        apiList = apiDAO.getAPIsForProvider(provider2, ApiType.STANDARD);
         Assert.assertTrue(apiList.isEmpty());
 
         // Add APIs belonging to provider1
@@ -548,7 +548,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         apiDAO.addAPI(api3);
 
         // Get APIs belonging to provider1
-        apiList = apiDAO.getAPIsForProvider(provider1);
+        apiList = apiDAO.getAPIsForProvider(provider1, ApiType.STANDARD);
 
         List<API> expectedAPIs = new ArrayList<>();
         expectedAPIs.add(SampleTestObjectCreator.copyAPISummary(api1));
@@ -560,7 +560,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
                 TestUtil.printDiff(apiList, expectedAPIs));
 
         // Get APIs belonging to provider2
-        apiList = apiDAO.getAPIsForProvider(provider2);
+        apiList = apiDAO.getAPIsForProvider(provider2, ApiType.STANDARD);
 
         API expectedAPI = SampleTestObjectCreator.copyAPISummary(api3);
 
