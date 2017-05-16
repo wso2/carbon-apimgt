@@ -20,6 +20,10 @@
 package org.wso2.carbon.apimgt.core.util;
 
 import org.apache.commons.lang3.StringUtils;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
@@ -288,6 +292,91 @@ public class APIUtils {
             String errorMsg = "Role(s) list is null.";
             log.error(errorMsg);
             throw new APIManagementException(errorMsg, ExceptionCodes.ROLES_CANNOT_BE_NULL);
+        }
+    }
+
+    /**
+     * This method will return map with role names and its permission values.
+     *
+     * @param permissionJsonString Permission json object a string
+     * @return Map of permission values.
+     * @throws ParseException If failed to parse the json string.
+     */
+    public static HashMap getAPIPermissionArray(String permissionJsonString) throws ParseException {
+
+        HashMap roleNamePermissionList = new HashMap();
+        JSONParser jsonParser = new JSONParser();
+
+        JSONArray baseJsonArray = (JSONArray) jsonParser.parse(permissionJsonString);
+        for (Object aBaseJsonArray : baseJsonArray) {
+            JSONObject jsonObject = (JSONObject) aBaseJsonArray;
+            String groupId = jsonObject.get(APIMgtConstants.Permission.GROUP_ID).toString();
+            JSONArray subJsonArray = (JSONArray) jsonObject.get(APIMgtConstants.Permission.PERMISSION);
+            int totalPermissionValue = 0;
+            for (Object aSubJsonArray : subJsonArray) {
+                if (APIMgtConstants.Permission.READ.equals(aSubJsonArray.toString().trim())) {
+                    totalPermissionValue += APIMgtConstants.Permission.READ_PERMISSION;
+                } else if (APIMgtConstants.Permission.UPDATE.equals(aSubJsonArray.toString().trim())) {
+                    totalPermissionValue += APIMgtConstants.Permission.UPDATE_PERMISSION;
+                } else if (APIMgtConstants.Permission.DELETE.equals(aSubJsonArray.toString().trim())) {
+                    totalPermissionValue += APIMgtConstants.Permission.DELETE_PERMISSION;
+                }
+            }
+            roleNamePermissionList.put(groupId, totalPermissionValue);
+        }
+
+        return roleNamePermissionList;
+
+    }
+
+    public static void handleInvalidApiUpdateAttempt(API.APIBuilder apiBuilder, API originalAPI)
+                                                                                    throws APIManagementException {
+        if (!originalAPI.getLifeCycleStatus().equals(apiBuilder.getLifeCycleStatus())) {
+            String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as" +
+                    " API have " +
+                    "status change";
+            if (log.isDebugEnabled()) {
+                log.debug(msg);
+            }
+
+            log.error(msg);
+            throw new APIManagementException(msg, ExceptionCodes.COULD_NOT_UPDATE_API);
+        } else if (!originalAPI.getName().equals(apiBuilder.getName())) {
+            String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as" +
+                    " API have " +
+                    "API Name Change";
+            if (log.isDebugEnabled()) {
+                log.debug(msg);
+            }
+            log.error(msg);
+            throw new APIManagementException(msg, ExceptionCodes.COULD_NOT_UPDATE_API);
+        } else if (!originalAPI.getContext().equals(apiBuilder.getContext())) {
+            String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as" +
+                    " API have " +
+                    "Context change";
+            if (log.isDebugEnabled()) {
+                log.debug(msg);
+            }
+            log.error(msg);
+            throw new APIManagementException(msg, ExceptionCodes.COULD_NOT_UPDATE_API);
+        } else if (!originalAPI.getVersion().equals(apiBuilder.getVersion())) {
+            String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as" +
+                    " API have " +
+                    "Version change";
+            if (log.isDebugEnabled()) {
+                log.debug(msg);
+            }
+            log.error(msg);
+            throw new APIManagementException(msg, ExceptionCodes.COULD_NOT_UPDATE_API);
+        } else if (!originalAPI.getProvider().equals(apiBuilder.getProvider())) {
+            String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as" +
+                    " API have " +
+                    "provider change";
+            if (log.isDebugEnabled()) {
+                log.debug(msg);
+            }
+            log.error(msg);
+            throw new APIManagementException(msg, ExceptionCodes.COULD_NOT_UPDATE_API);
         }
     }
 }
