@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.Broker;
 import org.wso2.carbon.apimgt.core.dto.GatewayDTO;
+import org.wso2.carbon.apimgt.core.exception.BrokerException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
 
@@ -77,6 +78,10 @@ public class BrokerUtil {
                     "topic :" + topicName;
             log.error(errorMessage, e);
             throw new GatewayException(errorMessage, ExceptionCodes.GATEWAY_EXCEPTION);
+        } catch (BrokerException e) {
+            String errorMessage = "Error occurred while obtaining broker topic connection for topic : " + topicName;
+            log.error(errorMessage, e);
+            throw new GatewayException(errorMessage, ExceptionCodes.GATEWAY_EXCEPTION);
         } finally {
             if (topicPublisher != null) {
 
@@ -106,12 +111,15 @@ public class BrokerUtil {
     /**
      * Retrieve a new TopicConnection from broker connection pool
      *
-     * @return topicConnection  new topic connection to broker
-     * @throws JMSException if it failed to create a new topic connection
+     * @return  topicConnection  new topic connection to broker
+     * @throws BrokerException  If there is a failure to initialize broker connection factory
+     * @throws JMSException     If there is a failure to obtain topic connection
      */
-    private static TopicConnection getTopicConnection() throws JMSException {
+    private static TopicConnection getTopicConnection() throws BrokerException, JMSException {
         if (broker == null) {
-            throw new JMSException("Error while creating topic connection");
+            String message = "Error while initializing broker connection factory";
+            log.error(message);
+            throw new BrokerException(message, ExceptionCodes.BROKER_EXCEPTION);
         }
         return broker.getTopicConnection();
     }

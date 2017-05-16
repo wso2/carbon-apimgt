@@ -22,7 +22,6 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.api.APIStore;
@@ -54,7 +53,6 @@ public class APIManagerFactory {
     private APIMgtAdminService apiMgtAdminService;
     private IdentityProvider identityProvider;
     private KeyManager keyManager;
-    private APIGateway apiGateway;
 
     private static final int MAX_PROVIDERS = 50;
     private static final int MAX_CONSUMERS = 500;
@@ -240,19 +238,6 @@ public class APIManagerFactory {
             }
         }
         return identityProvider;
-    }
-
-    /**
-     * Get API gateway object
-     *
-     * @return APIGateway impl object
-     */
-    public APIGateway getGateway() {
-
-        if (apiGateway == null) {
-            apiGateway = new APIGatewayPublisherImpl();
-        }
-        return apiGateway;
     }
 
     /**

@@ -230,7 +230,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public String addAPI(API.APIBuilder apiBuilder) throws APIManagementException {
 
         API createdAPI;
-        APIGateway gateway = APIManagerFactory.getInstance().getGateway();
+        APIGateway gateway = getApiGateway();
 
         apiBuilder.provider(getUsername());
         if (StringUtils.isEmpty(apiBuilder.getId())) {
@@ -388,7 +388,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public void updateAPI(API.APIBuilder apiBuilder) throws APIManagementException {
-        APIGateway gateway = APIManagerFactory.getInstance().getGateway();
+        APIGateway gateway = getApiGateway();
 
         apiBuilder.provider(getUsername());
         apiBuilder.updatedBy(getUsername());
@@ -1090,7 +1090,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public void deleteAPI(String identifier) throws APIManagementException {
-        APIGateway gateway = APIManagerFactory.getInstance().getGateway();
+        APIGateway gateway = getApiGateway();
         try {
             if (getAPISubscriptionCountByAPI(identifier) == 0) {
                 API api = getApiDAO().getAPI(identifier);
@@ -1406,7 +1406,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public String addEndpoint(Endpoint endpoint) throws APIManagementException {
 
-        APIGateway gateway = APIManagerFactory.getInstance().getGateway();
+        APIGateway gateway = getApiGateway();
 
         Endpoint.Builder builder = new Endpoint.Builder(endpoint);
         builder.id(UUID.randomUUID().toString());
@@ -1439,7 +1439,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public void updateEndpoint(Endpoint endpoint) throws APIManagementException {
-        APIGateway gateway = APIManagerFactory.getInstance().getGateway();
+        APIGateway gateway = getApiGateway();
         gateway.updateEndpoint(endpoint);
         getApiDAO().updateEndpoint(endpoint);
     }
@@ -1452,7 +1452,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public void deleteEndpoint(String endpointId) throws APIManagementException {
-        APIGateway gateway = APIManagerFactory.getInstance().getGateway();
+        APIGateway gateway = getApiGateway();
         Endpoint endpoint = getEndpoint(endpointId);
         //Delete endpoint in gateway
         gateway.deleteEndpoint(endpoint);

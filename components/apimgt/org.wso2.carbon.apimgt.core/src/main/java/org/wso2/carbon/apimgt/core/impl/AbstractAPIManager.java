@@ -616,7 +616,7 @@ public abstract class AbstractAPIManager implements APIManager {
         return gatewaySourceGenerator;
     }
 
-    public APIGateway getApiGatewayPublisher() {
+    public APIGateway getApiGateway() {
         return apiGatewayPublisher;
     }
 }

@@ -104,7 +104,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     private static final Logger log = LoggerFactory.getLogger(APIStoreImpl.class);
     private TagDAO tagDAO;
     private APIMConfigurations config;
-    APIGateway gateway = APIManagerFactory.getInstance().getGateway();
+    APIGateway gateway = getApiGateway();
 
     /**
      * Constructor.

@@ -24,6 +24,8 @@ import org.wso2.andes.client.AMQConnectionFactory;
 import org.wso2.andes.url.URLSyntaxException;
 import org.wso2.carbon.apimgt.core.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.api.Broker;
+import org.wso2.carbon.apimgt.core.exception.BrokerException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.util.BrokerUtil;
 
@@ -53,11 +55,11 @@ public class BrokerImpl implements Broker {
      * {@inheritDoc}
      */
     @Override
-    public TopicConnection getTopicConnection() throws JMSException {
+    public TopicConnection getTopicConnection() throws JMSException, BrokerException {
         if (connFactory == null) {
             String error = "Could not create a new connection to the broker. Connection Factory:[null].";
             log.error(error);
-            throw new JMSException(error);
+            throw new BrokerException(error, ExceptionCodes.BROKER_EXCEPTION);
         }
         return connFactory.createTopicConnection();
     }
@@ -67,7 +69,7 @@ public class BrokerImpl implements Broker {
      *
      * @return connection string
      */
-    private static String getTCPConnectionURL(APIMConfigurations config) {
+    private String getTCPConnectionURL(APIMConfigurations config) {
         //TODO: The broker URL should be obtained from JNDI.properties file
         // amqp://{username}:{password}@carbon/carbon?brokerlist='tcp://{hostname}:{port}'
         return new StringBuffer().append("amqp://")

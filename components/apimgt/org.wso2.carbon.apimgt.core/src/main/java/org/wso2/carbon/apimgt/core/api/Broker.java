@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.core.api;
 
+import org.wso2.carbon.apimgt.core.exception.BrokerException;
+
 import javax.jms.JMSException;
 import javax.jms.TopicConnection;
 
@@ -32,5 +34,5 @@ public interface Broker {
      * @return TopicConnection  new Topic connection to broker
      * @throws JMSException if a JMS related error occurred
      */
-    TopicConnection getTopicConnection() throws JMSException;
+    TopicConnection getTopicConnection() throws JMSException, BrokerException;
 }
