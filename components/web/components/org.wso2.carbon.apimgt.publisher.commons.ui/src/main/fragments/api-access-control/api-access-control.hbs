@@ -31,9 +31,27 @@
                     <div class="well">
                         {{i18n "Role permissions for the API"}}
                         <hr>
-                        <div class="message message-info" id="no-roles-msg">
-                            <p><i class="icon fw fw-info"></i>&emsp; No roles added yet.</p>
-                        </div>
+                        <!--{--{#if @params.permissions}}-->
+                            <div class="message message-info" id="no-roles-msg">
+                                <p><i class="icon fw fw-info"></i>&emsp; No roles added yet.</p>
+                            </div>
+                        <!--{--{/if}}-->
+                            <!--{--{#each @params.permissions}}-->
+                                <div class="input-group hide" id="permission-div">
+                                    <label for="permission-options">
+                                    </label>
+                                    <!--{--{this.groupId}} &nbsp; : &nbsp; &nbsp;-->
+                                    <!--{--{#if this.permission}}checked{--{/if}}-->
+                                    <input type="checkbox" value="READ" class="permissionCheck">&nbsp;Read &nbsp; &nbsp;
+                                    <input type="checkbox" value="UPDATE" class="permissionCheck">&nbsp;Update &nbsp; &nbsp;
+                                    <input type="checkbox" value="DELETE" class="permissionCheck">&nbsp;Delete &nbsp; &nbsp; &nbsp;
+                                    <!--&emsp;-->
+                                    <!--<span class="fw fw-delete delete-role"></span>-->
+                                </div>
+                                <!--<option {--{#if this.isSelected}}selected{--{/if}}-->
+                                <!--value="{--{this.value}}">{--{this.groupId}}</option>-->
+                            <!--{-{/each}}-->
+
                         <div class="input-group hide" id="permission-div">
                             <label for="permission-options">
                             </label>

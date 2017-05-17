@@ -23,6 +23,8 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
@@ -1599,6 +1601,7 @@ public class ApiDAOImpl implements ApiDAO {
                                         ResourceCategory.WSDL_URI)).
                         transport(getTransports(connection, apiPrimaryKey)).
                         endpoint(getEndPointsForApi(connection, apiPrimaryKey)).
+                        permission(getPermissionsForApi(connection, apiPrimaryKey)).
                         businessInformation(businessInformation).
                         lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
@@ -2409,6 +2412,43 @@ public class ApiDAOImpl implements ApiDAO {
             throw new APIMgtDAOException(e);
         }
         return endpointList;
+    }
+
+    private String getPermissionsForApi(Connection connection, String apiId) throws SQLException {
+        JSONArray permissionArray = new JSONArray();
+        Map<String, Integer> permissionMap = new HashMap();
+        final String query = "SELECT GROUP_ID,PERMISSION FROM AM_API_GROUP_PERMISSION WHERE API_ID=?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, apiId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    permissionMap.put(resultSet.getString("GROUP_ID"), resultSet.getInt("PERMISSION"));
+                }
+            }
+        }
+        for (Map.Entry<String, Integer> entry : permissionMap.entrySet()) {
+            JSONObject jsonObject = new JSONObject();
+            ArrayList<String> array = new ArrayList<String>();
+            array.add(APIMgtConstants.Permission.READ);
+            if (entry.getValue() == (APIMgtConstants.Permission.READ_PERMISSION
+                    + APIMgtConstants.Permission.UPDATE_PERMISSION)) {
+                array.add(APIMgtConstants.Permission.READ);
+                array.add(APIMgtConstants.Permission.UPDATE);
+                jsonObject.put(entry.getKey(), array);
+            } else if (entry.getValue() == (APIMgtConstants.Permission.READ_PERMISSION
+                    + APIMgtConstants.Permission.DELETE_PERMISSION)) {
+                array.add(APIMgtConstants.Permission.READ);
+                array.add(APIMgtConstants.Permission.DELETE);
+                jsonObject.put(entry.getKey(), array);
+            } else if (entry.getValue() == (APIMgtConstants.Permission.READ_PERMISSION
+                    + APIMgtConstants.Permission.UPDATE_PERMISSION + APIMgtConstants.Permission.DELETE_PERMISSION)) {
+                array.add(APIMgtConstants.Permission.UPDATE);
+                array.add(APIMgtConstants.Permission.DELETE);
+                jsonObject.put(entry.getKey(), array);
+            }
+            permissionArray.add(jsonObject);
+        }
+        return permissionArray.toJSONString();
     }
 
     private Map<String, Endpoint> getEndPointsForApi(Connection connection, String apiId) throws SQLException,
