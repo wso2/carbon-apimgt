@@ -28,7 +28,7 @@ public class APIMgtConstants {
     public static final String DEPRECATE_PREVIOUS_VERSIONS = "Deprecate old versions after publish the API";
     public static final String REQUIRE_RE_SUBSCRIPTIONS = "Require re-subscription when publish the API";
     public static final String CHECK_LIST_ITEM_CHANGE_EVENT = "CheckListItemChange";
-
+    public static final String IS_EXTERNAL_KEYMANAGER = "IsExternalKeyManager";
     //Swagger v2.0 constants
     public static final String SWAGGER_X_SCOPE = "x-scope";
     public static final String SWAGGER_X_AUTH_TYPE = "x-auth-type";
