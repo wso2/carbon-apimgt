@@ -20,9 +20,9 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO.WorkflowStatusEnum;
 
 /**
- * Map Workflow related mappings
+ * Mappings related to miscellaneous objects
  */
-public class WorkflowMappintUtil {
+public class MiscMappingUtil {
     
     /**
      * Map WorkflowResponse to WorkflowResponseDTO

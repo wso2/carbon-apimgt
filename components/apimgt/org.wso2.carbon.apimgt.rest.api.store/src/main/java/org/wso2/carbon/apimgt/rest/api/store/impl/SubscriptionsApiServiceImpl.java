@@ -24,7 +24,6 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ApplicationStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.SubscriptionStatus;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
-import org.wso2.carbon.apimgt.core.workflow.HttpWorkflowResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -34,7 +33,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.SubscriptionMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.store.mappings.WorkflowMappintUtil;
+import org.wso2.carbon.apimgt.rest.api.store.mappings.MiscMappingUtil;
 import org.wso2.msf4j.Request;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
@@ -155,7 +154,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                 //if workflow is in pending state or if the executor sends any httpworklfowresponse (workflow state can 
                 //be in either pending or approved state) send back the workflow response 
                 if (SubscriptionStatus.ON_HOLD == subscription.getStatus()) {
-                    WorkflowResponseDTO workflowResponse = WorkflowMappintUtil
+                    WorkflowResponseDTO workflowResponse = MiscMappingUtil
                             .fromWorkflowResponsetoDTO(addSubResponse.getWorkflowResponse());
                     return Response.status(Response.Status.ACCEPTED).header(RestApiConstants.LOCATION_HEADER, location)
                             .entity(workflowResponse).build();
