@@ -66,20 +66,6 @@ public class ApiFileDAOImpl implements ApiDAO {
         String apiExportDirectory = APIFileUtils.getAPIBaseDirectory(storagePath, api);
         APIFileUtils.createDirectory(apiExportDirectory);
         APIFileUtils.exportApiDefinitionToFileSystem(api, apiExportDirectory);
-        //Save API Endpoints
-        APIFileUtils.createDirectory(apiExportDirectory + File.separator + APIMgtConstants.APIFileUtilConstants
-                .ENDPOINTS_ROOT_DIRECTORY);
-        api.getEndpoint().forEach((key, value) -> {
-            try {
-                APIFileUtils.exportEndpointToFileSystem(getEndpoint(value),
-                        apiExportDirectory + File.separator +
-                                APIMgtConstants.APIFileUtilConstants.ENDPOINTS_ROOT_DIRECTORY);
-            } catch (APIMgtDAOException e) {
-                String errorMsg = "Error while saving endpoint with id : " + value + " to file system";
-                log.error(errorMsg, e);
-                throw new RuntimeException(errorMsg, e);
-            }
-        });
 
         //Export gateway config to file system
         APIFileUtils.exportGatewayConfigToFileSystem(api.getGatewayConfig(), api, apiExportDirectory);
@@ -433,6 +419,30 @@ public class ApiFileDAOImpl implements ApiDAO {
     @Override
     public Comment getCommentByUUID(String commentId, String apiId) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Check Endpoint is exist
+     *
+     * @param name name of endpoint
+     * @return existence of endpoint
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    @Override
+    public boolean isEndpointExist(String name) throws APIMgtDAOException {
+        return getEndpointByName(name) != null;
+    }
+
+    /**
+     * Check endpoint use in api or operation
+     *
+     * @param endpointId id of endpoint
+     * @return true if used
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    @Override
+    public boolean isEndpointAssociated(String endpointId) throws APIMgtDAOException {
+        return false;
     }
 
     /**

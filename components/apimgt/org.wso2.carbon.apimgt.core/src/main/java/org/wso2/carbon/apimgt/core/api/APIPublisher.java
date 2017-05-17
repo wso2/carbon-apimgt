@@ -500,4 +500,11 @@ public interface APIPublisher extends APIManager {
      */
     void removePendingLifecycleWorkflowTaskForAPI(String apiId) throws APIManagementException;
 
+    /**
+     * Check Endpoint is exist
+     * @param name name of endpoint
+     * @return existence of endpoint
+     * @throws APIManagementException if API Manager core level exception occurred
+     */
+    boolean isEndpointExist(String name) throws APIManagementException;
 }

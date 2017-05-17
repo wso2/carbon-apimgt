@@ -547,4 +547,19 @@ public interface ApiDAO {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     String getLastUpdatedTimeOfComment(String commentId) throws APIMgtDAOException;
+    /**
+     * Check Endpoint is exist
+     * @param name name of endpoint
+     * @return existence of endpoint
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    boolean isEndpointExist(String name) throws APIMgtDAOException;
+
+    /**
+     * Check endpoint use in api or operation
+     * @param endpointId id of endpoint
+     * @return true if used
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    boolean isEndpointAssociated(String endpointId) throws APIMgtDAOException;
 }

@@ -715,7 +715,7 @@ function documentTabHandler(event) {
      UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-documents", data, "api-tab-doc-content", mode, callbacks);
     }
     
-    
+
     /**
      * Event handler for API Console tab onclick event;Get the API swagger definition and display in Swagger UI
      * @param event {object} Click event of the API Console tab
@@ -780,14 +780,14 @@ function documentTabHandler(event) {
     		    	            	  
     		    	              }
     		    	        };
-    		        	UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-console", 
+    		        	UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-console",
     		        			{"scheme": location.protocol.split(":")[0]}, "api-console-content", mode, callbacks);
     		        	}
     		        ).catch(apiGetErrorHandler);
     	   }
-    
+
     //Filter label data and return accessUrl matched to given label and editor app's scheme (http/https)
-    //Here label is the API published GW. 
+    //Here label is the API published GW.
     function getAccessURL(label_data, label) {
     	var protocolPrefix = location.protocol + "//";
     	if (label) {
@@ -801,7 +801,7 @@ function documentTabHandler(event) {
     				}
     			}
     		}
-    	}     	
+    	}
     	return null;
     }
 
