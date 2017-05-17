@@ -12,7 +12,9 @@ $(function () {
                 function (jsonData) {
                     var api = jsonData.obj;
                     policies = api.policies;
-                    var callbacks = {onSuccess: function () {},onFailure: function (message, e) {}};
+                    var callbacks = {onSuccess: function () {
+                        validateActionButtons("#subscribe-button");
+                    },onFailure: function (message, e) {}};
                     var mode = "OVERWRITE";
 
                     //Render Api header
@@ -33,8 +35,8 @@ $(function () {
                                 });
                             });
                         },onFailure: function (message, e) {}});
-                    
-                    
+
+
                     //Get Label Details
                     var label_names = api.labels.join(',');
                     var label_data = {};
@@ -44,7 +46,7 @@ $(function () {
                         },
                         function (jsonData) {
                             label_data = jsonData.obj.list;
-                            
+
                             //Get application details
                             setAuthHeader(swaggerClient);
                             swaggerClient["Application Collection"].get_applications({},
@@ -206,6 +208,7 @@ $(function () {
                                                 $("#api-overview").append(renderedData);
                                                 setOverviewTabData();
                                                 renderCommentsView();
+                                                validateActionButtons("#comment-add-button");
 
                                             }.bind(context), onFailure: function (message, e) {
                                                 var message = "Error occurred while getting api overview details." + message;
@@ -250,11 +253,11 @@ $(function () {
                                         			}
                                         			context.scheme = location.protocol.split(":")[0];
                                         			context.label_data = label_data;
-                                        		}                                      		
+                                        		}
                                         		$(document).ready(function(){
                                         			window.swaggerUi = new SwaggerUi({
         	                                			spec: swaggerJSON,
-        	                                			dom_id: "swagger-ui-container",        	                                			
+        	                                			dom_id: "swagger-ui-container",
         	                                			supportedSubmitMethods: submitMethods,
         	                                			onComplete: function(swaggerApi, swaggerUi){
         	                                				console.log("Loaded SwaggerUI");
@@ -273,7 +276,7 @@ $(function () {
                                         		UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.api-console",context, {
         		                        			onSuccess: function (renderedData) {
         		                        				$("#api-swagger").append(renderedData);
-        		                        				$(".env_name").bind("change", {label_data: label_data, 
+        		                        				$(".env_name").bind("change", {label_data: label_data,
                                         						                       swaggerJSON: swaggerJSON
                                         						                       },
                                         						                      select_environment);
@@ -293,7 +296,7 @@ $(function () {
         		                        				});
         		                        			}
         		                        		});
-                                        		
+
                                         		if (label_data && label_data.length > 0) {
                                             		//Retrieve API subscriptions and keys for API Console
                                             		swaggerClient["Application Collection"].get_applications({},
@@ -340,7 +343,7 @@ $(function () {
             	                                                            	context.label_data = label_data;
             	                                                            	context.scheme = location.protocol.split(":")[0];
             	                                                            	if (!gw_host){
-            	                                                            		context.no_host = true; 
+            	                                                            		context.no_host = true;
             	                                                            	}
 
             	    	                                                        UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.api-console",context, {
@@ -348,8 +351,8 @@ $(function () {
             	    	                                                				$("#authorizations").html(renderedData);
             	    	                                                				$(".subapp").change(change_token);
             	    	                                                				$(".keytype").change(change_token);
-            	    	                                                				$(".env_name").bind("change", 
-            	    	                                                						{label_data: label_data, 
+            	    	                                                				$(".env_name").bind("change",
+            	    	                                                						{label_data: label_data,
             	    	                                                						 swaggerJSON: swaggerJSON},
             	    	                                                						 select_environment);
             	    	                                                				change_token();
@@ -464,7 +467,7 @@ $(function () {
                                 });
                             }};
                             UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.api-detail-tab-list",context,
-                                 callback);                            
+                                 callback);
                         },
                         function (error) {
                             var message = "Error occurred while retrieving labels";
@@ -980,7 +983,7 @@ function getAccessURL(label_data, label) {
 			}
 		}
 	}
-	
+
 	return null;
 }
 
@@ -1019,10 +1022,10 @@ var change_token = function() {
     	$("#access_token").val(key);
     	//Set changed token as the token for API calls
     	if(key && key.trim() != "") {
-    		swaggerUi.api.clientAuthorizations.add("key", 
+    		swaggerUi.api.clientAuthorizations.add("key",
     				new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer "+ key, "header"));
     	} else{
-    		swaggerUi.api.clientAuthorizations.add("key", 
+    		swaggerUi.api.clientAuthorizations.add("key",
     				new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer ", "header"));
     	}
     }
@@ -1030,12 +1033,12 @@ var change_token = function() {
 
 
 var select_environment = function(event) {
-    var label_data = event.data.label_data; 
+    var label_data = event.data.label_data;
     var selectedEnvironment = $("#environment_name");
     var name = selectedEnvironment.val();
 
     var gw_host = getAccessURL(label_data, name);
-    
+
     //If no access URL available with the given scheme
     if (!gw_host) {
     	gw_host = "";
@@ -1045,10 +1048,10 @@ var select_environment = function(event) {
     	window.swaggerUi.setOption("supportedSubmitMethods", ['get', 'post', 'put', 'delete', 'patch', 'head']);
     	$("#label-warn-div").hide();
     }
-    
+
     var swaggerJSON = event.data.swaggerJSON;
     swaggerJSON["host"] = gw_host;
-    
+
     window.swaggerUi.setOption("spec", swaggerJSON);
     window.swaggerUi.updateSwaggerUi({});
 

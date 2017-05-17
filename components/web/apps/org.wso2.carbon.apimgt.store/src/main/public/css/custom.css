@@ -570,3 +570,10 @@ a.remove_rating:hover{
     float: left;
     padding-bottom: 5px;
 }
+
+.not-active {
+   pointer-events: none;
+   cursor: default;
+   tabindex="-1";
+   color:#CCC;
+}
