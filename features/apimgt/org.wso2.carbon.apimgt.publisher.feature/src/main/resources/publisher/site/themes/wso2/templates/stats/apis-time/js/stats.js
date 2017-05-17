@@ -86,7 +86,7 @@ $(document).ready(function(){
         .tickFormat(function (d) {
              return d3.time.format('%m/%d %H:%M')(new Date(d)) });
 
-        chart.yAxis.axisLabel(i18n.t('Published API Count'))
+        chart.yAxis.axisLabel(i18n.t('Created API Count'))
             .tickFormat(d3.format('d'));
 
         chart.tooltipContent(function(key, x, y, e, graph) {
