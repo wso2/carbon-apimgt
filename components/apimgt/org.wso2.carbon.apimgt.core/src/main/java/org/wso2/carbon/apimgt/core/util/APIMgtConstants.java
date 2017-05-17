@@ -28,7 +28,7 @@ public class APIMgtConstants {
     public static final String DEPRECATE_PREVIOUS_VERSIONS = "Deprecate old versions after publish the API";
     public static final String REQUIRE_RE_SUBSCRIPTIONS = "Require re-subscription when publish the API";
     public static final String CHECK_LIST_ITEM_CHANGE_EVENT = "CheckListItemChange";
-
+    public static final String IS_EXTERNAL_KEYMANAGER = "IsExternalKeyManager";
     //Swagger v2.0 constants
     public static final String SWAGGER_X_SCOPE = "x-scope";
     public static final String SWAGGER_X_AUTH_TYPE = "x-auth-type";
@@ -58,6 +58,26 @@ public class APIMgtConstants {
     public static final String AUTH_APPLICATION_USER_LEVEL_TOKEN = "Application_User";
     public static final String AUTH_APPLICATION_OR_USER_LEVEL_TOKEN = "Any";
     public static final String DEFAULT_API_POLICY = "Unlimited";
+    public static final String GLOBAL_ENDPOINT = "GLOBAL";
+    public static final String API_SPECIFIC_ENDPOINT = "API";
+    public static final String RESOURCE_SPECIFIC_ENDPOINT = "RESOURCE";
+    public static final String PRODUCTION_ENDPOINT = "production";
+
+    //workflow executor default executors
+    public static final String WF_DEFAULT_APPCREATION_EXEC =
+            "org.wso2.carbon.apimgt.core.workflow.ApplicationCreationSimpleWorkflowExecutor";
+    public static final String WF_DEFAULT_APISTATE_EXEC =
+            "org.wso2.carbon.apimgt.core.workflow.APIStateChangeSimpleWorkflowExecutor";
+    public static final String WF_DEFAULT_PRODAPP_EXEC =
+            "org.wso2.carbon.apimgt.core.workflow.ApplicationRegistrationSimpleWorkflowExecutor";
+    public static final String WF_DEFAULT_SANDBOXAPP_EXEC =
+            "org.wso2.carbon.apimgt.core.workflow.ApplicationRegistrationSimpleWorkflowExecutor";
+    public static final String WF_DEFAULT_APPDELETE_EXEC =
+            "org.wso2.carbon.apimgt.core.workflow.ApplicationDeletionSimpleWorkflowExecutor";
+    public static final String WF_DEFAULT_SUBCREATION_EXEC =
+            "org.wso2.carbon.apimgt.core.workflow.SubscriptionCreationSimpleWorkflowExecutor";
+    public static final String WF_DEFAULT_SUBDELETE_EXEC =
+            "org.wso2.carbon.apimgt.core.workflow.SubscriptionDeletionSimpleWorkflowExecutor";
 
     //workflow executor default executor
     public static final String WF_DEFAULT_WF_EXEC =
@@ -75,6 +95,8 @@ public class APIMgtConstants {
     public static final String SUBCONTEXT_SEARCH_TYPE_PREFIX = "subcontext";
     public static final String TAG_NAME_COLUMN = "NAME";
     public static final String URL_PATTERN_COLUMN = "URL_PATTERN";
+
+    public static final String SANDBOX_ENDPOINT = "sandbox";
 
     /**
      * Application statuses.
@@ -335,6 +357,21 @@ public class APIMgtConstants {
      */
     public static class ETagConstants {
         public static final String MESSAGE_DIGEST_ALGORITHM_MD5 = "MD5";
+    }
+
+    /**
+     * Gateway event types
+     */
+    public static class GatewayEventTypes {
+        public static final String API_CREATE = "API_CREATE";
+        public static final String API_UPDATE = "API_UPDATE";
+        public static final String API_DELETE = "API_DELETE";
+        public static final String API_PUBLISH = "API_PUBLISH";
+        public static final String ENDPOINT_CREATE = "ENDPOINT_CREATE";
+        public static final String ENDPOINT_UPDATE = "ENDPOINT_UPDATE";
+        public static final String ENDPOINT_DELETE = "ENDPOINT_DELETE";
+        public static final String SUBSCRIPTION_CREATE = "SUBSCRIPTION_CREATE";
+        public static final String SUBSCRIPTION_DELETE = "SUBSCRIPTION_DELETE";
     }
 
 }

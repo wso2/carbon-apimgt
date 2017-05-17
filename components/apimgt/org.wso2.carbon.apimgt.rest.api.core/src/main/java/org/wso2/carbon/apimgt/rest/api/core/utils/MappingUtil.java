@@ -25,11 +25,15 @@ package org.wso2.carbon.apimgt.rest.api.core.utils;
 
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
+import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.rest.api.core.dto.LabelDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.ResourcesListDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.SubscriptionListDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.UriTemplateDTO;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -75,5 +79,26 @@ public class MappingUtil {
             labels.add(label);
         }
         return labels;
+    }
+
+    /**
+     * Convert Uritemplate list to ResourceListDto
+     * @param resourcesOfApi list of uriTemplates
+     * @return ResourcesListDTO
+     */
+    public static ResourcesListDTO convertToResourceListDto(List<UriTemplate> resourcesOfApi){
+        ResourcesListDTO resourcesListDTO = new ResourcesListDTO();
+        List<UriTemplateDTO> uriTemplateDTOArrayList = new ArrayList<>();
+        resourcesOfApi.forEach((v)->{
+            UriTemplateDTO uriTemplateDTO = new UriTemplateDTO();
+            uriTemplateDTO.setUriTemplate(v.getUriTemplate());
+            uriTemplateDTO.setAuthType(v.getAuthType());
+            uriTemplateDTO.setPolicy(v.getPolicy());
+            uriTemplateDTO.setHttpVerb(v.getHttpVerb());
+            uriTemplateDTO.setScopes(Collections.emptyList());
+            uriTemplateDTOArrayList.add(uriTemplateDTO);
+        });
+        resourcesListDTO.setList(uriTemplateDTOArrayList);
+        return resourcesListDTO;
     }
 }

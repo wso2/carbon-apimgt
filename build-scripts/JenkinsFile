@@ -1,52 +1,84 @@
 #!groovy
+def mvnHome = env.MVN_HOME;
+String dockerHost = env.DOCKER_HOST;
+String nodeLabel = env.NODE_LABEL;
+String repositoryName = 'carbon-apimgt';
+String user = env.GIT_USER;
+String gitCredentialsID = env.GIT_CREDENTIALS_ID;
+String gitEmail = env.GIT_EMAIL;
+node("${nodeLabel}") {
+    try{
+        stage('Preparation') {
+            withCredentials(
+                    [[$class          : 'UsernamePasswordMultiBinding',
+                      credentialsId   : gitCredentialsID,
+                      usernameVariable: 'GIT_USERNAME',
+                      passwordVariable: 'GIT_PASSWORD']]) {
 
-def mvnHome;
-def dockerHost;
-node("openstack-apim") {
-
-    stage('Preparation') {
-        dockerHost = env.DOCKER_HOST;
-        mvnHome = tool 'apache-maven-3.0.5'
-        checkout([$class      : 'GitSCM', branches: [[name: '*/C5']], doGenerateSubmoduleConfigurations: false,
-                  extensions  : [[$class: 'CloneOption', reference: '', shallow: true]],
-                  submoduleCfg: [], userRemoteConfigs: [[name: 'C5', refspec: '+refs/heads/C5:refs/remotes/origin/C5',
-                                                         url : 'https://github.com/wso2/carbon-apimgt.git']]])
-    }
-    stage('Building carbon-apimgt with unit test') {
-        // Run the maven build
-        withEnv(["JAVA_HOME=${tool 'Oracle-JDK-1.8.0_45'}", "PATH+MAVEN=${mvnHome}/bin:${env.JAVA_HOME}/bin"]) {
-            sh "'${mvnHome}/bin/mvn' clean install -Dmaven.test.failure.ignore "
+                checkout([
+                        $class                           : 'GitSCM',
+                        branches                         : [[name: '*/master']],
+                        doGenerateSubmoduleConfigurations: false,
+                        extensions                       : [[$class: 'LocalBranch', localBranch: 'master'],
+                                                            [$class: 'RelativeTargetDirectory', relativeTargetDir: repositoryName]],
+                        submoduleCfg                     : [],
+                        userRemoteConfigs                :
+                                [[credentialsId: gitCredentialsID,
+                                  url          : "https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${user}/${repositoryName}.git"]]]);
+                dir(repositoryName) {
+                    withCredentials(
+                            [[$class          : 'UsernamePasswordMultiBinding',
+                              credentialsId   : gitCredentialsID,
+                              usernameVariable: 'GIT_USERNAME',
+                              passwordVariable: 'GIT_PASSWORD']]) {
+                        sh("git config user.name ${GIT_USERNAME}");
+                        sh("git config user.email ${gitEmail}");
+                    }
+                }
+            }
         }
-    }
-    stage('Running Test on H2 database') {
-        withEnv(["JAVA_HOME=${tool 'Oracle-JDK-1.8.0_45'}", "PATH+MAVEN=${mvnHome}/bin:${env.JAVA_HOME}/bin",
-                 "DOCKER_HOST=${dockerHost}"]) {
-            sh "'${mvnHome}/bin/mvn' verify -P local-h2 -f components/apimgt/org.wso2.carbon.apimgt.core/pom.xml -Dmaven.test.failure.ignore -Dskip.surefire.test=true"
+        stage('Building carbon-apimgt with unit test') {
+            // Run the maven build
+            withEnv(["PATH+MAVEN=${mvnHome}/bin:${env.JAVA_HOME}/bin"]) {
+                sh "mvn clean install -Dmaven.test.failure.ignore "
+            }
         }
-    }
-    stage('Running Test on Mysql database') {
-        withEnv(["JAVA_HOME=${tool 'Oracle-JDK-1.8.0_45'}", "PATH+MAVEN=${mvnHome}/bin:${env.JAVA_HOME}/bin",
-                 "DOCKER_HOST=${dockerHost}"]) {
-            sh "'${mvnHome}/bin/mvn' verify -P local-mysql -f components/apimgt/org.wso2.carbon.apimgt.core/pom.xml -Dmaven.test.failure.ignore -Dskip.surefire.test=true"
+        stage('Running Test on H2 database') {
+            withEnv(["PATH+MAVEN=${mvnHome}/bin:${env.JAVA_HOME}/bin",
+                    "DOCKER_HOST=${dockerHost}"]) {
+                sh "mvn verify -P local-h2 -f components/apimgt/org.wso2.carbon.apimgt.core/pom.xml -Dmaven.test.failure.ignore -Dskip.surefire.test=true"
+            }
         }
-    }
-    stage('Running Test on Oracle database') {
-        withEnv(["JAVA_HOME=${tool 'Oracle-JDK-1.8.0_45'}", "PATH+MAVEN=${mvnHome}/bin:${env.JAVA_HOME}/bin",
-                 "DOCKER_HOST=${dockerHost}"]) {
-            sh "'${mvnHome}/bin/mvn' verify -P local-oracle -f components/apimgt/org.wso2.carbon.apimgt.core/pom.xml -Dmaven.test.failure.ignore -Dskip.surefire.test=true"
+        stage('Running Test on Mysql database') {
+            withEnv(["PATH+MAVEN=${mvnHome}/bin:${env.JAVA_HOME}/bin",
+                    "DOCKER_HOST=${dockerHost}"]) {
+                sh "mvn verify -P local-mysql -f components/apimgt/org.wso2.carbon.apimgt.core/pom.xml -Dmaven.test.failure.ignore -Dskip.surefire.test=true"
+            }
         }
-    }
-    stage('Running Test on PostgreSql database') {
-        withEnv(["JAVA_HOME=${tool 'Oracle-JDK-1.8.0_45'}", "PATH+MAVEN=${mvnHome}/bin:${env.JAVA_HOME}/bin",
-                 "DOCKER_HOST=${dockerHost}"]) {
-            sh "'${mvnHome}/bin/mvn' verify -P local-postgres -f components/apimgt/org.wso2.carbon.apimgt.core/pom.xml -Dmaven.test.failure.ignore -Dskip.surefire.test=true"
+        stage('Running Test on Oracle database') {
+            withEnv(["PATH+MAVEN=${mvnHome}/bin:${env.JAVA_HOME}/bin",
+                    "DOCKER_HOST=${dockerHost}"]) {
+                sh "mvn verify -P local-oracle -f components/apimgt/org.wso2.carbon.apimgt.core/pom.xml -Dmaven.test.failure.ignore -Dskip.surefire.test=true"
+            }
         }
-    }
-    stage('Running Test on Mssql database') {
-        withEnv(["JAVA_HOME=${tool 'Oracle-JDK-1.8.0_45'}", "PATH+MAVEN=${mvnHome}/bin:${env.JAVA_HOME}/bin",
-                 "DOCKER_HOST=${dockerHost}"]) {
-            sh "'${mvnHome}/bin/mvn' verify -P local-mssql -f components/apimgt/org.wso2.carbon.apimgt.core/pom.xml -Dmaven.test.failure.ignore -Dskip.surefire.test=true"
+        stage('Running Test on PostgreSql database') {
+            withEnv(["PATH+MAVEN=${mvnHome}/bin:${env.JAVA_HOME}/bin",
+                    "DOCKER_HOST=${dockerHost}"]) {
+                sh "mvn verify -P local-postgres -f components/apimgt/org.wso2.carbon.apimgt.core/pom.xml -Dmaven.test.failure.ignore -Dskip.surefire.test=true"
+            }
         }
+        stage('Running Test on Mssql database') {
+            withEnv(["PATH+MAVEN=${mvnHome}/bin:${env.JAVA_HOME}/bin",
+                    "DOCKER_HOST=${dockerHost}"]) {
+                sh "mvn verify -P local-mssql -f components/apimgt/org.wso2.carbon.apimgt.core/pom.xml -Dmaven.test.failure.ignore -Dskip.surefire.test=true"
+            }
+        }
+        currentBuild.result = 'SUCCESS'
+    } catch (any) {
+        currentBuild.result = 'FAILURE'
+        throw any //rethrow exception to prevent the build from proceeding
+    }finally{
+        step([$class: 'JacocoPublisher', exclusionPattern: '**/rest/api/*/dto/*.class,**/rest/api/*/factories/*.class,**/rest/api/*/*.class'])
+        step([$class: 'Mailer', notifyEveryUnstableBuild: true, recipients: '', sendToIndividuals: true])
     }
-    step([$class: 'JacocoPublisher'])
 }

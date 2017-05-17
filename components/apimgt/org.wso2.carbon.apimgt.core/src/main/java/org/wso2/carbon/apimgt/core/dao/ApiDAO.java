@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.APILCWorkflowStatus;
 
 import java.io.InputStream;
@@ -547,4 +548,29 @@ public interface ApiDAO {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     String getLastUpdatedTimeOfComment(String commentId) throws APIMgtDAOException;
+
+    /**
+     * return list of respurces associated with API
+     *
+     * @param apiContext context of API
+     * @param apiVersion version of API
+     * @return list of resources
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    List<UriTemplate> getResourcesOfApi(String apiContext, String apiVersion) throws APIMgtDAOException;
+    /**
+     * Check Endpoint is exist
+     * @param name name of endpoint
+     * @return existence of endpoint
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    boolean isEndpointExist(String name) throws APIMgtDAOException;
+
+    /**
+     * Check endpoint use in api or operation
+     * @param endpointId id of endpoint
+     * @return true if used
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    boolean isEndpointAssociated(String endpointId) throws APIMgtDAOException;
 }

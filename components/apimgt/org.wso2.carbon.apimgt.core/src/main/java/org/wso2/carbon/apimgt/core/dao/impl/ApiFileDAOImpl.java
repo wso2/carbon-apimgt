@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
@@ -66,20 +67,6 @@ public class ApiFileDAOImpl implements ApiDAO {
         String apiExportDirectory = APIFileUtils.getAPIBaseDirectory(storagePath, api);
         APIFileUtils.createDirectory(apiExportDirectory);
         APIFileUtils.exportApiDefinitionToFileSystem(api, apiExportDirectory);
-        //Save API Endpoints
-        APIFileUtils.createDirectory(apiExportDirectory + File.separator + APIMgtConstants.APIFileUtilConstants
-                .ENDPOINTS_ROOT_DIRECTORY);
-        api.getEndpoint().forEach((key, value) -> {
-            try {
-                APIFileUtils.exportEndpointToFileSystem(getEndpoint(value),
-                        apiExportDirectory + File.separator +
-                                APIMgtConstants.APIFileUtilConstants.ENDPOINTS_ROOT_DIRECTORY);
-            } catch (APIMgtDAOException e) {
-                String errorMsg = "Error while saving endpoint with id : " + value + " to file system";
-                log.error(errorMsg, e);
-                throw new RuntimeException(errorMsg, e);
-            }
-        });
 
         //Export gateway config to file system
         APIFileUtils.exportGatewayConfigToFileSystem(api.getGatewayConfig(), api, apiExportDirectory);
@@ -436,6 +423,30 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
+     * Check Endpoint is exist
+     *
+     * @param name name of endpoint
+     * @return existence of endpoint
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    @Override
+    public boolean isEndpointExist(String name) throws APIMgtDAOException {
+        return getEndpointByName(name) != null;
+    }
+
+    /**
+     * Check endpoint use in api or operation
+     *
+     * @param endpointId id of endpoint
+     * @return true if used
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    @Override
+    public boolean isEndpointAssociated(String endpointId) throws APIMgtDAOException {
+        return false;
+    }
+
+    /**
      * @see ApiDAO#addComment(Comment, String)
      */
     @Override
@@ -469,6 +480,11 @@ public class ApiFileDAOImpl implements ApiDAO {
 
     @Override
     public String getLastUpdatedTimeOfComment(String commentId) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<UriTemplate> getResourcesOfApi(String apiContext, String apiVersion) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 

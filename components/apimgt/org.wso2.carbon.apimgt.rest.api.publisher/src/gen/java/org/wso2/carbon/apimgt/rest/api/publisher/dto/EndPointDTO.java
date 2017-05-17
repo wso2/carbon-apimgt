@@ -1,11 +1,11 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
-
+import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.Objects;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPoint_endpointSecurityDTO;
 
 /**
  * EndPointDTO
@@ -21,7 +21,7 @@ public class EndPointDTO   {
   private String endpointConfig = null;
 
   @JsonProperty("endpointSecurity")
-  private String endpointSecurity = null;
+  private EndPoint_endpointSecurityDTO endpointSecurity = null;
 
   @JsonProperty("maxTps")
   private Long maxTps = null;
@@ -83,7 +83,7 @@ public class EndPointDTO   {
     this.endpointConfig = endpointConfig;
   }
 
-  public EndPointDTO endpointSecurity(String endpointSecurity) {
+  public EndPointDTO endpointSecurity(EndPoint_endpointSecurityDTO endpointSecurity) {
     this.endpointSecurity = endpointSecurity;
     return this;
   }
@@ -92,12 +92,12 @@ public class EndPointDTO   {
    * Get endpointSecurity
    * @return endpointSecurity
   **/
-  @ApiModelProperty(example = "", value = "")
-  public String getEndpointSecurity() {
+  @ApiModelProperty(value = "")
+  public EndPoint_endpointSecurityDTO getEndpointSecurity() {
     return endpointSecurity;
   }
 
-  public void setEndpointSecurity(String endpointSecurity) {
+  public void setEndpointSecurity(EndPoint_endpointSecurityDTO endpointSecurity) {
     this.endpointSecurity = endpointSecurity;
   }
 
