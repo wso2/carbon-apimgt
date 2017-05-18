@@ -2,7 +2,7 @@ package org.wso2.carbon.apimgt.gateway;
 import ballerina.net.http;
 import org.wso2.carbon.apimgt.gateway.utils as gatewayUtil;
 @http:BasePath{value: "/healthCheck"}
-service Service1 {
+service healthCheck {
     @http:GET{}
     @http:Path{value: "/"}
     resource Resource1( message m) {
