@@ -51,6 +51,7 @@ public enum ExceptionCodes implements ErrorHandler {
     SUBSCRIPTION_STATE_INVALID(900318, "Invalid state change for subscription", 400, "Invalid state change for " +
             "subscription"),
     COMMENT_NOT_FOUND(900319, "Comment not found", 404, "Couldn't retrieve comment"),
+    APIM_DAO_EXCEPTION(900320, "Internal server error.", 500, " Error occurred while retrieving data"),
 
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),
