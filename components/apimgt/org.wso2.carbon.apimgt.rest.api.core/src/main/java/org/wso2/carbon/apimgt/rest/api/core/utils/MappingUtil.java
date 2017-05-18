@@ -23,14 +23,11 @@
 package org.wso2.carbon.apimgt.rest.api.core.utils;
 
 
+import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
-import org.wso2.carbon.apimgt.rest.api.core.dto.LabelDTO;
-import org.wso2.carbon.apimgt.rest.api.core.dto.ResourcesListDTO;
-import org.wso2.carbon.apimgt.rest.api.core.dto.SubscriptionDTO;
-import org.wso2.carbon.apimgt.rest.api.core.dto.SubscriptionListDTO;
-import org.wso2.carbon.apimgt.rest.api.core.dto.UriTemplateDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -100,5 +97,38 @@ public class MappingUtil {
         });
         resourcesListDTO.setList(uriTemplateDTOArrayList);
         return resourcesListDTO;
+    }
+
+    /**
+     * Converts API list to APIListDTO list.
+     *
+     * @param apisList List of APIs
+     * @return APIListDTO object
+     */
+    public static APIListDTO toAPIListDTO(List<API> apisList) {
+        APIListDTO apiListDTO = new APIListDTO();
+        apiListDTO.setCount(apisList.size());
+        apiListDTO.setList(toAPIInfo(apisList));
+        return apiListDTO;
+    }
+
+    /**
+     * Converts {@link API} List to an {@link APIInfoDTO} List.
+     *
+     * @param apiList
+     * @return
+     */
+    private static List<APIInfoDTO> toAPIInfo(List<API> apiList) {
+        List<APIInfoDTO> apiInfoList = new ArrayList<APIInfoDTO>();
+        for (API api : apiList) {
+            APIInfoDTO apiInfo = new APIInfoDTO();
+            apiInfo.setId(api.getId());
+            apiInfo.setContext(api.getContext());
+            apiInfo.setName(api.getName());
+            apiInfo.setLifeCycleStatus(api.getLifeCycleStatus());
+            apiInfo.setVersion(api.getVersion());
+            apiInfoList.add(apiInfo);
+        }
+        return apiInfoList;
     }
 }

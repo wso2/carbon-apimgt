@@ -2015,6 +2015,59 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
+    /**
+     *
+     * @see ApiDAO#getAPIsByStatus(List, String)
+     */
+    @Override
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
+    public List<API> getAPIsByStatus(List<String> gatewayLabels, String status) throws APIMgtDAOException {
+        final String query = "SELECT DISTINCT UUID, PROVIDER, A.NAME, CONTEXT, VERSION, DESCRIPTION, CURRENT_LC_STATUS,"
+                + " LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS FROM AM_API A INNER JOIN AM_API_LABEL_MAPPING M ON A.UUID"
+                + " = M.API_ID INNER JOIN AM_LABELS L ON L.LABEL_ID = M.LABEL_ID WHERE L.NAME IN (" + DAOUtil
+                .getParameterString(gatewayLabels.size()) + ") AND A.CURRENT_LC_STATUS=?";
+
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(query)) {
+            int i = 0;
+            for (String label : gatewayLabels) {
+                statement.setString(++i, label);
+            }
+            statement.setString(++i, status);
+            return constructAPISummaryList(connection, statement);
+        } catch (SQLException e) {
+            String errorMsg = "Error occurred while getting APIs for given gateway labels.";
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e);
+        }
+    }
+
+    /**
+     *
+     * @see ApiDAO#getAPIsByGatewayLabel(List)
+     */
+    @Override
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
+    public List<API> getAPIsByGatewayLabel(List<String> gatewayLabels) throws APIMgtDAOException {
+        final String query = "SELECT DISTINCT UUID, PROVIDER, A.NAME, CONTEXT, VERSION, DESCRIPTION, CURRENT_LC_STATUS,"
+                + " LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS FROM AM_API A INNER JOIN AM_API_LABEL_MAPPING M ON A.UUID"
+                + " = M.API_ID INNER JOIN AM_LABELS L ON L.LABEL_ID = M.LABEL_ID WHERE L.NAME IN (" + DAOUtil
+                .getParameterString(gatewayLabels.size()) + ")";
+
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(query)) {
+            int i = 0;
+            for (String label : gatewayLabels) {
+                statement.setString(++i, label);
+            }
+            return constructAPISummaryList(connection, statement);
+        } catch (SQLException e) {
+            String errorMsg = "Error occurred while searching APIs getting APIs for given gateway labels.";
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e);
+        }
+    }
+
     private boolean isEndpointAssociatedToOperation(Connection connection, String endpointId) throws SQLException {
         final String query = "Select 1 FROM AM_API_RESOURCE_ENDPOINT WHERE ENDPOINT_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {

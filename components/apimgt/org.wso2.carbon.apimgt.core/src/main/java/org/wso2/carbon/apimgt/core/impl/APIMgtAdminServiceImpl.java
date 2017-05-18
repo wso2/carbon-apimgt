@@ -217,4 +217,29 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
     }
 
+    @Override public List<API> getAPIsByStatus(List<String> gatewayLabels, String status)
+            throws APIManagementException {
+        List<API> apiList;
+        try {
+            apiList = apiDAO.getAPIsByStatus(gatewayLabels, status);
+        } catch (APIMgtDAOException e) {
+            String msg = "Error occurred while getting the API list in given states";
+            log.error(msg, e);
+            throw new APIManagementException(msg, ExceptionCodes.APIM_DAO_EXCEPTION);
+        }
+        return apiList;
+    }
+
+    @Override public List<API> getAPIsByGatewayLabel(List<String> gatewayLabels) throws APIManagementException {
+        List<API> apiList;
+        try {
+            apiList = apiDAO.getAPIsByGatewayLabel(gatewayLabels);
+        } catch (APIMgtDAOException e) {
+            String msg = "Error occurred while getting the API list in given gateway labels";
+            log.error(msg, e);
+            throw new APIManagementException(msg, ExceptionCodes.APIM_DAO_EXCEPTION);
+        }
+        return apiList;
+    }
+
 }
