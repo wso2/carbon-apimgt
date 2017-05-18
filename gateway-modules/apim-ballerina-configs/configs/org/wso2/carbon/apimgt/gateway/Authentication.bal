@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.gateway;
 import ballerina.net.http;
 import ballerina.lang.messages;
 import ballerina.lang.strings;
+import ballerina.lang.errors;
 import ballerina.utils;
 import org.wso2.carbon.apimgt.gateway.dto as dto;
 import org.wso2.carbon.apimgt.gateway.utils as gatewayUtil;
@@ -49,12 +50,13 @@ function authenticate( message m)( message ) {
             return response;
         }
         return response;
-    }catch(exception e){
+    }catch(errors:Error e){
         messages:setHeader(request, "Content-Type", "application/json");
         http:setStatusCode(response,401);
         gatewayUtil:constructAccessTokenNotFoundPayload(response);
         return response;
     }
+    return response;
 }
 function doIntrospect (message m,string authToken)(dto:IntrospectDto) {
     message request={};
@@ -84,4 +86,5 @@ function validateResource (dto:SubscriptionDto subscriptionDto)(dto:ResourceDto)
     dto:ResourceDto resourceDto = holder:getFromResourceCache(cachedKey);
     if(resourceDto != null){
     }
+    return resourceDto;
 }
