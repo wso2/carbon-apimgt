@@ -297,17 +297,42 @@ function accessControlTabHandler(event) {
                 onSuccess: function (data) {
                     $('.selectPermissions').multiselect(
                         {
-                            nonSelectedText: "No permissions set for role",
+                            nonSelectedText: response.data,//"No permissions set for role",
                             includeSelectAllOption: true
                         }
                     );
+                    if (!permission_data || permission_data === "[]"){
+                        $('#no-roles-msg').removeClass('hide');
+                    }
                 },
                 onFailure: function (data) {
                     console.debug("Failed");
                 }
             };
+            var permissionArray = [];
+            var permissions = JSON.parse(permission_data);
+            for(var role in permissions) {
+                var item = {};
+                var groupId = permissions[role].groupId;
+                item["groupId"] = groupId;
+                item["isRead"] = false;
+                item["isUpdate"] = false;
+                item["isDelete"] = false;
+                var permissionList = permissions[role].permission;
+                if(permissionList.includes("READ")) {
+                    item["isRead"] = true;
+                }
+                if (permissionList.includes("UPDATE")){
+                    item["isUpdate"] = true;
+                }
+                if (permissionList.includes("DELETE")) {
+                    item["isDelete"] = true;
+                }
+                permissionArray.push(item);
+            }
+
             var data = {
-                permissions: permission_data
+                permission: permissionArray
             };
 
             UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-access-control", data, "api-access-control-tab-content", mode, callbacks);

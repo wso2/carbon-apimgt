@@ -1,5 +1,5 @@
 {{js "js/permissions.js"}}
-{{js "css/permissions.css"}}
+{{css "css/permissions.css"}}
 <div class="page-header">
     <h4 class="lead">{{i18n "API Permissions"}}</h4>
 </div>
@@ -31,26 +31,20 @@
                     <div class="well">
                         {{i18n "Role permissions for the API"}}
                         <hr>
-                        <!--{--{#if @params.permissions}}-->
-                            <div class="message message-info" id="no-roles-msg">
-                                <p><i class="icon fw fw-info"></i>&emsp; No roles added yet.</p>
+                        <div class="message message-info hide" id="no-roles-msg">
+                            <p><i class="icon fw fw-info"></i>&emsp; No roles added yet.</p>
+                        </div>
+                        {{#each @params.permission}}
+                            <div class="input-group" id="div1">
+                                <label for="permission-options">{{this.groupId}}&nbsp; : &nbsp; &nbsp;
+                                </label>
+                                <input type="checkbox" value="READ" class="permissionCheck" {{#if this.isRead}}checked{{/if}}>&nbsp;Read &nbsp; &nbsp;
+                                <input type="checkbox" value="UPDATE" class="permissionCheck" {{#if this.isUpdate}}checked{{/if}}>&nbsp;Update &nbsp; &nbsp;
+                                <input type="checkbox" value="DELETE" class="permissionCheck" {{#if this.isDelete}}checked{{/if}}>&nbsp;Delete &nbsp; &nbsp; &nbsp;
+                                <!--&emsp;-->
+                                <!--<span class="fw fw-delete delete-role"></span>-->
                             </div>
-                        <!--{--{/if}}-->
-                            <!--{--{#each @params.permissions}}-->
-                                <div class="input-group hide" id="permission-div">
-                                    <label for="permission-options">
-                                    </label>
-                                    <!--{--{this.groupId}} &nbsp; : &nbsp; &nbsp;-->
-                                    <!--{--{#if this.permission}}checked{--{/if}}-->
-                                    <input type="checkbox" value="READ" class="permissionCheck">&nbsp;Read &nbsp; &nbsp;
-                                    <input type="checkbox" value="UPDATE" class="permissionCheck">&nbsp;Update &nbsp; &nbsp;
-                                    <input type="checkbox" value="DELETE" class="permissionCheck">&nbsp;Delete &nbsp; &nbsp; &nbsp;
-                                    <!--&emsp;-->
-                                    <!--<span class="fw fw-delete delete-role"></span>-->
-                                </div>
-                                <!--<option {--{#if this.isSelected}}selected{--{/if}}-->
-                                <!--value="{--{this.value}}">{--{this.groupId}}</option>-->
-                            <!--{-{/each}}-->
+                        {{/each}}
 
                         <div class="input-group hide" id="permission-div">
                             <label for="permission-options">
