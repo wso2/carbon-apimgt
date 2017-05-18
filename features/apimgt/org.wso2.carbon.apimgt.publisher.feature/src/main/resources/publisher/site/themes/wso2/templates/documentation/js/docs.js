@@ -89,7 +89,7 @@ var newDocFormToggle = function(){
 
 var removeDocumentation = function (provider, apiName, version, docName, docType) {
     $('#messageModal').html($('#confirmation-data').html());
-    $('#messageModal h3.modal-title').html(i18n.t('Confirm Delete'));
+    $('#messageModal h3.modal-title').html(i18n.t('Confirm Deletion'));
     $('#messageModal div.modal-body').html('\n\n' + i18n.t('Are you sure you want to delete the file') + '<b>"' + docName + '</b>"?');
     $('#messageModal a.btn-primary').html(i18n.t('Yes'));
     $('#messageModal a.btn-other').html(i18n.t('No'));

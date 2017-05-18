@@ -16,7 +16,7 @@
     "At least one resource should be specified. Do you want to add a wildcard resource (/*)?": "At least one resource should be specified. Do you want to add a wildcard resource (/*)?",
     "Block": "Block",
     "Cannot test the endpoint provided. Please specify the full URL for testing.": "Cannot test the endpoint provided. Please specify the full URL for testing.",
-    "Confirm Delete": "Confirm Delete",
+    "Confirm Deletion": "Confirm Deletion",
     "Could not save. You have entered an invalid email address.": "Could not save. You have entered an invalid email address.",
     "Count": "Count",
     "Data Publishing Enabled": "Data Publishing Enabled",
