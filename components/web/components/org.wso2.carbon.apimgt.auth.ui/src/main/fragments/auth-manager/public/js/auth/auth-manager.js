@@ -41,7 +41,7 @@ authManager.login = function () {
     var allAvailableScopes = retrieveScopes();
     if(allAvailableScopes === "") {
         noty({
-            text: "Scopes could bot be loaded from the swagger definition. Try again after refreshing the login page.",
+            text: "Scopes could not be loaded from the swagger definition. Try again after refreshing the login page.",
             type: 'error',
             dismissQueue: true,
             modal: true,
@@ -82,7 +82,7 @@ authManager.refresh = function (authzHeader) {
     var allAvailableScopes = retrieveScopes();
     if(allAvailableScopes === "") {
         noty({
-            text: "Scopes could bot be loaded from the swagger definition. Try again after refreshing the login page.",
+            text: "Scopes could not be loaded from the swagger definition. Try again after refreshing the login page.",
             type: 'error',
             dismissQueue: true,
             modal: true,
