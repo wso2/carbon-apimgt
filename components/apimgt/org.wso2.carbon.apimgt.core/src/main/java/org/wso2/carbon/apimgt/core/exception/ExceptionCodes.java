@@ -52,6 +52,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "subscription"),
     COMMENT_NOT_FOUND(900319, "Comment not found", 404, "Couldn't retrieve comment"),
     APIM_DAO_EXCEPTION(900320, "Internal server error.", 500, " Error occurred while retrieving data"),
+    GATEWAY_LABELS_CANNOT_BE_NULL(900321, "Gateway labels cannot be null.", 400, "Gateway labels cannot be null"),
+    STATUS_CANNOT_BE_NULL(900322, "Status cannot be null.", 400, " Status cannot be null"),
 
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),

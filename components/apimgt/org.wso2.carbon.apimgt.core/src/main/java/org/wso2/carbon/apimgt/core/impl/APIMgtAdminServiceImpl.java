@@ -221,7 +221,19 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
             throws APIManagementException {
         List<API> apiList;
         try {
-            apiList = apiDAO.getAPIsByStatus(gatewayLabels, status);
+            if (gatewayLabels != null && status != null) {
+                apiList = apiDAO.getAPIsByStatus(gatewayLabels, status);
+            } else {
+                if (gatewayLabels == null) {
+                    String msg = "Gateway labels cannot be null";
+                    log.error(msg);
+                    throw new APIManagementException(msg, ExceptionCodes.GATEWAY_LABELS_CANNOT_BE_NULL);
+                } else {
+                    String msg = "Status cannot be null";
+                    log.error(msg);
+                    throw new APIManagementException(msg, ExceptionCodes.STATUS_CANNOT_BE_NULL);
+                }
+            }
         } catch (APIMgtDAOException e) {
             String msg = "Error occurred while getting the API list in given states";
             log.error(msg, e);
@@ -233,7 +245,13 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override public List<API> getAPIsByGatewayLabel(List<String> gatewayLabels) throws APIManagementException {
         List<API> apiList;
         try {
-            apiList = apiDAO.getAPIsByGatewayLabel(gatewayLabels);
+            if (gatewayLabels != null) {
+                apiList = apiDAO.getAPIsByGatewayLabel(gatewayLabels);
+            } else {
+                String msg = "Gateway labels cannot be null";
+                log.error(msg);
+                throw new APIManagementException(msg, ExceptionCodes.GATEWAY_LABELS_CANNOT_BE_NULL);
+            }
         } catch (APIMgtDAOException e) {
             String msg = "Error occurred while getting the API list in given gateway labels";
             log.error(msg, e);
