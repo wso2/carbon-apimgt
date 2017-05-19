@@ -4,6 +4,7 @@ import org.wso2.carbon.apimgt.gateway.dto as dto;
 import org.wso2.carbon.apimgt.gateway.holders as holders;
 import ballerina.lang.jsons;
 import ballerina.net.http;
+
 function constructAccessTokenNotFoundPayload(message response){
     json payload = {"code":900902,"message":"accessToken invalid"};
     messages:setJsonPayload(response,payload);
@@ -87,4 +88,33 @@ function retrieveResources (string apiContext,string apiVersion){
             i = i+1;
         }
     }
+}
+
+function fromJsonToGatewayConf(json conf)(dto:GatewayConf){
+    dto:GatewayConf gatewayConf = {};
+    gatewayConf.keyManagerURL = "";
+    gatewayConf.brokerURL = "";
+
+    return gatewayConf;
+}
+
+function fromJSONToAPIDto(json api)(dto:APIDto){
+    dto:APIDto apiDto = {};
+    apiDto.id = jsons:getString(api, "id");
+    apiDto.name = jsons:getString(api, "name");
+    apiDto.version = jsons:getString(api, "version");
+    apiDto.context = jsons:getString(api, "context");
+
+    return apiDto;
+
+}
+
+function deployService(dto:APIDto api, string config){
+    //TODO:To be implemented
+}
+function undeployService(dto:APIDto api){
+    //TODO:To be implemented
+}
+function updateService (dto:APIDto api) {
+    //TODO:To be implemented
 }
