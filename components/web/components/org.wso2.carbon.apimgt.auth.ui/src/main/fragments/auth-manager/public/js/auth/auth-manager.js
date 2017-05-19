@@ -39,6 +39,20 @@ authManager.getUserScope = function () {
 };
 authManager.login = function () {
     var allAvailableScopes = retrieveScopes();
+    if(allAvailableScopes === "") {
+        noty({
+            text: "Scopes could bot be loaded from the swagger definition. Try again after refreshing the login page.",
+            type: 'error',
+            dismissQueue: true,
+            modal: true,
+            progressBar: true,
+            timeout: 5000,
+            layout: 'top',
+            theme: 'relax',
+            maxVisible: 10,
+        });
+        return;
+    }
     var params = {
         username: $('#username').val(),
         password: $('#password').val(),
@@ -66,6 +80,20 @@ authManager.login = function () {
 
 authManager.refresh = function (authzHeader) {
     var allAvailableScopes = retrieveScopes();
+    if(allAvailableScopes === "") {
+        noty({
+            text: "Scopes could bot be loaded from the swagger definition. Try again after refreshing the login page.",
+            type: 'error',
+            dismissQueue: true,
+            modal: true,
+            progressBar: true,
+            timeout: 5000,
+            layout: 'top',
+            theme: 'relax',
+            maxVisible: 10,
+        });
+        return;
+    }
     var params = {
         grant_type: 'refresh_token',
         validity_period: '3600',
@@ -184,17 +212,19 @@ function retrieveScopes() {
  */
 function extractScopesFromSwagger() {
     var scopes = '';
-          var swaggerJson = JSON.parse(localStorage.getItem(swaggerId));
-          var paths = swaggerJson["paths"];
-          for (var path in paths) {
-              var resource = paths[path];
-              for (var attr in resource) {
-                  if (paths[path][attr]["x-scope"] !== undefined) {
-                      if (scopes.indexOf(paths[path][attr]["x-scope"]) === -1) {
-                          scopes = scopes + " " + paths[path][attr]["x-scope"];
-                      }
-                  }
-              }
-          }
+    var swaggerJson = JSON.parse(localStorage.getItem(swaggerId));
+    if (swaggerJson !== null) {
+        var paths = swaggerJson["paths"];
+        for (var path in paths) {
+            var resource = paths[path];
+            for (var attr in resource) {
+                if (paths[path][attr]["x-scope"] !== undefined) {
+                    if (scopes.indexOf(paths[path][attr]["x-scope"]) === -1) {
+                        scopes = scopes + " " + paths[path][attr]["x-scope"];
+                    }
+                }
+            }
+        }
+    }
     return scopes;
 }
