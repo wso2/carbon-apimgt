@@ -756,4 +756,58 @@ public class SampleTestObjectCreator {
         comment.setUpdatedTime(LocalDateTime.now());
         return comment;
     }
+
+    public static API.APIBuilder createDefaultAPIWithApiLevelEndpoint() {
+        Set<String> transport = new HashSet<>();
+        transport.add(HTTP);
+        transport.add(HTTPS);
+
+        Set<String> tags = new HashSet<>();
+        tags.add(TAG_CLIMATE);
+
+        Set<String> policies = new HashSet<>();
+        policies.add(GOLD_TIER);
+        policies.add(SILVER_TIER);
+        policies.add(BRONZE_TIER);
+
+        BusinessInformation businessInformation = new BusinessInformation();
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        String permissionJson = "[{\"groupId\" : 1000, \"permission\" : "
+                + "[\"READ\",\"UPDATE\"]},{\"groupId\" : 1001, \"permission\" : [\"READ\",\"UPDATE\"]}]";
+        Map<String, Endpoint> endpointMap = new HashMap<>();
+        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, new Endpoint.Builder().id(endpointId).name
+                ("api1-production--endpint").applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build());
+        API.APIBuilder apiBuilder = new API.APIBuilder(ADMIN, "WeatherAPI", API_VERSION).
+                id(UUID.randomUUID().toString()).
+                context("weather").
+                description("Get Weather Info").
+                lifeCycleStatus(APIStatus.CREATED.getStatus()).
+                lifecycleInstanceId(UUID.randomUUID().toString()).
+                endpoint(endpointMap).
+                wsdlUri("http://localhost:9443/echo?wsdl").
+                isResponseCachingEnabled(false).
+                cacheTimeout(60).
+                isDefaultVersion(false).
+                apiPolicy(APIMgtConstants.DEFAULT_API_POLICY).
+                transport(transport).
+                tags(tags).
+                policies(policies).
+                visibility(API.Visibility.PUBLIC).
+                visibleRoles(new HashSet<>()).
+                businessInformation(businessInformation).
+                corsConfiguration(corsConfiguration).
+                apiType(ApiType.STANDARD).
+                createdTime(LocalDateTime.now()).
+                createdBy(ADMIN).
+                updatedBy(ADMIN).
+                lastUpdatedTime(LocalDateTime.now()).
+                permission(permissionJson).
+                uriTemplates(getMockUriTemplates()).
+                apiDefinition(apiDefinition);
+        HashMap map = new HashMap();
+        map.put("1000", 6);
+        map.put("1001", 4);
+        apiBuilder.permissionMap(map);
+        return apiBuilder;
+    }
 }
