@@ -181,15 +181,6 @@ public interface APIPublisher extends APIManager {
     void removeDocumentation(String docId) throws APIManagementException;
 
     /**
-     * Checks if a given API exists in the registry
-     *
-     * @param apiId UUID of the API
-     * @return boolean result
-     * @throws APIManagementException If failed to check ia API exist.
-     */
-    boolean checkIfAPIExists(String apiId) throws APIManagementException;
-
-    /**
      * Checks if a given API name exists in the registry
      *
      * @param name Name of the API.

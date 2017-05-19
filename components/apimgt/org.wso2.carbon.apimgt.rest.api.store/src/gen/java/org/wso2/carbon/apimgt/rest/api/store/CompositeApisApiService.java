@@ -41,7 +41,7 @@ public abstract class CompositeApisApiService {
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
     public abstract Response compositeApisApiIdSwaggerPut(String apiId
- ,String endpointId
+ ,String apiDefinition
  ,String contentType
  ,String ifMatch
  ,String ifUnmodifiedSince

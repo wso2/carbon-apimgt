@@ -1173,7 +1173,7 @@ paths:
       parameters:
         - $ref: '#/parameters/apiId'
         - in: formData
-          name: endpointId
+          name: apiDefinition
           description: Swagger definition of the Composite API
           type: string
           required: true

@@ -703,10 +703,10 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 API createdAPI = apiBuilder.build();
                 APIUtils.validate(createdAPI);
 
-                getApiDAO().addAPI(createdAPI);
-
                 //publishing config to gateway
                 gateway.addAPI(createdAPI);
+
+                getApiDAO().addAPI(createdAPI);
 
                 if (log.isDebugEnabled()) {
                     log.debug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
@@ -724,7 +724,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             } catch (GatewayException e) {
                 String message = "Error publishing service configuration to Gateway " + apiBuilder.getName();
                 log.error(message, e);
-                throw new APIManagementException(message, ExceptionCodes.GATEWAY_EXCEPTION);
+                throw new APIManagementException(message, e, ExceptionCodes.GATEWAY_EXCEPTION);
             }
 
         } else {
@@ -808,52 +808,72 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             //workflow status is an internal property and shouldn't be allowed to update externally
             apiBuilder.workflowStatus(originalAPI.getWorkflowStatus());
 
-            if ((originalAPI.getName().equals(apiBuilder.getName())) && (originalAPI.getVersion().equals
-                    (apiBuilder.getVersion())) && (originalAPI.getProvider().equals(apiBuilder.getProvider())) &&
-                    originalAPI.getLifeCycleStatus().equalsIgnoreCase(apiBuilder.getLifeCycleStatus())) {
-                try {
-                    setPermission(apiBuilder);
+            APIUtils.verifyValidityOfApiUpdate(apiBuilder, originalAPI);
 
-                    String updatedSwagger = apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder);
-                    String gatewayConfig = getApiGatewayConfig(apiBuilder.getId());
-                    GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
-                    gatewaySourceGenerator.setAPI(apiBuilder.build());
-                    String updatedGatewayConfig = gatewaySourceGenerator
-                            .getGatewayConfigFromSwagger(gatewayConfig, updatedSwagger);
+            try {
+                setPermission(apiBuilder);
 
-                    API api = apiBuilder.build();
+                String updatedSwagger = apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder);
+                String gatewayConfig = getApiGatewayConfig(apiBuilder.getId());
+                GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
+                gatewaySourceGenerator.setAPI(apiBuilder.build());
+                String updatedGatewayConfig = gatewaySourceGenerator
+                        .getGatewayConfigFromSwagger(gatewayConfig, updatedSwagger);
 
-                    if (originalAPI.getContext() != null && !originalAPI.getContext().equals(apiBuilder.getContext())) {
-                        if (isContextExist(api.getContext())) {
-                            throw new APIManagementException("Context already Exist", ExceptionCodes
-                                    .API_ALREADY_EXISTS);
-                        }
+                API api = apiBuilder.build();
+
+                if (originalAPI.getContext() != null && !originalAPI.getContext().equals(apiBuilder.getContext())) {
+                    if (isContextExist(api.getContext())) {
+                        throw new APIManagementException("Context already Exist", ExceptionCodes
+                                .API_ALREADY_EXISTS);
                     }
-
-                    getApiDAO().updateSwaggerDefinition(api.getId(), updatedSwagger, api.getUpdatedBy());
-                    getApiDAO().updateGatewayConfig(api.getId(), updatedGatewayConfig, api.getUpdatedBy());
-
-                    if (log.isDebugEnabled()) {
-                        log.debug("API " + api.getName() + "-" + api.getVersion() + " was updated successfully.");
-                    }
-
-                } catch (ParseException e) {
-                    String errorMsg = "Unable to update the documentation due to json parse error";
-                    log.error(errorMsg, e);
-                    throw new APIManagementException(errorMsg, e, ExceptionCodes.JSON_PARSE_ERROR);
-                } catch (APIMgtDAOException e) {
-                    String errorMsg = "Error occurred while updating the API - " + apiBuilder.getName();
-                    log.error(errorMsg, e);
-                    throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
                 }
-            } else {
-                APIUtils.handleInvalidApiUpdateAttempt(apiBuilder, originalAPI);
+
+                //publishing config to gateway
+                gateway.addAPI(api);
+
+                getApiDAO().updateSwaggerDefinition(api.getId(), updatedSwagger, api.getUpdatedBy());
+                getApiDAO().updateGatewayConfig(api.getId(), updatedGatewayConfig, api.getUpdatedBy());
+
+                if (log.isDebugEnabled()) {
+                    log.debug("API " + api.getName() + "-" + api.getVersion() + " was updated successfully.");
+                }
+
+            } catch (ParseException e) {
+                String errorMsg = "Unable to update the documentation due to json parse error";
+                log.error(errorMsg, e);
+                throw new APIManagementException(errorMsg, e, ExceptionCodes.JSON_PARSE_ERROR);
+            } catch (APIMgtDAOException e) {
+                String errorMsg = "Error occurred while updating the API - " + apiBuilder.getName();
+                log.error(errorMsg, e);
+                throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
             }
         } else {
 
             log.error("Couldn't found API with ID " + apiBuilder.getId());
             throw new APIManagementException("Couldn't found API with ID " + apiBuilder.getId(),
                     ExceptionCodes.API_NOT_FOUND);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void deleteCompositeApi(String apiId) throws APIManagementException {
+        try {
+            API api = getApiDAO().getAPI(apiId);
+            if (api != null && api.getApiType() == ApiType.COMPOSITE) {
+                //Delete API in gateway
+                gateway.deleteAPI(api);
+                getApiDAO().deleteAPI(apiId);
+            }
+        } catch (GatewayException e) {
+            String message = "Error occurred while deleting Composite API with id - " + apiId + " from gateway";
+            throw new APIManagementException(message, e, ExceptionCodes.GATEWAY_EXCEPTION);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while deleting the Composite API with id " + apiId;
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
