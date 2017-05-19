@@ -83,6 +83,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -342,20 +343,31 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 gateway.addAPI(createdAPI);
 
                 Set<String> apiRoleList;
-                //if the API has public visibility, add the API without any role checking
-                //if the API has role based visibility, add the API with role checking
-                if (API.Visibility.PUBLIC == createdAPI.getVisibility()) {
-                    getApiDAO().addAPI(createdAPI);
-                } else if (API.Visibility.RESTRICTED == createdAPI.getVisibility()) {
-                    //get all the roles in the system
-                    Set<String> allAvailableRoles = APIUtils.getAllAvailableRoles();
-                    //get the roles needed to be associated with the API
-                    apiRoleList = createdAPI.getVisibleRoles();
-                    if (APIUtils.checkAllowedRoles(allAvailableRoles, apiRoleList)) {
-                        getApiDAO().addAPI(createdAPI);
-                    }
+                Set<String> permissionRoleList = new HashSet<>();
+
+                Map<String, Integer> permissionMap = createdAPI.getPermissionMap();
+
+                for (String groupId : permissionMap.keySet()) {
+                    permissionRoleList.add(groupId);
                 }
 
+                Set<String> allAvailableRoles = APIUtils.getAllAvailableRoles();
+                if (permissionRoleList.isEmpty() || APIUtils.checkAllowedRoles(allAvailableRoles, permissionRoleList)) {
+                    //if the API has public visibility, add the API without any role checking
+                    //if the API has role based visibility, add the API with role checking
+                    if (API.Visibility.PUBLIC == createdAPI.getVisibility()) {
+                        getApiDAO().addAPI(createdAPI);
+                    } else if (API.Visibility.RESTRICTED == createdAPI.getVisibility()) {
+                        //                    //get all the roles in the system
+                        //                    Set<String> allAvailableRoles = APIUtils.getAllAvailableRoles();
+                        //get the roles needed to be associated with the API
+                        apiRoleList = createdAPI.getVisibleRoles();
+                        if (APIUtils.checkAllowedRoles(allAvailableRoles, apiRoleList)) {
+                            getApiDAO().addAPI(createdAPI);
+                        }
+                    }
+                }
+                
                 APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
                         "successfully.", log);
                 // 'API_M Functions' related code
