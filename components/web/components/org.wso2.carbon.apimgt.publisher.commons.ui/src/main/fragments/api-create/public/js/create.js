@@ -30,7 +30,7 @@ $(
                 $clone = $permissionsTemplate.clone().removeClass('hide').attr('id','role-' + roleIndex).insertBefore($permissionsTemplate);
                 $clone
                     .find('[id="remove"]').attr('id', 'remove-' + roleIndex ).end();
-                $clone.find('label[for="permission-options"]').html(role + '&nbsp; : &nbsp; &nbsp;');
+                $clone.find('label[class="permission-options"]').html(role + '&nbsp; : &nbsp; &nbsp;');
                 $('#no-roles-msg').hide();
                 $('#role-name').val(null);
             } else {
@@ -67,7 +67,7 @@ function createRolePermissionJsonString() {
         var jsonData = {};
         var permissionArrayPerRole = [];
         var obj = $(this);
-        var roleName = obj.find('label[for="permission-options"]').text().split(' :')[0].trim().toLowerCase();
+        var roleName = obj.find('label[class="permission-options"]').text().split(' :')[0].trim().toLowerCase();
         if(isValidRole(roleName)) {
             jsonData["groupId"] = roleName;
             obj.find(".permissionCheck:checked").each(function(){
@@ -85,16 +85,6 @@ function createRolePermissionJsonString() {
         var invalidRolesList = invalidRoles.join();
         var message = "The role(s) " + invalidRolesList + " is/are invalid and hence not assigned permissions.";
         alert(message);
-//        noty({
-//            text: message,
-//            type: 'warning',
-//            dismissQueue: true,
-//            progressBar: true,
-//            timeout: 5000,
-//            layout: 'topCenter',
-//            theme: 'relax',
-//            maxVisible: 10
-//        });
     }
     return JSON.stringify(permissionJson);
 }

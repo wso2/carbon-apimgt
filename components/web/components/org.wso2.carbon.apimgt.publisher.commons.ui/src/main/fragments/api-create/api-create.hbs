@@ -123,9 +123,9 @@
                     <div class="clearfix"></div>
                 </div>
                 <!--Advanced Settings-->
-                <a href="#" id="api-create-advanced"><h4><i class="fw fw-gadget"></i>&nbsp;Advanced Options</h4></a>
+                <a href="#" id="api-create-advanced"><h4><i class="fw fw-gadget"></i>&nbsp;{{i18n "Advanced.Options"}}</h4></a>
                 <div class="row add-padding-top-5x" id="api-create-advanced-div" style="display: none;">
-                    <h4>API Permissions</h4>
+                    <h4>{{i18n "API.Permissions"}}</h4>
                     <div class="col-xs-3"> <!-- required for floating -->
                         <!-- Nav tabs -->
                         <form class="form-horizontal" id="api-creation-advanced-form">
@@ -139,7 +139,7 @@
                                                id="role-name"
                                                placeholder="role name">
                                         <span class="input-group-btn">
-                                            <button class="btn btn-primary add-role" type="button">Add</button>
+                                            <button class="btn btn-primary add-role" type="button">{{i18n "Add"}}</button>
                                         </span>
                                     </div>
                                 </div>
@@ -151,16 +151,16 @@
                             <div class="form-group">
                                 <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8" id="set-permissions-list">
                                     <div class="well">
-                                        <p>Role permissions for the API</p>
+                                        <p>{{i18n "Role.permissions.for.API"}}</p>
                                         <div class="message message-info" id="no-roles-msg">
-                                            <p><i class="icon fw fw-info"></i>&emsp; No roles added yet.</p>
+                                            <p><i class="icon fw fw-info"></i>&emsp;{{i18n "No.roles.added."}}</p>
                                         </div>
                                         <div class="input-group hide" id="permission-div">
-                                            <label for="permission-options">
+                                            <label class="permission-options">
                                             </label>
-                                            <input type="checkbox" value="READ" class="permissionCheck">&nbsp;Read &nbsp; &nbsp;
-                                            <input type="checkbox" value="UPDATE" class="permissionCheck">&nbsp;Update &nbsp; &nbsp;
-                                            <input type="checkbox" value="DELETE" class="permissionCheck">&nbsp;Delete &nbsp; &nbsp; &nbsp;
+                                            <input type="checkbox" value="READ">&nbsp;{{i18n "Read"}} &nbsp; &nbsp;
+                                            <input type="checkbox" value="UPDATE">&nbsp;{{i18n "Update"}} &nbsp; &nbsp;
+                                            <input type="checkbox" value="DELETE">&nbsp;{{i18n "Delete"}} &nbsp; &nbsp; &nbsp;
                                             &emsp;
                                             <span class="fw fw-delete delete-role"></span>
                                         </div>

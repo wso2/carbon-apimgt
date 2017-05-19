@@ -295,12 +295,6 @@ function accessControlTabHandler(event) {
             var mode = "OVERWRITE"; // Available modes [OVERWRITE,APPEND, PREPEND]
             var callbacks = {
                 onSuccess: function (data) {
-                    $('.selectPermissions').multiselect(
-                        {
-                            nonSelectedText: response.data,//"No permissions set for role",
-                            includeSelectAllOption: true
-                        }
-                    );
                     if (!permission_data || permission_data === "[]"){
                         $('#no-roles-msg').removeClass('hide');
                     }
@@ -309,26 +303,27 @@ function accessControlTabHandler(event) {
                     console.debug("Failed");
                 }
             };
-            var permissionArray = [];
             var permissions = JSON.parse(permission_data);
+            //Processing the permission data to be sent to frontend
+            var permissionArray = [];
             for(var role in permissions) {
-                var item = {};
+                var groupPermission = {};
                 var groupId = permissions[role].groupId;
-                item["groupId"] = groupId;
-                item["isRead"] = false;
-                item["isUpdate"] = false;
-                item["isDelete"] = false;
+                groupPermission["groupId"] = groupId;
+                groupPermission["isRead"] = false;
+                groupPermission["isUpdate"] = false;
+                groupPermission["isDelete"] = false;
                 var permissionList = permissions[role].permission;
                 if(permissionList.includes("READ")) {
-                    item["isRead"] = true;
+                    groupPermission["isRead"] = true;
                 }
                 if (permissionList.includes("UPDATE")){
-                    item["isUpdate"] = true;
+                    groupPermission["isUpdate"] = true;
                 }
                 if (permissionList.includes("DELETE")) {
-                    item["isDelete"] = true;
+                    groupPermission["isDelete"] = true;
                 }
-                permissionArray.push(item);
+                permissionArray.push(groupPermission);
             }
 
             var data = {
@@ -706,7 +701,6 @@ function updatePermissionsHandler(event) {
         api_client: api_client,
         api_id: api_id
     };
-    //var selected_permissions = $('#permissions-list-dropdown').val();
     api_client.get(api_id).then(
         function (response) {
             var api_data = JSON.parse(response.data);
@@ -729,7 +723,6 @@ function updatePermissionsHandler(event) {
             );
             promised_update.catch(
                 function (error_response) {
-                    $('#permissions-list-dropdown').multiselect("deselectAll", false).multiselect("refresh");
                     var message = "Error[" + error_response.status + "]: " + error_response.data;
                     noty({
                         text: message,

@@ -12,7 +12,7 @@ $(
                 $clone = $permissionsTemplate.clone().removeClass('hide').attr('id','role-' + roleIndex).insertBefore($permissionsTemplate);
                 $clone
                     .find('[id="remove"]').attr('id', 'remove-' + roleIndex ).end();
-                $clone.find('label[for="permission-options"]').html(role + '&nbsp; : &nbsp; &nbsp;');
+                $clone.find('label[class="permission-options"]').html(role + '&nbsp; : &nbsp; &nbsp;');
                 $('#no-roles-msg').hide();
                 $('#role-name').val(null);
             } else {
