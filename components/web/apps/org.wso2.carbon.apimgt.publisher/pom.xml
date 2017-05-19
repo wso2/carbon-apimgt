@@ -78,7 +78,6 @@
                             <executable>${npm.executable}</executable>
                             <arguments>
                                 <argument>install</argument>
-                                <argument>${npm.package.prefix}</argument>
                             </arguments>
                         </configuration>
                     </execution>
@@ -93,7 +92,6 @@
                         <configuration>
                             <executable>${npm.executable}</executable>
                             <arguments>
-                                <argument>${npm.package.prefix}</argument>
                                 <argument>install</argument>
                                 <argument>rimraf</argument>
                             </arguments>
@@ -108,7 +106,6 @@
                         <configuration>
                             <executable>${npm.executable}</executable>
                             <arguments>
-                                <argument>${npm.package.prefix}</argument>
                                 <argument>run</argument>
                                 <argument>clean</argument>
                             </arguments>
@@ -123,7 +120,6 @@
                         <configuration>
                             <executable>${npm.executable}</executable>
                             <arguments>
-                                <argument>${npm.package.prefix}</argument>
                                 <argument>run</argument>
                                 <argument>${npm.build.command}</argument>
                             </arguments>
@@ -138,7 +134,6 @@
                         <configuration>
                             <executable>${npm.executable}</executable>
                             <arguments>
-                                <argument>${npm.package.prefix}</argument>
                                 <argument>run</argument>
                                 <argument>test</argument>
                                 <argument>&#45;&#45;</argument>
@@ -147,6 +142,9 @@
                         </configuration>
                     </execution>-->
                 </executions>
+                <configuration>
+                    <workingDirectory>${npm.working.dir}</workingDirectory>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.wso2.carbon.uuf.maven</groupId>
@@ -169,6 +167,6 @@
         <maven.test.skip>false</maven.test.skip>
         <npm.executable>npm</npm.executable>
         <npm.build.command>build</npm.build.command>
-        <npm.package.prefix>--prefix=./src/main/</npm.package.prefix>
+        <npm.working.dir>./src/main/</npm.working.dir>
     </properties>
 </project>

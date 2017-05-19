@@ -1,10 +1,5 @@
 apis: []
 
-bindings:
-  - zoneName: "org.wso2.carbon.apimgt.publisher.commons.ui.secondary-menu"
-    mode: prepend
-    fragments:
-      - org.wso2.carbon.apimgt.web.publisher.feature.secondary-menu
 
 config:
   title : "API Publisher Application"

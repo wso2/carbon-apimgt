@@ -1,13 +1,15 @@
-var path = require('path');
+let path = require('path');
 
 module.exports = {
     entry: {
-        app: './public/application.js'
+        index: './pages/index.js'
     },
     output: {
         path: path.resolve(__dirname, 'public/dist'),
         filename: '[name].js'
     },
+    devtool: "source-map",
+    watch: false,
     module: {
         rules: [
             {
@@ -24,4 +26,4 @@ module.exports = {
             }
         ]
     }
-}
+};
