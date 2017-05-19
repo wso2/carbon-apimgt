@@ -264,6 +264,9 @@ APIDesigner.prototype.check_if_resource_exist = function(path, method){
 
 APIDesigner.prototype.set_default_management_values = function(){
     var operations = this.query("$.paths.*.*");
+    if (operations == undefined) {
+        return;
+    }
     for(var i=0;i < operations.length;i++){
         if(!operations[i]["x-auth-type"]){
             if(operations[i].method == "OPTIONS"){
@@ -288,16 +291,21 @@ APIDesigner.prototype.add_default_resource = function(){
 
 APIDesigner.prototype.get_scopes = function() {
     var options = [{ "value": "" , "text": "" }];
-    if(checkNested(this.api_doc, 'x-wso2-security','apim','x-wso2-scopes')){
-    	var scopes = this.api_doc['x-wso2-security'].apim['x-wso2-scopes'];
-    	for(var i =0; i < scopes.length ; i++ ){
-    	    options.push({ "value": scopes[i].key , "text": scopes[i].name });
-    	}	
+    if (this.api_doc != undefined) {
+        if (checkNested(this.api_doc, 'x-wso2-security', 'apim', 'x-wso2-scopes')) {
+            var scopes = this.api_doc['x-wso2-security'].apim['x-wso2-scopes'];
+            for (var i = 0; i < scopes.length; i++) {
+                options.push({"value": scopes[i].key, "text": scopes[i].name});
+            }
+        }
     }
     return options;
 }
 
 APIDesigner.prototype.has_resources = function(){
+    if (this.api_doc == undefined) {
+        return false;
+    }
     if(Object.keys(this.api_doc.paths).length == 0)
         return false;
     else
@@ -363,8 +371,16 @@ APIDesigner.prototype.init_controllers = function(){
         // We do not need the version anymore. With the new plugable version strategy the context will have the version
         APIDesigner().baseURLValue = "http://localhost:8280/"+$("#context").val().replace("/","")});
     $("#context").change(function(e){ APIDesigner().baseURLValue = "http://localhost:8280/"+$(this).val().replace("/","")});
-    $("#name").change(function(e){ APIDesigner().api_doc.info.title = $(this).val() });
-    $("#description").change(function(e){ APIDesigner().api_doc.info.description = $(this).val() });
+    $("#name").change(function (e) {
+        if (APIDesigner().api_doc != null) {
+            APIDesigner().api_doc.info.title = $(this).val();
+        }
+    });
+    $("#description").change(function (e) {
+        if (APIDesigner().api_doc != null) {
+            APIDesigner().api_doc.info.description = $(this).val()
+        }
+    });
 
     this.container.delegate( ".delete_resource", "click", function( event ) { 
     	$("#messageModal div.modal-footer").html("");
@@ -555,8 +571,8 @@ APIDesigner.prototype.init_controllers = function(){
 					return;
 				}       
 
-		}, "json"); 
-	}); 
+            }, "json");
+    });
 
     $("#swaggerEditor").click(API_DESIGNER.edit_swagger);
 
@@ -569,10 +585,12 @@ APIDesigner.prototype.load_api_document = function(api_document){
     this.api_doc = api_document;
     this.render_resources();
     this.render_scopes();
-    $("#version").val(api_document.info.version);
-    $("#name").val(api_document.info.title);
-    if(api_document.info.description){
-    	$("#description").val(api_document.info.description);
+    if (this.api_document != null) {
+        $("#version").val(api_document.info.version);
+        $("#name").val(api_document.info.title);
+        if (api_document.info.description) {
+            $("#description").val(api_document.info.description);
+        }
     }
 };
 
