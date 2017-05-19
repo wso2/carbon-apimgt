@@ -303,6 +303,14 @@ public interface APIStore extends APIManager {
     void updateCompositeApi(API.APIBuilder apiBuilder) throws APIManagementException;
 
     /**
+     * Delete an existing Composite API.
+     *
+     * @param apiId API Id
+     * @throws APIManagementException if failed to delete Composite API
+     */
+    void deleteCompositeApi(String apiId) throws APIManagementException;
+
+    /**
      * Create a new version of the <code>Composite API</code>, with version <code>newVersion</code>
      *
      * @param apiId      The Composite API to be copied

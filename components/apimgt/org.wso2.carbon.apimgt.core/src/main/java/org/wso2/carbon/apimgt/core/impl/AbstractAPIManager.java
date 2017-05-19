@@ -176,15 +176,19 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
-     * Checks the Availability of given String
-     *
-     * @param api   PAI object
-     * @return true, if already exists. False, otherwise
-     * @throws APIManagementException if failed to get API availability
+     * {@inheritDoc}
      */
     @Override
-    public boolean isAPIAvailable(API api) throws APIManagementException {
-        return false;
+    public boolean checkIfAPIExists(String apiId) throws APIManagementException {
+        boolean status;
+        try {
+            status = getApiDAO().getAPISummary(apiId) != null;
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Couldn't get APISummary for " + apiId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return status;
     }
 
     /**

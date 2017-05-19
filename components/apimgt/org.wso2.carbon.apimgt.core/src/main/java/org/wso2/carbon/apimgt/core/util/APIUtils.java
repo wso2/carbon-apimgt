@@ -329,53 +329,65 @@ public class APIUtils {
 
     }
 
-    public static void handleInvalidApiUpdateAttempt(API.APIBuilder apiBuilder, API originalAPI)
+    public static void verifyValidityOfApiUpdate(API.APIBuilder apiBuilder, API originalAPI)
                                                                                     throws APIManagementException {
         if (!originalAPI.getLifeCycleStatus().equals(apiBuilder.getLifeCycleStatus())) {
             String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as" +
-                    " API have " +
-                    "status change";
+                    "the API Status cannot be changed";
             if (log.isDebugEnabled()) {
                 log.debug(msg);
             }
 
-            log.error(msg);
             throw new APIManagementException(msg, ExceptionCodes.COULD_NOT_UPDATE_API);
-        } else if (!originalAPI.getName().equals(apiBuilder.getName())) {
-            String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as" +
-                    " API have " +
-                    "API Name Change";
+        }
+
+        if (!originalAPI.getName().equals(apiBuilder.getName())) {
+            String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " update not allowed, " +
+                    "the API Name cannot be changed";
             if (log.isDebugEnabled()) {
                 log.debug(msg);
             }
-            log.error(msg);
+
             throw new APIManagementException(msg, ExceptionCodes.COULD_NOT_UPDATE_API);
-        } else if (!originalAPI.getContext().equals(apiBuilder.getContext())) {
-            String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as" +
-                    " API have " +
-                    "Context change";
+        }
+
+        if (!originalAPI.getContext().equals(apiBuilder.getContext())) {
+            String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " update not allowed, " +
+                    "the API Context cannot be changed";
             if (log.isDebugEnabled()) {
                 log.debug(msg);
             }
-            log.error(msg);
+
             throw new APIManagementException(msg, ExceptionCodes.COULD_NOT_UPDATE_API);
-        } else if (!originalAPI.getVersion().equals(apiBuilder.getVersion())) {
-            String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as" +
-                    " API have " +
-                    "Version change";
+        }
+
+        if (!originalAPI.getVersion().equals(apiBuilder.getVersion())) {
+            String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " update not allowed, " +
+                    "the API Version cannot be changed";
             if (log.isDebugEnabled()) {
                 log.debug(msg);
             }
-            log.error(msg);
+
             throw new APIManagementException(msg, ExceptionCodes.COULD_NOT_UPDATE_API);
-        } else if (!originalAPI.getProvider().equals(apiBuilder.getProvider())) {
-            String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as" +
-                    " API have " +
-                    "provider change";
+        }
+
+        if (!originalAPI.getProvider().equals(apiBuilder.getProvider())) {
+            String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " update not allowed, " +
+                    "the API Provider cannot be changed";
             if (log.isDebugEnabled()) {
                 log.debug(msg);
             }
-            log.error(msg);
+
+            throw new APIManagementException(msg, ExceptionCodes.COULD_NOT_UPDATE_API);
+        }
+
+        if (originalAPI.getApiType() != apiBuilder.getApiType()) {
+            String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " update not allowed, " +
+                    "the API Type cannot be changed";
+            if (log.isDebugEnabled()) {
+                log.debug(msg);
+            }
+
             throw new APIManagementException(msg, ExceptionCodes.COULD_NOT_UPDATE_API);
         }
     }

@@ -509,7 +509,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         ObserverNotifierThreadPool.getInstance().executeTask(observerNotifier);
                     }
                 } else {
-                    APIUtils.handleInvalidApiUpdateAttempt(apiBuilder, originalAPI);
+                    APIUtils.verifyValidityOfApiUpdate(apiBuilder, originalAPI);
                 }
             } else {
 
@@ -870,26 +870,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
-    }
-
-    /**
-     * Checks if a given API exists in the registry
-     *
-     * @param apiId UUID of the API.
-     * @return boolean result
-     * @throws APIManagementException If failed to check if API exist.
-     */
-    @Override
-    public boolean checkIfAPIExists(String apiId) throws APIManagementException {
-        boolean status;
-        try {
-            status = getApiDAO().getAPISummary(apiId) != null;
-        } catch (APIMgtDAOException e) {
-            String errorMsg = "Couldn't get APISummary for " + apiId;
-            log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
-        }
-        return status;
     }
 
     /**

@@ -77,12 +77,13 @@ public interface APIManager {
     String getLastUpdatedTimeOfSwaggerDefinition(String apiId) throws APIManagementException;
 
     /**
-     * Checks the Availability of given String
-     * @param api   API object.
-     * @return true, if already exists. False, otherwise
-     * @throws APIManagementException if failed to get API availability
+     * Checks if a given API exists
+     *
+     * @param apiId UUID of the API
+     * @return boolean result
+     * @throws APIManagementException If failed to check ia API exist.
      */
-    boolean isAPIAvailable(API api) throws APIManagementException;
+    boolean checkIfAPIExists(String apiId) throws APIManagementException;
 
     /**
      * Checks whether the given API context is already registered in the system
