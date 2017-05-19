@@ -5,7 +5,7 @@
 </div>
 
 <div class="row">
-    <div class="col-md-6 col-sm-6" id="search_role">
+    <div class="col-md-6 col-sm-6">
         <form class="form-horizontal">
             <div class="form-group">
                 <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3" for="role-name">
@@ -32,15 +32,15 @@
                         {{i18n "Role.permissions.for.API"}}
                         <hr>
                         <div class="message message-info hide" id="no-roles-msg">
-                            <p><i class="icon fw fw-info"></i>&emsp; {{i18n "No.roles.added."}}</p>
+                            <p><i class="icon fw fw-info"></i>&emsp; {{i18n "No.roles.added"}}.</p>
                         </div>
                         {{#each @params.permission}}
                             <div class="input-group" id="existing-permissions">
                                     <label class="permission-options">{{this.groupId}}&nbsp; : &nbsp; &nbsp;
                                     </label>
-                                    <input type="checkbox" value="READ" {{#if this.isRead}}checked{{/if}}>&nbsp;{{i18n "Read"}} &nbsp; &nbsp;
-                                    <input type="checkbox" value="UPDATE" {{#if this.isUpdate}}checked{{/if}}>&nbsp;{{i18n "Update"}} &nbsp; &nbsp;
-                                    <input type="checkbox" value="DELETE" {{#if this.isDelete}}checked{{/if}}>&nbsp;{{i18n "Delete"}} &nbsp; &nbsp; &nbsp;
+                                    <input type="checkbox" value="READ" class="permissionCheck" {{#if this.isRead}}checked{{/if}}>&nbsp;{{i18n "Read"}} &nbsp; &nbsp;
+                                    <input type="checkbox" value="UPDATE" class="permissionCheck" {{#if this.isUpdate}}checked{{/if}}>&nbsp;{{i18n "Update"}} &nbsp; &nbsp;
+                                    <input type="checkbox" value="DELETE" class="permissionCheck" {{#if this.isDelete}}checked{{/if}}>&nbsp;{{i18n "Delete"}} &nbsp; &nbsp; &nbsp;
                                     &emsp;
                                     <span class="fw fw-delete delete-role"></span>
                             </div>
@@ -49,9 +49,9 @@
                         <div class="input-group hide" id="permission-div">
                             <label class="permission-options">
                             </label>
-                            <input type="checkbox" value="READ">&nbsp;{{i18n "Read"}} &nbsp; &nbsp;
-                            <input type="checkbox" value="UPDATE">&nbsp;{{i18n "Update"}} &nbsp; &nbsp;
-                            <input type="checkbox" value="DELETE">&nbsp;{{i18n "Delete"}} &nbsp; &nbsp; &nbsp;
+                            <input type="checkbox" value="READ" class="permissionCheck">&nbsp;{{i18n "Read"}} &nbsp; &nbsp;
+                            <input type="checkbox" value="UPDATE" class="permissionCheck">&nbsp;{{i18n "Update"}} &nbsp; &nbsp;
+                            <input type="checkbox" value="DELETE" class="permissionCheck">&nbsp;{{i18n "Delete"}} &nbsp; &nbsp; &nbsp;
                             &emsp;
                             <span class="fw fw-delete delete-role"></span>
                         </div>

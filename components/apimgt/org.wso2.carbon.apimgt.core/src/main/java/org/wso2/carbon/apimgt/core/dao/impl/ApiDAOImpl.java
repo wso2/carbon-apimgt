@@ -2435,17 +2435,15 @@ public class ApiDAOImpl implements ApiDAO {
             if (entry.getValue() == (APIMgtConstants.Permission.READ_PERMISSION
                     + APIMgtConstants.Permission.UPDATE_PERMISSION)) {
                 array.add(APIMgtConstants.Permission.UPDATE);
-                jsonObject.put(permission, array);
             } else if (entry.getValue() == (APIMgtConstants.Permission.READ_PERMISSION
                     + APIMgtConstants.Permission.DELETE_PERMISSION)) {
                 array.add(APIMgtConstants.Permission.DELETE);
-                jsonObject.put(permission, array);
             } else if (entry.getValue() == (APIMgtConstants.Permission.READ_PERMISSION
                     + APIMgtConstants.Permission.UPDATE_PERMISSION + APIMgtConstants.Permission.DELETE_PERMISSION)) {
                 array.add(APIMgtConstants.Permission.UPDATE);
                 array.add(APIMgtConstants.Permission.DELETE);
-                jsonObject.put(permission, array);
             }
+            jsonObject.put(permission, array);
             permissionArray.add(jsonObject);
         }
         return new StringBuilder(permissionArray.toString());
