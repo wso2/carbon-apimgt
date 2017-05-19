@@ -22,11 +22,6 @@ $(
         validateActionButtons('#api-create-submit');
         $('#api-create-advanced').on('click', showAdvancedDiv);
         var roleIndex = 0;
-//        $("[id=remove-2]").on('click',function(e){
-//            e.preventDefault();
-//            var par = $("[id=role-2]");
-//            par.remove();
-//        });
         $('.add-role').on('click', function() {
             var role = $('#role-name').val().trim();
             if(role && role != ""){
@@ -52,6 +47,9 @@ $(
                 });
                 return;
             }
+        });
+        $(document).on('click', '.delete-role', function() {
+            $(this).closest('div').remove();
         });
     }
 );
