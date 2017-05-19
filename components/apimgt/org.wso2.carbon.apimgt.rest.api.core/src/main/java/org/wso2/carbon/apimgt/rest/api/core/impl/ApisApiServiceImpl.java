@@ -64,6 +64,14 @@ public class ApisApiServiceImpl extends ApisApiService {
         }
     }
 
+    /**
+     *
+     * @param labels Gateway labels
+     * @param status Lifecycle status
+     * @param request msf4j request object
+     * @return 200 OK if the opration was successful
+     * @throws NotFoundException If failed to retrieve APIs
+     */
     @Override public Response apisGet(String labels, String status, Request request) throws NotFoundException {
         APIListDTO apiListDTO;
         try {
