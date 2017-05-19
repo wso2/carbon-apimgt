@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack --config webpack.config.js"
+    "build_prod": "NODE_ENV=production webpack -p --progress --colors --config webpack.config.js",
+    "build_dev": "webpack -d --config webpack.config.js"
   },
   "repository": {
     "type": "git",

@@ -1,6 +1,6 @@
 let path = require('path');
 
-module.exports = {
+const config = {
     entry: {
         index: './pages/index.js'
     },
@@ -9,7 +9,7 @@ module.exports = {
         filename: '[name].js'
     },
     devtool: "source-map",
-    watch: false,
+    plugins: [],
     module: {
         rules: [
             {
@@ -27,3 +27,5 @@ module.exports = {
         ]
     }
 };
+
+module.exports = config;

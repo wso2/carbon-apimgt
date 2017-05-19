@@ -34,18 +34,6 @@
 
     <dependencies>
         <!--UUF Components-->
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.publisher.commons.ui</artifactId>
-            <type>zip</type>
-            <classifier>uuf-component</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.uuf.common</groupId>
-            <artifactId>org.wso2.carbon.uuf.common.foundation.ui</artifactId>
-            <type>zip</type>
-            <classifier>uuf-component</classifier>
-        </dependency>
         <!--UUF Themes-->
         <dependency>
             <groupId>org.wso2.carbon.uuf.common</groupId>
@@ -166,7 +154,7 @@
     <properties>
         <maven.test.skip>false</maven.test.skip>
         <npm.executable>npm</npm.executable>
-        <npm.build.command>build</npm.build.command>
+        <npm.build.command>build_prod</npm.build.command>
         <npm.working.dir>./src/main/</npm.working.dir>
     </properties>
 </project>
