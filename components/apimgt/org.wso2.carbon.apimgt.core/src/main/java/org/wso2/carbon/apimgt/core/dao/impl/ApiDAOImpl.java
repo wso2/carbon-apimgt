@@ -2015,10 +2015,6 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    /**
-     *
-     * @see ApiDAO#getAPIsByStatus(List, String)
-     */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     public List<API> getAPIsByStatus(List<String> gatewayLabels, String status) throws APIMgtDAOException {
@@ -2042,10 +2038,6 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    /**
-     *
-     * @see ApiDAO#getAPIsByGatewayLabel(List)
-     */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     public List<API> getAPIsByGatewayLabel(List<String> gatewayLabels) throws APIMgtDAOException {
