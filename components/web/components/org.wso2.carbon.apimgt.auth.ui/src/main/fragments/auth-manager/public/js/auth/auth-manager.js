@@ -198,7 +198,7 @@ authManager.loadSwaggerJson = function(async) {
 };
 
 /*
- * Helper method tp Extracts scopes from the swagger definition
+ * Helper method to Extracts scopes from the swagger definition
  */
 function retrieveScopes() {
     if (localStorage.getItem(swaggerId) === null) {
