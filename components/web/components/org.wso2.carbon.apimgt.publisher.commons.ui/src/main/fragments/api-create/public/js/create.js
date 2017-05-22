@@ -64,7 +64,7 @@ function createRolePermissionJsonString() {
         var jsonData = {};
         var permissionArrayPerRole = [];
         var obj = $(this);
-        var roleName = obj.find('label[class="permission-options"]').text().split(' :')[0].trim().toLowerCase();
+        var roleName = obj.find('label[class="permission-options"]').text().split(' :')[0].trim();
         jsonData["groupId"] = roleName;
         obj.find(".permissionCheck:checked").each(function(){
             permissionArrayPerRole.push($(this).val());

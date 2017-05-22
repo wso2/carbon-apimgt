@@ -404,14 +404,42 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         return apiBuilder.getId();
     }
 
+    /**
+     * This method is used to check whether the roles specified with permissions for a given API are valid
+     * @param permissionMap - The map containing the group IDs(roles) and their permissions
+     * @return validity of the roles
+     * @throws APIManagementException If one or more of the roles are invalid
+     */
     private boolean checkRoleValidityForAPIPermissions(Map<String, Integer> permissionMap)
             throws APIManagementException {
         Set<String> allAvailableRoles = APIUtils.getAllAvailableRoles();
+        Set<String> permissionRoleList = getRolesFromPermissionMap(permissionMap);
+        return APIUtils.checkAllowedRoles(allAvailableRoles, permissionRoleList);
+    }
+
+//    private void disableActionButtonsForUser(String loggedInUser, HashMap<String, Integer> permissionMap) {
+//        Set<String> loggedInUserRoles = APIUtils.getAllRolesOfUser(loggedInUser);
+//        Set<String> permissionRoleList = getRolesFromPermissionMap(permissionMap);
+//        Set<String> rolesOfUserWithAPIPermissions = null;
+//        if (loggedInUserRoles.retainAll(
+//                permissionRoleList)) { //get the intersection - retainAll() transforms first set to the intersection
+//            rolesOfUserWithAPIPermissions = loggedInUserRoles;
+//        }
+//        if (rolesOfUserWithAPIPermissions != null) {
+//            for (String role : rolesOfUserWithAPIPermissions) {
+//                Integer permission = permissionMap.get(role);
+//
+//            }
+//        }
+//
+//    }
+
+    private Set<String> getRolesFromPermissionMap(Map<String, Integer> permissionMap) {
         Set<String> permissionRoleList = new HashSet<>();
         for (String groupId : permissionMap.keySet()) {
             permissionRoleList.add(groupId);
         }
-        return APIUtils.checkAllowedRoles(allAvailableRoles, permissionRoleList);
+        return permissionRoleList;
     }
 
     /**
