@@ -15,6 +15,9 @@
  */
 "use strict";
 import SwaggerClient from 'swagger-client';
+
+window.SwaggerClient = SwaggerClient;
+
 /**
  * Manage API access keys with corresponding keys,Not related to the keymanager used in backend
  */
@@ -184,9 +187,10 @@ class API {
         this.auth_client = new AuthClient();
         this.client.then(
             (swagger) => {
-                swagger.setHost(location.host);
+                // swagger.setHost(location.host); // TODO: Should be change with the implementation of this https://github.com/swagger-api/swagger-js/issues/1045
+                swagger.spec.host = location.host;
                 this.keyMan = new KeyManager(access_key);
-                let scopes = swagger.swaggerObject["x-wso2-security"].apim["x-wso2-scopes"];
+                let scopes = swagger.spec["x-wso2-security"].apim["x-wso2-scopes"];
                 for (var index in scopes) {
                     if (scopes.hasOwnProperty(index)) {
                         let scope_key = scopes[index].key;
@@ -256,7 +260,7 @@ class API {
     }
 
     _getSwaggerURL() {
-        return swaggerURL;
+        return "/api/am/publisher/v1.0/apis/swagger.json";
     }
 
     /**
@@ -268,6 +272,7 @@ class API {
     _requestMetaData(data = {}) {
         AuthClient.refreshTokenOnExpire();
         let access_key_header = "Bearer " + AuthClient.getCookie("WSO2_AM_TOKEN_1");
+        debugger;
         let request_meta = {
             clientAuthorizations: {
                 api_key: new SwaggerClient.ApiKeyAuthorization("Authorization", access_key_header, "header")
@@ -349,7 +354,7 @@ class API {
     getAll(callback) {
         var promise_get_all = this.client.then(
             (client) => {
-                return client["API (Collection)"].get_apis({}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+                return client.apis["API (Collection)"].get_apis({}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
             }
         );
         if (callback) {
@@ -771,3 +776,5 @@ class API {
     }
 
 }
+
+export default API
