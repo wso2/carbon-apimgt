@@ -134,9 +134,10 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
      */
     public APIStoreImpl(String username, IdentityProvider idp, ApiDAO apiDAO, ApplicationDAO applicationDAO,
                         APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, TagDAO tagDAO, LabelDAO labelDAO,
-                        WorkflowDAO workflowDAO) {
+                        WorkflowDAO workflowDAO, GatewaySourceGenerator gatewaySourceGenerator,
+                        APIGateway apiGateway) {
         super(username, idp, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, new APILifeCycleManagerImpl(),
-                labelDAO, workflowDAO, tagDAO);
+                labelDAO, workflowDAO, tagDAO, gatewaySourceGenerator, apiGateway);
     }
 
     @Override

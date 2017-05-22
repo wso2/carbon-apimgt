@@ -49,8 +49,8 @@ public class UserAwareAPIStore extends APIStoreImpl {
 
     public UserAwareAPIStore(String username, IdentityProvider idp, ApiDAO apiDAO, ApplicationDAO applicationDAO,
                              APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, TagDAO tagDAO,
-                             LabelDAO labelDAO, WorkflowDAO workflowDAO, GatewaySourceGenerator
-                                     gatewaySourceGenerator, APIGateway apiGateway) {
+                             LabelDAO labelDAO, WorkflowDAO workflowDAO, GatewaySourceGenerator gatewaySourceGenerator,
+                             APIGateway apiGateway) {
         super(username, idp, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, tagDAO, labelDAO, workflowDAO,
                 gatewaySourceGenerator, apiGateway);
     }

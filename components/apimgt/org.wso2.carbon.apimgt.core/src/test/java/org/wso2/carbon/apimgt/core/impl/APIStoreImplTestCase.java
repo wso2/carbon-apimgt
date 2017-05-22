@@ -30,8 +30,8 @@ import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.api.EventObserver;
-import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
+import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
@@ -123,14 +123,14 @@ public class APIStoreImplTestCase {
         ConfigProvider configProvider = Mockito.mock(ConfigProvider.class);
         ServiceReferenceHolder.getInstance().setConfigProvider(configProvider);
     }
-    
+
     @Test(description = "Search APIs with a search query")
     public void searchAPIs() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIStore apiStore = getApiStoreImpl(apiDAO);
         List<API> apimResultsFromDAO = new ArrayList<>();
         Mockito.when(apiDAO.searchAPIs(new HashSet<>(), "admin", "pizza", ApiType.STANDARD,
-                                                                    1, 2)).thenReturn(apimResultsFromDAO);
+                1, 2)).thenReturn(apimResultsFromDAO);
         List<API> apis = apiStore.searchAPIs("pizza", 1, 2);
         Assert.assertNotNull(apis);
         Mockito.verify(apiDAO, Mockito.atLeastOnce()).searchAPIs(APIUtils.getAllRolesOfUser("admin"),
@@ -149,7 +149,7 @@ public class APIStoreImplTestCase {
         List<API> apis = apiStore.searchAPIs("", 1, 2);
         Assert.assertNotNull(apis);
         Mockito.verify(apiDAO, Mockito.atLeastOnce()).getAPIsByStatus(APIUtils.getAllRolesOfUser("admin"),
-                                                                                    statuses, ApiType.STANDARD);
+                statuses, ApiType.STANDARD);
     }
 
     @Test(description = "Search API", expectedExceptions = APIManagementException.class)
@@ -170,7 +170,7 @@ public class APIStoreImplTestCase {
         APIStore apiStore = getApiStoreImpl(apiDAO);
         List<API> expectedAPIs = new ArrayList<API>();
         Mockito.when(apiDAO.getAPIsByStatus(Arrays.asList(STATUS_CREATED, STATUS_PUBLISHED), ApiType.STANDARD)).
-                                                                                        thenReturn(expectedAPIs);
+                thenReturn(expectedAPIs);
         List<API> actualAPIs = apiStore.getAllAPIsByStatus(1, 2, new String[] {STATUS_CREATED, STATUS_PUBLISHED});
         Assert.assertNotNull(actualAPIs);
         Mockito.verify(apiDAO, Mockito.times(1)).
@@ -454,7 +454,7 @@ public class APIStoreImplTestCase {
         apiStore.deleteAPISubscription(UUID);
         Mockito.verify(apiSubscriptionDAO, Mockito.times(1)).deleteAPISubscription(UUID);
     }
-    
+
     @Test(description = "Delete subscription with on_hold state")
     public void testDeleteSubscriptionWithOnholdState() throws APIManagementException {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
@@ -468,11 +468,11 @@ public class APIStoreImplTestCase {
         API api = builder.build();
         Subscription subscription = new Subscription(UUID, application, api, "Gold");
         subscription.setStatus(SubscriptionStatus.ON_HOLD);
-        
+
         String externalRef = java.util.UUID.randomUUID().toString();
         Mockito.when(workflowDAO.getExternalWorkflowReferenceForPendingTask(subscription.getId(),
                 WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION)).thenReturn(externalRef);
-        
+
         Mockito.when(apiSubscriptionDAO.getAPISubscription(UUID)).thenReturn(subscription);
         apiStore.deleteAPISubscription(UUID);
         Mockito.verify(apiSubscriptionDAO, Mockito.times(1)).deleteAPISubscription(UUID);
@@ -542,6 +542,7 @@ public class APIStoreImplTestCase {
         apiStore.deleteApplication(UUID);
         Mockito.verify(applicationDAO, Mockito.times(1)).deleteApplication(UUID);
     }
+
     @Test(description = "Delete application which is in on_hold state")
     public void testDeleteApplicationWithOnHoldState() throws APIManagementException {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
@@ -571,11 +572,11 @@ public class APIStoreImplTestCase {
         application.setId(UUID);
         application.setStatus(ApplicationStatus.APPLICATION_APPROVED);
         Mockito.when(applicationDAO.getApplication(UUID)).thenReturn(application);
-        
+
         //update application's description
         application.setDescription("updated description");
-        
-        apiStore.updateApplication(UUID, application);        
+
+        apiStore.updateApplication(UUID, application);
         Mockito.verify(applicationDAO, Mockito.times(1)).updateApplication(UUID, application);
     }
 
@@ -1028,7 +1029,7 @@ public class APIStoreImplTestCase {
 
         Mockito.verify(applicationDAO, Mockito.times(1)).updateApplicationState(application.getId(), "REJECTED");
     }
-    
+
     @Test(description = "Test Application update workflow reject")
     public void testAddApplicationUpdateWorkflowReject() throws APIManagementException {
         /*
@@ -1056,15 +1057,15 @@ public class APIStoreImplTestCase {
         Workflow workflow = new ApplicationUpdateWorkflow();
         workflow.setWorkflowReference(application.getId());
         workflow.setExternalWorkflowReference(UUID);
-        
+
         //validate the rejection flow
-        
+
         //here we assume the application is an approve state before update
         //this attribute is set internally based on the workflow data
         workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_EXISTIN_APP_STATUS,
                 ApplicationStatus.APPLICATION_APPROVED);
-        
-        WorkflowResponse response = new GeneralWorkflowResponse();        
+
+        WorkflowResponse response = new GeneralWorkflowResponse();
         response.setWorkflowStatus(WorkflowStatus.REJECTED);
 
         Mockito.when(executor.complete(workflow)).thenReturn(response);
@@ -1072,16 +1073,16 @@ public class APIStoreImplTestCase {
 
         Mockito.verify(applicationDAO, Mockito.times(1)).updateApplicationState(application.getId(),
                 ApplicationStatus.APPLICATION_APPROVED);
-       
+
         //here we assume the application is an rejected state before update. 
         workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_EXISTIN_APP_STATUS,
                 ApplicationStatus.APPLICATION_REJECTED);
-        
+
         apiStore.completeWorkflow(executor, workflow);
         Mockito.verify(applicationDAO, Mockito.times(1)).updateApplicationState(application.getId(),
-                ApplicationStatus.APPLICATION_REJECTED);             
+                ApplicationStatus.APPLICATION_REJECTED);
 
-        
+
     }
 
     @Test(description = "Test Subscription workflow rejection")
@@ -1174,58 +1175,79 @@ public class APIStoreImplTestCase {
     }
 
     private APIStoreImpl getApiStoreImpl(ApiDAO apiDAO) {
-        return new APIStoreImpl(USER_NAME, null, apiDAO, null, null, null, null, null, null);
+        return new APIStoreImpl(USER_NAME, null, apiDAO, null, null, null, null, null, null, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, null, null, null, null, null);
+        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, null, null, null, null, null, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, PolicyDAO policyDAO, WorkflowDAO workflowDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, null, policyDAO, null, null, workflowDAO);
+        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, null, policyDAO, null, null, workflowDAO, null,
+                null);
     }
 
     private APIStoreImpl getApiStoreImpl(ApiDAO apiDAO, ApplicationDAO applicationDAO,
-            APISubscriptionDAO apiSubscriptionDAO, WorkflowDAO workflowDAO) {
+                                         APISubscriptionDAO apiSubscriptionDAO, WorkflowDAO workflowDAO) {
         return new APIStoreImpl(USER_NAME, null, apiDAO, applicationDAO, apiSubscriptionDAO, null, null, null,
-                workflowDAO);
+                workflowDAO, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO,
-            WorkflowDAO workflowDAO) {
+                                         WorkflowDAO workflowDAO, APIGateway apiGateway) {
         return new APIStoreImpl(USER_NAME, null, null, applicationDAO, apiSubscriptionDAO, null, null, null,
-                workflowDAO);
+                workflowDAO, null, apiGateway);
+    }
+
+    private APIStoreImpl getApiStoreImpl(ApiDAO apiDAO, ApplicationDAO applicationDAO,
+                                         APISubscriptionDAO apiSubscriptionDAO, WorkflowDAO workflowDAO,
+                                         APIGateway apiGateway) {
+        return new APIStoreImpl(USER_NAME, null, apiDAO, applicationDAO, apiSubscriptionDAO, null, null, null,
+                workflowDAO, null, apiGateway);
+    }
+
+    private APIStoreImpl getApiStoreImpl(ApiDAO apiDAO, GatewaySourceGenerator gatewaySourceGenerator,
+                                         APIGateway apiGateway) {
+        return new APIStoreImpl(USER_NAME, null, apiDAO, null, null, null, null, null, null, gatewaySourceGenerator,
+                apiGateway);
+    }
+
+    private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO,
+                                         WorkflowDAO workflowDAO) {
+        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, apiSubscriptionDAO, null, null, null,
+                workflowDAO, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, apiSubscriptionDAO, null, null, null, null);
+        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, apiSubscriptionDAO, null, null, null, null, null,
+                null);
     }
 
     private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, WorkflowDAO workflowDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, null, null, null, null, workflowDAO);
+        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, null, null, null, null, workflowDAO, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl(TagDAO tagDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, null, null, null, tagDAO, null, null);
+        return new APIStoreImpl(USER_NAME, null, null, null, null, null, tagDAO, null, null, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl(PolicyDAO policyDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, null, null, policyDAO, null, null, null);
+        return new APIStoreImpl(USER_NAME, null, null, null, null, policyDAO, null, null, null, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl(LabelDAO labelDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, null, null, null, null, labelDAO, null);
+        return new APIStoreImpl(USER_NAME, null, null, null, null, null, null, labelDAO, null, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, PolicyDAO policyDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, null, policyDAO, null, null, null);
+        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, null, policyDAO, null, null, null, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl() {
-        return new APIStoreImpl(USER_NAME, null, null, null, null, null, null, null, null);
+        return new APIStoreImpl(USER_NAME, null, null, null, null, null, null, null, null, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl(IdentityProvider identityProvider) {
-        return new APIStoreImpl(USER_NAME, identityProvider, null, null, null, null, null, null, null);
+        return new APIStoreImpl(USER_NAME, identityProvider, null, null, null, null, null, null, null, null, null);
     }
 }
