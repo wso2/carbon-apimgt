@@ -1,9 +1,14 @@
 package org.wso2.carbon.apimgt.gateway.utils;
 import ballerina.lang.messages;
+import ballerina.lang.jsons;
+import ballerina.lang.errors;
+import ballerina.lang.system;
+import ballerina.net.http;
 import org.wso2.carbon.apimgt.gateway.dto as dto;
 import org.wso2.carbon.apimgt.gateway.holders as holders;
-import ballerina.lang.jsons;
-import ballerina.net.http;
+import org.wso2.carbon.apimgt.gateway.constants as Constants;
+
+
 function constructAccessTokenNotFoundPayload(message response){
     json payload = {"code":900902,"message":"accessToken invalid"};
     messages:setJsonPayload(response,payload);
@@ -87,4 +92,53 @@ function retrieveResources (string apiContext,string apiVersion){
             i = i+1;
         }
     }
+}
+
+function fromJsonToGatewayConf(json conf)(dto:GatewayConf){
+    dto:GatewayConf gatewayConf = {};
+    gatewayConf.keyManagerURL = "";
+    gatewayConf.brokerURL = "";
+
+    return gatewayConf;
+}
+
+function fromJSONToAPIDto(json api)(dto:APIDto){
+    dto:APIDto apiDto = {};
+    apiDto.id = jsons:getString(api, "id");
+    apiDto.name = jsons:getString(api, "name");
+    apiDto.version = jsons:getString(api, "version");
+    apiDto.context = jsons:getString(api, "context");
+
+    return apiDto;
+
+}
+
+function getAPIServiceConfig (string apiId) (string) {
+    message request = {};
+    message response = {};
+    string apiConfig;
+    try {
+        http:ClientConnector client = create http:ClientConnector(getSystemProperty(Constants:API_CORE_URL));
+        response = http:ClientConnector.get (client, "/api/am/core/v1.0/apis/" + apiId + "/gateway-config", request);
+        apiConfig = messages:getStringPayload(response);
+    } catch (errors:Error e) {
+    system:println("[Error] : Error occurred while retrieving service configuration for API : " + apiId);
+    throw e;
+    }
+    return apiConfig;
+}
+
+function getSystemProperty (string prop) (string) {
+    string pathValue = system:getEnv(prop);
+    return pathValue;
+}
+
+function deployService(dto:APIDto api, string config){
+    //TODO:To be implemented
+}
+function undeployService(dto:APIDto api){
+    //TODO:To be implemented
+}
+function updateService (dto:APIDto api, string config) {
+    //TODO:To be implemented
 }
