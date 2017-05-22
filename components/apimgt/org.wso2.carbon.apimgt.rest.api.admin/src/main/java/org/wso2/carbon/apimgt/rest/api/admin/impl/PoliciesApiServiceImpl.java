@@ -48,8 +48,6 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         if (log.isDebugEnabled()) {
             log.debug("Received Advance Throttle Policy GET request");
         }
-//        return getAllThrottlePolicyByTier(tierLevel);
-        return null;
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             List<APIPolicy> policies = apiMgtAdminService.getAllAdvancePolicies();
