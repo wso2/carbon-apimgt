@@ -1,5 +1,7 @@
 package org.wso2.carbon.apimgt.gateway.holders;
 import org.wso2.carbon.apimgt.gateway.dto as dto;
+import ballerina.lang.maps;
+
 map tokenCacheMap = {};
 map subscriptionCache = {};
 map resourceCacheMap = {};
@@ -30,8 +32,12 @@ function putIntoResourceCache(string apiContext,string apiVersion,dto:ResourceDt
     resourceCacheMap[key] = resourceDto;
 }
 function putIntoAPICache (dto:APIDto apiDto) {
-    string key = apiDto.context+":"+apiDto.version;
+    string key = apiDto.context + ":" + apiDto.version;
     apiCache[key] = apiDto;
+}
+function removeFromAPICache (dto:APIDto apiDto) {
+    string key = apiDto.context + ":" + apiDto.version;
+    maps:remove(apiCache,key);
 }
 function getFromAPICache(string key)(dto:APIDto){
     return (dto:APIDto)apiCache[key];
