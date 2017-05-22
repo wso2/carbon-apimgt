@@ -153,8 +153,8 @@ public class SampleTestObjectCreator {
 
         BusinessInformation businessInformation = new BusinessInformation();
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        String permissionJson = "[{\"groupId\" : 1000, \"permission\" : "
-                + "[\"READ\",\"UPDATE\"]},{\"groupId\" : 1001, \"permission\" : [\"READ\",\"UPDATE\"]}]";
+        String permissionJson = "[{\"groupId\" : \"developer\", \"permission\" : "
+                + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"manager\", \"permission\" : [\"READ\",\"UPDATE\"]}]";
 
         API.APIBuilder apiBuilder = new API.APIBuilder(ADMIN, "WeatherAPI", API_VERSION).
                 id(UUID.randomUUID().toString()).
@@ -184,8 +184,8 @@ public class SampleTestObjectCreator {
                 uriTemplates(getMockUriTemplates()).
                 apiDefinition(apiDefinition);
         HashMap map = new HashMap();
-        map.put("1000", 6);
-        map.put("1001", 4);
+        map.put("developer", 6);
+        map.put("manager", 6);
         apiBuilder.permissionMap(map);
         return apiBuilder;
     }
@@ -789,8 +789,8 @@ public class SampleTestObjectCreator {
 
         BusinessInformation businessInformation = new BusinessInformation();
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        String permissionJson = "[{\"groupId\" : 1000, \"permission\" : "
-                + "[\"READ\",\"UPDATE\"]},{\"groupId\" : 1001, \"permission\" : [\"READ\",\"UPDATE\"]}]";
+        String permissionJson = "[{\"groupId\" : \"developer\", \"permission\" : "
+                + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"manager\", \"permission\" : [\"READ\",\"UPDATE\"]}]";
         Map<String, Endpoint> endpointMap = new HashMap<>();
         endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, new Endpoint.Builder().id(endpointId).name
                 ("api1-production--endpint").applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build());
@@ -822,8 +822,8 @@ public class SampleTestObjectCreator {
                 uriTemplates(getMockUriTemplates()).
                 apiDefinition(apiDefinition);
         HashMap map = new HashMap();
-        map.put("1000", 6);
-        map.put("1001", 4);
+        map.put("developer", 6);
+        map.put("manager", 6);
         apiBuilder.permissionMap(map);
         return apiBuilder;
     }
