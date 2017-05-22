@@ -41,7 +41,7 @@ var apiPolicy =
     "policyLevel": "",
     "policyDescription": "",
     "executionFlows": [],
-    "defaultLimit": {
+    "quotaPolicy": {
         "type": "",
         "limit": {
             "requestCount": 0,

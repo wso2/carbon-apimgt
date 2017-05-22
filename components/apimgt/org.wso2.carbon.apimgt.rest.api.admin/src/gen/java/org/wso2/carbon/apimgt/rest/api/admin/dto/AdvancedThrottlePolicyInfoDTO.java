@@ -13,25 +13,25 @@ import java.util.Objects;
  * AdvancedThrottlePolicyInfoDTO
  */
 public class AdvancedThrottlePolicyInfoDTO extends ThrottlePolicyDTO  {
-  @JsonProperty("defaultLimit")
-  private ThrottleLimitDTO defaultLimit = null;
+  @JsonProperty("quotaPolicy")
+  private ThrottleLimitDTO quotaPolicy = null;
 
-  public AdvancedThrottlePolicyInfoDTO defaultLimit(ThrottleLimitDTO defaultLimit) {
-    this.defaultLimit = defaultLimit;
+  public AdvancedThrottlePolicyInfoDTO quotaPolicy(ThrottleLimitDTO quotaPolicy) {
+    this.quotaPolicy = quotaPolicy;
     return this;
   }
 
    /**
-   * Get defaultLimit
-   * @return defaultLimit
+   * Get quotaPolicy
+   * @return quotaPolicy
   **/
   @ApiModelProperty(value = "")
-  public ThrottleLimitDTO getDefaultLimit() {
-    return defaultLimit;
+  public ThrottleLimitDTO getQuotaPolicy() {
+    return quotaPolicy;
   }
 
-  public void setDefaultLimit(ThrottleLimitDTO defaultLimit) {
-    this.defaultLimit = defaultLimit;
+  public void setQuotaPolicy(ThrottleLimitDTO quotaPolicy) {
+    this.quotaPolicy = quotaPolicy;
   }
 
 
@@ -44,13 +44,13 @@ public class AdvancedThrottlePolicyInfoDTO extends ThrottlePolicyDTO  {
       return false;
     }
     AdvancedThrottlePolicyInfoDTO advancedThrottlePolicyInfo = (AdvancedThrottlePolicyInfoDTO) o;
-    return Objects.equals(this.defaultLimit, advancedThrottlePolicyInfo.defaultLimit) &&
+    return Objects.equals(this.quotaPolicy, advancedThrottlePolicyInfo.quotaPolicy) &&
         super.equals(o);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(defaultLimit, super.hashCode());
+    return Objects.hash(quotaPolicy, super.hashCode());
   }
 
   @Override
@@ -58,7 +58,7 @@ public class AdvancedThrottlePolicyInfoDTO extends ThrottlePolicyDTO  {
     StringBuilder sb = new StringBuilder();
     sb.append("class AdvancedThrottlePolicyInfoDTO {\n");
     sb.append("    ").append(toIndentedString(super.toString())).append("\n");
-    sb.append("    defaultLimit: ").append(toIndentedString(defaultLimit)).append("\n");
+    sb.append("    quotaPolicy: ").append(toIndentedString(quotaPolicy)).append("\n");
     sb.append("}");
     return sb.toString();
   }

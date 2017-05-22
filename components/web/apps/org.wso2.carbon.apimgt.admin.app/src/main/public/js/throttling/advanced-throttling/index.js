@@ -205,16 +205,16 @@ $(function () {
 
         apiPolicyNew.policyDescription = policyDescription;
         apiPolicyNew.policyLevel = policyLevel;
-        apiPolicyNew.defaultLimit.type = defaultPolicyType;
+        apiPolicyNew.quotaPolicy.type = defaultPolicyType;
 
         var defaultPolicyDataUnit;
         if (defaultPolicyType == 'requestCount') {
             defaultPolicyLimit = $('#request-count').val();
             defaultPolicyUnit = $("#request-count-unit option:selected").val();
             defaultPolicyUnitTime = $("#unit-time-count").val();
-            apiPolicyNew.defaultLimit.limit.requestCount = defaultPolicyLimit;
-            apiPolicyNew.defaultLimit.limit.unitTime = defaultPolicyUnitTime;
-            apiPolicyNew.defaultLimit.limit.timeUnit = defaultPolicyUnit;
+            apiPolicyNew.quotaPolicy.limit.requestCount = defaultPolicyLimit;
+            apiPolicyNew.quotaPolicy.limit.unitTime = defaultPolicyUnitTime;
+            apiPolicyNew.quotaPolicy.limit.timeUnit = defaultPolicyUnit;
 
             if (!validateInput(defaultPolicyLimit, $('#request-count'), requiredMsg)) {
                 return false;
@@ -230,10 +230,10 @@ $(function () {
             defaultPolicyDataUnit = $("#bandwidth-unit option:selected").val();
             defaultPolicyUnitTime = $("#unit-time-count").val();
             defaultPolicyUnit = $("#request-count-unit option:selected").val();
-            apiPolicyNew.defaultLimit.limit.dataAmount = defaultPolicyLimit;
-            apiPolicyNew.defaultLimit.limit.unitTime = defaultPolicyUnitTime;
-            apiPolicyNew.defaultLimit.limit.dataUnit = defaultPolicyDataUnit;
-            apiPolicyNew.defaultLimit.limit.timeUnit = defaultPolicyUnit;
+            apiPolicyNew.quotaPolicy.limit.dataAmount = defaultPolicyLimit;
+            apiPolicyNew.quotaPolicy.limit.dataUnit = defaultPolicyDataUnit;
+            apiPolicyNew.quotaPolicy.limit.unitTime = defaultPolicyUnitTime;
+            apiPolicyNew.quotaPolicy.limit.timeUnit = defaultPolicyUnit;
 
             if (!validateInput(defaultPolicyLimit, $('#bandwidth'), requiredMsg)) {
                 return false;

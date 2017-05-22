@@ -16,28 +16,28 @@ import java.util.Objects;
  * AdvancedThrottlePolicyDTO
  */
 public class AdvancedThrottlePolicyDTO extends ThrottlePolicyDTO  {
-  @JsonProperty("defaultLimit")
-  private ThrottleLimitDTO defaultLimit = null;
+  @JsonProperty("quotaPolicy")
+  private ThrottleLimitDTO quotaPolicy = null;
 
   @JsonProperty("conditionalGroups")
   private List<ConditionalGroupDTO> conditionalGroups = new ArrayList<ConditionalGroupDTO>();
 
-  public AdvancedThrottlePolicyDTO defaultLimit(ThrottleLimitDTO defaultLimit) {
-    this.defaultLimit = defaultLimit;
+  public AdvancedThrottlePolicyDTO quotaPolicy(ThrottleLimitDTO quotaPolicy) {
+    this.quotaPolicy = quotaPolicy;
     return this;
   }
 
    /**
-   * Get defaultLimit
-   * @return defaultLimit
+   * Get quotaPolicy
+   * @return quotaPolicy
   **/
   @ApiModelProperty(value = "")
-  public ThrottleLimitDTO getDefaultLimit() {
-    return defaultLimit;
+  public ThrottleLimitDTO getQuotaPolicy() {
+    return quotaPolicy;
   }
 
-  public void setDefaultLimit(ThrottleLimitDTO defaultLimit) {
-    this.defaultLimit = defaultLimit;
+  public void setQuotaPolicy(ThrottleLimitDTO quotaPolicy) {
+    this.quotaPolicy = quotaPolicy;
   }
 
   public AdvancedThrottlePolicyDTO conditionalGroups(List<ConditionalGroupDTO> conditionalGroups) {
@@ -73,14 +73,14 @@ public class AdvancedThrottlePolicyDTO extends ThrottlePolicyDTO  {
       return false;
     }
     AdvancedThrottlePolicyDTO advancedThrottlePolicy = (AdvancedThrottlePolicyDTO) o;
-    return Objects.equals(this.defaultLimit, advancedThrottlePolicy.defaultLimit) &&
+    return Objects.equals(this.quotaPolicy, advancedThrottlePolicy.quotaPolicy) &&
         Objects.equals(this.conditionalGroups, advancedThrottlePolicy.conditionalGroups) &&
         super.equals(o);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(defaultLimit, conditionalGroups, super.hashCode());
+    return Objects.hash(quotaPolicy, conditionalGroups, super.hashCode());
   }
 
   @Override
@@ -88,7 +88,7 @@ public class AdvancedThrottlePolicyDTO extends ThrottlePolicyDTO  {
     StringBuilder sb = new StringBuilder();
     sb.append("class AdvancedThrottlePolicyDTO {\n");
     sb.append("    ").append(toIndentedString(super.toString())).append("\n");
-    sb.append("    defaultLimit: ").append(toIndentedString(defaultLimit)).append("\n");
+    sb.append("    quotaPolicy: ").append(toIndentedString(quotaPolicy)).append("\n");
     sb.append("    conditionalGroups: ").append(toIndentedString(conditionalGroups)).append("\n");
     sb.append("}");
     return sb.toString();

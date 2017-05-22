@@ -1242,11 +1242,11 @@ definitions:
   AdvancedThrottlePolicyInfo :
     title: Advanced Throttling Policy
     required:
-      - defaultLimit
+      - quotaPolicy
     allOf:
       - $ref: '#/definitions/ThrottlePolicy'
       - properties:
-          defaultLimit:
+          quotaPolicy:
             $ref: '#/definitions/ThrottleLimit'
 
 #-----------------------------------------------------
@@ -1255,11 +1255,11 @@ definitions:
   AdvancedThrottlePolicy :
     title: Advanced Throttling Policy
     required:
-      - defaultLimit
+      - quotaPolicy
     allOf:
       - $ref: '#/definitions/ThrottlePolicy'
       - properties:
-          defaultLimit:
+          quotaPolicy:
             $ref: '#/definitions/ThrottleLimit'
           conditionalGroups:
             type: array
@@ -1288,11 +1288,11 @@ definitions:
   ApplicationThrottlePolicy:
     title: Application Throttle Policy
     required:
-      - defaultLimit
+      - quotaPolicy
     allOf:
       - $ref: '#/definitions/ThrottlePolicy'
       - properties:
-          defaultLimit:
+          quotaPolicy:
             $ref: '#/definitions/ThrottleLimit'
 
 #-----------------------------------------------------
@@ -1317,11 +1317,11 @@ definitions:
   SubscriptionThrottlePolicy:
     title: Subscription Throttle Policy
     required:
-      - defaultLimit
+      - quotaPolicy
     allOf:
       - $ref: '#/definitions/ThrottlePolicy'
       - properties:
-          defaultLimit:
+          quotaPolicy:
             $ref: '#/definitions/ThrottleLimit'
           rateLimitCount:
             type: integer
