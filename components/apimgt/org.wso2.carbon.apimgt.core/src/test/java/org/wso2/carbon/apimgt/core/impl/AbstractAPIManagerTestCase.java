@@ -465,15 +465,15 @@ public class AbstractAPIManagerTestCase {
     }
 
     private APIStoreImpl getAPIStoreImpl(ApiDAO apiDAO) {
-        return new APIStoreImpl(USER_NAME, null, apiDAO, null, null, null, null, null, null);
+        return new APIStoreImpl(USER_NAME, null, apiDAO, null, null, null, null, null, null, null, null);
     }
 
     private APIStoreImpl getAPIStoreImpl(ApplicationDAO applicationDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, null, null, null, null, null);
+        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, null, null, null, null, null, null, null);
     }
 
     private APIStoreImpl getAPIStoreImpl(APISubscriptionDAO apiSubscriptionDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, null, apiSubscriptionDAO, null, null, null, null);
+        return new APIStoreImpl(USER_NAME, null, null, null, apiSubscriptionDAO, null, null, null, null, null, null);
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APILifecycleManager apiLifecycleManager) {
