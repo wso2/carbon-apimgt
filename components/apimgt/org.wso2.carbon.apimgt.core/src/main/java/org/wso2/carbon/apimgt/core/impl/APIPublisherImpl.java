@@ -333,7 +333,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 if (StringUtils.isEmpty(apiBuilder.getApiDefinition())) {
                     apiBuilder.apiDefinition(apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder));
                 }
-                if (apiBuilder.getPermission() != null && !("").equals(apiBuilder.getPermission())) {
+                if (apiBuilder.getPermission() != null && !("[]").equals(apiBuilder.getPermission())) {
                     HashMap<String, Integer> roleNamePermissionList;
                     roleNamePermissionList = getAPIPermissionArray(apiBuilder.getPermission());
                     if (checkRoleValidityForAPIPermissions(roleNamePermissionList)) {
@@ -448,7 +448,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         (apiBuilder.getVersion())) && (originalAPI.getProvider().equals(apiBuilder.getProvider())) &&
                         originalAPI.getLifeCycleStatus().equalsIgnoreCase(apiBuilder.getLifeCycleStatus())) {
 
-                    if (apiBuilder.getPermission() != null && !("").equals(apiBuilder.getPermission())) {
+                    if (apiBuilder.getPermission() != null && !("[]").equals(apiBuilder.getPermission())) {
                         HashMap<String, Integer> roleNamePermissionList;
                         roleNamePermissionList = getAPIPermissionArray(apiBuilder.getPermission());
                         if (checkRoleValidityForAPIPermissions(roleNamePermissionList)) {
