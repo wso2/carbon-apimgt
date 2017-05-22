@@ -19,6 +19,7 @@ function initGateway () (boolean) {
     try {
         //Register gateway in APIM core
         registerGateway ();
+
         //Retrieve API list to be deployed
         json apiList = getAPIMSummary();
         int index = 0;
@@ -26,8 +27,9 @@ function initGateway () (boolean) {
 
         while( index < apiCount){
             dto:APIDto api = gatewayUtil:fromJSONToAPIDto(apiList[index]);
+
             //Retrieve API configuration
-            string apiConfig = getAPIServiceConfig(api.id);
+            string apiConfig = gatewayUtil:getAPIServiceConfig(api.id);
             //Deploy API service
             gatewayUtil:deployService(api, apiConfig);
             //Update API cache
@@ -38,7 +40,9 @@ function initGateway () (boolean) {
     } catch (errors:Error e) {
         system:println("[Error] : Error while initilazing API gateway ");
     }
+
     return true;
+
 }
 
 function registerGateway () {
@@ -80,21 +84,6 @@ function getAPIMSummary () (json) {
         throw e;
     }
     return apiList;
-}
-
-function getAPIServiceConfig (string apiId) (string) {
-    message request = {};
-    message response = {};
-    string apiConfig;
-    try {
-        http:ClientConnector client = create http:ClientConnector("https://localhost:9292");
-        response = http:ClientConnector.get (client, "/api/am/core/v1.0/apis/" + apiId + "/gateway-config", request);
-        apiConfig = messages:getStringPayload(response);
-    } catch (errors:Error e) {
-        system:println("[Error] : Error occurred while retrieving service configuration for API : " + apiId);
-        throw e;
-    }
-    return apiConfig;
 }
 
 function getSystemProperty (string prop) (string) {
