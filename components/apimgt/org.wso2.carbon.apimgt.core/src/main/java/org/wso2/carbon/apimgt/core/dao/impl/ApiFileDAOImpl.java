@@ -265,10 +265,8 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public void addEndpoint(Endpoint endpoint) throws APIMgtDAOException {
-        String endpointExportDirectory = storagePath + File.separator + APIMgtConstants.APIFileUtilConstants
-                .ENDPOINTS_ROOT_DIRECTORY;
-        APIFileUtils.createDirectory(endpointExportDirectory);
-        APIFileUtils.exportEndpointToFileSystem(endpoint, endpointExportDirectory);
+        // global endpoints are not supported in editor mode
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -276,18 +274,8 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public boolean deleteEndpoint(String endpointId) throws APIMgtDAOException {
-        String endpointPartialName = endpointId + APIMgtConstants.APIFileUtilConstants.JSON_EXTENSION;
-        String endpointFilePath = APIFileUtils
-                .findInFileSystem(new File(storagePath + File.separator + APIMgtConstants.APIFileUtilConstants
-                                .ENDPOINTS_ROOT_DIRECTORY),
-                        endpointPartialName);
-        if (endpointFilePath == null) {
-            String errorMsg = "Endpoint with Id" + endpointId + " not found.";
-            log.error(errorMsg);
-            throw new APIMgtDAOException(errorMsg);
-        }
-        APIFileUtils.deleteFile(endpointFilePath);
-        return true;
+        // global endpoints are not supported in editor mode
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -295,10 +283,8 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public boolean updateEndpoint(Endpoint endpoint) throws APIMgtDAOException {
-        String endpointExportDirectory = storagePath + File.separator + APIMgtConstants.APIFileUtilConstants
-                .ENDPOINTS_ROOT_DIRECTORY;
-        APIFileUtils.exportEndpointToFileSystem(endpoint, endpointExportDirectory);
-        return true;
+        // global endpoints are not supported in editor mode
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -306,15 +292,8 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public Endpoint getEndpoint(String endpointId) throws APIMgtDAOException {
-        String endpointPartialName = endpointId + APIMgtConstants.APIFileUtilConstants.JSON_EXTENSION;
-        String endpointFilePath = APIFileUtils
-                .findInFileSystem(new File(storagePath + File.separator + APIMgtConstants.APIFileUtilConstants
-                                .ENDPOINTS_ROOT_DIRECTORY),
-                        endpointPartialName);
-        if (endpointFilePath != null) {
-            return (Endpoint) constructObjectSummaryFromFile(endpointFilePath, Endpoint.class);
-        }
-        return null;
+        // global endpoints are not supported in editor mode
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -322,11 +301,8 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public Endpoint getEndpointByName(String name) throws APIMgtDAOException {
-        String endpointFilePath = APIFileUtils.findInFileSystem(new File(storagePath), name);
-        if (endpointFilePath != null) {
-            return (Endpoint) constructObjectSummaryFromFile(endpointFilePath, Endpoint.class);
-        }
-        return null;
+        // global endpoints are not supported in editor mode
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -334,16 +310,8 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public List<Endpoint> getEndpoints() throws APIMgtDAOException {
-        File[] files = new File(storagePath + File.separator + APIMgtConstants.APIFileUtilConstants
-                .ENDPOINTS_ROOT_DIRECTORY).listFiles();
-        List<Endpoint> endpointList = new ArrayList<>();
-        if (files != null) {
-            for (File file : files) {
-                endpointList.add((Endpoint) fetchObject(file, Endpoint.class, null));
-            }
-        }
-        endpointList.removeIf(Objects::isNull);
-        return endpointList;
+        // global endpoints are not supported in editor mode
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -431,7 +399,8 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public boolean isEndpointExist(String name) throws APIMgtDAOException {
-        return getEndpointByName(name) != null;
+        // global endpoints are not supported in editor mode
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -444,6 +413,22 @@ public class ApiFileDAOImpl implements ApiDAO {
     @Override
     public boolean isEndpointAssociated(String endpointId) throws APIMgtDAOException {
         return false;
+    }
+
+    /**
+     *
+     * @see ApiDAO#getAPIsByStatus(List, String)
+     */
+    @Override public List<API> getAPIsByStatus(List<String> gatewayLabels, String status) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     *
+     * @see ApiDAO#getAPIsByGatewayLabel(List)
+     */
+    @Override public List<API> getAPIsByGatewayLabel(List<String> gatewayLabels) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
     }
 
     /**

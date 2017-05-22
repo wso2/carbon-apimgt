@@ -10,12 +10,17 @@ import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.core.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.core.NotFoundException;
+import org.wso2.carbon.apimgt.rest.api.core.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.core.utils.MappingUtil;
 import org.wso2.msf4j.Request;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 @javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-26T10:56:28.057+05:30")
 public class ApisApiServiceImpl extends ApisApiService {
@@ -56,6 +61,41 @@ public class ApisApiServiceImpl extends ApisApiService {
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).header(HttpHeaders.CONTENT_TYPE,
                     MediaType.APPLICATION_JSON).entity(errorDTO).build();
+        }
+    }
+
+    /**
+     *
+     * @param labels Gateway labels
+     * @param status Lifecycle status
+     * @param request msf4j request object
+     * @return 200 OK if the opration was successful
+     * @throws NotFoundException If failed to retrieve APIs
+     */
+    @Override public Response apisGet(String labels, String status, Request request) throws NotFoundException {
+        APIListDTO apiListDTO;
+        try {
+            APIMgtAdminService adminService = RestApiUtil.getAPIMgtAdminService();
+            if (labels != null && !labels.isEmpty()) {
+                String[] gatewayLabels = labels.split(",");
+                List<String> labelList = new ArrayList<String>(Arrays.asList(gatewayLabels));
+
+                if (status != null && !status.isEmpty()) {
+                    apiListDTO = MappingUtil.toAPIListDTO(adminService.getAPIsByStatus(labelList, status));
+                    return Response.ok().entity(apiListDTO).build();
+                } else {
+                    apiListDTO = MappingUtil.toAPIListDTO(adminService.getAPIsByGatewayLabel(labelList));
+                    return Response.ok().entity(apiListDTO).build();
+                }
+            } else {
+                apiListDTO = new APIListDTO();
+                return Response.ok().entity(apiListDTO).build();
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving APIs";
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
     }
 }
