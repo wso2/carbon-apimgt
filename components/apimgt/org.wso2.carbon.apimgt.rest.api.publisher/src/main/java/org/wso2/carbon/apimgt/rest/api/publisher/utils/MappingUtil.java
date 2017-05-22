@@ -64,6 +64,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class MappingUtil {
 
@@ -405,6 +406,11 @@ public class MappingUtil {
         Endpoint.Builder endPointBuilder = new Endpoint.Builder();
         endPointBuilder.endpointConfig(endPointDTO.getEndpointConfig());
         endPointBuilder.name(endPointDTO.getName());
+        if (!StringUtils.isEmpty(endPointDTO.getId())) {
+            endPointBuilder.id(endPointDTO.getId());
+        } else {
+            endPointBuilder.id(UUID.randomUUID().toString());
+        }
         if (endPointDTO.getMaxTps() != null){
             endPointBuilder.maxTps(endPointDTO.getMaxTps());
         }
