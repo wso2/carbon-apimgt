@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {Base, Listing} from "./app/components/index.js";
+import Utils from '../src/app/data/utils.js';
 
 class Publisher extends Component {
     constructor() {
@@ -8,6 +9,10 @@ class Publisher extends Component {
         this.state = {
             enteredText: ""
         }
+    }
+
+    componentDidMount() {
+        Utils.autoLogin(); // TODO: Remove once login page is implemented
     }
 
     getName(event) {
