@@ -817,14 +817,14 @@ paths:
         - $ref : "#/parameters/Accept"
         - $ref : "#/parameters/If-None-Match"
       tags:
-        - API (Collection)
+        - CompositeAPI (Collection)
       responses:
         200:
           description: |
             OK.
             List of qualifying Composite APIs is returned.
           schema:
-            $ref: '#/definitions/APIList'
+            $ref: '#/definitions/CompositeAPIList'
           headers:
             Content-Type:
               description: The content type of the body.
@@ -864,10 +864,10 @@ paths:
             API object that needs to be added
           required: true
           schema:
-            $ref: '#/definitions/API'
+            $ref: '#/definitions/CompositeAPI'
         - $ref: '#/parameters/Content-Type'
       tags:
-        - API (Collection)
+        - CompositeAPI (Collection)
       responses:
         201:
           description: |
@@ -875,7 +875,7 @@ paths:
             Successful response with the newly created object as entity in the body.
             Location header contains URL of newly created entity.
           schema:
-            $ref: '#/definitions/API'
+            $ref: '#/definitions/CompositeAPI'
           headers:
             Location:
               description: |
@@ -927,7 +927,7 @@ paths:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - API (Individual)
+        - CompositeAPI (Individual)
       responses:
         200:
           description: |
@@ -948,7 +948,7 @@ paths:
                 Used by caches, or in conditional requests (Will be supported in future).
               type: string
           schema:
-            $ref: '#/definitions/API'
+            $ref: '#/definitions/CompositeAPI'
         304:
           description: |
             Not Modified.
@@ -986,19 +986,19 @@ paths:
             API object that needs to be added
           required: true
           schema:
-            $ref: '#/definitions/API'
+            $ref: '#/definitions/CompositeAPI'
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - API (Individual)
+        - CompositeAPI (Individual)
       responses:
         200:
           description: |
             OK.
             Successful response with updated Composite API object
           schema:
-            $ref: '#/definitions/API'
+            $ref: '#/definitions/CompositeAPI'
           headers:
             Location:
               description: |
@@ -1060,7 +1060,7 @@ paths:
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - API (Individual)
+        - CompositeAPI (Individual)
       responses:
         200:
           description: |
@@ -1110,7 +1110,7 @@ paths:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - API (Individual)
+        - CompositeAPI (Individual)
       responses:
         200:
           description: |
@@ -1173,7 +1173,7 @@ paths:
       parameters:
         - $ref: '#/parameters/apiId'
         - in: formData
-          name: endpointId
+          name: apiDefinition
           description: Swagger definition of the Composite API
           type: string
           required: true
@@ -1181,7 +1181,7 @@ paths:
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - API (Individual)
+        - CompositeAPI (Individual)
       responses:
         200:
           description: |
@@ -1340,14 +1340,14 @@ paths:
         202:
           description: |
             Accepted.
-            The request has been accepted.  
+            The request has been accepted.
           schema:
             $ref: '#/definitions/WorkflowResponse'
           headers:
             Location:
               description: |
                 Location of the newly created Application.
-              type: string    
+              type: string
         400:
           description: |
             Bad Request.
@@ -1513,14 +1513,14 @@ paths:
         202:
           description: |
             Accepted.
-            The request has been accepted.  
+            The request has been accepted.
           schema:
             $ref: '#/definitions/WorkflowResponse'
           headers:
             Location:
               description: |
                 Location of the existing Application.
-              type: string    
+              type: string
         404:
           description: |
             Not Found.
@@ -1696,14 +1696,14 @@ paths:
         202:
           description: |
             Accepted.
-            The request has been accepted.  
+            The request has been accepted.
           schema:
             $ref: '#/definitions/WorkflowResponse'
           headers:
             Location:
               description: |
                 Location of the newly created subscription.
-              type: string    
+              type: string
         400:
           description: |
             Bad Request.
@@ -1785,14 +1785,14 @@ paths:
         202:
           description: |
             Accepted.
-            The request has been accepted.  
+            The request has been accepted.
           schema:
             $ref: '#/definitions/WorkflowResponse'
           headers:
             Location:
               description: |
                 Location of the existing subscription.
-              type: string    
+              type: string
         404:
           description: |
             Not Found.
@@ -2312,10 +2312,43 @@ definitions:
           $ref: '#/definitions/APIInfo'
 
 #-----------------------------------------------------
-# The API Info resource
+# The Composite API List resource
 #-----------------------------------------------------
-  APIInfo:
-    title: API Info object with basic API details.
+  CompositeAPIList:
+    title: Composite API List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of Composite APIs returned.
+      next:
+        type: string
+        description: |
+          Link to the next subset of resources qualified.
+          Empty if no more resources are to be returned.
+      previous:
+        type: string
+        description: |
+          Link to the previous subset of resources qualified.
+          Empty if current subset is the first subset returned.
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/CompositeAPIInfo'
+
+
+#-----------------------------------------------------
+# The Base API Info resource
+#-----------------------------------------------------
+  BaseAPIInfo:
+    discriminator: type
+    title: Base API info object with basic API details
+    required:
+          - name
+          - context
+          - version
+          - provider
+          - type
     properties:
       id:
         type: string
@@ -2331,21 +2364,46 @@ definitions:
         description: |
           If the provider value is not given, the user invoking the API will be used as the provider.
         type: string
-      lifeCycleStatus:
-        type: string
+      type:
+          type: string
+          enum:
+            - APIInfo
+            - CompositeAPIInfo
 
 #-----------------------------------------------------
-# The API resource
+# The Standard API Info resource
 #-----------------------------------------------------
-  API:
-    title: API object
+  APIInfo:
+    title: Standard API Info object with basic API details.
+    required:
+          - lifeCycleStatus
+    allOf:
+      - $ref: '#/definitions/BaseAPIInfo'
+      - properties:
+          lifeCycleStatus:
+            type: string
+
+#-----------------------------------------------------
+# The Composite API Info resource
+#-----------------------------------------------------
+  CompositeAPIInfo:
+    title: Composite API Info object with basic API details.
+    required:
+    allOf:
+      - $ref: '#/definitions/BaseAPIInfo'
+
+#-----------------------------------------------------
+# The Base API resource
+#-----------------------------------------------------
+  BaseAPI:
+    discriminator: type
+    title: Base API object
     required:
       - name
       - context
       - version
       - provider
-      - lifeCycleStatus
-      - endpointId
+      - type
     properties:
       id:
         type: string
@@ -2367,38 +2425,64 @@ definitions:
         description: |
           Swagger definition of the API which contains details about URI templates and scopes
         type: string
-      lifeCycleStatus:
-        type: string
-      isDefaultVersion:
-        type: boolean
       transport:
         type: array
         items:
           description: |
             Supported transports for the API (http and/or https).
           type: string
-      tags:
-        type: array
-        items:
-          type: string
       labels:
         type: array
         items:
           type: string
-      policies:
-        type: array
-        items:
+      type:
           type: string
-      businessInformation:
-        properties:
-          businessOwner:
+          enum:
+            - API
+            - CompositeAPI
+
+
+#-----------------------------------------------------
+# The Standard API resource
+#-----------------------------------------------------
+  API:
+    title: Standard API object
+    required:
+      - lifeCycleStatus
+    allOf:
+      - $ref: '#/definitions/BaseAPI'
+      - properties:
+          lifeCycleStatus:
             type: string
-          businessOwnerEmail:
-            type: string
-          technicalOwner:
-            type: string
-          technicalOwnerEmail:
-            type: string
+          isDefaultVersion:
+            type: boolean
+          tags:
+            type: array
+            items:
+              type: string
+          policies:
+            type: array
+            items:
+              type: string
+          businessInformation:
+            properties:
+              businessOwner:
+                type: string
+              businessOwnerEmail:
+                type: string
+              technicalOwner:
+                type: string
+              technicalOwnerEmail:
+                type: string
+
+#-----------------------------------------------------
+# The Composite API resource
+#-----------------------------------------------------
+  CompositeAPI:
+    title: Composite API object
+    required:
+    allOf:
+      - $ref: '#/definitions/BaseAPI'
 
 #-----------------------------------------------------
 # The Application List resource

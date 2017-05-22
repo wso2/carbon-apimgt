@@ -62,7 +62,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Search API by UUID")
     public void testSearchAPIByUUID() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
+        AbstractAPIManager apiStore = getAPIStoreImpl(apiDAO);
         API apiFromDAO = new API.APIBuilder(PROVIDER_NAME, API_NAME, API_VERSION).build();
         when(apiDAO.getAPI(UUID)).thenReturn(apiFromDAO);
         API api = apiStore.getAPIbyUUID(UUID);
@@ -73,7 +73,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Retrieve an application by uuid")
     public void testGetApplicationByUuid() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null, null);
+        AbstractAPIManager apiStore = getAPIStoreImpl(applicationDAO);
         Application applicationFromDAO = new Application(APP_NAME, USER_NAME);
         when(applicationDAO.getApplication(UUID)).thenReturn(applicationFromDAO);
         Application application = apiStore.getApplication(UUID, USER_NAME, null);
@@ -84,7 +84,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Retrieve documentation summary given the id")
     public void testGetDocumentationSummary() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
+        AbstractAPIManager apiStore = getAPIStoreImpl(apiDAO);
         DocumentInfo documentInfoMock = SampleTestObjectCreator.getMockDocumentInfoObject(UUID);
         when(apiDAO.getDocumentInfo(UUID)).thenReturn(documentInfoMock);
         DocumentInfo documentInfo = apiStore.getDocumentationSummary(UUID);
@@ -95,7 +95,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Retrieve list of documentations")
     public void testAllDocumentation() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
+        AbstractAPIManager apiStore = getAPIStoreImpl(apiDAO);
         List<DocumentInfo> documentInfoMockList = SampleTestObjectCreator.getMockDocumentInfoObjectsList();
         when(apiDAO.getDocumentsInfoList(UUID)).thenReturn(documentInfoMockList);
         List<DocumentInfo> documentInfoList = apiStore.getAllDocumentation(UUID, 1, 10);
@@ -142,8 +142,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Get subscription by UUID")
     public void testGetSubscriptionByUUID() throws APIManagementException {
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, null, apiSubscriptionDAO, null, null, null,
-                null);
+        AbstractAPIManager apiStore = getAPIStoreImpl(apiSubscriptionDAO);
         when(apiSubscriptionDAO.getAPISubscription(UUID)).thenReturn(new Subscription(UUID, null, null, null));
         apiStore.getSubscriptionByUUID(UUID);
         verify(apiSubscriptionDAO, times(1)).getAPISubscription(UUID);
@@ -179,7 +178,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Getting last updated time of Application")
     public void testGetLastUpdatedTimeOfApplication() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null, null);
+        AbstractAPIManager apiStore = getAPIStoreImpl(applicationDAO);
         when(applicationDAO.getLastUpdatedTimeOfApplication(UUID)).thenReturn(LAST_UPDATED_TIME);
         apiStore.getLastUpdatedTimeOfApplication(UUID);
         verify(applicationDAO, times(1)).getLastUpdatedTimeOfApplication(UUID);
@@ -188,8 +187,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Getting last updated time of Subscription")
     public void testGetLastUpdatedTimeOfSubscription() throws APIManagementException {
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, null, apiSubscriptionDAO, null, null, null,
-                null);
+        AbstractAPIManager apiStore = getAPIStoreImpl(apiSubscriptionDAO);
         when(apiSubscriptionDAO.getLastUpdatedTimeOfSubscription(UUID)).thenReturn(LAST_UPDATED_TIME);
         apiStore.getLastUpdatedTimeOfSubscription(UUID);
         verify(apiSubscriptionDAO, times(1)).getLastUpdatedTimeOfSubscription(UUID);
@@ -198,8 +196,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Getting subscriptions by API")
     public void testGetSubscriptionsByAPI() throws APIManagementException {
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, null, apiSubscriptionDAO, null, null, null,
-                null);
+        AbstractAPIManager apiStore = getAPIStoreImpl(apiSubscriptionDAO);
         when(apiSubscriptionDAO.getAPISubscriptionsByAPI(UUID)).thenReturn(new ArrayList<Subscription>());
         apiStore.getSubscriptionsByAPI(UUID);
         verify(apiSubscriptionDAO, times(1)).getAPISubscriptionsByAPI(UUID);
@@ -241,7 +238,7 @@ public class AbstractAPIManagerTestCase {
             expectedExceptions = APIManagementException.class)
     public void testGetApplicationByUuidException() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null, null);
+        AbstractAPIManager apiStore = getAPIStoreImpl(applicationDAO);
         doThrow(new APIMgtDAOException("Error occurred while retrieving application")).when(applicationDAO)
                 .getApplication(UUID);
         apiStore.getApplication(UUID, USER_NAME, null);
@@ -251,7 +248,7 @@ public class AbstractAPIManagerTestCase {
             expectedExceptions = APIMgtDAOException.class)
     public void testGetDocumentationSummaryException() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
+        AbstractAPIManager apiStore = getAPIStoreImpl(apiDAO);
         when(apiDAO.getDocumentInfo(UUID))
                 .thenThrow(new APIMgtDAOException("Error occurred while retrieving documents"));
         apiStore.getDocumentationSummary(UUID);
@@ -261,7 +258,7 @@ public class AbstractAPIManagerTestCase {
             expectedExceptions = APIManagementException.class)
     public void testAllDocumentationException() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
+        AbstractAPIManager apiStore = getAPIStoreImpl(apiDAO);
         when(apiDAO.getDocumentsInfoList(UUID))
                 .thenThrow(new APIMgtDAOException("Error occurred while retrieving documents"));
         apiStore.getAllDocumentation(UUID, 1, 10);
@@ -270,7 +267,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Exception when getting API by UUID", expectedExceptions = APIManagementException.class)
     public void testSearchAPIByUUIDException() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
+        AbstractAPIManager apiStore = getAPIStoreImpl(apiDAO);
         when(apiDAO.getAPI(UUID))
                 .thenThrow(new APIMgtDAOException("Error occurred while retrieving API with id " + UUID));
         apiStore.getAPIbyUUID(UUID);
@@ -333,8 +330,7 @@ public class AbstractAPIManagerTestCase {
             expectedExceptions = APIManagementException.class)
     public void testGetSubscriptionByUUIDException() throws APIManagementException {
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, null, apiSubscriptionDAO, null, null, null,
-                null);
+        AbstractAPIManager apiStore = getAPIStoreImpl(apiSubscriptionDAO);
         when(apiSubscriptionDAO.getAPISubscription(UUID))
                 .thenThrow(new APIMgtDAOException("Couldn't retrieve subscription for id " + UUID));
         apiStore.getSubscriptionByUUID(UUID);
@@ -378,7 +374,7 @@ public class AbstractAPIManagerTestCase {
             expectedExceptions = APIManagementException.class)
     public void testGetLastUpdatedTimeOfApplicationException() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null, null);
+        AbstractAPIManager apiStore = getAPIStoreImpl(applicationDAO);
         when(applicationDAO.getLastUpdatedTimeOfApplication(UUID)).thenThrow(new APIMgtDAOException(
                 "Error occurred while retrieving the last updated time of the application " + UUID));
         apiStore.getLastUpdatedTimeOfApplication(UUID);
@@ -389,8 +385,7 @@ public class AbstractAPIManagerTestCase {
             expectedExceptions = APIManagementException.class)
     public void testGetLastUpdatedTimeOfSubscriptionException() throws APIManagementException {
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, null, apiSubscriptionDAO, null, null, null,
-                null);
+        AbstractAPIManager apiStore = getAPIStoreImpl(apiSubscriptionDAO);
         when(apiSubscriptionDAO.getLastUpdatedTimeOfSubscription(UUID)).thenThrow(new APIMgtDAOException(
                 "Error occurred while retrieving the last updated time of the subscription " + UUID));
         apiStore.getLastUpdatedTimeOfSubscription(UUID);
@@ -401,8 +396,7 @@ public class AbstractAPIManagerTestCase {
             expectedExceptions = APIManagementException.class)
     public void testGetSubscriptionsByAPIException() throws APIManagementException {
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, null, apiSubscriptionDAO, null, null, null,
-                null);
+        AbstractAPIManager apiStore = getAPIStoreImpl(apiSubscriptionDAO);
         when(apiSubscriptionDAO.getAPISubscriptionsByAPI(UUID))
                 .thenThrow(new APIMgtDAOException("Couldn't find subscriptions for apiId " + UUID));
         apiStore.getSubscriptionsByAPI(UUID);
@@ -467,6 +461,21 @@ public class AbstractAPIManagerTestCase {
         when(labelDAO.getLabelByName(LABEL_NAME)).thenReturn(label);
         apiManager.getLabelByName(LABEL_NAME);
         verify(labelDAO, times(1)).getLabelByName(LABEL_NAME);
+    }
+
+    private APIStoreImpl getAPIStoreImpl(ApiDAO apiDAO) {
+        return new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null,
+                null, null, null);
+    }
+
+    private APIStoreImpl getAPIStoreImpl(ApplicationDAO applicationDAO) {
+        return new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null,
+                null, null, null);
+    }
+
+    private APIStoreImpl getAPIStoreImpl(APISubscriptionDAO apiSubscriptionDAO) {
+        return new APIStoreImpl(USER_NAME, null, null, apiSubscriptionDAO, null, null, null,
+                null, null, null);
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APILifecycleManager apiLifecycleManager) {
