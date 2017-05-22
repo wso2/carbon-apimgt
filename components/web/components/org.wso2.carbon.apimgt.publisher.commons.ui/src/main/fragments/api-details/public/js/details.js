@@ -645,49 +645,26 @@ function updateLabelsHandler(event) {
         }.bind(data));
 }
 
-//This variable contains the list of all valid roles
-var validRoleList = ["customer", "manager", "employee"];
-
 /**
  * This function is called to get the role permissions of an API as entered by the user
  */
 function createRolePermissionJsonString() {
     var permissionJson = [];
-    var invalidRoles = [];
-    $(".well > .input-group").each(function(index) {
-        var jsonData = {};
-        var permissionArrayPerRole = [];
-        var obj = $(this);
-        var roleName = obj.find('label[class="permission-options"]').text().split(' :')[0].trim().toLowerCase();
-        if(isValidRole(roleName)) {
+        $(".well > .input-group").each(function(index) {
+            var jsonData = {};
+            var permissionArrayPerRole = [];
+            var obj = $(this);
+            var roleName = obj.find('label[class="permission-options"]').text().split(' :')[0].trim().toLowerCase();
             jsonData["groupId"] = roleName;
             obj.find(".permissionCheck:checked").each(function(){
                 permissionArrayPerRole.push($(this).val());
             });
             jsonData["permission"] = permissionArrayPerRole;
             permissionJson.push(jsonData);
-        } else {
-            invalidRoles.push(roleName);
-        }
-    });
-
-    if(invalidRoles.length > 1) {
-        invalidRoles.pop();
-        var invalidRolesList = invalidRoles.join();
-        var message = "The role(s) " + invalidRolesList + " is/are invalid and hence not assigned permissions.";
-        alert(message);
-//        noty({
-//            text: message,
-//            type: 'warning',
-//            dismissQueue: true,
-//            progressBar: true,
-//            timeout: 5000,
-//            layout: 'topCenter',
-//            theme: 'relax',
-//            maxVisible: 10
-//        });
-    }
-    return JSON.stringify(permissionJson);
+        });
+        //to remove the empty role getting added due to the hidden div
+        permissionJson.pop();
+        return JSON.stringify(permissionJson);
 }
 
 function isValidRole(role) {
