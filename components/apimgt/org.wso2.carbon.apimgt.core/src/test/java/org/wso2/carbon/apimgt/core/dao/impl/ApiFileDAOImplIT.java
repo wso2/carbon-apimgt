@@ -30,7 +30,6 @@ import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.TestUtil;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.io.File;
@@ -76,7 +75,6 @@ public class ApiFileDAOImplIT {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
-        testAddGetEndpoint();
         apiDAO.addAPI(api);
 
         API apiFromDB = apiDAO.getAPI(api.getId());
@@ -84,34 +82,16 @@ public class ApiFileDAOImplIT {
         Assert.assertNotNull(apiFromDB);
         Assert.assertTrue(api.equals(apiFromDB), TestUtil.printDiff(api, apiFromDB));
     }
-
     @Test
-    public void testAddGetEndpoint() throws Exception {
+    public void testAddGetAPIWithApiLevelEndpoint() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
-        Endpoint endpoint = SampleTestObjectCreator.createMockEndpoint();
-        apiDAO.addEndpoint(endpoint);
-        Endpoint retrieved = apiDAO.getEndpoint(endpoint.getId());
-        Assert.assertEquals(endpoint, retrieved);
-    }
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPIWithApiLevelEndpoint();
+        API api = builder.build();
+        apiDAO.addAPI(api);
+        API apiFromDB = apiDAO.getAPI(api.getId());
 
-    @Test
-    public void testAddUpdateGetEndpoint() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
-        apiDAO.addEndpoint(SampleTestObjectCreator.createMockEndpoint());
-        Endpoint updatedEndpoint = SampleTestObjectCreator.createUpdatedEndpoint();
-        apiDAO.updateEndpoint(updatedEndpoint);
-        Endpoint retrieved = apiDAO.getEndpoint(updatedEndpoint.getId());
-        Assert.assertEquals(updatedEndpoint, retrieved);
-    }
-
-    @Test
-    public void testAddDeleteGetEndpoint() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
-        Endpoint endpoint = SampleTestObjectCreator.createMockEndpoint();
-        apiDAO.addEndpoint(endpoint);
-        apiDAO.deleteEndpoint(endpoint.getId());
-        Endpoint retrieved = apiDAO.getEndpoint(endpoint.getId());
-        Assert.assertNull(retrieved);
+        Assert.assertNotNull(apiFromDB);
+        Assert.assertTrue(api.equals(apiFromDB), TestUtil.printDiff(api, apiFromDB));
     }
 
     @Test
@@ -119,7 +99,6 @@ public class ApiFileDAOImplIT {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
-        testAddGetEndpoint();
         apiDAO.addAPI(api);
 
         apiDAO.deleteAPI(api.getId());
@@ -133,7 +112,6 @@ public class ApiFileDAOImplIT {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
-        testAddGetEndpoint();
         apiDAO.addAPI(api);
 
         HashMap permissionMap = new HashMap();
@@ -153,7 +131,6 @@ public class ApiFileDAOImplIT {
     @Test(description = "Get image from API")
     public void testGetImage() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
-        testAddGetEndpoint();
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         apiDAO.addAPI(api);
         apiDAO.updateImage(api.getId(), SampleTestObjectCreator.createDefaultThumbnailImage(), "image/jpg", ADMIN);

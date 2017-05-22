@@ -574,4 +574,23 @@ public interface ApiDAO {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     boolean isEndpointAssociated(String endpointId) throws APIMgtDAOException;
+
+    /**
+     * Retrieves available APIs with given life cycle status and gateway labels.
+     * @param gatewayLabels A list of gateway labels
+     * @param status Life cycle status
+     * @return {@code List<API>} matching results
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     *
+     */
+    List<API> getAPIsByStatus(List<String> gatewayLabels, String status) throws APIMgtDAOException;
+
+    /**
+     * Retrieves available APIs with given gateway labels.
+     * @param gatewayLabels A list of gateway labels
+     * @return {@code List<API>} matching results
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     *
+     */
+    List<API> getAPIsByGatewayLabel(List<String> gatewayLabels) throws APIMgtDAOException;
 }
