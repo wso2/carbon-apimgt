@@ -422,18 +422,18 @@ public class APIPublisherImplTestCase {
     public void testGetAPIsByProvider() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
-        Mockito.when(apiDAO.getAPIsForProvider(USER)).thenReturn(new ArrayList<API>());
-        apiPublisher.getAPIsByProvider(USER);
-        Mockito.verify(apiDAO, Mockito.times(1)).getAPIsForProvider(USER);
+        Mockito.when(apiDAO.getAPIsForProvider(USER, ApiType.STANDARD)).thenReturn(new ArrayList<API>());
+        apiPublisher.getAPIsByProvider(USER, ApiType.STANDARD);
+        Mockito.verify(apiDAO, Mockito.times(1)).getAPIsForProvider(USER, ApiType.STANDARD);
     }
 
     @Test(description = "Exception when get APIs by provider", expectedExceptions = APIManagementException.class)
     public void testGetAPIsByProviderException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
-        Mockito.when(apiDAO.getAPIsForProvider(USER))
+        Mockito.when(apiDAO.getAPIsForProvider(USER, ApiType.STANDARD))
                 .thenThrow(new APIMgtDAOException("Unable to fetch APIs of " + USER));
-        apiPublisher.getAPIsByProvider(USER);
+        apiPublisher.getAPIsByProvider(USER, ApiType.STANDARD);
     }
 
     @Test(description = "Get subscriptions for a provider's APIs")

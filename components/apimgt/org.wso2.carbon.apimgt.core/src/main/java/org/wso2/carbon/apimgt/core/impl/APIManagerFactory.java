@@ -136,7 +136,7 @@ public class APIManagerFactory {
             UserAwareAPIStore userAwareAPIStore = new UserAwareAPIStore(username, getIdentityProvider(),
                     DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(), DAOFactory.getAPISubscriptionDAO(),
                     DAOFactory.getPolicyDAO(), DAOFactory.getTagDAO(), DAOFactory.getLabelDAO(),
-                    DAOFactory.getWorkflowDAO());
+                    DAOFactory.getWorkflowDAO(), new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
 
             // Register all the observers which need to observe 'Store' component
             userAwareAPIStore.registerObserver(new EventLogger());

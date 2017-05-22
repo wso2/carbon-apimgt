@@ -23,6 +23,8 @@ package org.wso2.carbon.apimgt.core.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
+import org.wso2.carbon.apimgt.core.api.APIGateway;
+import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
@@ -47,8 +49,10 @@ public class UserAwareAPIStore extends APIStoreImpl {
 
     public UserAwareAPIStore(String username, IdentityProvider idp, ApiDAO apiDAO, ApplicationDAO applicationDAO,
                              APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, TagDAO tagDAO,
-                             LabelDAO labelDAO, WorkflowDAO workflowDAO) {
-        super(username, idp, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, tagDAO, labelDAO, workflowDAO);
+                             LabelDAO labelDAO, WorkflowDAO workflowDAO, GatewaySourceGenerator
+                                     gatewaySourceGenerator, APIGateway apiGateway) {
+        super(username, idp, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, tagDAO, labelDAO, workflowDAO,
+                gatewaySourceGenerator, apiGateway);
     }
 
     @Override
