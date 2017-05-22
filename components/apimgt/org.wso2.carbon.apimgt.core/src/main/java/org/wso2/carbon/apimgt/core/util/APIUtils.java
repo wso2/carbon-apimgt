@@ -329,6 +329,14 @@ public class APIUtils {
 
     }
 
+     /**
+     * Verifies that fields that cannot be changed via an API update
+     * do not differ from the values in the original API
+     *
+     * @param apiBuilder Updated APIBuilder object
+     * @param originalAPI Original API being updated
+     * @throws APIManagementException If non modifiable field update is detected
+     */
     public static void verifyValidityOfApiUpdate(API.APIBuilder apiBuilder, API originalAPI)
                                                                                     throws APIManagementException {
         if (!originalAPI.getLifeCycleStatus().equals(apiBuilder.getLifeCycleStatus())) {
