@@ -56,11 +56,10 @@ public class AuthenticatorAPI implements Microservice {
     @Path ("/token")
     @Produces (MediaType.APPLICATION_JSON)
     @Consumes ({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.MULTIPART_FORM_DATA })
-    public Response authenticate(
-            @Context Request request, @FormDataParam ("username") String userName,
+    public Response authenticate(@Context Request request, @FormDataParam ("username") String userName,
             @FormDataParam ("password") String password, @FormDataParam ("grant_type") String grantType,
             @FormDataParam ("validity_period") String validityPeriod,
-            @FormDataParam ("scopes") String scopesList) {
+            @FormDataParam ("remember_me") boolean isRememberMe, @FormDataParam ("scopes") String scopesList) {
         try {
             LoginTokenService loginTokenService = new LoginTokenService();
             AuthResponseBean authResponseBean = new AuthResponseBean();
@@ -102,8 +101,10 @@ public class AuthenticatorAPI implements Microservice {
             NewCookie restAPIContextCookie = AuthUtil
                     .cookieBuilder(APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J, part2, restAPIContext, true, true,
                             "");
-            NewCookie refreshTokenCookie, refreshTokenHttpOnlyCookie = null;
-            if (refreshToken != null) {
+            NewCookie refreshTokenCookie, refreshTokenHttpOnlyCookie;
+            // refresh token is not set to cookie if remember me is not set.
+            if (refreshToken != null && (AuthenticatorConstants.REFRESH_GRANT.equals(grantType) || (
+                    AuthenticatorConstants.PASSWORD_GRANT.equals(grantType) && isRememberMe))) {
                 String refTokenPart1 = refreshToken.substring(0, refreshToken.length() / 2);
                 String refTokenPart2 = refreshToken.substring(refreshToken.length() / 2);
                 refreshTokenCookie = AuthUtil
