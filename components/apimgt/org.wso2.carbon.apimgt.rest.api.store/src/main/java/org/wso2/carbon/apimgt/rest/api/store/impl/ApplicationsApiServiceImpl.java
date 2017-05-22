@@ -247,7 +247,7 @@ public class ApplicationsApiServiceImpl
             if (ApplicationStatus.APPLICATION_ONHOLD.equals(updatedApplication.getStatus())) {
                 
                 WorkflowResponseDTO workflowResponse = MiscMappingUtil
-                        .fromWorkflowResponsetoDTO(updateResponse);
+                        .fromWorkflowResponseToDTO(updateResponse);
                 URI location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" + applicationId);
                 return Response.status(Response.Status.ACCEPTED).header(RestApiConstants.LOCATION_HEADER, location)
                         .entity(workflowResponse).build();
@@ -419,7 +419,7 @@ public class ApplicationsApiServiceImpl
             if (ApplicationStatus.APPLICATION_ONHOLD.equals(createdApplication.getStatus())) {
                 
                 WorkflowResponseDTO workflowResponse = MiscMappingUtil
-                        .fromWorkflowResponsetoDTO(applicationResponse.getWorkflowResponse());
+                        .fromWorkflowResponseToDTO(applicationResponse.getWorkflowResponse());
                 return Response.status(Response.Status.ACCEPTED).header(RestApiConstants.LOCATION_HEADER, location)
                         .entity(workflowResponse).build();
             }    

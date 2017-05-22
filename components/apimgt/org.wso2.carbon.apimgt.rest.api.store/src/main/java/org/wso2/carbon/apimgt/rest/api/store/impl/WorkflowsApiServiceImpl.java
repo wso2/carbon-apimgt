@@ -121,7 +121,7 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
                 }
 
                 WorkflowResponse response = apiStore.completeWorkflow(workflowExecutor, workflow);
-                WorkflowResponseDTO workflowResponseDTO = MiscMappingUtil.fromWorkflowResponsetoDTO(response);
+                WorkflowResponseDTO workflowResponseDTO = MiscMappingUtil.fromWorkflowResponseToDTO(response);
                 return Response.ok().entity(workflowResponseDTO).build();
             }
 

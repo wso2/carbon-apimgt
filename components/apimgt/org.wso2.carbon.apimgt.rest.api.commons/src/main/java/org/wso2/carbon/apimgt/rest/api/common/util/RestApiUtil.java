@@ -203,6 +203,16 @@ public class RestApiUtil {
     }
 
     /**
+     * Returns an APIStore for anonymous user.
+     *
+     * @return  {@code APIStore}
+     * @throws APIManagementException if failed to get the consumer object.
+     */
+    public static APIStore getConsumer() throws APIManagementException {
+        return APIManagerFactory.getInstance().getAPIConsumer();
+    }
+
+    /**
      * Returns an APIMgtAdminService.
      *
      * @return API Management Admin Service

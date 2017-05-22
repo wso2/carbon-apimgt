@@ -155,7 +155,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                 //be in either pending or approved state) send back the workflow response 
                 if (SubscriptionStatus.ON_HOLD == subscription.getStatus()) {
                     WorkflowResponseDTO workflowResponse = MiscMappingUtil
-                            .fromWorkflowResponsetoDTO(addSubResponse.getWorkflowResponse());
+                            .fromWorkflowResponseToDTO(addSubResponse.getWorkflowResponse());
                     return Response.status(Response.Status.ACCEPTED).header(RestApiConstants.LOCATION_HEADER, location)
                             .entity(workflowResponse).build();
                 }               

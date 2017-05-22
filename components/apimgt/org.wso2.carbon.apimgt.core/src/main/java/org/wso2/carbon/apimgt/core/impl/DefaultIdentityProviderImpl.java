@@ -44,7 +44,7 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
     private static final String FILTER_PREFIX = "displayName Eq ";
     private static final String HOME_EMAIL = "home";
 
-    public DefaultIdentityProviderImpl() throws APIManagementException {
+    DefaultIdentityProviderImpl() throws APIManagementException {
         this(SCIMServiceStubFactory.getSCIMServiceStub());
     }
 
@@ -88,7 +88,6 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
             String errorMessage = "Error occurred while creating user. "
                     + ((response == null) ? "response is null" : "Status Code: " + response.status() + ' '
                     + response.body().toString());
-            log.error(errorMessage);
             throw new IdentityProviderException(errorMessage, ExceptionCodes.USER_CREATION_FAILED);
         }
     }

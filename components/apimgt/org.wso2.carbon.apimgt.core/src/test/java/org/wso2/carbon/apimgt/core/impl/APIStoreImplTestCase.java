@@ -28,6 +28,7 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.api.EventObserver;
+import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
@@ -41,6 +42,7 @@ import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -56,6 +58,7 @@ import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
 import org.wso2.carbon.apimgt.core.models.SubscriptionWorkflow;
+import org.wso2.carbon.apimgt.core.models.User;
 import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowConfig;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
@@ -534,7 +537,7 @@ public class APIStoreImplTestCase {
     @Test(description = "Add comment")
     public void testAddComment() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
+        APIStore apiStore = getApiStoreImpl(apiDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
         Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
@@ -546,7 +549,7 @@ public class APIStoreImplTestCase {
     @Test(description = "Get comment")
     public void testGetComment() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
+        APIStore apiStore = getApiStoreImpl(apiDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
         Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
@@ -559,7 +562,7 @@ public class APIStoreImplTestCase {
     @Test(description = "Get all comments for an api")
     public void testGetAllCommentsForApi() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
+        APIStore apiStore = getApiStoreImpl(apiDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
         List<Comment> commentList = new ArrayList<>();
@@ -578,7 +581,7 @@ public class APIStoreImplTestCase {
     @Test(description = "Delete comment")
     public void testDeleteComment() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
+        APIStore apiStore = getApiStoreImpl(apiDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
         Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
@@ -591,7 +594,7 @@ public class APIStoreImplTestCase {
     @Test(description = "Update comment")
     public void testUpdateComment() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
+        APIStore apiStore = getApiStoreImpl(apiDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
         Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
@@ -609,7 +612,7 @@ public class APIStoreImplTestCase {
             expectedExceptions = APIManagementException.class)
     public void testGetCommentException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
+        APIStore apiStore = getApiStoreImpl(apiDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
         String randomUUIDForComment = java.util.UUID.randomUUID().toString();
@@ -621,7 +624,7 @@ public class APIStoreImplTestCase {
     @Test(description = "Exception in dao when adding a comment", expectedExceptions = APIManagementException.class)
     public void testAddCommentException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
+        APIStore apiStore = getApiStoreImpl(apiDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
         Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
@@ -634,7 +637,7 @@ public class APIStoreImplTestCase {
             expectedExceptions = APIManagementException.class)
     public void testDeleteCommentException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
+        APIStore apiStore = getApiStoreImpl(apiDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
         String randomUUIDForComment = java.util.UUID.randomUUID().toString();
@@ -647,7 +650,7 @@ public class APIStoreImplTestCase {
             expectedExceptions = APIManagementException.class)
     public void testUpdateCommentException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
+        APIStore apiStore = getApiStoreImpl(apiDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
         String randomUUIDForComment = java.util.UUID.randomUUID().toString();
@@ -661,7 +664,7 @@ public class APIStoreImplTestCase {
             expectedExceptions = APIManagementException.class)
     public void testGetAllCommentsForApiException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
+        APIStore apiStore = getApiStoreImpl(apiDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
         Mockito.doThrow(new APIMgtDAOException("Error occurred while retrieving all comments for api " + api.getId()))
@@ -674,7 +677,7 @@ public class APIStoreImplTestCase {
     public void testGetCommentApiMissingException()
             throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
+        APIStore apiStore = getApiStoreImpl(apiDAO);
         String randomUUIDForApi = java.util.UUID.randomUUID().toString();
         Mockito.when(apiDAO.getAPI(randomUUIDForApi)).thenReturn(null);
         String randomUUIDForComment = java.util.UUID.randomUUID().toString();
@@ -686,7 +689,7 @@ public class APIStoreImplTestCase {
     public void testAddCommentApiMissingException()
             throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
+        APIStore apiStore = getApiStoreImpl(apiDAO);
         String randomUUIDForApi = java.util.UUID.randomUUID().toString();
         Mockito.when(apiDAO.getAPI(randomUUIDForApi)).thenReturn(null);
         Comment comment = SampleTestObjectCreator.createDefaultComment(randomUUIDForApi);
@@ -698,7 +701,7 @@ public class APIStoreImplTestCase {
     public void testDeleteCommentApiMissingException()
             throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
+        APIStore apiStore = getApiStoreImpl(apiDAO);
         String randomUUIDForApi = java.util.UUID.randomUUID().toString();
         Mockito.when(apiDAO.getAPI(randomUUIDForApi)).thenReturn(null);
         String randomUUIDForComment = java.util.UUID.randomUUID().toString();
@@ -710,7 +713,7 @@ public class APIStoreImplTestCase {
     public void testUpdateCommentApiMissingException()
             throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
+        APIStore apiStore = getApiStoreImpl(apiDAO);
         String randomUUIDForApi = java.util.UUID.randomUUID().toString();
         Mockito.when(apiDAO.getAPI(randomUUIDForApi)).thenReturn(null);
         Comment comment = SampleTestObjectCreator.createDefaultComment(randomUUIDForApi);
@@ -1059,53 +1062,77 @@ public class APIStoreImplTestCase {
 
     }
 
+    @Test(description = "User Self Signup")
+    public void testSelfSignUp() throws Exception {
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+        APIStoreImpl apiStore = getApiStoreImpl(identityProvider);
+        User user = new User();
+        Mockito.doNothing().when(identityProvider).registerUser(user);
+        apiStore.selfSignUp(user);
+    }
+
+    @Test(description = "User Self Signup Error Case", expectedExceptions = IdentityProviderException.class)
+    public void testSelfSignUpErrorCase() throws Exception {
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+        APIStoreImpl apiStore = getApiStoreImpl(identityProvider);
+        User user = new User();
+        Mockito.doThrow(IdentityProviderException.class).when(identityProvider).registerUser(user);
+        apiStore.selfSignUp(user);
+    }
+
     private APIStoreImpl getApiStoreImpl(ApiDAO apiDAO) {
-        return new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
+        return new APIStoreImpl(USER_NAME, null, apiDAO, null, null, null, null, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO) {
-        return new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null, null);
+        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, null, null, null, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, PolicyDAO policyDAO, WorkflowDAO workflowDAO) {
-        return new APIStoreImpl(USER_NAME, null, applicationDAO, null, policyDAO, null, null, workflowDAO);
+        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, null, policyDAO, null, null, workflowDAO);
     }
 
     private APIStoreImpl getApiStoreImpl(ApiDAO apiDAO, ApplicationDAO applicationDAO,
             APISubscriptionDAO apiSubscriptionDAO, WorkflowDAO workflowDAO) {
-        return new APIStoreImpl(USER_NAME, apiDAO, applicationDAO, apiSubscriptionDAO, null, null, null, workflowDAO);
+        return new APIStoreImpl(USER_NAME, null, apiDAO, applicationDAO, apiSubscriptionDAO, null, null, null,
+                workflowDAO);
     }
 
     private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO,
             WorkflowDAO workflowDAO) {
-        return new APIStoreImpl(USER_NAME, null, applicationDAO, apiSubscriptionDAO, null, null, null, workflowDAO);
+        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, apiSubscriptionDAO, null, null, null,
+                workflowDAO);
     }
 
     private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO) {
-        return new APIStoreImpl(USER_NAME, null, applicationDAO, apiSubscriptionDAO, null, null, null, null);
+        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, apiSubscriptionDAO, null, null, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, WorkflowDAO workflowDAO) {
-        return new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null, workflowDAO);
+        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, null, null, null, null, workflowDAO);
     }
 
     private APIStoreImpl getApiStoreImpl(TagDAO tagDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, null, null, tagDAO, null, null);
+        return new APIStoreImpl(USER_NAME, null, null, null, null, null, tagDAO, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl(PolicyDAO policyDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, null, policyDAO, null, null, null);
+        return new APIStoreImpl(USER_NAME, null, null, null, null, policyDAO, null, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl(LabelDAO labelDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, null, null, null, labelDAO, null);
+        return new APIStoreImpl(USER_NAME, null, null, null, null, null, null, labelDAO, null);
     }
 
     private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, PolicyDAO policyDAO) {
-        return new APIStoreImpl(USER_NAME, null, applicationDAO, null, policyDAO, null, null, null);
+        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, null, policyDAO, null, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl() {
-        return new APIStoreImpl(USER_NAME, null, null, null, null, null, null, null);
+        return new APIStoreImpl(USER_NAME, null, null, null, null, null, null, null, null);
+    }
+
+    private APIStoreImpl getApiStoreImpl(IdentityProvider identityProvider) {
+        return new APIStoreImpl(USER_NAME, identityProvider, null, null, null, null, null, null, null);
     }
 }

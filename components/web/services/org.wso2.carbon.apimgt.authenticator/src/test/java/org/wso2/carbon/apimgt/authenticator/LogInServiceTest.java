@@ -24,12 +24,9 @@ import com.google.gson.JsonParser;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.junit.Rule;
-import org.mockito.Mockito;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
-import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 import org.wso2.msf4j.MicroservicesRunner;
 
 import java.io.IOException;
@@ -109,9 +106,6 @@ public class LogInServiceTest {
         microservicesRunner
                 .deploy(testMicroservice)
                 .start();
-
-        ConfigProvider configProvider = Mockito.mock(ConfigProvider.class);
-        ServiceReferenceHolder.getInstance().setConfigProvider(configProvider);
     }
 
     @AfterClass

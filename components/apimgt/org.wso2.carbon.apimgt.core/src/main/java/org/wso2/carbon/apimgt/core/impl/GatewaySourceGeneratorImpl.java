@@ -150,7 +150,4 @@ public class GatewaySourceGeneratorImpl implements GatewaySourceGenerator {
         return writer.toString();
     }
 
-    public void setApi(API api) {
-        this.api = api;
-    }
 }

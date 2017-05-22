@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
 import org.wso2.carbon.apimgt.core.models.Tag;
+import org.wso2.carbon.apimgt.core.models.User;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 
 import java.util.List;
@@ -283,4 +284,12 @@ public interface APIStore extends APIManager {
      * @return a list of comments for the api
      */
     List<Comment> getCommentsForApi(String apiId) throws APIManagementException;
+
+    /**
+     * Store user self signup
+     *
+     * @param user User information object
+     * @throws APIManagementException if error occurred while registering the new user
+     */
+    void selfSignUp(User user) throws APIManagementException;
 }

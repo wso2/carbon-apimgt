@@ -275,6 +275,8 @@ public class APIMgtConstants {
         public static final String LIFECYCLE_ID = "LIFECYCLE_ID";
         public static final String WORKFLOW_REF_ID = "WORKFLOW_REFERENCE_ID";
         public static final String COMMENT_ID = "COMMENT_ID";
+        public static final String USERNAME = "USERNAME";
+        public static final String EMAIL = "EMAIL";
     }
 
     /**

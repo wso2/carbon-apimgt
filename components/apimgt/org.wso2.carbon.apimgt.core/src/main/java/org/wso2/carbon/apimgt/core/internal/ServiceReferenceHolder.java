@@ -44,21 +44,20 @@ public class ServiceReferenceHolder {
         this.configProvider = configProvider;
     }
 
-    public ConfigProvider getConfigProvider() {
-        return configProvider;
-    }
-
     public APIMConfigurations getAPIMConfiguration() {
         try {
-            config = ServiceReferenceHolder.getInstance().getConfigProvider()
-                    .getConfigurationObject(APIMConfigurations.class);
+            if (configProvider != null) {
+                config = configProvider.getConfigurationObject(APIMConfigurations.class);
+            } else {
+                log.error("Configuration provider is null");
+            }
         } catch (CarbonConfigurationException e) {
             log.error("error getting config : org.wso2.carbon.apimgt.core.internal.APIMConfiguration", e);
         }
 
         if (config == null) {
             config = new APIMConfigurations();
-            log.info("Setting default configurations");
+            log.info("Setting default configurations...");
         }
 
         return config;

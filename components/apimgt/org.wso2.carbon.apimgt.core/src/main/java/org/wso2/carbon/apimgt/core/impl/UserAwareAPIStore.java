@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
@@ -44,10 +45,10 @@ public class UserAwareAPIStore extends APIStoreImpl {
 
     private static final Logger log = LoggerFactory.getLogger(UserAwareAPIStore.class);
 
-    public UserAwareAPIStore(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
+    public UserAwareAPIStore(String username, IdentityProvider idp, ApiDAO apiDAO, ApplicationDAO applicationDAO,
                              APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, TagDAO tagDAO,
                              LabelDAO labelDAO, WorkflowDAO workflowDAO) {
-        super(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, tagDAO, labelDAO, workflowDAO);
+        super(username, idp, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, tagDAO, labelDAO, workflowDAO);
     }
 
     @Override

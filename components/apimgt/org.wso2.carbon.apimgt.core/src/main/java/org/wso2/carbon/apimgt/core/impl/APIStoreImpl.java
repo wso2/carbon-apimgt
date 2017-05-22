@@ -26,11 +26,11 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.api.APIMObservable;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.api.EventObserver;
+import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.api.LabelExtractor;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
@@ -51,7 +51,6 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
-import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
@@ -70,6 +69,7 @@ import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
 import org.wso2.carbon.apimgt.core.models.SubscriptionWorkflow;
 import org.wso2.carbon.apimgt.core.models.Tag;
+import org.wso2.carbon.apimgt.core.models.User;
 import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
@@ -102,8 +102,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     private Map<String, EventObserver> eventObservers = new HashMap<>();
 
     private static final Logger log = LoggerFactory.getLogger(APIStoreImpl.class);
-    private TagDAO tagDAO;
-    private APIMConfigurations config;
     APIGateway gateway = getApiGateway();
 
     /**
@@ -118,13 +116,11 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
      * @param labelDAO Label Data Access Object
      * @param workflowDAO WorkFlow Data Access Object
      */
-    public APIStoreImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
+    public APIStoreImpl(String username, IdentityProvider idp, ApiDAO apiDAO, ApplicationDAO applicationDAO,
                         APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, TagDAO tagDAO, LabelDAO labelDAO,
                         WorkflowDAO workflowDAO) {
-        super(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, new APILifeCycleManagerImpl(), labelDAO,
-                workflowDAO);
-        this.tagDAO = tagDAO;
-        config = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
+        super(username, idp, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, new APILifeCycleManagerImpl(),
+                labelDAO, workflowDAO, tagDAO);
     }
 
     @Override
@@ -133,7 +129,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         try {
             apiResults = getApiDAO().getAPIsByStatus(new ArrayList<>(Arrays.asList(statuses)), ApiType.STANDARD);
         } catch (APIMgtDAOException e) {
-            String errorMsg = "Error occurred while fetching APIs for the given statuses - "
+            String errorMsg = "Error occurred while fetching APIs for the given statuses     - "
                     + Arrays.toString(statuses);
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
@@ -491,7 +487,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     public List<Label> getLabelInfo(List<String> labels, String username) throws LabelException {
 
         List<Label> filteredLabels;
-        String labelExtractorClassName = config.getLabelExtractor();
+        String labelExtractorClassName = getConfig().getLabelExtractor();
         try {
             List<Label> availableLabels = getLabelDAO().getLabelsByName(labels);
             LabelExtractor labelExtractor = (LabelExtractor) Class.forName(labelExtractorClassName).newInstance();
@@ -923,10 +919,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
     }
 
-    private TagDAO getTagDAO() {
-        return tagDAO;
-    }
-
     /**
      * Add {@link org.wso2.carbon.apimgt.core.api.EventObserver} which needs to be registered to a Map.
      * Key should be class name of the observer. This is to prevent registering same observer twice to an
@@ -968,6 +960,11 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         if (observer != null) {
             eventObservers.remove(observer.getClass().getName());
         }
+    }
+
+    @Override
+    public void selfSignUp(User user) throws APIManagementException {
+        getIdentityProvider().registerUser(user);
     }
 
     /**

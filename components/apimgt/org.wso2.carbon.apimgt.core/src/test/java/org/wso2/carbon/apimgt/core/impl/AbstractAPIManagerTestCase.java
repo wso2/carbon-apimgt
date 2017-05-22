@@ -19,6 +19,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
+import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiType;
@@ -62,7 +63,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Search API by UUID")
     public void testSearchAPIByUUID() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, apiDAO, null, null, null, null, null, null);
         API apiFromDAO = new API.APIBuilder(PROVIDER_NAME, API_NAME, API_VERSION).build();
         when(apiDAO.getAPI(UUID)).thenReturn(apiFromDAO);
         API api = apiStore.getAPIbyUUID(UUID);
@@ -73,7 +74,8 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Retrieve an application by uuid")
     public void testGetApplicationByUuid() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null, null);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, null, applicationDAO, null, null, null, null,
+                null);
         Application applicationFromDAO = new Application(APP_NAME, USER_NAME);
         when(applicationDAO.getApplication(UUID)).thenReturn(applicationFromDAO);
         Application application = apiStore.getApplication(UUID, USER_NAME, null);
@@ -84,7 +86,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Retrieve documentation summary given the id")
     public void testGetDocumentationSummary() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, apiDAO, null, null, null, null, null, null);
         DocumentInfo documentInfoMock = SampleTestObjectCreator.getMockDocumentInfoObject(UUID);
         when(apiDAO.getDocumentInfo(UUID)).thenReturn(documentInfoMock);
         DocumentInfo documentInfo = apiStore.getDocumentationSummary(UUID);
@@ -95,7 +97,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Retrieve list of documentations")
     public void testAllDocumentation() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, apiDAO, null, null, null, null, null, null);
         List<DocumentInfo> documentInfoMockList = SampleTestObjectCreator.getMockDocumentInfoObjectsList();
         when(apiDAO.getDocumentsInfoList(UUID)).thenReturn(documentInfoMockList);
         List<DocumentInfo> documentInfoList = apiStore.getAllDocumentation(UUID, 1, 10);
@@ -142,8 +144,8 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Get subscription by UUID")
     public void testGetSubscriptionByUUID() throws APIManagementException {
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, null, apiSubscriptionDAO, null, null, null,
-                null);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, null, null, apiSubscriptionDAO, null, null,
+                null, null);
         when(apiSubscriptionDAO.getAPISubscription(UUID)).thenReturn(new Subscription(UUID, null, null, null));
         apiStore.getSubscriptionByUUID(UUID);
         verify(apiSubscriptionDAO, times(1)).getAPISubscription(UUID);
@@ -179,7 +181,8 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Getting last updated time of Application")
     public void testGetLastUpdatedTimeOfApplication() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null, null);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, null, applicationDAO, null, null, null, null,
+                null);
         when(applicationDAO.getLastUpdatedTimeOfApplication(UUID)).thenReturn(LAST_UPDATED_TIME);
         apiStore.getLastUpdatedTimeOfApplication(UUID);
         verify(applicationDAO, times(1)).getLastUpdatedTimeOfApplication(UUID);
@@ -188,8 +191,8 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Getting last updated time of Subscription")
     public void testGetLastUpdatedTimeOfSubscription() throws APIManagementException {
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, null, apiSubscriptionDAO, null, null, null,
-                null);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, null, null, apiSubscriptionDAO, null, null,
+                null, null);
         when(apiSubscriptionDAO.getLastUpdatedTimeOfSubscription(UUID)).thenReturn(LAST_UPDATED_TIME);
         apiStore.getLastUpdatedTimeOfSubscription(UUID);
         verify(apiSubscriptionDAO, times(1)).getLastUpdatedTimeOfSubscription(UUID);
@@ -198,8 +201,8 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Getting subscriptions by API")
     public void testGetSubscriptionsByAPI() throws APIManagementException {
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, null, apiSubscriptionDAO, null, null, null,
-                null);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, null, null, apiSubscriptionDAO, null, null,
+                null, null);
         when(apiSubscriptionDAO.getAPISubscriptionsByAPI(UUID)).thenReturn(new ArrayList<Subscription>());
         apiStore.getSubscriptionsByAPI(UUID);
         verify(apiSubscriptionDAO, times(1)).getAPISubscriptionsByAPI(UUID);
@@ -241,7 +244,8 @@ public class AbstractAPIManagerTestCase {
             expectedExceptions = APIManagementException.class)
     public void testGetApplicationByUuidException() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null, null);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, null, applicationDAO, null, null, null, null,
+                null);
         doThrow(new APIMgtDAOException("Error occurred while retrieving application")).when(applicationDAO)
                 .getApplication(UUID);
         apiStore.getApplication(UUID, USER_NAME, null);
@@ -251,7 +255,7 @@ public class AbstractAPIManagerTestCase {
             expectedExceptions = APIMgtDAOException.class)
     public void testGetDocumentationSummaryException() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, apiDAO, null, null, null, null, null, null);
         when(apiDAO.getDocumentInfo(UUID))
                 .thenThrow(new APIMgtDAOException("Error occurred while retrieving documents"));
         apiStore.getDocumentationSummary(UUID);
@@ -261,7 +265,7 @@ public class AbstractAPIManagerTestCase {
             expectedExceptions = APIManagementException.class)
     public void testAllDocumentationException() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, apiDAO, null, null, null, null, null, null);
         when(apiDAO.getDocumentsInfoList(UUID))
                 .thenThrow(new APIMgtDAOException("Error occurred while retrieving documents"));
         apiStore.getAllDocumentation(UUID, 1, 10);
@@ -270,7 +274,7 @@ public class AbstractAPIManagerTestCase {
     @Test(description = "Exception when getting API by UUID", expectedExceptions = APIManagementException.class)
     public void testSearchAPIByUUIDException() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, apiDAO, null, null, null, null, null, null);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, apiDAO, null, null, null, null, null, null);
         when(apiDAO.getAPI(UUID))
                 .thenThrow(new APIMgtDAOException("Error occurred while retrieving API with id " + UUID));
         apiStore.getAPIbyUUID(UUID);
@@ -333,8 +337,8 @@ public class AbstractAPIManagerTestCase {
             expectedExceptions = APIManagementException.class)
     public void testGetSubscriptionByUUIDException() throws APIManagementException {
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, null, apiSubscriptionDAO, null, null, null,
-                null);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, null, null, apiSubscriptionDAO, null, null,
+                null, null);
         when(apiSubscriptionDAO.getAPISubscription(UUID))
                 .thenThrow(new APIMgtDAOException("Couldn't retrieve subscription for id " + UUID));
         apiStore.getSubscriptionByUUID(UUID);
@@ -378,7 +382,8 @@ public class AbstractAPIManagerTestCase {
             expectedExceptions = APIManagementException.class)
     public void testGetLastUpdatedTimeOfApplicationException() throws APIManagementException {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, applicationDAO, null, null, null, null, null);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, null, applicationDAO, null, null, null, null,
+                null);
         when(applicationDAO.getLastUpdatedTimeOfApplication(UUID)).thenThrow(new APIMgtDAOException(
                 "Error occurred while retrieving the last updated time of the application " + UUID));
         apiStore.getLastUpdatedTimeOfApplication(UUID);
@@ -389,8 +394,8 @@ public class AbstractAPIManagerTestCase {
             expectedExceptions = APIManagementException.class)
     public void testGetLastUpdatedTimeOfSubscriptionException() throws APIManagementException {
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, null, apiSubscriptionDAO, null, null, null,
-                null);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, null, null, apiSubscriptionDAO, null, null,
+                null, null);
         when(apiSubscriptionDAO.getLastUpdatedTimeOfSubscription(UUID)).thenThrow(new APIMgtDAOException(
                 "Error occurred while retrieving the last updated time of the subscription " + UUID));
         apiStore.getLastUpdatedTimeOfSubscription(UUID);
@@ -401,8 +406,8 @@ public class AbstractAPIManagerTestCase {
             expectedExceptions = APIManagementException.class)
     public void testGetSubscriptionsByAPIException() throws APIManagementException {
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
-        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, null, apiSubscriptionDAO, null, null, null,
-                null);
+        AbstractAPIManager apiStore = new APIStoreImpl(USER_NAME, null, null, null, apiSubscriptionDAO, null, null,
+                null, null);
         when(apiSubscriptionDAO.getAPISubscriptionsByAPI(UUID))
                 .thenThrow(new APIMgtDAOException("Couldn't find subscriptions for apiId " + UUID));
         apiStore.getSubscriptionsByAPI(UUID);
@@ -470,44 +475,49 @@ public class AbstractAPIManagerTestCase {
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APILifecycleManager apiLifecycleManager) {
-        return new APIPublisherImpl(USER_NAME, apiDAO, null, null, null, apiLifecycleManager, null, null,
+        return new APIPublisherImpl(USER_NAME, null, apiDAO, null, null, null, apiLifecycleManager, null, null, null,
                 new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO) {
-        return new APIPublisherImpl(USER_NAME, apiDAO, null, null, null, null, null, null,
+        return new APIPublisherImpl(USER_NAME, null, apiDAO, null, null, null, null, null, null, null,
                 new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APISubscriptionDAO apiSubscriptionDAO,
                                                  APILifecycleManager apiLifecycleManager) {
-        return new APIPublisherImpl(USER_NAME, apiDAO, null, apiSubscriptionDAO, null, apiLifecycleManager, null, null,
-                new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
+        return new APIPublisherImpl(USER_NAME, null, apiDAO, null, apiSubscriptionDAO, null, apiLifecycleManager, null,
+                null, null, new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APISubscriptionDAO apiSubscriptionDAO) {
-        return new APIPublisherImpl(USER_NAME, apiDAO, null, apiSubscriptionDAO, null, null, null, null,
+        return new APIPublisherImpl(USER_NAME, null, apiDAO, null, apiSubscriptionDAO, null, null, null, null, null,
                 new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
             apiSubscriptionDAO, APILifecycleManager apiLifecycleManager) {
-        return new APIPublisherImpl(USER_NAME, apiDAO, applicationDAO, apiSubscriptionDAO, null, apiLifecycleManager,
-                null, null, new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
+        return new APIPublisherImpl(USER_NAME, null, apiDAO, applicationDAO, apiSubscriptionDAO, null,
+                apiLifecycleManager, null, null, null, new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(LabelDAO labelDAO) {
-        return new APIPublisherImpl(USER_NAME, null, null, null, null, null, labelDAO, null,
+        return new APIPublisherImpl(USER_NAME, null, null, null, null, null, null, labelDAO, null, null,
                 new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(PolicyDAO policyDAO) {
-        return new APIPublisherImpl(USER_NAME, null, null, null, policyDAO, null, null, null,
+        return new APIPublisherImpl(USER_NAME, null, null, null, null, policyDAO, null, null, null, null,
                 new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(APISubscriptionDAO apiSubscriptionDAO) {
-        return new APIPublisherImpl(USER_NAME, null, null, apiSubscriptionDAO, null, null, null, null,
+        return new APIPublisherImpl(USER_NAME, null, null, null, apiSubscriptionDAO, null, null, null, null, null,
+                new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
+    }
+
+    private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider) {
+        return new APIPublisherImpl(USER_NAME, identityProvider, null, null, null, null, null, null, null, null,
                 new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 }
