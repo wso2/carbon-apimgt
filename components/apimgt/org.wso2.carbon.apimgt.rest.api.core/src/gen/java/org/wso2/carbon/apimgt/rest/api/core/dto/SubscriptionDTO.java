@@ -38,6 +38,12 @@ public class SubscriptionDTO   {
   @JsonProperty("keyEnvType")
   private String keyEnvType = null;
 
+  @JsonProperty("applicationId")
+  private String applicationId = null;
+
+  @JsonProperty("applicationTier")
+  private String applicationTier = null;
+
   public SubscriptionDTO apiName(String apiName) {
     this.apiName = apiName;
     return this;
@@ -200,6 +206,42 @@ public class SubscriptionDTO   {
     this.keyEnvType = keyEnvType;
   }
 
+  public SubscriptionDTO applicationId(String applicationId) {
+    this.applicationId = applicationId;
+    return this;
+  }
+
+   /**
+   * UUID of Application 
+   * @return applicationId
+  **/
+  @ApiModelProperty(value = "UUID of Application ")
+  public String getApplicationId() {
+    return applicationId;
+  }
+
+  public void setApplicationId(String applicationId) {
+    this.applicationId = applicationId;
+  }
+
+  public SubscriptionDTO applicationTier(String applicationTier) {
+    this.applicationTier = applicationTier;
+    return this;
+  }
+
+   /**
+   * Tier of Application 
+   * @return applicationTier
+  **/
+  @ApiModelProperty(value = "Tier of Application ")
+  public String getApplicationTier() {
+    return applicationTier;
+  }
+
+  public void setApplicationTier(String applicationTier) {
+    this.applicationTier = applicationTier;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -218,12 +260,14 @@ public class SubscriptionDTO   {
         Objects.equals(this.subscriptionPolicy, subscription.subscriptionPolicy) &&
         Objects.equals(this.applicationName, subscription.applicationName) &&
         Objects.equals(this.applicationOwner, subscription.applicationOwner) &&
-        Objects.equals(this.keyEnvType, subscription.keyEnvType);
+        Objects.equals(this.keyEnvType, subscription.keyEnvType) &&
+        Objects.equals(this.applicationId, subscription.applicationId) &&
+        Objects.equals(this.applicationTier, subscription.applicationTier);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiName, apiContext, apiVersion, apiProvider, consumerKey, subscriptionPolicy, applicationName, applicationOwner, keyEnvType);
+    return Objects.hash(apiName, apiContext, apiVersion, apiProvider, consumerKey, subscriptionPolicy, applicationName, applicationOwner, keyEnvType, applicationId, applicationTier);
   }
 
   @Override
@@ -240,6 +284,8 @@ public class SubscriptionDTO   {
     sb.append("    applicationName: ").append(toIndentedString(applicationName)).append("\n");
     sb.append("    applicationOwner: ").append(toIndentedString(applicationOwner)).append("\n");
     sb.append("    keyEnvType: ").append(toIndentedString(keyEnvType)).append("\n");
+    sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
+    sb.append("    applicationTier: ").append(toIndentedString(applicationTier)).append("\n");
     sb.append("}");
     return sb.toString();
   }
