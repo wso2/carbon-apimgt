@@ -5,8 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -25,8 +23,8 @@ public class UriTemplateDTO   {
   @JsonProperty("policy")
   private String policy = null;
 
-  @JsonProperty("scopes")
-  private List<String> scopes = new ArrayList<String>();
+  @JsonProperty("scope")
+  private String scope = null;
 
   public UriTemplateDTO uriTemplate(String uriTemplate) {
     this.uriTemplate = uriTemplate;
@@ -100,27 +98,22 @@ public class UriTemplateDTO   {
     this.policy = policy;
   }
 
-  public UriTemplateDTO scopes(List<String> scopes) {
-    this.scopes = scopes;
-    return this;
-  }
-
-  public UriTemplateDTO addScopesItem(String scopesItem) {
-    this.scopes.add(scopesItem);
+  public UriTemplateDTO scope(String scope) {
+    this.scope = scope;
     return this;
   }
 
    /**
-   * Get scopes
-   * @return scopes
+   * scope for uri template. 
+   * @return scope
   **/
-  @ApiModelProperty(value = "")
-  public List<String> getScopes() {
-    return scopes;
+  @ApiModelProperty(value = "scope for uri template. ")
+  public String getScope() {
+    return scope;
   }
 
-  public void setScopes(List<String> scopes) {
-    this.scopes = scopes;
+  public void setScope(String scope) {
+    this.scope = scope;
   }
 
 
@@ -137,12 +130,12 @@ public class UriTemplateDTO   {
         Objects.equals(this.httpVerb, uriTemplate.httpVerb) &&
         Objects.equals(this.authType, uriTemplate.authType) &&
         Objects.equals(this.policy, uriTemplate.policy) &&
-        Objects.equals(this.scopes, uriTemplate.scopes);
+        Objects.equals(this.scope, uriTemplate.scope);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uriTemplate, httpVerb, authType, policy, scopes);
+    return Objects.hash(uriTemplate, httpVerb, authType, policy, scope);
   }
 
   @Override
@@ -154,7 +147,7 @@ public class UriTemplateDTO   {
     sb.append("    httpVerb: ").append(toIndentedString(httpVerb)).append("\n");
     sb.append("    authType: ").append(toIndentedString(authType)).append("\n");
     sb.append("    policy: ").append(toIndentedString(policy)).append("\n");
-    sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
+    sb.append("    scope: ").append(toIndentedString(scope)).append("\n");
     sb.append("}");
     return sb.toString();
   }

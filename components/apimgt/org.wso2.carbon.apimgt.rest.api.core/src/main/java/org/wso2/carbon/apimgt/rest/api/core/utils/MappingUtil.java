@@ -62,6 +62,8 @@ public class MappingUtil {
             subscriptionDTO.setApplicationName(subscriptionData.getApplicationName());
             subscriptionDTO.setApplicationOwner(subscriptionData.getApplicationOwner());
             subscriptionDTO.setKeyEnvType(subscriptionData.getKeyEnvType());
+            subscriptionDTO.setApplicationId(subscriptionData.getApplicationId());
+            subscriptionDTO.setApplicationTier(subscriptionData.getApplicationTier());
             subscriptionListDTO.addListItem(subscriptionDTO);
         }
         return subscriptionListDTO;
@@ -98,7 +100,7 @@ public class MappingUtil {
             uriTemplateDTO.setAuthType(v.getAuthType());
             uriTemplateDTO.setPolicy(v.getPolicy());
             uriTemplateDTO.setHttpVerb(v.getHttpVerb());
-            uriTemplateDTO.setScopes(Collections.emptyList());
+            uriTemplateDTO.setScope("");
             uriTemplateDTOArrayList.add(uriTemplateDTO);
         });
         resourcesListDTO.setList(uriTemplateDTOArrayList);

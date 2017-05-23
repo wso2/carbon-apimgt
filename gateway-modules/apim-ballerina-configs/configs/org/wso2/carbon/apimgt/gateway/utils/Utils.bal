@@ -19,42 +19,53 @@ function constructAccessTokenExpiredPayload(message response){
 }
 function fromJsonToIntrospectDto(json introspectResponse)(dto:IntrospectDto){
     dto:IntrospectDto introspectDto = {};
-    introspectDto.active = jsons:getBoolean(introspectResponse,"$.active");
+    introspectDto.active = (boolean )introspectResponse.active;
     if(introspectDto.active){
-        introspectDto.exp = jsons:getInt(introspectResponse,"$.iat");
-        introspectDto.username = jsons:getString(introspectResponse,"$.username");
-        introspectDto.scope = jsons:getString(introspectResponse,"$.scope");
-        introspectDto.token_type = jsons:getString(introspectResponse,"$.token_type");
-        introspectDto.client_id = jsons:getString(introspectResponse,"$.client_id");
-        introspectDto.iat = jsons:getInt(introspectResponse,"$.iat");
+        if(introspectResponse.exp != null){
+            introspectDto.exp = (int )introspectResponse.exp;
+        }else {
+            // https://github.com/ballerinalang/ballerina/issues/2396
+            introspectDto.exp = -1;
+        }
+        if(introspectResponse.username != null){
+            introspectDto.username = (string)introspectResponse.username;
+        }
+        if(introspectResponse.scope != null){
+            introspectDto.scope = (string )introspectResponse.scope;
+        }
+        if(introspectResponse.token_type != null){
+            introspectDto.token_type = (string )introspectResponse.token_type;
+        }
+        if(introspectResponse.iat != null){
+            introspectDto.iat = (int )introspectResponse.iat;
+        }
+        if(introspectResponse.client_id != null){
+            introspectDto.client_id = (string )introspectResponse.client_id;
+        }
     }
     return introspectDto;
 }
 function fromJsonToSubscriptionDto(json subscriptionResponse)(dto:SubscriptionDto){
     dto:SubscriptionDto subscriptionDto = {};
-    subscriptionDto.apiName = jsons:getString(subscriptionResponse,"$.apiName");
-    subscriptionDto.apiContext = jsons:getString(subscriptionResponse,"$.apiContext");
-    subscriptionDto.apiVersion = jsons:getString(subscriptionResponse,"$.apiVersion");
-    subscriptionDto.apiProvider = jsons:getString(subscriptionResponse,"$.apiProvider");
-    subscriptionDto.consumerKey = jsons:getString(subscriptionResponse,"$.consumerKey");
-    subscriptionDto.subscriptionPolicy = jsons:getString(subscriptionResponse,"$.subscriptionPolicy");
-    subscriptionDto.applicationOwner = jsons:getString(subscriptionResponse,"$.applicationOwner");
-    subscriptionDto.applicationName = jsons:getString(subscriptionResponse,"$.applicationName");
-    subscriptionDto.keyEnvType = jsons:getString(subscriptionResponse,"$.keyEnvType");
+    subscriptionDto.apiName = (string)subscriptionResponse.apiName;
+    subscriptionDto.apiContext = (string)subscriptionResponse.apiContext;
+    subscriptionDto.apiVersion = (string)subscriptionResponse.apiVersion;
+    subscriptionDto.apiProvider = (string)subscriptionResponse.apiProvider;
+    subscriptionDto.consumerKey = (string)subscriptionResponse.consumerKey;
+    subscriptionDto.subscriptionPolicy = (string)subscriptionResponse.subscriptionPolicy;
+    subscriptionDto.applicationOwner = (string)subscriptionResponse.applicationOwner;
+    subscriptionDto.applicationName = (string)subscriptionResponse.applicationName;
+    subscriptionDto.keyEnvType = (string)subscriptionResponse.keyEnvType;
+    subscriptionDto.applicationTier = (string)subscriptionResponse.applicationTier;
+    subscriptionDto.applicationId = (string )subscriptionResponse.applicationId;
     return subscriptionDto;
 }
 function fromJsonToResourceDto(json resourceResponse)(dto:ResourceDto){
     dto:ResourceDto resourceDto = {};
-    resourceDto.uriTemplate = jsons:getString(resourceResponse,"$.uriTemplate");
-    resourceDto.httpVerb = jsons:getString(resourceResponse,"$.httpVerb");
-    resourceDto.authType = jsons:getString(resourceResponse,"$.authType");
-    string [] scopes = {};
-    int length = jsons:getInt(resourceResponse,"$.scopes.length()");
-    int i = 0;
-    while(i<length){
-        scopes[i] = jsons:getString(resourceResponse,"$.scopes["+i+"]");
-        i = i+1;
-    }
+    resourceDto.uriTemplate = (string)resourceResponse.uriTemplate;
+    resourceDto.httpVerb = (string)resourceResponse.httpVerb;
+    resourceDto.authType = (string)resourceResponse.authType;
+    resourceDto.scope = (string)resourceResponse.scope;
     return resourceDto;
 }
 function retrieveSubscriptions (string apiContext,string apiVersion){

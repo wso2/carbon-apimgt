@@ -503,6 +503,14 @@ definitions:
         type: string
         description: |
           Key type (Production or Sandbox).
+      applicationId:
+        type: string
+        description: |
+          UUID of Application
+      applicationTier:
+        type: string
+        description: |
+          Tier of Application
 
 #-----------------------------------------------------
 # API Summary Info resource
@@ -526,10 +534,10 @@ definitions:
         type: string
         description: |
           policy of uri template.
-      scopes:
-        type: array
-        items:
-          type: string
+      scope:
+        type: string
+        description: |
+          scope for uri template.
   APISummary:
     title: APIs Summary Information
     properties:
