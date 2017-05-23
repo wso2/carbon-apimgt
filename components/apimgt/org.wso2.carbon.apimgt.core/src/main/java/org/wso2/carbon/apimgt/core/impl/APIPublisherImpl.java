@@ -85,6 +85,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -417,23 +418,57 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         return APIUtils.checkAllowedRoles(allAvailableRoles, permissionRoleList);
     }
 
-//    private void disableActionButtonsForUser(String loggedInUser, HashMap<String, Integer> permissionMap) {
-//        Set<String> loggedInUserRoles = APIUtils.getAllRolesOfUser(loggedInUser);
-//        Set<String> permissionRoleList = getRolesFromPermissionMap(permissionMap);
-//        Set<String> rolesOfUserWithAPIPermissions = null;
-//        if (loggedInUserRoles.retainAll(
-//                permissionRoleList)) { //get the intersection - retainAll() transforms first set to the intersection
-//            rolesOfUserWithAPIPermissions = loggedInUserRoles;
-//        }
-//        if (rolesOfUserWithAPIPermissions != null) {
-//            for (String role : rolesOfUserWithAPIPermissions) {
-//                Integer permission = permissionMap.get(role);
-//
-//            }
-//        }
-//
+    /**
+     * This method retrieves the set of overall permissions for a given api for the logged in user
+     * @param loggedInUser - Logged in user
+     * @param api - The API whose permissions for the logged in user is retrieved
+     * @return The overall list of permissions for the given API for the logged in user
+     */
+    private List<String> getAPIPermissionsOfLoggedInUser(String loggedInUser, API api) {
+
+        Map<String, Integer> permissionMap = api.getPermissionMap();
+        Set<String> loggedInUserRoles = APIUtils.getAllRolesOfUser(loggedInUser);
+        Set<String> permissionRoleList = getRolesFromPermissionMap(permissionMap);
+        Set<String> rolesOfUserWithAPIPermissions = null;
+        List<String> permissionArrayForUser = new ArrayList<>();
+        if (loggedInUserRoles.retainAll(
+                permissionRoleList)) { //get the intersection - retainAll() transforms first set to the intersection
+            rolesOfUserWithAPIPermissions = loggedInUserRoles;
+        }
+        if (rolesOfUserWithAPIPermissions != null) {
+            List<Integer> allPermissionsForUser = new ArrayList<>();
+            for (String role : rolesOfUserWithAPIPermissions) {
+                Integer permission = permissionMap.get(role);
+                allPermissionsForUser.add(permission);
+            }
+            //Determine maximum of all permissions
+            Integer highestPermission = Collections.max(allPermissionsForUser);
+            permissionArrayForUser.add(APIMgtConstants.Permission.READ);
+            if (highestPermission == (APIMgtConstants.Permission.READ_PERMISSION
+                    + APIMgtConstants.Permission.UPDATE_PERMISSION)) {
+                permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
+            } else if (highestPermission == (APIMgtConstants.Permission.READ_PERMISSION
+                    + APIMgtConstants.Permission.DELETE_PERMISSION)) {
+                permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
+            } else if (highestPermission
+                    == APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.UPDATE_PERMISSION
+                    + APIMgtConstants.Permission.DELETE_PERMISSION) {
+                permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
+                permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
+            }
+        }
+        return permissionArrayForUser;
+    }
+
+//    private Map<String, ArrayList<String>> getAllPermissionsForUser(String loggedInUser) {
+//        return null;
 //    }
 
+    /**
+     * This method is used to extract the groupIds or roles from the permissionMap
+     * @param permissionMap - The map containing the group IDs(roles) and their permissions
+     * @return - The list of groupIds specified for permissions
+     */
     private Set<String> getRolesFromPermissionMap(Map<String, Integer> permissionMap) {
         Set<String> permissionRoleList = new HashSet<>();
         for (String groupId : permissionMap.keySet()) {
