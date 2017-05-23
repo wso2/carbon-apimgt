@@ -231,7 +231,8 @@ public class APIManagerFactory {
         if (identityProvider == null) {
             try {
                 identityProvider = (IdentityProvider) Class.forName(ServiceReferenceHolder.getInstance()
-                        .getAPIMConfiguration().getIdpImplClass()).newInstance();
+                        .getAPIMConfiguration().getIdentityProviderConfigs().getIdentityProviderImplClass())
+                        .newInstance();
             } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
                 throw new IdentityProviderException("Error occurred while initializing identity provider", e,
                         ExceptionCodes.IDP_INITIALIZATION_FAILED);
@@ -250,7 +251,7 @@ public class APIManagerFactory {
         if (keyManager == null) {
             try {
                 keyManager = (KeyManager) Class.forName(ServiceReferenceHolder.getInstance().getAPIMConfiguration()
-                        .getKeyManagerImplClass()).newInstance();
+                        .getKeyManagerConfigs().getKeyManagerImplClass()).newInstance();
             } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
                 throw new KeyManagementException("Error occurred while initializing key manager", e,
                         ExceptionCodes.KEY_MANAGER_INITIALIZATION_FAILED);

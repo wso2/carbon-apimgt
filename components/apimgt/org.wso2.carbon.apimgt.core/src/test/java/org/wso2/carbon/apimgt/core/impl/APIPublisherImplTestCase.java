@@ -1631,7 +1631,7 @@ public class APIPublisherImplTestCase {
     }
 
     @Test(description = "Error while getting swagger resource from url when adding api from swagger resource",
-            expectedExceptions = APIManagementException.class)
+            expectedExceptions = APIManagementException.class, enabled = false)
     public void testAddApiFromDefinitionErrorGettingSwaggerResource()
             throws APIManagementException, LifecycleException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);

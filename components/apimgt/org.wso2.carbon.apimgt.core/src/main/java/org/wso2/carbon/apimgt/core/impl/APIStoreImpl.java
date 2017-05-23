@@ -503,7 +503,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     public List<Label> getLabelInfo(List<String> labels, String username) throws LabelException {
 
         List<Label> filteredLabels;
-        String labelExtractorClassName = getConfig().getLabelExtractor();
+        String labelExtractorClassName = getConfig().getLabelExtractorImpleClass();
         try {
             List<Label> availableLabels = getLabelDAO().getLabelsByName(labels);
             LabelExtractor labelExtractor = (LabelExtractor) Class.forName(labelExtractorClassName).newInstance();

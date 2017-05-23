@@ -45,13 +45,12 @@ import static org.testng.AssertJUnit.assertTrue;
 
 public class LogInServiceTest {
 
-
     private final AuthenticatorAPI testMicroservice = new AuthenticatorAPI();
     private MicroservicesRunner microservicesRunner;
     public static final String HOSTNAME = "localhost";
     public static final int PORT = 8094;
-    public static final int HTTP_PORT = 9090;
-    public static final int HTTPS_PORT = 9292;
+    public static final int HTTP_PORT = 9763;
+    public static final int HTTPS_PORT = 9443;
     public static final String HEADER_KEY_CONNECTION = "CONNECTION";
     public static final String HEADER_VAL_CLOSE = "CLOSE";
     protected static URI baseURI;
@@ -78,7 +77,7 @@ public class LogInServiceTest {
         wireMockRule.start();
 
         // Mock service for key manager DCR endpoint
-        wireMockRule.stubFor(post(urlEqualTo("/keyserver/identity/connect/register")).withBasicAuth("admin", "admin")
+        wireMockRule.stubFor(post(urlEqualTo("/identity/connect/register")).withBasicAuth("admin", "admin")
                 .withRequestBody(equalToJson("{\"client_name\":\"oauth_application\"}", true, true)).willReturn(
                         aResponse().withStatus(201).withHeader("Content-Type", "application/json").withBody(
                                 "{\"client_name\":\"publisher_application\","
@@ -88,7 +87,7 @@ public class LogInServiceTest {
                                         + "\"refresh_token\"]}")));
 
         // Mock service for key manager token endpoint
-        wireMockRule.stubFor(post(urlEqualTo("/keyserver/oauth2/token"))
+        wireMockRule.stubFor(post(urlEqualTo("/oauth2/token"))
                 .willReturn(
                         aResponse().withStatus(200).withHeader("Content-Type", "application/x-www-form-urlencoded")
                                 .withBody("{\"access_token\":\"8d4f62ea-edc5-419d-a898-a517f9d3d6f9\","
@@ -99,7 +98,7 @@ public class LogInServiceTest {
                                         + "\"apim:workflow_approve\"],\"expiresTimestamp\":1490615736702}")));
 
         // Mock service for key manager revoke endpoint
-        wireMockRule.stubFor(post(urlEqualTo("/keyserver/oauth2/revoke")).willReturn(aResponse().withStatus(200)));
+        wireMockRule.stubFor(post(urlEqualTo("/oauth2/revoke")).willReturn(aResponse().withStatus(200)));
 
         baseURI = URI.create(String.format("http://%s:%d", HOSTNAME, PORT));
         microservicesRunner = new MicroservicesRunner(PORT);
