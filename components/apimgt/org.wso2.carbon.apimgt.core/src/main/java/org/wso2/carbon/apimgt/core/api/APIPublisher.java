@@ -364,7 +364,7 @@ public interface APIPublisher extends APIManager {
     String addApiFromDefinition(InputStream apiDefinition) throws APIManagementException;
 
     /**
-     * Create api from it's using the url connection
+     * Create api using HttpUrlConnection
      *
      * @param httpURLConnection httpUrlConnection constructed by a url
      * @return details of the added API.
