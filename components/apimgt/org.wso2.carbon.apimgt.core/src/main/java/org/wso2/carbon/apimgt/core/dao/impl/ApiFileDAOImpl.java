@@ -416,6 +416,22 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
+     *
+     * @see ApiDAO#getAPIsByStatus(List, String)
+     */
+    @Override public List<API> getAPIsByStatus(List<String> gatewayLabels, String status) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     *
+     * @see ApiDAO#getAPIsByGatewayLabel(List)
+     */
+    @Override public List<API> getAPIsByGatewayLabel(List<String> gatewayLabels) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * @see ApiDAO#addComment(Comment, String)
      */
     @Override
@@ -479,10 +495,10 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#getAPIsForProvider(String providerName)
+     * {@inheritDoc}
      */
     @Override
-    public List<API> getAPIsForProvider(String providerName) throws APIMgtDAOException {
+    public List<API> getAPIsForProvider(String providerName, ApiType apiType) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 

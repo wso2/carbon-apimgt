@@ -15,7 +15,8 @@
   ~ limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>org.wso2.carbon.apimgt.web.publisher.feature</artifactId>
@@ -27,24 +28,12 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>web-parent</artifactId>
-        <version>7.0.14-SNAPSHOT</version>
+        <version>7.0.18-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <dependencies>
         <!--UUF Components-->
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.publisher.commons.ui</artifactId>
-            <type>zip</type>
-            <classifier>uuf-component</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.uuf.common</groupId>
-            <artifactId>org.wso2.carbon.uuf.common.foundation.ui</artifactId>
-            <type>zip</type>
-            <classifier>uuf-component</classifier>
-        </dependency>
         <!--UUF Themes-->
         <dependency>
             <groupId>org.wso2.carbon.uuf.common</groupId>
@@ -63,6 +52,89 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.5.0</version>
+                <executions>
+                    <execution>
+                        <id>npm install (initialize)</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                        <configuration>
+                            <executable>${npm.executable}</executable>
+                            <arguments>
+                                <argument>install</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <!-- 'npm run clean' which is run in clean lifecycle needs 'rimraf' node module.
+                     Make sure it is installed  -->
+                    <!--<execution>
+                        <id>npm install rimraf (clean)</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>pre-clean</phase>
+                        <configuration>
+                            <executable>${npm.executable}</executable>
+                            <arguments>
+                                <argument>install</argument>
+                                <argument>rimraf</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>-->
+                    <!--<execution>
+                        <id>npm run clean (clean)</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>clean</phase>
+                        <configuration>
+                            <executable>${npm.executable}</executable>
+                            <arguments>
+                                <argument>run</argument>
+                                <argument>clean</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>-->
+                    <execution>
+                        <id>npm run build (compile)</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>compile</phase>
+                        <configuration>
+                            <executable>${npm.executable}</executable>
+                            <arguments>
+                                <argument>run</argument>
+                                <argument>${npm.build.command}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <!--<execution>
+                        <id>npm run test (test)</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>test</phase>
+                        <configuration>
+                            <executable>${npm.executable}</executable>
+                            <arguments>
+                                <argument>run</argument>
+                                <argument>test</argument>
+                                <argument>&#45;&#45;</argument>
+                                <argument>&#45;&#45;skipTests=${maven.test.skip}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>-->
+                </executions>
+                <configuration>
+                    <workingDirectory>${npm.working.dir}</workingDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.wso2.carbon.uuf.maven</groupId>
                 <artifactId>carbon-uuf-maven-plugin</artifactId>
                 <version>${carbon-uuf-maven-plugin.version}</version>
@@ -79,5 +151,25 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>platform-windows</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+            </activation>
+            <properties>
+                <!-- Override the executable names for Windows -->
+                <npm.executable>npm.cmd</npm.executable>
+            </properties>
+        </profile>
+    </profiles>
 
+    <properties>
+        <maven.test.skip>false</maven.test.skip>
+        <npm.executable>npm</npm.executable>
+        <npm.build.command>build_prod</npm.build.command>
+        <npm.working.dir>./src/main/</npm.working.dir>
+    </properties>
 </project>

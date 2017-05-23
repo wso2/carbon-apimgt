@@ -194,16 +194,18 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#getAPIsForProvider(String)
+     * {@inheritDoc}
      */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<API> getAPIsForProvider(String providerName) throws APIMgtDAOException {
-        final String query = API_SUMMARY_SELECT + " WHERE PROVIDER = ?";
+    public List<API> getAPIsForProvider(String providerName, ApiType apiType) throws APIMgtDAOException {
+        final String query = API_SUMMARY_SELECT + " WHERE PROVIDER = ? AND API_TYPE_ID = " +
+                "(SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, providerName);
+            statement.setString(2, apiType.toString());
 
             return constructAPISummaryList(connection, statement);
         } catch (SQLException e) {
@@ -2010,6 +2012,51 @@ public class ApiDAOImpl implements ApiDAO {
             String msg = "Error while Checking existence of endpoint usage for " + endpointId;
             log.error(msg, e);
             throw new APIMgtDAOException(msg, e);
+        }
+    }
+
+    @Override
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
+    public List<API> getAPIsByStatus(List<String> gatewayLabels, String status) throws APIMgtDAOException {
+        final String query = "SELECT DISTINCT UUID, PROVIDER, A.NAME, CONTEXT, VERSION, DESCRIPTION, CURRENT_LC_STATUS,"
+                + " LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS FROM AM_API A INNER JOIN AM_API_LABEL_MAPPING M ON A.UUID"
+                + " = M.API_ID INNER JOIN AM_LABELS L ON L.LABEL_ID = M.LABEL_ID WHERE L.NAME IN (" + DAOUtil
+                .getParameterString(gatewayLabels.size()) + ") AND A.CURRENT_LC_STATUS=?";
+
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(query)) {
+            int i = 0;
+            for (String label : gatewayLabels) {
+                statement.setString(++i, label);
+            }
+            statement.setString(++i, status);
+            return constructAPISummaryList(connection, statement);
+        } catch (SQLException e) {
+            String errorMsg = "Error occurred while getting APIs for given gateway labels.";
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e);
+        }
+    }
+
+    @Override
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
+    public List<API> getAPIsByGatewayLabel(List<String> gatewayLabels) throws APIMgtDAOException {
+        final String query = "SELECT DISTINCT UUID, PROVIDER, A.NAME, CONTEXT, VERSION, DESCRIPTION, CURRENT_LC_STATUS,"
+                + " LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS FROM AM_API A INNER JOIN AM_API_LABEL_MAPPING M ON A.UUID"
+                + " = M.API_ID INNER JOIN AM_LABELS L ON L.LABEL_ID = M.LABEL_ID WHERE L.NAME IN (" + DAOUtil
+                .getParameterString(gatewayLabels.size()) + ")";
+
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(query)) {
+            int i = 0;
+            for (String label : gatewayLabels) {
+                statement.setString(++i, label);
+            }
+            return constructAPISummaryList(connection, statement);
+        } catch (SQLException e) {
+            String errorMsg = "Error occurred while searching APIs getting APIs for given gateway labels.";
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e);
         }
     }
 

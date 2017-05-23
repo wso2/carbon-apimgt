@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.core;
 
 import io.swagger.annotations.ApiParam;
 
+import org.wso2.carbon.apimgt.rest.api.core.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.core.factories.ApisApiServiceFactory;
 
@@ -58,5 +59,20 @@ public class ApisApi implements Microservice  {
 , @Context Request request)
     throws NotFoundException {
         return delegate.apisApiIdGatewayConfigGet(apiId,accept, request);
+    }
+    @GET
+    
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Retrieve API list", notes = "Retrieve available apis", response = APIListDTO.class, tags={  })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. List of APIs. ", response = APIListDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = APIListDTO.class) })
+    public Response apisGet(@ApiParam(value = "Comma seperated gateway labels ") @QueryParam("labels") String labels
+,@ApiParam(value = "Lifecycle status ") @QueryParam("status") String status
+, @Context Request request)
+    throws NotFoundException {
+        return delegate.apisGet(labels,status, request);
     }
 }

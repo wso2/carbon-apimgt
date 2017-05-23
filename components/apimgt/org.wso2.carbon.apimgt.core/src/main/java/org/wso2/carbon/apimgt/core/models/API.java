@@ -398,6 +398,10 @@ public final class API {
             return businessInformation;
         }
 
+        public ApiType getApiType() {
+            return apiType;
+        }
+
         private String version;
         private String context;
         private String description;

@@ -42,6 +42,7 @@ authManager.login = function () {
         password: $('#password').val(),
         grant_type: 'password',
         validity_period: '3600',
+        remember_me : $("#rememberMe").is(':checked'),
         scopes: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage' +
         ' apim:subscription_view apim:subscription_block apim:subscribe'
 
