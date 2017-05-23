@@ -58,6 +58,7 @@ authManager.login = function () {
         password: $('#password').val(),
         grant_type: 'password',
         validity_period: '3600',
+        remember_me : $("#rememberMe").is(':checked'),
         scopes: allAvailableScopes
 
     };
