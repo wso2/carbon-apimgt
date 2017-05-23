@@ -20,6 +20,8 @@ $(function(){
     if(authManager.getAuthStatus()){
         route.routTo(loginRedirectUri);
     }
+    var async = true;
+    authManager.loadSwaggerJson(async);
     var doLogin = function(){
         var loginPromise = authManager.login();
         loginPromise.then(function(data,status,xhr){
