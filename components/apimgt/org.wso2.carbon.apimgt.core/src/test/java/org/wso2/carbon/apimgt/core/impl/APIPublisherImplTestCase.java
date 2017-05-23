@@ -70,6 +70,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.ProtocolException;
 import java.sql.SQLException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -1633,28 +1635,50 @@ public class APIPublisherImplTestCase {
         apiPublisher.getApiGatewayConfig(API_ID);
     }
 
-    @Test(description = "Error while getting swagger resource from url when adding api from swagger resource",
+    @Test(description = "Response not 200 when getting swagger resource from url when adding api from swagger resource",
             expectedExceptions = APIManagementException.class)
-    public void testAddApiFromDefinitionErrorGettingSwaggerResource()
-            throws APIManagementException, LifecycleException {
+    public void testAddApiDefinitionErrorGettingSwaggerResource()
+            throws APIManagementException, LifecycleException, IOException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        HttpURLConnection httpURLConnection = Mockito.mock(HttpURLConnection.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user))
                 .thenReturn(new LifecycleState());
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager);
-        apiPublisher.addApiFromDefinition("http://test");
+        Mockito.when(httpURLConnection.getResponseCode()).thenReturn(400);
+        apiPublisher.addApiFromDefinition(httpURLConnection);
         Mockito.verify(apiLifecycleManager, Mockito.times(0)).addLifecycle(APIMgtConstants.API_LIFECYCLE, user);
     }
 
-    @Test(description = "Malformed url when adding api from swagger resource",
+    @Test(description = "Test protocol exception when adding api definition from swagger resource",
             expectedExceptions = APIManagementException.class)
-    public void testAddApiFromDefinitionMalformedUrl() throws APIManagementException, LifecycleException {
+    public void testAddApiDefinitionErrorProtocolException()
+            throws APIManagementException, LifecycleException, IOException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        HttpURLConnection httpURLConnection = Mockito.mock(HttpURLConnection.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user))
                 .thenReturn(new LifecycleState());
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager);
-        apiPublisher.addApiFromDefinition("http/test");
+        Mockito.doThrow(new ProtocolException())
+                .when(httpURLConnection).setRequestMethod(APIMgtConstants.HTTP_GET);
+        apiPublisher.addApiFromDefinition(httpURLConnection);
+        Mockito.verify(apiLifecycleManager, Mockito.times(0)).addLifecycle(APIMgtConstants.API_LIFECYCLE, user);
+    }
+
+    @Test(description = "Test IO exception when adding api definition from swagger resource",
+            expectedExceptions = APIManagementException.class)
+    public void  testAddApiDefinitionErrorIOException()
+            throws APIManagementException, LifecycleException, IOException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        HttpURLConnection httpURLConnection = Mockito.mock(HttpURLConnection.class);
+        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
+        Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user))
+                .thenReturn(new LifecycleState());
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager);
+        Mockito.doThrow(new IOException())
+                .when(httpURLConnection).getResponseCode();
+        apiPublisher.addApiFromDefinition(httpURLConnection);
         Mockito.verify(apiLifecycleManager, Mockito.times(0)).addLifecycle(APIMgtConstants.API_LIFECYCLE, user);
     }
 
