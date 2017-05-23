@@ -768,5 +768,51 @@ class API {
         );
         return promise_labels;
     }
-
+    /**
+     * Get the available Endpoint.
+     * @returns {Promise.<TResult>}
+     */
+    getEndpoints(callback) {
+        var promise_endpoints = this.client.then (
+            (client) => {
+                return client["Endpoint (Collection)"].get_endpoints({},
+                    this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+            }
+        );
+         if (callback) {
+                    return promise_endpoints.then(callback);
+                } else {
+                    return promise_endpoints;
+                }
+    }
+  /**
+     * Delete an Endpoint given an api identifier
+     * @param id {String} UUID of the API which want to delete
+     * @param callback {function} Function which needs to be called upon success of the Endpoint deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    deleteEndpoint(id) {
+        var promised_delete = this.client.then(
+            (client) => {
+                return client["Endpoint (individual)"].delete_endpoints_endpointId({endpointId:id,"Content-Type": "application/json"},
+                this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+            }
+        );
+        return promised_delete;
+    }
+  /**
+     * Check an Endpoint exist with name
+     * @param endpointName {String} name of the Endpoint which want to check
+     * @param callback {function} Function which needs to be called upon success of the Endpoint Existence
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    checkEndpointExist(endpointName) {
+        var promised_delete = this.client.then(
+            (client) => {
+                return client["Endpoint (Collection)"].head_endpoints({name:endpointName,"Content-Type": "application/json"},
+                this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+            }
+        );
+        return promised_delete;
+    }
 }

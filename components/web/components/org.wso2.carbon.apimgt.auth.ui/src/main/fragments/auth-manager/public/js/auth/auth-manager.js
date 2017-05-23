@@ -60,7 +60,6 @@ authManager.login = function () {
         validity_period: '3600',
         remember_me : $("#rememberMe").is(':checked'),
         scopes: allAvailableScopes
-
     };
     var referrer = (document.referrer.indexOf("https") !== -1) ? document.referrer:null;
     var url = contextPath + '/auth/apis/login/token';

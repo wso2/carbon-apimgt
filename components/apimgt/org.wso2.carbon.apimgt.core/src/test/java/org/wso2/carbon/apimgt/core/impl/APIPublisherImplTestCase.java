@@ -131,7 +131,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user))
                 .thenReturn(new LifecycleState());
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator);
-        String endpointId = apiBuilder.getEndpoint().get("production");
+        String endpointId = apiBuilder.getEndpoint().get("production").getId();
         Endpoint endpoint = new Endpoint.Builder().id(endpointId).name("testEndpoint").build();
         Mockito.when(apiDAO.getEndpoint(endpointId)).thenReturn(endpoint);
         apiPublisher.addAPI(apiBuilder);
@@ -141,11 +141,11 @@ public class APIPublisherImplTestCase {
 
     @Test(description = "Test add api with sandbox endpoint")
     public void testAddApiSandboxEndpoint() throws APIManagementException, LifecycleException {
-        Map<String, String> endpointMap = new HashMap<>();
-        endpointMap.put("sandbox", UUID.randomUUID().toString());
+        Map<String, Endpoint> endpointMap = new HashMap<>();
+        Map<String, Endpoint> resourceEndpointMap = new HashMap<>();
         Map<String, UriTemplate> uriTemplateMap = new HashMap();
         UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
-        uriTemplateBuilder.endpoint(endpointMap);
+        uriTemplateBuilder.endpoint(resourceEndpointMap);
         uriTemplateBuilder.templateId("getApisApiIdGet");
         uriTemplateBuilder.uriTemplate("/apis/");
         uriTemplateBuilder.authType(APIMgtConstants.AUTH_APPLICATION_LEVEL_TOKEN);
@@ -158,7 +158,7 @@ public class APIPublisherImplTestCase {
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user))
                 .thenReturn(new LifecycleState());
-        String endpointId = apiBuilder.getEndpoint().get("sandbox");
+        String endpointId = String.valueOf(apiBuilder.getEndpoint().get("sandbox"));
         Endpoint endpoint = new Endpoint.Builder().id(endpointId).name("testEndpoint").build();
         Mockito.when(apiDAO.getEndpoint(endpointId)).thenReturn(endpoint);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
@@ -293,7 +293,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user))
                 .thenReturn(new LifecycleState());
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator);
-        String endpointId = apiBuilder.getEndpoint().get("production");
+        String endpointId = apiBuilder.getEndpoint().get("production").getId();
         Endpoint endpoint = new Endpoint.Builder().id(endpointId).name("testEndpoint").build();
         Mockito.when(apiDAO.getEndpoint(endpointId)).thenReturn(endpoint);
         apiPublisher.addAPI(apiBuilder);
@@ -425,18 +425,18 @@ public class APIPublisherImplTestCase {
     public void testGetAPIsByProvider() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
-        Mockito.when(apiDAO.getAPIsForProvider(user)).thenReturn(new ArrayList<API>());
-        apiPublisher.getAPIsByProvider(user);
-        Mockito.verify(apiDAO, Mockito.times(1)).getAPIsForProvider(user);
+        Mockito.when(apiDAO.getAPIsForProvider(user, ApiType.STANDARD)).thenReturn(new ArrayList<API>());
+        apiPublisher.getAPIsByProvider(user, ApiType.STANDARD);
+        Mockito.verify(apiDAO, Mockito.times(1)).getAPIsForProvider(user, ApiType.STANDARD);
     }
 
     @Test(description = "Exception when get APIs by provider", expectedExceptions = APIManagementException.class)
     public void testGetAPIsByProviderException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
-        Mockito.when(apiDAO.getAPIsForProvider(user))
+        Mockito.when(apiDAO.getAPIsForProvider(user, ApiType.STANDARD))
                 .thenThrow(new APIMgtDAOException("Unable to fetch APIs of " + user));
-        apiPublisher.getAPIsByProvider(user);
+        apiPublisher.getAPIsByProvider(user, ApiType.STANDARD);
     }
 
     @Test(description = "Get subscriptions for a provider's APIs")
@@ -1674,7 +1674,8 @@ public class APIPublisherImplTestCase {
 
         String id = getApiPublisherImpl(apiDAO, gatewaySourceGenerator).addEndpoint(SampleTestObjectCreator
                 .createMockEndpoint());
-        Endpoint endpoint = new Endpoint.Builder(SampleTestObjectCreator.createMockEndpoint()).id(id).build();
+        Endpoint endpoint = new Endpoint.Builder(SampleTestObjectCreator.createMockEndpoint()).id(id).applicableLevel
+                (APIMgtConstants.GLOBAL_ENDPOINT).build();
         Mockito.verify(apiDAO, Mockito.times(1)).addEndpoint(endpoint);
     }
 
@@ -1727,10 +1728,267 @@ public class APIPublisherImplTestCase {
 
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, gatewaySourceGenerator);
         Endpoint endpoint = new Endpoint.Builder(SampleTestObjectCreator.createMockEndpoint()).build();
+        Mockito.when(apiDAO.isEndpointAssociated(endpoint.getId())).thenReturn(false);
         Mockito.when(apiDAO.deleteEndpoint(endpoint.getId())).thenReturn(true);
         apiPublisher.deleteEndpoint(endpoint.getId());
         Mockito.verify(apiDAO, Mockito.times(1)).deleteEndpoint(endpoint.getId());
     }
+
+    @Test(description = "Test add api with Api Specific Endpoint", expectedExceptions = {APIManagementException.class})
+    public void testAddApiSpecificEndpoint() throws APIManagementException, LifecycleException {
+        /**
+         * this test method verify the API Add with correct API object get invoked correctly
+         */
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
+        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
+        Endpoint globalEndpoint = new Endpoint.Builder().id(UUID.randomUUID().toString()).name("testEndpoint")
+                .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).build();
+        Endpoint apiEndpoint = new Endpoint.Builder().id(UUID.randomUUID().toString()).name("apiEndpoint")
+                .applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build();
+        Map<String, Endpoint> endpointMap = new HashMap();
+        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, globalEndpoint);
+        endpointMap.put(APIMgtConstants.SANDBOX_ENDPOINT, apiEndpoint);
+        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().endpoint(endpointMap);
+        Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user))
+                .thenReturn(new LifecycleState());
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator);
+        Mockito.when(apiDAO.getEndpoint(globalEndpoint.getId())).thenReturn(globalEndpoint);
+        Mockito.when(apiDAO.getEndpointByName(apiEndpoint.getName())).thenReturn(null);
+        Mockito.when(apiDAO.isAPINameExists(apiBuilder.getName(), user, ApiType.STANDARD)).thenReturn(false);
+        Mockito.when(apiDAO.isEndpointAssociated(globalEndpoint.getId())).thenReturn(true);
+        apiPublisher.addAPI(apiBuilder);
+        apiPublisher.deleteEndpoint(globalEndpoint.getId());
+        Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
+        Mockito.verify(apiLifecycleManager, Mockito.times(1)).addLifecycle(APIMgtConstants.API_LIFECYCLE, user);
+        Mockito.verify(apiDAO, Mockito.times(1)).getEndpointByName(apiEndpoint.getName());
+        Mockito.verify(apiDAO, Mockito.times(1)).isAPINameExists(apiBuilder.getName(), user, ApiType.STANDARD);
+    }
+
+    @Test(description = "Test add api with Api Specific Endpoint", expectedExceptions = {APIManagementException.class})
+    public void testAddAlreadyAddedEndpointToApi() throws APIManagementException, LifecycleException {
+        /**
+         * this test method verify the API Add with correct API object get invoked correctly
+         */
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
+        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
+        Endpoint globalEndpoint = new Endpoint.Builder().id(UUID.randomUUID().toString()).name("testEndpoint")
+                .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).build();
+        Endpoint apiEndpoint = new Endpoint.Builder().id(UUID.randomUUID().toString()).name("apiEndpoint")
+                .applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build();
+        Map<String, Endpoint> endpointMap = new HashMap();
+        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, globalEndpoint);
+        endpointMap.put(APIMgtConstants.SANDBOX_ENDPOINT, apiEndpoint);
+        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().endpoint(endpointMap);
+        Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user))
+                .thenReturn(new LifecycleState());
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator);
+        Mockito.when(apiDAO.getEndpoint(globalEndpoint.getId())).thenReturn(globalEndpoint);
+        Mockito.when(apiDAO.getEndpointByName(apiEndpoint.getName())).thenReturn(apiEndpoint);
+        Mockito.when(apiDAO.isAPINameExists(apiBuilder.getName(), user, ApiType.STANDARD)).thenReturn(false);
+        apiPublisher.addAPI(apiBuilder);
+        Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
+        Mockito.verify(apiLifecycleManager, Mockito.times(1)).addLifecycle(APIMgtConstants.API_LIFECYCLE, user);
+        Mockito.verify(apiDAO, Mockito.times(1)).getEndpointByName(apiEndpoint.getName());
+        Mockito.verify(apiDAO, Mockito.times(1)).isAPINameExists(apiBuilder.getName(), user, ApiType.STANDARD);
+    }
+
+    @Test(description = "Test add api with Api Specific Endpoint", expectedExceptions = {APIManagementException.class})
+    public void testApiLevelEndpointAddWhileDbGetError() throws APIManagementException, LifecycleException {
+        /**
+         * this test method verify the API Add with correct API object get invoked correctly
+         */
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
+        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
+        Endpoint globalEndpoint = new Endpoint.Builder().id(UUID.randomUUID().toString()).name("testEndpoint")
+                .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).build();
+        Endpoint apiEndpoint = new Endpoint.Builder().id(UUID.randomUUID().toString()).name("apiEndpoint")
+                .applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build();
+        Map<String, Endpoint> endpointMap = new HashMap();
+        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, globalEndpoint);
+        endpointMap.put(APIMgtConstants.SANDBOX_ENDPOINT, apiEndpoint);
+        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().endpoint(endpointMap);
+        Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user))
+                .thenReturn(new LifecycleState());
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator);
+        Mockito.when(apiDAO.getEndpoint(globalEndpoint.getId())).thenReturn(globalEndpoint);
+        Mockito.when(apiDAO.getEndpointByName(apiEndpoint.getName())).thenThrow(APIMgtDAOException.class);
+        Mockito.when(apiDAO.isAPINameExists(apiBuilder.getName(), user, ApiType.STANDARD)).thenReturn(false);
+        apiPublisher.addAPI(apiBuilder);
+        Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
+        Mockito.verify(apiDAO, Mockito.times(1)).getEndpointByName(apiEndpoint.getName());
+    }
+
+
+    @Test(description = "Test add api with Api Specific Endpoint")
+    public void testAddResourceLevelEndpoint() throws APIManagementException, LifecycleException {
+        /**
+         * this test method verify the API Add with correct API object get invoked correctly
+         */
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
+        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
+        Endpoint globalEndpoint = new Endpoint.Builder().id(UUID.randomUUID().toString()).name("testEndpoint")
+                .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).build();
+        Endpoint apiEndpoint = new Endpoint.Builder().id(UUID.randomUUID().toString()).name("apiEndpoint")
+                .applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build();
+        Endpoint resourceEndpoint = new Endpoint.Builder().id(UUID.randomUUID().toString()).name("resourceEndpoint")
+                .applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build();
+        Map<String, Endpoint> endpointMap = new HashMap();
+        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, globalEndpoint);
+        endpointMap.put(APIMgtConstants.SANDBOX_ENDPOINT, apiEndpoint);
+        Map<String, Endpoint> resourceEndpoints = new HashMap();
+        resourceEndpoints.put(APIMgtConstants.SANDBOX_ENDPOINT, resourceEndpoint);
+        Map<String, UriTemplate> uriTemplateMap = SampleTestObjectCreator.getMockUriTemplates();
+        uriTemplateMap.forEach((k, v) -> {
+            UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder(v);
+            uriTemplateBuilder.endpoint(resourceEndpoints);
+            uriTemplateMap.replace(k, uriTemplateBuilder.build());
+        });
+        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().endpoint(endpointMap).uriTemplates
+                (uriTemplateMap);
+        Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user))
+                .thenReturn(new LifecycleState());
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator);
+        Mockito.when(apiDAO.getEndpoint(globalEndpoint.getId())).thenReturn(globalEndpoint);
+        Mockito.when(apiDAO.getEndpointByName(apiEndpoint.getName())).thenReturn(null);
+        Mockito.when(apiDAO.getEndpointByName(resourceEndpoint.getName())).thenReturn(null);
+        Mockito.when(apiDAO.isAPINameExists(apiBuilder.getName(), user, ApiType.STANDARD)).thenReturn(false);
+        apiPublisher.addAPI(apiBuilder);
+        Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
+        Mockito.verify(apiDAO, Mockito.times(1)).getEndpointByName(apiEndpoint.getName());
+        Mockito.verify(apiDAO, Mockito.times(1)).getEndpointByName(resourceEndpoint.getName());
+
+    }
+
+    @Test(description = "Test add api with Api Specific Endpoint", expectedExceptions = {APIManagementException.class})
+    public void testAddResourceLevelEndpointWhileResourceEndpointAlreadyExists() throws APIManagementException,
+            LifecycleException {
+        /**
+         * this test method verify the API Add with correct API object get invoked correctly
+         */
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
+        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
+        Endpoint globalEndpoint = new Endpoint.Builder().id(UUID.randomUUID().toString()).name("testEndpoint")
+                .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).build();
+        Endpoint apiEndpoint = new Endpoint.Builder().id(UUID.randomUUID().toString()).name("apiEndpoint")
+                .applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build();
+        Endpoint resourceEndpoint = new Endpoint.Builder().id(UUID.randomUUID().toString()).name("resourceEndpoint")
+                .applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build();
+        Map<String, Endpoint> endpointMap = new HashMap();
+        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, globalEndpoint);
+        endpointMap.put(APIMgtConstants.SANDBOX_ENDPOINT, apiEndpoint);
+        Map<String, Endpoint> resourceEndpoints = new HashMap();
+        resourceEndpoints.put(APIMgtConstants.SANDBOX_ENDPOINT, resourceEndpoint);
+        Map<String, UriTemplate> uriTemplateMap = SampleTestObjectCreator.getMockUriTemplates();
+        uriTemplateMap.forEach((k, v) -> {
+            UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder(v);
+            uriTemplateBuilder.endpoint(resourceEndpoints);
+            uriTemplateMap.replace(k, uriTemplateBuilder.build());
+        });
+        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().endpoint(endpointMap).uriTemplates
+                (uriTemplateMap);
+        Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user))
+                .thenReturn(new LifecycleState());
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator);
+        Mockito.when(apiDAO.getEndpoint(globalEndpoint.getId())).thenReturn(globalEndpoint);
+        Mockito.when(apiDAO.getEndpointByName(apiEndpoint.getName())).thenReturn(null);
+        Mockito.when(apiDAO.getEndpointByName(resourceEndpoint.getName())).thenReturn(resourceEndpoint);
+        Mockito.when(apiDAO.isAPINameExists(apiBuilder.getName(), user, ApiType.STANDARD)).thenReturn(false);
+        apiPublisher.addAPI(apiBuilder);
+        Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
+        Mockito.verify(apiDAO, Mockito.times(1)).getEndpointByName(apiEndpoint.getName());
+        Mockito.verify(apiDAO, Mockito.times(1)).getEndpointByName(resourceEndpoint.getName());
+    }
+
+    @Test(description = "Test add api with Api Specific Endpoint", expectedExceptions = {APIManagementException.class})
+    public void testAddResourceLevelEndpointWhileResourceEndpointAlreadyExistsWhileDatabaseFailure() throws
+            APIManagementException, LifecycleException {
+        /**
+         * this test method verify the API Add with correct API object get invoked correctly
+         */
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
+        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
+        Endpoint globalEndpoint = new Endpoint.Builder().id(UUID.randomUUID().toString()).name("testEndpoint")
+                .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).build();
+        Endpoint apiEndpoint = new Endpoint.Builder().id(UUID.randomUUID().toString()).name("apiEndpoint")
+                .applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build();
+        Endpoint resourceEndpoint = new Endpoint.Builder().id(UUID.randomUUID().toString()).name("resourceEndpoint")
+                .applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build();
+        Map<String, Endpoint> endpointMap = new HashMap();
+        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, globalEndpoint);
+        endpointMap.put(APIMgtConstants.SANDBOX_ENDPOINT, apiEndpoint);
+        Map<String, Endpoint> resourceEndpoints = new HashMap();
+        resourceEndpoints.put(APIMgtConstants.SANDBOX_ENDPOINT, resourceEndpoint);
+        Map<String, UriTemplate> uriTemplateMap = SampleTestObjectCreator.getMockUriTemplates();
+        uriTemplateMap.forEach((k, v) -> {
+            UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder(v);
+            uriTemplateBuilder.endpoint(resourceEndpoints);
+            uriTemplateMap.replace(k, uriTemplateBuilder.build());
+        });
+        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().endpoint(endpointMap).uriTemplates
+                (uriTemplateMap);
+        Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user))
+                .thenReturn(new LifecycleState());
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator);
+        Mockito.when(apiDAO.getEndpoint(globalEndpoint.getId())).thenReturn(globalEndpoint);
+        Mockito.when(apiDAO.getEndpointByName(apiEndpoint.getName())).thenReturn(null);
+        Mockito.when(apiDAO.getEndpointByName(resourceEndpoint.getName())).thenThrow(APIMgtDAOException.class);
+        Mockito.when(apiDAO.isAPINameExists(apiBuilder.getName(), user, ApiType.STANDARD)).thenReturn(false);
+        apiPublisher.addAPI(apiBuilder);
+        Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
+        Mockito.verify(apiDAO, Mockito.times(1)).getEndpointByName(apiEndpoint.getName());
+        Mockito.verify(apiDAO, Mockito.times(1)).getEndpointByName(resourceEndpoint.getName());
+    }
+
+    @Test(description = "Test add api with Api Specific Endpoint")
+    public void testResourceProductionAndSandboxEndpoint() throws
+            APIManagementException, LifecycleException {
+        /**
+         * this test method verify the API Add with correct API object get invoked correctly
+         */
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
+        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
+        Endpoint globalEndpoint = new Endpoint.Builder().id(UUID.randomUUID().toString()).name("testEndpoint")
+                .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).build();
+        Endpoint apiEndpoint = new Endpoint.Builder().id(UUID.randomUUID().toString()).name("apiEndpoint")
+                .applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build();
+        Endpoint resourceEndpoint = new Endpoint.Builder().id(UUID.randomUUID().toString()).name("resourceEndpoint")
+                .applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build();
+        Endpoint resourceEndpoint1 = new Endpoint.Builder().id(UUID.randomUUID().toString()).name("resourceEndpoint1")
+                .applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build();
+        Map<String, Endpoint> endpointMap = new HashMap();
+        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, globalEndpoint);
+        endpointMap.put(APIMgtConstants.SANDBOX_ENDPOINT, apiEndpoint);
+        Map<String, Endpoint> resourceEndpoints = new HashMap();
+        resourceEndpoints.put(APIMgtConstants.SANDBOX_ENDPOINT, resourceEndpoint);
+        resourceEndpoints.put(APIMgtConstants.PRODUCTION_ENDPOINT, resourceEndpoint1);
+        Map<String, UriTemplate> uriTemplateMap = SampleTestObjectCreator.getMockUriTemplates();
+        uriTemplateMap.forEach((k, v) -> {
+            UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder(v);
+            uriTemplateBuilder.endpoint(resourceEndpoints);
+            uriTemplateMap.replace(k, uriTemplateBuilder.build());
+        });
+        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().endpoint(endpointMap).uriTemplates
+                (uriTemplateMap);
+        Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user))
+                .thenReturn(new LifecycleState());
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator);
+        Mockito.when(apiDAO.getEndpoint(globalEndpoint.getId())).thenReturn(globalEndpoint);
+        Mockito.when(apiDAO.getEndpointByName(apiEndpoint.getName())).thenReturn(null);
+        Mockito.when(apiDAO.getEndpointByName(resourceEndpoint.getName())).thenReturn(null);
+        Mockito.when(apiDAO.isAPINameExists(apiBuilder.getName(), user, ApiType.STANDARD)).thenReturn(false);
+        apiPublisher.addAPI(apiBuilder);
+        Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
+        Mockito.verify(apiDAO, Mockito.times(1)).getEndpointByName(apiEndpoint.getName());
+        Mockito.verify(apiDAO, Mockito.times(1)).getEndpointByName(resourceEndpoint.getName());
+    }
+
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APILifecycleManager apiLifecycleManager) {
         return new APIPublisherImpl(user, apiDAO, null, null, null, apiLifecycleManager, null, null,

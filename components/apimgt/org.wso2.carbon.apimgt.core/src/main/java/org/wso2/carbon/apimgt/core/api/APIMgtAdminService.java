@@ -21,9 +21,11 @@ package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.APIConfigRetrievalException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
+import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 
 import java.util.List;
@@ -152,4 +154,27 @@ public interface APIMgtAdminService {
      */
     String getAPIGatewayServiceConfig(String apiId) throws APIConfigRetrievalException;
 
+    /**
+     * Retrieve Resources for API
+     * @param apiContext Context of API
+     * @param apiVersion Version of API
+     * @return list of API Resources
+     * @throws APIManagementException if failed to retrieve resources
+     */
+    List<UriTemplate> getAllResourcesForApi(String apiContext, String apiVersion) throws APIManagementException;
+
+    /**
+     * Get a list of APIs with given gateway labels and status
+     *@param gatewayLabels A list of gateway labels
+     * @param status Lifecycle status
+     * @throws APIManagementException If failed to get API list
+     */
+    List<API> getAPIsByStatus(List<String> gatewayLabels, String status) throws APIManagementException;
+
+    /**
+     * Get a list of APIs with given gateway labels
+     *
+     * @throws APIManagementException If failed to get API list
+     */
+    List<API> getAPIsByGatewayLabel(List<String> gatewayLabels) throws APIManagementException;
 }

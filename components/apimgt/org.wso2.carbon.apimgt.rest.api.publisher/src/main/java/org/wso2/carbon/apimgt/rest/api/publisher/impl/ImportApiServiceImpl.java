@@ -14,10 +14,10 @@ import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.formparam.FileInfo;
 
-import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.InputStream;
 import java.util.UUID;
+import javax.ws.rs.core.Response;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
         "2017-01-19T18:39:38.447+05:30")

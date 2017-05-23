@@ -122,7 +122,7 @@ public class SampleTestObjectCreator {
     public static String apiDefinition;
     public static InputStream inputStream;
     private static final Logger log = LoggerFactory.getLogger(SampleTestObjectCreator.class);
-    static String endpointId = UUID.randomUUID().toString();
+    public static String endpointId = UUID.randomUUID().toString();
 
     static {
         try {
@@ -667,31 +667,34 @@ public class SampleTestObjectCreator {
 
     public static Endpoint createMockEndpoint() {
         return new Endpoint.Builder().endpointConfig("{'type':'http','url':'http://localhost:8280'}").id(endpointId)
-                .maxTps(1000L).security("{'enabled':false}").name("Endpoint1").build();
+                .maxTps(1000L).security("{'enabled':false}").name("Endpoint1").applicableLevel(APIMgtConstants
+                        .GLOBAL_ENDPOINT).type("http").build();
     }
 
     public static Endpoint createUpdatedEndpoint() {
         return new Endpoint.Builder().endpointConfig("{'type':'soap','url':'http://localhost:8280'}").id(endpointId)
-                .maxTps(1000L).security("{'enabled':false}").name("Endpoint1").build();
+                .maxTps(1000L).security("{'enabled':false}").name("Endpoint1").applicableLevel(APIMgtConstants
+                        .GLOBAL_ENDPOINT).type("http").build();
     }
 
     public static Endpoint createAlternativeEndpoint() {
         String uuid = UUID.randomUUID().toString();
         return new Endpoint.Builder().endpointConfig("{'type':'soap','url':'http://localhost:8280'}").id(uuid)
-                .maxTps(1000L).security("{'enabled':false}").build();
+                .name("Endpoint2").maxTps(1000L).security("{'enabled':false}").applicableLevel(APIMgtConstants
+                        .GLOBAL_ENDPOINT).build();
 
     }
 
-    public static Map<String, String> getMockEndpointMap() {
-        Map<String, String> endpointMap = new HashedMap();
-        endpointMap.put(PRODUCTION_ENDPOINT, endpointId);
+    public static Map<String, Endpoint> getMockEndpointMap() {
+        Map<String, Endpoint> endpointMap = new HashedMap();
+        endpointMap.put(PRODUCTION_ENDPOINT, new Endpoint.Builder().id(endpointId).applicableLevel(APIMgtConstants
+                .GLOBAL_ENDPOINT).build());
         return endpointMap;
     }
 
     public static Map<String, UriTemplate> getMockUriTemplates() {
         Map<String, UriTemplate> uriTemplateMap = new HashMap();
         UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
-        uriTemplateBuilder.endpoint(getMockEndpointMap());
         uriTemplateBuilder.templateId(TEMPLATE_ID);
         uriTemplateBuilder.uriTemplate("/apis/");
         uriTemplateBuilder.authType(APIMgtConstants.AUTH_APPLICATION_LEVEL_TOKEN);
@@ -752,5 +755,59 @@ public class SampleTestObjectCreator {
         comment.setCreatedTime(LocalDateTime.now());
         comment.setUpdatedTime(LocalDateTime.now());
         return comment;
+    }
+
+    public static API.APIBuilder createDefaultAPIWithApiLevelEndpoint() {
+        Set<String> transport = new HashSet<>();
+        transport.add(HTTP);
+        transport.add(HTTPS);
+
+        Set<String> tags = new HashSet<>();
+        tags.add(TAG_CLIMATE);
+
+        Set<String> policies = new HashSet<>();
+        policies.add(GOLD_TIER);
+        policies.add(SILVER_TIER);
+        policies.add(BRONZE_TIER);
+
+        BusinessInformation businessInformation = new BusinessInformation();
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        String permissionJson = "[{\"groupId\" : 1000, \"permission\" : "
+                + "[\"READ\",\"UPDATE\"]},{\"groupId\" : 1001, \"permission\" : [\"READ\",\"UPDATE\"]}]";
+        Map<String, Endpoint> endpointMap = new HashMap<>();
+        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, new Endpoint.Builder().id(endpointId).name
+                ("api1-production--endpint").applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build());
+        API.APIBuilder apiBuilder = new API.APIBuilder(ADMIN, "WeatherAPI", API_VERSION).
+                id(UUID.randomUUID().toString()).
+                context("weather").
+                description("Get Weather Info").
+                lifeCycleStatus(APIStatus.CREATED.getStatus()).
+                lifecycleInstanceId(UUID.randomUUID().toString()).
+                endpoint(endpointMap).
+                wsdlUri("http://localhost:9443/echo?wsdl").
+                isResponseCachingEnabled(false).
+                cacheTimeout(60).
+                isDefaultVersion(false).
+                apiPolicy(APIMgtConstants.DEFAULT_API_POLICY).
+                transport(transport).
+                tags(tags).
+                policies(policies).
+                visibility(API.Visibility.PUBLIC).
+                visibleRoles(new HashSet<>()).
+                businessInformation(businessInformation).
+                corsConfiguration(corsConfiguration).
+                apiType(ApiType.STANDARD).
+                createdTime(LocalDateTime.now()).
+                createdBy(ADMIN).
+                updatedBy(ADMIN).
+                lastUpdatedTime(LocalDateTime.now()).
+                permission(permissionJson).
+                uriTemplates(getMockUriTemplates()).
+                apiDefinition(apiDefinition);
+        HashMap map = new HashMap();
+        map.put("1000", 6);
+        map.put("1001", 4);
+        apiBuilder.permissionMap(map);
+        return apiBuilder;
     }
 }

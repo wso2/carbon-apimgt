@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.util.APIFileUtils;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.ApiImportExportManager;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.FileBasedApiImportExportManager;
@@ -86,8 +87,10 @@ public class APIImportExportTestCase {
         apiPublisher = Mockito.mock(APIPublisher.class);
 
         String api1Id = UUID.randomUUID().toString();
-        String api1SandBoxEndpointId = UUID.randomUUID().toString();
-        String api1ProdEndpointId = UUID.randomUUID().toString();
+        Endpoint api1SandBoxEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
+                (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("abcd").build();
+        Endpoint api1ProdEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
+                (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("cdef").build();
         API api1 = createApi("provider1", api1Id, "testapi1", "1.0.0", "Test API 1 - version 1.0.0",
                 createEndpointTypeToIdMap(api1SandBoxEndpointId, api1ProdEndpointId)).build();
 
@@ -136,8 +139,10 @@ public class APIImportExportTestCase {
         apiPublisher = Mockito.mock(APIPublisher.class);
 
         String api4Id = UUID.randomUUID().toString();
-        String api4SandBoxEndpointId = UUID.randomUUID().toString();
-        String api4ProdEndpointId = UUID.randomUUID().toString();
+        Endpoint api4SandBoxEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
+                (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("abcd").build();
+        Endpoint api4ProdEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
+                (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("cdef").build();
         API api4 = createApi("provider4", api4Id, "testapi4", "1.0.0", "Test API 4 - version 1.0.0",
                 createEndpointTypeToIdMap(api4SandBoxEndpointId, api4ProdEndpointId)).build();
 
@@ -171,8 +176,10 @@ public class APIImportExportTestCase {
         Mockito.when(apiPublisher.getThumbnailImage(api4Id)).thenReturn(null);
 
         String api5Id = UUID.randomUUID().toString();
-        String api5SandBoxEndpointId = UUID.randomUUID().toString();
-        String api5ProdEndpointId = UUID.randomUUID().toString();
+        Endpoint api5SandBoxEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
+                (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("abcd").build();
+        Endpoint api5ProdEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
+                (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("cdef").build();
         API api5 = createApi("provider5", api5Id, "testapi4", "1.0.0", "Test API 5 - version 1.0.0",
                 createEndpointTypeToIdMap(api5SandBoxEndpointId, api5ProdEndpointId)).build();
 
@@ -218,8 +225,10 @@ public class APIImportExportTestCase {
         apiPublisher = Mockito.mock(APIPublisher.class);
 
         String api6Id = UUID.randomUUID().toString();
-        String api6SandBoxEndpointId = UUID.randomUUID().toString();
-        String api6ProdEndpointId = UUID.randomUUID().toString();
+        Endpoint api6SandBoxEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
+                (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("abcd").build();
+        Endpoint api6ProdEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
+                (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("cdef").build();
         API api6 = createApi("provider4", api6Id, "testapi6", "1.0.0", "Test API 6 - version 1.0.0",
                 createEndpointTypeToIdMap(api6SandBoxEndpointId, api6ProdEndpointId)).build();
 
@@ -254,9 +263,10 @@ public class APIImportExportTestCase {
                 ("api1_thumbnail.png"));
 
         String api7Id = UUID.randomUUID().toString();
-        String api7SandBoxEndpointId = UUID.randomUUID().toString();
-        String api7ProdEndpointId = UUID.randomUUID().toString();
-        API api7 = createApi("provider5", api7Id, "testapi4", "1.0.0", "Test API 7 - version 1.0.0",
+        Endpoint api7SandBoxEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
+                (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("abcd").build();
+        Endpoint api7ProdEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
+                (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("cdef").build();     API api7 = createApi("provider5", api7Id, "testapi4", "1.0.0", "Test API 7 - version 1.0.0",
                 createEndpointTypeToIdMap(api7SandBoxEndpointId, api7ProdEndpointId)).build();
 
         String api7Doc1Id = UUID.randomUUID().toString();
@@ -301,9 +311,10 @@ public class APIImportExportTestCase {
         apiPublisher = Mockito.mock(APIPublisher.class);
 
         String api2Id = UUID.randomUUID().toString();
-        String api2SandBoxEndpointId = UUID.randomUUID().toString();
-        String api2ProdEndpointId = UUID.randomUUID().toString();
-        API api2 = createApi("provider1", api2Id, "testapi1", "1.0.0", "Test API 1 - version 1.0.0",
+        Endpoint api2SandBoxEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
+                (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("abcd").build();
+        Endpoint api2ProdEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
+                (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("cdef").build();   API api2 = createApi("provider1", api2Id, "testapi1", "1.0.0", "Test API 1 - version 1.0.0",
                 createEndpointTypeToIdMap(api2SandBoxEndpointId, api2ProdEndpointId)).build();
 
         String api2Doc1Id = UUID.randomUUID().toString();
@@ -353,8 +364,10 @@ public class APIImportExportTestCase {
     private void testApiExport (String exportDir) throws Exception {
 
         String api1Id = UUID.randomUUID().toString();
-        String api1SandBoxEndpointId = UUID.randomUUID().toString();
-        String api1ProdEndpointId = UUID.randomUUID().toString();
+        Endpoint api1SandBoxEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
+                (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("abcd").build();
+        Endpoint api1ProdEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
+                (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("cdef").build();
         API api1 = createApi("provider1", api1Id, "testapi1", "1.0.0", "Test API 1 - version 1.0.0",
                 createEndpointTypeToIdMap(api1SandBoxEndpointId, api1ProdEndpointId)).build();
 
@@ -389,18 +402,20 @@ public class APIImportExportTestCase {
         api1Details.addDocumentContents(api1DocContent);
         api1Details.setThumbnailStream(getClass().getClassLoader().getResourceAsStream("api1_thumbnail.png"));
 
-        Endpoint api1SandboxEndpoint = createEndpoint(api1SandBoxEndpointId, "api1SandBoxEndpoint", "SANDBOX",
+        Endpoint api1SandboxEndpoint = createEndpoint(api1SandBoxEndpointId.getId(), "api1SandBoxEndpoint", "SANDBOX",
                 "{'type':'http','url':'http://localhost:8280'}",
                 "{'enabled':'true','type':'basic','properties':{'username':'admin','password':'admin'}}", 10l);
-        Endpoint api1ProdEndpoint = createEndpoint(api1ProdEndpointId, "api1ProdEndpoint", "PRODUCTION",
+        Endpoint api1ProdEndpoint = createEndpoint(api1ProdEndpointId.getId(), "api1ProdEndpoint", "PRODUCTION",
                 "{'type':'http','url':'http://localhost:8280'}",
                 "{'enabled':'true','type':'basic','properties':{'username':'admin','password':'admin'}}", 10l);
         api1Details.addEndpoint(api1SandboxEndpoint);
         api1Details.addEndpoint(api1ProdEndpoint);
 
         String api2Id = UUID.randomUUID().toString();
-        String api2SandBoxEndpointId = UUID.randomUUID().toString();
-        String api2ProdEndpointId = UUID.randomUUID().toString();
+        Endpoint api2SandBoxEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
+                (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("abcd").build();
+        Endpoint api2ProdEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
+                (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("cdef").build();
         API api2 = createApi("provider2", api2Id, "testapi2", "3.0.0", "Test API 2 - version 3.0.0",
                 createEndpointTypeToIdMap(api2SandBoxEndpointId, api2ProdEndpointId)).build();
         List<API> apis = new ArrayList<>();
@@ -431,10 +446,10 @@ public class APIImportExportTestCase {
         api2Details.addDocumentContents(api2DocContent);
         api2Details.setThumbnailStream(getClass().getClassLoader().getResourceAsStream("api2_thumbnail.jpg"));
 
-        Endpoint api2SandboxEndpoint = createEndpoint(api2SandBoxEndpointId, "api2SandBoxEndpoint", "SANDBOX",
+        Endpoint api2SandboxEndpoint = createEndpoint(api2SandBoxEndpointId.getId(), "api2SandBoxEndpoint", "SANDBOX",
                 "{'type':'http','url':'http://localhost:8280'}",
                 "{'enabled':'true','type':'basic','properties':{'username':'admin','password':'admin'}}", 20l);
-        Endpoint api2ProdEndpoint = createEndpoint(api2ProdEndpointId, "api2ProdEndpoint", "PRODUCTION",
+        Endpoint api2ProdEndpoint = createEndpoint(api2ProdEndpointId.getId(), "api2ProdEndpoint", "PRODUCTION",
                 "{'type':'http','url':'http://localhost:8280'}",
                 "{'enabled':'true','type':'basic','properties':{'username':'admin','password':'admin'}}", 20l);
         api2Details.addEndpoint(api2SandboxEndpoint);
@@ -482,7 +497,7 @@ public class APIImportExportTestCase {
     }
 
     private static API.APIBuilder createApi(String provider, String apiId, String name, String version, String
-            description, Map<String, String> endpointTypeToIdMap)
+            description, Map<String, Endpoint> endpointTypeToIdMap)
             throws APIManagementException {
         Set<String> transport = new HashSet<>();
         transport.add("http");
@@ -544,10 +559,10 @@ public class APIImportExportTestCase {
                 security(endpointSecurity).maxTps(maxTps).build();
     }
 
-    private static Map<String, String> createEndpointTypeToIdMap (String sandboxEndpointId, String
+    private static Map<String, Endpoint> createEndpointTypeToIdMap (Endpoint sandboxEndpointId, Endpoint
             productionEndpointId) {
 
-        Map<String, String> endpointTypeToIdMap = new HashedMap();
+        Map<String, Endpoint> endpointTypeToIdMap = new HashedMap();
         endpointTypeToIdMap.put("PRODUCTION", productionEndpointId);
         endpointTypeToIdMap.put("SANDBOX", sandboxEndpointId);
         return endpointTypeToIdMap;

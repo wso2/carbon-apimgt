@@ -23,6 +23,9 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.utils;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -34,6 +37,7 @@ import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
@@ -46,6 +50,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPointDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPoint_endpointSecurityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
@@ -53,11 +58,13 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowResponseDTO.WorkflowStatusEnum;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class MappingUtil {
 
@@ -67,7 +74,7 @@ public class MappingUtil {
      * @param api API object
      * @return APIDTO object with provided API object
      */
-    public static APIDTO toAPIDto(API api) {
+    public static APIDTO toAPIDto(API api) throws IOException {
         APIDTO apidto = new APIDTO();
         apidto.setId(api.getId());
         apidto.setName(api.getName());
@@ -118,13 +125,19 @@ public class MappingUtil {
         return apidto;
     }
 
-    private static List<API_endpointDTO> fromEndpointToList(Map<String, String> endpoint) {
+    private static List<API_endpointDTO> fromEndpointToList(Map<String, Endpoint> endpoint) throws IOException {
         List<API_endpointDTO> endpointDTOs = new ArrayList<>();
-        for (Map.Entry<String, String> entry : endpoint.entrySet()) {
-            API_endpointDTO endpointDTO = new API_endpointDTO();
-            endpointDTO.setId(entry.getValue());
-            endpointDTO.setType(entry.getKey());
-            endpointDTOs.add(endpointDTO);
+        if (endpoint != null) {
+            for (Map.Entry<String, Endpoint> entry : endpoint.entrySet()) {
+                API_endpointDTO endpointDTO = new API_endpointDTO();
+                if (APIMgtConstants.API_SPECIFIC_ENDPOINT.equals(entry.getValue().getApplicableLevel())) {
+                    endpointDTO.setInline(toEndPointDTO(entry.getValue()));
+                } else {
+                    endpointDTO.setKey(entry.getValue().getId());
+                }
+                endpointDTO.setType(entry.getKey());
+                endpointDTOs.add(endpointDTO);
+            }
         }
         return endpointDTOs;
     }
@@ -135,7 +148,7 @@ public class MappingUtil {
      * @param apidto APIDTO object with API data
      * @return APIBuilder object
      */
-    public static API.APIBuilder toAPI(APIDTO apidto) {
+    public static API.APIBuilder toAPI(APIDTO apidto) throws JsonProcessingException {
         BusinessInformation businessInformation = new BusinessInformation();
         API_businessInformationDTO apiBusinessInformationDTO = apidto.getBusinessInformation();
         if (apiBusinessInformationDTO != null) {
@@ -164,8 +177,6 @@ public class MappingUtil {
             uriTemplateBuilder.policy(operationsDTO.getPolicy());
             if (operationsDTO.getEndpoint() != null && !operationsDTO.getEndpoint().isEmpty()) {
                 uriTemplateBuilder.endpoint(fromEndpointListToMap(operationsDTO.getEndpoint()));
-            } else {
-                uriTemplateBuilder.endpoint(fromEndpointListToMap(apidto.getEndpoint()));
             }
             if (operationsDTO.getId() != null) {
                 uriTemplateBuilder.templateId(operationsDTO.getId());
@@ -205,10 +216,16 @@ public class MappingUtil {
         return apiBuilder;
     }
 
-    private static Map<String, String> fromEndpointListToMap(List<API_endpointDTO> endpoint) {
-        Map<String, String> endpointMap = new HashMap<>();
+    private static Map<String, Endpoint> fromEndpointListToMap(List<API_endpointDTO> endpoint) throws
+            JsonProcessingException {
+        Map<String, Endpoint> endpointMap = new HashMap<>();
         for (API_endpointDTO endpointDTO : endpoint) {
-            endpointMap.put(endpointDTO.getType(), endpointDTO.getId());
+            if (!StringUtils.isEmpty(endpointDTO.getKey())){
+                endpointMap.put(endpointDTO.getType(), new Endpoint.Builder().id(endpointDTO.getKey())
+                        .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).build());
+            }if (endpointDTO.getInline() != null){
+                endpointMap.put(endpointDTO.getType(), toEndpoint(endpointDTO.getInline()));
+            }
         }
         return endpointMap;
     }
@@ -361,12 +378,18 @@ public class MappingUtil {
      * @param endpoint endpoint model instance
      * @return EndPointDTO instance containing endpoint data
      */
-    public static EndPointDTO toEndPointDTO(Endpoint endpoint) {
+    public static EndPointDTO toEndPointDTO(Endpoint endpoint) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
         EndPointDTO endPointDTO = new EndPointDTO();
         endPointDTO.setId(endpoint.getId());
         endPointDTO.setName(endpoint.getName());
         endPointDTO.setEndpointConfig(endpoint.getEndpointConfig());
-        endPointDTO.setEndpointSecurity(endpoint.getSecurity());
+        EndPoint_endpointSecurityDTO endpointSecurityDTO = mapper.readValue(endpoint.getSecurity(),
+                EndPoint_endpointSecurityDTO.class);
+        if(endpointSecurityDTO.getEnabled()){
+            endpointSecurityDTO.setPassword("");
+        }
+        endPointDTO.setEndpointSecurity(endpointSecurityDTO);
         endPointDTO.setMaxTps(endpoint.getMaxTps());
         endPointDTO.setType(endpoint.getType());
         return endPointDTO;
@@ -378,13 +401,22 @@ public class MappingUtil {
      * @param endPointDTO Contains data of a endpoint
      * @return Endpoint model instance containing endpoint data
      */
-    public static Endpoint toEndpoint(EndPointDTO endPointDTO) {
+    public static Endpoint toEndpoint(EndPointDTO endPointDTO) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
         Endpoint.Builder endPointBuilder = new Endpoint.Builder();
         endPointBuilder.endpointConfig(endPointDTO.getEndpointConfig());
         endPointBuilder.name(endPointDTO.getName());
-        endPointBuilder.maxTps(endPointDTO.getMaxTps());
-        endPointBuilder.security(endPointDTO.getEndpointSecurity());
+        if (!StringUtils.isEmpty(endPointDTO.getId())) {
+            endPointBuilder.id(endPointDTO.getId());
+        } else {
+            endPointBuilder.id(UUID.randomUUID().toString());
+        }
+        if (endPointDTO.getMaxTps() != null){
+            endPointBuilder.maxTps(endPointDTO.getMaxTps());
+        }
+        endPointBuilder.security(mapper.writeValueAsString(endPointDTO.getEndpointSecurity()));
         endPointBuilder.type(endPointDTO.getType());
+        endPointBuilder.applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT);
         return endPointBuilder.build();
     }
 

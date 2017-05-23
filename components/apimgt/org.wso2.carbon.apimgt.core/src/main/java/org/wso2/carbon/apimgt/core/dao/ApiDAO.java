@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.APILCWorkflowStatus;
 
 import java.io.InputStream;
@@ -96,11 +97,12 @@ public interface ApiDAO {
     /**
      * Retrieves summary data of all available APIs of a given provider.
      * @param providerName A given API Provider
+     * @param apiType Type of API
      * @return {@code List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    List<API> getAPIsForProvider(String providerName) throws APIMgtDAOException;
+    List<API> getAPIsForProvider(String providerName, ApiType apiType) throws APIMgtDAOException;
 
     /**
      * Retrieves summary data of all available APIs with life cycle status that matches the status list provided
@@ -547,4 +549,48 @@ public interface ApiDAO {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     String getLastUpdatedTimeOfComment(String commentId) throws APIMgtDAOException;
+
+    /**
+     * return list of respurces associated with API
+     *
+     * @param apiContext context of API
+     * @param apiVersion version of API
+     * @return list of resources
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    List<UriTemplate> getResourcesOfApi(String apiContext, String apiVersion) throws APIMgtDAOException;
+    /**
+     * Check Endpoint is exist
+     * @param name name of endpoint
+     * @return existence of endpoint
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    boolean isEndpointExist(String name) throws APIMgtDAOException;
+
+    /**
+     * Check endpoint use in api or operation
+     * @param endpointId id of endpoint
+     * @return true if used
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    boolean isEndpointAssociated(String endpointId) throws APIMgtDAOException;
+
+    /**
+     * Retrieves available APIs with given life cycle status and gateway labels.
+     * @param gatewayLabels A list of gateway labels
+     * @param status Life cycle status
+     * @return {@code List<API>} matching results
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     *
+     */
+    List<API> getAPIsByStatus(List<String> gatewayLabels, String status) throws APIMgtDAOException;
+
+    /**
+     * Retrieves available APIs with given gateway labels.
+     * @param gatewayLabels A list of gateway labels
+     * @return {@code List<API>} matching results
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     *
+     */
+    List<API> getAPIsByGatewayLabel(List<String> gatewayLabels) throws APIMgtDAOException;
 }

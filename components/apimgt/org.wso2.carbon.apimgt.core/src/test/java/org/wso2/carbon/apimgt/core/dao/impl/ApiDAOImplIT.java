@@ -21,6 +21,8 @@
 package org.wso2.carbon.apimgt.core.dao.impl;
 
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
@@ -380,6 +382,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         apiDAO.addAPI(api);
         apiDAO.changeLifeCycleStatus(api.getId(), finalLifecycleStatus);
     }
+    private static final Logger log = LoggerFactory.getLogger(ApiDAOImplIT.class);
 
     @Test
     public void testAddGetAPI() throws Exception {
@@ -515,14 +518,14 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testGetAPIsForProvider() throws Exception {
+    public void testGetStandardAPIsForProvider() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         String provider1 = "Watson";
         String provider2 = "Holmes";
 
-        List<API> apiList = apiDAO.getAPIsForProvider(provider1);
+        List<API> apiList = apiDAO.getAPIsForProvider(provider1, ApiType.STANDARD);
         Assert.assertTrue(apiList.isEmpty());
-        apiList = apiDAO.getAPIsForProvider(provider2);
+        apiList = apiDAO.getAPIsForProvider(provider2, ApiType.STANDARD);
         Assert.assertTrue(apiList.isEmpty());
 
         // Add APIs belonging to provider1
@@ -545,7 +548,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         apiDAO.addAPI(api3);
 
         // Get APIs belonging to provider1
-        apiList = apiDAO.getAPIsForProvider(provider1);
+        apiList = apiDAO.getAPIsForProvider(provider1, ApiType.STANDARD);
 
         List<API> expectedAPIs = new ArrayList<>();
         expectedAPIs.add(SampleTestObjectCreator.copyAPISummary(api1));
@@ -557,7 +560,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
                 TestUtil.printDiff(apiList, expectedAPIs));
 
         // Get APIs belonging to provider2
-        apiList = apiDAO.getAPIsForProvider(provider2);
+        apiList = apiDAO.getAPIsForProvider(provider2, ApiType.STANDARD);
 
         API expectedAPI = SampleTestObjectCreator.copyAPISummary(api3);
 
@@ -712,8 +715,8 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         commonStringResult.add(apis.get(upperCaseString));
 
         // Search by common mixed case
-        List<API> apiList = apiDAO.searchAPIs(new HashSet<>(), provider, commonMixedCaseSearchString,
-                                                                            ApiType.STANDARD, 0, 10);
+        List<API> apiList = apiDAO.searchAPIs(new HashSet<>(), provider, commonMixedCaseSearchString, ApiType
+                .STANDARD, 0, 10);
         Assert.assertEquals(apiList.size(), 3);
         Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, commonStringResult, new APIComparator()),
                 TestUtil.printListDiff(apiList, commonStringResult));
@@ -1076,13 +1079,15 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Endpoint endpoint = SampleTestObjectCreator.createMockEndpoint();
         apiDAO.addEndpoint(endpoint);
         Endpoint retrieved = apiDAO.getEndpointByName(endpoint.getName());
-        Assert.assertEquals(endpoint, retrieved);
+        Assert.assertEquals(endpoint, retrieved, TestUtil.printDiff(endpoint, retrieved));
     }
 
     @Test(description = "Test adding API with endpointMap")
     public void testAddEndPointsForApi() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
-        Map<String, String> endpointMap = SampleTestObjectCreator.getMockEndpointMap();
+        Map<String, Endpoint> endpointMap = new HashMap<>();
+        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, new Endpoint.Builder().id(SampleTestObjectCreator
+                .endpointId).applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).build());
         API api = SampleTestObjectCreator.createDefaultAPI().endpoint(endpointMap).build();
         testAddGetEndpoint();
         apiDAO.addAPI(api);
@@ -1118,12 +1123,17 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         Endpoint endpoint1 = SampleTestObjectCreator.createMockEndpoint();
         Endpoint endpoint2 = SampleTestObjectCreator.createAlternativeEndpoint();
+        Endpoint apiSpecificEndpoint = new Endpoint.Builder(SampleTestObjectCreator.createAlternativeEndpoint()).name
+                ("APISpecific").applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).id(UUID.randomUUID().toString())
+                .build();
         apiDAO.addEndpoint(endpoint1);
         apiDAO.addEndpoint(endpoint2);
+        apiDAO.addEndpoint(apiSpecificEndpoint);
         List<Endpoint> endpointListAdd = new ArrayList<>();
         endpointListAdd.add(endpoint1);
         endpointListAdd.add(endpoint2);
         List<Endpoint> endpointList = apiDAO.getEndpoints();
+        Assert.assertNotEquals(3, endpointList.size());
         APIUtils.isListsEqualIgnoreOrder(endpointListAdd, endpointList, new EndPointComparator());
     }
 
@@ -1279,10 +1289,10 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
         API api = builder.build();
         testAddGetEndpoint();
-        apiDAO.addAPI(api);        
+        apiDAO.addAPI(api);
         Thread.sleep(10);
         apiDAO.updateAPIWorkflowStatus(api.getId(), APIMgtConstants.APILCWorkflowStatus.PENDING);
-        
+
         API apiFromDB = apiDAO.getAPI(api.getId());
 
         Assert.assertNotNull(apiFromDB);
@@ -1323,6 +1333,40 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertFalse(apiDAO.isDocumentExist(api.getId(), documentInfo));
     }
 
+    @Test
+    public void testAddApiAndResourceSpecificEndpointToApi() throws APIMgtDAOException {
+        Endpoint apiSpecificEndpoint = new Endpoint.Builder(SampleTestObjectCreator.createMockEndpoint())
+                .applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build();
+        Endpoint urlSpecificEndpoint = new Endpoint.Builder(SampleTestObjectCreator.createMockEndpoint()).id(UUID
+                .randomUUID().toString()).applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).name("URI1")
+                .build();
+        Endpoint endpointToInsert = SampleTestObjectCreator.createAlternativeEndpoint();
+        Endpoint globalEndpoint = new Endpoint.Builder().applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).id
+                (endpointToInsert.getId()).build();
+        Map<String, Endpoint> apiEndpointMap = new HashMap();
+
+        apiEndpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, apiSpecificEndpoint);
+        apiEndpointMap.put(APIMgtConstants.SANDBOX_ENDPOINT, globalEndpoint);
+        Map<String, Endpoint> uriTemplateEndpointMap = new HashMap();
+        uriTemplateEndpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, urlSpecificEndpoint);
+        Map<String, UriTemplate> uriTemplateMap = SampleTestObjectCreator.getMockUriTemplates();
+        uriTemplateMap.forEach((k, v) -> {
+            UriTemplate uriTemplate = new UriTemplate.UriTemplateBuilder(v).endpoint(uriTemplateEndpointMap).build();
+            uriTemplateMap.replace(k, uriTemplate);
+        });
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API api = SampleTestObjectCreator.createDefaultAPI().apiDefinition(SampleTestObjectCreator
+                .apiDefinition).endpoint(apiEndpointMap).uriTemplates(uriTemplateMap).build();
+        apiDAO.addEndpoint(endpointToInsert);
+        apiDAO.addAPI(api);
+        Map<String, Endpoint> retrievedApiEndpoint = apiDAO.getAPI(api.getId()).getEndpoint();
+        Assert.assertTrue(apiDAO.isEndpointAssociated(globalEndpoint.getId()));
+        Assert.assertEquals(apiEndpointMap, retrievedApiEndpoint);
+        apiDAO.deleteAPI(api.getId());
+        Endpoint retrievedGlobal = apiDAO.getEndpoint(globalEndpoint.getId());
+        Assert.assertNotNull(retrievedGlobal);
+        Assert.assertEquals(endpointToInsert, retrievedGlobal);
+    }
     @Test
     public void testAddGetComment() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();

@@ -1,38 +1,60 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
-
+import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.Objects;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPointDTO;
 
 /**
  * API_endpointDTO
  */
+@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-05-04T18:05:59.301+05:30")
 public class API_endpointDTO   {
-  @JsonProperty("id")
-  private String id = null;
+  @JsonProperty("key")
+  private String key = null;
+
+  @JsonProperty("inline")
+  private EndPointDTO inline = null;
 
   @JsonProperty("type")
   private String type = null;
 
-  public API_endpointDTO id(String id) {
-    this.id = id;
+  public API_endpointDTO key(String key) {
+    this.key = key;
     return this;
   }
 
    /**
-   * Get id
-   * @return id
+   * Get key
+   * @return key
   **/
   @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "")
-  public String getId() {
-    return id;
+  public String getKey() {
+    return key;
   }
 
-  public void setId(String id) {
-    this.id = id;
+  public void setKey(String key) {
+    this.key = key;
+  }
+
+  public API_endpointDTO inline(EndPointDTO inline) {
+    this.inline = inline;
+    return this;
+  }
+
+   /**
+   * Get inline
+   * @return inline
+  **/
+  @ApiModelProperty(value = "")
+  public EndPointDTO getInline() {
+    return inline;
+  }
+
+  public void setInline(EndPointDTO inline) {
+    this.inline = inline;
   }
 
   public API_endpointDTO type(String type) {
@@ -63,13 +85,14 @@ public class API_endpointDTO   {
       return false;
     }
     API_endpointDTO apIEndpoint = (API_endpointDTO) o;
-    return Objects.equals(this.id, apIEndpoint.id) &&
+    return Objects.equals(this.key, apIEndpoint.key) &&
+        Objects.equals(this.inline, apIEndpoint.inline) &&
         Objects.equals(this.type, apIEndpoint.type);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, type);
+    return Objects.hash(key, inline, type);
   }
 
   @Override
@@ -77,7 +100,8 @@ public class API_endpointDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class API_endpointDTO {\n");
     
-    sb.append("    id: ").append(toIndentedString(id)).append("\n");
+    sb.append("    key: ").append(toIndentedString(key)).append("\n");
+    sb.append("    inline: ").append(toIndentedString(inline)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("}");
     return sb.toString();
