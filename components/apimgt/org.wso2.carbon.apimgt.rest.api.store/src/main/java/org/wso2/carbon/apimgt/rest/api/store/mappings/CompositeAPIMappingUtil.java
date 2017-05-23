@@ -27,6 +27,7 @@ public class CompositeAPIMappingUtil {
         compositeAPIDTO.setContext(api.getContext());
         compositeAPIDTO.setDescription(api.getDescription());
         compositeAPIDTO.setLabels(new ArrayList<>(api.getLabels()));
+        compositeAPIDTO.setApplicationId(api.getApplicationId());
         return compositeAPIDTO;
     }
 
@@ -44,7 +45,9 @@ public class CompositeAPIMappingUtil {
                 labels(new HashSet<>(apidto.getLabels())).
                 transport(new HashSet<>(apidto.getTransport())).
                 apiType(ApiType.COMPOSITE).
-                apiDefinition(apidto.getApiDefinition());
+                apiDefinition(apidto.getApiDefinition()).
+                applicationId(apidto.getApplicationId());
+
     }
 
     /**
@@ -78,6 +81,7 @@ public class CompositeAPIMappingUtil {
             apiInfo.setName(apiSummary.getName());
             apiInfo.setProvider(apiSummary.getProvider());
             apiInfo.setVersion(apiSummary.getVersion());
+            apiInfo.setApplicationId(apiSummary.getApplicationId());
             apiInfoList.add(apiInfo);
         }
         return apiInfoList;

@@ -76,6 +76,14 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addApplicationAssociatedAPI(API api) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * @see ApiDAO#updateAPI(String apiID, API substituteAPI)
      */
     @Override
@@ -116,6 +124,14 @@ public class ApiFileDAOImpl implements ApiDAO {
             throw new APIMgtDAOException(errorMsg, ExceptionCodes.API_NOT_FOUND);
         }
         APIFileUtils.deleteDirectory(APIFileUtils.getAPIBaseDirectory(storagePath, api));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void deleteApplicationAssociatedAPI(String apiId, String appId) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
     }
 
     /**

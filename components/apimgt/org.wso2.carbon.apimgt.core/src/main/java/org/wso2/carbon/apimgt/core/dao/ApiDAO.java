@@ -210,6 +210,16 @@ public interface ApiDAO {
     void addAPI(API api) throws APIMgtDAOException;
 
     /**
+     * Create API that is associated with an Application. This is specifically required to support the creation of
+     * Composite APIs which are always associated with a specific Application.
+     * @param api The {@link API} object to be added
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     *
+     */
+    void addApplicationAssociatedAPI(API api) throws APIMgtDAOException;
+
+
+    /**
      * Update an existing API
      * @param apiID The UUID of the API that needs to be updated
      * @param substituteAPI Substitute {@link API} object that will replace the existing API
@@ -225,6 +235,17 @@ public interface ApiDAO {
      *
      */
     void deleteAPI(String apiID) throws APIMgtDAOException;
+
+    /**
+     * Delete API that is associated with an Application. This is specifically required to support the deletion of
+     * Composite APIs which are always associated with a specific Application.
+     * @param apiId The UUID of the API that needs to be deleted
+     * @param appId The UUID of the Application that the API is currently associated with
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     *
+     */
+    void deleteApplicationAssociatedAPI(String apiId, String appId) throws APIMgtDAOException;
+
 
     /**
      * Get swagger definition of a given API

@@ -184,7 +184,7 @@ public class APIStoreImplTestCase {
         APIStore apiStore = getApiStoreImpl(apiDAO, gatewaySourceGenerator, apiGateway);
         
         apiStore.addCompositeApi(apiBuilder);
-        Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
+        Mockito.verify(apiDAO, Mockito.times(1)).addApplicationAssociatedAPI(apiBuilder.build());
 
         API api = apiBuilder.build();
         Assert.assertEquals(api.getApiType(), ApiType.COMPOSITE);
@@ -247,7 +247,7 @@ public class APIStoreImplTestCase {
         apiStore.createNewCompositeApiVersion(createdAPI.getId(), newVersion);
 
         final ArgumentCaptor<API> captor = ArgumentCaptor.forClass(API.class);
-        Mockito.verify(apiDAO, Mockito.times(2)).addAPI(captor.capture());
+        Mockito.verify(apiDAO, Mockito.times(2)).addApplicationAssociatedAPI(captor.capture());
 
         API newAPIVersion = captor.getValue();
         Assert.assertEquals(newAPIVersion.getVersion(), newVersion);

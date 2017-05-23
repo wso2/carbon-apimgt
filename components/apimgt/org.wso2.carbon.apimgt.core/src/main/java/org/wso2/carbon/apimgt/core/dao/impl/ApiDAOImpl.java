@@ -73,7 +73,7 @@ public class ApiDAOImpl implements ApiDAO {
 
     private final ApiDAOVendorSpecificStatements sqlStatements;
 
-    static final String API_SUMMARY_SELECT = "SELECT UUID, PROVIDER, NAME, CONTEXT, VERSION, DESCRIPTION, " +
+    private static final String API_SUMMARY_SELECT = "SELECT UUID, PROVIDER, NAME, CONTEXT, VERSION, DESCRIPTION, " +
             "CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS, API_TYPE_ID FROM AM_API";
 
     private static final String API_SELECT = "SELECT UUID, PROVIDER, NAME, CONTEXT, VERSION, IS_DEFAULT_VERSION, " +
@@ -81,6 +81,15 @@ public class ApiDAOImpl implements ApiDAO {
             "BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, CURRENT_LC_STATUS, API_TYPE_ID, " +
             "CORS_ENABLED, CORS_ALLOW_ORIGINS, CORS_ALLOW_CREDENTIALS, CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS, " +
             "CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME, COPIED_FROM_API, UPDATED_BY, LC_WORKFLOW_STATUS FROM AM_API";
+
+    private static final String API_INSERT = "INSERT INTO AM_API (PROVIDER, NAME, CONTEXT, VERSION, " +
+            "IS_DEFAULT_VERSION, DESCRIPTION, VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, " +
+            "UUID, TECHNICAL_OWNER, TECHNICAL_EMAIL, BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, " +
+            "CURRENT_LC_STATUS, CORS_ENABLED, CORS_ALLOW_ORIGINS, CORS_ALLOW_CREDENTIALS, CORS_ALLOW_HEADERS, " +
+            "CORS_ALLOW_METHODS, API_TYPE_ID, CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME, COPIED_FROM_API, " +
+            "UPDATED_BY, LC_WORKFLOW_STATUS) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+    private static final String API_DELETE = "DELETE FROM AM_API WHERE UUID = ?";
 
     private static final String AM_API_TABLE_NAME = "AM_API";
     private static final String AM_TAGS_TABLE_NAME = "AM_TAGS";
@@ -504,74 +513,12 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public void addAPI(final API api) throws APIMgtDAOException {
-        final String addAPIQuery = "INSERT INTO AM_API (PROVIDER, NAME, CONTEXT, VERSION, " +
-                "IS_DEFAULT_VERSION, DESCRIPTION, VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, " +
-                "UUID, TECHNICAL_OWNER, TECHNICAL_EMAIL, BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, " +
-                "CURRENT_LC_STATUS, CORS_ENABLED, CORS_ALLOW_ORIGINS, CORS_ALLOW_CREDENTIALS, CORS_ALLOW_HEADERS, " +
-                "CORS_ALLOW_METHODS, API_TYPE_ID, CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME, COPIED_FROM_API, " +
-                "UPDATED_BY, LC_WORKFLOW_STATUS) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-
         try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(addAPIQuery)) {
+             PreparedStatement statement = connection.prepareStatement(API_INSERT)) {
             try {
                 connection.setAutoCommit(false);
 
-                String apiPrimaryKey = api.getId();
-                statement.setString(1, api.getProvider());
-                statement.setString(2, api.getName());
-                statement.setString(3, api.getContext());
-                statement.setString(4, api.getVersion());
-                statement.setBoolean(5, api.isDefaultVersion());
-                statement.setString(6, api.getDescription());
-                statement.setString(7, api.getVisibility().toString());
-                statement.setBoolean(8, api.isResponseCachingEnabled());
-                statement.setInt(9, api.getCacheTimeout());
-                statement.setString(10, apiPrimaryKey);
-
-                BusinessInformation businessInformation = api.getBusinessInformation();
-                statement.setString(11, businessInformation.getTechnicalOwner());
-                statement.setString(12, businessInformation.getTechnicalOwnerEmail());
-                statement.setString(13, businessInformation.getBusinessOwner());
-                statement.setString(14, businessInformation.getBusinessOwnerEmail());
-
-                statement.setString(15, api.getLifecycleInstanceId());
-                statement.setString(16, api.getLifeCycleStatus());
-
-                CorsConfiguration corsConfiguration = api.getCorsConfiguration();
-                statement.setBoolean(17, corsConfiguration.isEnabled());
-                statement.setString(18, String.join(",", corsConfiguration.getAllowOrigins()));
-                statement.setBoolean(19, corsConfiguration.isAllowCredentials());
-                statement.setString(20, String.join(",", corsConfiguration.getAllowHeaders()));
-                statement.setString(21, String.join(",", corsConfiguration.getAllowMethods()));
-
-                statement.setInt(22, getApiTypeId(connection, api.getApiType()));
-                statement.setString(23, api.getCreatedBy());
-                statement.setTimestamp(24, Timestamp.valueOf(LocalDateTime.now()));
-                statement.setTimestamp(25, Timestamp.valueOf(LocalDateTime.now()));
-                statement.setString(26, api.getCopiedFromApiId());
-                statement.setString(27, api.getUpdatedBy());
-                statement.setString(28, APILCWorkflowStatus.APPROVED.toString());
-                statement.execute();
-
-                if (API.Visibility.RESTRICTED == api.getVisibility()) {
-                    addVisibleRole(connection, apiPrimaryKey, api.getVisibleRoles());
-                }
-
-                String wsdlUri = api.getWsdlUri();
-
-                if (wsdlUri != null) {
-                    ApiResourceDAO.addTextResource(connection, apiPrimaryKey, UUID.randomUUID().toString(),
-                            ResourceCategory.WSDL_URI, MediaType.TEXT_PLAIN, wsdlUri, api.getCreatedBy());
-                }
-                addTagsMapping(connection, apiPrimaryKey, api.getTags());
-                addLabelMapping(connection, apiPrimaryKey, api.getLabels());
-                addGatewayConfig(connection, apiPrimaryKey, api.getGatewayConfig(), api.getCreatedBy());
-                addTransports(connection, apiPrimaryKey, api.getTransport());
-                addUrlMappings(connection, api.getUriTemplates().values(), apiPrimaryKey);
-                addSubscriptionPolicies(connection, api.getPolicies(), apiPrimaryKey);
-                addEndPointsForApi(connection, apiPrimaryKey, api.getEndpoint());
-                addAPIDefinition(connection, apiPrimaryKey, api.getApiDefinition(), api.getCreatedBy());
-                addAPIPermission(connection, api.getPermissionMap(), apiPrimaryKey);
+                addAPIRelatedInformation(connection, statement, api);
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -579,6 +526,121 @@ public class ApiDAOImpl implements ApiDAO {
             } finally {
                 connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addApplicationAssociatedAPI(API api) throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(API_INSERT)) {
+            try {
+                connection.setAutoCommit(false);
+
+                addAPIRelatedInformation(connection, statement, api);
+                associateApiWithApplication(connection, api.getId(), api.getApplicationId());
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new APIMgtDAOException(e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    /**
+     * Method for adding API related information
+     * @param connection DB Connection
+     * @param statement  PreparedStatement
+     * @param api API object
+     * @throws SQLException if error occurs while accessing data layer
+     */
+    private void addAPIRelatedInformation(Connection connection, PreparedStatement statement, final API api)
+            throws SQLException {
+        String apiPrimaryKey = api.getId();
+        statement.setString(1, api.getProvider());
+        statement.setString(2, api.getName());
+        statement.setString(3, api.getContext());
+        statement.setString(4, api.getVersion());
+        statement.setBoolean(5, api.isDefaultVersion());
+        statement.setString(6, api.getDescription());
+        statement.setString(7, api.getVisibility().toString());
+        statement.setBoolean(8, api.isResponseCachingEnabled());
+        statement.setInt(9, api.getCacheTimeout());
+        statement.setString(10, apiPrimaryKey);
+
+        BusinessInformation businessInformation = api.getBusinessInformation();
+        statement.setString(11, businessInformation.getTechnicalOwner());
+        statement.setString(12, businessInformation.getTechnicalOwnerEmail());
+        statement.setString(13, businessInformation.getBusinessOwner());
+        statement.setString(14, businessInformation.getBusinessOwnerEmail());
+
+        statement.setString(15, api.getLifecycleInstanceId());
+        statement.setString(16, api.getLifeCycleStatus());
+
+        CorsConfiguration corsConfiguration = api.getCorsConfiguration();
+        statement.setBoolean(17, corsConfiguration.isEnabled());
+        statement.setString(18, String.join(",", corsConfiguration.getAllowOrigins()));
+        statement.setBoolean(19, corsConfiguration.isAllowCredentials());
+        statement.setString(20, String.join(",", corsConfiguration.getAllowHeaders()));
+        statement.setString(21, String.join(",", corsConfiguration.getAllowMethods()));
+
+        statement.setInt(22, getApiTypeId(connection, api.getApiType()));
+        statement.setString(23, api.getCreatedBy());
+        statement.setTimestamp(24, Timestamp.valueOf(LocalDateTime.now()));
+        statement.setTimestamp(25, Timestamp.valueOf(LocalDateTime.now()));
+        statement.setString(26, api.getCopiedFromApiId());
+        statement.setString(27, api.getUpdatedBy());
+        statement.setString(28, APILCWorkflowStatus.APPROVED.toString());
+        statement.execute();
+
+        if (API.Visibility.RESTRICTED == api.getVisibility()) {
+            addVisibleRole(connection, apiPrimaryKey, api.getVisibleRoles());
+        }
+
+        String wsdlUri = api.getWsdlUri();
+
+        if (wsdlUri != null) {
+            ApiResourceDAO.addTextResource(connection, apiPrimaryKey, UUID.randomUUID().toString(),
+                    ResourceCategory.WSDL_URI, MediaType.TEXT_PLAIN, wsdlUri, api.getCreatedBy());
+        }
+        addTagsMapping(connection, apiPrimaryKey, api.getTags());
+        addLabelMapping(connection, apiPrimaryKey, api.getLabels());
+        addGatewayConfig(connection, apiPrimaryKey, api.getGatewayConfig(), api.getCreatedBy());
+        addTransports(connection, apiPrimaryKey, api.getTransport());
+        addUrlMappings(connection, api.getUriTemplates().values(), apiPrimaryKey);
+        addSubscriptionPolicies(connection, api.getPolicies(), apiPrimaryKey);
+        addEndPointsForApi(connection, apiPrimaryKey, api.getEndpoint());
+        addAPIDefinition(connection, apiPrimaryKey, api.getApiDefinition(), api.getCreatedBy());
+        addAPIPermission(connection, api.getPermissionMap(), apiPrimaryKey);
+    }
+
+    /**
+     * Associate API with Application. This is specifically required to support the creation of Composite APIs which are
+     * always associated with a specific Application. Changes by this operation will not be persisted automatically.
+     * The caller will need to manually invoke DAOConnection.commit() to persist the changes
+     *
+     * @param connection Connection to DAO layer
+     * @param apiId The UUID of the API
+     * @param appId The UUID of the Application
+     * @throws APIMgtDAOException If failed to delete application.
+     */
+
+    private void associateApiWithApplication(Connection connection, String apiId, String appId)
+            throws APIMgtDAOException {
+        final String query = "UPDATE AM_APPLICATION SET COMPOSITE_API_ID = ? WHERE UUID = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, apiId);
+            statement.setString(2, appId);
+            statement.execute();
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
         }
@@ -688,27 +750,80 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public void deleteAPI(String apiID) throws APIMgtDAOException {
-        final String query = "DELETE FROM AM_API WHERE UUID = ?";
         try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-            try {
-                deleteEndPointsForOperation(connection, apiID);
-                deleteUrlMappings(connection, apiID);
-                deleteEndPointsForApi(connection, apiID);
-                connection.setAutoCommit(false);
-                statement.setString(1, apiID);
-                statement.execute();
-                connection.commit();
-            } catch (SQLException | IOException e) {
-                String msg = "Couldn't delete api : " + apiID;
-                log.error(msg, e);
-                connection.rollback();
-                throw new APIMgtDAOException(e);
-            } finally {
-                connection.setAutoCommit(DAOUtil.isAutoCommit());
-            }
-        } catch (SQLException e) {
+             PreparedStatement statement = connection.prepareStatement(API_DELETE)) {
+            persistAPIDelete(connection, statement, apiID);
+        } catch (SQLException | IOException e) {
             throw new APIMgtDAOException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void deleteApplicationAssociatedAPI(String apiId, String appId) throws APIMgtDAOException {
+        final String validationQuery = "SELECT COMPOSITE_API_ID FROM AM_APPLICATION WHERE UUID = ?";
+
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement validationStatement = connection.prepareStatement(validationQuery)) {
+            validationStatement.setString(1, appId);
+
+            String compositeApiId = "";
+            try (ResultSet rs = validationStatement.executeQuery()) {
+                if (rs.next()) {
+                    compositeApiId = rs.getString("COMPOSITE_API_ID");
+                }
+            }
+
+            if (compositeApiId.equals(apiId)) {
+                removeApplicationLinkWithAPI(connection, appId);
+
+                try (PreparedStatement statement = connection.prepareStatement(API_DELETE)) {
+                    persistAPIDelete(connection, statement, apiId);
+                }
+            }
+
+        } catch (SQLException | IOException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+
+    private void persistAPIDelete(Connection connection, PreparedStatement statement, String apiId)
+            throws IOException, SQLException {
+        try {
+            connection.setAutoCommit(false);
+
+            deleteAPIRelatedInformation(connection, statement, apiId);
+
+            connection.commit();
+        } catch (SQLException | IOException e) {
+            String msg = "Couldn't delete api : " + apiId;
+            log.error(msg, e);
+            connection.rollback();
+            throw e;
+        } finally {
+            connection.setAutoCommit(DAOUtil.isAutoCommit());
+        }
+    }
+
+    private void deleteAPIRelatedInformation(Connection connection, PreparedStatement statement, String apiID)
+                                                                                throws IOException, SQLException {
+        deleteEndPointsForOperation(connection, apiID);
+        deleteUrlMappings(connection, apiID);
+        deleteEndPointsForApi(connection, apiID);
+        statement.setString(1, apiID);
+        statement.execute();
+    }
+
+
+    private void removeApplicationLinkWithAPI(Connection connection, String appId) throws SQLException {
+        final String updateQuery = "UPDATE AM_APPLICATION SET COMPOSITE_API_ID = NULL WHERE UUID = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {
+            statement.setString(1, appId);
+            statement.execute();
         }
     }
 
@@ -1705,7 +1820,7 @@ public class ApiDAOImpl implements ApiDAO {
 
 
     private void addUrlMappings(Connection connection, Collection<UriTemplate> uriTemplates, String apiID)
-            throws SQLException, APIMgtDAOException {
+            throws SQLException {
         final String query = "INSERT INTO AM_API_OPERATION_MAPPING (OPERATION_ID,API_ID, HTTP_METHOD, URL_PATTERN, "
                 + "AUTH_SCHEME, API_POLICY_ID) VALUES (?,?,?,?,?,?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -2245,7 +2360,7 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     private void addEndPointsForApi(Connection connection, String apiId, Map<String, Endpoint> endpointMap) throws
-            SQLException, APIMgtDAOException {
+            SQLException {
         final String query = "INSERT INTO AM_API_ENDPOINT_MAPPING (API_ID,TYPE,ENDPOINT_ID) VALUES (?,?,?)";
         if (endpointMap != null && !endpointMap.isEmpty()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
@@ -2339,7 +2454,7 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     private void addEndPointsForOperation(Connection connection, String apiId, String operationId, Map<String,
-            Endpoint> endpointMap) throws SQLException, APIMgtDAOException {
+            Endpoint> endpointMap) throws SQLException {
         final String query = "INSERT INTO AM_API_RESOURCE_ENDPOINT (API_ID,OPERATION_ID,TYPE,ENDPOINT_ID) " +
                 "VALUES (?,?,?,?)";
         if (endpointMap != null && !endpointMap.isEmpty()) {

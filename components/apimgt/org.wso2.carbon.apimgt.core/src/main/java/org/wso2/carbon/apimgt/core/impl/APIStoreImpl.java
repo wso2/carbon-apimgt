@@ -706,7 +706,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 //publishing config to gateway
                 gateway.addAPI(createdAPI);
 
-                getApiDAO().addAPI(createdAPI);
+                getApiDAO().addApplicationAssociatedAPI(createdAPI);
 
                 if (log.isDebugEnabled()) {
                     log.debug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
@@ -717,11 +717,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 String errorMsg = "Unable to update the documentation due to json parse error";
                 log.error(errorMsg, e);
                 throw new APIManagementException(errorMsg, e, ExceptionCodes.JSON_PARSE_ERROR);
-            } catch (APIMgtDAOException e) {
-                String errorMsg = "Error occurred while creating the API - " + apiBuilder.getName();
-                log.error(errorMsg);
-                throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
-            } catch (GatewayException e) {
+            }  catch (GatewayException e) {
                 String message = "Error publishing service configuration to Gateway " + apiBuilder.getName();
                 log.error(message, e);
                 throw new APIManagementException(message, e, ExceptionCodes.GATEWAY_EXCEPTION);
@@ -866,7 +862,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             if (api != null && api.getApiType() == ApiType.COMPOSITE) {
                 //Delete API in gateway
                 gateway.deleteAPI(api);
-                getApiDAO().deleteAPI(apiId);
+                getApiDAO().deleteApplicationAssociatedAPI(apiId, api.getApplicationId());
             }
         } catch (GatewayException e) {
             String message = "Error occurred while deleting Composite API with id - " + apiId + " from gateway";
@@ -913,7 +909,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 if (StringUtils.isEmpty(apiBuilder.getApiDefinition())) {
                     apiBuilder.apiDefinition(apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder));
                 }
-                getApiDAO().addAPI(apiBuilder.build());
+                getApiDAO().addApplicationAssociatedAPI(apiBuilder.build());
                 newVersionedId = apiBuilder.getId();
             } else {
                 throw new APIMgtResourceNotFoundException("Requested API on UUID " + apiId + "Couldn't be found");

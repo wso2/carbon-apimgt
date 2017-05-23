@@ -776,10 +776,9 @@ public class APIPublisherImplTestCase {
                         lifecycleIdPrevious, user, previousApi)).thenReturn(previousLifecycleState);
         previousLifecycleState.setState(APIStatus.DEPRECATED.getStatus());
 
-        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        API api = SampleTestObjectCreator.createDefaultAPI().copiedFromApiId(previousApiUUID).build();
         String uuid = api.getId();
         String lcState = api.getLifeCycleStatus();
-        api.setCopiedFromApiId(previousApiUUID);
         String lifecycleId = api.getLifecycleInstanceId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
         LifecycleState lifecycleState = SampleTestObjectCreator.getMockLifecycleStateObject(lifecycleId);

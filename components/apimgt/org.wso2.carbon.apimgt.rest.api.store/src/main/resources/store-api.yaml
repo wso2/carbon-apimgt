@@ -2391,6 +2391,10 @@ definitions:
     required:
     allOf:
       - $ref: '#/definitions/BaseAPIInfo'
+      - properties:
+          applicationId:
+            type: string
+
 
 #-----------------------------------------------------
 # The Base API resource
@@ -2483,6 +2487,9 @@ definitions:
     required:
     allOf:
       - $ref: '#/definitions/BaseAPI'
+      - properties:
+          applicationId:
+            type: string
 
 #-----------------------------------------------------
 # The Application List resource
