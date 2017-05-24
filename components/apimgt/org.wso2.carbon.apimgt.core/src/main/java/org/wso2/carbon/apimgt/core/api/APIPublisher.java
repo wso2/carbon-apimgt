@@ -35,6 +35,7 @@ import org.wso2.carbon.lcm.core.impl.LifecycleState;
 import org.wso2.carbon.lcm.sql.beans.LifecycleHistoryBean;
 
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -363,13 +364,13 @@ public interface APIPublisher extends APIManager {
     String addApiFromDefinition(InputStream apiDefinition) throws APIManagementException;
 
     /**
-     * Create api from it's definition located in url
+     * Create api using HttpUrlConnection
      *
-     * @param swaggerResourceUrl url of the swagger resource
+     * @param httpURLConnection httpUrlConnection constructed by a url
      * @return details of the added API.
      * @throws APIManagementException If failed to add the API.
      */
-    String addApiFromDefinition(String swaggerResourceUrl) throws APIManagementException;
+    String addApiFromDefinition(HttpURLConnection httpURLConnection) throws APIManagementException;
 
     /**
      * Get list of policies of an particular tier level.
