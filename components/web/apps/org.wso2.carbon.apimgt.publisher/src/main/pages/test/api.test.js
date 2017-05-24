@@ -17,7 +17,6 @@ describe('Api',
                         };
                         let promised_create = api.create(data);
                         return promised_create.then((response) => {
-                            debugger;
                             assert.equal(response.status, 200);
                         });
                     }
