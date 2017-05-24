@@ -113,7 +113,7 @@
                             </arguments>
                         </configuration>
                     </execution>
-                    <!--<execution>
+                    <execution>
                         <id>npm run test (test)</id>
                         <goals>
                             <goal>exec</goal>
@@ -124,11 +124,11 @@
                             <arguments>
                                 <argument>run</argument>
                                 <argument>test</argument>
-                                <argument>&#45;&#45;</argument>
-                                <argument>&#45;&#45;skipTests=${maven.test.skip}</argument>
+                                <argument>--</argument>
+                                <argument>--skipTests=${maven.test.skip}</argument>
                             </arguments>
                         </configuration>
-                    </execution>-->
+                    </execution>
                 </executions>
                 <configuration>
                     <workingDirectory>${npm.working.dir}</workingDirectory>

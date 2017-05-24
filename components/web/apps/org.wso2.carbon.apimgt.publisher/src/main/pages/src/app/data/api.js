@@ -15,9 +15,6 @@
  */
 "use strict";
 import SwaggerClient from 'swagger-client';
-
-window.SwaggerClient = SwaggerClient;
-
 /**
  * Manage API access keys with corresponding keys,Not related to the keymanager used in backend
  */
@@ -94,15 +91,15 @@ class KeyManager {
 
 class AuthClient {
 
-    static refreshTokenOnExpire(){
+    static refreshTokenOnExpire() {
         var timestampSkew = 100;
-        var currentTimestamp =  Math.floor(Date.now() / 1000);
+        var currentTimestamp = Math.floor(Date.now() / 1000);
         var tokenTimestamp = window.localStorage.getItem("expiresIn");
         var rememberMe = (window.localStorage.getItem("rememberMe") == 'true');
-        if(rememberMe && (tokenTimestamp - currentTimestamp < timestampSkew)) {
+        if (rememberMe && (tokenTimestamp - currentTimestamp < timestampSkew)) {
             var bearerToken = "Bearer " + AuthClient.getCookie("WSO2_AM_REFRESH_TOKEN_1");
             var loginPromise = authManager.refresh(bearerToken);
-            loginPromise.then(function(data,status,xhr){
+            loginPromise.then(function (data, status, xhr) {
                 authManager.setAuthStatus(true);
                 var expiresIn = data.validityPeriod + Math.floor(Date.now() / 1000);
                 window.localStorage.setItem("expiresIn", expiresIn);
@@ -110,7 +107,7 @@ class AuthClient {
             loginPromise.error(
                 function (error) {
                     var error_data = JSON.parse(error.responseText);
-                    var message = "Error while refreshing token" + "<br/> You will be redirect to the login page ..." ;
+                    var message = "Error while refreshing token" + "<br/> You will be redirect to the login page ...";
                     noty({
                         text: message,
                         type: 'error',
@@ -187,11 +184,10 @@ class API {
         this.auth_client = new AuthClient();
         this.client.then(
             (swagger) => {
-                // swagger.setHost(location.host); // TODO: Should be change with the implementation of this https://github.com/swagger-api/swagger-js/issues/1045
-                swagger.spec.host = location.host;
+                swagger.setHost(location.host);
                 this.keyMan = new KeyManager(access_key);
-                let scopes = swagger.spec["x-wso2-security"].apim["x-wso2-scopes"];
-                for (var index in scopes) {
+                let scopes = swagger.swaggerObject["x-wso2-security"].apim["x-wso2-scopes"];
+                for (let index in scopes) {
                     if (scopes.hasOwnProperty(index)) {
                         let scope_key = scopes[index].key;
                         this.keyMan.addKey(null, scope_key);
@@ -272,7 +268,6 @@ class API {
     _requestMetaData(data = {}) {
         AuthClient.refreshTokenOnExpire();
         let access_key_header = "Bearer " + AuthClient.getCookie("WSO2_AM_TOKEN_1");
-        debugger;
         let request_meta = {
             clientAuthorizations: {
                 api_key: new SwaggerClient.ApiKeyAuthorization("Authorization", access_key_header, "header")
@@ -313,21 +308,21 @@ class API {
     create(api_data, callback = null) {
         let payload;
         let promise_create;
-        if (api_data.constructor.name === Blob.name || api_data.constructor.name === File.name) {
+        if (api_data.constructor.name === 'Blob' || api_data.constructor.name === 'File') {
             payload = {file: api_data, 'Content-Type': "multipart/form-data"};
             promise_create = this.client.then(
                 (client) => {
                     return client["API (Collection)"].post_apis_import_definition(payload,
-                    this._requestMetaData({'Content-Type': "multipart/form-data"})).catch(AuthClient.unauthorizedErrorHandler);
+                        this._requestMetaData({'Content-Type': "multipart/form-data"})).catch(AuthClient.unauthorizedErrorHandler);
                 }
             );
         } else if (api_data.type == 'swagger-url') {
             payload = {url: api_data.url, 'Content-Type': "multipart/form-data"};
             promise_create = this.client.then(
-                    (client) => {
+                (client) => {
                     return client["API (Collection)"].post_apis_import_definition(payload,
-                    this._requestMetaData({'Content-Type': "multipart/form-data"})).catch(AuthClient.unauthorizedErrorHandler);
-                    }
+                        this._requestMetaData({'Content-Type': "multipart/form-data"})).catch(AuthClient.unauthorizedErrorHandler);
+                }
             );
         } else {
             payload = {body: this._updateTemplate(api_data), "Content-Type": "application/json"};
@@ -351,10 +346,10 @@ class API {
      * @param callback {function} A callback function to invoke after receiving successful response.
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    getAll(callback) {
+    getAll(callback = null) {
         var promise_get_all = this.client.then(
             (client) => {
-                return client.apis["API (Collection)"].get_apis({}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+                return client["API (Collection)"].get_apis({}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
             }
         );
         if (callback) {
@@ -391,7 +386,7 @@ class API {
      * @param callback {function} A callback function to invoke after receiving successful response.
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    createNewAPIVersion(id,version,callback = null) {
+    createNewAPIVersion(id, version, callback = null) {
         var promise_copy_api = this.client.then(
             (client) => {
                 return client["API (Individual)"].post_apis_copy_api(
@@ -406,7 +401,7 @@ class API {
         }
     }
 
-     /**
+    /**
      * Get the swagger of an API
      * @param id {String} UUID of the API in which the swagger is needed
      * @param callback {function} Function which needs to be called upon success of the API deletion
@@ -414,16 +409,16 @@ class API {
      */
     getSwagger(id, callback = null) {
         var promise_get = this.client.then(
-                        (client) => {
-                        return client["API (Individual)"].get_apis_apiId_swagger(
-                            {apiId: id}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+            (client) => {
+                return client["API (Individual)"].get_apis_apiId_swagger(
+                    {apiId: id}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
             }
         );
-            if (callback) {
-                return promise_get.then(callback);
-            } else {
-                return promise_get;
-            }
+        if (callback) {
+            return promise_get.then(callback);
+        } else {
+            return promise_get;
+        }
     }
 
     /**
@@ -432,11 +427,15 @@ class API {
      */
     updateSwagger(id, swagger) {
         var promised_update = this.client.then(
-                (client) => {
-                    let payload = {"apiId": id, "endpointId": JSON.stringify(swagger), "Content-Type": "multipart/form-data"};
-                    return client["API (Individual)"].put_apis_apiId_swagger(
-                        payload, this._requestMetaData({'Content-Type': "multipart/form-data"})).catch(AuthClient.unauthorizedErrorHandler);
-        }
+            (client) => {
+                let payload = {
+                    "apiId": id,
+                    "endpointId": JSON.stringify(swagger),
+                    "Content-Type": "multipart/form-data"
+                };
+                return client["API (Individual)"].put_apis_apiId_swagger(
+                    payload, this._requestMetaData({'Content-Type': "multipart/form-data"})).catch(AuthClient.unauthorizedErrorHandler);
+            }
         );
         return promised_update;
     }
@@ -479,11 +478,11 @@ class API {
      */
     getLcState(id, callback = null) {
         var promise_lc_get = this.client.then(
-                (client) => {
+            (client) => {
                 return client["API (Individual)"].get_apis_apiId_lifecycle(
                     {apiId: id}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
-    }
-    );
+            }
+        );
         if (callback) {
             return promise_lc_get.then(callback);
         } else {
@@ -498,11 +497,11 @@ class API {
      */
     getLcHistory(id, callback = null) {
         var promise_lc_history_get = this.client.then(
-                (client) => {
+            (client) => {
                 return client["API (Individual)"].get_apis_apiId_lifecycle_history(
                     {apiId: id}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
-    }
-    );
+            }
+        );
         if (callback) {
             return promise_lc_history_get.then(callback);
         } else {
@@ -517,7 +516,7 @@ class API {
      * @param callback {function} Callback function which needs to be executed in the success call
      */
     updateLcState(id, state, checkedItems, callback = null) {
-        var payload = {action: state, apiId: id, lifecycleChecklist: checkedItems,"Content-Type": "application/json"};
+        var payload = {action: state, apiId: id, lifecycleChecklist: checkedItems, "Content-Type": "application/json"};
         var promise_lc_update = this.client.then(
             (client) => {
                 return client["API (Individual)"].post_apis_change_lifecycle(
@@ -531,19 +530,19 @@ class API {
         }
     }
 
-     /**
+    /**
      * Cleanup pending workflow state change task for API given its id (UUID)
      * @param id {string} UUID of the api
      * @param callback {function} Callback function which needs to be executed in the success call
      */
     cleanupPendingTask(id, callback = null) {
         var promise_deletePendingTask = this.client.then(
-                (client) => {
-                    return client["API (Individual)"].delete_apis_apiId_lifecycle_lifecycle_pending_task({apiId: id},
+            (client) => {
+                return client["API (Individual)"].delete_apis_apiId_lifecycle_lifecycle_pending_task({apiId: id},
                     this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
-                }
-            );
-            return promise_deletePendingTask;   
+            }
+        );
+        return promise_deletePendingTask;
     }
 
     /**
@@ -592,7 +591,7 @@ class API {
         var promise_subscription = this.client.then(
             (client) => {
                 return client["Subscription (Individual)"].post_subscriptions_block_subscription(
-                    {subscriptionId: id,blockState: state},
+                    {subscriptionId: id, blockState: state},
                     this._requestMetaData()
                 ).catch(AuthClient.unauthorizedErrorHandler);
             }
@@ -667,106 +666,122 @@ class API {
     updateEndpoint(data) {
         return this.client.then(
             (client) => {
-            return client["Endpoint (individual)"].put_endpoints_endpointId(
-                {
-                    endpointId: data.id,
-                    body: data,
-                    'Content-Type': 'application/json'
-                }, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
-        }).catch(AuthClient.unauthorizedErrorHandler);
+                return client["Endpoint (individual)"].put_endpoints_endpointId(
+                    {
+                        endpointId: data.id,
+                        body: data,
+                        'Content-Type': 'application/json'
+                    }, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+            }).catch(AuthClient.unauthorizedErrorHandler);
     }
 
 
-    addDocument(api_id,body) {
+    addDocument(api_id, body) {
 
-            var promised_addDocument = this.client.then(
-                (client) => {
-                    let payload = {apiId: api_id, body:body,"Content-Type": "application/json"};
-                    return client["Document (Collection)"].post_apis_apiId_documents(
-                        payload, this._requestMetaData());
-                }
-            ).catch(AuthClient.unauthorizedErrorHandler);
+        var promised_addDocument = this.client.then(
+            (client) => {
+                let payload = {apiId: api_id, body: body, "Content-Type": "application/json"};
+                return client["Document (Collection)"].post_apis_apiId_documents(
+                    payload, this._requestMetaData());
+            }
+        ).catch(AuthClient.unauthorizedErrorHandler);
 
-            return promised_addDocument;
-        }
+        return promised_addDocument;
+    }
 
-    addFileToDocument(api_id,docId,fileToDocument) {
-            var promised_addFileToDocument = this.client.then(
-                (client) => {
-                    let payload = {apiId: api_id, documentId: docId, file:fileToDocument, "Content-Type": "application/json"};
-                    return client["Document (Individual)"].post_apis_apiId_documents_documentId_content(
-                        payload, this._requestMetaData({"Content-Type": "multipart/form-data"}));
-                }
-            ).catch(AuthClient.unauthorizedErrorHandler);
+    addFileToDocument(api_id, docId, fileToDocument) {
+        var promised_addFileToDocument = this.client.then(
+            (client) => {
+                let payload = {
+                    apiId: api_id,
+                    documentId: docId,
+                    file: fileToDocument,
+                    "Content-Type": "application/json"
+                };
+                return client["Document (Individual)"].post_apis_apiId_documents_documentId_content(
+                    payload, this._requestMetaData({"Content-Type": "multipart/form-data"}));
+            }
+        ).catch(AuthClient.unauthorizedErrorHandler);
 
-            return promised_addFileToDocument;
-     }
+        return promised_addFileToDocument;
+    }
 
-    getFileForDocument(api_id,docId){
-            var promised_getDocContent = this.client.then(
-                (client) => {
-                    let payload = {apiId: api_id, documentId: docId, "Accept":"application/octet-stream"};
-                    return client["Document (Individual)"].get_apis_apiId_documents_documentId_content(
-                        payload, this._requestMetaData({"Content-Type": "multipart/form-data"}));
-                }
-            ).catch(AuthClient.unauthorizedErrorHandler);
+    getFileForDocument(api_id, docId) {
+        var promised_getDocContent = this.client.then(
+            (client) => {
+                let payload = {apiId: api_id, documentId: docId, "Accept": "application/octet-stream"};
+                return client["Document (Individual)"].get_apis_apiId_documents_documentId_content(
+                    payload, this._requestMetaData({"Content-Type": "multipart/form-data"}));
+            }
+        ).catch(AuthClient.unauthorizedErrorHandler);
 
-            return promised_getDocContent;
+        return promised_getDocContent;
 
     }
 
 
     getDocuments(api_id, callback) {
-            var promise_get_all = this.client.then(
-                (client) => {
-                    return client["Document (Collection)"].get_apis_apiId_documents({apiId: api_id}, this._requestMetaData()).
-                    catch(AuthClient.unauthorizedErrorHandler);
-                }
-            );
-            if (callback) {
-                return promise_get_all.catch(AuthClient.unauthorizedErrorHandler).then(callback);
-            } else {
-                return promise_get_all;
+        var promise_get_all = this.client.then(
+            (client) => {
+                return client["Document (Collection)"].get_apis_apiId_documents({apiId: api_id}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
             }
+        );
+        if (callback) {
+            return promise_get_all.catch(AuthClient.unauthorizedErrorHandler).then(callback);
+        } else {
+            return promise_get_all;
+        }
     }
 
     updateDocument(api_id, docId, body) {
-            var promised_updateDocument = this.client.then(
-                (client) => {
-                   let payload = {apiId: api_id, body:body, documentId:$('#docId').val(),"Content-Type": "application/json"};
-                       return client["Document (Individual)"].put_apis_apiId_documents_documentId(
-                            payload, this._requestMetaData());
-                   }
-                ).catch(AuthClient.unauthorizedErrorHandler);
-                return promised_updateDocument;
+        var promised_updateDocument = this.client.then(
+            (client) => {
+                let payload = {
+                    apiId: api_id,
+                    body: body,
+                    documentId: $('#docId').val(),
+                    "Content-Type": "application/json"
+                };
+                return client["Document (Individual)"].put_apis_apiId_documents_documentId(
+                    payload, this._requestMetaData());
             }
+        ).catch(AuthClient.unauthorizedErrorHandler);
+        return promised_updateDocument;
+    }
 
     getDocument(api_id, docId, callback) {
-            var promise_get = this.client.then(
-                (client) => {
-                    return client["Document (Individual)"].get_apis_apiId_documents_documentId({apiId: api_id, documentId: docId},
+        var promise_get = this.client.then(
+            (client) => {
+                return client["Document (Individual)"].get_apis_apiId_documents_documentId({
+                        apiId: api_id,
+                        documentId: docId
+                    },
                     this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
-                }
-            );
-            return promise_get;
+            }
+        );
+        return promise_get;
     }
 
 
-    deleteDocument(api_id,document_id) {
-            var promise_deleteDocument = this.client.then(
-                (client) => {
-                    return client["Document (Individual)"].delete_apis_apiId_documents_documentId({apiId: api_id, documentId:document_id},
+    deleteDocument(api_id, document_id) {
+        var promise_deleteDocument = this.client.then(
+            (client) => {
+                return client["Document (Individual)"].delete_apis_apiId_documents_documentId({
+                        apiId: api_id,
+                        documentId: document_id
+                    },
                     this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
-                }
-            );
-            return promise_deleteDocument;
+            }
+        );
+        return promise_deleteDocument;
     }
+
     /**
      * Get the available labels.
      * @returns {Promise.<TResult>}
      */
     labels() {
-        var promise_labels = this.client.then (
+        var promise_labels = this.client.then(
             (client) => {
                 return client["Label (Collection)"].get_labels({},
                     this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
