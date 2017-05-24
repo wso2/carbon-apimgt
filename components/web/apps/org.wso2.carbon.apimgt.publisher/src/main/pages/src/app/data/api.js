@@ -184,7 +184,6 @@ class API {
         this.auth_client = new AuthClient();
         this.client.then(
             (swagger) => {
-                debugger;
                 swagger.setHost(location.host);
                 this.keyMan = new KeyManager(access_key);
                 let scopes = swagger.swaggerObject["x-wso2-security"].apim["x-wso2-scopes"];
@@ -347,7 +346,7 @@ class API {
      * @param callback {function} A callback function to invoke after receiving successful response.
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    getAll(callback) {
+    getAll(callback = null) {
         var promise_get_all = this.client.then(
             (client) => {
                 return client["API (Collection)"].get_apis({}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
