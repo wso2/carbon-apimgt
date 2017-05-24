@@ -79,11 +79,8 @@ import org.wso2.carbon.lcm.sql.beans.LifecycleHistoryBean;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.ProtocolException;
-import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -1336,44 +1333,24 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
     }
 
-    /**
-     * @see org.wso2.carbon.apimgt.core.api.APIPublisher#addApiFromDefinition(String)
-     */
     @Override
-    public String addApiFromDefinition(String swaggerResourceUrl) throws APIManagementException {
-        URL url;
-        HttpURLConnection urlConn;
+    public String addApiFromDefinition(HttpURLConnection urlConn) throws APIManagementException {
         try {
-            url = new URL(swaggerResourceUrl);
-            urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
             urlConn.setRequestMethod(APIMgtConstants.HTTP_GET);
+            urlConn.connect();
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {
-                String responseStr = new String(IOUtils.toByteArray(urlConn.getInputStream()), "UTF-8");
-                API.APIBuilder apiBuilder = apiDefinitionFromSwagger20.generateApiFromSwaggerResource(getUsername(),
-                        responseStr);
-                apiBuilder.corsConfiguration(new CorsConfiguration());
-                apiBuilder.apiDefinition(responseStr);
-                addAPI(apiBuilder);
-                return apiBuilder.getId();
+                return addApiFromDefinition(urlConn.getInputStream());
             } else {
-                throw new APIManagementException("Error while getting swagger resource from url : " + url,
+                throw new APIManagementException("Error while getting swagger resource from url : " + urlConn.getURL(),
                         ExceptionCodes.API_DEFINITION_MALFORMED);
             }
-        } catch (UnsupportedEncodingException e) {
-            String msg = "Unsupported encoding exception while getting the swagger resource from url";
-            log.error(msg, e);
-            throw new APIManagementException(msg, ExceptionCodes.API_DEFINITION_MALFORMED);
         } catch (ProtocolException e) {
             String msg = "Protocol exception while getting the swagger resource from url";
             log.error(msg, e);
             throw new APIManagementException(msg, ExceptionCodes.API_DEFINITION_MALFORMED);
-        } catch (MalformedURLException e) {
-            String msg = "Malformed url while getting the swagger resource from url";
-            log.error(msg, e);
-            throw new APIManagementException(msg, ExceptionCodes.API_DEFINITION_MALFORMED);
-        } catch (IOException e) {
+        }  catch (IOException e) {
             String msg = "Error while getting the swagger resource from url";
             log.error(msg, e);
             throw new APIManagementException(msg, ExceptionCodes.API_DEFINITION_MALFORMED);

@@ -62,7 +62,7 @@ public class APIMConfigurations {
             "deployment" + File.separator + "org" + File.separator + "wso2" + File.separator + "apim";
 
     @Element(description = "label extractor")
-    private String labelExtractorImpleClass = "org.wso2.carbon.apimgt.core.impl.DefaultLabelExtractorImpl";
+    private String labelExtractorImplClass = "org.wso2.carbon.apimgt.core.impl.DefaultLabelExtractorImpl";
 
     @Element(description = "Key Manager Configurations")
     private KeyMgtConfigurations keyManagerConfigs = new KeyMgtConfigurations();
@@ -78,8 +78,8 @@ public class APIMConfigurations {
         return reverseProxyEnabled;
     }
 
-    public String getLabelExtractorImpleClass() {
-        return labelExtractorImpleClass;
+    public String getLabelExtractorImplClass() {
+        return labelExtractorImplClass;
     }
 
     public String getPublisherContext() {
