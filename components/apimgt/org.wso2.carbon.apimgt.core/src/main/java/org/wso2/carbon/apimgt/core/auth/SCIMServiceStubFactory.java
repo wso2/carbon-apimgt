@@ -23,9 +23,9 @@ import feign.Feign;
 import feign.auth.BasicAuthRequestInterceptor;
 import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.configuration.models.IdentityProviderConfigurations;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.util.AMSSLSocketFactory;
 
 /**
@@ -33,17 +33,15 @@ import org.wso2.carbon.apimgt.core.util.AMSSLSocketFactory;
  */
 public class SCIMServiceStubFactory {
 
-    private static final Logger log = LoggerFactory.getLogger(SCIMServiceStubFactory.class);
-
     private static final String WSO2_SCIM_BASE_PATH = "/wso2/scim";
-    private static final String DEFAULT_IDP_BASE_URL = "https://localhost:9443";
-    private static final String DEFAULT_IDP_USERNAME = "admin";
-    private static final String DEFAULT_IDP_PASSWORD = "admin";
     private static final String DEFAULT_IDP_CERT_ALIAS = "wso2carbon";
 
     public static SCIMServiceStub getSCIMServiceStub() throws APIManagementException {
-        //todo: check configs for idp url
-        return getSCIMServiceStub(DEFAULT_IDP_BASE_URL, DEFAULT_IDP_USERNAME, DEFAULT_IDP_PASSWORD,
+        IdentityProviderConfigurations idpConfigs = ServiceReferenceHolder.getInstance().getAPIMConfiguration()
+                .getIdentityProviderConfigs();
+        return getSCIMServiceStub(idpConfigs.getIdentityProviderBaseUrl(),
+                idpConfigs.getIdentityProviderCredentials().getUsername(),
+                idpConfigs.getIdentityProviderCredentials().getUsername(),
                 DEFAULT_IDP_CERT_ALIAS);
     }
 

@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.core;
+package org.wso2.carbon.apimgt.core.configuration.models;
 /*
  * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -19,7 +19,6 @@ package org.wso2.carbon.apimgt.core;
 
 import org.wso2.carbon.kernel.annotations.Configuration;
 import org.wso2.carbon.kernel.annotations.Element;
-
 
 import java.io.File;
 
@@ -63,12 +62,13 @@ public class APIMConfigurations {
             "deployment" + File.separator + "org" + File.separator + "wso2" + File.separator + "apim";
 
     @Element(description = "label extractor")
-    private String labelExtractor = "org.wso2.carbon.apimgt.core.impl.DefaultLabelExtractorImpl";
+    private String labelExtractorImplClass = "org.wso2.carbon.apimgt.core.impl.DefaultLabelExtractorImpl";
 
-    @Element(description = "Key Manager Implementation")
-    private String keyManagerImplClass = "org.wso2.carbon.apimgt.core.impl.DefaultKeyManagerImpl";
-    @Element(description = "Identity Provider Implementation")
-    private String idpImplClass = "org.wso2.carbon.apimgt.core.impl.DefaultIdentityProviderImpl";
+    @Element(description = "Key Manager Configurations")
+    private KeyMgtConfigurations keyManagerConfigs = new KeyMgtConfigurations();
+
+    @Element(description = "Identity Provider Configurations")
+    private IdentityProviderConfigurations identityProviderConfigs = new IdentityProviderConfigurations();
 
     public String getHostname() {
         return hostname;
@@ -78,8 +78,8 @@ public class APIMConfigurations {
         return reverseProxyEnabled;
     }
 
-    public String getLabelExtractor() {
-        return labelExtractor;
+    public String getLabelExtractorImplClass() {
+        return labelExtractorImplClass;
     }
 
     public String getPublisherContext() {
@@ -134,11 +134,11 @@ public class APIMConfigurations {
         return gatewayPackageNamePath;
     }
 
-    public String getKeyManagerImplClass() {
-        return keyManagerImplClass;
+    public KeyMgtConfigurations getKeyManagerConfigs() {
+        return keyManagerConfigs;
     }
 
-    public String getIdpImplClass() {
-        return idpImplClass;
+    public IdentityProviderConfigurations getIdentityProviderConfigs() {
+        return identityProviderConfigs;
     }
 }
