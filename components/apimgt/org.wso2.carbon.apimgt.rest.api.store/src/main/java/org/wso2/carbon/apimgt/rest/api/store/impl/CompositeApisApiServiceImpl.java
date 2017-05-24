@@ -8,6 +8,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
@@ -95,7 +96,7 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
             }
 
             CompositeAPIDTO apidto = CompositeAPIMappingUtil.toCompositeAPIDTO(RestApiUtil.getConsumer(username).
-                    getAPIbyUUID(apiId));
+                    getCompositeAPIbyId(apiId));
             return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"")
                                                                             .entity(apidto).build();
         } catch (APIManagementException e) {
@@ -132,11 +133,11 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
             }
 
-            API.APIBuilder api = CompositeAPIMappingUtil.toAPI(body).id(apiId);
+            CompositeAPI.Builder api = CompositeAPIMappingUtil.toAPI(body).id(apiId);
             apiStore.updateCompositeApi(api);
 
             String newFingerprint = compositeApisApiIdGetFingerprint(apiId, null, null, null, request);
-            CompositeAPIDTO apidto = CompositeAPIMappingUtil.toCompositeAPIDTO(apiStore.getAPIbyUUID(apiId));
+            CompositeAPIDTO apidto = CompositeAPIMappingUtil.toCompositeAPIDTO(apiStore.getCompositeAPIbyId(apiId));
             return Response.ok().header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"").entity(apidto).build();
         } catch (APIManagementException e) {
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -221,7 +222,7 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
         CompositeAPIListDTO apiListDTO = null;
         try {
             apiListDTO = CompositeAPIMappingUtil.toCompositeAPIListDTO(RestApiUtil.getConsumer(username).
-                                                                    searchAPIs(query, offset, limit));
+                    searchCompositeAPIs(query, offset, limit));
             return Response.ok().entity(apiListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving APIs";
@@ -236,10 +237,10 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
             throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
-            API.APIBuilder apiBuilder = CompositeAPIMappingUtil.toAPI(body);
+            CompositeAPI.Builder apiBuilder = CompositeAPIMappingUtil.toAPI(body);
             APIStore apiStore = RestApiUtil.getConsumer(username);
             apiStore.addCompositeApi(apiBuilder);
-            API returnAPI = apiStore.getAPIbyUUID(apiBuilder.getId());
+            CompositeAPI returnAPI = apiStore.getCompositeAPIbyId(apiBuilder.build().getId());
             return Response.status(Response.Status.CREATED).
                     entity(CompositeAPIMappingUtil.toCompositeAPIDTO(returnAPI)).build();
         } catch (APIManagementException e) {

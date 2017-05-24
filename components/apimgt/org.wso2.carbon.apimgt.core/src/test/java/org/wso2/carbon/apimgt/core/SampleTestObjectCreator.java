@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.Comment;
+import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
@@ -344,6 +345,35 @@ public class SampleTestObjectCreator {
 
         return apiBuilder;
     }
+
+    public static CompositeAPI.Builder createUniqueCompositeAPI() {
+        Set<String> transport = new HashSet<>();
+        transport.add(HTTP);
+
+        HashMap permissionMap = new HashMap();
+        permissionMap.put("1000", 6);
+        permissionMap.put("1001", 4);
+
+        CompositeAPI.Builder apiBuilder = new CompositeAPI.Builder().
+                id(UUID.randomUUID().toString()).
+                name(UUID.randomUUID().toString()).
+                provider(UUID.randomUUID().toString()).
+                version(API_VERSION).
+                context(UUID.randomUUID().toString()).
+                description("Get Food & Beverage Info").
+                transport(transport).
+                permissionMap(permissionMap).
+                applicationId(UUID.randomUUID().toString()).
+                createdTime(LocalDateTime.now()).
+                createdBy(API_CREATOR).
+                uriTemplates(Collections.emptyMap()).
+                apiDefinition(apiDefinition).
+                lastUpdatedTime(LocalDateTime.now());
+
+        return apiBuilder;
+    }
+
+
 
     public static API.APIBuilder createCustomAPI(String name, String version, String context) {
         API.APIBuilder apiBuilder = createDefaultAPI();

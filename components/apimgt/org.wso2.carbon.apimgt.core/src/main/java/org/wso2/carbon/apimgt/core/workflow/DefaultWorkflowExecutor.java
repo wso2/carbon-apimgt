@@ -33,12 +33,9 @@ public class DefaultWorkflowExecutor implements WorkflowExecutor {
     private static final Log log = LogFactory.getLog(DefaultWorkflowExecutor.class);
 
     /**
-     * Execute the workflow executor
-     *
-     * @param workFlow
-     * @throws WorkflowException
+     * {@inheritDoc}
      */
-
+    @Override
     public WorkflowResponse execute(Workflow workFlow) throws WorkflowException {
         if (log.isDebugEnabled()) {
             log.debug("Executing execute() in Workflow for " + workFlow.getWorkflowType());

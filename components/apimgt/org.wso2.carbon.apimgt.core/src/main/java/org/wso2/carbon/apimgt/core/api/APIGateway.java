@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 
@@ -37,6 +38,14 @@ public interface APIGateway {
     void addAPI(API api) throws GatewayException;
 
     /**
+     * Add CompositeAPI in gateway
+     *
+     * @param api   CompositeAPI artifact
+     * @throws GatewayException     If there is a failure while adding CompositeAPI to gateway
+     */
+    void addCompositeAPI(CompositeAPI api) throws GatewayException;
+
+    /**
      * Update API in gateway
      *
      * @param api   API artifact
@@ -51,6 +60,14 @@ public interface APIGateway {
      * @throws GatewayException     If there is a failure to delete API in gateway
      */
     void deleteAPI(API api) throws GatewayException;
+
+    /**
+     * Delete CompositeAPI in gateway
+     *
+     * @param api   API artifact
+     * @throws GatewayException     If there is a failure to delete API in gateway
+     */
+    void deleteCompositeAPI(CompositeAPI api) throws GatewayException;
 
     /**
      * Add API subscription to gateway

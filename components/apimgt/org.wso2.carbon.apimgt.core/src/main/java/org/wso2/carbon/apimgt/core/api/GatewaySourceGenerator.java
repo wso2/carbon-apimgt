@@ -18,8 +18,8 @@
 */
 package org.wso2.carbon.apimgt.core.api;
 
-import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.template.APIConfigContext;
 import org.wso2.carbon.apimgt.core.template.APITemplateException;
 import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
 
@@ -66,8 +66,8 @@ public interface GatewaySourceGenerator {
     String getSwaggerFromGatewayConfig(String gatewayConfig) throws APITemplateException;
 
     /**
-     * Used to set API Object.
-     * @param api
+     * Used to set API Config context.
+     * @param apiConfigContext  APIConfigContext instance
      */
-    public void setAPI(API api);
+    void setApiConfigContext(APIConfigContext apiConfigContext);
 }

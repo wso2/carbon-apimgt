@@ -31,7 +31,6 @@ import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
-import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
@@ -244,7 +243,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user))
                 .thenReturn(new LifecycleState());
         Mockito.when(apiDAO.isAPIContextExists("weather")).thenReturn(true);
-        Mockito.when(apiDAO.isAPINameExists("WeatherAPI", user, ApiType.STANDARD)).thenReturn(false);
+        Mockito.when(apiDAO.isAPINameExists("WeatherAPI", user)).thenReturn(false);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager);
         apiPublisher.addAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
@@ -259,7 +258,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user))
                 .thenReturn(new LifecycleState());
         Mockito.when(apiDAO.isAPIContextExists("weather")).thenReturn(false);
-        Mockito.when(apiDAO.isAPINameExists("WeatherAPI", user, ApiType.STANDARD)).thenReturn(true);
+        Mockito.when(apiDAO.isAPINameExists("WeatherAPI", user)).thenReturn(true);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager);
         apiPublisher.addAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
@@ -393,12 +392,12 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
         List<API> apimResultsFromDAO = new ArrayList<>();
-        Mockito.when(apiDAO.searchAPIs(new HashSet<>(), user, QUERY_STRING, ApiType.STANDARD, 1, 2)).
+        Mockito.when(apiDAO.searchAPIs(new HashSet<>(), user, QUERY_STRING, 1, 2)).
                 thenReturn(apimResultsFromDAO);
         List<API> apis = apiPublisher.searchAPIs(2, 1, QUERY_STRING);
         Assert.assertNotNull(apis);
         Mockito.verify(apiDAO, Mockito.atLeastOnce()).searchAPIs(APIUtils.getAllRolesOfUser(user),
-                user, QUERY_STRING, ApiType.STANDARD, 1, 2);
+                user, QUERY_STRING, 1, 2);
     }
 
     @Test(description = "Search APIs with null query string")
@@ -406,37 +405,19 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
         List<API> apimResultsFromDAO = new ArrayList<>();
-        Mockito.when(apiDAO.searchAPIs(new HashSet<>(), user, null, ApiType.STANDARD, 1, 2)).
+        Mockito.when(apiDAO.searchAPIs(new HashSet<>(), user, null, 1, 2)).
                 thenReturn(apimResultsFromDAO);
         apiPublisher.searchAPIs(2, 1, null);
-        Mockito.verify(apiDAO, Mockito.times(1)).getAPIs(ApiType.STANDARD);
+        Mockito.verify(apiDAO, Mockito.times(1)).getAPIs();
     }
 
     @Test(description = "Exception when searching APIs", expectedExceptions = APIManagementException.class)
     public void testSearchAPIsException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
-        Mockito.when(apiDAO.searchAPIs(APIUtils.getAllRolesOfUser(user), user, QUERY_STRING, ApiType.STANDARD, 1, 2))
+        Mockito.when(apiDAO.searchAPIs(APIUtils.getAllRolesOfUser(user), user, QUERY_STRING, 1, 2))
                 .thenThrow(new APIMgtDAOException("Error occurred while Searching the API with query pizza"));
         apiPublisher.searchAPIs(2, 1, QUERY_STRING);
-    }
-
-    @Test(description = "Get APIs by provider")
-    public void testGetAPIsByProvider() throws APIManagementException {
-        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
-        Mockito.when(apiDAO.getAPIsForProvider(user, ApiType.STANDARD)).thenReturn(new ArrayList<API>());
-        apiPublisher.getAPIsByProvider(user, ApiType.STANDARD);
-        Mockito.verify(apiDAO, Mockito.times(1)).getAPIsForProvider(user, ApiType.STANDARD);
-    }
-
-    @Test(description = "Exception when get APIs by provider", expectedExceptions = APIManagementException.class)
-    public void testGetAPIsByProviderException() throws APIManagementException {
-        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
-        Mockito.when(apiDAO.getAPIsForProvider(user, ApiType.STANDARD))
-                .thenThrow(new APIMgtDAOException("Unable to fetch APIs of " + user));
-        apiPublisher.getAPIsByProvider(user, ApiType.STANDARD);
     }
 
     @Test(description = "Get subscriptions for a provider's APIs")
@@ -1754,14 +1735,14 @@ public class APIPublisherImplTestCase {
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator);
         Mockito.when(apiDAO.getEndpoint(globalEndpoint.getId())).thenReturn(globalEndpoint);
         Mockito.when(apiDAO.getEndpointByName(apiEndpoint.getName())).thenReturn(null);
-        Mockito.when(apiDAO.isAPINameExists(apiBuilder.getName(), user, ApiType.STANDARD)).thenReturn(false);
+        Mockito.when(apiDAO.isAPINameExists(apiBuilder.getName(), user)).thenReturn(false);
         Mockito.when(apiDAO.isEndpointAssociated(globalEndpoint.getId())).thenReturn(true);
         apiPublisher.addAPI(apiBuilder);
         apiPublisher.deleteEndpoint(globalEndpoint.getId());
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
         Mockito.verify(apiLifecycleManager, Mockito.times(1)).addLifecycle(APIMgtConstants.API_LIFECYCLE, user);
         Mockito.verify(apiDAO, Mockito.times(1)).getEndpointByName(apiEndpoint.getName());
-        Mockito.verify(apiDAO, Mockito.times(1)).isAPINameExists(apiBuilder.getName(), user, ApiType.STANDARD);
+        Mockito.verify(apiDAO, Mockito.times(1)).isAPINameExists(apiBuilder.getName(), user);
     }
 
     @Test(description = "Test add api with Api Specific Endpoint", expectedExceptions = {APIManagementException.class})
@@ -1785,12 +1766,12 @@ public class APIPublisherImplTestCase {
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator);
         Mockito.when(apiDAO.getEndpoint(globalEndpoint.getId())).thenReturn(globalEndpoint);
         Mockito.when(apiDAO.getEndpointByName(apiEndpoint.getName())).thenReturn(apiEndpoint);
-        Mockito.when(apiDAO.isAPINameExists(apiBuilder.getName(), user, ApiType.STANDARD)).thenReturn(false);
+        Mockito.when(apiDAO.isAPINameExists(apiBuilder.getName(), user)).thenReturn(false);
         apiPublisher.addAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
         Mockito.verify(apiLifecycleManager, Mockito.times(1)).addLifecycle(APIMgtConstants.API_LIFECYCLE, user);
         Mockito.verify(apiDAO, Mockito.times(1)).getEndpointByName(apiEndpoint.getName());
-        Mockito.verify(apiDAO, Mockito.times(1)).isAPINameExists(apiBuilder.getName(), user, ApiType.STANDARD);
+        Mockito.verify(apiDAO, Mockito.times(1)).isAPINameExists(apiBuilder.getName(), user);
     }
 
     @Test(description = "Test add api with Api Specific Endpoint", expectedExceptions = {APIManagementException.class})
@@ -1814,7 +1795,7 @@ public class APIPublisherImplTestCase {
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator);
         Mockito.when(apiDAO.getEndpoint(globalEndpoint.getId())).thenReturn(globalEndpoint);
         Mockito.when(apiDAO.getEndpointByName(apiEndpoint.getName())).thenThrow(APIMgtDAOException.class);
-        Mockito.when(apiDAO.isAPINameExists(apiBuilder.getName(), user, ApiType.STANDARD)).thenReturn(false);
+        Mockito.when(apiDAO.isAPINameExists(apiBuilder.getName(), user)).thenReturn(false);
         apiPublisher.addAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
         Mockito.verify(apiDAO, Mockito.times(1)).getEndpointByName(apiEndpoint.getName());
@@ -1854,7 +1835,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiDAO.getEndpoint(globalEndpoint.getId())).thenReturn(globalEndpoint);
         Mockito.when(apiDAO.getEndpointByName(apiEndpoint.getName())).thenReturn(null);
         Mockito.when(apiDAO.getEndpointByName(resourceEndpoint.getName())).thenReturn(null);
-        Mockito.when(apiDAO.isAPINameExists(apiBuilder.getName(), user, ApiType.STANDARD)).thenReturn(false);
+        Mockito.when(apiDAO.isAPINameExists(apiBuilder.getName(), user)).thenReturn(false);
         apiPublisher.addAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
         Mockito.verify(apiDAO, Mockito.times(1)).getEndpointByName(apiEndpoint.getName());
@@ -1896,7 +1877,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiDAO.getEndpoint(globalEndpoint.getId())).thenReturn(globalEndpoint);
         Mockito.when(apiDAO.getEndpointByName(apiEndpoint.getName())).thenReturn(null);
         Mockito.when(apiDAO.getEndpointByName(resourceEndpoint.getName())).thenReturn(resourceEndpoint);
-        Mockito.when(apiDAO.isAPINameExists(apiBuilder.getName(), user, ApiType.STANDARD)).thenReturn(false);
+        Mockito.when(apiDAO.isAPINameExists(apiBuilder.getName(), user)).thenReturn(false);
         apiPublisher.addAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
         Mockito.verify(apiDAO, Mockito.times(1)).getEndpointByName(apiEndpoint.getName());
@@ -1937,7 +1918,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiDAO.getEndpoint(globalEndpoint.getId())).thenReturn(globalEndpoint);
         Mockito.when(apiDAO.getEndpointByName(apiEndpoint.getName())).thenReturn(null);
         Mockito.when(apiDAO.getEndpointByName(resourceEndpoint.getName())).thenThrow(APIMgtDAOException.class);
-        Mockito.when(apiDAO.isAPINameExists(apiBuilder.getName(), user, ApiType.STANDARD)).thenReturn(false);
+        Mockito.when(apiDAO.isAPINameExists(apiBuilder.getName(), user)).thenReturn(false);
         apiPublisher.addAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
         Mockito.verify(apiDAO, Mockito.times(1)).getEndpointByName(apiEndpoint.getName());
@@ -1981,7 +1962,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiDAO.getEndpoint(globalEndpoint.getId())).thenReturn(globalEndpoint);
         Mockito.when(apiDAO.getEndpointByName(apiEndpoint.getName())).thenReturn(null);
         Mockito.when(apiDAO.getEndpointByName(resourceEndpoint.getName())).thenReturn(null);
-        Mockito.when(apiDAO.isAPINameExists(apiBuilder.getName(), user, ApiType.STANDARD)).thenReturn(false);
+        Mockito.when(apiDAO.isAPINameExists(apiBuilder.getName(), user)).thenReturn(false);
         apiPublisher.addAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
         Mockito.verify(apiDAO, Mockito.times(1)).getEndpointByName(apiEndpoint.getName());

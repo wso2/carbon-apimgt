@@ -21,7 +21,6 @@ import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
-import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
@@ -310,7 +309,7 @@ public class AbstractAPIManagerTestCase {
     public void testIsApiNameExistException() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
         AbstractAPIManager apiPublisher = getApiPublisherImpl(apiDAO);
-        when(apiDAO.isAPINameExists(API_NAME, USER_NAME, ApiType.STANDARD))
+        when(apiDAO.isAPINameExists(API_NAME, USER_NAME))
                 .thenThrow(new APIMgtDAOException("Couldn't check API Name " + API_NAME + " Exists."));
         apiPublisher.isApiNameExist(API_NAME);
     }

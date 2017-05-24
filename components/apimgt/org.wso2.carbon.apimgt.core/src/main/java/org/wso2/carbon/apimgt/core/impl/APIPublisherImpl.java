@@ -34,7 +34,6 @@ import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
-import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
@@ -62,6 +61,7 @@ import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
+import org.wso2.carbon.apimgt.core.template.APIConfigContext;
 import org.wso2.carbon.apimgt.core.template.APITemplateException;
 import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
@@ -129,7 +129,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @param limit Number of search results returned
      * @param providerName if of the provider
      * @return {@code List<Subscriber>} List of subscriptions for provider's APIs
-     * @throws APIManagementException
+     * @throws APIManagementException if failed to get subscriptions
      */
     @Override
     public List<Subscription> getSubscribersOfProvider(int offset, int limit, String providerName)
@@ -251,7 +251,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
                 Map<String, UriTemplate> uriTemplateMap = new HashMap();
                 if (apiBuilder.getUriTemplates().isEmpty()) {
-                    apiDefinitionFromSwagger20.setDefaultSwaggerDefinition(apiBuilder);
+                    apiBuilder.uriTemplates(APIUtils.getDefaultUriTemplates());
+                    apiBuilder.apiDefinition(apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder));
                 } else {
                     for (UriTemplate uriTemplate : apiBuilder.getUriTemplates().values()) {
                         UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder
@@ -324,7 +325,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     resourceList.add(dto);
                 }
                 GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
-                gatewaySourceGenerator.setAPI(apiBuilder.build());
+                APIConfigContext apiConfigContext = new APIConfigContext(apiBuilder.getName(), apiBuilder.getContext(),
+                        apiBuilder.getVersion(), apiBuilder.getCreatedTime(), config.getGatewayPackageName());
+                gatewaySourceGenerator.setApiConfigContext(apiConfigContext);
                 String gatewayConfig = gatewaySourceGenerator.getConfigStringFromTemplate(resourceList);
                 if (log.isDebugEnabled()) {
                     log.debug("API " + apiBuilder.getName() + "gateway config: " + gatewayConfig);
@@ -445,7 +448,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     String updatedSwagger = apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder);
                     String gatewayConfig = getApiGatewayConfig(apiBuilder.getId());
                     GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
-                    gatewaySourceGenerator.setAPI(apiBuilder.build());
+                    APIConfigContext apiConfigContext = new APIConfigContext(apiBuilder.getName(),
+                            apiBuilder.getContext(),
+                            apiBuilder.getVersion(), apiBuilder.getCreatedTime(), config.getGatewayPackageName());
+                    gatewaySourceGenerator.setApiConfigContext(apiConfigContext);
                     String updatedGatewayConfig = gatewaySourceGenerator
                             .getGatewayConfigFromSwagger(gatewayConfig, updatedSwagger);
 
@@ -1074,9 +1080,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 String user = "admin";
                 Set<String> roles = APIUtils.getAllRolesOfUser(user);
                 //TODO get the logged in user and user roles from key manager.
-                apiResults = getApiDAO().searchAPIs(roles, user, query, ApiType.STANDARD, offset, limit);
+                apiResults = getApiDAO().searchAPIs(roles, user, query, offset, limit);
             } else {
-                apiResults = getApiDAO().getAPIs(ApiType.STANDARD);
+                apiResults = getApiDAO().getAPIs();
             }
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while Searching the API with query " + query;
