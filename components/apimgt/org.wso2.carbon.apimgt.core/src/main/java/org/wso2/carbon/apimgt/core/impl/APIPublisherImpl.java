@@ -1339,13 +1339,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             urlConn.connect();
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {
-                String responseStr = new String(IOUtils.toByteArray(urlConn.getInputStream()), "UTF-8");
-                API.APIBuilder apiBuilder = apiDefinitionFromSwagger20.generateApiFromSwaggerResource(getUsername(),
-                        responseStr);
-                apiBuilder.corsConfiguration(new CorsConfiguration());
-                apiBuilder.apiDefinition(responseStr);
-                addAPI(apiBuilder);
-                return apiBuilder.getId();
+                return addApiFromDefinition(urlConn.getInputStream());
             } else {
                 throw new APIManagementException("Error while getting swagger resource from url : " + urlConn.getURL(),
                         ExceptionCodes.API_DEFINITION_MALFORMED);

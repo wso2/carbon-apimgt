@@ -1625,6 +1625,24 @@ public class APIPublisherImplTestCase {
         Mockito.verify(apiLifecycleManager, Mockito.times(1)).addLifecycle(APIMgtConstants.API_LIFECYCLE, user);
     }
 
+    @Test(description = "Add api from definition using httpUrlConnection")
+    public void testAddApiFromDefinitionFromUrlConnection()
+            throws APIManagementException, LifecycleException, IOException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
+        HttpURLConnection httpURLConnection = Mockito.mock(HttpURLConnection.class);
+        Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, user))
+                .thenReturn(new LifecycleState());
+        GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator);
+        String def = SampleTestObjectCreator.apiDefinition;
+        InputStream apiDefinition = new ByteArrayInputStream(def.getBytes());
+        Mockito.when(httpURLConnection.getInputStream()).thenReturn(apiDefinition);
+        Mockito.when(httpURLConnection.getResponseCode()).thenReturn(200);
+        apiPublisher.addApiFromDefinition(httpURLConnection);
+        Mockito.verify(apiLifecycleManager, Mockito.times(1)).addLifecycle(APIMgtConstants.API_LIFECYCLE, user);
+    }
+
     @Test(description = "Couldn't retrieve swagger definition for api when getting api gateway config",
             expectedExceptions = APIManagementException.class)
     public void testGetApiGatewayConfigException() throws APIManagementException {
