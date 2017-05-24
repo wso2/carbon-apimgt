@@ -27,13 +27,14 @@ public class SelfSignupApiServiceImpl extends SelfSignupApiService {
             apiStore.selfSignUp(MiscMappingUtil.fromUserDTOToUser(body));
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while user signup: " + body.getUsername();
-            HashMap<String, String> paramList = new HashMap<String, String>();
+            HashMap<String, String> paramList = new HashMap<>();
             paramList.put(APIMgtConstants.ExceptionsConstants.USERNAME, body.getUsername());
-            paramList.put(APIMgtConstants.ExceptionsConstants.EMAIL, body.getEmail());
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            errorDTO.setDescription(e.getMessage());
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-        return Response.ok().build();
+        body.setPassword(null);
+        return Response.ok(body).build();
     }
 }

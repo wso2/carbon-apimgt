@@ -18,7 +18,10 @@
 
 package org.wso2.carbon.apimgt.core.impl;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import feign.Response;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
@@ -78,18 +81,39 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
     public void registerUser(User user) throws IdentityProviderException {
         SCIMUser scimUser = new SCIMUser();
         scimUser.setUsername(user.getUsername());
-        scimUser.setPassword(user.getPassword());
+        scimUser.setPassword(new String(user.getPassword()));
         scimUser.setName(new SCIMUser.SCIMName(user.getFirstName(), user.getLastName()));
         List<SCIMUser.SCIMUserEmails> emails = new ArrayList<>();
         emails.add(new SCIMUser.SCIMUserEmails(user.getEmail(), HOME_EMAIL, true));
         scimUser.setEmails(emails);
         Response response = scimServiceStub.addUser(scimUser);
         if (response == null || response.status() != 201) {
-            String errorMessage = "Error occurred while creating user. "
-                    + ((response == null) ? "response is null" : "Status Code: " + response.status() + ' '
-                    + response.body().toString());
-            throw new IdentityProviderException(errorMessage, ExceptionCodes.USER_CREATION_FAILED);
+            StringBuilder errorMessage = new StringBuilder("Error occurred while creating user. ");
+            if (response == null) {
+                errorMessage.append("Response is null");
+            } else {
+                String msg = getErrorMessage(response);
+                if (!StringUtils.isEmpty(msg)) {
+                    errorMessage.append(msg);
+                }
+            }
+            throw new IdentityProviderException(errorMessage.toString(), ExceptionCodes.USER_CREATION_FAILED);
         }
+    }
+
+    private String getErrorMessage(Response response) {
+        StringBuilder errorMessage = new StringBuilder("");
+        if (response != null && response.body() != null) {
+            try {
+                String errorDescription = new Gson().fromJson(response.body().toString(), JsonElement.class)
+                        .getAsJsonObject().get("Errors").getAsJsonArray().get(0).getAsJsonObject()
+                        .get("description").getAsString();
+                errorMessage.append(errorDescription);
+            } catch (Exception ex) {
+                log.error("Error occurred while parsing error response", ex);
+            }
+        }
+        return errorMessage.toString();
     }
 
 }
