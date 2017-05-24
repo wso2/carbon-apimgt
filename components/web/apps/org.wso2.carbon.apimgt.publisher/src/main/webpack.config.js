@@ -10,6 +10,7 @@ const config = {
     },
     devtool: "source-map",
     plugins: [],
+    watch: false,
     module: {
         rules: [
             {
@@ -27,5 +28,9 @@ const config = {
         ]
     }
 };
+
+if (process.env.NODE_ENV === "development") {
+    config.watch = true;
+}
 
 module.exports = config;
