@@ -1004,6 +1004,16 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 Map<String, String> attributeMap = new HashMap<>();
                 // TODO get the logged in user and user roles from key manager.
                 boolean isFullTextSearch = false;
+                String searchAttribute, searchValue;
+                if (!query.contains(":")) {
+                    isFullTextSearch = true;
+                } else {
+                    searchAttribute = attributes[0].split(":")[0];
+                    searchValue = attributes[0].split(":")[1];
+                    attributeMap.put(searchAttribute, searchValue);
+                }
+
+                /*
                 for (String attribute : attributes) {
                     if (attribute.split(":").length > 1) {
                         attributeMap.put(attribute.split(":")[0], attribute.split(":")[1]);
@@ -1014,10 +1024,11 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                     }
 
                 }
+                */
                 if (isFullTextSearch) {
                     apiResults = getApiDAO().searchAPIs(roles, user, query, ApiType.STANDARD, offset, limit);
                 } else {
-                    apiResults = getApiDAO().attributeSearchAPIsStore(new ArrayList<>(roles),
+                    apiResults = getApiDAO().searchAPIsByAttribute(new ArrayList<>(roles),
                             attributeMap, offset, limit);
                 }
             } else {
