@@ -13,18 +13,17 @@ import ballerina.lang.jsons;
 @http:BasePath {value:"/api1"}
 service Service1 {
     dto:APIKeyValidationInfoDTO keyValidationDto;
-    @http:GET {}
+    @http:POST {}
     @http:Path {value:"/"}
     resource Resource1 (message m) {
         int i = - 1;
         boolean valid;
         valid, m = authenticate(m);
-        if(valid){
-            system:println("KeyValidationInfo : " + messages:getProperty(m, constants:KEY_VALIDATION_INFO));
-            http:ClientConnector client = create http:ClientConnector("http://www.mocky.io");
-            message response = http:ClientConnector.get (client, "/v2/58e253c6250000fa0096ae4d", m);
+        if (valid) {
+            http:ClientConnector client = create http:ClientConnector("http://localhost:8688");
+            message response = http:ClientConnector.post (client, "/api", m);
             reply response;
-        }else{
+        } else {
             reply m;
         }
     }
@@ -35,6 +34,7 @@ function authenticate (message m) (boolean, message) {
     boolean state = false;
     dto:SubscriptionDto subscriptionDto;
     dto:ResourceDto resourceDto;
+    json userInfo;
     boolean introspectCacheHit = true;
     string apiContext = "/api1";
     string version = "1.0.0";
@@ -70,6 +70,13 @@ function authenticate (message m) (boolean, message) {
                         //put into cache
                         holder:putIntoTokenCache(authToken, introspectDto);
                     }
+                    if (introspectDto.username != "") {
+                        userInfo = holder:getFromUserInfoCache(introspectDto.username);
+                        if ((userInfo == null) && (introspectDto.scope != "") && (strings:contains(introspectDto.scope, "openid"))) {
+                            userInfo = retrieveUserInfo(authToken);
+                            holder:putIntoUserInfoCache(introspectDto.username, userInfo);
+                        }
+                    }
                     // if token come from cache hit
                     if (introspectCacheHit) {
 
@@ -85,7 +92,6 @@ function authenticate (message m) (boolean, message) {
                         if (validateScopes(resourceDto, introspectDto)) {
                             string keyValidationInfo = constructKeyValidationDto(authToken, introspectDto, subscriptionDto, resourceDto);
                             messages:setProperty(m, "KEY_VALIDATION_INFO", jsons:toString(keyValidationInfo));
-                        system:println("hello");
                             state = true;
                             response = m;
                         }
@@ -161,13 +167,20 @@ function constructKeyValidationDto (string token, dto:IntrospectDto introspectDt
     keyValidationInfoDTO.apiKey = token;
     keyValidationInfoDTO.apiTier = subscriptionDto.subscriptionPolicy;
     keyValidationInfoDTO.applicationName = subscriptionDto.applicationName;
+    dto:ApplicationDto applicationDto = holder:getFromApplicationCache(subscriptionDto.applicationId);
     keyValidationInfoDTO.consumerKey = subscriptionDto.consumerKey;
     keyValidationInfoDTO.keyType = subscriptionDto.keyEnvType;
-    keyValidationInfoDTO.subscriber = subscriptionDto.applicationOwner;
+    keyValidationInfoDTO.subscriber = applicationDto.applicationOwner;
     keyValidationInfoDTO.applicationId = subscriptionDto.applicationId;
-    keyValidationInfoDTO.applicationTier = subscriptionDto.applicationTier;
+    keyValidationInfoDTO.applicationTier = applicationDto.applicationPolicy;
     return jsons:toString(keyValidationInfoDTO);
 }
-function retrieveUserInfo () {
-    
+function retrieveUserInfo (string token) (json) {
+    message request = {};
+    string keyURl = "https://localhost:9443";
+    messages:setHeader(request, "Content-Type", "application/json");
+    messages:setHeader(request, constants:AUTHORIZATION, "Bearer " + token);
+    http:ClientConnector userInfoConnector = create http:ClientConnector(keyURl);
+    message userInfoResponse = http:ClientConnector.post (userInfoConnector, constants:USER_INFO_CONTEXT + "?schema=openid", request);
+    return messages:getJsonPayload(userInfoResponse);
 }
