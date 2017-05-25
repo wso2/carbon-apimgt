@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import java.util.Map;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -37,8 +37,8 @@ public class APIInfoDTO   {
   @JsonProperty("workflowStatus")
   private String workflowStatus = null;
 
-  @JsonProperty("permissionMap")
-  private Map<String, Integer> permissionMap = null;
+  @JsonProperty("userPermissionsForApi")
+  private List<String> userPermissionsForApi = null;
 
   public APIInfoDTO id(String id) {
     this.id = id;
@@ -185,16 +185,16 @@ public class APIInfoDTO   {
   }
 
   /**
-   * Get permissionMap
-   * @return permissionMap
+   * Get userPermissionsForApi
+   * @return userPermissionsForApi
    **/
-  @ApiModelProperty(example = "APPROVED", value = "") //Change the desc - example etc.
-  public Map<String, Integer> getPermissionMap() {
-    return permissionMap;
+  @ApiModelProperty(example = "[\"READ\",\"UPDATE\"]", value = "")
+  public List<String> getUserPermissionsForApi() {
+    return userPermissionsForApi;
   }
 
-  public void setPermissionMap(Map<String, Integer> permissionMap) {
-    this.permissionMap = permissionMap;
+  public void setUserPermissionsForApi(List<String> userPermissionsForApi) {
+    this.userPermissionsForApi = userPermissionsForApi;
   }
 
 
@@ -215,12 +215,12 @@ public class APIInfoDTO   {
         Objects.equals(this.provider, apIInfo.provider) &&
         Objects.equals(this.lifeCycleStatus, apIInfo.lifeCycleStatus) &&
         Objects.equals(this.workflowStatus, apIInfo.workflowStatus) &&
-        Objects.equals(this.permissionMap, apIInfo.permissionMap);
+        Objects.equals(this.userPermissionsForApi, apIInfo.userPermissionsForApi);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, workflowStatus, permissionMap);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, workflowStatus, userPermissionsForApi);
   }
 
   @Override
@@ -236,7 +236,7 @@ public class APIInfoDTO   {
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
     sb.append("    workflowStatus: ").append(toIndentedString(workflowStatus)).append("\n");
-    sb.append("    permissionMap: ").append(toIndentedString(permissionMap)).append("\n");
+    sb.append("    userPermissionsForApi: ").append(toIndentedString(userPermissionsForApi)).append("\n");
     sb.append("}");
     return sb.toString();
   }

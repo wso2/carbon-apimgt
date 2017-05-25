@@ -1624,7 +1624,7 @@ public class ApiDAOImpl implements ApiDAO {
     private List<API> constructAPISummaryList(Connection connection, PreparedStatement statement) throws SQLException {
         List<API> apiList = new ArrayList<>();
         Map<String, Integer> permissionMap = new HashMap<>();
-        permissionMap.put("developer", 6);
+        permissionMap.put("admin", 6);
         try (ResultSet rs = statement.executeQuery()) {
             while (rs.next()) {
                 API apiSummary = new API.APIBuilder(rs.getString("PROVIDER"), rs.getString("NAME"),
