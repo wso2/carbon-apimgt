@@ -35,6 +35,7 @@
 
     <modules>
         <module>apim-ballerina-configs</module>
+        <module>apim-ballerina-native-component</module>
     </modules>
 
 </project>
