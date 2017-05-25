@@ -60,9 +60,6 @@ import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.models.ApplicationCreationResponse;
-import org.wso2.carbon.apimgt.core.models.ApplicationCreationWorkflow;
-import org.wso2.carbon.apimgt.core.models.ApplicationUpdateWorkflow;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.Event;
@@ -72,22 +69,25 @@ import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
-import org.wso2.carbon.apimgt.core.models.SubscriptionWorkflow;
 import org.wso2.carbon.apimgt.core.models.Tag;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.User;
-import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.template.APITemplateException;
 import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ApplicationStatus;
-import org.wso2.carbon.apimgt.core.util.APIMgtConstants.SubscriptionStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
+import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationResponse;
+import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationWorkflow;
+import org.wso2.carbon.apimgt.core.workflow.ApplicationDeletionWorkflow;
+import org.wso2.carbon.apimgt.core.workflow.ApplicationUpdateWorkflow;
+import org.wso2.carbon.apimgt.core.workflow.SubscriptionCreationWorkflow;
+import org.wso2.carbon.apimgt.core.workflow.SubscriptionDeletionWorkflow;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExecutorFactory;
 
 import java.io.IOException;
@@ -195,8 +195,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             if (existingApplication != null) {
                 WorkflowExecutor executor = WorkflowExecutorFactory.getInstance()
                         .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);
-                ApplicationUpdateWorkflow workflow = new ApplicationUpdateWorkflow();
-                
+                ApplicationUpdateWorkflow workflow = new ApplicationUpdateWorkflow(getApplicationDAO(),
+                        getWorkflowDAO());
                 
                 application.setId(uuid);
                 application.setUpdatedUser(getUsername());
@@ -361,7 +361,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             Subscription subscription = new Subscription(subscriptionId, application, api, tier);
             subscription.setStatus(APIMgtConstants.SubscriptionStatus.ON_HOLD);
             
-            SubscriptionWorkflow workflow = new SubscriptionWorkflow();
+            SubscriptionCreationWorkflow workflow = new SubscriptionCreationWorkflow(getApiSubscriptionDAO(),
+                    getWorkflowDAO(), getApiGateway());
 
             workflow.setCreatedTime(LocalDateTime.now());
             workflow.setExternalWorkflowReference(UUID.randomUUID().toString());
@@ -423,8 +424,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             } else {
                 //remove pending tasks for subscription creation first 
                 cleanupPendingTaskForSubscriptionDeletion(subscription);
-                
-                SubscriptionWorkflow workflow = new SubscriptionWorkflow();
+
+                SubscriptionDeletionWorkflow workflow = new SubscriptionDeletionWorkflow(getApiSubscriptionDAO(),
+                        getWorkflowDAO(), getApiGateway());
                 workflow.setWorkflowReference(subscriptionId);
                 workflow.setSubscription(subscription);
                 workflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
@@ -1056,8 +1058,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             cleanupPendingTaskForApplicationDeletion(application);
             WorkflowExecutor removeApplicationWFExecutor = WorkflowExecutorFactory.getInstance().
                     getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
-            
-            ApplicationCreationWorkflow workflow = new ApplicationCreationWorkflow();
+
+            ApplicationDeletionWorkflow workflow = new ApplicationDeletionWorkflow(getApplicationDAO(),
+                    getWorkflowDAO());
             workflow.setApplication(application);
             workflow.setWorkflowType(APIMgtConstants.WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
             workflow.setWorkflowReference(application.getId());
@@ -1172,7 +1175,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             WorkflowExecutor appCreationWFExecutor = WorkflowExecutorFactory.getInstance()
                     .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
 
-            ApplicationCreationWorkflow workflow = new ApplicationCreationWorkflow();
+            ApplicationCreationWorkflow workflow = new ApplicationCreationWorkflow(getApplicationDAO(),
+                    getWorkflowDAO());
 
             workflow.setApplication(application);
             workflow.setCreatedBy(getUsername());
@@ -1305,176 +1309,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
      */
     public Map<String, EventObserver> getEventObservers() {
         return eventObservers;
-    }
-
-    /**API store related workflow complete tasks
-     * {@inheritDoc}
-     */
-    @Override
-    public WorkflowResponse completeWorkflow(WorkflowExecutor workflowExecutor, Workflow workflow)
-            throws APIManagementException {
-        WorkflowResponse response;
-        if (workflow.getWorkflowReference() == null) {
-            String message = "Error while changing the workflow. Missing reference";
-            log.error(message);
-            throw new APIManagementException(message, ExceptionCodes.WORKFLOW_EXCEPTION);
-        }
-
-        if (workflow instanceof ApplicationCreationWorkflow
-                && WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION.equals(workflow.getWorkflowType())) {
-            ApplicationCreationWorkflow appCreateWorkflow = (ApplicationCreationWorkflow) workflow;
-            if (appCreateWorkflow.getApplication() == null) {
-                // this is when complete method is executed through workflow rest api
-                appCreateWorkflow.setApplication(getApplicationDAO().getApplication(workflow.getWorkflowReference()));
-            }      
-            response = workflowExecutor.complete(appCreateWorkflow);
-
-            // setting the workflow status from the one getting from the executor. this gives the executor developer
-            // to change the state as well.
-            appCreateWorkflow.setStatus(response.getWorkflowStatus());
-
-            String applicationState = "";
-            if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Application Creation workflow complete: Approved");
-                }
-                applicationState = APIMgtConstants.ApplicationStatus.APPLICATION_APPROVED;
-
-            } else if (WorkflowStatus.REJECTED == response.getWorkflowStatus()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Application Creation workflow complete: Rejected");
-                }
-                applicationState = APIMgtConstants.ApplicationStatus.APPLICATION_REJECTED;
-            }
-            getApplicationDAO().updateApplicationState(workflow.getWorkflowReference(), applicationState);
-            updateWorkflowEntries(appCreateWorkflow);
-
-        } else if (workflow instanceof ApplicationCreationWorkflow
-                && WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION.equals(workflow.getWorkflowType())) {
-            ApplicationCreationWorkflow appDeleteWorkflow = (ApplicationCreationWorkflow) workflow;
-            if (appDeleteWorkflow.getApplication() == null) {
-                // this is when complete method is executed through workflow rest api
-                appDeleteWorkflow.setApplication(getApplicationDAO().getApplication(workflow.getWorkflowReference()));
-            }    
-            response = workflowExecutor.complete(appDeleteWorkflow);
-            appDeleteWorkflow.setStatus(response.getWorkflowStatus());
-            if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Application Deletion workflow complete: Approved");
-                }
-                getApplicationDAO().deleteApplication(workflow.getWorkflowReference());
-
-            } else if (WorkflowStatus.REJECTED == response.getWorkflowStatus()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Subscription Creation workflow complete: Rejected");
-                }
-            }
-            updateWorkflowEntries(appDeleteWorkflow);
-        } else if (workflow instanceof SubscriptionWorkflow
-                && WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION.equals(workflow.getWorkflowType())) {
-            
-            SubscriptionWorkflow subsriptionWorkflow = (SubscriptionWorkflow) workflow;
-            if (subsriptionWorkflow.getSubscription() == null) {
-                // this is when complete method is executed through workflow rest api
-                subsriptionWorkflow
-                        .setSubscription(getApiSubscriptionDAO().getAPISubscription(workflow.getWorkflowReference()));
-            }
-            response = workflowExecutor.complete(workflow);
-            workflow.setStatus(response.getWorkflowStatus());
-            SubscriptionStatus subscriptionState = null;
-            if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Subscription Creation workflow complete: Approved");
-                }
-
-                subscriptionState = APIMgtConstants.SubscriptionStatus.ACTIVE;
-
-            } else if (WorkflowStatus.REJECTED == response.getWorkflowStatus()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Subscription Creation workflow complete: Rejected");
-                }
-                subscriptionState = APIMgtConstants.SubscriptionStatus.REJECTED;
-            }
-
-            //Add subscription to gateway
-            gateway.addAPISubscription(((SubscriptionWorkflow) workflow).getSubscription());
-            getApiSubscriptionDAO().updateSubscriptionStatus(workflow.getWorkflowReference(), subscriptionState);
-            updateWorkflowEntries(workflow);
-        } else if (workflow instanceof SubscriptionWorkflow
-                && WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION.equals(workflow.getWorkflowType())) {
-            SubscriptionWorkflow subsriptionWorkflow = (SubscriptionWorkflow) workflow;
-            if (subsriptionWorkflow.getSubscription() == null) {
-                // this is when complete method is executed through workflow rest api
-                subsriptionWorkflow
-                        .setSubscription(getApiSubscriptionDAO().getAPISubscription(workflow.getWorkflowReference()));
-            }
-            response = workflowExecutor.complete(subsriptionWorkflow);
-            subsriptionWorkflow.setStatus(response.getWorkflowStatus());
-            if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Subscription deletion workflow complete: Approved");
-                }
-                gateway.deleteAPISubscription(((SubscriptionWorkflow) workflow).getSubscription());
-                getApiSubscriptionDAO().deleteAPISubscription(workflow.getWorkflowReference());
-
-            } else if (WorkflowStatus.REJECTED == response.getWorkflowStatus()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Subscription deletion workflow complete: Rejected");
-                }
-            }
-            updateWorkflowEntries(subsriptionWorkflow);
-        } else if (workflow instanceof ApplicationUpdateWorkflow) {
-            ApplicationUpdateWorkflow updateWorkflow = (ApplicationUpdateWorkflow) workflow;
-            String appId = updateWorkflow.getWorkflowReference();
-            String name = updateWorkflow.getAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_NAME);
-            String updatedUser = updateWorkflow.getAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_UPDATEDBY);
-            String applicationId = updateWorkflow.getWorkflowReference();
-            String tier = updateWorkflow.getAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_TIER);
-            String description = updateWorkflow.getAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_DESCRIPTION);
-            String callbackUrl = updateWorkflow.getAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_CALLBACKURL);
-            String groupId = updateWorkflow.getAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_GROUPID);
-            String permisson = updateWorkflow.getAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_PERMISSION);
-
-            Application application = new Application(name, updatedUser); 
-            application.setTier(tier);
-            application.setCallbackUrl(callbackUrl);
-            application.setDescription(description);
-            application.setGroupId(groupId);
-            application.setId(applicationId);
-            application.setUpdatedTime(LocalDateTime.now());
-            application.setUpdatedUser(updatedUser);
-            application.setPermissionString(permisson);
-
-            if (updateWorkflow.getExistingApplication() == null && updateWorkflow.getUpdatedApplication() == null) {
-                // this is when complete method is executed through workflow rest api
-                updateWorkflow.setExistingApplication(getApplicationDAO().getApplication(appId));
-                updateWorkflow.setUpdatedApplication(application);
-            }
-            response = workflowExecutor.complete(updateWorkflow);
-            
-            updateWorkflow.setStatus(response.getWorkflowStatus());
-            if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Application update workflow complete: Approved");
-                }
-                application.setStatus(ApplicationStatus.APPLICATION_APPROVED);                
-                getApplicationDAO().updateApplication(appId, application);
-            } else if (WorkflowStatus.REJECTED == response.getWorkflowStatus()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Application update workflow complete: Rejected");
-                }
-                String existingAppStatus = updateWorkflow
-                        .getAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_EXISTIN_APP_STATUS);
-                getApplicationDAO().updateApplicationState(appId, existingAppStatus);
-            }
-            updateWorkflowEntries(updateWorkflow);
-        } else {
-            String message = "Invalid workflow type for store workflows:  " + workflow.getWorkflowType();
-            log.error(message);
-            throw new APIManagementException(message, ExceptionCodes.WORKFLOW_INV_STORE_WFTYPE);
-        }
-
-        return response;
     }
 
 

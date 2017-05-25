@@ -16,7 +16,17 @@
 * under the License.
 */
 
-package org.wso2.carbon.apimgt.core.models;
+package org.wso2.carbon.apimgt.core.workflow;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
+import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
+import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -25,7 +35,9 @@ import java.util.Map;
 /**
  * This is the model that will be used for storing workflow related contextual information.
  */
-public class Workflow {
+public abstract class Workflow {
+
+    private static final Logger log = LoggerFactory.getLogger(Workflow.class);
 
     private String workflowReference;
 
@@ -46,9 +58,15 @@ public class Workflow {
     private String externalWorkflowReference;
 
     private String callbackURL;
-    
+
     private String createdBy;
-    
+
+    private WorkflowDAO workflowDAO;
+
+    public Workflow(WorkflowDAO workflowDAO) {
+        this.workflowDAO = workflowDAO;
+    }
+
     //to pass any additional parameters. This can be used to pass parameters to the executor's complete() method
     private Map<String, String> attributes = new HashMap<>();
 
@@ -154,12 +172,39 @@ public class Workflow {
         this.createdBy = createdBy;
     }
 
+    /**
+     * Persist workflow status after the workflow is completed
+     *
+     * @param workflow Workflow  information
+     * @throws APIManagementException if error occurred while updating workflow status
+     */
+    protected void updateWorkflowEntries(Workflow workflow) throws APIManagementException {
+        this.updatedTime = LocalDateTime.now();
+        try {
+            workflowDAO.updateWorkflowStatus(workflow);
+            // TODO stats stuff
+        } catch (APIMgtDAOException e) {
+            String message = "Error while updating workflow entry";
+            log.error(message, e);
+            throw new APIManagementException(message, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    /**
+     * Complete workflow after the approval
+     *
+     * @param workflowExecutor Workflow executor
+     * @return Workflow Response object
+     * @throws APIManagementException if error occurred while completing the workflow
+     */
+    public abstract WorkflowResponse completeWorkflow(WorkflowExecutor workflowExecutor) throws APIManagementException;
+
     @Override
     public String toString() {
         return "Workflow [workflowReference=" + workflowReference + ", workflowType=" + workflowType + ", status="
                 + status + ", createdTime=" + createdTime + ", updatedTime=" + updatedTime + ", workflowDescription="
                 + workflowDescription + ", externalWorkflowReference=" + externalWorkflowReference + ", callbackURL="
-                + callbackURL + ", createdBy=" + createdBy + ", attributes=" + attributes + "]";
-    }   
-    
+                + callbackURL + ", createdBy=" + createdBy + ", attributes=" + attributes + ']';
+    }
+
 }

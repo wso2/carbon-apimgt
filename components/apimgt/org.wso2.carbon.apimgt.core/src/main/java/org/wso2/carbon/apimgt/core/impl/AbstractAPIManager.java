@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.core.api.APIManager;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
+import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
@@ -52,9 +53,9 @@ import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
-import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.template.APITemplateException;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
+import org.wso2.carbon.apimgt.core.workflow.Workflow;
 
 import java.io.InputStream;
 import java.time.LocalDateTime;
@@ -686,6 +687,17 @@ public abstract class AbstractAPIManager implements APIManager {
         log.error(msg);
         throw new APIMgtResourceAlreadyExistsException(msg);
     }
+
+    @Override
+    public WorkflowResponse completeWorkflow(WorkflowExecutor workflowExecutor, Workflow workflow)
+            throws APIManagementException {
+        if (workflow.getWorkflowReference() == null) {
+            String message = "Error while changing the workflow. Missing reference";
+            log.error(message);
+            throw new APIManagementException(message, ExceptionCodes.WORKFLOW_EXCEPTION);
+        }
+        return workflow.completeWorkflow(workflowExecutor);
+    }
     
     /**
      * Retrieve workflow for given internal ref id
@@ -702,19 +714,6 @@ public abstract class AbstractAPIManager implements APIManager {
             log.error(message);
             throw new APIMgtDAOException(message, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }        
-    }
-    
-    protected void updateWorkflowEntries(Workflow workflow) throws APIManagementException {
-        workflow.setUpdatedTime(LocalDateTime.now());
-        try {
-            getWorkflowDAO().updateWorkflowStatus(workflow);
-            // TODO stats stuff
-        } catch (APIMgtDAOException e) {
-            String message = "Error while updating workflow entry";
-            log.error(message);
-            throw new APIManagementException(message, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
-        }
-
     }
 
     protected void addWorkflowEntries(Workflow workflow) throws APIManagementException {
