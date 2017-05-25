@@ -338,6 +338,8 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertEquals(validationData.getApiVersion(), api.getVersion());
         Assert.assertEquals(validationData.getApplicationOwner(), app.getCreatedUser());
         Assert.assertEquals(validationData.getSubscriptionPolicy(), GOLD_TIER);
+        Assert.assertEquals(validationData.getApplicationId(), app.getId());
+        Assert.assertEquals(validationData.getApplicationTier(), app.getTier());
     }
 
     @Test

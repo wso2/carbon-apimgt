@@ -35,6 +35,8 @@ public final class SubscriptionValidationData {
     private String applicationOwner;
     private String keyAuthType;
     private String keyEnvType;
+    private String applicationId;
+    private String applicationTier;
 
     public SubscriptionValidationData(String apiContext, String apiVersion, String consumerKey) {
         this.apiContext = apiContext;
@@ -108,5 +110,21 @@ public final class SubscriptionValidationData {
 
     public void setKeyEnvType(String keyEnvType) {
         this.keyEnvType = keyEnvType;
+    }
+
+    public String getApplicationId() {
+        return applicationId;
+    }
+
+    public void setApplicationId(String applicationId) {
+        this.applicationId = applicationId;
+    }
+
+    public String getApplicationTier() {
+        return applicationTier;
+    }
+
+    public void setApplicationTier(String applicationTier) {
+        this.applicationTier = applicationTier;
     }
 }
