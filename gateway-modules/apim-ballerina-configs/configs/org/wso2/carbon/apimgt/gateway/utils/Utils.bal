@@ -75,11 +75,18 @@ function retrieveSubscriptions (json subscriptions) {
     int length = jsons:getInt(subscriptions, "$.length()");
     int i = 0;
     while (i < length) {
-        holders:putIntoSubscriptionCache(fromJsonToSubscriptionDto(subscriptions[i]));
+        dto:SubscriptionDto subscriptionDto = fromJsonToSubscriptionDto(subscriptions[i]);
+        dto:ApplicationDto applicationDto = {};
+        applicationDto.applicationId = subscriptionDto.applicationId;
+        applicationDto.applicationName = subscriptionDto.applicationName;
+        applicationDto.applicationOwner = subscriptionDto.applicationOwner;
+        applicationDto.applicationPolicy = subscriptionDto.applicationTier;
+        holders:putIntoSubscriptionCache(subscriptionDto);
+        holders:putIntoApplicationCache(applicationDto);
         i = i + 1;
     }
 }
-function retrieveResources (string apiContext,string apiVersion,json resources) {
+function retrieveResources (string apiContext, string apiVersion, json resources) {
     int length = jsons:getInt(resources, "$.length()");
     int i = 0;
     while (i < length) {
@@ -96,11 +103,11 @@ function retrieveAPIInformation (string apiContext, string apiVersion) {
     messages:setHeader(request, "Content-Type", "application/json");
     message response = http:ClientConnector.get (apiInfoConnector, query, request);
     json apiInfo = messages:getJsonPayload(response);
-    int length = jsons:getInt(apiInfo,"$.list.length()");
+    int length = jsons:getInt(apiInfo, "$.list.length()");
     if (length > 0) {
-        json resources =apiInfo["list"][0]["resources"];
-        json subscriptions =apiInfo["list"][0]["subscriptions"];
-        retrieveResources(apiContext,apiVersion,resources);
+        json resources = apiInfo["list"][0]["resources"];
+        json subscriptions = apiInfo["list"][0]["subscriptions"];
+        retrieveResources(apiContext, apiVersion, resources);
         retrieveSubscriptions(subscriptions);
         system:println("after");
     }
