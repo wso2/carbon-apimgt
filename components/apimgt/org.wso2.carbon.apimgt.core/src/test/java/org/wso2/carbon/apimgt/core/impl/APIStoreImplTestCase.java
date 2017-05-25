@@ -74,6 +74,8 @@ import org.wso2.carbon.apimgt.core.workflow.WorkflowExtensionsConfigBuilder;
 import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
 import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -197,6 +199,8 @@ public class APIStoreImplTestCase {
         APIGateway apiGateway = Mockito.mock(APIGateway.class);
         APIStore apiStore = getApiStoreImpl(apiDAO, gatewaySourceGenerator, apiGateway);
 
+        String ballerinaImpl = "Ballerina";
+
         apiStore.addCompositeApi(apiBuilder);
 
         CompositeAPI createdAPI = apiBuilder.build();
@@ -210,6 +214,9 @@ public class APIStoreImplTestCase {
         apiBuilder.context(createdAPI.getContext());
 
         Mockito.when(apiDAO.getCompositeAPI(apiBuilder.getId())).thenReturn(createdAPI);
+        Mockito.when(apiDAO.getCompositeAPIGatewayConfig(apiBuilder.getId())).thenReturn(
+                new ByteArrayInputStream(ballerinaImpl.getBytes(StandardCharsets.UTF_8)));
+        
         apiStore.updateCompositeApi(apiBuilder);
 
         CompositeAPI updatedAPI = apiBuilder.build();

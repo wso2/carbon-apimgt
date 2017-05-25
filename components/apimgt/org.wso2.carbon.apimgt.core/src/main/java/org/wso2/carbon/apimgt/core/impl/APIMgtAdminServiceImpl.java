@@ -194,7 +194,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public String getAPIGatewayServiceConfig(String apiId) throws APIConfigRetrievalException {
         try {
-            return apiDAO.getGatewayConfig(apiId);
+            return apiDAO.getGatewayConfigOfAPI(apiId);
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't retrieve gateway configuration for apiId " + apiId;
             log.error(errorMessage, e);

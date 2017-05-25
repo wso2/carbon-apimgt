@@ -7,21 +7,25 @@ import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
-import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.CompositeApisApiService;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CompositeAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CompositeAPIListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.CompositeAPIMappingUtil;
 import org.wso2.msf4j.Request;
+import org.wso2.msf4j.formparam.FileInfo;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 @javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
@@ -109,6 +113,62 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
         }
     }
 
+    @Override
+    public Response compositeApisApiIdImplementationGet(String apiId, String accept, String ifNoneMatch,
+                                                        String ifModifiedSince, Request request)
+                                                                                    throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIStore apiStore = RestApiUtil.getConsumer(username);
+            String existingFingerprint = compositeApisApiIdImplementationGetFingerprint(apiId, accept, ifNoneMatch,
+                    ifModifiedSince, request);
+            if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
+                    .contains(existingFingerprint)) {
+                return Response.notModified().build();
+            }
+            InputStream implementation = apiStore.getCompositeApiImplementation(apiId);
+            return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").
+                                entity(implementation).build();
+        } catch (APIManagementException e) {
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+    @Override
+    public Response compositeApisApiIdImplementationPut(String apiId, InputStream apiImplementationInputStream,
+                                                        FileInfo apiImplementationDetail, String contentType,
+                                                        String ifMatch, String ifUnmodifiedSince, Request request)
+                                                                                        throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIStore apiStore = RestApiUtil.getConsumer(username);
+            String existingFingerprint = compositeApisApiIdImplementationGetFingerprint(apiId, null, null,
+                    null, request);
+            if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && ifMatch
+                    .contains(existingFingerprint)) {
+                return Response.notModified().build();
+            }
+            apiStore.updateCompositeApiImplementation(apiId, apiImplementationInputStream);
+
+            String uriString = RestApiConstants.RESOURCE_PATH_IMPLEMENTATION
+                    .replace(RestApiConstants.APIID_PARAM, apiId);
+            FileInfoDTO infoDTO = new FileInfoDTO();
+            infoDTO.setRelativePath(uriString);
+            infoDTO.setMediaType(MediaType.APPLICATION_OCTET_STREAM);
+            
+            String newFingerprint = compositeApisApiIdImplementationGetFingerprint(apiId, null, null, null, request);
+            return Response.ok().header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"").entity(infoDTO).build();
+        } catch (APIManagementException e) {
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
     /**
      * Updates an API by UUID
      *
@@ -170,7 +230,7 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
                     .contains(existingFingerprint)) {
                 return Response.notModified().build();
             }
-            String swagger = apiStore.getSwagger20Definition(apiId);
+            String swagger = apiStore.getCompositeApiDefinition(apiId);
             return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(swagger).build();
         } catch (APIManagementException e) {
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -203,8 +263,8 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
                     .contains(existingFingerprint)) {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
             }
-            apiStore.saveSwagger20Definition(apiId, apiDefinition);
-            String apiSwagger = apiStore.getSwagger20Definition(apiId);
+            apiStore.updateCompositeApiDefinition(apiId, apiDefinition);
+            String apiSwagger = apiStore.getApiSwaggerDefinition(apiId);
             String newFingerprint = compositeApisApiIdSwaggerGetFingerprint(apiId, null, null, null, request);
             return Response.ok().header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"").entity(apiSwagger).build();
         } catch (APIManagementException e) {
@@ -265,6 +325,11 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
 
     private String compositeApisApiIdSwaggerGetFingerprint(String apiId, String accept, String ifNoneMatch,
                                                 String ifModifiedSince, Request request) {
+        return getEtag(apiId);
+    }
+
+    private String compositeApisApiIdImplementationGetFingerprint(String apiId, String accept, String ifNoneMatch,
+                                                       String ifModifiedSince, Request request) {
         return getEtag(apiId);
     }
 

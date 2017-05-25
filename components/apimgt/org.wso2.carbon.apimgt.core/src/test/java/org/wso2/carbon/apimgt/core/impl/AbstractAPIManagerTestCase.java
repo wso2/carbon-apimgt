@@ -133,9 +133,9 @@ public class AbstractAPIManagerTestCase {
         ApiDAO apiDAO = mock(ApiDAO.class);
         AbstractAPIManager apiPublisher = getApiPublisherImpl(apiDAO);
         String swaggerDefinition = SampleTestObjectCreator.apiDefinition;
-        when(apiDAO.getSwaggerDefinition(UUID)).thenReturn(swaggerDefinition);
-        apiPublisher.getSwagger20Definition(UUID);
-        verify(apiDAO, times(1)).getSwaggerDefinition(UUID);
+        when(apiDAO.getApiSwaggerDefinition(UUID)).thenReturn(swaggerDefinition);
+        apiPublisher.getApiSwaggerDefinition(UUID);
+        verify(apiDAO, times(1)).getApiSwaggerDefinition(UUID);
     }
 
     @Test(description = "Get subscription by UUID")
@@ -319,10 +319,10 @@ public class AbstractAPIManagerTestCase {
     public void testGetSwagger20DefinitionException() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
         AbstractAPIManager apiPublisher = getApiPublisherImpl(apiDAO);
-        when(apiDAO.getSwaggerDefinition(UUID))
+        when(apiDAO.getApiSwaggerDefinition(UUID))
                 .thenThrow(new APIMgtDAOException("Couldn't retrieve swagger definition for apiId " + UUID));
-        apiPublisher.getSwagger20Definition(UUID);
-        verify(apiDAO, times(0)).getSwaggerDefinition(UUID);
+        apiPublisher.getApiSwaggerDefinition(UUID);
+        verify(apiDAO, times(0)).getApiSwaggerDefinition(UUID);
     }
 
     @Test(description = "Exception when getting subscription by UUID",

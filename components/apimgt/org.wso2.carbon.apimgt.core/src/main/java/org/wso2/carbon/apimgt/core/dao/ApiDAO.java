@@ -252,7 +252,16 @@ public interface ApiDAO {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    String getSwaggerDefinition(String apiID) throws APIMgtDAOException;
+    String getApiSwaggerDefinition(String apiID) throws APIMgtDAOException;
+
+    /**
+     * Get swagger definition of a given Composite API
+     * @param apiID The UUID of the respective Composite API
+     * @return Swagger definition String
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     *
+     */
+    String getCompositeApiSwaggerDefinition(String apiID) throws APIMgtDAOException;
 
     /**
      * Get image of a given API
@@ -446,7 +455,19 @@ public interface ApiDAO {
      * @param updatedBy user who performs the update
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    void updateSwaggerDefinition(String apiID, String swaggerDefinition, String updatedBy)
+    void updateApiDefinition(String apiID, String swaggerDefinition, String updatedBy)
+            throws APIMgtDAOException;
+
+
+    /**
+     * Update swagger definition of a given Composite API
+     *
+     * @param apiID             The UUID of the respective Composite API
+     * @param swaggerDefinition Swagger definition String
+     * @param updatedBy user who performs the update
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    void updateCompositeApiDefinition(String apiID, String swaggerDefinition, String updatedBy)
             throws APIMgtDAOException;
 
     /**
@@ -456,7 +477,16 @@ public interface ApiDAO {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    String getGatewayConfig(String apiID) throws APIMgtDAOException;
+    String getGatewayConfigOfAPI(String apiID) throws APIMgtDAOException;
+
+    /**
+     * Get gateway configuration of a given Composite API
+     * @param apiID The UUID of the respective Composite API
+     * @return gateway configuration String
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     *
+     */
+    InputStream getCompositeAPIGatewayConfig(String apiID) throws APIMgtDAOException;
 
     /**
      * update gateway config
@@ -467,6 +497,17 @@ public interface ApiDAO {
      * @throws APIMgtDAOException throws if any error occurred
      */
     void updateGatewayConfig(String apiID, String gatewayConfig, String updatedBy) throws APIMgtDAOException;
+
+    /**
+     * update gateway config
+     *
+     * @param apiID         api uuid
+     * @param gatewayConfig config text
+     * @param updatedBy user who performs the action
+     * @throws APIMgtDAOException throws if any error occurred
+     */
+    void updateCompositeAPIGatewayConfig(String apiID, InputStream gatewayConfig, String updatedBy)
+            throws APIMgtDAOException;
 
     /**
      * Retrieves the last updated time of a document of an API

@@ -762,7 +762,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         testAddGetEndpoint();
         API api = SampleTestObjectCreator.createUniqueAPI().build();
         apiDAO.addAPI(api);
-        Assert.assertNotNull(apiDAO.getSwaggerDefinition(api.getId()));
+        Assert.assertNotNull(apiDAO.getApiSwaggerDefinition(api.getId()));
     }
 
     @Test
@@ -772,7 +772,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         String configString = SampleTestObjectCreator.createSampleGatewayConfig();
         API api = SampleTestObjectCreator.createUniqueAPI().gatewayConfig(configString).build();
         apiDAO.addAPI(api);
-        Assert.assertNotNull(apiDAO.getGatewayConfig(api.getId()));
+        Assert.assertNotNull(apiDAO.getGatewayConfigOfAPI(api.getId()));
     }
 
     @Test(description = "Changing the Lifecycle status of a given API")
@@ -944,7 +944,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Thread.sleep(1);
 
         String swagger = SampleTestObjectCreator.createAlternativeSwaggerDefinition();
-        apiDAO.updateSwaggerDefinition(api.getId(), swagger, ADMIN);
+        apiDAO.updateApiDefinition(api.getId(), swagger, ADMIN);
         String fingerprintAfterUpdate = ETagUtils
                 .generateETag(apiDAO.getLastUpdatedTimeOfSwaggerDefinition(api.getId()));
         Assert.assertNotNull(fingerprintAfterUpdate);

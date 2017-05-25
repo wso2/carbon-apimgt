@@ -810,14 +810,15 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
             try {
                 String updatedSwagger = apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder);
-                String gatewayConfig = getApiGatewayConfig(apiBuilder.getId());
+                InputStream gatewayConfig = getApiDAO().getCompositeAPIGatewayConfig(apiBuilder.getId());
                 GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
                 APIConfigContext apiConfigContext = new APIConfigContext(apiBuilder.getName(), apiBuilder.getContext(),
                         apiBuilder.getVersion(), apiBuilder.getCreatedTime(), config.getGatewayPackageName());
 
                 gatewaySourceGenerator.setApiConfigContext(apiConfigContext);
                 String updatedGatewayConfig = gatewaySourceGenerator
-                        .getGatewayConfigFromSwagger(gatewayConfig, updatedSwagger);
+                        .getGatewayConfigFromSwagger(IOUtils.toString(gatewayConfig, StandardCharsets.UTF_8),
+                                updatedSwagger);
 
                 CompositeAPI api = apiBuilder.build();
 
@@ -831,7 +832,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 //publishing config to gateway
                 gateway.addCompositeAPI(api);
 
-                getApiDAO().updateSwaggerDefinition(api.getId(), updatedSwagger, api.getUpdatedBy());
+                getApiDAO().updateApiDefinition(api.getId(), updatedSwagger, api.getUpdatedBy());
                 getApiDAO().updateGatewayConfig(api.getId(), updatedGatewayConfig, api.getUpdatedBy());
 
                 if (log.isDebugEnabled()) {
@@ -840,6 +841,11 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
             } catch (APIMgtDAOException e) {
                 String errorMsg = "Error occurred while updating the API - " + apiBuilder.getName();
+                log.error(errorMsg, e);
+                throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            } catch (IOException e) {
+                String errorMsg = "Error occurred while reading gateway configuration the API - " +
+                                        apiBuilder.getName();
                 log.error(errorMsg, e);
                 throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
             }
@@ -1051,6 +1057,35 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         }
 
         return apiResults;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getCompositeApiDefinition(String id) throws APIManagementException {
+        return getApiDAO().getCompositeApiSwaggerDefinition(id);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void updateCompositeApiDefinition(String id, String apiDefinition) throws APIManagementException {
+        getApiDAO().updateCompositeApiDefinition(id, apiDefinition, getUsername());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public InputStream getCompositeApiImplementation(String id) throws APIManagementException {
+        return getApiDAO().getCompositeAPIGatewayConfig(id);
+    }
+
+    @Override
+    public void updateCompositeApiImplementation(String id, InputStream implementation) throws APIManagementException {
+        getApiDAO().updateCompositeAPIGatewayConfig(id, implementation, getUsername());
     }
 
     /**

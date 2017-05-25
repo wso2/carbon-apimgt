@@ -483,7 +483,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.lifeCycleStatus(APIStatus.CREATED.getStatus()).build());
         Mockito.when(apiDAO.isAPIContextExists(api.getContext())).thenReturn(true);
         String configString = SampleTestObjectCreator.createSampleGatewayConfig();
-        Mockito.when(apiDAO.getGatewayConfig(uuid)).thenReturn(configString);
+        Mockito.when(apiDAO.getGatewayConfigOfAPI(uuid)).thenReturn(configString);
         apiPublisher.updateAPI(api.lifeCycleStatus(APIStatus.CREATED.getStatus()).id(uuid));
         Mockito.verify(apiDAO, Mockito.times(1)).getAPI(uuid);
         Mockito.verify(apiDAO, Mockito.times(0)).isAPIContextExists(api.getContext());
@@ -642,7 +642,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.lifeCycleStatus(APIStatus.CREATED.getStatus()).build());
         Mockito.when(apiDAO.isAPIContextExists(api.getContext())).thenReturn(true);
         String configString = SampleTestObjectCreator.createSampleGatewayConfig();
-        Mockito.when(apiDAO.getGatewayConfig(uuid)).thenReturn(configString);
+        Mockito.when(apiDAO.getGatewayConfigOfAPI(uuid)).thenReturn(configString);
         apiPublisher.updateAPI(api.lifeCycleStatus(APIStatus.CREATED.getStatus()).id(uuid));
         Mockito.verify(apiDAO, Mockito.times(1)).getAPI(uuid);
         Mockito.verify(apiDAO, Mockito.times(0)).isAPIContextExists(api.getContext());
@@ -1536,7 +1536,7 @@ public class APIPublisherImplTestCase {
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, gatewaySourceGenerator);
         apiPublisher.saveSwagger20Definition(uuid, SampleTestObjectCreator.apiDefinition);
         Mockito.verify(apiDAO, Mockito.times(1))
-                .updateSwaggerDefinition(uuid, SampleTestObjectCreator.apiDefinition, user);
+                .updateApiDefinition(uuid, SampleTestObjectCreator.apiDefinition, user);
     }
 
     @Test(description = "Exception when saving swagger definition for API",
@@ -1547,7 +1547,7 @@ public class APIPublisherImplTestCase {
         String uuid = api.getId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
         Mockito.doThrow(new APIMgtDAOException("Couldn't update the Swagger Definition")).when(apiDAO)
-                .updateSwaggerDefinition(uuid, SampleTestObjectCreator.apiDefinition, user);
+                .updateApiDefinition(uuid, SampleTestObjectCreator.apiDefinition, user);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, gatewaySourceGenerator);
         apiPublisher.saveSwagger20Definition(uuid, SampleTestObjectCreator.apiDefinition);
@@ -1608,7 +1608,7 @@ public class APIPublisherImplTestCase {
     public void testGetApiGatewayConfigException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
-        Mockito.when(apiDAO.getGatewayConfig(API_ID))
+        Mockito.when(apiDAO.getGatewayConfigOfAPI(API_ID))
                 .thenThrow(new APIMgtDAOException("Error generating swagger from gateway config " + API_ID));
         apiPublisher.getApiGatewayConfig(API_ID);
     }
@@ -1642,9 +1642,9 @@ public class APIPublisherImplTestCase {
     public void testGetApiDefinition() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         String uuid = UUID.randomUUID().toString();
-        Mockito.when(apiDAO.getSwaggerDefinition(uuid)).thenReturn(SampleTestObjectCreator.apiDefinition);
-        String returnedSwagger = getApiPublisherImpl(apiDAO).getSwagger20Definition(uuid);
-        Mockito.verify(apiDAO, Mockito.times(1)).getSwaggerDefinition(uuid);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(uuid)).thenReturn(SampleTestObjectCreator.apiDefinition);
+        String returnedSwagger = getApiPublisherImpl(apiDAO).getApiSwaggerDefinition(uuid);
+        Mockito.verify(apiDAO, Mockito.times(1)).getApiSwaggerDefinition(uuid);
     }
 
     @Test(description = "Endpoint add")

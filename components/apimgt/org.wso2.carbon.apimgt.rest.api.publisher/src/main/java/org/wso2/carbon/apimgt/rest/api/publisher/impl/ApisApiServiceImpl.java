@@ -14,12 +14,10 @@ import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
-import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
-import org.wso2.carbon.apimgt.core.workflow.HttpWorkflowResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -878,7 +876,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                     .contains(existingFingerprint)) {
                 return Response.notModified().build();
             }
-            String swagger = apiPublisher.getSwagger20Definition(apiId);
+            String swagger = apiPublisher.getApiSwaggerDefinition(apiId);
             return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(swagger).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving swagger definition of API : " + apiId;
@@ -939,7 +937,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
             }
             apiPublisher.saveSwagger20Definition(apiId, apiDefinition);
-            String apiSwagger = apiPublisher.getSwagger20Definition(apiId);
+            String apiSwagger = apiPublisher.getApiSwaggerDefinition(apiId);
             String newFingerprint = apisApiIdSwaggerGetFingerprint(apiId, null, null, null, request);
             return Response.ok().header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"").entity(apiSwagger).build();
         } catch (APIManagementException e) {

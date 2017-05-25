@@ -107,7 +107,7 @@ public interface APIManager {
      * @return swagger string
      * @throws APIManagementException If failed to get swagger v2.0 definition
      */
-    String getSwagger20Definition(String api) throws APIManagementException;
+    String getApiSwaggerDefinition(String api) throws APIManagementException;
 
     /**
      * Returns a paginated list of documentation attached to a particular API
@@ -177,15 +177,6 @@ public interface APIManager {
     Subscription getSubscriptionByUUID(String subId) throws APIManagementException;
 
     /**
-     * This method updates Swagger 2.0 resources in the registry
-     *
-     * @param apiId    id of the String
-     * @param jsonText json text to be saved in the registry
-     * @throws APIManagementException If failed to save swagger definition.
-     */
-    void saveSwagger20Definition(String apiId, String jsonText) throws APIManagementException;
-
-    /**
      * Save the thumbnail icon for api
      *
      * @param apiId       apiId of api
@@ -204,23 +195,7 @@ public interface APIManager {
      */
     InputStream getThumbnailImage(String apiId) throws APIManagementException;
 
-    /**
-     * This method updates gateway config in the database
-     *
-     * @param apiId        id of the String
-     * @param configString text to be saved in the registry
-     * @throws APIManagementException If failed to update gateway config.
-     */
-    void updateApiGatewayConfig(String apiId, String configString) throws APIManagementException;
 
-    /**
-     * This method retrieve gateway config in the database
-     *
-     * @param apiId id of the String
-     * @return API gateway config as a string
-     * @throws APIManagementException If failed to get gateway config of the API.
-     */
-    String getApiGatewayConfig(String apiId) throws APIManagementException;
 
     /**
      *

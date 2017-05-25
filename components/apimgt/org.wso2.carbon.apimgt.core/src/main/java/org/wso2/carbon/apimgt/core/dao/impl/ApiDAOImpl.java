@@ -866,7 +866,7 @@ public class ApiDAOImpl implements ApiDAO {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
-    public String getSwaggerDefinition(String apiID) throws APIMgtDAOException {
+    public String getApiSwaggerDefinition(String apiID) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
             return getAPIDefinition(connection, apiID);
         } catch (SQLException | IOException e) {
@@ -875,15 +875,30 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#updateSwaggerDefinition(String, String, String)
+     * {@inheritDoc}
      */
     @Override
-    public void updateSwaggerDefinition(String apiID, String swaggerDefinition, String updatedBy)
+    public String getCompositeApiSwaggerDefinition(String apiID) throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()) {
+            InputStream apiDefinition = ApiResourceDAO.getBinaryValueForCategory(connection, apiID,
+                    ResourceCategory.SWAGGER, ApiType.COMPOSITE);
+
+            return IOUtils.toString(apiDefinition, StandardCharsets.UTF_8);
+        } catch (SQLException | IOException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    /**
+     * @see ApiDAO#updateApiDefinition(String, String, String)
+     */
+    @Override
+    public void updateApiDefinition(String apiID, String apiDefinition, String updatedBy)
             throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
             try {
                 connection.setAutoCommit(false);
-                updateAPIDefinition(connection, apiID, swaggerDefinition, updatedBy);
+                updateAPIDefinition(connection, apiID, apiDefinition, updatedBy);
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -897,15 +912,43 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void updateCompositeApiDefinition(String apiID, String apiDefinition, String updatedBy)
+                                                                                        throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()) {
+            ApiResourceDAO.updateBinaryResourceForCategory(connection, apiID, ResourceCategory.SWAGGER,
+                    new ByteArrayInputStream(apiDefinition.getBytes(StandardCharsets.UTF_8)), updatedBy,
+                    ApiType.COMPOSITE);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException("Data access error when updating API definition", e);
+        }
+    }
+
+    /**
      * Get gateway configuration of a given API
      *
      * @param apiID The UUID of the respective API
      * @return gateway configuration String
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    public String getGatewayConfig(String apiID) throws APIMgtDAOException {
+    public String getGatewayConfigOfAPI(String apiID) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
             return getGatewayConfig(connection, apiID);
+        } catch (SQLException | IOException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public InputStream getCompositeAPIGatewayConfig(String apiID) throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()) {
+            return ApiResourceDAO
+                    .getBinaryValueForCategory(connection, apiID, ResourceCategory.GATEWAY_CONFIG, ApiType.COMPOSITE);
         } catch (SQLException | IOException e) {
             throw new APIMgtDAOException(e);
         }
@@ -918,6 +961,20 @@ public class ApiDAOImpl implements ApiDAO {
     public void updateGatewayConfig(String apiID, String gatewayConfig, String updatedBy) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
             updateGatewayConfig(connection, apiID, gatewayConfig, updatedBy);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void updateCompositeAPIGatewayConfig(String apiID, InputStream gatewayConfig, String updatedBy)
+                                                                                    throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()) {
+            ApiResourceDAO.updateBinaryResourceForCategory(connection, apiID, ResourceCategory.GATEWAY_CONFIG,
+                    gatewayConfig, updatedBy, ApiType.COMPOSITE);
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
         }
@@ -1220,7 +1277,8 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     public InputStream getImage(String apiID) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
-            return ApiResourceDAO.getBinaryValueForCategory(connection, apiID, ResourceCategory.IMAGE);
+            return ApiResourceDAO.getBinaryValueForCategory(connection, apiID,
+                                            ResourceCategory.IMAGE, ApiType.STANDARD);
         } catch (SQLException | IOException e) {
             throw new APIMgtDAOException("Couldn't retrieve api thumbnail for api " + apiID, e);
         }
@@ -1242,7 +1300,7 @@ public class ApiDAOImpl implements ApiDAO {
                                 ResourceCategory.IMAGE, dataType, image, updatedBy);
                     } else {
                         ApiResourceDAO.updateBinaryResourceForCategory(connection, apiID,
-                                ResourceCategory.IMAGE, image, updatedBy);
+                                ResourceCategory.IMAGE, image, updatedBy, ApiType.STANDARD);
                     }
                     connection.commit();
                 } catch (SQLException e) {
@@ -1769,12 +1827,12 @@ public class ApiDAOImpl implements ApiDAO {
     private void updateAPIDefinition(Connection connection, String apiID, String apiDefinition, String updatedBy)
             throws SQLException {
         ApiResourceDAO.updateBinaryResourceForCategory(connection, apiID, ResourceCategory.SWAGGER,
-                new ByteArrayInputStream(apiDefinition.getBytes(StandardCharsets.UTF_8)), updatedBy);
+                new ByteArrayInputStream(apiDefinition.getBytes(StandardCharsets.UTF_8)), updatedBy, ApiType.STANDARD);
     }
 
     private String getAPIDefinition(Connection connection, String apiID) throws SQLException, IOException {
         InputStream apiDefinition = ApiResourceDAO.getBinaryValueForCategory(connection, apiID,
-                ResourceCategory.SWAGGER);
+                ResourceCategory.SWAGGER, ApiType.STANDARD);
 
         return IOUtils.toString(apiDefinition, StandardCharsets.UTF_8);
     }
@@ -1791,7 +1849,7 @@ public class ApiDAOImpl implements ApiDAO {
 
     private String getGatewayConfig(Connection connection, String apiID) throws SQLException, IOException {
         InputStream gatewayConfig = ApiResourceDAO
-                .getBinaryValueForCategory(connection, apiID, ResourceCategory.GATEWAY_CONFIG);
+                .getBinaryValueForCategory(connection, apiID, ResourceCategory.GATEWAY_CONFIG, ApiType.STANDARD);
 
         if (gatewayConfig != null) {
             return IOUtils.toString(gatewayConfig, StandardCharsets.UTF_8);
@@ -1803,7 +1861,8 @@ public class ApiDAOImpl implements ApiDAO {
             throws SQLException {
         if (gatewayConfig != null && !gatewayConfig.isEmpty()) {
             ApiResourceDAO.updateBinaryResourceForCategory(connection, apiID, ResourceCategory.GATEWAY_CONFIG,
-                    new ByteArrayInputStream(gatewayConfig.getBytes(StandardCharsets.UTF_8)), updatedBy);
+                    new ByteArrayInputStream(gatewayConfig.getBytes(StandardCharsets.UTF_8)), updatedBy,
+                    ApiType.STANDARD);
         }
     }
 

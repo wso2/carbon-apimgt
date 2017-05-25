@@ -64,8 +64,11 @@ public class RestApiConstants {
     public static final String HEADER_CONTENT_TYPE = "Content-Type";
 
     public static final String RESOURCE_PATH_APIS = "/apis";
+    public static final String RESOURCE_PATH_COMPOSITE_APIS = "/composite-apis";
     public static final String APIID_PARAM = "{apiId}";
     public static final String RESOURCE_PATH_THUMBNAIL = RESOURCE_PATH_APIS + "/" + APIID_PARAM + "/thumbnail";
+    public static final String RESOURCE_PATH_IMPLEMENTATION = RESOURCE_PATH_COMPOSITE_APIS + "/" + APIID_PARAM +
+                                                                                            "/implementation";
     public static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
 
     public static final String REST_API_PROVIDER = "admin";

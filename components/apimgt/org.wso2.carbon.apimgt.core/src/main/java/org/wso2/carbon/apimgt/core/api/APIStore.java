@@ -87,6 +87,43 @@ public interface APIStore extends APIManager {
      */
     List<CompositeAPI> searchCompositeAPIs(String query, int offset, int limit) throws APIManagementException;
 
+
+    /**
+     * Returns Swagger definition of a Composite API
+     *
+     * @param id ID of the API
+     * @return The CompositeAPI Swagger definition
+     * @throws APIManagementException if failed get CompositeAPI implementation for given id
+     */
+    String getCompositeApiDefinition(String id) throws APIManagementException;
+
+    /**
+     * Update Swagger definition of a Composite API
+     *
+     * @param id ID of the API
+     * @param apiDefinition  CompositeAPI Swagger definition
+     * @throws APIManagementException if failed get CompositeAPI implementation for given id
+     */
+    void updateCompositeApiDefinition(String id, String apiDefinition) throws APIManagementException;
+
+    /**
+     * Returns Ballerina implementation of a Composite API
+     *
+     * @param id ID of the API
+     * @return File of the CompositeAPI implementation
+     * @throws APIManagementException if failed get CompositeAPI implementation for given id
+     */
+    InputStream getCompositeApiImplementation(String id) throws APIManagementException;
+
+    /**
+     * Update Ballerina implementation of a Composite API
+     *
+     * @param id ID of the API
+     * @param implementation  CompositeAPI Ballerina implementation file
+     * @throws APIManagementException if failed get CompositeAPI implementation for given id
+     */
+    void updateCompositeApiImplementation(String id, InputStream implementation) throws APIManagementException;
+
     /**
      * Function to remove an Application from the API Store
      *
