@@ -10,6 +10,7 @@ map apiCache = {};
 dto:LabelInfoDto labelInfo = {};
 dto:GatewayConf gatewayConf = {};
 map applicationCache = {};
+map userInfoCache = {};
 
 function getFromTokenCache (string key) (dto:IntrospectDto){
     return (dto:IntrospectDto)tokenCacheMap[key];
@@ -95,4 +96,16 @@ function removeFromResources (string apiContext, string apiVersion) {
 function removeFromSubscriptionCache (string apiContext, string apiVersion, string consumerKey) {
     string key = apiContext + ":" + apiVersion + ":" + consumerKey;
     maps:remove(subscriptionCache, key);
+}
+function getFromUserInfoCache (string userId) (json){
+    if (userInfoCache[userId] != null) {
+        return (json)userInfoCache[userId];
+    } else {
+        return null;
+    }
+}
+function putIntoUserInfoCache (string userId, json userInfo) {
+    if (userInfoCache[userId] == null) {
+        userInfoCache[userId] = userInfo;
+    }
 }

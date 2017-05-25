@@ -95,7 +95,6 @@ function retrieveResources (string apiContext, string apiVersion, json resources
     }
 }
 function retrieveAPIInformation (string apiContext, string apiVersion) {
-    system:println(apiContext);
     string coreUrl = "https://localhost:9293/api/am/core/v1.0";
     string query = "/apis-summary/?apiContext=" + apiContext + "&apiVersion=" + apiVersion;
     message request = {};
@@ -109,7 +108,6 @@ function retrieveAPIInformation (string apiContext, string apiVersion) {
         json subscriptions = apiInfo["list"][0]["subscriptions"];
         retrieveResources(apiContext, apiVersion, resources);
         retrieveSubscriptions(subscriptions);
-        system:println("after");
     }
 }
 
