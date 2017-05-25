@@ -21,38 +21,38 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.models.APISummary;
+import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
+import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
-import org.wso2.carbon.apimgt.rest.api.core.*;
+import org.wso2.carbon.apimgt.rest.api.core.ApisSummaryApiService;
 import org.wso2.carbon.apimgt.rest.api.core.NotFoundException;
-import org.wso2.carbon.apimgt.rest.api.core.util.APISummaryComparator;
+import org.wso2.carbon.apimgt.rest.api.core.dto.APISummaryListDTO;
+import org.wso2.carbon.apimgt.rest.api.core.utils.MappingUtil;
 import org.wso2.msf4j.Request;
 
-import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import javax.ws.rs.core.Response;
 
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-16T14:58:37.369+05:30")
+@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
+        "2017-01-16T14:58:37.369+05:30")
 public class ApisSummaryApiServiceImpl extends ApisSummaryApiService {
     private static final Logger log = LoggerFactory.getLogger(ApisSummaryApiServiceImpl.class);
 
-    /**
-     * Retrieve API summary
-     *
-     * @return API summary details
-     * @throws NotFoundException If failed to retrieve api summary
-     */
-    @Override
-    public Response apisSummaryGet(String accept, Request request) throws NotFoundException {
 
-        List<APISummary> apisSummary = new ArrayList<APISummary>();
-        Collections.sort(apisSummary, new APISummaryComparator());
+    @Override
+    public Response apisSummaryGet(String apiContext, String apiVersion, String accept, Request request) throws
+            NotFoundException {
+
         try {
             APIMgtAdminService adminService = RestApiUtil.getAPIMgtAdminService();
-            apisSummary = adminService.getAPIInfo();
+            List<UriTemplate> uriTemplates = adminService.getAllResourcesForApi(apiContext, apiVersion);
+            List<SubscriptionValidationData> subscriptionValidationDataList = adminService.getAPISubscriptionsOfApi
+                    (apiContext, apiVersion);
+            APISummaryListDTO apiSummaryListDTO = MappingUtil.toApiSummaryListDto(uriTemplates,
+                    subscriptionValidationDataList);
+            return Response.ok(apiSummaryListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retreiving API summary";
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -60,6 +60,6 @@ public class ApisSummaryApiServiceImpl extends ApisSummaryApiService {
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-        return Response.ok().entity(apisSummary).build();
+
     }
 }
