@@ -22,13 +22,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
-import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -49,6 +48,20 @@ public class H2SQLStatements implements ApiDAOVendorSpecificStatements {
             "VERSION, DESCRIPTION, CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS " +
             "FROM AM_API ";
 
+    private Map<String, ApiAttributeSearchStore> searchMap;
+
+    public H2SQLStatements() {
+        searchMap = new HashMap<>();
+        //for tag search, need to check AM_API_TAG_MAPPING and AM_TAGS tables
+        searchMap.put(APIMgtConstants.TAG_SEARCH_TYPE_PREFIX, new H2TagSearchImpl());
+        //for subcontext search, need to check AM_API_OPERATION_MAPPING table
+        searchMap.put(APIMgtConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX, new H2SubcontextSearchImpl());
+        //for any other attribute search, need to check AM_API table
+        searchMap.put(APIMgtConstants.PROVIDER_SEARCH_TYPE_PREFIX, new H2GenericSearchImpl());
+        searchMap.put(APIMgtConstants.VERSION_SEARCH_TYPE_PREFIX, new H2GenericSearchImpl());
+        searchMap.put(APIMgtConstants.CONTEXT_SEARCH_TYPE_PREFIX, new H2GenericSearchImpl());
+        searchMap.put(APIMgtConstants.DESCRIPTION_SEARCH_TYPE_PREFIX, new H2GenericSearchImpl());
+    }
     /**
      * @see ApiDAOVendorSpecificStatements#getApiSearchQuery(int)
      */
@@ -141,15 +154,15 @@ public class H2SQLStatements implements ApiDAOVendorSpecificStatements {
     }
 
     /**
-     * @see ApiDAOVendorSpecificStatements#attributeSearchStore(Connection connection, List,
+     * @see ApiDAOVendorSpecificStatements#prepareAttributeSearchStatementStore(Connection connection, List,
      * Map, int, int)
      */
     @Override
     @SuppressFBWarnings({"SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
             "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE"})
-    public PreparedStatement attributeSearchStore(Connection connection, List<String> roles,
-                                                  Map<String, String> attributeMap, int offset,
-                                                  int limit) throws APIMgtDAOException {
+    public PreparedStatement prepareAttributeSearchStatementStore(Connection connection, List<String> roles,
+                                                                  Map<String, String> attributeMap, int offset,
+                                                                  int limit) throws APIMgtDAOException {
         StringBuilder roleListBuilder = new StringBuilder();
         roleListBuilder.append("?");
         for (int i = 0; i < roles.size() - 1; i++) {
@@ -176,61 +189,11 @@ public class H2SQLStatements implements ApiDAOVendorSpecificStatements {
             }
         }
 
-        String query = null;
-
-        if (attributeMap.containsKey(APIMgtConstants.TAG_SEARCH_TYPE_PREFIX)) {
-            //for tag search, need to check AM_API_TAG_MAPPING and AM_TAGS tables
-            query = API_SUMMARY_SELECT_STORE + " WHERE CURRENT_LC_STATUS  IN ('" +
-                    APIStatus.PUBLISHED.getStatus() + "','" +
-                    APIStatus.PROTOTYPED.getStatus() + "') AND " +
-                    "VISIBILITY = '" + API.Visibility.PUBLIC + "' AND " +
-                    "UUID IN (SELECT API_ID FROM AM_API_TAG_MAPPING WHERE TAG_ID IN " +
-                    "(SELECT TAG_ID FROM AM_TAGS WHERE " + searchQuery.toString() + ")) " +
-                    "UNION " +
-                    API_SUMMARY_SELECT_STORE + " WHERE CURRENT_LC_STATUS  IN ('" +
-                    APIStatus.PUBLISHED.getStatus() + "','" +
-                    APIStatus.PROTOTYPED.getStatus() + "') AND " +
-                    "VISIBILITY = '" + API.Visibility.RESTRICTED + "' AND " +
-                    "UUID IN (SELECT API_ID FROM AM_API_VISIBLE_ROLES WHERE ROLE IN (" +
-                    roleListBuilder.toString() + ")) AND " +
-                    "UUID IN (SELECT API_ID FROM AM_API_TAG_MAPPING WHERE TAG_ID IN " +
-                    "(SELECT TAG_ID FROM AM_TAGS WHERE " + searchQuery.toString() + ")) " +
-                    "LIMIT ? OFFSET ?";
-        } else if (attributeMap.containsKey(APIMgtConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX)) {
-            //for subcontext search, need to check AM_API_OPERATION_MAPPING table
-            query = API_SUMMARY_SELECT_STORE + " WHERE CURRENT_LC_STATUS  IN ('" +
-                    APIStatus.PUBLISHED.getStatus() + "','" +
-                    APIStatus.PROTOTYPED.getStatus() + "') AND " +
-                    "VISIBILITY = '" + API.Visibility.PUBLIC + "' AND " +
-                    "UUID IN (SELECT API_ID FROM AM_API_OPERATION_MAPPING WHERE " +
-                    searchQuery.toString() + ") " +
-                    "UNION " +
-                    API_SUMMARY_SELECT_STORE + " WHERE CURRENT_LC_STATUS  IN ('" +
-                    APIStatus.PUBLISHED.getStatus() + "','" +
-                    APIStatus.PROTOTYPED.getStatus() + "') AND " +
-                    "VISIBILITY = '" + API.Visibility.RESTRICTED + "' AND " +
-                    "UUID IN (SELECT API_ID FROM AM_API_VISIBLE_ROLES WHERE ROLE IN (" +
-                    roleListBuilder.toString() + ")) AND " +
-                    "UUID IN (SELECT API_ID FROM AM_API_OPERATION_MAPPING WHERE " +
-                    searchQuery.toString() + ") " +
-                    "LIMIT ? OFFSET ?";
-        } else {
-            //for any other attribute search, need to check AM_API table
-            query = API_SUMMARY_SELECT_STORE + " WHERE CURRENT_LC_STATUS  IN ('" +
-                    APIStatus.PUBLISHED.getStatus() + "','" +
-                    APIStatus.PROTOTYPED.getStatus() + "') AND " +
-                    "VISIBILITY = '" + API.Visibility.PUBLIC + "' AND " +
-                    searchQuery.toString() +
-                    " UNION " +
-                    API_SUMMARY_SELECT_STORE + " WHERE CURRENT_LC_STATUS  IN ('" +
-                    APIStatus.PUBLISHED.getStatus() + "','" +
-                    APIStatus.PROTOTYPED.getStatus() + "') AND " +
-                    "VISIBILITY = '" + API.Visibility.RESTRICTED + "' AND " +
-                    "UUID IN (SELECT API_ID FROM AM_API_VISIBLE_ROLES WHERE ROLE IN (" +
-                    roleListBuilder.toString() + ")) AND " +
-                    searchQuery.toString() +
-                    " LIMIT ? OFFSET ?";
-        }
+        //retrieve the attribute applicable for the search
+        String searchAttribute = attributeMap.entrySet().iterator().next().getKey();
+        //get the corresponding implementation based on the attribute to be searched
+        String query = searchMap.get(searchAttribute).
+                getStoreAttributeSearchQuery(roleListBuilder, searchQuery, offset, limit);
 
         try {
             int queryIndex = 1;
