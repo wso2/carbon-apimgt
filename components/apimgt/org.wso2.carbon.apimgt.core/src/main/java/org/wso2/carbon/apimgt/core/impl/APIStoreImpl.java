@@ -1013,18 +1013,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                     attributeMap.put(searchAttribute, searchValue);
                 }
 
-                /*
-                for (String attribute : attributes) {
-                    if (attribute.split(":").length > 1) {
-                        attributeMap.put(attribute.split(":")[0], attribute.split(":")[1]);
-                    } else if (attribute.contains(":") && attribute.split(":").length > 0) {
-                        attributeMap.put(attribute.split(":")[0], "");
-                    } else {
-                        isFullTextSearch = true;
-                    }
-
-                }
-                */
                 if (isFullTextSearch) {
                     apiResults = getApiDAO().searchAPIs(roles, user, query, ApiType.STANDARD, offset, limit);
                 } else {
