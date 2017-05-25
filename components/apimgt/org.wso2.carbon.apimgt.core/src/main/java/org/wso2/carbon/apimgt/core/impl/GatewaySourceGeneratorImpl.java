@@ -33,7 +33,6 @@ import org.wso2.carbon.apimgt.core.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.template.APIConfigContext;
 import org.wso2.carbon.apimgt.core.template.APITemplateException;
@@ -46,20 +45,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
-//import javax.script.ScriptException;
 
 /**
  * Generate API config template
  */
 public class GatewaySourceGeneratorImpl implements GatewaySourceGenerator {
     private static final Logger log = LoggerFactory.getLogger(GatewaySourceGeneratorImpl.class);
-    private API api;
+    private APIConfigContext apiConfigContext;
     private String packageName;
-
-    public GatewaySourceGeneratorImpl(API api) {
-        this();
-        this.api = api;
-    }
 
     public GatewaySourceGeneratorImpl() {
         APIMConfigurations config = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
@@ -72,10 +65,9 @@ public class GatewaySourceGeneratorImpl implements GatewaySourceGenerator {
         String templatePath = "resources" + File.separator + "template" + File.separator + "template.xml";
         try {
             // build the context for template and apply the necessary decorators
-            ConfigContext configcontext = new APIConfigContext(this.api, packageName);
-            configcontext.validate();
-            configcontext = new ResourceConfigContext(configcontext, this.api, apiResources);
-            VelocityContext context = configcontext.getContext();
+            apiConfigContext.validate();
+            ConfigContext configContext = new ResourceConfigContext(apiConfigContext, apiResources);
+            VelocityContext context = configContext.getContext();
             VelocityEngine velocityengine = new VelocityEngine();
             velocityengine.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
             velocityengine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
@@ -121,8 +113,8 @@ public class GatewaySourceGeneratorImpl implements GatewaySourceGenerator {
     }
 
     @Override
-    public void setAPI(API api) {
-        this.api = api;
+    public void setApiConfigContext(APIConfigContext apiConfigContext) {
+        this.apiConfigContext = apiConfigContext;
     }
 
     @Override
@@ -148,9 +140,5 @@ public class GatewaySourceGeneratorImpl implements GatewaySourceGenerator {
             throw new APITemplateException("Syntax error in " + templatePath, ExceptionCodes.TEMPLATE_EXCEPTION);
         }
         return writer.toString();
-    }
-
-    public void setApi(API api) {
-        this.api = api;
     }
 }

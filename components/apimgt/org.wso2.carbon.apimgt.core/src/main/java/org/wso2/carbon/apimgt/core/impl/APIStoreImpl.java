@@ -28,7 +28,6 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.api.APIMObservable;
 import org.wso2.carbon.apimgt.core.api.APIStore;
@@ -40,7 +39,6 @@ import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
-import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
@@ -55,7 +53,6 @@ import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
-import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
@@ -65,7 +62,7 @@ import org.wso2.carbon.apimgt.core.models.ApplicationCreationResponse;
 import org.wso2.carbon.apimgt.core.models.ApplicationCreationWorkflow;
 import org.wso2.carbon.apimgt.core.models.ApplicationUpdateWorkflow;
 import org.wso2.carbon.apimgt.core.models.Comment;
-import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
+import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.Event;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
@@ -79,6 +76,7 @@ import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
+import org.wso2.carbon.apimgt.core.template.APIConfigContext;
 import org.wso2.carbon.apimgt.core.template.APITemplateException;
 import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
@@ -90,6 +88,7 @@ import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExecutorFactory;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -119,7 +118,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
     private static final Logger log = LoggerFactory.getLogger(APIStoreImpl.class);
     private TagDAO tagDAO;
-    private APIMConfigurations config;
+
     APIGateway gateway = getApiGateway();
 
     /**
@@ -133,6 +132,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
      * @param tagDAO Tag Data Access Object
      * @param labelDAO Label Data Access Object
      * @param workflowDAO WorkFlow Data Access Object
+     * @param gatewaySourceGenerator GatewaySourceGenerator object
+     * @param apiGatewayPublisher APIGateway object
      */
     public APIStoreImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
                         APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, TagDAO tagDAO, LabelDAO labelDAO,
@@ -141,14 +142,29 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         super(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, new APILifeCycleManagerImpl(), labelDAO,
                 workflowDAO, gatewaySourceGenerator, apiGatewayPublisher);
         this.tagDAO = tagDAO;
-        config = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public CompositeAPI getCompositeAPIbyId(String id) throws APIManagementException {
+        CompositeAPI api = null;
+        try {
+            api = getApiDAO().getCompositeAPI(id);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while retrieving API with id " + id;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return api;
     }
 
     @Override
     public List<API> getAllAPIsByStatus(int offset, int limit, String[] statuses) throws APIManagementException {
         List<API> apiResults = null;
         try {
-            apiResults = getApiDAO().getAPIsByStatus(new ArrayList<>(Arrays.asList(statuses)), ApiType.STANDARD);
+            apiResults = getApiDAO().getAPIsByStatus(new ArrayList<>(Arrays.asList(statuses)));
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while fetching APIs for the given statuses - "
                     + Arrays.toString(statuses);
@@ -680,7 +696,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
      * {@inheritDoc}
      */
     @Override
-    public String addCompositeApi(API.APIBuilder apiBuilder) throws APIManagementException {
+    public String addCompositeApi(CompositeAPI.Builder apiBuilder) throws APIManagementException {
         apiBuilder.provider(getUsername());
         if (StringUtils.isEmpty(apiBuilder.getId())) {
             apiBuilder.id(UUID.randomUUID().toString());
@@ -691,36 +707,29 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         apiBuilder.lastUpdatedTime(localDateTime);
         apiBuilder.createdBy(getUsername());
         apiBuilder.updatedBy(getUsername());
-        apiBuilder.apiType(ApiType.COMPOSITE);
 
         if (!isApiNameExist(apiBuilder.getName()) && !isContextExist(apiBuilder.getContext())) {
             setUriTemplates(apiBuilder);
             setGatewayDefinitionSource(apiBuilder);
-            setSwaggerDefinition(apiBuilder);
-            try {
-                setPermission(apiBuilder);
 
-                API createdAPI = apiBuilder.build();
+            if (StringUtils.isEmpty(apiBuilder.getApiDefinition())) {
+                apiBuilder.apiDefinition(apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder));
+            }
+
+            try {
+                CompositeAPI createdAPI = apiBuilder.build();
                 APIUtils.validate(createdAPI);
 
                 //publishing config to gateway
-                gateway.addAPI(createdAPI);
+                gateway.addCompositeAPI(createdAPI);
 
-                getApiDAO().addAPI(createdAPI);
+                getApiDAO().addApplicationAssociatedAPI(createdAPI);
 
                 if (log.isDebugEnabled()) {
                     log.debug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
                             "successfully.", log);
                 }
 
-            } catch (ParseException e) {
-                String errorMsg = "Unable to update the documentation due to json parse error";
-                log.error(errorMsg, e);
-                throw new APIManagementException(errorMsg, e, ExceptionCodes.JSON_PARSE_ERROR);
-            } catch (APIMgtDAOException e) {
-                String errorMsg = "Error occurred while creating the API - " + apiBuilder.getName();
-                log.error(errorMsg);
-                throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
             } catch (GatewayException e) {
                 String message = "Error publishing service configuration to Gateway " + apiBuilder.getName();
                 log.error(message, e);
@@ -736,10 +745,11 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         return apiBuilder.getId();
     }
 
-    private void setUriTemplates(API.APIBuilder apiBuilder) {
+    private void setUriTemplates(CompositeAPI.Builder apiBuilder) {
         Map<String, UriTemplate> uriTemplateMap = new HashMap();
         if (apiBuilder.getUriTemplates().isEmpty()) {
-            apiDefinitionFromSwagger20.setDefaultSwaggerDefinition(apiBuilder);
+            apiBuilder.uriTemplates(APIUtils.getDefaultUriTemplates());
+            apiBuilder.apiDefinition(apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder));
         } else {
             for (UriTemplate uriTemplate : apiBuilder.getUriTemplates().values()) {
                 UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder
@@ -748,9 +758,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                     uriTemplateBuilder.templateId(APIUtils.generateOperationIdFromPath(uriTemplate
                             .getUriTemplate(), uriTemplate.getHttpVerb()));
                 }
-                if (uriTemplate.getEndpoint().isEmpty()) {
-                    uriTemplateBuilder.endpoint(apiBuilder.getEndpoint());
-                }
+
                 uriTemplateMap.put(uriTemplateBuilder.getTemplateId(), uriTemplateBuilder.build());
             }
             apiBuilder.uriTemplates(uriTemplateMap);
@@ -758,7 +766,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
     }
 
-    private void setGatewayDefinitionSource(API.APIBuilder apiBuilder) throws APITemplateException {
+
+
+    private void setGatewayDefinitionSource(CompositeAPI.Builder apiBuilder) throws APITemplateException {
         List<UriTemplate> list = new ArrayList<>(apiBuilder.getUriTemplates().values());
         List<TemplateBuilderDTO> resourceList = new ArrayList<>();
 
@@ -772,7 +782,10 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             resourceList.add(dto);
         }
         GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
-        gatewaySourceGenerator.setAPI(apiBuilder.build());
+        APIConfigContext apiConfigContext = new APIConfigContext(apiBuilder.getName(), apiBuilder.getContext(),
+                apiBuilder.getVersion(), apiBuilder.getCreatedTime(), config.getGatewayPackageName());
+
+        gatewaySourceGenerator.setApiConfigContext(apiConfigContext);
         String gatewayConfig = gatewaySourceGenerator.getConfigStringFromTemplate(resourceList);
         if (log.isDebugEnabled()) {
             log.debug("API " + apiBuilder.getName() + "gateway config: " + gatewayConfig);
@@ -780,29 +793,15 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         apiBuilder.gatewayConfig(gatewayConfig);
     }
 
-    private void setSwaggerDefinition(API.APIBuilder apiBuilder) {
-        if (StringUtils.isEmpty(apiBuilder.getApiDefinition())) {
-            apiBuilder.apiDefinition(apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder));
-        }
-    }
-
-    private void setPermission(API.APIBuilder apiBuilder) throws ParseException {
-        if (apiBuilder.getPermission() != null && !("").equals(apiBuilder.getPermission())) {
-            HashMap roleNamePermissionList;
-            roleNamePermissionList = APIUtils.getAPIPermissionArray(apiBuilder.getPermission());
-            apiBuilder.permissionMap(roleNamePermissionList);
-        }
-    }
-
     /**
      * {@inheritDoc}
      */
     @Override
-    public void updateCompositeApi(API.APIBuilder apiBuilder) throws APIManagementException {
+    public void updateCompositeApi(CompositeAPI.Builder apiBuilder) throws APIManagementException {
         apiBuilder.provider(getUsername());
         apiBuilder.updatedBy(getUsername());
 
-        API originalAPI = getAPIbyUUID(apiBuilder.getId());
+        CompositeAPI originalAPI = getApiDAO().getCompositeAPI(apiBuilder.getId());
         if (originalAPI != null) {
             apiBuilder.createdTime(originalAPI.getCreatedTime());
             //workflow status is an internal property and shouldn't be allowed to update externally
@@ -811,16 +810,18 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             APIUtils.verifyValidityOfApiUpdate(apiBuilder, originalAPI);
 
             try {
-                setPermission(apiBuilder);
-
                 String updatedSwagger = apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder);
-                String gatewayConfig = getApiGatewayConfig(apiBuilder.getId());
+                InputStream gatewayConfig = getApiDAO().getCompositeAPIGatewayConfig(apiBuilder.getId());
                 GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
-                gatewaySourceGenerator.setAPI(apiBuilder.build());
-                String updatedGatewayConfig = gatewaySourceGenerator
-                        .getGatewayConfigFromSwagger(gatewayConfig, updatedSwagger);
+                APIConfigContext apiConfigContext = new APIConfigContext(apiBuilder.getName(), apiBuilder.getContext(),
+                        apiBuilder.getVersion(), apiBuilder.getCreatedTime(), config.getGatewayPackageName());
 
-                API api = apiBuilder.build();
+                gatewaySourceGenerator.setApiConfigContext(apiConfigContext);
+                String updatedGatewayConfig = gatewaySourceGenerator
+                        .getGatewayConfigFromSwagger(IOUtils.toString(gatewayConfig, StandardCharsets.UTF_8),
+                                updatedSwagger);
+
+                CompositeAPI api = apiBuilder.build();
 
                 if (originalAPI.getContext() != null && !originalAPI.getContext().equals(apiBuilder.getContext())) {
                     if (isContextExist(api.getContext())) {
@@ -830,21 +831,24 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 }
 
                 //publishing config to gateway
-                gateway.addAPI(api);
+                gateway.addCompositeAPI(api);
 
-                getApiDAO().updateSwaggerDefinition(api.getId(), updatedSwagger, api.getUpdatedBy());
-                getApiDAO().updateGatewayConfig(api.getId(), updatedGatewayConfig, api.getUpdatedBy());
+                getApiDAO().updateCompositeApiDefinition(api.getId(), updatedSwagger, api.getUpdatedBy());
+                getApiDAO().updateCompositeAPIGatewayConfig(api.getId(),
+                        new ByteArrayInputStream(updatedGatewayConfig.getBytes(StandardCharsets.UTF_8)),
+                        api.getUpdatedBy());
 
                 if (log.isDebugEnabled()) {
                     log.debug("API " + api.getName() + "-" + api.getVersion() + " was updated successfully.");
                 }
 
-            } catch (ParseException e) {
-                String errorMsg = "Unable to update the documentation due to json parse error";
-                log.error(errorMsg, e);
-                throw new APIManagementException(errorMsg, e, ExceptionCodes.JSON_PARSE_ERROR);
             } catch (APIMgtDAOException e) {
                 String errorMsg = "Error occurred while updating the API - " + apiBuilder.getName();
+                log.error(errorMsg, e);
+                throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            } catch (IOException e) {
+                String errorMsg = "Error occurred while reading gateway configuration the API - " +
+                                        apiBuilder.getName();
                 log.error(errorMsg, e);
                 throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
             }
@@ -862,11 +866,12 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     @Override
     public void deleteCompositeApi(String apiId) throws APIManagementException {
         try {
-            API api = getApiDAO().getAPI(apiId);
-            if (api != null && api.getApiType() == ApiType.COMPOSITE) {
+            CompositeAPI api = getApiDAO().getCompositeAPI(apiId);
+
+            if (api != null) {
                 //Delete API in gateway
-                gateway.deleteAPI(api);
-                getApiDAO().deleteAPI(apiId);
+                gateway.deleteCompositeAPI(api);
+                getApiDAO().deleteCompositeApi(apiId);
             }
         } catch (GatewayException e) {
             String message = "Error occurred while deleting Composite API with id - " + apiId + " from gateway";
@@ -897,7 +902,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         String newVersionedId;
 
         try {
-            API api = getApiDAO().getAPI(apiId);
+            CompositeAPI api = getApiDAO().getCompositeAPI(apiId);
             if (api != null) {
                 if (api.getVersion().equals(newVersion)) {
                     String errMsg = "New API version " + newVersion + " cannot be same as the previous version for " +
@@ -905,7 +910,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                     log.error(errMsg);
                     throw new APIManagementException(errMsg, ExceptionCodes.API_ALREADY_EXISTS);
                 }
-                API.APIBuilder apiBuilder = new API.APIBuilder(api);
+                CompositeAPI.Builder apiBuilder = new CompositeAPI.Builder(api);
                 apiBuilder.id(UUID.randomUUID().toString());
                 apiBuilder.version(newVersion);
                 apiBuilder.context(api.getContext().replace(api.getVersion(), newVersion));
@@ -913,7 +918,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 if (StringUtils.isEmpty(apiBuilder.getApiDefinition())) {
                     apiBuilder.apiDefinition(apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder));
                 }
-                getApiDAO().addAPI(apiBuilder.build());
+                getApiDAO().addApplicationAssociatedAPI(apiBuilder.build());
                 newVersionedId = apiBuilder.getId();
             } else {
                 throw new APIMgtResourceNotFoundException("Requested API on UUID " + apiId + "Couldn't be found");
@@ -934,9 +939,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     public String addCompositeApiFromDefinition(InputStream apiDefinition) throws APIManagementException {
         try {
             String apiDefinitionString = IOUtils.toString(apiDefinition);
-            API.APIBuilder apiBuilder = apiDefinitionFromSwagger20.generateApiFromSwaggerResource(getUsername(),
-                    apiDefinitionString);
-            apiBuilder.corsConfiguration(new CorsConfiguration());
+            CompositeAPI.Builder apiBuilder = apiDefinitionFromSwagger20.
+                    generateCompositeApiFromSwaggerResource(getUsername(), apiDefinitionString);
             apiBuilder.apiDefinition(apiDefinitionString);
             addCompositeApi(apiBuilder);
             return apiBuilder.getId();
@@ -959,9 +963,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {
                 String responseStr = new String(IOUtils.toByteArray(urlConn.getInputStream()), StandardCharsets.UTF_8);
-                API.APIBuilder apiBuilder = apiDefinitionFromSwagger20.generateApiFromSwaggerResource(getUsername(),
-                        responseStr);
-                apiBuilder.corsConfiguration(new CorsConfiguration());
+                CompositeAPI.Builder apiBuilder = apiDefinitionFromSwagger20.
+                        generateCompositeApiFromSwaggerResource(getUsername(), responseStr);
                 apiBuilder.apiDefinition(responseStr);
                 addCompositeApi(apiBuilder);
                 return apiBuilder.getId();
@@ -1019,7 +1022,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
                 }
                 if (isFullTextSearch) {
-                    apiResults = getApiDAO().searchAPIs(roles, user, query, ApiType.STANDARD, offset, limit);
+                    apiResults = getApiDAO().searchAPIs(roles, user, query, offset, limit);
                 } else {
                     apiResults = getApiDAO().attributeSearchAPIsStore(new ArrayList<>(roles),
                             attributeMap, offset, limit);
@@ -1028,7 +1031,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 List<String> statuses = new ArrayList<>();
                 statuses.add(APIStatus.PUBLISHED.getStatus());
                 statuses.add(APIStatus.PROTOTYPED.getStatus());
-                apiResults = getApiDAO().getAPIsByStatus(roles, statuses, ApiType.STANDARD);
+                apiResults = getApiDAO().getAPIsByStatus(roles, statuses);
             }
 
         } catch (APIMgtDAOException e) {
@@ -1038,6 +1041,54 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         }
 
         return apiResults;
+    }
+
+    @Override
+    public List<CompositeAPI> searchCompositeAPIs(String query, int offset, int limit) throws APIManagementException {
+        List<CompositeAPI> apiResults;
+
+        //this should be current logged in user
+        String user = "admin";
+        //role list of current user
+        Set<String> roles = APIUtils.getAllRolesOfUser(user);
+        try {
+            apiResults = getApiDAO().searchCompositeAPIs(roles, user, query, offset, limit);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while updating searching APIs - " + query;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+
+        return apiResults;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getCompositeApiDefinition(String id) throws APIManagementException {
+        return getApiDAO().getCompositeApiSwaggerDefinition(id);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void updateCompositeApiDefinition(String id, String apiDefinition) throws APIManagementException {
+        getApiDAO().updateCompositeApiDefinition(id, apiDefinition, getUsername());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public InputStream getCompositeApiImplementation(String id) throws APIManagementException {
+        return getApiDAO().getCompositeAPIGatewayConfig(id);
+    }
+
+    @Override
+    public void updateCompositeApiImplementation(String id, InputStream implementation) throws APIManagementException {
+        getApiDAO().updateCompositeAPIGatewayConfig(id, implementation, getUsername());
     }
 
     /**

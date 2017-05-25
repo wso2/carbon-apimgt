@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.core.api;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIResource;
+import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.Scope;
 
 import java.util.List;
@@ -59,6 +60,13 @@ public interface APIDefinition {
     String generateSwaggerFromResources(API.APIBuilder api);
 
     /**
+     * generate the swagger from uri templates.
+     * @param api   CompositeAPI.Builder object
+     * @return      generated swagger as a string.
+     */
+    String generateSwaggerFromResources(CompositeAPI.Builder api);
+
+    /**
      * return API Object
      *
      * @param apiDefinition     API definition as a string
@@ -69,8 +77,13 @@ public interface APIDefinition {
     API.APIBuilder generateApiFromSwaggerResource(String provider, String apiDefinition) throws APIManagementException;
 
     /**
-     * Set the default swagger and uri templates
-     * @param apiBuilder    API object.
+     * return CompositeAPI Object
+     *
+     * @param apiDefinition     API definition as a string
+     * @param provider          Provider of the API
+     * @return                  CompositeAPI.Builder object.
+     * @throws APIManagementException   If error occurs while generate swagger from resources.
      */
-    void setDefaultSwaggerDefinition(API.APIBuilder apiBuilder);
+    CompositeAPI.Builder generateCompositeApiFromSwaggerResource(String provider, String apiDefinition)
+            throws APIManagementException;
 }

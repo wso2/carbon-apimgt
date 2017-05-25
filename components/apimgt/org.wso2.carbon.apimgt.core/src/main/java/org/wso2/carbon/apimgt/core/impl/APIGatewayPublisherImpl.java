@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummary;
+import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
@@ -92,10 +93,35 @@ public class APIGatewayPublisherImpl implements APIGateway {
             publishToPublisherTopic(gatewayDTO);
 
         } else {
-            saveApi(api, gwHome, gatewayConfig, false);
+            saveApi(api.getName(), api.getVersion(), gwHome, gatewayConfig, false);
             if (api.isDefaultVersion()) {
-                saveApi(api, gwHome, defaultConfig, true);
+                saveApi(api.getName(), api.getVersion(), gwHome, defaultConfig, true);
             }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addCompositeAPI(CompositeAPI api) throws GatewayException {
+        String gatewayConfig = api.getGatewayConfig();
+        String defaultConfig = null;
+
+        if (gwHome == null) {
+
+            // build the message to send
+            APIDTO gatewayDTO = new APIDTO(APIMgtConstants.GatewayEventTypes.API_CREATE);
+            gatewayDTO.setLabels(api.getLabels());
+            APISummary apiSummary = new APISummary(api.getId());
+            apiSummary.setName(api.getName());
+            apiSummary.setVersion(api.getVersion());
+            apiSummary.setContext(api.getContext());
+            gatewayDTO.setApiSummary(apiSummary);
+            publishToPublisherTopic(gatewayDTO);
+
+        } else {
+            saveApi(api.getName(), api.getVersion(), gwHome, gatewayConfig, false);
         }
     }
 
@@ -124,6 +150,21 @@ public class APIGatewayPublisherImpl implements APIGateway {
     @Override
     public void deleteAPI(API api) throws GatewayException {
 
+        if (gwHome == null) {
+            // build the message to send
+            APIDTO gatewayDTO = new APIDTO(APIMgtConstants.GatewayEventTypes.API_DELETE);
+            gatewayDTO.setLabels(api.getLabels());
+            APISummary apiSummary = new APISummary(api.getId());
+            apiSummary.setName(api.getName());
+            apiSummary.setVersion(api.getVersion());
+            apiSummary.setContext(api.getContext());
+            gatewayDTO.setApiSummary(apiSummary);
+            publishToPublisherTopic(gatewayDTO);
+        }
+    }
+
+    @Override
+    public void deleteCompositeAPI(CompositeAPI api) throws GatewayException {
         if (gwHome == null) {
             // build the message to send
             APIDTO gatewayDTO = new APIDTO(APIMgtConstants.GatewayEventTypes.API_DELETE);
@@ -228,11 +269,12 @@ public class APIGatewayPublisherImpl implements APIGateway {
     /**
      * Save API into FS
      *
-     * @param api     API object
+     * @param apiName     API Name
+     * @param apiVersion     API Version
      * @param gwHome  path of the gateway
      * @param content API config
      */
-    private void saveApi(API api, String gwHome, String content, boolean isDefaultApi) {
+    private void saveApi(String apiName, String apiVersion, String gwHome, String content, boolean isDefaultApi) {
         String deploymentDirPath = gwHome + File.separator + config.getGatewayPackageNamePath();
         File deploymentDir = new File(deploymentDirPath);
         if (!deploymentDir.exists()) {
@@ -245,9 +287,9 @@ public class APIGatewayPublisherImpl implements APIGateway {
 
         String path;
         if (isDefaultApi) {
-            path = deploymentDirPath + File.separator + api.getName() + gatewayFileExtension;
+            path = deploymentDirPath + File.separator + apiName + gatewayFileExtension;
         } else {
-            path = deploymentDirPath + File.separator + api.getName() + '_' + api.getVersion() + gatewayFileExtension;
+            path = deploymentDirPath + File.separator + apiName + '_' + apiVersion + gatewayFileExtension;
         }
         Writer writer = null;
         PrintWriter printWriter = null;

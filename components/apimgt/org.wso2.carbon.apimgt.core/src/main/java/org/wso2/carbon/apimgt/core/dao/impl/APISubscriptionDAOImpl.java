@@ -662,7 +662,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
         return subscriptionList;
     }
 
-    private void createSubscription(String apiId, String appId, String uuid, String tier, APIMgtConstants
+    void createSubscription(String apiId, String appId, String uuid, String tier, APIMgtConstants
             .SubscriptionStatus status, Connection conn) throws APIMgtDAOException, SQLException {
         //check for existing subscriptions
         final String checkExistingSubscriptionSql = " SELECT UUID FROM AM_SUBSCRIPTION WHERE API_ID = ? " +

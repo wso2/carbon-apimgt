@@ -19,7 +19,6 @@
  */
 package org.wso2.carbon.apimgt.core.api;
 
-import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
@@ -45,18 +44,6 @@ public interface APIManager {
      * @throws APIManagementException if failed get API from String
      */
     API getAPIbyUUID(String uuid) throws APIManagementException;
-
-    /**
-     * Get a list of APIs published by the given provider. If a given API has multiple APIs,
-     * only the latest version will
-     * be included in this list.
-     *
-     * @param providerName username of the the user who created the API
-     * @param apiType Type of API
-     * @return set of APIs
-     * @throws APIManagementException if failed to get set of API
-     */
-    List<API> getAPIsByProvider(String providerName, ApiType apiType) throws APIManagementException;
 
     /**
      * Retrieves the last updated time of an API
@@ -120,7 +107,7 @@ public interface APIManager {
      * @return swagger string
      * @throws APIManagementException If failed to get swagger v2.0 definition
      */
-    String getSwagger20Definition(String api) throws APIManagementException;
+    String getApiSwaggerDefinition(String api) throws APIManagementException;
 
     /**
      * Returns a paginated list of documentation attached to a particular API
@@ -190,15 +177,6 @@ public interface APIManager {
     Subscription getSubscriptionByUUID(String subId) throws APIManagementException;
 
     /**
-     * This method updates Swagger 2.0 resources in the registry
-     *
-     * @param apiId    id of the String
-     * @param jsonText json text to be saved in the registry
-     * @throws APIManagementException If failed to save swagger definition.
-     */
-    void saveSwagger20Definition(String apiId, String jsonText) throws APIManagementException;
-
-    /**
      * Save the thumbnail icon for api
      *
      * @param apiId       apiId of api
@@ -217,23 +195,7 @@ public interface APIManager {
      */
     InputStream getThumbnailImage(String apiId) throws APIManagementException;
 
-    /**
-     * This method updates gateway config in the database
-     *
-     * @param apiId        id of the String
-     * @param configString text to be saved in the registry
-     * @throws APIManagementException If failed to update gateway config.
-     */
-    void updateApiGatewayConfig(String apiId, String configString) throws APIManagementException;
 
-    /**
-     * This method retrieve gateway config in the database
-     *
-     * @param apiId id of the String
-     * @return API gateway config as a string
-     * @throws APIManagementException If failed to get gateway config of the API.
-     */
-    String getApiGatewayConfig(String apiId) throws APIManagementException;
 
     /**
      *

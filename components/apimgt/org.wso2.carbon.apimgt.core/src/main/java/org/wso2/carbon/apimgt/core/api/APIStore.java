@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.ApplicationCreationResponse;
 import org.wso2.carbon.apimgt.core.models.Comment;
+import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.Subscription;
@@ -42,6 +43,15 @@ import java.util.Map;
  *
  */
 public interface APIStore extends APIManager {
+
+    /**
+     * Returns details of an API
+     *
+     * @param id ID of the API
+     * @return An CompositeAPI object for the given id or null
+     * @throws APIManagementException if failed get CompositeAPI for given id
+     */
+    CompositeAPI getCompositeAPIbyId(String id) throws APIManagementException;
 
     /**
      * Returns a paginated list of all APIs in given Status list. If a given API has multiple APIs,
@@ -65,6 +75,54 @@ public interface APIStore extends APIManager {
      * @throws APIManagementException   If failed to search apis.
      */
     List<API> searchAPIs(String query, int offset, int limit) throws APIManagementException;
+
+    /**
+     * Returns a paginated list of all Composite APIs which match the given search criteria.
+     *
+     * @param query searchType
+     * @param limit limit
+     * @param offset offset
+     * @return {@code List<CompositeAPI>}
+     * @throws APIManagementException   If failed to search apis.
+     */
+    List<CompositeAPI> searchCompositeAPIs(String query, int offset, int limit) throws APIManagementException;
+
+
+    /**
+     * Returns Swagger definition of a Composite API
+     *
+     * @param id ID of the API
+     * @return The CompositeAPI Swagger definition
+     * @throws APIManagementException if failed get CompositeAPI implementation for given id
+     */
+    String getCompositeApiDefinition(String id) throws APIManagementException;
+
+    /**
+     * Update Swagger definition of a Composite API
+     *
+     * @param id ID of the API
+     * @param apiDefinition  CompositeAPI Swagger definition
+     * @throws APIManagementException if failed get CompositeAPI implementation for given id
+     */
+    void updateCompositeApiDefinition(String id, String apiDefinition) throws APIManagementException;
+
+    /**
+     * Returns Ballerina implementation of a Composite API
+     *
+     * @param id ID of the API
+     * @return File of the CompositeAPI implementation
+     * @throws APIManagementException if failed get CompositeAPI implementation for given id
+     */
+    InputStream getCompositeApiImplementation(String id) throws APIManagementException;
+
+    /**
+     * Update Ballerina implementation of a Composite API
+     *
+     * @param id ID of the API
+     * @param implementation  CompositeAPI Ballerina implementation file
+     * @throws APIManagementException if failed get CompositeAPI implementation for given id
+     */
+    void updateCompositeApiImplementation(String id, InputStream implementation) throws APIManagementException;
 
     /**
      * Function to remove an Application from the API Store
@@ -292,7 +350,7 @@ public interface APIStore extends APIManager {
      * @return Details of the added Composite API.
      * @throws APIManagementException if failed to add Composite API
      */
-    String addCompositeApi(API.APIBuilder apiBuilder) throws APIManagementException;
+    String addCompositeApi(CompositeAPI.Builder apiBuilder) throws APIManagementException;
 
     /**
      * Updates design and implementation of an existing Composite API.
@@ -300,7 +358,7 @@ public interface APIStore extends APIManager {
      * @param apiBuilder {@code org.wso2.carbon.apimgt.core.models.API.APIBuilder}
      * @throws APIManagementException if failed to update Composite API
      */
-    void updateCompositeApi(API.APIBuilder apiBuilder) throws APIManagementException;
+    void updateCompositeApi(CompositeAPI.Builder apiBuilder) throws APIManagementException;
 
     /**
      * Delete an existing Composite API.

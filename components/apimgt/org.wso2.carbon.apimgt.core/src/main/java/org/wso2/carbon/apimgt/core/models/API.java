@@ -65,6 +65,7 @@ public final class API {
         corsConfiguration = builder.corsConfiguration;
         createdTime = builder.createdTime;
         apiType = builder.apiType;
+        applicationId = builder.applicationId;
         createdBy = builder.createdBy;
         updatedBy = builder.updatedBy;
         lastUpdatedTime = builder.lastUpdatedTime;
@@ -201,6 +202,22 @@ public final class API {
         return apiPermission;
     }
 
+    public String getApiDefinition() {
+        return apiDefinition;
+    }
+
+    public String getCopiedFromApiId() {
+        return copiedFromApiId;
+    }
+
+    public ApiType getApiType() {
+        return apiType;
+    }
+
+    public String getApplicationId() {
+        return applicationId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -234,6 +251,8 @@ public final class API {
                 Objects.equals(visibleRoles, api.visibleRoles) &&
                 Objects.equals(businessInformation, api.businessInformation) &&
                 Objects.equals(corsConfiguration, api.corsConfiguration) &&
+                apiType == api.apiType &&
+                Objects.equals(applicationId, api.applicationId) &&
                 APIUtils.isTimeStampsEquals(createdTime, api.createdTime) &&
                 Objects.equals(createdBy, api.createdBy) &&
                 Objects.equals(updatedBy, api.updatedBy) &&
@@ -249,8 +268,8 @@ public final class API {
         return Objects.hash(id, provider, name, version, context, description, lifeCycleStatus, lifecycleInstanceId,
                 endpoint, gatewayConfig, wsdlUri, isResponseCachingEnabled, cacheTimeout, isDefaultVersion,
                 transport, tags, labels, policies, visibility, visibleRoles, businessInformation, corsConfiguration,
-                createdTime, createdBy, updatedBy, lastUpdatedTime, lifecycleState, uriTemplates, copiedFromApiId,
-                workflowStatus);
+                apiType, applicationId, createdTime, createdBy, updatedBy, lastUpdatedTime, lifecycleState,
+                uriTemplates, copiedFromApiId, workflowStatus);
     }
 
 
@@ -284,6 +303,7 @@ public final class API {
     private final BusinessInformation businessInformation;
     private final CorsConfiguration corsConfiguration;
     private final ApiType apiType;
+    private final String applicationId;
     private final LocalDateTime createdTime;
     private final String createdBy;
     private final String updatedBy;
@@ -425,6 +445,7 @@ public final class API {
         private BusinessInformation businessInformation;
         private CorsConfiguration corsConfiguration;
         private ApiType apiType;
+        private String applicationId;
         private LocalDateTime createdTime;
         private String createdBy;
         private String updatedBy;
@@ -464,6 +485,7 @@ public final class API {
             this.businessInformation = copy.businessInformation;
             this.corsConfiguration = copy.corsConfiguration;
             this.apiType = copy.apiType;
+            this.applicationId = copy.applicationId;
             this.createdTime = copy.createdTime;
             this.createdBy = copy.createdBy;
             this.lastUpdatedTime = copy.lastUpdatedTime;
@@ -805,6 +827,18 @@ public final class API {
         }
 
         /**
+         * Sets the {@code applicationId} and returns a reference to this APIBuilder so that the methods can be chained
+         * together.
+         *
+         * @param applicationId the {@code applicationId} to set
+         * @return a reference to this APIBuilder
+         */
+        public APIBuilder applicationId(String applicationId) {
+            this.applicationId = applicationId;
+            return this;
+        }
+
+        /**
          * Sets the {@code createdTime} and returns a reference to this APIBuilder so that the methods can be chained
          * together.
          *
@@ -992,21 +1026,5 @@ public final class API {
         public String getWorkflowStatus() {
             return workflowStatus;
         }
-    }
-
-    public String getApiDefinition() {
-        return apiDefinition;
-    }
-
-    public String getCopiedFromApiId() {
-        return copiedFromApiId;
-    }
-
-    public ApiType getApiType() {
-        return apiType;
-    }
-
-    public void setCopiedFromApiId(String copiedFromApiId) {
-             this.copiedFromApiId = copiedFromApiId;
     }
 }
