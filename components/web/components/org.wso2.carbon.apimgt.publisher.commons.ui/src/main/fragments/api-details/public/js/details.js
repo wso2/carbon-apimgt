@@ -181,6 +181,7 @@ function lifecycleTabHandler(event) {
                     animateElement.setAttribute("repeatCount", "indefinite");
                     state_rectangle.appendChild(animateElement);
                 }, false);
+                validateActionButtons('#update-tiers-button', '#update-labels-button');
 
             }, onFailure: function (data) {
             }
@@ -256,6 +257,7 @@ function endpointsTabHandler(event) {
                     }
                     var callbacks = {
                         onSuccess: function (data) {
+                            validateActionButtons('#update-endpoints-configuration');
                         }, onFailure: function (data) {
                         }
                     };
@@ -702,6 +704,9 @@ function documentTabHandler(event) {
     var callbacks = {
             onSuccess: function (data) {
             api_client.getDocuments(api_id,getDocsCallback);
+            if(!hasValidScopes("/apis/{apiId}/documents", "post")) {
+              $('#add-new-doc').addClass('not-active');
+            }
             }, onFailure: function (data) {
            }
           };
@@ -710,28 +715,7 @@ function documentTabHandler(event) {
      UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-documents", data, "api-tab-doc-content", mode, callbacks);
     }
     
-    
-    var select_environment = function(){
-        var selectedEnvironment = $("#environment_name");
-        var name = selectedEnvironment.val();
 
-        //Token to load the swagger definition
-        var bearerToken = "Bearer " + getCookie("WSO2_AM_TOKEN_1");
-        swaggerUi.api.clientAuthorizations.add("key", new SwaggerClient.ApiKeyAuthorization("Authorization", bearerToken, "header"));
-
-        //Set Swagger URL
-        if (window.swaggerUi.api.url.indexOf("?") != -1) {
-        	if (window.swaggerUi.api.url.indexOf("labelName") != -1) {
-        		window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url.split("labelName")[0] + "labelName=" + name + "&scheme=" + location.protocol});
-        	} else {
-                window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "&labelName=" + name + "&scheme=" + location.protocol});
-        	}
-        } else {
-        	window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "?labelName=" + name + "&scheme=" + location.protocol});
-        }
-        //change_token();
-      };
-    
     /**
      * Event handler for API Console tab onclick event;Get the API swagger definition and display in Swagger UI
      * @param event {object} Click event of the API Console tab
@@ -745,52 +729,81 @@ function documentTabHandler(event) {
     	   api_client.get(api_id).then(
     		        function (response) {
     		        	var context = response.obj;
+    		        	var label_names = context.labels;
     		        	var callbacks = {
-    		    	          onSuccess: function (data) {
-    		    	                 api_client.getSwagger(api_id).then(
-    		    	                		 function (jsonData) {
-    		    	                			 var swaggerURL = jsonData.url;
-    		    	                			 if (context.labels.length > 0) {
-    		    	                				 swaggerURL = jsonData.url + "?labelName=" + context.labels[0] + "&scheme=" + location.protocol;
-    		    	                				 }
-    		    	                			 var bearerToken = "Bearer " + getCookie("WSO2_AM_TOKEN_1");
-    		    	                			 $(document).ready(function() {
-    		    	                				 window.swaggerUi = new SwaggerUi({
-    		    	                					 url: swaggerURL,
-    		    	                					 dom_id: "swagger-ui-container",
-    		    	                					 authorizations: {
-    		    	                						 key: new SwaggerClient.ApiKeyAuthorization("Authorization", bearerToken, "header")
-    		    	                					 },
-    		    	                					 supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch', 'head'],
-    		    	                					 onComplete: function(swaggerApi, swaggerUi){
-    		    	                						 console.log("Loaded SwaggerUI");
-    		    	                					 },
-    		    	                					 onFailure: function(data) {
-    		    	                						 console.log("Unable to Load SwaggerUI");
-    		    	                						 },
-    		    	                					 docExpansion: "list",
-    		    	                					 jsonEditor: false,
-    		    	                					 defaultModelRendering: 'schema',
-    		    	                					 showRequestHeaders: true,
-    		    	                					 validatorUrl: null
-    		    	                					 });
-    		    	                				 window.swaggerUi.load();
-    		    	                				 });
-    		    	                			 }
-    		    	                		 ).catch(apiGetErrorHandler);
-    		    	                 $(".env_name").change(select_environment);
+    		    	          onSuccess: function (renderedData) {
+    		    	        	  api_client.labels().then(
+    		    	        			  function(labelresponse) {
+    		    	        				  api_client.getSwagger(api_id).then(
+    		    		    	                		 function (jsonData) {
+    		    		    	                			 $("#console-info-div").html(renderedData);
+    		    		    	                			 var swaggerJSON = JSON.parse(jsonData.data);
+    		    		    	                			 var submitMethods = [];
+    		    		    	                			 var label_data = labelresponse.obj.list;
+    		    		    	                			 if (label_data && label_data.length > 0) {
+    		    		    	                				 var gw_host = getAccessURL(label_data, label_names);
+    		    		    	                				 if (gw_host) {
+    		    		    	                					 swaggerJSON["host"] = gw_host;
+    		    		    	                					 swaggerJSON["schemes"] = [location.protocol.split(":")[0]];
+    		    		    	                					 submitMethods = ['get', 'post', 'put', 'delete', 'patch', 'head'];
+    		    		    	                					 $("#label-warn-div").hide();
+    		    		    	                				 } else {
+    		    		    	                					 submitMethods = [];
+    		    		    	                					 $("#label-warn-div").show();
+    		    		    	                				 }
+    		    		    	                			 }
+    		    		    	                			 spec: swaggerJSON,
+    		    		    	                			 $(document).ready(function() {
+    		    		    	                				 window.swaggerUi = new SwaggerUi({
+    		    		    	                					 spec: swaggerJSON,
+    		    		    	                					 dom_id: "swagger-ui-container",
+    		    		    	                					 supportedSubmitMethods: submitMethods,
+    		    		    	                					 onComplete: function(swaggerApi, swaggerUi){
+    		    		    	                						 console.log("Loaded SwaggerUI");
+    		    		    	                					 },
+    		    		    	                					 onFailure: function(data) {
+    		    		    	                						 console.log("Unable to Load SwaggerUI");
+    		    		    	                						 },
+    		    		    	                					 docExpansion: "list",
+    		    		    	                					 jsonEditor: false,
+    		    		    	                					 defaultModelRendering: 'schema',
+    		    		    	                					 showRequestHeaders: true,
+    		    		    	                					 validatorUrl: null
+    		    		    	                					 });
+    		    		    	                				 window.swaggerUi.load();
+    		    		    	                				 });
+    		    		    	                			 }
+    		    		    	                		 ).catch(apiGetErrorHandler);
+    		    	        			  }
+    		    	        	  ).catch(apiGetErrorHandler);
     		    	              }, onFailure: function (data) {
     		    	            	  
     		    	              }
     		    	        };
-    		        	var data = {
-    		        			labels: context.labels
-    		        			};
-    		        	UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-console", data, 
-    		     			   "api-console-content", mode, callbacks);
+    		        	UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-console",
+    		        			{"scheme": location.protocol.split(":")[0]}, "api-console-content", mode, callbacks);
     		        	}
     		        ).catch(apiGetErrorHandler);
     	   }
+
+    //Filter label data and return accessUrl matched to given label and editor app's scheme (http/https)
+    //Here label is the API published GW.
+    function getAccessURL(label_data, label) {
+    	var protocolPrefix = location.protocol + "//";
+    	if (label) {
+    		for (var i = 0; i < label_data.length; i++) {
+    			if (label[0] == label_data[i].name) {
+    				var accessUrls = label_data[i].accessUrls;
+    				for (var j = 0; j < accessUrls.length; j++) {
+    					if (accessUrls[j].indexOf(location.protocol) == 0) {
+    						return accessUrls[j].split(protocolPrefix)[1];
+    					}
+    				}
+    			}
+    		}
+    	}
+    	return null;
+    }
 
 
 /**

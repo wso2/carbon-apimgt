@@ -215,6 +215,11 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
             APIManagementException {
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(apiDefinition);
+
+        if (swagger == null) {
+            throw new APIManagementException("Swagger could not be generated from provided API definition");
+        }
+
         Info apiInfo = swagger.getInfo();
         if (apiInfo == null) {
             throw new APIManagementException("Swagger doesn't contains the info");
@@ -247,9 +252,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
     public void setDefaultSwaggerDefinition(API.APIBuilder apiBuilder) {
         Map<String, UriTemplate> uriTemplateMap = new HashMap<>();
         UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
-        uriTemplateBuilder.endpoint(apiBuilder.getEndpoint());
         uriTemplateBuilder.uriTemplate("/*");
-        uriTemplateBuilder.endpoint(apiBuilder.getEndpoint());
         for (String httpVerb : APIMgtConstants.SUPPORTED_HTTP_VERBS.split(",")) {
             if (!"OPTIONS".equals(httpVerb)) {
                 uriTemplateBuilder.httpVerb(httpVerb);

@@ -1,6 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
-import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -13,11 +13,11 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_corsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_endpointDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_operationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SequenceDTO;
+import java.util.Objects;
 
 /**
  * APIDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-06T17:02:03.158+05:30")
 public class APIDTO   {
   @JsonProperty("id")
   private String id = null;

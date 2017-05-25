@@ -1,15 +1,35 @@
 package org.wso2.carbon.apimgt.rest.api.store;
 
+
 import io.swagger.annotations.ApiParam;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import org.osgi.service.component.annotations.Component;
+
+import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.factories.SubscriptionsApiServiceFactory;
+
 import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
+import org.wso2.msf4j.formparam.FileInfo;
+import org.wso2.msf4j.formparam.FormDataParam;
+import org.osgi.service.component.annotations.Component;
+
+import java.io.InputStream;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.HEAD;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 
 @Component(
     name = "org.wso2.carbon.apimgt.rest.api.store.SubscriptionsApi",
@@ -20,7 +40,6 @@ import org.wso2.msf4j.Request;
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the subscriptions API")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-25T10:57:52.774+05:30")
 public class SubscriptionsApi implements Microservice  {
    private final SubscriptionsApiService delegate = SubscriptionsApiServiceFactory.getSubscriptionsApi();
 
@@ -53,7 +72,7 @@ public class SubscriptionsApi implements Microservice  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = SubscriptionDTO.class),
         
-        @io.swagger.annotations.ApiResponse(code = 202, message = "Accepted. The request has been accepted.   ", response = SubscriptionDTO.class),
+        @io.swagger.annotations.ApiResponse(code = 202, message = "Accepted. The request has been accepted. ", response = SubscriptionDTO.class),
         
         @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = SubscriptionDTO.class),
         
@@ -72,7 +91,7 @@ public class SubscriptionsApi implements Microservice  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Resource successfully deleted. ", response = void.class),
         
-        @io.swagger.annotations.ApiResponse(code = 202, message = "Accepted. The request has been accepted.   ", response = void.class),
+        @io.swagger.annotations.ApiResponse(code = 202, message = "Accepted. The request has been accepted. ", response = void.class),
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Resource to be deleted does not exist. ", response = void.class),
         

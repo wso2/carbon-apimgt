@@ -68,14 +68,7 @@
                         <!-- Tab panes -->
                         <div class="tab-content">
                             <div class="tab-pane active" id="endpointTab">
-                                <form class="form-horizontal sub-implementation-option" id="endpoint-option-form">
-                                    <div class="form-group">
-                                        <div class="col-sm-12">
-                                            <input id="endpoint-url" name="wsdl-url" class="form-control input-small"
-                                                   type="text" placeholder="E.g.: http://appserver/resource">
-                                        </div>
-                                    </div>
-                                </form>
+                                    {{fragment "org.wso2.carbon.apimgt.publisher.commons.ui.api-endpoint-create"}}
                             </div>
                             <div class="tab-pane" id="swaggerTab">
                                 <form class="form-horizontal sub-implementation-option" id="swagger-option-form">
@@ -130,7 +123,7 @@
                 </div>
                 <!-- Button -->
                 <hr/>
-                <button id="api-create-submit" class="btn btn-primary" data-toggle="modal"
+                <button id="api-create-submit" class="btn btn-primary" data-resource-path="/apis" data-resource-method="post" data-toggle="modal"
                         data-target="#myModal2">Create API
                 </button>
             </div>

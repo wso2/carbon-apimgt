@@ -64,7 +64,6 @@ public class KeyManagerConstants {
     public static final String TOKEN_ENDPOINT = "TokenEndpoint";
     public static final String REVOKE_ENDPOINT = "RevokeEndpoint";
     public static final String INTROSPECT_ENDPOINT = "introspectEndpoint";
-    public static final String DEFAULT_VALIDITY_PERIOD = "3600";
     public static final String OAUTH2_DEFAULT_SCOPE = "default";
 
 

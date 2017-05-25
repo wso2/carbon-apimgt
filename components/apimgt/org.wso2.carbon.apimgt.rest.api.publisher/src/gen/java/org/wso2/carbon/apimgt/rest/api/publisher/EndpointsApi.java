@@ -1,23 +1,28 @@
 package org.wso2.carbon.apimgt.rest.api.publisher;
 
+
 import io.swagger.annotations.ApiParam;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPointDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPointListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.factories.EndpointsApiServiceFactory;
 import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.HEAD;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 
 @Component(
     name = "org.wso2.carbon.apimgt.rest.api.publisher.EndpointsApi",
@@ -28,7 +33,6 @@ import org.wso2.msf4j.Request;
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the endpoints API")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-06T17:02:03.158+05:30")
 public class EndpointsApi implements Microservice  {
    private final EndpointsApiService delegate = EndpointsApiServiceFactory.getEndpointsApi();
 
@@ -111,6 +115,26 @@ public class EndpointsApi implements Microservice  {
 , @Context Request request)
     throws NotFoundException {
         return delegate.endpointsGet(accept,ifNoneMatch,ifModifiedSince, request);
+    }
+    @HEAD
+
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Check given Endpoint is already exist ", notes = "Using this operation, you can check a given Endpoint name is already used. You need to provide the name you want to check. ", response = void.class, tags={ "Endpoint (Collection)", })
+    @io.swagger.annotations.ApiResponses(value = {
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Requested Endpoint attibute status is returned ", response = void.class),
+
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Requested Endpoint attribute does not meet requiremnts. ", response = void.class),
+
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested Endpoint does not exist. ", response = void.class),
+
+        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = void.class) })
+    public Response endpointsHead(@ApiParam(value = "") @QueryParam("name") String name
+,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
+,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
+, @Context Request request)
+    throws NotFoundException {
+        return delegate.endpointsHead(name,accept,ifNoneMatch, request);
     }
     @POST
     

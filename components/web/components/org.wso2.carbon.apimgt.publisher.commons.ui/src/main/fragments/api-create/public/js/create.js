@@ -19,6 +19,7 @@ $(
         $('#api-create-submit').on('click', createAPIHandler);
         $('input[type=radio][name=implementation-options]').on('change', implementationOptionsHandler);
         $('input[type=radio][name=import-definition]').on('change', importDefinitionOptionsHandler);
+        validateActionButtons('#api-create-submit');
     }
 );
 
@@ -82,7 +83,7 @@ function createAPIHandler(event) {
             createAPIFromSwagger(input_type);
             break;
         case "endpoint-option":
-            addEndpoint(createAPIUsingEndpoint);
+            createAPIUsingEndpoint();
             break; /* TODO: till endpoint and mock api creation implement ~tmkb */
         case "mock-option":
             var api_data = {
@@ -189,23 +190,12 @@ function createAPIFromSwagger(input_type) {
  *
  * @param response
  */
-function createAPIUsingEndpoint(response) {
-    var endpoint = [];
-    var responseObject = response.obj;
-    var id = responseObject.id;
-    endpoint.push({
-        'id': id,
-        'type': 'production'
-    });
-    endpoint.push({
-        'id': id,
-        'type': 'sandbox'
-    });
+function createAPIUsingEndpoint() {
     var api_data = {
         name: $("#new-api-name").val(),
         context: $('#new-api-context').val(),
         version: $('#new-api-version').val(),
-        endpoint: endpoint
+        endpoint: constructEndpointsForApi()
     };
     var new_api = new API('');
     var promised_create = new_api.create(api_data);
@@ -231,47 +221,34 @@ function createAPIUsingEndpoint(response) {
                 console.debug(error_response);
             });
 }
-/**
- * Add endpoint when api is added by providing endpoint
- *
- * @param callBack function
- */
-function addEndpoint(callBack) {
-    var url = $('#endpoint-url').val();
-    var name = $("#new-api-name").val();
-    var context = $('#new-api-context').val();
-    var version = $('#new-api-version').val();
+function constructEndpointsForApi(){
+ var endpoint = [];
 
-    //todo: need to endpoint type after it is defined
-    var body = {
-        name: 'endpoint_' + name + '_' + version,
-        endpointConfig: url,
-        endpointSecurity: "{'enabled':'true','type':'basic','properties':{'username':'admin','password':'admin'}}",
-        maxTps: 1000,
-        type:"http"
-    };
-
-    var new_api = new API('');
-    var promised_endpoint = new_api.addEndpoint(body);
-    promised_endpoint
-        .then(callBack)
-        .catch(
-            function (error_response) {
-                var error_data = JSON.parse(error_response.data);
-                var message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
-                noty({
-                    text: message,
-                    type: 'error',
-                    dismissQueue: true,
-                    modal: true,
-                    closeWith: ['click', 'backdrop'],
-                    progressBar: true,
-                    timeout: 5000,
-                    layout: 'top',
-                    theme: 'relax',
-                    maxVisible: 10
-                });
-                $('[data-toggle="loading"]').loading('hide');
-                console.debug(error_response);
-            });
+     var productionLevel = $('input[name=endpoint-select-production]:checked').val();
+     var sandBoxLevel = $('input[name=endpoint-select-sandbox]:checked').val();
+     if(productionLevel =="global"){
+     var endpointId = $('#global-endpoint-production option:selected').val();
+        endpoint.push({
+            'key': endpointId,
+            'type': 'production'
+        });
+     }else{
+         endpoint.push({
+             'inline': constructEndpoint('production'),
+             'type': 'production'
+         });
+     }
+     if(sandBoxLevel =="global"){
+          var endpointId = $('#global-endpoint-sandbox option:selected').val();
+             endpoint.push({
+                 'key': endpointId,
+                 'type': 'sandbox'
+             });
+          }else{
+              endpoint.push({
+                  'inline': constructEndpoint('sandbox'),
+                  'type': 'sandbox'
+              });
+          }
+     return endpoint;
 }

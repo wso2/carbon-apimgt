@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>7.0.6-SNAPSHOT</version>
+        <version>7.0.22-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -64,6 +64,14 @@
         <dependency>
             <groupId>com.fasterxml.jackson.jaxrs</groupId>
             <artifactId>jackson-jaxrs-json-provider</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
@@ -131,18 +139,6 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>org.wso2.carbon.apimgt.rest.api.publisher.Application</mainClass>
-                        </manifest>
-                        <!--<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>-->
-                    </archive>
-                </configuration>
-            </plugin>
-
 
             <plugin><!-- Overridden from parent pom to exclude generated sources -->
                 <groupId>org.apache.maven.plugins</groupId>
@@ -177,7 +173,6 @@
     </build>
 
     <properties>
-        <microservice.mainClass>org.wso2.carbon.apimgt.rest.api.publisher.Application</microservice.mainClass>
         <private.package>
             org.wso2.carbon.apimgt.rest.api.publisher.internal
         </private.package>
@@ -193,7 +188,9 @@
             com.google.gson.*; version="${google.code.gson.import.version.range}",
             org.apache.commons.lang3.*; version="${apache.commons.lang3.import.version.range}",
             org.json.simple.*,
-	    org.apache.commons.io.*
+	        org.apache.commons.io.*,
+            com.fasterxml.jackson.core.*,
+            com.fasterxml.jackson.databind.*
         </import.package>
         <export.package>
             !org.wso2.carbon.apimgt.rest.api.publisher.internal,

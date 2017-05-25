@@ -1,6 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.core.dto;
 
-import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
@@ -8,11 +8,11 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.core.dto.SubscriptionDTO;
+import java.util.Objects;
 
 /**
  * SubscriptionListDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-01-18T15:27:32.639+05:30")
 public class SubscriptionListDTO   {
   @JsonProperty("list")
   private List<SubscriptionDTO> list = new ArrayList<SubscriptionDTO>();

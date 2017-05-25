@@ -45,7 +45,7 @@ public class ConfigurationActivator {
             unbind = "unregisterConfigProvider")
     protected void registerConfigProvider(ConfigProvider configProvider) {
         ServiceReferenceHolder.getInstance().setConfigProvider(configProvider);
-        log.info(ServiceReferenceHolder.getInstance().getAPIMConfiguration().getTopicName());
+
     }
 
     /**

@@ -1,13 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +11,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
-import org.wso2.carbon.apimgt.core.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.APIKey;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.Application;
@@ -27,11 +19,9 @@ import org.wso2.carbon.apimgt.core.models.ApplicationCreationResponse;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ApplicationStatus;
 import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
-import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ApplicationStatus;
-import org.wso2.carbon.apimgt.core.util.APIMgtConstants.SubscriptionStatus;
-import org.wso2.carbon.apimgt.core.workflow.HttpWorkflowResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -44,8 +34,17 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.store.mappings.WorkflowMappintUtil;
+import org.wso2.carbon.apimgt.rest.api.store.mappings.MiscMappingUtil;
 import org.wso2.msf4j.Request;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
         "2016-11-01T13:48:55.078+05:30")
@@ -118,7 +117,7 @@ public class ApplicationsApiServiceImpl
                 if (application.getKeys() != null) {
                     //TODO : this logic needs to be wriiten properly ones the Identity server DCR endpoint is
                     // available to get oauth app details by providing consumer
-                    KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+                    KeyManager keyManager = APIManagerFactory.getInstance().getIdentityProvider();
                     for (APIKey apiKey : application.getKeys()) {
                         try {
                             OAuthApplicationInfo oAuthApplicationInfo = keyManager
@@ -247,8 +246,8 @@ public class ApplicationsApiServiceImpl
             //be in either pending or approved state) send back the workflow response 
             if (ApplicationStatus.APPLICATION_ONHOLD.equals(updatedApplication.getStatus())) {
                 
-                WorkflowResponseDTO workflowResponse = WorkflowMappintUtil
-                        .fromWorkflowResponsetoDTO(updateResponse);
+                WorkflowResponseDTO workflowResponse = MiscMappingUtil
+                        .fromWorkflowResponseToDTO(updateResponse);
                 URI location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" + applicationId);
                 return Response.status(Response.Status.ACCEPTED).header(RestApiConstants.LOCATION_HEADER, location)
                         .entity(workflowResponse).build();
@@ -419,8 +418,8 @@ public class ApplicationsApiServiceImpl
             //be in either pending or approved state) send back the workflow response 
             if (ApplicationStatus.APPLICATION_ONHOLD.equals(createdApplication.getStatus())) {
                 
-                WorkflowResponseDTO workflowResponse = WorkflowMappintUtil
-                        .fromWorkflowResponsetoDTO(applicationResponse.getWorkflowResponse());
+                WorkflowResponseDTO workflowResponse = MiscMappingUtil
+                        .fromWorkflowResponseToDTO(applicationResponse.getWorkflowResponse());
                 return Response.status(Response.Status.ACCEPTED).header(RestApiConstants.LOCATION_HEADER, location)
                         .entity(workflowResponse).build();
             }    

@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIConfigRetrievalException;
@@ -15,6 +16,7 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
+import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 
 import java.util.ArrayList;
@@ -62,7 +64,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
      */
     @Override
     public List<APISummary> getAPIInfo() throws APIManagementException {
-        List<API> apiList = apiDAO.getAPIs();
+        List<API> apiList = apiDAO.getAPIs(ApiType.STANDARD);
         List<APISummary> apiSummaryList = new ArrayList<APISummary>();
         apiList.forEach(apiInfo -> {
             APISummary apiSummary = new APISummary(apiInfo.getId());
@@ -88,7 +90,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
      */
     @Override
     public void updatePolicy(Policy policy) throws APIManagementException {
-
+        policyDAO.updatePolicy(policy);
     }
 
     /**
@@ -100,11 +102,26 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     }
 
     /**
+     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#deletePolicyByUuid(String, String)
+     */
+    @Override public void deletePolicyByUuid(String uuid, String policyLevel) throws APIManagementException {
+        policyDAO.deletePolicyByUuid(uuid, policyLevel);
+    }
+
+    /**
      * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#getPolicy(String, String)
      */
     @Override
     public Policy getPolicy(String policyLevel, String policyName) throws APIManagementException {
         return policyDAO.getPolicy(policyLevel, policyName);
+    }
+
+    /**
+     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#getPolicyByUuid(String, String)
+     */
+    @Override
+    public Policy getPolicyByUuid(String uuid, String policyLevel) throws APIManagementException {
+        return policyDAO.getPolicyByUuid(uuid, policyLevel);
     }
 
     /**
@@ -184,6 +201,63 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
             log.error(errorMessage, e);
             throw new APIConfigRetrievalException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
+    }
+
+    /**
+     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#getAllResourcesForApi(String, String)
+     */
+    @Override
+    public List<UriTemplate> getAllResourcesForApi(String apiContext, String apiVersion) throws APIManagementException {
+        try {
+            return apiDAO.getResourcesOfApi(apiContext, apiVersion);
+        } catch (APIManagementException e) {
+            String msg = "Couldn't retrieve resources for Api Name: " + apiContext;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    @Override public List<API> getAPIsByStatus(List<String> gatewayLabels, String status)
+            throws APIManagementException {
+        List<API> apiList;
+        try {
+            if (gatewayLabels != null && status != null) {
+                apiList = apiDAO.getAPIsByStatus(gatewayLabels, status);
+            } else {
+                if (gatewayLabels == null) {
+                    String msg = "Gateway labels cannot be null";
+                    log.error(msg);
+                    throw new APIManagementException(msg, ExceptionCodes.GATEWAY_LABELS_CANNOT_BE_NULL);
+                } else {
+                    String msg = "Status cannot be null";
+                    log.error(msg);
+                    throw new APIManagementException(msg, ExceptionCodes.STATUS_CANNOT_BE_NULL);
+                }
+            }
+        } catch (APIMgtDAOException e) {
+            String msg = "Error occurred while getting the API list in given states";
+            log.error(msg, e);
+            throw new APIManagementException(msg, ExceptionCodes.APIM_DAO_EXCEPTION);
+        }
+        return apiList;
+    }
+
+    @Override public List<API> getAPIsByGatewayLabel(List<String> gatewayLabels) throws APIManagementException {
+        List<API> apiList;
+        try {
+            if (gatewayLabels != null) {
+                apiList = apiDAO.getAPIsByGatewayLabel(gatewayLabels);
+            } else {
+                String msg = "Gateway labels cannot be null";
+                log.error(msg);
+                throw new APIManagementException(msg, ExceptionCodes.GATEWAY_LABELS_CANNOT_BE_NULL);
+            }
+        } catch (APIMgtDAOException e) {
+            String msg = "Error occurred while getting the API list in given gateway labels";
+            log.error(msg, e);
+            throw new APIManagementException(msg, ExceptionCodes.APIM_DAO_EXCEPTION);
+        }
+        return apiList;
     }
 
 }

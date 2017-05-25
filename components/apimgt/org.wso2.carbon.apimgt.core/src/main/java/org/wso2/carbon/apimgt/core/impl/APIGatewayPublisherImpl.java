@@ -18,144 +18,211 @@
 */
 package org.wso2.carbon.apimgt.core.impl;
 
-import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.andes.client.AMQConnectionFactory;
-import org.wso2.andes.url.URLSyntaxException;
-import org.wso2.carbon.apimgt.core.APIMConfigurations;
-import org.wso2.carbon.apimgt.core.api.APIGatewayPublisher;
-import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.api.APIGateway;
+import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
+import org.wso2.carbon.apimgt.core.dto.APIDTO;
+import org.wso2.carbon.apimgt.core.dto.EndpointDTO;
+import org.wso2.carbon.apimgt.core.dto.GatewayDTO;
+import org.wso2.carbon.apimgt.core.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.template.dto.GatewayConfigDTO;
+import org.wso2.carbon.apimgt.core.models.APISummary;
+import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.BrokerUtil;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
-import javax.jms.JMSException;
-import javax.jms.TextMessage;
-import javax.jms.Topic;
-import javax.jms.TopicConnection;
-import javax.jms.TopicConnectionFactory;
-import javax.jms.TopicPublisher;
-import javax.jms.TopicSession;
 
 /**
- * API gateway related functions
+ * This is responsible for handling API gateway related operations
  */
-public class APIGatewayPublisherImpl implements APIGatewayPublisher {
+public class APIGatewayPublisherImpl implements APIGateway {
     private static final Logger log = LoggerFactory.getLogger(APIGatewayPublisherImpl.class);
     private APIMConfigurations config;
     private String gatewayFileExtension = ".bal";
     private String endpointConfigName = "endpoint";
+    private String gwHome;
 
     public APIGatewayPublisherImpl() {
         config = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
-    }
 
-    /**
-     * Publishing API configuration artifacts to the gateway
-     *
-     * @param api API model
-     * @return is publishing success
-     */
-    @Override
-    public boolean publishToGateway(API api) throws GatewayException {
-        try {
-            String gatewayConfig = api.getGatewayConfig();
-            String gwHome = System.getProperty("gwHome");
-            //TODO: remove temp fix to ignore gateway home
-            if (gwHome == null) {
-                gwHome = System.getProperty("carbon.home");
-            }
-            String defaultConfig = null;
-            if (api.isDefaultVersion()) {
-                //change the context name without version
-                String newContext = "@http:BasePath(\"/" + api.getContext() + "\")";
-                defaultConfig = gatewayConfig.replaceAll("@http:BasePath\\(\"(.)*\"\\)", newContext);
-                //set the service name with api name only
-                String newServiceName = "service " + api.getName() + " {";
-                defaultConfig = defaultConfig
-                        .replaceAll("service( )*" + api.getName() + "_[0-9]*( )*\\{", newServiceName);
-            }
-            if (gwHome == null) {
-                // create the message to send
-                GatewayConfigDTO dto = new GatewayConfigDTO();
-                dto.setType("api");
-                dto.setApiName(api.getName());
-                dto.setContext(api.getContext());
-                dto.setVersion(api.getVersion());
-                dto.setCreator(api.getCreatedBy());
-                dto.setConfig(gatewayConfig);
-                publishMessage(dto); //publishing versioned API
-                if (api.isDefaultVersion()) {
-                    //publishing default API
-                    publishMessage(dto);
-                }
-            } else {
-                saveApi(api, gwHome, gatewayConfig, false);
-                if (api.isDefaultVersion()) {
-                    saveApi(api, gwHome, defaultConfig, true);
-                }
-            }
-            return true;
-        } catch (JMSException e) {
-            log.error("Error deploying API configuration for API " + api.getName(), e);
-            throw new GatewayException("Error deploying API configuration for API " + api.getName(),
-                    ExceptionCodes.GATEWAY_EXCEPTION);
-        } catch (URLSyntaxException e) {
-            log.error("Error deploying API configuration for API " + api.getName(), e);
-            throw new GatewayException("Error generating API configuration for API " + api.getName(),
-                    ExceptionCodes.GATEWAY_EXCEPTION);
+        //TODO:Remove this once broker is integrated
+        gwHome = System.getProperty("gwHome");
+        if (gwHome == null) {
+            gwHome = System.getProperty("carbon.home");
         }
     }
 
     /**
-     * Publishing the API config to gateway
-     *
-     * @param dto GatewayConfigDTO to be published
-     * @throws JMSException       if JMS issue is occurred
-     * @throws URLSyntaxException If connection String is invalid
+     * {@inheritDoc}
      */
-    private void publishMessage(GatewayConfigDTO dto) throws JMSException, URLSyntaxException {
-        // create connection factory
-        TopicConnectionFactory connFactory = new AMQConnectionFactory(
-                getTCPConnectionURL(config.getUsername(), config.getPassword()));
-        TopicConnection topicConnection = connFactory.createTopicConnection();
-        topicConnection.start();
-        TopicSession topicSession = topicConnection.createTopicSession(false, TopicSession.AUTO_ACKNOWLEDGE);
-        // Send message
-        Topic topic = topicSession.createTopic(config.getTopicName());
+    @Override
+    public void addAPI(API api) throws GatewayException {
 
-        TextMessage textMessage = topicSession.createTextMessage(new Gson().toJson(dto));
-        TopicPublisher topicPublisher = topicSession.createPublisher(topic);
-        topicPublisher.publish(textMessage);
+        String gatewayConfig = api.getGatewayConfig();
+        String defaultConfig = null;
+        if (api.isDefaultVersion()) {
+            //change the context name without version
+            String newContext = "@http:BasePath(\"/" + api.getContext() + "\")";
+            defaultConfig = gatewayConfig.replaceAll("@http:BasePath\\(\"(.)*\"\\)", newContext);
+            //set the service name with api name only
+            String newServiceName = "service " + api.getName() + " {";
+            defaultConfig = defaultConfig
+                    .replaceAll("service( )*" + api.getName() + "_[0-9]*( )*\\{", newServiceName);
+        }
+        if (gwHome == null) {
 
-        topicPublisher.close();
-        topicSession.close();
-        topicConnection.stop();
-        topicConnection.close();
+            // build the message to send
+            APIDTO gatewayDTO = new APIDTO(APIMgtConstants.GatewayEventTypes.API_CREATE);
+            gatewayDTO.setLabels(api.getLabels());
+            APISummary apiSummary = new APISummary(api.getId());
+            apiSummary.setName(api.getName());
+            apiSummary.setVersion(api.getVersion());
+            apiSummary.setContext(api.getContext());
+            gatewayDTO.setApiSummary(apiSummary);
+            publishToPublisherTopic(gatewayDTO);
+
+        } else {
+            saveApi(api, gwHome, gatewayConfig, false);
+            if (api.isDefaultVersion()) {
+                saveApi(api, gwHome, defaultConfig, true);
+            }
+        }
     }
 
     /**
-     * Get connection config
-     *
-     * @param username username
-     * @param password password
-     * @return connection string
+     * {@inheritDoc}
      */
-    private String getTCPConnectionURL(String username, String password) {
-        // amqp://{username}:{password}@carbon/carbon?brokerlist='tcp://{hostname}:{port}'
-        return new StringBuffer().append("amqp://").append(username).append(":").append(password).append("@")
-                .append(config.getCarbonClientId()).append("/")
-                .append(config.getCarbonVirtualHostName()).append("?brokerlist='tcp://")
-                .append(config.getTopicServerHost()).append(":")
-                .append(config.getTopicServerPort()).append("'").toString();
+    @Override
+    public void updateAPI(API api) throws GatewayException {
 
+        if (gwHome == null) {
+            // build the message to send
+            APIDTO gatewayDTO = new APIDTO(APIMgtConstants.GatewayEventTypes.API_UPDATE);
+            gatewayDTO.setLabels(api.getLabels());
+            APISummary apiSummary = new APISummary(api.getId());
+            apiSummary.setName(api.getName());
+            apiSummary.setVersion(api.getVersion());
+            apiSummary.setContext(api.getContext());
+            gatewayDTO.setApiSummary(apiSummary);
+            publishToPublisherTopic(gatewayDTO);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void deleteAPI(API api) throws GatewayException {
+
+        if (gwHome == null) {
+            // build the message to send
+            APIDTO gatewayDTO = new APIDTO(APIMgtConstants.GatewayEventTypes.API_DELETE);
+            gatewayDTO.setLabels(api.getLabels());
+            APISummary apiSummary = new APISummary(api.getId());
+            apiSummary.setName(api.getName());
+            apiSummary.setVersion(api.getVersion());
+            apiSummary.setContext(api.getContext());
+            gatewayDTO.setApiSummary(apiSummary);
+            publishToPublisherTopic(gatewayDTO);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addAPISubscription(Subscription subscription) throws GatewayException {
+        if (gwHome == null) {
+            SubscriptionDTO subscriptionDTO = new SubscriptionDTO(
+                    APIMgtConstants.GatewayEventTypes.SUBSCRIPTION_CREATE);
+            subscriptionDTO.setSubscription(subscription);
+            publishToStoreTopic(subscriptionDTO);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void deleteAPISubscription(Subscription subscription) throws GatewayException {
+        if (gwHome == null) {
+            SubscriptionDTO subscriptionDTO = new SubscriptionDTO(
+                    APIMgtConstants.GatewayEventTypes.SUBSCRIPTION_DELETE);
+            subscriptionDTO.setSubscription(subscription);
+            publishToStoreTopic(subscriptionDTO);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addEndpoint(Endpoint endpoint) throws GatewayException {
+
+        if (gwHome == null) {
+            EndpointDTO dto = new EndpointDTO(APIMgtConstants.GatewayEventTypes.ENDPOINT_CREATE);
+            dto.setEndpoint(endpoint);
+            publishToPublisherTopic(dto);
+        } else {
+            saveEndpointConfig(gwHome, endpoint.getEndpointConfig());
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void updateEndpoint(Endpoint endpoint) throws GatewayException {
+        if (gwHome == null) {
+            EndpointDTO dto = new EndpointDTO(APIMgtConstants.GatewayEventTypes.ENDPOINT_UPDATE);
+            dto.setEndpoint(endpoint);
+            publishToPublisherTopic(dto);
+        } else {
+            saveEndpointConfig(gwHome, endpoint.getEndpointConfig());
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void deleteEndpoint(Endpoint endpoint) throws GatewayException {
+
+        if (gwHome == null) {
+            EndpointDTO dto = new EndpointDTO(APIMgtConstants.GatewayEventTypes.ENDPOINT_DELETE);
+            dto.setEndpoint(endpoint);
+            publishToPublisherTopic(dto);
+        }
+    }
+
+    /**
+     * Publish event to publisher topic
+     *
+     * @param gatewayDTO    gateway data transfer object
+     * @throws GatewayException     If there is a failure to publish to gateway
+     */
+    private void publishToPublisherTopic(GatewayDTO gatewayDTO) throws GatewayException {
+        BrokerUtil.publishToTopic(config.getPublisherTopic(), gatewayDTO);
+    }
+
+    /**
+     * Publish event to store topic
+     *
+     * @param gatewayDTO    gateway data transfer object
+     * @throws GatewayException     If there is a failure to publish to gateway
+     */
+    private void publishToStoreTopic(GatewayDTO gatewayDTO) throws GatewayException {
+        BrokerUtil.publishToTopic(config.getStoreTopic(), gatewayDTO);
     }
 
     /**
@@ -201,43 +268,6 @@ public class APIGatewayPublisherImpl implements APIGatewayPublisher {
             } catch (IOException e) {
                 log.error("Error closing connections", e);
             }
-        }
-    }
-
-    /**
-     * Publishing Endpoint configuration artifacts to the gateway
-     *
-     * @param config endpoint config
-     * @return is publishing success
-     */
-    @Override
-    public boolean publishEndpointConfigToGateway(String config) throws GatewayException {
-        try {
-            String gwHome = System.getProperty("gwHome");
-
-            //TODO: remove temp fix to ignore gateway home
-            if (gwHome == null) {
-                gwHome = System.getProperty("carbon.home");
-            }
-
-            if (gwHome == null) {
-                GatewayConfigDTO dto = new GatewayConfigDTO();
-                dto.setType("endpoint");
-                dto.setApiName(endpointConfigName);
-                dto.setConfig(config);
-                publishMessage(dto); //TODO publish endpoint configs correctly
-            } else {
-                saveEndpointConfig(gwHome, config);
-            }
-            return true;
-        } catch (JMSException e) {
-            log.error("Error deploying configuration for " + endpointConfigName, e);
-            throw new GatewayException("Template " + "resources" + File.separator + "template.xml not Found",
-                    ExceptionCodes.GATEWAY_EXCEPTION);
-        } catch (URLSyntaxException e) {
-            log.error("Error deploying configuration for " + endpointConfigName, e);
-            throw new GatewayException("Error deploying configuration for " + endpointConfigName,
-                    ExceptionCodes.GATEWAY_EXCEPTION);
         }
     }
 

@@ -93,7 +93,7 @@ public class KeyManagerUtil {
             oAuthTokenResponse.setExpiresIn(validityPeriod);
             oAuthTokenResponse.setToken(UUID.randomUUID().toString());
             oAuthTokenResponse.setRefreshToken(UUID.randomUUID().toString());
-            oAuthTokenResponse.setScopes(userScopesMap.get(username));
+            oAuthTokenResponse.setScopes(String.join(" ", userScopesMap.get(username)));
             tokenMap.put(oAuthTokenResponse.getToken(), oAuthTokenResponse);
             refreshTokenMap.put(oAuthTokenResponse.getRefreshToken(), oAuthTokenResponse);
             return true;
@@ -115,7 +115,7 @@ public class KeyManagerUtil {
             oAuthTokenResponse.setExpiresIn(validityPeriod);
             oAuthTokenResponse.setToken(UUID.randomUUID().toString());
             oAuthTokenResponse.setRefreshToken(UUID.randomUUID().toString());
-            oAuthTokenResponse.setScopes(userScopesMap.get(username));
+            oAuthTokenResponse.setScopes(String.join(" ", userScopesMap.get(username)));
             tokenMap.put(oAuthTokenResponse.getToken(), oAuthTokenResponse);
             refreshTokenMap.put(oAuthTokenResponse.getRefreshToken(), oAuthTokenResponse);
             return true;
@@ -145,14 +145,7 @@ public class KeyManagerUtil {
             if (new Timestamp(System.currentTimeMillis()).getTime() <= expireTime) {
                 OAuthTokenResponse oAuthTokenResponse = tokenMap.get(accessToken);
                 oAuth2IntrospectionResponse.setActive(true);
-                StringBuilder builder = new StringBuilder();
-                oAuthTokenResponse.getScopes().forEach(scope -> {
-                            builder.append(scope);
-                            builder.append(" ");
-
-                        }
-                    );
-                oAuth2IntrospectionResponse.setScope(builder.toString());
+                oAuth2IntrospectionResponse.setScope(oAuthTokenResponse.getScopes());
                 oAuth2IntrospectionResponse.setExp(oAuthTokenResponse.getExpiresIn());
                 oAuth2IntrospectionResponse.setIat(System.currentTimeMillis());
                 return true;
@@ -218,8 +211,6 @@ public class KeyManagerUtil {
 
             oos = new ObjectOutputStream(fos);
             oos.writeObject(appsByClientId);
-        } catch (FileNotFoundException e) {
-            log.error("Error while backing up token data", e);
         } catch (IOException e) {
             log.error("Error while backing up token data", e);
         } finally {
@@ -282,8 +273,6 @@ public class KeyManagerUtil {
             FileInputStream fis = new FileInputStream(backUpPath);
             ois = new ObjectInputStream(fis);
             applications = (Map) ois.readObject();
-        } catch (FileNotFoundException e) {
-            log.error("Error while getting backed up token data", e);
         } catch (IOException e) {
             log.error("Error while getting backed up token data", e);
         } catch (ClassNotFoundException e) {
@@ -321,8 +310,6 @@ public class KeyManagerUtil {
             } else {
                 refreshTokenMap = (Map) ois.readObject();
             }
-        } catch (FileNotFoundException e) {
-            log.error("Error while getting backed up token data", e);
         } catch (IOException e) {
             log.error("Error while getting backed up token data", e);
         } catch (ClassNotFoundException e) {

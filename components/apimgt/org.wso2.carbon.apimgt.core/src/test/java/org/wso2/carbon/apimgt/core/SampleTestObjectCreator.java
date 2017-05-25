@@ -24,6 +24,7 @@ import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Application;
@@ -38,7 +39,14 @@ import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.BandwidthLimit;
+import org.wso2.carbon.apimgt.core.models.policy.Condition;
+import org.wso2.carbon.apimgt.core.models.policy.HeaderCondition;
+import org.wso2.carbon.apimgt.core.models.policy.IPCondition;
+import org.wso2.carbon.apimgt.core.models.policy.JWTClaimsCondition;
+import org.wso2.carbon.apimgt.core.models.policy.Pipeline;
 import org.wso2.carbon.apimgt.core.models.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.core.models.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.core.models.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
@@ -53,8 +61,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class SampleTestObjectCreator {
@@ -85,6 +95,7 @@ public class SampleTestObjectCreator {
     private static final String FIFTY_PER_MIN_TIER = "50PerMin";
     private static final String TWENTY_PER_MIN_TIER = "20PerMin";
     private static final String TIME_UNIT_SECONDS = "s";
+    private static final String TIME_UNIT_MONTH = "Month";
     private static final String CUSTOMER_ROLE = "customer";
     private static final String EMPLOYEE_ROLE = "employee";
     private static final String MANAGER_ROLE = "manager";
@@ -111,7 +122,7 @@ public class SampleTestObjectCreator {
     public static String apiDefinition;
     public static InputStream inputStream;
     private static final Logger log = LoggerFactory.getLogger(SampleTestObjectCreator.class);
-    static String endpointId = UUID.randomUUID().toString();
+    public static String endpointId = UUID.randomUUID().toString();
 
     static {
         try {
@@ -124,14 +135,14 @@ public class SampleTestObjectCreator {
     }
 
     public static API.APIBuilder createDefaultAPI() {
-        List<String> transport = new ArrayList<>();
+        Set<String> transport = new HashSet<>();
         transport.add(HTTP);
         transport.add(HTTPS);
 
-        List<String> tags = new ArrayList<>();
+        Set<String> tags = new HashSet<>();
         tags.add(TAG_CLIMATE);
 
-        List<String> policies = new ArrayList<>();
+        Set<String> policies = new HashSet<>();
         policies.add(GOLD_TIER);
         policies.add(SILVER_TIER);
         policies.add(BRONZE_TIER);
@@ -157,9 +168,10 @@ public class SampleTestObjectCreator {
                 tags(tags).
                 policies(policies).
                 visibility(API.Visibility.PUBLIC).
-                visibleRoles(new ArrayList<>()).
+                visibleRoles(new HashSet<>()).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
+                apiType(ApiType.STANDARD).
                 createdTime(LocalDateTime.now()).
                 createdBy(ADMIN).
                 updatedBy(ADMIN).
@@ -179,6 +191,7 @@ public class SampleTestObjectCreator {
                 id(api.getId()).
                 context(api.getContext()).
                 description(api.getDescription()).
+                apiType(ApiType.STANDARD).
                 lifeCycleStatus(api.getLifeCycleStatus()).
                 lifecycleInstanceId(api.getLifecycleInstanceId()).build();
     }
@@ -191,6 +204,7 @@ public class SampleTestObjectCreator {
                 name(fromAPI.getName()).
                 version(fromAPI.getVersion()).
                 context(fromAPI.getContext()).
+                apiType(fromAPI.getApiType()).
                 createdTime(fromAPI.getCreatedTime()).
                 createdBy(fromAPI.getCreatedBy()).
                 lifecycleInstanceId(fromAPI.getLifecycleInstanceId()).
@@ -212,14 +226,14 @@ public class SampleTestObjectCreator {
     }
 
     public static API.APIBuilder createAlternativeAPI() {
-        List<String> transport = new ArrayList<>();
+        Set<String> transport = new HashSet<>();
         transport.add(HTTP);
 
-        List<String> tags = new ArrayList<>();
+        Set<String> tags = new HashSet<>();
         tags.add(TAG_FOOD);
         tags.add(TAG_BEVERAGE);
 
-        List<String> policies = new ArrayList<>();
+        Set<String> policies = new HashSet<>();
         policies.add(SILVER_TIER);
         policies.add(BRONZE_TIER);
 
@@ -237,6 +251,10 @@ public class SampleTestObjectCreator {
         corsConfiguration.setAllowHeaders(Arrays.asList(ALLOWED_HEADER_AUTHORIZATION, ALLOWED_HEADER_CUSTOM));
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.setAllowOrigins(Arrays.asList("*"));
+
+        HashMap permissionMap = new HashMap();
+        permissionMap.put("1000", 6);
+        permissionMap.put("1001", 4);
 
         API.APIBuilder apiBuilder = new API.APIBuilder("Adam", "restaurantAPI", "0.9").
                 id(UUID.randomUUID().toString()).
@@ -253,9 +271,11 @@ public class SampleTestObjectCreator {
                 tags(tags).
                 policies(policies).
                 visibility(API.Visibility.RESTRICTED).
-                visibleRoles(Arrays.asList(CUSTOMER_ROLE, MANAGER_ROLE, EMPLOYEE_ROLE)).
+                visibleRoles(new HashSet<>(Arrays.asList(CUSTOMER_ROLE, MANAGER_ROLE, EMPLOYEE_ROLE))).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
+                apiType(ApiType.STANDARD).
+                permissionMap(permissionMap).
                 createdTime(LocalDateTime.now()).
                 createdBy(API_CREATOR).
                 apiDefinition(apiDefinition).
@@ -265,14 +285,14 @@ public class SampleTestObjectCreator {
     }
 
     public static API.APIBuilder createUniqueAPI() {
-        List<String> transport = new ArrayList<>();
+        Set<String> transport = new HashSet<>();
         transport.add(HTTP);
 
-        List<String> tags = new ArrayList<>();
+        Set<String> tags = new HashSet<>();
         tags.add(TAG_FOOD);
         tags.add(TAG_BEVERAGE);
 
-        List<String> policies = new ArrayList<>();
+        Set<String> policies = new HashSet<>();
         policies.add(SILVER_TIER);
         policies.add(BRONZE_TIER);
 
@@ -290,6 +310,10 @@ public class SampleTestObjectCreator {
         corsConfiguration.setAllowHeaders(Arrays.asList(ALLOWED_HEADER_AUTHORIZATION, ALLOWED_HEADER_CUSTOM));
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.setAllowOrigins(Arrays.asList("*"));
+
+        HashMap permissionMap = new HashMap();
+        permissionMap.put("1000", 6);
+        permissionMap.put("1001", 4);
 
         API.APIBuilder apiBuilder = new API.APIBuilder(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
                 API_VERSION).
@@ -307,9 +331,11 @@ public class SampleTestObjectCreator {
                 tags(tags).
                 policies(policies).
                 visibility(API.Visibility.RESTRICTED).
-                visibleRoles(Arrays.asList(CUSTOMER_ROLE, MANAGER_ROLE, EMPLOYEE_ROLE)).
+                visibleRoles(new HashSet<>(Arrays.asList(CUSTOMER_ROLE, MANAGER_ROLE, EMPLOYEE_ROLE))).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
+                apiType(ApiType.STANDARD).
+                permissionMap(permissionMap).
                 createdTime(LocalDateTime.now()).
                 createdBy(API_CREATOR).
                 uriTemplates(Collections.emptyMap()).
@@ -334,6 +360,7 @@ public class SampleTestObjectCreator {
                 id(api.getId()).
                 context(api.getContext()).
                 description(api.getDescription()).
+                apiType(api.getApiType()).
                 lifeCycleStatus(api.getLifeCycleStatus()).
                 lifecycleInstanceId(api.getLifecycleInstanceId()).build();
     }
@@ -466,6 +493,11 @@ public class SampleTestObjectCreator {
         return application;
     }
 
+    /**
+     * create default api policy
+     *
+     * @return APIPolicy object is returned
+     */
     public static APIPolicy createDefaultAPIPolicy() {
         APIPolicy apiPolicy = new APIPolicy(SAMPLE_API_POLICY);
         apiPolicy.setDisplayName(SAMPLE_API_POLICY);
@@ -478,6 +510,97 @@ public class SampleTestObjectCreator {
         requestCountLimit.setRequestCount(10000);
         requestCountLimit.setUnitTime(1000);
         defaultQuotaPolicy.setLimit(requestCountLimit);
+        apiPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+        apiPolicy.setPipelines(createDefaultPipelines());
+        return apiPolicy;
+    }
+
+    /**
+     * create default pipeline for api policy
+     *
+     * @return list of Pipeline objects is returned
+     */
+    public static List<Pipeline> createDefaultPipelines() {
+        //Pipeline 1
+        IPCondition ipCondition = new IPCondition(PolicyConstants.IP_RANGE_TYPE);
+        ipCondition.setStartingIP("192.168.12.3");
+        ipCondition.setEndingIP("192.168.88.19");
+        IPCondition ipConditionSpecific = new IPCondition(PolicyConstants.IP_SPECIFIC_TYPE);
+        ipConditionSpecific.setSpecificIP("123.42.14.56");
+
+        //adding above conditions to condition list of pipeline 1
+        List<Condition> conditionsList = new ArrayList<>(); //contains conditions for each pipeline
+        conditionsList.add(ipCondition);
+        conditionsList.add(ipConditionSpecific);
+        //set quota policy with bandwidth limit
+        BandwidthLimit bandwidthLimit = new BandwidthLimit();
+        bandwidthLimit.setDataAmount(1000);
+        bandwidthLimit.setDataUnit(PolicyConstants.MB);
+        bandwidthLimit.setUnitTime(1);
+        bandwidthLimit.setTimeUnit(TIME_UNIT_MONTH);
+        QuotaPolicy quotaPolicy1 = new QuotaPolicy();
+        quotaPolicy1.setType(PolicyConstants.BANDWIDTH_TYPE);
+        quotaPolicy1.setLimit(bandwidthLimit);
+
+        Pipeline pipeline1 = new Pipeline();
+        pipeline1.setConditions(conditionsList);
+        pipeline1.setQuotaPolicy(quotaPolicy1);
+
+        //End of pipeline 1 -> Beginning of pipeline 2
+        HeaderCondition headerCondition = new HeaderCondition();
+        headerCondition.setHeader("Browser");
+        headerCondition.setValue("Chrome");
+        JWTClaimsCondition jwtClaimsCondition = new JWTClaimsCondition();
+        jwtClaimsCondition.setClaimUrl("/path/path2");
+        jwtClaimsCondition.setAttribute("attributed");
+        QueryParameterCondition queryParameterCondition = new QueryParameterCondition();
+        queryParameterCondition.setParameter("Location");
+        queryParameterCondition.setValue("Colombo");
+
+        //adding conditions to condition list of pipeline2
+        conditionsList = new ArrayList<>();
+        conditionsList.add(headerCondition);
+        conditionsList.add(jwtClaimsCondition);
+        conditionsList.add(queryParameterCondition);
+        //pipeline 2 with request count as quota policy
+        RequestCountLimit requestCountLimit = new RequestCountLimit();
+        requestCountLimit.setRequestCount(1000);
+        requestCountLimit.setUnitTime(1);
+        requestCountLimit.setTimeUnit(TIME_UNIT_SECONDS);
+        QuotaPolicy quotaPolicy2 = new QuotaPolicy();
+        quotaPolicy2.setType(PolicyConstants.REQUEST_COUNT_TYPE);
+        quotaPolicy2.setLimit(requestCountLimit);
+
+        Pipeline pipeline2 = new Pipeline();
+        pipeline2.setConditions(conditionsList);
+        pipeline2.setQuotaPolicy(quotaPolicy2);
+        //adding pipelines
+        List<Pipeline> pipelineList = new ArrayList<>();    //contains all the default pipelines
+        pipelineList.add(pipeline1);
+        pipelineList.add(pipeline2);
+
+        return pipelineList;
+    }
+
+    /**
+     * Create default api policy with bandwidth limit as quota policy
+     *
+     * @return APIPolicy object with bandwidth limit as quota policy is returned
+     */
+    public static APIPolicy createDefaultAPIPolicyWithBandwidthLimit() {
+        BandwidthLimit bandwidthLimit = new BandwidthLimit();
+        bandwidthLimit.setDataAmount(1000);
+        bandwidthLimit.setDataUnit(PolicyConstants.MB);
+        bandwidthLimit.setUnitTime(1);
+        bandwidthLimit.setTimeUnit(TIME_UNIT_MONTH);
+        QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+        defaultQuotaPolicy.setType(PolicyConstants.BANDWIDTH_TYPE);
+        defaultQuotaPolicy.setLimit(bandwidthLimit);
+        //set default API Policy
+        APIPolicy apiPolicy = new APIPolicy(SAMPLE_API_POLICY);
+        apiPolicy.setDisplayName(SAMPLE_API_POLICY);
+        apiPolicy.setDescription(SAMPLE_API_POLICY_DESCRIPTION);
+        apiPolicy.setUserLevel(APIMgtConstants.ThrottlePolicyConstants.API_LEVEL);
         apiPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
         return apiPolicy;
     }
@@ -544,31 +667,34 @@ public class SampleTestObjectCreator {
 
     public static Endpoint createMockEndpoint() {
         return new Endpoint.Builder().endpointConfig("{'type':'http','url':'http://localhost:8280'}").id(endpointId)
-                .maxTps(1000L).security("{'enabled':false}").name("Endpoint1").build();
+                .maxTps(1000L).security("{'enabled':false}").name("Endpoint1").applicableLevel(APIMgtConstants
+                        .GLOBAL_ENDPOINT).type("http").build();
     }
 
     public static Endpoint createUpdatedEndpoint() {
         return new Endpoint.Builder().endpointConfig("{'type':'soap','url':'http://localhost:8280'}").id(endpointId)
-                .maxTps(1000L).security("{'enabled':false}").name("Endpoint1").build();
+                .maxTps(1000L).security("{'enabled':false}").name("Endpoint1").applicableLevel(APIMgtConstants
+                        .GLOBAL_ENDPOINT).type("http").build();
     }
 
     public static Endpoint createAlternativeEndpoint() {
         String uuid = UUID.randomUUID().toString();
         return new Endpoint.Builder().endpointConfig("{'type':'soap','url':'http://localhost:8280'}").id(uuid)
-                .maxTps(1000L).security("{'enabled':false}").build();
+                .name("Endpoint2").maxTps(1000L).security("{'enabled':false}").applicableLevel(APIMgtConstants
+                        .GLOBAL_ENDPOINT).build();
 
     }
 
-    public static Map<String, String> getMockEndpointMap() {
-        Map<String, String> endpointMap = new HashedMap();
-        endpointMap.put(PRODUCTION_ENDPOINT, endpointId);
+    public static Map<String, Endpoint> getMockEndpointMap() {
+        Map<String, Endpoint> endpointMap = new HashedMap();
+        endpointMap.put(PRODUCTION_ENDPOINT, new Endpoint.Builder().id(endpointId).applicableLevel(APIMgtConstants
+                .GLOBAL_ENDPOINT).build());
         return endpointMap;
     }
 
     public static Map<String, UriTemplate> getMockUriTemplates() {
         Map<String, UriTemplate> uriTemplateMap = new HashMap();
         UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
-        uriTemplateBuilder.endpoint(getMockEndpointMap());
         uriTemplateBuilder.templateId(TEMPLATE_ID);
         uriTemplateBuilder.uriTemplate("/apis/");
         uriTemplateBuilder.authType(APIMgtConstants.AUTH_APPLICATION_LEVEL_TOKEN);
@@ -625,8 +751,63 @@ public class SampleTestObjectCreator {
         comment.setApiId(apiId);
         comment.setCommentText("this is a sample comment");
         comment.setCommentedUser("admin");
+        comment.setUpdatedUser("admin");
         comment.setCreatedTime(LocalDateTime.now());
         comment.setUpdatedTime(LocalDateTime.now());
         return comment;
+    }
+
+    public static API.APIBuilder createDefaultAPIWithApiLevelEndpoint() {
+        Set<String> transport = new HashSet<>();
+        transport.add(HTTP);
+        transport.add(HTTPS);
+
+        Set<String> tags = new HashSet<>();
+        tags.add(TAG_CLIMATE);
+
+        Set<String> policies = new HashSet<>();
+        policies.add(GOLD_TIER);
+        policies.add(SILVER_TIER);
+        policies.add(BRONZE_TIER);
+
+        BusinessInformation businessInformation = new BusinessInformation();
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        String permissionJson = "[{\"groupId\" : 1000, \"permission\" : "
+                + "[\"READ\",\"UPDATE\"]},{\"groupId\" : 1001, \"permission\" : [\"READ\",\"UPDATE\"]}]";
+        Map<String, Endpoint> endpointMap = new HashMap<>();
+        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, new Endpoint.Builder().id(endpointId).name
+                ("api1-production--endpint").applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build());
+        API.APIBuilder apiBuilder = new API.APIBuilder(ADMIN, "WeatherAPI", API_VERSION).
+                id(UUID.randomUUID().toString()).
+                context("weather").
+                description("Get Weather Info").
+                lifeCycleStatus(APIStatus.CREATED.getStatus()).
+                lifecycleInstanceId(UUID.randomUUID().toString()).
+                endpoint(endpointMap).
+                wsdlUri("http://localhost:9443/echo?wsdl").
+                isResponseCachingEnabled(false).
+                cacheTimeout(60).
+                isDefaultVersion(false).
+                apiPolicy(APIMgtConstants.DEFAULT_API_POLICY).
+                transport(transport).
+                tags(tags).
+                policies(policies).
+                visibility(API.Visibility.PUBLIC).
+                visibleRoles(new HashSet<>()).
+                businessInformation(businessInformation).
+                corsConfiguration(corsConfiguration).
+                apiType(ApiType.STANDARD).
+                createdTime(LocalDateTime.now()).
+                createdBy(ADMIN).
+                updatedBy(ADMIN).
+                lastUpdatedTime(LocalDateTime.now()).
+                permission(permissionJson).
+                uriTemplates(getMockUriTemplates()).
+                apiDefinition(apiDefinition);
+        HashMap map = new HashMap();
+        map.put("1000", 6);
+        map.put("1001", 4);
+        apiBuilder.permissionMap(map);
+        return apiBuilder;
     }
 }

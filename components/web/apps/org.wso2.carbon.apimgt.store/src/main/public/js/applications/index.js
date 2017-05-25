@@ -132,13 +132,21 @@ $(function () {
             var viewIcon2 = $("<i>").addClass("fw fw-view fw-stack-1x");
             var viewSpanIcon = $("<span>").addClass("fw-stack").append(viewIcon1).append(viewIcon2);
             var viewSpanText = $("<span>").addClass("hidden-xs").text("View");
+            var viewClass = "btn  btn-sm padding-reduce-on-grid-view";
+            if (!hasValidScopes("/applications/{applicationId}", "get")) {
+                viewClass = "btn  btn-sm padding-reduce-on-grid-view not-active";
+            }
             var view_button = $('<a>', {id: data, href: contextPath + '/applications/' + data, title: 'View'})
-                .addClass("btn  btn-sm padding-reduce-on-grid-view")
+                .addClass(viewClass)
                 .append(viewSpanIcon)
                 .append(viewSpanText);
 
             if ( row.lifeCycleStatus == "APPROVED" ) {
                             var editIcon1 = $("<i>").addClass("fw fw-ring fw-stack-2x");
+            var editClass = "btn  btn-sm padding-reduce-on-grid-view";
+            if (!hasValidScopes("/applications/{applicationId}", "put")) {
+                editClass = "btn  btn-sm padding-reduce-on-grid-view not-active";
+            }
             var editIcon2 = $("<i>").addClass("fw fw-edit fw-stack-1x");
             var editSpanIcon = $("<span>").addClass("fw-stack").append(editIcon1).append(editIcon2);
             var editSpanText = $("<span>").addClass("hidden-xs").text("Edit");
@@ -147,18 +155,21 @@ $(function () {
                 href: contextPath + '/applications/' + data + '/edit',
                 title: 'Edit'
             })
-                .addClass("btn  btn-sm padding-reduce-on-grid-view")
+                .addClass(editClass)
                 .append(editSpanIcon)
                 .append(editSpanText);
 
             }
-
+            var deleteClass = "btn btn-sm padding-reduce-on-grid-view deleteApp";
+            if (!hasValidScopes("/applications/{applicationId}", "delete")) {
+                deleteClass = "btn btn-sm padding-reduce-on-grid-view deleteApp not-active";
+            }
             var deleteIcon1 = $("<i>").addClass("fw fw-ring fw-stack-2x");
             var deleteIcon2 = $("<i>").addClass("fw fw-delete fw-stack-1x");
             var deleteSpanIcon = $("<span>").addClass("fw-stack").append(deleteIcon1).append(deleteIcon2);
             var deleteSpanText = $("<span>").addClass("hidden-xs").text("delete");
             var delete_button = $('<a>', {id: data, href: '#', 'data-id': data, title: 'delete'})
-                .addClass("btn btn-sm padding-reduce-on-grid-view deleteApp")
+                .addClass(deleteClass)
                 .append(deleteSpanIcon)
                 .append(deleteSpanText);
             return $('<div></div>').append(view_button).append(edit_button).append(delete_button).html();

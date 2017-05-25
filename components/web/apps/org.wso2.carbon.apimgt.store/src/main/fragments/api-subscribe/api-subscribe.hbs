@@ -30,7 +30,7 @@
                 {{/each}}
             </select>
         </div>
-        <button type="button" id="subscribe-button" {{#unless @params.policies}} disabled="disabled" {{/unless}}
+        <button type="button" id="subscribe-button" data-resource-path="/subscriptions" data-resource-method="post" {{#unless @params.policies}} disabled="disabled" {{/unless}}
                 class="btn btn-primary btn-mobile">
                                                            <span class="icon fw-stack">
                                                                <i class="fw fw-subscribe fw-stack-1x"></i>

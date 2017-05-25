@@ -22,34 +22,47 @@ package org.wso2.carbon.apimgt.core.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.api.APIGatewayPublisher;
+import org.wso2.carbon.apimgt.core.api.APIDefinition;
+import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
 import org.wso2.carbon.apimgt.core.api.APIManager;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
+import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
+import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
+import org.wso2.carbon.apimgt.core.dao.TagDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
+import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.APIResource;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.Workflow;
+import org.wso2.carbon.apimgt.core.template.APITemplateException;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.io.InputStream;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
 /**
  * This class contains the implementation of the common methods for Publisher and store
  */
@@ -62,19 +75,24 @@ public abstract class AbstractAPIManager implements APIManager {
     private APISubscriptionDAO apiSubscriptionDAO;
     private PolicyDAO policyDAO;
     private String username;
+    private IdentityProvider identityProvider;
     private APILifecycleManager apiLifecycleManager;
     private LabelDAO labelDAO;
     private WorkflowDAO workflowDAO;
+    private TagDAO tagDAO;
     private GatewaySourceGenerator gatewaySourceGenerator;
-    private APIGatewayPublisher apiGatewayPublisher;
+    private APIGateway apiGatewayPublisher;
+    private APIMConfigurations config;
+    protected APIDefinition apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
 
-    public AbstractAPIManager(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
-                              APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager
-                                      apiLifecycleManager,
-                              LabelDAO labelDAO, WorkflowDAO workflowDAO, GatewaySourceGenerator
-                                      gatewaySourceGenerator, APIGatewayPublisher apiGatewayPublisher) {
+    public AbstractAPIManager(String username, IdentityProvider idp, ApiDAO apiDAO,
+                              ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO,
+                              APILifecycleManager apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO,
+                              TagDAO tagDAO, GatewaySourceGenerator gatewaySourceGenerator,
+                              APIGateway apiGatewayPublisher) {
 
         this.username = username;
+        this.identityProvider = idp;
         this.apiDAO = apiDAO;
         this.applicationDAO = applicationDAO;
         this.apiSubscriptionDAO = apiSubscriptionDAO;
@@ -82,43 +100,21 @@ public abstract class AbstractAPIManager implements APIManager {
         this.apiLifecycleManager = apiLifecycleManager;
         this.labelDAO = labelDAO;
         this.workflowDAO = workflowDAO;
+        this.tagDAO = tagDAO;
         this.gatewaySourceGenerator = gatewaySourceGenerator;
         this.apiGatewayPublisher = apiGatewayPublisher;
+        this.config = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
     }
 
-    public AbstractAPIManager(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
-                              APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager
-                                      apiLifecycleManager,
-                              LabelDAO labelDAO, WorkflowDAO workflowDAO) {
+    public AbstractAPIManager(String username, IdentityProvider idp, ApiDAO apiDAO,
+                              ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO,
+                              APILifecycleManager apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO,
+                              TagDAO tagDAO) {
 
-        this.username = username;
-        this.apiDAO = apiDAO;
-        this.applicationDAO = applicationDAO;
-        this.apiSubscriptionDAO = apiSubscriptionDAO;
-        this.policyDAO = policyDAO;
-        this.apiLifecycleManager = apiLifecycleManager;
-        this.labelDAO = labelDAO;
-        this.workflowDAO = workflowDAO;
+        this(username, idp, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, apiLifecycleManager,
+                labelDAO, workflowDAO, tagDAO, new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
-
-
-    /**
-     * Returns a list of all existing APIs by all providers. The API objects returned by this
-     * method may be partially initialized (due to performance reasons). Each API instance
-     * is guaranteed to have the API name, version, provider name, context, status and icon URL.
-     * All other fields may not be initialized. Therefore, the objects returned by this method
-     * must not be used to access any metadata item related to an API, other than the ones listed
-     * above. For that purpose a fully initialized API object instance should be acquired by
-     * calling the getAPI(String) method.
-     *
-     * @return a List of API objects (partially initialized), possibly empty
-     * @throws APIManagementException on error
-     */
-    @Override
-    public List<API> getAllAPIs() throws APIManagementException {
-        return null;
-    }
 
     /**
      * Returns details of an API.
@@ -138,6 +134,20 @@ public abstract class AbstractAPIManager implements APIManager {
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return api;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<API> getAPIsByProvider(String providerName, ApiType apiType) throws APIManagementException {
+        try {
+            return getApiDAO().getAPIsForProvider(providerName, apiType);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Unable to fetch APIs of " + providerName;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
     }
 
     /**
@@ -178,15 +188,19 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
-     * Checks the Availability of given String
-     *
-     * @param api   PAI object
-     * @return true, if already exists. False, otherwise
-     * @throws APIManagementException if failed to get API availability
+     * {@inheritDoc}
      */
     @Override
-    public boolean isAPIAvailable(API api) throws APIManagementException {
-        return false;
+    public boolean checkIfAPIExists(String apiId) throws APIManagementException {
+        boolean status;
+        try {
+            status = getApiDAO().getAPISummary(apiId) != null;
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Couldn't get APISummary for " + apiId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return status;
     }
 
     /**
@@ -220,7 +234,7 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     @Override public boolean isApiNameExist(String apiName) throws APIManagementException {
         try {
-            return getApiDAO().isAPINameExists(apiName, username);
+            return getApiDAO().isAPINameExists(apiName, username, ApiType.STANDARD);
 
         } catch (APIMgtDAOException e) {
             String errorMsg = "Couldn't check API Name " + apiName + "Exists";
@@ -373,6 +387,130 @@ public abstract class AbstractAPIManager implements APIManager {
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg + subId);
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void saveSwagger20Definition(String apiId, String jsonText) throws APIManagementException {
+        try {
+            LocalDateTime localDateTime = LocalDateTime.now();
+            API api = getAPIbyUUID(apiId);
+            Map<String, UriTemplate> oldUriTemplateMap = api.getUriTemplates();
+            List<APIResource> apiResourceList = apiDefinitionFromSwagger20.parseSwaggerAPIResources(new StringBuilder
+                    (jsonText));
+            Map<String, UriTemplate> updatedUriTemplateMap = new HashMap<>();
+            for (APIResource apiResource : apiResourceList) {
+                updatedUriTemplateMap.put(apiResource.getUriTemplate().getTemplateId(), apiResource.getUriTemplate());
+            }
+            Map<String, UriTemplate> uriTemplateMapNeedTobeUpdate = APIUtils.getMergedUriTemplates(oldUriTemplateMap,
+                    updatedUriTemplateMap);
+            API.APIBuilder apiBuilder = new API.APIBuilder(api);
+            apiBuilder.uriTemplates(uriTemplateMapNeedTobeUpdate);
+            apiBuilder.updatedBy(getUsername());
+            apiBuilder.lastUpdatedTime(localDateTime);
+
+            api = apiBuilder.build();
+            GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
+            gatewaySourceGenerator.setAPI(api);
+            String existingGatewayConfig = getApiGatewayConfig(apiId);
+            String updatedGatewayConfig = gatewaySourceGenerator
+                    .getGatewayConfigFromSwagger(existingGatewayConfig, jsonText);
+            getApiDAO().updateAPI(apiId, api);
+            getApiDAO().updateSwaggerDefinition(apiId, jsonText, getUsername());
+            getApiDAO().updateGatewayConfig(apiId, updatedGatewayConfig, getUsername());
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Couldn't update the Swagger Definition";
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void saveThumbnailImage(String apiId, InputStream inputStream, String dataType)
+            throws APIManagementException {
+        try {
+            getApiDAO().updateImage(apiId, inputStream, dataType, getUsername());
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Couldn't save the thumbnail image";
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public InputStream getThumbnailImage(String apiId) throws APIManagementException {
+        try {
+            return getApiDAO().getImage(apiId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Couldn't retrieve thumbnail for api " + apiId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void updateApiGatewayConfig(String apiId, String configString) throws APIManagementException {
+        API api = getAPIbyUUID(apiId);
+        GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
+        gatewaySourceGenerator.setAPI(api);
+        try {
+            String swagger = gatewaySourceGenerator.getSwaggerFromGatewayConfig(configString);
+            getApiDAO().updateSwaggerDefinition(apiId, swagger, getUsername());
+            getApiDAO().updateGatewayConfig(apiId, configString, getUsername());
+        } catch (APIMgtDAOException e) {
+            log.error("Couldn't update configuration for apiId " + apiId, e);
+            throw new APIManagementException("Couldn't update configuration for apiId " + apiId,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        } catch (APITemplateException e) {
+            log.error("Error generating swagger from gateway config " + apiId, e);
+            throw new APIManagementException("Error generating swagger from gateway config " + apiId,
+                    ExceptionCodes.TEMPLATE_EXCEPTION);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getApiGatewayConfig(String apiId) throws APIManagementException {
+        try {
+            return getApiDAO().getGatewayConfig(apiId);
+
+        } catch (APIMgtDAOException e) {
+            log.error("Couldn't retrieve swagger definition for apiId " + apiId, e);
+            throw new APIManagementException("Couldn't retrieve gateway configuration for apiId " + apiId,
+                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getLastUpdatedTimeOfGatewayConfig(String apiId) throws APIManagementException {
+        String lastUpdatedTime;
+        try {
+            lastUpdatedTime = getApiDAO().getLastUpdatedTimeOfGatewayConfig(apiId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg =
+                    "Error occurred while retrieving the last update time of the gateway configuration of API with id "
+                            + apiId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+
+        return lastUpdatedTime;
     }
 
     /**
@@ -623,7 +761,19 @@ public abstract class AbstractAPIManager implements APIManager {
         return gatewaySourceGenerator;
     }
 
-    public APIGatewayPublisher getApiGatewayPublisher() {
+    public APIGateway getApiGateway() {
         return apiGatewayPublisher;
+    }
+
+    public IdentityProvider getIdentityProvider() {
+        return identityProvider;
+    }
+
+    public APIMConfigurations getConfig() {
+        return config;
+    }
+
+    public TagDAO getTagDAO() {
+        return tagDAO;
     }
 }

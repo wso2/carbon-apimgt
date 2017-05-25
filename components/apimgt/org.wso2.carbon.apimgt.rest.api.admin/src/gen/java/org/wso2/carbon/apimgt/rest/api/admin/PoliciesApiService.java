@@ -1,38 +1,109 @@
 package org.wso2.carbon.apimgt.rest.api.admin;
 
-import javax.ws.rs.core.Response;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.TierDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.TierPermissionDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.*;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.*;
+
+import org.wso2.msf4j.formparam.FormDataParam;
+import org.wso2.msf4j.formparam.FileInfo;
 import org.wso2.msf4j.Request;
 
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-07T14:13:41.057+05:30")
+import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomRuleDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomRuleListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.TierDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.TierListDTO;
+
+import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.admin.NotFoundException;
+
+import java.io.InputStream;
+
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+
 public abstract class PoliciesApiService {
-    public abstract Response policiesTierLevelTierLevelGet(String tierLevel
- ,Integer limit
- ,Integer offset
- ,String accept
+    public abstract Response policiesThrottlingAdvancedGet(String accept
  ,String ifNoneMatch
+ ,String ifModifiedSince
  , Request request) throws NotFoundException;
-    public abstract Response policiesTierLevelTierLevelPost(TierDTO body
- ,String tierLevel
- ,String contentType
- , Request request) throws NotFoundException;
-    public abstract Response policiesTierLevelTierLevelTierNameTierNameDelete(String tierName
- ,String tierLevel
+    public abstract Response policiesThrottlingAdvancedPolicyIdDelete(String policyId
  ,String ifMatch
  ,String ifUnmodifiedSince
  , Request request) throws NotFoundException;
-    public abstract Response policiesTierLevelTierLevelTierNameTierNamePut(String tierName
+    public abstract Response policiesThrottlingAdvancedPolicyIdGet(String policyId
+ ,String ifNoneMatch
+ ,String ifModifiedSince
+ , Request request) throws NotFoundException;
+    public abstract Response policiesThrottlingAdvancedPolicyIdPut(String policyId
  ,TierDTO body
- ,String tierLevel
  ,String contentType
  ,String ifMatch
  ,String ifUnmodifiedSince
  , Request request) throws NotFoundException;
-    public abstract Response policiesUpdatePermissionPost(String tierName
- ,String tierLevel
+    public abstract Response policiesThrottlingAdvancedPost(TierDTO body
+ ,String contentType
+ , Request request) throws NotFoundException;
+    public abstract Response policiesThrottlingApplicationGet(String accept
+ ,String ifNoneMatch
+ ,String ifModifiedSince
+ , Request request) throws NotFoundException;
+    public abstract Response policiesThrottlingApplicationPolicyIdDelete(String policyId
  ,String ifMatch
  ,String ifUnmodifiedSince
- ,TierPermissionDTO permissions
+ , Request request) throws NotFoundException;
+    public abstract Response policiesThrottlingApplicationPolicyIdGet(String policyId
+ ,String ifNoneMatch
+ ,String ifModifiedSince
+ , Request request) throws NotFoundException;
+    public abstract Response policiesThrottlingApplicationPolicyIdPut(String policyId
+ ,TierDTO body
+ ,String contentType
+ ,String ifMatch
+ ,String ifUnmodifiedSince
+ , Request request) throws NotFoundException;
+    public abstract Response policiesThrottlingApplicationPost(TierDTO body
+ ,String contentType
+ , Request request) throws NotFoundException;
+    public abstract Response policiesThrottlingCustomGet(String accept
+ ,String ifNoneMatch
+ ,String ifModifiedSince
+ , Request request) throws NotFoundException;
+    public abstract Response policiesThrottlingCustomPost(CustomRuleDTO body
+ ,String contentType
+ , Request request) throws NotFoundException;
+    public abstract Response policiesThrottlingCustomRuleIdDelete(String ruleId
+ ,String ifMatch
+ ,String ifUnmodifiedSince
+ , Request request) throws NotFoundException;
+    public abstract Response policiesThrottlingCustomRuleIdGet(String ruleId
+ ,String ifNoneMatch
+ ,String ifModifiedSince
+ , Request request) throws NotFoundException;
+    public abstract Response policiesThrottlingCustomRuleIdPut(String ruleId
+ ,CustomRuleDTO body
+ ,String contentType
+ ,String ifMatch
+ ,String ifUnmodifiedSince
+ , Request request) throws NotFoundException;
+    public abstract Response policiesThrottlingSubscriptionGet(String accept
+ ,String ifNoneMatch
+ ,String ifModifiedSince
+ , Request request) throws NotFoundException;
+    public abstract Response policiesThrottlingSubscriptionPolicyIdDelete(String policyId
+ ,String ifMatch
+ ,String ifUnmodifiedSince
+ , Request request) throws NotFoundException;
+    public abstract Response policiesThrottlingSubscriptionPolicyIdGet(String policyId
+ ,String ifNoneMatch
+ ,String ifModifiedSince
+ , Request request) throws NotFoundException;
+    public abstract Response policiesThrottlingSubscriptionPolicyIdPut(String policyId
+ ,TierDTO body
+ ,String contentType
+ ,String ifMatch
+ ,String ifUnmodifiedSince
+ , Request request) throws NotFoundException;
+    public abstract Response policiesThrottlingSubscriptionPost(TierDTO body
+ ,String contentType
  , Request request) throws NotFoundException;
 }

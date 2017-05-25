@@ -43,7 +43,7 @@ public final class UriTemplate implements Serializable {
     private final String httpVerb;
     private final String authType;
     private final String policy;
-    private final Map<String, String> endpoint;
+    private final Map<String, Endpoint> endpoint;
 
     private UriTemplate(UriTemplateBuilder uriTemplateBuilder) {
         uriTemplate = uriTemplateBuilder.uriTemplate;
@@ -70,7 +70,7 @@ public final class UriTemplate implements Serializable {
         return policy;
     }
 
-    public Map<String, String> getEndpoint() {
+    public Map<String, Endpoint> getEndpoint() {
         return endpoint;
     }
 
@@ -120,7 +120,7 @@ public final class UriTemplate implements Serializable {
         private String httpVerb;
         private String authType = APIMgtConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
         private String policy = APIUtils.getDefaultAPIPolicy();
-        private Map<String, String> endpoint = Collections.emptyMap();
+        private Map<String, Endpoint> endpoint = Collections.emptyMap();
         public String templateId;
 
         public UriTemplateBuilder() {
@@ -162,7 +162,7 @@ public final class UriTemplate implements Serializable {
             return this;
         }
 
-        public UriTemplateBuilder endpoint(Map<String, String> endpoint) {
+        public UriTemplateBuilder endpoint(Map<String, Endpoint> endpoint) {
             this.endpoint = endpoint;
             return this;
         }
@@ -183,7 +183,7 @@ public final class UriTemplate implements Serializable {
             return policy;
         }
 
-        public Map<String, String> getEndpoint() {
+        public Map<String, Endpoint> getEndpoint() {
             return endpoint;
         }
 

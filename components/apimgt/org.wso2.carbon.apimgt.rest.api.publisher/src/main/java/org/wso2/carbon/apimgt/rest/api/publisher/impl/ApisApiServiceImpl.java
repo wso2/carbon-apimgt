@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,9 +40,13 @@ import org.wso2.msf4j.formparam.FileInfo;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -238,7 +243,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                     return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
                 }
                 docBuilder = docBuilder.fileName(fileDetail.getFileName());
-                apiProvider.uploadDocumentationFile(documentId, fileInputStream, fileDetail.getFileName());
+                apiProvider.uploadDocumentationFile(documentId, fileInputStream, fileDetail.getContentType());
             } else if (inlineContent != null) {
                 if (!documentation.getSourceType().equals(DocumentInfo.SourceType.INLINE)) {
                     String msg = "Source type of document " + documentId + " is not INLINE";
@@ -688,6 +693,11 @@ public class ApisApiServiceImpl extends ApisApiService {
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
 
+        } catch (IOException e) {
+            String errorMessage = "Error while retrieving API : " + apiId;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
         }
     }
 
@@ -834,6 +844,16 @@ public class ApisApiServiceImpl extends ApisApiService {
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
 
+        } catch (JsonProcessingException e) {
+            String errorMessage = "Error while updating API : " + apiId;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
+        } catch (IOException e) {
+            String errorMessage = "Error while updating API : " + apiId;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
         }
     }
 
@@ -841,8 +861,6 @@ public class ApisApiServiceImpl extends ApisApiService {
      * Retrieves the swagger definition of an API
      *
      * @param apiId           UUID of API
-     * @param labelName       Label name of the gateway
-     * @param scheme          Transport scheme (http | https)
      * @param accept          Accept header value
      * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
@@ -851,7 +869,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response apisApiIdSwaggerGet(String apiId, String labelName, String scheme, String accept,
+    public Response apisApiIdSwaggerGet(String apiId, String accept,
                                         String ifNoneMatch, String ifModifiedSince, Request request) throws
             NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
@@ -860,15 +878,10 @@ public class ApisApiServiceImpl extends ApisApiService {
             String existingFingerprint = apisApiIdSwaggerGetFingerprint(apiId, accept, ifNoneMatch, ifModifiedSince,
                     request);
             if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
-                    .contains(existingFingerprint) && StringUtils.isEmpty(labelName)) {
+                    .contains(existingFingerprint)) {
                 return Response.notModified().build();
             }
             String swagger = apiPublisher.getSwagger20Definition(apiId);
-            // Provide the swagger with label
-            if (!StringUtils.isEmpty(labelName)) {
-                Label label = apiPublisher.getLabelByName(labelName);
-                swagger = RestApiUtil.getSwaggerDefinitionWithLabel(swagger, label, scheme);
-            }
             return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(swagger).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving swagger definition of API : " + apiId;
@@ -1153,6 +1166,11 @@ public class ApisApiServiceImpl extends ApisApiService {
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList, e);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        } catch (IOException e) {
+            String errorMessage = "Error while create new API version " + apiId;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
         }
     }
 
@@ -1268,7 +1286,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             if (fileInputStream != null) {
                 uuid = apiPublisher.addApiFromDefinition(fileInputStream);
             } else if (url != null) {
-                uuid = apiPublisher.addApiFromDefinition(url);
+                URL swaggerUrl = new URL(url);
+                HttpURLConnection urlConn = (HttpURLConnection) swaggerUrl.openConnection();
+                uuid = apiPublisher.addApiFromDefinition(urlConn);
             } else {
                 String msg = "Either 'file' or 'inlineContent' should be specified";
                 log.error(msg);
@@ -1283,6 +1303,17 @@ public class ApisApiServiceImpl extends ApisApiService {
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        } catch (MalformedURLException e) {
+            String errorMessage = "Error while constructing swagger url";
+            ErrorHandler errorHandler = ExceptionCodes.SWAGGER_URL_MALFORMED;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorHandler);
+            log.error(errorMessage, e);
+            return Response.status(errorHandler.getHttpStatusCode()).entity(errorDTO).build();
+        } catch (IOException e) {
+            String errorMessage = "Error while adding new API";
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
         }
     }
 
@@ -1298,8 +1329,8 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisPost(APIDTO body, String contentType, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
-        API.APIBuilder apiBuilder = MappingUtil.toAPI(body);
         try {
+            API.APIBuilder apiBuilder = MappingUtil.toAPI(body);
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             apiPublisher.addAPI(apiBuilder);
             API returnAPI = apiPublisher.getAPIbyUUID(apiBuilder.getId());
@@ -1313,6 +1344,16 @@ public class ApisApiServiceImpl extends ApisApiService {
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        } catch (JsonProcessingException e) {
+            String errorMessage = "Error while adding new API";
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
+        } catch (IOException e) {
+            String errorMessage = "Error while adding new API";
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
         }
     }
 

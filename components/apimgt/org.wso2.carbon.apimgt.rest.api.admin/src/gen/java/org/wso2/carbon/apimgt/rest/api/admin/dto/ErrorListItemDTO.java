@@ -1,15 +1,15 @@
 package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
-import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.Objects;
 
 /**
  * ErrorListItemDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-03-22T12:24:12.664+05:30")
 public class ErrorListItemDTO   {
   @JsonProperty("code")
   private String code = null;

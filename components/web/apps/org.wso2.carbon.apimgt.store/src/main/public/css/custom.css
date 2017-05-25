@@ -51,6 +51,10 @@ a.btn .icon-caret, .btn .icon-caret {
     background-color:#215080;
 }
 
+.navbar.affix, .navbar.affix-bottom {
+    z-index: 100000;
+}
+
 @media (max-width: 767px) {
     .navbar-right{
         margin-left:-15px;
@@ -520,6 +524,18 @@ a.remove_rating:hover{
     font-weight:500;
 }
 
+.comment-table {
+    width: 100%;
+}
+
+.comment-table-text {
+    width: 95%;
+}
+
+.comment-table-icon {
+    width: 5%;
+}
+
 .requiredAstrix{
   color:red;
 }
@@ -553,4 +569,11 @@ a.remove_rating:hover{
 .search-help-wrapper{
     float: left;
     padding-bottom: 5px;
+}
+
+.not-active {
+   pointer-events: none;
+   cursor: default;
+   tabindex="-1";
+   color:#CCC;
 }

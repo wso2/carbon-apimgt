@@ -1,6 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
-import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
@@ -9,11 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LifecycleState_permissionBeansDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LifecycleState_validationBeansDTO;
+import java.util.Objects;
 
 /**
  * LifecycleState_checkItemBeanListDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-06T17:02:03.158+05:30")
 public class LifecycleState_checkItemBeanListDTO   {
   @JsonProperty("permissionBeans")
   private List<LifecycleState_permissionBeansDTO> permissionBeans = new ArrayList<LifecycleState_permissionBeansDTO>();

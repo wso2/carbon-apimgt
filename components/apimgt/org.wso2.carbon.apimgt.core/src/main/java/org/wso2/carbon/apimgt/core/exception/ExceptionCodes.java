@@ -51,6 +51,9 @@ public enum ExceptionCodes implements ErrorHandler {
     SUBSCRIPTION_STATE_INVALID(900318, "Invalid state change for subscription", 400, "Invalid state change for " +
             "subscription"),
     COMMENT_NOT_FOUND(900319, "Comment not found", 404, "Couldn't retrieve comment"),
+    APIM_DAO_EXCEPTION(900320, "Internal server error.", 500, " Error occurred while retrieving data"),
+    GATEWAY_LABELS_CANNOT_BE_NULL(900321, "Gateway labels cannot be null.", 400, "Gateway labels cannot be null"),
+    STATUS_CANNOT_BE_NULL(900322, "Status cannot be null.", 400, " Status cannot be null"),
 
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),
@@ -60,12 +63,15 @@ public enum ExceptionCodes implements ErrorHandler {
     ENDPOINT_NOT_FOUND(900450, "Endpoint Not Found", 404, "Endpoint Not Found"),
     ENDPOINT_ALREADY_EXISTS(900451, "Endpoint already exists", 409, "Endpoint already exists"),
     ENDPOINT_ADD_FAILED(900452, "Endpoint adding failed", 400, "Endpoint adding failed"),
+    ENDPOINT_DELETE_FAILED(900453, "Endpoint Delete Failed", 400, "Endpoint Delete Failed"),
 
 
     // Gateway related codes
     API_DEFINITION_MALFORMED(900500, "ApiDefinition not found", 400, "Failed to retrieve API Definition"),
     TEMPLATE_EXCEPTION(900501, "Service configuration Error", 500, " Error generate service config"),
     GATEWAY_EXCEPTION(900502, "Gateway publishing Error", 500, " Error occurred while publishing to Gateway"),
+    BROKER_EXCEPTION(900503, "Broker Connection Error", 500, " Error occurred while obtaining broker connection"),
+    SWAGGER_URL_MALFORMED(900504, "Swagger url malformed", 400, "swagger url is malformed"),
 
 
     // Workflow related codes
@@ -85,10 +91,16 @@ public enum ExceptionCodes implements ErrorHandler {
     WORKFLOW_REJCECTED(900558, "Workflow error", 403, "Requested action is rejected"),
 
     // Auth related codes
-    ROLES_CANNOT_BE_EMPTY(900600, "Role list cannot be empty", 400, " Role list cannot be empty"),
-    ROLES_CANNOT_BE_NULL(900601, "Role list cannot be null", 400, " Role list cannot be null"),
+    ROLES_CANNOT_BE_EMPTY(900600, "Role list cannot be empty", 400, "Role list cannot be empty"),
+    ROLES_CANNOT_BE_NULL(900601, "Role list cannot be null", 400, "Role list cannot be null"),
     UNSUPPORTED_ROLE(900602, "Non existing roles cannot be added to an API", 400,
-            " Non existing roles cannot be added to an API"),
+            "Non existing roles cannot be added to an API"),
+    USER_DOES_NOT_EXIST(900603, "User does not exist in the system", 404, "User does not exist in the system"),
+    USER_CREATION_FAILED(900604, "User creation failed", 500, "User creation failed"),
+    IDP_INITIALIZATION_FAILED(900605, "Identity Provider initialization failed", 500,
+            "Identity provider initialization failed"),
+    KEY_MANAGER_INITIALIZATION_FAILED(900606, "Key Manager initialization failed", 500,
+            "Key Manager initialization failed"),
 
 
     // Labels related codes

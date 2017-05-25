@@ -25,6 +25,7 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
@@ -55,7 +56,7 @@ public class APIMgtAdminServiceImplTestCase {
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
         APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforAPISubscriptionDAO(apiSubscriptionDAO);
         when(apiSubscriptionDAO.getAPISubscriptionsOfAPIForValidation(LIMIT))
-                .thenReturn(new ArrayList<SubscriptionValidationData>());
+                .thenReturn(new ArrayList<>());
         adminService.getAPISubscriptions(LIMIT);
         verify(apiSubscriptionDAO, times(1)).getAPISubscriptionsOfAPIForValidation(LIMIT);
     }
@@ -106,9 +107,9 @@ public class APIMgtAdminServiceImplTestCase {
         ApiDAO apiDAO = mock(ApiDAO.class);
         APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforApiDAO(apiDAO);
         List<API> apiList = SampleTestObjectCreator.createMockAPIList();
-        when(apiDAO.getAPIs()).thenReturn(apiList);
+        when(apiDAO.getAPIs(ApiType.STANDARD)).thenReturn(apiList);
         adminService.getAPIInfo();
-        verify(apiDAO, times(1)).getAPIs();
+        verify(apiDAO, times(1)).getAPIs(ApiType.STANDARD);
     }
 
     @Test(description = "Delete a label")

@@ -1,21 +1,34 @@
 package org.wso2.carbon.apimgt.rest.api.core;
 
-import org.wso2.carbon.apimgt.rest.api.core.factories.GatewaysApiServiceFactory;
 
 import io.swagger.annotations.ApiParam;
 
 import org.wso2.carbon.apimgt.rest.api.core.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.RegistrationDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.RegistrationSummaryDTO;
+import org.wso2.carbon.apimgt.rest.api.core.factories.GatewaysApiServiceFactory;
 
 import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
+import org.wso2.msf4j.formparam.FileInfo;
+import org.wso2.msf4j.formparam.FormDataParam;
 import org.osgi.service.component.annotations.Component;
 
 import java.io.InputStream;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.HEAD;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.*;
 
 @Component(
     name = "org.wso2.carbon.apimgt.rest.api.core.GatewaysApi",
@@ -26,7 +39,6 @@ import javax.ws.rs.*;
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the gateways API")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-27T16:59:46.102+05:30")
 public class GatewaysApi implements Microservice  {
    private final GatewaysApiService delegate = GatewaysApiServiceFactory.getGatewaysApi();
 

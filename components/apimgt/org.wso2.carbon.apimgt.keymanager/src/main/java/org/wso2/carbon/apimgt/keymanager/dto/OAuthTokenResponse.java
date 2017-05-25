@@ -21,7 +21,6 @@ package org.wso2.carbon.apimgt.keymanager.dto;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * The access_token response class
@@ -37,8 +36,8 @@ public class OAuthTokenResponse implements Serializable {
     @SerializedName("expires_in")
     private long expires_in;
 
-    @SerializedName("scopes")
-    private List<String> scopes;
+    @SerializedName("scope")
+    private String scope;
 
     @SerializedName("expires_timestamp")
     private long expiresTimestamp;
@@ -77,11 +76,11 @@ public class OAuthTokenResponse implements Serializable {
         this.expires_in = expires_in;
     }
 
-    public List<String> getScopes() {
-        return scopes;
+    public String getScopes() {
+        return scope;
     }
 
-    public void setScopes(List<String> scopes) {
-        this.scopes = scopes;
+    public void setScopes(String scopes) {
+        this.scope = scopes;
     }
 }

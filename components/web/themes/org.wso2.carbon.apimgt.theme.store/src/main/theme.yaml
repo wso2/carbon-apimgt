@@ -5,6 +5,7 @@ css:
  - lib/font-awesome/css/font-awesome.min.css
  - lib/bootstrap-select/css/bootstrap-select.min.css
  - lib/bootstrap-rating/bootstrap-rating.css
+ - lib/bootstrap-editable/css/bootstrap-editable.css
  - lib/data-tables_1.10.7/extensions/Bootstrap/css/dataTables.bootstrap.css
  - lib/data-tables_1.10.7/extensions/Responsive/css/dataTables.responsive.css
 headJs:
@@ -13,6 +14,7 @@ headJs:
  - lib/i18n/i18next-1.5.9.js
 # - lib/jquery-csrf/jquery-csrf.js 
  - lib/bootstrap-rating/bootstrap-rating.js
+ - lib/bootstrap-editable/js/bootstrap-editable.js
 
 js:
  - lib/theme-wso2_1.0/js/theme-wso2.js

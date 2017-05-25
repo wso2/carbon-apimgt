@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -72,6 +73,14 @@ public class DAOUtil {
     static String getParameterString(int numberOfParameters) {
         List<String> questionMarks = new ArrayList<>(Collections.nCopies(numberOfParameters, "?"));
         return String.join(",", questionMarks);
+    }
+
+    static List<String> commaSeperatedStringToList(String strValue) {
+        if (strValue != null && !strValue.isEmpty()) {
+            return Arrays.asList(strValue.split("\\s*,\\s*"));
+        }
+
+        return new ArrayList<>();
     }
 
     public static void clearDataSource() {

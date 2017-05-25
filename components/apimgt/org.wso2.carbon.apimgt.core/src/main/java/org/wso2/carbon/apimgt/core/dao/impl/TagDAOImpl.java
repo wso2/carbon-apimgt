@@ -30,7 +30,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -44,7 +46,7 @@ public class TagDAOImpl implements TagDAO {
 
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     static List<String> addTagsIfNotExist(
-            Connection connection, List<String> tags) throws SQLException {
+            Connection connection, Set<String> tags) throws SQLException {
         List<String> tagIDs = new ArrayList<>();
 
         if (!tags.isEmpty()) {
@@ -54,8 +56,9 @@ public class TagDAOImpl implements TagDAO {
             List<String> existingTags = new ArrayList<>();
 
             try (PreparedStatement statement = connection.prepareStatement(query)) {
-                for (int i = 0; i < tags.size(); ++i) {
-                    statement.setString(i + 1, tags.get(i));
+                int i = 0;
+                for (String tag : tags) {
+                    statement.setString(++i, tag);
                 }
 
                 try (ResultSet rs = statement.executeQuery()) {
@@ -69,7 +72,7 @@ public class TagDAOImpl implements TagDAO {
             }
 
             if (!existingTags.isEmpty()) {
-                tags = new ArrayList<>(tags); // Create a copy of the tags to prevent modifying original
+                tags = new HashSet<>(tags); // Create a copy of the tags to prevent modifying original
                 tags.removeAll(existingTags); // Remove already existing tags from list so we wont try to add them again
             }
 
@@ -82,8 +85,8 @@ public class TagDAOImpl implements TagDAO {
     }
 
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    static List<String> getTagsByIDs(Connection connection, List<String> tagIDs) throws SQLException {
-        List<String> tags = new ArrayList<>();
+    static Set<String> getTagsByIDs(Connection connection, List<String> tagIDs) throws SQLException {
+        Set<String> tags = new HashSet<>();
 
         if (!tagIDs.isEmpty()) {
             final String query = "SELECT NAME FROM AM_TAGS WHERE TAG_ID IN (" +
@@ -114,7 +117,7 @@ public class TagDAOImpl implements TagDAO {
         }
     }
 
-    private static void insertNewTags(Connection connection, List<String> tags, List<String> tagIDs)
+    private static void insertNewTags(Connection connection, Set<String> tags, List<String> tagIDs)
             throws SQLException {
         final String query = "INSERT INTO AM_TAGS (TAG_ID, NAME, COUNT) VALUES (?,?,?)";
 

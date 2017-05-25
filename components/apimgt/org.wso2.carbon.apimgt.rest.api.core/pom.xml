@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>7.0.6-SNAPSHOT</version>
+        <version>7.0.22-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>org.wso2.carbon.apimgt.rest.api.core</artifactId>
@@ -96,16 +96,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>org.wso2.carbon.apimgt.rest.api.core.Application</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
             <plugin><!-- Overridden from parent pom to exclude generated sources -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
@@ -139,7 +129,6 @@
     </build>
 
     <properties>
-        <microservice.mainClass>org.wso2.carbon.apimgt.rest.api.core.Application</microservice.mainClass>
         <private.package>org.wso2.carbon.apimgt.rest.api.core.internal</private.package>
         <import.package>
             org.wso2.carbon.datasource.core.*; version="${datasources.core.package.import.version.range}",
@@ -156,7 +145,7 @@
             org.wso2.carbon.apimgt.rest.api.core.*; version="${carbon.apimgt.version}"
         </export.package>
         <carbon.component>
-            osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="4"
+            osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="5"
         </carbon.component>
     </properties>
 </project>

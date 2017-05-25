@@ -13,8 +13,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Provides access to Labels which maybe shared across multiple entities
@@ -238,8 +240,8 @@ public class LabelDAOImpl implements LabelDAO {
      * @throws SQLException if error occurs while retrieving label names
      */
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    static List<String> getLabelNamesByIDs(List<String> labelIDs) throws SQLException {
-        List<String> labelNames = new ArrayList<>();
+    static Set<String> getLabelNamesByIDs(List<String> labelIDs) throws SQLException {
+        Set<String> labelNames = new HashSet<>();
 
         if (!labelIDs.isEmpty()) {
             final String query = "SELECT NAME FROM AM_LABELS WHERE LABEL_ID IN (" +

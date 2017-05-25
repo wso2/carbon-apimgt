@@ -1,19 +1,33 @@
 package org.wso2.carbon.apimgt.rest.api.core;
 
-import org.wso2.carbon.apimgt.rest.api.core.factories.ApisApiServiceFactory;
 
 import io.swagger.annotations.ApiParam;
 
+import org.wso2.carbon.apimgt.rest.api.core.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.core.factories.ApisApiServiceFactory;
 
 import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
+import org.wso2.msf4j.formparam.FileInfo;
+import org.wso2.msf4j.formparam.FormDataParam;
 import org.osgi.service.component.annotations.Component;
 
 import java.io.InputStream;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.HEAD;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.*;
 
 @Component(
     name = "org.wso2.carbon.apimgt.rest.api.core.ApisApi",
@@ -24,7 +38,6 @@ import javax.ws.rs.*;
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
 @io.swagger.annotations.Api(description = "the apis API")
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-27T16:59:46.102+05:30")
 public class ApisApi implements Microservice  {
    private final ApisApiService delegate = ApisApiServiceFactory.getApisApi();
 
@@ -45,6 +58,21 @@ public class ApisApi implements Microservice  {
 ,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
 , @Context Request request)
     throws NotFoundException {
-        return delegate.apisApiIdGatewayConfigGet(apiId, accept, request);
+        return delegate.apisApiIdGatewayConfigGet(apiId,accept, request);
+    }
+    @GET
+    
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Retrieve API list", notes = "Retrieve available apis", response = APIListDTO.class, tags={  })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. List of APIs. ", response = APIListDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = APIListDTO.class) })
+    public Response apisGet(@ApiParam(value = "Comma seperated gateway labels ") @QueryParam("labels") String labels
+,@ApiParam(value = "Lifecycle status ") @QueryParam("status") String status
+, @Context Request request)
+    throws NotFoundException {
+        return delegate.apisGet(labels,status, request);
     }
 }

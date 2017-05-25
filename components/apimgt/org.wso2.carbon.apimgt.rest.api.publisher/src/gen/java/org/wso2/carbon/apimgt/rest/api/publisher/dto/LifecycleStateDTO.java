@@ -1,6 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
-import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
@@ -12,11 +12,11 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.LifecycleState_checkItemBea
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LifecycleState_inputBeanListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LifecycleState_permissionBeansDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LifecycleState_validationBeansDTO;
+import java.util.Objects;
 
 /**
  * LifecycleStateDTO
  */
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-04-06T17:02:03.158+05:30")
 public class LifecycleStateDTO   {
   @JsonProperty("lcName")
   private String lcName = null;

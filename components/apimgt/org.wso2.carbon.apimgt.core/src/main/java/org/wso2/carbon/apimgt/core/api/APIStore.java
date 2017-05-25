@@ -31,8 +31,10 @@ import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
 import org.wso2.carbon.apimgt.core.models.Tag;
+import org.wso2.carbon.apimgt.core.models.User;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -283,4 +285,66 @@ public interface APIStore extends APIManager {
      * @return a list of comments for the api
      */
     List<Comment> getCommentsForApi(String apiId) throws APIManagementException;
+
+    /**
+     * Adds a new Composite API
+     *
+     * @param apiBuilder API Builder object
+     * @return Details of the added Composite API.
+     * @throws APIManagementException if failed to add Composite API
+     */
+    String addCompositeApi(API.APIBuilder apiBuilder) throws APIManagementException;
+
+    /**
+     * Updates design and implementation of an existing Composite API.
+     *
+     * @param apiBuilder {@code org.wso2.carbon.apimgt.core.models.API.APIBuilder}
+     * @throws APIManagementException if failed to update Composite API
+     */
+    void updateCompositeApi(API.APIBuilder apiBuilder) throws APIManagementException;
+
+    /**
+     * Delete an existing Composite API.
+     *
+     * @param apiId API Id
+     * @throws APIManagementException if failed to delete Composite API
+     */
+    void deleteCompositeApi(String apiId) throws APIManagementException;
+
+    /**
+     * Create a new version of the <code>Composite API</code>, with version <code>newVersion</code>
+     *
+     * @param apiId      The Composite API to be copied
+     * @param newVersion The version of the new Composite API
+     * @return Details of the newly created version of the Composite API.
+     * @throws APIManagementException If an error occurs while trying to create
+     *                                the new version of the Composite API
+     */
+    String createNewCompositeApiVersion(String apiId, String newVersion) throws APIManagementException;
+
+    /**
+     * Create Composite API from Swagger Definition
+     *
+     * @param apiDefinition Swagger content of the Composite API.
+     * @return Details of the added Composite API.
+     * @throws APIManagementException If failed to add Composite API.
+     */
+    String addCompositeApiFromDefinition(InputStream apiDefinition) throws APIManagementException;
+
+    /**
+     * Create Composite API from Swagger definition located by a given url
+     *
+     * @param swaggerResourceUrl url of the Swagger resource
+     * @return details of the added Composite API.
+     * @throws APIManagementException If failed to add the Composite API.
+     */
+    String addCompositeApiFromDefinition(String swaggerResourceUrl) throws APIManagementException;
+
+    /**
+     * Store user self signup
+     *
+     * @param user User information object
+     * @throws APIManagementException if error occurred while registering the new user
+     */
+    void selfSignUp(User user) throws APIManagementException;
 }
