@@ -357,15 +357,15 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#attributeSearchAPIsStore(List roles, Map attributeMap, int offset, int limit)
+     * @see ApiDAO#searchAPIsByAttribute(List roles, Map attributeMap, int offset, int limit)
      */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<API> attributeSearchAPIsStore(List<String> roles, Map<String, String> attributeMap,
-                                              int offset, int limit) throws APIMgtDAOException {
+    public List<API> searchAPIsByAttribute(List<String> roles, Map<String, String> attributeMap,
+                                           int offset, int limit) throws APIMgtDAOException {
 
         try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement statement = sqlStatements.attributeSearchStore
+             PreparedStatement statement = sqlStatements.prepareAttributeSearchStatementStore
                      (connection, roles, attributeMap, offset, limit)) {
             DatabaseMetaData md = connection.getMetaData();
             Iterator<Map.Entry<String, String>> entries = attributeMap.entrySet().iterator();
