@@ -98,10 +98,10 @@ public class APIManagerFactory {
 
     private APIPublisher newProvider(String username) throws APIManagementException {
         try {
-            UserAwareAPIPublisher userAwareAPIPublisher = new UserAwareAPIPublisher(username, DAOFactory.getApiDAO(),
-                    DAOFactory.getApplicationDAO(), DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO(),
-                    DAOFactory.getLabelDAO(), DAOFactory.getWorkflowDAO(), new GatewaySourceGeneratorImpl(),
-                    new APIGatewayPublisherImpl());
+            UserAwareAPIPublisher userAwareAPIPublisher = new UserAwareAPIPublisher(username, getIdentityProvider(),
+                    DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(), DAOFactory.getAPISubscriptionDAO(),
+                    DAOFactory.getPolicyDAO(), DAOFactory.getLabelDAO(), DAOFactory.getWorkflowDAO(),
+                    DAOFactory.getTagDAO(), new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
 
             // Register all the observers which need to observe 'Publisher' component
             userAwareAPIPublisher.registerObserver(new EventLogger());
@@ -133,8 +133,8 @@ public class APIManagerFactory {
         // username = null;
         // }
         try {
-            UserAwareAPIStore userAwareAPIStore = new UserAwareAPIStore(username, DAOFactory.getApiDAO(),
-                    DAOFactory.getApplicationDAO(), DAOFactory.getAPISubscriptionDAO(),
+            UserAwareAPIStore userAwareAPIStore = new UserAwareAPIStore(username, getIdentityProvider(),
+                    DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(), DAOFactory.getAPISubscriptionDAO(),
                     DAOFactory.getPolicyDAO(), DAOFactory.getTagDAO(), DAOFactory.getLabelDAO(),
                     DAOFactory.getWorkflowDAO(), new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
 
@@ -231,7 +231,8 @@ public class APIManagerFactory {
         if (identityProvider == null) {
             try {
                 identityProvider = (IdentityProvider) Class.forName(ServiceReferenceHolder.getInstance()
-                        .getAPIMConfiguration().getIdpImplClass()).newInstance();
+                        .getAPIMConfiguration().getIdentityProviderConfigs().getIdentityProviderImplClass())
+                        .newInstance();
             } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
                 throw new IdentityProviderException("Error occurred while initializing identity provider", e,
                         ExceptionCodes.IDP_INITIALIZATION_FAILED);
@@ -250,7 +251,7 @@ public class APIManagerFactory {
         if (keyManager == null) {
             try {
                 keyManager = (KeyManager) Class.forName(ServiceReferenceHolder.getInstance().getAPIMConfiguration()
-                        .getKeyManagerImplClass()).newInstance();
+                        .getKeyManagerConfigs().getKeyManagerImplClass()).newInstance();
             } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
                 throw new KeyManagementException("Error occurred while initializing key manager", e,
                         ExceptionCodes.KEY_MANAGER_INITIALIZATION_FAILED);

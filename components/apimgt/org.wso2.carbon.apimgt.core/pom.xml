@@ -24,7 +24,7 @@
     <parent>
         <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>7.0.18-SNAPSHOT</version>
+        <version>7.0.21-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -289,9 +289,21 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
-            <plugin>
+        <!--    <plugin>  todo change to this plugin when kernel is upgraded to 5.2.0-m4
                 <groupId>org.wso2.carbon.config</groupId>
                 <artifactId>org.wso2.carbon.config.maven.plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>create-doc</goal>
+                        </goals>
+                        <phase>compile</phase>
+                    </execution>
+                </executions>
+            </plugin> -->
+            <plugin>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.extensions.configuration.maven.plugin</artifactId>
                 <executions>
                     <execution>
                         <goals>

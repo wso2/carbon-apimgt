@@ -71,6 +71,7 @@ public enum ExceptionCodes implements ErrorHandler {
     TEMPLATE_EXCEPTION(900501, "Service configuration Error", 500, " Error generate service config"),
     GATEWAY_EXCEPTION(900502, "Gateway publishing Error", 500, " Error occurred while publishing to Gateway"),
     BROKER_EXCEPTION(900503, "Broker Connection Error", 500, " Error occurred while obtaining broker connection"),
+    SWAGGER_URL_MALFORMED(900504, "Swagger url malformed", 400, "swagger url is malformed"),
 
 
     // Workflow related codes

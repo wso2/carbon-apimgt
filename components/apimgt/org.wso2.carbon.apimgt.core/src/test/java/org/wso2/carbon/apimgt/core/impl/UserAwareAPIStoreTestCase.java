@@ -140,17 +140,17 @@ public class UserAwareAPIStoreTestCase {
 
     private UserAwareAPIStore getUserAwareAPIStore(ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO,
                                                    WorkflowDAO workflowDAO) {
-        return new UserAwareAPIStore(USER_NAME, null, applicationDAO, apiSubscriptionDAO, null, null, null,
+        return new UserAwareAPIStore(USER_NAME, null, null, applicationDAO, apiSubscriptionDAO, null, null, null,
                 workflowDAO, null, null);
     }
 
     private UserAwareAPIStore getUserAwareAPIStore(ApplicationDAO applicationDAO, WorkflowDAO workflowDAO) {
-        return new UserAwareAPIStore(USER_NAME, null, applicationDAO, null, null, null, null,
+        return new UserAwareAPIStore(USER_NAME, null, null, applicationDAO, null, null, null, null,
                 workflowDAO, null, null);
     }
 
     private UserAwareAPIStore getUserAwareAPIStore(ApplicationDAO applicationDAO) {
-        return new UserAwareAPIStore(USER_NAME, null, applicationDAO, null, null, null, null,
+        return new UserAwareAPIStore(USER_NAME, null, null, applicationDAO, null, null, null, null,
                 null, null, null);
     }
 }
