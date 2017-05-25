@@ -27,30 +27,29 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
-import org.wso2.carbon.apimgt.rest.api.core.dto.LabelDTO;
-import org.wso2.carbon.apimgt.rest.api.core.dto.ResourcesListDTO;
-import org.wso2.carbon.apimgt.rest.api.core.dto.SubscriptionDTO;
-import org.wso2.carbon.apimgt.rest.api.core.dto.SubscriptionListDTO;
-import org.wso2.carbon.apimgt.rest.api.core.dto.UriTemplateDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.APISummaryDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.APISummaryListDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.LabelDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.SubscriptionDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.UriTemplateDTO;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 public class MappingUtil {
 
     /**
-     * This method converts List of SubscriptionValidationData into SubscriptionListDTO object.
+     * This method converts List of SubscriptionValidationData into SubscriptionDTO list.
      *
      * @param subscriptionValidationData List of Subscription Validation Data
-     * @return subscriptionListDTO
+     * @return SubscriptionDTO list
      */
-    public static SubscriptionListDTO convertToSubscriptionListDto(
+    public static List<SubscriptionDTO> convertToSubscriptionListDto(
             List<SubscriptionValidationData> subscriptionValidationData) {
-        SubscriptionListDTO subscriptionListDTO = new SubscriptionListDTO();
+        List<SubscriptionDTO> subscriptionDTOList = new ArrayList<>();
         for (SubscriptionValidationData subscriptionData : subscriptionValidationData) {
             SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
             subscriptionDTO.setApiName(subscriptionData.getApiName());
@@ -64,9 +63,9 @@ public class MappingUtil {
             subscriptionDTO.setKeyEnvType(subscriptionData.getKeyEnvType());
             subscriptionDTO.setApplicationId(subscriptionData.getApplicationId());
             subscriptionDTO.setApplicationTier(subscriptionData.getApplicationTier());
-            subscriptionListDTO.addListItem(subscriptionDTO);
+            subscriptionDTOList.add(subscriptionDTO);
         }
-        return subscriptionListDTO;
+        return subscriptionDTOList;
     }
 
     /**
@@ -87,12 +86,11 @@ public class MappingUtil {
     }
 
     /**
-     * Convert Uritemplate list to ResourceListDto
+     * Convert Uritemplate list to UriTemplateDTO list
      * @param resourcesOfApi list of uriTemplates
      * @return ResourcesListDTO
      */
-    public static ResourcesListDTO convertToResourceListDto(List<UriTemplate> resourcesOfApi){
-        ResourcesListDTO resourcesListDTO = new ResourcesListDTO();
+    public static List<UriTemplateDTO> convertToResourceListDto(List<UriTemplate> resourcesOfApi){
         List<UriTemplateDTO> uriTemplateDTOArrayList = new ArrayList<>();
         resourcesOfApi.forEach((v)->{
             UriTemplateDTO uriTemplateDTO = new UriTemplateDTO();
@@ -103,8 +101,7 @@ public class MappingUtil {
             uriTemplateDTO.setScope("");
             uriTemplateDTOArrayList.add(uriTemplateDTO);
         });
-        resourcesListDTO.setList(uriTemplateDTOArrayList);
-        return resourcesListDTO;
+        return uriTemplateDTOArrayList;
     }
 
     /**
@@ -138,5 +135,21 @@ public class MappingUtil {
             apiInfoList.add(apiInfo);
         }
         return apiInfoList;
+    }
+
+    /**
+     * Convert uritemplates+ subscription validation to ApiSummaryList
+     * @param uriTemplates list of resources
+     * @param subscriptionValidationDataList list of subscription data
+     * @return APISummaryListDTO
+     */
+    public static APISummaryListDTO toApiSummaryListDto(List<UriTemplate> uriTemplates, List<SubscriptionValidationData>
+            subscriptionValidationDataList) {
+        APISummaryListDTO apiSummaryListDTO = new APISummaryListDTO();
+        APISummaryDTO apiSummaryDTO = new APISummaryDTO();
+        apiSummaryDTO.setResources(convertToResourceListDto(uriTemplates));
+        apiSummaryDTO.setSubscriptions(convertToSubscriptionListDto(subscriptionValidationDataList));
+        apiSummaryListDTO.addListItem(apiSummaryDTO);
+        return apiSummaryListDTO;
     }
 }

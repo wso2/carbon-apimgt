@@ -117,7 +117,7 @@ paths:
             $ref: '#/definitions/Error'
 
 #-----------------------------------------------------
-#  Retrieve API Infomation Summary
+#  Retrieve Subscriptions And Resources in API for Validation
 #-----------------------------------------------------
 
   /apis-summary:
@@ -125,20 +125,24 @@ paths:
       x-wso2-curl: "curl -k https://localhost:9292/api/am/core/v1/apis-summary"
       x-wso2-request: |
         GET https://localhost:9292/api/am/core/v1/apis-summary
-        Content-Type: application/json
-        {\r\n\"labelInfo\":{\r\n  \"overwriteLabels\":false,\r\n  \"labelList\":[\r\n     {\r\n        \"name\":\"Private\",\r\n        \"accessUrls\":[\r\n           \"https:\/\/local.privatfdsafe\"\r\n        ]\r\n     },\r\n     {\r\n        \"name\":\"Public\",\r\n        \"accessUrls\":[\r\n           \"http:\/\/local.private\",\r\n           \"https:\/\/local.public\"\r\n        ]\r\n     }\r\n  ]\r\
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type:application/json"
-      summary: Summary of all available apis
-      description: Request summary of all available apis.
+      summary: |
+        Return the list of resources of an API
+      description: |
+        Return the list of subscriptions and Resources in API.
       parameters:
+        - $ref : '#/parameters/apiContext'
+        - $ref : '#/parameters/apiVersion'
         - $ref : '#/parameters/Accept'
+      tags:
+        - Summary of API
       responses:
         200:
           description: |
             OK.
-            Subscription Validation Information.
+            The list of Subscriptions.
           schema:
-            $ref: '#/definitions/APISummaryList'
+            $ref: '#/definitions/ResourcesList'
           headers:
             Content-Type:
               description: The content type of the body.
@@ -722,7 +726,22 @@ definitions:
         example: 1.0.0
       lifeCycleStatus:
         type: string
-example: CREATED
+        example: 'CREATED'
+
+#-----------------------------------------------------
+# The API Info resource
+#-----------------------------------------------------
+  APISummary:
+    title: API Info object with basic API details.
+    properties:
+      subscriptions:
+        type: array
+        items:
+          $ref: '#/definitions/Subscription'
+      resources:
+        type: array
+        items:
+          $ref: '#/definitions/UriTemplate'
 
 #-----------------------------------------------------
 # END-OF-FILE

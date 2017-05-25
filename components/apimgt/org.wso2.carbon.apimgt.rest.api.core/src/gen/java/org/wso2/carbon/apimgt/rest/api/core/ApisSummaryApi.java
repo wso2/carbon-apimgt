@@ -3,8 +3,8 @@ package org.wso2.carbon.apimgt.rest.api.core;
 
 import io.swagger.annotations.ApiParam;
 
-import org.wso2.carbon.apimgt.rest.api.core.dto.APISummaryListDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.ResourcesListDTO;
 import org.wso2.carbon.apimgt.rest.api.core.factories.ApisSummaryApiServiceFactory;
 
 import org.wso2.msf4j.Microservice;
@@ -45,18 +45,20 @@ public class ApisSummaryApi implements Microservice  {
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Summary of all available apis", notes = "Request summary of all available apis.", response = APISummaryListDTO.class, tags={  })
+    @io.swagger.annotations.ApiOperation(value = "Return the list of resources of an API ", notes = "Return the list of subscriptions and Resources in API. ", response = ResourcesListDTO.class, tags={ "Summary of API", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Subscription Validation Information. ", response = APISummaryListDTO.class),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. The list of Subscriptions. ", response = ResourcesListDTO.class),
         
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = APISummaryListDTO.class),
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ResourcesListDTO.class),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = APISummaryListDTO.class),
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ResourcesListDTO.class),
         
-        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = APISummaryListDTO.class) })
-    public Response apisSummaryGet(@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
+        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ResourcesListDTO.class) })
+    public Response apisSummaryGet(@ApiParam(value = "Context of the API. ") @QueryParam("apiContext") String apiContext
+,@ApiParam(value = "Version of the API. ") @QueryParam("apiVersion") String apiVersion
+,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
 , @Context Request request)
     throws NotFoundException {
-        return delegate.apisSummaryGet(accept, request);
+        return delegate.apisSummaryGet(apiContext,apiVersion,accept, request);
     }
 }
