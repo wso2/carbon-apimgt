@@ -36,13 +36,29 @@ function putIntoSubscriptionCache(dto:SubscriptionDto subscriptionDto){
         subscriptionMap[internalKey] = subscriptionDto;
         subscriptionCache[key] = subscriptionMap;
 }
-function getFromResourceCache(string apiContext,string apiVersion,string resourceUri,string httpVerb)(dto:ResourceDto){
-    string key = apiContext+":"+apiVersion+":"+resourceUri+":"+httpVerb;
-    return (dto:ResourceDto)resourceCacheMap[key];
+function getFromResourceCache (string apiContext, string apiVersion, string resourceUri, string httpVerb) (dto:ResourceDto){
+    string internalKey = apiContext + ":" + apiVersion + ":" + resourceUri + ":" + httpVerb;
+    string key = apiContext + ":" + apiVersion;
+    if (resourceCacheMap[key] != null) {
+        map resourceMap = (map)resourceCacheMap[key];
+        if (resourceMap[internalKey] != null) {
+            return (dto:ResourceDto)resourceMap[internalKey];
+        } else {
+            return null;
+        }
+    } else {
+        return null;
+    }
 }
 function putIntoResourceCache(string apiContext,string apiVersion,dto:ResourceDto resourceDto){
-    string key = apiContext+":"+apiVersion+":"+resourceDto.uriTemplate+":"+resourceDto.httpVerb;
-    resourceCacheMap[key] = resourceDto;
+    string internalKey = apiContext+":"+apiVersion+":"+resourceDto.uriTemplate+":"+resourceDto.httpVerb;
+    string  key = apiContext+":"+apiVersion;
+    map resourceMap ={};
+    if(resourceCacheMap[key] != null){
+        resourceMap = (map)resourceCacheMap[key];
+    }
+    resourceMap[internalKey] = resourceDto;
+    resourceCacheMap[key] = resourceMap;
 }
 function removeFromTokenCache(string key){
     maps:remove(tokenCacheMap,key);

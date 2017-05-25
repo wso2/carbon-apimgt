@@ -8,44 +8,47 @@ import org.wso2.carbon.apimgt.gateway.dto as dto;
 import org.wso2.carbon.apimgt.gateway.holders as holders;
 import org.wso2.carbon.apimgt.gateway.constants as Constants;
 
-
-function constructAccessTokenNotFoundPayload(message response){
-    json payload = {"code":900902,"message":"accessToken invalid"};
-    messages:setJsonPayload(response,payload);
+function constructAccessTokenNotFoundPayload (message response) {
+    json payload = {"code":900902, "message":"accessToken invalid"};
+    messages:setJsonPayload(response, payload);
 }
-function constructAccessTokenExpiredPayload(message response){
-    json payload = {"code":900901,"message":"accessToken expired"};
-    messages:setJsonPayload(response,payload);
+function constructAccessTokenExpiredPayload (message response) {
+    json payload = {"code":900901, "message":"accessToken expired"};
+    messages:setJsonPayload(response, payload);
 }
-function fromJsonToIntrospectDto(json introspectResponse)(dto:IntrospectDto){
+function constructSubscriptionNotFound (message response) {
+    json payload = {"code":900903, "message":"subscription not found"};
+    messages:setJsonPayload(response, payload);
+}
+function fromJsonToIntrospectDto (json introspectResponse) (dto:IntrospectDto){
     dto:IntrospectDto introspectDto = {};
-    introspectDto.active = (boolean )introspectResponse.active;
-    if(introspectDto.active){
-        if(introspectResponse.exp != null){
-            introspectDto.exp = (int )introspectResponse.exp;
-        }else {
+    introspectDto.active = (boolean)introspectResponse.active;
+    if (introspectDto.active) {
+        if (introspectResponse.exp != null) {
+            introspectDto.exp = (int)introspectResponse.exp;
+        } else {
             // https://github.com/ballerinalang/ballerina/issues/2396
-            introspectDto.exp = -1;
+            introspectDto.exp = - 1;
         }
-        if(introspectResponse.username != null){
+        if (introspectResponse.username != null) {
             introspectDto.username = (string)introspectResponse.username;
         }
-        if(introspectResponse.scope != null){
-            introspectDto.scope = (string )introspectResponse.scope;
+        if (introspectResponse.scope != null) {
+            introspectDto.scope = (string)introspectResponse.scope;
         }
-        if(introspectResponse.token_type != null){
-            introspectDto.token_type = (string )introspectResponse.token_type;
+        if (introspectResponse.token_type != null) {
+            introspectDto.token_type = (string)introspectResponse.token_type;
         }
-        if(introspectResponse.iat != null){
-            introspectDto.iat = (int )introspectResponse.iat;
+        if (introspectResponse.iat != null) {
+            introspectDto.iat = (int)introspectResponse.iat;
         }
-        if(introspectResponse.client_id != null){
-            introspectDto.client_id = (string )introspectResponse.client_id;
+        if (introspectResponse.client_id != null) {
+            introspectDto.client_id = (string)introspectResponse.client_id;
         }
     }
     return introspectDto;
 }
-function fromJsonToSubscriptionDto(json subscriptionResponse)(dto:SubscriptionDto){
+function fromJsonToSubscriptionDto (json subscriptionResponse) (dto:SubscriptionDto){
     dto:SubscriptionDto subscriptionDto = {};
     subscriptionDto.apiName = (string)subscriptionResponse.apiName;
     subscriptionDto.apiContext = (string)subscriptionResponse.apiContext;
@@ -57,10 +60,10 @@ function fromJsonToSubscriptionDto(json subscriptionResponse)(dto:SubscriptionDt
     subscriptionDto.applicationName = (string)subscriptionResponse.applicationName;
     subscriptionDto.keyEnvType = (string)subscriptionResponse.keyEnvType;
     subscriptionDto.applicationTier = (string)subscriptionResponse.applicationTier;
-    subscriptionDto.applicationId = (string )subscriptionResponse.applicationId;
+    subscriptionDto.applicationId = (string)subscriptionResponse.applicationId;
     return subscriptionDto;
 }
-function fromJsonToResourceDto(json resourceResponse)(dto:ResourceDto){
+function fromJsonToResourceDto (json resourceResponse) (dto:ResourceDto){
     dto:ResourceDto resourceDto = {};
     resourceDto.uriTemplate = (string)resourceResponse.uriTemplate;
     resourceDto.httpVerb = (string)resourceResponse.httpVerb;
@@ -68,44 +71,42 @@ function fromJsonToResourceDto(json resourceResponse)(dto:ResourceDto){
     resourceDto.scope = (string)resourceResponse.scope;
     return resourceDto;
 }
-function retrieveSubscriptions (string apiContext,string apiVersion){
-    string coreUrl = "https://localhost:9293/api/am/core/v1.0";
-    string query = "/subscriptions";
-    if((apiContext != "") && (apiVersion != "")){
-        query = query + "/?apiContext="+apiContext+"&apiVersion="+apiVersion;
-    }
-    message request = {};
-    http:ClientConnector subscriptionConnector = create http:ClientConnector(coreUrl);
-    messages:setHeader(request, "Content-Type", "application/json");
-    message response = http:ClientConnector.get(subscriptionConnector,query,request);
-    json subscription = messages:getJsonPayload(response);
-    int length = jsons:getInt(subscription,"$.list.length()");
+function retrieveSubscriptions (json subscriptions) {
+    int length = jsons:getInt(subscriptions, "$.length()");
     int i = 0;
-    while(i<length){
-        holders:putIntoSubscriptionCache(fromJsonToSubscriptionDto(jsons:getJson(subscription,"$.list["+i+"]")));
-        i = i+1;
+    while (i < length) {
+        holders:putIntoSubscriptionCache(fromJsonToSubscriptionDto(subscriptions[i]));
+        i = i + 1;
     }
 }
-function retrieveResources (string apiContext,string apiVersion){
+function retrieveResources (string apiContext,string apiVersion,json resources) {
+    int length = jsons:getInt(resources, "$.length()");
+    int i = 0;
+    while (i < length) {
+        holders:putIntoResourceCache(apiContext, apiVersion, fromJsonToResourceDto(resources[i]));
+        i = i + 1;
+    }
+}
+function retrieveAPIInformation (string apiContext, string apiVersion) {
+    system:println(apiContext);
     string coreUrl = "https://localhost:9293/api/am/core/v1.0";
-    string query = "/resources";
-    if((apiContext != "") && (apiVersion != "")){
-        query = query + "/?apiContext="+apiContext+"&apiVersion="+apiVersion;
-        message request = {};
-        http:ClientConnector subscriptionConnector = create http:ClientConnector(coreUrl);
-        messages:setHeader(request, "Content-Type", "application/json");
-        message response = http:ClientConnector.get(subscriptionConnector,query,request);
-        json subscription = messages:getJsonPayload(response);
-        int length = jsons:getInt(subscription,"$.list.length()");
-        int i = 0;
-        while(i<length){
-            holders:putIntoResourceCache(apiContext,apiVersion,fromJsonToResourceDto(jsons:getJson(subscription,"$.list["+i+"]")));
-            i = i+1;
-        }
+    string query = "/apis-summary/?apiContext=" + apiContext + "&apiVersion=" + apiVersion;
+    message request = {};
+    http:ClientConnector apiInfoConnector = create http:ClientConnector(coreUrl);
+    messages:setHeader(request, "Content-Type", "application/json");
+    message response = http:ClientConnector.get (apiInfoConnector, query, request);
+    json apiInfo = messages:getJsonPayload(response);
+    int length = jsons:getInt(apiInfo,"$.list.length()");
+    if (length > 0) {
+        json resources =apiInfo["list"][0]["resources"];
+        json subscriptions =apiInfo["list"][0]["subscriptions"];
+        retrieveResources(apiContext,apiVersion,resources);
+        retrieveSubscriptions(subscriptions);
+        system:println("after");
     }
 }
 
-function fromJsonToGatewayConf(json conf)(dto:GatewayConf){
+function fromJsonToGatewayConf (json conf) (dto:GatewayConf){
     dto:GatewayConf gatewayConf = {};
     gatewayConf.keyManagerURL = "";
     gatewayConf.brokerURL = "";
@@ -113,13 +114,12 @@ function fromJsonToGatewayConf(json conf)(dto:GatewayConf){
     return gatewayConf;
 }
 
-function fromJSONToAPIDto(json api)(dto:APIDto){
+function fromJSONToAPIDto (json api) (dto:APIDto){
     dto:APIDto apiDto = {};
     apiDto.id = jsons:getString(api, "id");
     apiDto.name = jsons:getString(api, "name");
     apiDto.version = jsons:getString(api, "version");
     apiDto.context = jsons:getString(api, "context");
-
     return apiDto;
 
 }
@@ -133,8 +133,8 @@ function getAPIServiceConfig (string apiId) (string) {
         response = http:ClientConnector.get (client, "/api/am/core/v1.0/apis/" + apiId + "/gateway-config", request);
         apiConfig = messages:getStringPayload(response);
     } catch (errors:Error e) {
-    system:println("[Error] : Error occurred while retrieving service configuration for API : " + apiId);
-    throw e;
+        system:println("[Error] : Error occurred while retrieving service configuration for API : " + apiId);
+        throw e;
     }
     return apiConfig;
 }
@@ -144,10 +144,10 @@ function getSystemProperty (string prop) (string) {
     return pathValue;
 }
 
-function deployService(dto:APIDto api, string config){
+function deployService (dto:APIDto api, string config) {
     //TODO:To be implemented
 }
-function undeployService(dto:APIDto api){
+function undeployService (dto:APIDto api) {
     //TODO:To be implemented
 }
 function updateService (dto:APIDto api, string config) {

@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.core.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.UriTemplateDTO;
 import java.util.Objects;
 
@@ -14,114 +15,56 @@ import java.util.Objects;
  * APISummaryDTO
  */
 public class APISummaryDTO   {
-  @JsonProperty("id")
-  private String id = null;
+  @JsonProperty("subscriptions")
+  private List<SubscriptionDTO> subscriptions = new ArrayList<SubscriptionDTO>();
 
-  @JsonProperty("name")
-  private String name = null;
+  @JsonProperty("resources")
+  private List<UriTemplateDTO> resources = new ArrayList<UriTemplateDTO>();
 
-  @JsonProperty("context")
-  private String context = null;
+  public APISummaryDTO subscriptions(List<SubscriptionDTO> subscriptions) {
+    this.subscriptions = subscriptions;
+    return this;
+  }
 
-  @JsonProperty("version")
-  private String version = null;
-
-  @JsonProperty("uriTemplates")
-  private List<UriTemplateDTO> uriTemplates = new ArrayList<UriTemplateDTO>();
-
-  public APISummaryDTO id(String id) {
-    this.id = id;
+  public APISummaryDTO addSubscriptionsItem(SubscriptionDTO subscriptionsItem) {
+    this.subscriptions.add(subscriptionsItem);
     return this;
   }
 
    /**
-   * uuid of the api. 
-   * @return id
+   * Get subscriptions
+   * @return subscriptions
   **/
-  @ApiModelProperty(value = "uuid of the api. ")
-  public String getId() {
-    return id;
+  @ApiModelProperty(value = "")
+  public List<SubscriptionDTO> getSubscriptions() {
+    return subscriptions;
   }
 
-  public void setId(String id) {
-    this.id = id;
+  public void setSubscriptions(List<SubscriptionDTO> subscriptions) {
+    this.subscriptions = subscriptions;
   }
 
-  public APISummaryDTO name(String name) {
-    this.name = name;
+  public APISummaryDTO resources(List<UriTemplateDTO> resources) {
+    this.resources = resources;
+    return this;
+  }
+
+  public APISummaryDTO addResourcesItem(UriTemplateDTO resourcesItem) {
+    this.resources.add(resourcesItem);
     return this;
   }
 
    /**
-   * api name. 
-   * @return name
+   * Get resources
+   * @return resources
   **/
-  @ApiModelProperty(value = "api name. ")
-  public String getName() {
-    return name;
+  @ApiModelProperty(value = "")
+  public List<UriTemplateDTO> getResources() {
+    return resources;
   }
 
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public APISummaryDTO context(String context) {
-    this.context = context;
-    return this;
-  }
-
-   /**
-   * api context. 
-   * @return context
-  **/
-  @ApiModelProperty(value = "api context. ")
-  public String getContext() {
-    return context;
-  }
-
-  public void setContext(String context) {
-    this.context = context;
-  }
-
-  public APISummaryDTO version(String version) {
-    this.version = version;
-    return this;
-  }
-
-   /**
-   * api version. 
-   * @return version
-  **/
-  @ApiModelProperty(value = "api version. ")
-  public String getVersion() {
-    return version;
-  }
-
-  public void setVersion(String version) {
-    this.version = version;
-  }
-
-  public APISummaryDTO uriTemplates(List<UriTemplateDTO> uriTemplates) {
-    this.uriTemplates = uriTemplates;
-    return this;
-  }
-
-  public APISummaryDTO addUriTemplatesItem(UriTemplateDTO uriTemplatesItem) {
-    this.uriTemplates.add(uriTemplatesItem);
-    return this;
-  }
-
-   /**
-   * List of uriTemplates. 
-   * @return uriTemplates
-  **/
-  @ApiModelProperty(value = "List of uriTemplates. ")
-  public List<UriTemplateDTO> getUriTemplates() {
-    return uriTemplates;
-  }
-
-  public void setUriTemplates(List<UriTemplateDTO> uriTemplates) {
-    this.uriTemplates = uriTemplates;
+  public void setResources(List<UriTemplateDTO> resources) {
+    this.resources = resources;
   }
 
 
@@ -134,16 +77,13 @@ public class APISummaryDTO   {
       return false;
     }
     APISummaryDTO apISummary = (APISummaryDTO) o;
-    return Objects.equals(this.id, apISummary.id) &&
-        Objects.equals(this.name, apISummary.name) &&
-        Objects.equals(this.context, apISummary.context) &&
-        Objects.equals(this.version, apISummary.version) &&
-        Objects.equals(this.uriTemplates, apISummary.uriTemplates);
+    return Objects.equals(this.subscriptions, apISummary.subscriptions) &&
+        Objects.equals(this.resources, apISummary.resources);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, version, uriTemplates);
+    return Objects.hash(subscriptions, resources);
   }
 
   @Override
@@ -151,11 +91,8 @@ public class APISummaryDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class APISummaryDTO {\n");
     
-    sb.append("    id: ").append(toIndentedString(id)).append("\n");
-    sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    context: ").append(toIndentedString(context)).append("\n");
-    sb.append("    version: ").append(toIndentedString(version)).append("\n");
-    sb.append("    uriTemplates: ").append(toIndentedString(uriTemplates)).append("\n");
+    sb.append("    subscriptions: ").append(toIndentedString(subscriptions)).append("\n");
+    sb.append("    resources: ").append(toIndentedString(resources)).append("\n");
     sb.append("}");
     return sb.toString();
   }
