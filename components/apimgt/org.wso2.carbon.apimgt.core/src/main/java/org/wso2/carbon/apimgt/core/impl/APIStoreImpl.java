@@ -88,6 +88,7 @@ import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExecutorFactory;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -832,8 +833,10 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 //publishing config to gateway
                 gateway.addCompositeAPI(api);
 
-                getApiDAO().updateApiDefinition(api.getId(), updatedSwagger, api.getUpdatedBy());
-                getApiDAO().updateGatewayConfig(api.getId(), updatedGatewayConfig, api.getUpdatedBy());
+                getApiDAO().updateCompositeApiDefinition(api.getId(), updatedSwagger, api.getUpdatedBy());
+                getApiDAO().updateCompositeAPIGatewayConfig(api.getId(),
+                        new ByteArrayInputStream(updatedGatewayConfig.getBytes(StandardCharsets.UTF_8)),
+                        api.getUpdatedBy());
 
                 if (log.isDebugEnabled()) {
                     log.debug("API " + api.getName() + "-" + api.getVersion() + " was updated successfully.");
@@ -868,7 +871,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             if (api != null) {
                 //Delete API in gateway
                 gateway.deleteCompositeAPI(api);
-                getApiDAO().deleteApplicationAssociatedAPI(apiId, api.getApplicationId());
+                getApiDAO().deleteCompositeApi(apiId);
             }
         } catch (GatewayException e) {
             String message = "Error occurred while deleting Composite API with id - " + apiId + " from gateway";

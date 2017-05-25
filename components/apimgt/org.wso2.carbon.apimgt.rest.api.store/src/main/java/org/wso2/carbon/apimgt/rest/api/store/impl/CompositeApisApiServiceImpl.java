@@ -264,7 +264,7 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
             }
             apiStore.updateCompositeApiDefinition(apiId, apiDefinition);
-            String apiSwagger = apiStore.getApiSwaggerDefinition(apiId);
+            String apiSwagger = apiStore.getCompositeApiDefinition(apiId);
             String newFingerprint = compositeApisApiIdSwaggerGetFingerprint(apiId, null, null, null, request);
             return Response.ok().header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"").entity(apiSwagger).build();
         } catch (APIManagementException e) {

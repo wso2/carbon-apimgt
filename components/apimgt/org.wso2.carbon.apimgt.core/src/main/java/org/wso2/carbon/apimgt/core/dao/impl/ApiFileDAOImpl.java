@@ -130,7 +130,7 @@ public class ApiFileDAOImpl implements ApiDAO {
      * {@inheritDoc}
      */
     @Override
-    public void deleteApplicationAssociatedAPI(String apiId, String appId) throws APIMgtDAOException {
+    public void deleteCompositeApi(String apiId) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 

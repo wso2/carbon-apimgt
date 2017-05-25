@@ -21,6 +21,7 @@
 package org.wso2.carbon.apimgt.core.impl;
 
 import org.mockito.ArgumentCaptor;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.testng.Assert;
@@ -216,6 +217,8 @@ public class APIStoreImplTestCase {
         Mockito.when(apiDAO.getCompositeAPI(apiBuilder.getId())).thenReturn(createdAPI);
         Mockito.when(apiDAO.getCompositeAPIGatewayConfig(apiBuilder.getId())).thenReturn(
                 new ByteArrayInputStream(ballerinaImpl.getBytes(StandardCharsets.UTF_8)));
+        Mockito.when(gatewaySourceGenerator.getGatewayConfigFromSwagger(Matchers.anyString(), Matchers.anyString())).
+                thenReturn(ballerinaImpl);
         
         apiStore.updateCompositeApi(apiBuilder);
 

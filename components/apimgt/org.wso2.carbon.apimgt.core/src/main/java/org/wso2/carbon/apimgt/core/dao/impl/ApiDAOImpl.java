@@ -25,6 +25,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
@@ -37,6 +38,7 @@ import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.ResourceCategory;
+import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.APILCWorkflowStatus;
@@ -538,7 +540,12 @@ public class ApiDAOImpl implements ApiDAO {
                 connection.setAutoCommit(false);
 
                 addCompositeAPIRelatedInformation(connection, statement, api);
-                associateApiWithApplication(connection, api.getId(), api.getApplicationId());
+
+                APISubscriptionDAOImpl apiSubscriptionDAO = (APISubscriptionDAOImpl) DAOFactory.getAPISubscriptionDAO();
+                apiSubscriptionDAO.createSubscription(api.getId(), api.getApplicationId(),
+                        UUID.randomUUID().toString(), PolicyDAOImpl.UNLIMITED_TIER,
+                        APIMgtConstants.SubscriptionStatus.ACTIVE, connection);
+
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -651,30 +658,6 @@ public class ApiDAOImpl implements ApiDAO {
         addUrlMappings(connection, api.getUriTemplates().values(), apiPrimaryKey);
         addAPIDefinition(connection, apiPrimaryKey, api.getApiDefinition(), api.getCreatedBy());
         addAPIPermission(connection, api.getPermissionMap(), apiPrimaryKey);
-    }
-
-    /**
-     * Associate API with Application. This is specifically required to support the creation of Composite APIs which are
-     * always associated with a specific Application. Changes by this operation will not be persisted automatically.
-     * The caller will need to manually invoke DAOConnection.commit() to persist the changes
-     *
-     * @param connection Connection to DAO layer
-     * @param apiId The UUID of the API
-     * @param appId The UUID of the Application
-     * @throws APIMgtDAOException If failed to delete application.
-     */
-
-    private void associateApiWithApplication(Connection connection, String apiId, String appId)
-            throws APIMgtDAOException {
-        final String query = "UPDATE AM_APPLICATION SET COMPOSITE_API_ID = ? WHERE UUID = ?";
-
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, apiId);
-            statement.setString(2, appId);
-            statement.execute();
-        } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
-        }
     }
 
     /**
@@ -793,28 +776,18 @@ public class ApiDAOImpl implements ApiDAO {
      * {@inheritDoc}
      */
     @Override
-    public void deleteApplicationAssociatedAPI(String apiId, String appId) throws APIMgtDAOException {
-        final String validationQuery = "SELECT COMPOSITE_API_ID FROM AM_APPLICATION WHERE UUID = ?";
+    public void deleteCompositeApi(String apiId) throws APIMgtDAOException {
+        APISubscriptionDAO apiSubscriptionDAO = DAOFactory.getAPISubscriptionDAO();
+        List<Subscription> subscriptions = apiSubscriptionDAO.getAPISubscriptionsByAPI(apiId);
+
+        for (Subscription subscription : subscriptions) {
+            apiSubscriptionDAO.deleteAPISubscription(subscription.getId());
+        }
+
 
         try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement validationStatement = connection.prepareStatement(validationQuery)) {
-            validationStatement.setString(1, appId);
-
-            String compositeApiId = "";
-            try (ResultSet rs = validationStatement.executeQuery()) {
-                if (rs.next()) {
-                    compositeApiId = rs.getString("COMPOSITE_API_ID");
-                }
-            }
-
-            if (compositeApiId.equals(apiId)) {
-                removeApplicationLinkWithAPI(connection, appId);
-
-                try (PreparedStatement statement = connection.prepareStatement(API_DELETE)) {
-                    persistAPIDelete(connection, statement, apiId);
-                }
-            }
-
+             PreparedStatement statement = connection.prepareStatement(API_DELETE)) {
+            persistAPIDelete(connection, statement, apiId);
         } catch (SQLException | IOException e) {
             throw new APIMgtDAOException(e);
         }
@@ -848,15 +821,6 @@ public class ApiDAOImpl implements ApiDAO {
         statement.execute();
     }
 
-
-    private void removeApplicationLinkWithAPI(Connection connection, String appId) throws SQLException {
-        final String updateQuery = "UPDATE AM_APPLICATION SET COMPOSITE_API_ID = NULL WHERE UUID = ?";
-
-        try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {
-            statement.setString(1, appId);
-            statement.execute();
-        }
-    }
 
     /**
      * Get swagger definition of a given API
@@ -1653,7 +1617,7 @@ public class ApiDAOImpl implements ApiDAO {
 
 
     private CompositeAPI getCompositeAPIFromResultSet(Connection connection, PreparedStatement statement)
-                                                                                throws SQLException, IOException {
+            throws SQLException, IOException, APIMgtDAOException {
         try (ResultSet rs = statement.executeQuery()) {
             while (rs.next()) {
 
@@ -1683,7 +1647,7 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     private List<CompositeAPI> getCompositeAPISummaryList(Connection connection, PreparedStatement statement)
-                                                                                        throws SQLException {
+            throws SQLException, APIMgtDAOException {
         List<CompositeAPI> apiList = new ArrayList<>();
         try (ResultSet rs = statement.executeQuery()) {
             while (rs.next()) {
@@ -1707,21 +1671,16 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
 
-    private String getCompositeAPIApplicationId(Connection connection, String apiId) throws SQLException {
-        final String query = "SELECT UUID FROM AM_APPLICATION WHERE COMPOSITE_API_ID = ?";
+    private String getCompositeAPIApplicationId(Connection connection, String apiId) throws APIMgtDAOException {
+        APISubscriptionDAO apiSubscriptionDAO = DAOFactory.getAPISubscriptionDAO();
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, apiId);
-            statement.execute();
+        List<Subscription> subscriptions = apiSubscriptionDAO.getAPISubscriptionsByAPI(apiId);
 
-            try (ResultSet rs = statement.getResultSet()) {
-                if (rs.next()) {
-                    return rs.getString("UUID");
-                }
-            }
+        if (!subscriptions.isEmpty()) {
+            return subscriptions.get(0).getApplication().getId();
         }
 
-        throw new SQLException("Application does not exist for Composite API ID " + apiId);
+        throw new APIMgtDAOException("Composite API ID " + apiId + " has no associated Application subscription");
     }
 
 

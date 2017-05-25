@@ -41,6 +41,7 @@ import javax.annotation.CheckForNull;
 public interface ApiDAO {
     /**
      * Retrieve a given instance of an API
+     *
      * @param apiID The UUID that uniquely identifies an API
      * @return valid {@link API} object or null
      * @throws APIMgtDAOException if error occurs while accessing data layer
@@ -50,6 +51,7 @@ public interface ApiDAO {
 
     /**
      * Retrieve a given instance of an APISummary object
+     *
      * @param apiID The UUID that uniquely identifies an API
      * @return valid {@link API} object or null
      * @throws APIMgtDAOException if error occurs while accessing data layer
@@ -60,6 +62,7 @@ public interface ApiDAO {
 
     /**
      * Retrieve a given instance of a Composite API
+     *
      * @param apiID The UUID that uniquely identifies a Composite API
      * @return valid {@link CompositeAPI} object or null
      * @throws APIMgtDAOException if error occurs while accessing data layer
@@ -106,6 +109,7 @@ public interface ApiDAO {
 
     /**
      * Retrieves summary data of all available APIs with life cycle status that matches the status list provided
+     *
      * @param statuses A list of matching life cycle statuses
      * @return {@code List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
@@ -127,6 +131,7 @@ public interface ApiDAO {
     /**
      * Retrieves summary of paginated data of all available APIs that match the given search criteria. This will use
      * the full text search for API table
+     *
      * @param roles     List of the roles of the user.
      * @param user      Current user.
      * @param searchString The search string provided
@@ -142,6 +147,7 @@ public interface ApiDAO {
     /**
      * Retrieves summary of paginated data of all available Composite APIs that match the given search criteria.
      * This will use the full text search for API table
+     *
      * @param roles     List of the roles of the user.
      * @param user      Current user.
      * @param searchString The search string provided
@@ -156,6 +162,7 @@ public interface ApiDAO {
 
     /**
      * Retrieves summary of paginated data of all available APIs that match the given search criteria.
+     *
      * @param roles     List of the roles of the user.
      * @param user      Current user.
      * @param attributeMap Map containing the attributes and search queries for those attributes
@@ -171,6 +178,7 @@ public interface ApiDAO {
     /**
      * Retrieves summary of paginated data of APIs based on visibility (in store), that match the
      * given search criteria.
+     *
      * @param roles List of the roles of the user.
      * @param attributeMap Map containing the attributes to be searched
      * @param offset The starting point of the search results.
@@ -184,6 +192,7 @@ public interface ApiDAO {
     /**
      * Checks if a given API which is uniquely identified by the Provider, API Name and Version combination already
      * exists
+     *
      * @param apiName Name of API
      * @param providerName Provider of the API.
      * @return true if providerName, apiName, version combination already exists else false
@@ -193,6 +202,7 @@ public interface ApiDAO {
 
     /**
      * Checks if a given API Context already exists
+     *
      * @param contextName Name of API Context
      * @return true if contextName already exists else false
      * @throws APIMgtDAOException if error occurs while accessing data layer
@@ -201,6 +211,7 @@ public interface ApiDAO {
 
     /**
      * Add a new instance of an API
+     *
      * @param api The {@link API} object to be added
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
@@ -210,6 +221,7 @@ public interface ApiDAO {
     /**
      * Create API that is associated with an Application. This is specifically required to support the creation of
      * Composite APIs which are always associated with a specific Application.
+     *
      * @param api The {@link API} object to be added
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
@@ -219,6 +231,7 @@ public interface ApiDAO {
 
     /**
      * Update an existing API
+     *
      * @param apiID The UUID of the API that needs to be updated
      * @param substituteAPI Substitute {@link API} object that will replace the existing API
      * @throws APIMgtDAOException if error occurs while accessing data layer
@@ -228,6 +241,7 @@ public interface ApiDAO {
 
     /**
      * Remove an existing API
+     *
      * @param apiID The UUID of the API that needs to be deleted
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
@@ -237,16 +251,17 @@ public interface ApiDAO {
     /**
      * Delete API that is associated with an Application. This is specifically required to support the deletion of
      * Composite APIs which are always associated with a specific Application.
+     *
      * @param apiId The UUID of the API that needs to be deleted
-     * @param appId The UUID of the Application that the API is currently associated with
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    void deleteApplicationAssociatedAPI(String apiId, String appId) throws APIMgtDAOException;
+    void deleteCompositeApi(String apiId) throws APIMgtDAOException;
 
 
     /**
      * Get swagger definition of a given API
+     *
      * @param apiID The UUID of the respective API
      * @return Swagger definition String
      * @throws APIMgtDAOException if error occurs while accessing data layer
@@ -256,6 +271,7 @@ public interface ApiDAO {
 
     /**
      * Get swagger definition of a given Composite API
+     *
      * @param apiID The UUID of the respective Composite API
      * @return Swagger definition String
      * @throws APIMgtDAOException if error occurs while accessing data layer
@@ -265,6 +281,7 @@ public interface ApiDAO {
 
     /**
      * Get image of a given API
+     *
      * @param apiID The UUID of the respective API
      * @return Image stream
      * @throws APIMgtDAOException if error occurs while accessing data layer
@@ -285,6 +302,7 @@ public interface ApiDAO {
 
     /**
      * Change the lifecycle status of a given API
+     *
      * @param apiID The UUID of the respective API
      * @param status The lifecycle status that the API must be set to
      * @throws APIMgtDAOException  if error occurs while accessing data layer
@@ -380,12 +398,14 @@ public interface ApiDAO {
 
     /**
      * used to deprecate older versions of the api
+     *
      * @param identifier API ID.
      */
     void deprecateOlderVersions(String identifier);
 
     /**
      * Check if document Exist
+     *
      * @param apiId UUID of the API.
      * @param documentInfo  Document.
      * @return  TRUE or false based on the existence of document.
@@ -442,6 +462,7 @@ public interface ApiDAO {
 
     /**
      * get all Endpoints
+     *
      * @return  List of endpoint objects.
      * @throws APIMgtDAOException   If failed to get endpoint.
      */
@@ -472,6 +493,7 @@ public interface ApiDAO {
 
     /**
      * Get gateway configuration of a given API
+     *
      * @param apiID The UUID of the respective API
      * @return gateway configuration String
      * @throws APIMgtDAOException if error occurs while accessing data layer
@@ -481,6 +503,7 @@ public interface ApiDAO {
 
     /**
      * Get gateway configuration of a given Composite API
+     *
      * @param apiID The UUID of the respective Composite API
      * @return gateway configuration String
      * @throws APIMgtDAOException if error occurs while accessing data layer
@@ -612,7 +635,7 @@ public interface ApiDAO {
     String getLastUpdatedTimeOfComment(String commentId) throws APIMgtDAOException;
 
     /**
-     * return list of respurces associated with API
+     * return list of resources associated with API
      *
      * @param apiContext context of API
      * @param apiVersion version of API
@@ -622,6 +645,7 @@ public interface ApiDAO {
     List<UriTemplate> getResourcesOfApi(String apiContext, String apiVersion) throws APIMgtDAOException;
     /**
      * Check Endpoint is exist
+     *
      * @param name name of endpoint
      * @return existence of endpoint
      * @throws APIMgtDAOException if error occurs while accessing data layer
@@ -630,6 +654,7 @@ public interface ApiDAO {
 
     /**
      * Check endpoint use in api or operation
+     *
      * @param endpointId id of endpoint
      * @return true if used
      * @throws APIMgtDAOException if error occurs while accessing data layer
@@ -638,6 +663,7 @@ public interface ApiDAO {
 
     /**
      * Retrieves available APIs with given life cycle status and gateway labels.
+     *
      * @param gatewayLabels A list of gateway labels
      * @param status Life cycle status
      * @return {@code List<API>} matching results
@@ -648,6 +674,7 @@ public interface ApiDAO {
 
     /**
      * Retrieves available APIs with given gateway labels.
+     * 
      * @param gatewayLabels A list of gateway labels
      * @return {@code List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
