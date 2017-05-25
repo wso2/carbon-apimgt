@@ -248,6 +248,7 @@ public class MappingUtil {
             apiInfo.setLifeCycleStatus(apiSummary.getLifeCycleStatus());
             apiInfo.setVersion(apiSummary.getVersion());
             apiInfo.setWorkflowStatus(apiSummary.getWorkflowStatus());
+            apiInfo.setPermissionMap(apiSummary.getPermissionMap());
             apiInfoList.add(apiInfo);
         }
         return apiInfoList;

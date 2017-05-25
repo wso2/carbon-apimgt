@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -34,6 +36,9 @@ public class APIInfoDTO   {
 
   @JsonProperty("workflowStatus")
   private String workflowStatus = null;
+
+  @JsonProperty("permissionMap")
+  private Map<String, Integer> permissionMap = null;
 
   public APIInfoDTO id(String id) {
     this.id = id;
@@ -179,6 +184,19 @@ public class APIInfoDTO   {
     this.workflowStatus = workflowStatus;
   }
 
+  /**
+   * Get permissionMap
+   * @return permissionMap
+   **/
+  @ApiModelProperty(example = "APPROVED", value = "") //Change the desc - example etc.
+  public Map<String, Integer> getPermissionMap() {
+    return permissionMap;
+  }
+
+  public void setPermissionMap(Map<String, Integer> permissionMap) {
+    this.permissionMap = permissionMap;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -196,12 +214,13 @@ public class APIInfoDTO   {
         Objects.equals(this.version, apIInfo.version) &&
         Objects.equals(this.provider, apIInfo.provider) &&
         Objects.equals(this.lifeCycleStatus, apIInfo.lifeCycleStatus) &&
-        Objects.equals(this.workflowStatus, apIInfo.workflowStatus);
+        Objects.equals(this.workflowStatus, apIInfo.workflowStatus) &&
+        Objects.equals(this.permissionMap, apIInfo.permissionMap);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, workflowStatus);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, workflowStatus, permissionMap);
   }
 
   @Override
@@ -217,6 +236,7 @@ public class APIInfoDTO   {
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
     sb.append("    workflowStatus: ").append(toIndentedString(workflowStatus)).append("\n");
+    sb.append("    permissionMap: ").append(toIndentedString(permissionMap)).append("\n");
     sb.append("}");
     return sb.toString();
   }

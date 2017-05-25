@@ -1623,6 +1623,8 @@ public class ApiDAOImpl implements ApiDAO {
 
     private List<API> constructAPISummaryList(Connection connection, PreparedStatement statement) throws SQLException {
         List<API> apiList = new ArrayList<>();
+        Map<String, Integer> permissionMap = new HashMap<>();
+        permissionMap.put("developer", 6);
         try (ResultSet rs = statement.executeQuery()) {
             while (rs.next()) {
                 API apiSummary = new API.APIBuilder(rs.getString("PROVIDER"), rs.getString("NAME"),
@@ -1632,7 +1634,8 @@ public class ApiDAOImpl implements ApiDAO {
                         description(rs.getString("DESCRIPTION")).
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
                         lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
-                        workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).build();
+                        workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).
+                        permissionMap(permissionMap).build();
 
                 apiList.add(apiSummary);
             }

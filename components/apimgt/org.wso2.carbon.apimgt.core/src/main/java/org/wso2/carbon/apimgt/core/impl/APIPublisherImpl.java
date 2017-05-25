@@ -431,8 +431,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         Set<String> permissionRoleList = getRolesFromPermissionMap(permissionMap);
         Set<String> rolesOfUserWithAPIPermissions = null;
         List<String> permissionArrayForUser = new ArrayList<>();
-        if (loggedInUserRoles.retainAll(
-                permissionRoleList)) { //get the intersection - retainAll() transforms first set to the intersection
+        loggedInUserRoles.retainAll(
+                permissionRoleList); //get the intersection - retainAll() transforms first set to the intersection
+        if (!loggedInUserRoles.isEmpty()) {
             rolesOfUserWithAPIPermissions = loggedInUserRoles;
         }
         if (rolesOfUserWithAPIPermissions != null) {
@@ -459,10 +460,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
         return permissionArrayForUser;
     }
-
-//    private Map<String, ArrayList<String>> getAllPermissionsForUser(String loggedInUser) {
-//        return null;
-//    }
 
     /**
      * This method is used to extract the groupIds or roles from the permissionMap
@@ -1098,22 +1095,34 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public List<API> searchAPIs(Integer limit, Integer offset, String query) throws APIManagementException {
 
         List<API> apiResults;
+        String user = "admin";
+        Set<String> roles = APIUtils.getAllRolesOfUser(user);
         try {
             //TODO: Need to validate users roles against results returned
             if (query != null && !query.isEmpty()) {
-                String user = "admin";
-                Set<String> roles = APIUtils.getAllRolesOfUser(user);
                 //TODO get the logged in user and user roles from key manager.
                 apiResults = getApiDAO().searchAPIs(roles, user, query, ApiType.STANDARD, offset, limit);
             } else {
                 apiResults = getApiDAO().getAPIs(ApiType.STANDARD);
             }
+            List<API> apiList = setAllApiPermissionsForUser(user, apiResults);
+            apiResults = apiList;
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while Searching the API with query " + query;
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return apiResults;
+    }
+
+    private List<API> setAllApiPermissionsForUser(String userId, List<API> originalAPIList) {
+        List<API> updatedAPIList = new ArrayList<API>();
+        for (API api : originalAPIList) {
+            List<String> aggregatedApiPermissions = getAPIPermissionsOfLoggedInUser(userId, api);
+            api.setUserSpecificApiPermissions(aggregatedApiPermissions);
+            updatedAPIList.add(api);
+        }
+        return updatedAPIList;
     }
 
     /**
