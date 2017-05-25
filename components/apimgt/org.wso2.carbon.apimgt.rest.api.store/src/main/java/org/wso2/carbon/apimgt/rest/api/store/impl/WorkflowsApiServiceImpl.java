@@ -37,7 +37,7 @@ import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.WorkflowsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.store.mappings.WorkflowMappintUtil;
+import org.wso2.carbon.apimgt.rest.api.store.mappings.MiscMappingUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -121,7 +121,7 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
                 }
 
                 WorkflowResponse response = apiStore.completeWorkflow(workflowExecutor, workflow);
-                WorkflowResponseDTO workflowResponseDTO = WorkflowMappintUtil.fromWorkflowResponsetoDTO(response);
+                WorkflowResponseDTO workflowResponseDTO = MiscMappingUtil.fromWorkflowResponseToDTO(response);
                 return Response.ok().entity(workflowResponseDTO).build();
             }
 

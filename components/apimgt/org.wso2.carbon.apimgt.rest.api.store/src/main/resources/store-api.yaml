@@ -2062,6 +2062,50 @@ paths:
             $ref: '#/definitions/Error'
 
 ######################################################
+# The "Self Signup" functional resource APIs
+######################################################
+  /self-signup:
+
+#-----------------------------------------------------
+# Register a new user
+#-----------------------------------------------------
+    post:
+      x-scope: apim:signup
+      description: |
+        User self signup API
+      parameters:
+        - in: body
+          name: body
+          description: |
+            User object to represent the new user
+          required: true
+          schema:
+            $ref: '#/definitions/User'
+        - $ref: '#/parameters/Content-Type'
+      tags:
+        - Signup
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created object as entity in the body.
+            Location header contains URL of newly created entity.
+          schema:
+            $ref: '#/definitions/User'
+        202:
+          description: |
+            Accepted.
+            The request has been accepted.
+          schema:
+            $ref: '#/definitions/WorkflowResponse'
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
 # Parameters - required by some of the APIs above
 ######################################################
 parameters:
@@ -3130,6 +3174,29 @@ definitions:
       jsonPayload:
         description: |
           Attributes that returned after the workflow execution
+        type: string
+
+#-----------------------------------------------------
+# The Self Signup User resource
+#-----------------------------------------------------
+  User:
+    title: User
+    required:
+      - username
+      - password
+      - firstName
+      - lastName
+      - email
+    properties:
+      username:
+        type: string
+      password:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      email:
         type: string
        
 #-----------------------------------------------------

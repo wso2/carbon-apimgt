@@ -118,7 +118,8 @@ public class DefaultIdentityProviderImplTestCase {
 
         //error path
         final int errorSc = 409;
-        final String errorMsg = "User creation failed";
+        final String errorMsg = "{\"Errors\":[{\"code\":\"409\",\"description\":\"Error in adding the user: test to " +
+                "the user store.\"}]}";
         Response errorResponse = Response.builder().status(errorSc).headers(new HashMap<>())
                 .body(errorMsg.getBytes()).build();
         Mockito.when(scimServiceStub.addUser(any(SCIMUser.class))).thenReturn(errorResponse);
@@ -128,8 +129,7 @@ public class DefaultIdentityProviderImplTestCase {
             Assert.fail("Exception was expected, but wasn't thrown");
         } catch (Exception ex) {
             Assert.assertTrue(ex instanceof IdentityProviderException);
-            Assert.assertEquals(ex.getMessage(), "Error occurred while creating user. Status Code: " + errorSc + ' '
-                    + errorMsg);
+            Assert.assertTrue(ex.getMessage().startsWith("Error occurred while creating user."));
         }
     }
 

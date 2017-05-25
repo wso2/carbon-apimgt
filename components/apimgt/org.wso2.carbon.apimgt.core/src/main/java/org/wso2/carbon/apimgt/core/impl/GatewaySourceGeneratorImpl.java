@@ -29,8 +29,8 @@ import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.ballerinalang.composer.service.workspace.swagger.SwaggerConverterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
+import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -46,7 +46,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
-//import javax.script.ScriptException;
 
 /**
  * Generate API config template
@@ -150,7 +149,4 @@ public class GatewaySourceGeneratorImpl implements GatewaySourceGenerator {
         return writer.toString();
     }
 
-    public void setApi(API api) {
-        this.api = api;
-    }
 }

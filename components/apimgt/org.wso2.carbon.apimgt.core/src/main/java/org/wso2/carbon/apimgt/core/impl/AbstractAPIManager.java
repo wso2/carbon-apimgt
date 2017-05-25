@@ -27,19 +27,23 @@ import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
 import org.wso2.carbon.apimgt.core.api.APIManager;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
+import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
+import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
+import org.wso2.carbon.apimgt.core.dao.TagDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
+import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIResource;
 import org.wso2.carbon.apimgt.core.models.Application;
@@ -58,6 +62,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 /**
  * This class contains the implementation of the common methods for Publisher and store
  */
@@ -70,20 +75,24 @@ public abstract class AbstractAPIManager implements APIManager {
     private APISubscriptionDAO apiSubscriptionDAO;
     private PolicyDAO policyDAO;
     private String username;
+    private IdentityProvider identityProvider;
     private APILifecycleManager apiLifecycleManager;
     private LabelDAO labelDAO;
     private WorkflowDAO workflowDAO;
+    private TagDAO tagDAO;
     private GatewaySourceGenerator gatewaySourceGenerator;
     private APIGateway apiGatewayPublisher;
+    private APIMConfigurations config;
     protected APIDefinition apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
 
-    public AbstractAPIManager(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
-                              APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager
-                                      apiLifecycleManager,
-                              LabelDAO labelDAO, WorkflowDAO workflowDAO, GatewaySourceGenerator
-                                      gatewaySourceGenerator, APIGateway apiGatewayPublisher) {
+    public AbstractAPIManager(String username, IdentityProvider idp, ApiDAO apiDAO,
+                              ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO,
+                              APILifecycleManager apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO,
+                              TagDAO tagDAO, GatewaySourceGenerator gatewaySourceGenerator,
+                              APIGateway apiGatewayPublisher) {
 
         this.username = username;
+        this.identityProvider = idp;
         this.apiDAO = apiDAO;
         this.applicationDAO = applicationDAO;
         this.apiSubscriptionDAO = apiSubscriptionDAO;
@@ -91,16 +100,19 @@ public abstract class AbstractAPIManager implements APIManager {
         this.apiLifecycleManager = apiLifecycleManager;
         this.labelDAO = labelDAO;
         this.workflowDAO = workflowDAO;
+        this.tagDAO = tagDAO;
         this.gatewaySourceGenerator = gatewaySourceGenerator;
         this.apiGatewayPublisher = apiGatewayPublisher;
+        this.config = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
     }
 
-    public AbstractAPIManager(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
-                              APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO,
-                              APILifecycleManager apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO) {
+    public AbstractAPIManager(String username, IdentityProvider idp, ApiDAO apiDAO,
+                              ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO,
+                              APILifecycleManager apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO,
+                              TagDAO tagDAO) {
 
-        this(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, apiLifecycleManager, labelDAO,
-                workflowDAO, new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
+        this(username, idp, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, apiLifecycleManager,
+                labelDAO, workflowDAO, tagDAO, new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
 
@@ -751,5 +763,17 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public APIGateway getApiGateway() {
         return apiGatewayPublisher;
+    }
+
+    public IdentityProvider getIdentityProvider() {
+        return identityProvider;
+    }
+
+    public APIMConfigurations getConfig() {
+        return config;
+    }
+
+    public TagDAO getTagDAO() {
+        return tagDAO;
     }
 }

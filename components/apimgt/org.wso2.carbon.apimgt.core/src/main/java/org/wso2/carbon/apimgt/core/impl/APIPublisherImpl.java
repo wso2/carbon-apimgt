@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.core.api.APIMObservable;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
+import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
@@ -38,6 +39,7 @@ import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
+import org.wso2.carbon.apimgt.core.dao.TagDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
@@ -77,11 +79,8 @@ import org.wso2.carbon.lcm.sql.beans.LifecycleHistoryBean;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.ProtocolException;
-import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -103,12 +102,12 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     // Map to store observers, which observe APIPublisher events
     private Map<String, EventObserver> eventObservers = new HashMap<>();
 
-    public APIPublisherImpl(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
+    public APIPublisherImpl(String username, IdentityProvider idp, ApiDAO apiDAO, ApplicationDAO applicationDAO,
                             APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager
-                                    apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO,
+                                    apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO, TagDAO tagDAO,
                             GatewaySourceGenerator gatewaySourceGenerator, APIGateway apiGatewayPublisher) {
-        super(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, apiLifecycleManager, labelDAO,
-                workflowDAO, gatewaySourceGenerator, apiGatewayPublisher);
+        super(username, idp, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, apiLifecycleManager, labelDAO,
+                workflowDAO, tagDAO, gatewaySourceGenerator, apiGatewayPublisher);
     }
 
     /**
@@ -1334,44 +1333,24 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
     }
 
-    /**
-     * @see org.wso2.carbon.apimgt.core.api.APIPublisher#addApiFromDefinition(String)
-     */
     @Override
-    public String addApiFromDefinition(String swaggerResourceUrl) throws APIManagementException {
-        URL url;
-        HttpURLConnection urlConn;
+    public String addApiFromDefinition(HttpURLConnection urlConn) throws APIManagementException {
         try {
-            url = new URL(swaggerResourceUrl);
-            urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
             urlConn.setRequestMethod(APIMgtConstants.HTTP_GET);
+            urlConn.connect();
             int responseCode = urlConn.getResponseCode();
             if (responseCode == 200) {
-                String responseStr = new String(IOUtils.toByteArray(urlConn.getInputStream()), "UTF-8");
-                API.APIBuilder apiBuilder = apiDefinitionFromSwagger20.generateApiFromSwaggerResource(getUsername(),
-                        responseStr);
-                apiBuilder.corsConfiguration(new CorsConfiguration());
-                apiBuilder.apiDefinition(responseStr);
-                addAPI(apiBuilder);
-                return apiBuilder.getId();
+                return addApiFromDefinition(urlConn.getInputStream());
             } else {
-                throw new APIManagementException("Error while getting swagger resource from url : " + url,
+                throw new APIManagementException("Error while getting swagger resource from url : " + urlConn.getURL(),
                         ExceptionCodes.API_DEFINITION_MALFORMED);
             }
-        } catch (UnsupportedEncodingException e) {
-            String msg = "Unsupported encoding exception while getting the swagger resource from url";
-            log.error(msg, e);
-            throw new APIManagementException(msg, ExceptionCodes.API_DEFINITION_MALFORMED);
         } catch (ProtocolException e) {
             String msg = "Protocol exception while getting the swagger resource from url";
             log.error(msg, e);
             throw new APIManagementException(msg, ExceptionCodes.API_DEFINITION_MALFORMED);
-        } catch (MalformedURLException e) {
-            String msg = "Malformed url while getting the swagger resource from url";
-            log.error(msg, e);
-            throw new APIManagementException(msg, ExceptionCodes.API_DEFINITION_MALFORMED);
-        } catch (IOException e) {
+        }  catch (IOException e) {
             String msg = "Error while getting the swagger resource from url";
             log.error(msg, e);
             throw new APIManagementException(msg, ExceptionCodes.API_DEFINITION_MALFORMED);
