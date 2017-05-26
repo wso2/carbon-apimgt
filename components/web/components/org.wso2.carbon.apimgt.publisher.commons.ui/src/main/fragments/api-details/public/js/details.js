@@ -667,10 +667,6 @@ function createRolePermissionJsonString() {
         return JSON.stringify(permissionJson);
 }
 
-function isValidRole(role) {
-    return validRoleList.includes(role);
-}
-
 function updatePermissionsHandler(event) {
     var api_client = event.data.api_client;
     var api_id = event.data.api_id;
