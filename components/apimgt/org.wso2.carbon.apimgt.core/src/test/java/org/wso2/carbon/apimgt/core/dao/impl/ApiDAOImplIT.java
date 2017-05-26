@@ -326,7 +326,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
                                    String[] expectedAPINames) throws APIMgtDAOException {
 
         ApiDAO apiDAO = DAOFactory.getApiDAO();
-        List<API> apiList = apiDAO.searchAPIsByAttribute(userRoles, attributeMap, 10, 0);
+        List<API> apiList = apiDAO.searchAPIsByAttributeInStore(userRoles, attributeMap, 10, 0);
         List<String> resultAPINameList = new ArrayList<>();
         for (API api : apiList) {
             resultAPINameList.add(api.getName());

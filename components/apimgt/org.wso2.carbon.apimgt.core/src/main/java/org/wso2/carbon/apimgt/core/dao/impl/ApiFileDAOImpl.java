@@ -538,11 +538,11 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#searchAPIsByAttribute(List roles, Map attributeMap, int offset, int limit)
+     * @see ApiDAO#searchAPIsByAttributeInStore(List roles, Map attributeMap, int offset, int limit)
      */
     @Override
-    public List<API> searchAPIsByAttribute(List<String> roles, Map<String, String> attributeMap,
-                                           int offset, int limit) throws APIMgtDAOException {
+    public List<API> searchAPIsByAttributeInStore(List<String> roles, Map<String, String> attributeMap,
+                                                  int offset, int limit) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 

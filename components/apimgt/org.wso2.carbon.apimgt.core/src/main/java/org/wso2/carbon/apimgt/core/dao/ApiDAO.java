@@ -167,8 +167,8 @@ public interface ApiDAO {
      * @return {@code List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    List<API> searchAPIsByAttribute(List<String> roles, Map<String, String> attributeMap,
-                                    int offset, int limit) throws APIMgtDAOException;
+    List<API> searchAPIsByAttributeInStore(List<String> roles, Map<String, String> attributeMap,
+                                           int offset, int limit) throws APIMgtDAOException;
 
     /**
      * Retrieves summary data of all available APIs with life cycle status that matches the status list provided
