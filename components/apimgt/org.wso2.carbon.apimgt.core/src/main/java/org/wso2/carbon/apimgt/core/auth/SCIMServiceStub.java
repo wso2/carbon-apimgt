@@ -24,6 +24,8 @@ import feign.RequestLine;
 import feign.Response;
 import org.wso2.carbon.apimgt.core.auth.dto.SCIMUser;
 
+import java.util.ArrayList;
+
 /**
  * This is the stub class from SCIM service
  */
@@ -37,8 +39,7 @@ public interface SCIMServiceStub {
     SCIMUser getUser(@Param("id") String id);
 
     @RequestLine("GET /Groups?filter={query}")
-    Response searchGroups(@Param("query") String query);
-
+    ArrayList<SCIMUser.SCIMUserGroups> searchGroups(@Param("query") String query);
 }
 
 

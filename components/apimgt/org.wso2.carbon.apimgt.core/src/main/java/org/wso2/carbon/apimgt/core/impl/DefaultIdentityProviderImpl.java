@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.auth.SCIMServiceStub;
 import org.wso2.carbon.apimgt.core.auth.SCIMServiceStubFactory;
+import org.wso2.carbon.apimgt.core.auth.dto.SCIMGroup;
 import org.wso2.carbon.apimgt.core.auth.dto.SCIMUser;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
@@ -56,25 +57,30 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
     }
 
     @Override
-    public List<String> getRolesOfUser(String userId) throws IdentityProviderException {
-        List<String> roleNames = new ArrayList<>();
+    public List<String> getRoleIdsOfUser(String userId) throws IdentityProviderException {
+        List<String> roleIds = new ArrayList<>();
         SCIMUser scimUser = scimServiceStub.getUser(userId);
         if (scimUser != null) {
             List<SCIMUser.SCIMUserGroups> roles = scimUser.getGroups();
             if (roles != null) {
-                roles.forEach(role -> roleNames.add(role.getDisplay()));
+                roles.forEach(role -> roleIds.add(role.getValue()));
             }
         } else {
             String errorMessage = "User id " + userId + " does not exist in the system.";
             log.error(errorMessage);
             throw new IdentityProviderException(errorMessage, ExceptionCodes.USER_DOES_NOT_EXIST);
         }
-        return roleNames;
+        return roleIds;
     }
 
     @Override
-    public boolean isValidRole(String roleName) {
-        return scimServiceStub.searchGroups(FILTER_PREFIX + roleName).status() == 200;
+    public String getRoleId(String roleName) {
+        List<SCIMUser.SCIMUserGroups> role = scimServiceStub.searchGroups(FILTER_PREFIX + roleName);
+        String roleId = null;
+        if (role.size() == 1) {
+            roleId = role.get(0).getValue();
+        }
+        return roleId;
     }
 
     @Override
