@@ -1,7 +1,17 @@
 import React, {Component} from 'react'
-import {Base, Listing} from "./app/components/index.js"
+import {Base, Listing, Apis,Breadcrumb,Footer,Navbar,Header,Leftnav} from "./app/components/index.js"
+import {
+  BrowserRouter as Router,
+  Route,
+  Link
+} from 'react-router-dom'
 import Utils from '../src/app/data/utils.js'
-
+import './App.css'
+const Home = () => (
+  <div>
+    <h2>Home</h2>
+  </div>
+)
 class Publisher extends Component {
     constructor() {
         super();
@@ -23,11 +33,24 @@ class Publisher extends Component {
 
     render() {
         return (
+          <Router>
             <div>
-                <Base>
-                    <Listing/>
-                </Base>
+              <Header />
+              <Breadcrumb />
+              <div className="page-content-wrapper">
+                  <Leftnav />
+                  <Navbar />
+                  <div className="container-fluid content-section">
+                      <div className="body-wrapper">
+                      <Route exact path="/" component={Apis}/>
+                      <Route path="/apis" component={Apis}/>
+
+                    </div>
+                  </div>
+              </div>
+              <Footer />
             </div>
+          </Router>
         );
     }
 }
