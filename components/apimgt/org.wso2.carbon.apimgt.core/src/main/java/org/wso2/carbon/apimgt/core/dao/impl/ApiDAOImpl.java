@@ -1601,7 +1601,7 @@ public class ApiDAOImpl implements ApiDAO {
                                         ResourceCategory.WSDL_URI)).
                         transport(getTransports(connection, apiPrimaryKey)).
                         endpoint(getEndPointsForApi(connection, apiPrimaryKey)).
-                        apiPermission(getPermissionsForApi(connection, apiPrimaryKey)).
+                        apiPermission(getPermissionsStringForApi(connection, apiPrimaryKey)).
                         businessInformation(businessInformation).
                         lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
@@ -1623,19 +1623,18 @@ public class ApiDAOImpl implements ApiDAO {
 
     private List<API> constructAPISummaryList(Connection connection, PreparedStatement statement) throws SQLException {
         List<API> apiList = new ArrayList<>();
-        Map<String, Integer> permissionMap = new HashMap<>();
-        permissionMap.put("admin", 6);
         try (ResultSet rs = statement.executeQuery()) {
             while (rs.next()) {
+                String apiPrimaryKey = rs.getString("UUID");
                 API apiSummary = new API.APIBuilder(rs.getString("PROVIDER"), rs.getString("NAME"),
                         rs.getString("VERSION")).
-                        id(rs.getString("UUID")).
+                        id(apiPrimaryKey).
                         context(rs.getString("CONTEXT")).
                         description(rs.getString("DESCRIPTION")).
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
                         lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
                         workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).
-                        permissionMap(permissionMap).build();
+                        permissionMap(getPermissionMapForApi(connection, apiPrimaryKey)).build();
 
                 apiList.add(apiSummary);
             }
@@ -2417,19 +2416,10 @@ public class ApiDAOImpl implements ApiDAO {
         return endpointList;
     }
 
-    private StringBuilder getPermissionsForApi(Connection connection, String apiId) throws SQLException {
+    private StringBuilder getPermissionsStringForApi(Connection connection, String apiId) throws SQLException {
         final String permission = "permission";
         JSONArray permissionArray = new JSONArray();
-        Map<String, Integer> permissionMap = new HashMap();
-        final String query = "SELECT GROUP_ID,PERMISSION FROM AM_API_GROUP_PERMISSION WHERE API_ID=?";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setString(1, apiId);
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                while (resultSet.next()) {
-                    permissionMap.put(resultSet.getString("GROUP_ID"), resultSet.getInt("PERMISSION"));
-                }
-            }
-        }
+        Map<String, Integer> permissionMap = getPermissionMapForApi(connection, apiId);
         for (Map.Entry<String, Integer> entry : permissionMap.entrySet()) {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("groupId", entry.getKey());
@@ -2450,6 +2440,20 @@ public class ApiDAOImpl implements ApiDAO {
             permissionArray.add(jsonObject);
         }
         return new StringBuilder(permissionArray.toString());
+    }
+
+    private Map<String, Integer> getPermissionMapForApi(Connection connection, String apiId) throws SQLException {
+        Map<String, Integer> permissionMap = new HashMap();
+        final String query = "SELECT GROUP_ID,PERMISSION FROM AM_API_GROUP_PERMISSION WHERE API_ID=?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, apiId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    permissionMap.put(resultSet.getString("GROUP_ID"), resultSet.getInt("PERMISSION"));
+                }
+            }
+        }
+        return permissionMap;
     }
 
     private Map<String, Endpoint> getEndPointsForApi(Connection connection, String apiId) throws SQLException,
