@@ -46,7 +46,7 @@ public class MysqlSQLStatements implements ApiDAOVendorSpecificStatements {
                     + "API.CURRENT_LC_STATUS, API.LIFECYCLE_INSTANCE_ID, API.LC_WORKFLOW_STATUS, API.API_TYPE_ID "
                     + "FROM AM_API API LEFT JOIN AM_API_GROUP_PERMISSION PERMISSION ON `UUID` = `API_ID`";
 
-    private Map<String, ApiAttributeSearchStore> searchMap;
+    private Map<String, StoreApiAttributeSearch> searchMap;
 
     public MysqlSQLStatements() {
         searchMap = new HashMap<>();
@@ -168,15 +168,15 @@ public class MysqlSQLStatements implements ApiDAOVendorSpecificStatements {
     }
 
     /**
-     * @see ApiDAOVendorSpecificStatements#prepareAttributeSearchStatementStore(Connection connection, List,
+     * @see ApiDAOVendorSpecificStatements#prepareAttributeSearchStatementForStore(Connection connection, List,
      * Map, int, int)
      */
     @Override
     @SuppressFBWarnings({"SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
             "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE"})
-    public PreparedStatement prepareAttributeSearchStatementStore(Connection connection, List<String> roles,
-                                                                  Map<String, String> attributeMap, int offset,
-                                                                  int limit) throws APIMgtDAOException {
+    public PreparedStatement prepareAttributeSearchStatementForStore(Connection connection, List<String> roles,
+                                                                     Map<String, String> attributeMap, int offset,
+                                                                     int limit) throws APIMgtDAOException {
 
         StringBuilder roleListBuilder = new StringBuilder();
         roleListBuilder.append("?");

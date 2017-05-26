@@ -25,15 +25,12 @@ import org.wso2.carbon.apimgt.core.models.APIStatus;
 /**
  * SQL Statements that are specific to sub-context search in Oracle Database.
  */
-class OracleSubcontextSearchImpl implements ApiAttributeSearchStore {
+class OracleSubcontextSearchImpl implements StoreApiAttributeSearch {
 
     private static final String API_SUMMARY_SELECT_STORE = "SELECT UUID, PROVIDER, NAME, " +
             "CONTEXT, VERSION, DESCRIPTION, CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, " +
             "LC_WORKFLOW_STATUS FROM AM_API ";
 
-    /**
-     * @see ApiAttributeSearchStore#getStoreAttributeSearchQuery(StringBuilder, StringBuilder, int, int)
-     */
     @Override
     public String getStoreAttributeSearchQuery(StringBuilder roleListBuilder,
                                                StringBuilder searchQuery, int offset, int limit) {

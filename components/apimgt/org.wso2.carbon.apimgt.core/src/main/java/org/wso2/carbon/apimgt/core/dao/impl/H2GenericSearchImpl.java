@@ -24,7 +24,7 @@ import org.wso2.carbon.apimgt.core.models.APIStatus;
 /**
  * SQL Statements that are specific to attribute search in H2 Database.
  */
-class H2GenericSearchImpl implements ApiAttributeSearchStore {
+class H2GenericSearchImpl implements StoreApiAttributeSearch {
 
     private static final String API_SUMMARY_SELECT_STORE = "SELECT UUID, PROVIDER, NAME, CONTEXT, " +
             "VERSION, DESCRIPTION, CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS " +

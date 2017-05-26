@@ -21,13 +21,13 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 /**
  * This interface produces search queries for API store.
  */
-interface ApiAttributeSearchStore {
+interface StoreApiAttributeSearch {
 
     /**
      * This method will return the query query to be executed, for each search type
      * (i.e - tag, subcontext or general search)
      *
-     * @param roleListBuilder a string builder constructed based on user roles
+     * @param roleListBuilder a parameterized string builder with question marks constructed based on user roles
      * @param searchQuery a sub string containing only the attributes
      * @param offset the starting point of the search results.
      * @param limit number of search results that will be returned.

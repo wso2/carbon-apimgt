@@ -365,7 +365,7 @@ public class ApiDAOImpl implements ApiDAO {
                                                   int offset, int limit) throws APIMgtDAOException {
 
         try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement statement = sqlStatements.prepareAttributeSearchStatementStore
+             PreparedStatement statement = sqlStatements.prepareAttributeSearchStatementForStore
                      (connection, roles, attributeMap, offset, limit)) {
             DatabaseMetaData md = connection.getMetaData();
             Iterator<Map.Entry<String, String>> entries = attributeMap.entrySet().iterator();

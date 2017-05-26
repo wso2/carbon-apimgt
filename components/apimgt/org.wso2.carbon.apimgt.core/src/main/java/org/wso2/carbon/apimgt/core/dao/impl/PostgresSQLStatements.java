@@ -50,7 +50,7 @@ public class PostgresSQLStatements implements ApiDAOVendorSpecificStatements {
             "VERSION, DESCRIPTION, CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS " +
             "FROM AM_API ";
 
-    private Map<String, ApiAttributeSearchStore> searchMap;
+    private Map<String, StoreApiAttributeSearch> searchMap;
 
     public PostgresSQLStatements() {
         searchMap = new HashMap<>();
@@ -171,15 +171,15 @@ public class PostgresSQLStatements implements ApiDAOVendorSpecificStatements {
     }
 
     /**
-     * @see ApiDAOVendorSpecificStatements#prepareAttributeSearchStatementStore(Connection connection, List,
+     * @see ApiDAOVendorSpecificStatements#prepareAttributeSearchStatementForStore(Connection connection, List,
      * Map, int, int)
      */
     @Override
     @SuppressFBWarnings({"SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
             "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE"})
-    public PreparedStatement prepareAttributeSearchStatementStore(Connection connection, List<String> roles,
-                                                                  Map<String, String> attributeMap, int offset,
-                                                                  int limit) throws APIMgtDAOException {
+    public PreparedStatement prepareAttributeSearchStatementForStore(Connection connection, List<String> roles,
+                                                                     Map<String, String> attributeMap, int offset,
+                                                                     int limit) throws APIMgtDAOException {
         StringBuilder roleListBuilder = new StringBuilder();
         roleListBuilder.append("?");
         for (int i = 0; i < roles.size() - 1; i++) {
