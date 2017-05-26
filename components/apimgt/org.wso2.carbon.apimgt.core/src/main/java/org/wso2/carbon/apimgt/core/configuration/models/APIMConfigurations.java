@@ -70,6 +70,9 @@ public class APIMConfigurations {
     @Element(description = "Identity Provider Configurations")
     private IdentityProviderConfigurations identityProviderConfigs = new IdentityProviderConfigurations();
 
+    @Element(description = "DAS REST API URL")
+    private String dasRestApiUrl = "http://localhost:9090/";
+
     public String getHostname() {
         return hostname;
     }
@@ -140,5 +143,9 @@ public class APIMConfigurations {
 
     public IdentityProviderConfigurations getIdentityProviderConfigs() {
         return identityProviderConfigs;
+    }
+
+    public String getDasRestApiUrl() {
+        return dasRestApiUrl;
     }
 }

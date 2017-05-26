@@ -307,6 +307,6 @@ public class DAOFactory {
     private static void setup() throws APIMgtDAOException {
         ApiDAOImpl.initResourceCategories();
         ApiDAOImpl.initApiTypes();
-        PolicyDAOImpl.initDefaultPolicies();
+        //PolicyDAOImpl.initDefaultPolicies();
     }
 }

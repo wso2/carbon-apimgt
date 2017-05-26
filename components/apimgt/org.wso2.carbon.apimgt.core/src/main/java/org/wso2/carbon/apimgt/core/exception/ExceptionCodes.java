@@ -138,8 +138,11 @@ public enum ExceptionCodes implements ErrorHandler {
     TOKEN_INTROSPECTION_FAILED(900956, "Keymanagement Error", 500, " Error while introspecting the access token."),
     APPLICATION_TOKEN_GENERATION_FAILED(900957, "Keymanagement Error", 500, " Error while generating the application" +
             "access token."),
-    ACCESS_TOKEN_REVOKE_FAILED(900958, "Keymanagement Error", 500, " Error while revoking the access token.");
+    ACCESS_TOKEN_REVOKE_FAILED(900958, "Keymanagement Error", 500, " Error while revoking the access token."),
 
+
+    //Throttle related codes
+    THROTTLE_TEMPLATE_EXCEPTION(900959, "Service configuration Error", 500, " Error generate service config");
 
     private final long errorCode;
     private final String errorMessage;

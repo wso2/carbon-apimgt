@@ -909,6 +909,7 @@
             org.apache.commons.io.*;
             org.apache.commons.*;
             org.apache.velocity.*;
+            org.apache.velocity.app.*;
             org.wso2.andes.*;
             javax.jms.*;
             javax.ws.rs.*;
