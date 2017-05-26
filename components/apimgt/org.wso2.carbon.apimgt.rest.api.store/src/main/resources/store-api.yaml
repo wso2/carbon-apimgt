@@ -1765,6 +1765,7 @@ paths:
       parameters:
         - $ref: '#/parameters/apiId-Q'
         - $ref: '#/parameters/applicationId-Q'
+        - $ref: '#/parameters/apiType'
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/Accept'
@@ -2266,6 +2267,19 @@ parameters:
       **Application Identifier** consisting of the UUID of the Application.
     required: true
     type: string
+
+# API Type
+# Specified as part of the query string
+  apiType:
+    name: apiType
+    in: query
+    description: |
+      **API Type** filters information pertaining to a specific type of API
+    required: false
+    type: string
+    enum:
+      - STANDARD
+      - COMPOSITE
 
 # Group Identifier of the application
   groupId:

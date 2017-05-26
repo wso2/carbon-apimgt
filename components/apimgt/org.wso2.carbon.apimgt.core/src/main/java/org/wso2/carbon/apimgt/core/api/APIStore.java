@@ -20,6 +20,7 @@
 
 package org.wso2.carbon.apimgt.core.api;
 
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -210,6 +211,18 @@ public interface APIStore extends APIManager {
      * @throws APIManagementException If failed to get the subscriptions for the application.
      */
     List<Subscription> getAPISubscriptionsByApplication(Application application) throws APIManagementException;
+
+
+    /**
+     * Retrieve list of subscriptions given the application and the API Type.
+     *
+     * @param application   Application Object.
+     * @param apiType   API Type to filter subscriptions
+     * @return List of subscriptions objects of the given application made for the specified API Type.
+     * @throws APIManagementException If failed to get the subscriptions for the application.
+     */
+    List<Subscription> getAPISubscriptionsByApplication(Application application, ApiType apiType)
+                                                                                throws APIManagementException;
 
     /**
      * Add an api subscription.
