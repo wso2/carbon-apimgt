@@ -30,43 +30,33 @@ import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.ReturnType;
 
 /**
- * Native function ballerina.utils:base64decode.
- * This function will be used to put cache entry by providing cacheName, cacheKey and cache entry
- *
- * @since 0.10-SNAPSHOT
+ *This class will handle cache remove operation.
  */
 
 @BallerinaFunction(
         packageName = "org.wso2.carbon.apimgt.ballerina.caching",
-        functionName = "putCacheEntry",
+        functionName = "removeCacheEntry",
         args = {@Argument(name = "cacheName", type = TypeEnum.STRING),
-                @Argument(name = "cacheKey", type = TypeEnum.STRING),
-                @Argument(name = "cacheEntry", type = TypeEnum.ANY)},
+                @Argument(name = "cacheKey", type = TypeEnum.STRING)},
         returnType = {@ReturnType(type = TypeEnum.STRING)},
         isPublic = true
 )
 @BallerinaAnnotation(annotationName = "Description", attributes = {@Attribute(name = "value",
-        value = "Put cache entry by providing cacheName, cacheKey and cache entry") })
+        value = "Remove cache entry by providing cacheName and cacheKey") })
 @BallerinaAnnotation(annotationName = "Param", attributes = {@Attribute(name = "cacheName",
         value = "Cache Manager name") })
 @BallerinaAnnotation(annotationName = "Param", attributes = {@Attribute(name = "cacheKey",
         value = "String cache key") })
-@BallerinaAnnotation(annotationName = "Param", attributes = {@Attribute(name = "cacheEntry",
-        value = "Cache entry to be push to cache") })
 @BallerinaAnnotation(annotationName = "Return", attributes = {@Attribute(name = "string",
         value = "Cache Manager reference") })
 
-public class PutCacheEntry extends AbstractNativeFunction {
+public class RemoveCacheEntry extends AbstractNativeFunction {
     @Override
     public BValue[] execute(Context context) {
         String cacheName = getArgument(context, 0).stringValue();
         String cacheKey = getArgument(context, 1).stringValue();
-        //BValue cacheEntry = getArgument(context, 2);
-        BCacheEntry cacheEntry1 = new BCacheEntry();
-        cacheEntry1.setType(getArgument(context, 2).getType());
-        cacheEntry1.setValue(getArgument(context, 2));
-        //TODO If cache is not created then need to send proper message or create and put entry.
-        CacheManagerHolder.getInstance().getCacheManager().getCache(cacheName).put(cacheKey, cacheEntry1);
+        CacheManagerHolder.getInstance().getCacheManager().getCache(cacheName).remove(cacheKey);
         return getBValues(new BString(cacheName));
     }
 }
+

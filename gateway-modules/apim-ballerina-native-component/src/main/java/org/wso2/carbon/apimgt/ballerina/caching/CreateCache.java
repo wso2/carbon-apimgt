@@ -54,7 +54,7 @@ import javax.cache.expiry.Duration;
         isPublic = true
 )
 @BallerinaAnnotation(annotationName = "Description", attributes = {@Attribute(name = "value",
-        value = "Get cache manager")})
+        value = " Create cache as per user requirement")})
 @BallerinaAnnotation(annotationName = "Param", attributes = {@Attribute(name = "cacheName",
         value = "Cache Manager name")})
 @BallerinaAnnotation(annotationName = "Param", attributes = {@Attribute(name = "cacheTimeout",
