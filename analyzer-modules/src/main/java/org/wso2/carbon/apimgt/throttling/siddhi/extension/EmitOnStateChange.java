@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.throttling.siddhi.extension;
 
+import org.apache.log4j.Logger;
 import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.Parameter;
@@ -86,6 +87,7 @@ public class EmitOnStateChange extends StreamProcessor {
     private VariableExpressionExecutor keyExpressionExecutor;
     private VariableExpressionExecutor isThrottledExpressionExecutor;
     private Map<String, Object> throttleStateMap = new HashMap<String, Object>();
+    private static final Logger log = Logger.getLogger(ThrottleStreamProcessor.class);
 
     @Override
     public void start() {
@@ -112,10 +114,10 @@ public class EmitOnStateChange extends StreamProcessor {
             StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
         while (streamEventChunk.hasNext()) {
             StreamEvent event = streamEventChunk.next();
-            boolean currentThrottleState = (boolean) isThrottledExpressionExecutor.execute(event);
+            Boolean currentThrottleState = (Boolean) isThrottledExpressionExecutor.execute(event);
             String key = (String) keyExpressionExecutor.execute(event);
-            boolean lastThrottleState = (boolean) throttleStateMap.get(key);
-            if (lastThrottleState == currentThrottleState && !currentThrottleState) {
+            Boolean lastThrottleState = (Boolean) throttleStateMap.get(key);
+            if (currentThrottleState.equals(lastThrottleState) && !currentThrottleState) {
                 streamEventChunk.remove();
             } else {
                 throttleStateMap.put(key, currentThrottleState);
