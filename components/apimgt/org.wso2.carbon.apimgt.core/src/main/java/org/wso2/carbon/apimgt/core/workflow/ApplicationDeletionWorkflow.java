@@ -41,7 +41,7 @@ public class ApplicationDeletionWorkflow extends Workflow {
     private ApplicationDAO applicationDAO;
 
     public ApplicationDeletionWorkflow(ApplicationDAO applicationDAO, WorkflowDAO workflowDAO) {
-        super(workflowDAO);
+        super(workflowDAO, Category.STORE);
         this.applicationDAO = applicationDAO;
         setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
     }

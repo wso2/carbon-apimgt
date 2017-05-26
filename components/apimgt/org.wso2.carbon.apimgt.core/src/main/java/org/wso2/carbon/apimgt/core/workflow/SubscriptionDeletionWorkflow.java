@@ -43,7 +43,7 @@ public class SubscriptionDeletionWorkflow extends Workflow {
 
     public SubscriptionDeletionWorkflow(APISubscriptionDAO apiSubscriptionDAO, WorkflowDAO workflowDAO,
                                         APIGateway apiGateway) {
-        super(workflowDAO);
+        super(workflowDAO, Category.STORE);
         this.apiSubscriptionDAO = apiSubscriptionDAO;
         this.apiGateway = apiGateway;
     }

@@ -40,31 +40,26 @@ public abstract class Workflow {
     private static final Logger log = LoggerFactory.getLogger(Workflow.class);
 
     private String workflowReference;
-
     private String workflowType;
+    private final Category category;
 
     //Used to hold the status of the workflow. When a workflow is initially executed, it will be in the CREATED state.
     //It will then move to the APPROVED or REJECTED states depending on the output of the workflow execution.
     private WorkflowStatus status;
-
     private LocalDateTime createdTime;
-
     private LocalDateTime updatedTime;
 
     //Holds the workflow description. This is used for having a human readable description from the output of the
     //workflow execution. Ex: If an approval was rejected, why was it so.
     private String workflowDescription;
-
     private String externalWorkflowReference;
-
     private String callbackURL;
-
     private String createdBy;
-
     private WorkflowDAO workflowDAO;
 
-    public Workflow(WorkflowDAO workflowDAO) {
+    public Workflow(WorkflowDAO workflowDAO, Category category) {
         this.workflowDAO = workflowDAO;
+        this.category = category;
     }
 
     //to pass any additional parameters. This can be used to pass parameters to the executor's complete() method
@@ -172,6 +167,10 @@ public abstract class Workflow {
         this.createdBy = createdBy;
     }
 
+    public Category getCategory() {
+        return category;
+    }
+
     /**
      * Persist workflow status after the workflow is completed
      *
@@ -205,6 +204,13 @@ public abstract class Workflow {
                 + status + ", createdTime=" + createdTime + ", updatedTime=" + updatedTime + ", workflowDescription="
                 + workflowDescription + ", externalWorkflowReference=" + externalWorkflowReference + ", callbackURL="
                 + callbackURL + ", createdBy=" + createdBy + ", attributes=" + attributes + ']';
+    }
+
+    /**
+     * Workflow category which depends on where the workflow is applicable to.
+     */
+    public enum Category {
+        STORE, PUBLISHER
     }
 
 }

@@ -45,7 +45,7 @@ public class ApplicationUpdateWorkflow extends Workflow {
     private ApplicationDAO applicationDAO;
 
     public ApplicationUpdateWorkflow(ApplicationDAO applicationDAO, WorkflowDAO workflowDAO) {
-        super(workflowDAO);
+        super(workflowDAO, Category.STORE);
         this.applicationDAO = applicationDAO;
         setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);
     }

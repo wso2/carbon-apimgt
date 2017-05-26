@@ -66,7 +66,7 @@ public class APIStateChangeWorkflow extends Workflow {
 
     public APIStateChangeWorkflow(ApiDAO apiDAO, APISubscriptionDAO apiSubscriptionDAO, WorkflowDAO workflowDAO,
                                   APILifecycleManager apiLifecycleManager) {
-        super(workflowDAO);
+        super(workflowDAO, Category.PUBLISHER);
         this.apiDAO = apiDAO;
         this.apiLifecycleManager = apiLifecycleManager;
         this.apiSubscriptionDAO = apiSubscriptionDAO;

@@ -42,7 +42,7 @@ public class ApplicationCreationWorkflow extends Workflow {
     private ApplicationDAO applicationDAO;
 
     public ApplicationCreationWorkflow(ApplicationDAO applicationDAO, WorkflowDAO workflowDAO) {
-        super(workflowDAO);
+        super(workflowDAO, Category.STORE);
         this.applicationDAO = applicationDAO;
         setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
     }

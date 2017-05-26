@@ -55,56 +55,69 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
                 log.error(errorMessage, e);
                 return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-            } else if (WorkflowStatus.APPROVED == workflow.getStatus()) {
-                String errorMessage = "Workflow is already in complete state";
-                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
-                        ExceptionCodes.WORKFLOW_ALREADY_COMPLETED);
-                Map<String, String> paramList = new HashMap<>();
-                paramList.put(APIMgtConstants.ExceptionsConstants.WORKFLOW_REF_ID, workflowReferenceId);
-                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
-                log.error(errorMessage, e);
-                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
             } else {
-                WorkflowExecutor workflowExecutor = WorkflowExecutorFactory.getInstance()
-                        .getWorkflowExecutor(workflow.getWorkflowType());
-
-                if (body == null) {
-                    RestApiUtil.handleBadRequest("Request payload is missing", log);
+                if (!Workflow.Category.PUBLISHER.equals(workflow.getCategory())) {
+                    String errorMessage = "Incompatible workflow request received by publisher. RefId: "
+                            + workflowReferenceId + " Workflow category: " + workflow.getCategory().name();
+                    APIManagementException ex = new APIManagementException(errorMessage,
+                            ExceptionCodes.INCOMPATIBLE_WORKFLOW_REQUEST_FOR_PUBLISHER);
+                    Map<String, String> paramList = new HashMap<>();
+                    paramList.put(APIMgtConstants.ExceptionsConstants.WORKFLOW_REF_ID, workflowReferenceId);
+                    paramList.put(APIMgtConstants.ExceptionsConstants.WORKFLOW_CATEGORY, workflow.getCategory().name());
+                    ErrorDTO errorDTO = RestApiUtil.getErrorDTO(ex.getErrorHandler(), paramList);
+                    log.error(errorMessage, ex);
+                    return Response.status(ex.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
                 }
-
-                if (body.getDescription() != null) {
-                    workflow.setWorkflowDescription(body.getDescription());
-                }
-
-                if (body.getStatus() == null) {
-                    String errorMessage = "Workflow status is not defined";
-                    APIManagementException e = new APIManagementException(errorMessage,
-                            ExceptionCodes.WORKFLOW_STATE_MISSING);
+                if (WorkflowStatus.APPROVED == workflow.getStatus()) {
+                    String errorMessage = "Workflow is already in complete state";
+                    APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
+                            ExceptionCodes.WORKFLOW_ALREADY_COMPLETED);
                     Map<String, String> paramList = new HashMap<>();
                     paramList.put(APIMgtConstants.ExceptionsConstants.WORKFLOW_REF_ID, workflowReferenceId);
                     ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
                     log.error(errorMessage, e);
                     return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
                 } else {
-                    workflow.setStatus(WorkflowStatus.valueOf(body.getStatus().toString()));
-                }
+                    WorkflowExecutor workflowExecutor = WorkflowExecutorFactory.getInstance()
+                            .getWorkflowExecutor(workflow.getWorkflowType());
 
-                if (body.getAttributes() != null) {
-                    Map<String, String> existingAttributs = workflow.getAttributes();
-                    Map<String, String> newAttributes = body.getAttributes();
-                    if (existingAttributs == null) {
-                        workflow.setAttributes(newAttributes);
-                    } else {
-                        newAttributes.forEach(existingAttributs::putIfAbsent);
-                        workflow.setAttributes(existingAttributs);
+                    if (body == null) {
+                        RestApiUtil.handleBadRequest("Request payload is missing", log);
                     }
+
+                    if (body.getDescription() != null) {
+                        workflow.setWorkflowDescription(body.getDescription());
+                    }
+
+                    if (body.getStatus() == null) {
+                        String errorMessage = "Workflow status is not defined";
+                        APIManagementException e = new APIManagementException(errorMessage,
+                                ExceptionCodes.WORKFLOW_STATE_MISSING);
+                        Map<String, String> paramList = new HashMap<>();
+                        paramList.put(APIMgtConstants.ExceptionsConstants.WORKFLOW_REF_ID, workflowReferenceId);
+                        ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                        log.error(errorMessage, e);
+                        return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+                    } else {
+                        workflow.setStatus(WorkflowStatus.valueOf(body.getStatus().toString()));
+                    }
+
+                    if (body.getAttributes() != null) {
+                        Map<String, String> existingAttributs = workflow.getAttributes();
+                        Map<String, String> newAttributes = body.getAttributes();
+                        if (existingAttributs == null) {
+                            workflow.setAttributes(newAttributes);
+                        } else {
+                            newAttributes.forEach(existingAttributs::putIfAbsent);
+                            workflow.setAttributes(existingAttributs);
+                        }
+                    }
+
+                    WorkflowResponse response = apiPublisher.completeWorkflow(workflowExecutor, workflow);
+                    WorkflowResponseDTO workflowResponseDTO = MappingUtil.toWorkflowResponseDTO(response);
+                    return Response.ok().entity(workflowResponseDTO).build();
                 }
-
-                WorkflowResponse response = apiPublisher.completeWorkflow(workflowExecutor, workflow);
-                WorkflowResponseDTO workflowResponseDTO = MappingUtil.toWorkflowResponseDTO(response);
-                return Response.ok().entity(workflowResponseDTO).build();
             }
-
         } catch (APIManagementException e) {
             String errorMessage = "Error while completing workflow for reference : " + workflowReferenceId + ". "
                     + e.getMessage();
