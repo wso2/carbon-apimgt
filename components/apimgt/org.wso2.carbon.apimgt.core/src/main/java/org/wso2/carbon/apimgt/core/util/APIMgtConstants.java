@@ -93,6 +93,11 @@ public class APIMgtConstants {
 
     public static final String TAG_SEARCH_TYPE_PREFIX = "tags";
     public static final String SUBCONTEXT_SEARCH_TYPE_PREFIX = "subcontext";
+    public static final String PROVIDER_SEARCH_TYPE_PREFIX = "provider";
+    public static final String VERSION_SEARCH_TYPE_PREFIX = "version";
+    public static final String CONTEXT_SEARCH_TYPE_PREFIX = "context";
+    public static final String DESCRIPTION_SEARCH_TYPE_PREFIX = "description";
+
     public static final String TAG_NAME_COLUMN = "NAME";
     public static final String URL_PATTERN_COLUMN = "URL_PATTERN";
 
