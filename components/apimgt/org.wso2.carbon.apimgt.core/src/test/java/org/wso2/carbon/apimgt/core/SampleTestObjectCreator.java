@@ -25,6 +25,8 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.ApiType;
+import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Application;
@@ -35,7 +37,6 @@ import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
-import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
@@ -52,6 +53,8 @@ import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
+import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationWorkflow;
+import org.wso2.carbon.apimgt.core.workflow.Workflow;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
 
 import java.io.IOException;
@@ -714,8 +717,9 @@ public class SampleTestObjectCreator {
                 accessUrls(accessUrls);
     }
 
-    public static Workflow createWorkflow(String workflowReferenceID) {
-        Workflow workflow = new Workflow();
+    public static Workflow createWorkflow(String workflowReferenceID) throws APIMgtDAOException {
+        Workflow workflow = new ApplicationCreationWorkflow(DAOFactory.getApplicationDAO(),
+                DAOFactory.getWorkflowDAO());
         workflow.setExternalWorkflowReference(workflowReferenceID);
         workflow.setStatus(WorkflowStatus.CREATED);
         workflow.setCreatedTime(LocalDateTime.now());

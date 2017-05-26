@@ -16,24 +16,37 @@
 package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
+import org.wso2.carbon.apimgt.core.models.User;
+import org.wso2.carbon.apimgt.rest.api.store.dto.UserDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO.WorkflowStatusEnum;
 
 /**
- * Map Workflow related mappings
+ * Mappings related to miscellaneous objects
  */
-public class WorkflowMappintUtil {
-    
+public class MiscMappingUtil {
+
     /**
      * Map WorkflowResponse to WorkflowResponseDTO
+     *
      * @param response WorkflowResponse object
      * @return WorkflowResponseDTO mapped WorkflowResponseDTO
      */
-    public static WorkflowResponseDTO fromWorkflowResponsetoDTO(WorkflowResponse response) {
+    public static WorkflowResponseDTO fromWorkflowResponseToDTO(WorkflowResponse response) {
         WorkflowResponseDTO responseDTO = new WorkflowResponseDTO();
         responseDTO.setWorkflowStatus(WorkflowStatusEnum.valueOf(response.getWorkflowStatus().toString()));
         responseDTO.setJsonPayload(response.getJSONPayload());
         return responseDTO;
+    }
+
+    public static User fromUserDTOToUser(UserDTO userDTO) {
+        User user = new User();
+        user.setUsername(userDTO.getUsername());
+        user.setPassword(userDTO.getPassword().toCharArray());
+        user.setFirstName(userDTO.getFirstName());
+        user.setLastName(userDTO.getLastName());
+        user.setEmail(userDTO.getEmail());
+        return user;
     }
 
 }

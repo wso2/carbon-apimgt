@@ -24,9 +24,9 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
-import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
+import org.wso2.carbon.apimgt.core.workflow.Workflow;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
