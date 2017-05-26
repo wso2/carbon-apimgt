@@ -39,7 +39,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
 /**
- * {{@inheritDoc}}
+ * This class deploy the generated policy configuration to DAS using it's rest API
  */
 public class ThrottlePolicyDeploymentManagerImpl implements ThrottlePolicyDeploymentManager {
     private static final Log log = LogFactory.getLog(ThrottlePolicyDeploymentManagerImpl.class);
@@ -49,9 +49,6 @@ public class ThrottlePolicyDeploymentManagerImpl implements ThrottlePolicyDeploy
         templateBuilder = new ThrottlePolicyTemplateBuilder();
     }
 
-    /**
-     * {{@inheritDoc}}
-     */
     @Override
     public boolean deployPolicy(String policyLevel, Policy policy) throws APIManagementException {
 
@@ -74,18 +71,12 @@ public class ThrottlePolicyDeploymentManagerImpl implements ThrottlePolicyDeploy
         }
     }
 
-    /**
-     * {{@inheritDoc}}
-     */
     @Override
     public boolean unDeployPolicy(String policyLevel, Policy apiPolicy) throws APIManagementException {
         //todo implement the content
         return unDeployPolicy(null);
     }
 
-    /**
-     * {{@inheritDoc}}
-     */
     @Override
     public boolean updatePolicy(String policyLevel, Policy apiPolicy) throws APIManagementException {
         //todo implement the content

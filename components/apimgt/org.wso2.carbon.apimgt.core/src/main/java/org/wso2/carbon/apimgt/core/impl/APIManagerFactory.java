@@ -262,13 +262,8 @@ public class APIManagerFactory {
     }
 
     /**
-     * Get Key Manager object
-     *
-     * @return Key Manager object
-     * @throws KeyManagementException if error occurred while initializing key manager
-     */
-    /**+
      * Get Throttle Policy Deployment Manager object
+     *
      * @return ThrottlePolicyDeploymentManager object
      */
     public ThrottlePolicyDeploymentManager getThrottlePolicyDeploymentManager() {

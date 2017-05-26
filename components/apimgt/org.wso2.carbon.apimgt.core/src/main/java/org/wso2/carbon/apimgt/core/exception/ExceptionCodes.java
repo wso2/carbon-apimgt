@@ -142,7 +142,7 @@ public enum ExceptionCodes implements ErrorHandler {
 
 
     //Throttle related codes
-    THROTTLE_TEMPLATE_EXCEPTION(900959, "Service configuration Error", 500, " Error generate service config");
+    THROTTLE_TEMPLATE_EXCEPTION(900959, "Policy Generating Error", 500, " Error while generate policy configuration");
 
     private final long errorCode;
     private final String errorMessage;

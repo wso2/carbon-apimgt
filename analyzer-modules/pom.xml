@@ -8,7 +8,7 @@
         <version>7.0.21-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
+    <packaging>bundle</packaging>
     <artifactId>apimgt-analyzer-modules</artifactId>
 
     <dependencies>
@@ -48,7 +48,26 @@
                             org.wso2.carbon.apimgt.throttling.siddhi.extension.*,
                         </Export-Package>
                         <Import-Package>
-                            *;resolution:=optional
+                            org.apache.log4j.*,
+                            org.wso2.siddhi.annotation.*,
+                            org.wso2.siddhi.annotation.util.*,
+                            org.wso2.siddhi.core.config.*,
+                            org.wso2.siddhi.core.executor.*,
+                            org.wso2.siddhi.core.event.*,
+                            org.wso2.siddhi.core.event.state.*,
+                            org.wso2.siddhi.core.event.stream.*,
+                            org.wso2.siddhi.core.event.stream.populater.*,
+                            org.wso2.siddhi.core.query.processor.*,
+                            org.wso2.siddhi.core.query.processor.stream.*,
+                            org.wso2.siddhi.core.query.processor.stream.window.*,
+                            org.wso2.siddhi.core.table.*,
+                            org.wso2.siddhi.core.util.*,
+                            org.wso2.siddhi.core.util.config.*,
+                            org.wso2.siddhi.core.util.collection.operator.*,
+                            org.wso2.siddhi.core.util.parser.*,
+                            org.wso2.siddhi.query.api.definition.*,
+                            org.wso2.siddhi.query.api.exception.*,
+                            org.wso2.siddhi.query.api.expression.*,
                         </Import-Package>
                         <Include-Resource>
                             META-INF=target/classes/META-INF

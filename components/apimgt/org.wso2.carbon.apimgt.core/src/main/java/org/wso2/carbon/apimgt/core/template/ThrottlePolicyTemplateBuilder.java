@@ -59,7 +59,7 @@ public class ThrottlePolicyTemplateBuilder {
     /**
      * Set the location of the policy templates. If not set, default location is used
      *
-     * @param path
+     * @param path custom policy path
      */
     public void setPolicyTemplateLocation(String path) {
         policyTemplateLocation = path;
@@ -71,8 +71,8 @@ public class ThrottlePolicyTemplateBuilder {
      * @param policy Policy with level 'api'. isAcrossAllUsers() method in policy is used to identify the level in
      *               the api level. Policy can have multiple pipelines and a default condition which will be used as
      *               else condition
-     * @return
-     * @throws APITemplateException
+     * @return throttle policies for api level
+     * @throws APITemplateException throws if generation failure occur
      */
     public Map<String, String> getThrottlePolicyForAPILevel(APIPolicy policy) throws APITemplateException {
 
@@ -128,8 +128,8 @@ public class ThrottlePolicyTemplateBuilder {
      * @param policy Policy with level 'api'. isAcrossAllUsers() method in policy is used to identify the level in
      *               the api level. Policy can have multiple pipelines and a default condition which will be used as
      *               else condition
-     * @return
-     * @throws APITemplateException
+     * @return throttle policies for default api
+     * @throws APITemplateException throws if generation failure occur
      */
     public String getThrottlePolicyForAPILevelDefault(APIPolicy policy) throws APITemplateException {
 
@@ -188,8 +188,8 @@ public class ThrottlePolicyTemplateBuilder {
      *
      * @param policy policy with level 'global'. Multiple pipelines are not allowed. Can define more than one condition
      *               as set of conditions. all these conditions should be passed as a single pipeline
-     * @return
-     * @throws APITemplateException
+     * @return throttle policies for global level
+     * @throws APITemplateException throws if generation failure occur
      */
     public String getThrottlePolicyForGlobalLevel(GlobalPolicy policy) throws APITemplateException {
         StringWriter writer = new StringWriter();
@@ -229,8 +229,8 @@ public class ThrottlePolicyTemplateBuilder {
      *
      * @param policy policy with level 'app'. Multiple pipelines are not allowed. Can define more than one condition
      *               as set of conditions. all these conditions should be passed as a single pipeline
-     * @return
-     * @throws APITemplateException
+     * @return throttle policies for app level
+     * @throws APITemplateException throws if generation failure occur
      */
     public String getThrottlePolicyForAppLevel(ApplicationPolicy policy) throws APITemplateException {
         StringWriter writer = new StringWriter();
@@ -265,8 +265,8 @@ public class ThrottlePolicyTemplateBuilder {
      *
      * @param policy policy with level 'sub'. Multiple pipelines are not allowed. Can define more than one condition
      *               as set of conditions. all these conditions should be passed as a single pipeline
-     * @return
-     * @throws APITemplateException
+     * @return throttle policies for subscription level
+     * @throws APITemplateException throws if generation failure occur
      */
     public String getThrottlePolicyForSubscriptionLevel(SubscriptionPolicy policy) throws APITemplateException {
         StringWriter writer = new StringWriter();
@@ -333,8 +333,8 @@ public class ThrottlePolicyTemplateBuilder {
     /**
      * Produces final condition inside a pipeline
      *
-     * @param conditions
-     * @return
+     * @param conditions list of throttle conditions
+     * @return formatted condition list
      */
     private static String getPolicyCondition(List<Condition> conditions) {
         String conditionString = null;
@@ -353,8 +353,8 @@ public class ThrottlePolicyTemplateBuilder {
     /**
      * Produces final condition inside a pipeline for default policy with null string
      *
-     * @param conditions
-     * @return
+     * @param conditions list of default throttle conditions
+     * @return formatted condition list
      */
     private static String getPolicyConditionForDefault(List<Condition> conditions) {
         String conditionString = null;
@@ -375,8 +375,8 @@ public class ThrottlePolicyTemplateBuilder {
      * Generate the condition for the default query. This returns the condition to check thing that are not in
      * any of the other conditions
      *
-     * @param conditionsSet
-     * @return
+     * @param conditionsSet list of default throttle conditions
+     * @return formatted condition list
      */
     private static String getConditionForDefault(Set<String> conditionsSet) {
         String conditionString = "";

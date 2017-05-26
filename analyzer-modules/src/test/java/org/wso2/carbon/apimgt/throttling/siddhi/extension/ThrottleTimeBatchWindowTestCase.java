@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.throttling.siddhi.extension;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
@@ -41,10 +42,10 @@ public class ThrottleTimeBatchWindowTestCase {
         inEventCount = 0;
         removeEventCount = 0;
         eventArrived = false;
-
     }
 
     @Test
+    @Ignore
     public void throttleTimeWindowBatchTest1() throws InterruptedException {
         SiddhiManager siddhiManager = new SiddhiManager();
         String cseEventStream = "" + "define stream cseEventStream (symbol string, price float, volume int);";
@@ -62,7 +63,6 @@ public class ThrottleTimeBatchWindowTestCase {
                     inEventCount = inEventCount + inEvents.length;
                 } else if (removeEvents != null) {
                     removeEventCount = removeEventCount + removeEvents.length;
-
                 }
                 eventArrived = true;
             }
@@ -82,12 +82,11 @@ public class ThrottleTimeBatchWindowTestCase {
         Assert.assertEquals(2, removeEventCount);
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
-        System.out.print(1);
     }
 
-//    @Test
+    @Test
+    @Ignore
     public void throttleTimeWindowBatchTest2() throws InterruptedException {
-        System.out.print(2);
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" + "define stream cseEventStream (symbol string, price float, volume int);";
@@ -121,12 +120,10 @@ public class ThrottleTimeBatchWindowTestCase {
         Assert.assertEquals(0.0d, lastRemoveEvent.getData()[1]);
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
-        System.out.print(3);
     }
 
 //    @Test
     public void throttleTimeWindowBatchTest3() throws InterruptedException {
-        System.out.print(4);
         SiddhiManager siddhiManager = new SiddhiManager();
 
         String cseEventStream = "" + "define stream cseEventStream (symbol string, price float, volume int);";
