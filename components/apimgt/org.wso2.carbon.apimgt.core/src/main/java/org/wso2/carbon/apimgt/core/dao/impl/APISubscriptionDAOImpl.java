@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISubscriptionResults;
@@ -130,6 +131,30 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(getSubscriptionsByAppSql)) {
             ps.setString(1, applicationId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return createSubscriptionsWithApiInformationOnly(rs);
+            }
+        } catch (SQLException e) {
+            log.error("Error while executing sql query", e);
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    @Override
+    public List<Subscription> getAPISubscriptionsByApplication(String applicationId, ApiType apiType)
+                                                                                            throws APIMgtDAOException {
+        final String getSubscriptionsByAppSql = "SELECT SUBS.UUID AS SUBS_UUID, SUBS.TIER_ID AS SUBS_TIER, " +
+                "SUBS.API_ID AS API_ID, SUBS.APPLICATION_ID AS APP_ID, SUBS.SUB_STATUS AS SUB_STATUS, " +
+                "SUBS.SUB_TYPE AS SUB_TYPE, API.PROVIDER AS API_PROVIDER, API.NAME AS API_NAME, " +
+                "API.CONTEXT AS API_CONTEXT, API.VERSION AS API_VERSION, POLICY.NAME AS SUBS_POLICY " +
+                "FROM AM_SUBSCRIPTION SUBS, AM_API API, AM_SUBSCRIPTION_POLICY POLICY  " +
+                "WHERE SUBS.APPLICATION_ID = ? AND SUBS.API_ID = API.UUID AND SUBS.TIER_ID = POLICY.UUID " +
+                "AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)";
+
+        try (Connection conn = DAOUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(getSubscriptionsByAppSql)) {
+            ps.setString(1, applicationId);
+            ps.setString(2, apiType.toString());
             try (ResultSet rs = ps.executeQuery()) {
                 return createSubscriptionsWithApiInformationOnly(rs);
             }
