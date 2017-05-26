@@ -71,7 +71,7 @@ public class APIMConfigurations {
     private IdentityProviderConfigurations identityProviderConfigs = new IdentityProviderConfigurations();
 
     @Element(description = "DAS REST API URL")
-    private String dasRestApiUrl = "http://localhost:9090/";
+    private String dasRestApiUrl = "http://localhost:9091";
 
     public String getHostname() {
         return hostname;
