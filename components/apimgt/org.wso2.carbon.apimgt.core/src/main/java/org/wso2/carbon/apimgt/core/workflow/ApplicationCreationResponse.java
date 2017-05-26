@@ -18,7 +18,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.core.models;
+package org.wso2.carbon.apimgt.core.workflow;
 
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 

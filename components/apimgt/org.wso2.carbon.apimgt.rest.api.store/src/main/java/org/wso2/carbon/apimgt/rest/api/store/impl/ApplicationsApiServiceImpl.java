@@ -15,7 +15,7 @@ import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.APIKey;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.models.ApplicationCreationResponse;
+import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationResponse;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
