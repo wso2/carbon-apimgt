@@ -57,9 +57,9 @@ public enum ExceptionCodes implements ErrorHandler {
     NEED_COMMENT_MODERATOR_PERMISSION(900323, "Comment moderator permission needed", 403,
             "This user is not a comment moderator"),
     RATING_NOT_FOUND(900324, "Rating not found", 404, "Couldn't retrieve rating"),
-    RATING_VALUE_INVALID(900325, "Rating value invalid", 404, "Provided rating value does not fall in between min max "
+    RATING_VALUE_INVALID(900325, "Rating value invalid", 400, "Provided rating value does not fall in between min max "
             + "values"),
-    COMMENT_LENGTH_EXCEEDED(900326, "Comment length exceeds max limit", 404, "Comment length exceeds allowed maximum "
+    COMMENT_LENGTH_EXCEEDED(900326, "Comment length exceeds max limit", 400, "Comment length exceeds allowed maximum "
             + "number of characters"),
 
     // Generic codes
