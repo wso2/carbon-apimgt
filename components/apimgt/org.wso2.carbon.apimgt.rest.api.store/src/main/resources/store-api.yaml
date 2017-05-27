@@ -1293,7 +1293,7 @@ paths:
   /applications:
 
 #-----------------------------------------------------
-# Retrieve a list of all applications of a certain username
+# Retrieve a list of all applications of a certain subscriber
 #-----------------------------------------------------
     get:
       x-scope: apim:subscribe
@@ -2262,11 +2262,11 @@ parameters:
 
 # Subscriber Name
 # Specified as part of the path expression
-  username:
-    name: username
+  subscriberName:
+    name: subscriberName
     in: path
     description: |
-      username of the invoker
+      subscriber Name
     required: true
     type: string
 
@@ -2632,9 +2632,9 @@ definitions:
         type: string
       name:
         type: string
-      username:
+      subscriber:
         description: |
-          If username is not given user invoking the API will be taken as the username.
+          If subscriber is not given user invoking the API will be taken as the subscriber.
         type: string
       throttlingTier:
         type: string
@@ -2664,7 +2664,7 @@ definitions:
         type: string
       name:
         type: string
-      username:
+      subscriber:
         type: string
       throttlingTier:
         type: string

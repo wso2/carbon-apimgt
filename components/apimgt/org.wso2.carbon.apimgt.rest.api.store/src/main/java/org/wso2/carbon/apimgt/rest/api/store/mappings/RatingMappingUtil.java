@@ -42,7 +42,7 @@ public class RatingMappingUtil {
         RatingDTO ratingDTO = new RatingDTO();
         ratingDTO.setRatingId(rating.getUuid());
         ratingDTO.setRating(rating.getRating());
-        ratingDTO.setUserName(rating.getUsername());
+        ratingDTO.setUsername(rating.getUsername());
 
         return ratingDTO;
     }

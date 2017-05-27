@@ -69,7 +69,7 @@ public class ApisApi implements Microservice  {
     @Path("/{apiId}/comments/{commentId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get the individual comment given by a subscriber for a certain API. ", response = CommentDTO.class, tags={ "Retrieve Comment", })
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Get the individual comment given by a username for a certain API. ", response = CommentDTO.class, tags={ "Retrieve Comment", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Comment returned. ", response = CommentDTO.class),
         

@@ -41,7 +41,7 @@ public class CommentMappingUtil {
 
         CommentDTO commentDTO = new CommentDTO();
         commentDTO.setCommentId(comment.getUuid());
-        commentDTO.setUserName(comment.getCommentedUser());
+        commentDTO.setUsername(comment.getCommentedUser());
         commentDTO.setCommentText(comment.getCommentText());
         commentDTO.setCreatedBy(comment.getCreatedUser());
         commentDTO.setLastUpdatedBy(comment.getUpdatedUser());

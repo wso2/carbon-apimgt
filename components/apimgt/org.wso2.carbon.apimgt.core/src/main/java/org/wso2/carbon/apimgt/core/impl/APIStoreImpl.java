@@ -630,7 +630,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
      */
     private void checkIfUserIsCommentModerator(String username) throws APICommentException {
         Set<String> roles = APIUtils.getAllRolesOfUser(username);
-        if (roles.contains(config.getCommentModeratorRole())) {
+        if (roles.contains(getConfig().getCommentModeratorRole())) {
             return;
         }
         String errorMsg = "comment moderator permission needed";
@@ -645,7 +645,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
      * @throws APIRatingException if rating value is negative or larger than max rating
      */
     private void validateMaxMinRatingValue(int ratingValue) throws APIRatingException {
-        if (ratingValue > 0 && ratingValue <= config.getRatingMaxValue()) {
+        if (ratingValue > 0 && ratingValue <= getConfig().getRatingMaxValue()) {
             return;
         }
         String errorMsg = "Provided rating value is invalid";
@@ -660,7 +660,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
      * @throws APICommentException if comment length is larger than max length allowed
      */
     private void validateCommentMaxCharacterLength(String commentText) throws APICommentException {
-        if (commentText.length() <= config.getCommentMaxLength()) {
+        if (commentText.length() <= getConfig().getCommentMaxLength()) {
             return;
         }
         String errorMsg = "comment text exceeds allowed maximum length of characters";
