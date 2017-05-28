@@ -94,8 +94,8 @@ class AuthClient {
     static refreshTokenOnExpire() {
         var timestampSkew = 100;
         var currentTimestamp = Math.floor(Date.now() / 1000);
-        var tokenTimestamp = window.localStorage.getItem("expiresIn");
-        var rememberMe = (window.localStorage.getItem("rememberMe") == 'true');
+        var tokenTimestamp = localStorage.getItem("expiresIn");
+        var rememberMe = (localStorage.getItem("rememberMe") == 'true');
         if (rememberMe && (tokenTimestamp - currentTimestamp < timestampSkew)) {
             var bearerToken = "Bearer " + AuthClient.getCookie("WSO2_AM_REFRESH_TOKEN_1");
             var loginPromise = authManager.refresh(bearerToken);
@@ -136,27 +136,31 @@ class AuthClient {
      */
     static unauthorizedErrorHandler(error_response) {
         if (error_response.status !== 401) { /* Skip unrelated response code to handle in unauthorizedErrorHandler*/
-            console.debug(error_response);
+            console.log(error_response);
             throw error_response;
             /* re throwing the error since we don't handle it here and propagate to downstream error handlers in catch chain*/
         }
-        var message = "The session has expired" + ".<br/> You will be redirect to the login page ...";
-        noty({
-            text: message,
-            type: 'error',
-            dismissQueue: true,
-            modal: true,
-            progressBar: true,
-            timeout: 5000,
-            layout: 'top',
-            theme: 'relax',
-            maxVisible: 10,
-            callback: {
-                afterClose: function () {
-                    window.location = loginPageUri;
-                },
-            }
-        });
+        let message = "The session has expired" + ".<br/> You will be redirect to the login page ...";
+        if (typeof noty !== 'undefined') {
+            noty({
+                text: message,
+                type: 'error',
+                dismissQueue: true,
+                modal: true,
+                progressBar: true,
+                timeout: 5000,
+                layout: 'top',
+                theme: 'relax',
+                maxVisible: 10,
+                callback: {
+                    afterClose: function () {
+                        window.location = loginPageUri;
+                    },
+                }
+            });
+        } else {
+            console.log(error_response);
+        }
     }
 
     static getCookie(name) {
@@ -184,7 +188,7 @@ class API {
         this.auth_client = new AuthClient();
         this.client.then(
             (swagger) => {
-                swagger.setHost(location.host);
+                swagger.setHost(window.location.host);
                 this.keyMan = new KeyManager(access_key);
                 let scopes = swagger.swaggerObject["x-wso2-security"].apim["x-wso2-scopes"];
                 for (let index in scopes) {
@@ -262,7 +266,7 @@ class API {
     /**
      *
      * @param data
-     * @returns {{clientAuthorizations: {api_key: SwaggerClient.ApiKeyAuthorization}, requestContentType: (*|string)}}
+     * @returns {object} Metadata for API request
      * @private
      */
     _requestMetaData(data = {}) {
@@ -270,10 +274,14 @@ class API {
         let access_key_header = "Bearer " + AuthClient.getCookie("WSO2_AM_TOKEN_1");
         let request_meta = {
             clientAuthorizations: {
-                api_key: new SwaggerClient.ApiKeyAuthorization("Authorization", access_key_header, "header")
+                am_token1: new SwaggerClient.ApiKeyAuthorization("Authorization", access_key_header, "header")
             },
             requestContentType: data['Content-Type'] || "application/json"
         };
+        let am_token2 = AuthClient.getCookie('WSO2_AM_TOKEN_MSF4J'); // This cookie is meant to be send via browser, Hence this will be overridden by browser
+        if (am_token2) {
+            request_meta.clientAuthorizations['am_token2'] = new SwaggerClient.ApiKeyAuthorization("Cookie", "WSO2_AM_TOKEN_MSF4J=" + am_token2, "header")
+        }
         return request_meta;
     }
 
