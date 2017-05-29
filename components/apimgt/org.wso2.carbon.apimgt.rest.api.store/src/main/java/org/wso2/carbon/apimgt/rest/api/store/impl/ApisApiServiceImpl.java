@@ -250,7 +250,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                     "\"" + fingerprint + "\"").entity(createdCommentDTO)
                     .build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while adding comment to api : " + body.getApiId();
+            String errorMessage = "Error while adding comment to api : " + apiId;
             Map<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, body.getApiId());
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
