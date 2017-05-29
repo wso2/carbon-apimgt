@@ -63,6 +63,7 @@ public class APIMConfigurations {
 
     @Element(description = "rating upper limit")
     private int ratingMaxValue = 5;
+
     @Element(description = "Broker Configurations")
     private BrokerConfigurations brokerConfiguration = new BrokerConfigurations();
 
@@ -126,6 +127,7 @@ public class APIMConfigurations {
     public int getCommentMaxLength() {
         return commentMaxLength;
     }
+
     public BrokerConfigurations getBrokerConfiguration() {
         return brokerConfiguration;
     }
