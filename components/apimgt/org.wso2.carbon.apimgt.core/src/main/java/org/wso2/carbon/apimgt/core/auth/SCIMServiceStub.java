@@ -24,8 +24,6 @@ import feign.RequestLine;
 import feign.Response;
 import org.wso2.carbon.apimgt.core.auth.dto.SCIMUser;
 
-import java.util.ArrayList;
-
 /**
  * This is the stub class from SCIM service
  */
