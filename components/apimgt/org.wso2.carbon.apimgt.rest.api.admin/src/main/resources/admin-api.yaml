@@ -1223,6 +1223,7 @@ definitions:
     title: Generic Throttle Policy
     required:
       - policyName
+      - type
     properties:
       policyId:
         type: string
@@ -1235,19 +1236,14 @@ definitions:
       isDeployed:
         type: boolean
         default: false
+      type:
+        type: string
+        enum:
+          - AdvancedThrottlePolicy
+          - ApplicationThrottlePolicy
+          - SubscriptionThrottlePolicy
 
-#-----------------------------------------------------
-# The Advanced Throttle Policy Info resource
-#-----------------------------------------------------
-  AdvancedThrottlePolicyInfo :
-    title: Advanced Throttling Policy
-    required:
-      - quotaPolicy
-    allOf:
-      - $ref: '#/definitions/ThrottlePolicy'
-      - properties:
-          quotaPolicy:
-            $ref: '#/definitions/ThrottleLimit'
+
 
 #-----------------------------------------------------
 # The Advanced Throttle Policy resource
@@ -1280,7 +1276,7 @@ definitions:
       list:
         type: array
         items:
-          $ref: '#/definitions/AdvancedThrottlePolicyInfo'
+          $ref: '#/definitions/AdvancedThrottlePolicy'
 
 #-----------------------------------------------------
 # The Application Throttle Policy resource

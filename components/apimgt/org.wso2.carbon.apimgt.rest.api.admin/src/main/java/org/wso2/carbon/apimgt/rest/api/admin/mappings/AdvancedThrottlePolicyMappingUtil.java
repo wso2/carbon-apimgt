@@ -18,14 +18,13 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.mappings;
 
-import org.wso2.carbon.apimgt.rest.api.admin.exceptions.UnsupportedThrottleConditionTypeException;
-import org.wso2.carbon.apimgt.rest.api.admin.exceptions.UnsupportedThrottleLimitTypeException;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Pipeline;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.AdvancedThrottlePolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.AdvancedThrottlePolicyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.AdvancedThrottlePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ConditionalGroupDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.exceptions.UnsupportedThrottleConditionTypeException;
+import org.wso2.carbon.apimgt.rest.api.admin.exceptions.UnsupportedThrottleLimitTypeException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +46,7 @@ public class AdvancedThrottlePolicyMappingUtil {
     public static AdvancedThrottlePolicyListDTO fromAPIPolicyArrayToListDTO(List<APIPolicy> apiPolicies)
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
         AdvancedThrottlePolicyListDTO listDTO = new AdvancedThrottlePolicyListDTO();
-        List<AdvancedThrottlePolicyInfoDTO> advancedPolicyDTOs = new ArrayList<>();
+        List<AdvancedThrottlePolicyDTO> advancedPolicyDTOs = new ArrayList<>();
         if (apiPolicies != null) {
             for (APIPolicy apiPolicy : apiPolicies) {
                 advancedPolicyDTOs.add(fromAdvancedPolicyToInfoDTO(apiPolicy));
@@ -112,13 +111,12 @@ public class AdvancedThrottlePolicyMappingUtil {
      * @throws UnsupportedThrottleLimitTypeException
      * @throws UnsupportedThrottleConditionTypeException
      */
-    public static AdvancedThrottlePolicyInfoDTO fromAdvancedPolicyToInfoDTO(APIPolicy apiPolicy)
+    public static AdvancedThrottlePolicyDTO fromAdvancedPolicyToInfoDTO(APIPolicy apiPolicy)
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
-        AdvancedThrottlePolicyInfoDTO policyDTO = new AdvancedThrottlePolicyInfoDTO();
+        AdvancedThrottlePolicyDTO policyDTO = new AdvancedThrottlePolicyDTO();
         policyDTO = CommonThrottleMappingUtil.updateFieldsFromToPolicyToDTO(apiPolicy, policyDTO);
         if (apiPolicy.getDefaultQuotaPolicy() != null) {
-            policyDTO.setQuotaPolicy(
-                    CommonThrottleMappingUtil.fromQuotaPolicyToDTO(apiPolicy.getDefaultQuotaPolicy()));
+            policyDTO.setQuotaPolicy(CommonThrottleMappingUtil.fromQuotaPolicyToDTO(apiPolicy.getDefaultQuotaPolicy()));
         }
         return policyDTO;
     }

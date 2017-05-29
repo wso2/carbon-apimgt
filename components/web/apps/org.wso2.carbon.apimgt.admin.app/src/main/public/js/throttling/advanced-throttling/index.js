@@ -77,8 +77,8 @@ $(function () {
             columns: [
                 {'data': "displayName"},
                 {'data': "description"},
-                {'data': "defaultLimit.unitTime"},
-                {'data': "defaultLimit.timeUnit"},
+                {'data': "quotaPolicy.unitTime"},
+                {'data': "quotaPolicy.timeUnit"},
                 {'data': "displayName"}
             ],
             columnDefs: [
@@ -205,16 +205,17 @@ $(function () {
 
         apiPolicyNew.policyDescription = policyDescription;
         apiPolicyNew.policyLevel = policyLevel;
-        apiPolicyNew.quotaPolicy.type = defaultPolicyType;
 
         var defaultPolicyDataUnit;
         if (defaultPolicyType == 'requestCount') {
             defaultPolicyLimit = $('#request-count').val();
             defaultPolicyUnit = $("#request-count-unit option:selected").val();
             defaultPolicyUnitTime = $("#unit-time-count").val();
-            apiPolicyNew.quotaPolicy.limit.requestCount = defaultPolicyLimit;
-            apiPolicyNew.quotaPolicy.limit.unitTime = defaultPolicyUnitTime;
-            apiPolicyNew.quotaPolicy.limit.timeUnit = defaultPolicyUnit;
+            apiPolicyNew.quotaPolicy.requestCount = defaultPolicyLimit;
+            apiPolicyNew.quotaPolicy.unitTime = defaultPolicyUnitTime;
+            apiPolicyNew.quotaPolicy.timeUnit = defaultPolicyUnit;
+            apiPolicyNew.quotaPolicy.type = 'RequestCountLimit';
+            apiPolicyNew.type = 'AdvancedThrottlePolicy';
 
             if (!validateInput(defaultPolicyLimit, $('#request-count'), requiredMsg)) {
                 return false;
@@ -230,10 +231,12 @@ $(function () {
             defaultPolicyDataUnit = $("#bandwidth-unit option:selected").val();
             defaultPolicyUnitTime = $("#unit-time-count").val();
             defaultPolicyUnit = $("#request-count-unit option:selected").val();
-            apiPolicyNew.quotaPolicy.limit.dataAmount = defaultPolicyLimit;
-            apiPolicyNew.quotaPolicy.limit.dataUnit = defaultPolicyDataUnit;
-            apiPolicyNew.quotaPolicy.limit.unitTime = defaultPolicyUnitTime;
-            apiPolicyNew.quotaPolicy.limit.timeUnit = defaultPolicyUnit;
+            apiPolicyNew.quotaPolicy.dataAmount = defaultPolicyLimit;
+            apiPolicyNew.quotaPolicy.dataUnit = defaultPolicyDataUnit;
+            apiPolicyNew.quotaPolicy.unitTime = defaultPolicyUnitTime;
+            apiPolicyNew.quotaPolicy.timeUnit = defaultPolicyUnit;
+            apiPolicyNew.quotaPolicy.type = 'BandwidthLimit';
+            apiPolicyNew.type = 'AdvancedThrottlePolicy';
 
             if (!validateInput(defaultPolicyLimit, $('#bandwidth'), requiredMsg)) {
                 return false;
