@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
+import org.wso2.carbon.apimgt.core.api.ThrottlePolicyDeploymentManager;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
@@ -258,5 +259,14 @@ public class APIManagerFactory {
             }
         }
         return keyManager;
+    }
+
+    /**
+     * Get Throttle Policy Deployment Manager object
+     *
+     * @return ThrottlePolicyDeploymentManager object
+     */
+    public ThrottlePolicyDeploymentManager getThrottlePolicyDeploymentManager() {
+        return new ThrottlePolicyDeploymentManagerImpl();
     }
 }
