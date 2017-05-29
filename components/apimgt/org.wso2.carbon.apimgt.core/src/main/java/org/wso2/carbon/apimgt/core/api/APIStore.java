@@ -274,7 +274,7 @@ public interface APIStore extends APIManager {
      * @param commentId UUID od the comment
      * @param apiId     UUID of the API
      * @return Comment Object.
-     * @throws APICommentException if failed to retrieve comment from data layer
+     * @throws APICommentException if failed to retrieve comment from data alayer
      * @throws APIMgtResourceNotFoundException if api or comment was not found
      */
     Comment getCommentByUUID(String commentId, String apiId) throws APICommentException,
@@ -303,7 +303,7 @@ public interface APIStore extends APIManager {
     Rating getRatingByUUID(String apiId, String ratingId) throws APIRatingException, APIMgtResourceNotFoundException;
 
     /**
-     * Retrieve Average Rating based on the API ID
+     * Retrieve Average Rating based of an api, up to one decimal point.
      *
      * @param apiId UUID of the API
      * @return Average Rating value

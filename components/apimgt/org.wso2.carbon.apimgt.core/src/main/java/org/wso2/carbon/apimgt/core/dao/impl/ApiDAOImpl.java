@@ -825,7 +825,6 @@ public class ApiDAOImpl implements ApiDAO {
         return EntityDAO.getLastUpdatedTimeOfResourceByUUID(AM_ENDPOINT_TABLE_NAME, endpointId);
     }
 
-
     @Override
     public Comment getCommentByUUID(String commentId, String apiId) throws APIMgtDAOException {
         final String query = "SELECT UUID, COMMENT_TEXT, USER_IDENTIFIER, API_ID, "
@@ -1049,6 +1048,8 @@ public class ApiDAOImpl implements ApiDAO {
                         "Error while adding rating for api id: " + apiId;
                 log.error(errorMessage, e);
                 throw new APIMgtDAOException(e);
+            }  finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
             log.error("Error while creating database connection/prepared-statement", e);

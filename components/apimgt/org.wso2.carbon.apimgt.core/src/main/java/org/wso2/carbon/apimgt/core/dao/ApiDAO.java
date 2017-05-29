@@ -596,7 +596,9 @@ public interface ApiDAO {
     List<API> getAPIsByGatewayLabel(List<String> gatewayLabels) throws APIMgtDAOException;
 
     /**
-     * Add a rating for an api
+     * Add a rating for an api.
+     * By default the max rating value is 5. To update the max rating, add "ratingMaxValue" config to deployment.yaml
+     * and set a suitable value.
      *
      * @param apiId UUID of the api
      * @param rating rating object
@@ -635,7 +637,7 @@ public interface ApiDAO {
     Rating getRatingByUUID(String apiId, String ratingId) throws APIMgtDAOException;
 
     /**
-     * Retrieve average rating for ana api
+     * Retrieve average rating for an api
      *
      * @param apiId  UUID of the api
      * @return average rating of the api
