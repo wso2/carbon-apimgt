@@ -23,7 +23,8 @@ import org.slf4j.LoggerFactory;
 import org.wso2.andes.client.AMQConnectionFactory;
 import org.wso2.andes.url.URLSyntaxException;
 import org.wso2.carbon.apimgt.core.api.Broker;
-import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
+import org.wso2.carbon.apimgt.core.configuration.models.BrokerConfigurations;
+import org.wso2.carbon.apimgt.core.configuration.models.JMSConnectionConfiguration;
 import org.wso2.carbon.apimgt.core.exception.BrokerException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
@@ -38,14 +39,17 @@ import javax.jms.TopicConnectionFactory;
  */
 public class BrokerImpl implements Broker {
 
-    private APIMConfigurations config;
+    private BrokerConfigurations config;
     private TopicConnectionFactory connFactory = null;
+    private static final String CF_NAME_PREFIX = "connectionfactory.";
     private static final Logger log = LoggerFactory.getLogger(BrokerUtil.class);
 
     public BrokerImpl() {
-        config = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
+        config = ServiceReferenceHolder.getInstance().getAPIMConfiguration().getBrokerConfiguration();
+        JMSConnectionConfiguration jmsConnectionConfiguration = config.getJmsConnectionConfiguration();
+
         try {
-            connFactory = new AMQConnectionFactory(getTCPConnectionURL(config));
+            connFactory = new AMQConnectionFactory(jmsConnectionConfiguration.getTopicConnectionFactoryURL());
         } catch (URLSyntaxException e) {
             log.error("Error while initilizing broker connection factory", e);
         }
@@ -63,24 +67,6 @@ public class BrokerImpl implements Broker {
         }
         return connFactory.createTopicConnection();
     }
-
-    /**
-     * Get connection config
-     *
-     * @return connection string
-     */
-    private String getTCPConnectionURL(APIMConfigurations config) {
-        //TODO: The broker URL should be obtained from JNDI.properties file
-        // amqp://{username}:{password}@carbon/carbon?brokerlist='tcp://{hostname}:{port}'
-        return new StringBuffer().append("amqp://")
-                .append(config.getUsername()).append(":")
-                .append(config.getPassword()).append("@")
-                .append(config.getCarbonClientId()).append("/")
-                .append(config.getCarbonVirtualHostName()).append("?brokerlist='tcp://")
-                .append(config.getTopicServerHost()).append(":")
-                .append(config.getTopicServerPort()).append("'").toString();
-    }
-
 }
 
 

@@ -28,22 +28,7 @@ import java.io.File;
 
 @Configuration(namespace = "wso2.carbon.apimgt", description = "APIM Configuration Parameters")
 public class APIMConfigurations {
-    private String carbonClientId = "carbon";
-    @Element(description = "server version")
-    private String carbonVirtualHostName = "carbon";
-    @Element(description = "topic server host")
-    private String topicServerHost = "localhost";
-    @Element(description = "topic server port")
-    private String topicServerPort = "5672";
-    @Element(description = "publisher topic name")
-    private String publisherTopic = "PublisherTopic";
-    @Element(description = "store topic name")
-    private String storeTopic = "StoreTopic";
-    @Element(description = "username for topic")
-    private String username = "admin";
-    @Element(description = "password for topic")
-    private String password = "admin";
-    @Element(description = "password for topic")
+
     private boolean reverseProxyEnabled = false;
     @Element(description = "hostname")
     private String hostname = "localhost";
@@ -78,6 +63,17 @@ public class APIMConfigurations {
 
     @Element(description = "rating upper limit")
     private int ratingMaxValue = 5;
+    @Element(description = "Broker Configurations")
+    private BrokerConfigurations brokerConfiguration = new BrokerConfigurations();
+
+    @Element(description = "JWT Configurations")
+    private JWTConfigurations jwtConfigurations = new JWTConfigurations();
+
+    @Element(description = "Analytics Configurations")
+    private AnalyticsConfigurations analyticsConfigurations = new AnalyticsConfigurations();
+
+    @Element(description = "Throttling Configurations")
+    private ThrottlingConfigurations throttlingConfigurations = new ThrottlingConfigurations();
 
     public String getHostname() {
         return hostname;
@@ -101,38 +97,6 @@ public class APIMConfigurations {
 
     public String getAdminContext() {
         return adminContext;
-    }
-
-    public String getCarbonClientId() {
-        return carbonClientId;
-    }
-
-    public String getCarbonVirtualHostName() {
-        return carbonVirtualHostName;
-    }
-
-    public String getTopicServerHost() {
-        return topicServerHost;
-    }
-
-    public String getTopicServerPort() {
-        return topicServerPort;
-    }
-
-    public String getPublisherTopic() {
-        return publisherTopic;
-    }
-
-    public String getStoreTopic() {
-        return storeTopic;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
     }
 
     public String getGatewayPackageName() {
@@ -161,5 +125,20 @@ public class APIMConfigurations {
 
     public int getCommentMaxLength() {
         return commentMaxLength;
+    }
+    public BrokerConfigurations getBrokerConfiguration() {
+        return brokerConfiguration;
+    }
+
+    public JWTConfigurations getJwtConfigurations() {
+        return jwtConfigurations;
+    }
+
+    public AnalyticsConfigurations getAnalyticsConfigurations() {
+        return analyticsConfigurations;
+    }
+
+    public ThrottlingConfigurations getThrottlingConfigurations() {
+        return throttlingConfigurations;
     }
 }
