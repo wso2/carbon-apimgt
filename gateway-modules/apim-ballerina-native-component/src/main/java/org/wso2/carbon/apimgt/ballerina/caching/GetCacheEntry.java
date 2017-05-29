@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.ballerina.caching;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.model.types.TypeEnum;
-import org.ballerinalang.model.values.BString;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.natives.AbstractNativeFunction;
 import org.ballerinalang.natives.annotations.Argument;
@@ -63,10 +62,9 @@ public class GetCacheEntry extends AbstractNativeFunction {
         String cacheName = getArgument(context, 0).stringValue();
         String cacheKey = getArgument(context, 1).stringValue();
         Cache cache = (CacheManagerHolder.getInstance().getCacheManager().getCache(cacheName));
-        Object cacheEntry = cache.get(cacheKey);
-        BCacheEntry bCacheEntry = (BCacheEntry) cacheEntry;
+        BValue cacheEntry = (BValue) cache.get(cacheKey);
         //TODO build ballerina any type value based on the cache entry and return it.
-        return getBValues((new BString(bCacheEntry.getStringValue())));
+        return getBValues(cacheEntry);
     }
 }
 

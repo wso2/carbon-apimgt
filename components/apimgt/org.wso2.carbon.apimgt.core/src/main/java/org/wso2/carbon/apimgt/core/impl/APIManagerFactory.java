@@ -22,11 +22,14 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.APIGateway;
+import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
+import org.wso2.carbon.apimgt.core.api.ThrottlePolicyDeploymentManager;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
@@ -53,6 +56,8 @@ public class APIManagerFactory {
     private APIMgtAdminService apiMgtAdminService;
     private IdentityProvider identityProvider;
     private KeyManager keyManager;
+    private APIGateway apiGateway;
+    private APILifecycleManager apiLifecycleManager;
 
     private static final int MAX_PROVIDERS = 50;
     private static final int MAX_CONSUMERS = 500;
@@ -100,8 +105,9 @@ public class APIManagerFactory {
         try {
             UserAwareAPIPublisher userAwareAPIPublisher = new UserAwareAPIPublisher(username, getIdentityProvider(),
                     DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(), DAOFactory.getAPISubscriptionDAO(),
-                    DAOFactory.getPolicyDAO(), DAOFactory.getLabelDAO(), DAOFactory.getWorkflowDAO(),
-                    DAOFactory.getTagDAO(), new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
+                    DAOFactory.getPolicyDAO(), geApiLifecycleManager(), DAOFactory.getLabelDAO(),
+                    DAOFactory.getWorkflowDAO(), DAOFactory.getTagDAO(), new GatewaySourceGeneratorImpl(),
+                    new APIGatewayPublisherImpl());
 
             // Register all the observers which need to observe 'Publisher' component
             userAwareAPIPublisher.registerObserver(new EventLogger());
@@ -258,5 +264,40 @@ public class APIManagerFactory {
             }
         }
         return keyManager;
+    }
+
+    /**
+     * Get Throttle Policy Deployment Manager object
+     *
+     * @return ThrottlePolicyDeploymentManager object
+     */
+    public ThrottlePolicyDeploymentManager getThrottlePolicyDeploymentManager() {
+        return new ThrottlePolicyDeploymentManagerImpl();
+    }
+
+    /**
+     * Get API gateway publisher implementation object
+     *
+     * @return APIGateway impl object
+     */
+    public APIGateway getApiGateway() {
+
+        if (apiGateway == null) {
+            apiGateway = new APIGatewayPublisherImpl();
+        }
+        return apiGateway;
+    }
+
+    /**
+     * Get API Lifecycle Manager implementation object
+     *
+     * @return APILifecycleManager impl object
+     */
+    public APILifecycleManager geApiLifecycleManager() {
+
+        if (apiLifecycleManager == null) {
+            apiLifecycleManager = new APILifeCycleManagerImpl();
+        }
+        return apiLifecycleManager;
     }
 }

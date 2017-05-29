@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -54,7 +54,7 @@ import javax.cache.expiry.Duration;
         isPublic = true
 )
 @BallerinaAnnotation(annotationName = "Description", attributes = {@Attribute(name = "value",
-        value = "Get cache manager")})
+        value = " Create cache as per user requirement")})
 @BallerinaAnnotation(annotationName = "Param", attributes = {@Attribute(name = "cacheName",
         value = "Cache Manager name")})
 @BallerinaAnnotation(annotationName = "Param", attributes = {@Attribute(name = "cacheTimeout",
@@ -79,7 +79,8 @@ public class CreateCache extends AbstractNativeFunction {
             MutableConfiguration<String, String> config = new MutableConfiguration<>();
             config.setStoreByValue(true)
                     .setExpiryPolicyFactory(AccessedExpiryPolicy.factoryOf(cacheExpiry))
-                    .setStatisticsEnabled(false);
+                    .setStatisticsEnabled(false)
+                    .setStoreByValue(false);
             cacheManager.createCache(cacheName, config);
         }
         return getBValues(new BString(cacheName));
