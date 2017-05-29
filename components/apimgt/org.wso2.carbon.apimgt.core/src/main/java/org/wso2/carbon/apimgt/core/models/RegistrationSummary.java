@@ -1,5 +1,7 @@
+package org.wso2.carbon.apimgt.core.models;
+
 /*
-* Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+* Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -13,7 +15,6 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.wso2.carbon.apimgt.core.models;
 
 import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.configuration.models.AnalyticsConfigurations;
@@ -27,6 +28,7 @@ import org.wso2.carbon.apimgt.core.configuration.models.ThrottlingConfigurations
  * This class holds the Gateway Registration Summary required by gateway
  */
 public class RegistrationSummary {
+
     private KeyManagerInfo keyManagerInfo;
     private AnalyticsInfo analyticsInfo;
     private JWTInfo jwtInfo;
@@ -46,6 +48,9 @@ public class RegistrationSummary {
 
     public RegistrationSummary(APIMConfigurations apimConfigurations) {
         this.keyManagerInfo = new KeyManagerInfo(apimConfigurations.getKeyManagerConfigs());
+        this.analyticsInfo = new AnalyticsInfo(apimConfigurations.getAnalyticsConfigurations());
+        this.jwtInfo = new JWTInfo(apimConfigurations.getJwtConfigurations());
+        this.throttlingInfo = new ThrottlingInfo(apimConfigurations.getThrottlingConfigurations());
     }
 
     public KeyManagerInfo getKeyManagerInfo() {
@@ -55,14 +60,14 @@ public class RegistrationSummary {
     /**
      * This class holds KeyManager information required by gateway
      */
-    public class KeyManagerInfo {
+    public static class KeyManagerInfo {
         private String dcrEndpoint;
         private String tokenEndpoint;
         private String revokeEndpoint;
         private String introspectEndpoint;
         private Credentials credentials;
 
-        public KeyManagerInfo(KeyMgtConfigurations keyMgtConfigurations) {
+        KeyManagerInfo(KeyMgtConfigurations keyMgtConfigurations) {
             this.dcrEndpoint = keyMgtConfigurations.getDcrEndpoint();
             this.tokenEndpoint = keyMgtConfigurations.getTokenEndpoint();
             this.revokeEndpoint = keyMgtConfigurations.getRevokeEndpoint();
@@ -94,11 +99,11 @@ public class RegistrationSummary {
     /**
      * This class holds Analytics information required by gateway
      */
-    public class AnalyticsInfo {
+    public static class AnalyticsInfo {
         private String dasServerURL;
         private Credentials dasServerCredentials;
 
-        public AnalyticsInfo(AnalyticsConfigurations analyticsConfigurations) {
+        AnalyticsInfo(AnalyticsConfigurations analyticsConfigurations) {
             this.dasServerURL = analyticsConfigurations.getDasServerURL();
             this.dasServerCredentials = new Credentials(analyticsConfigurations.getDasServerCredentials());
         }
@@ -115,11 +120,11 @@ public class RegistrationSummary {
     /**
      * This class holds JWT information required by gateway
      */
-    public class JWTInfo {
+    public static class JWTInfo {
         private boolean isEnableJWTGeneration;
         private String jwtHeader;
 
-        public JWTInfo(JWTConfigurations jwtConfigurations) {
+        JWTInfo(JWTConfigurations jwtConfigurations) {
             this.isEnableJWTGeneration = jwtConfigurations.isEnableJWTGeneration();
             this.jwtHeader = jwtConfigurations.getJwtHeader();
         }
@@ -136,7 +141,7 @@ public class RegistrationSummary {
     /**
      * This class holds Throttling information required by gateway
      */
-    public class ThrottlingInfo {
+    public static class ThrottlingInfo {
         private DataPublisher dataPublisher;
 
         public ThrottlingInfo(ThrottlingConfigurations throttlingConfigurations) {
@@ -147,11 +152,14 @@ public class RegistrationSummary {
             return dataPublisher;
         }
 
-        public class DataPublisher {
+        /**
+         * This class holds DataPulisher information required by gateway
+         */
+        public static class DataPublisher {
             private String receiverURL;
             private Credentials credentials;
 
-            public DataPublisher(DataPublisherConfigurations dataPublisherConfigurations) {
+            DataPublisher(DataPublisherConfigurations dataPublisherConfigurations) {
                 this.receiverURL = dataPublisherConfigurations.getReceiverURL();
                 this.credentials = new Credentials(dataPublisherConfigurations.getDataPublisherCredentials());
             }
@@ -169,11 +177,11 @@ public class RegistrationSummary {
     /**
      * This class holds the credential infomation
      */
-    public class Credentials {
+    public static class Credentials {
         private String username;
         private String password;
 
-        public Credentials(CredentialConfigurations credentialConfigurations) {
+        Credentials(CredentialConfigurations credentialConfigurations) {
             this.username = credentialConfigurations.getUsername();
             this.password = credentialConfigurations.getPassword();
         }
@@ -186,4 +194,5 @@ public class RegistrationSummary {
             return password;
         }
     }
+
 }

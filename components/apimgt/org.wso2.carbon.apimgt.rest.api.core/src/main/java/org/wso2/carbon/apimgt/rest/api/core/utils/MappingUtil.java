@@ -146,12 +146,12 @@ public class MappingUtil {
     }
 
     /**
-     * Converts {@Link RegistrationSummary} toan {@Link RegistrationSummaryDTO}
+     * Converts the Gateway registration summary into RegistrationSummaryDTO
      *
-     * @param registrationSummary
-     * @return
+     * @param registrationSummary the registration summary required by gateway
+     * @return RegistrationSummaryDTO
      */
-    public static RegistrationSummaryDTO toRegistrationSummaryDTO(RegistrationSummary registrationSummary){
+    public static RegistrationSummaryDTO toRegistrationSummaryDTO(RegistrationSummary registrationSummary) {
         RegistrationSummaryDTO registrationSummaryDTO = new RegistrationSummaryDTO();
         registrationSummaryDTO.setKeyManagerInfo(toKeyManagerInfoDTO(registrationSummary));
         registrationSummaryDTO.setAnalyticsInfo(toAnalyticsDTO(registrationSummary));
@@ -160,7 +160,14 @@ public class MappingUtil {
         return registrationSummaryDTO;
     }
 
-    private static KeyManagerInfoDTO toKeyManagerInfoDTO(RegistrationSummary registrationSummary){
+    /**
+     * Converts RegistrationSummary key manager information into KeyManagerInfoDTO
+     *
+     * @param registrationSummary the registration summary required by gateway
+     * @return KeyManagerInfoDTO
+     */
+    private static KeyManagerInfoDTO toKeyManagerInfoDTO(RegistrationSummary registrationSummary) {
+
         KeyManagerInfoDTO keyManagerInfoDTO = new KeyManagerInfoDTO();
         keyManagerInfoDTO.setDcrEndpoint(registrationSummary.getKeyManagerInfo().getDcrEndpoint());
         keyManagerInfoDTO.setIntrospectEndpoint(registrationSummary.getKeyManagerInfo().getIntrospectEndpoint());
@@ -173,24 +180,44 @@ public class MappingUtil {
         return keyManagerInfoDTO;
     }
 
-    private static AnalyticsInfoDTO toAnalyticsDTO(RegistrationSummary registrationSummary){
+    /**
+     * Converts RegistrationSummary analytics information into AnalyticsInfoDTO
+     *
+     * @param registrationSummary the registration summary required by gateway
+     * @return AnalyticsInfoDTO
+     */
+    private static AnalyticsInfoDTO toAnalyticsDTO(RegistrationSummary registrationSummary) {
         AnalyticsInfoDTO analyticsInfoDTO = new AnalyticsInfoDTO();
         analyticsInfoDTO.serverURL(registrationSummary.getAnalyticsInfo().getDasServerURL());
         CredentialsDTO analyticsServerCredentials = new CredentialsDTO();
-        analyticsServerCredentials.setUsername(registrationSummary.getAnalyticsInfo().getDasServerCredentials().getUsername());
-        analyticsServerCredentials.setPassword(registrationSummary.getAnalyticsInfo().getDasServerCredentials().getPassword());
+        analyticsServerCredentials.setUsername(registrationSummary.getAnalyticsInfo().getDasServerCredentials()
+                .getUsername());
+        analyticsServerCredentials.setPassword(registrationSummary.getAnalyticsInfo().getDasServerCredentials()
+                .getPassword());
         analyticsInfoDTO.setCredentials(analyticsServerCredentials);
         return analyticsInfoDTO;
     }
 
-    private static JWTInfoDTO toJWTInfoDTO(RegistrationSummary registrationSummary){
+    /**
+     * Converts RegistrationSummary JWT information into JWTInfoDTO
+     *
+     * @param registrationSummary the registration summary required by gateway
+     * @return JWTInfoDTO
+     */
+    private static JWTInfoDTO toJWTInfoDTO(RegistrationSummary registrationSummary) {
         JWTInfoDTO jwtInfoDTO = new JWTInfoDTO();
         jwtInfoDTO.enableJWTGeneration(registrationSummary.getJwtInfo().isEnableJWTGeneration());
         jwtInfoDTO.jwtHeader(registrationSummary.getJwtInfo().getJwtHeader());
         return jwtInfoDTO;
     }
 
-    private static ThrottlingInfoDTO toThrottlingInfoDTO(RegistrationSummary registrationSummary){
+    /**
+     * Converts RegistrationSummary Throttling information into ThrottlingInfoDTO
+     *
+     * @param registrationSummary the registration summary required by gateway
+     * @return ThrottlingInfoDTO
+     */
+    private static ThrottlingInfoDTO toThrottlingInfoDTO(RegistrationSummary registrationSummary) {
         ThrottlingInfoDTO throttlingInfoDTO = new ThrottlingInfoDTO();
         throttlingInfoDTO.serverURL(registrationSummary.getThrottlingInfo().getDataPublisher().getReceiverURL());
         CredentialsDTO throttlingServerCredentials = new CredentialsDTO();
