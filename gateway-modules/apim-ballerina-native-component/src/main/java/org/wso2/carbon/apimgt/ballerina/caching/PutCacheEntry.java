@@ -61,12 +61,9 @@ public class PutCacheEntry extends AbstractNativeFunction {
     public BValue[] execute(Context context) {
         String cacheName = getArgument(context, 0).stringValue();
         String cacheKey = getArgument(context, 1).stringValue();
-        //BValue cacheEntry = getArgument(context, 2);
-        BCacheEntry cacheEntry1 = new BCacheEntry();
-        cacheEntry1.setType(getArgument(context, 2).getType());
-        cacheEntry1.setValue(getArgument(context, 2));
+        BValue cacheEntry = getArgument(context, 2);
         //TODO If cache is not created then need to send proper message or create and put entry.
-        CacheManagerHolder.getInstance().getCacheManager().getCache(cacheName).put(cacheKey, cacheEntry1);
+        CacheManagerHolder.getInstance().getCacheManager().getCache(cacheName).put(cacheKey, cacheEntry);
         return getBValues(new BString(cacheName));
     }
 }

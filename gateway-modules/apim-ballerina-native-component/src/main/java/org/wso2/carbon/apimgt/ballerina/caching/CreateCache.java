@@ -79,7 +79,8 @@ public class CreateCache extends AbstractNativeFunction {
             MutableConfiguration<String, String> config = new MutableConfiguration<>();
             config.setStoreByValue(true)
                     .setExpiryPolicyFactory(AccessedExpiryPolicy.factoryOf(cacheExpiry))
-                    .setStatisticsEnabled(false);
+                    .setStatisticsEnabled(false)
+                    .setStoreByValue(false);
             cacheManager.createCache(cacheName, config);
         }
         return getBValues(new BString(cacheName));
