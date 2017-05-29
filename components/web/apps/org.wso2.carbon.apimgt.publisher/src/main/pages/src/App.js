@@ -1,18 +1,16 @@
 import React, {Component} from 'react'
 import ReactDom from 'react-dom'
-import {Base, Listing, Apis,Breadcrumb,Footer,Navbar,Header,Leftnav} from "./app/components/index.js"
-import {
-  BrowserRouter as Router,
-  Route,
-  Link
-} from 'react-router-dom'
+import {Base, Listing, Apis, Breadcrumb, Footer, Navbar, Header, Leftnav} from "./app/components/index.js"
+import {BrowserRouter as Router, Route, Link} from 'react-router-dom'
 import Utils from '../src/app/data/utils.js'
 import './App.css'
+
 const Home = () => (
-  <div>
-    <h2>Home</h2>
-  </div>
-)
+    <div>
+        <h2>Home</h2>
+    </div>
+);
+
 class Publisher extends Component {
     constructor() {
         super();
@@ -34,24 +32,24 @@ class Publisher extends Component {
 
     render() {
         return (
-          <Router>
-            <div>
-              <Header />
-              <Breadcrumb />
-              <div className="page-content-wrapper">
-                  <Leftnav />
-                  <Navbar />
-                  <div className="container-fluid content-section">
-                      <div className="body-wrapper">
-                      <Route exact path="/" component={Apis}/>
-                      <Route path="/apis" component={Apis}/>
+            <Router>
+                <div>
+                    <Header />
+                    <Breadcrumb />
+                    <div className="page-content-wrapper">
+                        <Leftnav />
+                        <Navbar />
+                        <div className="container-fluid content-section">
+                            <div className="body-wrapper">
+                                <Route exact path="/" component={Apis}/>
+                                <Route path="/apis" component={Apis}/>
 
+                            </div>
+                        </div>
                     </div>
-                  </div>
-              </div>
-              <Footer />
-            </div>
-          </Router>
+                    <Footer />
+                </div>
+            </Router>
         );
     }
 }
