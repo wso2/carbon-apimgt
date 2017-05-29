@@ -1,6 +1,3 @@
-apis: []
-
-
 config:
   title : "API Publisher Application"
   appName : API Publisher
