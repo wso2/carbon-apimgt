@@ -39,7 +39,7 @@ public interface SCIMServiceStub {
     SCIMUser getUser(@Param("id") String id);
 
     @RequestLine("GET /Groups?filter={query}")
-    ArrayList<SCIMUser.SCIMUserGroups> searchGroups(@Param("query") String query);
+    Response searchGroups(@Param("query") String query);
 }
 
 
