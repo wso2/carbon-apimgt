@@ -4,10 +4,9 @@
   "description": "WSO2 API Manager Web Apps Publisher",
   "main": "app.js",
   "scripts": {
-    "test": " [[ $1 == skipTest ]] && NODE_TLS_REJECT_UNAUTHORIZED='0' mocha --recursive --require babel-register  pages/test/ || ",
+    "test": "NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED='0' mocha --recursive --require babel-register  -r mock-local-storage \"./pages/test/**/!(index).js\"",
     "build_prod": "NODE_ENV=production webpack -p --progress --colors --config webpack.config.js",
-    "build_dev": "NODE_ENV=development webpack -d --config webpack.config.js",
-    "vola": " [[ $1 == skipTest ]] && echo 'ok' || echo 'not ok'"
+    "build_dev": "NODE_ENV=development webpack -d --config webpack.config.js --watch "
   },
   "repository": {
     "type": "git",
