@@ -274,7 +274,7 @@ public interface APIStore extends APIManager {
      * @param commentId UUID od the comment
      * @param apiId     UUID of the API
      * @return Comment Object.
-     * @throws APICommentException if failed to retrieve comment from data alayer
+     * @throws APICommentException if failed to retrieve comment from data layer
      * @throws APIMgtResourceNotFoundException if api or comment was not found
      */
     Comment getCommentByUUID(String commentId, String apiId) throws APICommentException,
