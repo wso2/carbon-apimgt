@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -27,6 +28,42 @@ public class ThrottlePolicyDTO   {
 
   @JsonProperty("isDeployed")
   private Boolean isDeployed = false;
+
+  /**
+   * Gets or Sets type
+   */
+  public enum TypeEnum {
+    ADVANCEDTHROTTLEPOLICY("AdvancedThrottlePolicy"),
+    
+    APPLICATIONTHROTTLEPOLICY("ApplicationThrottlePolicy"),
+    
+    SUBSCRIPTIONTHROTTLEPOLICY("SubscriptionThrottlePolicy");
+
+    private String value;
+
+    TypeEnum(String value) {
+      this.value = value;
+    }
+
+    @Override
+    @JsonValue
+    public String toString() {
+      return String.valueOf(value);
+    }
+
+    @JsonCreator
+    public static TypeEnum fromValue(String text) {
+      for (TypeEnum b : TypeEnum.values()) {
+        if (String.valueOf(b.value).equals(text)) {
+          return b;
+        }
+      }
+      return null;
+    }
+  }
+
+  @JsonProperty("type")
+  private TypeEnum type = null;
 
   public ThrottlePolicyDTO policyId(String policyId) {
     this.policyId = policyId;
@@ -118,6 +155,24 @@ public class ThrottlePolicyDTO   {
     this.isDeployed = isDeployed;
   }
 
+  public ThrottlePolicyDTO type(TypeEnum type) {
+    this.type = type;
+    return this;
+  }
+
+   /**
+   * Get type
+   * @return type
+  **/
+  @ApiModelProperty(required = true, value = "")
+  public TypeEnum getType() {
+    return type;
+  }
+
+  public void setType(TypeEnum type) {
+    this.type = type;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -132,12 +187,13 @@ public class ThrottlePolicyDTO   {
         Objects.equals(this.policyName, throttlePolicy.policyName) &&
         Objects.equals(this.displayName, throttlePolicy.displayName) &&
         Objects.equals(this.description, throttlePolicy.description) &&
-        Objects.equals(this.isDeployed, throttlePolicy.isDeployed);
+        Objects.equals(this.isDeployed, throttlePolicy.isDeployed) &&
+        Objects.equals(this.type, throttlePolicy.type);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(policyId, policyName, displayName, description, isDeployed);
+    return Objects.hash(policyId, policyName, displayName, description, isDeployed, type);
   }
 
   @Override
@@ -150,6 +206,7 @@ public class ThrottlePolicyDTO   {
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    isDeployed: ").append(toIndentedString(isDeployed)).append("\n");
+    sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -78,8 +78,8 @@ $(function () {
             columns: [
                 {'data': "displayName"},
                 {'data': "description"},
-                {'data': "defaultLimit.unitTime"},
-                {'data': "defaultLimit.timeUnit"},
+                {'data': "quotaPolicy.unitTime"},
+                {'data': "quotaPolicy.timeUnit"},
                 {'data': "displayName"}
             ],
             columnDefs: [

@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.AdvancedThrottlePolicyInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.AdvancedThrottlePolicyDTO;
 import java.util.Objects;
 
 /**
@@ -18,7 +18,7 @@ public class AdvancedThrottlePolicyListDTO   {
   private Integer count = null;
 
   @JsonProperty("list")
-  private List<AdvancedThrottlePolicyInfoDTO> list = new ArrayList<AdvancedThrottlePolicyInfoDTO>();
+  private List<AdvancedThrottlePolicyDTO> list = new ArrayList<AdvancedThrottlePolicyDTO>();
 
   public AdvancedThrottlePolicyListDTO count(Integer count) {
     this.count = count;
@@ -38,12 +38,12 @@ public class AdvancedThrottlePolicyListDTO   {
     this.count = count;
   }
 
-  public AdvancedThrottlePolicyListDTO list(List<AdvancedThrottlePolicyInfoDTO> list) {
+  public AdvancedThrottlePolicyListDTO list(List<AdvancedThrottlePolicyDTO> list) {
     this.list = list;
     return this;
   }
 
-  public AdvancedThrottlePolicyListDTO addListItem(AdvancedThrottlePolicyInfoDTO listItem) {
+  public AdvancedThrottlePolicyListDTO addListItem(AdvancedThrottlePolicyDTO listItem) {
     this.list.add(listItem);
     return this;
   }
@@ -53,11 +53,11 @@ public class AdvancedThrottlePolicyListDTO   {
    * @return list
   **/
   @ApiModelProperty(value = "")
-  public List<AdvancedThrottlePolicyInfoDTO> getList() {
+  public List<AdvancedThrottlePolicyDTO> getList() {
     return list;
   }
 
-  public void setList(List<AdvancedThrottlePolicyInfoDTO> list) {
+  public void setList(List<AdvancedThrottlePolicyDTO> list) {
     this.list = list;
   }
 

@@ -1,7 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
