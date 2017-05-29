@@ -1,5 +1,8 @@
 package $package;
 import ballerina.net.http;
+import ballerina.lang.messages;
+import org.wso2.carbon.apimgt.gateway.handler;
+import org.wso2.carbon.apimgt.gateway.event.analytics.latency;
 
 @http:BasePath{value:"$apiContext"}
 service $serviceName {
@@ -12,7 +15,9 @@ service $serviceName {
     #if(!$StringUtils.isEmpty($url.produces))@Produces ($url.produces)#end
 	@http:Path{value:"$url.uriTemplate"}
     resource $url.templateId (message m) {
-        #if($url.productionEndpoint)http:ClientConnector productionEndpoint = create http:ClientConnector(getUrlFromKey("$url.productionEndpoint"));#end
+		latency:mediateIn(m);
+		handler:mediateIn(m);
+		#if($url.productionEndpoint)http:ClientConnector productionEndpoint = create http:ClientConnector(getUrlFromKey("$url.productionEndpoint"));#end
 
         #if($url.sandboxEndpoint)http:ClientConnector sandboxEndpoint = create http:ClientConnector(getUrlFromKey("$url.sandboxEndpoint"));#end
 
@@ -25,11 +30,16 @@ service $serviceName {
         productionType = "production";
 
         if (endpointType == productionType) {
+			messages:setProperty(m, "destination", getUrlFromKey("$url.productionEndpoint"));
             response = http:ClientConnector.execute(productionEndpoint, "$url.httpVerb.toLowerCase()", "", m);
         } else {
+			messages:setProperty(m, "destination", getUrlFromKey("$url.sandboxEndpoint"));
             response = http:ClientConnector.execute(sandboxEndpoint, "$url.httpVerb.toLowerCase()", "", m);
         }
 
+		latency:mediateEndpointResponse(m);
+		latency:mediateOut(m);
+		handler:mediateOut(m, response);
         reply response;
     }
 #end

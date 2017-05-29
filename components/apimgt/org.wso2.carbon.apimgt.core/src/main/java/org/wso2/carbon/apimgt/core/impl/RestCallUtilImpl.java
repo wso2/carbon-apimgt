@@ -234,7 +234,7 @@ public class RestCallUtilImpl implements RestCallUtil {
             }
 
             OutputStream outputStream = httpConnection.getOutputStream();
-            outputStream.write(entity.toString().getBytes(StandardCharsets.UTF_8));
+            outputStream.write(entity.getEntity().toString().getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
             outputStream.close();
 

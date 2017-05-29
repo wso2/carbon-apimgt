@@ -89,6 +89,10 @@ public enum ExceptionCodes implements ErrorHandler {
     WORKFLOW_NO_PENDING_TASK(900557, "Workflow error", 412,
             "Requested resource does not have a pending workflow task"),
     WORKFLOW_REJCECTED(900558, "Workflow error", 403, "Requested action is rejected"),
+    INCOMPATIBLE_WORKFLOW_REQUEST_FOR_PUBLISHER(900559, "Incompatible workflow request", 400, "Incompatible workflow " +
+            "request received by publisher"),
+    INCOMPATIBLE_WORKFLOW_REQUEST_FOR_STORE(900560, "Incompatible workflow request", 400, "Incompatible workflow " +
+            "request received by store"),
 
     // Auth related codes
     ROLES_CANNOT_BE_EMPTY(900600, "Role list cannot be empty", 400, "Role list cannot be empty"),
@@ -138,8 +142,11 @@ public enum ExceptionCodes implements ErrorHandler {
     TOKEN_INTROSPECTION_FAILED(900956, "Keymanagement Error", 500, " Error while introspecting the access token."),
     APPLICATION_TOKEN_GENERATION_FAILED(900957, "Keymanagement Error", 500, " Error while generating the application" +
             "access token."),
-    ACCESS_TOKEN_REVOKE_FAILED(900958, "Keymanagement Error", 500, " Error while revoking the access token.");
+    ACCESS_TOKEN_REVOKE_FAILED(900958, "Keymanagement Error", 500, " Error while revoking the access token."),
 
+
+    //Throttle related codes
+    THROTTLE_TEMPLATE_EXCEPTION(900959, "Policy Generating Error", 500, " Error while generate policy configuration");
 
     private final long errorCode;
     private final String errorMessage;

@@ -52,17 +52,12 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.API.APIBuilder;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.models.ApplicationCreationResponse;
-import org.wso2.carbon.apimgt.core.models.ApplicationCreationWorkflow;
-import org.wso2.carbon.apimgt.core.models.ApplicationUpdateWorkflow;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.Event;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
-import org.wso2.carbon.apimgt.core.models.SubscriptionWorkflow;
 import org.wso2.carbon.apimgt.core.models.User;
-import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowConfig;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
@@ -71,8 +66,13 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ApplicationStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.SubscriptionStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
+import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationResponse;
+import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationWorkflow;
+import org.wso2.carbon.apimgt.core.workflow.ApplicationUpdateWorkflow;
 import org.wso2.carbon.apimgt.core.workflow.DefaultWorkflowExecutor;
 import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
+import org.wso2.carbon.apimgt.core.workflow.SubscriptionCreationWorkflow;
+import org.wso2.carbon.apimgt.core.workflow.Workflow;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExtensionsConfigBuilder;
 import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
 import org.wso2.carbon.kernel.configprovider.ConfigProvider;
@@ -978,23 +978,15 @@ public class APIStoreImplTestCase {
 
     // End of exception testing
 
-
-    @Test(description = "Exception when completing workflow without valid workflow obj",
-            expectedExceptions = APIManagementException.class)
-    public void testCompleteWorkflowWithoutValidWorkflowObj() throws Exception {
-
-        APIStore apiStore = getApiStoreImpl();
-        apiStore.completeWorkflow(null, new Workflow());
-    }
-
     @Test(description = "Exception when completing application creation workflow without a reference",
             expectedExceptions = APIManagementException.class)
     public void testCompleteApplicationWorkflowWithoutReference() throws Exception {
 
-        APIStore apiStore = getApiStoreImpl();
-
+        WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
+        ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
+        APIStore apiStore = getApiStoreImpl(applicationDAO, workflowDAO);
         WorkflowExecutor executor = new DefaultWorkflowExecutor();
-        Workflow workflow = new ApplicationCreationWorkflow();
+        Workflow workflow = new ApplicationCreationWorkflow(applicationDAO, workflowDAO);
         workflow.setWorkflowReference(null);
         apiStore.completeWorkflow(executor, workflow);
     }
@@ -1015,10 +1007,8 @@ public class APIStoreImplTestCase {
                 (policy);
 
         apiStore.addApplication(application);
-
-
         DefaultWorkflowExecutor executor = Mockito.mock(DefaultWorkflowExecutor.class);
-        Workflow workflow = new ApplicationCreationWorkflow();
+        Workflow workflow = new ApplicationCreationWorkflow(applicationDAO, workflowDAO);
         workflow.setWorkflowReference(application.getId());
 
         WorkflowResponse response = new GeneralWorkflowResponse();
@@ -1054,7 +1044,7 @@ public class APIStoreImplTestCase {
 
         //following section mock the workflow callback api
         DefaultWorkflowExecutor executor = Mockito.mock(DefaultWorkflowExecutor.class);
-        Workflow workflow = new ApplicationUpdateWorkflow();
+        Workflow workflow = new ApplicationUpdateWorkflow(applicationDAO, workflowDAO);
         workflow.setWorkflowReference(application.getId());
         workflow.setExternalWorkflowReference(UUID);
 
@@ -1106,7 +1096,7 @@ public class APIStoreImplTestCase {
         SubscriptionResponse response = apiStore.addApiSubscription(apiId, UUID, TIER);
 
         DefaultWorkflowExecutor executor = Mockito.mock(DefaultWorkflowExecutor.class);
-        Workflow workflow = new SubscriptionWorkflow();
+        Workflow workflow = new SubscriptionCreationWorkflow(apiSubscriptionDAO, workflowDAO, apiGateway);
         workflow.setWorkflowType(APIMgtConstants.WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
         workflow.setWorkflowReference(response.getSubscriptionUUID());
 

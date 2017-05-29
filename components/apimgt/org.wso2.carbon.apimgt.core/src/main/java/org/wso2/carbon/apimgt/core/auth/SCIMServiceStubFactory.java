@@ -41,7 +41,7 @@ public class SCIMServiceStubFactory {
                 .getIdentityProviderConfigs();
         return getSCIMServiceStub(idpConfigs.getIdentityProviderBaseUrl(),
                 idpConfigs.getIdentityProviderCredentials().getUsername(),
-                idpConfigs.getIdentityProviderCredentials().getUsername(),
+                idpConfigs.getIdentityProviderCredentials().getPassword(),
                 DEFAULT_IDP_CERT_ALIAS);
     }
 

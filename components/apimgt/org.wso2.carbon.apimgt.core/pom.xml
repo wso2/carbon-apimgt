@@ -24,7 +24,7 @@
     <parent>
         <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>7.0.22-SNAPSHOT</version>
+        <version>7.0.24-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -909,6 +909,7 @@
             org.apache.commons.io.*;
             org.apache.commons.*;
             org.apache.velocity.*;
+            org.apache.velocity.app.*;
             org.wso2.andes.*;
             javax.jms.*;
             javax.ws.rs.*;
