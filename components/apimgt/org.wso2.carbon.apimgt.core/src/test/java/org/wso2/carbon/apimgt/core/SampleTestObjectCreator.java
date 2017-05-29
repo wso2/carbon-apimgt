@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
+import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
@@ -759,6 +760,18 @@ public class SampleTestObjectCreator {
         comment.setCreatedTime(LocalDateTime.now());
         comment.setUpdatedTime(LocalDateTime.now());
         return comment;
+    }
+
+    public static Rating createDefaultRating(String apiId) {
+        Rating rating = new Rating();
+        rating.setUuid(UUID.randomUUID().toString());
+        rating.setApiId(apiId);
+        rating.setRating(4);
+        rating.setUsername("john");
+        rating.setLastUpdatedUser("john");
+        rating.setCreatedTime(LocalDateTime.now());
+        rating.setLastUpdatedTime(LocalDateTime.now());
+        return rating;
     }
 
     public static API.APIBuilder createDefaultAPIWithApiLevelEndpoint() {

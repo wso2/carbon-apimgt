@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
+import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIComparator;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
@@ -1410,6 +1411,57 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNotNull(commentFromDB);
         Assert.assertEquals(newCommentText, commentFromDB.getCommentText());
 
+    }
+
+    @Test
+    public void testAddGetRating() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
+                .apiDefinition(SampleTestObjectCreator.apiDefinition);
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+        Rating rating = SampleTestObjectCreator.createDefaultRating(api.getId());
+        apiDAO.addRating(api.getId(), rating);
+        Rating ratingFromDB = apiDAO.getRatingByUUID(api.getId(), rating.getUuid());
+        Assert.assertNotNull(ratingFromDB);
+    }
+
+    @Test
+    public void testUpdateRating() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
+                .apiDefinition(SampleTestObjectCreator.apiDefinition);
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+        Rating rating1 = SampleTestObjectCreator.createDefaultRating(api.getId());
+        apiDAO.addRating(api.getId(), rating1);
+        Rating rating2 = SampleTestObjectCreator.createDefaultRating(api.getId());
+        rating2.setRating(4);
+        apiDAO.updateRating(api.getId(), rating1.getUuid(), rating2);
+        Rating ratingFromDB = apiDAO.getRatingByUUID(api.getId(), rating1.getUuid());
+        Assert.assertNotNull(ratingFromDB);
+        Assert.assertEquals(4, ratingFromDB.getRating());
+    }
+
+    @Test
+    public void testAddGetAllRatings() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
+                .apiDefinition(SampleTestObjectCreator.apiDefinition);
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+        Rating rating1 = SampleTestObjectCreator.createDefaultRating(api.getId());
+        apiDAO.addRating(api.getId(), rating1);
+        Rating rating2 = SampleTestObjectCreator.createDefaultRating(api.getId());
+        rating2.setRating(3);
+        rating2.setUsername("andrew");
+        apiDAO.addRating(api.getId(), rating2);
+        List<Rating> ratingsListFromDB = apiDAO.getRatingsListForApi(api.getId());
+        Assert.assertNotNull(ratingsListFromDB);
+        Assert.assertEquals(2, ratingsListFromDB.size());
     }
 
     @Test(expectedExceptions = APIMgtDAOException.class)
