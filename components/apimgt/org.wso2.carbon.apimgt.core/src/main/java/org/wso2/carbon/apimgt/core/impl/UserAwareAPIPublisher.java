@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.core.impl;
 
 import org.wso2.carbon.apimgt.core.api.APIGateway;
+import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
@@ -34,7 +35,8 @@ import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 class UserAwareAPIPublisher extends APIPublisherImpl {
 
     public UserAwareAPIPublisher(String username, IdentityProvider idp, ApiDAO apiDAO, ApplicationDAO applicationDAO,
-                                 APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, LabelDAO labelDAO,
+                                 APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager
+                                         apiLifecycleManager, LabelDAO labelDAO,
                                  WorkflowDAO workflowDAO, TagDAO tagDAO, GatewaySourceGenerator gatewaySourceGenerator,
                                  APIGateway apiGatewayPublisher) {
         super(username, idp, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, new APILifeCycleManagerImpl(),
