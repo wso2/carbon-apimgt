@@ -36,12 +36,12 @@ $('#addThrottleBtn').on('click', addPolicyToBackend );
 
 var apiPolicy =
 {
-    "policyId" : "",
+    "policyId": "",
     "policyName": "",
     "policyLevel": "",
     "policyDescription": "",
     "executionFlows": [],
-    "defaultQuotaPolicy": {
+    "quotaPolicy": {
         "type": "",
         "limit": {
             "requestCount": 0,

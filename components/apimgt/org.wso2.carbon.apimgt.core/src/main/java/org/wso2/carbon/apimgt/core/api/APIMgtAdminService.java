@@ -26,7 +26,10 @@ import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
+import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
+import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 
 import java.util.List;
 
@@ -75,10 +78,27 @@ public interface APIMgtAdminService {
     /**
      * Updates existing @{@link Policy} to the system
      *
-     * @param policy Policy object to be updated.
+     * @param apiPolicy Policy object to be updated.
      * @throws APIManagementException If failed to update the policy.
      */
-    void updatePolicy(Policy policy) throws APIManagementException;
+    void updateAPIPolicy(APIPolicy apiPolicy) throws APIManagementException;
+
+    /**
+     * Updates existing @{@link Policy} to the system
+     *
+     * @param applicationPolicy Policy object to be updated.
+     * @throws APIManagementException If failed to update the policy.
+     */
+    void updateApplicationPolicy(ApplicationPolicy applicationPolicy) throws APIManagementException;
+
+
+    /**
+     * Updates existing @{@link Policy} to the system
+     *
+     * @param subscriptionPolicy Policy object to be updated.
+     * @throws APIManagementException If failed to update the policy.
+     */
+    void updateSubscriptionPolicy(SubscriptionPolicy subscriptionPolicy) throws APIManagementException;
 
     /**
      * Delete existing @{@link Policy} in the system
@@ -113,11 +133,29 @@ public interface APIMgtAdminService {
      * Get a @{@link Policy} by policy uuid
      *
      * @param uuid Policy uuid
-     * @param policyLevel Tier level of the policy.
      * @return Policy object.
      * @throws APIManagementException If failed to get policy.
      */
-    Policy getPolicyByUuid(String uuid, String policyLevel) throws APIManagementException;
+    APIPolicy getAPIPolicyByUuid(String uuid) throws APIManagementException;
+
+    /**
+     * Get a @{@link Policy} by policy uuid
+     *
+     * @param uuid Policy uuid
+     * @return Policy object.
+     * @throws APIManagementException If failed to get policy.
+     */
+    ApplicationPolicy getApplicationPolicyByUuid(String uuid) throws APIManagementException;
+
+
+    /**
+     * Get a @{@link Policy} by policy uuid
+     *
+     * @param uuid Policy uuid
+     * @return Policy object.
+     * @throws APIManagementException If failed to get policy.
+     */
+    SubscriptionPolicy getSubscriptionPolicyByUuid(String uuid) throws APIManagementException;
 
     /**
      * Get a List of policies of a particular level
@@ -177,4 +215,21 @@ public interface APIMgtAdminService {
      * @throws APIManagementException If failed to get API list
      */
     List<API> getAPIsByGatewayLabel(List<String> gatewayLabels) throws APIManagementException;
+    List<APIPolicy> getAllAdvancePolicies() throws APIManagementException;
+
+    /**
+     * Get a List of Advance policies.
+     *
+     * @return List of Policy objects of the given level.
+     * @throws APIManagementException If failed to get policies.
+     */
+    List<ApplicationPolicy> getAllApplicationPolicies() throws APIManagementException;
+
+    /**
+     * Get a List of Advance policies.
+     *
+     * @return List of Policy objects of the given level.
+     * @throws APIManagementException If failed to get policies.
+     */
+    List<SubscriptionPolicy> getAllSubscriptionPolicies() throws APIManagementException;
 }

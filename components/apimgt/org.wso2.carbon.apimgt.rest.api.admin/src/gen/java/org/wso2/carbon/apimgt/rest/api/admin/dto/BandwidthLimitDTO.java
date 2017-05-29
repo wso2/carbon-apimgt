@@ -14,12 +14,12 @@ import java.util.Objects;
  */
 public class BandwidthLimitDTO extends ThrottleLimitDTO  {
   @JsonProperty("dataAmount")
-  private Long dataAmount = 0l;
+  private Integer dataAmount = 0;
 
   @JsonProperty("dataUnit")
   private String dataUnit = null;
 
-  public BandwidthLimitDTO dataAmount(Long dataAmount) {
+  public BandwidthLimitDTO dataAmount(Integer dataAmount) {
     this.dataAmount = dataAmount;
     return this;
   }
@@ -29,11 +29,11 @@ public class BandwidthLimitDTO extends ThrottleLimitDTO  {
    * @return dataAmount
   **/
   @ApiModelProperty(value = "")
-  public Long getDataAmount() {
+  public Integer getDataAmount() {
     return dataAmount;
   }
 
-  public void setDataAmount(Long dataAmount) {
+  public void setDataAmount(Integer dataAmount) {
     this.dataAmount = dataAmount;
   }
 

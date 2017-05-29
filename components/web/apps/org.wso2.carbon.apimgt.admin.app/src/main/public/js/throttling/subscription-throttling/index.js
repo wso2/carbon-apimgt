@@ -12,7 +12,7 @@ $(function () {
 
         var callbacks = {
             onSuccess: function () {
-                _initDataTable(raw_data);
+                _initDataTable(raw_data.data.list);
             },
             onFailure: function (message, e) {
 
@@ -75,15 +75,13 @@ $(function () {
 
     function _initDataTable(raw_data) {
         $('#api-policy').DataTable({
-            ajax: function (data, callback, settings) {
-                callback(raw_data);
-            },
+            data: raw_data,
             columns: [
-                {'data': 'name'},
-                {'data': 'description'},
-                {'data': 'unitTime'},
-                {'data': 'timeUnit'},
-                {'data': 'name'}
+                {'data': "displayName"},
+                {'data': "description"},
+                {'data': "defaultLimit.unitTime"},
+                {'data': "defaultLimit.timeUnit"},
+                {'data': "displayName"}
             ],
             columnDefs: [
                 {
@@ -108,7 +106,7 @@ $(function () {
                 href: contextPath + '/applications/' + data + '/edit',
                 title: 'Edit'
             })
-                    .attr("data-uuid", row.uuid)
+                    .attr("data-uuid", row.policyId)
                     .addClass("btn  btn-sm padding-reduce-on-grid-view tier-edit")
                     .append(editSpanIcon)
                     .append(editSpanText);
@@ -118,7 +116,7 @@ $(function () {
             var deleteSpanIcon = $("<span>").addClass("fw-stack").append(deleteIcon1).append(deleteIcon2);
             var deleteSpanText = $("<span>").addClass("hidden-xs").text("delete");
             var delete_button = $('<a>', {id: data, href: '#', 'data-id': data, title: 'delete'})
-                    .attr("data-uuid", row.uuid)
+                    .attr("data-uuid", row.policyId)
                     .addClass("btn btn-sm padding-reduce-on-grid-view deletePolicy")
                     .append(deleteSpanIcon)
                     .append(deleteSpanText);
