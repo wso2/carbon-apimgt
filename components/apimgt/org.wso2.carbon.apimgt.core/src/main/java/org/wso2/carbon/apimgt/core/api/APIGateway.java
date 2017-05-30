@@ -93,11 +93,11 @@ public interface APIGateway {
     void deleteEndpoint(Endpoint endpoint) throws GatewayException;
 
     /**
-     * Add API state change to gateway
+     * Publish the lifecycle state change of an API to gateway
      *
-     * @param api
-     * @param status
-     * @throws GatewayException
+     * @param api API artifact
+     * @param status Target lifecycle status to be changed
+     * @throws GatewayException If there is a failure to notify state change to gateway
      */
     void changeAPIState(API api, String status) throws GatewayException;
 

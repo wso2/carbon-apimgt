@@ -233,7 +233,8 @@ public class APIStateChangeWorkflow extends Workflow {
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
         } catch (GatewayException e) {
-            String message = "Error occurred while changing the state of api ID " + apiId + " in gateway";
+            String message = "Error occurred while changing the state of api ID: " + apiId + " to " + status
+                    + "in gateway";
             log.error(message, e);
             throw new APIManagementException(message, ExceptionCodes.GATEWAY_EXCEPTION);
         }
