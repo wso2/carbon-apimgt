@@ -24,15 +24,24 @@ package org.wso2.carbon.apimgt.rest.api.core.utils;
 
 
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Label;
+import org.wso2.carbon.apimgt.core.models.RegistrationSummary;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.rest.api.core.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.APISummaryDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.APISummaryListDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.AnalyticsInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.CredentialsDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.JWTInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.KeyManagerInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.LabelDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.RegistrationSummaryDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.SubscriptionDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.ThrottlingInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.UriTemplateDTO;
 
 import java.util.ArrayList;
@@ -58,11 +67,8 @@ public class MappingUtil {
             subscriptionDTO.setApiProvider(subscriptionData.getApiProvider());
             subscriptionDTO.setConsumerKey(subscriptionData.getConsumerKey());
             subscriptionDTO.setSubscriptionPolicy(subscriptionData.getSubscriptionPolicy());
-            subscriptionDTO.setApplicationName(subscriptionData.getApplicationName());
-            subscriptionDTO.setApplicationOwner(subscriptionData.getApplicationOwner());
             subscriptionDTO.setKeyEnvType(subscriptionData.getKeyEnvType());
             subscriptionDTO.setApplicationId(subscriptionData.getApplicationId());
-            subscriptionDTO.setApplicationTier(subscriptionData.getApplicationTier());
             subscriptionDTOList.add(subscriptionDTO);
         }
         return subscriptionDTOList;
@@ -138,18 +144,104 @@ public class MappingUtil {
     }
 
     /**
-     * Convert uritemplates+ subscription validation to ApiSummaryList
-     * @param uriTemplates list of resources
-     * @param subscriptionValidationDataList list of subscription data
-     * @return APISummaryListDTO
+     * convert {@link ApplicationDTO} to {@link Application}
+     * @param applicationList  List of {@link Application}
+     * @return ApplicationDTO list
      */
-    public static APISummaryListDTO toApiSummaryListDto(List<UriTemplate> uriTemplates, List<SubscriptionValidationData>
-            subscriptionValidationDataList) {
-        APISummaryListDTO apiSummaryListDTO = new APISummaryListDTO();
-        APISummaryDTO apiSummaryDTO = new APISummaryDTO();
-        apiSummaryDTO.setResources(convertToResourceListDto(uriTemplates));
-        apiSummaryDTO.setSubscriptions(convertToSubscriptionListDto(subscriptionValidationDataList));
-        apiSummaryListDTO.addListItem(apiSummaryDTO);
-        return apiSummaryListDTO;
+    public static List<ApplicationDTO> convertToApplicationDtoList(List<Application> applicationList) {
+        List<ApplicationDTO> applicationDTOList = new ArrayList<>();
+        for (Application application : applicationList) {
+            ApplicationDTO applicationDTO = new ApplicationDTO();
+            applicationDTO.setName(application.getName());
+            applicationDTO.setApplicationId(application.getId());
+            applicationDTO.setThrottlingTier(application.getTier());
+            applicationDTO.setSubscriber(application.getCreatedUser());
+            applicationDTOList.add(applicationDTO);
+        }
+        return applicationDTOList;
+    }
+
+/**
+     * Converts the Gateway registration summary into RegistrationSummaryDTO
+     *
+     * @param registrationSummary the registration summary required by gateway
+     * @return RegistrationSummaryDTO
+     */
+    public static RegistrationSummaryDTO toRegistrationSummaryDTO(RegistrationSummary registrationSummary) {
+        RegistrationSummaryDTO registrationSummaryDTO = new RegistrationSummaryDTO();
+        registrationSummaryDTO.setKeyManagerInfo(toKeyManagerInfoDTO(registrationSummary));
+        registrationSummaryDTO.setAnalyticsInfo(toAnalyticsDTO(registrationSummary));
+        registrationSummaryDTO.setJwTInfo(toJWTInfoDTO(registrationSummary));
+        registrationSummaryDTO.setThrottlingInfo(toThrottlingInfoDTO(registrationSummary));
+        return registrationSummaryDTO;
+    }
+
+    /**
+     * Converts RegistrationSummary key manager information into KeyManagerInfoDTO
+     *
+     * @param registrationSummary the registration summary required by gateway
+     * @return KeyManagerInfoDTO
+     */
+    private static KeyManagerInfoDTO toKeyManagerInfoDTO(RegistrationSummary registrationSummary) {
+
+        KeyManagerInfoDTO keyManagerInfoDTO = new KeyManagerInfoDTO();
+        keyManagerInfoDTO.setDcrEndpoint(registrationSummary.getKeyManagerInfo().getDcrEndpoint());
+        keyManagerInfoDTO.setIntrospectEndpoint(registrationSummary.getKeyManagerInfo().getIntrospectEndpoint());
+        keyManagerInfoDTO.setRevokeEndpoint(registrationSummary.getKeyManagerInfo().getRevokeEndpoint());
+        keyManagerInfoDTO.setTokenEndpoint(registrationSummary.getKeyManagerInfo().getTokenEndpoint());
+        CredentialsDTO keyManagerCredentials = new CredentialsDTO();
+        keyManagerCredentials.setUsername(registrationSummary.getKeyManagerInfo().getCredentials().getUsername());
+        keyManagerCredentials.setPassword(registrationSummary.getKeyManagerInfo().getCredentials().getPassword());
+        keyManagerInfoDTO.setCredentials(keyManagerCredentials);
+        return keyManagerInfoDTO;
+    }
+
+    /**
+     * Converts RegistrationSummary analytics information into AnalyticsInfoDTO
+     *
+     * @param registrationSummary the registration summary required by gateway
+     * @return AnalyticsInfoDTO
+     */
+    private static AnalyticsInfoDTO toAnalyticsDTO(RegistrationSummary registrationSummary) {
+        AnalyticsInfoDTO analyticsInfoDTO = new AnalyticsInfoDTO();
+        analyticsInfoDTO.serverURL(registrationSummary.getAnalyticsInfo().getDasServerURL());
+        CredentialsDTO analyticsServerCredentials = new CredentialsDTO();
+        analyticsServerCredentials.setUsername(registrationSummary.getAnalyticsInfo().getDasServerCredentials()
+                .getUsername());
+        analyticsServerCredentials.setPassword(registrationSummary.getAnalyticsInfo().getDasServerCredentials()
+                .getPassword());
+        analyticsInfoDTO.setCredentials(analyticsServerCredentials);
+        return analyticsInfoDTO;
+    }
+
+    /**
+     * Converts RegistrationSummary JWT information into JWTInfoDTO
+     *
+     * @param registrationSummary the registration summary required by gateway
+     * @return JWTInfoDTO
+     */
+    private static JWTInfoDTO toJWTInfoDTO(RegistrationSummary registrationSummary) {
+        JWTInfoDTO jwtInfoDTO = new JWTInfoDTO();
+        jwtInfoDTO.enableJWTGeneration(registrationSummary.getJwtInfo().isEnableJWTGeneration());
+        jwtInfoDTO.jwtHeader(registrationSummary.getJwtInfo().getJwtHeader());
+        return jwtInfoDTO;
+    }
+
+    /**
+     * Converts RegistrationSummary Throttling information into ThrottlingInfoDTO
+     *
+     * @param registrationSummary the registration summary required by gateway
+     * @return ThrottlingInfoDTO
+     */
+    private static ThrottlingInfoDTO toThrottlingInfoDTO(RegistrationSummary registrationSummary) {
+        ThrottlingInfoDTO throttlingInfoDTO = new ThrottlingInfoDTO();
+        throttlingInfoDTO.serverURL(registrationSummary.getThrottlingInfo().getDataPublisher().getReceiverURL());
+        CredentialsDTO throttlingServerCredentials = new CredentialsDTO();
+        throttlingServerCredentials.setUsername(registrationSummary.getThrottlingInfo().getDataPublisher()
+                .getCredentials().getUsername());
+        throttlingServerCredentials.setPassword(registrationSummary.getThrottlingInfo().getDataPublisher()
+                .getCredentials().getPassword());
+        throttlingInfoDTO.setCredentials(throttlingServerCredentials);
+        return throttlingInfoDTO;
     }
 }

@@ -12,6 +12,7 @@ import org.wso2.carbon.apimgt.gateway.holders as holder;
 
 service gatewayInitService {
     boolean isReady = initGateway();
+    boolean isCacheInitialized = holder:initializeCache();
 }
 
 function initGateway () (boolean) {

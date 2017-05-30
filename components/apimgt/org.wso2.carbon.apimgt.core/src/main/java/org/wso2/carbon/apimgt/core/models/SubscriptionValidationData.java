@@ -31,12 +31,8 @@ public final class SubscriptionValidationData {
     private String apiProvider;
     private String consumerKey;
     private String subscriptionPolicy;
-    private String applicationName;
-    private String applicationOwner;
-    private String keyAuthType;
     private String keyEnvType;
     private String applicationId;
-    private String applicationTier;
 
     public SubscriptionValidationData(String apiContext, String apiVersion, String consumerKey) {
         this.apiContext = apiContext;
@@ -80,30 +76,6 @@ public final class SubscriptionValidationData {
         this.subscriptionPolicy = subscriptionPolicy;
     }
 
-    public String getApplicationName() {
-        return applicationName;
-    }
-
-    public void setApplicationName(String applicationName) {
-        this.applicationName = applicationName;
-    }
-
-    public String getApplicationOwner() {
-        return applicationOwner;
-    }
-
-    public void setApplicationOwner(String applicationOwner) {
-        this.applicationOwner = applicationOwner;
-    }
-
-    public String getKeyAuthType() {
-        return keyAuthType;
-    }
-
-    public void setKeyAuthType(String keyAuthType) {
-        this.keyAuthType = keyAuthType;
-    }
-
     public String getKeyEnvType() {
         return keyEnvType;
     }
@@ -120,11 +92,4 @@ public final class SubscriptionValidationData {
         this.applicationId = applicationId;
     }
 
-    public String getApplicationTier() {
-        return applicationTier;
-    }
-
-    public void setApplicationTier(String applicationTier) {
-        this.applicationTier = applicationTier;
-    }
 }

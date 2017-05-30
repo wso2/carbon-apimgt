@@ -3,18 +3,23 @@ package org.wso2.carbon.apimgt.core.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
+import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiType;
+import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIConfigRetrievalException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummary;
+import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Label;
+import org.wso2.carbon.apimgt.core.models.RegistrationSummary;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
@@ -33,13 +38,17 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     private PolicyDAO policyDAO;
     private ApiDAO apiDAO;
     private LabelDAO labelDAO;
+    private ApplicationDAO applicationDAO;
+    private APIMConfigurations apimConfiguration;
 
     public APIMgtAdminServiceImpl(APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, ApiDAO apiDAO,
-                                  LabelDAO labelDAO) {
+                                  LabelDAO labelDAO , ApplicationDAO applicationDAO) {
         this.apiSubscriptionDAO = apiSubscriptionDAO;
         this.policyDAO = policyDAO;
         this.apiDAO = apiDAO;
         this.labelDAO = labelDAO;
+        this.apimConfiguration = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
+        this.applicationDAO = applicationDAO;
     }
 
     /**
@@ -258,6 +267,23 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
             throw new APIManagementException(msg, ExceptionCodes.APIM_DAO_EXCEPTION);
         }
         return apiList;
+    }
+
+    @Override
+    public RegistrationSummary getRegistrationSummary() {
+        return new RegistrationSummary(apimConfiguration);
+    }
+
+    @Override
+    public List<Application> getAllApplications() throws APIManagementException {
+        try {
+            List<Application> applicationList = applicationDAO.getAllApplications();
+            return applicationList;
+        } catch (APIMgtDAOException ex) {
+            String msg = "Error occurred while getting the Application list";
+            log.error(msg, ex);
+            throw new APIManagementException(msg, ExceptionCodes.APIM_DAO_EXCEPTION);
+        }
     }
 
 }
