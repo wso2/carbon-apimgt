@@ -3,10 +3,8 @@ package org.wso2.carbon.apimgt.gateway;
 import ballerina.net.http;
 import ballerina.lang.messages;
 import ballerina.lang.system;
-import ballerina.lang.jsons;
 
 import org.wso2.carbon.apimgt.gateway.holders as throttle;
-import org.wso2.carbon.apimgt.gateway.utils as util;
 
 function doThrottling( message msg) (boolean){
 
@@ -24,16 +22,11 @@ function doThrottling( message msg) (boolean){
     //apiLevelThrottleKey key = {apiContext}:{apiVersion}
     string apiLevelThrottleKey;
 
-    //Other Relevant parameters
-    map authContext = util:getStringProperty(msg,"authCtx");
     string authorizedUser;
 
     //Throttle decisions
-    boolean isThrottled = false;
-    boolean isResourceLevelThrottled = false;
     boolean isApplicationLevelThrottled = false;
     boolean isSubscriptionLevelThrottled =false;
-    boolean isSubscriptionLevelSpikeThrottled = false;
     boolean isApiLevelThrottled = false;
     boolean apiLevelThrottlingTriggered = false;
 
@@ -42,29 +35,25 @@ function doThrottling( message msg) (boolean){
     string apiLevelBlockingKey = "";
     string userLevelBlockingKey = "";
 
-    //todo condition implementation ConditionGroupDTO[] conditionGroupDTOs;
-
-    //todo get these from authcontext
     json keyValidationDto = (json)messages:getProperty(msg, "KEY_VALIDATION_INFO");
 
-    authorizedUser = jsons:getString(keyValidationDto, "username");
+    authorizedUser = getJsonString(keyValidationDto, "username");
     //Throttle Policies
-    string applicationLevelPolicy = jsons:getString(keyValidationDto, "applicationPolicy");
-    string subscriptionLevelPolicy = jsons:getString(keyValidationDto, "subscriptionPolicy");
-    string apiLevelPolicy =  jsons:getString(keyValidationDto, "apiLevelPolicy");
+    string applicationLevelPolicy = getJsonString(keyValidationDto, "applicationPolicy");
+    string subscriptionLevelPolicy = getJsonString(keyValidationDto, "subscriptionPolicy");
+    string apiLevelPolicy =  getJsonString(keyValidationDto, "apiLevelPolicy");
 
-    string apiContext = jsons:getString(keyValidationDto, "apiContext");
-    string apiVersion = jsons:getString(keyValidationDto, "apiVersion");
-    string applicationId = jsons:getString(keyValidationDto, "applicationId");
+    string apiContext = getJsonString(keyValidationDto, "apiContext");
+    string apiVersion = getJsonString(keyValidationDto, "apiVersion");
+    string applicationId = getJsonString(keyValidationDto, "applicationId");
 
     //todo get the correct key value
-    string ip = util:getStringProperty(msg, "CLIENT_IP");
-
+    ipLevelBlockingKey = getStringProperty(msg, "CLIENT_IP_ADDRESS");
     apiLevelThrottleKey = apiContext + ":" + apiVersion;
     subscriptionLevelThrottleKey = applicationId + ":" + apiContext + ":" + apiVersion;
 
     // Blocking Condition
-    boolean isBlocked = throttle:isRequestBlocked(apiLevelThrottleKey,subscriptionLevelThrottleKey,authorizedUser,ip);
+    boolean isBlocked = throttle:isRequestBlocked(apiLevelThrottleKey,subscriptionLevelThrottleKey,authorizedUser,ipLevelBlockingKey);
     // strings:equalsIgnoreCase(apiContext,"")
     if (apiContext == ""){
         http:setStatusCode( msg, 400 );
@@ -79,9 +68,9 @@ function doThrottling( message msg) (boolean){
         return true;
     }
    
-    string httpMethod = jsons:getString(keyValidationDto, "verb");
-    string resourceLevelPolicy = jsons:getString(keyValidationDto, "resourceLevelPolicy");
-    string resourceUri = jsons:getString(keyValidationDto, "resourcePath");
+    string httpMethod = getJsonString(keyValidationDto, "verb");
+    string resourceLevelPolicy = getJsonString(keyValidationDto, "resourceLevelPolicy");
+    string resourceUri = getJsonString(keyValidationDto, "resourcePath");
     resourceLevelThrottleKey = apiContext + "/" + apiVersion + resourceUri + ":" + httpMethod;
 
     //Check API Level is Applied
@@ -124,9 +113,9 @@ function doThrottling( message msg) (boolean){
 
     // Application Level Throttling
     applicationLevelThrottleKey = applicationId + ":" + authorizedUser;
-    isApiLevelThrottled = throttle:isThrottled(applicationLevelThrottleKey);
+    isApplicationLevelThrottled = throttle:isThrottled(applicationLevelThrottleKey);
 
-    if(isApiLevelThrottled){
+    if(isApplicationLevelThrottled){
         setAPIThrottledResponse(msg);
         return true;
     }
@@ -135,8 +124,6 @@ function doThrottling( message msg) (boolean){
 
     return false;
 }
-
-
 
 function SetAPIBlockedResponse(message msg){
     http:setStatusCode( msg, 403 );

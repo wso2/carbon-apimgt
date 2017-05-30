@@ -188,3 +188,13 @@ function getStringProperty(message msg, string propertyKey)(string){
     }
     return value;
 }
+
+function getJsonString(json jsonObject, string jsonPath)(string){
+    string value = "";
+    try{
+        value = jsons:getString(jsonObject, jsonPath) ;
+    }catch(errors:Error e){
+        return "";
+    }
+    return value;
+}
