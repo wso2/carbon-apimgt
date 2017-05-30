@@ -13,11 +13,14 @@ function doThrottling( message msg) (boolean){
     //Throttle Keys
     //applicationLevelThrottleKey = {applicationId}:{authorizedUser}
     string applicationLevelThrottleKey;
+
     //subscriptionLevelThrottleKey = {applicationId}:{apiContext}:{apiVersion}
     string subscriptionLevelThrottleKey;
+
     // resourceLevelThrottleKey = {apiContext}/{apiVersion}{resourceUri}:{httpMethod}
     // if policy is user level then authorized user will append at end
     string resourceLevelThrottleKey;
+
     //apiLevelThrottleKey key = {apiContext}:{apiVersion}
     string apiLevelThrottleKey;
 
@@ -33,7 +36,6 @@ function doThrottling( message msg) (boolean){
     boolean isSubscriptionLevelSpikeThrottled = false;
     boolean isApiLevelThrottled = false;
     boolean apiLevelThrottlingTriggered = false;
-    boolean policyLevelUserTriggered = false;
 
     string ipLevelBlockingKey = "";
     string appLevelBlockingKey = "";
@@ -46,10 +48,10 @@ function doThrottling( message msg) (boolean){
     json keyValidationDto = (json)messages:getProperty(msg, "KEY_VALIDATION_INFO");
 
     authorizedUser = jsons:getString(keyValidationDto, "username");
-    //Throttle Tiers
-    string applicationLevelTier = jsons:getString(keyValidationDto, "applicationTier");
-    string subscriptionLevelTier = jsons:getString(keyValidationDto, "subscriptionTier");
-    string apiLevelTier =  jsons:getString(keyValidationDto, "apiTier");
+    //Throttle Policies
+    string applicationLevelPolicy = jsons:getString(keyValidationDto, "applicationPolicy");
+    string subscriptionLevelPolicy = jsons:getString(keyValidationDto, "subscriptionPolicy");
+    string apiLevelPolicy =  jsons:getString(keyValidationDto, "apiLevelPolicy");
 
     string apiContext = jsons:getString(keyValidationDto, "apiContext");
     string apiVersion = jsons:getString(keyValidationDto, "apiVersion");
@@ -76,37 +78,33 @@ function doThrottling( message msg) (boolean){
         SetAPIBlockedResponse(msg);
         return true;
     }
-
-    json resourceDto = (json)messages:getProperty(msg, "RESOURCE_INFO");
-    string verb = jsons:getString(resourceDto, "verb");
-    string resourceLevelTier = jsons:getString(resourceDto, "resourceLevelTier");
-    string applicableLevel = jsons:getString(resourceDto, "applicableLevel");
+   
+    string httpMethod = jsons:getString(keyValidationDto, "verb");
+    string resourceLevelPolicy = jsons:getString(keyValidationDto, "resourceLevelPolicy");
+    string resourceUri = jsons:getString(keyValidationDto, "resourcePath");
+    resourceLevelThrottleKey = apiContext + "/" + apiVersion + resourceUri + ":" + httpMethod;
 
     //Check API Level is Applied
-    if (apiLevelTier != "" && apiLevelTier != "Unlimited"){
+    if (apiLevelPolicy != "" && apiLevelPolicy != "Unlimited"){
         apiLevelThrottlingTriggered = true;
         resourceLevelThrottleKey = apiLevelThrottleKey ;
     }
 
     //Check if verb dto is present
     //If verbInfo is present then only we will do resource level throttling
-    if( verb == ""){
+    if( httpMethod == ""){
         system:println("Error while getting throttling information for resource and http verb");
         return false;
     }
 
     
-    if ( resourceLevelTier == "Unlimited" && !apiLevelThrottlingTriggered) {
-        //If unlimited tier throttling will not apply at resource level and pass it
+    if ( resourceLevelPolicy == "Unlimited" && !apiLevelThrottlingTriggered) {
+        //If unlimited Policy throttling will not apply at resource level and pass it
          system:println("Resource level throttling set as unlimited and request will pass resource level");
     }else{
-        
-        if (applicableLevel == "userLevel" ) {
-            resourceLevelThrottleKey = resourceLevelThrottleKey + "_" + authorizedUser;
-            policyLevelUserTriggered = true;
-        }
 
-        //todo check for conditions
+        // todo check for conditions
+        // resource level condition checking
         if (throttle:isThrottled(resourceLevelThrottleKey)) {
             setAPIThrottledResponse(msg);
             return true;
