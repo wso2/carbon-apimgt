@@ -170,4 +170,13 @@ public interface ApplicationDAO {
      * @throws APIMgtDAOException if DB level exception occurred
      */
     String getLastUpdatedTimeOfApplication(String applicationId) throws APIMgtDAOException;
+
+    /**
+     * Retrieves all Applications
+     *
+     * @return List of Applications
+     * @throws APIMgtDAOException if DB level exception occurred
+     */
+    List<Application> getAllApplications() throws APIMgtDAOException;
+
 }
