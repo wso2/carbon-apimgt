@@ -668,6 +668,7 @@ function createRolePermissionJsonString() {
 }
 
 function updatePermissionsHandler(event) {
+    event.preventDefault();
     var api_client = event.data.api_client;
     var api_id = event.data.api_id;
     var data = {
