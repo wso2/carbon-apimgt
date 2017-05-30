@@ -90,7 +90,8 @@ public class ThrottlePolicyDeploymentManagerImpl implements ThrottlePolicyDeploy
      * @return status of the deployment
      */
     private boolean deployPolicy(String policy) throws APIManagementException, URISyntaxException {
-        String getDasRestApiUrl = APIMConfigurationService.getInstance().getApimConfigurations().getDasRestApiUrl()
+        String getDasRestApiUrl = APIMConfigurationService.getInstance().getApimConfigurations()
+                .getAnalyticsConfigurations().getDasServerURL()
                 + ThrottleConstants.DAS_REST_API_PATH_ARTIFACT_DEPLOY;
         URI uri = new URI(getDasRestApiUrl);
         HttpResponse response = new RestCallUtilImpl()
