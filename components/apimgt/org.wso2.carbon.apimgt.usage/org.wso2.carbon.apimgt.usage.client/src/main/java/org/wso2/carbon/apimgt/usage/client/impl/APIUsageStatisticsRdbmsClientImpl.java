@@ -1209,13 +1209,22 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                         + APIUsageStatisticsClientConstants.HOST_NAME + "," + APIUsageStatisticsClientConstants.YEAR
                         + "," + APIUsageStatisticsClientConstants.MONTH + "," + APIUsageStatisticsClientConstants.DAY
                         + "," + APIUsageStatisticsClientConstants.TIME + ", weighted_service_time";
+            } else if (connection != null && connection.getMetaData().getDatabaseProductName()
+                    .equalsIgnoreCase("oracle")) {
+                query = "select " + APIUsageStatisticsClientConstants.API_VERSION + ','
+                        + APIUsageStatisticsClientConstants.CONTEXT + ',' + "SUM("
+                        + APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + ") AS totalTime,SUM(CAST("
+                        + APIUsageStatisticsClientConstants.SERVICE_TIME + " as FLOAT) * CAST("
+                        + APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + " as FLOAT)) AS totalWeightTime" +
+                        " from " + tableName + " GROUP BY " + APIUsageStatisticsClientConstants.CONTEXT + ','
+                        + APIUsageStatisticsClientConstants.API_VERSION;
             } else {
                 query = "select " + APIUsageStatisticsClientConstants.API_VERSION + ','
                         + APIUsageStatisticsClientConstants.CONTEXT + ',' + "SUM("
-                        + APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + ") AS totalTime,SUM("
-                        + APIUsageStatisticsClientConstants.SERVICE_TIME + " * "
-                        + APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + ") AS totalWeightTime" + " from "
-                        + tableName + " GROUP BY " + APIUsageStatisticsClientConstants.CONTEXT + ','
+                        + APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + ") AS totalTime,SUM(CAST("
+                        + APIUsageStatisticsClientConstants.SERVICE_TIME + " as bigint) * CAST("
+                        + APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + " as bigint)) AS totalWeightTime" +
+                        " from " + tableName + " GROUP BY " + APIUsageStatisticsClientConstants.CONTEXT + ','
                         + APIUsageStatisticsClientConstants.API_VERSION;
             }
 
