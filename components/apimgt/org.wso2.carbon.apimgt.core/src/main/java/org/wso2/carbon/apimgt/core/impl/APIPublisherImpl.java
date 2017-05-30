@@ -444,8 +444,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             }
             //Determine maximum of all permissions
             Integer highestPermission = Collections.max(allPermissionsForUser);
-            permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-            if (highestPermission == (APIMgtConstants.Permission.READ_PERMISSION
+            if (highestPermission == APIMgtConstants.Permission.READ_PERMISSION) {
+                permissionArrayForUser.add(APIMgtConstants.Permission.READ);
+            } else if (highestPermission == (APIMgtConstants.Permission.READ_PERMISSION
                     + APIMgtConstants.Permission.UPDATE_PERMISSION)) {
                 permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
             } else if (highestPermission == (APIMgtConstants.Permission.READ_PERMISSION
@@ -1119,8 +1120,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         List<API> updatedAPIList = new ArrayList<API>();
         for (API api : originalAPIList) {
             List<String> aggregatedApiPermissions = getAPIPermissionsOfLoggedInUser(userId, api);
-            api.setUserSpecificApiPermissions(aggregatedApiPermissions);
-            updatedAPIList.add(api);
+            if (!aggregatedApiPermissions.isEmpty()) {
+                api.setUserSpecificApiPermissions(aggregatedApiPermissions);
+                updatedAPIList.add(api);
+            }
         }
         return updatedAPIList;
     }
