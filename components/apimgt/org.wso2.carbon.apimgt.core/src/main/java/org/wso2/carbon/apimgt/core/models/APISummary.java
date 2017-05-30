@@ -39,6 +39,8 @@ public class APISummary implements Serializable {
 
     private List<UriTemplate> uriTemplates = new ArrayList<UriTemplate>();
 
+    private String lifeCycleState;
+
     public APISummary(String id) {
         this.id = id;
     }
@@ -61,6 +63,14 @@ public class APISummary implements Serializable {
 
     public void setContext(String context) {
         this.context = context;
+    }
+
+    public String getLifeCycleState() {
+        return lifeCycleState;
+    }
+
+    public void setLifeCycleState(String lifeCycleState) {
+        this.lifeCycleState = lifeCycleState;
     }
 
     public List<UriTemplate> getUriTemplates() {
@@ -101,6 +111,9 @@ public class APISummary implements Serializable {
         if (uriTemplates != null ? !uriTemplates.equals(apiInfo.uriTemplates) : apiInfo.uriTemplates != null) {
             return false;
         }
+        if (lifeCycleState != null ? !lifeCycleState.equals(apiInfo.lifeCycleState) : apiInfo.lifeCycleState != null) {
+            return false;
+        }
 
         return true;
     }
@@ -111,6 +124,7 @@ public class APISummary implements Serializable {
         result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (context != null ? context.hashCode() : 0);
         result = 31 * result + (uriTemplates != null ? uriTemplates.hashCode() : 0);
+        result = 31 * result + (lifeCycleState != null ? lifeCycleState.hashCode() : 0);
         return result;
     }
 
@@ -120,6 +134,7 @@ public class APISummary implements Serializable {
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
                 ", context='" + context + '\'' +
+                ", lifeCycleState='" + lifeCycleState + '\'' +
                 uriTemplates.toString() +
                 '}';
     }
