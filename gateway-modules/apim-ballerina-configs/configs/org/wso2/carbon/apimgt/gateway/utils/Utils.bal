@@ -158,3 +158,16 @@ function undeployService (dto:APIDto api) {
 function updateService (dto:APIDto api, string config) {
     //TODO:To be implemented
 }
+
+function getStringProperty(message msg, string propertyKey)(string){
+    string value = "";
+    try{
+        value = messages:getProperty(msg,propertyKey);
+        if(value != ""){
+            return value;
+        }
+    }catch (errors:Error e) {
+        return "";
+    }
+    return value;
+}

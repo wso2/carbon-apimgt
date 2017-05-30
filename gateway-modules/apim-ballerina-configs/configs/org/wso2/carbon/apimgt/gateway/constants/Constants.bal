@@ -19,3 +19,23 @@ const string SUBSCRIPTION_CACHE = "SUBSCRIPTION_CACHE";
 const string APPLICATION_CACHE = "APPLICATION_CACHE";
 const string RESOURCE_CACHE = "RESOURCE_CACHE";
 const string POLICY_CACHE = "POLICY_CACHE";
+
+const string THROTTLE_KEY = "throttleKey";
+const string POLICY_TEMPLATE_KEY = "keyTemplateValue";
+const string IS_THROTTLED = "isThrottled";
+const string EXPIRY_TIMESTAMP = "expiryTimeStamp";
+const string TRUE = "true";
+const string ADD = "add";
+
+const string BLOCKING_EVENT_TYPE = "jms";
+const string BLOCKING_EVENT_FORMAT = "map";
+const string BLOCKING_CONDITION_STATE = "state";
+const string BLOCKING_CONDITION_KEY = "blockingCondition";
+const string BLOCKING_CONDITION_VALUE = "conditionValue";
+const string BLOCKING_CONDITION_DOMAIN = "tenantDomain";
+const string BLOCKING_CONDITIONS_APPLICATION = "APPLICATION";
+const string BLOCKING_CONDITIONS_API = "API";
+const string BLOCKING_CONDITIONS_USER = "USER";
+const string BLOCKING_CONDITIONS_IP = "IP";
+const string KEY_TEMPLATE_KEY = "keyTemplateValue";
+const string KEY_TEMPLATE_KEY_STATE = "keyTemplateState";

@@ -135,12 +135,10 @@ function isAnyBlockedMapContainsData()(boolean) {
 
 function isRequestBlocked(string apiBlockingKey, string applicationBlockingKey, string userBlockingKey, string ipBlockingKey)(boolean){
 
-    string apiCondition = (string)blockedAPIConditionsMap[apiBlockingKey];
-    string appCondition = (string)blockedApplicationConditionsMap[applicationBlockingKey];
-    string userCondition = (string)blockedUserConditionsMap[userBlockingKey];
-    string ipCondition = (string)blockedIpConditionsMap[ipBlockingKey];
-
-    return ( apiCondition != "" || appCondition != "" || userCondition != "" || ipCondition != "");
+    return ( blockedAPIConditionsMap[apiBlockingKey] != null || 
+             blockedApplicationConditionsMap[applicationBlockingKey] != null || 
+             blockedApplicationConditionsMap[userBlockingKey] != null || 
+             blockedApplicationConditionsMap[ipBlockingKey] != null );
 }
 
 
@@ -157,8 +155,8 @@ function isAPIThrottled(string apiKey)(boolean){
 
 function isThrottled(string apiKey)(boolean){
 
-    string value = (string)throttleDataMap[apiKey];
-    if (value != ""){
+
+    if (throttleDataMap[apiKey] != null){
         return true;
     }
     // todo Check for throttle time

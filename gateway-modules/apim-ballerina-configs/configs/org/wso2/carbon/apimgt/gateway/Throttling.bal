@@ -3,8 +3,10 @@ package org.wso2.carbon.apimgt.gateway;
 import ballerina.net.http;
 import ballerina.lang.messages;
 import ballerina.lang.system;
+import ballerina.lang.jsons;
 
 import org.wso2.carbon.apimgt.gateway.holders as throttle;
+import org.wso2.carbon.apimgt.gateway.utils as util;
 
 function doThrottling( message msg) (boolean){
 
@@ -19,14 +21,8 @@ function doThrottling( message msg) (boolean){
     //apiLevelThrottleKey key = {apiContext}:{apiVersion}
     string apiLevelThrottleKey;
 
-    //Throttle Tiers
-    string applicationLevelTier;
-    string subscriptionLevelTier;
-    string resourceLevelTier = "";
-    string apiLevelTier;
-
     //Other Relevant parameters
-    map authContext = messages:getProperty(msg,"authCtx");
+    map authContext = util:getStringProperty(msg,"authCtx");
     string authorizedUser;
 
     //Throttle decisions
@@ -44,24 +40,29 @@ function doThrottling( message msg) (boolean){
     string apiLevelBlockingKey = "";
     string userLevelBlockingKey = "";
 
-    //todo
-    boolean stopOnQuotaReach = true;
-
-    //todo ConditionGroupDTO[] conditionGroupDTOs;
+    //todo condition implementation ConditionGroupDTO[] conditionGroupDTOs;
 
     //todo get these from authcontext
-    authorizedUser = messages:getProperty(msg,"authorizedUser");
-    //Throttle Tiers
-    applicationLevelTier = messages:getProperty(msg,"APPLICATION_TIER");
-    subscriptionLevelTier = messages:getProperty(msg,"SUBSCRIPTION_TIER");
-    apiLevelTier =  messages:getProperty(msg,"API_TIER");
+    json keyValidationDto = (json)messages:getProperty(msg, "KEY_VALIDATION_INFO");
 
-    string apiContext = messages:getProperty(msg,"REST_API_CONTEXT");
-    string apiVersion = messages:getProperty(msg,"REST_API_VERSION");
-    string applicationId = messages:getProperty(msg,"APPLICATION_ID");
+    authorizedUser = jsons:getString(keyValidationDto, "username");
+    //Throttle Tiers
+    string applicationLevelTier = jsons:getString(keyValidationDto, "applicationTier");
+    string subscriptionLevelTier = jsons:getString(keyValidationDto, "subscriptionTier");
+    string apiLevelTier =  jsons:getString(keyValidationDto, "apiTier");
+
+    string apiContext = jsons:getString(keyValidationDto, "apiContext");
+    string apiVersion = jsons:getString(keyValidationDto, "apiVersion");
+    string applicationId = jsons:getString(keyValidationDto, "applicationId");
+
+    //todo get the correct key value
+    string ip = util:getStringProperty(msg, "CLIENT_IP");
+
+    apiLevelThrottleKey = apiContext + ":" + apiVersion;
+    subscriptionLevelThrottleKey = applicationId + ":" + apiContext + ":" + apiVersion;
 
     // Blocking Condition
-    boolean isBlocked = throttle:isRequestBlocked(apiContext,apiContext,apiContext,apiContext);
+    boolean isBlocked = throttle:isRequestBlocked(apiLevelThrottleKey,subscriptionLevelThrottleKey,authorizedUser,ip);
     // strings:equalsIgnoreCase(apiContext,"")
     if (apiContext == ""){
         http:setStatusCode( msg, 400 );
@@ -76,10 +77,10 @@ function doThrottling( message msg) (boolean){
         return true;
     }
 
-    string verb = messages:getProperty(msg,"verb");
-    string throttling = messages:getProperty(msg,"throttling");
-    string applicableLevel = messages:getProperty(msg,"applicableLevel");
-    apiLevelThrottleKey = apiContext + ":" + apiVersion;
+    json resourceDto = (json)messages:getProperty(msg, "RESOURCE_INFO");
+    string verb = jsons:getString(resourceDto, "verb");
+    string resourceLevelTier = jsons:getString(resourceDto, "resourceLevelTier");
+    string applicableLevel = jsons:getString(resourceDto, "applicableLevel");
 
     //Check API Level is Applied
     if (apiLevelTier != "" && apiLevelTier != "Unlimited"){
@@ -95,7 +96,7 @@ function doThrottling( message msg) (boolean){
     }
 
     
-    if ( throttling == "Unlimited" && !apiLevelThrottlingTriggered) {
+    if ( resourceLevelTier == "Unlimited" && !apiLevelThrottlingTriggered) {
         //If unlimited tier throttling will not apply at resource level and pass it
          system:println("Resource level throttling set as unlimited and request will pass resource level");
     }else{
@@ -114,7 +115,6 @@ function doThrottling( message msg) (boolean){
 
     // IF no blocking conditions / API LEVEL / Resource Level
     // Subscription Level throttling
-    subscriptionLevelThrottleKey = applicationId + ":" + apiContext + ":" + apiVersion;
     isSubscriptionLevelThrottled = throttle:isThrottled(subscriptionLevelThrottleKey);
 
     if(isSubscriptionLevelThrottled){
@@ -138,24 +138,7 @@ function doThrottling( message msg) (boolean){
     return false;
 }
 
-function SetProperties( message msg) {
-    http:convertToResponse(msg);
-    messages:setStringPayload(msg, "sasasasasas");
-    messages:setHeader(msg, "sasasasasas", "xxxxxxxxxxxxxxxxxxxx");
-    messages:setProperty(msg, "name", "Test");
-    messages:setProperty(msg, "REST_API_CONTEXT", "/test");
-    messages:setProperty(msg, "REST_API_VERSION", "1.0.0");
-    messages:setProperty(msg, "subscriber", "admin");
-    messages:setProperty(msg, "authorizedUser", "admin");
-    messages:setProperty(msg, "APPLICATION_ID", "001");
-    messages:setProperty(msg, "APPLICATION_TIER", "Unlimited");
-    messages:setProperty(msg, "SUBSCRIPTION_TIER", "Unlimited");
-    messages:setProperty(msg, "API_TIER", "Unlimited");
-    messages:setProperty(msg, "authType", "user");
-    messages:setProperty(msg, "verb", "POST");
-    messages:setProperty(msg, "throttling", "Unlimited");
-    messages:setProperty(msg, "applicableLevel", "user");
-}
+
 
 function SetAPIBlockedResponse(message msg){
     http:setStatusCode( msg, 403 );
