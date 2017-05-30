@@ -92,4 +92,13 @@ public interface APIGateway {
      */
     void deleteEndpoint(Endpoint endpoint) throws GatewayException;
 
+    /**
+     * Add API state change to gateway
+     *
+     * @param api
+     * @param status
+     * @throws GatewayException
+     */
+    void changeAPIState(API api, String status) throws GatewayException;
+
 }
