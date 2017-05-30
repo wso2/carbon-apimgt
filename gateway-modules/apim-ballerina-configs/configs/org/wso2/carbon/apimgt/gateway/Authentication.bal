@@ -20,7 +20,6 @@ service Service1 {
         boolean valid;
         valid, m = authenticate(m);
         if (valid) {
-            system:println(messages:getProperty(m,constants:KEY_VALIDATION_INFO));
             http:ClientConnector client = create http:ClientConnector("http://localhost:8688");
             message response = http:ClientConnector.post (client, "/api", m);
             reply response;
@@ -164,19 +163,24 @@ function validateScopes (dto:ResourceDto resourceDto, dto:IntrospectDto introspe
 }
 function constructKeyValidationDto (string token, dto:IntrospectDto introspectDto, dto:SubscriptionDto subscriptionDto, dto:ResourceDto resourceDto) (string){
     json keyValidationInfoDTO = {};
-    keyValidationInfoDTO.username = introspectDto.username;
-    keyValidationInfoDTO.apiKey = token;
-    keyValidationInfoDTO.apiTier = subscriptionDto.subscriptionPolicy;
-    keyValidationInfoDTO.resourceLevelTier = resourceDto.policy;
-    keyValidationInfoDTO.verb = resourceDto.httpVerb;
     dto:ApplicationDto applicationDto = holder:getFromApplicationCache(subscriptionDto.applicationId);
+    keyValidationInfoDTO.username = introspectDto.username;
+    keyValidationInfoDTO.applicationPolicy = applicationDto.applicationPolicy;
+    keyValidationInfoDTO.subscriptionPolicy = subscriptionDto.subscriptionPolicy;
+    keyValidationInfoDTO.apiLevelPolicy = subscriptionDto.apiLevelPolicy;
+    keyValidationInfoDTO.resourceLevelPolicy = resourceDto.policy;
+    keyValidationInfoDTO.verb = resourceDto.httpVerb;
+    keyValidationInfoDTO.apiName = subscriptionDto.apiName;
+    keyValidationInfoDTO.apiProvider = subscriptionDto.apiProvider;
+    keyValidationInfoDTO.apiContext = subscriptionDto.apiContext;
+    keyValidationInfoDTO.apiVersion = subscriptionDto.apiVersion;
+    keyValidationInfoDTO.applicationId = subscriptionDto.applicationId;
+    keyValidationInfoDTO.apiKey = token;
     keyValidationInfoDTO.applicationName = applicationDto.applicationName;
     keyValidationInfoDTO.consumerKey = subscriptionDto.consumerKey;
     keyValidationInfoDTO.keyType = subscriptionDto.keyEnvType;
     keyValidationInfoDTO.subscriber = applicationDto.applicationOwner;
-    keyValidationInfoDTO.applicationId = subscriptionDto.applicationId;
-    keyValidationInfoDTO.applicationTier = applicationDto.applicationPolicy;
-    keyValidationInfoDTO.resourceKey = resourceDto.uriTemplate;
+    keyValidationInfoDTO.resourcePath = resourceDto.uriTemplate;
     return jsons:toString(keyValidationInfoDTO);
 }
 function retrieveUserInfo (string token) (json) {

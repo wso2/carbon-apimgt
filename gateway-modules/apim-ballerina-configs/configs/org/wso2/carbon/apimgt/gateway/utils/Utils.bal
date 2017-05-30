@@ -112,14 +112,18 @@ function retrieveApplications ()(boolean) {
     message response = http:ClientConnector.get (apiInfoConnector, query, request);
     json applications = messages:getJsonPayload(response);
     int length = jsons:getInt(applications, "$.list.length()");
+    int i = 0;
     if (length > 0) {
-        json application = applications["list"][0];
-        dto:ApplicationDto applicationDto = {};
-        applicationDto.applicationId = (string )application.applicationId;
-        applicationDto.applicationName = (string )application.name;
-        applicationDto.applicationOwner = (string )application.subscriber;
-        applicationDto.applicationPolicy = (string )application.throttlingTier;
-        holders:putIntoApplicationCache(applicationDto);
+        while(i<length){
+            json application = applications.list[i];
+            dto:ApplicationDto applicationDto = {};
+            applicationDto.applicationId = (string )application.applicationId;
+            applicationDto.applicationName = (string )application.name;
+            applicationDto.applicationOwner = (string )application.subscriber;
+            applicationDto.applicationPolicy = (string )application.throttlingTier;
+            holders:putIntoApplicationCache(applicationDto);
+            i=i+1;
+        }
     }
     return true;
 }
