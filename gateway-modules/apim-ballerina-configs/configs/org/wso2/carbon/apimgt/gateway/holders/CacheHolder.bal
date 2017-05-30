@@ -131,3 +131,15 @@ function initializeCache()(boolean ){
     caching:createCache(constants:USER_INFO_CACHE,"15");
     return true;
 }
+function getFromUserInfoCache (string userId) (json){
+    if (userInfoCache[userId] != null) {
+        return (json)userInfoCache[userId];
+    } else {
+        return null;
+    }
+}
+function putIntoUserInfoCache (string userId, json userInfo) {
+    if (userInfoCache[userId] == null) {
+        userInfoCache[userId] = userInfo;
+    }
+}
