@@ -11,12 +11,12 @@ import org.wso2.carbon.apimgt.gateway.holders as throttle;
 
 
 @jms:JMSSource {
-factoryInitial:"org.wso2.andes.jndi.PropertiesFileInitialContextFactory",
-providerUrl:"/Users/Sam/Documents/Ballerina_GIT/tools-distribution/modules/ballerina-tools/target/ballerina-tools-0.88-SNAPSHOT/bin/jndi.properties"}
-@jms:ConnectionProperty {key:"connectionFactoryType", value:"topic"}
-@jms:ConnectionProperty {key:"destination", value:"throttleData"}
-@jms:ConnectionProperty {key:"connectionFactoryJNDIName", value:"TopicConnectionFactory"}
-@jms:ConnectionProperty {key:"sessionAcknowledgement", value:"AUTO_ACKNOWLEDGE"}
+factoryInitial : "org.apache.activemq.jndi.ActiveMQInitialContextFactory",
+providerUrl : "tcp://localhost:61616"}
+@jms:ConnectionProperty{key:"connectionFactoryType", value:"topic"}
+@jms:ConnectionProperty{key:"destination", value:"TEST.FOO"}
+@jms:ConnectionProperty{key:"connectionFactoryJNDIName", value:"TopicConnectionFactory"}
+@jms:ConnectionProperty{key:"sessionAcknowledgement", value:"AUTO_ACKNOWLEDGE"}
 service ThrottleJmsService {
 
     @http:GET {}
@@ -27,8 +27,8 @@ service ThrottleJmsService {
             json event = messages:getJsonPayload(m);
 
             system:println("Throttling Message received : " + (string)event);
-            string value = jsons:getString(event, Constants:BLOCKING_CONDITION_KEY) ;
-            if ("" != jsons:getString(event, Constants:THROTTLE_KEY)) {
+            
+            if ("" != getJsonString(event, Constants:THROTTLE_KEY)) {
                
                  // This message contains throttle data in map which contains Keys
                  // throttleKey - Key of particular throttling level
@@ -36,14 +36,14 @@ service ThrottleJmsService {
                  // expiryTimeStamp - When the throttling time window will expires
                  
                 handleThrottleUpdateMessage(event);
-            } else if ("" != jsons:getString(event, Constants:BLOCKING_CONDITION_KEY)) {
+            } else if ("" != getJsonString(event, Constants:BLOCKING_CONDITION_KEY)) {
                 
                  // This message contains blocking condition data
                  // blockingCondition - Blocking condition type
                  // conditionValue - blocking condition value
                  // state - State whether blocking condition is enabled or not
                 handleBlockingMessage(event);
-            } else if ("" != jsons:getString(event, Constants:POLICY_TEMPLATE_KEY)) {
+            } else if ("" != getJsonString(event, Constants:POLICY_TEMPLATE_KEY)) {
                 
                  // This message contains key template data
                  // keyTemplateValue - Value of key template
@@ -52,7 +52,7 @@ service ThrottleJmsService {
             }
             
         }catch(errors:Error e){
-        	system:println("Error occured... ");
+        	system:println("Error occured... " + e.msg);
         }
     }
 
@@ -60,9 +60,9 @@ service ThrottleJmsService {
 
 function handleThrottleUpdateMessage(json event){
 
-    string throttleKey = jsons:getString(event, Constants:THROTTLE_KEY);
-    string throttleState = jsons:getString(event, Constants:IS_THROTTLED);
-    string timeStamp = jsons:getString(event, Constants:EXPIRY_TIMESTAMP);
+    string throttleKey = getJsonString(event, Constants:THROTTLE_KEY);
+    string throttleState = getJsonString(event, Constants:IS_THROTTLED);
+    string timeStamp = getJsonString(event, Constants:EXPIRY_TIMESTAMP);
 
     system:println("Received Key -  throttleKey : " + throttleKey + " , " + "isThrottled :" + throttleState + " , expiryTime : " + timeStamp);
     
@@ -76,11 +76,11 @@ function handleThrottleUpdateMessage(json event){
 
 function handleBlockingMessage(json event) {
     system:println("Received Key -  blockingCondition : " + jsons:getString(event, Constants:BLOCKING_CONDITION_KEY) + " , " +
-              "conditionValue :" + jsons:getString(event, Constants:BLOCKING_CONDITION_VALUE));
+              "conditionValue :" + getJsonString(event, Constants:BLOCKING_CONDITION_VALUE));
     
-    string condition = (string)jsons:getString(event, Constants:BLOCKING_CONDITION_KEY);
-    string conditionValue = (string)jsons:getString(event, Constants:BLOCKING_CONDITION_VALUE);
-    string conditionState = (string)jsons:getString(event, Constants:BLOCKING_CONDITION_STATE);
+    string condition = getJsonString(event, Constants:BLOCKING_CONDITION_KEY);
+    string conditionValue = getJsonString(event, Constants:BLOCKING_CONDITION_VALUE);
+    string conditionState = getJsonString(event, Constants:BLOCKING_CONDITION_STATE);
 
     if (Constants:BLOCKING_CONDITIONS_APPLICATION == condition) {
         if (Constants:TRUE == conditionState) {
@@ -113,8 +113,8 @@ function handleKeyTemplateMessage(json event) {
     
     system:println("Received Key -  KeyTemplate : " + jsons:getString(event, Constants:KEY_TEMPLATE_KEY));
     
-    string keyTemplateValue = jsons:getString(event, Constants:KEY_TEMPLATE_KEY);
-    string keyTemplateState = jsons:getString(event, Constants:KEY_TEMPLATE_KEY_STATE);
+    string keyTemplateValue = getJsonString(event, Constants:KEY_TEMPLATE_KEY);
+    string keyTemplateState = getJsonString(event, Constants:KEY_TEMPLATE_KEY_STATE);
     if (Constants:ADD == keyTemplateState) {
         throttle:addKeyTemplate(keyTemplateValue, keyTemplateValue);
     } else {
@@ -122,3 +122,12 @@ function handleKeyTemplateMessage(json event) {
     }
 }
 
+function getJsonString(json jsonObject, string jsonPath)(string){
+    string value = "";
+    try{
+        value = jsons:getString(jsonObject, jsonPath) ;
+    }catch(errors:Error e){
+        return "";
+    }
+    return value;
+}
