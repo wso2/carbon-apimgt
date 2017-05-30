@@ -56,10 +56,7 @@ function fromJsonToSubscriptionDto (json subscriptionResponse) (dto:Subscription
     subscriptionDto.apiProvider = (string)subscriptionResponse.apiProvider;
     subscriptionDto.consumerKey = (string)subscriptionResponse.consumerKey;
     subscriptionDto.subscriptionPolicy = (string)subscriptionResponse.subscriptionPolicy;
-    subscriptionDto.applicationOwner = (string)subscriptionResponse.applicationOwner;
-    subscriptionDto.applicationName = (string)subscriptionResponse.applicationName;
     subscriptionDto.keyEnvType = (string)subscriptionResponse.keyEnvType;
-    subscriptionDto.applicationTier = (string)subscriptionResponse.applicationTier;
     subscriptionDto.applicationId = (string)subscriptionResponse.applicationId;
     return subscriptionDto;
 }
@@ -69,46 +66,62 @@ function fromJsonToResourceDto (json resourceResponse) (dto:ResourceDto){
     resourceDto.httpVerb = (string)resourceResponse.httpVerb;
     resourceDto.authType = (string)resourceResponse.authType;
     resourceDto.scope = (string)resourceResponse.scope;
+    resourceDto.policy = (string)resourceResponse.policy;
     return resourceDto;
 }
-function retrieveSubscriptions (json subscriptions) {
-    int length = jsons:getInt(subscriptions, "$.length()");
+function retrieveSubscriptions () (boolean ){
+    string coreUrl = "https://localhost:9293/api/am/core/v1.0";
+    string query = "/subscriptions?limit=-1";
+    message request = {};
+    http:ClientConnector apiInfoConnector = create http:ClientConnector(coreUrl);
+    messages:setHeader(request, "Content-Type", "application/json");
+    message response = http:ClientConnector.get (apiInfoConnector, query, request);
+    json subscriptions = messages:getJsonPayload(response);
+    int length = jsons:getInt(subscriptions, "$.list.length()");
     int i = 0;
     while (i < length) {
-        dto:SubscriptionDto subscriptionDto = fromJsonToSubscriptionDto(subscriptions[i]);
-        dto:ApplicationDto applicationDto = {};
-        applicationDto.applicationId = subscriptionDto.applicationId;
-        applicationDto.applicationName = subscriptionDto.applicationName;
-        applicationDto.applicationOwner = subscriptionDto.applicationOwner;
-        applicationDto.applicationPolicy = subscriptionDto.applicationTier;
+        json subscription = subscriptions.list[i];
+        dto:SubscriptionDto subscriptionDto = fromJsonToSubscriptionDto(subscription);
         holders:putIntoSubscriptionCache(subscriptionDto);
         holders:putIntoApplicationCache(applicationDto);
         i = i + 1;
     }
 }
-function retrieveResources (string apiContext, string apiVersion, json resources) {
-    int length = jsons:getInt(resources, "$.length()");
-    int i = 0;
-    while (i < length) {
-        holders:putIntoResourceCache(apiContext, apiVersion, fromJsonToResourceDto(resources[i]));
-        i = i + 1;
-    }
-}
-function retrieveAPIInformation (string apiContext, string apiVersion) {
+function retrieveResources (string apiContext, string apiVersion) {
     string coreUrl = "https://localhost:9293/api/am/core/v1.0";
-    string query = "/apis-summary/?apiContext=" + apiContext + "&apiVersion=" + apiVersion;
+    string query = "/resources/?apiContext="+apiContext+"&apiVersion="+apiVersion;
     message request = {};
     http:ClientConnector apiInfoConnector = create http:ClientConnector(coreUrl);
     messages:setHeader(request, "Content-Type", "application/json");
     message response = http:ClientConnector.get (apiInfoConnector, query, request);
-    json apiInfo = messages:getJsonPayload(response);
-    int length = jsons:getInt(apiInfo, "$.list.length()");
-    if (length > 0) {
-        json resources = apiInfo["list"][0]["resources"];
-        json subscriptions = apiInfo["list"][0]["subscriptions"];
-        retrieveResources(apiContext, apiVersion, resources);
-        retrieveSubscriptions(subscriptions);
+    json resources = messages:getJsonPayload(response);
+    int length = jsons:getInt(resources, "$.list.length()");
+    int i = 0;
+    while (i < length) {
+        json resource1 = resources.list[i];
+        holders:putIntoResourceCache(apiContext, apiVersion, fromJsonToResourceDto(resource1));
+        i = i + 1;
     }
+}
+function retrieveApplications ()(boolean) {
+    string coreUrl = "https://localhost:9293/api/am/core/v1.0";
+    string query = "/applications";
+    message request = {};
+    http:ClientConnector apiInfoConnector = create http:ClientConnector(coreUrl);
+    messages:setHeader(request, "Content-Type", "application/json");
+    message response = http:ClientConnector.get (apiInfoConnector, query, request);
+    json applications = messages:getJsonPayload(response);
+    int length = jsons:getInt(applications, "$.list.length()");
+    if (length > 0) {
+        json application = applications["list"][0];
+        dto:ApplicationDto applicationDto = {};
+        applicationDto.applicationId = (string )application.applicationId;
+        applicationDto.applicationName = (string )application.name;
+        applicationDto.applicationOwner = (string )application.subscriber;
+        applicationDto.applicationPolicy = (string )application.throttlingTier;
+        holders:putIntoApplicationCache(applicationDto);
+    }
+    return true;
 }
 
 function fromJsonToGatewayConf (json conf) (dto:GatewayConf){

@@ -20,6 +20,7 @@ service Service1 {
         boolean valid;
         valid, m = authenticate(m);
         if (valid) {
+            system:println(messages:getProperty(m,constants:KEY_VALIDATION_INFO));
             http:ClientConnector client = create http:ClientConnector("http://localhost:8688");
             message response = http:ClientConnector.post (client, "/api", m);
             reply response;
@@ -143,7 +144,7 @@ function validateResource (string apiContext, string apiVersion, string uriTempl
     dto:ResourceDto resourceDto = holder:getFromResourceCache(apiContext, apiVersion, uriTemplate, verb);
     if (resourceDto == null) {
         //cachedKey doesn't exist in cache
-        gatewayUtil:retrieveAPIInformation(apiContext, apiVersion);
+        gatewayUtil:retrieveResources(apiContext, apiVersion);
         resourceDto = holder:getFromResourceCache(apiContext, apiVersion, uriTemplate, verb);
     }
     return resourceDto;
@@ -166,13 +167,16 @@ function constructKeyValidationDto (string token, dto:IntrospectDto introspectDt
     keyValidationInfoDTO.username = introspectDto.username;
     keyValidationInfoDTO.apiKey = token;
     keyValidationInfoDTO.apiTier = subscriptionDto.subscriptionPolicy;
-    keyValidationInfoDTO.applicationName = subscriptionDto.applicationName;
+    keyValidationInfoDTO.resourceLevelTier = resourceDto.policy;
+    keyValidationInfoDTO.verb = resourceDto.httpVerb;
     dto:ApplicationDto applicationDto = holder:getFromApplicationCache(subscriptionDto.applicationId);
+    keyValidationInfoDTO.applicationName = applicationDto.applicationName;
     keyValidationInfoDTO.consumerKey = subscriptionDto.consumerKey;
     keyValidationInfoDTO.keyType = subscriptionDto.keyEnvType;
     keyValidationInfoDTO.subscriber = applicationDto.applicationOwner;
     keyValidationInfoDTO.applicationId = subscriptionDto.applicationId;
     keyValidationInfoDTO.applicationTier = applicationDto.applicationPolicy;
+    keyValidationInfoDTO.resourceKey = resourceDto.uriTemplate;
     return jsons:toString(keyValidationInfoDTO);
 }
 function retrieveUserInfo (string token) (json) {
