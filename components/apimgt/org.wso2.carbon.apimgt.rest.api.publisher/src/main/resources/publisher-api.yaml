@@ -1782,6 +1782,12 @@ paths:
     get:
       produces:
         - application/zip
+      x-scope: apim:api_view
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/publisher/v1.0/export/apis?query=xxx > exported-apis.zip"
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/publisher/v1.0/export/apis?query=xxx
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\n Connection: keep-alive\n  Content-Disposition: attachment; filename=\"exported-apis.zip\"\n  Content-Type: application/zip"
       summary: Export information related to an API.
       description: |
         This operation can be used to export information related to a particular API.
@@ -1836,6 +1842,12 @@ paths:
     put:
       consumes:
         - multipart/form-data
+      x-scope: apim:api_create
+      x-wso2-curl: "curl -k -F \"file=@exported.zip\" -X PUT -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/publisher/v1.0/import/apis"
+      x-wso2-request: |
+        PUT https://127.0.0.1:9292/api/am/publisher/v1.0/import/apis
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\"count\":2,\"list\":[{\"id\":\"4df90edc-f76b-4b19-bf57-7d161fa04467\",\"name\":\"testApi2\",\"context\":\"/test2\",\"version\":\"2.0.3\",\"provider\":\"admin\",\"lifeCycleStatus\":\"Created\",\"workflowStatus\":\"APPROVED\"},{\"id\":\"4066bc9e-1d87-4296-bcca-f6e38d3da6d0\",\"name\":\"testApi\",\"context\":\"/testApi\",\"version\":\"1.0.0\",\"provider\":\"admin\",\"lifeCycleStatus\":\"Created\",\"workflowStatus\":\"APPROVED\"}]}"
       summary: Imports API(s).
       description: |
         This operation can be used to import one or more existing APIs.
@@ -1891,6 +1903,12 @@ paths:
     post:
           consumes:
             - multipart/form-data
+          x-scope: apim:api_create
+          x-wso2-curl: "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/publisher/v1.0/import/apis"
+          x-wso2-request: |
+            POST https://127.0.0.1:9292/api/am/publisher/v1.0/import/apis
+            Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+          x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\"count\":2,\"list\":[{\"id\":\"4df90edc-f76b-4b19-bf57-7d161fa04467\",\"name\":\"testApi2\",\"context\":\"/test2\",\"version\":\"2.0.3\",\"provider\":\"admin\",\"lifeCycleStatus\":\"Created\",\"workflowStatus\":\"APPROVED\"},{\"id\":\"4066bc9e-1d87-4296-bcca-f6e38d3da6d0\",\"name\":\"testApi\",\"context\":\"/testApi\",\"version\":\"1.0.0\",\"provider\":\"admin\",\"lifeCycleStatus\":\"Created\",\"workflowStatus\":\"APPROVED\"}]}"
           summary: Imports API(s).
           description: |
             This operation can be used to import one or more existing APIs.
