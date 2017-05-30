@@ -314,11 +314,9 @@ public class APIGatewayPublisherImpl implements APIGateway {
     /**
      * {@inheritDoc}
      */
-    @Override
-    public void changeAPIState(API api, String status) throws GatewayException {
+    @Override public void changeAPIState(API api, String status) throws GatewayException {
 
         if (gwHome == null) {
-
             // build the message to send
             APIDTO gatewayDTO = new APIDTO(APIMgtConstants.GatewayEventTypes.API_STATE_CHANGE);
             gatewayDTO.setLabels(api.getLabels());
@@ -329,7 +327,6 @@ public class APIGatewayPublisherImpl implements APIGateway {
             apiSummary.setLifeCycleState(status);
             gatewayDTO.setApiSummary(apiSummary);
             publishToPublisherTopic(gatewayDTO);
-
         } else {
             //TODO save to file system: need to consider editor mode scenario
         }
