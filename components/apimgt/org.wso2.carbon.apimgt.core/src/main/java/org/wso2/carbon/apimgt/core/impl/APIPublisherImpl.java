@@ -448,13 +448,16 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 permissionArrayForUser.add(APIMgtConstants.Permission.READ);
             } else if (highestPermission == (APIMgtConstants.Permission.READ_PERMISSION
                     + APIMgtConstants.Permission.UPDATE_PERMISSION)) {
+                permissionArrayForUser.add(APIMgtConstants.Permission.READ);
                 permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
             } else if (highestPermission == (APIMgtConstants.Permission.READ_PERMISSION
                     + APIMgtConstants.Permission.DELETE_PERMISSION)) {
+                permissionArrayForUser.add(APIMgtConstants.Permission.READ);
                 permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
             } else if (highestPermission
                     == APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.UPDATE_PERMISSION
                     + APIMgtConstants.Permission.DELETE_PERMISSION) {
+                permissionArrayForUser.add(APIMgtConstants.Permission.READ);
                 permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
                 permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
             }

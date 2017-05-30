@@ -2424,15 +2424,20 @@ public class ApiDAOImpl implements ApiDAO {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("groupId", entry.getKey());
             ArrayList<String> array = new ArrayList<String>();
-            array.add(APIMgtConstants.Permission.READ);
-            if (entry.getValue() == (APIMgtConstants.Permission.READ_PERMISSION
+            Integer permissionValue = entry.getValue();
+            if (permissionValue == APIMgtConstants.Permission.READ_PERMISSION) {
+                array.add(APIMgtConstants.Permission.READ);
+            } else if (permissionValue == (APIMgtConstants.Permission.READ_PERMISSION
                     + APIMgtConstants.Permission.UPDATE_PERMISSION)) {
+                array.add(APIMgtConstants.Permission.READ);
                 array.add(APIMgtConstants.Permission.UPDATE);
-            } else if (entry.getValue() == (APIMgtConstants.Permission.READ_PERMISSION
+            } else if (permissionValue == (APIMgtConstants.Permission.READ_PERMISSION
                     + APIMgtConstants.Permission.DELETE_PERMISSION)) {
+                array.add(APIMgtConstants.Permission.READ);
                 array.add(APIMgtConstants.Permission.DELETE);
-            } else if (entry.getValue() == (APIMgtConstants.Permission.READ_PERMISSION
+            } else if (permissionValue == (APIMgtConstants.Permission.READ_PERMISSION
                     + APIMgtConstants.Permission.UPDATE_PERMISSION + APIMgtConstants.Permission.DELETE_PERMISSION)) {
+                array.add(APIMgtConstants.Permission.READ);
                 array.add(APIMgtConstants.Permission.UPDATE);
                 array.add(APIMgtConstants.Permission.DELETE);
             }
