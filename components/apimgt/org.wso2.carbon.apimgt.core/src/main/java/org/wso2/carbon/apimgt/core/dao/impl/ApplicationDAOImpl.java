@@ -420,6 +420,18 @@ public class ApplicationDAOImpl implements ApplicationDAO {
         return EntityDAO.getLastUpdatedTimeOfResourceByUUID(AM_APPLICATION_TABLE_NAME, applicationId);
     }
 
+    @Override
+    public List<Application> getAllApplications() throws APIMgtDAOException {
+        try (Connection conn = DAOUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(GET_APPS_QUERY)) {
+            try (ResultSet rs = ps.executeQuery()) {
+                return this.createApplicationsFromResultSet(rs);
+            }
+        } catch (SQLException ex) {
+            throw new APIMgtDAOException(ex);
+        }
+    }
+
     private void setApplicationKeys(Connection conn, Application application, String applicationId)
             throws APIMgtDAOException {
         final String getApplicationKeysQuery =

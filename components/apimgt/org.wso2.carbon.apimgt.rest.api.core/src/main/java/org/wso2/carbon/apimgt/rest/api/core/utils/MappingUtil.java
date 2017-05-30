@@ -24,12 +24,14 @@ package org.wso2.carbon.apimgt.rest.api.core.utils;
 
 
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.RegistrationSummary;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.rest.api.core.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.APISummaryDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.APISummaryListDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.AnalyticsInfoDTO;
@@ -65,11 +67,8 @@ public class MappingUtil {
             subscriptionDTO.setApiProvider(subscriptionData.getApiProvider());
             subscriptionDTO.setConsumerKey(subscriptionData.getConsumerKey());
             subscriptionDTO.setSubscriptionPolicy(subscriptionData.getSubscriptionPolicy());
-            subscriptionDTO.setApplicationName(subscriptionData.getApplicationName());
-            subscriptionDTO.setApplicationOwner(subscriptionData.getApplicationOwner());
             subscriptionDTO.setKeyEnvType(subscriptionData.getKeyEnvType());
             subscriptionDTO.setApplicationId(subscriptionData.getApplicationId());
-            subscriptionDTO.setApplicationTier(subscriptionData.getApplicationTier());
             subscriptionDTOList.add(subscriptionDTO);
         }
         return subscriptionDTOList;
@@ -145,19 +144,21 @@ public class MappingUtil {
     }
 
     /**
-     * Convert uritemplates+ subscription validation to ApiSummaryList
-     * @param uriTemplates list of resources
-     * @param subscriptionValidationDataList list of subscription data
-     * @return APISummaryListDTO
+     * convert {@link ApplicationDTO} to {@link Application}
+     * @param applicationList  List of {@link Application}
+     * @return ApplicationDTO list
      */
-    public static APISummaryListDTO toApiSummaryListDto(List<UriTemplate> uriTemplates, List<SubscriptionValidationData>
-            subscriptionValidationDataList) {
-        APISummaryListDTO apiSummaryListDTO = new APISummaryListDTO();
-        APISummaryDTO apiSummaryDTO = new APISummaryDTO();
-        apiSummaryDTO.setResources(convertToResourceListDto(uriTemplates));
-        apiSummaryDTO.setSubscriptions(convertToSubscriptionListDto(subscriptionValidationDataList));
-        apiSummaryListDTO.addListItem(apiSummaryDTO);
-        return apiSummaryListDTO;
+    public static List<ApplicationDTO> convertToApplicationDtoList(List<Application> applicationList) {
+        List<ApplicationDTO> applicationDTOList = new ArrayList<>();
+        for (Application application : applicationList) {
+            ApplicationDTO applicationDTO = new ApplicationDTO();
+            applicationDTO.setName(application.getName());
+            applicationDTO.setApplicationId(application.getId());
+            applicationDTO.setThrottlingTier(application.getTier());
+            applicationDTO.setSubscriber(application.getCreatedUser());
+            applicationDTOList.add(applicationDTO);
+        }
+        return applicationDTOList;
     }
 
 /**

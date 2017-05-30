@@ -193,20 +193,20 @@ public class APIMgtAdminServiceImplTestCase {
     }
 
     private APIMgtAdminServiceImpl newAPIMgtAdminServiceImplforApiDAO(ApiDAO apiDAO) {
-        return new APIMgtAdminServiceImpl(null, null, apiDAO, null);
+        return new APIMgtAdminServiceImpl(null, null, apiDAO, null, null);
     }
 
     private APIMgtAdminServiceImpl newAPIMgtAdminServiceImplforPolicyDAO(PolicyDAO policyDAO) {
-        return new APIMgtAdminServiceImpl(null, policyDAO, null, null);
+        return new APIMgtAdminServiceImpl(null, policyDAO, null, null, null);
     }
 
     private APIMgtAdminServiceImpl newAPIMgtAdminServiceImplforAPISubscriptionDAO(APISubscriptionDAO
                                                                                           apiSubscriptionDAO) {
-        return new APIMgtAdminServiceImpl(apiSubscriptionDAO, null, null, null);
+        return new APIMgtAdminServiceImpl(apiSubscriptionDAO, null, null, null, null);
     }
 
     private APIMgtAdminServiceImpl newAPIMgtAdminServiceImplforLabelDAO(LabelDAO labelDAO) {
-        return new APIMgtAdminServiceImpl(null, null, null, labelDAO);
+        return new APIMgtAdminServiceImpl(null, null, null, labelDAO, null);
     }
 
 }
