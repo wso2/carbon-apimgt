@@ -83,9 +83,9 @@ function retrieveSubscriptions () (boolean ){
         json subscription = subscriptions.list[i];
         dto:SubscriptionDto subscriptionDto = fromJsonToSubscriptionDto(subscription);
         holders:putIntoSubscriptionCache(subscriptionDto);
-        holders:putIntoApplicationCache(applicationDto);
         i = i + 1;
     }
+    return true;
 }
 function retrieveResources (string apiContext, string apiVersion) {
     string coreUrl = "https://localhost:9293/api/am/core/v1.0";
