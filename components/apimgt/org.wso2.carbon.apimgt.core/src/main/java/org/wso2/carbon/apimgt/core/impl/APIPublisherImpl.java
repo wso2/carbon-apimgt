@@ -334,12 +334,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 if (StringUtils.isEmpty(apiBuilder.getApiDefinition())) {
                     apiBuilder.apiDefinition(apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder));
                 }
-                if (apiBuilder.getPermission() != null && !("[]").equals(apiBuilder.getPermission())) {
+                if (apiBuilder.getPermission() != null && !("").equals(apiBuilder.getPermission())) {
                     HashMap<String, Integer> roleNamePermissionList;
                     roleNamePermissionList = getAPIPermissionArray(apiBuilder.getPermission());
-                    if (checkRoleValidityForAPIPermissions(roleNamePermissionList)) {
-                        apiBuilder.permissionMap(roleNamePermissionList);
-                    }
+                    apiBuilder.permissionMap(roleNamePermissionList);
+
                 }
 
                 createdAPI = apiBuilder.build();
