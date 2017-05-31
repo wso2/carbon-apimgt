@@ -44,7 +44,7 @@ public class ThrottlerUtil {
      *
      * @throws APIManagementException throws if any exception occured
      */
-    public static void addDefaultSuperTenantAdvancedThrottlePolicies() throws APIManagementException {
+    public static void addDefaultAdvancedThrottlePolicies() throws APIManagementException {
         ThrottlePolicyDeploymentManager policyDeploymentManager = APIManagerFactory.getInstance()
                 .getThrottlePolicyDeploymentManager();
 

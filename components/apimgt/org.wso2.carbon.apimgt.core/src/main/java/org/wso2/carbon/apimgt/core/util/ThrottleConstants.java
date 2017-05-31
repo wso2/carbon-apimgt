@@ -92,5 +92,6 @@ public final class ThrottleConstants {
     public static final String BILLING_PLAN_FREE = "FREE";
 
     public static final String DAS_REST_API_PATH_ARTIFACT_DEPLOY = "/siddhi/artifact/deploy";
+    public static final String DAS_REST_API_PATH_ARTIFACT_LIST = "/siddhi/artifact/list";
 
 }

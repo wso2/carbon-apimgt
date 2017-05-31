@@ -5,7 +5,7 @@ import ballerina.lang.messages;
 import ballerina.lang.system;
 
 function publish (json event) {
-    http:ClientConnector client = create http:ClientConnector("http://localhost:9090");
+    http:ClientConnector client = create http:ClientConnector("http://localhost:9091");
     message request = {};
     message response = {};
 
