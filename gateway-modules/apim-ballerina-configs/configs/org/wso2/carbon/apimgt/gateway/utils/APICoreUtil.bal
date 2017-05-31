@@ -60,7 +60,7 @@ function getAPIs () (json) {
     json apiList;
     try {
         http:ClientConnector client = create http:ClientConnector(getAPICoreURL());
-        string query = "?labels=Private&Public";
+        string query = "?labels=Private,Public";
         response = http:ClientConnector.get (client, "/api/am/core/v1.0/apis" + query, request);
         apiList = messages:getJsonPayload(response);
         return apiList;
