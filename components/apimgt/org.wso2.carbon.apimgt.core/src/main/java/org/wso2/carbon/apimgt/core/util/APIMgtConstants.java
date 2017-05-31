@@ -93,6 +93,11 @@ public class APIMgtConstants {
 
     public static final String TAG_SEARCH_TYPE_PREFIX = "tags";
     public static final String SUBCONTEXT_SEARCH_TYPE_PREFIX = "subcontext";
+    public static final String PROVIDER_SEARCH_TYPE_PREFIX = "provider";
+    public static final String VERSION_SEARCH_TYPE_PREFIX = "version";
+    public static final String CONTEXT_SEARCH_TYPE_PREFIX = "context";
+    public static final String DESCRIPTION_SEARCH_TYPE_PREFIX = "description";
+
     public static final String TAG_NAME_COLUMN = "NAME";
     public static final String URL_PATTERN_COLUMN = "URL_PATTERN";
 
@@ -274,7 +279,9 @@ public class APIMgtConstants {
         public static final String ENDPOINT_ID = "ENDPOINT_ID";
         public static final String LIFECYCLE_ID = "LIFECYCLE_ID";
         public static final String WORKFLOW_REF_ID = "WORKFLOW_REFERENCE_ID";
+        public static final String WORKFLOW_CATEGORY = "WORKFLOW_CATEGORY";
         public static final String COMMENT_ID = "COMMENT_ID";
+        public static final String RATING_ID = "RATING_ID";
         public static final String USERNAME = "USERNAME";
     }
 
@@ -367,7 +374,7 @@ public class APIMgtConstants {
         public static final String API_CREATE = "API_CREATE";
         public static final String API_UPDATE = "API_UPDATE";
         public static final String API_DELETE = "API_DELETE";
-        public static final String API_PUBLISH = "API_PUBLISH";
+        public static final String API_STATE_CHANGE = "API_STATE_CHANGE";
         public static final String ENDPOINT_CREATE = "ENDPOINT_CREATE";
         public static final String ENDPOINT_UPDATE = "ENDPOINT_UPDATE";
         public static final String ENDPOINT_DELETE = "ENDPOINT_DELETE";

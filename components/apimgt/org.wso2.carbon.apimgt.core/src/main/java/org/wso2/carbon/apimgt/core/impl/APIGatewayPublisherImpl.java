@@ -310,4 +310,26 @@ public class APIGatewayPublisherImpl implements APIGateway {
             }
         }
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void changeAPIState(API api, String status) throws GatewayException {
+        if (gwHome == null) {
+            //create the message to be sent to the gateway. This contains the basic details of the API and target
+            //lifecycle state.
+            APIDTO gatewayDTO = new APIDTO(APIMgtConstants.GatewayEventTypes.API_STATE_CHANGE);
+            gatewayDTO.setLabels(api.getLabels());
+            APISummary apiSummary = new APISummary(api.getId());
+            apiSummary.setName(api.getName());
+            apiSummary.setVersion(api.getVersion());
+            apiSummary.setContext(api.getContext());
+            apiSummary.setLifeCycleState(status);
+            gatewayDTO.setApiSummary(apiSummary);
+            publishToPublisherTopic(gatewayDTO);
+        } else {
+            //TODO save to file system: need to consider editor mode scenario
+        }
+    }
 }

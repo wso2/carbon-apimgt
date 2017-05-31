@@ -246,6 +246,7 @@ public class APIUtils {
         Set<String> userRoles = new HashSet<>();
         if ("admin".equalsIgnoreCase(username)) {
             userRoles.add("admin");
+            userRoles.add("comment-moderator");
             userRoles.add(APIMgtConstants.Permission.EVERYONE_GROUP);
         } else if ("subscriber".equalsIgnoreCase(username)) {
             userRoles.add("subscriber");

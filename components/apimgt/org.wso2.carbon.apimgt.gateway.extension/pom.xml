@@ -2,7 +2,7 @@
     <parent>
         <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>7.0.21-SNAPSHOT</version>
+        <version>7.0.24-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -22,7 +22,7 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
-<!--            <plugin>  todo change to this when kernel is upgraded to 5.2.0-m4
+<!--            <plugin>  todo change to this plugin when kernel is upgraded to 5.2.0-m4
                 <groupId>org.wso2.carbon.config</groupId>
                 <artifactId>org.wso2.carbon.config.maven.plugin</artifactId>
                 <executions>
