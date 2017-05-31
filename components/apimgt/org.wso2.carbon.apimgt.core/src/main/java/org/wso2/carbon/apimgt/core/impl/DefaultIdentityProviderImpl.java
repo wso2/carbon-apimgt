@@ -22,6 +22,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import feign.Response;
 import org.apache.commons.lang.StringUtils;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
@@ -56,25 +60,35 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
     }
 
     @Override
-    public List<String> getRolesOfUser(String userId) throws IdentityProviderException {
-        List<String> roleNames = new ArrayList<>();
+    public List<String> getRoleIdsOfUser(String userId) throws IdentityProviderException {
+        List<String> roleIds = new ArrayList<>();
         SCIMUser scimUser = scimServiceStub.getUser(userId);
         if (scimUser != null) {
             List<SCIMUser.SCIMUserGroups> roles = scimUser.getGroups();
             if (roles != null) {
-                roles.forEach(role -> roleNames.add(role.getDisplay()));
+                roles.forEach(role -> roleIds.add(role.getValue()));
             }
         } else {
             String errorMessage = "User id " + userId + " does not exist in the system.";
             log.error(errorMessage);
             throw new IdentityProviderException(errorMessage, ExceptionCodes.USER_DOES_NOT_EXIST);
         }
-        return roleNames;
+        return roleIds;
     }
 
     @Override
-    public boolean isValidRole(String roleName) {
-        return scimServiceStub.searchGroups(FILTER_PREFIX + roleName).status() == 200;
+    public String getRoleId(String roleName) throws IdentityProviderException, ParseException {
+        Response role = scimServiceStub.searchGroups(FILTER_PREFIX + roleName);
+        String roleId = null;
+        String responseBody = role.body().toString();
+        JSONParser parser = new JSONParser();
+        JSONObject parsedResponseBody = (JSONObject) parser.parse(responseBody);
+        JSONArray roleList = (JSONArray) parsedResponseBody.get("Resources");
+        if (roleList.size() == 1) {
+            JSONObject scimGroup = (JSONObject) roleList.get(0);
+            roleId = (String) scimGroup.get("id");
+        }
+        return roleId;
     }
 
     @Override
