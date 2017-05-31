@@ -8,6 +8,7 @@ import ballerina.lang.errors;
 import ballerina.lang.jsons;
 import org.wso2.carbon.apimgt.gateway.constants as Constants;
 import org.wso2.carbon.apimgt.gateway.holders as throttle;
+import org.wso2.carbon.apimgt.gateway.utils as util;
 
 
 @jms:JMSSource {
@@ -28,7 +29,7 @@ service ThrottleJmsService {
 
             system:println("Throttling Message received : " + (string)event);
             
-            if ("" != getJsonString(event, Constants:THROTTLE_KEY)) {
+            if ("" != util:getJsonString(event, Constants:THROTTLE_KEY)) {
                
                  // This message contains throttle data in map which contains Keys
                  // throttleKey - Key of particular throttling level
@@ -36,14 +37,14 @@ service ThrottleJmsService {
                  // expiryTimeStamp - When the throttling time window will expires
                  
                 handleThrottleUpdateMessage(event);
-            } else if ("" != getJsonString(event, Constants:BLOCKING_CONDITION_KEY)) {
+            } else if ("" != util:getJsonString(event, Constants:BLOCKING_CONDITION_KEY)) {
                 
                  // This message contains blocking condition data
                  // blockingCondition - Blocking condition type
                  // conditionValue - blocking condition value
                  // state - State whether blocking condition is enabled or not
                 handleBlockingMessage(event);
-            } else if ("" != getJsonString(event, Constants:POLICY_TEMPLATE_KEY)) {
+            } else if ("" != util:getJsonString(event, Constants:POLICY_TEMPLATE_KEY)) {
                 
                  // This message contains key template data
                  // keyTemplateValue - Value of key template
@@ -60,9 +61,9 @@ service ThrottleJmsService {
 
 function handleThrottleUpdateMessage(json event){
 
-    string throttleKey = getJsonString(event, Constants:THROTTLE_KEY);
-    string throttleState = getJsonString(event, Constants:IS_THROTTLED);
-    string timeStamp = getJsonString(event, Constants:EXPIRY_TIMESTAMP);
+    string throttleKey = util:getJsonString(event, Constants:THROTTLE_KEY);
+    string throttleState = util:getJsonString(event, Constants:IS_THROTTLED);
+    string timeStamp = util:getJsonString(event, Constants:EXPIRY_TIMESTAMP);
 
     system:println("Received Key -  throttleKey : " + throttleKey + " , " + "isThrottled :" + throttleState + " , expiryTime : " + timeStamp);
     
@@ -76,11 +77,11 @@ function handleThrottleUpdateMessage(json event){
 
 function handleBlockingMessage(json event) {
     system:println("Received Key -  blockingCondition : " + jsons:getString(event, Constants:BLOCKING_CONDITION_KEY) + " , " +
-              "conditionValue :" + getJsonString(event, Constants:BLOCKING_CONDITION_VALUE));
+              "conditionValue :" + util:getJsonString(event, Constants:BLOCKING_CONDITION_VALUE));
     
-    string condition = getJsonString(event, Constants:BLOCKING_CONDITION_KEY);
-    string conditionValue = getJsonString(event, Constants:BLOCKING_CONDITION_VALUE);
-    string conditionState = getJsonString(event, Constants:BLOCKING_CONDITION_STATE);
+    string condition = util:getJsonString(event, Constants:BLOCKING_CONDITION_KEY);
+    string conditionValue = util:getJsonString(event, Constants:BLOCKING_CONDITION_VALUE);
+    string conditionState = util:getJsonString(event, Constants:BLOCKING_CONDITION_STATE);
 
     if (Constants:BLOCKING_CONDITIONS_APPLICATION == condition) {
         if (Constants:TRUE == conditionState) {
@@ -113,21 +114,11 @@ function handleKeyTemplateMessage(json event) {
     
     system:println("Received Key -  KeyTemplate : " + jsons:getString(event, Constants:KEY_TEMPLATE_KEY));
     
-    string keyTemplateValue = getJsonString(event, Constants:KEY_TEMPLATE_KEY);
-    string keyTemplateState = getJsonString(event, Constants:KEY_TEMPLATE_KEY_STATE);
+    string keyTemplateValue = util:getJsonString(event, Constants:KEY_TEMPLATE_KEY);
+    string keyTemplateState = util:getJsonString(event, Constants:KEY_TEMPLATE_KEY_STATE);
     if (Constants:ADD == keyTemplateState) {
         throttle:addKeyTemplate(keyTemplateValue, keyTemplateValue);
     } else {
         throttle:removeKeyTemplate(keyTemplateValue);
     }
-}
-
-function getJsonString(json jsonObject, string jsonPath)(string){
-    string value = "";
-    try{
-        value = jsons:getString(jsonObject, jsonPath) ;
-    }catch(errors:Error e){
-        return "";
-    }
-    return value;
 }

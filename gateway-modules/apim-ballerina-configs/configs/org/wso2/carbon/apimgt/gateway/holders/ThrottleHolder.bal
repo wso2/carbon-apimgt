@@ -1,6 +1,7 @@
 package org.wso2.carbon.apimgt.gateway.holders;
 
 import ballerina.lang.maps;
+import ballerina.lang.system;
 
 map blockedAPIConditionsMap = {};
 map blockedApplicationConditionsMap = {};
@@ -8,21 +9,12 @@ map blockedUserConditionsMap = {};
 map blockedIpConditionsMap = {};
 map keyTemplateMap = {};
 map throttleDataMap = {};
-map throttledAPIKeysMap = {};
 
 boolean isBlockingConditionsPresent = false;
 boolean isKeyTemplatesPresent = false;
 
 function addThrottleData(string key,string value) {
     throttleDataMap[key] = value;
-}
-
-function addThrottledAPIKey(string key, string value){
-    throttledAPIKeysMap[key] = value;
-}
-
-function removeThrottledAPIKey(string key){
-    maps:remove(throttledAPIKeysMap,key);
 }
 
 function removeThrottleData(string key) {
@@ -66,7 +58,6 @@ function removeApplicationBlockingCondition(string key) {
         isBlockingConditionsPresent = false;
     }
 }
-
 
 function removeUserBlockingCondition(string key) {
     maps:remove(blockedUserConditionsMap,key);
@@ -141,24 +132,21 @@ function isRequestBlocked(string apiBlockingKey, string applicationBlockingKey, 
              blockedApplicationConditionsMap[ipBlockingKey] != null );
 }
 
+function isThrottled(string throttleKey)(boolean){
 
-function isAPIThrottled(string apiKey)(boolean){
-    // used for condition implementation 
-    string value = (string)throttledAPIKeysMap[apiKey];
+    if (throttleDataMap[throttleKey] != null){
 
-    if (value != ""){
-        return true;
+        int currentTime = system:currentTimeMillis();
+        string expiryTime=(string)throttleDataMap[throttleKey];
+        int expiryStamp =(int)expiryTime;
+
+        if( expiryStamp >= currentTime ) {
+            return true;
+        } else {
+            maps:remove(throttleDataMap,throttleKey);
+            return false;
+        }
     }
-    // todo Check for throttle time
-    return false;
-}
 
-function isThrottled(string apiKey)(boolean){
-
-
-    if (throttleDataMap[apiKey] != null){
-        return true;
-    }
-    // todo Check for throttle time
     return false;
 }
