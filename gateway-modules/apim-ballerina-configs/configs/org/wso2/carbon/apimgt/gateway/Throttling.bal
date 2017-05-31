@@ -6,9 +6,11 @@ import ballerina.lang.system;
 
 import org.wso2.carbon.apimgt.gateway.holders as throttle;
 import org.wso2.carbon.apimgt.gateway.utils as util;
+import org.wso2.carbon.apimgt.gateway.constants as constants;
 
 
 function doThrottling( message msg) (boolean){
+    // will return true if the request is throttled
 
     //Throttle Keys
     //applicationLevelThrottleKey = {applicationId}:{authorizedUser}
@@ -49,6 +51,14 @@ function doThrottling( message msg) (boolean){
     string apiVersion = util:getJsonString(keyValidationDto, "apiVersion");
     string applicationId = util:getJsonString(keyValidationDto, "applicationId");
 
+    if (authorizedUser == ""){
+        http:setStatusCode( msg, constants:HTTP_UNAUTHORIZED);
+        messages:setProperty(msg, constants:THROTTLED_ERROR_CODE, constants:BLOCKED_ERROR_CODE);
+        messages:setProperty(msg, constants:THROTTLED_OUT_REASON, constants:THROTTLE_OUT_REASON_REQUEST_BLOCKED);
+        setThrottledResponse(msg);
+        return true;
+    }
+
     //todo get the correct key value
     ipLevelBlockingKey = util:getStringProperty(msg, "CLIENT_IP_ADDRESS");
     apiLevelThrottleKey = apiContext + ":" + apiVersion;
@@ -56,17 +66,12 @@ function doThrottling( message msg) (boolean){
 
     // Blocking Condition
     boolean isBlocked = throttle:isRequestBlocked(apiLevelThrottleKey,subscriptionLevelThrottleKey,authorizedUser,ipLevelBlockingKey);
-    // strings:equalsIgnoreCase(apiContext,"")
-    if (apiContext == ""){
-        http:setStatusCode( msg, 400 );
-        messages:setStringPayload (msg,"Meesage Blocked please contact Administrator");
-        system:println ("Context is Null....");
-        return true;
-    }
     
     if (isBlocked) {
-        system:println ("Request Blocked....");
-        SetAPIBlockedResponse(msg);
+        http:setStatusCode( msg, constants:HTTP_FORBIDDEN);
+        messages:setProperty(msg, constants:THROTTLED_ERROR_CODE, constants:BLOCKED_ERROR_CODE);
+        messages:setProperty(msg, constants:THROTTLED_OUT_REASON, constants:THROTTLE_OUT_REASON_REQUEST_BLOCKED);
+        setThrottledResponse(msg);
         return true;
     }
    
@@ -76,7 +81,7 @@ function doThrottling( message msg) (boolean){
     resourceLevelThrottleKey = apiContext + "/" + apiVersion + resourceUri + ":" + httpMethod;
 
     //Check API Level is Applied
-    if (apiLevelPolicy != "" && apiLevelPolicy != "Unlimited"){
+    if (apiLevelPolicy != "" && apiLevelPolicy != constants:UNLIMITED_TIER){
         apiLevelThrottlingTriggered = true;
         resourceLevelThrottleKey = apiLevelThrottleKey ;
     }
@@ -89,25 +94,38 @@ function doThrottling( message msg) (boolean){
     }
 
     
-    if ( resourceLevelPolicy == "Unlimited" && !apiLevelThrottlingTriggered) {
+    if ( resourceLevelPolicy == constants:UNLIMITED_TIER && !apiLevelThrottlingTriggered) {
         //If unlimited Policy throttling will not apply at resource level and pass it
          system:println("Resource level throttling set as unlimited and request will pass resource level");
     }else{
 
         // todo check for conditions
-        // resource level condition checking
+        // resource level + API level condition checking
         if (throttle:isThrottled(resourceLevelThrottleKey)) {
-            setAPIThrottledResponse(msg);
+
+            if(apiLevelThrottlingTriggered){
+                messages:setProperty(msg, constants:THROTTLED_ERROR_CODE, constants:API_THROTTLE_OUT_ERROR_CODE);
+                messages:setProperty(msg, constants:THROTTLED_OUT_REASON, constants:THROTTLE_OUT_REASON_API_LIMIT_EXCEEDED);
+            }else{
+                messages:setProperty(msg, constants:THROTTLED_ERROR_CODE, constants:RESOURCE_THROTTLE_OUT_ERROR_CODE);
+                messages:setProperty(msg, constants:THROTTLED_OUT_REASON, constants:THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED);
+            }
+
+            http:setStatusCode( msg, constants:HTTP_TOO_MANY_REQUESTS);
+            setThrottledResponse(msg);
+
             return true;
         }
     }
 
-    // IF no blocking conditions / API LEVEL / Resource Level
     // Subscription Level throttling
     isSubscriptionLevelThrottled = throttle:isThrottled(subscriptionLevelThrottleKey);
 
     if(isSubscriptionLevelThrottled){
-        setAPIThrottledResponse(msg);
+        http:setStatusCode( msg, constants:HTTP_TOO_MANY_REQUESTS );
+        messages:setProperty(msg, constants:THROTTLED_ERROR_CODE, constants:SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE);
+        messages:setProperty(msg, constants:THROTTLED_OUT_REASON, constants:THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED);
+        setThrottledResponse(msg);
         return true;
     }
 
@@ -118,7 +136,10 @@ function doThrottling( message msg) (boolean){
     isApplicationLevelThrottled = throttle:isThrottled(applicationLevelThrottleKey);
 
     if(isApplicationLevelThrottled){
-        setAPIThrottledResponse(msg);
+        http:setStatusCode( msg, constants:HTTP_TOO_MANY_REQUESTS );
+        messages:setProperty(msg, constants:THROTTLED_ERROR_CODE, constants:APPLICATION_THROTTLE_OUT_ERROR_CODE);
+        messages:setProperty(msg, constants:THROTTLED_OUT_REASON, constants:THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED);
+        setThrottledResponse(msg);
         return true;
     }
 
@@ -127,13 +148,11 @@ function doThrottling( message msg) (boolean){
     return false;
 }
 
-function SetAPIBlockedResponse(message msg){
-    http:setStatusCode( msg, 403 );
-    messages:setStringPayload(msg, "API Is Blocked Please Contact Administrator");
-}
-
-function setAPIThrottledResponse(message msg){
-    messages:setStringPayload(msg, "API is Throttled Out");
+function setThrottledResponse(message msg){
+    json jsonPayload = {};
+    jsonPayload.Error_Code =(string)messages:getProperty(msg, constants:THROTTLED_ERROR_CODE);
+    jsonPayload.Error_Message = (string)messages:getProperty(msg, constants:THROTTLED_OUT_REASON);
+    messages:setJsonPayload(msg, jsonPayload);
 }
 
 function setInvalidUser(message msg){
