@@ -32,7 +32,7 @@ service jmsService {
                 json apiSummary = jsons:getJson(event, "apiSummary");
                 if(apiSummary != null){
 
-                    dto:APIDto api = gatewayUtil:fromJSONToAPIDto(apiSummary);
+                    dto:APIDTO api = gatewayUtil:fromJSONToAPIDTO(apiSummary);
                     //Retrieve API configuration
                     string apiConfig = gatewayUtil:getAPIServiceConfig(api.id);
                     //Deploy API service
@@ -48,7 +48,7 @@ service jmsService {
                 json apiSummary = jsons:getJson(event, "apiSummary");
                 if(apiSummary != null){
 
-                    dto:APIDto api = gatewayUtil:fromJSONToAPIDto(apiSummary);
+                    dto:APIDTO api = gatewayUtil:fromJSONToAPIDTO(apiSummary);
                     //Retrieve API configuration
                     string apiConfig = gatewayUtil:getAPIServiceConfig(api.id);
                     //Update API service
@@ -63,7 +63,7 @@ service jmsService {
                 json apiSummary = jsons:getJson(event, "apiSummary");
                 if(apiSummary != null){
 
-                    dto:APIDto api = gatewayUtil:fromJSONToAPIDto(apiSummary);
+                    dto:APIDTO api = gatewayUtil:fromJSONToAPIDTO(apiSummary);
                     //Retrieve API configuration
                     string apiConfig = gatewayUtil:getAPIServiceConfig(api.id);
                     //Undeploy API service

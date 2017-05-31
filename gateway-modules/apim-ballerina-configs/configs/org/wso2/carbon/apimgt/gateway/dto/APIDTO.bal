@@ -1,6 +1,6 @@
 package org.wso2.carbon.apimgt.gateway.dto;
 
-struct APIDto {
+struct APIDTO {
     string id;
     string name;
     string version;
