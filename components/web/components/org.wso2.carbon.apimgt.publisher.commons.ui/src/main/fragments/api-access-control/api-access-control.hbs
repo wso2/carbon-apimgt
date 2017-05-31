@@ -30,31 +30,48 @@
                 <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8" id="set-permissions-list">
                     <div class="well">
                         {{i18n "Role.permissions.for.API"}}
-                        <hr>
+                        <!--<hr>-->
                         <div class="message message-info hide" id="no-roles-msg">
                             <p><i class="icon fw fw-info"></i>&emsp; {{i18n "No.roles.added"}}.</p>
                         </div>
-                        {{#each @params.permission}}
-                            <div class="input-group" id="existing-permissions">
-                                    <label class="permission-options">{{this.groupId}}&nbsp; : &nbsp; &nbsp;
-                                    </label>
-                                    <input type="checkbox" value="READ" class="permissionCheck" {{#if this.isRead}}checked{{/if}}>&nbsp;{{i18n "Read"}} &nbsp; &nbsp;
-                                    <input type="checkbox" value="UPDATE" class="permissionCheck" {{#if this.isUpdate}}checked{{/if}}>&nbsp;{{i18n "Update"}} &nbsp; &nbsp;
-                                    <input type="checkbox" value="DELETE" class="permissionCheck" {{#if this.isDelete}}checked{{/if}}>&nbsp;{{i18n "Delete"}} &nbsp; &nbsp; &nbsp;
-                                    &emsp;
-                                    <span class="fw fw-delete delete-role"></span>
-                            </div>
-                        {{/each}}
+                        <table style="width:100%" id="permissionTable">
+                            <tr>
+                                <th>Role</th>
+                                <th>Permissions</th>
+                                <th>Actions</th>
+                            </tr>
 
-                        <div class="input-group hide" id="permission-div">
-                            <label class="permission-options">
-                            </label>
-                            <input type="checkbox" value="READ" class="permissionCheck">&nbsp;{{i18n "Read"}} &nbsp; &nbsp;
-                            <input type="checkbox" value="UPDATE" class="permissionCheck">&nbsp;{{i18n "Update"}} &nbsp; &nbsp;
-                            <input type="checkbox" value="DELETE" class="permissionCheck">&nbsp;{{i18n "Delete"}} &nbsp; &nbsp; &nbsp;
-                            &emsp;
-                            <span class="fw fw-delete delete-role"></span>
-                        </div>
+                            {{#each @params.permission}}
+                                <tr class="permissions">
+                                    <td>
+                                        <label class="permission-options">{{this.groupId}}
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <input type="checkbox" value="READ" class="permissionCheck" {{#if this.isRead}}checked{{/if}}>&nbsp;{{i18n "Read"}} &nbsp; &nbsp;
+                                        <input type="checkbox" value="UPDATE" class="permissionCheck" {{#if this.isUpdate}}checked{{/if}}>&nbsp;{{i18n "Update"}} &nbsp; &nbsp;
+                                        <input type="checkbox" value="DELETE" class="permissionCheck" {{#if this.isDelete}}checked{{/if}}>&nbsp;{{i18n "Delete"}} &nbsp; &nbsp;
+                                    </td>
+                                    <td>
+                                        <span class="fw fw-delete delete-role"></span>
+                                    </td>
+                                <tr>
+                            {{/each}}
+                                <tr class="permissions hide" id="permission-div">
+                                    <td>
+                                        <label class="permission-options">
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <input type="checkbox" value="READ" class="permissionCheck">&nbsp;{{i18n "Read"}} &nbsp; &nbsp;
+                                        <input type="checkbox" value="UPDATE" class="permissionCheck">&nbsp;{{i18n "Update"}} &nbsp; &nbsp;
+                                        <input type="checkbox" value="DELETE" class="permissionCheck">&nbsp;{{i18n "Delete"}} &nbsp; &nbsp;
+                                    </td>
+                                    <td>
+                                        <span class="fw fw-delete delete-role"></span>
+                                    </td>
+                                </tr>
+                        </table>
                     </div>
                 </div>
             </div>

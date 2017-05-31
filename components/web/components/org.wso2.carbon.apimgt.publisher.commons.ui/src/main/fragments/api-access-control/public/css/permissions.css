@@ -3,3 +3,11 @@ input[type="checkbox"] {
         position: relative;
         bottom: 3px;
     }
+
+table, th, td {
+    border: 1px solid black;
+}
+
+th, tr {
+    text-align: center;
+}

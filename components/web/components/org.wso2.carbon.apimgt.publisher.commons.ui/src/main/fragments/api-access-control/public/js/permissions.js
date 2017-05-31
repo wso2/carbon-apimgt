@@ -12,7 +12,7 @@ $(
                 $clone = $permissionsTemplate.clone().removeClass('hide').attr('id','role-' + roleIndex).insertBefore($permissionsTemplate);
                 $clone
                     .find('[id="remove"]').attr('id', 'remove-' + roleIndex ).end();
-                $clone.find('label[class="permission-options"]').html(role + '&nbsp; : &nbsp; &nbsp;');
+                $clone.find('label[class="permission-options"]').html(role);
                 $('#no-roles-msg').hide();
                 $('#role-name').val(null);
             } else {
@@ -32,7 +32,7 @@ $(
         });
 
         $(document).on('click', '.delete-role', function() {
-            $(this).closest('div').remove();
+            $(this).closest('tr').remove();
         });
     }
 );

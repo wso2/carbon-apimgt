@@ -650,11 +650,11 @@ function updateLabelsHandler(event) {
  */
 function createRolePermissionJsonString() {
     var permissionJson = [];
-        $(".well > .input-group").each(function(index) {
+        $("#permissionTable tr.permissions").each(function(index) {
             var jsonData = {};
             var permissionArrayPerRole = [];
             var obj = $(this);
-            var roleName = obj.find('label[class="permission-options"]').text().split(' :')[0].trim();
+            var roleName = obj.find('label[class="permission-options"]').text().trim();
             jsonData["groupId"] = roleName;
             obj.find(".permissionCheck:checked").each(function(){
                 permissionArrayPerRole.push($(this).val());
