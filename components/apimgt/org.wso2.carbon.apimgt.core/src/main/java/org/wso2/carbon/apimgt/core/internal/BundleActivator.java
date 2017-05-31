@@ -75,9 +75,9 @@ public class BundleActivator {
         // deploying default policies
         try {
             ThrottlerUtil.addDefaultAdvancedThrottlePolicies();
-            log.info("Checked default throttle policies successfully");
+            log.debug("Checked default throttle policies successfully");
         } catch (APIManagementException e) {
-            log.error("addDefaultSuperTenantAdvancedThrottlePolicies", e);
+            log.error("Error occurred while deploying default policies", e);
         }
     }
 
