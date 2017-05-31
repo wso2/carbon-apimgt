@@ -1,7 +1,7 @@
 import React, {Component} from 'react'
 import ReactDom from 'react-dom'
 import {Base, Listing, Apis, Breadcrumb, Footer, Navbar, Header, Leftnav} from "./app/components/index.js"
-import {BrowserRouter as Router, Route, Link} from 'react-router-dom'
+import {BrowserRouter as Router, Route, Link, Switch} from 'react-router-dom'
 import Utils from '../src/app/data/utils.js'
 import './App.css'
 

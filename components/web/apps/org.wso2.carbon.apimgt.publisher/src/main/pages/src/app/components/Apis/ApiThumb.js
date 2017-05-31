@@ -1,9 +1,5 @@
 import React from 'react'
-import {
-    BrowserRouter as Router,
-    Route,
-    Link
-} from 'react-router-dom'
+import {BrowserRouter as Router, Route, Link} from 'react-router-dom'
 import './Apis.css'
 class ApiThumb extends React.Component {
     getGridUI = () => {
@@ -27,7 +23,7 @@ class ApiThumb extends React.Component {
                                 {this.props.api.context}</p>
                         </div>
                         <div className="col-xs-12 col-md-6">
-                            <a className="btn btn-success" href="http://www.jquery2dotnet.com">More details</a>
+                            <Link to="/" className="btn btn-success">More details </Link>
                         </div>
                     </div>
                 </div>
