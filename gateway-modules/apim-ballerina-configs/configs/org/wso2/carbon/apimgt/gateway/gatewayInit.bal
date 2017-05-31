@@ -2,19 +2,24 @@ package org.wso2.carbon.apimgt.gateway;
 
 import ballerina.lang.system;
 import ballerina.lang.errors;
-import org.wso2.carbon.apimgt.gateway.utils as apiCoreUtil;
+import org.wso2.carbon.apimgt.gateway.utils as gatewayUtil;
+import org.wso2.carbon.apimgt.gateway.holders as holder;
+
 
 service gatewayInitService {
     boolean isReady = initGateway();
+    boolean isCacheInitialized = holder:initializeCache();
+    boolean subscriptionsInitialized = gatewayUtil:retrieveSubscriptions();
+    boolean applicationsInitialized = gatewayUtil:retrieveApplications();
 }
 
 function initGateway () (boolean) {
 
     try {
         //Register gateway in API Core
-        apiCoreUtil:registerGateway();
+        gatewayUtil:registerGateway();
         //Retrieve APIs from API Core and deploy
-        apiCoreUtil:loadAPIs();
+        gatewayUtil:loadAPIs();
     } catch (errors:Error e) {
         system:println("Error while initilazing API gateway. " + e.msg);
     }

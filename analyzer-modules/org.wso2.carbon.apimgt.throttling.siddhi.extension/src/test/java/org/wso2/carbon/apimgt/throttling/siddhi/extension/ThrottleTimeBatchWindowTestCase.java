@@ -122,7 +122,7 @@ public class ThrottleTimeBatchWindowTestCase {
         executionPlanRuntime.shutdown();
     }
 
-//    @Test
+    @Ignore
     public void throttleTimeWindowBatchTest3() throws InterruptedException {
         SiddhiManager siddhiManager = new SiddhiManager();
 
