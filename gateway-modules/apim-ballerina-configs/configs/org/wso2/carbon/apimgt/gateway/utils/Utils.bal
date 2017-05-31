@@ -128,37 +128,62 @@ function retrieveApplications ()(boolean) {
     return true;
 }
 
-function fromJsonToGatewayConf (json conf) (dto:GatewayConf){
-    dto:GatewayConf gatewayConf = {};
-    gatewayConf.keyManagerURL = "";
-    gatewayConf.brokerURL = "";
+function fromJsonToGatewayConfDTO (json conf) (dto:GatewayConfDTO){
+    dto:GatewayConfDTO gatewayConf = {};
+
+    //Extract key manager information and populate KeyManageInfoDTO to be cached
+    json keyManagerInfo = conf.keyManagerInfo;
+    dto:KeyManagerInfoDTO keyManagerInfoDTO = {};
+    keyManagerInfoDTO.dcrEndpoint = jsons:getString(keyManagerInfo, "dcrEndpoint");
+    keyManagerInfoDTO.tokenEndpoint = jsons:getString(keyManagerInfo, "tokenEndpoint");
+    keyManagerInfoDTO.revokeEndpoint = jsons:getString(keyManagerInfo, "revokeEndpoint");
+    keyManagerInfoDTO.introspectEndpoint = jsons:getString(keyManagerInfo, "introspectEndpoint");
+    dto:CredentialsDTO keyManagerCredentialsDTO = {};
+    json keyManagerCredentials = keyManagerInfo.credentials;
+    keyManagerCredentialsDTO.username = jsons:getString(keyManagerCredentials, "username");
+    keyManagerCredentialsDTO.password = jsons:getString(keyManagerCredentials, "password");
+    gatewayConf.keyManagerInfo = keyManagerInfoDTO;
+
+    //Extract JWT information and populate JWTInfoDTO to be cached
+    json jwTInfo = conf.jwTInfo;
+    dto:JWTInfoDTO jwtInfoDTO = {};
+    jwtInfoDTO.enableJWTGeneration = jsons:getBoolean(jwTInfo, "enableJWTGeneration");
+    jwtInfoDTO.jwtHeader = jsons:getString(jwTInfo, "jwtHeader");
+    gatewayConf.jwtInfo = jwtInfoDTO;
+
+    //Extract Analytics Server information and populate AnalyticsInfoDTO to be cached
+    json analyticsInfo = conf.analyticsInfo;
+    dto:AnalyticsInfoDTO analyticsInfoDTO = {};
+    analyticsInfoDTO.serverURL = jsons:getString(analyticsInfo, "serverURL");
+    dto:CredentialsDTO analyticsServerCredentialsDTO = {};
+    json analyticsServerCredentials = analyticsInfo.credentials;
+    analyticsServerCredentialsDTO.username = jsons:getString(analyticsServerCredentials, "username");
+    analyticsServerCredentialsDTO.password = jsons:getString(analyticsServerCredentials, "password");
+    analyticsInfoDTO.credentials = analyticsServerCredentialsDTO;
+    gatewayConf.analyticsInfo = analyticsInfoDTO;
+
+    //Extract Throttling Server information and populate ThrottlingInfoDTO to be cached
+    json throttlingInfo = conf.throttlingInfo;
+    dto:ThrottlingInfoDTO throttlingInfoDTO = {};
+    throttlingInfoDTO.serverURL = jsons:getString(throttlingInfo, "serverURL");
+    json throttlingServerCredentials = throttlingInfo.credentials;
+    dto:CredentialsDTO throttlingServerCredentialsDTO = {};
+    throttlingServerCredentialsDTO.username = jsons:getString(throttlingServerCredentials, "username");
+    throttlingServerCredentialsDTO.password = jsons:getString(throttlingServerCredentials, "password");
+    throttlingInfoDTO.credentials = throttlingServerCredentialsDTO;
+    gatewayConf.throttlingInfo = throttlingInfoDTO;
 
     return gatewayConf;
 }
 
-function fromJSONToAPIDto (json api) (dto:APIDto){
-    dto:APIDto apiDto = {};
-    apiDto.id = jsons:getString(api, "id");
-    apiDto.name = jsons:getString(api, "name");
-    apiDto.version = jsons:getString(api, "version");
-    apiDto.context = jsons:getString(api, "context");
-    return apiDto;
+function fromJSONToAPIDTO (json api) (dto:APIDTO){
+    dto:APIDTO APIDTO = {};
+    APIDTO.id = jsons:getString(api, "id");
+    APIDTO.name = jsons:getString(api, "name");
+    APIDTO.version = jsons:getString(api, "version");
+    APIDTO.context = jsons:getString(api, "context");
+    return APIDTO;
 
-}
-
-function getAPIServiceConfig (string apiId) (string) {
-    message request = {};
-    message response = {};
-    string apiConfig;
-    try {
-        http:ClientConnector client = create http:ClientConnector(getSystemProperty(Constants:API_CORE_URL));
-        response = http:ClientConnector.get (client, "/api/am/core/v1.0/apis/" + apiId + "/gateway-config", request);
-        apiConfig = messages:getStringPayload(response);
-    } catch (errors:Error e) {
-        system:println("[Error] : Error occurred while retrieving service configuration for API : " + apiId);
-        throw e;
-    }
-    return apiConfig;
 }
 
 function getSystemProperty (string prop) (string) {

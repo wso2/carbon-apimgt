@@ -9,8 +9,7 @@ map resourceCacheMap = {};
 map jwtTokenCache = {};
 map keyValidationInfoCache = {};
 map apiCache = {};
-dto:LabelInfoDto labelInfo = {};
-dto:GatewayConf gatewayConf = {};
+dto:GatewayConfDTO gatewayConf = {};
 map applicationCache = {};
 map userInfoCache = {};
 
@@ -68,31 +67,24 @@ function putIntoResourceCache (string apiContext, string apiVersion, dto:Resourc
 function removeFromTokenCache (string key) {
     caching:removeCacheEntry(constants:TOKEN_CACHE,key);
 }
-function putIntoAPICache (dto:APIDto apiDto) {
-    string key = apiDto.context + ":" + apiDto.version;
-    apiCache[key] = apiDto;
+function putIntoAPICache (dto:APIDTO APIDTO) {
+    string key = APIDTO.context + ":" + APIDTO.version;
+    apiCache[key] = APIDTO;
 }
-function removeFromAPICache (dto:APIDto apiDto) {
-    string key = apiDto.context + ":" + apiDto.version;
+function removeFromAPICache (dto:APIDTO APIDTO) {
+    string key = APIDTO.context + ":" + APIDTO.version;
     maps:remove(apiCache, key);
 }
-function getFromAPICache (string key) (dto:APIDto){
-    return (dto:APIDto)apiCache[key];
+function getFromAPICache (string key) (dto:APIDTO){
+    return (dto:APIDTO)apiCache[key];
 }
-function setGatewayConf (dto:GatewayConf conf) {
+function setGatewayConf (dto:GatewayConfDTO conf) {
     gatewayConf = conf;
 }
-function getGatewayConf () (dto:GatewayConf){
+function getGatewayConf () (dto:GatewayConfDTO){
     return gatewayConf;
 }
 
-function getLabelInfo () (dto:LabelInfoDto){
-    return labelInfo;
-}
-
-function setLabelInfo (dto:LabelInfoDto labelInfoDto) {
-    labelInfo = labelInfoDto;
-}
 function putIntoApplicationCache (dto:ApplicationDto applicationDto) {
     caching:putCacheEntry(constants:APPLICATION_CACHE,applicationDto.applicationId,applicationDto);
 }
