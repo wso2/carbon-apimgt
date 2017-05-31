@@ -1,5 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.admin.dto;
-
+components/apimgt/org.wso2.carbon.apimgt.rest.api.admin/src/gen/java/org/wso2/carbon/apimgt/rest/api/admin/dto/ConditionalGroupDTO.java package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
