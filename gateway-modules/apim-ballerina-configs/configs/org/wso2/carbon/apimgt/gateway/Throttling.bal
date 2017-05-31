@@ -5,6 +5,8 @@ import ballerina.lang.messages;
 import ballerina.lang.system;
 
 import org.wso2.carbon.apimgt.gateway.holders as throttle;
+import org.wso2.carbon.apimgt.gateway.utils as util;
+
 
 function doThrottling( message msg) (boolean){
 
@@ -37,18 +39,18 @@ function doThrottling( message msg) (boolean){
 
     json keyValidationDto = (json)messages:getProperty(msg, "KEY_VALIDATION_INFO");
 
-    authorizedUser = getJsonString(keyValidationDto, "username");
+    authorizedUser = util:getJsonString(keyValidationDto, "username");
     //Throttle Policies
-    string applicationLevelPolicy = getJsonString(keyValidationDto, "applicationPolicy");
-    string subscriptionLevelPolicy = getJsonString(keyValidationDto, "subscriptionPolicy");
-    string apiLevelPolicy =  getJsonString(keyValidationDto, "apiLevelPolicy");
+    string applicationLevelPolicy = util:getJsonString(keyValidationDto, "applicationPolicy");
+    string subscriptionLevelPolicy = util:getJsonString(keyValidationDto, "subscriptionPolicy");
+    string apiLevelPolicy =  util:getJsonString(keyValidationDto, "apiLevelPolicy");
 
-    string apiContext = getJsonString(keyValidationDto, "apiContext");
-    string apiVersion = getJsonString(keyValidationDto, "apiVersion");
-    string applicationId = getJsonString(keyValidationDto, "applicationId");
+    string apiContext = util:getJsonString(keyValidationDto, "apiContext");
+    string apiVersion = util:getJsonString(keyValidationDto, "apiVersion");
+    string applicationId = util:getJsonString(keyValidationDto, "applicationId");
 
     //todo get the correct key value
-    ipLevelBlockingKey = getStringProperty(msg, "CLIENT_IP_ADDRESS");
+    ipLevelBlockingKey = util:getStringProperty(msg, "CLIENT_IP_ADDRESS");
     apiLevelThrottleKey = apiContext + ":" + apiVersion;
     subscriptionLevelThrottleKey = applicationId + ":" + apiContext + ":" + apiVersion;
 
@@ -68,9 +70,9 @@ function doThrottling( message msg) (boolean){
         return true;
     }
    
-    string httpMethod = getJsonString(keyValidationDto, "verb");
-    string resourceLevelPolicy = getJsonString(keyValidationDto, "resourceLevelPolicy");
-    string resourceUri = getJsonString(keyValidationDto, "resourcePath");
+    string httpMethod = util:getJsonString(keyValidationDto, "verb");
+    string resourceLevelPolicy = util:getJsonString(keyValidationDto, "resourceLevelPolicy");
+    string resourceUri = util:getJsonString(keyValidationDto, "resourcePath");
     resourceLevelThrottleKey = apiContext + "/" + apiVersion + resourceUri + ":" + httpMethod;
 
     //Check API Level is Applied
