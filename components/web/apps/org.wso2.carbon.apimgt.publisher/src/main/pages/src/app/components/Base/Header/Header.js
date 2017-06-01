@@ -14,8 +14,6 @@ const Header = (props) => {
                 </div>
                 <div className="pull-left brand">
                     <Link to="/">
-                        <img src="/publisher/public/components/root/base/images/logo.svg" alt="wso2" title="wso2"
-                             className="logo"/>
                         <span>APIM Publisher</span>
                     </Link>
                 </div>
@@ -35,9 +33,8 @@ const Header = (props) => {
                     </li>
                 </ul>
             </div>
-            <
-            / header >
-            );
-            };
+        </header >
+    );
+};
 
-            export default Header
+export default Header
