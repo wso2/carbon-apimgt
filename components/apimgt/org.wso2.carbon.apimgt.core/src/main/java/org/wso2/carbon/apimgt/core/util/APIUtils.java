@@ -436,16 +436,6 @@ public class APIUtils {
 
             throw new APIManagementException(msg, ExceptionCodes.COULD_NOT_UPDATE_API);
         }
-
-        if (originalAPI.getApiType() != apiBuilder.getApiType()) {
-            String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " update not allowed, " +
-                    "the API Type cannot be changed";
-            if (log.isDebugEnabled()) {
-                log.debug(msg);
-            }
-
-            throw new APIManagementException(msg, ExceptionCodes.COULD_NOT_UPDATE_API);
-        }
     }
 
     /**

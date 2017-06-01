@@ -595,7 +595,7 @@ public class ApiDAOImpl implements ApiDAO {
         statement.setString(20, String.join(",", corsConfiguration.getAllowHeaders()));
         statement.setString(21, String.join(",", corsConfiguration.getAllowMethods()));
 
-        statement.setInt(22, getApiTypeId(connection, api.getApiType()));
+        statement.setInt(22, getApiTypeId(connection, ApiType.STANDARD));
         statement.setString(23, api.getCreatedBy());
         statement.setTimestamp(24, Timestamp.valueOf(LocalDateTime.now()));
         statement.setTimestamp(25, Timestamp.valueOf(LocalDateTime.now()));
@@ -1580,7 +1580,6 @@ public class ApiDAOImpl implements ApiDAO {
                         lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
                         corsConfiguration(corsConfiguration).
-                        apiType(getApiTypeById(connection, rs.getInt("API_TYPE_ID"))).
                         createdBy(rs.getString("CREATED_BY")).
                         updatedBy(rs.getString("UPDATED_BY")).
                         createdTime(rs.getTimestamp("CREATED_TIME").toLocalDateTime()).
@@ -1614,7 +1613,6 @@ public class ApiDAOImpl implements ApiDAO {
 
         return apiList;
     }
-
 
     private CompositeAPI getCompositeAPIFromResultSet(Connection connection, PreparedStatement statement)
             throws SQLException, IOException, APIMgtDAOException {
@@ -1670,7 +1668,6 @@ public class ApiDAOImpl implements ApiDAO {
         return apiList;
     }
 
-
     private String getCompositeAPIApplicationId(Connection connection, String apiId) throws APIMgtDAOException {
         APISubscriptionDAO apiSubscriptionDAO = DAOFactory.getAPISubscriptionDAO();
 
@@ -1682,7 +1679,6 @@ public class ApiDAOImpl implements ApiDAO {
 
         throw new APIMgtDAOException("Composite API ID " + apiId + " has no associated Application subscription");
     }
-
 
     private void addTagsMapping(Connection connection, String apiID, Set<String> tags) throws SQLException {
         if (!tags.isEmpty()) {
@@ -2075,23 +2071,6 @@ public class ApiDAOImpl implements ApiDAO {
                 }
 
                 throw new SQLException("API Type " + apiType.toString() + " does not exist");
-            }
-        }
-    }
-
-    private ApiType getApiTypeById(Connection connection, int apiTypeId) throws SQLException {
-        final String query = "SELECT TYPE_NAME FROM AM_API_TYPES WHERE TYPE_ID = ?";
-
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, apiTypeId);
-            statement.execute();
-
-            try (ResultSet rs = statement.getResultSet()) {
-                if (rs.next()) {
-                    return ApiType.valueOf(rs.getString("TYPE_NAME"));
-                }
-
-                throw new SQLException("API Type Id " + apiTypeId + " does not exist");
             }
         }
     }
