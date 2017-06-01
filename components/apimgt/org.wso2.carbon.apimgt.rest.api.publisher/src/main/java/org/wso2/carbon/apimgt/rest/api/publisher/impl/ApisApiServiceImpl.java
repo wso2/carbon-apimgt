@@ -2,15 +2,21 @@ package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.lang3.StringUtils;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
+import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.core.impl.DefaultIdentityProviderImpl;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
@@ -47,6 +53,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -684,6 +691,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
 
             APIDTO apidto = MappingUtil.toAPIDto(RestAPIPublisherUtil.getApiPublisher(username).getAPIbyUUID(apiId));
+            String permissionString = apidto.getPermission();
+            apidto.setPermission(replaceGroupIdWithName(permissionString));
             return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(apidto).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving API : " + apiId;
@@ -692,13 +701,45 @@ public class ApisApiServiceImpl extends ApisApiService {
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-
+        } catch (ParseException e) {
+            String errorMessage = "Parse Exception while retrieving API : " + apiId;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
         } catch (IOException e) {
             String errorMessage = "Error while retrieving API : " + apiId;
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
             log.error(errorMessage, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
         }
+    }
+
+    private String replaceGroupIdWithName(String permissionString) throws ParseException, APIManagementException {
+        IdentityProvider defaultIdentityProvider = new DefaultIdentityProviderImpl();
+        List<String> nonExistingRoleList = new ArrayList<>();
+        JSONArray newPermissionArray = new JSONArray();
+        JSONParser jsonParser = new JSONParser();
+        JSONArray permissionArray = (JSONArray) jsonParser.parse(permissionString);
+
+        for (Object permissionObj : permissionArray) {
+            JSONObject jsonObject = (JSONObject) permissionObj;
+            String groupId = (String) jsonObject.get(APIMgtConstants.Permission.GROUP_ID);
+            String groupName = defaultIdentityProvider.getRoleName(groupId);
+            if (groupName != null) {
+                JSONObject obj = new JSONObject();
+                obj.put(APIMgtConstants.Permission.GROUP_ID, groupName);
+                obj.put(APIMgtConstants.Permission.PERMISSION, jsonObject.get(APIMgtConstants.Permission.PERMISSION));
+                newPermissionArray.add(obj);
+            } else {
+                nonExistingRoleList.add(groupId);
+            }
+        }
+        if (!nonExistingRoleList.isEmpty()) {
+            String message = "The roles with role Ids " + nonExistingRoleList.toString() + " does not exist.";
+            log.error(message);
+            throw new APIManagementException(message, ExceptionCodes.ROLE_DOES_NOT_EXIST);
+        }
+        return newPermissionArray.toJSONString();
     }
 
     /**
