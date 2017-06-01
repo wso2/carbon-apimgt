@@ -1,4 +1,5 @@
 import React from 'react';
+
 import ApiThumb from './ApiThumb'
 import './Apis.css'
 import API from '../../data/api.js'
@@ -33,11 +34,11 @@ class Apis extends React.Component {
                     <div className="btn-group">
                         <a href="#" id="list" className={this.isActive('list')}
                            onClick={() => this.setListType('list')}>
-                            <span className="glyphicon glyphicon-th-list"></span>List
+                            <span className="glyphicon glyphicon-th-list"/>List
                         </a>
                         <a href="#" id="grid" className={this.isActive('grid')}
                            onClick={() => this.setListType('grid')}>
-                            <span className="glyphicon glyphicon-th"></span>Grid
+                            <span className="glyphicon glyphicon-th"/>Grid
                         </a>
                     </div>
                 </div>
