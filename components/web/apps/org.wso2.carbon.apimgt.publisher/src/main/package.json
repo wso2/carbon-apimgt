@@ -37,6 +37,7 @@
     "chai": "^3.5.0",
     "css-loader": "^0.28.2",
     "mocha": "^3.4.1",
+    "mock-local-storage": "^1.0.2",
     "style-loader": "^0.18.1"
   }
 }
