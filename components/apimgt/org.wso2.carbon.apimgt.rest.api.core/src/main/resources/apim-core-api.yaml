@@ -674,9 +674,13 @@ definitions:
     title: Registration Summary Information
     properties:
       KeyManagerInfo:
-        type: string
-        description: |
-          Key Manager related information
+        $ref: '#/definitions/KeyManagerInfo'
+      JWTInfo:
+        $ref: '#/definitions/JWTInfo'
+      AnalyticsInfo:
+        $ref: '#/definitions/AnalyticsInfo'
+      ThrottlingInfo:
+        $ref: '#/definitions/ThrottlingInfo'
 
 #-----------------------------------------------------
 # The API List resource
@@ -714,8 +718,78 @@ definitions:
         example: 1.0.0
       lifeCycleStatus:
         type: string
-example: CREATED
+      example: CREATED
 
+#-----------------------------------------------------
+# Key Manager Configurations
+#-----------------------------------------------------
+  KeyManagerInfo:
+    title: Key manager configurations
+    properties:
+      dcrEndpoint:
+        type: string
+        example: http://localhost:9763/identity/connect/register
+      tokenEndpoint:
+        type: string
+        example: https://localhost:9443/oauth2/token
+      revokeEndpoint:
+        type: string
+        example: https://localhost:9443/oauth2/revoke
+      introspectEndpoint:
+        type: string
+        example: http://localhost:9763/oauth2/introspect
+      defaultTokenValidityPeriod:
+        type: long
+        example: 3600
+      credentials:
+        $ref: '#/definitions/Credentials'
+
+#-----------------------------------------------------
+# JWT configurations
+#-----------------------------------------------------
+  JWTInfo:
+    title: JWT configurations
+    properties:
+      enableJWTGeneration:
+        type: boolean
+        example: false
+      jwtHeader:
+        type: string
+        example: X-JWT-Assertion
+
+#-----------------------------------------------------
+# Analytics Configurations
+#-----------------------------------------------------
+  AnalyticsInfo:
+    title: Analytics configurations
+    properties:
+      enabled:
+        type: boolead
+        example: true
+      serverURL:
+        type: string
+        example: tcp://localhost:7612
+      credentials:
+        $ref: '#/definitions/Credentials'
+
+  ThrottlingInfo:
+    title: Throttling configuration
+    properties:
+      serverURL:
+        type: string
+        example:
+      credentials:
+        $ref: '#/definitions/Credentials'
+
+  Credentials:
+    title: Credentials
+    properties:
+      username:
+        type: string
+        example: admin
+      password:
+        type: string
+        example: admin
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------

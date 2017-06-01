@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.Label;
+import org.wso2.carbon.apimgt.core.models.RegistrationSummary;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
@@ -177,4 +178,12 @@ public interface APIMgtAdminService {
      * @throws APIManagementException If failed to get API list
      */
     List<API> getAPIsByGatewayLabel(List<String> gatewayLabels) throws APIManagementException;
+
+    /**
+     * Retrieve API Gateway registration summary
+     *
+     * @return  RegistrationSummary
+     * @throws APIManagementException   
+     */
+    RegistrationSummary getRegistrationSummary() throws APIManagementException;
 }

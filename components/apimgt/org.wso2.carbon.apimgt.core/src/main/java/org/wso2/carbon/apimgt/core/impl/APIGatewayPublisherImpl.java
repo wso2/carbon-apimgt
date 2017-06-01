@@ -212,7 +212,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
      * @throws GatewayException     If there is a failure to publish to gateway
      */
     private void publishToPublisherTopic(GatewayDTO gatewayDTO) throws GatewayException {
-        BrokerUtil.publishToTopic(config.getPublisherTopic(), gatewayDTO);
+        BrokerUtil.publishToTopic(config.getBrokerConfiguration().getPublisherTopic(), gatewayDTO);
     }
 
     /**
@@ -222,7 +222,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
      * @throws GatewayException     If there is a failure to publish to gateway
      */
     private void publishToStoreTopic(GatewayDTO gatewayDTO) throws GatewayException {
-        BrokerUtil.publishToTopic(config.getStoreTopic(), gatewayDTO);
+        BrokerUtil.publishToTopic(config.getBrokerConfiguration().getStoreTopic(), gatewayDTO);
     }
 
     /**
