@@ -1089,6 +1089,23 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
     /**
      * {@inheritDoc}
+     * <p>Implementation will try to retrieve the summary of API to decide if API exist or not</p>
+     */
+    @Override
+    public boolean isCompositeAPIExist(String apiId) throws APIManagementException {
+        boolean status;
+        try {
+            status = getApiDAO().getCompositeAPISummary(apiId) != null;
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Couldn't get APISummary for Composite API: " + apiId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return status;
+    }
+
+    /**
+     * {@inheritDoc}
      */
     @Override
     public void updateCompositeApiDefinition(String id, String apiDefinition) throws APIManagementException {

@@ -99,6 +99,16 @@ public interface APIStore extends APIManager {
     String getCompositeApiDefinition(String id) throws APIManagementException;
 
     /**
+     * Checks the existence of a Composite API with {@code apiId}.
+     *
+     * @param apiId API id of the Composite API
+     * @return {@code true} if Composite API with {@code apiId} exists
+     * {@code false} otherwise.
+     * @throws APIManagementException if failed to retrieve summary of Composite API with {@code apiId}
+     */
+    boolean isCompositeAPIExist(String apiId) throws APIManagementException;
+
+    /**
      * Update Swagger definition of a Composite API
      *
      * @param id ID of the API

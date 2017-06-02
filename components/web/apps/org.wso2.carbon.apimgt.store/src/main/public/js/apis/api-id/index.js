@@ -11,6 +11,7 @@ $(function () {
                 {"responseContentType": 'application/json'},
                 function (jsonData) {
                     var api = jsonData.obj;
+                    api.isStandardAPI = true;
                     policies = api.policies;
                     var callbacks = {onSuccess: function () {
                         validateActionButtons("#subscribe-button");

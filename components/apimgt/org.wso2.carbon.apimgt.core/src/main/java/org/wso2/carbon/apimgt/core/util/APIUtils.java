@@ -388,7 +388,7 @@ public class APIUtils {
     public static void verifyValidityOfApiUpdate(API.APIBuilder apiBuilder, API originalAPI)
                                                                                     throws APIManagementException {
         if (!originalAPI.getLifeCycleStatus().equals(apiBuilder.getLifeCycleStatus())) {
-            String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as" +
+            String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as " +
                     "the API Status cannot be changed";
             if (log.isDebugEnabled()) {
                 log.debug(msg);

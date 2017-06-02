@@ -82,7 +82,7 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
                                           String ifModifiedSince, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
-            if (!RestApiUtil.getConsumer(username).checkIfAPIExists(apiId)) {
+            if (!RestApiUtil.getConsumer(username).isCompositeAPIExist(apiId)) {
                 String errorMessage = "API not found : " + apiId;
                 APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
                         ExceptionCodes.API_NOT_FOUND);

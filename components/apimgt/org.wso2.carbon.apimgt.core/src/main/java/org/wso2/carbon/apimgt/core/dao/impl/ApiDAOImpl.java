@@ -154,6 +154,29 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     @Override
+    @CheckForNull
+    public CompositeAPI getCompositeAPISummary(String apiID) throws APIMgtDAOException {
+        final String query = COMPOSITE_API_SUMMARY_SELECT + " WHERE UUID = ? AND API_TYPE_ID = " +
+                "(SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)";
+
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, apiID);
+            statement.setString(2, ApiType.COMPOSITE.toString());
+
+            List<CompositeAPI> apiResults = getCompositeAPISummaryList(connection, statement);
+            if (apiResults.isEmpty()) {
+                return null;
+            }
+
+            // there should be on 1 result from the database
+            return apiResults.get(0);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    @Override
     public CompositeAPI getCompositeAPI(String apiID) throws APIMgtDAOException {
         final String query = "SELECT UUID, PROVIDER, NAME, CONTEXT, VERSION, DESCRIPTION, CREATED_BY, CREATED_TIME, " +
                 "LAST_UPDATED_TIME, COPIED_FROM_API, UPDATED_BY, LC_WORKFLOW_STATUS " +

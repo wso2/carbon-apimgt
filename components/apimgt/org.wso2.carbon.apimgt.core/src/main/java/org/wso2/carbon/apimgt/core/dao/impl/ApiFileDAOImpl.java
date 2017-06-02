@@ -639,6 +639,11 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     @Override
+    public CompositeAPI getCompositeAPISummary(String apiID) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public CompositeAPI getCompositeAPI(String apiID) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }

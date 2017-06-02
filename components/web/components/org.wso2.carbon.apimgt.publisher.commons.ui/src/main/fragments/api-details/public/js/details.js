@@ -673,6 +673,7 @@ function resourcesTabHandler(event) {
                     var data = {
                         name: api.info.title,
                         id: api_id,
+                        isStandardAPI: true,
                         version: api.info.version,
                         context: api_context,
                         verbs: [ 'get' , 'post' , 'put' , 'delete', 'patch', 'head']
