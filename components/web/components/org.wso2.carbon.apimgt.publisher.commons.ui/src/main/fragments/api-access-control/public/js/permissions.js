@@ -14,6 +14,7 @@ $(
                     .find('[id="remove"]').attr('id', 'remove-' + roleIndex ).end();
                 $clone.find('label[class="permission-options"]').html(role);
                 $('#no-roles-msg').hide();
+                $('#permissionTable').show();
                 $('#role-name').val(null);
             } else {
                 var message = "Please specify a role";

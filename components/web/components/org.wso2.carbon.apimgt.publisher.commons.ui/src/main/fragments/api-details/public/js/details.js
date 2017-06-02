@@ -297,6 +297,7 @@ function accessControlTabHandler(event) {
                 onSuccess: function (data) {
                     if (!permission_data || permission_data === "[]"){
                         $('#no-roles-msg').removeClass('hide');
+                        $('#permissionTable').hide();
                     }
                 },
                 onFailure: function (data) {

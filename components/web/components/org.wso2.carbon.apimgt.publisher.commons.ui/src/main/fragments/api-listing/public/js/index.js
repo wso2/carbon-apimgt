@@ -147,10 +147,6 @@ function initDataTable(raw_data) {
                 .text(" " + data.name)
                 .prepend(icon.addClass("fw-2x fw-api"));
             var userPermissions = data.userPermissionsForApi;
-
-            if(!userPermissions.includes("UPDATE")) {
-                name_link.addClass('not-active');
-            }
             return $('<div></div>').append(name_link).html();
         } else if (type === "filter") {
             return data.name;
