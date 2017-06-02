@@ -22,10 +22,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
-import org.wso2.carbon.apimgt.core.dto.APIDTO;
-import org.wso2.carbon.apimgt.core.dto.EndpointDTO;
-import org.wso2.carbon.apimgt.core.dto.GatewayDTO;
-import org.wso2.carbon.apimgt.core.dto.SubscriptionDTO;
+import org.wso2.carbon.apimgt.core.models.events.APIEvent;
+import org.wso2.carbon.apimgt.core.models.events.EndpointEvent;
+import org.wso2.carbon.apimgt.core.models.events.GatewayEvent;
+import org.wso2.carbon.apimgt.core.models.events.SubscriptionDTO;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -82,7 +82,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
         if (gwHome == null) {
 
             // build the message to send
-            APIDTO gatewayDTO = new APIDTO(APIMgtConstants.GatewayEventTypes.API_CREATE);
+            APIEvent gatewayDTO = new APIEvent(APIMgtConstants.GatewayEventTypes.API_CREATE);
             gatewayDTO.setLabels(api.getLabels());
             APISummary apiSummary = new APISummary(api.getId());
             apiSummary.setName(api.getName());
@@ -107,7 +107,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
 
         if (gwHome == null) {
             // build the message to send
-            APIDTO gatewayDTO = new APIDTO(APIMgtConstants.GatewayEventTypes.API_UPDATE);
+            APIEvent gatewayDTO = new APIEvent(APIMgtConstants.GatewayEventTypes.API_UPDATE);
             gatewayDTO.setLabels(api.getLabels());
             APISummary apiSummary = new APISummary(api.getId());
             apiSummary.setName(api.getName());
@@ -126,7 +126,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
 
         if (gwHome == null) {
             // build the message to send
-            APIDTO gatewayDTO = new APIDTO(APIMgtConstants.GatewayEventTypes.API_DELETE);
+            APIEvent gatewayDTO = new APIEvent(APIMgtConstants.GatewayEventTypes.API_DELETE);
             gatewayDTO.setLabels(api.getLabels());
             APISummary apiSummary = new APISummary(api.getId());
             apiSummary.setName(api.getName());
@@ -170,7 +170,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
     public void addEndpoint(Endpoint endpoint) throws GatewayException {
 
         if (gwHome == null) {
-            EndpointDTO dto = new EndpointDTO(APIMgtConstants.GatewayEventTypes.ENDPOINT_CREATE);
+            EndpointEvent dto = new EndpointEvent(APIMgtConstants.GatewayEventTypes.ENDPOINT_CREATE);
             dto.setEndpoint(endpoint);
             publishToPublisherTopic(dto);
         } else {
@@ -184,7 +184,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
     @Override
     public void updateEndpoint(Endpoint endpoint) throws GatewayException {
         if (gwHome == null) {
-            EndpointDTO dto = new EndpointDTO(APIMgtConstants.GatewayEventTypes.ENDPOINT_UPDATE);
+            EndpointEvent dto = new EndpointEvent(APIMgtConstants.GatewayEventTypes.ENDPOINT_UPDATE);
             dto.setEndpoint(endpoint);
             publishToPublisherTopic(dto);
         } else {
@@ -199,7 +199,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
     public void deleteEndpoint(Endpoint endpoint) throws GatewayException {
 
         if (gwHome == null) {
-            EndpointDTO dto = new EndpointDTO(APIMgtConstants.GatewayEventTypes.ENDPOINT_DELETE);
+            EndpointEvent dto = new EndpointEvent(APIMgtConstants.GatewayEventTypes.ENDPOINT_DELETE);
             dto.setEndpoint(endpoint);
             publishToPublisherTopic(dto);
         }
@@ -211,7 +211,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
      * @param gatewayDTO    gateway data transfer object
      * @throws GatewayException     If there is a failure to publish to gateway
      */
-    private void publishToPublisherTopic(GatewayDTO gatewayDTO) throws GatewayException {
+    private void publishToPublisherTopic(GatewayEvent gatewayDTO) throws GatewayException {
         BrokerUtil.publishToTopic(config.getBrokerConfiguration().getPublisherTopic(), gatewayDTO);
     }
 
@@ -221,7 +221,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
      * @param gatewayDTO    gateway data transfer object
      * @throws GatewayException     If there is a failure to publish to gateway
      */
-    private void publishToStoreTopic(GatewayDTO gatewayDTO) throws GatewayException {
+    private void publishToStoreTopic(GatewayEvent gatewayDTO) throws GatewayException {
         BrokerUtil.publishToTopic(config.getBrokerConfiguration().getStoreTopic(), gatewayDTO);
     }
 
@@ -319,7 +319,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
         if (gwHome == null) {
             //create the message to be sent to the gateway. This contains the basic details of the API and target
             //lifecycle state.
-            APIDTO gatewayDTO = new APIDTO(APIMgtConstants.GatewayEventTypes.API_STATE_CHANGE);
+            APIEvent gatewayDTO = new APIEvent(APIMgtConstants.GatewayEventTypes.API_STATE_CHANGE);
             gatewayDTO.setLabels(api.getLabels());
             APISummary apiSummary = new APISummary(api.getId());
             apiSummary.setName(api.getName());
