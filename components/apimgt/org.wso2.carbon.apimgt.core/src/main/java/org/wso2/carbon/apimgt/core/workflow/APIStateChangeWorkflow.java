@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.core.workflow;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
@@ -31,6 +32,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Subscription;
@@ -63,13 +65,15 @@ public class APIStateChangeWorkflow extends Workflow {
     private ApiDAO apiDAO;
     private APISubscriptionDAO apiSubscriptionDAO;
     private APILifecycleManager apiLifecycleManager;
+    private APIGateway apiGateway;
 
     public APIStateChangeWorkflow(ApiDAO apiDAO, APISubscriptionDAO apiSubscriptionDAO, WorkflowDAO workflowDAO,
-                                  APILifecycleManager apiLifecycleManager) {
+                                  APILifecycleManager apiLifecycleManager, APIGateway apiGateway) {
         super(workflowDAO, Category.PUBLISHER);
         this.apiDAO = apiDAO;
         this.apiLifecycleManager = apiLifecycleManager;
         this.apiSubscriptionDAO = apiSubscriptionDAO;
+        this.apiGateway = apiGateway;
     }
 
     public String getCurrentState() {
@@ -215,6 +219,8 @@ public class APIStateChangeWorkflow extends Workflow {
                         }
                     }
                 }
+                //publish API state change to gateway
+                apiGateway.changeAPIState(originalAPI, status);
             } else {
                 throw new APIMgtResourceNotFoundException("Requested API " + apiId + " Not Available");
             }
@@ -226,6 +232,11 @@ public class APIStateChangeWorkflow extends Workflow {
             String errorMsg = "Couldn't change the status of api ID " + apiId;
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
+        } catch (GatewayException e) {
+            String message = "Error occurred while changing the state of api ID: " + apiId + " to " + status
+                    + "in gateway";
+            log.error(message, e);
+            throw new APIManagementException(message, ExceptionCodes.GATEWAY_EXCEPTION);
         }
     }
 

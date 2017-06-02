@@ -69,7 +69,7 @@ public class ApisApi implements Microservice  {
     @Path("/{apiId}/comments/{commentId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get the individual comment given by a subscriber for a certain API. ", response = CommentDTO.class, tags={ "Retrieve Comment", })
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Get the individual comment given by a username for a certain API. ", response = CommentDTO.class, tags={ "Retrieve Comment", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Comment returned. ", response = CommentDTO.class),
         
@@ -235,7 +235,7 @@ public class ApisApi implements Microservice  {
         return delegate.apisApiIdGet(apiId,accept,ifNoneMatch,ifModifiedSince, request);
     }
     @GET
-    @Path("/{apiId}/rating")
+    @Path("/{apiId}/ratings")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "", notes = "Get the rating of an API. ", response = RatingListDTO.class, tags={ "Retrieve Rating", })
@@ -245,31 +245,35 @@ public class ApisApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested rating does not exist. ", response = RatingListDTO.class),
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = RatingListDTO.class) })
-    public Response apisApiIdRatingGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
+    public Response apisApiIdRatingsGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
 ,@ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit
 ,@ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
 ,@ApiParam(value = "Media types acceptable for the response. Default is JSON. " , defaultValue="JSON")@HeaderParam("Accept") String accept
 , @Context Request request)
     throws NotFoundException {
-        return delegate.apisApiIdRatingGet(apiId,limit,offset,accept, request);
+        return delegate.apisApiIdRatingsGet(apiId,limit,offset,accept, request);
     }
-    @POST
-    @Path("/{apiId}/rating")
+    @GET
+    @Path("/{apiId}/ratings/{ratingId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Add a new Rating ", response = RatingDTO.class, tags={ "Create", })
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a specific rating of an API. ", response = RatingDTO.class, tags={ "Retrieve Rating", })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = RatingDTO.class),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Rating returned. ", response = RatingDTO.class),
         
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = RatingDTO.class),
+        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource. ", response = RatingDTO.class),
         
-        @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format. ", response = RatingDTO.class) })
-    public Response apisApiIdRatingPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
-,@ApiParam(value = "Rating object that should to be added " ,required=true) RatingDTO body
-,@ApiParam(value = "Media type of the entity in the body. Default is JSON. " ,required=true, defaultValue="JSON")@HeaderParam("Content-Type") String contentType
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested rating does not exist. ", response = RatingDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = RatingDTO.class) })
+    public Response apisApiIdRatingsRatingIdGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
+,@ApiParam(value = "Rating Id ",required=true) @PathParam("ratingId") String ratingId
+,@ApiParam(value = "Media types acceptable for the response. Default is JSON. " , defaultValue="JSON")@HeaderParam("Accept") String accept
+,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
+,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
 , @Context Request request)
     throws NotFoundException {
-        return delegate.apisApiIdRatingPost(apiId,body,contentType, request);
+        return delegate.apisApiIdRatingsRatingIdGet(apiId,ratingId,accept,ifNoneMatch,ifModifiedSince, request);
     }
     @GET
     @Path("/{apiId}/swagger")
@@ -291,6 +295,24 @@ public class ApisApi implements Microservice  {
 , @Context Request request)
     throws NotFoundException {
         return delegate.apisApiIdSwaggerGet(apiId,accept,ifNoneMatch,ifModifiedSince, request);
+    }
+    @PUT
+    @Path("/{apiId}/user-rating")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Adds or updates a rating ", response = RatingDTO.class, tags={ "Create", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = RatingDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = RatingDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format. ", response = RatingDTO.class) })
+    public Response apisApiIdUserRatingPut(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
+,@ApiParam(value = "Rating object that should to be added " ,required=true) RatingDTO body
+,@ApiParam(value = "Media type of the entity in the body. Default is JSON. " ,required=true, defaultValue="JSON")@HeaderParam("Content-Type") String contentType
+, @Context Request request)
+    throws NotFoundException {
+        return delegate.apisApiIdUserRatingPut(apiId,body,contentType, request);
     }
     @GET
     
