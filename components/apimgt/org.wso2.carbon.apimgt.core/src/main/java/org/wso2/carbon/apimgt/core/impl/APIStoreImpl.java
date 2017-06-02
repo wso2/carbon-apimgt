@@ -46,10 +46,12 @@ import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.TagDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
+import org.wso2.carbon.apimgt.core.exception.APICommentException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.core.exception.APIRatingException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
@@ -527,20 +529,166 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         return filteredLabels;
     }
 
+
     /**
-     * @see APIStore#getCommentByUUID(String, String)
+     * Check if api exists
+     *
+     * @param apiId UUID of the api
+     * @throws APIMgtResourceNotFoundException if API does not exist
+     * @throws APIMgtDAOException if error occurred while accessing data layer
      */
-    @Override
-    public Comment getCommentByUUID(String commentId, String apiId) throws APIManagementException {
-        Comment comment;
+    public void checkIfApiExists(String apiId) throws APIMgtResourceNotFoundException, APIMgtDAOException {
+        ApiDAO apiDAO = getApiDAO();
         try {
-            ApiDAO apiDAO = getApiDAO();
             API api = apiDAO.getAPI(apiId);
             if (api == null) {
-                String errorMsg = "Couldn't find api with api_id : " + apiId;
+                String errorMsg = "api not found for the id : " + apiId;
                 log.error(errorMsg);
                 throw new APIMgtResourceNotFoundException(errorMsg, ExceptionCodes.API_NOT_FOUND);
             }
+        } catch (APIMgtDAOException e) {
+            String errorMsg =
+                    "Error occurred while checking if api exists for api_id " + apiId;
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    @Override
+    public String addComment(Comment comment, String apiId) throws APICommentException,
+            APIMgtResourceNotFoundException {
+        validateCommentMaxCharacterLength(comment.getCommentText());
+        String generatedUuid = UUID.randomUUID().toString();
+        comment.setUuid(generatedUuid);
+        try {
+            checkIfApiExists(apiId);
+            getApiDAO().addComment(comment, apiId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while adding comment for api - " + apiId;
+            log.error(errorMsg, e);
+            throw new APICommentException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return comment.getUuid();
+    }
+
+    @Override
+    public void deleteComment(String commentId, String apiId, String username) throws APICommentException,
+            APIMgtResourceNotFoundException {
+        try {
+            ApiDAO apiDAO = getApiDAO();
+            checkIfApiExists(apiId);
+            Comment comment = apiDAO.getCommentByUUID(commentId, apiId);
+            if (comment != null) {
+                // if the delete operation is done by a user who isn't the owner of the comment
+                if (!comment.getCommentedUser().equals(username)) {
+                    checkIfUserIsCommentModerator(username);
+                }
+                apiDAO.deleteComment(commentId, apiId);
+            } else {
+                String errorMsg = "Couldn't find comment with comment_id : " + commentId;
+                log.error(errorMsg);
+                throw new APIMgtResourceNotFoundException(errorMsg, ExceptionCodes.COMMENT_NOT_FOUND);
+            }
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while deleting comment " + commentId;
+            log.error(errorMsg, e);
+            throw new APICommentException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    @Override
+    public void updateComment(Comment comment, String commentId, String apiId, String username) throws
+            APICommentException, APIMgtResourceNotFoundException {
+        validateCommentMaxCharacterLength(comment.getCommentText());
+        try {
+            checkIfApiExists(apiId);
+            Comment oldComment = getApiDAO().getCommentByUUID(commentId, apiId);
+            if (oldComment != null) {
+                // if the update operation is done by a user who isn't the owner of the comment
+                if (!oldComment.getCommentedUser().equals(username)) {
+                    checkIfUserIsCommentModerator(username);
+                }
+                getApiDAO().updateComment(comment, commentId, apiId);
+            } else {
+                String errorMsg = "Couldn't find comment with comment_id : " + commentId + "and api_id : " + apiId;
+                log.error(errorMsg);
+                throw new APIMgtResourceNotFoundException(errorMsg, ExceptionCodes.COMMENT_NOT_FOUND);
+            }
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while updating comment " + commentId;
+            log.error(errorMsg, e);
+            throw new APICommentException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+
+    }
+
+    /**
+     * Check whether current user is a comment moderator
+     *
+     * @param username username of the user
+     * @throws APICommentException if user does not have comment moderator role
+     */
+    private void checkIfUserIsCommentModerator(String username) throws APICommentException {
+        Set<String> roles = APIUtils.getAllRolesOfUser(username);
+        if (roles.contains(getConfig().getCommentModeratorRole())) {
+            return;
+        }
+        String errorMsg = "comment moderator permission needed";
+        log.error(errorMsg);
+        throw new APICommentException(errorMsg, ExceptionCodes.NEED_COMMENT_MODERATOR_PERMISSION);
+    }
+
+    /**
+     * Validate whether the rating value provided by user is positive and less than or equal to the max rating in config
+     *
+     * @param ratingValue rating value provided by user
+     * @throws APIRatingException if rating value is negative or larger than max rating
+     */
+    private void validateMaxMinRatingValue(int ratingValue) throws APIRatingException {
+        if (ratingValue > 0 && ratingValue <= getConfig().getRatingMaxValue()) {
+            return;
+        }
+        String errorMsg = "Provided rating value is invalid";
+        log.error(errorMsg);
+        throw new APIRatingException(errorMsg, ExceptionCodes.RATING_VALUE_INVALID);
+    }
+
+    /**
+     * Validates the comment length is less than or equal to max comment length in config
+     *
+     * @param commentText comment text
+     * @throws APICommentException if comment length is larger than max length allowed
+     */
+    private void validateCommentMaxCharacterLength(String commentText) throws APICommentException {
+        if (commentText.length() <= getConfig().getCommentMaxLength()) {
+            return;
+        }
+        String errorMsg = "comment text exceeds allowed maximum length of characters";
+        log.error(errorMsg);
+        throw new APICommentException(errorMsg, ExceptionCodes.COMMENT_LENGTH_EXCEEDED);
+    }
+
+
+
+    @Override
+    public List<Comment> getCommentsForApi(String apiId) throws APICommentException, APIMgtResourceNotFoundException {
+        try {
+            checkIfApiExists(apiId);
+            List<Comment> commentList = getApiDAO().getCommentsForApi(apiId);
+            return commentList;
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while retrieving comments for api " + apiId;
+            log.error(errorMsg, e);
+            throw new APICommentException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    @Override
+    public Comment getCommentByUUID(String commentId, String apiId) throws APICommentException,
+            APIMgtResourceNotFoundException {
+        Comment comment;
+        try {
+            checkIfApiExists(apiId);
             comment = getApiDAO().getCommentByUUID(commentId, apiId);
             if (comment == null) {
                 String errorMsg = "Couldn't find comment with comment_id - " + commentId + " for api_id " + apiId;
@@ -551,126 +699,101 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             String errorMsg =
                     "Error occurred while retrieving comment for comment_id " + commentId + " for api_id " + apiId;
             log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APICommentException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return comment;
     }
 
-    @Override
-    public double getUserRating(String apiId, String username) throws APIManagementException {
-        return 0;
-    }
 
     @Override
-    public double getAvgRating(String apiId) throws APIManagementException {
-        return 0;
-    }
-
-    @Override
-    public List<Rating> getUserRatingDTOList(String apiId) throws APIManagementException {
-        return null;
-    }
-
-    /**
-     * @see APIStore#addComment(Comment, String)
-     */
-    @Override
-    public String addComment(Comment comment, String apiId) throws APIManagementException {
-        String generatedUuid = UUID.randomUUID().toString();
-        comment.setUuid(generatedUuid);
+    public String addRating(String apiId, Rating rating) throws APIRatingException, APIMgtResourceNotFoundException {
         try {
-            ApiDAO apiDAO = getApiDAO();
-            API api = apiDAO.getAPI(apiId);
-            if (api == null) {
-                String errorMsg = "Couldn't find api with api_id : " + apiId;
-                log.error(errorMsg);
-                throw new APIMgtResourceNotFoundException(errorMsg, ExceptionCodes.API_NOT_FOUND);
-            }
-            getApiDAO().addComment(comment, apiId);
+            validateMaxMinRatingValue(rating.getRating());
+            checkIfApiExists(apiId);
+            String generatedUuid = UUID.randomUUID().toString();
+            rating.setUuid(generatedUuid);
+            getApiDAO().addRating(apiId, rating);
+            return rating.getUuid();
         } catch (APIMgtDAOException e) {
-            String errorMsg = "Error occurred while adding comment for api - " + apiId;
+            String errorMsg = "Error occurred while adding rating for user " + getUsername() + " for api " + apiId;
             log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
-        }
-        return comment.getUuid();
-    }
-
-    /**
-     * @see APIStore#deleteComment(String, String)
-     */
-    @Override
-    public void deleteComment(String commentId, String apiId) throws APIManagementException {
-        try {
-            ApiDAO apiDAO = getApiDAO();
-            API api = apiDAO.getAPI(apiId);
-            if (api == null) {
-                String errorMsg = "Couldn't find api with api_id : " + apiId;
-                log.error(errorMsg);
-                throw new APIMgtResourceNotFoundException(errorMsg, ExceptionCodes.API_NOT_FOUND);
-            }
-            Comment comment = apiDAO.getCommentByUUID(commentId, apiId);
-            if (comment == null) {
-                String errorMsg = "Couldn't find comment with comment_id : " + commentId;
-                log.error(errorMsg);
-                throw new APIMgtResourceNotFoundException(errorMsg, ExceptionCodes.COMMENT_NOT_FOUND);
-            } else {
-                apiDAO.deleteComment(commentId, apiId);
-            }
-        } catch (APIMgtDAOException e) {
-            String errorMsg = "Error occurred while deleting comment " + commentId;
-            log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIRatingException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
-    /**
-     * @see APIStore#updateComment(Comment, String, String)
-     */
     @Override
-    public void updateComment(Comment comment, String commentId, String apiId) throws APIManagementException {
+    public void updateRating(String apiId, String ratingId, Rating ratingFromPayload) throws APIRatingException,
+            APIMgtResourceNotFoundException {
         try {
-            ApiDAO apiDAO = getApiDAO();
-            API api = apiDAO.getAPI(apiId);
-            if (api == null) {
-                String errorMsg = "Couldn't find api with api_id : " + apiId;
-                log.error(errorMsg);
-                throw new APIMgtResourceNotFoundException(errorMsg, ExceptionCodes.API_NOT_FOUND);
-            }
-            Comment oldComment = apiDAO.getCommentByUUID(commentId, apiId);
-            if (oldComment != null) {
-                getApiDAO().updateComment(comment, commentId, apiId);
-            } else {
-                String errorMsg = "Couldn't find comment with comment_id : " + commentId + "and api_id : " + apiId;
-                log.error(errorMsg);
-                throw new APIMgtResourceNotFoundException(errorMsg, ExceptionCodes.COMMENT_NOT_FOUND);
-            }
+            validateMaxMinRatingValue(ratingFromPayload.getRating());
+            checkIfApiExists(apiId);
+            getApiDAO().updateRating(apiId, ratingId, ratingFromPayload);
         } catch (APIMgtDAOException e) {
-            String errorMsg = "Error occurred while updating comment " + commentId;
+            String errorMsg = "Error occurred while updating rating for user " + getUsername() + " for api " + apiId;
             log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIRatingException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
-
     }
 
-    /**
-     * @see APIStore#getCommentsForApi(String)
-     */
     @Override
-    public List<Comment> getCommentsForApi(String apiId) throws APIManagementException {
+    public Rating getRatingForApiFromUser(String apiId, String userId) throws APIRatingException,
+            APIMgtResourceNotFoundException {
         try {
-            ApiDAO apiDAO = getApiDAO();
-            API api = apiDAO.getAPI(apiId);
-            if (api == null) {
-                String errorMsg = "api not found for the id : " + apiId;
-                log.error(errorMsg);
-                throw new APIMgtResourceNotFoundException(errorMsg, ExceptionCodes.API_NOT_FOUND);
-            }
-            List<Comment> commentList = getApiDAO().getCommentsForApi(apiId);
-            return commentList;
+            checkIfApiExists(apiId);
+            Rating userRatingForApi = getApiDAO().getUserRatingForApiFromUser(apiId, userId);
+            return userRatingForApi;
         } catch (APIMgtDAOException e) {
-            String errorMsg = "Error occurred while retrieving comments for api " + apiId;
+            String errorMsg = "Error occurred while retrieving ratings for user " + userId + " for api " + apiId;
             log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIRatingException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    @Override
+    public Rating getRatingByUUID(String apiId, String ratingId) throws APIRatingException,
+            APIMgtResourceNotFoundException {
+        Rating rating;
+        try {
+            checkIfApiExists(apiId);
+            rating = getApiDAO().getRatingByUUID(apiId, ratingId);
+            if (rating == null) {
+                String errorMsg = "Couldn't find rating with rating id - " + ratingId + " for api_id " + apiId;
+                log.error(errorMsg);
+                throw new APIMgtResourceNotFoundException(errorMsg, ExceptionCodes.RATING_NOT_FOUND);
+            }
+        } catch (APIMgtDAOException e) {
+            String errorMsg =
+                    "Error occurred while retrieving rating for rating id " + ratingId + " for api_id " + apiId;
+            log.error(errorMsg, e);
+            throw new APIRatingException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return rating;
+    }
+
+    @Override
+    public double getAvgRating(String apiId) throws APIRatingException, APIMgtResourceNotFoundException {
+        try {
+            checkIfApiExists(apiId);
+            return getApiDAO().getAverageRating(apiId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg =
+                    "Error occurred while retrieving average rating for api_id " + apiId;
+            log.error(errorMsg, e);
+            throw new APIRatingException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    @Override
+    public List<Rating> getRatingsListForApi(String apiId) throws APIRatingException, APIMgtResourceNotFoundException {
+        try {
+            checkIfApiExists(apiId);
+            List<Rating> ratingsListForApi = getApiDAO().getRatingsListForApi(apiId);
+            return ratingsListForApi;
+        } catch (APIMgtDAOException e) {
+            String errorMsg =
+                    "Error occurred while retrieving ratings list for api_id " + apiId;
+            log.error(errorMsg, e);
+            throw new APIRatingException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 

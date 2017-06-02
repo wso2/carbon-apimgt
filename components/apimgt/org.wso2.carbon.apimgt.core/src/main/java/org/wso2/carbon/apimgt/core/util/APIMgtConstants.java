@@ -281,6 +281,7 @@ public class APIMgtConstants {
         public static final String WORKFLOW_REF_ID = "WORKFLOW_REFERENCE_ID";
         public static final String WORKFLOW_CATEGORY = "WORKFLOW_CATEGORY";
         public static final String COMMENT_ID = "COMMENT_ID";
+        public static final String RATING_ID = "RATING_ID";
         public static final String USERNAME = "USERNAME";
     }
 
@@ -373,7 +374,7 @@ public class APIMgtConstants {
         public static final String API_CREATE = "API_CREATE";
         public static final String API_UPDATE = "API_UPDATE";
         public static final String API_DELETE = "API_DELETE";
-        public static final String API_PUBLISH = "API_PUBLISH";
+        public static final String API_STATE_CHANGE = "API_STATE_CHANGE";
         public static final String ENDPOINT_CREATE = "ENDPOINT_CREATE";
         public static final String ENDPOINT_UPDATE = "ENDPOINT_UPDATE";
         public static final String ENDPOINT_DELETE = "ENDPOINT_DELETE";

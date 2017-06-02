@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
+import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIComparator;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
@@ -572,12 +573,12 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         // Define statuses used in test
         final String publishedStatus = "PUBLISHED";
         final String createdStatus = "CREATED";
-        final String blockedStatus = "BLOCKED";
+        final String maintenanceStatus = "MAINTENANCE";
 
         // Define number of APIs to be created for a given status
         final int numberOfPublished = 4;
         final int numberOfCreated = 2;
-        final int numberOfBlocked = 1;
+        final int numberOfInMaintenance = 1;
 
         // Add APIs
         List<API> publishedAPIsSummary = new ArrayList<>();
@@ -595,10 +596,10 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
             apiDAO.addAPI(api);
         }
 
-        List<API> blockedAPIsSummary = new ArrayList<>();
-        for (int i = 0; i < numberOfBlocked; ++i) {
-            API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(blockedStatus).build();
-            blockedAPIsSummary.add(SampleTestObjectCreator.getSummaryFromAPI(api));
+        List<API> maintenanceAPIsSummary = new ArrayList<>();
+        for (int i = 0; i < numberOfInMaintenance; ++i) {
+            API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(maintenanceStatus).build();
+            maintenanceAPIsSummary.add(SampleTestObjectCreator.getSummaryFromAPI(api));
             apiDAO.addAPI(api);
         }
 
@@ -613,18 +614,18 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         // Filter APIs by two statuses
         List<String> twoStatuses = new ArrayList<>();
         twoStatuses.add(publishedStatus);
-        twoStatuses.add(blockedStatus);
+        twoStatuses.add(maintenanceStatus);
 
         apiList = apiDAO.getAPIsByStatus(twoStatuses, ApiType.STANDARD);
 
-        Assert.assertEquals(apiList.size(), publishedAPIsSummary.size() + blockedAPIsSummary.size());
+        Assert.assertEquals(apiList.size(), publishedAPIsSummary.size() + maintenanceAPIsSummary.size());
 
         for (API api : publishedAPIsSummary) {
             Assert.assertTrue(apiList.contains(api));
             apiList.remove(api);
         }
 
-        for (API api : blockedAPIsSummary) {
+        for (API api : maintenanceAPIsSummary) {
             Assert.assertTrue(apiList.contains(api));
             apiList.remove(api);
         }
@@ -635,11 +636,11 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         List<String> multipleStatuses = new ArrayList<>();
         multipleStatuses.add(publishedStatus);
         multipleStatuses.add(createdStatus);
-        multipleStatuses.add(blockedStatus);
+        multipleStatuses.add(maintenanceStatus);
 
         apiList = apiDAO.getAPIsByStatus(multipleStatuses, ApiType.STANDARD);
 
-        Assert.assertEquals(apiList.size(), publishedAPIsSummary.size() + blockedAPIsSummary.size()
+        Assert.assertEquals(apiList.size(), publishedAPIsSummary.size() + maintenanceAPIsSummary.size()
                 + createdAPIsSummary.size());
 
         for (API api : publishedAPIsSummary) {
@@ -647,7 +648,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
             apiList.remove(api);
         }
 
-        for (API api : blockedAPIsSummary) {
+        for (API api : maintenanceAPIsSummary) {
             Assert.assertTrue(apiList.contains(api));
             apiList.remove(api);
         }
@@ -1412,6 +1413,57 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     }
 
+    @Test
+    public void testAddGetRating() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
+                .apiDefinition(SampleTestObjectCreator.apiDefinition);
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+        Rating rating = SampleTestObjectCreator.createDefaultRating(api.getId());
+        apiDAO.addRating(api.getId(), rating);
+        Rating ratingFromDB = apiDAO.getRatingByUUID(api.getId(), rating.getUuid());
+        Assert.assertNotNull(ratingFromDB);
+    }
+
+    @Test
+    public void testUpdateRating() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
+                .apiDefinition(SampleTestObjectCreator.apiDefinition);
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+        Rating rating1 = SampleTestObjectCreator.createDefaultRating(api.getId());
+        apiDAO.addRating(api.getId(), rating1);
+        Rating rating2 = SampleTestObjectCreator.createDefaultRating(api.getId());
+        rating2.setRating(4);
+        apiDAO.updateRating(api.getId(), rating1.getUuid(), rating2);
+        Rating ratingFromDB = apiDAO.getRatingByUUID(api.getId(), rating1.getUuid());
+        Assert.assertNotNull(ratingFromDB);
+        Assert.assertEquals(4, ratingFromDB.getRating());
+    }
+
+    @Test
+    public void testAddGetAllRatings() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
+                .apiDefinition(SampleTestObjectCreator.apiDefinition);
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+        Rating rating1 = SampleTestObjectCreator.createDefaultRating(api.getId());
+        apiDAO.addRating(api.getId(), rating1);
+        Rating rating2 = SampleTestObjectCreator.createDefaultRating(api.getId());
+        rating2.setRating(3);
+        rating2.setUsername("andrew");
+        apiDAO.addRating(api.getId(), rating2);
+        List<Rating> ratingsListFromDB = apiDAO.getRatingsListForApi(api.getId());
+        Assert.assertNotNull(ratingsListFromDB);
+        Assert.assertEquals(2, ratingsListFromDB.size());
+    }
+
     @Test(expectedExceptions = APIMgtDAOException.class)
     public void testGetAPIByStatus() throws Exception {
 
@@ -1419,14 +1471,14 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         // Define statuses used in test
         final String publishedStatus = "PUBLISHED";
         final String createdStatus = "CREATED";
-        final String blockedStatus = "BLOCKED";
+        final String maintenanceStatus = "MAINTENANCE";
         // Define number of APIs to be created for a given status by role
         final int numberOfPublishedAdmin = 4;
         final int numberOfCreatedAdmin = 2;
-        final int numberOfBlockedAdmin = 1;
+        final int numberOfMaintenanceAdmin = 1;
         final int numberOfPublishedCreator = 5;
         final int numberOfCreatedCreator = 3;
-        final int numberOfBlockedCreator = 1;
+        final int numberOfMaintenanceCreator = 1;
 
         Set<String> singleRole = new HashSet<>();
         singleRole.add(ADMIN);
@@ -1446,11 +1498,11 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
             createdAPIsSummaryAdmin.add(SampleTestObjectCreator.getSummaryFromAPI(api));
             apiDAO.addAPI(api);
         }
-        List<API> blockedAPIsSummaryAdmin = new ArrayList<>();
-        for (int i = 0; i < numberOfBlockedAdmin; ++i) {
-            API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(blockedStatus).
+        List<API> maintenanceAPIsSummaryAdmin = new ArrayList<>();
+        for (int i = 0; i < numberOfMaintenanceAdmin; ++i) {
+            API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(maintenanceStatus).
                     visibleRoles(singleRole).build();
-            blockedAPIsSummaryAdmin.add(SampleTestObjectCreator.getSummaryFromAPI(api));
+            maintenanceAPIsSummaryAdmin.add(SampleTestObjectCreator.getSummaryFromAPI(api));
             apiDAO.addAPI(api);
         }
         // Filter APIs by single status
@@ -1460,7 +1512,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, publishedAPIsSummaryAdmin, new APIComparator()));
         List<String> twoStatus = new ArrayList<>();
         twoStatus.add(createdStatus);
-        twoStatus.add(blockedStatus);
+        twoStatus.add(maintenanceStatus);
         Set<String> twoRoles = new HashSet<>();
         twoRoles.add(ADMIN);
         twoRoles.add(CREATOR);
@@ -1480,20 +1532,21 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
             createdAPIsSummaryTwoRoles.add(SampleTestObjectCreator.getSummaryFromAPI(api));
             apiDAO.addAPI(api);
         }
-        List<API> blockedAPIsSummaryTwoRoles = new ArrayList<>();
-        for (int i = 0; i < numberOfBlockedCreator; ++i) {
-            API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(blockedStatus).
+        List<API> maintenanceAPIsSummaryTwoRoles = new ArrayList<>();
+        for (int i = 0; i < numberOfMaintenanceCreator; ++i) {
+            API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(maintenanceStatus).
                     visibleRoles(twoRoles).build();
-            blockedAPIsSummaryTwoRoles.add(SampleTestObjectCreator.getSummaryFromAPI(api));
+            maintenanceAPIsSummaryTwoRoles.add(SampleTestObjectCreator.getSummaryFromAPI(api));
             apiDAO.addAPI(api);
         }
         apiList = apiDAO.getAPIsByStatus(twoRoles, twoStatus, ApiType.STANDARD);
-        Assert.assertEquals(apiList.size(), publishedAPIsSummaryTwoRoles.size() + blockedAPIsSummaryTwoRoles.size());
+        Assert.assertEquals(apiList.size(),
+                publishedAPIsSummaryTwoRoles.size() + maintenanceAPIsSummaryTwoRoles.size());
         for (API api : publishedAPIsSummaryTwoRoles) {
             Assert.assertTrue(apiList.contains(api));
             apiList.remove(api);
         }
-        for (API api : blockedAPIsSummaryTwoRoles) {
+        for (API api : maintenanceAPIsSummaryTwoRoles) {
             Assert.assertTrue(apiList.contains(api));
             apiList.remove(api);
         }

@@ -553,7 +553,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 WorkflowExecutor executor = WorkflowExecutorFactory.getInstance()
                         .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
                 APIStateChangeWorkflow workflow = new APIStateChangeWorkflow(getApiDAO(), getApiSubscriptionDAO(),
-                        getWorkflowDAO(), getApiLifecycleManager());
+                        getWorkflowDAO(), getApiLifecycleManager(), getApiGateway());
                 workflow.setApiName(originalAPI.getName());
                 workflow.setApiProvider(originalAPI.getProvider());
                 workflow.setApiVersion(originalAPI.getVersion());

@@ -67,6 +67,15 @@ public class APIMConfigurations {
     @Element(description = "Throttling Configurations")
     private ThrottlingConfigurations throttlingConfigurations = new ThrottlingConfigurations();
 
+    @Element(description = "comment moderator role")
+    private String commentModeratorRole = "comment-moderator";
+
+    @Element(description = "comment text max length")
+    private int commentMaxLength = 1000;
+
+    @Element(description = "rating upper limit")
+    private int ratingMaxValue = 5;
+
     public String getHostname() {
         return hostname;
     }
@@ -121,5 +130,17 @@ public class APIMConfigurations {
 
     public ThrottlingConfigurations getThrottlingConfigurations() {
         return throttlingConfigurations;
+    }
+
+    public String getCommentModeratorRole() {
+        return commentModeratorRole;
+    }
+
+    public int getRatingMaxValue() {
+        return ratingMaxValue;
+    }
+
+    public int getCommentMaxLength() {
+        return commentMaxLength;
     }
 }
