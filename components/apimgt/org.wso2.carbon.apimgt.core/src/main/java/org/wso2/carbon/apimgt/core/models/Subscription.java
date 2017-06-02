@@ -35,6 +35,7 @@ public final class Subscription {
     private Application application;
     private String subscriptionTier;
     private APIMgtConstants.SubscriptionStatus status;
+    private String subscriptionPolicyId;
 
     public Subscription(String uuid, Application application, API api, String subscriptionTier) {
         this.uuid = uuid;
@@ -65,6 +66,14 @@ public final class Subscription {
 
     public void setStatus(APIMgtConstants.SubscriptionStatus status) {
         this.status = status;
+    }
+
+    public String getSubscriptionPolicyId() {
+        return subscriptionPolicyId;
+    }
+
+    public void setSubscriptionPolicyId(String subscriptionPolicyId) {
+        this.subscriptionPolicyId = subscriptionPolicyId;
     }
 
     @Override

@@ -6,7 +6,6 @@ import ballerina.lang.system;
 import ballerina.net.http;
 import org.wso2.carbon.apimgt.gateway.dto as dto;
 import org.wso2.carbon.apimgt.gateway.holders as holders;
-import org.wso2.carbon.apimgt.gateway.constants as Constants;
 
 function constructAccessTokenNotFoundPayload (message response) {
     json payload = {"code":900902, "message":"accessToken invalid"};
@@ -189,16 +188,6 @@ function fromJSONToAPIDTO (json api) (dto:APIDTO){
 function getSystemProperty (string prop) (string) {
     string pathValue = system:getEnv(prop);
     return pathValue;
-}
-
-function deployService (dto:APIDto api, string config) {
-    //TODO:To be implemented
-}
-function undeployService (dto:APIDto api) {
-    //TODO:To be implemented
-}
-function updateService (dto:APIDto api, string config) {
-    //TODO:To be implemented
 }
 
 function getStringProperty(message msg, string propertyKey)(string){

@@ -6,7 +6,6 @@ import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
-import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
@@ -16,7 +15,6 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.RegistrationSummary;
@@ -66,24 +64,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     public List<SubscriptionValidationData> getAPISubscriptionsOfApi(String apiContext, String apiVersion)
             throws APIManagementException {
         return apiSubscriptionDAO.getAPISubscriptionsOfAPIForValidation(apiContext, apiVersion);
-    }
-
-    /**
-     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#getAPIInfo()
-     */
-    @Override
-    public List<APISummary> getAPIInfo() throws APIManagementException {
-        List<API> apiList = apiDAO.getAPIs(ApiType.STANDARD);
-        List<APISummary> apiSummaryList = new ArrayList<APISummary>();
-        apiList.forEach(apiInfo -> {
-            APISummary apiSummary = new APISummary(apiInfo.getId());
-            apiSummary.setName(apiInfo.getName());
-            apiSummary.setContext(apiInfo.getContext());
-            apiSummary.setVersion(apiInfo.getVersion());
-            apiSummary.setUriTemplates(new ArrayList<>(apiInfo.getUriTemplates().values()));
-            apiSummaryList.add(apiSummary);
-        });
-        return apiSummaryList;
     }
 
     /**

@@ -64,7 +64,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 "SUBS.APPLICATION_ID AS APP_ID, SUBS.SUB_STATUS AS SUB_STATUS, API.PROVIDER AS API_PROVIDER, " +
                 "API.NAME AS API_NAME, API.CONTEXT AS API_CONTEXT, API.VERSION AS API_VERSION, APP.NAME AS APP_NAME, " +
                 "APP.CALLBACK_URL AS APP_CALLBACK_URL, APP.APPLICATION_STATUS AS APP_STATUS, " +
-                "APP.CREATED_BY AS APP_OWNER, POLICY.NAME AS SUBS_POLICY " +
+                "APP.CREATED_BY AS APP_OWNER, POLICY.NAME AS SUBS_POLICY, POLICY.UUID AS SUBS_POLICY_ID " +
                 "FROM AM_SUBSCRIPTION SUBS, AM_API API, AM_APPLICATION APP, AM_SUBSCRIPTION_POLICY POLICY " +
                 "WHERE SUBS.UUID = ? AND SUBS.API_ID = API.UUID AND SUBS.APPLICATION_ID = APP.UUID AND " +
                 "SUBS.TIER_ID = POLICY.UUID";
@@ -583,6 +583,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
             if (rs.next()) {
                 String subscriptionId = rs.getString("SUBS_UUID");
                 String subscriptionTier = rs.getString("SUBS_POLICY");
+                String subscriptionPolicyId = rs.getString("SUBS_POLICY_ID");
 
                 API.APIBuilder apiBuilder = new API.APIBuilder(rs.getString("API_PROVIDER"),
                         rs.getString("API_NAME"), rs.getString("API_VERSION"));
@@ -597,6 +598,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
 
                 subscription = new Subscription(subscriptionId, app, api, subscriptionTier);
                 subscription.setStatus(APIMgtConstants.SubscriptionStatus.valueOf(rs.getString("SUB_STATUS")));
+                subscription.setSubscriptionPolicyId(subscriptionPolicyId);
             }
         } catch (SQLException e) {
             log.error("Error while executing sql query", e);
