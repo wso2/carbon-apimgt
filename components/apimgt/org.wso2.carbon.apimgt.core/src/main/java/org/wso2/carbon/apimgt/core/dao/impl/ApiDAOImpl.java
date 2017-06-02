@@ -1850,14 +1850,15 @@ public class ApiDAOImpl implements ApiDAO {
                     statement.executeBatch();
                 }
             }
-        } else {
-            try (PreparedStatement statement = connection.prepareStatement(query)) {
-                statement.setString(1, apiId);
-                statement.setString(2, "2beef7eb-f854-46f1-adb2-642088dda508");
-                statement.setInt(3, 7);
-                statement.execute();
-            }
         }
+//        else {
+//            try (PreparedStatement statement = connection.prepareStatement(query)) {
+//                statement.setString(1, apiId);
+//                statement.setString(2, "2beef7eb-f854-46f1-adb2-642088dda508");
+//                statement.setInt(3, 7);
+//                statement.execute();
+//            }
+//        }
 
     }
 
