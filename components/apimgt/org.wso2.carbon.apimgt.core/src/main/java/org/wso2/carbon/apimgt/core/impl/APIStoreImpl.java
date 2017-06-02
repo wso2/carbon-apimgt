@@ -764,7 +764,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
     private void setUriTemplates(CompositeAPI.Builder apiBuilder) {
         Map<String, UriTemplate> uriTemplateMap = new HashMap();
-        if (apiBuilder.getUriTemplates().isEmpty()) {
+        if (apiBuilder.getUriTemplates() == null || apiBuilder.getUriTemplates().isEmpty()) {
             apiBuilder.uriTemplates(APIUtils.getDefaultUriTemplates());
             apiBuilder.apiDefinition(apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder));
         } else {
