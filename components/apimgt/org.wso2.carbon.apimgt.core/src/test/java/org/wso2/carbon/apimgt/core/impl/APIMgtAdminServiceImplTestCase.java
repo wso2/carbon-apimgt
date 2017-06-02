@@ -25,12 +25,10 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
-import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
-import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
@@ -100,16 +98,6 @@ public class APIMgtAdminServiceImplTestCase {
         Policy policy = mock(Policy.class);
         adminService.addPolicy(POLICY_LEVEL, policy);
         verify(policyDAO, times(1)).addPolicy(POLICY_LEVEL, policy);
-    }
-
-    @Test(description = "Get API Info")
-    public void testGetAPIInfo() throws APIManagementException {
-        ApiDAO apiDAO = mock(ApiDAO.class);
-        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforApiDAO(apiDAO);
-        List<API> apiList = SampleTestObjectCreator.createMockAPIList();
-        when(apiDAO.getAPIs(ApiType.STANDARD)).thenReturn(apiList);
-        adminService.getAPIInfo();
-        verify(apiDAO, times(1)).getAPIs(ApiType.STANDARD);
     }
 
     @Test(description = "Delete a label")

@@ -22,16 +22,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
+import org.wso2.carbon.apimgt.core.exception.GatewayException;
+import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.APIKey;
+import org.wso2.carbon.apimgt.core.models.APISummary;
+import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.events.APIEvent;
 import org.wso2.carbon.apimgt.core.models.events.EndpointEvent;
 import org.wso2.carbon.apimgt.core.models.events.GatewayEvent;
 import org.wso2.carbon.apimgt.core.models.events.SubscriptionDTO;
-import org.wso2.carbon.apimgt.core.exception.GatewayException;
-import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APISummary;
-import org.wso2.carbon.apimgt.core.models.Endpoint;
-import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.BrokerUtil;
 
@@ -41,6 +44,8 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This is responsible for handling API gateway related operations
@@ -82,14 +87,10 @@ public class APIGatewayPublisherImpl implements APIGateway {
         if (gwHome == null) {
 
             // build the message to send
-            APIEvent gatewayDTO = new APIEvent(APIMgtConstants.GatewayEventTypes.API_CREATE);
-            gatewayDTO.setLabels(api.getLabels());
-            APISummary apiSummary = new APISummary(api.getId());
-            apiSummary.setName(api.getName());
-            apiSummary.setVersion(api.getVersion());
-            apiSummary.setContext(api.getContext());
-            gatewayDTO.setApiSummary(apiSummary);
-            publishToPublisherTopic(gatewayDTO);
+            APIEvent apiCreateEvent = new APIEvent(APIMgtConstants.GatewayEventTypes.API_CREATE);
+            apiCreateEvent.setLabels(api.getLabels());
+            apiCreateEvent.setApiSummary(toAPISummary(api));
+            publishToPublisherTopic(apiCreateEvent);
 
         } else {
             saveApi(api, gwHome, gatewayConfig, false);
@@ -107,14 +108,10 @@ public class APIGatewayPublisherImpl implements APIGateway {
 
         if (gwHome == null) {
             // build the message to send
-            APIEvent gatewayDTO = new APIEvent(APIMgtConstants.GatewayEventTypes.API_UPDATE);
-            gatewayDTO.setLabels(api.getLabels());
-            APISummary apiSummary = new APISummary(api.getId());
-            apiSummary.setName(api.getName());
-            apiSummary.setVersion(api.getVersion());
-            apiSummary.setContext(api.getContext());
-            gatewayDTO.setApiSummary(apiSummary);
-            publishToPublisherTopic(gatewayDTO);
+            APIEvent apiUpdateEvent = new APIEvent(APIMgtConstants.GatewayEventTypes.API_UPDATE);
+            apiUpdateEvent.setLabels(api.getLabels());
+            apiUpdateEvent.setApiSummary(toAPISummary(api));
+            publishToPublisherTopic(apiUpdateEvent);
         }
     }
 
@@ -126,14 +123,10 @@ public class APIGatewayPublisherImpl implements APIGateway {
 
         if (gwHome == null) {
             // build the message to send
-            APIEvent gatewayDTO = new APIEvent(APIMgtConstants.GatewayEventTypes.API_DELETE);
-            gatewayDTO.setLabels(api.getLabels());
-            APISummary apiSummary = new APISummary(api.getId());
-            apiSummary.setName(api.getName());
-            apiSummary.setVersion(api.getVersion());
-            apiSummary.setContext(api.getContext());
-            gatewayDTO.setApiSummary(apiSummary);
-            publishToPublisherTopic(gatewayDTO);
+            APIEvent apiDeleteEvent = new APIEvent(APIMgtConstants.GatewayEventTypes.API_DELETE);
+            apiDeleteEvent.setLabels(api.getLabels());
+            apiDeleteEvent.setApiSummary(toAPISummary(api));
+            publishToPublisherTopic(apiDeleteEvent);
         }
     }
 
@@ -145,7 +138,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
         if (gwHome == null) {
             SubscriptionDTO subscriptionDTO = new SubscriptionDTO(
                     APIMgtConstants.GatewayEventTypes.SUBSCRIPTION_CREATE);
-            subscriptionDTO.setSubscription(subscription);
+            subscriptionDTO.setSubscriptionsList(toSubscriptionValidationData(subscription));
             publishToStoreTopic(subscriptionDTO);
         }
     }
@@ -158,7 +151,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
         if (gwHome == null) {
             SubscriptionDTO subscriptionDTO = new SubscriptionDTO(
                     APIMgtConstants.GatewayEventTypes.SUBSCRIPTION_DELETE);
-            subscriptionDTO.setSubscription(subscription);
+            subscriptionDTO.setSubscriptionsList(toSubscriptionValidationData(subscription));
             publishToStoreTopic(subscriptionDTO);
         }
     }
@@ -208,8 +201,8 @@ public class APIGatewayPublisherImpl implements APIGateway {
     /**
      * Publish event to publisher topic
      *
-     * @param gatewayDTO    gateway data transfer object
-     * @throws GatewayException     If there is a failure to publish to gateway
+     * @param gatewayDTO gateway data transfer object
+     * @throws GatewayException If there is a failure to publish to gateway
      */
     private void publishToPublisherTopic(GatewayEvent gatewayDTO) throws GatewayException {
         BrokerUtil.publishToTopic(config.getBrokerConfiguration().getPublisherTopic(), gatewayDTO);
@@ -218,8 +211,8 @@ public class APIGatewayPublisherImpl implements APIGateway {
     /**
      * Publish event to store topic
      *
-     * @param gatewayDTO    gateway data transfer object
-     * @throws GatewayException     If there is a failure to publish to gateway
+     * @param gatewayDTO gateway data transfer object
+     * @throws GatewayException If there is a failure to publish to gateway
      */
     private void publishToStoreTopic(GatewayEvent gatewayDTO) throws GatewayException {
         BrokerUtil.publishToTopic(config.getBrokerConfiguration().getStoreTopic(), gatewayDTO);
@@ -321,15 +314,54 @@ public class APIGatewayPublisherImpl implements APIGateway {
             //lifecycle state.
             APIEvent gatewayDTO = new APIEvent(APIMgtConstants.GatewayEventTypes.API_STATE_CHANGE);
             gatewayDTO.setLabels(api.getLabels());
-            APISummary apiSummary = new APISummary(api.getId());
-            apiSummary.setName(api.getName());
-            apiSummary.setVersion(api.getVersion());
-            apiSummary.setContext(api.getContext());
-            apiSummary.setLifeCycleState(status);
-            gatewayDTO.setApiSummary(apiSummary);
+            gatewayDTO.setApiSummary(toAPISummary(api));
             publishToPublisherTopic(gatewayDTO);
         } else {
             //TODO save to file system: need to consider editor mode scenario
         }
+    }
+
+    /**
+     * Convert API definition into APISummary
+     *
+     * @param api API definition
+     * @return The summary of the API
+     */
+    private APISummary toAPISummary(API api) {
+        APISummary apiSummary = new APISummary();
+        apiSummary.setId(api.getId());
+        apiSummary.setName(api.getName());
+        apiSummary.setVersion(api.getVersion());
+        apiSummary.setContext(api.getContext());
+        apiSummary.setLifeCycleState(api.getLifeCycleStatus());
+        apiSummary.setLifeCycleState(api.getLifeCycleStatus());
+        apiSummary.setCreatedTime(api.getCreatedTime());
+        apiSummary.setLastUpdatedTime(api.getLastUpdatedTime());
+        return apiSummary;
+    }
+
+    /**
+     * Converts Subscription into a list of SubscriptionValidationData
+     *
+     * @param subscription subscription details
+     * @return list of SubscriptionValidationData
+     */
+    private List<SubscriptionValidationData> toSubscriptionValidationData(Subscription subscription) {
+        List<SubscriptionValidationData> subscriptionDataList = new ArrayList<>();
+        API subscribedAPI = subscription.getApi();
+        Application subscribedApp = subscription.getApplication();
+        List<APIKey> keyList = subscribedApp.getKeys();
+        for (int i = 0; i < keyList.size(); i++) {
+            SubscriptionValidationData subscriptionValidationData = new SubscriptionValidationData(subscribedAPI
+                    .getContext(), subscribedAPI.getVersion(), keyList.get(i).getConsumerKey());
+            subscriptionValidationData.setKeyEnvType(keyList.get(i).getType());
+            subscriptionValidationData.setApiName(subscribedAPI.getName());
+            subscriptionValidationData.setApiProvider(subscribedAPI.getProvider());
+            subscriptionValidationData.setApplicationId(subscribedApp.getId());
+            subscriptionValidationData.setSubscriptionPolicy(subscription.getSubscriptionPolicyId());
+            subscriptionDataList.add(subscriptionValidationData);
+        }
+        return subscriptionDataList;
+
     }
 }

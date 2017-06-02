@@ -22,7 +22,6 @@ package org.wso2.carbon.apimgt.core.api;
 import org.wso2.carbon.apimgt.core.exception.APIConfigRetrievalException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.RegistrationSummary;
@@ -56,14 +55,6 @@ public interface APIMgtAdminService {
      */
     List<SubscriptionValidationData> getAPISubscriptionsOfApi(String apiContext, String apiVersion)
             throws APIManagementException;
-
-    /**
-     * Load api info from db
-     *
-     * @return Subscription Validation Information
-     * @throws APIManagementException If failed to get lAPI summary data
-     */
-    public List<APISummary> getAPIInfo() throws APIManagementException;
 
     /**
      * Adds new @{@link Policy} to the system

@@ -20,22 +20,24 @@ package org.wso2.carbon.apimgt.core.models.events;
 
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 
+import java.util.List;
+
 /**
  * Holds the Subscription related details transferred to Gateway
  */
 public class SubscriptionDTO extends GatewayEvent {
 
-    private SubscriptionValidationData subscription;
+    private List<SubscriptionValidationData> subscriptionsList;
 
     public SubscriptionDTO(String eventType) {
         super(eventType);
     }
 
-    public SubscriptionValidationData getSubscription() {
-        return subscription;
+    public List<SubscriptionValidationData> getSubscriptionsList() {
+        return subscriptionsList;
     }
 
-    public void setSubscription(SubscriptionValidationData subscription) {
-        this.subscription = subscription;
+    public void setSubscriptionsList(List<SubscriptionValidationData> subscriptionsList) {
+        this.subscriptionsList = subscriptionsList;
     }
 }
