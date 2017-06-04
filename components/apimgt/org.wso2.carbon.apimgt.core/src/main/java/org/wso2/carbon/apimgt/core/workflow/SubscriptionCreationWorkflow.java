@@ -44,7 +44,7 @@ public class SubscriptionCreationWorkflow extends Workflow {
 
     public SubscriptionCreationWorkflow(APISubscriptionDAO apiSubscriptionDAO, WorkflowDAO workflowDAO,
                                         APIGateway apiGateway) {
-        super(workflowDAO, Category.STORE);
+        super(workflowDAO, Category.STORE, apiGateway);
         this.apiSubscriptionDAO = apiSubscriptionDAO;
         this.apiGateway = apiGateway;
     }

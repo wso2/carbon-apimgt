@@ -146,7 +146,7 @@ public class MappingUtil {
     /**
      * convert {@link ApplicationDTO} to {@link Application}
      * @param applicationList  List of {@link Application}
-     * @return ApplicationDTO list
+     * @return ApplicationEvent list
      */
     public static List<ApplicationDTO> convertToApplicationDtoList(List<Application> applicationList) {
         List<ApplicationDTO> applicationDTOList = new ArrayList<>();
