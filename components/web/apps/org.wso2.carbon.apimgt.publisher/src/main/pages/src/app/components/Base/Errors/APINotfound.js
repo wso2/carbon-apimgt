@@ -1,13 +1,13 @@
 import React, {Component} from 'react'
 
-const NotFound = (props) => {
+const APINotFound = (props) => {
     return (
         <div>
             <div className="message message-danger">
-                <h4><i className="icon fw fw-error"/>404 Page Not Found!</h4>
+                <h4><i className="icon fw fw-error"/>404 API Not Found!</h4>
                 <p>
-                    Sorry the page you are looking for <span style={{color: 'green'}}> {props.location.pathname} </span>
-                    is not available.
+                    Can't find an API associate with the given API ID <span
+                    style={{color: 'green'}}> {props.match.params.api_uuid} </span>
                 </p>
             </div>
 
@@ -15,4 +15,4 @@ const NotFound = (props) => {
     );
 };
 
-export default NotFound
+export default APINotFound

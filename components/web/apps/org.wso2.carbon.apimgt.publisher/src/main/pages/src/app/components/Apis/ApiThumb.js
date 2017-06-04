@@ -5,8 +5,9 @@ class ApiThumb extends React.Component {
     getGridUI = () => {
         return 'item  col-xs-4 col-lg-4 ' + this.props.listType + '-group-item';
     }
-    render = function () {
 
+    render() {
+        let details_link = "/apis/" + this.props.api.id;
         return <div className={this.getGridUI()} key={this.props.api.id}>
             <div className="thumbnail">
                 <img className="group list-group-image" src="http://placehold.it/400x250/000/fff" alt=""/>
@@ -23,7 +24,7 @@ class ApiThumb extends React.Component {
                                 {this.props.api.context}</p>
                         </div>
                         <div className="col-xs-12 col-md-6">
-                            <Link to="/" className="btn btn-success">More details </Link>
+                            <Link to={details_link} className="btn btn-success">More details </Link>
                         </div>
                     </div>
                 </div>

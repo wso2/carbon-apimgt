@@ -8,37 +8,44 @@
     <title>WSO2 Theme Template</title>
 
     <!-- Font WSO2 CSS -->
-    <link href="/publisher/public/components/root/base/javascripts/libs/font-wso2-1.2.1/css/font-wso2.min.css" rel="stylesheet" type="text/css" />
-
-    <!-- WSO2 Theme -->
-    <link href="/publisher/public/components/root/base/stylesheets/theme-wso2.min.css" rel="stylesheet">
-
-    <link href="/publisher/public/components/root/base/javascripts/libs/bootstrap-material-design/css/bootstrap-material-design.css" rel="stylesheet">
-    <link href="/publisher/public/components/root/base/javascripts/libs/bootstrap-material-design/css/ripples.css" rel="stylesheet">
-
-    <link rel="stylesheet" type="text/css" href="/publisher/public/components/root/base/stylesheets/test.css" />
-    <link rel="stylesheet" type="text/css" href="/publisher/public/components/root/base/stylesheets/bootstrap_buttons.css" />
-    <link rel="stylesheet" type="text/css" href="/publisher/public/components/root/base/stylesheets/progress-wizard.min.css">
-
-    <link rel="stylesheet" type="text/css" href="/publisher/public/components/root/base/stylesheets/component.css" />
-    <link rel="stylesheet" type="text/css" href="/publisher/public/components/root/base/stylesheets/custom.css" />
-
-    <script src="/publisher/public/components/root/base/javascripts/modernizr.custom.js"></script>
-
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
+    <link href="/publisher/public/components/root/base/javascripts/libs/font-wso2-1.2.1/css/font-wso2.min.css"
+          rel="stylesheet" type="text/css"/>
 </head>
 
 <body class="sticky-footer">
 
 <div id="react-root">
-
+    <div style="text-align: center">
+        <i class="fw fw-wso2-logo fw-pulse fw-5x"></i>
+        <p>Loading . . . </p>
+    </div>
 </div>
 
+<!-- WSO2 Theme -->
+<link href="/publisher/public/components/root/base/stylesheets/theme-wso2.min.css" rel="stylesheet">
+
+<link href="/publisher/public/components/root/base/javascripts/libs/bootstrap-material-design/css/bootstrap-material-design.css"
+      rel="stylesheet">
+<link href="/publisher/public/components/root/base/javascripts/libs/bootstrap-material-design/css/ripples.css"
+      rel="stylesheet">
+
+<link rel="stylesheet" type="text/css" href="/publisher/public/components/root/base/stylesheets/test.css"/>
+<link rel="stylesheet" type="text/css"
+      href="/publisher/public/components/root/base/stylesheets/bootstrap_buttons.css"/>
+<link rel="stylesheet" type="text/css"
+      href="/publisher/public/components/root/base/stylesheets/progress-wizard.min.css">
+
+<link rel="stylesheet" type="text/css" href="/publisher/public/components/root/base/stylesheets/component.css"/>
+<link rel="stylesheet" type="text/css" href="/publisher/public/components/root/base/stylesheets/custom.css"/>
+
+<script src="/publisher/public/components/root/base/javascripts/modernizr.custom.js"></script>
+
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
 <script src="/publisher/public/components/root/base/dist/index.js"></script>
 <script src="/publisher/public/components/root/base/javascripts/modernizr.custom.js"></script>
 <!-- jQuery (necessary for Bootstrap and WSO2 Theme JavaScript plugins) -->
@@ -63,29 +70,34 @@
 </script>
 
 <script>
-    var button,parentLi,chGrid,swaggerFormContainer,posa,parentPosa, containerWidth, moveThismuch;
+    var button, parentLi, chGrid, swaggerFormContainer, posa, parentPosa, containerWidth, moveThismuch;
 
-    $(".test_button").on("click",morphButton);
+    $(".test_button").on("click", morphButton);
 
-    $("#btn-close-step1").on("click",function(){
+    $("#btn-close-step1").on("click", function () {
         //debugger;
         var closeBtn = $(this);
         parentLi.removeClass("active");
         swaggerFormContainer.addClass("hide");
-        $("#btn-close-step1").transition({opacity:'0',zIndex:'0'},function () {
+        $("#btn-close-step1").transition({opacity: '0', zIndex: '0'}, function () {
             $("#btn-close-step1").hide();
         });
-        $("#btn-next-step").transition({opacity:'0',zIndex:'0'},function(){
+        $("#btn-next-step").transition({opacity: '0', zIndex: '0'}, function () {
             $("#btn-next-step").hide();
         });
         button
-            .transition({width: '200',borderRadius:'50% 50% 50% 50%', zIndex: '0',x: '0'},200,'cubic-bezier(0.4, 0.0, 0.2, 1);');
+            .transition({
+                width: '200',
+                borderRadius: '50% 50% 50% 50%',
+                zIndex: '0',
+                x: '0'
+            }, 200, 'cubic-bezier(0.4, 0.0, 0.2, 1);');
         //button.on("click",morphButton);
         console.log(moveThismuch);
     });
 
 
-    function morphButton(){
+    function morphButton() {
         button = $(this);
         parentLi = $(this).parent();
         chGrid = $(".ch-grid");
@@ -93,18 +105,30 @@
         posa = button.offset();
         parentPosa = chGrid.offset();
         containerWidth = chGrid.width();
-        moveThismuch  = posa.left - parentPosa.left;
+        moveThismuch = posa.left - parentPosa.left;
 
-        if(!parentLi.hasClass("active")){
+        if (!parentLi.hasClass("active")) {
             parentLi.addClass("active");
             button
-                .transition({borderRadius:'0 0 0 0', zIndex: '1',delay: 300},'cubic-bezier(0.4, 0.0, 0.6, 1)')
+                .transition({borderRadius: '0 0 0 0', zIndex: '1', delay: 300}, 'cubic-bezier(0.4, 0.0, 0.6, 1)')
                 .transition({x: -(moveThismuch - 20)}, 'cubic-bezier(0.4, 0.0, 0.2, 1);')
-                .transition({width: containerWidth},'cubic-bezier(0.4, 0.0, 0.2, 1);', function(){
+                .transition({width: containerWidth}, 'cubic-bezier(0.4, 0.0, 0.2, 1);', function () {
                     swaggerFormContainer.removeClass("hide");
                     $("#btn-close-step1,#btn-next-step").show();
-                    $("#btn-close-step1").transition({opacity:'1',x: 100,y: -parentPosa.top - 30, zIndex:'2', delay: 100},'cubic-bezier(0.4, 0.0, 0.6, 1)');
-                    $("#btn-next-step").transition({opacity:'1',x: -30,y: - (parentPosa.top - 70), zIndex:'2', delay: 300},'cubic-bezier(0.4, 0.0, 0.6, 1)');
+                    $("#btn-close-step1").transition({
+                        opacity: '1',
+                        x: 100,
+                        y: -parentPosa.top - 30,
+                        zIndex: '2',
+                        delay: 100
+                    }, 'cubic-bezier(0.4, 0.0, 0.6, 1)');
+                    $("#btn-next-step").transition({
+                        opacity: '1',
+                        x: -30,
+                        y: -(parentPosa.top - 70),
+                        zIndex: '2',
+                        delay: 300
+                    }, 'cubic-bezier(0.4, 0.0, 0.6, 1)');
                     //button.off("click",morphButton);
                     //button.removeClass("ripple-effect");
                     //debugger;
@@ -118,20 +142,17 @@
         console.log(moveThismuch);
     }
 
-    $(".animate").bind('oanimationend animationend webkitAnimationEnd', function() {
+    $(".animate").bind('oanimationend animationend webkitAnimationEnd', function () {
         console.log("fin");
     });
 
 
-
-
-
-    (function($) {
-        $(".ripple-effect").click(function(e){
+    (function ($) {
+        $(".ripple-effect").click(function (e) {
             var rippler = $(this);
 
             // create .ink element if it doesn't exist
-            if(rippler.find(".ink").length == 0) {
+            if (rippler.find(".ink").length == 0) {
                 rippler.append("<span class='ink'></span>");
             }
 
@@ -141,20 +162,19 @@
             ink.removeClass("animate");
 
             // set .ink diametr
-            if(!ink.height() && !ink.width())
-            {
+            if (!ink.height() && !ink.width()) {
                 var d = Math.max(rippler.outerWidth(), rippler.outerHeight());
                 ink.css({height: d, width: d});
             }
 
             // get click coordinates
-            var x = e.pageX - rippler.offset().left - ink.width()/2;
-            var y = e.pageY - rippler.offset().top - ink.height()/2;
+            var x = e.pageX - rippler.offset().left - ink.width() / 2;
+            var y = e.pageY - rippler.offset().top - ink.height() / 2;
 
             // set .ink position and add class .animate
             ink.css({
-                top: y+'px',
-                left:x+'px'
+                top: y + 'px',
+                left: x + 'px'
             }).addClass("animate");
         })
     })(jQuery);
@@ -171,7 +191,7 @@
         $(view).show();
         $(view).siblings().hide();
 
-        if($(view).find('button[data-target=#left-sidebar-sub]').length == 0){
+        if ($(view).find('button[data-target=#left-sidebar-sub]').length == 0) {
             $('#left-sidebar-sub').hide();
         }
         else {
@@ -186,13 +206,13 @@
         $(target).find('input#input-name').val(value);
 
         $('.gadget').removeClass('active');
-        setTimeout(function(){
-            if($(target).hasClass('toggled')){
+        setTimeout(function () {
+            if ($(target).hasClass('toggled')) {
                 $(button).closest('.gadget').addClass('active');
                 $(button).closest('.gadget').removeClass('deactive');
                 $('.gadget:not(.active)').addClass('deactive');
             }
-            else{
+            else {
                 $('.gadget').removeClass('active').removeClass('deactive');
             }
         }, 5);
@@ -208,7 +228,7 @@
     $('.sidebar-wrapper').on('shown.bs.collapse', toggleCaret);
 
 
-    $('#gridGuideToggle').change(function(){
+    $('#gridGuideToggle').change(function () {
         $('body').toggleClass('grid-on');
     });
 

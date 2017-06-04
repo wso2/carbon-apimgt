@@ -3,7 +3,7 @@ import ReactDom from 'react-dom'
 import {BrowserRouter as Router, Route, Link, Switch} from 'react-router-dom'
 
 import {Apis, Landing, Base} from './app/components/index'
-import NotFound from './app/components/Base/Error/Notfound'
+import {PageNotFound} from './app/components/Base/Errors/index'
 import Utils from '../src/app/data/utils.js'
 
 import './App.css'
@@ -24,7 +24,7 @@ class Publisher extends Component {
                     <Switch>
                         <Route exact path={"/"} component={Landing}/>
                         <Route path={"/apis"} component={Apis}/>
-                        <Route component={NotFound}/>
+                        <Route component={PageNotFound}/>
                     </Switch>
                 </Base>
             </Router>
