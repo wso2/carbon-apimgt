@@ -48,7 +48,7 @@ public interface WorkflowDAO {
      * @return Workflow workflow data
      * @throws APIMgtDAOException if API Manager core level exception occurred
      */
-    public Workflow retrieveWorkflow(String workflowReference) throws APIMgtDAOException;
+    Workflow retrieveWorkflow(String workflowReference) throws APIMgtDAOException;
 
     /**
      * Get the external reference id for tasks in Created state for a given workflow reference id. 

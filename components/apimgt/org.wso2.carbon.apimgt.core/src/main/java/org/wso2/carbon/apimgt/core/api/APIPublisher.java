@@ -107,7 +107,7 @@ public interface APIPublisher extends APIManager {
      * @return Validity of the API update.
      * @throws APIManagementException If failed to check validity of API update.
      */
-    public boolean isAPIUpdateValid(API api) throws APIManagementException;
+    boolean isAPIUpdateValid(API api) throws APIManagementException;
 
     /**
      * Updates design and implementation of an existing API. This method must not be used to change API status.

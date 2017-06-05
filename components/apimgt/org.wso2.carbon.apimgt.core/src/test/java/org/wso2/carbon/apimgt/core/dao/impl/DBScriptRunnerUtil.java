@@ -124,7 +124,7 @@ public class DBScriptRunnerUtil {
 
             String q = "select index_name,index_type,status,domidx_status,domidx_opstatus from user_indexes "
                     + "where index_type like '%DOMAIN%' and (domidx_status <> 'VALID' or domidx_opstatus <> 'VALID')";
-            try (Statement statement = connection.createStatement(); ResultSet rs = statement.executeQuery(q);) {
+            try (Statement statement = connection.createStatement(); ResultSet rs = statement.executeQuery(q)) {
                 while (rs.next()) {
                     if (rs.getString("index_name").equals("API_INDEX")) { // re build index if it has failed.
                         String rebuild = "alter index API_INDEX rebuild";

@@ -53,7 +53,7 @@ public interface APISubscriptionDAO {
      * @return List of {@link Subscription} objects
      * @throws APIMgtDAOException   If failed to get subscriptions.
      */
-    public List<Subscription> getAPISubscriptionsByAPI(String apiId) throws APIMgtDAOException;
+    List<Subscription> getAPISubscriptionsByAPI(String apiId) throws APIMgtDAOException;
 
     /**
      * Retrieve the list of subscriptions of an API for validation
