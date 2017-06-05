@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.core.api;
 
-import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
 import org.wso2.carbon.apimgt.core.models.User;
 
@@ -30,22 +29,22 @@ import java.util.List;
 public interface IdentityProvider extends KeyManager {
 
     /**
-     * Get the role Id list of a user.
+     * Get the role list of a user.
      *
      * @param userId User Id
-     * @return a list of role Ids
-     * @throws IdentityProviderException if error occurred while getting role Ids of the user
+     * @return a list of roles
+     * @throws IdentityProviderException if error occurred while getting roles of the user
      */
-    public List<String> getRoleIdsOfUser(String userId) throws IdentityProviderException;
+    public List<String> getRolesOfUser(String userId) throws IdentityProviderException;
 
     /**
-     * Get role Id of given role.
+     * Validate role.
      *
      * @param roleName Role name
-     * @return the roleId if the role is available else null
-     * @throws IdentityProviderException if error occurred while getting role Id for role name
+     * @return true if role is valid, else false.
+     * @throws IdentityProviderException if error occurred while validation the role
      */
-    public String getRoleId(String roleName) throws IdentityProviderException, ParseException;
+    public boolean isValidRole(String roleName) throws IdentityProviderException;
 
     /**
      * Register a new user to the system

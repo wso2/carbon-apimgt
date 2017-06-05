@@ -410,12 +410,12 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @return validity of the roles
      * @throws APIManagementException If one or more of the roles are invalid
      */
-//    private boolean checkRoleValidityForAPIPermissions(Map<String, Integer> permissionMap)
-//            throws APIManagementException {
-//        Set<String> allAvailableRoles = APIUtils.getAllAvailableRoles();
-//        Set<String> permissionRoleList = getRolesFromPermissionMap(permissionMap);
-//        return APIUtils.checkAllowedRoles(allAvailableRoles, permissionRoleList);
-//    }
+    private boolean checkRoleValidityForAPIPermissions(Map<String, Integer> permissionMap)
+            throws APIManagementException {
+        Set<String> allAvailableRoles = APIUtils.getAllAvailableRoles();
+        Set<String> permissionRoleList = getRolesFromPermissionMap(permissionMap);
+        return APIUtils.checkAllowedRoles(allAvailableRoles, permissionRoleList);
+    }
 
     /**
      * This method retrieves the set of overall permissions for a given api for the logged in user
@@ -514,9 +514,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     if (apiBuilder.getPermission() != null && !("[]").equals(apiBuilder.getPermission())) {
                         HashMap<String, Integer> roleNamePermissionList;
                         roleNamePermissionList = getAPIPermissionArray(apiBuilder.getPermission());
-                        //if (checkRoleValidityForAPIPermissions(roleNamePermissionList)) {
-                        apiBuilder.permissionMap(roleNamePermissionList);
-                        //}
+                        if (checkRoleValidityForAPIPermissions(roleNamePermissionList)) {
+                            apiBuilder.permissionMap(roleNamePermissionList);
+                        }
                     }
 
                     String updatedSwagger = apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder);
@@ -616,17 +616,15 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @return Map of permission values.
      * @throws ParseException If failed to parse the json string.
      */
-    private HashMap<String, Integer> getAPIPermissionArray(String permissionJsonString)
-            throws ParseException, APIManagementException {
+    private HashMap<String, Integer> getAPIPermissionArray(String permissionJsonString) throws ParseException {
 
         HashMap<String, Integer> roleNamePermissionList = new HashMap<String, Integer>();
         JSONParser jsonParser = new JSONParser();
-        IdentityProvider defaultIdentityProvider = new DefaultIdentityProviderImpl();
+
         JSONArray baseJsonArray = (JSONArray) jsonParser.parse(permissionJsonString);
         for (Object aBaseJsonArray : baseJsonArray) {
             JSONObject jsonObject = (JSONObject) aBaseJsonArray;
-            String groupName = jsonObject.get(APIMgtConstants.Permission.GROUP_ID).toString();
-            String groupId = defaultIdentityProvider.getRoleId(groupName);
+            String groupId = jsonObject.get(APIMgtConstants.Permission.GROUP_ID).toString();
             JSONArray subJsonArray = (JSONArray) jsonObject.get(APIMgtConstants.Permission.PERMISSION);
             int totalPermissionValue = 0;
             for (Object aSubJsonArray : subJsonArray) {
@@ -638,9 +636,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     totalPermissionValue += APIMgtConstants.Permission.DELETE_PERMISSION;
                 }
             }
-            if (groupId != null) {
-                roleNamePermissionList.put(groupId, totalPermissionValue);
-            }
+            roleNamePermissionList.put(groupId, totalPermissionValue);
         }
 
         return roleNamePermissionList;
