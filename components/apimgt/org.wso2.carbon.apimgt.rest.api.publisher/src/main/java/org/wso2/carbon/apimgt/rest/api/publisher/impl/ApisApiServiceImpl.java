@@ -715,7 +715,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     private String replaceGroupIdWithName(String permissionString) throws ParseException, APIManagementException {
-        IdentityProvider idp = APIManagerFactory.getInstance().getIdentityProvider();
+        IdentityProvider defaultIdentityProvider = APIManagerFactory.getInstance().getIdentityProvider();
         List<String> nonExistingRoleList = new ArrayList<>();
         JSONArray newPermissionArray = new JSONArray();
         JSONParser jsonParser = new JSONParser();
@@ -724,7 +724,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         for (Object permissionObj : permissionArray) {
             JSONObject jsonObject = (JSONObject) permissionObj;
             String groupId = (String) jsonObject.get(APIMgtConstants.Permission.GROUP_ID);
-            String groupName = idp.getRoleName(groupId);
+            String groupName = defaultIdentityProvider.getRoleName(groupId);
             if (groupName != null) {
                 JSONObject obj = new JSONObject();
                 obj.put(APIMgtConstants.Permission.GROUP_ID, groupName);
