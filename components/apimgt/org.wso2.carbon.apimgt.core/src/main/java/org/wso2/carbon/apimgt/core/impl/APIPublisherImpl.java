@@ -228,7 +228,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     try {
                         if (getApiDAO().getEndpointByName(endpoint.getName()) != null) {
                             String msg = "Endpoint Already Exist By Name : " + endpoint.getName();
-                            throw new APIManagementException(msg, ExceptionCodes.ENDPOINT_ALREADY_EXISTS);
+                            throw new APIManagementException(msg, ExceptionCodes
+                                    .ENDPOINT_ALREADY_EXISTS);
                         } else {
                             apiEndpointMap.replace(entry.getKey(), endpointBuilder.build());
                         }
@@ -243,8 +244,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
         try {
             if (!isApiNameExist(apiBuilder.getName()) && !isContextExist(apiBuilder.getContext())) {
-                LifecycleState lifecycleState = getApiLifecycleManager()
-                        .addLifecycle(APIMgtConstants.API_LIFECYCLE, getUsername());
+                LifecycleState lifecycleState = getApiLifecycleManager().addLifecycle(APIMgtConstants.API_LIFECYCLE,
+                        getUsername());
                 apiBuilder.associateLifecycle(lifecycleState);
 
                 Map<String, UriTemplate> uriTemplateMap = new HashMap();
@@ -252,18 +253,18 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     apiDefinitionFromSwagger20.setDefaultSwaggerDefinition(apiBuilder);
                 } else {
                     for (UriTemplate uriTemplate : apiBuilder.getUriTemplates().values()) {
-                        UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder(
-                                uriTemplate);
+                        UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder
+                                (uriTemplate);
                         if (StringUtils.isEmpty(uriTemplateBuilder.getTemplateId())) {
-                            uriTemplateBuilder.templateId(
-                                    APIUtils.generateOperationIdFromPath(uriTemplate.getUriTemplate(),
-                                            uriTemplate.getHttpVerb()));
+                            uriTemplateBuilder.templateId(APIUtils.generateOperationIdFromPath(uriTemplate
+                                    .getUriTemplate(), uriTemplate.getHttpVerb()));
                         }
                         if (uriTemplate.getEndpoint() != null && !uriTemplate.getEndpoint().isEmpty()) {
                             for (Map.Entry<String, Endpoint> entry : uriTemplate.getEndpoint().entrySet()) {
-                                if (APIMgtConstants.API_SPECIFIC_ENDPOINT
-                                        .equals(entry.getValue().getApplicableLevel())) {
-                                    Endpoint.Builder endpointBuilder = new Endpoint.Builder(entry.getValue());
+                                if (APIMgtConstants.API_SPECIFIC_ENDPOINT.equals(entry.getValue().getApplicableLevel
+                                        ())) {
+                                    Endpoint.Builder endpointBuilder = new Endpoint.Builder(entry.getValue
+                                            ());
                                     if (StringUtils.isEmpty(endpointBuilder.getId())) {
                                         endpointBuilder.id(UUID.randomUUID().toString());
                                     }
@@ -274,8 +275,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                                     try {
                                         if (getApiDAO().getEndpointByName(endpoint.getName()) != null) {
                                             String msg = "Endpoint Already Exist By Name : " + endpoint.getName();
-                                            throw new APIManagementException(msg,
-                                                    ExceptionCodes.ENDPOINT_ALREADY_EXISTS);
+                                            throw new APIManagementException(msg, ExceptionCodes
+                                                    .ENDPOINT_ALREADY_EXISTS);
                                         } else {
                                             uriTemplate.getEndpoint().replace(entry.getKey(), endpoint);
                                         }
@@ -360,9 +361,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         getApiDAO().addAPI(createdAPI);
                     }
                 }
-
-                APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created "
-                        + "successfully.", log);
+                
+                APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
+                        "successfully.", log);
                 // 'API_M Functions' related code
                 //Create a payload with event specific details
                 Map<String, String> eventPayload = new HashMap<>();
@@ -401,6 +402,19 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
         return apiBuilder.getId();
     }
+
+    /**
+     * This method is used to check whether the roles specified with permissions for a given API are valid
+     * @param permissionMap - The map containing the group IDs(roles) and their permissions
+     * @return validity of the roles
+     * @throws APIManagementException If one or more of the roles are invalid
+     */
+//    private boolean checkRoleValidityForAPIPermissions(Map<String, Integer> permissionMap)
+//            throws APIManagementException {
+//        Set<String> allAvailableRoles = APIUtils.getAllAvailableRoles();
+//        Set<String> permissionRoleList = getRolesFromPermissionMap(permissionMap);
+//        return APIUtils.checkAllowedRoles(allAvailableRoles, permissionRoleList);
+//    }
 
     /**
      * This method retrieves the set of overall permissions for a given api for the logged in user
