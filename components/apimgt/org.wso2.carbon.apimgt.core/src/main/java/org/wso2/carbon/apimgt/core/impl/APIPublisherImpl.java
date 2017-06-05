@@ -633,7 +633,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     private String replaceGroupNamesWithId (String permissionString) throws ParseException, APIManagementException {
-        IdentityProvider defaultIdentityProvider = new DefaultIdentityProviderImpl();
+        IdentityProvider idp = APIManagerFactory.getInstance().getIdentityProvider();
         List<String> invalidRoleList = new ArrayList<>();
         JSONArray newPermissionArray = new JSONArray();
         JSONParser jsonParser = new JSONParser();
@@ -641,7 +641,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         for (Object permissionObj : permissionArray) {
             JSONObject jsonObject = (JSONObject) permissionObj;
             String groupName = (String) jsonObject.get(APIMgtConstants.Permission.GROUP_ID);
-            String groupId = defaultIdentityProvider.getRoleId(groupName);
+            String groupId = idp.getRoleId(groupName);
             if (groupId != null) {
                 JSONObject obj = new JSONObject();
                 obj.put(APIMgtConstants.Permission.GROUP_ID, groupId);
