@@ -388,7 +388,7 @@ public class APIUtils {
     public static void verifyValidityOfApiUpdate(API.APIBuilder apiBuilder, API originalAPI)
                                                                                     throws APIManagementException {
         if (!originalAPI.getLifeCycleStatus().equals(apiBuilder.getLifeCycleStatus())) {
-            String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as" +
+            String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as " +
                     "the API Status cannot be changed";
             if (log.isDebugEnabled()) {
                 log.debug(msg);
@@ -430,16 +430,6 @@ public class APIUtils {
         if (!originalAPI.getProvider().equals(apiBuilder.getProvider())) {
             String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " update not allowed, " +
                     "the API Provider cannot be changed";
-            if (log.isDebugEnabled()) {
-                log.debug(msg);
-            }
-
-            throw new APIManagementException(msg, ExceptionCodes.COULD_NOT_UPDATE_API);
-        }
-
-        if (originalAPI.getApiType() != apiBuilder.getApiType()) {
-            String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " update not allowed, " +
-                    "the API Type cannot be changed";
             if (log.isDebugEnabled()) {
                 log.debug(msg);
             }

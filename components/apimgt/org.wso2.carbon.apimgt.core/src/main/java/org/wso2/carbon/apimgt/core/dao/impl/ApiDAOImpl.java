@@ -154,6 +154,29 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     @Override
+    @CheckForNull
+    public CompositeAPI getCompositeAPISummary(String apiID) throws APIMgtDAOException {
+        final String query = COMPOSITE_API_SUMMARY_SELECT + " WHERE UUID = ? AND API_TYPE_ID = " +
+                "(SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)";
+
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, apiID);
+            statement.setString(2, ApiType.COMPOSITE.toString());
+
+            List<CompositeAPI> apiResults = getCompositeAPISummaryList(connection, statement);
+            if (apiResults.isEmpty()) {
+                return null;
+            }
+
+            // there should be on 1 result from the database
+            return apiResults.get(0);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    @Override
     public CompositeAPI getCompositeAPI(String apiID) throws APIMgtDAOException {
         final String query = "SELECT UUID, PROVIDER, NAME, CONTEXT, VERSION, DESCRIPTION, CREATED_BY, CREATED_TIME, " +
                 "LAST_UPDATED_TIME, COPIED_FROM_API, UPDATED_BY, LC_WORKFLOW_STATUS " +
@@ -595,7 +618,7 @@ public class ApiDAOImpl implements ApiDAO {
         statement.setString(20, String.join(",", corsConfiguration.getAllowHeaders()));
         statement.setString(21, String.join(",", corsConfiguration.getAllowMethods()));
 
-        statement.setInt(22, getApiTypeId(connection, api.getApiType()));
+        statement.setInt(22, getApiTypeId(connection, ApiType.STANDARD));
         statement.setString(23, api.getCreatedBy());
         statement.setTimestamp(24, Timestamp.valueOf(LocalDateTime.now()));
         statement.setTimestamp(25, Timestamp.valueOf(LocalDateTime.now()));
@@ -1580,7 +1603,6 @@ public class ApiDAOImpl implements ApiDAO {
                         lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
                         corsConfiguration(corsConfiguration).
-                        apiType(getApiTypeById(connection, rs.getInt("API_TYPE_ID"))).
                         createdBy(rs.getString("CREATED_BY")).
                         updatedBy(rs.getString("UPDATED_BY")).
                         createdTime(rs.getTimestamp("CREATED_TIME").toLocalDateTime()).
@@ -1614,7 +1636,6 @@ public class ApiDAOImpl implements ApiDAO {
 
         return apiList;
     }
-
 
     private CompositeAPI getCompositeAPIFromResultSet(Connection connection, PreparedStatement statement)
             throws SQLException, IOException, APIMgtDAOException {
@@ -1670,7 +1691,6 @@ public class ApiDAOImpl implements ApiDAO {
         return apiList;
     }
 
-
     private String getCompositeAPIApplicationId(Connection connection, String apiId) throws APIMgtDAOException {
         APISubscriptionDAO apiSubscriptionDAO = DAOFactory.getAPISubscriptionDAO();
 
@@ -1682,7 +1702,6 @@ public class ApiDAOImpl implements ApiDAO {
 
         throw new APIMgtDAOException("Composite API ID " + apiId + " has no associated Application subscription");
     }
-
 
     private void addTagsMapping(Connection connection, String apiID, Set<String> tags) throws SQLException {
         if (!tags.isEmpty()) {
@@ -2075,23 +2094,6 @@ public class ApiDAOImpl implements ApiDAO {
                 }
 
                 throw new SQLException("API Type " + apiType.toString() + " does not exist");
-            }
-        }
-    }
-
-    private ApiType getApiTypeById(Connection connection, int apiTypeId) throws SQLException {
-        final String query = "SELECT TYPE_NAME FROM AM_API_TYPES WHERE TYPE_ID = ?";
-
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, apiTypeId);
-            statement.execute();
-
-            try (ResultSet rs = statement.getResultSet()) {
-                if (rs.next()) {
-                    return ApiType.valueOf(rs.getString("TYPE_NAME"));
-                }
-
-                throw new SQLException("API Type Id " + apiTypeId + " does not exist");
             }
         }
     }

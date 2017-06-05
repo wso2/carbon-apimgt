@@ -47,7 +47,8 @@ public interface ApiDAO {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    @CheckForNull API getAPI(String apiID) throws APIMgtDAOException;
+    @CheckForNull
+    API getAPI(String apiID) throws APIMgtDAOException;
 
     /**
      * Retrieve a given instance of an APISummary object
@@ -59,6 +60,17 @@ public interface ApiDAO {
      */
     @CheckForNull
     API getAPISummary(String apiID) throws APIMgtDAOException;
+
+    /**
+     * Retrieves the summary of a Composite API. Summary contains only basic information
+     * of the API. To get the complete API details, use {@link #getAPI(String)}
+     *
+     * @param apiID ID of the Composite API
+     * @return Basic information about the Composite API with {@code apiID}
+     * @throws APIMgtDAOException if failed to retrieve/create API summary
+     */
+    @CheckForNull
+    CompositeAPI getCompositeAPISummary(String apiID) throws APIMgtDAOException;
 
     /**
      * Retrieve a given instance of a Composite API

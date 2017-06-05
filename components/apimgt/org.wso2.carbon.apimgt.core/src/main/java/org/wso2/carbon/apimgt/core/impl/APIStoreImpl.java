@@ -764,7 +764,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
     private void setUriTemplates(CompositeAPI.Builder apiBuilder) {
         Map<String, UriTemplate> uriTemplateMap = new HashMap();
-        if (apiBuilder.getUriTemplates().isEmpty()) {
+        if (apiBuilder.getUriTemplates() == null || apiBuilder.getUriTemplates().isEmpty()) {
             apiBuilder.uriTemplates(APIUtils.getDefaultUriTemplates());
             apiBuilder.apiDefinition(apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder));
         } else {
@@ -1085,6 +1085,24 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     @Override
     public String getCompositeApiDefinition(String id) throws APIManagementException {
         return getApiDAO().getCompositeApiSwaggerDefinition(id);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>Implementation will try to retrieve the summary of API to decide if API exist or not</p>
+     */
+    @Override
+    public boolean isCompositeAPIExist(String apiId) throws APIManagementException {
+        boolean status;
+        try {
+            CompositeAPI compositeAPI = getApiDAO().getCompositeAPISummary(apiId);
+            status = compositeAPI != null;
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Couldn't get APISummary for Composite API: " + apiId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return status;
     }
 
     /**
