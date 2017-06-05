@@ -16,21 +16,21 @@
  * under the License.
  */
 
-import {Axios} from 'axios'
+import React, {Component} from 'react'
 
-class ConfigManager {
+const APINotFound = (props) => {
+    return (
+        <div>
+            <div className="message message-danger">
+                <h4><i className="icon fw fw-error"/>404 API Not Found!</h4>
+                <p>
+                    Can't find an API associate with the given API ID <span
+                    style={{color: 'green'}}> {props.match.params.api_uuid} </span>
+                </p>
+            </div>
 
-    constructor() {
-        this.preBuildConfigs = {};
-        this.runTimeConfigs = {};
-        this.runTimeConfigLocation = ""; // URL to fetch runtime config JSON
-    }
+        </div>
+    );
+};
 
-    checkRunTimeConfigs() {
-
-    }
-
-    getConfigs() {
-
-    }
-}
+export default APINotFound

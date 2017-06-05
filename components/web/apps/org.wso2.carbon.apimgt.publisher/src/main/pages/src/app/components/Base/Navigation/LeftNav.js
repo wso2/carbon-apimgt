@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 import React, {Component} from 'react'
 import {Link} from 'react-router-dom'
 
@@ -11,28 +29,9 @@ const LeftNav = (props) => {
                 <div className="nano ">
                     <div className="nano-content ">
                         <ul className="nav nav-pills nav-stacked pages">
-                            <li><Link to="/apis"> APIs </Link></li>
+                            <li><Link to="/apis"><i className="fw fw-api"/> APIs</Link></li>
                             <li><a className="icon" href="#"><i className="fw fw-statistics"/> Statistics</a></li>
                             <li><a className="icon" href="#"><i className="fw fw-subscribe"/> Subscriptions</a></li>
-                            <li className="active"><a href="#">Test</a></li>
-                            <li>
-                                <a data-toggle="collapse" data-target="#forms" className="collapsed">Sub <span
-                                    className="arrow"/></a>
-                                <ul className="sub-menu collapse" id="forms">
-                                    <li><a className="icon" href="#"><i className="fw fw-view"/> Overview</a></li>
-                                    <li><a className="icon" href="#"><i className="fw fw-lifecycle"/> Lifecycle</a></li>
-                                    <li><a className="icon" href="#"><i className="fw fw-endpoint"/> Endpoints</a></li>
-                                    <li><a className="icon" href="#"><i className="fw fw-resource"/> Resources</a></li>
-                                    <li><a className="icon" href="#"><i className="fw fw-document"/> Documents</a></li>
-                                    <li><a className="icon" href="#"><i className="fw fw-checklist"/> Access Control</a>
-                                    </li>
-                                    <li><a className="icon" href="#"><i className="fw fw-message"/> Mediation</a></li>
-                                    <li><a className="icon" href="#"><i className="fw fw-code"/> Scripting</a></li>
-                                    <li><a className="icon" href="#"><i className="fw fw-subscribe"/> Subscriptions</a>
-                                    </li>
-                                    <li><a className="icon" href="#"><i className="fw fw-display"/> API Console</a></li>
-                                </ul>
-                            </li>
                         </ul>
                     </div>
                 </div>

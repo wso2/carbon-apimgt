@@ -16,21 +16,21 @@
  * under the License.
  */
 
-import {Axios} from 'axios'
+import React, {Component} from 'react'
 
-class ConfigManager {
+const NotFound = (props) => {
+    return (
+        <div>
+            <div className="message message-danger">
+                <h4><i className="icon fw fw-error"/>404 Page Not Found!</h4>
+                <p>
+                    Sorry the page you are looking for <span style={{color: 'green'}}> {props.location.pathname} </span>
+                    is not available.
+                </p>
+            </div>
 
-    constructor() {
-        this.preBuildConfigs = {};
-        this.runTimeConfigs = {};
-        this.runTimeConfigLocation = ""; // URL to fetch runtime config JSON
-    }
+        </div>
+    );
+};
 
-    checkRunTimeConfigs() {
-
-    }
-
-    getConfigs() {
-
-    }
-}
+export default NotFound

@@ -16,21 +16,7 @@
  * under the License.
  */
 
-import {Axios} from 'axios'
+import PageNotFound from './PageNotfound'
+import APINotFound from './APINotfound'
 
-class ConfigManager {
-
-    constructor() {
-        this.preBuildConfigs = {};
-        this.runTimeConfigs = {};
-        this.runTimeConfigLocation = ""; // URL to fetch runtime config JSON
-    }
-
-    checkRunTimeConfigs() {
-
-    }
-
-    getConfigs() {
-
-    }
-}
+export {PageNotFound, APINotFound}
