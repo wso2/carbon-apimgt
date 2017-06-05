@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.auth.SCIMServiceStub;
 import org.wso2.carbon.apimgt.core.auth.SCIMServiceStubFactory;
-import org.wso2.carbon.apimgt.core.auth.dto.SCIMGroup;
 import org.wso2.carbon.apimgt.core.auth.dto.SCIMUser;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
@@ -52,11 +51,11 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
     private static final String FILTER_PREFIX = "displayName Eq ";
     private static final String HOME_EMAIL = "home";
 
-    public DefaultIdentityProviderImpl() throws APIManagementException {
+    DefaultIdentityProviderImpl() throws APIManagementException {
         this(SCIMServiceStubFactory.getSCIMServiceStub());
     }
 
-    public DefaultIdentityProviderImpl(SCIMServiceStub scimServiceStub) {
+    DefaultIdentityProviderImpl(SCIMServiceStub scimServiceStub) {
         this.scimServiceStub = scimServiceStub;
     }
 
@@ -81,31 +80,15 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
     public String getRoleId(String roleName) throws IdentityProviderException, ParseException {
         Response role = scimServiceStub.searchGroups(FILTER_PREFIX + roleName);
         String roleId = null;
-        if (role.status() == 200) {
-            String responseBody = role.body().toString();
-            JSONParser parser = new JSONParser();
-            JSONObject parsedResponseBody = (JSONObject) parser.parse(responseBody);
-            JSONArray roleList = (JSONArray) parsedResponseBody.get("Resources");
-            if (roleList.size() == 1) {
-                JSONObject scimGroup = (JSONObject) roleList.get(0);
-                roleId = (String) scimGroup.get("id");
-            }
+        String responseBody = role.body().toString();
+        JSONParser parser = new JSONParser();
+        JSONObject parsedResponseBody = (JSONObject) parser.parse(responseBody);
+        JSONArray roleList = (JSONArray) parsedResponseBody.get("Resources");
+        if (roleList.size() == 1) {
+            JSONObject scimGroup = (JSONObject) roleList.get(0);
+            roleId = (String) scimGroup.get("id");
         }
         return roleId;
-    }
-
-    @Override
-    public String getRoleName(String roleId) throws IdentityProviderException, ParseException {
-        SCIMGroup scimGroup = scimServiceStub.getGroup(roleId);
-        String displayName;
-        if (scimGroup != null) {
-            displayName = scimGroup.getDisplayName();
-        } else {
-            String errorMessage = "Role with role Id " + roleId + " does not exist in the system.";
-            log.error(errorMessage);
-            throw new IdentityProviderException(errorMessage, ExceptionCodes.ROLE_DOES_NOT_EXIST);
-        }
-        return displayName;
     }
 
     @Override

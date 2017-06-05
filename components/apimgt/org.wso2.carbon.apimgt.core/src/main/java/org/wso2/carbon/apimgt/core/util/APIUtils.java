@@ -231,7 +231,7 @@ public class APIUtils {
         availableRoles.add("manager");
         availableRoles.add("developer");
         availableRoles.add("lead");
-        availableRoles.add("2beef7eb-f854-46f1-adb2-642088dda508");
+        availableRoles.add(APIMgtConstants.Permission.EVERYONE_GROUP);
         return availableRoles;
     }
 
@@ -248,7 +248,7 @@ public class APIUtils {
         if ("admin".equalsIgnoreCase(username)) {
             userRoles.add("admin");
             userRoles.add("comment-moderator");
-            userRoles.add("2beef7eb-f854-46f1-adb2-642088dda508");
+            userRoles.add(APIMgtConstants.Permission.EVERYONE_GROUP);
         } else if ("subscriber".equalsIgnoreCase(username)) {
             userRoles.add("subscriber");
         } else if ("John".equalsIgnoreCase(username)) {

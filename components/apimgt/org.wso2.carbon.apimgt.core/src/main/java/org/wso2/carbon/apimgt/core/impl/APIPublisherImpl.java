@@ -512,10 +512,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         originalAPI.getLifeCycleStatus().equalsIgnoreCase(apiBuilder.getLifeCycleStatus())) {
 
                     if (apiBuilder.getPermission() != null && !("[]").equals(apiBuilder.getPermission())) {
-                        apiBuilder.setPermission(replaceGroupNamesWithId(apiBuilder.getPermission()));
                         HashMap<String, Integer> roleNamePermissionList;
                         roleNamePermissionList = getAPIPermissionArray(apiBuilder.getPermission());
+                        //if (checkRoleValidityForAPIPermissions(roleNamePermissionList)) {
                         apiBuilder.permissionMap(roleNamePermissionList);
+                        //}
                     }
 
                     String updatedSwagger = apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder);
@@ -618,12 +619,14 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     private HashMap<String, Integer> getAPIPermissionArray(String permissionJsonString)
             throws ParseException, APIManagementException {
 
-        HashMap<String, Integer> rolePermissionList = new HashMap<String, Integer>();
+        HashMap<String, Integer> roleNamePermissionList = new HashMap<String, Integer>();
         JSONParser jsonParser = new JSONParser();
+        IdentityProvider defaultIdentityProvider = new DefaultIdentityProviderImpl();
         JSONArray baseJsonArray = (JSONArray) jsonParser.parse(permissionJsonString);
         for (Object aBaseJsonArray : baseJsonArray) {
             JSONObject jsonObject = (JSONObject) aBaseJsonArray;
-            String groupId = jsonObject.get(APIMgtConstants.Permission.GROUP_ID).toString();
+            String groupName = jsonObject.get(APIMgtConstants.Permission.GROUP_ID).toString();
+            String groupId = defaultIdentityProvider.getRoleId(groupName);
             JSONArray subJsonArray = (JSONArray) jsonObject.get(APIMgtConstants.Permission.PERMISSION);
             int totalPermissionValue = 0;
             for (Object aSubJsonArray : subJsonArray) {
@@ -635,37 +638,12 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     totalPermissionValue += APIMgtConstants.Permission.DELETE_PERMISSION;
                 }
             }
-            rolePermissionList.put(groupId, totalPermissionValue);
-        }
-
-        return rolePermissionList;
-    }
-
-    private String replaceGroupNamesWithId (String permissionString) throws ParseException, APIManagementException {
-        IdentityProvider defaultIdentityProvider = new DefaultIdentityProviderImpl();
-        List<String> invalidRoleList = new ArrayList<>();
-        JSONArray newPermissionArray = new JSONArray();
-        JSONParser jsonParser = new JSONParser();
-        JSONArray permissionArray = (JSONArray) jsonParser.parse(permissionString);
-        for (Object permissionObj : permissionArray) {
-            JSONObject jsonObject = (JSONObject) permissionObj;
-            String groupName = (String) jsonObject.get(APIMgtConstants.Permission.GROUP_ID);
-            String groupId = defaultIdentityProvider.getRoleId(groupName);
             if (groupId != null) {
-                JSONObject obj = new JSONObject();
-                obj.put(APIMgtConstants.Permission.GROUP_ID, groupId);
-                obj.put(APIMgtConstants.Permission.PERMISSION, jsonObject.get(APIMgtConstants.Permission.PERMISSION));
-                newPermissionArray.add(obj);
-            } else {
-                invalidRoleList.add(groupName);
+                roleNamePermissionList.put(groupId, totalPermissionValue);
             }
         }
-        if (!invalidRoleList.isEmpty()) {
-            String message = "The role(s) " + invalidRoleList.toString() + " is/are invalid.";
-            log.error(message);
-            throw new APIManagementException(message, ExceptionCodes.UNSUPPORTED_ROLE);
-        }
-        return newPermissionArray.toJSONString();
+
+        return roleNamePermissionList;
     }
 
     /**

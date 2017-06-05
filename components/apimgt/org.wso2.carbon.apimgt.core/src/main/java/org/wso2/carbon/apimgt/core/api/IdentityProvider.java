@@ -48,15 +48,6 @@ public interface IdentityProvider extends KeyManager {
     public String getRoleId(String roleName) throws IdentityProviderException, ParseException;
 
     /**
-     * Get displayName of given role Id.
-     *
-     * @param roleId Role ID
-     * @return the displayName of role if the role is available else null
-     * @throws IdentityProviderException if error occurred while getting displayName for roleId
-     */
-    public String getRoleName(String roleId) throws IdentityProviderException, ParseException;
-
-    /**
      * Register a new user to the system
      *
      * @param user User to be registered
