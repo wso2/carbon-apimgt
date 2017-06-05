@@ -79,7 +79,7 @@ paths:
   '/policies/throttling/application':
 
 #-----------------------------------------------------
-# Retrieve all Application level policies
+# Retrieve all Application level related policies
 #-----------------------------------------------------
     get:
       x-scope: apim:tier_view
@@ -126,7 +126,7 @@ paths:
             $ref: '#/definitions/Error'
 
 #-----------------------------------------------------
-# Add a Application level throttle policy
+# Add a Application level Bandwidth related throttle policy
 #-----------------------------------------------------
     post:
       x-scope: apim:tier_manage
@@ -183,7 +183,7 @@ paths:
   '/policies/throttling/application/{policyId}':
 
 #-----------------------------------------------------
-# Retrieve a certain Application Policy
+# Retrieve a certain Application level Bandwidth related Policy
 #-----------------------------------------------------
     get:
       x-scope: apim:tier_view
@@ -236,7 +236,7 @@ paths:
             $ref: '#/definitions/Error'
 
 #-----------------------------------------------------
-# Delete an Application level throttle policy
+# Delete an Application level Bandwidth throttle policy
 #-----------------------------------------------------
     delete:
       x-scope: apim:tier_manage
@@ -268,7 +268,7 @@ paths:
             $ref: '#/definitions/Error'
 
 #-----------------------------------------------------
-# Update an Application throttle policy
+# Update an Application level Bandwidth throttle policy
 #-----------------------------------------------------
     put:
       x-scope: apim:tier_manage
@@ -1238,11 +1238,8 @@ definitions:
         default: false
       type:
         type: string
-        enum:
-          - AdvancedThrottlePolicy
-          - ApplicationThrottlePolicy
-          - SubscriptionThrottlePolicy
-
+        description: |
+          ApplicationThrottlePolicy, SubscriptionThrottlePolicy and AdvancedThrottlePolicy are the supported values.
 
 #-----------------------------------------------------
 # The Advanced Throttle Policy Info resource
@@ -1294,7 +1291,7 @@ definitions:
 # The Application Throttle Policy resource
 #-----------------------------------------------------
   ApplicationThrottlePolicy:
-    title: Application Throttle Policy
+    title: Application Level Throttle Policy
     required:
       - defaultLimit
     allOf:
@@ -1304,7 +1301,7 @@ definitions:
             $ref: '#/definitions/ThrottleLimit'
 
 #-----------------------------------------------------
-# The Advanced Throttle Policy List resource
+# The Application Throttle Policy List resource
 #-----------------------------------------------------
   ApplicationThrottlePolicyList:
     title: Application Level Throttle Policy List
@@ -1485,7 +1482,6 @@ definitions:
 # The Throttle Limit resource
 #-----------------------------------------------------
   ThrottleLimit :
-    discriminator: type
     x-wso2-subtypes:
       - RequestCountLimit
       - BandwidthLimit
@@ -1494,11 +1490,16 @@ definitions:
       - timeUnit
       - unitTime
     properties:
+      bandwidthLimit:
+        type: object
+        $ref: '#/definitions/BandwidthLimit'
+      requestCountLimit:
+        type: object
+        $ref: '#/definitions/RequestCountLimit'
       type:
         type: string
-        enum:
-          - RequestCountLimit
-          - BandwidthLimit
+        description: |
+          BandwidthLimit and RequestCountLimit are the supported values.
       timeUnit:
         type: string
       unitTime:
@@ -1512,15 +1513,13 @@ definitions:
     required:
       - dataAmount
       - dataUnit
-    allOf:
-      - $ref: '#/definitions/ThrottleLimit'
-      - properties:
-          dataAmount:
-            type: integer
-            format: int32
-            default: 0
-          dataUnit:
-            type: string
+    properties:
+      dataAmount:
+        type: integer
+        format: int32
+        default: 0
+      dataUnit:
+        type: string
 
 #-----------------------------------------------------
 # The Throttle Request Count Limit resource
@@ -1528,13 +1527,11 @@ definitions:
   RequestCountLimit :
     required:
       - requestCount
-    allOf:
-      - $ref: '#/definitions/ThrottleLimit'
-      - properties:
-          requestCount:
-            type: integer
-            format: int32
-            default: 0
+    properties:
+      requestCount:
+        type: integer
+        format: int32
+        default: 0
 
 #-----------------------------------------------------
 # The Throttle Blocking Condition resource

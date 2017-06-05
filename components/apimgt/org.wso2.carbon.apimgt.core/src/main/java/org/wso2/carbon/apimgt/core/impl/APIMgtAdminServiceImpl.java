@@ -85,7 +85,13 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
      */
     @Override
     public void addPolicy(String policyLevel, Policy policy) throws APIManagementException {
-        policyDAO.addPolicy(policyLevel, policy);
+        try {
+            policyDAO.addPolicy(policyLevel, policy);
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't add policy for uuid: " + policy.getUuid() + ", level: " + policyLevel;
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
     }
 
     /**
@@ -99,7 +105,14 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
      * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#updateApplicationPolicy(ApplicationPolicy)
      */
     @Override public void updateApplicationPolicy(ApplicationPolicy apiPolicy) throws APIManagementException {
-        policyDAO.updateApplicationPolicy(apiPolicy);
+        try {
+            policyDAO.updateApplicationPolicy(apiPolicy);
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't update policy for uuid: " + apiPolicy.getUuid() + ", policy name: " +
+                    apiPolicy.getPolicyName();
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
     }
 
     /**

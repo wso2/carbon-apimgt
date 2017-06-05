@@ -75,8 +75,8 @@ public class AdvancedThrottlePolicyMappingUtil {
                 dto.getConditionalGroups());
         apiPolicy.setPipelines(pipelines);
 
-        if (dto.getQuotaPolicy() != null) {
-            apiPolicy.setDefaultQuotaPolicy(CommonThrottleMappingUtil.fromDTOToQuotaPolicy(dto.getQuotaPolicy()));
+        if (dto.getDefaultLimit() != null) {
+            apiPolicy.setDefaultQuotaPolicy(CommonThrottleMappingUtil.fromDTOToQuotaPolicy(dto.getDefaultLimit()));
         }
         return apiPolicy;
     }
@@ -98,7 +98,7 @@ public class AdvancedThrottlePolicyMappingUtil {
         policyDTO.setConditionalGroups(groupDTOs);
 
         if (apiPolicy.getDefaultQuotaPolicy() != null) {
-            policyDTO.setQuotaPolicy(CommonThrottleMappingUtil.fromQuotaPolicyToDTO(apiPolicy.getDefaultQuotaPolicy()));
+            policyDTO.setDefaultLimit(CommonThrottleMappingUtil.fromQuotaPolicyToDTO(apiPolicy.getDefaultQuotaPolicy()));
         }
         return policyDTO;
     }
@@ -116,7 +116,7 @@ public class AdvancedThrottlePolicyMappingUtil {
         AdvancedThrottlePolicyDTO policyDTO = new AdvancedThrottlePolicyDTO();
         policyDTO = CommonThrottleMappingUtil.updateFieldsFromToPolicyToDTO(apiPolicy, policyDTO);
         if (apiPolicy.getDefaultQuotaPolicy() != null) {
-            policyDTO.setQuotaPolicy(CommonThrottleMappingUtil.fromQuotaPolicyToDTO(apiPolicy.getDefaultQuotaPolicy()));
+            policyDTO.setDefaultLimit(CommonThrottleMappingUtil.fromQuotaPolicyToDTO(apiPolicy.getDefaultQuotaPolicy()));
         }
         return policyDTO;
     }
