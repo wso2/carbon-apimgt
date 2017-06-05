@@ -87,6 +87,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -418,56 +419,48 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     /**
      * This method retrieves the set of overall permissions for a given api for the logged in user
-     * @param loggedInUserId - Logged in user
+     * @param loggedInUser - Logged in user
      * @param api - The API whose permissions for the logged in user is retrieved
      * @return The overall list of permissions for the given API for the logged in user
      */
-    private List<String> getAPIPermissionsOfLoggedInUser(String loggedInUserId, API api) throws APIManagementException {
-        IdentityProvider idp = new DefaultIdentityProviderImpl();
-        List<String> permissionArrayForUser = new ArrayList<>();
-        Integer highestPermission = 7; //Default permissions for API
+    private List<String> getAPIPermissionsOfLoggedInUser(String loggedInUser, API api) {
+
         Map<String, Integer> permissionMap = api.getPermissionMap();
-
-        if (!permissionMap.isEmpty()) {
-            List<String> loggedInUserRoles = idp.getRoleIdsOfUser("cfbde56e-8422-498e-b6dc-85a6f1f8b058");
-            //How do we know the user id?
-            // implement another method to get the logged in user from SCIM
-            List<String> permissionRoleList = getRolesFromPermissionMap(permissionMap);
-            List<String> rolesOfUserWithAPIPermissions = null;
-
-            //get the intersection - retainAll() transforms first set to the result of intersection
-            loggedInUserRoles.retainAll(permissionRoleList);
-            if (!loggedInUserRoles.isEmpty()) {
-                rolesOfUserWithAPIPermissions = loggedInUserRoles;
+        Set<String> loggedInUserRoles = APIUtils.getAllRolesOfUser(loggedInUser);
+        Set<String> permissionRoleList = getRolesFromPermissionMap(permissionMap);
+        Set<String> rolesOfUserWithAPIPermissions = null;
+        List<String> permissionArrayForUser = new ArrayList<>();
+        loggedInUserRoles.retainAll(
+                permissionRoleList); //get the intersection - retainAll() transforms first set to the intersection
+        if (!loggedInUserRoles.isEmpty()) {
+            rolesOfUserWithAPIPermissions = loggedInUserRoles;
+        }
+        if (rolesOfUserWithAPIPermissions != null) {
+            List<Integer> allPermissionsForUser = new ArrayList<>();
+            for (String role : rolesOfUserWithAPIPermissions) {
+                Integer permission = permissionMap.get(role);
+                allPermissionsForUser.add(permission);
             }
-            if (rolesOfUserWithAPIPermissions != null) {
-                List<Integer> allPermissionsForUser = new ArrayList<>();
-                for (String role : rolesOfUserWithAPIPermissions) {
-                    Integer permission = permissionMap.get(role);
-                    allPermissionsForUser.add(permission);
-                }
-                //Determine maximum of all permissions
-                highestPermission = Collections.max(allPermissionsForUser);
+            //Determine maximum of all permissions
+            Integer highestPermission = Collections.max(allPermissionsForUser);
+            if (highestPermission == APIMgtConstants.Permission.READ_PERMISSION) {
+                permissionArrayForUser.add(APIMgtConstants.Permission.READ);
+            } else if (highestPermission == (APIMgtConstants.Permission.READ_PERMISSION
+                    + APIMgtConstants.Permission.UPDATE_PERMISSION)) {
+                permissionArrayForUser.add(APIMgtConstants.Permission.READ);
+                permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
+            } else if (highestPermission == (APIMgtConstants.Permission.READ_PERMISSION
+                    + APIMgtConstants.Permission.DELETE_PERMISSION)) {
+                permissionArrayForUser.add(APIMgtConstants.Permission.READ);
+                permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
+            } else if (highestPermission
+                    == APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.UPDATE_PERMISSION
+                    + APIMgtConstants.Permission.DELETE_PERMISSION) {
+                permissionArrayForUser.add(APIMgtConstants.Permission.READ);
+                permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
+                permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
             }
         }
-        if (highestPermission == APIMgtConstants.Permission.READ_PERMISSION) {
-            permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-        } else if (highestPermission == (APIMgtConstants.Permission.READ_PERMISSION
-                + APIMgtConstants.Permission.UPDATE_PERMISSION)) {
-            permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-            permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
-        } else if (highestPermission == (APIMgtConstants.Permission.READ_PERMISSION
-                + APIMgtConstants.Permission.DELETE_PERMISSION)) {
-            permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-            permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
-        } else if (highestPermission
-                == APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.UPDATE_PERMISSION
-                + APIMgtConstants.Permission.DELETE_PERMISSION) {
-            permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-            permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
-            permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
-        }
-
         return permissionArrayForUser;
     }
 
@@ -476,8 +469,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @param permissionMap - The map containing the group IDs(roles) and their permissions
      * @return - The list of groupIds specified for permissions
      */
-    private List<String> getRolesFromPermissionMap(Map<String, Integer> permissionMap) {
-        List<String> permissionRoleList = new ArrayList<>();
+    private Set<String> getRolesFromPermissionMap(Map<String, Integer> permissionMap) {
+        Set<String> permissionRoleList = new HashSet<>();
         for (String groupId : permissionMap.keySet()) {
             permissionRoleList.add(groupId);
         }
@@ -1151,8 +1144,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         return apiResults;
     }
 
-    private List<API> setAllApiPermissionsForUser(String userId, List<API> originalAPIList)
-            throws APIManagementException {
+    private List<API> setAllApiPermissionsForUser(String userId, List<API> originalAPIList) {
         List<API> updatedAPIList = new ArrayList<API>();
         for (API api : originalAPIList) {
             List<String> aggregatedApiPermissions = getAPIPermissionsOfLoggedInUser(userId, api);
