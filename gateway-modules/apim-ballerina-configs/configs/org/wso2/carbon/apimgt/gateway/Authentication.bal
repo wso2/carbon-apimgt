@@ -45,8 +45,6 @@ function authenticate (message m) (boolean, message) {
     dto:APIDTO apiDto = holder:getFromAPICache(apiKey);
 
     if (constants:MAINTENANCE == apiDto.lifeCycleStatus) {
-        messages:setHeader(response, "Content-Type", "application/json");
-        http:setStatusCode(response, 503);
         gatewayUtil:constructAPIIsInMaintenance(response);
         return false, response;
     }
