@@ -20,6 +20,10 @@ function constructSubscriptionNotFound (message response) {
     json payload = {"code":900903, "message":"subscription not found"};
     messages:setJsonPayload(response, payload);
 }
+function constructAPIIsInMaintenance (message response) {
+    json payload = {"code":700700, "message":"This API has been blocked temporarily"};
+    messages:setJsonPayload(response, payload);
+}
 function fromJsonToIntrospectDto (json introspectResponse) (dto:IntrospectDto){
     dto:IntrospectDto introspectDto = {};
     introspectDto.active = (boolean)introspectResponse.active;
@@ -182,6 +186,7 @@ function fromJSONToAPIDTO (json api) (dto:APIDTO){
     APIDTO.name = jsons:getString(api, "name");
     APIDTO.version = jsons:getString(api, "version");
     APIDTO.context = jsons:getString(api, "context");
+    APIDTO.lifeCycleStatus = jsons:getString(api, "lifeCycleState");
     return APIDTO;
 
 }
