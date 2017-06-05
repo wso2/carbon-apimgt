@@ -3,16 +3,14 @@ package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.ThrottleLimitDTO;
 import java.util.Objects;
 
 /**
  * BandwidthLimitDTO
  */
-public class BandwidthLimitDTO extends ThrottleLimitDTO  {
+public class BandwidthLimitDTO   {
   @JsonProperty("dataAmount")
   private Integer dataAmount = 0;
 
@@ -28,7 +26,7 @@ public class BandwidthLimitDTO extends ThrottleLimitDTO  {
    * Get dataAmount
    * @return dataAmount
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   public Integer getDataAmount() {
     return dataAmount;
   }
@@ -46,7 +44,7 @@ public class BandwidthLimitDTO extends ThrottleLimitDTO  {
    * Get dataUnit
    * @return dataUnit
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   public String getDataUnit() {
     return dataUnit;
   }
@@ -66,20 +64,19 @@ public class BandwidthLimitDTO extends ThrottleLimitDTO  {
     }
     BandwidthLimitDTO bandwidthLimit = (BandwidthLimitDTO) o;
     return Objects.equals(this.dataAmount, bandwidthLimit.dataAmount) &&
-        Objects.equals(this.dataUnit, bandwidthLimit.dataUnit) &&
-        super.equals(o);
+        Objects.equals(this.dataUnit, bandwidthLimit.dataUnit);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(dataAmount, dataUnit, super.hashCode());
+    return Objects.hash(dataAmount, dataUnit);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class BandwidthLimitDTO {\n");
-    sb.append("    ").append(toIndentedString(super.toString())).append("\n");
+    
     sb.append("    dataAmount: ").append(toIndentedString(dataAmount)).append("\n");
     sb.append("    dataUnit: ").append(toIndentedString(dataUnit)).append("\n");
     sb.append("}");

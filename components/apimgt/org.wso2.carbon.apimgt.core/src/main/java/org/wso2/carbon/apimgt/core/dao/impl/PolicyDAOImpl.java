@@ -103,11 +103,26 @@ public class PolicyDAOImpl implements PolicyDAO {
                         policy.getDefaultQuotaPolicy().getLimit().getUnitTime(),
                         policy.getDefaultQuotaPolicy().getLimit().getTimeUnit(), ((APIPolicy) policy).getPipelines(),
                         API_TIER_LEVEL);
+
             } else if (policy instanceof ApplicationPolicy) {
-                addApplicationPolicy(connection, policy.getPolicyName(), policy.getDisplayName(),
-                        policy.getDescription(), policy.getDefaultQuotaPolicy().getType(), 0, "",
-                        (int) policy.getDefaultQuotaPolicy().getLimit().getUnitTime(),
-                        policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+                ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
+                Limit limit = appPolicy.getDefaultQuotaPolicy().getLimit();
+                if (limit instanceof BandwidthLimit) {
+                    BandwidthLimit bwLimit = (BandwidthLimit) limit;
+                    addApplicationPolicy(connection, policy.getPolicyName(), policy.getDisplayName(),
+                            policy.getDescription(), policy.getDefaultQuotaPolicy().getType(), bwLimit.getDataAmount(),
+                            bwLimit.getDataUnit(), (int) policy.getDefaultQuotaPolicy().getLimit().getUnitTime(),
+                            policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+
+                } else if (limit instanceof RequestCountLimit) {
+                    RequestCountLimit reqCountLimit = (RequestCountLimit) limit;
+                    addApplicationPolicy(connection, policy.getPolicyName(), policy.getDisplayName(),
+                            policy.getDescription(), policy.getDefaultQuotaPolicy().getType(),
+                            reqCountLimit.getRequestCount(), "",
+                            (int) policy.getDefaultQuotaPolicy().getLimit().getUnitTime(),
+                            policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+                }
+
             } else if (policy instanceof SubscriptionPolicy) {
                 addSubscriptionPolicy(connection, policy.getPolicyName(), policy.getDisplayName(),
                         policy.getDescription(), policy.getDefaultQuotaPolicy().getType(), 0, "",
@@ -115,7 +130,6 @@ public class PolicyDAOImpl implements PolicyDAO {
                         policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
             }
         } catch (SQLException e) {
-            log.error(e.getMessage(), e);
             throw new APIMgtDAOException(e);
         }
     }

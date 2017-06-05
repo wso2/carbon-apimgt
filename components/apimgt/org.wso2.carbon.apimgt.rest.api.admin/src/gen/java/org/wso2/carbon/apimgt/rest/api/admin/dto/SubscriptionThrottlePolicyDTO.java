@@ -3,7 +3,6 @@ package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
@@ -17,8 +16,8 @@ import java.util.Objects;
  * SubscriptionThrottlePolicyDTO
  */
 public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
-  @JsonProperty("quotaPolicy")
-  private ThrottleLimitDTO quotaPolicy = null;
+  @JsonProperty("defaultLimit")
+  private ThrottleLimitDTO defaultLimit = null;
 
   @JsonProperty("rateLimitCount")
   private Integer rateLimitCount = null;
@@ -35,22 +34,22 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
   @JsonProperty("billingPlan")
   private String billingPlan = null;
 
-  public SubscriptionThrottlePolicyDTO quotaPolicy(ThrottleLimitDTO quotaPolicy) {
-    this.quotaPolicy = quotaPolicy;
+  public SubscriptionThrottlePolicyDTO defaultLimit(ThrottleLimitDTO defaultLimit) {
+    this.defaultLimit = defaultLimit;
     return this;
   }
 
    /**
-   * Get quotaPolicy
-   * @return quotaPolicy
+   * Get defaultLimit
+   * @return defaultLimit
   **/
   @ApiModelProperty(value = "")
-  public ThrottleLimitDTO getQuotaPolicy() {
-    return quotaPolicy;
+  public ThrottleLimitDTO getDefaultLimit() {
+    return defaultLimit;
   }
 
-  public void setQuotaPolicy(ThrottleLimitDTO quotaPolicy) {
-    this.quotaPolicy = quotaPolicy;
+  public void setDefaultLimit(ThrottleLimitDTO defaultLimit) {
+    this.defaultLimit = defaultLimit;
   }
 
   public SubscriptionThrottlePolicyDTO rateLimitCount(Integer rateLimitCount) {
@@ -158,7 +157,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
       return false;
     }
     SubscriptionThrottlePolicyDTO subscriptionThrottlePolicy = (SubscriptionThrottlePolicyDTO) o;
-    return Objects.equals(this.quotaPolicy, subscriptionThrottlePolicy.quotaPolicy) &&
+    return Objects.equals(this.defaultLimit, subscriptionThrottlePolicy.defaultLimit) &&
         Objects.equals(this.rateLimitCount, subscriptionThrottlePolicy.rateLimitCount) &&
         Objects.equals(this.rateLimitTimeUnit, subscriptionThrottlePolicy.rateLimitTimeUnit) &&
         Objects.equals(this.customAttributes, subscriptionThrottlePolicy.customAttributes) &&
@@ -169,7 +168,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
 
   @Override
   public int hashCode() {
-    return Objects.hash(quotaPolicy, rateLimitCount, rateLimitTimeUnit, customAttributes, stopOnQuotaReach, billingPlan, super.hashCode());
+    return Objects.hash(defaultLimit, rateLimitCount, rateLimitTimeUnit, customAttributes, stopOnQuotaReach, billingPlan, super.hashCode());
   }
 
   @Override
@@ -177,7 +176,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
     StringBuilder sb = new StringBuilder();
     sb.append("class SubscriptionThrottlePolicyDTO {\n");
     sb.append("    ").append(toIndentedString(super.toString())).append("\n");
-    sb.append("    quotaPolicy: ").append(toIndentedString(quotaPolicy)).append("\n");
+    sb.append("    defaultLimit: ").append(toIndentedString(defaultLimit)).append("\n");
     sb.append("    rateLimitCount: ").append(toIndentedString(rateLimitCount)).append("\n");
     sb.append("    rateLimitTimeUnit: ").append(toIndentedString(rateLimitTimeUnit)).append("\n");
     sb.append("    customAttributes: ").append(toIndentedString(customAttributes)).append("\n");

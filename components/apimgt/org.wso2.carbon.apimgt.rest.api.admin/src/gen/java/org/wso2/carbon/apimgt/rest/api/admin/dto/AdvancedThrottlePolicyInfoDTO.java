@@ -10,13 +10,13 @@ import org.wso2.carbon.apimgt.rest.api.admin.dto.ThrottlePolicyDTO;
 import java.util.Objects;
 
 /**
- * ApplicationThrottlePolicyDTO
+ * AdvancedThrottlePolicyInfoDTO
  */
-public class ApplicationThrottlePolicyDTO extends ThrottlePolicyDTO  {
+public class AdvancedThrottlePolicyInfoDTO extends ThrottlePolicyDTO  {
   @JsonProperty("defaultLimit")
   private ThrottleLimitDTO defaultLimit = null;
 
-  public ApplicationThrottlePolicyDTO defaultLimit(ThrottleLimitDTO defaultLimit) {
+  public AdvancedThrottlePolicyInfoDTO defaultLimit(ThrottleLimitDTO defaultLimit) {
     this.defaultLimit = defaultLimit;
     return this;
   }
@@ -43,8 +43,8 @@ public class ApplicationThrottlePolicyDTO extends ThrottlePolicyDTO  {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ApplicationThrottlePolicyDTO applicationThrottlePolicy = (ApplicationThrottlePolicyDTO) o;
-    return Objects.equals(this.defaultLimit, applicationThrottlePolicy.defaultLimit) &&
+    AdvancedThrottlePolicyInfoDTO advancedThrottlePolicyInfo = (AdvancedThrottlePolicyInfoDTO) o;
+    return Objects.equals(this.defaultLimit, advancedThrottlePolicyInfo.defaultLimit) &&
         super.equals(o);
   }
 
@@ -56,7 +56,7 @@ public class ApplicationThrottlePolicyDTO extends ThrottlePolicyDTO  {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ApplicationThrottlePolicyDTO {\n");
+    sb.append("class AdvancedThrottlePolicyInfoDTO {\n");
     sb.append("    ").append(toIndentedString(super.toString())).append("\n");
     sb.append("    defaultLimit: ").append(toIndentedString(defaultLimit)).append("\n");
     sb.append("}");

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -29,41 +28,8 @@ public class ThrottlePolicyDTO   {
   @JsonProperty("isDeployed")
   private Boolean isDeployed = false;
 
-  /**
-   * Gets or Sets type
-   */
-  public enum TypeEnum {
-    ADVANCEDTHROTTLEPOLICY("AdvancedThrottlePolicy"),
-    
-    APPLICATIONTHROTTLEPOLICY("ApplicationThrottlePolicy"),
-    
-    SUBSCRIPTIONTHROTTLEPOLICY("SubscriptionThrottlePolicy");
-
-    private String value;
-
-    TypeEnum(String value) {
-      this.value = value;
-    }
-
-    @Override
-    @JsonValue
-    public String toString() {
-      return String.valueOf(value);
-    }
-
-    @JsonCreator
-    public static TypeEnum fromValue(String text) {
-      for (TypeEnum b : TypeEnum.values()) {
-        if (String.valueOf(b.value).equals(text)) {
-          return b;
-        }
-      }
-      return null;
-    }
-  }
-
   @JsonProperty("type")
-  private TypeEnum type = null;
+  private String type = null;
 
   public ThrottlePolicyDTO policyId(String policyId) {
     this.policyId = policyId;
@@ -155,21 +121,21 @@ public class ThrottlePolicyDTO   {
     this.isDeployed = isDeployed;
   }
 
-  public ThrottlePolicyDTO type(TypeEnum type) {
+  public ThrottlePolicyDTO type(String type) {
     this.type = type;
     return this;
   }
 
    /**
-   * Get type
+   * ApplicationThrottlePolicy, SubscriptionThrottlePolicy and AdvancedThrottlePolicy are the supported values. 
    * @return type
   **/
-  @ApiModelProperty(required = true, value = "")
-  public TypeEnum getType() {
+  @ApiModelProperty(required = true, value = "ApplicationThrottlePolicy, SubscriptionThrottlePolicy and AdvancedThrottlePolicy are the supported values. ")
+  public String getType() {
     return type;
   }
 
-  public void setType(TypeEnum type) {
+  public void setType(String type) {
     this.type = type;
   }
 

@@ -67,7 +67,7 @@ public class ApplicationThrottlePolicyMappingUtil {
         ApplicationThrottlePolicyDTO policyDTO = new ApplicationThrottlePolicyDTO();
         policyDTO = CommonThrottleMappingUtil.updateFieldsFromToPolicyToDTO(appPolicy, policyDTO);
         if (appPolicy.getDefaultQuotaPolicy() != null) {
-            policyDTO.setQuotaPolicy(CommonThrottleMappingUtil.fromQuotaPolicyToDTO(appPolicy.getDefaultQuotaPolicy()));
+            policyDTO.setDefaultLimit(CommonThrottleMappingUtil.fromQuotaPolicyToDTO(appPolicy.getDefaultQuotaPolicy()));
         }
         return policyDTO;
     }
@@ -84,8 +84,8 @@ public class ApplicationThrottlePolicyMappingUtil {
 
         ApplicationPolicy appPolicy = new ApplicationPolicy(dto.getPolicyName());
         appPolicy = CommonThrottleMappingUtil.updateFieldsFromDTOToPolicy(dto, appPolicy);
-        if (dto.getQuotaPolicy() != null) {
-            appPolicy.setDefaultQuotaPolicy(CommonThrottleMappingUtil.fromDTOToQuotaPolicy(dto.getQuotaPolicy()));
+        if (dto.getDefaultLimit() != null) {
+            appPolicy.setDefaultQuotaPolicy(CommonThrottleMappingUtil.fromDTOToQuotaPolicy(dto.getDefaultLimit()));
         }
         return appPolicy;
     }

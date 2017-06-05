@@ -95,7 +95,7 @@ public class SubscriptionThrottlePolicyMappingUtil {
                 policyDTO.setCustomAttributes(customAttributeDTOs);
             }
             if (subscriptionPolicy.getDefaultQuotaPolicy() != null) {
-                policyDTO.setQuotaPolicy(CommonThrottleMappingUtil.fromQuotaPolicyToDTO(subscriptionPolicy.getDefaultQuotaPolicy()));
+                policyDTO.setDefaultLimit(CommonThrottleMappingUtil.fromQuotaPolicyToDTO(subscriptionPolicy.getDefaultQuotaPolicy()));
             }
             return policyDTO;
         } catch (ParseException | UnsupportedThrottleLimitTypeException e) {
@@ -132,9 +132,9 @@ public class SubscriptionThrottlePolicyMappingUtil {
             subscriptionPolicy.setCustomAttributes(
                     String.valueOf(customAttrJsonArray.toJSONString().getBytes(Charset.forName("UTF-8"))));
         }
-        if (dto.getQuotaPolicy() != null) {
+        if (dto.getDefaultLimit() != null) {
             subscriptionPolicy
-                    .setDefaultQuotaPolicy(CommonThrottleMappingUtil.fromDTOToQuotaPolicy(dto.getQuotaPolicy()));
+                    .setDefaultQuotaPolicy(CommonThrottleMappingUtil.fromDTOToQuotaPolicy(dto.getDefaultLimit()));
         }
         return subscriptionPolicy;
     }
