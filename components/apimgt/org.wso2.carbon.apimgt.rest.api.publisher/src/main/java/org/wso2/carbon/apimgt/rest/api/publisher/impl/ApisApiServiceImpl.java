@@ -715,7 +715,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     private String replaceGroupIdWithName(String permissionString) throws ParseException, APIManagementException {
-        IdentityProvider defaultIdentityProvider = APIManagerFactory.getInstance().getIdentityProvider();
+        IdentityProvider defaultIdentityProvider = new DefaultIdentityProviderImpl();
         List<String> nonExistingRoleList = new ArrayList<>();
         JSONArray newPermissionArray = new JSONArray();
         JSONParser jsonParser = new JSONParser();

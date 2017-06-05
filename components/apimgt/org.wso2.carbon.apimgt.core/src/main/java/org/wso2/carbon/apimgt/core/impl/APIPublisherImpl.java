@@ -423,13 +423,15 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @return The overall list of permissions for the given API for the logged in user
      */
     private List<String> getAPIPermissionsOfLoggedInUser(String loggedInUserId, API api) throws APIManagementException {
-        IdentityProvider idp = APIManagerFactory.getInstance().getIdentityProvider();
+        IdentityProvider idp = new DefaultIdentityProviderImpl();
         List<String> permissionArrayForUser = new ArrayList<>();
         Integer highestPermission = 7; //Default permissions for API
         Map<String, Integer> permissionMap = api.getPermissionMap();
 
         if (!permissionMap.isEmpty()) {
             List<String> loggedInUserRoles = idp.getRoleIdsOfUser("cfbde56e-8422-498e-b6dc-85a6f1f8b058");
+            //How do we know the user id?
+            // implement another method to get the logged in user from SCIM
             List<String> permissionRoleList = getRolesFromPermissionMap(permissionMap);
             List<String> rolesOfUserWithAPIPermissions = null;
 

@@ -52,11 +52,11 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
     private static final String FILTER_PREFIX = "displayName Eq ";
     private static final String HOME_EMAIL = "home";
 
-    DefaultIdentityProviderImpl() throws APIManagementException {
+    public DefaultIdentityProviderImpl() throws APIManagementException {
         this(SCIMServiceStubFactory.getSCIMServiceStub());
     }
 
-    DefaultIdentityProviderImpl(SCIMServiceStub scimServiceStub) {
+    public DefaultIdentityProviderImpl(SCIMServiceStub scimServiceStub) {
         this.scimServiceStub = scimServiceStub;
     }
 
