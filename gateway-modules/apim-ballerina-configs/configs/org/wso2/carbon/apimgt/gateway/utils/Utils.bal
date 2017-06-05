@@ -20,12 +20,14 @@ function constructSubscriptionNotFound (message response) {
     json payload = {"code":900903, "message":"subscription not found"};
     messages:setJsonPayload(response, payload);
 }
+
 function constructAPIIsInMaintenance (message response) {
     messages:setHeader(response, "Content-Type", "application/json");
     http:setStatusCode(response, 503);
     json payload = {"code":700700, "message":"This API has been blocked temporarily"};
     messages:setJsonPayload(response, payload);
 }
+
 function fromJsonToIntrospectDto (json introspectResponse) (dto:IntrospectDto){
     dto:IntrospectDto introspectDto = {};
     introspectDto.active = (boolean)introspectResponse.active;
