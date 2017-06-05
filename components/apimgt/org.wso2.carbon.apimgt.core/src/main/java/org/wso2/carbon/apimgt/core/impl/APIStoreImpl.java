@@ -198,8 +198,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 WorkflowExecutor executor = WorkflowExecutorFactory.getInstance()
                         .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);
                 ApplicationUpdateWorkflow workflow = new ApplicationUpdateWorkflow(getApplicationDAO(),
-                        getWorkflowDAO());
-                
+                        getWorkflowDAO(), getApiGateway());
                 application.setId(uuid);
                 application.setUpdatedUser(getUsername());
                 application.setUpdatedTime(LocalDateTime.now());
@@ -1182,7 +1181,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                     getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
 
             ApplicationDeletionWorkflow workflow = new ApplicationDeletionWorkflow(getApplicationDAO(),
-                    getWorkflowDAO());
+                    getWorkflowDAO(), getApiGateway());
             workflow.setApplication(application);
             workflow.setWorkflowType(APIMgtConstants.WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
             workflow.setWorkflowReference(application.getId());
@@ -1298,7 +1297,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                     .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
 
             ApplicationCreationWorkflow workflow = new ApplicationCreationWorkflow(getApplicationDAO(),
-                    getWorkflowDAO());
+                    getWorkflowDAO(), getApiGateway());
 
             workflow.setApplication(application);
             workflow.setCreatedBy(getUsername());

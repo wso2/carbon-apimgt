@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 
@@ -100,5 +101,30 @@ public interface APIGateway {
      * @throws GatewayException If there is a failure to notify state change to gateway
      */
     void changeAPIState(API api, String status) throws GatewayException;
+
+    /**
+     * Publish Application Creation into Gateway
+     *
+     * @param application {@link Application}
+     * @throws GatewayException If there is a failure in notifying creation to gateway
+     */
+    void addApplication(Application application) throws GatewayException;
+
+    /**
+     * Publish the update application change to Gateway
+     *
+     * @param application {@link Application}
+     * @throws GatewayException
+     */
+    void updateApplication(Application application) throws GatewayException;
+
+
+    /**
+     * Publish the delete application change to Gateway
+     *
+     * @param applicationId applicationId of application
+     * @throws GatewayException
+     */
+    void deleteApplication(String applicationId) throws GatewayException;
 
 }

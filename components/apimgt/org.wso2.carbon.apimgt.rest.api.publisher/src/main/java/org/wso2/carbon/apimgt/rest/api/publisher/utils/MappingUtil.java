@@ -324,7 +324,7 @@ public class MappingUtil {
 
 
     /**
-     * This method convert Application model to ApplicationDTO
+     * This method convert Application model to ApplicationEvent
      * @param application Contains application data
      * @return DTO containing application data
      */

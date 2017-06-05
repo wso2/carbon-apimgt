@@ -8,7 +8,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
 
 /**
- * ApplicationDTO
+ * ApplicationEvent
  */
 public class ApplicationDTO   {
   @JsonProperty("applicationId")
@@ -163,7 +163,7 @@ public class ApplicationDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ApplicationDTO {\n");
+    sb.append("class ApplicationEvent {\n");
     
     sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");

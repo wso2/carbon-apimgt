@@ -18,6 +18,7 @@
 */
 package org.wso2.carbon.apimgt.core.impl;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIGateway;
@@ -32,6 +33,7 @@ import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.events.APIEvent;
+import org.wso2.carbon.apimgt.core.models.events.ApplicationEvent;
 import org.wso2.carbon.apimgt.core.models.events.EndpointEvent;
 import org.wso2.carbon.apimgt.core.models.events.GatewayEvent;
 import org.wso2.carbon.apimgt.core.models.events.SubscriptionDTO;
@@ -41,9 +43,7 @@ import org.wso2.carbon.apimgt.core.util.BrokerUtil;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.Writer;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -242,25 +242,10 @@ public class APIGatewayPublisherImpl implements APIGateway {
         } else {
             path = deploymentDirPath + File.separator + api.getName() + '_' + api.getVersion() + gatewayFileExtension;
         }
-        Writer writer = null;
-        PrintWriter printWriter = null;
-        try {
-            writer = new OutputStreamWriter(new FileOutputStream(path), "UTF-8");
-            printWriter = new PrintWriter(writer);
-            printWriter.println(content);
+        try (OutputStream outputStream = new FileOutputStream(path)) {
+            IOUtils.write(content, outputStream, "UTF-8");
         } catch (IOException e) {
             log.error("Error saving API configuration in " + path, e);
-        } finally {
-            try {
-                if (printWriter != null) {
-                    printWriter.close();
-                }
-                if (writer != null) {
-                    writer.close();
-                }
-            } catch (IOException e) {
-                log.error("Error closing connections", e);
-            }
         }
     }
 
@@ -282,25 +267,10 @@ public class APIGatewayPublisherImpl implements APIGateway {
         }
 
         String path = deploymentDirPath + File.separator + endpointConfigName + gatewayFileExtension;
-        Writer writer = null;
-        PrintWriter printWriter = null;
-        try {
-            writer = new OutputStreamWriter(new FileOutputStream(path), "UTF-8");
-            printWriter = new PrintWriter(writer);
-            printWriter.println(content);
+        try (OutputStream outputStream = new FileOutputStream(path)) {
+            IOUtils.write(content, outputStream, "UTF-8");
         } catch (IOException e) {
-            log.error("Error saving endpoint configuration in " + path, e);
-        } finally {
-            try {
-                if (printWriter != null) {
-                    printWriter.close();
-                }
-                if (writer != null) {
-                    writer.close();
-                }
-            } catch (IOException e) {
-                log.error("Error closing connections", e);
-            }
+            log.error("Error saving API configuration in " + path, e);
         }
     }
 
@@ -318,6 +288,44 @@ public class APIGatewayPublisherImpl implements APIGateway {
             publishToPublisherTopic(gatewayDTO);
         } else {
             //TODO save to file system: need to consider editor mode scenario
+        }
+    }
+
+    @Override
+    public void addApplication(Application application) throws GatewayException {
+        if (application != null) {
+            ApplicationEvent applicationEvent = new ApplicationEvent(APIMgtConstants.GatewayEventTypes
+                    .APPLICATION_CREATE);
+            applicationEvent.setId(application.getId());
+            applicationEvent.setName(application.getName());
+            applicationEvent.setPolicy(application.getPolicyId());
+            applicationEvent.setCreatedUser(application.getCreatedUser());
+            publishToStoreTopic(applicationEvent);
+        }
+    }
+
+
+    @Override
+    public void updateApplication(Application application) throws GatewayException {
+        if (application != null) {
+            ApplicationEvent applicationEvent = new ApplicationEvent(APIMgtConstants.GatewayEventTypes
+                    .APPLICATION_UPDATE);
+            applicationEvent.setId(application.getId());
+            applicationEvent.setName(application.getName());
+            applicationEvent.setPolicy(application.getPolicyId());
+            applicationEvent.setCreatedUser(application.getCreatedUser());
+            publishToStoreTopic(applicationEvent);
+        }
+    }
+
+
+    @Override
+    public void deleteApplication(String applicationId) throws GatewayException {
+        if (applicationId != null) {
+            ApplicationEvent applicationEvent = new ApplicationEvent(APIMgtConstants.GatewayEventTypes
+                    .APPLICATION_DELETE);
+            applicationEvent.setId(applicationId);
+            publishToStoreTopic(applicationEvent);
         }
     }
 
