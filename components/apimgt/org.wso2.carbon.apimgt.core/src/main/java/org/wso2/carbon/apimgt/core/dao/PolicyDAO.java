@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.core.dao;
 
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.models.BlockConditions;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
@@ -218,4 +219,78 @@ public interface PolicyDAO {
      */
     String getLastUpdatedTimeOfThrottlingPolicy(APIMgtAdminService.PolicyLevel policyLevel, String policyName)
             throws APIMgtDAOException;
+
+    /**
+     * Add a block condition
+     *
+     * @param conditionType  Type of the block condition
+     * @param conditionValue value related to the type
+     * @return uuid of the block condition if successfully added
+     * @throws APIMgtDAOException
+     */
+    String addBlockConditions(String conditionType, String conditionValue) throws APIMgtDAOException;
+
+    /**
+     * Get details of a block condition by Id
+     *
+     * @param conditionId id of the condition
+     * @return Block conditoin represented by the UUID
+     * @throws APIMgtDAOException
+     */
+    BlockConditions getBlockCondition(int conditionId) throws APIMgtDAOException;
+
+    /**
+     * Get details of a block condition by UUID
+     *
+     * @param uuid uuid of the block condition
+     * @return Block conditoin represented by the UUID
+     * @throws APIMgtDAOException
+     */
+    BlockConditions getBlockConditionByUUID(String uuid) throws APIMgtDAOException;
+
+    /**
+     * Return all block conditions
+     *
+     * @return list of BlockConditions
+     * @throws APIMgtDAOException
+     */
+    List<BlockConditions> getBlockConditions() throws APIMgtDAOException;
+
+    /**
+     * Update the block condition state true (Enabled) /false (Disabled) given the UUID
+     *
+     * @param conditionId id of the block condition
+     * @param state       blocking state
+     * @return true if the operation was success
+     * @throws APIMgtDAOException
+     */
+    boolean updateBlockConditionState(int conditionId, String state) throws APIMgtDAOException;
+
+    /**
+     * Update the block condition state true (Enabled) /false (Disabled) given the UUID
+     *
+     * @param uuid  UUID of the block condition
+     * @param state blocking state
+     * @return true if the operation was success
+     * @throws APIMgtDAOException
+     */
+    boolean updateBlockConditionStateByUUID(String uuid, String state) throws APIMgtDAOException;
+
+    /**
+     * Delete the block condition given the id
+     *
+     * @param conditionId id of the condition
+     * @return true if successfully deleted
+     * @throws APIMgtDAOException
+     */
+    boolean deleteBlockCondition(int conditionId) throws APIMgtDAOException;
+
+    /**
+     * Delete the block condition given the id
+     *
+     * @param uuid UUID of the block condition
+     * @return true if successfully deleted
+     * @throws APIMgtDAOException
+     */
+    boolean deleteBlockConditionByUUID(String uuid) throws APIMgtDAOException;
 }

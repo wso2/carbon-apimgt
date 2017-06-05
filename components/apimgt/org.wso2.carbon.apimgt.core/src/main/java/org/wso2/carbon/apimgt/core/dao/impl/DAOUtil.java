@@ -25,6 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -104,6 +106,65 @@ public class DAOUtil {
 
     public static void clearDataSource() {
         dataSource = null;
+    }
+
+    /**
+     * Utility method to close the connection streams.
+     * @param preparedStatement PreparedStatement
+     * @param connection Connection
+     * @param resultSet ResultSet
+     */
+    public static void closeAllConnections(PreparedStatement preparedStatement, Connection connection,
+            ResultSet resultSet) {
+        closeConnection(connection);
+        closeResultSet(resultSet);
+        closeStatement(preparedStatement);
+    }
+
+    /**
+     * Close Connection
+     * @param dbConnection Connection
+     */
+    private static void closeConnection(Connection dbConnection) {
+        if (dbConnection != null) {
+            try {
+                dbConnection.close();
+            } catch (SQLException e) {
+                log.warn("Database error. Could not close database connection. Continuing with " +
+                        "others. - " + e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * Close ResultSet
+     * @param resultSet ResultSet
+     */
+    private static void closeResultSet(ResultSet resultSet) {
+        if (resultSet != null) {
+            try {
+                resultSet.close();
+            } catch (SQLException e) {
+                log.warn("Database error. Could not close ResultSet  - " + e.getMessage(), e);
+            }
+        }
+
+    }
+
+    /**
+     * Close PreparedStatement
+     * @param preparedStatement PreparedStatement
+     */
+    public static void closeStatement(PreparedStatement preparedStatement) {
+        if (preparedStatement != null) {
+            try {
+                preparedStatement.close();
+            } catch (SQLException e) {
+                log.warn("Database error. Could not close PreparedStatement. Continuing with" +
+                        " others. - " + e.getMessage(), e);
+            }
+        }
+
     }
 }
 
