@@ -25,6 +25,10 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
+import org.wso2.carbon.apimgt.core.auth.DCRMServiceStub;
+import org.wso2.carbon.apimgt.core.auth.DCRMServiceStubFactory;
+import org.wso2.carbon.apimgt.core.auth.OAuth2ServiceStubs;
+import org.wso2.carbon.apimgt.core.auth.OAuth2ServiceStubsFactory;
 import org.wso2.carbon.apimgt.core.auth.SCIMServiceStub;
 import org.wso2.carbon.apimgt.core.auth.SCIMServiceStubFactory;
 import org.wso2.carbon.apimgt.core.auth.dto.SCIMUser;
@@ -32,6 +36,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
 import org.wso2.carbon.apimgt.core.models.User;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,10 +53,13 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
     private static final String HOME_EMAIL = "home";
 
     DefaultIdentityProviderImpl() throws APIManagementException {
-        this(SCIMServiceStubFactory.getSCIMServiceStub());
+        this(SCIMServiceStubFactory.getSCIMServiceStub(), DCRMServiceStubFactory.getDCRMServiceStub(),
+                OAuth2ServiceStubsFactory.getOAuth2ServiceStubs());
     }
 
-    DefaultIdentityProviderImpl(SCIMServiceStub scimServiceStub) {
+    DefaultIdentityProviderImpl(SCIMServiceStub scimServiceStub, DCRMServiceStub dcrmServiceStub,
+                                OAuth2ServiceStubs oAuth2ServiceStubs) throws APIManagementException {
+        super(dcrmServiceStub, oAuth2ServiceStubs);
         this.scimServiceStub = scimServiceStub;
     }
 
@@ -74,7 +82,8 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
 
     @Override
     public boolean isValidRole(String roleName) {
-        return scimServiceStub.searchGroups(FILTER_PREFIX + roleName).status() == 200;
+        return scimServiceStub.searchGroups(FILTER_PREFIX + roleName).status()
+                == APIMgtConstants.HTTPStatusCodes.SC_200_OK;
     }
 
     @Override
@@ -87,7 +96,7 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
         emails.add(new SCIMUser.SCIMUserEmails(user.getEmail(), HOME_EMAIL, true));
         scimUser.setEmails(emails);
         Response response = scimServiceStub.addUser(scimUser);
-        if (response == null || response.status() != 201) {
+        if (response == null || response.status() != APIMgtConstants.HTTPStatusCodes.SC_201_CREATED) {
             StringBuilder errorMessage = new StringBuilder("Error occurred while creating user. ");
             if (response == null) {
                 errorMessage.append("Response is null");

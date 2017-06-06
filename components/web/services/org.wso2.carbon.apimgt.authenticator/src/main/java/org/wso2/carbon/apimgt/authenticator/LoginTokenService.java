@@ -28,9 +28,12 @@ import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -61,25 +64,23 @@ public class LoginTokenService {
      *
      */
     public String getTokens(AuthResponseBean authResponseBean, String appName, String userName, String password,
-            String grantType, String refreshToken, String[] scopes, long validityPeriod) throws KeyManagementException {
+            String grantType, String refreshToken, String scopes, long validityPeriod) throws KeyManagementException {
         //TODO - call method which provides client id and secret.
         Map<String, String> consumerKeySecretMap = getConsumerKeySecret(appName);
         AccessTokenRequest accessTokenRequest = AuthUtil
                 .createAccessTokenRequest(userName, password, grantType, refreshToken, null, validityPeriod, scopes,
                         consumerKeySecretMap.get("CONSUMER_KEY"), consumerKeySecretMap.get("CONSUMER_SECRET"));
         AccessTokenInfo accessTokenInfo = APIManagerFactory.getInstance().getKeyManager()
-                .getNewApplicationAccessToken(accessTokenRequest);
+                .getNewAccessToken(accessTokenRequest);
         setAccessTokenData(authResponseBean, accessTokenInfo);
         authResponseBean.setAuthUser(userName);
         return accessTokenInfo.getAccessToken() + ":" + accessTokenInfo.getRefreshToken();
     }
 
-    public void revokeAccessToken (String appName, String accessToken) throws KeyManagementException {
+    public void revokeAccessToken(String appName, String accessToken) throws KeyManagementException {
         Map<String, String> consumerKeySecretMap = getConsumerKeySecret(appName);
-        AccessTokenRequest accessTokenRequest = AuthUtil
-                .createAccessTokenRequest("", "", "", "", accessToken, 0 , new String[0],
-                        consumerKeySecretMap.get("CONSUMER_KEY"), consumerKeySecretMap.get("CONSUMER_SECRET"));
-        APIManagerFactory.getInstance().getKeyManager().revokeLogInAccessToken(accessTokenRequest);
+        APIManagerFactory.getInstance().getKeyManager().revokeAccessToken(accessToken,
+                consumerKeySecretMap.get("CONSUMER_KEY"), consumerKeySecretMap.get("CONSUMER_SECRET"));
     }
 
     private Map<String, String> getConsumerKeySecret(String appName) throws KeyManagementException {
@@ -87,12 +88,12 @@ public class LoginTokenService {
         HashMap<String, String> consumerKeySecretMap;
         if (!AuthUtil.getConsumerKeySecretMap().containsKey(appName)) {
             consumerKeySecretMap = new HashMap<>();
-            OAuthAppRequest oauthAppRequest = null;
+            List<String> grantTypes = new ArrayList<>();
+            grantTypes.add(KeyManagerConstants.PASSWORD_GRANT_TYPE);
+            grantTypes.add(KeyManagerConstants.REFRESH_GRANT_TYPE);
+            OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(appName,
+                    "http://temporary.callback/url", grantTypes);
 
-                oauthAppRequest = AuthUtil
-                        .createOauthAppRequest(appName, "admin", null,
-                                null);
-            //for now tokenSope = null
             oauthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.VALIDITY_PERIOD, 3600);
             oauthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.APP_KEY_TYPE, "application");
             OAuthApplicationInfo oAuthApplicationInfo;
@@ -107,7 +108,4 @@ public class LoginTokenService {
             return AuthUtil.getConsumerKeySecretMap().get(appName);
         }
     }
-
-
-
 }
