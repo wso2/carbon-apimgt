@@ -42,7 +42,6 @@ public class BrokerImpl implements Broker {
 
     private BrokerConfigurations config;
     private TopicConnectionFactory connFactory = null;
-    //    private static final String CF_NAME_PREFIX = "connectionfactory.";
     private static final Logger log = LoggerFactory.getLogger(BrokerUtil.class);
 
     public BrokerImpl() {
