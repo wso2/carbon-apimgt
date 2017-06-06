@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -38,7 +38,7 @@ public class APIInfoDTO   {
   private String workflowStatus = null;
 
   @JsonProperty("userPermissionsForApi")
-  private List<String> userPermissionsForApi = null;
+  private List<String> userPermissionsForApi = new ArrayList<String>();
 
   public APIInfoDTO id(String id) {
     this.id = id;
@@ -184,11 +184,21 @@ public class APIInfoDTO   {
     this.workflowStatus = workflowStatus;
   }
 
-  /**
-   * Get userPermissionsForApi
+  public APIInfoDTO userPermissionsForApi(List<String> userPermissionsForApi) {
+    this.userPermissionsForApi = userPermissionsForApi;
+    return this;
+  }
+
+  public APIInfoDTO addUserPermissionsForApiItem(String userPermissionsForApiItem) {
+    this.userPermissionsForApi.add(userPermissionsForApiItem);
+    return this;
+  }
+
+   /**
+   * LoggedIn user permissions for the API 
    * @return userPermissionsForApi
-   **/
-  @ApiModelProperty(example = "[\"READ\",\"UPDATE\"]", value = "")
+  **/
+  @ApiModelProperty(example = "[&quot;READ&quot;,&quot;UPDATE&quot;]", value = "LoggedIn user permissions for the API ")
   public List<String> getUserPermissionsForApi() {
     return userPermissionsForApi;
   }
