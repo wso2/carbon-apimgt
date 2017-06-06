@@ -1476,14 +1476,27 @@ public class PolicyDAOImpl implements PolicyDAO {
         final String query = "UPDATE AM_APPLICATION_POLICY SET NAME = ?, DISPLAY_NAME = ?, DESCRIPTION = ?, "
                 + "QUOTA_TYPE = ?, QUOTA = ?, QUOTA_UNIT = ?, UNIT_TIME = ?, TIME_UNIT = ? WHERE UUID = ?";
 
+        Limit limit = applicationPolicy.getDefaultQuotaPolicy().getLimit();
+        boolean isBandwidthLimitPolicy = false, isRequestCountLimitPolicy = false;
+        if (limit instanceof BandwidthLimit) {
+            isBandwidthLimitPolicy = true;
+        } else if (limit instanceof RequestCountLimit) {
+            isRequestCountLimitPolicy = true;
+        }
+
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, applicationPolicy.getPolicyName());
             statement.setString(2, applicationPolicy.getDisplayName());
             statement.setString(3, applicationPolicy.getDescription());
             statement.setString(4, applicationPolicy.getDefaultQuotaPolicy().getType());
-            statement.setInt(5, 0);
-            statement.setString(6, "");
+            if (isBandwidthLimitPolicy) {
+                statement.setInt(5, ((BandwidthLimit) limit).getDataAmount());
+                statement.setString(6, ((BandwidthLimit) limit).getDataUnit());
+            } else if (isRequestCountLimitPolicy) {
+                statement.setInt(5, ((RequestCountLimit) limit).getRequestCount());
+                statement.setString(6, "");
+            }
             statement.setInt(7, applicationPolicy.getDefaultQuotaPolicy().getLimit().getUnitTime());
             statement.setString(8, applicationPolicy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
             statement.setString(9, applicationPolicy.getUuid());
@@ -1499,7 +1512,17 @@ public class PolicyDAOImpl implements PolicyDAO {
     public void updateSubscriptionPolicy(SubscriptionPolicy subscriptionPolicy) throws APIMgtDAOException {
         final String query =
                 "UPDATE AM_SUBSCRIPTION_POLICY SET NAME = ?, DISPLAY_NAME = ?, DESCRIPTION = ?, QUOTA_TYPE = ?, "
-                        + "QUOTA = ?, QUOTA_UNIT = ?, UNIT_TIME = ?, TIME_UNIT = ? WHERE UUID = ?";
+                        + "QUOTA = ?, QUOTA_UNIT = ?, UNIT_TIME = ?, TIME_UNIT = ?, RATE_LIMIT_COUNT =?, "
+                        + "RATE_LIMIT_TIME_UNIT = ?, IS_DEPLOYED = ?, CUSTOM_ATTRIBUTES = ?, STOP_ON_QUOTA_REACH = ?, "
+                        + "BILLING_PLAN = ? WHERE UUID = ?";
+
+        Limit limit = subscriptionPolicy.getDefaultQuotaPolicy().getLimit();
+        boolean isBandwidthLimitPolicy = false, isRequestCountLimitPolicy = false;
+        if (limit instanceof BandwidthLimit) {
+            isBandwidthLimitPolicy = true;
+        } else if (limit instanceof RequestCountLimit) {
+            isRequestCountLimitPolicy = true;
+        }
 
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(query)) {
@@ -1507,11 +1530,23 @@ public class PolicyDAOImpl implements PolicyDAO {
             statement.setString(2, subscriptionPolicy.getDisplayName());
             statement.setString(3, subscriptionPolicy.getDescription());
             statement.setString(4, subscriptionPolicy.getDefaultQuotaPolicy().getType());
-            statement.setInt(5, 0);
-            statement.setString(6, "");
+            if (isBandwidthLimitPolicy) {
+                statement.setInt(5, ((BandwidthLimit) limit).getDataAmount());
+                statement.setString(6, ((BandwidthLimit) limit).getDataUnit());
+            } else if (isRequestCountLimitPolicy) {
+                statement.setInt(5, ((RequestCountLimit) limit).getRequestCount());
+                statement.setString(6, "");
+            }
             statement.setInt(7, subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getUnitTime());
             statement.setString(8, subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
-            statement.setString(9, subscriptionPolicy.getUuid());
+            statement.setInt(9, subscriptionPolicy.getRateLimitCount());
+            statement.setString(10, subscriptionPolicy.getRateLimitTimeUnit());
+            // TODO: check if we can hard code isDeployed to true
+            statement.setBoolean(11, subscriptionPolicy.isDeployed());
+            statement.setBytes(12, subscriptionPolicy.getCustomAttributes());
+            statement.setBoolean(13, subscriptionPolicy.isStopOnQuotaReach());
+            statement.setString(14, subscriptionPolicy.getBillingPlan());
+            statement.setString(15, subscriptionPolicy.getUuid());
 
             statement.execute();
         } catch (SQLException e) {

@@ -258,8 +258,11 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             ApplicationPolicy applicationPolicy = ApplicationThrottlePolicyMappingUtil
                     .fromApplicationThrottlePolicyDTOToModel(body);
+            applicationPolicy.setUuid(policyId);
             apiMgtAdminService.updateApplicationPolicy(applicationPolicy);
-            return Response.status(Response.Status.OK).entity(applicationPolicy).build();
+            return Response.status(Response.Status.OK).entity(ApplicationThrottlePolicyMappingUtil.
+                    fromApplicationThrottlePolicyToDTO(apiMgtAdminService.getApplicationPolicyByUuid(applicationPolicy.
+                            getUuid()))).build();
 
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while updating Application Policy. policy uuid: " + policyId;
@@ -404,7 +407,10 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
                     .fromSubscriptionThrottlePolicyDTOToModel(body);
             subscriptionPolicy.setUuid(policyId);
             apiMgtAdminService.updateSubscriptionPolicy(subscriptionPolicy);
-            return Response.status(Response.Status.CREATED).entity(subscriptionPolicy).build();
+            return Response.status(Response.Status.CREATED).entity(SubscriptionThrottlePolicyMappingUtil
+                    .fromSubscriptionThrottlePolicyToDTO(apiMgtAdminService.
+                            getSubscriptionPolicyByUuid(subscriptionPolicy.getUuid()))).build();
+
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while updating Application Policy. policy uuid: " + policyId;
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
