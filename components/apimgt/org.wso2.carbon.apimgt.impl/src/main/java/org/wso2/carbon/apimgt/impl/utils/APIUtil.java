@@ -3697,12 +3697,10 @@ public final class APIUtil {
             }
          }
         if(!configFileHasKey){
-            System.out.println();
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                     getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
             displayMultiVersions = config.getFirstProperty(APIConstants.API_STORE_DISPLAY_MULTIPLE_VERSIONS);
-            System.out.println("Getting frtom super tenant config = " + displayMultiVersions);
 
             if (displayMultiVersions == null) {
                 log.warn("The configurations related to show multiple versions of API in APIStore " +
