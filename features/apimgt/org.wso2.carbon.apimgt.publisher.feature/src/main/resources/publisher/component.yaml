@@ -1,0 +1,6 @@
+config:
+  title : "API Publisher Application"
+  appName : API Publisher
+  loginRedirectUri: "/apis"
+  loginPageUri : "https://localhost:9292/publisher/auth/login"
+
