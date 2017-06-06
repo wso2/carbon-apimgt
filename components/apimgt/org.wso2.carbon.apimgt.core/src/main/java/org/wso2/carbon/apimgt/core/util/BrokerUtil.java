@@ -67,6 +67,7 @@ public class BrokerUtil {
         TopicConnection topicConnection = null;
         try {
             topicConnection = getTopicConnection();
+            topicConnection.start();
             topicSession = topicConnection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
 
             topic = topicSession.createTopic(topicName);

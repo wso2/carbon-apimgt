@@ -27,7 +27,7 @@ import org.wso2.carbon.kernel.annotations.Element;
 public class AnalyticsConfigurations {
 
     @Element(description = "DAS server URL")
-    private String dasServerURL = "tcp://localhost:7612";
+    private String dasServerURL = "http://localhost:9091";
     @Element(description = "DAS server credentials")
     private CredentialConfigurations dasServerCredentials = new CredentialConfigurations();
 

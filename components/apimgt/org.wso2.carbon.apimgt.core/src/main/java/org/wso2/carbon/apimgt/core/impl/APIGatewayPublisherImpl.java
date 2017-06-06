@@ -59,12 +59,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
 
     public APIGatewayPublisherImpl() {
         config = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
-
-        //TODO:Remove this once broker is integrated
         gwHome = System.getProperty("gwHome");
-        if (gwHome == null) {
-            gwHome = System.getProperty("carbon.home");
-        }
     }
 
     /**
