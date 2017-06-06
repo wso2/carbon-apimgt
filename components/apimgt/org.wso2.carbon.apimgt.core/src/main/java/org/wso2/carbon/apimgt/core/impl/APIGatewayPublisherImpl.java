@@ -36,7 +36,7 @@ import org.wso2.carbon.apimgt.core.models.events.APIEvent;
 import org.wso2.carbon.apimgt.core.models.events.ApplicationEvent;
 import org.wso2.carbon.apimgt.core.models.events.EndpointEvent;
 import org.wso2.carbon.apimgt.core.models.events.GatewayEvent;
-import org.wso2.carbon.apimgt.core.models.events.SubscriptionDTO;
+import org.wso2.carbon.apimgt.core.models.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.BrokerUtil;
 
@@ -131,10 +131,23 @@ public class APIGatewayPublisherImpl implements APIGateway {
     @Override
     public void addAPISubscription(Subscription subscription) throws GatewayException {
         if (gwHome == null) {
-            SubscriptionDTO subscriptionDTO = new SubscriptionDTO(
-                    APIMgtConstants.GatewayEventTypes.SUBSCRIPTION_CREATE);
-            subscriptionDTO.setSubscriptionsList(toSubscriptionValidationData(subscription));
-            publishToStoreTopic(subscriptionDTO);
+            SubscriptionEvent subscriptionAddEvent = new SubscriptionEvent(APIMgtConstants.GatewayEventTypes
+                    .SUBSCRIPTION_CREATE);
+            subscriptionAddEvent.setSubscriptionsList(toSubscriptionValidationData(subscription));
+            publishToStoreTopic(subscriptionAddEvent);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void updateAPISubscriptionStatus(Subscription subscription) throws GatewayException {
+        if (gwHome == null) {
+            SubscriptionEvent subscriptionBlockEvent = new SubscriptionEvent(APIMgtConstants.GatewayEventTypes
+                    .SUBSCRIPTION_STATE_CHANGE);
+            subscriptionBlockEvent.setSubscriptionsList(toSubscriptionValidationData(subscription));
+            publishToStoreTopic(subscriptionBlockEvent);
         }
     }
 
@@ -144,10 +157,10 @@ public class APIGatewayPublisherImpl implements APIGateway {
     @Override
     public void deleteAPISubscription(Subscription subscription) throws GatewayException {
         if (gwHome == null) {
-            SubscriptionDTO subscriptionDTO = new SubscriptionDTO(
+            SubscriptionEvent subscriptionDeleteEvent = new SubscriptionEvent(
                     APIMgtConstants.GatewayEventTypes.SUBSCRIPTION_DELETE);
-            subscriptionDTO.setSubscriptionsList(toSubscriptionValidationData(subscription));
-            publishToStoreTopic(subscriptionDTO);
+            subscriptionDeleteEvent.setSubscriptionsList(toSubscriptionValidationData(subscription));
+            publishToStoreTopic(subscriptionDeleteEvent);
         }
     }
 

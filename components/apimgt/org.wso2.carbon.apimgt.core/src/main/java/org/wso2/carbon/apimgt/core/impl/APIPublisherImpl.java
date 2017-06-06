@@ -1015,8 +1015,12 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             APIManagementException {
         try {
             getApiSubscriptionDAO().updateSubscriptionStatus(subId, subStatus);
+            Subscription subscription = getSubscriptionByUUID(subId);
+            getApiGateway().updateAPISubscriptionStatus(subscription);
         } catch (APIMgtDAOException e) {
             throw new APIManagementException(e);
+        } catch (GatewayException e) {
+            log.error("Error occurred while updating subscription status in gateway", e);
         }
     }
 

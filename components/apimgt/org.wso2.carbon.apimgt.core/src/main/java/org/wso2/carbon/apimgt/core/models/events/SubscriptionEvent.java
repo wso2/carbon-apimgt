@@ -25,11 +25,11 @@ import java.util.List;
 /**
  * Holds the Subscription related details transferred to Gateway
  */
-public class SubscriptionDTO extends GatewayEvent {
+public class SubscriptionEvent extends GatewayEvent {
 
     private List<SubscriptionValidationData> subscriptionsList;
 
-    public SubscriptionDTO(String eventType) {
+    public SubscriptionEvent(String eventType) {
         super(eventType);
     }
 

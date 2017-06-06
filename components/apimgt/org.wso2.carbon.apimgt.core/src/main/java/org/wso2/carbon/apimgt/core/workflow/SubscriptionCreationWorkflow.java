@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
@@ -88,8 +89,12 @@ public class SubscriptionCreationWorkflow extends Workflow {
         }
 
         //Add subscription to gateway
-        apiGateway.addAPISubscription(subscription);
         apiSubscriptionDAO.updateSubscriptionStatus(getWorkflowReference(), subscriptionState);
+        try {
+            apiGateway.addAPISubscription(subscription);
+        } catch (GatewayException e) {
+            log.error("Error occurred while adding subscription to gateway", e);
+        }
         updateWorkflowEntries(this);
         return response;
     }

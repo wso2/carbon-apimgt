@@ -62,6 +62,14 @@ public interface APIGateway {
     void addAPISubscription(Subscription subscription) throws GatewayException;
 
     /**
+     * Update API subscription status in gateway
+     *
+     * @param subscription  Subscription details
+     * @throws GatewayException     If there is a failure to update subscription status
+     */
+    void updateAPISubscriptionStatus(Subscription subscription) throws GatewayException;
+
+    /**
      * Delete API subscription from gateway
      *
      * @param subscription  Subscription details
