@@ -1,0 +1,42 @@
+@Plan:name('request summarization')
+
+@Store(type="rdbms", jdbc.url="jdbc:h2:./database/AM_STAT_DB;DB_CLOSE_ON_EXIT=FALSE;LOCK_TIMEOUT=60000;AUTO_SERVER=TRUE",
+username="wso2carbon",
+password="wso2carbon",field.length="api:254", pool.properties="driverClassName:org.h2.Driver" )
+@PrimaryKey("api, version, publisher, context, consumer_key, application_name, user_id, uri_template, method, year, month, day, hour, minute")
+define table api_request_summary (api string, version string, publisher string, context string, consumer_key string, application_name string, user_id string, uri_template string, method string, request_count long, time long, year int ,month int, day int, hour int, minute int);
+
+@source(type='inMemory', topic='apim.analytics.request', @map(type='passThrough'))
+Define stream perMinuteRequests (
+api STRING, context STRING, version STRING, publisher STRING,
+uri_template STRING,
+method STRING,
+consumer_key STRING,
+application_name STRING,
+user_id STRING,
+total_request_count LONG,
+request_time LONG,
+year INT, month INT, day INT, hour INT, minute INT
+);
+
+@info(name = 'query1')
+from perMinuteRequests
+select api, version, publisher, context, consumer_key, application_name, user_id , uri_template, method,
+total_request_count as request_count, request_time as time,
+year, month, day, hour, minute
+update or insert into api_request_summary
+on api_request_summary.api == api
+and api_request_summary.version == version
+and api_request_summary.publisher == publisher
+and api_request_summary.context == context
+and api_request_summary.consumer_key == consumer_key
+and api_request_summary.application_name == application_name
+and api_request_summary.user_id == user_id
+and api_request_summary.uri_template == uri_template
+and api_request_summary.method == method
+and api_request_summary.year == year
+and api_request_summary.month == month
+and api_request_summary.day == day
+and api_request_summary.hour == hour
+and api_request_summary.minute == minute
+;

@@ -26,7 +26,7 @@ function mediate (message m, message res) {
     json event = {};
 
     jsons:add (event, "$", "streamName", "ResponseStream");
-    jsons:add (event, "$", "executionPlanName", "ResponseExecutionPlan");
+    jsons:add (event, "$", "executionPlanName", "analytics_events_pre_process");
     jsons:add (event, "$", "timestamp", "123456789");
 
     json dataArr = [];
