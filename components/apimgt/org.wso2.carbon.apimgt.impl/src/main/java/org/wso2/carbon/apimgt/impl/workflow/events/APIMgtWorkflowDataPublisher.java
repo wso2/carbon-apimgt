@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.databridge.agent.DataPublisher;
 import org.wso2.carbon.databridge.agent.exception.DataEndpointAgentConfigurationException;
 import org.wso2.carbon.databridge.agent.exception.DataEndpointAuthenticationException;
@@ -56,6 +55,7 @@ public class APIMgtWorkflowDataPublisher {
     boolean enabled = APIUtil.isAnalyticsEnabled();
     private static String wfStreamName;
     private static String wfStreamVersion;
+    private static DataPublisher dataPublisherStatics;
 
     public APIMgtWorkflowDataPublisher() {
         if (!enabled) {
@@ -77,42 +77,38 @@ public class APIMgtWorkflowDataPublisher {
 
     private static DataPublisher getDataPublisher() {
 
-        String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-
-        //Get DataPublisher which has been registered for the tenant.
-        DataPublisher dataPublisher = getDataPublisher(tenantDomain);
-        String bamServerURL = analyticsConfig.getDasReceiverUrlGroups();
-        String bamServerAuthURL = analyticsConfig.getDasReceiverAuthUrlGroups();
-        String bamServerUser = analyticsConfig.getDasReceiverServerUser();
-        String bamServerPassword = analyticsConfig.getDasReceiverServerPassword();
-
         //If a DataPublisher had not been registered for the tenant.
-        if (dataPublisher == null) {
+        if (dataPublisherStatics == null) {
+
+            //Get DataPublisher which has been registered for the tenant.
+            String serverURL = analyticsConfig.getDasReceiverUrlGroups();
+            String serverAuthURL = analyticsConfig.getDasReceiverAuthUrlGroups();
+            String serverUser = analyticsConfig.getDasReceiverServerUser();
+            String serverPassword = analyticsConfig.getDasReceiverServerPassword();
 
             try {
-                dataPublisher = new DataPublisher(null, bamServerURL, bamServerAuthURL, bamServerUser,
-                        bamServerPassword);
+                //Create new DataPublisher for the tenant.
+                synchronized (APIMgtWorkflowDataPublisher.class) {
 
-                //Add created DataPublisher.
-                addDataPublisher(tenantDomain, dataPublisher);
-            } catch (DataPublisherAlreadyExistsException e) {
-                log.warn("Attempting to register a data publisher for the tenant " + tenantDomain +
-                         " when one already exists. Returning existing data publisher");
-                return getDataPublisher(tenantDomain);
+                    if (dataPublisherStatics == null) {
+                        dataPublisherStatics = new DataPublisher(null, serverURL, serverAuthURL, serverUser,
+                                serverPassword);
+                    }
+                }
             } catch (DataEndpointConfigurationException e) {
-                log.error("Error while creating data publisher",e);
+                log.error("Error while creating data publisher", e);
             } catch (DataEndpointException e) {
-                log.error("Error while creating data publisher",e);
+                log.error("Error while creating data publisher", e);
             } catch (DataEndpointAgentConfigurationException e) {
-                log.error("Error while creating data publisher",e);
+                log.error("Error while creating data publisher", e);
             } catch (TransportException e) {
-                log.error("Error while creating data publisher",e);
+                log.error("Error while creating data publisher", e);
             } catch (DataEndpointAuthenticationException e) {
-                log.error("Error while creating data publisher",e);
+                log.error("Error while creating data publisher", e);
             }
         }
 
-        return dataPublisher;
+        return dataPublisherStatics;
     }
 
     public boolean publishEvent(WorkflowDTO workflowDTO) {

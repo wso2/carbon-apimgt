@@ -187,7 +187,7 @@
         });
 
         var api_url = encodeURIComponent(window.location+'');
-        var description = document.title + " : try this API at "+window.location;
+        var description = document.title + " : try this API at ";
 
         $("#facebook").attr("href","http://www.facebook.com/sharer.php?u="+api_url);
         $("#twitter").attr("href","http://twitter.com/share?url="+api_url+"&text="+encodeURIComponent(description));

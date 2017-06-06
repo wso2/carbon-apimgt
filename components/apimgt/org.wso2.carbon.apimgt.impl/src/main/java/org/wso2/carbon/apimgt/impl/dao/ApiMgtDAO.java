@@ -5820,6 +5820,8 @@ public class ApiMgtDAO {
                     }
 
                     scopePrepStmt.setInt(2, uriTemplate.getScope().getId());
+                    scopePrepStmt.setInt(3, APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(api.getId().
+                            getProviderName())));
                     scopePrepStmt.addBatch();
                 }
             }

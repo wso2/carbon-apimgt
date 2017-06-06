@@ -875,7 +875,12 @@
         }
 
         if (isEnjoyHintEnabled()) {
-            runEnjoyHintScript(enjoyhint_instance_implement, item_implement_script_data);
+            enjoyhint_instance_implement = runEnjoyHintScript(enjoyhint_instance_implement, item_implement_script_data);
+        }
+    });
+    $(window).resize(function(){
+    	if (isEnjoyHintEnabled()) {
+          	enjoyhint_instance_implement.resume();
         }
     });
 
@@ -894,6 +899,38 @@
 
 
 <script id="advance-endpoint-ui-template" type="text/x-handlebars-template">
+    {{#if address }}
+        <fieldset>
+            <legend><%=i18n.localize("Message Content")%></legend>
+            <div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">
+				<div class="form-group">
+					<label class="control-label col-sm-3" for="format">Format</label>
+					<div class="col-sm-4">
+						<select class="form-control selectpicker" id="format" name="format">
+							<option value="soap11">SOAP 1.1</option>
+							<option value="soap12">SOAP 1.2</option>
+							<option value="POX">Plain Old XML (POX)</option>
+							<option value="REST">Representational State Transer (REST)</option>
+							<option value="GET">GET</option>
+							<option selected value="leave-as-is"><%=i18n.localize("Leave As-Is")%></option>
+						</select>
+						<p class="help-block hide"><%=i18n.localize("Message format for the endpoint.")%></p>
+					</div>
+				</div>
+				<div class="form-group ">
+					<label class="control-label col-sm-3" for="optimize"><%=i18n.localize("Optimize")%></label>
+					<div class="col-sm-4">
+						<select class="form-control selectpicker" id="optimize" name="optimize">
+							<option value="SWA">SWA</option>
+							<option value="MTOM">MTOM</option>
+							<option selected value="leave-as-is"><%=i18n.localize("Leave As-Is")%></option>
+						</select>
+						<p class="help-block hide"><%=i18n.localize("Method to optimize the attachments.")%></p>
+					</div>
+				</div>
+			</div>
+        </fieldset>
+    {{/if}}
         <fieldset>
             <legend><%=i18n.localize("Endpoint Suspend State")%></legend>
 				<div class="form-group ">

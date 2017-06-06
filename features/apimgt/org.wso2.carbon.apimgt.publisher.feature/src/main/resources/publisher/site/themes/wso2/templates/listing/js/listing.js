@@ -4,7 +4,7 @@ var removeAPI = function(name, version, provider, buttonElement) {
     jagg.message({
         content: i18n.t("Are you sure you want to delete the API") + " - " + name + " - " + version ,
         type:"confirm",
-        title: i18n.t("Confirm Delete"),
+        title: i18n.t("Confirm Deletion"),
         anotherDialog:true,
         okCallback:function(){
             $('#messageModal').modal({backdrop: 'static', keyboard: false });

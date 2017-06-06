@@ -29,6 +29,7 @@ function runEnjoyHintScript(enjoyhint_instance, script_data) {
     enjoyhint_instance = new EnjoyHint({});
     enjoyhint_instance.setScript(script_data);
     enjoyhint_instance.runScript();
+    return enjoyhint_instance;
 }
 
 // Set the api name into local storage value

@@ -21,9 +21,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.usage.publisher.dto.*;
-import org.wso2.carbon.apimgt.usage.publisher.internal.DataPublisherAlreadyExistsException;
-import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.databridge.agent.DataPublisher;
 import org.wso2.carbon.databridge.agent.exception.DataEndpointAgentConfigurationException;
 import org.wso2.carbon.databridge.agent.exception.DataEndpointAuthenticationException;
@@ -36,6 +33,7 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
     private static final Log log   = LogFactory.getLog(APIMgtUsageDataBridgeDataPublisher.class);
 
     private DataPublisher dataPublisher;
+    private static DataPublisher dataPublisherStatics;
 
     public void init(){
         try {
@@ -130,13 +128,8 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
     }
     private static DataPublisher getDataPublisher() {
 
-        String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-
-        //Get DataPublisher which has been registered for the tenant.
-        DataPublisher dataPublisher = UsageComponent.getDataPublisher(tenantDomain);
-
         //If a DataPublisher had not been registered for the tenant.
-        if (dataPublisher == null
+        if (dataPublisherStatics == null
                 && DataPublisherUtil.getApiManagerAnalyticsConfiguration().getDasReceiverUrlGroups() != null) {
 
             String serverUser = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getDasReceiverServerUser();
@@ -149,18 +142,13 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
             try {
                 //Create new DataPublisher for the tenant.
                 synchronized (APIMgtUsageDataBridgeDataPublisher.class) {
-                    dataPublisher = UsageComponent.getDataPublisher(tenantDomain);
-                    if (dataPublisher == null) {
-                        dataPublisher = new DataPublisher(null, serverURL, serverAuthURL, serverUser, serverPassword);
-                        //Add created DataPublisher.
-                        UsageComponent.addDataPublisher(tenantDomain, dataPublisher);
+
+                    if (dataPublisherStatics == null) {
+                        dataPublisherStatics = new DataPublisher(null, serverURL, serverAuthURL, serverUser,
+                                serverPassword);
                     }
                 }
-            } catch (DataPublisherAlreadyExistsException e) {
-                log.warn("Attempting to register a data publisher for the tenant " + tenantDomain +
-                         " when one already exists. Returning existing data publisher");
-                return UsageComponent.getDataPublisher(tenantDomain);
-            } catch (DataEndpointConfigurationException e) {
+            }  catch (DataEndpointConfigurationException e) {
                 log.error("Error while creating data publisher", e);
             } catch (DataEndpointException e) {
                 log.error("Error while creating data publisher", e);
@@ -173,7 +161,7 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
             }
         }
 
-        return dataPublisher;
+        return dataPublisherStatics;
     }
 
     /**

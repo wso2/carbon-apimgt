@@ -1,7 +1,24 @@
 var jagg = jagg || {};
 
 (function () {
-    var option = { resGetPath:requestURL+'/site/conf/locales/js/i18nResources.json'};
+    try {
+        var locale = navigator.languages && navigator.languages[0] || // Chrome / Firefox
+            navigator.language ||   // All browsers
+            navigator.userLanguage; // IE <= 10
+
+        locale = "_" + locale;
+        if (locale.toLowerCase() == "_en-us" || locale.toLowerCase() == "_en") {
+            locale = "";
+        }
+    } catch (err) {
+        console.error("Error occurred while detecting browser locale");
+    }
+
+    // getAsync: false option is provided to make sure localization will load before calling other UI js.
+    var option = {
+        resGetPath: requestURL + '/site/conf/locales/js/i18nResources' + locale + '.json',
+        getAsync: false
+    };
     i18n.init(option);
 
     jagg.post = function () {
