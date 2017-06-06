@@ -34,6 +34,7 @@ function overviewTabHandler(event) {
     api_client.get(api_id).then(
         function (response) {
             var context = response.obj;
+            var api_data = JSON.parse(response.data);
             if (context.endpointConfig) {
                 var endpointConfig = $.parseJSON(context.endpointConfig);
                 context.productionEndpoint = endpointConfig.production_endpoints.url;
@@ -41,6 +42,11 @@ function overviewTabHandler(event) {
             var callbacks = {
                 onSuccess: function (renderedHTML) {
                     $('#overview-content').html(renderedHTML);
+                    var userPermissions = api_data.userPermissionsForApi;
+                    if(!userPermissions.includes("UPDATE")) {
+                        $('#statusTab').addClass('not-active');
+                        $('#docsTab').addClass('not-active');
+                    }
                 }, onFailure: function (data) {
                 }
             };
@@ -925,6 +931,25 @@ function documentTabHandler(event) {
     	return null;
     }
 
+function disableTabsOnPermissions(client, apiId) {
+    var api_client = client;
+    var api_id = apiId;
+
+    api_client.get(api_id).then(
+        function (response) {
+            var api_data = JSON.parse(response.data);
+            var userPermissions = api_data.userPermissionsForApi;
+            if(!userPermissions.includes("UPDATE")) {
+                $('#tab-2 > a').addClass('not-active');
+                $('#tab-3 > a').addClass('not-active');
+                $('#tab-4 > a').addClass('not-active');
+                $('#tab-5 > a').addClass('not-active');
+                $('#tab-6 > a').addClass('not-active');
+                $('#tab-9 > a').addClass('not-active');
+            }
+        }
+    ).catch(apiGetErrorHandler);
+}
 
 /**
  * Execute once the page load is done.
@@ -952,4 +977,5 @@ $(function () {
     $(document).on('click', "#checkItem", {api_client: client, api_id: api_id}, updateLifecycleCheckListHandler);
     $(document).on('click', "#update-labels-button", {api_client: client, api_id: api_id}, updateLabelsHandler);
     loadFromHash();
+    disableTabsOnPermissions(client, api_id);
 });

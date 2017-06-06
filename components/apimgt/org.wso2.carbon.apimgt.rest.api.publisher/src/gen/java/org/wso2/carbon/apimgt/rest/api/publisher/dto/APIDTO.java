@@ -76,6 +76,9 @@ public class APIDTO   {
   @JsonProperty("policies")
   private List<String> policies = new ArrayList<String>();
 
+  @JsonProperty("userPermissionsForApi")
+  private List<String> userPermissionsForApi = null;
+
   /**
    * Gets or Sets visibility
    */
@@ -708,6 +711,19 @@ public class APIDTO   {
     this.operations = operations;
   }
 
+  /**
+   * Get userPermissionsForApi
+   * @return userPermissionsForApi
+   **/
+  @ApiModelProperty(example = "[\"READ\",\"UPDATE\"]", value = "")
+  public List<String> getUserPermissionsForApi() {
+    return userPermissionsForApi;
+  }
+
+  public void setUserPermissionsForApi(List<String> userPermissionsForApi) {
+    this.userPermissionsForApi = userPermissionsForApi;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -746,6 +762,7 @@ public class APIDTO   {
         Objects.equals(this.businessInformation, API.businessInformation) &&
         Objects.equals(this.corsConfiguration, API.corsConfiguration) &&
         Objects.equals(this.endpoint, API.endpoint) &&
+        Objects.equals(this.userPermissionsForApi, API.userPermissionsForApi) &&
         Objects.equals(this.operations, API.operations);
   }
 
@@ -786,6 +803,7 @@ public class APIDTO   {
     sb.append("    sequences: ").append(toIndentedString(sequences)).append("\n");
     sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
     sb.append("    corsConfiguration: ").append(toIndentedString(corsConfiguration)).append("\n");
+    sb.append("    userPermissionsForApi: ").append(toIndentedString(userPermissionsForApi)).append("\n");
     sb.append("    endpoint: ").append(toIndentedString(endpoint)).append("\n");
     sb.append("    operations: ").append(toIndentedString(operations)).append("\n");
     sb.append("}");

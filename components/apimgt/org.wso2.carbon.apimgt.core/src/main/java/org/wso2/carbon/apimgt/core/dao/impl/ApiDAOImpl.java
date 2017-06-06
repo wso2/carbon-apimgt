@@ -1602,6 +1602,7 @@ public class ApiDAOImpl implements ApiDAO {
                         transport(getTransports(connection, apiPrimaryKey)).
                         endpoint(getEndPointsForApi(connection, apiPrimaryKey)).
                         apiPermission(getPermissionsStringForApi(connection, apiPrimaryKey)).
+                        permissionMap(getPermissionMapForApi(connection, apiPrimaryKey)).
                         businessInformation(businessInformation).
                         lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).

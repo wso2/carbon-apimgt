@@ -85,7 +85,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -415,53 +414,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         Set<String> allAvailableRoles = APIUtils.getAllAvailableRoles();
         Set<String> permissionRoleList = getRolesFromPermissionMap(permissionMap);
         return APIUtils.checkAllowedRoles(allAvailableRoles, permissionRoleList);
-    }
-
-    /**
-     * This method retrieves the set of overall permissions for a given api for the logged in user
-     * @param loggedInUser - Logged in user
-     * @param api - The API whose permissions for the logged in user is retrieved
-     * @return The overall list of permissions for the given API for the logged in user
-     */
-    private List<String> getAPIPermissionsOfLoggedInUser(String loggedInUser, API api) {
-
-        Map<String, Integer> permissionMap = api.getPermissionMap();
-        Set<String> loggedInUserRoles = APIUtils.getAllRolesOfUser(loggedInUser);
-        Set<String> permissionRoleList = getRolesFromPermissionMap(permissionMap);
-        Set<String> rolesOfUserWithAPIPermissions = null;
-        List<String> permissionArrayForUser = new ArrayList<>();
-        loggedInUserRoles.retainAll(
-                permissionRoleList); //get the intersection - retainAll() transforms first set to the intersection
-        if (!loggedInUserRoles.isEmpty()) {
-            rolesOfUserWithAPIPermissions = loggedInUserRoles;
-        }
-        if (rolesOfUserWithAPIPermissions != null) {
-            List<Integer> allPermissionsForUser = new ArrayList<>();
-            for (String role : rolesOfUserWithAPIPermissions) {
-                Integer permission = permissionMap.get(role);
-                allPermissionsForUser.add(permission);
-            }
-            //Determine maximum of all permissions
-            Integer highestPermission = Collections.max(allPermissionsForUser);
-            if (highestPermission == APIMgtConstants.Permission.READ_PERMISSION) {
-                permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-            } else if (highestPermission == (APIMgtConstants.Permission.READ_PERMISSION
-                    + APIMgtConstants.Permission.UPDATE_PERMISSION)) {
-                permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-                permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
-            } else if (highestPermission == (APIMgtConstants.Permission.READ_PERMISSION
-                    + APIMgtConstants.Permission.DELETE_PERMISSION)) {
-                permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-                permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
-            } else if (highestPermission
-                    == APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.UPDATE_PERMISSION
-                    + APIMgtConstants.Permission.DELETE_PERMISSION) {
-                permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-                permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
-                permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
-            }
-        }
-        return permissionArrayForUser;
     }
 
     /**
@@ -1108,26 +1060,12 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             } else {
                 apiResults = getApiDAO().getAPIs(ApiType.STANDARD);
             }
-            List<API> apiList = setAllApiPermissionsForUser(user, apiResults);
-            apiResults = apiList;
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while Searching the API with query " + query;
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return apiResults;
-    }
-
-    private List<API> setAllApiPermissionsForUser(String userId, List<API> originalAPIList) {
-        List<API> updatedAPIList = new ArrayList<API>();
-        for (API api : originalAPIList) {
-            List<String> aggregatedApiPermissions = getAPIPermissionsOfLoggedInUser(userId, api);
-            if (!aggregatedApiPermissions.isEmpty()) {
-                api.setUserSpecificApiPermissions(aggregatedApiPermissions);
-                updatedAPIList.add(api);
-            }
-        }
-        return updatedAPIList;
     }
 
     /**

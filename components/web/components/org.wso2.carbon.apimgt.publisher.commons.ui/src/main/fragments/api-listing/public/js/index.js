@@ -146,7 +146,6 @@ function initDataTable(raw_data) {
             var name_link = $('<a>', {href: data.id})
                 .text(" " + data.name)
                 .prepend(icon.addClass("fw-2x fw-api"));
-            var userPermissions = data.userPermissionsForApi;
             return $('<div></div>').append(name_link).html();
         } else if (type === "filter") {
             return data.name;
