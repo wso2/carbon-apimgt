@@ -38,6 +38,7 @@ public interface SCIMServiceStub {
 
     @RequestLine("GET /Groups?filter={query}")
     Response searchGroups(@Param("query") String query);
+
 }
 
 

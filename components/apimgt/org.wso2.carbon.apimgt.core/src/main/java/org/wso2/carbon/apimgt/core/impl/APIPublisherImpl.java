@@ -1050,12 +1050,12 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public List<API> searchAPIs(Integer limit, Integer offset, String query) throws APIManagementException {
 
         List<API> apiResults;
-        String user = "admin";
-        Set<String> roles = APIUtils.getAllRolesOfUser(user);
         try {
             //TODO: Need to validate users roles against results returned
             if (query != null && !query.isEmpty()) {
                 //TODO get the logged in user and user roles from key manager.
+                String user = "admin";
+                Set<String> roles = APIUtils.getAllRolesOfUser(user);
                 apiResults = getApiDAO().searchAPIs(roles, user, query, ApiType.STANDARD, offset, limit);
             } else {
                 apiResults = getApiDAO().getAPIs(ApiType.STANDARD);
