@@ -1069,7 +1069,11 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         //role list of current user
         Set<String> roles = APIUtils.getAllRolesOfUser(user);
         try {
-            apiResults = getApiDAO().searchCompositeAPIs(roles, user, query, offset, limit);
+            if (query != null && !query.isEmpty()) {
+                apiResults = getApiDAO().searchCompositeAPIs(roles, user, query, offset, limit);
+            } else {
+                apiResults = getApiDAO().getCompositeAPIs(roles, user, offset, limit);
+            }
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while updating searching APIs - " + query;
             log.error(errorMsg, e);

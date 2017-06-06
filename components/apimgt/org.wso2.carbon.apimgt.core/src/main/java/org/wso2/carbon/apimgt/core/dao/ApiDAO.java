@@ -84,6 +84,23 @@ public interface ApiDAO {
     CompositeAPI getCompositeAPI(String apiID) throws APIMgtDAOException;
 
     /**
+     * Retrieves a paginated list of composite APIs. Resulting APIs will be filtered for
+     * PROVIDER name <code>user</code>.
+     *
+     * @param roles     If provided, results will be filtered for only the APIs with these roles.
+     *                  If not APIs with any role will be retrieved.
+     * @param user      Name of the PROVIDER who owns requested set of Composite APIs
+     * @param offset    Page number
+     *                  <p>(ex: <code>offset</code> 2 with <code>limit</code> 10 will retrieve 11-20th results)</p>
+     * @param limit     Number of results to be included in the resulting list
+     * @return
+     * @throws APIMgtDAOException if database error occurred while querying data
+     */
+    @CheckForNull
+    List<CompositeAPI> getCompositeAPIs(Set<String> roles, String user, int offset, int limit)
+            throws APIMgtDAOException;
+
+    /**
      * Retrieves the last updated time of an API
      *
      * @param apiId UUID of API

@@ -233,9 +233,6 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    /**
-     * @see ApiDAO#getAPIs()
-     */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     public List<API> getAPIs() throws APIMgtDAOException {
@@ -247,6 +244,27 @@ public class ApiDAOImpl implements ApiDAO {
             statement.setString(1, ApiType.STANDARD.toString());
 
             return constructAPISummaryList(connection, statement);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    @Override
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
+    public List<CompositeAPI> getCompositeAPIs(Set<String> roles, String user, int offset, int limit)
+            throws APIMgtDAOException {
+
+        // TODO: 6/5/17 Implement pagination support when implementing pagination support for
+        // other list operations.
+        final String query = COMPOSITE_API_SUMMARY_SELECT + " WHERE API_TYPE_ID = " +
+                "(SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?) AND PROVIDER = ?";
+
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, ApiType.COMPOSITE.toString());
+            statement.setString(2, user);
+
+            return getCompositeAPISummaryList(connection, statement);
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
         }
@@ -906,8 +924,7 @@ public class ApiDAOImpl implements ApiDAO {
                                                                                         throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
             ApiResourceDAO.updateBinaryResourceForCategory(connection, apiID, ResourceCategory.SWAGGER,
-                    new ByteArrayInputStream(apiDefinition.getBytes(StandardCharsets.UTF_8)), updatedBy,
-                    ApiType.COMPOSITE);
+                    new ByteArrayInputStream(apiDefinition.getBytes(StandardCharsets.UTF_8)), updatedBy);
         } catch (SQLException e) {
             throw new APIMgtDAOException("Data access error when updating API definition", e);
         }
@@ -961,7 +978,7 @@ public class ApiDAOImpl implements ApiDAO {
                                                                                     throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
             ApiResourceDAO.updateBinaryResourceForCategory(connection, apiID, ResourceCategory.GATEWAY_CONFIG,
-                    gatewayConfig, updatedBy, ApiType.COMPOSITE);
+                    gatewayConfig, updatedBy);
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
         }
@@ -1287,7 +1304,7 @@ public class ApiDAOImpl implements ApiDAO {
                                 ResourceCategory.IMAGE, dataType, image, updatedBy);
                     } else {
                         ApiResourceDAO.updateBinaryResourceForCategory(connection, apiID,
-                                ResourceCategory.IMAGE, image, updatedBy, ApiType.STANDARD);
+                                ResourceCategory.IMAGE, image, updatedBy);
                     }
                     connection.commit();
                 } catch (SQLException e) {
@@ -1805,7 +1822,7 @@ public class ApiDAOImpl implements ApiDAO {
     private void updateAPIDefinition(Connection connection, String apiID, String apiDefinition, String updatedBy)
             throws SQLException {
         ApiResourceDAO.updateBinaryResourceForCategory(connection, apiID, ResourceCategory.SWAGGER,
-                new ByteArrayInputStream(apiDefinition.getBytes(StandardCharsets.UTF_8)), updatedBy, ApiType.STANDARD);
+                new ByteArrayInputStream(apiDefinition.getBytes(StandardCharsets.UTF_8)), updatedBy);
     }
 
     private String getAPIDefinition(Connection connection, String apiID) throws SQLException, IOException {
@@ -1839,8 +1856,7 @@ public class ApiDAOImpl implements ApiDAO {
             throws SQLException {
         if (gatewayConfig != null && !gatewayConfig.isEmpty()) {
             ApiResourceDAO.updateBinaryResourceForCategory(connection, apiID, ResourceCategory.GATEWAY_CONFIG,
-                    new ByteArrayInputStream(gatewayConfig.getBytes(StandardCharsets.UTF_8)), updatedBy,
-                    ApiType.STANDARD);
+                    new ByteArrayInputStream(gatewayConfig.getBytes(StandardCharsets.UTF_8)), updatedBy);
         }
     }
 
