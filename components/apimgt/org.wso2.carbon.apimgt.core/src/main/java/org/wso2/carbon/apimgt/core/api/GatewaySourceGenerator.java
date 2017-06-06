@@ -76,6 +76,7 @@ public interface GatewaySourceGenerator {
      * Generate initial service implementation for a composite API
      *
      * @param apiResources List of api resources.
+     * @param compositeApiEndpoints List of api endpoints of subscribed APIs.
      * @return service impl as Text
      * @throws APITemplateException throws if an error occurred
      */

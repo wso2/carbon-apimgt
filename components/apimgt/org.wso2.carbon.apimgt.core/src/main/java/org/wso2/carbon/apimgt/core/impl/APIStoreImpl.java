@@ -808,7 +808,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 endpointDTOs.add(endpointDTO);
             }
         } catch (APIMgtDAOException e) {
-            String errorMsg = "Error while getting subscription of application" + appId;
+            String errorMsg = "Error while getting subscriptions of the application " + appId;
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
