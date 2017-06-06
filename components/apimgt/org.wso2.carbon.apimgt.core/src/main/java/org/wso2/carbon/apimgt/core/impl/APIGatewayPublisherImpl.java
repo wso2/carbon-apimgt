@@ -375,6 +375,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
             subscriptionValidationData.setApiProvider(subscribedAPI.getProvider());
             subscriptionValidationData.setApplicationId(subscribedApp.getId());
             subscriptionValidationData.setSubscriptionPolicy(subscription.getSubscriptionPolicyId());
+            subscriptionValidationData.setSubscriptionStatus(subscription.getStatus().name());
             subscriptionDataList.add(subscriptionValidationData);
         }
         return subscriptionDataList;
