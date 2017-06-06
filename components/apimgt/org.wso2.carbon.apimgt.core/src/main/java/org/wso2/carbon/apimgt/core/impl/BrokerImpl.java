@@ -20,8 +20,6 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.andes.client.AMQConnectionFactory;
-import org.wso2.andes.url.URLSyntaxException;
 import org.wso2.carbon.apimgt.core.api.Broker;
 import org.wso2.carbon.apimgt.core.configuration.models.BrokerConfigurations;
 import org.wso2.carbon.apimgt.core.configuration.models.JMSConnectionConfiguration;
@@ -30,9 +28,12 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.util.BrokerUtil;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import javax.jms.JMSException;
 import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
+
 
 /**
  * The implementation for APIM broker
@@ -41,17 +42,23 @@ public class BrokerImpl implements Broker {
 
     private BrokerConfigurations config;
     private TopicConnectionFactory connFactory = null;
-    private static final String CF_NAME_PREFIX = "connectionfactory.";
     private static final Logger log = LoggerFactory.getLogger(BrokerUtil.class);
 
     public BrokerImpl() {
         config = ServiceReferenceHolder.getInstance().getAPIMConfiguration().getBrokerConfiguration();
         JMSConnectionConfiguration jmsConnectionConfiguration = config.getJmsConnectionConfiguration();
-
+        Class<?> clientClass = null;
+        Constructor<?> construct = null;
+        Object clientInst = null;
         try {
-            connFactory = new AMQConnectionFactory(jmsConnectionConfiguration.getTopicConnectionFactoryURL());
-        } catch (URLSyntaxException e) {
-            log.error("Error while initilizing broker connection factory", e);
+            clientClass = Class.forName("org.apache.activemq.ActiveMQConnectionFactory");
+            construct = clientClass.getConstructor(String.class);
+            clientInst = construct.newInstance(jmsConnectionConfiguration.getTopicConnectionFactoryURL());
+            connFactory = (TopicConnectionFactory) clientInst;
+        } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException
+                | InvocationTargetException e) {
+            String error = "Could not create a JMS client connection from the class";
+            log.error(error);
         }
     }
 

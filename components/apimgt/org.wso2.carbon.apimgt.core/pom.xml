@@ -910,7 +910,6 @@
             org.apache.commons.*;
             org.apache.velocity.*;
             org.apache.velocity.app.*;
-            org.wso2.andes.*;
             javax.jms.*;
             javax.ws.rs.*;
             org.wso2.securevault.*;
@@ -938,7 +937,7 @@
             org.ballerinalang.composer.service.workspace.swagger.generators.*,
             com.fasterxml.jackson.core.*,
             com.fasterxml.jackson.databind.*,
-
+            org.apache.activemq.*;resolution:=optional,
         </import.package>
         <export.package>
             !org.wso2.carbon.apimgt.core.internal,
