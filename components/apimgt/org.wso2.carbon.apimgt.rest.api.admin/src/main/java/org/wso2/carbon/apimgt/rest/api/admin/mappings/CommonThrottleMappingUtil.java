@@ -277,7 +277,7 @@ public class CommonThrottleMappingUtil {
      */
 
     public static Limit fromDTOToLimit(ThrottleLimitDTO dto) throws UnsupportedThrottleLimitTypeException {
-        // TODO: extract constants
+
         if (PolicyConstants.BANDWIDTH_LIMIT_TYPE.equals(dto.getType())) {
             // check if all required params are available
             if (dto.getBandwidthLimit() == null || dto.getBandwidthLimit().getDataAmount() == null || dto

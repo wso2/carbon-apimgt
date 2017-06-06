@@ -79,7 +79,7 @@ paths:
   '/policies/throttling/application':
 
 #-----------------------------------------------------
-# Retrieve all Application level related policies
+# Retrieve all Application level throttle policies
 #-----------------------------------------------------
     get:
       x-scope: apim:tier_view
@@ -126,7 +126,7 @@ paths:
             $ref: '#/definitions/Error'
 
 #-----------------------------------------------------
-# Add a Application level Bandwidth related throttle policy
+# Add a Application level throttle policy
 #-----------------------------------------------------
     post:
       x-scope: apim:tier_manage
@@ -183,7 +183,7 @@ paths:
   '/policies/throttling/application/{policyId}':
 
 #-----------------------------------------------------
-# Retrieve a certain Application level Bandwidth related Policy
+# Retrieve a certain Application level Policy
 #-----------------------------------------------------
     get:
       x-scope: apim:tier_view
@@ -236,7 +236,7 @@ paths:
             $ref: '#/definitions/Error'
 
 #-----------------------------------------------------
-# Delete an Application level Bandwidth throttle policy
+# Delete an Application level throttle policy
 #-----------------------------------------------------
     delete:
       x-scope: apim:tier_manage
@@ -268,7 +268,7 @@ paths:
             $ref: '#/definitions/Error'
 
 #-----------------------------------------------------
-# Update an Application level Bandwidth throttle policy
+# Update an Application level throttle policy
 #-----------------------------------------------------
     put:
       x-scope: apim:tier_manage

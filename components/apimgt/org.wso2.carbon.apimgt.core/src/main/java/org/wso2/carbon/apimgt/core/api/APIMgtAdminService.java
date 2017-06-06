@@ -71,9 +71,10 @@ public interface APIMgtAdminService {
      *
      * @param policyLevel Tier level of the policy.
      * @param policy      Policy object to be added.
+     * @return created policy uuid
      * @throws APIManagementException If failed to add the policy.
      */
-    void addPolicy(String policyLevel, Policy policy) throws APIManagementException;
+    String addPolicy(String policyLevel, Policy policy) throws APIManagementException;
 
     /**
      * Updates existing @{@link Policy} to the system

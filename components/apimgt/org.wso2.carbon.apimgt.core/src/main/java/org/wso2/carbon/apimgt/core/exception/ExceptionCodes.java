@@ -138,7 +138,8 @@ public enum ExceptionCodes implements ErrorHandler {
     APPLICATION_TOKEN_GENERATION_FAILED(900957, "Keymanagement Error", 500, " Error while generating the application" +
             "access token."),
     ACCESS_TOKEN_REVOKE_FAILED(900958, "Keymanagement Error", 500, " Error while revoking the access token."),
-    UNSUPPORTED_THROTTLE_LIMIT_TYPE(900960, "Throttle Policy Error", 400, "Throttle Limit type is not supported");
+    UNSUPPORTED_THROTTLE_LIMIT_TYPE(900960, "Throttle Policy Error", 400, "Throttle Limit type is not supported"),
+    POLICY_NOT_FOUND(900961, "Policy Not found", 404, "Failed to retrieve Policy Definition");
 
     private final long errorCode;
     private final String errorMessage;

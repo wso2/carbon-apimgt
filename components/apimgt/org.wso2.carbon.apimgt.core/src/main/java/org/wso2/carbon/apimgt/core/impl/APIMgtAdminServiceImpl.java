@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Implementation of APIMgtAdminService
@@ -84,9 +85,16 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
      * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#addPolicy(String, Policy)
      */
     @Override
-    public void addPolicy(String policyLevel, Policy policy) throws APIManagementException {
+    public String addPolicy(String policyLevel, Policy policy) throws APIManagementException {
         try {
+            String policyUuid = policy.getUuid();
+            if (policyUuid == null) {
+                policyUuid = UUID.randomUUID().toString();
+                policy.setUuid(policyUuid);
+            }
             policyDAO.addPolicy(policyLevel, policy);
+            return policyUuid;
+
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't add policy for uuid: " + policy.getUuid() + ", level: " + policyLevel;
             log.error(errorMessage, e);
@@ -171,13 +179,21 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
 
     @Override
     public SubscriptionPolicy getSubscriptionPolicyByUuid(String policyId) throws APIManagementException {
+
+        SubscriptionPolicy subscriptionPolicy = null;
         try {
-            return policyDAO.getSubscriptionPolicyById(policyId);
+            subscriptionPolicy = policyDAO.getSubscriptionPolicyById(policyId);
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't retrieve application policy for uuid: " + policyId;
             log.error(errorMessage, e);
             throw new APIConfigRetrievalException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
+
+        if (subscriptionPolicy == null) {
+            throw new APIManagementException("Unable to find the Subscription policy by uuid: " + policyId,
+                    ExceptionCodes.POLICY_NOT_FOUND);
+        }
+        return subscriptionPolicy;
     }
 
     /**
