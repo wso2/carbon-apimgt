@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.exceptions.UnsupportedThrottleLimit
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,16 +81,17 @@ public class SubscriptionThrottlePolicyMappingUtil {
             policyDTO.setRateLimitTimeUnit(subscriptionPolicy.getRateLimitTimeUnit());
             policyDTO.setStopOnQuotaReach(subscriptionPolicy.isStopOnQuotaReach());
 
-            String customAttributes = subscriptionPolicy.getCustomAttributes();
-            if (customAttributes != null) {
+            byte[] customAttributes = subscriptionPolicy.getCustomAttributes();
+            if (customAttributes != null && customAttributes.length > 0) {
                 List<CustomAttributeDTO> customAttributeDTOs = new ArrayList<>();
                 JSONParser parser = new JSONParser();
-                JSONArray attributeArray = (JSONArray) parser.parse(subscriptionPolicy.getCustomAttributes());
+                JSONArray attributeArray = (JSONArray) parser.parse(new String(customAttributes,
+                        StandardCharsets.UTF_8));
                 for (Object attributeObj : attributeArray) {
                     JSONObject attribute = (JSONObject) attributeObj;
-                    CustomAttributeDTO customAttributeDTO = CommonThrottleMappingUtil.getCustomAttribute(
-                            attribute.get(RestApiConstants.THROTTLING_CUSTOM_ATTRIBUTE_NAME).toString(),
-                            attribute.get(RestApiConstants.THROTTLING_CUSTOM_ATTRIBUTE_VALUE).toString());
+                    CustomAttributeDTO customAttributeDTO = CommonThrottleMappingUtil
+                            .getCustomAttribute(attribute.get(RestApiConstants.THROTTLING_CUSTOM_ATTRIBUTE_NAME).toString(),
+                                    attribute.get(RestApiConstants.THROTTLING_CUSTOM_ATTRIBUTE_VALUE).toString());
                     customAttributeDTOs.add(customAttributeDTO);
                 }
                 policyDTO.setCustomAttributes(customAttributeDTOs);
@@ -129,8 +131,7 @@ public class SubscriptionThrottlePolicyMappingUtil {
                 attrJsonObj.put(RestApiConstants.THROTTLING_CUSTOM_ATTRIBUTE_VALUE, customAttributeDTO.getValue());
                 customAttrJsonArray.add(attrJsonObj);
             }
-            subscriptionPolicy.setCustomAttributes(
-                    String.valueOf(customAttrJsonArray.toJSONString().getBytes(Charset.forName("UTF-8"))));
+            subscriptionPolicy.setCustomAttributes(customAttrJsonArray.toJSONString().getBytes(StandardCharsets.UTF_8));
         }
         if (dto.getDefaultLimit() != null) {
             subscriptionPolicy
