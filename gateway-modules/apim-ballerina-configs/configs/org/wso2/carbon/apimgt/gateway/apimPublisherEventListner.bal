@@ -74,9 +74,15 @@ service jmsService {
                     system:println("Invalid json received");
                 }
 
-            } else if(strings:equalsIgnoreCase(eventType, Constants:API_PUBLISH)){
-                //TODO: Implement logic
-
+            } else if(strings:equalsIgnoreCase(eventType, Constants:API_STATE_CHANGE)){
+                json apiSummary = jsons:getJson(event, "apiSummary");
+                if(apiSummary != null){
+                    //Update API cache
+                    dto:APIDTO api = gatewayUtil:fromJSONToAPIDTO(apiSummary);
+                    holder:putIntoAPICache(api);
+                } else {
+                    system:println("Invalid json received");
+                }
             } else {
                 system:println("Invalid event received");
             }

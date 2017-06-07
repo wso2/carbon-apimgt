@@ -5,6 +5,7 @@ import ballerina.net.jms;
 import ballerina.net.http;
 import ballerina.lang.system;
 import ballerina.lang.errors;
+import ballerina.lang.strings;
 import ballerina.lang.jsons;
 import org.wso2.carbon.apimgt.gateway.constants as Constants;
 import org.wso2.carbon.apimgt.gateway.holders as throttle;
@@ -23,9 +24,24 @@ service ThrottleJmsService {
     @http:GET {}
     resource onMessage (message m) {
         try {
+            
             system:println("OnMessage fired ............");
 
-            json event = messages:getJsonPayload(m);
+            json event = {};
+            
+            string receivedMessage = messages:getStringPayload(m);
+            
+            // Should be removed after getting a proper json message from TM
+            if(strings:contains(receivedMessage,"siddhiEventId")){
+                string[] tempArray = strings:split(receivedMessage, "\n");
+                receivedMessage = tempArray[1]; // removing siddhi ID
+                string[] attributes = strings:split(receivedMessage, ",");
+                event.throttleKey = attributes[0];
+                event.isThrottled = attributes[1];
+                event.expiryTimeStamp = attributes[2];
+            }else{
+                event = messages:getJsonPayload(m);
+            }
 
             system:println("Throttling Message received : " + (string)event);
             
@@ -76,6 +92,7 @@ function handleThrottleUpdateMessage(json event){
 
 
 function handleBlockingMessage(json event) {
+
     system:println("Received Key -  blockingCondition : " + jsons:getString(event, Constants:BLOCKING_CONDITION_KEY) + " , " +
               "conditionValue :" + util:getJsonString(event, Constants:BLOCKING_CONDITION_VALUE));
     

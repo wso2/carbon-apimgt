@@ -3,13 +3,16 @@ package org.wso2.carbon.apimgt.gateway;
 import ballerina.net.http;
 import ballerina.lang.messages;
 import ballerina.lang.system;
+import ballerina.lang.jsons;
+import ballerina.lang.errors;
 
 import org.wso2.carbon.apimgt.gateway.holders as throttle;
 import org.wso2.carbon.apimgt.gateway.utils as util;
 import org.wso2.carbon.apimgt.gateway.constants as constants;
+import org.wso2.carbon.apimgt.gateway.event.publisher;
 
 
-function doThrottling( message msg) (boolean){
+function isrequestThrottled( message msg) (boolean){
     // will return true if the request is throttled
 
     //Throttle Keys
@@ -120,13 +123,20 @@ function doThrottling( message msg) (boolean){
 
     // Subscription Level throttling
     isSubscriptionLevelThrottled = throttle:isThrottled(subscriptionLevelThrottleKey);
+    string stopOnQuotaReach = util:getStringProperty(msg, constants:STOP_ON_QUOTA_REACH);
+
 
     if(isSubscriptionLevelThrottled){
-        http:setStatusCode( msg, constants:HTTP_TOO_MANY_REQUESTS );
-        messages:setProperty(msg, constants:THROTTLED_ERROR_CODE, constants:SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE);
-        messages:setProperty(msg, constants:THROTTLED_OUT_REASON, constants:THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED);
-        setThrottledResponse(msg);
-        return true;
+
+        if(stopOnQuotaReach == "true"){
+            http:setStatusCode( msg, constants:HTTP_TOO_MANY_REQUESTS );
+            messages:setProperty(msg, constants:THROTTLED_ERROR_CODE, constants:SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE);
+            messages:setProperty(msg, constants:THROTTLED_OUT_REASON, constants:THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED);
+            setThrottledResponse(msg);
+            return true;
+        }
+        
+        system:println("Request throttled at subscription level for throttle key" + subscriptionLevelThrottleKey + ". But subscription policy " + subscriptionLevelPolicy + " allows to continue to serve requests");
     }
 
     //TODO Spike Arrest
@@ -143,7 +153,13 @@ function doThrottling( message msg) (boolean){
         return true;
     }
 
-    //todo data publisher to CEP
+    // Data publishing to Traffic Manger
+
+    try{
+        publishEvent(msg, authorizedUser, applicationId, apiContext, apiVersion, apiLevelPolicy, applicationLevelPolicy, subscriptionLevelPolicy, ipLevelBlockingKey);
+    }catch(errors:Error e){
+        system:println("Error occured while data publsihing " + e.msg);
+    }
 
     return false;
 }
@@ -158,3 +174,55 @@ function setThrottledResponse(message msg){
 function setInvalidUser(message msg){
     messages:setStringPayload(msg, "API is Throttled Out");
 }
+
+
+function publishEvent(message m, string userId, string applicationId, string apiContext, string apiVersion,string apiTier,string applicationTier, string subscriptionTier, string ip) {
+
+    string requestUrl = apiContext;
+    json event = {};
+
+    jsons:add (event, "$", "streamName", "PreRequestStream");
+    jsons:add (event, "$", "executionPlanName", "requestPreProcessorExecutionPlan");
+    int currentTime = system:currentTimeMillis();
+    string time = (string)currentTime;
+    jsons:add (event, "$", "timestamp", time);
+
+    json dataArr = [];
+
+    string messageID = "messageID";
+    string appKey = applicationId+ ":" + userId;
+    string subscriptionKey = applicationId + ":" + requestUrl + ":" + apiVersion;
+    string apiKey = requestUrl + ":" + apiVersion;
+
+    string resourceKey = "sdsdskdskd";
+    string resourceTier = "Unlimited";
+    string appTenant = "carbon.super";
+    string apiTenant = "carbon.super";
+    string apiName = "test";
+    string properties = "dsdsdsdsdsdsd";
+
+    jsons:add (dataArr, "$", messageID);
+    jsons:add (dataArr, "$", appKey);
+    jsons:add (dataArr, "$", applicationTier);
+    jsons:add (dataArr, "$", apiKey);
+    jsons:add (dataArr, "$", apiTier);
+    jsons:add (dataArr, "$", subscriptionKey);
+    jsons:add (dataArr, "$", subscriptionTier);
+    jsons:add (dataArr, "$", resourceKey);
+    jsons:add (dataArr, "$", resourceTier);
+    jsons:add (dataArr, "$", userId);
+    jsons:add (dataArr, "$", apiContext);
+    jsons:add (dataArr, "$", apiVersion);
+    jsons:add (dataArr, "$", appTenant);
+    jsons:add (dataArr, "$", apiTenant);
+    jsons:add (dataArr, "$", applicationId);
+    jsons:add (dataArr, "$", apiName);
+    jsons:add (dataArr, "$", properties);
+
+    jsons:add (event, "$", "data", dataArr);
+
+    publisher:publish(event);
+
+    system:println("********** Throttle Event Published *******");
+}
+
