@@ -42,11 +42,6 @@ function overviewTabHandler(event) {
             var callbacks = {
                 onSuccess: function (renderedHTML) {
                     $('#overview-content').html(renderedHTML);
-                    var userPermissions = api_data.userPermissionsForApi;
-                    if(!userPermissions.includes("UPDATE")) {
-                        $('#statusTab').addClass('not-active');
-                        $('#docsTab').addClass('not-active');
-                    }
                 }, onFailure: function (data) {
                 }
             };
@@ -146,6 +141,14 @@ function lifecycleTabHandler(event) {
                             allSelectedText: false
                         }
                     );
+                }
+
+                //Disable edit buttons based on logged in user role permissions
+                var userPermissions = api_data.userPermissionsForApi;
+                if(!userPermissions.includes("UPDATE")) {
+                    $('#update-tiers-button').addClass('not-active');
+                    $('#update-labels-button').addClass('not-active');
+                    $("input.lc-state-btn").addClass('not-active');
                 }
 
                 // Handle svg object
@@ -792,7 +795,7 @@ function resourcesTabHandler(event) {
     api_client.get(api_id).then(
         function (response) {
             api_context = response.obj.context;
-
+            var api_data = JSON.parse(response.data);
             api_client.getSwagger(api_id).then(
                 function (response) {
                     var api = response.obj;
@@ -813,6 +816,12 @@ function resourcesTabHandler(event) {
                                     designer.initControllersCall = "";
                                     designer.load_api_document(api_doc_local);
                                 });
+                            //Disable edit buttons based on logged in user role permissions
+                            var userPermissions = api_data.userPermissionsForApi;
+                            if(!userPermissions.includes("UPDATE")) {
+                                $('#add_resource').addClass('not-active');
+                                $('#save_resources').addClass('not-active');
+                            }
                         }, onFailure: function (data) {
                         }
                     };
@@ -827,18 +836,28 @@ function resourcesTabHandler(event) {
 function documentTabHandler(event) {
     var api_client = event.data.api_client;
     var api_id = event.data.api_id;
-    var callbacks = {
-            onSuccess: function (data) {
-            api_client.getDocuments(api_id,getDocsCallback);
-            if(!hasValidScopes("/apis/{apiId}/documents", "post")) {
-              $('#add-new-doc').addClass('not-active');
+    api_client.get(api_id).then(
+            function (response) {
+               var api_data = JSON.parse(response.data);
+               var callbacks = {
+                   onSuccess: function (data) {
+                       api_client.getDocuments(api_id,getDocsCallback);
+                       if(!hasValidScopes("/apis/{apiId}/documents", "post")) {
+                         $('#add-new-doc').addClass('not-active');
+                       }
+                       //Disable edit buttons based on logged in user role permissions
+                       var userPermissions = api_data.userPermissionsForApi;
+                       if(!userPermissions.includes("UPDATE")) {
+                           $('#add-new-doc').addClass('not-active');
+                       }
+                   }, onFailure: function (data) {
+                }
+               };
+                var mode = "OVERWRITE";
+                var data = {};
+                UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-documents", data, "api-tab-doc-content", mode, callbacks);
             }
-            }, onFailure: function (data) {
-           }
-          };
-     var mode = "OVERWRITE";
-     var data = {};
-     UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-documents", data, "api-tab-doc-content", mode, callbacks);
+        ).catch(apiGetErrorHandler);
     }
     
 
@@ -940,11 +959,9 @@ function disableTabsOnPermissions(client, apiId) {
             var api_data = JSON.parse(response.data);
             var userPermissions = api_data.userPermissionsForApi;
             if(!userPermissions.includes("UPDATE")) {
-                $('#tab-2 > a').addClass('not-active');
-                $('#tab-3 > a').addClass('not-active');
-                $('#tab-4 > a').addClass('not-active');
-                $('#tab-5 > a').addClass('not-active');
                 $('#tab-6 > a').addClass('not-active');
+                $('#tab-7 > a').addClass('not-active');
+                $('#tab-8 > a').addClass('not-active');
                 $('#tab-9 > a').addClass('not-active');
             }
         }
