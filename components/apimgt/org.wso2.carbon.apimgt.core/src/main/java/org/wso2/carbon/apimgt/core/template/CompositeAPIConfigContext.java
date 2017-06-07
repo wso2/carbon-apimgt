@@ -44,6 +44,9 @@ public class CompositeAPIConfigContext extends ConfigContext {
         this.compositeApiEndpoints = compositeApiEndpoints;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void validate() throws APITemplateException {
     }
