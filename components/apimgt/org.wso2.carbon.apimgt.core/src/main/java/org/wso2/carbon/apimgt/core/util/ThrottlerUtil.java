@@ -19,11 +19,9 @@ package org.wso2.carbon.apimgt.core.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.core.api.ThrottlePolicyDeploymentManager;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
@@ -45,8 +43,6 @@ public class ThrottlerUtil {
      * @throws APIManagementException throws if any exception occured
      */
     public static void addDefaultAdvancedThrottlePolicies() throws APIManagementException {
-        ThrottlePolicyDeploymentManager policyDeploymentManager = APIManagerFactory.getInstance()
-                .getThrottlePolicyDeploymentManager();
 
         long[] requestCount = new long[] { 50, 20, 10, Integer.MAX_VALUE };
         //Adding application level throttle policies
@@ -75,8 +71,6 @@ public class ThrottlerUtil {
                 defaultQuotaPolicy.setLimit(requestCountLimit);
                 applicationPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
                 policyDAO.addPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, applicationPolicy);
-                policyDeploymentManager
-                        .deployPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, applicationPolicy);
             }
         }
 
@@ -107,8 +101,6 @@ public class ThrottlerUtil {
                 subscriptionPolicy.setStopOnQuotaReach(true);
                 subscriptionPolicy.setBillingPlan(ThrottleConstants.BILLING_PLAN_FREE);
                 policyDAO.addPolicy(APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL, subscriptionPolicy);
-                policyDeploymentManager
-                        .deployPolicy(APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL, subscriptionPolicy);
             }
         }
 
@@ -138,13 +130,6 @@ public class ThrottlerUtil {
                 defaultQuotaPolicy.setLimit(requestCountLimit);
                 apiPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
                 policyDAO.addPolicy(APIMgtConstants.ThrottlePolicyConstants.API_LEVEL, apiPolicy);
-                boolean status = policyDeploymentManager
-                        .deployPolicy(APIMgtConstants.ThrottlePolicyConstants.API_LEVEL, apiPolicy);
-                if (status) {
-                    log.debug("Successfully deployed policy " + apiPolicy.getPolicyName());
-                } else {
-                    log.warn("Default policy '" + apiPolicy.getPolicyName() + "' deployment failed");
-                }
             }
         }
     }
