@@ -78,7 +78,7 @@ import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.template.APIConfigContext;
-import org.wso2.carbon.apimgt.core.template.APITemplateException;
+import org.wso2.carbon.apimgt.core.template.dto.CompositeAPIEndpointDTO;
 import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ApplicationStatus;
@@ -785,9 +785,33 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
 
 
-    private void setGatewayDefinitionSource(CompositeAPI.Builder apiBuilder) throws APITemplateException {
+    private void setGatewayDefinitionSource(CompositeAPI.Builder apiBuilder) throws APIManagementException {
         List<UriTemplate> list = new ArrayList<>(apiBuilder.getUriTemplates().values());
         List<TemplateBuilderDTO> resourceList = new ArrayList<>();
+
+        String appId = null;
+        List<CompositeAPIEndpointDTO> endpointDTOs = new ArrayList<CompositeAPIEndpointDTO>();
+        try {
+            appId = apiBuilder.getApplicationId();
+            List<Subscription> subscriptions = getApiSubscriptionDAO().getAPISubscriptionsByApplication(
+                                                                       apiBuilder.getApplicationId(), ApiType.STANDARD);
+            for (Subscription subscription : subscriptions) {
+                CompositeAPIEndpointDTO endpointDTO = new CompositeAPIEndpointDTO();
+                API api = subscription.getApi();
+                endpointDTO.setEndpointName(api.getName());
+                // TODO: currently only HTTPS endpoint considered. Websocket APIs and http transport should considered
+                endpointDTO.setTransportType(APIMgtConstants.HTTPS);
+                // TODO: replace host with gateway domain host
+                String endpointUrl = APIMgtConstants.HTTPS + "://" + config.getHostname() + "/" + api.getContext()
+                                     + "/" + api.getVersion();
+                endpointDTO.setEndpointUrl(endpointUrl);
+                endpointDTOs.add(endpointDTO);
+            }
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error while getting subscriptions of the application " + appId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
 
         for (UriTemplate uriTemplate : list) {
             TemplateBuilderDTO dto = new TemplateBuilderDTO();
@@ -802,8 +826,10 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         APIConfigContext apiConfigContext = new APIConfigContext(apiBuilder.getName(), apiBuilder.getContext(),
                 apiBuilder.getVersion(), apiBuilder.getCreatedTime(), config.getGatewayPackageName());
 
+
         gatewaySourceGenerator.setApiConfigContext(apiConfigContext);
-        String gatewayConfig = gatewaySourceGenerator.getConfigStringFromTemplate(resourceList);
+        String gatewayConfig = gatewaySourceGenerator.getCompositeAPIConfigStringFromTemplate(resourceList,
+                                                                                              endpointDTOs);
         if (log.isDebugEnabled()) {
             log.debug("API " + apiBuilder.getName() + "gateway config: " + gatewayConfig);
         }
