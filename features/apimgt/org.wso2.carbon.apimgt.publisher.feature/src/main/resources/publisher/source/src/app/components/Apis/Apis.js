@@ -1,56 +1,38 @@
-import React from 'react';
-import ApiThumb from './ApiThumb'
-import './Apis.css'
-import API from '../../data/api.js'
+/*
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
-class Apis extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {listType:'grid',apis: null};
-  }
-  componentDidMount() {
-      let api = new API();
-      let promised_apis = api.getAll();
-      promised_apis.then((response) => {
-          this.setState({apis: response.obj})
+import React from 'react'
+import {Route, Switch, BrowserRouter as Router} from 'react-router-dom'
 
-      });
-  }
-  setListType = (value) => {
-    this.setState({listType:value});
-  }
-  isActive = (value) => {
-    return 'btn '+((value===this.state.listType) ?'active':'default');
-  }
+import Listing from './Listing/Listing'
+import Details from './Details/index'
+import {PageNotFound} from '../Base/Errors/index'
 
-  render() {
+const Apis = (props) => {
     return (
-      <div className="container-fluid">
-        <div className="well well-sm">
-            <strong>Display</strong>
-            <div className="btn-group">
-                <a href="#" id="list" className={this.isActive('list')} onClick={() => this.setListType('list')} >
-                  <span className="glyphicon glyphicon-th-list"></span>List
-                </a>
-                <a href="#" id="grid" className={this.isActive('grid')} onClick={() => this.setListType('grid')} >
-                  <span className="glyphicon glyphicon-th"></span>Grid
-                </a>
-            </div>
+        <div>
+            <Switch>
+                <Route exact path={"/apis"} component={Listing}/>
+                <Route path={"/apis/:api_uuid/"} component={Details}/>
+                <Route component={PageNotFound}/>
+            </Switch>
         </div>
-
-          <div id="products" className="row list-group">
-          {this.state.apis ?
-             this.state.apis.list.map((api,i) => {
-                return <ApiThumb listType={this.state.listType} api={api} />
-            }) : "loading apis"
-          }
-          </div>
-
-    </div>
-
-
     );
-  }
 }
 
 export default Apis;
