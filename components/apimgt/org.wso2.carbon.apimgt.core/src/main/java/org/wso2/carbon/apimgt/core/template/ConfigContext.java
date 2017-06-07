@@ -30,6 +30,11 @@ public abstract class ConfigContext {
 
     public abstract void validate() throws APITemplateException;
 
+    /**
+     * Get the velocity context which holds the data to pass into the template
+     *
+     * @return VelocityContext object
+     */
     public abstract VelocityContext getContext();
 
     protected void handleException(String msg) throws Exception {

@@ -48,6 +48,9 @@ public class CompositeAPIConfigContext extends ConfigContext {
     public void validate() throws APITemplateException {
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public VelocityContext getContext() {
         VelocityContext context = configContext.getContext();
