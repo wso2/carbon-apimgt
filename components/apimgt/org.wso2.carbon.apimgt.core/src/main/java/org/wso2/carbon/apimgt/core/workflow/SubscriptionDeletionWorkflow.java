@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 
@@ -77,16 +76,15 @@ public class SubscriptionDeletionWorkflow extends Workflow {
                 log.debug("Subscription deletion workflow complete: Approved");
             }
             apiSubscriptionDAO.deleteAPISubscription(getWorkflowReference());
-            try {
-                apiGateway.deleteAPISubscription(subscription);
-            } catch (GatewayException e) {
-                log.error("Error occurred while removing subscription from gateway", e);
-            }
 
         } else if (WorkflowStatus.REJECTED == response.getWorkflowStatus()) {
             if (log.isDebugEnabled()) {
                 log.debug("Subscription deletion workflow complete: Rejected");
             }
+        }
+        if (WorkflowStatus.APPROVED == response.getWorkflowStatus() && subscription.getApplication() != null &&
+                !subscription.getApplication().getKeys().isEmpty()) {
+            apiGateway.deleteAPISubscription(subscription);
         }
         updateWorkflowEntries(this);
         return response;
