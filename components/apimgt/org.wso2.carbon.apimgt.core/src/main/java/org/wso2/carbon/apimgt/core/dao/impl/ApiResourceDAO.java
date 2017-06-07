@@ -210,12 +210,10 @@ class ApiResourceDAO {
     }
 
     static void updateBinaryResourceForCategory(Connection connection, String apiID, ResourceCategory category,
-                                                InputStream resourceValue, String updatedBy, ApiType apiType)
+                                                InputStream resourceValue, String updatedBy)
                                                                                                 throws SQLException {
-        final String query = "UPDATE AM_API_RESOURCES res SET res.RESOURCE_BINARY_VALUE = ?, res.UPDATED_BY = ?, " +
-                "res.LAST_UPDATED_TIME = ? INNER JOIN AM_API api ON res.API_ID = api.UUID " +
-                "WHERE res.API_ID = ? AND res.RESOURCE_CATEGORY_ID = ? AND " +
-                "api.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)";
+        final String query = "UPDATE AM_API_RESOURCES SET RESOURCE_BINARY_VALUE = ?, UPDATED_BY = ?, "
+                + "LAST_UPDATED_TIME = ? WHERE API_ID = ? AND RESOURCE_CATEGORY_ID = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setBinaryStream(1, resourceValue);
@@ -223,7 +221,6 @@ class ApiResourceDAO {
             statement.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
             statement.setString(4, apiID);
             statement.setInt(5, ResourceCategoryDAO.getResourceCategoryID(connection, category));
-            statement.setString(6, apiType.toString());
 
             statement.execute();
         }

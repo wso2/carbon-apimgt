@@ -348,15 +348,6 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void updateCompositeApiDefinition(String apiID, String swaggerDefinition, String updatedBy)
-            throws APIMgtDAOException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
      * @see ApiDAO#getGatewayConfigOfAPI(String apiID)
      */
     @Override

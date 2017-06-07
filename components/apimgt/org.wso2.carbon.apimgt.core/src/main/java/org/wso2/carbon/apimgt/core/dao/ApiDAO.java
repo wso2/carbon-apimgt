@@ -508,18 +508,6 @@ public interface ApiDAO {
     void updateApiDefinition(String apiID, String swaggerDefinition, String updatedBy)
             throws APIMgtDAOException;
 
-
-    /**
-     * Update swagger definition of a given Composite API
-     *
-     * @param apiID             The UUID of the respective Composite API
-     * @param swaggerDefinition Swagger definition String
-     * @param updatedBy user who performs the update
-     * @throws APIMgtDAOException if error occurs while accessing data layer
-     */
-    void updateCompositeApiDefinition(String apiID, String swaggerDefinition, String updatedBy)
-            throws APIMgtDAOException;
-
     /**
      * Get gateway configuration of a given API
      *

@@ -850,7 +850,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 //publishing config to gateway
                 gateway.addCompositeAPI(api);
 
-                getApiDAO().updateCompositeApiDefinition(api.getId(), updatedSwagger, api.getUpdatedBy());
+                getApiDAO().updateApiDefinition(api.getId(), updatedSwagger, api.getUpdatedBy());
                 getApiDAO().updateCompositeAPIGatewayConfig(api.getId(),
                         new ByteArrayInputStream(updatedGatewayConfig.getBytes(StandardCharsets.UTF_8)),
                         api.getUpdatedBy());
@@ -1114,7 +1114,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
      */
     @Override
     public void updateCompositeApiDefinition(String id, String apiDefinition) throws APIManagementException {
-        getApiDAO().updateCompositeApiDefinition(id, apiDefinition, getUsername());
+        getApiDAO().updateApiDefinition(id, apiDefinition, getUsername());
     }
 
     /**

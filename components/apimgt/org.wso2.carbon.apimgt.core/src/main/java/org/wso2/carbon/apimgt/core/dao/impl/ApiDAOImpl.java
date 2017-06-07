@@ -917,20 +917,6 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void updateCompositeApiDefinition(String apiID, String apiDefinition, String updatedBy)
-                                                                                        throws APIMgtDAOException {
-        try (Connection connection = DAOUtil.getConnection()) {
-            ApiResourceDAO.updateBinaryResourceForCategory(connection, apiID, ResourceCategory.SWAGGER,
-                    new ByteArrayInputStream(apiDefinition.getBytes(StandardCharsets.UTF_8)), updatedBy);
-        } catch (SQLException e) {
-            throw new APIMgtDAOException("Data access error when updating API definition", e);
-        }
-    }
-
-    /**
      * Get gateway configuration of a given API
      *
      * @param apiID The UUID of the respective API
