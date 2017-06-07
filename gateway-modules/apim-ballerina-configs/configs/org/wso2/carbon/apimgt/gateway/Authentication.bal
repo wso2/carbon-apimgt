@@ -40,85 +40,98 @@ function authenticate (message m) (boolean, message) {
     string version = "1.0.0";
     string uriTemplate = "/*";
     string httpVerb = strings:toUpperCase(http:getMethod(m));
-    //check resource exist in cache
-    resourceDto = validateResource(apiContext, version, uriTemplate, httpVerb);
+    //check api status
+    string apiKey = apiContext + ":" + version;
+    dto:APIDTO apiDto = holder:getFromAPICache(apiKey);
 
-    if (resourceDto != null) {
-        if (resourceDto.authType != constants:AUTHENTICATION_TYPE_NONE) {
-            try {
-                //extract key
-                string authToken = messages:getHeader(m, constants:AUTHORIZATION);
-                authToken = strings:replace(authToken, constants:BEARER, "");
-                if (strings:length(authToken) == 0) {
-                    // token incorrect
-                    gatewayUtil:constructAccessTokenNotFoundPayload(response);
-                    http:setStatusCode(response, 401);
-                    return false, response;
-                }
-                //check key exist in cache
-                dto:IntrospectDto introspectDto = holder:getFromTokenCache(authToken);
-                if (introspectDto == null) {
-                    introspectCacheHit = false;
-                    // if not exist
-                    introspectDto = doIntrospect(authToken);
-                }
+    if (apiDto != null) {
+        if (constants:MAINTENANCE == apiDto.lifeCycleStatus) {
+            gatewayUtil:constructAPIIsInMaintenance(response);
+            return false, response;
+        }
 
-                //check token is active
-                if (introspectDto.active) {
-                    // if token had exp
-                    if (introspectDto.exp != - 1) {
-                        //put into cache
-                        holder:putIntoTokenCache(authToken, introspectDto);
-                    }
-                    if (introspectDto.username != "") {
-                        userInfo = holder:getFromUserInfoCache(introspectDto.username);
-                        if ((userInfo == null) && (introspectDto.scope != "") && (strings:contains(introspectDto.scope, "openid"))) {
-                            userInfo = retrieveUserInfo(authToken);
-                            holder:putIntoUserInfoCache(introspectDto.username, userInfo);
-                        }
-                    }
-                    // if token come from cache hit
-                    if (introspectCacheHit) {
+        //check resource exist in cache
+        resourceDto = validateResource(apiContext, version, uriTemplate, httpVerb);
 
-                        if (introspectDto.exp < system:currentTimeMillis() / 1000) {
-                            holder:removeFromTokenCache(authToken);
-                            gatewayUtil:constructAccessTokenExpiredPayload(response);
-                            return false, response;
-                        }
-                    }
-                    // validating subscription
-                    subscriptionDto = validateSubscription(apiContext, version, introspectDto);
-                    if (subscriptionDto != null) {
-                        if (validateScopes(resourceDto, introspectDto)) {
-                            string keyValidationInfo = constructKeyValidationDto(authToken, introspectDto, subscriptionDto, resourceDto);
-                            messages:setProperty(m, "KEY_VALIDATION_INFO", jsons:toString(keyValidationInfo));
-                            state = true;
-                            response = m;
-                        }
-                    } else {
-                        //subscription missing
-                        gatewayUtil:constructSubscriptionNotFound(response);
+        if (resourceDto != null) {
+            if (resourceDto.authType != constants:AUTHENTICATION_TYPE_NONE) {
+                try {
+                    //extract key
+                    string authToken = messages:getHeader(m, constants:AUTHORIZATION);
+                    authToken = strings:replace(authToken, constants:BEARER, "");
+                    if (strings:length(authToken) == 0) {
+                        // token incorrect
+                        gatewayUtil:constructAccessTokenNotFoundPayload(response);
+                        http:setStatusCode(response, 401);
                         return false, response;
                     }
-                } else {
-                    // access token expired
-                    gatewayUtil:constructAccessTokenExpiredPayload(response);
+                    //check key exist in cache
+                    dto:IntrospectDto introspectDto = holder:getFromTokenCache(authToken);
+                    if (introspectDto == null) {
+                        introspectCacheHit = false;
+                        // if not exist
+                        introspectDto = doIntrospect(authToken);
+                    }
+
+                    //check token is active
+                    if (introspectDto.active) {
+                        // if token had exp
+                        if (introspectDto.exp != - 1) {
+                            //put into cache
+                            holder:putIntoTokenCache(authToken, introspectDto);
+                        }
+                        if (introspectDto.username != "") {
+                            userInfo = holder:getFromUserInfoCache(introspectDto.username);
+                            if ((userInfo == null) && (introspectDto.scope != "") && (strings:contains(introspectDto.scope, "openid"))) {
+                                userInfo = retrieveUserInfo(authToken);
+                                holder:putIntoUserInfoCache(introspectDto.username, userInfo);
+                            }
+                        }
+                        // if token come from cache hit
+                        if (introspectCacheHit) {
+
+                            if (introspectDto.exp < system:currentTimeMillis() / 1000) {
+                                holder:removeFromTokenCache(authToken);
+                                gatewayUtil:constructAccessTokenExpiredPayload(response);
+                                return false, response;
+                            }
+                        }
+                        // validating subscription
+                        subscriptionDto = validateSubscription(apiContext, version, introspectDto);
+                        if (subscriptionDto != null) {
+                            if (validateScopes(resourceDto, introspectDto)) {
+                                string keyValidationInfo = constructKeyValidationDto(authToken, introspectDto, subscriptionDto, resourceDto);
+                                messages:setProperty(m, "KEY_VALIDATION_INFO", jsons:toString(keyValidationInfo));
+                                state = true;
+                                response = m;
+                            }
+                        } else {
+                            //subscription missing
+                            gatewayUtil:constructSubscriptionNotFound(response);
+                            return false, response;
+                        }
+                    } else {
+                        // access token expired
+                        gatewayUtil:constructAccessTokenExpiredPayload(response);
+                        return false, response;
+                    }
+                }
+                catch (errors:Error e) {
+                    messages:setHeader(response, "Content-Type", "application/json");
+                    http:setStatusCode(response, 401);
+                    gatewayUtil:constructAccessTokenNotFoundPayload(response);
                     return false, response;
                 }
-            }
-            catch (errors:Error e) {
-                messages:setHeader(response, "Content-Type", "application/json");
-                http:setStatusCode(response, 401);
-                gatewayUtil:constructAccessTokenNotFoundPayload(response);
-                return false, response;
+            } else {
+                // set user as anonymous
+                // set throttling tier as unauthenticated
             }
         } else {
-            // set user as anonymous
-            // set throttling tier as unauthenticated
+            http:setStatusCode(response, 404);
+
         }
     } else {
         http:setStatusCode(response, 404);
-
     }
     return state, response;
 }
