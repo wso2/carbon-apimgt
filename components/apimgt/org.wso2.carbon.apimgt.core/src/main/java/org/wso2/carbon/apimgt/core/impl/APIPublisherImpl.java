@@ -409,34 +409,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     /**
-     * This method is used to check whether the roles specified with permissions for a given API are valid
-     *
-     * @param permissionMap - The map containing the group IDs(roles) and their permissions
-     * @return validity of the roles
-     * @throws APIManagementException If one or more of the roles are invalid
-     */
-    private boolean checkRoleValidityForAPIPermissions(Map<String, Integer> permissionMap)
-            throws APIManagementException {
-        Set<String> allAvailableRoles = APIUtils.getAllAvailableRoles();
-        Set<String> permissionRoleList = getRolesFromPermissionMap(permissionMap);
-        return APIUtils.checkAllowedRoles(allAvailableRoles, permissionRoleList);
-    }
-
-    /**
-     * This method is used to extract the groupIds or roles from the permissionMap
-     *
-     * @param permissionMap - The map containing the group IDs(roles) and their permissions
-     * @return - The list of groupIds specified for permissions
-     */
-    private Set<String> getRolesFromPermissionMap(Map<String, Integer> permissionMap) {
-        Set<String> permissionRoleList = new HashSet<>();
-        for (String groupId : permissionMap.keySet()) {
-            permissionRoleList.add(groupId);
-        }
-        return permissionRoleList;
-    }
-
-    /**
      * @param api API Object
      * @return If api definition is valid or not.
      * @throws APIManagementException If failed to validate the API.
@@ -473,9 +445,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     if (!StringUtils.isEmpty(apiBuilder.getPermission())) {
                         Map<String, Integer> roleNamePermissionList;
                         roleNamePermissionList = getAPIPermissionArray(apiBuilder.getPermission());
-                        if (checkRoleValidityForAPIPermissions(roleNamePermissionList)) {
-                            apiBuilder.permissionMap(roleNamePermissionList);
-                        }
+                        apiBuilder.permissionMap(roleNamePermissionList);
                     }
 
                     String updatedSwagger = apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder);
@@ -1071,7 +1041,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             if (query != null && !query.isEmpty()) {
                 String user = getUsername();
                 Set<String> roles = APIUtils.getAllRolesOfUser(user);
-
                 //TODO get the logged in user and user roles from key manager.
                 apiResults = getApiDAO().searchAPIs(roles, user, query, offset, limit);
             } else {
