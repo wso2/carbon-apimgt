@@ -60,5 +60,6 @@ const int HTTP_FORBIDDEN = 403;
 const int HTTP_TOO_MANY_REQUESTS = 429;
 const int HTTP_UNAUTHORIZED = 401;
 
+const string STOP_ON_QUOTA_REACH = "STOP_ON_QUOTA_REACH";
 //lifecycle status
 const string MAINTENANCE = "Maintenance";
