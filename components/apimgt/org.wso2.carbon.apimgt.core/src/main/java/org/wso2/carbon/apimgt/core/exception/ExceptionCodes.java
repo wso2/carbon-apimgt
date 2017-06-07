@@ -55,6 +55,8 @@ public enum ExceptionCodes implements ErrorHandler {
     GATEWAY_LABELS_CANNOT_BE_NULL(900321, "Gateway labels cannot be null.", 400, "Gateway labels cannot be null"),
     STATUS_CANNOT_BE_NULL(900322, "Status cannot be null.", 400, " Status cannot be null"),
     API_TYPE_INVALID(900323, "API Type specified is invalid.", 400, "API Type specified is invalid"),
+    COMPOSITE_API_ALREADY_EXISTS(900324, "A Composite API already exists.", 409,
+            "A Composite API already exists for this application"),
 
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),

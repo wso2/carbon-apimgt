@@ -4,9 +4,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
@@ -299,6 +302,20 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
         try {
             CompositeAPI.Builder apiBuilder = CompositeAPIMappingUtil.toAPI(body);
             APIStore apiStore = RestApiUtil.getConsumer(username);
+            Application app = apiStore.getApplicationByUuid(apiBuilder.getApplicationId());
+
+            // Prevent creating multiple Composite APIs for the same application.
+            // One application can only have one Composite API in default implementation
+            if (apiStore.getAPISubscriptionsByApplication(app, ApiType.COMPOSITE).size() > 0) {
+                String errorMessage = "A Composite API already exists for application : " + app.getId();
+                APIMgtResourceAlreadyExistsException e = new APIMgtResourceAlreadyExistsException(errorMessage,
+                        ExceptionCodes.COMPOSITE_API_ALREADY_EXISTS);
+                HashMap<String, String> paramList = new HashMap<String, String>();
+                paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, app.getId());
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+            }
+
             apiStore.addCompositeApi(apiBuilder);
             CompositeAPI returnAPI = apiStore.getCompositeAPIbyId(apiBuilder.build().getId());
             return Response.status(Response.Status.CREATED).
