@@ -146,9 +146,9 @@ function lifecycleTabHandler(event) {
                 var svg_object = document.getElementById("lifecycle-svg");
                 var state_array = {
                     'Created': 'Prototyped,Published',
-                    'Published': 'Published,Created,Blocked,Deprecated,Prototyped',
+                    'Published': 'Published,Created,Maintenance,Deprecated,Prototyped',
                     'Prototyped': 'Published,Created,Prototyped',
-                    'Blocked': 'Published,Deprecated',
+                    'Maintenance': 'Published,Deprecated',
                     'Deprecated': 'Retired,',
                     'Retired': ','
                 };

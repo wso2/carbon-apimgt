@@ -40,8 +40,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1281,7 +1284,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             if (fileInputStream != null) {
                 uuid = apiPublisher.addApiFromDefinition(fileInputStream);
             } else if (url != null) {
-                uuid = apiPublisher.addApiFromDefinition(url);
+                URL swaggerUrl = new URL(url);
+                HttpURLConnection urlConn = (HttpURLConnection) swaggerUrl.openConnection();
+                uuid = apiPublisher.addApiFromDefinition(urlConn);
             } else {
                 String msg = "Either 'file' or 'inlineContent' should be specified";
                 log.error(msg);
@@ -1296,6 +1301,12 @@ public class ApisApiServiceImpl extends ApisApiService {
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        } catch (MalformedURLException e) {
+            String errorMessage = "Error while constructing swagger url";
+            ErrorHandler errorHandler = ExceptionCodes.SWAGGER_URL_MALFORMED;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorHandler);
+            log.error(errorMessage, e);
+            return Response.status(errorHandler.getHttpStatusCode()).entity(errorDTO).build();
         } catch (IOException e) {
             String errorMessage = "Error while adding new API";
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);

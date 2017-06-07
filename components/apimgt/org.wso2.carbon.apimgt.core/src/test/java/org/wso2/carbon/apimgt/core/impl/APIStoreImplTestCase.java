@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
+import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
@@ -41,26 +42,27 @@ import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.TagDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
+import org.wso2.carbon.apimgt.core.exception.APICommentException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.core.exception.APIRatingException;
+import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.API.APIBuilder;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.models.ApplicationCreationResponse;
-import org.wso2.carbon.apimgt.core.models.ApplicationCreationWorkflow;
-import org.wso2.carbon.apimgt.core.models.ApplicationUpdateWorkflow;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.Event;
 import org.wso2.carbon.apimgt.core.models.Label;
+import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
-import org.wso2.carbon.apimgt.core.models.SubscriptionWorkflow;
-import org.wso2.carbon.apimgt.core.models.Workflow;
+import org.wso2.carbon.apimgt.core.models.User;
 import org.wso2.carbon.apimgt.core.models.WorkflowConfig;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
@@ -69,8 +71,13 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ApplicationStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.SubscriptionStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
+import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationResponse;
+import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationWorkflow;
+import org.wso2.carbon.apimgt.core.workflow.ApplicationUpdateWorkflow;
 import org.wso2.carbon.apimgt.core.workflow.DefaultWorkflowExecutor;
 import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
+import org.wso2.carbon.apimgt.core.workflow.SubscriptionCreationWorkflow;
+import org.wso2.carbon.apimgt.core.workflow.Workflow;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExtensionsConfigBuilder;
 import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
 import org.wso2.carbon.kernel.configprovider.ConfigProvider;
@@ -91,7 +98,7 @@ import java.util.Map;
  */
 public class APIStoreImplTestCase {
 
-    private static final String USER_NAME = "username";
+    private static final String USER_NAME = "admin";
     private static final String APP_NAME = "appname";
     private static final String USER_ID = "userid";
     private static final String API_ID = "apiid";
@@ -185,7 +192,7 @@ public class APIStoreImplTestCase {
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway apiGateway = Mockito.mock(APIGateway.class);
         APIStore apiStore = getApiStoreImpl(apiDAO, gatewaySourceGenerator, apiGateway);
-        
+
         apiStore.addCompositeApi(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).addApplicationAssociatedAPI(apiBuilder.build());
     }
@@ -247,7 +254,7 @@ public class APIStoreImplTestCase {
         // Create new API version
         String newVersion = java.util.UUID.randomUUID().toString();
         Mockito.when(apiDAO.getCompositeAPI(apiBuilder.getId())).thenReturn(createdAPI);
-        
+
         apiStore.createNewCompositeApiVersion(createdAPI.getId(), newVersion);
 
         final ArgumentCaptor<CompositeAPI> captor = ArgumentCaptor.forClass(CompositeAPI.class);
@@ -455,7 +462,7 @@ public class APIStoreImplTestCase {
         apiStore.deleteAPISubscription(UUID);
         Mockito.verify(apiSubscriptionDAO, Mockito.times(1)).deleteAPISubscription(UUID);
     }
-    
+
     @Test(description = "Delete subscription with on_hold state")
     public void testDeleteSubscriptionWithOnholdState() throws APIManagementException {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
@@ -469,11 +476,11 @@ public class APIStoreImplTestCase {
         API api = builder.build();
         Subscription subscription = new Subscription(UUID, application, api, "Gold");
         subscription.setStatus(SubscriptionStatus.ON_HOLD);
-        
+
         String externalRef = java.util.UUID.randomUUID().toString();
         Mockito.when(workflowDAO.getExternalWorkflowReferenceForPendingTask(subscription.getId(),
                 WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION)).thenReturn(externalRef);
-        
+
         Mockito.when(apiSubscriptionDAO.getAPISubscription(UUID)).thenReturn(subscription);
         apiStore.deleteAPISubscription(UUID);
         Mockito.verify(apiSubscriptionDAO, Mockito.times(1)).deleteAPISubscription(UUID);
@@ -543,6 +550,7 @@ public class APIStoreImplTestCase {
         apiStore.deleteApplication(UUID);
         Mockito.verify(applicationDAO, Mockito.times(1)).deleteApplication(UUID);
     }
+
     @Test(description = "Delete application which is in on_hold state")
     public void testDeleteApplicationWithOnHoldState() throws APIManagementException {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
@@ -572,11 +580,11 @@ public class APIStoreImplTestCase {
         application.setId(UUID);
         application.setStatus(ApplicationStatus.APPLICATION_APPROVED);
         Mockito.when(applicationDAO.getApplication(UUID)).thenReturn(application);
-        
+
         //update application's description
         application.setDescription("updated description");
-        
-        apiStore.updateApplication(UUID, application);        
+
+        apiStore.updateApplication(UUID, application);
         Mockito.verify(applicationDAO, Mockito.times(1)).updateApplication(UUID, application);
     }
 
@@ -679,7 +687,7 @@ public class APIStoreImplTestCase {
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
         Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
         Mockito.when(apiDAO.getCommentByUUID(comment.getUuid(), api.getId())).thenReturn(comment);
-        apiStore.deleteComment(comment.getUuid(), api.getId());
+        apiStore.deleteComment(comment.getUuid(), api.getId(), "admin");
         Mockito.verify(apiDAO, Mockito.times(1)).getAPI(api.getId());
         Mockito.verify(apiDAO, Mockito.times(1)).deleteComment(comment.getUuid(), api.getId());
     }
@@ -692,18 +700,109 @@ public class APIStoreImplTestCase {
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
         Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
         Mockito.when(apiDAO.getCommentByUUID(UUID, api.getId())).thenReturn(comment);
-        apiStore.updateComment(comment, UUID, api.getId());
+        apiStore.updateComment(comment, UUID, api.getId(), "admin");
         Mockito.verify(apiDAO, Mockito.times(1)).getAPI(api.getId());
         Mockito.verify(apiDAO, Mockito.times(1)).updateComment(comment, UUID, api.getId());
     }
+
+    @Test(description = "Add rating")
+    public void testAddRating() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APIStore apiStore = getApiStoreImpl(apiDAO);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
+        Rating rating = SampleTestObjectCreator.createDefaultRating(api.getId());
+        Mockito.when(apiDAO.getRatingByUUID(api.getId(), rating.getUuid())).thenReturn(rating);
+        apiStore.addRating(api.getId(), rating);
+        Mockito.verify(apiDAO, Mockito.times(1)).getAPI(api.getId());
+        Mockito.verify(apiDAO, Mockito.times(1)).addRating(api.getId(), rating);
+    }
+
+    @Test(description = "Update rating")
+    public void testUpdateRating() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APIStore apiStore = getApiStoreImpl(apiDAO);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
+        Rating ratingFromDB = SampleTestObjectCreator.createDefaultRating(api.getId());
+        Rating ratingFromPayload = SampleTestObjectCreator.createDefaultRating(api.getId());
+        ratingFromPayload.setRating(3);
+        Mockito.when(apiDAO.getRatingByUUID(api.getId(), ratingFromDB.getUuid())).thenReturn(ratingFromDB);
+        apiStore.updateRating(api.getId(), ratingFromDB.getUuid(), ratingFromPayload);
+        Mockito.verify(apiDAO, Mockito.times(1)).getAPI(api.getId());
+        Mockito.verify(apiDAO, Mockito.times(1)).updateRating(api.getId(), ratingFromDB.getUuid(), ratingFromPayload);
+    }
+
+    @Test(description = "Get rating for api from user")
+    public void testGetRatingForApiFromUser() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APIStore apiStore = getApiStoreImpl(apiDAO);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
+        Rating ratingFromDB = SampleTestObjectCreator.createDefaultRating(api.getId());
+        Mockito.when(apiDAO.getRatingByUUID(api.getId(), ratingFromDB.getUuid())).thenReturn(ratingFromDB);
+        apiStore.getRatingForApiFromUser(api.getId(), "john");
+        Mockito.verify(apiDAO, Mockito.times(1)).getAPI(api.getId());
+        Mockito.verify(apiDAO, Mockito.times(1)).getUserRatingForApiFromUser(api.getId(), "john");
+    }
+
+    @Test(description = "Get rating from rating id")
+    public void testGetRatingByUUID() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APIStore apiStore = getApiStoreImpl(apiDAO);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
+        String randomRatingUUID = java.util.UUID.randomUUID().toString();
+        Mockito.when(apiDAO.getRatingByUUID(api.getId(), randomRatingUUID))
+                .thenReturn(SampleTestObjectCreator.createDefaultRating(api.getId()));
+        apiStore.getRatingByUUID(api.getId(), randomRatingUUID);
+        Mockito.verify(apiDAO, Mockito.times(1)).getAPI(api.getId());
+        Mockito.verify(apiDAO, Mockito.times(1)).getRatingByUUID(api.getId(), randomRatingUUID);
+    }
+
+    @Test(description = "Get average rating for a given api")
+    public void testGetAverageRating() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APIStore apiStore = getApiStoreImpl(apiDAO);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
+        apiStore.getAvgRating(api.getId());
+        Mockito.verify(apiDAO, Mockito.times(1)).getAPI(api.getId());
+        Mockito.verify(apiDAO, Mockito.times(1)).getAverageRating(api.getId());
+    }
+
+    @Test(description = "Get list of ratings for a given api")
+    public void testGetRatingsListForApi() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APIStore apiStore = getApiStoreImpl(apiDAO);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
+        apiStore.getRatingsListForApi(api.getId());
+        Mockito.verify(apiDAO, Mockito.times(1)).getAPI(api.getId());
+        Mockito.verify(apiDAO, Mockito.times(1)).getRatingsListForApi(api.getId());
+    }
+
 
     /**
      * Tests to catch exceptions in methods
      */
 
+    @Test(description = "Add rating exception in dao", expectedExceptions = APIRatingException.class)
+    public void testAddRatingDaoException() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APIStore apiStore = getApiStoreImpl(apiDAO);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
+        Rating rating = SampleTestObjectCreator.createDefaultRating(api.getId());
+        Mockito.when(apiDAO.getRatingByUUID(api.getId(), rating.getUuid())).thenReturn(rating);
+        Mockito.doThrow(new APIMgtDAOException("Error occurred while adding rating for api "))
+                .when(apiDAO).addRating(api.getId(), rating);
+        apiStore.addRating(api.getId(), rating);
+    }
+
     @Test(description = "Exception in dao when retrieving a specific comment",
             expectedExceptions = APIManagementException.class)
-    public void testGetCommentException() throws APIManagementException {
+    public void testGetCommentDaoException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIStore apiStore = getApiStoreImpl(apiDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
@@ -711,6 +810,18 @@ public class APIStoreImplTestCase {
         String randomUUIDForComment = java.util.UUID.randomUUID().toString();
         Mockito.doThrow(new APIMgtDAOException("Error occurred while retrieving comment " + randomUUIDForComment))
                 .when(apiDAO).getCommentByUUID(randomUUIDForComment, api.getId());
+        apiStore.getCommentByUUID(randomUUIDForComment, api.getId());
+    }
+
+    @Test(description = "Comment not found in db when retrieving comment",
+            expectedExceptions = APIMgtResourceNotFoundException.class)
+    public void testGetCommentMissingException() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APIStore apiStore = getApiStoreImpl(apiDAO);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
+        String randomUUIDForComment = java.util.UUID.randomUUID().toString();
+        Mockito.when(apiDAO.getCommentByUUID(api.getId(), randomUUIDForComment)).thenReturn(null);
         apiStore.getCommentByUUID(randomUUIDForComment, api.getId());
     }
 
@@ -727,30 +838,68 @@ public class APIStoreImplTestCase {
     }
 
     @Test(description = "Exception in dao when deleting a specific comment",
-            expectedExceptions = APIManagementException.class)
-    public void testDeleteCommentException() throws APIManagementException {
+            expectedExceptions = APICommentException.class)
+    public void testDeleteCommentDaoException() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APIStore apiStore = getApiStoreImpl(apiDAO);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
+        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
+        Mockito.when(apiDAO.getCommentByUUID(comment.getUuid(), api.getId())).thenReturn(comment);
+        Mockito.doThrow(new APIMgtDAOException("Error occurred while deleting comment " + comment.getUuid()))
+                .when(apiDAO).deleteComment(comment.getUuid(), api.getId());
+        apiStore.deleteComment(comment.getUuid(), api.getId(), "admin");
+    }
+
+    @Test(description = "check if user is comment moderator while delete comment",
+            expectedExceptions = APICommentException.class)
+    public void testCommentModeratorWhileDeleteComment() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APIStore apiStore = getApiStoreImpl(apiDAO);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
+        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
+        Mockito.when(apiDAO.getCommentByUUID(comment.getUuid(), api.getId())).thenReturn(comment);
+        apiStore.deleteComment(comment.getUuid(), api.getId(), "john");
+    }
+
+
+    @Test(description = "Comment not found in db when retrieving comment before delete",
+            expectedExceptions = APIMgtResourceNotFoundException.class)
+    public void testDeleteCommentMissingException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIStore apiStore = getApiStoreImpl(apiDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
         String randomUUIDForComment = java.util.UUID.randomUUID().toString();
-        Mockito.doThrow(new APIMgtDAOException("Error occurred while deleting comment " + randomUUIDForComment))
-                .when(apiDAO).deleteComment(randomUUIDForComment, api.getId());
-        apiStore.deleteComment(randomUUIDForComment, api.getId());
+        Mockito.when(apiDAO.getCommentByUUID(randomUUIDForComment, api.getId())).thenReturn(null);
+        apiStore.deleteComment(randomUUIDForComment, api.getId(), "admin");
     }
 
     @Test(description = "Exception in dao when updating a specific comment",
-            expectedExceptions = APIManagementException.class)
-    public void testUpdateCommentException() throws APIManagementException {
+            expectedExceptions = APICommentException.class)
+    public void testUpdateCommentDaoException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIStore apiStore = getApiStoreImpl(apiDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
-        String randomUUIDForComment = java.util.UUID.randomUUID().toString();
         Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
-        Mockito.doThrow(new APIMgtDAOException("Error occurred while deleting comment " + randomUUIDForComment))
-                .when(apiDAO).updateComment(comment, randomUUIDForComment, api.getId());
-        apiStore.updateComment(comment, randomUUIDForComment, api.getId());
+        Mockito.when(apiDAO.getCommentByUUID(comment.getUuid(), api.getId())).thenReturn(comment);
+        Mockito.doThrow(new APIMgtDAOException("Error occurred while updating comment " + comment.getUuid()))
+                .when(apiDAO).updateComment(comment, comment.getUuid(), api.getId());
+        apiStore.updateComment(comment, comment.getUuid(), api.getId(), "admin");
+    }
+
+    @Test(description = "Comment not found in db when retrieving comment before update",
+            expectedExceptions = APIMgtResourceNotFoundException.class)
+    public void testUpdateCommentMissingException() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APIStore apiStore = getApiStoreImpl(apiDAO);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
+        Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
+        Mockito.when(apiDAO.getCommentByUUID(comment.getUuid(), api.getId())).thenReturn(null);
+        apiStore.updateComment(comment, comment.getUuid(), api.getId(), "admin");
     }
 
     @Test(description = "Exception in dao when retrieving all comments",
@@ -798,7 +947,7 @@ public class APIStoreImplTestCase {
         String randomUUIDForApi = java.util.UUID.randomUUID().toString();
         Mockito.when(apiDAO.getAPI(randomUUIDForApi)).thenReturn(null);
         String randomUUIDForComment = java.util.UUID.randomUUID().toString();
-        apiStore.deleteComment(randomUUIDForComment, randomUUIDForApi);
+        apiStore.deleteComment(randomUUIDForComment, randomUUIDForApi, "admin");
     }
 
     @Test(description = "Exception when updating a comment due to missing api",
@@ -810,7 +959,7 @@ public class APIStoreImplTestCase {
         String randomUUIDForApi = java.util.UUID.randomUUID().toString();
         Mockito.when(apiDAO.getAPI(randomUUIDForApi)).thenReturn(null);
         Comment comment = SampleTestObjectCreator.createDefaultComment(randomUUIDForApi);
-        apiStore.updateComment(comment, comment.getUuid(), randomUUIDForApi);
+        apiStore.updateComment(comment, comment.getUuid(), randomUUIDForApi, "admin");
     }
 
 
@@ -978,23 +1127,15 @@ public class APIStoreImplTestCase {
 
     // End of exception testing
 
-
-    @Test(description = "Exception when completing workflow without valid workflow obj",
-            expectedExceptions = APIManagementException.class)
-    public void testCompleteWorkflowWithoutValidWorkflowObj() throws Exception {
-
-        APIStore apiStore = getApiStoreImpl();
-        apiStore.completeWorkflow(null, new Workflow());
-    }
-
     @Test(description = "Exception when completing application creation workflow without a reference",
             expectedExceptions = APIManagementException.class)
     public void testCompleteApplicationWorkflowWithoutReference() throws Exception {
 
-        APIStore apiStore = getApiStoreImpl();
-
+        WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
+        ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
+        APIStore apiStore = getApiStoreImpl(applicationDAO, workflowDAO);
         WorkflowExecutor executor = new DefaultWorkflowExecutor();
-        Workflow workflow = new ApplicationCreationWorkflow();
+        Workflow workflow = new ApplicationCreationWorkflow(applicationDAO, workflowDAO);
         workflow.setWorkflowReference(null);
         apiStore.completeWorkflow(executor, workflow);
     }
@@ -1015,10 +1156,8 @@ public class APIStoreImplTestCase {
                 (policy);
 
         apiStore.addApplication(application);
-
-
         DefaultWorkflowExecutor executor = Mockito.mock(DefaultWorkflowExecutor.class);
-        Workflow workflow = new ApplicationCreationWorkflow();
+        Workflow workflow = new ApplicationCreationWorkflow(applicationDAO, workflowDAO);
         workflow.setWorkflowReference(application.getId());
 
         WorkflowResponse response = new GeneralWorkflowResponse();
@@ -1029,7 +1168,7 @@ public class APIStoreImplTestCase {
 
         Mockito.verify(applicationDAO, Mockito.times(1)).updateApplicationState(application.getId(), "REJECTED");
     }
-    
+
     @Test(description = "Test Application update workflow reject")
     public void testAddApplicationUpdateWorkflowReject() throws APIManagementException {
         /*
@@ -1054,18 +1193,18 @@ public class APIStoreImplTestCase {
 
         //following section mock the workflow callback api
         DefaultWorkflowExecutor executor = Mockito.mock(DefaultWorkflowExecutor.class);
-        Workflow workflow = new ApplicationUpdateWorkflow();
+        Workflow workflow = new ApplicationUpdateWorkflow(applicationDAO, workflowDAO);
         workflow.setWorkflowReference(application.getId());
         workflow.setExternalWorkflowReference(UUID);
-        
+
         //validate the rejection flow
-        
+
         //here we assume the application is an approve state before update
         //this attribute is set internally based on the workflow data
         workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_EXISTIN_APP_STATUS,
                 ApplicationStatus.APPLICATION_APPROVED);
-        
-        WorkflowResponse response = new GeneralWorkflowResponse();        
+
+        WorkflowResponse response = new GeneralWorkflowResponse();
         response.setWorkflowStatus(WorkflowStatus.REJECTED);
 
         Mockito.when(executor.complete(workflow)).thenReturn(response);
@@ -1073,16 +1212,16 @@ public class APIStoreImplTestCase {
 
         Mockito.verify(applicationDAO, Mockito.times(1)).updateApplicationState(application.getId(),
                 ApplicationStatus.APPLICATION_APPROVED);
-       
+
         //here we assume the application is an rejected state before update. 
         workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_EXISTIN_APP_STATUS,
                 ApplicationStatus.APPLICATION_REJECTED);
-        
+
         apiStore.completeWorkflow(executor, workflow);
         Mockito.verify(applicationDAO, Mockito.times(1)).updateApplicationState(application.getId(),
-                ApplicationStatus.APPLICATION_REJECTED);             
+                ApplicationStatus.APPLICATION_REJECTED);
 
-        
+
     }
 
     @Test(description = "Test Subscription workflow rejection")
@@ -1106,7 +1245,7 @@ public class APIStoreImplTestCase {
         SubscriptionResponse response = apiStore.addApiSubscription(apiId, UUID, TIER);
 
         DefaultWorkflowExecutor executor = Mockito.mock(DefaultWorkflowExecutor.class);
-        Workflow workflow = new SubscriptionWorkflow();
+        Workflow workflow = new SubscriptionCreationWorkflow(apiSubscriptionDAO, workflowDAO, apiGateway);
         workflow.setWorkflowType(APIMgtConstants.WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
         workflow.setWorkflowReference(response.getSubscriptionUUID());
 
@@ -1156,71 +1295,98 @@ public class APIStoreImplTestCase {
 
     }
 
+    @Test(description = "User Self Signup")
+    public void testSelfSignUp() throws Exception {
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+        APIStoreImpl apiStore = getApiStoreImpl(identityProvider);
+        User user = new User();
+        Mockito.doNothing().when(identityProvider).registerUser(user);
+        apiStore.selfSignUp(user);
+    }
+
+    @Test(description = "User Self Signup Error Case", expectedExceptions = IdentityProviderException.class)
+    public void testSelfSignUpErrorCase() throws Exception {
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+        APIStoreImpl apiStore = getApiStoreImpl(identityProvider);
+        User user = new User();
+        Mockito.doThrow(IdentityProviderException.class).when(identityProvider).registerUser(user);
+        apiStore.selfSignUp(user);
+    }
+
     private APIStoreImpl getApiStoreImpl(ApiDAO apiDAO) {
-        return new APIStoreImpl(USER_NAME, apiDAO, null, null, null,
-                null, null, null, null, null);
+        return new APIStoreImpl(USER_NAME, null, apiDAO, null, null, null, null, null, null, null, null);
+    }
+
+    private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO) {
+        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, null, null, null, null, null, null, null);
+    }
+
+    private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, PolicyDAO policyDAO, WorkflowDAO workflowDAO) {
+        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, null, policyDAO, null, null, workflowDAO, null,
+                null);
+    }
+
+    private APIStoreImpl getApiStoreImpl(ApiDAO apiDAO, ApplicationDAO applicationDAO,
+                                         APISubscriptionDAO apiSubscriptionDAO, WorkflowDAO workflowDAO) {
+        return new APIStoreImpl(USER_NAME, null, apiDAO, applicationDAO, apiSubscriptionDAO, null, null, null,
+                workflowDAO, null, null);
+    }
+
+    private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO,
+                                         WorkflowDAO workflowDAO, APIGateway apiGateway) {
+        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, apiSubscriptionDAO, null, null, null,
+                workflowDAO, null, apiGateway);
+    }
+
+    private APIStoreImpl getApiStoreImpl(ApiDAO apiDAO, ApplicationDAO applicationDAO,
+                                         APISubscriptionDAO apiSubscriptionDAO, WorkflowDAO workflowDAO,
+                                         APIGateway apiGateway) {
+        return new APIStoreImpl(USER_NAME, null, apiDAO, applicationDAO, apiSubscriptionDAO, null, null, null,
+                workflowDAO, null, apiGateway);
     }
 
     private APIStoreImpl getApiStoreImpl(ApiDAO apiDAO, GatewaySourceGenerator gatewaySourceGenerator,
                                          APIGateway apiGateway) {
-        return new APIStoreImpl(USER_NAME, apiDAO, null, null, null,
-                null, null, null, gatewaySourceGenerator, apiGateway);
-    }
-
-    private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO) {
-        return new APIStoreImpl(USER_NAME, null, applicationDAO, null, null,
-                null, null, null, null, null);
-    }
-
-    private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, PolicyDAO policyDAO, WorkflowDAO workflowDAO) {
-        return new APIStoreImpl(USER_NAME, null, applicationDAO, null, policyDAO, null,
-                null, workflowDAO, null, null);
-    }
-
-    private APIStoreImpl getApiStoreImpl(ApiDAO apiDAO, ApplicationDAO applicationDAO,
-            APISubscriptionDAO apiSubscriptionDAO, WorkflowDAO workflowDAO, APIGateway apiGateway) {
-        return new APIStoreImpl(USER_NAME, apiDAO, applicationDAO, apiSubscriptionDAO, null, null,
-                null, workflowDAO, null, apiGateway);
+        return new APIStoreImpl(USER_NAME, null, apiDAO, null, null, null, null, null, null, gatewaySourceGenerator,
+                apiGateway);
     }
 
     private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO,
-            WorkflowDAO workflowDAO, APIGateway apiGateway) {
-        return new APIStoreImpl(USER_NAME, null, applicationDAO, apiSubscriptionDAO, null,
-                null, null, workflowDAO, null, apiGateway);
+                                         WorkflowDAO workflowDAO) {
+        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, apiSubscriptionDAO, null, null, null,
+                workflowDAO, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO) {
-        return new APIStoreImpl(USER_NAME, null, applicationDAO, apiSubscriptionDAO, null,
-                null, null, null, null, null);
+        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, apiSubscriptionDAO, null, null, null, null, null,
+                null);
     }
 
     private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, WorkflowDAO workflowDAO) {
-        return new APIStoreImpl(USER_NAME, null, applicationDAO, null, null,
-                null, null, workflowDAO, null, null);
+        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, null, null, null, null, workflowDAO, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl(TagDAO tagDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, null, null,
-                tagDAO, null, null, null, null);
+        return new APIStoreImpl(USER_NAME, null, null, null, null, null, tagDAO, null, null, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl(PolicyDAO policyDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, null, policyDAO,
-                null, null, null, null, null);
+        return new APIStoreImpl(USER_NAME, null, null, null, null, policyDAO, null, null, null, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl(LabelDAO labelDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, null, null,
-                null, labelDAO, null, null, null);
+        return new APIStoreImpl(USER_NAME, null, null, null, null, null, null, labelDAO, null, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, PolicyDAO policyDAO) {
-        return new APIStoreImpl(USER_NAME, null, applicationDAO, null, policyDAO, null,
-                null, null, null, null);
+        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, null, policyDAO, null, null, null, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl() {
-        return new APIStoreImpl(USER_NAME, null, null, null, null,
-                null, null, null, null, null);
+        return new APIStoreImpl(USER_NAME, null, null, null, null, null, null, null, null, null, null);
+    }
+
+    private APIStoreImpl getApiStoreImpl(IdentityProvider identityProvider) {
+        return new APIStoreImpl(USER_NAME, identityProvider, null, null, null, null, null, null, null, null, null);
     }
 }

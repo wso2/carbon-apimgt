@@ -22,19 +22,18 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
+import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 
@@ -66,9 +65,6 @@ public class DefaultKeyManagerImpl implements KeyManager {
     private static final String PASSWORD_GRANT_TYPE = "password";
     private static final String REFRESH_GRANT_TYPE = "refresh_token";
     private static final String GRANT_TYPE_PARAM_VALIDITY = "validity_period";
-    private static final String EXTERNEL_KEYMANAGER_ENDPOINT = "https://localhost:9443";
-    private static final String INTERNAL_KEYMANAGER_ENDPOINT = "https://localhost:9292/keyserver";
-    private static boolean isExternalKeyManager = false;
 
     /**
      * Create the oauth2 application with calling DCR endpoint of WSO2 IS
@@ -118,9 +114,8 @@ public class DefaultKeyManagerImpl implements KeyManager {
         try {
             createSSLConnection();
             // Calling DCR endpoint of IS
-            String dcrEndpoint = getKeyManagerEndPoint("/identity/connect/register");
-                    /*System.getProperty("dcrEndpoint",
-                    "https://localhost:9443/identity/connect/register");*/
+            String dcrEndpoint = ServiceReferenceHolder.getInstance().getAPIMConfiguration()
+                    .getKeyManagerConfigs().getDcrEndpoint();
             url = new URL(dcrEndpoint);
             urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
@@ -206,9 +201,8 @@ public class DefaultKeyManagerImpl implements KeyManager {
         try {
             // Calling DCR endpoint of IS
             createSSLConnection();
-            String dcrEndpoint = getKeyManagerEndPoint("/identity/connect/register/") + consumerKey;
-                    /*System.getProperty("dcrEndpoint", "https://localhost:9443/identity/connect/register/") +
-                            consumerKey;*/
+            String dcrEndpoint = ServiceReferenceHolder.getInstance().getAPIMConfiguration()
+                    .getKeyManagerConfigs().getDcrEndpoint() + consumerKey;
             url = new URL(dcrEndpoint);
             urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
@@ -247,9 +241,8 @@ public class DefaultKeyManagerImpl implements KeyManager {
         try {
             createSSLConnection();
             // Calling DCR endpoint of IS using consumer key
-            String dcrEndpoint = getKeyManagerEndPoint("/identity/connect/register/") + consumerKey;
-                   /* System.getProperty("dcrEndpoint", "https://localhost:9443/identity/connect/register/" +
-                    consumerKey);*/
+            String dcrEndpoint = ServiceReferenceHolder.getInstance().getAPIMConfiguration()
+                    .getKeyManagerConfigs().getDcrEndpoint() + consumerKey;
             url = new URL(dcrEndpoint);
             urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
@@ -325,13 +318,10 @@ public class DefaultKeyManagerImpl implements KeyManager {
             return null;
         }
 
-        //TO-DO -ADD A CONFIG FOR TOKEN ENDPOINT
-        String tokenEndpoint = getKeyManagerEndPoint("/oauth2/token");
-        //System.getProperty("TokenEndpoint", "https://localhost:9443/oauth2/token");
-        //TO-DO -ADD A CONFIG FOR REVOKE ENDPOINT
-        String revokeEndpoint = getKeyManagerEndPoint("/oauth2/revoke");
-        //System.getProperty("RevokeEndpoint", "https://localhost:9443/oauth2/revoke");
-        ;
+        String tokenEndpoint = ServiceReferenceHolder.getInstance().getAPIMConfiguration()
+                .getKeyManagerConfigs().getTokenEndpoint();
+        String revokeEndpoint = ServiceReferenceHolder.getInstance().getAPIMConfiguration()
+                .getKeyManagerConfigs().getRevokeEndpoint();
 
         // Call the /revoke only if there's a token to be revoked.
 
@@ -484,8 +474,8 @@ public class DefaultKeyManagerImpl implements KeyManager {
         HttpURLConnection urlConn = null;
         try {
             createSSLConnection();
-            String introspectEndpoint = getKeyManagerEndPoint("/oauth2/introspect");
-            //System.getProperty("introspectEndpoint", "https://localhost:9443/oauth2/introspect");
+            String introspectEndpoint = ServiceReferenceHolder.getInstance().getAPIMConfiguration()
+                    .getKeyManagerConfigs().getIntrospectEndpoint();
             url = new URL(introspectEndpoint);
             urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setDoOutput(true);
@@ -569,8 +559,8 @@ public class DefaultKeyManagerImpl implements KeyManager {
             return;
         }
 
-        //TO-DO -ADD A CONFIG FOR REVOKE ENDPOINT
-        String revokeEndpoint = getKeyManagerEndPoint("/oauth2/revoke");
+        String revokeEndpoint = ServiceReferenceHolder.getInstance().getAPIMConfiguration()
+                .getKeyManagerConfigs().getRevokeEndpoint();
 
         URL url;
         HttpURLConnection urlConn = null;
@@ -706,18 +696,4 @@ public class DefaultKeyManagerImpl implements KeyManager {
         HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
     }
 
-    /*
-    This is a temp method to test with external IS 5.3.0
-     */
-    private static String getKeyManagerEndPoint(String context) {
-
-        String externalKeyManager = System.getProperty(APIMgtConstants.IS_EXTERNAL_KEYMANAGER);
-        if (StringUtils.isNotEmpty(externalKeyManager)) {
-            isExternalKeyManager = Boolean.valueOf(externalKeyManager);
-        }
-        if (isExternalKeyManager) {
-            return EXTERNEL_KEYMANAGER_ENDPOINT + context;
-        }
-        return INTERNAL_KEYMANAGER_ENDPOINT + context;
-    }
 }

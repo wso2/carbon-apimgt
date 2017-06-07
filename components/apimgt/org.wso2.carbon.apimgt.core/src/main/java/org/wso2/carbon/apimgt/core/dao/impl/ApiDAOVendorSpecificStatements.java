@@ -95,7 +95,7 @@ public interface ApiDAOVendorSpecificStatements {
      * @return statement build for specific database type.
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    PreparedStatement attributeSearchStore(Connection connection, List<String> roles, Map<String,
+    PreparedStatement prepareAttributeSearchStatementForStore(Connection connection, List<String> roles, Map<String,
             String> attributeMap, int offset, int limit) throws APIMgtDAOException;
 
 }

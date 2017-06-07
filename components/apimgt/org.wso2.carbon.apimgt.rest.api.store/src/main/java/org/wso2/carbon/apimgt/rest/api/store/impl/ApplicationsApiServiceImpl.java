@@ -15,7 +15,7 @@ import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.APIKey;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.models.ApplicationCreationResponse;
+import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationResponse;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
@@ -34,7 +34,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.store.mappings.WorkflowMappintUtil;
+import org.wso2.carbon.apimgt.rest.api.store.mappings.MiscMappingUtil;
 import org.wso2.msf4j.Request;
 
 import java.net.URI;
@@ -246,8 +246,8 @@ public class ApplicationsApiServiceImpl
             //be in either pending or approved state) send back the workflow response 
             if (ApplicationStatus.APPLICATION_ONHOLD.equals(updatedApplication.getStatus())) {
                 
-                WorkflowResponseDTO workflowResponse = WorkflowMappintUtil
-                        .fromWorkflowResponsetoDTO(updateResponse);
+                WorkflowResponseDTO workflowResponse = MiscMappingUtil
+                        .fromWorkflowResponseToDTO(updateResponse);
                 URI location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" + applicationId);
                 return Response.status(Response.Status.ACCEPTED).header(RestApiConstants.LOCATION_HEADER, location)
                         .entity(workflowResponse).build();
@@ -418,8 +418,8 @@ public class ApplicationsApiServiceImpl
             //be in either pending or approved state) send back the workflow response 
             if (ApplicationStatus.APPLICATION_ONHOLD.equals(createdApplication.getStatus())) {
                 
-                WorkflowResponseDTO workflowResponse = WorkflowMappintUtil
-                        .fromWorkflowResponsetoDTO(applicationResponse.getWorkflowResponse());
+                WorkflowResponseDTO workflowResponse = MiscMappingUtil
+                        .fromWorkflowResponseToDTO(applicationResponse.getWorkflowResponse());
                 return Response.status(Response.Status.ACCEPTED).header(RestApiConstants.LOCATION_HEADER, location)
                         .entity(workflowResponse).build();
             }    

@@ -13,8 +13,9 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package org.wso2.carbon.apimgt.core;
+package org.wso2.carbon.apimgt.core.configuration;
 
+import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 
 /**

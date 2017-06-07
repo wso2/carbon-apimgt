@@ -22,18 +22,21 @@ package org.wso2.carbon.apimgt.core.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.api.APIDefinition;
 import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
 import org.wso2.carbon.apimgt.core.api.APIManager;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
+import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
+import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
+import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
+import org.wso2.carbon.apimgt.core.dao.TagDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
@@ -47,12 +50,12 @@ import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Subscription;
-import org.wso2.carbon.apimgt.core.models.Workflow;
+import org.wso2.carbon.apimgt.core.workflow.Workflow;
 
 import java.io.InputStream;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+
 /**
  * This class contains the implementation of the common methods for Publisher and store
  */
@@ -65,21 +68,24 @@ public abstract class AbstractAPIManager implements APIManager {
     private APISubscriptionDAO apiSubscriptionDAO;
     private PolicyDAO policyDAO;
     private String username;
+    private IdentityProvider identityProvider;
     private APILifecycleManager apiLifecycleManager;
     private LabelDAO labelDAO;
     private WorkflowDAO workflowDAO;
+    private TagDAO tagDAO;
     private GatewaySourceGenerator gatewaySourceGenerator;
     private APIGateway apiGatewayPublisher;
     protected APIDefinition apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
     protected APIMConfigurations config;
 
-    public AbstractAPIManager(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
-                              APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager
-                                      apiLifecycleManager,
-                              LabelDAO labelDAO, WorkflowDAO workflowDAO, GatewaySourceGenerator
-                                      gatewaySourceGenerator, APIGateway apiGatewayPublisher) {
+    public AbstractAPIManager(String username, IdentityProvider idp, ApiDAO apiDAO,
+                              ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO,
+                              APILifecycleManager apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO,
+                              TagDAO tagDAO, GatewaySourceGenerator gatewaySourceGenerator,
+                              APIGateway apiGatewayPublisher) {
 
         this.username = username;
+        this.identityProvider = idp;
         this.apiDAO = apiDAO;
         this.applicationDAO = applicationDAO;
         this.apiSubscriptionDAO = apiSubscriptionDAO;
@@ -87,18 +93,19 @@ public abstract class AbstractAPIManager implements APIManager {
         this.apiLifecycleManager = apiLifecycleManager;
         this.labelDAO = labelDAO;
         this.workflowDAO = workflowDAO;
+        this.tagDAO = tagDAO;
         this.gatewaySourceGenerator = gatewaySourceGenerator;
         this.apiGatewayPublisher = apiGatewayPublisher;
-
-        config = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
+        this.config = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
     }
 
-    public AbstractAPIManager(String username, ApiDAO apiDAO, ApplicationDAO applicationDAO,
-                              APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO,
-                              APILifecycleManager apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO) {
+    public AbstractAPIManager(String username, IdentityProvider idp, ApiDAO apiDAO,
+                              ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO,
+                              APILifecycleManager apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO,
+                              TagDAO tagDAO) {
 
-        this(username, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, apiLifecycleManager, labelDAO,
-                workflowDAO, new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
+        this(username, idp, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, apiLifecycleManager,
+                labelDAO, workflowDAO, tagDAO, new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
 
@@ -585,6 +592,17 @@ public abstract class AbstractAPIManager implements APIManager {
         log.error(msg);
         throw new APIMgtResourceAlreadyExistsException(msg);
     }
+
+    @Override
+    public WorkflowResponse completeWorkflow(WorkflowExecutor workflowExecutor, Workflow workflow)
+            throws APIManagementException {
+        if (workflow.getWorkflowReference() == null) {
+            String message = "Error while changing the workflow. Missing reference";
+            log.error(message);
+            throw new APIManagementException(message, ExceptionCodes.WORKFLOW_EXCEPTION);
+        }
+        return workflow.completeWorkflow(workflowExecutor);
+    }
     
     /**
      * Retrieve workflow for given internal ref id
@@ -601,19 +619,6 @@ public abstract class AbstractAPIManager implements APIManager {
             log.error(message);
             throw new APIMgtDAOException(message, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }        
-    }
-    
-    protected void updateWorkflowEntries(Workflow workflow) throws APIManagementException {
-        workflow.setUpdatedTime(LocalDateTime.now());
-        try {
-            getWorkflowDAO().updateWorkflowStatus(workflow);
-            // TODO stats stuff
-        } catch (APIMgtDAOException e) {
-            String message = "Error while updating workflow entry";
-            log.error(message);
-            throw new APIManagementException(message, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
-        }
-
     }
 
     protected void addWorkflowEntries(Workflow workflow) throws APIManagementException {
@@ -662,5 +667,17 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public APIGateway getApiGateway() {
         return apiGatewayPublisher;
+    }
+
+    public IdentityProvider getIdentityProvider() {
+        return identityProvider;
+    }
+
+    public APIMConfigurations getConfig() {
+        return config;
+    }
+
+    public TagDAO getTagDAO() {
+        return tagDAO;
     }
 }

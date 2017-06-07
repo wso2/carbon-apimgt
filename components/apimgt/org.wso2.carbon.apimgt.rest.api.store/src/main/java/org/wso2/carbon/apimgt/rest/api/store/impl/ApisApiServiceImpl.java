@@ -4,6 +4,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -18,6 +19,7 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -68,10 +70,10 @@ public class ApisApiServiceImpl extends ApisApiService {
                     .contains(existingFingerprint)) {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
             }
-            apiStore.deleteComment(commentId, apiId);
+            apiStore.deleteComment(commentId, apiId, username);
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting comment with commentId: " + commentId + " of apiID :" + apiId;
-            HashMap<String, String> paramList = new HashMap<String, String>();
+            Map<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
             paramList.put(APIMgtConstants.ExceptionsConstants.COMMENT_ID, commentId);
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
@@ -111,7 +113,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                     "\"" + existingFingerprint + "\"").entity(commentDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving comment with commentId: " + commentId + " of apiID :" + apiId;
-            HashMap<String, String> paramList = new HashMap<String, String>();
+            Map<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
             paramList.put(APIMgtConstants.ExceptionsConstants.COMMENT_ID, commentId);
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
@@ -209,7 +211,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.ok().entity(commentListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving comments for api : " + apiId;
-            HashMap<String, String> paramList = new HashMap<String, String>();
+            Map<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
@@ -239,15 +241,17 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             Comment createdComment = apiStore.getCommentByUUID(createdCommentId, apiId);
             CommentDTO createdCommentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
-            URI location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/");
+            URI location = new URI(
+                    RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId + RestApiConstants.SUBRESOURCE_PATH_COMMENTS
+                            + "/" + createdCommentId);
 
             String fingerprint = getEtag(comment.getUuid());
-            return Response.status(Response.Status.CREATED).header("Location", location).header(HttpHeaders.ETAG,
+            return Response.status(Response.Status.CREATED).header(RestApiConstants.LOCATION_HEADER, location).header(HttpHeaders.ETAG,
                     "\"" + fingerprint + "\"").entity(createdCommentDTO)
                     .build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while adding comment to api : " + body.getApiId();
-            HashMap<String, String> paramList = new HashMap<String, String>();
+            String errorMessage = "Error while adding comment to api : " + apiId;
+            Map<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, body.getApiId());
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
@@ -286,7 +290,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
             }
             Comment comment = CommentMappingUtil.fromDTOToComment(body, username);
-            apiStore.updateComment(comment, commentId, apiId);
+            apiStore.updateComment(comment, commentId, apiId, username);
 
             Comment updatedComment = apiStore.getCommentByUUID(commentId, apiId);
             CommentDTO updatedCommentDTO = CommentMappingUtil.fromCommentToDTO(updatedComment);
@@ -296,7 +300,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                     "\"" + newFingerprint + "\"").entity(updatedCommentDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while updating comment : " + commentId;
-            HashMap<String, String> paramList = new HashMap<String, String>();
+            Map<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, body.getApiId());
             paramList.put(APIMgtConstants.ExceptionsConstants.COMMENT_ID, commentId);
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
@@ -556,54 +560,109 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param accept  accept header value
      * @param request msf4j request object
      * @return List of Ratings for API
-     * @throws NotFoundException If failed to get Ratings
+     * @throws NotFoundException  if failed to find method implementation
      */
     @Override
-    public Response apisApiIdRatingGet(String apiId, Integer limit, Integer offset, String accept, Request request)
-            throws NotFoundException {
-
-        RatingListDTO ratingListDTO = null;
-        double avgRating, userRating;
-        List<RatingDTO> ratingDTOList = null;
-
-
+    public Response apisApiIdRatingsGet(String apiId, Integer limit, Integer offset, String accept,
+            Request request) throws NotFoundException {
+        double avgRating;
         String username = RestApiUtil.getLoggedInUsername();
-        Response response;
+        int userRatingValue = 0;
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
-            userRating = apiStore.getUserRating(apiId, username);
+            Rating userRating = apiStore.getRatingForApiFromUser(apiId, username);
+            if(userRating != null) {
+                userRatingValue = userRating.getRating();
+            }
             avgRating = apiStore.getAvgRating(apiId);
-            ratingDTOList = RatingMappingUtil.fromRatingListToDTOList(apiStore.getUserRatingDTOList(apiId));
-
-            ratingListDTO = RatingMappingUtil.fromRatingListToDTO(avgRating, userRating, offset, limit, ratingDTOList);
+            List<Rating> ratingListForApi = apiStore.getRatingsListForApi(apiId);
+            List<RatingDTO> ratingDTOList = RatingMappingUtil.fromRatingListToDTOList(ratingListForApi);
+            RatingListDTO ratingListDTO = RatingMappingUtil.fromRatingDTOListToRatingListDTO(avgRating, userRatingValue, offset, limit, ratingDTOList);
 
             return Response.ok().entity(ratingListDTO).build();
-
         } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving Rating for given API " + apiId;
-            HashMap<String, String> paramList = new HashMap<String, String>();
+            String errorMessage = "Error while retrieving rating for given API " + apiId;
+            Map<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
+    }
 
+    @Override
+    public Response apisApiIdRatingsRatingIdGet(String apiId, String ratingId, String accept,
+            String ifNoneMatch, String ifModifiedSince, Request request) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIStore apiStore = RestApiUtil.getConsumer(username);
+            Rating rating = apiStore.getRatingByUUID(apiId, ratingId);
+            RatingDTO ratingDTO = RatingMappingUtil.fromRatingToDTO(rating);
+
+            return Response.ok().entity(ratingDTO).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving rating for given API " + apiId;
+            Map<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            paramList.put(APIMgtConstants.ExceptionsConstants.RATING_ID, ratingId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
     }
 
     /**
-     * Add rating to a API
+     * Add or update raating to an API
      *
      * @param apiId       APIID
      * @param body        RatingDTO object
      * @param contentType content-type header
      * @param request     msf4j request
      * @return 201 response if successful
-     * @throws NotFoundException if API not found
+     * @throws NotFoundException if failed to find method implementation
      */
     @Override
-    public Response apisApiIdRatingPost(String apiId, RatingDTO body, String contentType, Request request)
+    public Response apisApiIdUserRatingPut(String apiId, RatingDTO body, String contentType, Request request)
             throws NotFoundException {
-        return null;
+        String username = RestApiUtil.getLoggedInUsername();
+        String ratingId;
+        try {
+            APIStore apiStore = RestApiUtil.getConsumer(username);
+            Rating ratingFromPayload = RatingMappingUtil.fromDTOToRating(username, apiId, body);
+            Rating existingRating = apiStore.getRatingForApiFromUser(apiId, username);
+
+            if (existingRating != null) {
+                String existingRatingUUID = existingRating.getUuid();
+                apiStore.updateRating(apiId, existingRatingUUID, ratingFromPayload);
+                Rating updatedRating = apiStore.getRatingByUUID(apiId, existingRatingUUID);
+                RatingDTO updatedRatingDTO = RatingMappingUtil.fromRatingToDTO(updatedRating);
+                return Response.ok().entity(updatedRatingDTO)
+                        .build();
+            } else {
+                ratingId = apiStore.addRating(apiId, ratingFromPayload);
+                Rating createdRating = apiStore.getRatingByUUID(apiId, ratingId);
+                RatingDTO createdRatingDTO = RatingMappingUtil.fromRatingToDTO(createdRating);
+                URI location = new URI(
+                        RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId + RestApiConstants.SUBRESOURCE_PATH_RATINGS
+                                + "/" + ratingId);
+                return Response.status(Response.Status.CREATED).header(RestApiConstants.LOCATION_HEADER, location)
+                        .entity(createdRatingDTO).build();
+            }
+        } catch (APIManagementException e) {
+            String errorMessage =
+                    "Error while adding/updating rating for user " + username + " for given API " + apiId;
+            Map<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while adding location header in response for comment";
+            ErrorHandler errorHandler = ExceptionCodes.LOCATION_HEADER_INCORRECT;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorHandler);
+            log.error(errorMessage, e);
+            return Response.status(errorHandler.getHttpStatusCode()).entity(errorDTO).build();
+        }
     }
 
     /**
@@ -629,9 +688,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             return null;
         }
     }
-
-
-
 
 
     /**
@@ -670,6 +726,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
     }
+
 
     /**
      * Retrieves the fingerprint of the swagger given its API's ID
