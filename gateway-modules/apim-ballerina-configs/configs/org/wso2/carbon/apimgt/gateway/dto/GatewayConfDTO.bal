@@ -21,6 +21,7 @@ struct JWTInfoDTO {
 }
 
 struct AnalyticsInfoDTO {
+    boolean enabled;
     string serverURL;
     CredentialsDTO credentials;
 }

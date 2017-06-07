@@ -5,9 +5,15 @@ import ballerina.lang.messages;
 import ballerina.lang.jsons;
 import ballerina.lang.system;
 import ballerina.net.http;
+import org.wso2.carbon.apimgt.gateway.holders as holder;
+import org.wso2.carbon.apimgt.gateway.dto;
 
 function mediate (message m, message res) {
-
+    dto:AnalyticsInfoDTO analyticsConf = holder:getAnalyticsConf();
+    if (!analyticsConf.enabled) {
+        system:println("Analytics is Disabled");
+        return;
+    }
     int request_start_time = (int)messages:getProperty(m, "am.request_start_time");
     int request_end_time = (int)messages:getProperty(m, "am.request_end_time");
     int backend_start_time = (int)messages:getProperty(m, "am.backend_start_time");
