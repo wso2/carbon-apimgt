@@ -85,6 +85,10 @@ function getGatewayConf () (dto:GatewayConfDTO){
     return gatewayConf;
 }
 
+function getAnalyticsConf () (dto:AnalyticsInfoDTO){
+    return gatewayConf.analyticsInfo;
+}
+
 function putIntoApplicationCache (dto:ApplicationDto applicationDto) {
     caching:putCacheEntry(constants:APPLICATION_CACHE,applicationDto.applicationId,applicationDto);
 }

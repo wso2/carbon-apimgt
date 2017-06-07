@@ -26,6 +26,8 @@ import org.wso2.carbon.kernel.annotations.Element;
 @Configuration(description = "Analytics configurations")
 public class AnalyticsConfigurations {
 
+    @Element(description = "enable analytics")
+    private boolean enabled = false;
     @Element(description = "DAS server URL")
     private String dasServerURL = "http://localhost:9091";
     @Element(description = "DAS server credentials")
@@ -33,6 +35,10 @@ public class AnalyticsConfigurations {
 
     public String getDasServerURL() {
         return dasServerURL;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
     }
 
     public CredentialConfigurations getDasServerCredentials() {
