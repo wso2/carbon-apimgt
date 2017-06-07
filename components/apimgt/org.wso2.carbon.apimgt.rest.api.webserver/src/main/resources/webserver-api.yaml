@@ -1,0 +1,227 @@
+swagger: '2.0'
+######################################################
+# Prolog
+######################################################
+info:
+  version: "v1.0"
+  title: "WSO2 API Manager - Web server"
+  description: |
+    This specifies a **RESTful API** for WSO2 **API Manager** - Web server.
+
+    Please see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.0.4/components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher/src/main/resources/publisher-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.
+  contact:
+    name: "WSO2"
+    url: "http://wso2.com/products/api-manager/"
+    email: "architecture@wso2.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+######################################################
+# The fixed parts of the URLs of the API
+######################################################
+
+# The schemes supported by the API
+schemes:
+  - https
+  - http
+
+# The domain of the API.
+# This is configured by the customer during deployment.
+# The given host is just an example.
+host: apis.wso2.com
+
+# The base path of the API.
+# Will be prefixed to all paths.
+basePath: /
+
+# The following media types can be passed as input in message bodies of the API.
+# The actual media type must be specified in the Content-Type header field of the request.
+# The default is json, i.e. the Content-Type header is not needed to
+# be set, but supporting it serves extensibility.
+consumes:
+  - application/json
+
+# The following media types may be passed as output in message bodies of the API.
+# The media type(s) consumable by the requestor is specified in the Accept header field
+# of the corresponding request.
+# The actual media type returned will be specfied in the Content-Type header field
+# of the of the response.
+# The default of the Accept header is json, i.e. there is not needed to
+# set the value, but supporting it serves extensibility.
+produces:
+  - application/json
+
+x-wso2-security:
+  apim:
+    x-wso2-scopes:
+      - description: ""
+        roles: webserver
+        name: apim:web_server
+        key: apim:web_server
+      - description: ""
+        roles: webserver
+        name: apim:web_server
+        key: apim:web_server
+      - description: ""
+        roles: webserver
+        name: apim:bl_view
+        key: apim:bl_view
+      - description: ""
+        roles: webserver
+        name: apim:bl_manage
+        key: apim:bl_manage
+
+######################################################
+# The "API Collection" resource APIs
+######################################################
+paths:
+  '/publisher':
+
+#-----------------------------------------------------
+# Retrieve all Application level policies
+#-----------------------------------------------------
+    get:
+      x-scope: apim:tier_view
+      summary: Get file
+      description: |
+        Get file as requested
+      parameters:
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
+      produces:
+        - text/html; charset=utf-8
+      tags:
+        - Application Policies
+      responses:
+        200:
+          description: OK
+          schema:
+            type: file
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported.
+          schema:
+            $ref: '#/definitions/Error'
+
+
+######################################################
+# Parameters - required by some of the APIs above
+######################################################
+parameters:
+
+# The HTTP Accept header
+  Accept:
+    name: Accept
+    in: header
+    description: |
+      Media types acceptable for the response. Default is JSON.
+    default: JSON
+    type: string
+
+# The HTTP Content-Type header
+  Content-Type:
+    name: Content-Type
+    in: header
+    description: |
+      Media type of the entity in the body. Default is JSON.
+    default: JSON
+    required: true
+    type : string
+
+# The HTTP If-None-Match header
+# Used to avoid retrieving data that are already cached
+  If-None-Match:
+    name: If-None-Match
+    in: header
+    description: |
+      Validator for conditional requests; based on the ETag of the formerly retrieved
+      variant of the resourec.
+    type : string
+
+# The HTTP If-Modified-Since header
+# Used to avoid retrieving data that are already cached
+  If-Modified-Since:
+    name: If-Modified-Since
+    in: header
+    description: |
+      Validator for conditional requests; based on Last Modified header of the
+      formerly retrieved variant of the resource.
+    type: string
+
+# The HTTP If-Match header
+# Used to avoid concurrent updates
+  If-Match:
+    name: If-Match
+    in: header
+    description: |
+      Validator for conditional requests; based on ETag.
+    type: string
+
+# The HTTP If-Unmodified-Since header
+# Used to avoid concurrent updates
+  If-Unmodified-Since:
+    name: If-Unmodified-Since
+    in: header
+    description: |
+      Validator for conditional requests; based on Last Modified header.
+    type: string
+
+######################################################
+# The resources used by some of the APIs above within the message body
+######################################################
+definitions:
+
+#-----------------------------------------------------
+# The Error resource
+#-----------------------------------------------------
+  Error:
+    title: Error object returned with 4XX HTTP status
+    required:
+      - code
+      - message
+    properties:
+      code:
+        type: integer
+        format: int64
+      message:
+        type: string
+        description: Error message.
+      description:
+        type: string
+        description: |
+          A detail description about the error message.
+      moreInfo:
+        type: string
+        description: |
+          Preferably an url with more details about the error.
+      error:
+        type: array
+        description: |
+          If there are more than one error list them out.
+          For example, list out validation errors by each field.
+        items:
+          $ref: '#/definitions/ErrorListItem'
+
+#-----------------------------------------------------
+# The Error List Item resource
+#-----------------------------------------------------
+  ErrorListItem:
+    title: Description of individual errors that may have occurred during a request.
+    required:
+      - code
+      - message
+    properties:
+      code:
+        type: string
+      message:
+        type: string
+        description: |
+          Description about individual errors occurred
+
