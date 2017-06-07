@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Captures common attributes used in an OAuth Application.
+ * Model for DCR Client (OAuth2 Application)
  */
 public final class DCRClientInfo {
 
@@ -69,20 +69,10 @@ public final class DCRClientInfo {
         this.clientSecret = clientSecret;
     }
 
-    /**
-     * Set client Name of OAuthApplication.
-     *
-     * @param clientName Name of the application.
-     */
     public void setClientName(String clientName) {
         this.clientName = clientName;
     }
 
-    /**
-     * Set grant types of OAuth Application.
-     *
-     * @param grantTypes grant types
-     */
     public void setGrantTypes(List<String> grantTypes) {
         this.grantTypes = grantTypes;
     }

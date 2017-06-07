@@ -61,7 +61,7 @@ public class OAuth2ServiceStubs {
      * @param introspectEndpoint Token introspection endpoint
      * @param kmCertAlias        Key manager certificate alias
      * @param username           Username of Key Manager
-     * @param password           for Key Manager
+     * @param password           Password of Key Manager
      */
     public OAuth2ServiceStubs(String tokenEndpoint, String revokeEndpoint, String introspectEndpoint,
                               String kmCertAlias, String username, String password) {
@@ -284,8 +284,7 @@ public class OAuth2ServiceStubs {
         private String urlEncodeKeyValuePair(Map.Entry<String, Object> entry) {
             try {
                 return URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8.toString()) + '='
-                        + URLEncoder.encode(String.valueOf(entry.getValue()),
-                        StandardCharsets.UTF_8.toString());
+                        + URLEncoder.encode(String.valueOf(entry.getValue()), StandardCharsets.UTF_8.toString());
             } catch (UnsupportedEncodingException ex) {
                 throw new EncodeException("Error occurred while URL encoding message", ex);
             }
