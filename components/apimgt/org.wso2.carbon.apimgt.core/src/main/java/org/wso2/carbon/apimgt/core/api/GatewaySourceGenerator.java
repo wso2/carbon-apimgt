@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.core.api;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.template.APIConfigContext;
 import org.wso2.carbon.apimgt.core.template.APITemplateException;
+import org.wso2.carbon.apimgt.core.template.dto.CompositeAPIEndpointDTO;
 import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
 
 import java.util.List;
@@ -70,4 +71,16 @@ public interface GatewaySourceGenerator {
      * @param apiConfigContext  APIConfigContext instance
      */
     void setApiConfigContext(APIConfigContext apiConfigContext);
+
+    /**
+     * Generate initial service implementation for a composite API
+     *
+     * @param apiResources List of api resources.
+     * @param compositeApiEndpoints List of api endpoints of subscribed APIs.
+     * @return service impl as Text
+     * @throws APITemplateException throws if an error occurred
+     */
+    String getCompositeAPIConfigStringFromTemplate(List<TemplateBuilderDTO> apiResources,
+                                                   List<CompositeAPIEndpointDTO> compositeApiEndpoints)
+                                                   throws APITemplateException;
 }

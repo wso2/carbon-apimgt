@@ -189,10 +189,11 @@ public class APIStoreImplTestCase {
         CompositeAPI.Builder apiBuilder = SampleTestObjectCreator.createUniqueCompositeAPI();
 
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway apiGateway = Mockito.mock(APIGateway.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO, gatewaySourceGenerator, apiGateway);
-
+        IdentityProvider idp = Mockito.mock(IdentityProvider.class);
+        APIStore apiStore = getApiStoreImpl(idp, apiDAO, apiSubscriptionDAO, gatewaySourceGenerator, apiGateway);
         apiStore.addCompositeApi(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).addApplicationAssociatedAPI(apiBuilder.build());
     }
@@ -203,9 +204,11 @@ public class APIStoreImplTestCase {
         CompositeAPI.Builder apiBuilder = SampleTestObjectCreator.createUniqueCompositeAPI();
 
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway apiGateway = Mockito.mock(APIGateway.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO, gatewaySourceGenerator, apiGateway);
+        IdentityProvider idp = Mockito.mock(IdentityProvider.class);
+        APIStore apiStore = getApiStoreImpl(idp, apiDAO, apiSubscriptionDAO, gatewaySourceGenerator, apiGateway);
 
         String ballerinaImpl = "Ballerina";
 
@@ -245,7 +248,9 @@ public class APIStoreImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway apiGateway = Mockito.mock(APIGateway.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO, gatewaySourceGenerator, apiGateway);
+        APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
+        IdentityProvider idp = Mockito.mock(IdentityProvider.class);
+        APIStore apiStore = getApiStoreImpl(idp, apiDAO, apiSubscriptionDAO, gatewaySourceGenerator, apiGateway);
 
         apiStore.addCompositeApi(apiBuilder);
 
@@ -1315,6 +1320,12 @@ public class APIStoreImplTestCase {
 
     private APIStoreImpl getApiStoreImpl(ApiDAO apiDAO) {
         return new APIStoreImpl(USER_NAME, null, apiDAO, null, null, null, null, null, null, null, null);
+    }
+
+    private APIStoreImpl getApiStoreImpl(IdentityProvider idp, ApiDAO apiDAO, APISubscriptionDAO apiSubscriptionDAO,
+            GatewaySourceGenerator gatewaySourceGenerator, APIGateway apiGateway) {
+        return new APIStoreImpl(USER_NAME, idp, apiDAO, null, apiSubscriptionDAO, null,
+                null, null, null, gatewaySourceGenerator, apiGateway);
     }
 
     private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO) {
