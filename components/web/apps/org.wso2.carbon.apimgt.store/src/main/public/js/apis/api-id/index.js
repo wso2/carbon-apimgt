@@ -567,7 +567,7 @@ $(function () {
                                             },
                                             {addClass: 'btn btn-default', text: 'Stay on this page', onClick: function($noty) {
                                                 $noty.close();
-                                                location.href = contextPath + "/apis/" + apiId;
+                                                location.href = contextPath + "/apis/" + apiIdentifier;
                                               }
                                             }
                                           ]
@@ -588,7 +588,7 @@ $(function () {
                                             },
                                             {addClass: 'btn btn-default', text: 'Stay on this page', onClick: function($noty) {
                                                 $noty.close();
-                                                location.href = contextPath + "/apis/" + apiId;
+                                                location.href = contextPath + "/apis/" + apiIdentifier;
                                               }
                                             }
                                           ]
@@ -610,7 +610,7 @@ $(function () {
                                         },
                                         {addClass: 'btn btn-default', text: 'Stay on this page', onClick: function($noty) {
                                             $noty.close();
-                                            location.href = contextPath + "/apis/" + apiId;
+                                            location.href = contextPath + "/apis/" + apiIdentifier;
                                           }
                                         }
                                       ]
