@@ -1480,37 +1480,42 @@ public class PolicyDAOImpl implements PolicyDAO {
      * @see PolicyDAO#updateAPIPolicy(APIPolicy)
      */
     public void updateAPIPolicy(APIPolicy policy) throws APIMgtDAOException {
-        Connection connection = null;
+
         String queryFindPolicyName = "SELECT * from AM_API_POLICY WHERE UUID = ?";
-        try {
-            connection = DAOUtil.getConnection();
-            if (policy.getUuid().isEmpty()) {
-                String errorMsg =
-                        "Policy object doesn't contain mandatory parameters. At least UUID" + " should be provided.";
-                log.error(errorMsg);
-                throw new APIMgtDAOException(errorMsg);
-            }
-            try (PreparedStatement selectStatement = connection.prepareStatement(queryFindPolicyName)) {
-                selectStatement.setString(1, policy.getUuid());
-                try (ResultSet resultSet = selectStatement.executeQuery()) {
-                    while (resultSet.next()) {
-                        String policyName = resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_NAME);
-                        deletePolicy(policyName, APIMgtConstants.ThrottlePolicyConstants.API_LEVEL);
+
+        try (Connection connection = DAOUtil.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                if (policy.getUuid().isEmpty()) {
+                    String errorMsg =
+                            "Policy object doesn't contain mandatory parameters. At least UUID should be provided.";
+                    log.error(errorMsg);
+                    throw new APIMgtDAOException(errorMsg);
+                }
+                try (PreparedStatement selectStatement = connection.prepareStatement(queryFindPolicyName)) {
+                    selectStatement.setString(1, policy.getUuid());
+                    try (ResultSet resultSet = selectStatement.executeQuery()) {
+                        while (resultSet.next()) {
+                            String policyName = resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.
+                                    COLUMN_NAME);
+                            deletePolicy(policyName, APIMgtConstants.ThrottlePolicyConstants.API_LEVEL);
+                        }
                     }
                 }
+                addApiPolicy(policy, connection);
+
+            } catch (SQLException e) {
+                connection.rollback();
+                String errorMessage = "Error in updating API throttling policy with name: " + policy.getPolicyName();
+                throw new APIMgtDAOException(errorMessage, e);
+
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
-            addApiPolicy(policy, connection);
 
         } catch (SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ex) {
-
-                    // Rollback failed. Exception will be thrown later for upper exception
-                    log.error("Failed to rollback the add Api Policy: " + policy.toString(), ex);
-                }
-            }
+            String errorMsg = "Error in obtaining DB connection";
+            throw new APIMgtDAOException(errorMsg, e);
         }
     }
 
