@@ -119,4 +119,12 @@ public class PolicyConstants {
 
     public static final String KB = "KB";
 
+    public static final String IP_CONDITION_TYPE = "IPCondition";
+
+    public static final String JWT_CLAIMS_CONDITION_TYPE = "JWTClaimsCondition";
+
+    public static final String QUERY_PARAMS_CONDITION_TYPE = "QueryParameterCondition";
+
+    public static final String HEADER_CONDITION_TYPE = "HeaderCondition";
+
 }

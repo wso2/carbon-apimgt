@@ -49,7 +49,7 @@ public class AdvancedThrottlePolicyMappingUtil {
         List<AdvancedThrottlePolicyDTO> advancedPolicyDTOs = new ArrayList<>();
         if (apiPolicies != null) {
             for (APIPolicy apiPolicy : apiPolicies) {
-                advancedPolicyDTOs.add(fromAdvancedPolicyToInfoDTO(apiPolicy));
+                advancedPolicyDTOs.add(fromAdvancedPolicyToDTO(apiPolicy));
             }
         }
         listDTO.setList(advancedPolicyDTOs);

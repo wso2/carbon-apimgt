@@ -148,8 +148,24 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         if (log.isDebugEnabled()) {
             log.info("Received Advance Policy POST request " + body + " with tierLevel = " + tierLevel);
         }
-//        return createPolicy(tierLevel, body);
-        return null;
+
+        if (log.isDebugEnabled()) {
+            log.info("Received Advance Policy PUT request " + body + " with tierLevel = " + tierLevel);
+        }
+        try {
+            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
+            APIPolicy apiPolicy = AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyDTOToPolicy(body);
+            String policyId = apiMgtAdminService.addPolicy(tierLevel, apiPolicy);
+            return Response.status(Response.Status.CREATED).entity(AdvancedThrottlePolicyMappingUtil
+                    .fromAdvancedPolicyToDTO(apiMgtAdminService.getAPIPolicyByUuid(policyId)))
+                    .build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error occurred while adding Advanced Throttle Policy, policy name: " + body
+                    .getPolicyName();
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
     }
 
     /**
@@ -434,19 +450,18 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         if (log.isDebugEnabled()) {
             log.info("Received Subscription Policy POST request " + body + " with tierLevel = " + tierLevel);
         }
-        String policyName = null;
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             SubscriptionPolicy subscriptionPolicy = SubscriptionThrottlePolicyMappingUtil.
                     fromSubscriptionThrottlePolicyDTOToModel(body);
-            policyName = subscriptionPolicy.getPolicyName();
             String policyId = apiMgtAdminService.addPolicy(tierLevel, subscriptionPolicy);
             return Response.status(Response.Status.CREATED).entity(SubscriptionThrottlePolicyMappingUtil
                     .fromSubscriptionThrottlePolicyToDTO(apiMgtAdminService.getSubscriptionPolicyByUuid(policyId)))
                     .build();
 
         } catch (APIManagementException e) {
-            String errorMessage = "Error occurred while adding Subscription Policy. policy name: " + policyName;
+            String errorMessage = "Error occurred while adding Subscription Policy. policy name: " +
+                    body.getPolicyName();
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();

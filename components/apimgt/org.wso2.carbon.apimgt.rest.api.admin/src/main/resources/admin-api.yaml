@@ -1386,7 +1386,6 @@ definitions:
 # The Throttle Condition resource
 #-----------------------------------------------------
   ThrottleCondition:
-    discriminator: type
     x-wso2-subtypes:
       - HeaderCondition
       - IPCondition
@@ -1397,13 +1396,22 @@ definitions:
     required:
       - type
     properties:
+      headerCondition:
+        type: object
+        $ref: '#/definitions/HeaderCondition'
+      ipCondition:
+        type: object
+        $ref: '#/definitions/IPCondition'
+      jwtClaimsCondition:
+        type: object
+        $ref: '#/definitions/JWTClaimsCondition'
+      queryParameterCondition:
+        type: object
+        $ref: '#/definitions/QueryParameterCondition'
       type:
         type: string
-        enum:
-          - HeaderCondition
-          - IPCondition
-          - JWTClaimsCondition
-          - QueryParameterCondition
+        desciption: |
+          HeaderCondition, IPCondition, JWTClaimsCondition and QueryParameterCondition are the supported values
       invertCondition:
         type: boolean
         default: false
@@ -1416,35 +1424,28 @@ definitions:
     required:
       - headerName
       - headerValue
-    allOf:
-      - $ref: '#/definitions/ThrottleCondition'
-      - properties:
-          headerName:
-            type: string
-          headerValue:
-            type: string
+    properties:
+     headerName:
+       type: string
+     headerValue:
+       type: string
 
 #-----------------------------------------------------
 # The Throttle IP Condition resource
 #-----------------------------------------------------
   IPCondition:
     title: IP based throttle condition
-    required:
-      - specificIP
-    allOf:
-      - $ref: '#/definitions/ThrottleCondition'
-      - properties:
-          ipConditionType:
-            type: string
-            enum:
-              - IPRange
-              - IPSpecific
-          specificIP:
-            type: string
-          startingIP:
-            type: string
-          endingIP:
-            type: string
+    properties:
+      ipConditionType:
+        type: string
+        description: |
+          IPRange and IPSpecific are the supported values
+      specificIP:
+        type: string
+      startingIP:
+        type: string
+      endingIP:
+        type: string
 
 #-----------------------------------------------------
 # The Throttle JWT Claims Condition resource
@@ -1454,13 +1455,11 @@ definitions:
     required:
       - claimUrl
       - attribute
-    allOf:
-      - $ref: '#/definitions/ThrottleCondition'
-      - properties:
-          claimUrl:
-            type: string
-          attribute:
-            type: string
+    properties:
+      claimUrl:
+        type: string
+      attribute:
+        type: string
 
 #-----------------------------------------------------
 # The Throttle Query Parameter Condition resource
@@ -1470,13 +1469,11 @@ definitions:
     required:
       - parameterName
       - parameterValue
-    allOf:
-      - $ref: '#/definitions/ThrottleCondition'
-      - properties:
-          parameterName:
-            type: string
-          parameterValue:
-            type: string
+    properties:
+      parameterName:
+        type: string
+      parameterValue:
+        type: string
 
 #-----------------------------------------------------
 # The Throttle Limit resource

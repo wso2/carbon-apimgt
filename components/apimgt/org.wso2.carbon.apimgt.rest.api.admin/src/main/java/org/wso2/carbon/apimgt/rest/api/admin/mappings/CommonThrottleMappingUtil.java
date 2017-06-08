@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.core.models.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.core.models.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.core.models.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.BandwidthLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ConditionalGroupDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomAttributeDTO;
@@ -179,14 +180,14 @@ public class CommonThrottleMappingUtil {
      */
     public static Condition fromDTOToCondition(ThrottleConditionDTO dto)
             throws UnsupportedThrottleConditionTypeException {
-        if (dto instanceof IPConditionDTO) {
-            return fromDTOToIPCondition((IPConditionDTO) dto);
-        } else if (dto instanceof HeaderConditionDTO) {
-            return fromDTOToHeaderCondition((HeaderConditionDTO) dto);
-        } else if (dto instanceof QueryParameterConditionDTO) {
-            return fromDTOToQueryParameterCondition((QueryParameterConditionDTO) dto);
-        } else if (dto instanceof JWTClaimsConditionDTO) {
-            return fromDTOToJWTClaimsCondition((JWTClaimsConditionDTO) dto);
+        if (PolicyConstants.IP_CONDITION_TYPE.equals(dto.getType())) {
+            return fromDTOToIPCondition(dto);
+        } else if (PolicyConstants.HEADER_CONDITION_TYPE.equals(dto.getType())) {
+            return fromDTOToHeaderCondition(dto);
+        } else if (PolicyConstants.QUERY_PARAMS_CONDITION_TYPE.equals(dto.getType())) {
+            return fromDTOToQueryParameterCondition(dto);
+        } else if (PolicyConstants.JWT_CLAIMS_CONDITION_TYPE.equals(dto.getType())) {
+            return fromDTOToJWTClaimsCondition(dto);
         } else {
             String msg = "Throttle Condition type " + dto.getClass().getName() + " is not supported";
             log.error(msg);
@@ -368,13 +369,13 @@ public class CommonThrottleMappingUtil {
      * @param dto IP Condition DTO object
      * @return IP Condition model object derived from DTO
      */
-    public static IPCondition fromDTOToIPCondition(IPConditionDTO dto) {
-        String ipConditionType = mapIPConditionTypeFromDTOToModel(dto.getIpConditionType());
+    public static IPCondition fromDTOToIPCondition(ThrottleConditionDTO dto) {
+        String ipConditionType = mapIPConditionTypeFromDTOToModel(dto.getIpCondition().getIpConditionType());
         IPCondition ipCondition = new IPCondition(ipConditionType);
         ipCondition = updateFieldsFromDTOToCondition(dto, ipCondition);
-        ipCondition.setSpecificIP(dto.getSpecificIP());
-        ipCondition.setStartingIP(dto.getStartingIP());
-        ipCondition.setEndingIP(dto.getEndingIP());
+        ipCondition.setSpecificIP(dto.getIpCondition().getSpecificIP());
+        ipCondition.setStartingIP(dto.getIpCondition().getStartingIP());
+        ipCondition.setEndingIP(dto.getIpCondition().getEndingIP());
         return ipCondition;
     }
 
@@ -384,16 +385,17 @@ public class CommonThrottleMappingUtil {
      * @param ipCondition IP Condition model object
      * @return DTO object derived from model object
      */
-    public static IPConditionDTO fromIPConditionToDTO(IPCondition ipCondition) {
-        IPConditionDTO.IpConditionTypeEnum ipConditionType = mapIPConditionTypeFromModelToDTO(ipCondition.getType());
-        IPConditionDTO dto = new IPConditionDTO();
-        dto.setType(ThrottleConditionDTO.TypeEnum.IPCONDITION);
-        dto = updateFieldsFromConditionToDTO(ipCondition, dto);
-        dto.setIpConditionType(ipConditionType);
-        dto.setSpecificIP(ipCondition.getSpecificIP());
-        dto.setStartingIP(ipCondition.getStartingIP());
-        dto.setEndingIP(ipCondition.getEndingIP());
-        return dto;
+    public static ThrottleConditionDTO fromIPConditionToDTO(IPCondition ipCondition) {
+        String ipConditionType = mapIPConditionTypeFromModelToDTO(ipCondition.getType());
+        ThrottleConditionDTO throttleConditionDTO = new ThrottleConditionDTO();
+        throttleConditionDTO.setType(PolicyConstants.IP_CONDITION_TYPE);
+        throttleConditionDTO.setIpCondition(new IPConditionDTO());
+        throttleConditionDTO = updateFieldsFromConditionToDTO(ipCondition, throttleConditionDTO);
+        throttleConditionDTO.getIpCondition().setIpConditionType(ipConditionType);
+        throttleConditionDTO.getIpCondition().setSpecificIP(ipCondition.getSpecificIP());
+        throttleConditionDTO.getIpCondition().setStartingIP(ipCondition.getStartingIP());
+        throttleConditionDTO.getIpCondition().setEndingIP(ipCondition.getEndingIP());
+        return throttleConditionDTO;
     }
 
     /**
@@ -402,11 +404,11 @@ public class CommonThrottleMappingUtil {
      * @param dto Header Condition DTO object
      * @return Header Condition model object derived from Header Condition DTO
      */
-    public static HeaderCondition fromDTOToHeaderCondition(HeaderConditionDTO dto) {
+    public static HeaderCondition fromDTOToHeaderCondition(ThrottleConditionDTO dto) {
         HeaderCondition headerCondition = new HeaderCondition();
         headerCondition = updateFieldsFromDTOToCondition(dto, headerCondition);
-        headerCondition.setHeader(dto.getHeaderName());
-        headerCondition.setValue(dto.getHeaderValue());
+        headerCondition.setHeader(dto.getHeaderCondition().getHeaderName());
+        headerCondition.setValue(dto.getHeaderCondition().getHeaderValue());
         return headerCondition;
     }
 
@@ -416,13 +418,14 @@ public class CommonThrottleMappingUtil {
      * @param headerCondition Header Condition model object
      * @return DTO object that was derived from Header Condition model object
      */
-    public static HeaderConditionDTO fromHeaderConditionToDTO(HeaderCondition headerCondition) {
-        HeaderConditionDTO dto = new HeaderConditionDTO();
-        dto.setType(ThrottleConditionDTO.TypeEnum.HEADERCONDITION);
-        dto = updateFieldsFromConditionToDTO(headerCondition, dto);
-        dto.setHeaderName(headerCondition.getHeaderName());
-        dto.setHeaderValue(headerCondition.getValue());
-        return dto;
+    public static ThrottleConditionDTO fromHeaderConditionToDTO(HeaderCondition headerCondition) {
+        ThrottleConditionDTO throttleConditionDTO = new ThrottleConditionDTO();
+        throttleConditionDTO.setType(PolicyConstants.HEADER_CONDITION_TYPE);
+        throttleConditionDTO.setHeaderCondition(new HeaderConditionDTO());
+        throttleConditionDTO = updateFieldsFromConditionToDTO(headerCondition, throttleConditionDTO);
+        throttleConditionDTO.getHeaderCondition().setHeaderName(headerCondition.getHeaderName());
+        throttleConditionDTO.getHeaderCondition().setHeaderValue(headerCondition.getValue());
+        return throttleConditionDTO;
     }
 
     /**
@@ -431,11 +434,11 @@ public class CommonThrottleMappingUtil {
      * @param dto Query Parameter Condition DTO object
      * @return Query Parameter Condition model object derived from Query Parameter Condition DTO
      */
-    public static QueryParameterCondition fromDTOToQueryParameterCondition(QueryParameterConditionDTO dto) {
+    public static QueryParameterCondition fromDTOToQueryParameterCondition(ThrottleConditionDTO dto) {
         QueryParameterCondition queryParameterCondition = new QueryParameterCondition();
         queryParameterCondition = updateFieldsFromDTOToCondition(dto, queryParameterCondition);
-        queryParameterCondition.setParameter(dto.getParameterName());
-        queryParameterCondition.setValue(dto.getParameterValue());
+        queryParameterCondition.setParameter(dto.getQueryParameterCondition().getParameterName());
+        queryParameterCondition.setValue(dto.getQueryParameterCondition().getParameterValue());
         return queryParameterCondition;
     }
 
@@ -445,13 +448,14 @@ public class CommonThrottleMappingUtil {
      * @param condition Query Parameter Condition model object
      * @return DTO object that was derived from Query Parameter Condition model object
      */
-    public static QueryParameterConditionDTO fromQueryParameterConditionToDTO(QueryParameterCondition condition) {
-        QueryParameterConditionDTO dto = new QueryParameterConditionDTO();
-        dto.setType(ThrottleConditionDTO.TypeEnum.QUERYPARAMETERCONDITION);
-        dto = updateFieldsFromConditionToDTO(condition, dto);
-        dto.setParameterName(condition.getParameter());
-        dto.setParameterValue(condition.getValue());
-        return dto;
+    public static ThrottleConditionDTO fromQueryParameterConditionToDTO(QueryParameterCondition condition) {
+        ThrottleConditionDTO throttleConditionDTO = new ThrottleConditionDTO();
+        throttleConditionDTO.setType(PolicyConstants.QUERY_PARAMS_CONDITION_TYPE);
+        throttleConditionDTO.setQueryParameterCondition(new QueryParameterConditionDTO());
+        throttleConditionDTO = updateFieldsFromConditionToDTO(condition, throttleConditionDTO);
+        throttleConditionDTO.getQueryParameterCondition().setParameterName(condition.getParameter());
+        throttleConditionDTO.getQueryParameterCondition().setParameterValue(condition.getValue());
+        return throttleConditionDTO;
     }
 
     /**
@@ -460,11 +464,11 @@ public class CommonThrottleMappingUtil {
      * @param dto JWT Claims Condition DTO object
      * @return JWT Claims Condition model object derived from JWT Claims Condition DTO
      */
-    public static JWTClaimsCondition fromDTOToJWTClaimsCondition(JWTClaimsConditionDTO dto) {
+    public static JWTClaimsCondition fromDTOToJWTClaimsCondition(ThrottleConditionDTO dto) {
         JWTClaimsCondition jwtClaimsCondition = new JWTClaimsCondition();
         jwtClaimsCondition = updateFieldsFromDTOToCondition(dto, jwtClaimsCondition);
-        jwtClaimsCondition.setAttribute(dto.getAttribute());
-        jwtClaimsCondition.setClaimUrl(dto.getClaimUrl());
+        jwtClaimsCondition.setAttribute(dto.getJwtClaimsCondition().getAttribute());
+        jwtClaimsCondition.setClaimUrl(dto.getJwtClaimsCondition().getClaimUrl());
         return jwtClaimsCondition;
     }
 
@@ -474,13 +478,14 @@ public class CommonThrottleMappingUtil {
      * @param condition JWT Claims Condition model object
      * @return DTO object that was derived from JWT Claims Condition model object
      */
-    public static JWTClaimsConditionDTO fromJWTClaimsConditionToDTO(JWTClaimsCondition condition) {
-        JWTClaimsConditionDTO dto = new JWTClaimsConditionDTO();
-        dto.setType(ThrottleConditionDTO.TypeEnum.JWTCLAIMSCONDITION);
-        dto = updateFieldsFromConditionToDTO(condition, dto);
-        dto.setClaimUrl(condition.getClaimUrl());
-        dto.setAttribute(condition.getAttribute());
-        return dto;
+    public static ThrottleConditionDTO fromJWTClaimsConditionToDTO(JWTClaimsCondition condition) {
+        ThrottleConditionDTO throttleConditionDTO = new ThrottleConditionDTO();
+        throttleConditionDTO.setType(PolicyConstants.JWT_CLAIMS_CONDITION_TYPE);
+        throttleConditionDTO.setJwtClaimsCondition(new JWTClaimsConditionDTO());
+        throttleConditionDTO = updateFieldsFromConditionToDTO(condition, throttleConditionDTO);
+        throttleConditionDTO.getJwtClaimsCondition().setClaimUrl(condition.getClaimUrl());
+        throttleConditionDTO.getJwtClaimsCondition().setAttribute(condition.getAttribute());
+        return throttleConditionDTO;
     }
 
     /**
@@ -613,14 +618,14 @@ public class CommonThrottleMappingUtil {
     /**
      * Maps IP Condition Type from IP Condition DTO into IP Condition model type
      *
-     * @param typeEnum Type from IP Condition DTO
+     * @param ipConditionTypeDto Type from IP Condition DTO
      * @return Mapped IP Condition model type
      */
-    private static String mapIPConditionTypeFromDTOToModel(IPConditionDTO.IpConditionTypeEnum typeEnum) {
-        switch (typeEnum) {
-        case IPRANGE:
+    private static String mapIPConditionTypeFromDTOToModel(String ipConditionTypeDto) {
+        switch (ipConditionTypeDto) {
+        case PolicyConstants.IP_RANGE_TYPE:
             return PolicyConstants.IP_RANGE_TYPE;
-        case IPSPECIFIC:
+        case PolicyConstants.IP_SPECIFIC_TYPE:
             return PolicyConstants.IP_SPECIFIC_TYPE;
         default:
             return null;
@@ -630,15 +635,15 @@ public class CommonThrottleMappingUtil {
     /**
      * Map IP Condition model type into DTO's type
      *
-     * @param ipConditionType IP Condition model type
+     * @param ipConditionTypeInModel IP Condition model type
      * @return Mapped IP Condition DTO type
      */
-    private static IPConditionDTO.IpConditionTypeEnum mapIPConditionTypeFromModelToDTO(String ipConditionType) {
-        switch (ipConditionType) {
+    private static String mapIPConditionTypeFromModelToDTO(String ipConditionTypeInModel) {
+        switch (ipConditionTypeInModel) {
         case PolicyConstants.IP_RANGE_TYPE:
-            return IPConditionDTO.IpConditionTypeEnum.IPRANGE;
+            return PolicyConstants.IP_RANGE_TYPE;
         case PolicyConstants.IP_SPECIFIC_TYPE:
-            return IPConditionDTO.IpConditionTypeEnum.IPSPECIFIC;
+            return PolicyConstants.IP_SPECIFIC_TYPE;
         default:
             return null;
         }

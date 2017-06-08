@@ -97,17 +97,29 @@ public class PolicyDAOImpl implements PolicyDAO {
     @Override public void addPolicy(String policyLevel, Policy policy) throws APIMgtDAOException {
 
         try (Connection connection = DAOUtil.getConnection()) {
-            if (policy instanceof APIPolicy) {
-                addApiPolicy(policy, connection);
+            try {
+                connection.setAutoCommit(false);
+                if (policy instanceof APIPolicy) {
+                    addApiPolicy(policy, connection);
 
-            } else if (policy instanceof ApplicationPolicy) {
-                addApplicationPolicy(policy, connection);
+                } else if (policy instanceof ApplicationPolicy) {
+                    addApplicationPolicy(policy, connection);
 
-            } else if (policy instanceof SubscriptionPolicy) {
-                addSubscriptionPolicy(policy, connection);
+                } else if (policy instanceof SubscriptionPolicy) {
+                    addSubscriptionPolicy(policy, connection);
+                }
+            } catch (SQLException e) {
+                connection.rollback();
+                String errorMessage = "Error in adding throttling policy for level: " + policyLevel + ", policy name:"
+                        + " " + policy.getPolicyName();
+                throw new APIMgtDAOException(errorMessage, e);
+
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            String errorMsg = "Error in obtaining DB connection";
+            throw new APIMgtDAOException(errorMsg, e);
         }
     }
 
@@ -137,18 +149,18 @@ public class PolicyDAOImpl implements PolicyDAO {
         if (limit instanceof BandwidthLimit) {
             BandwidthLimit bwLimit = (BandwidthLimit) limit;
             addAPIPolicy(connection, policy.getPolicyName(), policy.getDisplayName(), policy.getDescription(),
-                    policy.getDefaultQuotaPolicy().getType(), bwLimit.getDataAmount(),
+                    policy.getDefaultQuotaPolicy().getType(), bwLimit.getDataAmount(), bwLimit.getDataUnit(),
                     policy.getDefaultQuotaPolicy().getLimit().getUnitTime(),
                     policy.getDefaultQuotaPolicy().getLimit().getTimeUnit(), ((APIPolicy) policy).getPipelines(),
-                    API_TIER_LEVEL);
+                    API_TIER_LEVEL, policy.getUuid(), policy.isDeployed());
 
         } else if (limit instanceof RequestCountLimit) {
             RequestCountLimit reqCountLimit = (RequestCountLimit) limit;
             addAPIPolicy(connection, policy.getPolicyName(), policy.getDisplayName(), policy.getDescription(),
-                    policy.getDefaultQuotaPolicy().getType(), reqCountLimit.getRequestCount(),
+                    policy.getDefaultQuotaPolicy().getType(), reqCountLimit.getRequestCount(), "",
                     policy.getDefaultQuotaPolicy().getLimit().getUnitTime(),
                     policy.getDefaultQuotaPolicy().getLimit().getTimeUnit(), ((APIPolicy) policy).getPipelines(),
-                    API_TIER_LEVEL);
+                    API_TIER_LEVEL, policy.getUuid(), policy.isDeployed());
         }
     }
 
@@ -901,14 +913,18 @@ public class PolicyDAOImpl implements PolicyDAO {
                 if (!isDefaultPoliciesExist(connection)) {
                     connection.setAutoCommit(false);
 
-                    addAPIPolicy(connection, UNLIMITED_TIER, UNLIMITED_TIER, UNLIMITED_TIER, REQUEST_COUNT_TYPE, 1, 60,
-                            SECONDS_TIMUNIT, null, API_TIER_LEVEL);
-                    addAPIPolicy(connection, GOLD_TIER, GOLD_TIER, GOLD_TIER, REQUEST_COUNT_TYPE, 1, 60,
-                            SECONDS_TIMUNIT, null, API_TIER_LEVEL);
-                    addAPIPolicy(connection, SILVER_TIER, SILVER_TIER, SILVER_TIER, REQUEST_COUNT_TYPE, 1, 60,
-                            SECONDS_TIMUNIT, null, API_TIER_LEVEL);
-                    addAPIPolicy(connection, BRONZE_TIER, BRONZE_TIER, BRONZE_TIER, REQUEST_COUNT_TYPE, 1, 60,
-                            SECONDS_TIMUNIT, null, API_TIER_LEVEL);
+                    addAPIPolicy(connection, UNLIMITED_TIER, UNLIMITED_TIER, UNLIMITED_TIER, REQUEST_COUNT_TYPE, 1,
+                            PolicyConstants.MB, 60,
+                            SECONDS_TIMUNIT, null, API_TIER_LEVEL, UUID.randomUUID().toString(), false);
+                    addAPIPolicy(connection, GOLD_TIER, GOLD_TIER, GOLD_TIER, REQUEST_COUNT_TYPE, 1, PolicyConstants.MB,
+                            60,
+                            SECONDS_TIMUNIT, null, API_TIER_LEVEL, UUID.randomUUID().toString(), false);
+                    addAPIPolicy(connection, SILVER_TIER, SILVER_TIER, SILVER_TIER, REQUEST_COUNT_TYPE, 1,
+                            PolicyConstants.MB, 60,
+                            SECONDS_TIMUNIT, null, API_TIER_LEVEL, UUID.randomUUID().toString(), false);
+                    addAPIPolicy(connection, BRONZE_TIER, BRONZE_TIER, BRONZE_TIER, REQUEST_COUNT_TYPE, 1,
+                            PolicyConstants.MB, 60,
+                            SECONDS_TIMUNIT, null, API_TIER_LEVEL, UUID.randomUUID().toString(), false);
 
                     addSubscriptionPolicy(connection, UNLIMITED_TIER, UNLIMITED_TIER, UNLIMITED_TIER,
                             REQUEST_COUNT_TYPE,
@@ -962,46 +978,47 @@ public class PolicyDAOImpl implements PolicyDAO {
 
     /**
      * Adding api policy to db
-     *
-     * @param connection connection to the db
+     *  @param connection connection to the db
      * @param name  name of the policy to be added
      * @param displayName display name of the policy
      * @param description description about the policy
      * @param quotaType quota type of the policy ( request count or bandwidth limit)
      * @param quota amount of the quota
+     * @param quotaUnit unit of the quota (ex.: if quota type is {@link BandwidthLimit}, this should be KB/MB, etc.)
      * @param unitTime time period
      * @param timeUnit time unit
      * @param pipelines pipelines of the api policy
      * @param applicableLevel policy applicable level
-     * @return created policy uuid
-     * @throws SQLException If error occurred while inserting policy to db
+     * @param uuid unique id of the policy      @throws SQLException If error occurred while inserting policy to db
+     * @param isDeployed is the policy deployed or not
      */
-    private static String addAPIPolicy(Connection connection, String name, String displayName, String description,
-            String quotaType, long quota, long unitTime, String timeUnit, List<Pipeline> pipelines,
-            String applicableLevel) throws SQLException {
-        //todo: Bandwidth based quotapolicy inserting as default quota policy
+    private static void addAPIPolicy(Connection connection, String name, String displayName, String description,
+            String quotaType, long quota, String quotaUnit, long unitTime, String timeUnit, List<Pipeline> pipelines,
+            String applicableLevel, String uuid, boolean isDeployed) throws SQLException {
+
         final String query = "INSERT INTO AM_API_POLICY (UUID, NAME, DISPLAY_NAME, DESCRIPTION, "
                 + "DEFAULT_QUOTA_TYPE, DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME,"
-                + " DEFAULT_TIME_UNIT, APPLICABLE_LEVEL) " + "VALUES (?,?,?,?,?,?,?,?,?,?)";
-        String policyID = UUID.randomUUID().toString();
+                + " DEFAULT_TIME_UNIT, APPLICABLE_LEVEL, IS_DEPLOYED) " + "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, policyID);
+            statement.setString(1, uuid);
             statement.setString(2, name);
             statement.setString(3, displayName);
             statement.setString(4, description);
             statement.setString(5, quotaType);
             statement.setLong(6, quota);
-            statement.setString(7, PolicyConstants.MB);
+            statement.setString(7, quotaUnit);
             statement.setLong(8, unitTime);
             statement.setString(9, timeUnit);
             statement.setString(10, applicableLevel);
+            statement.setBoolean(11, isDeployed);
             statement.execute();
-            if (pipelines != null) {
-                addAPIPipeline(connection, pipelines, policyID);
-            }
-        }
 
-        return policyID;
+            if (pipelines != null) {
+                addAPIPipeline(connection, pipelines, uuid);
+            }
+            connection.commit();
+        }
     }
 
     /**
@@ -1017,9 +1034,9 @@ public class PolicyDAOImpl implements PolicyDAO {
             throws SQLException {
 
         final String query =
-                "INSERT INTO AM_CONDITION_GROUP (UUID, " + "QUOTA_TYPE, QUOTA, QUOTA_UNIT, UNIT_TIME, TIME_UNIT) "
+                "INSERT INTO AM_CONDITION_GROUP (UUID, QUOTA_TYPE, QUOTA, QUOTA_UNIT, UNIT_TIME, TIME_UNIT) "
                         + "VALUES (?,?,?,?,?,?)";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (PreparedStatement statement = connection.prepareStatement(query, new String[]{"CONDITION_GROUP_ID"})) {
             for (Pipeline pipeline : pipelines) {
                 statement.setString(1, uuid);
                 statement.setString(2, pipeline.getQuotaPolicy().getType());
@@ -1037,20 +1054,26 @@ public class PolicyDAOImpl implements PolicyDAO {
                 }
                 statement.setLong(5, pipeline.getQuotaPolicy().getLimit().getUnitTime());
                 statement.setString(6, pipeline.getQuotaPolicy().getLimit().getTimeUnit());
-                statement.execute();
-                List<Integer> conditionGroupIds = getConditionGroupIDs(connection, uuid);
-                int conID = conditionGroupIds.get(conditionGroupIds.size() - 1); //getting the last condition group id
-                List<Condition> conditionList = pipeline.getConditions();
-                for (Condition condition : conditionList) {
-                    if (condition instanceof IPCondition) {
-                        addIPCondition(connection, (IPCondition) condition, conID);
-                    } else if (condition instanceof HeaderCondition) {
-                        addHeaderCondition(connection, (HeaderCondition) condition, conID);
-                    } else if (condition instanceof JWTClaimsCondition) {
-                        addJWTClaimCondition(connection, (JWTClaimsCondition) condition, conID);
-                    } else if (condition instanceof QueryParameterCondition) {
-                        addParamCondition(connection, (QueryParameterCondition) condition, conID);
+                statement.executeUpdate();
+                ResultSet rs = statement.getGeneratedKeys();
+                if (rs.next()) {
+                    // get the auto increment id
+                    int conditionId = rs.getInt(1);
+                    List<Condition> conditionList = pipeline.getConditions();
+                    for (Condition condition : conditionList) {
+                        if (condition instanceof IPCondition) {
+                            addIPCondition(connection, (IPCondition) condition, conditionId);
+                        } else if (condition instanceof HeaderCondition) {
+                            addHeaderCondition(connection, (HeaderCondition) condition, conditionId);
+                        } else if (condition instanceof JWTClaimsCondition) {
+                            addJWTClaimCondition(connection, (JWTClaimsCondition) condition, conditionId);
+                        } else if (condition instanceof QueryParameterCondition) {
+                            addParamCondition(connection, (QueryParameterCondition) condition, conditionId);
+                        }
                     }
+                } else {
+                    String errorMsg = "Unable to retrieve auto incremented id, hence unable to add Pipeline Condition";
+                    throw new SQLException(errorMsg);
                 }
             }
         }
@@ -1065,14 +1088,15 @@ public class PolicyDAOImpl implements PolicyDAO {
      * @throws SQLException if error occurred while inserting ip condition to db
      */
     private static void addIPCondition(Connection connection, IPCondition ipCondition, int conId) throws SQLException {
-        String query = "INSERT INTO AM_IP_CONDITION (STARTING_IP, ENDING_IP, SPECIFIC_IP, "
-                + "CONDITION_GROUP_ID) VALUES (?,?,?,?)";
+        String query = "INSERT INTO AM_IP_CONDITION (STARTING_IP, ENDING_IP, SPECIFIC_IP, WITHIN_IP_RANGE, "
+                + "CONDITION_GROUP_ID) VALUES (?,?,?,?,?)";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, ipCondition.getStartingIP());
             statement.setString(2, ipCondition.getEndingIP());
             statement.setString(3, ipCondition.getSpecificIP());
-            statement.setInt(4, conId);         //Con id represents condition group id
+            statement.setBoolean(4, ipCondition.isInvertCondition());
+            statement.setInt(5, conId);         //Con id represents condition group id
             statement.execute();
         }
     }
@@ -1088,11 +1112,12 @@ public class PolicyDAOImpl implements PolicyDAO {
     private static void addHeaderCondition(Connection connection, HeaderCondition headerCondition, int conId)
             throws SQLException {
         String query = "INSERT INTO AM_HEADER_FIELD_CONDITION (HEADER_FIELD_NAME, HEADER_FIELD_VALUE, "
-                + "CONDITION_GROUP_ID) VALUES (?,?,?)";
+                + "CONDITION_GROUP_ID, IS_HEADER_FIELD_MAPPING) VALUES (?,?,?,?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, headerCondition.getHeaderName());
             statement.setString(2, headerCondition.getValue());
             statement.setInt(3, conId);         //Con id represents condition group id
+            statement.setBoolean(4, headerCondition.isInvertCondition());
             statement.execute();
         }
     }
@@ -1108,11 +1133,13 @@ public class PolicyDAOImpl implements PolicyDAO {
     private static void addJWTClaimCondition(Connection connection, JWTClaimsCondition jwtClaimsCondition, int conID)
             throws SQLException {
         String query =
-                "INSERT INTO AM_JWT_CLAIM_CONDITION (CLAIM_URI, CLAIM_ATTRIB, " + "CONDITION_GROUP_ID) VALUES (?,?,?)";
+                "INSERT INTO AM_JWT_CLAIM_CONDITION (CLAIM_URI, CLAIM_ATTRIB, CONDITION_GROUP_ID, IS_CLAIM_MAPPING) "
+                        + "VALUES (?,?,?,?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, jwtClaimsCondition.getClaimUrl());
             statement.setString(2, jwtClaimsCondition.getAttribute());
             statement.setInt(3, conID);         //Con id represents condition group id
+            statement.setBoolean(4, jwtClaimsCondition.isInvertCondition());
             statement.execute();
         }
     }
@@ -1128,11 +1155,12 @@ public class PolicyDAOImpl implements PolicyDAO {
     private static void addParamCondition(Connection connection, QueryParameterCondition queryParamCondition, int conID)
             throws SQLException {
         String query = "INSERT INTO AM_QUERY_PARAMETER_CONDITION (PARAMETER_NAME, "
-                + "PARAMETER_VALUE,CONDITION_GROUP_ID) VALUES (?,?,?)";
+                + "PARAMETER_VALUE,CONDITION_GROUP_ID, IS_PARAM_MAPPING) VALUES (?,?,?,?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, queryParamCondition.getParameter());
             statement.setString(2, queryParamCondition.getValue());
             statement.setInt(3, conID);         //Con id represents condition group id
+            statement.setBoolean(4, queryParamCondition.isInvertCondition());
             statement.execute();
         }
     }
@@ -1187,6 +1215,7 @@ public class PolicyDAOImpl implements PolicyDAO {
             statement.setString(15, billingPlan);
 
             statement.execute();
+            connection.commit();
         }
     }
 
@@ -1209,6 +1238,7 @@ public class PolicyDAOImpl implements PolicyDAO {
             statement.setString(9, timeUnit);
 
             statement.execute();
+            connection.commit();
         }
     }
 
@@ -1449,8 +1479,16 @@ public class PolicyDAOImpl implements PolicyDAO {
     @Override
     public void updateAPIPolicy(APIPolicy apiPolicy) throws APIMgtDAOException {
         final String query = "UPDATE AM_API_POLICY SET NAME = ?, DISPLAY_NAME = ?, DESCRIPTION = ?, "
-                + "DEFAULT_QUOTA_TYPE = ?, DEFAULT_QUOTA = ?, DEFAULT_UNIT_TIME = ?, DEFAULT_TIME_UNIT = ?, "
-                + "APPLICABLE_LEVEL = ? WHERE UUID = ?";
+                + "DEFAULT_QUOTA_TYPE = ?, DEFAULT_QUOTA = ?, DEFAULT_QUOTA_UNIT = ?, DEFAULT_UNIT_TIME = ?, "
+                + "DEFAULT_TIME_UNIT = ?, APPLICABLE_LEVEL = ?, IS_DEPLOYED= ?  WHERE UUID = ?";
+
+        Limit limit = apiPolicy.getDefaultQuotaPolicy().getLimit();
+        boolean isBandwidthLimitPolicy = false, isRequestCountLimitPolicy = false;
+        if (limit instanceof BandwidthLimit) {
+            isBandwidthLimitPolicy = true;
+        } else if (limit instanceof RequestCountLimit) {
+            isRequestCountLimitPolicy = true;
+        }
 
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(query)) {
@@ -1458,13 +1496,24 @@ public class PolicyDAOImpl implements PolicyDAO {
             statement.setString(2, apiPolicy.getDisplayName());
             statement.setString(3, apiPolicy.getDescription());
             statement.setString(4, apiPolicy.getDefaultQuotaPolicy().getType());
-            statement.setInt(5, 0);
-            statement.setLong(6, apiPolicy.getDefaultQuotaPolicy().getLimit().getUnitTime());
-            statement.setString(7, apiPolicy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
-            statement.setString(8, API_TIER_LEVEL);
-            statement.setString(9, apiPolicy.getUuid());
-
+            if (isBandwidthLimitPolicy) {
+                statement.setInt(5, ((BandwidthLimit) limit).getDataAmount());
+                statement.setString(6, ((BandwidthLimit) limit).getDataUnit());
+            } else if (isRequestCountLimitPolicy) {
+                statement.setInt(5, ((RequestCountLimit) limit).getRequestCount());
+                statement.setString(6, "");
+            }
+            statement.setLong(7, apiPolicy.getDefaultQuotaPolicy().getLimit().getUnitTime());
+            statement.setString(8, apiPolicy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+            statement.setString(9, API_TIER_LEVEL);
+            statement.setBoolean(10, apiPolicy.isDeployed());
+            statement.setString(11, apiPolicy.getUuid());
             statement.execute();
+
+//            if (apiPolicy.getPipelines() != null && !apiPolicy.getPipelines().isEmpty()) {
+//
+//            }
+
         } catch (SQLException e) {
             log.error(e.getMessage(), e);
             throw new APIMgtDAOException(e);
