@@ -143,7 +143,7 @@ public class PolicyDAOImpl implements PolicyDAO {
         }
     }
 
-    private void addApiPolicy(Policy policy, Connection connection) throws SQLException {
+    private static void addApiPolicy(Policy policy, Connection connection) throws SQLException {
         APIPolicy apiPolicy = (APIPolicy) policy;
         Limit limit = apiPolicy.getDefaultQuotaPolicy().getLimit();
         if (limit instanceof BandwidthLimit) {
@@ -1476,47 +1476,41 @@ public class PolicyDAOImpl implements PolicyDAO {
         }
     }
 
-    @Override
-    public void updateAPIPolicy(APIPolicy apiPolicy) throws APIMgtDAOException {
-        final String query = "UPDATE AM_API_POLICY SET NAME = ?, DISPLAY_NAME = ?, DESCRIPTION = ?, "
-                + "DEFAULT_QUOTA_TYPE = ?, DEFAULT_QUOTA = ?, DEFAULT_QUOTA_UNIT = ?, DEFAULT_UNIT_TIME = ?, "
-                + "DEFAULT_TIME_UNIT = ?, APPLICABLE_LEVEL = ?, IS_DEPLOYED= ?  WHERE UUID = ?";
-
-        Limit limit = apiPolicy.getDefaultQuotaPolicy().getLimit();
-        boolean isBandwidthLimitPolicy = false, isRequestCountLimitPolicy = false;
-        if (limit instanceof BandwidthLimit) {
-            isBandwidthLimitPolicy = true;
-        } else if (limit instanceof RequestCountLimit) {
-            isRequestCountLimitPolicy = true;
-        }
-
-        try (Connection connection = DAOUtil.getConnection();
-                PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, apiPolicy.getPolicyName());
-            statement.setString(2, apiPolicy.getDisplayName());
-            statement.setString(3, apiPolicy.getDescription());
-            statement.setString(4, apiPolicy.getDefaultQuotaPolicy().getType());
-            if (isBandwidthLimitPolicy) {
-                statement.setInt(5, ((BandwidthLimit) limit).getDataAmount());
-                statement.setString(6, ((BandwidthLimit) limit).getDataUnit());
-            } else if (isRequestCountLimitPolicy) {
-                statement.setInt(5, ((RequestCountLimit) limit).getRequestCount());
-                statement.setString(6, "");
+    /**
+     * @see PolicyDAO#updateAPIPolicy(APIPolicy)
+     */
+    public void updateAPIPolicy(APIPolicy policy) throws APIMgtDAOException {
+        Connection connection = null;
+        String queryFindPolicyName = "SELECT * from AM_API_POLICY WHERE UUID = ?";
+        try {
+            connection = DAOUtil.getConnection();
+            if (policy.getUuid().isEmpty()) {
+                String errorMsg =
+                        "Policy object doesn't contain mandatory parameters. At least UUID" + " should be provided.";
+                log.error(errorMsg);
+                throw new APIMgtDAOException(errorMsg);
             }
-            statement.setLong(7, apiPolicy.getDefaultQuotaPolicy().getLimit().getUnitTime());
-            statement.setString(8, apiPolicy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
-            statement.setString(9, API_TIER_LEVEL);
-            statement.setBoolean(10, apiPolicy.isDeployed());
-            statement.setString(11, apiPolicy.getUuid());
-            statement.execute();
-
-//            if (apiPolicy.getPipelines() != null && !apiPolicy.getPipelines().isEmpty()) {
-//
-//            }
+            try (PreparedStatement selectStatement = connection.prepareStatement(queryFindPolicyName)) {
+                selectStatement.setString(1, policy.getUuid());
+                try (ResultSet resultSet = selectStatement.executeQuery()) {
+                    while (resultSet.next()) {
+                        String policyName = resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_NAME);
+                        deletePolicy(policyName, APIMgtConstants.ThrottlePolicyConstants.API_LEVEL);
+                    }
+                }
+            }
+            addApiPolicy(policy, connection);
 
         } catch (SQLException e) {
-            log.error(e.getMessage(), e);
-            throw new APIMgtDAOException(e);
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+
+                    // Rollback failed. Exception will be thrown later for upper exception
+                    log.error("Failed to rollback the add Api Policy: " + policy.toString(), ex);
+                }
+            }
         }
     }
 
