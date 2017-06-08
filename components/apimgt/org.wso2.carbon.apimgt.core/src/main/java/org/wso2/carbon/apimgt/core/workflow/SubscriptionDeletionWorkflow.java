@@ -24,8 +24,10 @@ import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
+import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 
@@ -40,11 +42,13 @@ public class SubscriptionDeletionWorkflow extends Workflow {
     private String subscriber;
     private APISubscriptionDAO apiSubscriptionDAO;
     private APIGateway apiGateway;
+    private ApplicationDAO applicationDAO;
 
     public SubscriptionDeletionWorkflow(APISubscriptionDAO apiSubscriptionDAO, WorkflowDAO workflowDAO,
-                                        APIGateway apiGateway) {
+                                        ApplicationDAO applicationDAO, APIGateway apiGateway) {
         super(workflowDAO, Category.STORE, apiGateway);
         this.apiSubscriptionDAO = apiSubscriptionDAO;
+        this.applicationDAO = applicationDAO;
         this.apiGateway = apiGateway;
     }
 
@@ -82,11 +86,13 @@ public class SubscriptionDeletionWorkflow extends Workflow {
                 log.debug("Subscription deletion workflow complete: Rejected");
             }
         }
-        if (WorkflowStatus.APPROVED == response.getWorkflowStatus() && subscription.getApplication() != null &&
-                !subscription.getApplication().getKeys().isEmpty()) {
-            apiGateway.deleteAPISubscription(subscription);
-        }
         updateWorkflowEntries(this);
+        if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
+            Application application = applicationDAO.getApplication(subscription.getApplication().getId());
+            if (application != null && !application.getKeys().isEmpty()) {
+                apiGateway.deleteAPISubscription(subscription);
+            }
+        }
         return response;
     }
 

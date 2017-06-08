@@ -75,10 +75,9 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             SubscriptionDTO subscriptionDTO = MappingUtil.fromSubscription(newSubscription);
             return Response.ok().entity(subscriptionDTO).build();
         } catch (GatewayException e){
-            String errorMessage = "Subscription will be blocked withing short period of time";
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO("Subscription block request is accepted", 202L, errorMessage);
+            String errorMessage = "Failed to block subscription :"+ subscriptionId + " in gateway";
             log.error(errorMessage, e);
-            return Response.status(Response.Status.ACCEPTED).entity(errorDTO).build();
+            return Response.status(Response.Status.ACCEPTED).build();
         }
         catch (APIManagementException e) {
             String errorMessage = "Error while blocking the subscription " + subscriptionId;
@@ -243,11 +242,9 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             SubscriptionDTO subscriptionDTO = MappingUtil.fromSubscription(newSubscription);
             return Response.ok().entity(subscriptionDTO).build();
         } catch (GatewayException e){
-            String errorMessage = "Subscription will be unblocked withing short period of time";
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO("Subscription unblock request is accepted", 202L,
-                    errorMessage);
+            String errorMessage = "Failed to unblock subscription :"+ subscriptionId + " in gateway";
             log.error(errorMessage, e);
-            return Response.status(Response.Status.ACCEPTED).entity(errorDTO).build();
+            return Response.status(Response.Status.ACCEPTED).build();
         }
          catch (APIManagementException e) {
             String errorMessage = "Error while unblocking the subscription " + subscriptionId;

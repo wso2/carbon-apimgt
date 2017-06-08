@@ -180,10 +180,9 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             }
 
         } catch (GatewayException e){
-            String errorMessage = "Subscription is accepted and will be activated withing short period of time";
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO("Subscription is accepted", 202L, errorMessage);
+            String errorMessage = "Failed to add subscription of API : "+ body.getApiIdentifier() + " to gateway";
             log.error(errorMessage, e);
-            return Response.status(Response.Status.ACCEPTED).entity(errorDTO).build();
+            return Response.status(Response.Status.ACCEPTED).build();
         }
         catch (APIManagementException e) {
             String errorMessage = "Error while adding subscriptions";
@@ -236,11 +235,9 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
             apiStore.deleteAPISubscription(subscriptionId);
         } catch (GatewayException e) {
-            String errorMessage = "Unsubscription is accepted. Subscription will be removed withing short period " +
-                    "of time";
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO("Unsubscription is accepted", 202L, errorMessage);
+            String errorMessage = "Failed to remove subscription :" +subscriptionId + " from gateway";
             log.error(errorMessage, e);
-            return Response.status(Response.Status.ACCEPTED).entity(errorDTO).build();
+            return Response.status(Response.Status.ACCEPTED).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting subscription";
             HashMap<String, String> paramList = new HashMap<String, String>();
