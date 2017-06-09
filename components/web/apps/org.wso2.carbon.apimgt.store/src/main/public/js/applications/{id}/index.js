@@ -33,18 +33,19 @@ $(function () {
                     client["Subscription Collection"].get_subscriptions({
                         "apiId": "",
                         "applicationId": id,
+                        "apiType": "STANDARD",
                         "responseContentType": 'application/json'
                     },
                         function (subscriptionData) {
-
                             var subData = {};
-                            subData.data=JSON.parse(subscriptionData.data).list;
+                            subData.data = subscriptionData.obj.list
                             var mode = "PREPEND";
                             var context = {
                                 "subscriptionsAvailable": subData.data.length>0?true:false,
                                 "contextPath":contextPath
 
                             };
+
                             //Render APIs listing page
                             UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.subscription-listing", context, {
                                 onSuccess: function (data) {
@@ -164,9 +165,53 @@ $(function () {
                                 redirectToLogin(contextPath);
                             }
                         });
+
+                        // get registered composite API for this applications.
+                        // Note: one application can only have one composite API
+                        client["Subscription Collection"].get_subscriptions({
+                            "apiId": "",
+                            "applicationId": id,
+                            "apiType": "COMPOSITE",
+                            "responseContentType": 'application/json'
+                        }, function (data) {
+                            var compositeAPIId = undefined;
+
+                            if (data.obj.count > 0) {
+                                compositeAPIId = data.obj.list[0].apiIdentifier; // 0 - there is only one composite api
+                            }
+
+                            if (compositeAPIId) {
+                                client["CompositeAPI (Individual)"].get_composite_apis_apiId({
+                                    "apiId": compositeAPIId,
+                                    "responseContentType": 'application/json'
+                                }, function (apiData) {
+                                    renderCompositeApi(apiData.obj);
+                                }, function (error) {
+                                    if (error.status == 401){
+                                        redirectToLogin(contextPath);
+                                    } else {
+                                        var message = "Error occurred while loading application details";
+                                        noty({
+                                            text: message,
+                                            type: 'error',
+                                            dismissQueue: true,
+                                            modal: true,
+                                            progressBar: true,
+                                            timeout: 2000,
+                                            layout: 'top',
+                                            theme: 'relax',
+                                            maxVisible: 10,
+                                        });
+                                    }
+                                });
+                            } else {
+                                renderCompositeApi();
+                            }
+
+                        });
                 },
             function (error) {
-                if(error.status==401){
+                if(error.status == 401){
                     redirectToLogin(contextPath);
                 }
             });
@@ -546,7 +591,6 @@ var show_Keys = function (obj) {
     }
 };
 
-
 function _renderActionButtons(data, type, row) {
     var btnClass = "btn btn-sm padding-reduce-on-grid-view deleteSub";
     if(!hasValidScopes("/subscriptions/{subscriptionId}", "delete")) {
@@ -566,4 +610,74 @@ function _renderActionButtons(data, type, row) {
     } else {
         return data;
     }
+}
+
+var renderCompositeApi = function (data) {
+    var id, name, version, provider;
+    if (data) {
+        id = data.id;
+        name = data.name;
+        version = data.version;
+        provider = data.provider;
+    }
+
+    var callbacks = {
+        onSuccess: function (renderedData) {
+            $("#composite-api").html(renderedData);
+            $(".api-name-icon").each(function () {
+                var elem = $(this).next().children(".api-name");
+                $(this).nametoChar({
+                    nameElement: elem
+                });
+            });
+        },
+        onFailure: function (message, e) {
+            var message = "Error occurred while listing composite api";
+            noty({
+            text: message,
+            type: 'error',
+            dismissQueue: true,
+            modal: true,
+            progressBar: true,
+            timeout: 2000,
+            layout: 'top',
+            theme: 'relax',
+            maxVisible: 10,
+            });
+        }
+    };
+
+    // draw create api view if composite API is not available for this application
+    // draw api thumbnail view if composite API is available for this application
+    var context = {
+        compositeAPIAvailable: data != undefined,
+        id: id,
+        name: name,
+        version: version,
+        provider: provider
+    };
+
+    UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.composite-api-tab", context, callbacks);
+}
+
+var createCompositeAPI = function () {
+    var apiName = $("#composite-api-name").val();
+    var apiContext = $("#composite-api-context").val();
+    var apiVersion = $("#composite-api-version").val();
+    var api = {
+        name: apiName,
+        context: apiContext,
+        version: apiVersion,
+        applicationId: document.getElementById("appid").value
+    };
+
+    setAuthHeader(client);
+    client["CompositeAPI (Collection)"].post_composite_apis({
+        "body": api,
+        "Content-Type": "application/json"
+    }, function (data) {
+        if (data.status == 201) {
+            renderCompositeApi(data.obj);
+        }
+    });
 }

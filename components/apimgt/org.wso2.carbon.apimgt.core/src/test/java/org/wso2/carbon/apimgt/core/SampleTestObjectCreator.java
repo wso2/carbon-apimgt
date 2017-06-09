@@ -24,7 +24,6 @@ import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -32,6 +31,7 @@ import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.Comment;
+import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
@@ -151,8 +151,8 @@ public class SampleTestObjectCreator {
 
         BusinessInformation businessInformation = new BusinessInformation();
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        String permissionJson = "[{\"groupId\" : 1000, \"permission\" : "
-                + "[\"READ\",\"UPDATE\"]},{\"groupId\" : 1001, \"permission\" : [\"READ\",\"UPDATE\"]}]";
+        String permissionJson = "[{\"groupId\" : \"developer\", \"permission\" : "
+              + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\",\"DELETE\"]}]";
 
         API.APIBuilder apiBuilder = new API.APIBuilder(ADMIN, "WeatherAPI", API_VERSION).
                 id(UUID.randomUUID().toString()).
@@ -173,7 +173,6 @@ public class SampleTestObjectCreator {
                 visibleRoles(new HashSet<>()).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
-                apiType(ApiType.STANDARD).
                 createdTime(LocalDateTime.now()).
                 createdBy(ADMIN).
                 updatedBy(ADMIN).
@@ -182,8 +181,8 @@ public class SampleTestObjectCreator {
                 uriTemplates(getMockUriTemplates()).
                 apiDefinition(apiDefinition);
         HashMap map = new HashMap();
-        map.put("1000", 6);
-        map.put("1001", 4);
+        map.put("developer", 6);
+        map.put("admin", 7);
         apiBuilder.permissionMap(map);
         return apiBuilder;
     }
@@ -193,7 +192,6 @@ public class SampleTestObjectCreator {
                 id(api.getId()).
                 context(api.getContext()).
                 description(api.getDescription()).
-                apiType(ApiType.STANDARD).
                 lifeCycleStatus(api.getLifeCycleStatus()).
                 lifecycleInstanceId(api.getLifecycleInstanceId()).build();
     }
@@ -206,7 +204,6 @@ public class SampleTestObjectCreator {
                 name(fromAPI.getName()).
                 version(fromAPI.getVersion()).
                 context(fromAPI.getContext()).
-                apiType(fromAPI.getApiType()).
                 createdTime(fromAPI.getCreatedTime()).
                 createdBy(fromAPI.getCreatedBy()).
                 lifecycleInstanceId(fromAPI.getLifecycleInstanceId()).
@@ -255,8 +252,8 @@ public class SampleTestObjectCreator {
         corsConfiguration.setAllowOrigins(Arrays.asList("*"));
 
         HashMap permissionMap = new HashMap();
-        permissionMap.put("1000", 6);
-        permissionMap.put("1001", 4);
+        permissionMap.put("developer", 6);
+        permissionMap.put("admin", 7);
 
         API.APIBuilder apiBuilder = new API.APIBuilder("Adam", "restaurantAPI", "0.9").
                 id(UUID.randomUUID().toString()).
@@ -276,7 +273,6 @@ public class SampleTestObjectCreator {
                 visibleRoles(new HashSet<>(Arrays.asList(CUSTOMER_ROLE, MANAGER_ROLE, EMPLOYEE_ROLE))).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
-                apiType(ApiType.STANDARD).
                 permissionMap(permissionMap).
                 createdTime(LocalDateTime.now()).
                 createdBy(API_CREATOR).
@@ -314,8 +310,8 @@ public class SampleTestObjectCreator {
         corsConfiguration.setAllowOrigins(Arrays.asList("*"));
 
         HashMap permissionMap = new HashMap();
-        permissionMap.put("1000", 6);
-        permissionMap.put("1001", 4);
+        permissionMap.put("developer", 6);
+        permissionMap.put("admin", 7);
 
         API.APIBuilder apiBuilder = new API.APIBuilder(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
                 API_VERSION).
@@ -336,7 +332,6 @@ public class SampleTestObjectCreator {
                 visibleRoles(new HashSet<>(Arrays.asList(CUSTOMER_ROLE, MANAGER_ROLE, EMPLOYEE_ROLE))).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
-                apiType(ApiType.STANDARD).
                 permissionMap(permissionMap).
                 createdTime(LocalDateTime.now()).
                 createdBy(API_CREATOR).
@@ -346,6 +341,35 @@ public class SampleTestObjectCreator {
 
         return apiBuilder;
     }
+
+    public static CompositeAPI.Builder createUniqueCompositeAPI() {
+        Set<String> transport = new HashSet<>();
+        transport.add(HTTP);
+
+        HashMap permissionMap = new HashMap();
+        permissionMap.put("1000", 6);
+        permissionMap.put("1001", 4);
+
+        CompositeAPI.Builder apiBuilder = new CompositeAPI.Builder().
+                id(UUID.randomUUID().toString()).
+                name(UUID.randomUUID().toString()).
+                provider(UUID.randomUUID().toString()).
+                version(API_VERSION).
+                context(UUID.randomUUID().toString()).
+                description("Get Food & Beverage Info").
+                transport(transport).
+                permissionMap(permissionMap).
+                applicationId(UUID.randomUUID().toString()).
+                createdTime(LocalDateTime.now()).
+                createdBy(API_CREATOR).
+                uriTemplates(Collections.emptyMap()).
+                apiDefinition(apiDefinition).
+                lastUpdatedTime(LocalDateTime.now());
+
+        return apiBuilder;
+    }
+
+
 
     public static API.APIBuilder createCustomAPI(String name, String version, String context) {
         API.APIBuilder apiBuilder = createDefaultAPI();
@@ -362,7 +386,6 @@ public class SampleTestObjectCreator {
                 id(api.getId()).
                 context(api.getContext()).
                 description(api.getDescription()).
-                apiType(api.getApiType()).
                 lifeCycleStatus(api.getLifeCycleStatus()).
                 lifecycleInstanceId(api.getLifecycleInstanceId()).build();
     }
@@ -665,28 +688,28 @@ public class SampleTestObjectCreator {
 
     public static Endpoint createMockEndpoint() {
         return new Endpoint.Builder().endpointConfig("{'type':'http','url':'http://localhost:8280'}").id(endpointId)
-                .maxTps(1000L).security("{'enabled':false}").name("Endpoint1").applicableLevel(APIMgtConstants
-                        .GLOBAL_ENDPOINT).type("http").build();
+                .maxTps(1000L).security("{'enabled':false}").name("Endpoint1")
+                .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).type("http").build();
     }
 
     public static Endpoint createUpdatedEndpoint() {
         return new Endpoint.Builder().endpointConfig("{'type':'soap','url':'http://localhost:8280'}").id(endpointId)
-                .maxTps(1000L).security("{'enabled':false}").name("Endpoint1").applicableLevel(APIMgtConstants
-                        .GLOBAL_ENDPOINT).type("http").build();
+                .maxTps(1000L).security("{'enabled':false}").name("Endpoint1")
+                .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).type("http").build();
     }
 
     public static Endpoint createAlternativeEndpoint() {
         String uuid = UUID.randomUUID().toString();
         return new Endpoint.Builder().endpointConfig("{'type':'soap','url':'http://localhost:8280'}").id(uuid)
-                .name("Endpoint2").maxTps(1000L).security("{'enabled':false}").applicableLevel(APIMgtConstants
-                        .GLOBAL_ENDPOINT).build();
+                .name("Endpoint2").maxTps(1000L).security("{'enabled':false}")
+                .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).build();
 
     }
 
     public static Map<String, Endpoint> getMockEndpointMap() {
         Map<String, Endpoint> endpointMap = new HashedMap();
-        endpointMap.put(PRODUCTION_ENDPOINT, new Endpoint.Builder().id(endpointId).applicableLevel(APIMgtConstants
-                .GLOBAL_ENDPOINT).build());
+        endpointMap.put(PRODUCTION_ENDPOINT,
+                new Endpoint.Builder().id(endpointId).applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).build());
         return endpointMap;
     }
 
@@ -720,14 +743,15 @@ public class SampleTestObjectCreator {
         workflow.setCreatedTime(LocalDateTime.now());
         workflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
         workflow.setWorkflowReference(UUID.randomUUID().toString());
-        
+
         Map<String, String> properties = new HashMap<>();
         properties.put("property1", "value1");
         properties.put("property2", "value2");
         workflow.setAttributes(properties);
-        
+
         return workflow;
     }
+
     public static DocumentInfo createDefaultFileDocumentationInfo() {
         //created by admin
         DocumentInfo.Builder builder = new DocumentInfo.Builder();
@@ -783,11 +807,12 @@ public class SampleTestObjectCreator {
 
         BusinessInformation businessInformation = new BusinessInformation();
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        String permissionJson = "[{\"groupId\" : 1000, \"permission\" : "
-                + "[\"READ\",\"UPDATE\"]},{\"groupId\" : 1001, \"permission\" : [\"READ\",\"UPDATE\"]}]";
+        String permissionJson = "[{\"groupId\" : \"developer\", \"permission\" : "
+              + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\",\"DELETE\"]}]";
         Map<String, Endpoint> endpointMap = new HashMap<>();
-        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, new Endpoint.Builder().id(endpointId).name
-                ("api1-production--endpint").applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build());
+        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT,
+                new Endpoint.Builder().id(endpointId).name("api1-production--endpint")
+                        .applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build());
         API.APIBuilder apiBuilder = new API.APIBuilder(ADMIN, "WeatherAPI", API_VERSION).
                 id(UUID.randomUUID().toString()).
                 context("weather").
@@ -807,7 +832,6 @@ public class SampleTestObjectCreator {
                 visibleRoles(new HashSet<>()).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
-                apiType(ApiType.STANDARD).
                 createdTime(LocalDateTime.now()).
                 createdBy(ADMIN).
                 updatedBy(ADMIN).
@@ -816,8 +840,8 @@ public class SampleTestObjectCreator {
                 uriTemplates(getMockUriTemplates()).
                 apiDefinition(apiDefinition);
         HashMap map = new HashMap();
-        map.put("1000", 6);
-        map.put("1001", 4);
+        map.put("developer", 6);
+        map.put("admin", 7);
         apiBuilder.permissionMap(map);
         return apiBuilder;
     }

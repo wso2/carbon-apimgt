@@ -14,12 +14,11 @@ import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
-import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
-import org.wso2.carbon.apimgt.core.workflow.HttpWorkflowResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -47,9 +46,13 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
@@ -683,7 +686,9 @@ public class ApisApiServiceImpl extends ApisApiService {
                 return Response.notModified().build();
             }
 
-            APIDTO apidto = MappingUtil.toAPIDto(RestAPIPublisherUtil.getApiPublisher(username).getAPIbyUUID(apiId));
+            API api = RestAPIPublisherUtil.getApiPublisher(username).getAPIbyUUID(apiId);
+            api.setUserSpecificApiPermissions(getAPIPermissionsOfLoggedInUser(username, api));
+            APIDTO apidto = MappingUtil.toAPIDto(api);
             return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(apidto).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving API : " + apiId;
@@ -699,6 +704,66 @@ public class ApisApiServiceImpl extends ApisApiService {
             log.error(errorMessage, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
         }
+    }
+
+    /**
+     * This method retrieves the set of overall permissions for a given api for the logged in user
+     *
+     * @param loggedInUser - Logged in user
+     * @param api - The API whose permissions for the logged in user is retrieved
+     * @return The overall list of permissions for the given API for the logged in user
+     */
+    private List<String> getAPIPermissionsOfLoggedInUser(String loggedInUser, API api) {
+
+        Map<String, Integer> permissionMap = api.getPermissionMap();
+        Set<String> loggedInUserRoles = APIUtils.getAllRolesOfUser(loggedInUser);
+        Set<String> permissionRoleList = getRolesFromPermissionMap(permissionMap);
+        Set<String> rolesOfUserWithAPIPermissions = null;
+        Set<String> permissionArrayForUser = new HashSet<>();
+        loggedInUserRoles.retainAll(
+                permissionRoleList); //get the intersection - retainAll() transforms first set to the intersection
+        if (!loggedInUserRoles.isEmpty()) {
+            rolesOfUserWithAPIPermissions = loggedInUserRoles;
+        }
+        if (rolesOfUserWithAPIPermissions != null) {
+            for (String role : rolesOfUserWithAPIPermissions) {
+                Integer permission = permissionMap.get(role);
+                if (permission == APIMgtConstants.Permission.READ_PERMISSION) {
+                    permissionArrayForUser.add(APIMgtConstants.Permission.READ);
+                } else if (permission == (APIMgtConstants.Permission.READ_PERMISSION
+                        + APIMgtConstants.Permission.UPDATE_PERMISSION)) {
+                    permissionArrayForUser.add(APIMgtConstants.Permission.READ);
+                    permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
+                } else if (permission == (APIMgtConstants.Permission.READ_PERMISSION
+                        + APIMgtConstants.Permission.DELETE_PERMISSION)) {
+                    permissionArrayForUser.add(APIMgtConstants.Permission.READ);
+                    permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
+                } else if (permission
+                        == APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.UPDATE_PERMISSION
+                        + APIMgtConstants.Permission.DELETE_PERMISSION) {
+                    permissionArrayForUser.add(APIMgtConstants.Permission.READ);
+                    permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
+                    permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
+                }
+            }
+        }
+        List<String> finalAggregatedPermissionList = new ArrayList<>();
+        finalAggregatedPermissionList.addAll(permissionArrayForUser);
+        return finalAggregatedPermissionList;
+    }
+
+    /**
+     * This method is used to extract the groupIds or roles from the permissionMap
+     * 
+     * @param permissionMap - The map containing the group IDs(roles) and their permissions
+     * @return - The list of groupIds specified for permissions
+     */
+    private Set<String> getRolesFromPermissionMap(Map<String, Integer> permissionMap) {
+        Set<String> permissionRoleList = new HashSet<>();
+        for (String groupId : permissionMap.keySet()) {
+            permissionRoleList.add(groupId);
+        }
+        return permissionRoleList;
     }
 
     /**
@@ -881,7 +946,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                     .contains(existingFingerprint)) {
                 return Response.notModified().build();
             }
-            String swagger = apiPublisher.getSwagger20Definition(apiId);
+            String swagger = apiPublisher.getApiSwaggerDefinition(apiId);
             return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(swagger).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving swagger definition of API : " + apiId;
@@ -942,7 +1007,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
             }
             apiPublisher.saveSwagger20Definition(apiId, apiDefinition);
-            String apiSwagger = apiPublisher.getSwagger20Definition(apiId);
+            String apiSwagger = apiPublisher.getApiSwaggerDefinition(apiId);
             String newFingerprint = apisApiIdSwaggerGetFingerprint(apiId, null, null, null, request);
             return Response.ok().header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"").entity(apiSwagger).build();
         } catch (APIManagementException e) {
@@ -1192,8 +1257,9 @@ public class ApisApiServiceImpl extends ApisApiService {
         String username = RestApiUtil.getLoggedInUsername();
         APIListDTO apiListDTO = null;
         try {
-            apiListDTO = MappingUtil.toAPIListDTO(RestAPIPublisherUtil.getApiPublisher(username).searchAPIs
-                    (limit, offset, query));
+            List<API> apiList = RestAPIPublisherUtil.getApiPublisher(username).searchAPIs(limit, offset, query);
+            List<API> updatedApiList = setAllApiPermissionsForUser(username, apiList);
+            apiListDTO = MappingUtil.toAPIListDTO(updatedApiList);
             return Response.ok().entity(apiListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving APIs";
@@ -1202,6 +1268,25 @@ public class ApisApiServiceImpl extends ApisApiService {
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
+    }
+
+    /**
+     * Set user specific permissions for each API returned during search
+     *
+     * @param user - the logged in user name
+     * @param originalAPIList - original api list returned by search
+     * @return the updated list of APIs
+     */
+    private List<API> setAllApiPermissionsForUser(String user, List<API> originalAPIList) {
+        List<API> updatedAPIList = new ArrayList<API>();
+        for (API api : originalAPIList) {
+            List<String> aggregatedApiPermissions = getAPIPermissionsOfLoggedInUser(user, api);
+            if (!aggregatedApiPermissions.isEmpty()) {
+                api.setUserSpecificApiPermissions(aggregatedApiPermissions);
+                updatedAPIList.add(api);
+            }
+        }
+        return updatedAPIList;
     }
 
     /**

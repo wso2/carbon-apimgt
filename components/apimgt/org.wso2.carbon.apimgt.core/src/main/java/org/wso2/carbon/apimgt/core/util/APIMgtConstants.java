@@ -102,6 +102,8 @@ public class APIMgtConstants {
     public static final String URL_PATTERN_COLUMN = "URL_PATTERN";
 
     public static final String SANDBOX_ENDPOINT = "sandbox";
+    public static final String HTTP = "http";
+    public static final String HTTPS = "https";
 
     /**
      * Application statuses.
