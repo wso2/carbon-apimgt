@@ -320,6 +320,7 @@ public class DefaultKeyManagerImpl implements KeyManager {
                 accessTokenInfo.setAccessToken(oAuth2TokenInfo.getAccessToken());
                 accessTokenInfo.setScopes(oAuth2TokenInfo.getScope());
                 accessTokenInfo.setRefreshToken(oAuth2TokenInfo.getRefreshToken());
+                accessTokenInfo.setIdToken(oAuth2TokenInfo.getIdToken());
                 accessTokenInfo.setValidityPeriod(oAuth2TokenInfo.getExpiresIn());
                 return accessTokenInfo;
             } catch (IOException e) {
@@ -388,7 +389,7 @@ public class DefaultKeyManagerImpl implements KeyManager {
             throws KeyManagementException {
         log.debug("Revoking access token");
         try {
-            Response response = oAuth2ServiceStubs.getRevokeServiceStub().revokeToken(accessToken, clientId,
+            Response response = oAuth2ServiceStubs.getRevokeServiceStub().revokeAccessToken(accessToken, clientId,
                     clientSecret);
             if (response == null) {
                 throw new KeyManagementException("Error occurred while revoking current access token. " +

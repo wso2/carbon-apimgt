@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.authenticator;
 
+import com.google.gson.Gson;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.authenticator.utils.AuthUtil;
@@ -31,7 +33,9 @@ import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,14 +53,17 @@ public class LoginTokenService {
      * This method authenticate the user.
      *
      */
-    public AuthResponseBean setAccessTokenData(AuthResponseBean responseBean, AccessTokenInfo accessTokenInfo) {
+    public AuthResponseBean setAccessTokenData(AuthResponseBean responseBean, AccessTokenInfo accessTokenInfo)
+            throws KeyManagementException {
         responseBean.setTokenValid(true);
-        responseBean.setAuthUser(accessTokenInfo.getEndUserName());
+        if (accessTokenInfo.getIdToken() != null) {
+            responseBean.setAuthUser(getUsernameFromJWT(accessTokenInfo.getIdToken()));
+        }
         responseBean.setScopes(accessTokenInfo.getScopes());
         responseBean.setType("Bearer");
         responseBean.setValidityPeriod(accessTokenInfo.getValidityPeriod());
+        responseBean.setIdToken(accessTokenInfo.getIdToken());
         return responseBean;
-
     }
 
     /**
@@ -65,7 +72,14 @@ public class LoginTokenService {
      */
     public String getTokens(AuthResponseBean authResponseBean, String appName, String userName, String password,
             String grantType, String refreshToken, String scopes, long validityPeriod) throws KeyManagementException {
-        //TODO - call method which provides client id and secret.
+        //set openid scope
+        if (StringUtils.isEmpty(scopes)) {
+            scopes = KeyManagerConstants.OPEN_ID_CONNECT_SCOPE;
+        } else {
+            scopes = scopes + ' ' + KeyManagerConstants.OPEN_ID_CONNECT_SCOPE;
+        }
+
+        //TODO - implement a storing mechanism for client_id and secret
         Map<String, String> consumerKeySecretMap = getConsumerKeySecret(appName);
         AccessTokenRequest accessTokenRequest = AuthUtil
                 .createAccessTokenRequest(userName, password, grantType, refreshToken, null, validityPeriod, scopes,
@@ -73,7 +87,6 @@ public class LoginTokenService {
         AccessTokenInfo accessTokenInfo = APIManagerFactory.getInstance().getKeyManager()
                 .getNewAccessToken(accessTokenRequest);
         setAccessTokenData(authResponseBean, accessTokenInfo);
-        authResponseBean.setAuthUser(userName);
         return accessTokenInfo.getAccessToken() + ":" + accessTokenInfo.getRefreshToken();
     }
 
@@ -106,6 +119,50 @@ public class LoginTokenService {
             return consumerKeySecretMap;
         } else {
             return AuthUtil.getConsumerKeySecretMap().get(appName);
+        }
+    }
+
+    private String getUsernameFromJWT(String jwt) throws KeyManagementException {
+        if (jwt != null && jwt.contains(".")) {
+            String[] jwtParts = jwt.split("\\.");
+            JWTTokenPayload jwtHeader = new Gson().fromJson(new String(Base64.getDecoder().decode(jwtParts[1]),
+                    StandardCharsets.UTF_8), JWTTokenPayload.class);
+
+            //removing "@carbon.super" part explicitly (until IS side is fixed to drop it)
+            String username = jwtHeader.getSub();
+            username = username.replace("@carbon.super", "");
+            return username;
+        } else {
+            log.error("JWT Parsing failed. Invalid JWT: " + jwt);
+            throw new KeyManagementException("JWT Parsing failed. Invalid JWT.");
+        }
+    }
+
+    private class JWTTokenPayload {
+        private String sub;
+        private String iss;
+        private String exp;
+        private String iat;
+        private String[] aud;
+
+        public String getSub() {
+            return sub;
+        }
+
+        public String getIss() {
+            return iss;
+        }
+
+        public String getExp() {
+            return exp;
+        }
+
+        public String getIat() {
+            return iat;
+        }
+
+        public String[] getAud() {
+            return aud;
         }
     }
 }

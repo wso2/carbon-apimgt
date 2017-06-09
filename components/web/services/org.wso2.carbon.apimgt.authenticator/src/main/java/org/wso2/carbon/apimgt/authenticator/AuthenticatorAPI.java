@@ -43,7 +43,7 @@ import javax.ws.rs.core.Response;
  * This class provides access token during login from store app.
  *
  */
-@Path("/oauth")
+@Path("/login")
 public class AuthenticatorAPI implements Microservice {
 
     private static final Logger log = LoggerFactory.getLogger(AuthenticatorAPI.class);

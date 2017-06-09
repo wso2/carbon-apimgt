@@ -42,6 +42,8 @@ public class AccessTokenInfo {
 
     private String refreshToken;
 
+    private String idToken;
+
     private long issuedTime;
 
     private long expiryTime;
@@ -132,6 +134,14 @@ public class AccessTokenInfo {
 
     public void setRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
+    }
+
+    public String getIdToken() {
+        return idToken;
+    }
+
+    public void setIdToken(String idToken) {
+        this.idToken = idToken;
     }
 
     public void setIssuedTime(long issuedTime) {

@@ -68,6 +68,7 @@ public class KeyManagerConstants {
     public static final String REVOKE_ENDPOINT = "RevokeEndpoint";
     public static final String INTROSPECT_ENDPOINT = "introspectEndpoint";
     public static final String OAUTH2_DEFAULT_SCOPE = "default";
+    public static final String OPEN_ID_CONNECT_SCOPE = "openid";
     public static final String OAUTH_RESPONSE_ACCESSTOKEN = "access_token";
     public static final String OAUTH_RESPONSE_REFRESH_TOKEN = "refresh_token";
     public static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
