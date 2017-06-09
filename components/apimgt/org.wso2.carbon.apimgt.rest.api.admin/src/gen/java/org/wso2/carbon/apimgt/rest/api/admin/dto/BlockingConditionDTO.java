@@ -21,6 +21,9 @@ public class BlockingConditionDTO   {
   @JsonProperty("conditionValue")
   private String conditionValue = null;
 
+  @JsonProperty("status")
+  private Boolean status = null;
+
   public BlockingConditionDTO conditionId(String conditionId) {
     this.conditionId = conditionId;
     return this;
@@ -75,6 +78,24 @@ public class BlockingConditionDTO   {
     this.conditionValue = conditionValue;
   }
 
+  public BlockingConditionDTO status(Boolean status) {
+    this.status = status;
+    return this;
+  }
+
+   /**
+   * Get status
+   * @return status
+  **/
+  @ApiModelProperty(value = "")
+  public Boolean getStatus() {
+    return status;
+  }
+
+  public void setStatus(Boolean status) {
+    this.status = status;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -87,12 +108,13 @@ public class BlockingConditionDTO   {
     BlockingConditionDTO blockingCondition = (BlockingConditionDTO) o;
     return Objects.equals(this.conditionId, blockingCondition.conditionId) &&
         Objects.equals(this.conditionType, blockingCondition.conditionType) &&
-        Objects.equals(this.conditionValue, blockingCondition.conditionValue);
+        Objects.equals(this.conditionValue, blockingCondition.conditionValue) &&
+        Objects.equals(this.status, blockingCondition.status);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(conditionId, conditionType, conditionValue);
+    return Objects.hash(conditionId, conditionType, conditionValue, status);
   }
 
   @Override
@@ -103,6 +125,7 @@ public class BlockingConditionDTO   {
     sb.append("    conditionId: ").append(toIndentedString(conditionId)).append("\n");
     sb.append("    conditionType: ").append(toIndentedString(conditionType)).append("\n");
     sb.append("    conditionValue: ").append(toIndentedString(conditionValue)).append("\n");
+    sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("}");
     return sb.toString();
   }

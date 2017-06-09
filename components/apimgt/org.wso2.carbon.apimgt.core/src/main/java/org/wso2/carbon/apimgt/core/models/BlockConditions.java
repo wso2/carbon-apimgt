@@ -19,7 +19,7 @@
 package org.wso2.carbon.apimgt.core.models;
 
 /**
- *  This class is to model the block condition
+ *  This class is to model the block condition.
  */
 public class BlockConditions {
     private boolean enabled;

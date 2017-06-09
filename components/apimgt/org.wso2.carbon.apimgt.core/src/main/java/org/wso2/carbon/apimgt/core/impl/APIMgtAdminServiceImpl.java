@@ -15,7 +15,12 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
+<<<<<<< fa2fe480f6fd3d66f9b14330e5b0bbc3ffef255e
 import org.wso2.carbon.apimgt.core.models.Application;
+=======
+import org.wso2.carbon.apimgt.core.models.APISummary;
+import org.wso2.carbon.apimgt.core.models.BlockConditions;
+>>>>>>> Fixing end to end blacklist condition adding,updating and deleting.
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.RegistrationSummary;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
@@ -480,4 +485,69 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
 
     }
 
+    /**
+     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#addBlockCondition(String, String)
+     */
+    @Override public String addBlockCondition(String conditionType, String conditionValue)
+            throws APIManagementException {
+        try {
+            return policyDAO.addBlockConditions(conditionType, conditionValue);
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't add block condition.";
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    /**
+     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#updateBlockConditionStateByUUID(String, Boolean)
+     */
+    @Override public boolean updateBlockConditionStateByUUID(String uuid, Boolean state) throws APIManagementException {
+        try {
+            return policyDAO.updateBlockConditionStateByUUID(uuid, state);
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't update block condition.";
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    /**
+     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#deleteBlockConditionByUuid(String)
+     */
+    @Override public boolean deleteBlockConditionByUuid(String uuid) throws APIManagementException {
+        try {
+            return policyDAO.deleteBlockConditionByUuid(uuid);
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't delete block condition.";
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    /**
+     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#getBlockConditions()
+     */
+    @Override public List<BlockConditions> getBlockConditions() throws APIManagementException {
+        try {
+            return policyDAO.getBlockConditions();
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't get list of block conditions.";
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    /**
+     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#getBlockConditionByUUID(String)
+     */
+    @Override public BlockConditions getBlockConditionByUUID(String uuid) throws APIManagementException {
+        try {
+            return policyDAO.getBlockConditionByUUID(uuid);
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't get block condition by UUID.";
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
 }

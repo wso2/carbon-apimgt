@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.core.exception.APIConfigRetrievalException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.BlockConditions;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.RegistrationSummary;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
@@ -98,6 +99,16 @@ public interface APIMgtAdminService {
     String addApplicationPolicy(ApplicationPolicy policy) throws APIManagementException;
 
     /**
+     *  Add a block condition
+     *
+     * @param conditionType type of the condition (IP, Context .. )
+     * @param conditionValue value of the condition
+     * @return UUID of the new Block Condition
+     * @throws APIManagementException
+     */
+    String addBlockCondition(String conditionType, String conditionValue) throws APIManagementException;
+
+    /**
      * Adds new {@link SubscriptionPolicy} to the system
      *
      * @param policy      Policy object to be added.
@@ -131,13 +142,32 @@ public interface APIMgtAdminService {
     void updateApplicationPolicy(ApplicationPolicy policy) throws APIManagementException;
 
     /**
-     * Delete an existing Policy in the system
+     * Updates a block condition given its UUID
+     *
+     * @param uuid uuid of the block condition
+     * @param state state of condition
+     * @return state change success or not
+     * @throws APIManagementException
+     */
+    boolean updateBlockConditionStateByUUID(String uuid, Boolean state) throws APIManagementException;
+
+    /**
+     * Delete existing @{@link Policy} in the system
      *
      * @param policyName    Policy Name to be deleted.
      * @param policyLevel Policy Level to which above Policy belongs to
      * @throws APIManagementException   If failed to delete the policy.
      */
     void deletePolicy(String policyName, APIMgtAdminService.PolicyLevel policyLevel) throws APIManagementException;
+
+    /**
+     * Delete existing @{@link BlockConditions} in the system
+     *
+     * @param uuid uuid of the block condition to be deleted
+     * @return true if successfully deleted
+     * @throws APIManagementException If failed to delete the block condition
+     */
+    boolean deleteBlockConditionByUuid(String uuid) throws APIManagementException;
 
     /**
      * Delete an existing Plicy in the system using the policy id
@@ -316,9 +346,29 @@ public interface APIMgtAdminService {
     /**
      * Policy Level enum
      */
+<<<<<<< fa2fe480f6fd3d66f9b14330e5b0bbc3ffef255e
     enum PolicyLevel {
         api,
         application,
         subscription
     }
+=======
+    List<SubscriptionPolicy> getAllSubscriptionPolicies() throws APIManagementException;
+
+    /**
+     *
+     * @return List of block Conditions
+     * @throws APIManagementException
+     */
+    List<BlockConditions> getBlockConditions() throws APIManagementException;
+
+    /**
+     * Retrieves a block condition by its UUID
+     *
+     * @param uuid uuid of the block condition
+     * @return Retrieve a block Condition
+     * @throws APIManagementException
+     */
+    BlockConditions getBlockConditionByUUID(String uuid) throws APIManagementException;
+>>>>>>> Fixing end to end blacklist condition adding,updating and deleting.
 }

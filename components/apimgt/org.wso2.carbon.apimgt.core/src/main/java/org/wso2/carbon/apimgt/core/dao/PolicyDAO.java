@@ -231,15 +231,6 @@ public interface PolicyDAO {
     String addBlockConditions(String conditionType, String conditionValue) throws APIMgtDAOException;
 
     /**
-     * Get details of a block condition by Id
-     *
-     * @param conditionId id of the condition
-     * @return Block conditoin represented by the UUID
-     * @throws APIMgtDAOException
-     */
-    BlockConditions getBlockCondition(int conditionId) throws APIMgtDAOException;
-
-    /**
      * Get details of a block condition by UUID
      *
      * @param uuid uuid of the block condition
@@ -259,31 +250,12 @@ public interface PolicyDAO {
     /**
      * Update the block condition state true (Enabled) /false (Disabled) given the UUID
      *
-     * @param conditionId id of the block condition
-     * @param state       blocking state
-     * @return true if the operation was success
-     * @throws APIMgtDAOException
-     */
-    boolean updateBlockConditionState(int conditionId, String state) throws APIMgtDAOException;
-
-    /**
-     * Update the block condition state true (Enabled) /false (Disabled) given the UUID
-     *
      * @param uuid  UUID of the block condition
      * @param state blocking state
      * @return true if the operation was success
      * @throws APIMgtDAOException
      */
-    boolean updateBlockConditionStateByUUID(String uuid, String state) throws APIMgtDAOException;
-
-    /**
-     * Delete the block condition given the id
-     *
-     * @param conditionId id of the condition
-     * @return true if successfully deleted
-     * @throws APIMgtDAOException
-     */
-    boolean deleteBlockCondition(int conditionId) throws APIMgtDAOException;
+    boolean updateBlockConditionStateByUUID(String uuid, Boolean state) throws APIMgtDAOException;
 
     /**
      * Delete the block condition given the id
@@ -292,5 +264,5 @@ public interface PolicyDAO {
      * @return true if successfully deleted
      * @throws APIMgtDAOException
      */
-    boolean deleteBlockConditionByUUID(String uuid) throws APIMgtDAOException;
+    boolean deleteBlockConditionByUuid(String uuid) throws APIMgtDAOException;
 }

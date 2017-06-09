@@ -1050,6 +1050,74 @@ paths:
             The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# Update an Blacklist condition
+#-----------------------------------------------------
+    put:
+      x-scope: apim:bl_manage
+      summary: Update a blacklist condition
+      description: |
+        Update a blacklist condition
+      parameters:
+        - $ref: '#/parameters/conditionId'
+        - in: body
+          name: body
+          description: |
+            Blacklist condition object that needs to be modified
+          required: true
+          schema:
+            $ref: '#/definitions/BlockingCondition'
+        - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
+      tags:
+        - Blacklist condition
+      responses:
+        200:
+          description: |
+            OK.
+            Blacklist updated.
+          schema:
+            $ref: '#/definitions/BlockingCondition'
+          headers:
+            Location:
+              description: |
+                The URL of the newly created resource.
+              type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional request.
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional reuquests.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
@@ -1546,6 +1614,9 @@ definitions:
         type: string
       conditionValue:
         type: string
+      status:
+        type: boolean
+        deafult: true
 
 #-----------------------------------------------------
 # The Throttle Blocking Condition List resource

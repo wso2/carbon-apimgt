@@ -28,12 +28,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class is responsible for mapping Block Condition model and its sub components into REST API DTOs and vice-versa
+ * This class is responsible for mapping Block Condition model and its sub components into REST API DTOs and vice-versa.
  */
 public class BlockingConditionMappingUtil {
 
     /**
-     * Converts a List of Block Condition in to REST API LIST DTO Object
+     * Converts a List of Block Condition in to REST API LIST DTO Object.
      *
      * @param blockConditionList A List of Block Conditions
      * @return REST API List DTO object derived from Block Condition list
@@ -55,7 +55,7 @@ public class BlockingConditionMappingUtil {
     }
 
     /**
-     * Converts a single Block Condition model object into REST API DTO object
+     * Converts a single Block Condition model object into REST API DTO object.
      *
      * @param blockCondition Block condition model object
      * @return Block condition DTO object derived from block condition model object
@@ -66,6 +66,7 @@ public class BlockingConditionMappingUtil {
         BlockingConditionDTO dto = new BlockingConditionDTO();
         dto.setConditionId(blockCondition.getUuid());
         dto.setConditionType(blockCondition.getConditionType());
+        dto.setStatus(blockCondition.isEnabled());
 
         String conditionValue = blockCondition.getConditionValue();
         if (APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_IP.equals(blockCondition.getConditionType())) {

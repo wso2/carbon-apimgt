@@ -28,6 +28,12 @@ public abstract class BlacklistApiService {
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
+    public abstract Response blacklistConditionIdPut(String conditionId
+ ,BlockingConditionDTO body
+ ,String contentType
+ ,String ifMatch
+ ,String ifUnmodifiedSince
+ , Request request) throws NotFoundException;
     public abstract Response blacklistGet(String accept
  ,String ifNoneMatch
  ,String ifModifiedSince
