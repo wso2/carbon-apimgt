@@ -6,6 +6,7 @@ import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.admin.NotFoundException;
@@ -22,7 +23,6 @@ import javax.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class PoliciesApiServiceImpl extends PoliciesApiService {
 
@@ -44,7 +44,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         }
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
-            List<APIPolicy> policies = apiMgtAdminService.getAllAdvancePolicies();
+            List<Policy> policies = apiMgtAdminService.getAllPoliciesByLevel(APIMgtConstants.ThrottlePolicyConstants.API_LEVEL);
             AdvancedThrottlePolicyListDTO advancedThrottlePolicyListDTO = AdvancedThrottlePolicyMappingUtil
                     .fromAPIPolicyArrayToListDTO(policies);
             return Response.ok().entity(advancedThrottlePolicyListDTO).build();
@@ -90,9 +90,11 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         }
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
-            APIPolicy apiPolicy = apiMgtAdminService.getAPIPolicyByUuid(policyId);
-            AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyToDTO(apiPolicy);
-            return Response.status(Response.Status.OK).entity(apiPolicy).build();
+            Policy policy = apiMgtAdminService.getPolicyByUuid(APIMgtConstants.ThrottlePolicyConstants
+                    .API_LEVEL, policyId);
+            return Response.status(Response.Status.OK).entity(AdvancedThrottlePolicyMappingUtil.
+                    fromAdvancedPolicyToDTO(policy)).build();
+
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while getting Advanced Policy. policy uuid: " + policyId;
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
@@ -123,8 +125,10 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             APIPolicy apiPolicy = AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyDTOToPolicy(body);
             apiPolicy.setUuid(policyId);
-            apiMgtAdminService.updateAPIPolicy(apiPolicy);
-            return Response.status(Response.Status.CREATED).entity(apiPolicy).build();
+            apiMgtAdminService.updatePolicy(tierLevel, apiPolicy);
+            return Response.status(Response.Status.CREATED).entity(AdvancedThrottlePolicyMappingUtil
+                    .fromAdvancedPolicyToDTO(apiMgtAdminService.getPolicyByUuid(tierLevel, policyId))).build();
+
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while updating Advanced Policy. policy uuid: " + policyId;
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
@@ -157,7 +161,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             APIPolicy apiPolicy = AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyDTOToPolicy(body);
             String policyId = apiMgtAdminService.addPolicy(tierLevel, apiPolicy);
             return Response.status(Response.Status.CREATED).entity(AdvancedThrottlePolicyMappingUtil
-                    .fromAdvancedPolicyToDTO(apiMgtAdminService.getAPIPolicyByUuid(policyId)))
+                    .fromAdvancedPolicyToDTO(apiMgtAdminService.getPolicyByUuid(tierLevel, policyId)))
                     .build();
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while adding Advanced Throttle Policy, policy name: " + body
@@ -186,7 +190,8 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         }
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
-            List<ApplicationPolicy> policies = apiMgtAdminService.getAllApplicationPolicies();
+            List<Policy> policies = apiMgtAdminService.getAllPoliciesByLevel(APIMgtConstants
+                    .ThrottlePolicyConstants.APPLICATION_LEVEL);
             ApplicationThrottlePolicyListDTO applicationThrottlePolicyListDTO = ApplicationThrottlePolicyMappingUtil
                     .fromApplicationPolicyArrayToListDTO(policies);
             return Response.ok().entity(applicationThrottlePolicyListDTO).build();
@@ -237,9 +242,10 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         }
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
-            ApplicationPolicy applicationPolicy = apiMgtAdminService.getApplicationPolicyByUuid(policyId);
-            ApplicationThrottlePolicyMappingUtil.fromApplicationThrottlePolicyToDTO(applicationPolicy);
-            return Response.status(Response.Status.OK).entity(applicationPolicy).build();
+            Policy applicationPolicy = apiMgtAdminService.getPolicyByUuid(APIMgtConstants
+                    .ThrottlePolicyConstants.APPLICATION_LEVEL, policyId);
+            return Response.status(Response.Status.OK).entity(ApplicationThrottlePolicyMappingUtil.
+                    fromApplicationThrottlePolicyToDTO(applicationPolicy)).build();
 
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while getting Application Policy. policy uuid: " + policyId;
@@ -275,10 +281,10 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             ApplicationPolicy applicationPolicy = ApplicationThrottlePolicyMappingUtil
                     .fromApplicationThrottlePolicyDTOToModel(body);
             applicationPolicy.setUuid(policyId);
-            apiMgtAdminService.updateApplicationPolicy(applicationPolicy);
+            apiMgtAdminService.updatePolicy(tierLevel, applicationPolicy);
             return Response.status(Response.Status.OK).entity(ApplicationThrottlePolicyMappingUtil.
-                    fromApplicationThrottlePolicyToDTO(apiMgtAdminService.getApplicationPolicyByUuid(applicationPolicy.
-                            getUuid()))).build();
+                    fromApplicationThrottlePolicyToDTO(apiMgtAdminService.getPolicyByUuid(tierLevel, policyId))).
+                    build();
 
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while updating Application Policy. policy uuid: " + policyId;
@@ -313,8 +319,8 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             policyName = applicationPolicy.getPolicyName();
             String applicationPolicyUuid = apiMgtAdminService.addPolicy(tierLevel, applicationPolicy);
             return Response.status(Response.Status.CREATED).entity(ApplicationThrottlePolicyMappingUtil
-                    .fromApplicationThrottlePolicyToDTO(apiMgtAdminService.getApplicationPolicyByUuid
-                            (applicationPolicyUuid))).build();
+                    .fromApplicationThrottlePolicyToDTO(apiMgtAdminService.getPolicyByUuid(tierLevel,
+                            applicationPolicyUuid))).build();
 
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while adding Application Policy. policy name: " + policyName;
@@ -340,10 +346,12 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         }
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
-            List<SubscriptionPolicy> policies = apiMgtAdminService.getAllSubscriptionPolicies();
+            List<Policy> policies = apiMgtAdminService.getAllPoliciesByLevel(APIMgtConstants
+                    .ThrottlePolicyConstants.SUBSCRIPTION_LEVEL);
             SubscriptionThrottlePolicyListDTO subscriptionThrottlePolicyListDTO = SubscriptionThrottlePolicyMappingUtil
                     .fromSubscriptionPolicyArrayToListDTO(policies);
             return Response.ok().entity(subscriptionThrottlePolicyListDTO).build();
+
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while retrieving Application Policies";
             org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
@@ -386,10 +394,12 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         }
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
-            SubscriptionPolicy subscriptionPolicy = apiMgtAdminService.getSubscriptionPolicyByUuid(policyId);
+            Policy subscriptionPolicy = apiMgtAdminService.getPolicyByUuid(APIMgtConstants
+                    .ThrottlePolicyConstants.SUBSCRIPTION_LEVEL, policyId);
             SubscriptionThrottlePolicyDTO subscriptionThrottlePolicyDTO = SubscriptionThrottlePolicyMappingUtil
                     .fromSubscriptionThrottlePolicyToDTO(subscriptionPolicy);
             return Response.status(Response.Status.OK).entity(subscriptionThrottlePolicyDTO).build();
+
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while getting Subscription Policy. policy uuid: " + policyId;
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
@@ -422,10 +432,10 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             SubscriptionPolicy subscriptionPolicy = SubscriptionThrottlePolicyMappingUtil
                     .fromSubscriptionThrottlePolicyDTOToModel(body);
             subscriptionPolicy.setUuid(policyId);
-            apiMgtAdminService.updateSubscriptionPolicy(subscriptionPolicy);
+            apiMgtAdminService.updatePolicy(tierLevel, subscriptionPolicy);
             return Response.status(Response.Status.CREATED).entity(SubscriptionThrottlePolicyMappingUtil
                     .fromSubscriptionThrottlePolicyToDTO(apiMgtAdminService.
-                            getSubscriptionPolicyByUuid(subscriptionPolicy.getUuid()))).build();
+                            getPolicyByUuid(tierLevel, subscriptionPolicy.getUuid()))).build();
 
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while updating Application Policy. policy uuid: " + policyId;
@@ -456,7 +466,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
                     fromSubscriptionThrottlePolicyDTOToModel(body);
             String policyId = apiMgtAdminService.addPolicy(tierLevel, subscriptionPolicy);
             return Response.status(Response.Status.CREATED).entity(SubscriptionThrottlePolicyMappingUtil
-                    .fromSubscriptionThrottlePolicyToDTO(apiMgtAdminService.getSubscriptionPolicyByUuid(policyId)))
+                    .fromSubscriptionThrottlePolicyToDTO(apiMgtAdminService.getPolicyByUuid(tierLevel, policyId)))
                     .build();
 
         } catch (APIManagementException e) {

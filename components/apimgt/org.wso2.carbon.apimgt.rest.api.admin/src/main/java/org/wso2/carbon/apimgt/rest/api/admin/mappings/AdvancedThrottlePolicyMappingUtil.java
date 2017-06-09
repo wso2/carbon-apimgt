@@ -18,8 +18,11 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.mappings;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Pipeline;
+import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.AdvancedThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.AdvancedThrottlePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ConditionalGroupDTO;
@@ -35,21 +38,23 @@ import java.util.List;
  */
 public class AdvancedThrottlePolicyMappingUtil {
 
+    private static final Logger log = LoggerFactory.getLogger(AdvancedThrottlePolicyMappingUtil.class);
+
     /**
      * Converts an array of Advanced Policy objects into a List DTO
      *
-     * @param apiPolicies Array of Advanced Policies
+     * @param policies Array of Advanced Policies
      * @return A List DTO of converted Advanced Policies
      * @throws UnsupportedThrottleLimitTypeException
      * @throws UnsupportedThrottleConditionTypeException
      */
-    public static AdvancedThrottlePolicyListDTO fromAPIPolicyArrayToListDTO(List<APIPolicy> apiPolicies)
+    public static AdvancedThrottlePolicyListDTO fromAPIPolicyArrayToListDTO(List<Policy> policies)
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
         AdvancedThrottlePolicyListDTO listDTO = new AdvancedThrottlePolicyListDTO();
         List<AdvancedThrottlePolicyDTO> advancedPolicyDTOs = new ArrayList<>();
-        if (apiPolicies != null) {
-            for (APIPolicy apiPolicy : apiPolicies) {
-                advancedPolicyDTOs.add(fromAdvancedPolicyToDTO(apiPolicy));
+        if (policies != null) {
+            for (Policy policy : policies) {
+                advancedPolicyDTOs.add(fromAdvancedPolicyToDTO(policy));
             }
         }
         listDTO.setList(advancedPolicyDTOs);
@@ -84,21 +89,26 @@ public class AdvancedThrottlePolicyMappingUtil {
     /**
      * Converts a single Advanced Policy model into REST API DTO
      *
-     * @param apiPolicy Advanced Policy model object
+     * @param policy Advanced Policy model object
      * @return Converted Advanced policy REST API DTO object
      * @throws UnsupportedThrottleLimitTypeException
      * @throws UnsupportedThrottleConditionTypeException
      */
-    public static AdvancedThrottlePolicyDTO fromAdvancedPolicyToDTO(APIPolicy apiPolicy)
+    public static AdvancedThrottlePolicyDTO fromAdvancedPolicyToDTO(Policy policy)
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
         AdvancedThrottlePolicyDTO policyDTO = new AdvancedThrottlePolicyDTO();
-        policyDTO = CommonThrottleMappingUtil.updateFieldsFromToPolicyToDTO(apiPolicy, policyDTO);
-        List<ConditionalGroupDTO> groupDTOs = CommonThrottleMappingUtil.fromPipelineListToConditionalGroupDTOList(
-                apiPolicy.getPipelines());
-        policyDTO.setConditionalGroups(groupDTOs);
+        policyDTO = CommonThrottleMappingUtil.updateFieldsFromToPolicyToDTO(policy, policyDTO);
+        if (policy instanceof APIPolicy) {
+            List<ConditionalGroupDTO> groupDTOs = CommonThrottleMappingUtil.fromPipelineListToConditionalGroupDTOList
+                    (((APIPolicy) policy).getPipelines());
+            policyDTO.setConditionalGroups(groupDTOs);
+        } else {
+            log.error("policy object " + policy.toString() + " is not an APIPolicy, hence will not be "
+                    + "considered");
+        }
 
-        if (apiPolicy.getDefaultQuotaPolicy() != null) {
-            policyDTO.setDefaultLimit(CommonThrottleMappingUtil.fromQuotaPolicyToDTO(apiPolicy.getDefaultQuotaPolicy()));
+        if (policy.getDefaultQuotaPolicy() != null) {
+            policyDTO.setDefaultLimit(CommonThrottleMappingUtil.fromQuotaPolicyToDTO(policy.getDefaultQuotaPolicy()));
         }
         return policyDTO;
     }
