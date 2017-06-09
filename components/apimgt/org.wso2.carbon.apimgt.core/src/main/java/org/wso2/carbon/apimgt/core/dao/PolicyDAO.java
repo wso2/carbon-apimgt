@@ -21,10 +21,7 @@
 package org.wso2.carbon.apimgt.core.dao;
 
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
-import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
-import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
-import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 
 import java.util.List;
 
@@ -32,7 +29,6 @@ import java.util.List;
  * Provides access to Policy data layer
  */
 public interface PolicyDAO {
-
 
     /**
      * Gets a Policy by Name and Level
@@ -43,6 +39,16 @@ public interface PolicyDAO {
      * @throws APIMgtDAOException If failed to get the Policy
      */
     Policy getPolicy(String policyLevel, String policyName) throws APIMgtDAOException;
+
+    /**
+     * Gets a Policy by uuid and Level
+     *
+     * @param policyLevel Policy level to which this policy belongs to
+     * @param uuid policy id
+     * @return {@link Policy} Gets a Policy by given name and level
+     * @throws APIMgtDAOException If failed to get the Policy
+     */
+    Policy getPolicyByUuid(String policyLevel, String uuid) throws APIMgtDAOException;
 
     /**
      * Gets all the Policies belongs to a level
@@ -65,28 +71,11 @@ public interface PolicyDAO {
     /**
      * Updates a Policy belongs to a level
      *
-     * @param apiPolicy Policy to update
-     * @throws APIMgtDAOException If failed to add a Policy
+     * @param policyLevel Policy Level to which this Policy belongs to
+     * @param policy Policy to add
+     * @throws APIMgtDAOException If failed to update the specified policy
      */
-    void updateAPIPolicy(APIPolicy apiPolicy) throws APIMgtDAOException;
-
-
-    /**
-     * Updates a Policy belongs to a level
-     *
-     * @param applicationPolicy Policy to update
-     * @throws APIMgtDAOException If failed to add a Policy
-     */
-    void updateApplicationPolicy(ApplicationPolicy applicationPolicy) throws APIMgtDAOException;
-
-
-    /**
-     * Updates a Policy belongs to a level
-     *
-     * @param subscriptionPolicy Policy to update
-     * @throws APIMgtDAOException If failed to add a Policy
-     */
-    void updateSubscriptionPolicy(SubscriptionPolicy subscriptionPolicy) throws APIMgtDAOException;
+    void updatePolicy(String policyLevel, Policy policy) throws APIMgtDAOException;
 
     /**
      * Deletes a Policy by Name and Level
@@ -107,51 +96,6 @@ public interface PolicyDAO {
     void deletePolicyByUuid(String uuid, String policyLevel) throws APIMgtDAOException;
 
     /**
-     * Retrieves Subscription Policy by name
-     *
-     * @param policyName Subscription policy name
-     * @return {@link SubscriptionPolicy} of given UUID
-     * @throws APIMgtDAOException If failed to get a Subscription Policy by Name
-     */
-    SubscriptionPolicy getSubscriptionPolicy(String policyName) throws APIMgtDAOException;
-
-    /**
-     * Retrieves Application Policy by UUID
-     *
-     * @param policyId  Application policy ID
-     * @return {@link ApplicationPolicy} of given UUID
-     * @throws APIMgtDAOException   If failed to get application policy.
-     */
-    ApplicationPolicy getApplicationPolicyById(String policyId) throws APIMgtDAOException;
-
-    /**
-     * Retrieves API Policy Policy by UUID
-     *
-     * @param policyId  Application policy ID
-     * @return {@link APIPolicy} of given UUID
-     * @throws APIMgtDAOException   If failed to get application policy.
-     */
-    APIPolicy getAPIPolicyById(String policyId) throws APIMgtDAOException;
-
-    /**
-     * Retrieves API Policy Policy by UUID
-     *
-     * @param policyId  Application policy ID
-     * @return {@link ApplicationPolicy} of given UUID
-     * @throws APIMgtDAOException   If failed to get application policy.
-     */
-    ApplicationPolicy getApplicationPolicyByUuid(String policyId) throws APIMgtDAOException;
-
-    /**
-     * Retrieves Subscription Policy by UUID
-     *
-     * @param policyId  Application policy ID
-     * @return {@link SubscriptionPolicy} of given UUID
-     * @throws APIMgtDAOException   If failed to get application policy.
-     */
-    SubscriptionPolicy getSubscriptionPolicyById(String policyId) throws APIMgtDAOException;
-
-    /**
      * Retrieves the last updated time of a throttling policy given its policy level and policy name
      *
      * @param policyLevel level of the throttling policy
@@ -160,58 +104,4 @@ public interface PolicyDAO {
      * @throws APIMgtDAOException if API Manager core level exception occurred
      */
     String getLastUpdatedTimeOfThrottlingPolicy(String policyLevel, String policyName) throws APIMgtDAOException;
-
-    /**
-     * Retrieves the last updated time of an API level throttling policy given its policy name
-     *
-     * @param policyName name of the throttling policy
-     * @return last updated time
-     * @throws APIMgtDAOException if API Manager core level exception occurred
-     */
-    String getLastUpdatedTimeOfAPIPolicy(String policyName) throws APIMgtDAOException;
-
-    /**
-     * Retrieves the last updated time of an application level throttling policy given its policy name
-     *
-     * @param policyName name of the throttling policy
-     * @return last updated time
-     * @throws APIMgtDAOException if API Manager core level exception occurred
-     */
-    String getLastUpdatedTimeOfApplicationPolicy(String policyName)
-            throws APIMgtDAOException;
-
-    /**
-     * Retrieves the last updated time of an subscription level throttling policy given its policy name
-     *
-     * @param policyName name of the throttling policy
-     * @return last updated time
-     * @throws APIMgtDAOException if API Manager core level exception occurred
-     */
-    String getLastUpdatedTimeOfSubscriptionPolicy(String policyName)
-            throws APIMgtDAOException;
-
-
-    /**
-     * Gets all the Advance Policies.
-     *
-     * @return {@link List} List Policies belongs to the provided level
-     * @throws APIMgtDAOException If failed to get Policies
-     */
-    List<APIPolicy> getAllAdvancePolicies() throws APIMgtDAOException;
-
-    /**
-     * Gets all the Application Policies.
-     *
-     * @return {@link List} List Policies belongs to the provided level
-     * @throws APIMgtDAOException If failed to get Policies
-     */
-    List<ApplicationPolicy> getAllApplicationPolicies() throws APIMgtDAOException;
-
-    /**
-     * Gets all the Subscription Policies.
-     *
-     * @return {@link List} List Policies belongs to the provided level
-     * @throws APIMgtDAOException If failed to get Policies
-     */
-    List<SubscriptionPolicy> getAllSubscriptionPolicies() throws APIMgtDAOException;
 }

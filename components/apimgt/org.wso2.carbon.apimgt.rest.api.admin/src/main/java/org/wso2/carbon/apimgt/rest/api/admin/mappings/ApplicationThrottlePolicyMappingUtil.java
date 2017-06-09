@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.mappings;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.rest.api.admin.exceptions.UnsupportedThrottleConditionTypeException;
 import org.wso2.carbon.apimgt.rest.api.admin.exceptions.UnsupportedThrottleLimitTypeException;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
@@ -33,6 +36,8 @@ import java.util.List;
  */
 public class ApplicationThrottlePolicyMappingUtil {
 
+    private static final Logger log = LoggerFactory.getLogger(ApplicationThrottlePolicyMappingUtil.class);
+
     /**
      * Converts an array of Application Policy objects into a List DTO
      *
@@ -40,14 +45,19 @@ public class ApplicationThrottlePolicyMappingUtil {
      * @return A List DTO of converted Application Policies
      * @throws UnsupportedThrottleLimitTypeException
      */
-    public static ApplicationThrottlePolicyListDTO fromApplicationPolicyArrayToListDTO( List<ApplicationPolicy> appPolicies)
+    public static ApplicationThrottlePolicyListDTO fromApplicationPolicyArrayToListDTO( List<Policy> appPolicies)
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
         ApplicationThrottlePolicyListDTO listDTO = new ApplicationThrottlePolicyListDTO();
         List<ApplicationThrottlePolicyDTO> appPolicyDTOList = new ArrayList<>();
         if (appPolicies != null) {
-            for (ApplicationPolicy policy : appPolicies) {
-                ApplicationThrottlePolicyDTO dto = fromApplicationThrottlePolicyToDTO(policy);
-                appPolicyDTOList.add(dto);
+            for (Policy policy : appPolicies) {
+                if (policy instanceof ApplicationPolicy) {
+                    ApplicationThrottlePolicyDTO dto = fromApplicationThrottlePolicyToDTO((ApplicationPolicy) policy);
+                    appPolicyDTOList.add(dto);
+                } else {
+                    log.error("policy object " + policy.toString() + " is not an Application Policy, hence will not be "
+                            + "considered");
+                }
             }
         }
         listDTO.setCount(appPolicyDTOList.size());
@@ -62,7 +72,7 @@ public class ApplicationThrottlePolicyMappingUtil {
      * @return Converted Application policy REST API DTO object
      * @throws UnsupportedThrottleLimitTypeException
      */
-    public static ApplicationThrottlePolicyDTO fromApplicationThrottlePolicyToDTO(ApplicationPolicy appPolicy)
+    public static ApplicationThrottlePolicyDTO fromApplicationThrottlePolicyToDTO(Policy appPolicy)
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
         ApplicationThrottlePolicyDTO policyDTO = new ApplicationThrottlePolicyDTO();
         policyDTO = CommonThrottleMappingUtil.updateFieldsFromToPolicyToDTO(appPolicy, policyDTO);
