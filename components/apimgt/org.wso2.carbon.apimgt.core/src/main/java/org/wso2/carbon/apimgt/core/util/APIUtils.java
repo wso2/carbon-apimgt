@@ -264,6 +264,16 @@ public class APIUtils {
     }
 
     /**
+     * Get logged in user
+     *
+     * @return logged in user
+     */
+    public static String getLoggedInUser() {
+        //get the logged in user from key manager.
+        return "admin";
+    }
+
+    /**
      * Check the validity of roles to be assigned to an API
      *
      * @param availableRoleList all available roles
@@ -330,6 +340,8 @@ public class APIUtils {
         return roleNamePermissionList;
 
     }
+
+
 
      /**
      * Verifies that fields that cannot be changed via an API update
