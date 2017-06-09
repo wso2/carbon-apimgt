@@ -14,8 +14,8 @@ import org.wso2.carbon.apimgt.gateway.holders as holder;
 
 
 @jms:JMSSource {
-factoryInitial:"org.apache.activemq.jndi.ActiveMQInitialContextFactory",
-providerUrl:"tcp://localhost:61616"}
+factoryInitial : "org.apache.activemq.jndi.ActiveMQInitialContextFactory",
+providerUrl : "tcp://localhost:61616"}
 @jms:ConnectionProperty {key:"connectionFactoryType", value:"topic"}
 @jms:ConnectionProperty {key:"destination", value:"PublisherTopic"}
 @jms:ConnectionProperty {key:"connectionFactoryJNDIName", value:"TopicConnectionFactory"}
