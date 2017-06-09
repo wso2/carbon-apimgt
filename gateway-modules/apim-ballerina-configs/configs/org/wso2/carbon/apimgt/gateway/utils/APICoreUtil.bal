@@ -61,7 +61,7 @@ function getAPIs () (json) {
     json apiList;
     try {
         http:ClientConnector client = create http:ClientConnector(getAPICoreURL());
-        string query = "?labels=Private,Public";
+        string query = "?labels=Default";
         response = http:ClientConnector.get (client, "/api/am/core/v1.0/apis" + query, request);
         apiList = messages:getJsonPayload(response);
         return apiList;
@@ -90,7 +90,7 @@ function getAPIServiceConfig (string apiId) (string) {
 
 function getAPICoreURL () (string){
     string apiCoreURL;
-    if(system:getEnv(Constants:API_CORE_URL) != null) {
+    if(system:getEnv(Constants:API_CORE_URL) != "") {
         apiCoreURL = system:getEnv(Constants:API_CORE_URL);
     } else {
         apiCoreURL = "https://localhost:9292";

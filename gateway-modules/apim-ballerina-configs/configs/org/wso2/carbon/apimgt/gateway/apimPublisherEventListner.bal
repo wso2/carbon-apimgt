@@ -30,6 +30,7 @@ service jmsService {
 
             if (strings:equalsIgnoreCase(eventType, Constants:API_CREATE)) {
                 json apiSummary = jsons:getJson(event, "apiSummary");
+                system:println(apiSummary);
                 if(apiSummary != null){
 
                     dto:APIDTO api = gatewayUtil:fromJSONToAPIDTO(apiSummary);
@@ -78,6 +79,7 @@ service jmsService {
                 json apiSummary = jsons:getJson(event, "apiSummary");
                 if(apiSummary != null){
                     //Update API cache
+                    system:println(apiSummary);
                     dto:APIDTO api = gatewayUtil:fromJSONToAPIDTO(apiSummary);
                     holder:putIntoAPICache(api);
                 } else {
@@ -88,6 +90,7 @@ service jmsService {
             }
 
         }catch(errors:Error e){
+            system:println(e.msg);
             system:println("[Error] : Error occurred while processing gateway event ");
         }
     }
