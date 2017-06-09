@@ -77,7 +77,7 @@ function fromJsonToResourceDto (json resourceResponse) (dto:ResourceDto){
     return resourceDto;
 }
 function retrieveSubscriptions () (boolean ){
-    string coreUrl = "https://localhost:9293/api/am/core/v1.0";
+    string coreUrl = "https://localhost:9292/api/am/core/v1.0";
     string query = "/subscriptions?limit=-1";
     message request = {};
     http:ClientConnector apiInfoConnector = create http:ClientConnector(coreUrl);
@@ -95,7 +95,7 @@ function retrieveSubscriptions () (boolean ){
     return true;
 }
 function retrieveResources (string apiContext, string apiVersion) {
-    string coreUrl = "https://localhost:9293/api/am/core/v1.0";
+    string coreUrl = "https://localhost:9292/api/am/core/v1.0";
     string query = "/resources/?apiContext="+apiContext+"&apiVersion="+apiVersion;
     message request = {};
     http:ClientConnector apiInfoConnector = create http:ClientConnector(coreUrl);
@@ -111,7 +111,7 @@ function retrieveResources (string apiContext, string apiVersion) {
     }
 }
 function retrieveApplications ()(boolean) {
-    string coreUrl = "https://localhost:9293/api/am/core/v1.0";
+    string coreUrl = "https://localhost:9292/api/am/core/v1.0";
     string query = "/applications";
     message request = {};
     http:ClientConnector apiInfoConnector = create http:ClientConnector(coreUrl);
