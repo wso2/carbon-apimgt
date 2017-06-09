@@ -1864,6 +1864,7 @@ public class ApiDAOImpl implements ApiDAO {
 
     /**
      * Update API permission
+     *
      * @param connection connection to database
      * @param permissionMap updated permission map
      * @param apiId id of API to be updated permission
@@ -2419,6 +2420,7 @@ public class ApiDAOImpl implements ApiDAO {
 
     /**
      * This returns the json string containing the role permissions for a given API
+     *
      * @param connection - DB connection
      * @param apiId - apiId of the API
      * @return permission string
@@ -2456,6 +2458,7 @@ public class ApiDAOImpl implements ApiDAO {
 
     /**
      * This constructs and returns the API permissions map from the DB
+     *
      * @param connection - DB connection
      * @param apiId - apiId of the API
      * @return permission map for the API

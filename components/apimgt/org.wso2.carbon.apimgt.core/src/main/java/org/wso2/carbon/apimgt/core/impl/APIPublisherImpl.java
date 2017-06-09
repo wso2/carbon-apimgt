@@ -405,6 +405,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     /**
      * This method is used to check whether the roles specified with permissions for a given API are valid
+     *
      * @param permissionMap - The map containing the group IDs(roles) and their permissions
      * @return validity of the roles
      * @throws APIManagementException If one or more of the roles are invalid
@@ -418,6 +419,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     /**
      * This method is used to extract the groupIds or roles from the permissionMap
+     *
      * @param permissionMap - The map containing the group IDs(roles) and their permissions
      * @return - The list of groupIds specified for permissions
      */

@@ -710,6 +710,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * This method retrieves the set of overall permissions for a given api for the logged in user
+     *
      * @param loggedInUser - Logged in user
      * @param api - The API whose permissions for the logged in user is retrieved
      * @return The overall list of permissions for the given API for the logged in user
@@ -755,6 +756,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * This method is used to extract the groupIds or roles from the permissionMap
+     * 
      * @param permissionMap - The map containing the group IDs(roles) and their permissions
      * @return - The list of groupIds specified for permissions
      */
@@ -1272,6 +1274,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Set user specific permissions for each API returned during search
+     *
      * @param user - the logged in user name
      * @param originalAPIList - original api list returned by search
      * @return the updated list of APIs
