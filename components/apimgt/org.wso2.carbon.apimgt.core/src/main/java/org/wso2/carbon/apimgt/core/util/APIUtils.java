@@ -19,6 +19,7 @@
 
 package org.wso2.carbon.apimgt.core.util;
 
+import io.swagger.models.HttpMethod;
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -230,7 +231,7 @@ public class APIUtils {
         UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
         uriTemplateBuilder.uriTemplate("/*");
         for (String httpVerb : APIMgtConstants.SUPPORTED_HTTP_VERBS.split(",")) {
-            if (!"OPTIONS".equals(httpVerb)) {
+            if (!HttpMethod.OPTIONS.toString().equals(httpVerb)) {
                 uriTemplateBuilder.httpVerb(httpVerb);
                 uriTemplateBuilder.templateId(APIUtils.generateOperationIdFromPath(uriTemplateBuilder.getUriTemplate
                         (), httpVerb));

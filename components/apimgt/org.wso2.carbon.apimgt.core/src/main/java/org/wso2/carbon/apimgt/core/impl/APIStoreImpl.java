@@ -903,8 +903,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
     }
 
-
-
     private void setGatewayDefinitionSource(CompositeAPI.Builder apiBuilder) throws APIManagementException {
         List<UriTemplate> list = new ArrayList<>(apiBuilder.getUriTemplates().values());
         List<TemplateBuilderDTO> resourceList = new ArrayList<>();
@@ -945,7 +943,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
         APIConfigContext apiConfigContext = new APIConfigContext(apiBuilder.getName(), apiBuilder.getContext(),
                 apiBuilder.getVersion(), apiBuilder.getCreatedTime(), config.getGatewayPackageName());
-
 
         gatewaySourceGenerator.setApiConfigContext(apiConfigContext);
         String gatewayConfig = gatewaySourceGenerator.getCompositeAPIConfigStringFromTemplate(resourceList,
@@ -1210,7 +1207,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         List<CompositeAPI> apiResults;
 
         //this should be current logged in user
-        String user = "admin";
+        String user = getUsername();
         //role list of current user
         Set<String> roles = APIUtils.getAllRolesOfUser(user);
         try {

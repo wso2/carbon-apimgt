@@ -54,15 +54,17 @@ public interface APIDefinition {
 
     /**
      * generate the swagger from uri templates.
-     * @param api   API object
-     * @return      generated swagger as a string.
+     *
+     * @param api API object
+     * @return generated swagger as a string.
      */
     String generateSwaggerFromResources(API.APIBuilder api);
 
     /**
      * generate the swagger from uri templates.
-     * @param api   CompositeAPI.Builder object
-     * @return      generated swagger as a string.
+     *
+     * @param api CompositeAPI.Builder object
+     * @return generated swagger as a string.
      */
     String generateSwaggerFromResources(CompositeAPI.Builder api);
 

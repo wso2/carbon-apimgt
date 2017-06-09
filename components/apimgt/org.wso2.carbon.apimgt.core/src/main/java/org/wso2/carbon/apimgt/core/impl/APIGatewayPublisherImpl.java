@@ -63,9 +63,6 @@ public class APIGatewayPublisherImpl implements APIGateway {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void addAPI(API api) throws GatewayException {
 
@@ -100,9 +97,6 @@ public class APIGatewayPublisherImpl implements APIGateway {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void addCompositeAPI(CompositeAPI api) throws GatewayException {
         String gatewayConfig = api.getGatewayConfig();
@@ -119,15 +113,11 @@ public class APIGatewayPublisherImpl implements APIGateway {
             apiSummary.setContext(api.getContext());
             gatewayDTO.setApiSummary(apiSummary);
             publishToPublisherTopic(gatewayDTO);
-
         } else {
             saveApi(api.getName(), api.getVersion(), gwHome, gatewayConfig, false);
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void updateAPI(API api) throws GatewayException {
 
@@ -141,12 +131,13 @@ public class APIGatewayPublisherImpl implements APIGateway {
             apiSummary.setContext(api.getContext());
             gatewayDTO.setApiSummary(apiSummary);
             publishToPublisherTopic(gatewayDTO);
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Gateway home is not properly configured (null)");
+            }
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void deleteAPI(API api) throws GatewayException {
 
@@ -160,6 +151,10 @@ public class APIGatewayPublisherImpl implements APIGateway {
             apiSummary.setContext(api.getContext());
             gatewayDTO.setApiSummary(apiSummary);
             publishToPublisherTopic(gatewayDTO);
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Gateway home is not properly configured (null)");
+            }
         }
     }
 
@@ -175,12 +170,13 @@ public class APIGatewayPublisherImpl implements APIGateway {
             apiSummary.setContext(api.getContext());
             gatewayDTO.setApiSummary(apiSummary);
             publishToPublisherTopic(gatewayDTO);
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Gateway home is not properly configured (null)");
+            }
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void addAPISubscription(Subscription subscription) throws GatewayException {
         if (gwHome == null) {
@@ -188,12 +184,13 @@ public class APIGatewayPublisherImpl implements APIGateway {
                     APIMgtConstants.GatewayEventTypes.SUBSCRIPTION_CREATE);
             subscriptionDTO.setSubscription(subscription);
             publishToStoreTopic(subscriptionDTO);
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Gateway home is not properly configured (null)");
+            }
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void deleteAPISubscription(Subscription subscription) throws GatewayException {
         if (gwHome == null) {
@@ -201,12 +198,13 @@ public class APIGatewayPublisherImpl implements APIGateway {
                     APIMgtConstants.GatewayEventTypes.SUBSCRIPTION_DELETE);
             subscriptionDTO.setSubscription(subscription);
             publishToStoreTopic(subscriptionDTO);
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Gateway home is not properly configured (null)");
+            }
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void addEndpoint(Endpoint endpoint) throws GatewayException {
 
@@ -219,9 +217,6 @@ public class APIGatewayPublisherImpl implements APIGateway {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void updateEndpoint(Endpoint endpoint) throws GatewayException {
         if (gwHome == null) {
@@ -233,9 +228,6 @@ public class APIGatewayPublisherImpl implements APIGateway {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void deleteEndpoint(Endpoint endpoint) throws GatewayException {
 
@@ -243,6 +235,10 @@ public class APIGatewayPublisherImpl implements APIGateway {
             EndpointDTO dto = new EndpointDTO(APIMgtConstants.GatewayEventTypes.ENDPOINT_DELETE);
             dto.setEndpoint(endpoint);
             publishToPublisherTopic(dto);
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Gateway home is not properly configured (null)");
+            }
         }
     }
 
@@ -269,10 +265,12 @@ public class APIGatewayPublisherImpl implements APIGateway {
     /**
      * Save API into FS
      *
-     * @param apiName     API Name
-     * @param apiVersion     API Version
-     * @param gwHome  path of the gateway
-     * @param content API config
+     * @param apiName      API Name
+     * @param apiVersion   API Version
+     * @param gwHome       path of the gateway
+     * @param content      API config
+     * @param isDefaultApi mark this as the default version of this API. Setting this to <code>true<code/>
+     *                     will allow accessing API without version number prefix in the URL
      */
     private void saveApi(String apiName, String apiVersion, String gwHome, String content, boolean isDefaultApi) {
         String deploymentDirPath = gwHome + File.separator + config.getGatewayPackageNamePath();
@@ -353,9 +351,6 @@ public class APIGatewayPublisherImpl implements APIGateway {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void changeAPIState(API api, String status) throws GatewayException {
         if (gwHome == null) {
@@ -372,6 +367,9 @@ public class APIGatewayPublisherImpl implements APIGateway {
             publishToPublisherTopic(gatewayDTO);
         } else {
             //TODO save to file system: need to consider editor mode scenario
+            if (log.isDebugEnabled()) {
+                log.debug("Gateway home is not properly configured (null)");
+            }
         }
     }
 }
