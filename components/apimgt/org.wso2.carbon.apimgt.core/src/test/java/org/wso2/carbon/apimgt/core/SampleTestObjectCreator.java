@@ -106,8 +106,6 @@ public class SampleTestObjectCreator {
     private static final String ALLOWED_HEADER_AUTHORIZATION = "Authorization";
     private static final String ALLOWED_HEADER_CUSTOM = "X-Custom";
     private static final String API_CREATOR = "Adam Doe";
-    private static final String CALLBACK_URL_1 = "http://localhost/myapp";
-    private static final String CALLBACK_URL_2 = "http://localhost/myapp2";
     private static final String GROUP_1 = "groupx";
     private static final String GROUP_2 = "groupx2";
     private static final String SAMPLE_DOC_NAME = "CalculatorDoc";
@@ -440,7 +438,6 @@ public class SampleTestObjectCreator {
         //created by admin
         Application application = new Application(TEST_APP_1, ADMIN);
         application.setId(UUID.randomUUID().toString());
-        application.setCallbackUrl(CALLBACK_URL_1);
         application.setDescription("This is a test application");
         application.setGroupId(GROUP_1);
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
@@ -455,7 +452,6 @@ public class SampleTestObjectCreator {
         //created by admin and updated by admin2
         Application application = new Application(TEST_APP_2, ADMIN);
         application.setId(UUID.randomUUID().toString());
-        application.setCallbackUrl(CALLBACK_URL_2);
         application.setDescription("This is test application 2");
         application.setGroupId(GROUP_2);
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_APPROVED);
@@ -468,7 +464,6 @@ public class SampleTestObjectCreator {
     public static Application createCustomApplication(String applicationName, String owner) {
         Application application = new Application(applicationName, owner);
         application.setId(UUID.randomUUID().toString());
-        application.setCallbackUrl(CALLBACK_URL_1);
         application.setDescription("This is a test application");
         application.setGroupId(GROUP_1);
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
@@ -485,7 +480,6 @@ public class SampleTestObjectCreator {
         permissionMap.put(APIMgtConstants.Permission.UPDATE, APIMgtConstants.Permission.UPDATE_PERMISSION);
         Application application = new Application(TEST_APP_1, ADMIN);
         application.setId(UUID.randomUUID().toString());
-        application.setCallbackUrl(CALLBACK_URL_1);
         application.setDescription("This is a test application");
         application.setGroupId(GROUP_1);
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);

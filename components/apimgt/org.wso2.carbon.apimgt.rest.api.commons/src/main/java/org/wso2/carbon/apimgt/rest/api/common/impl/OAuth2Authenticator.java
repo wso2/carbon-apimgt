@@ -207,16 +207,16 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
     * @return true if scope validation successful
     * */
     @SuppressFBWarnings({"DLS_DEAD_LOCAL_STORE"})
-    private boolean validateScopes(Request request, ServiceMethodInfo serviceMethodInfo, String[] scopesToValidate,
+    private boolean validateScopes(Request request, ServiceMethodInfo serviceMethodInfo, String scopesToValidate,
                                    String restAPIResource) throws APIMgtSecurityException {
-        final boolean authorized[] = {false};
+        final boolean[] authorized = {false};
 
         String path = (String) request.getProperty("REQUEST_URL");
         String verb = (String) request.getProperty("HTTP_METHOD");
         String resource = path.substring(path.length() - 1);
-
-        if (scopesToValidate.length > 0) {
-            final List<String> scopes = Arrays.asList(scopesToValidate);
+        String[] scopesListToValidate = scopesToValidate.split(" ");
+        if (scopesListToValidate.length > 0) {
+            final List<String> scopes = Arrays.asList(scopesListToValidate);
             if (restAPIResource != null) {
                 APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
                 try {
@@ -231,21 +231,20 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
                     }
                     apiDefinitionScopes.keySet()      //Only do the scope validation.hence key set is sufficient.
                             .forEach(scopeKey -> {
-                                Optional<String> key = scopes.stream().filter(scp -> {
-                                    return scp.equalsIgnoreCase(scopeKey);
-                                }).findAny();
+                                Optional<String> key = scopes.stream().filter(scp
+                                        -> scp.equalsIgnoreCase(scopeKey)).findAny();
                                 if (key.isPresent()) {
                                     authorized[0] = true;
                                 }
                             });
                 } catch (APIManagementException e) {
                     String message = "Error while validating scopes";
-                    log.error(message);
+                    log.error(message, e);
                     throw new APIMgtSecurityException(message, ExceptionCodes.AUTH_GENERAL_ERROR);
                 }
             } else {
                 if (log.isDebugEnabled()) {
-                    log.debug("Rest API resource could not be found for resource '" + resource + "'");
+                    log.debug("Rest API resource could not be found for resource '" + resource + '\'');
                 }
             }
         } else { // scope validation gets through if access token does not contain scopes to validate
@@ -253,7 +252,7 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
         }
 
         if (!authorized[0]) {
-            String message = "Scope validation fails for the scopes " + Arrays.toString(scopesToValidate);
+            String message = "Scope validation fails for the scopes " + Arrays.toString(scopesListToValidate);
             throw new APIMgtSecurityException(message, ExceptionCodes.ACCESS_TOKEN_INACTIVE);
 
         }

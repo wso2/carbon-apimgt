@@ -77,7 +77,7 @@ public class LogInServiceTest {
         wireMockRule.start();
 
         // Mock service for key manager DCR endpoint
-        wireMockRule.stubFor(post(urlEqualTo("/identity/connect/register")).withBasicAuth("admin", "admin")
+        wireMockRule.stubFor(post(urlEqualTo("/identity/connect/register/")).withBasicAuth("admin", "admin")
                 .withRequestBody(equalToJson("{\"client_name\":\"oauth_application\"}", true, true)).willReturn(
                         aResponse().withStatus(201).withHeader("Content-Type", "application/json").withBody(
                                 "{\"client_name\":\"publisher_application\","
@@ -87,7 +87,7 @@ public class LogInServiceTest {
                                         + "\"refresh_token\"]}")));
 
         // Mock service for key manager token endpoint
-        wireMockRule.stubFor(post(urlEqualTo("/oauth2/token"))
+        wireMockRule.stubFor(post(urlEqualTo("/oauth2/token/"))
                 .willReturn(
                         aResponse().withStatus(200).withHeader("Content-Type", "application/x-www-form-urlencoded")
                                 .withBody("{\"access_token\":\"8d4f62ea-edc5-419d-a898-a517f9d3d6f9\","
@@ -98,7 +98,7 @@ public class LogInServiceTest {
                                         + "\"apim:workflow_approve\"],\"expiresTimestamp\":1490615736702}")));
 
         // Mock service for key manager revoke endpoint
-        wireMockRule.stubFor(post(urlEqualTo("/oauth2/revoke")).willReturn(aResponse().withStatus(200)));
+        wireMockRule.stubFor(post(urlEqualTo("/oauth2/revoke/")).willReturn(aResponse().withStatus(200)));
 
         baseURI = URI.create(String.format("http://%s:%d", HOSTNAME, PORT));
         microservicesRunner = new MicroservicesRunner(PORT);
