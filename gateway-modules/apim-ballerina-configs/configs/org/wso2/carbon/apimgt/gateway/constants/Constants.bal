@@ -62,3 +62,4 @@ const int HTTP_UNAUTHORIZED = 401;
 
 const string STOP_ON_QUOTA_REACH = "STOP_ON_QUOTA_REACH";
 const string MAINTENANCE = "Maintenance";
+const string BASE_PATH = "BASE_PATH";
