@@ -10,24 +10,6 @@ import org.wso2.carbon.apimgt.gateway.utils as gatewayUtil;
 import org.wso2.carbon.apimgt.gateway.holders as holder;
 import org.wso2.carbon.apimgt.gateway.constants;
 import ballerina.lang.jsons;
-@http:BasePath {value:"/api1"}
-service Service1 {
-    dto:APIKeyValidationInfoDTO keyValidationDto;
-    @http:POST {}
-    @http:Path {value:"/"}
-    resource Resource1 (message m) {
-        int i = - 1;
-        boolean valid;
-        valid, m = authenticate(m);
-        if (valid) {
-            http:ClientConnector client = create http:ClientConnector("http://localhost:8688");
-            message response = http:ClientConnector.post (client, "/api", m);
-            reply response;
-        } else {
-            reply m;
-        }
-    }
-}
 function authenticate (message m) (boolean, message) {
     message response = {};
     message request = {};
@@ -36,8 +18,10 @@ function authenticate (message m) (boolean, message) {
     dto:ResourceDto resourceDto;
     json userInfo;
     boolean introspectCacheHit = true;
-    string apiContext = "/api1";
+    string apiContext = messages:getProperty(m,constants:BASE_PATH);
+    //todo get this from ballerina property once they set versioning
     string version = "1.0.0";
+    //todo need to have elected resource to be in properties
     string uriTemplate = "/*";
     string httpVerb = strings:toUpperCase(http:getMethod(m));
     //check api status
@@ -138,11 +122,12 @@ function authenticate (message m) (boolean, message) {
 
 function doIntrospect (string authToken) (dto:IntrospectDto) {
     message request = {};
-    string keyURl = "https://localhost:9443";
+    dto:KeyManagerInfoDTO keyManagerConf = holder:keyManagerConf;
+    dto:CredentialsDTO credentials = keyManagerConf.credentials;
     messages:setStringPayload(request, "token=" + authToken);
     messages:setHeader(request, "Content-Type", "application/x-www-form-urlencoded");
-    messages:setHeader(request, constants:AUTHORIZATION, "Basic " + utils:base64encode("admin:admin"));
-    http:ClientConnector introspectConnector = create http:ClientConnector(keyURl);
+    messages:setHeader(request, constants:AUTHORIZATION, "Basic " + utils:base64encode(credentials.username + ":" + credentials.password));
+    http:ClientConnector introspectConnector = create http:ClientConnector(keyManagerConf.introspectEndpoint);
     message introspectResponse = http:ClientConnector.post (introspectConnector, constants:INTROSPECT_CONTEXT, request);
     dto:IntrospectDto introspectDto = gatewayUtil:fromJsonToIntrospectDto(messages:getJsonPayload(introspectResponse));
     return introspectDto;
