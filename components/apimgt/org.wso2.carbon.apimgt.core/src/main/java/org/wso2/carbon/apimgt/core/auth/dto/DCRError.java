@@ -16,29 +16,25 @@
  *  under the License.
  */
 
-package org.wso2.carbon.apimgt.core.auth;
+package org.wso2.carbon.apimgt.core.auth.dto;
 
-import feign.Headers;
-import feign.Param;
-import feign.RequestLine;
-import feign.Response;
-import org.wso2.carbon.apimgt.core.auth.dto.SCIMUser;
+import com.google.gson.annotations.SerializedName;
 
 /**
- * This is the stub class for SCIM service
+ * Model of DCR(M) Error
  */
-public interface SCIMServiceStub {
+public class DCRError {
 
-    @Headers("Content-Type: application/json")
-    @RequestLine("POST /Users")
-    Response addUser(SCIMUser scimUser);
+    @SerializedName("error")
+    private String error;
+    @SerializedName("error_description")
+    private String errorDescription;
 
-    @RequestLine("GET /Users/{id}")
-    SCIMUser getUser(@Param("id") String id);
+    public String getError() {
+        return error;
+    }
 
-    @RequestLine("GET /Groups?filter={query}")
-    Response searchGroups(@Param("query") String query);
-
+    public String getErrorDescription() {
+        return errorDescription;
+    }
 }
-
-

@@ -223,8 +223,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_TIER, application.getTier());
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_DESCRIPTION,
                         application.getDescription());
-                workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_CALLBACKURL,
-                        application.getCallbackUrl());
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_GROUPID, application.getGroupId());
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_PERMISSION,
                         application.getPermissionString());  
@@ -254,54 +252,52 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
     @Override
-    public Map<String, Object> generateApplicationKeys(String userId, String applicationName, String applicationId,
-            String tokenType, String callbackUrl, String[] allowedDomains, String validityTime, String tokenScope,
+    public Map<String, Object> generateApplicationKeys(String applicationName, String applicationId,
+            String tokenType, String callbackUrl, List<String> grantTypes, String validityTime, String tokenScopes,
             String groupingId) throws APIManagementException {
 
-        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, userId, callbackUrl,
-                null); // for now tokenSope = null
+        //todo: remove this temporary line when UI is fixed to send grant type list, which does not happen yet
+        grantTypes.add(KeyManagerConstants.CLIENT_CREDENTIALS_GRANT_TYPE);
+
+        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, callbackUrl,
+                grantTypes);
         oauthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.VALIDITY_PERIOD, validityTime);
         oauthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.APP_KEY_TYPE, tokenType);
+        oauthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.TOKEN_SCOPES, tokenScopes);
         KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();
-        try {
-            OAuthApplicationInfo oauthAppInfo = keyManager.createApplication(oauthAppRequest);
-            Map<String, Object> keyDetails = new HashMap<>();
-            AccessTokenRequest accessTokenRequest = null;
 
-            if (oauthAppInfo != null) {
-                APIUtils.logDebug("Successfully created OAuth application", log);
-                keyDetails.put(KeyManagerConstants.KeyDetails.CONSUMER_KEY, oauthAppInfo.getClientId());
-                keyDetails.put(KeyManagerConstants.KeyDetails.CONSUMER_SECRET, oauthAppInfo.getClientSecret());
-                keyDetails.put(KeyManagerConstants.KeyDetails.SUPPORTED_GRANT_TYPES, oauthAppInfo.getGrantTypes());
-                keyDetails.put(KeyManagerConstants.KeyDetails.APP_DETAILS, oauthAppInfo.getJSONString());
-            } else {
-                throw new KeyManagementException("Error occurred while creating OAuth application");
-            }
-            accessTokenRequest = ApplicationUtils.createAccessTokenRequest(oauthAppInfo);
-            AccessTokenInfo accessTokenInfo = keyManager.getNewApplicationAccessToken(accessTokenRequest);
-            // adding access token information with key details
-            if (accessTokenInfo != null) {
-                APIUtils.logDebug("Successfully created OAuth access token", log);
-                keyDetails.put(KeyManagerConstants.KeyDetails.ACCESS_TOKEN, accessTokenInfo.getAccessToken());
-                keyDetails.put(KeyManagerConstants.KeyDetails.VALIDITY_TIME, accessTokenInfo.getValidityPeriod());
-            } else {
-                throw new KeyManagementException("Error occurred while generating access token for OAuth application");
-            }
-
-            // todo: temporarily saving to db. later this has to be done via workflow
-            try {
-                getApplicationDAO().addApplicationKeys(applicationId, oauthAppInfo);
-            } catch (APIMgtDAOException e) {
-                String errorMsg = "Error occurred while saving key data - " + applicationId;
-                log.error(errorMsg, e);
-                throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
-            }
-            return keyDetails;
-        } catch (KeyManagementException e) {
-            String errorMsg = "Error occurred while generating OAuth keys for application - ";
-            log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
+        OAuthApplicationInfo oauthAppInfo = keyManager.createApplication(oauthAppRequest);
+        Map<String, Object> keyDetails = new HashMap<>();
+        if (oauthAppInfo != null) {
+            APIUtils.logDebug("Successfully created OAuth application", log);
+            keyDetails.put(KeyManagerConstants.KeyDetails.CONSUMER_KEY, oauthAppInfo.getClientId());
+            keyDetails.put(KeyManagerConstants.KeyDetails.CONSUMER_SECRET, oauthAppInfo.getClientSecret());
+            keyDetails.put(KeyManagerConstants.KeyDetails.SUPPORTED_GRANT_TYPES, oauthAppInfo.getGrantTypes());
+            keyDetails.put(KeyManagerConstants.KeyDetails.APP_DETAILS, oauthAppInfo.getJSONString());
+        } else {
+            throw new KeyManagementException("Error occurred while creating OAuth application");
         }
+
+        AccessTokenRequest accessTokenRequest = ApplicationUtils.createAccessTokenRequest(oauthAppInfo);
+        AccessTokenInfo accessTokenInfo = keyManager.getNewAccessToken(accessTokenRequest);
+        // adding access token information to key details
+        if (accessTokenInfo != null) {
+            APIUtils.logDebug("Successfully created OAuth access token", log);
+            keyDetails.put(KeyManagerConstants.KeyDetails.ACCESS_TOKEN, accessTokenInfo.getAccessToken());
+            keyDetails.put(KeyManagerConstants.KeyDetails.VALIDITY_TIME, accessTokenInfo.getValidityPeriod());
+            keyDetails.put(KeyManagerConstants.KeyDetails.TOKEN_SCOPES, accessTokenInfo.getScopes());
+        } else {
+            throw new KeyManagementException("Error occurred while generating access token for OAuth application");
+        }
+
+        try {
+            getApplicationDAO().addApplicationKeys(applicationId, oauthAppInfo);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while saving key data - " + applicationId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return keyDetails;
     }
 
     @Override

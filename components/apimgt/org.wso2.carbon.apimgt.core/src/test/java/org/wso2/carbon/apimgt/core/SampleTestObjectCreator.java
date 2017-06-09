@@ -106,8 +106,6 @@ public class SampleTestObjectCreator {
     private static final String ALLOWED_HEADER_AUTHORIZATION = "Authorization";
     private static final String ALLOWED_HEADER_CUSTOM = "X-Custom";
     private static final String API_CREATOR = "Adam Doe";
-    private static final String CALLBACK_URL_1 = "http://localhost/myapp";
-    private static final String CALLBACK_URL_2 = "http://localhost/myapp2";
     private static final String GROUP_1 = "groupx";
     private static final String GROUP_2 = "groupx2";
     private static final String SAMPLE_DOC_NAME = "CalculatorDoc";
@@ -153,8 +151,8 @@ public class SampleTestObjectCreator {
 
         BusinessInformation businessInformation = new BusinessInformation();
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        String permissionJson = "[{\"groupId\" : 1000, \"permission\" : "
-                + "[\"READ\",\"UPDATE\"]},{\"groupId\" : 1001, \"permission\" : [\"READ\",\"UPDATE\"]}]";
+        String permissionJson = "[{\"groupId\" : \"developer\", \"permission\" : "
+              + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\",\"DELETE\"]}]";
 
         API.APIBuilder apiBuilder = new API.APIBuilder(ADMIN, "WeatherAPI", API_VERSION).
                 id(UUID.randomUUID().toString()).
@@ -184,8 +182,8 @@ public class SampleTestObjectCreator {
                 uriTemplates(getMockUriTemplates()).
                 apiDefinition(apiDefinition);
         HashMap map = new HashMap();
-        map.put("1000", 6);
-        map.put("1001", 4);
+        map.put("developer", 6);
+        map.put("admin", 7);
         apiBuilder.permissionMap(map);
         return apiBuilder;
     }
@@ -257,8 +255,8 @@ public class SampleTestObjectCreator {
         corsConfiguration.setAllowOrigins(Arrays.asList("*"));
 
         HashMap permissionMap = new HashMap();
-        permissionMap.put("1000", 6);
-        permissionMap.put("1001", 4);
+        permissionMap.put("developer", 6);
+        permissionMap.put("admin", 7);
 
         API.APIBuilder apiBuilder = new API.APIBuilder("Adam", "restaurantAPI", "0.9").
                 id(UUID.randomUUID().toString()).
@@ -316,8 +314,8 @@ public class SampleTestObjectCreator {
         corsConfiguration.setAllowOrigins(Arrays.asList("*"));
 
         HashMap permissionMap = new HashMap();
-        permissionMap.put("1000", 6);
-        permissionMap.put("1001", 4);
+        permissionMap.put("developer", 6);
+        permissionMap.put("admin", 7);
 
         API.APIBuilder apiBuilder = new API.APIBuilder(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
                 API_VERSION).
@@ -440,7 +438,6 @@ public class SampleTestObjectCreator {
         //created by admin
         Application application = new Application(TEST_APP_1, ADMIN);
         application.setId(UUID.randomUUID().toString());
-        application.setCallbackUrl(CALLBACK_URL_1);
         application.setDescription("This is a test application");
         application.setGroupId(GROUP_1);
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
@@ -455,7 +452,6 @@ public class SampleTestObjectCreator {
         //created by admin and updated by admin2
         Application application = new Application(TEST_APP_2, ADMIN);
         application.setId(UUID.randomUUID().toString());
-        application.setCallbackUrl(CALLBACK_URL_2);
         application.setDescription("This is test application 2");
         application.setGroupId(GROUP_2);
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_APPROVED);
@@ -468,7 +464,6 @@ public class SampleTestObjectCreator {
     public static Application createCustomApplication(String applicationName, String owner) {
         Application application = new Application(applicationName, owner);
         application.setId(UUID.randomUUID().toString());
-        application.setCallbackUrl(CALLBACK_URL_1);
         application.setDescription("This is a test application");
         application.setGroupId(GROUP_1);
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
@@ -485,7 +480,6 @@ public class SampleTestObjectCreator {
         permissionMap.put(APIMgtConstants.Permission.UPDATE, APIMgtConstants.Permission.UPDATE_PERMISSION);
         Application application = new Application(TEST_APP_1, ADMIN);
         application.setId(UUID.randomUUID().toString());
-        application.setCallbackUrl(CALLBACK_URL_1);
         application.setDescription("This is a test application");
         application.setGroupId(GROUP_1);
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
@@ -671,28 +665,28 @@ public class SampleTestObjectCreator {
 
     public static Endpoint createMockEndpoint() {
         return new Endpoint.Builder().endpointConfig("{'type':'http','url':'http://localhost:8280'}").id(endpointId)
-                .maxTps(1000L).security("{'enabled':false}").name("Endpoint1").applicableLevel(APIMgtConstants
-                        .GLOBAL_ENDPOINT).type("http").build();
+                .maxTps(1000L).security("{'enabled':false}").name("Endpoint1")
+                .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).type("http").build();
     }
 
     public static Endpoint createUpdatedEndpoint() {
         return new Endpoint.Builder().endpointConfig("{'type':'soap','url':'http://localhost:8280'}").id(endpointId)
-                .maxTps(1000L).security("{'enabled':false}").name("Endpoint1").applicableLevel(APIMgtConstants
-                        .GLOBAL_ENDPOINT).type("http").build();
+                .maxTps(1000L).security("{'enabled':false}").name("Endpoint1")
+                .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).type("http").build();
     }
 
     public static Endpoint createAlternativeEndpoint() {
         String uuid = UUID.randomUUID().toString();
         return new Endpoint.Builder().endpointConfig("{'type':'soap','url':'http://localhost:8280'}").id(uuid)
-                .name("Endpoint2").maxTps(1000L).security("{'enabled':false}").applicableLevel(APIMgtConstants
-                        .GLOBAL_ENDPOINT).build();
+                .name("Endpoint2").maxTps(1000L).security("{'enabled':false}")
+                .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).build();
 
     }
 
     public static Map<String, Endpoint> getMockEndpointMap() {
         Map<String, Endpoint> endpointMap = new HashedMap();
-        endpointMap.put(PRODUCTION_ENDPOINT, new Endpoint.Builder().id(endpointId).applicableLevel(APIMgtConstants
-                .GLOBAL_ENDPOINT).build());
+        endpointMap.put(PRODUCTION_ENDPOINT,
+                new Endpoint.Builder().id(endpointId).applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).build());
         return endpointMap;
     }
 
@@ -726,14 +720,15 @@ public class SampleTestObjectCreator {
         workflow.setCreatedTime(LocalDateTime.now());
         workflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
         workflow.setWorkflowReference(UUID.randomUUID().toString());
-        
+
         Map<String, String> properties = new HashMap<>();
         properties.put("property1", "value1");
         properties.put("property2", "value2");
         workflow.setAttributes(properties);
-        
+
         return workflow;
     }
+
     public static DocumentInfo createDefaultFileDocumentationInfo() {
         //created by admin
         DocumentInfo.Builder builder = new DocumentInfo.Builder();
@@ -789,11 +784,12 @@ public class SampleTestObjectCreator {
 
         BusinessInformation businessInformation = new BusinessInformation();
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        String permissionJson = "[{\"groupId\" : 1000, \"permission\" : "
-                + "[\"READ\",\"UPDATE\"]},{\"groupId\" : 1001, \"permission\" : [\"READ\",\"UPDATE\"]}]";
+        String permissionJson = "[{\"groupId\" : \"developer\", \"permission\" : "
+              + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\",\"DELETE\"]}]";
         Map<String, Endpoint> endpointMap = new HashMap<>();
-        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, new Endpoint.Builder().id(endpointId).name
-                ("api1-production--endpint").applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build());
+        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT,
+                new Endpoint.Builder().id(endpointId).name("api1-production--endpint")
+                        .applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build());
         API.APIBuilder apiBuilder = new API.APIBuilder(ADMIN, "WeatherAPI", API_VERSION).
                 id(UUID.randomUUID().toString()).
                 context("weather").
@@ -822,8 +818,8 @@ public class SampleTestObjectCreator {
                 uriTemplates(getMockUriTemplates()).
                 apiDefinition(apiDefinition);
         HashMap map = new HashMap();
-        map.put("1000", 6);
-        map.put("1001", 4);
+        map.put("developer", 6);
+        map.put("admin", 7);
         apiBuilder.permissionMap(map);
         return apiBuilder;
     }

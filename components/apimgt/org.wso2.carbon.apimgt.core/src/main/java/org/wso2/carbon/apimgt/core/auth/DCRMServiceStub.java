@@ -22,22 +22,26 @@ import feign.Headers;
 import feign.Param;
 import feign.RequestLine;
 import feign.Response;
-import org.wso2.carbon.apimgt.core.auth.dto.SCIMUser;
+import org.wso2.carbon.apimgt.core.auth.dto.DCRClientInfo;
 
 /**
- * This is the stub class for SCIM service
+ * This is the stub class for DCR(M) services
  */
-public interface SCIMServiceStub {
+public interface DCRMServiceStub {
 
     @Headers("Content-Type: application/json")
-    @RequestLine("POST /Users")
-    Response addUser(SCIMUser scimUser);
+    @RequestLine("POST /")
+    Response registerApplication(DCRClientInfo dcrClientInfo);
 
-    @RequestLine("GET /Users/{id}")
-    SCIMUser getUser(@Param("id") String id);
+    @RequestLine("GET /{consumerKey}")
+    Response getApplication(@Param("consumerKey") String consumerKey);
 
-    @RequestLine("GET /Groups?filter={query}")
-    Response searchGroups(@Param("query") String query);
+    @Headers("Content-Type: application/json")
+    @RequestLine("PUT /{consumerKey}")
+    Response updateApplication(DCRClientInfo dcrClientInfo, @Param("consumerKey") String consumerKey);
+
+    @RequestLine("DELETE /{consumerKey}")
+    Response deleteApplication(@Param("consumerKey") String consumerKey);
 
 }
 
