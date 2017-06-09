@@ -298,7 +298,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
 
         Info apiInfo = swagger.getInfo();
         if (apiInfo == null) {
-            throw new APIManagementException("Swagger doesn't contains the info");
+            throw new APIManagementException("Provided Swagger definition doesn't contain API information");
         } else {
             String apiName = apiInfo.getTitle();
             String apiVersion = apiInfo.getVersion();

@@ -156,6 +156,7 @@ public interface APIMgtAdminService {
 
     /**
      * Retrieve Resources for API
+     *
      * @param apiContext Context of API
      * @param apiVersion Version of API
      * @return list of API Resources
@@ -165,8 +166,9 @@ public interface APIMgtAdminService {
 
     /**
      * Get a list of APIs with given gateway labels and status
+     *
      * @param gatewayLabels A list of gateway labels
-     * @param status Lifecycle status
+     * @param status        Lifecycle status
      * @return list of API Resources
      * @throws APIManagementException If failed to get API list
      */
@@ -174,6 +176,7 @@ public interface APIMgtAdminService {
 
     /**
      * Get a list of APIs with given gateway labels
+     *
      * @param gatewayLabels List of labels
      * @return list of API Resources
      * @throws APIManagementException If failed to get API list

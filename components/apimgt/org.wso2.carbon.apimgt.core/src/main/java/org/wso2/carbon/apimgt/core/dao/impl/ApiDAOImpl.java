@@ -170,7 +170,7 @@ public class ApiDAOImpl implements ApiDAO {
                 return null;
             }
 
-            // there should be on 1 result from the database
+            // there should be only 1 result from the database
             return apiResults.get(0);
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -567,9 +567,6 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void addApplicationAssociatedAPI(CompositeAPI api) throws APIMgtDAOException {
         final String query = "INSERT INTO AM_API (PROVIDER, NAME, CONTEXT, VERSION, " +
@@ -602,9 +599,10 @@ public class ApiDAOImpl implements ApiDAO {
 
     /**
      * Method for adding API related information
+     *
      * @param connection DB Connection
      * @param statement  PreparedStatement
-     * @param api API object
+     * @param api        API object
      * @throws SQLException if error occurs while accessing data layer
      */
     private void addAPIRelatedInformation(Connection connection, PreparedStatement statement, final API api)
@@ -667,12 +665,12 @@ public class ApiDAOImpl implements ApiDAO {
         addAPIPermission(connection, api.getPermissionMap(), apiPrimaryKey);
     }
 
-
     /**
      * Method for adding Composite API related information
+     *
      * @param connection DB Connection
      * @param statement  PreparedStatement
-     * @param api Composite API object
+     * @param api        Composite API object
      * @throws SQLException if error occurs while accessing data layer
      */
     private void addCompositeAPIRelatedInformation(Connection connection, PreparedStatement statement,
@@ -814,9 +812,6 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void deleteCompositeApi(String apiId) throws APIMgtDAOException {
         APISubscriptionDAO apiSubscriptionDAO = DAOFactory.getAPISubscriptionDAO();
@@ -834,7 +829,6 @@ public class ApiDAOImpl implements ApiDAO {
             throw new APIMgtDAOException(e);
         }
     }
-
 
     private void persistAPIDelete(Connection connection, PreparedStatement statement, String apiId)
             throws IOException, SQLException {
@@ -880,9 +874,6 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getCompositeApiSwaggerDefinition(String apiID) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
@@ -895,9 +886,6 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    /**
-     * @see ApiDAO#updateApiDefinition(String, String, String)
-     */
     @Override
     public void updateApiDefinition(String apiID, String apiDefinition, String updatedBy)
             throws APIMgtDAOException {
@@ -932,9 +920,6 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public InputStream getCompositeAPIGatewayConfig(String apiID) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
@@ -945,9 +930,6 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    /**
-     * @see ApiDAO#updateGatewayConfig(String, String, String)
-     */
     @Override
     public void updateGatewayConfig(String apiID, String gatewayConfig, String updatedBy) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
@@ -957,9 +939,6 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void updateCompositeAPIGatewayConfig(String apiID, InputStream gatewayConfig, String updatedBy)
                                                                                     throws APIMgtDAOException {
@@ -971,17 +950,11 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    /**
-     * @see ApiDAO#getLastUpdatedTimeOfDocument(String)
-     */
     @Override
     public String getLastUpdatedTimeOfDocument(String documentId) throws APIMgtDAOException {
         return DocMetaDataDAO.getLastUpdatedTimeOfDocument(documentId);
     }
 
-    /**
-     * @see ApiDAO#getLastUpdatedTimeOfDocumentContent(String, String)
-     */
     @Override
     public String getLastUpdatedTimeOfDocumentContent(String apiId, String documentId) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
