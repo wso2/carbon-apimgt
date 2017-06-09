@@ -1826,6 +1826,7 @@ public class ApiDAOImpl implements ApiDAO {
 
     /**
      * Adding API permission to database
+     *
      * @param connection connection to database
      * @param permissionMap permission map
      * @param apiId id of the API
