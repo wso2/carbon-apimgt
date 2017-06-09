@@ -20,8 +20,8 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.api.APIGateway;
+import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.dto.APIDTO;
 import org.wso2.carbon.apimgt.core.dto.EndpointDTO;
 import org.wso2.carbon.apimgt.core.dto.GatewayDTO;
@@ -350,6 +350,28 @@ public class APIGatewayPublisherImpl implements APIGateway {
             } catch (IOException e) {
                 log.error("Error closing connections", e);
             }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void changeAPIState(API api, String status) throws GatewayException {
+        if (gwHome == null) {
+            //create the message to be sent to the gateway. This contains the basic details of the API and target
+            //lifecycle state.
+            APIDTO gatewayDTO = new APIDTO(APIMgtConstants.GatewayEventTypes.API_STATE_CHANGE);
+            gatewayDTO.setLabels(api.getLabels());
+            APISummary apiSummary = new APISummary(api.getId());
+            apiSummary.setName(api.getName());
+            apiSummary.setVersion(api.getVersion());
+            apiSummary.setContext(api.getContext());
+            apiSummary.setLifeCycleState(status);
+            gatewayDTO.setApiSummary(apiSummary);
+            publishToPublisherTopic(gatewayDTO);
+        } else {
+            //TODO save to file system: need to consider editor mode scenario
         }
     }
 }

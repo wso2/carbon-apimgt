@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.ResourceCategory;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
@@ -233,9 +234,6 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    /**
-     * @see ApiDAO#getAPIs()
-     */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     public List<API> getAPIs() throws APIMgtDAOException {
@@ -247,6 +245,27 @@ public class ApiDAOImpl implements ApiDAO {
             statement.setString(1, ApiType.STANDARD.toString());
 
             return constructAPISummaryList(connection, statement);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    @Override
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
+    public List<CompositeAPI> getCompositeAPIs(Set<String> roles, String user, int offset, int limit)
+            throws APIMgtDAOException {
+
+        // TODO: 6/5/17 Implement pagination support when implementing pagination support for
+        // other list operations.
+        final String query = COMPOSITE_API_SUMMARY_SELECT + " WHERE API_TYPE_ID = " +
+                "(SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?) AND PROVIDER = ?";
+
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, ApiType.COMPOSITE.toString());
+            statement.setString(2, user);
+
+            return getCompositeAPISummaryList(connection, statement);
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
         }
@@ -413,15 +432,15 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#attributeSearchAPIsStore(List roles, Map attributeMap, int offset, int limit)
+     * @see ApiDAO#searchAPIsByAttributeInStore(List roles, Map attributeMap, int offset, int limit)
      */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<API> attributeSearchAPIsStore(List<String> roles, Map<String, String> attributeMap,
-                                              int offset, int limit) throws APIMgtDAOException {
+    public List<API> searchAPIsByAttributeInStore(List<String> roles, Map<String, String> attributeMap,
+                                                  int offset, int limit) throws APIMgtDAOException {
 
         try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement statement = sqlStatements.attributeSearchStore
+             PreparedStatement statement = sqlStatements.prepareAttributeSearchStatementForStore
                      (connection, roles, attributeMap, offset, limit)) {
             DatabaseMetaData md = connection.getMetaData();
             Iterator<Map.Entry<String, String>> entries = attributeMap.entrySet().iterator();
@@ -899,21 +918,6 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void updateCompositeApiDefinition(String apiID, String apiDefinition, String updatedBy)
-                                                                                        throws APIMgtDAOException {
-        try (Connection connection = DAOUtil.getConnection()) {
-            ApiResourceDAO.updateBinaryResourceForCategory(connection, apiID, ResourceCategory.SWAGGER,
-                    new ByteArrayInputStream(apiDefinition.getBytes(StandardCharsets.UTF_8)), updatedBy,
-                    ApiType.COMPOSITE);
-        } catch (SQLException e) {
-            throw new APIMgtDAOException("Data access error when updating API definition", e);
-        }
-    }
-
-    /**
      * Get gateway configuration of a given API
      *
      * @param apiID The UUID of the respective API
@@ -961,7 +965,7 @@ public class ApiDAOImpl implements ApiDAO {
                                                                                     throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
             ApiResourceDAO.updateBinaryResourceForCategory(connection, apiID, ResourceCategory.GATEWAY_CONFIG,
-                    gatewayConfig, updatedBy, ApiType.COMPOSITE);
+                    gatewayConfig, updatedBy);
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
         }
@@ -1014,9 +1018,6 @@ public class ApiDAOImpl implements ApiDAO {
         return EntityDAO.getLastUpdatedTimeOfResourceByUUID(AM_ENDPOINT_TABLE_NAME, endpointId);
     }
 
-    /**
-     * @see ApiDAO#getCommentByUUID(String, String)
-     */
     @Override
     public Comment getCommentByUUID(String commentId, String apiId) throws APIMgtDAOException {
         final String query = "SELECT UUID, COMMENT_TEXT, USER_IDENTIFIER, API_ID, "
@@ -1084,9 +1085,7 @@ public class ApiDAOImpl implements ApiDAO {
         return comment;
     }
 
-    /**
-     * @see ApiDAO#addComment(Comment, String)
-     */
+
     @Override
     public void addComment(Comment comment, String apiId) throws APIMgtDAOException {
         final String addCommentQuery =
@@ -1121,9 +1120,7 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    /**
-     * @see ApiDAO#deleteComment(String, String)
-     */
+
     @Override
     public void deleteComment(String commentId, String apiId) throws APIMgtDAOException {
         final String deleteCommentQuery = "DELETE FROM AM_API_COMMENTS WHERE UUID = ? AND API_ID = ?";
@@ -1150,26 +1147,21 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    /**
-     * @see ApiDAO#updateComment(Comment, String, String)
-     */
+
     @Override
     public void updateComment(Comment comment, String commentId, String apiId) throws APIMgtDAOException {
-        final String updateCommentQuery = "UPDATE AM_API_COMMENTS SET COMMENT_TEXT = ? , USER_IDENTIFIER = ? ,"
-                + " CREATED_BY = ? , CREATED_TIME = ?, UPDATED_BY = ? , LAST_UPDATED_TIME = ?"
+        final String updateCommentQuery = "UPDATE AM_API_COMMENTS SET COMMENT_TEXT = ? "
+                + ", UPDATED_BY = ? , LAST_UPDATED_TIME = ?"
                 + " WHERE UUID = ? AND API_ID = ?";
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(updateCommentQuery)) {
             try {
                 connection.setAutoCommit(false);
                 statement.setString(1, comment.getCommentText());
-                statement.setString(2, comment.getCommentedUser());
-                statement.setString(3, comment.getCreatedUser());
-                statement.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
-                statement.setString(5, comment.getUpdatedUser());
-                statement.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now()));
-                statement.setString(7, commentId);
-                statement.setString(8, apiId);
+                statement.setString(2, comment.getUpdatedUser());
+                statement.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+                statement.setString(4, commentId);
+                statement.setString(5, apiId);
                 statement.execute();
                 connection.commit();
             } catch (SQLException e) {
@@ -1188,9 +1180,7 @@ public class ApiDAOImpl implements ApiDAO {
 
     }
 
-    /**
-     * @see ApiDAO#getCommentsForApi(String)
-     */
+
     @Override
     public List<Comment> getCommentsForApi(String apiId) throws APIMgtDAOException {
         List<Comment> commentList = new ArrayList<>();
@@ -1224,6 +1214,210 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     public String getLastUpdatedTimeOfComment(String commentId) throws APIMgtDAOException {
         return EntityDAO.getLastUpdatedTimeOfResourceByUUID(AM_API_COMMENTS_TABLE_NAME, commentId);
+    }
+
+    @Override
+    public void addRating(String apiId, Rating rating) throws APIMgtDAOException {
+        final String addRatingQuery =
+                "INSERT INTO AM_API_RATINGS (UUID, API_ID, RATING, USER_IDENTIFIER, " +
+                        "CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME" + ") VALUES (?,?,?,?,?,?,?,?)";
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(addRatingQuery)) {
+            try {
+                connection.setAutoCommit(false);
+                statement.setString(1, rating.getUuid());
+                statement.setString(2, apiId);
+                statement.setInt(3, rating.getRating());
+                statement.setString(4, rating.getUsername());
+                statement.setString(5, rating.getCreatedUser());
+                statement.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now()));
+                statement.setString(7, rating.getLastUpdatedUser());
+                statement.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now()));
+                statement.execute();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                String errorMessage =
+                        "Error while adding rating for api id: " + apiId;
+                log.error(errorMessage, e);
+                throw new APIMgtDAOException(e);
+            }  finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
+            }
+        } catch (SQLException e) {
+            log.error("Error while creating database connection/prepared-statement", e);
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    @Override
+    public Rating getRatingByUUID(String apiId, String ratingId) throws APIMgtDAOException {
+        final String query = "SELECT UUID, API_ID, RATING, USER_IDENTIFIER, " +
+                "CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME "
+                + "FROM AM_API_RATINGS WHERE UUID = ? AND API_ID = ?";
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(query)) {
+            try {
+                statement.setString(1, ratingId);
+                statement.setString(2, apiId);
+                statement.execute();
+                try (ResultSet rs = statement.getResultSet()) {
+                    if (rs.next()) {
+                        return constructRatingFromResultSet(rs);
+                    }
+                }
+            } catch (SQLException e) {
+                String errorMessage =
+                        "Error while retrieving rating for api id: " + apiId + " with uuid " + ratingId;
+                log.error(errorMessage, e);
+                throw new APIMgtDAOException(e);
+            }
+        } catch (SQLException e) {
+            log.error("Error while creating database connection/prepared-statement", e);
+            throw new APIMgtDAOException(e);
+        }
+        return null;
+    }
+
+    @Override
+    public Rating getUserRatingForApiFromUser(String apiId, String userId) throws APIMgtDAOException {
+        final String query = "SELECT UUID, API_ID, RATING, USER_IDENTIFIER, " +
+                "CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME "
+                + "FROM AM_API_RATINGS WHERE USER_IDENTIFIER = ? AND API_ID = ?";
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(query)) {
+            try {
+                statement.setString(1, userId);
+                statement.setString(2, apiId);
+                statement.execute();
+                try (ResultSet rs = statement.getResultSet()) {
+                    if (rs.next()) {
+                        return constructRatingFromResultSet(rs);
+                    }
+                }
+            } catch (SQLException e) {
+                String errorMessage =
+                        "Error while retrieving rating for user id: " + userId + " and api id: " + apiId;
+                log.error(errorMessage, e);
+                throw new APIMgtDAOException(e);
+            }
+        } catch (SQLException e) {
+            log.error("Error while creating database connection/prepared-statement", e);
+            throw new APIMgtDAOException(e);
+        }
+        return null;
+    }
+
+    /**
+     * Constructs a Rating object from a result set
+     *
+     * @param rs the result set retrieved from db
+     * @return Rating constructed from result set
+     * @throws APIMgtDAOException if result set access fails
+     */
+    private Rating constructRatingFromResultSet(ResultSet rs) throws APIMgtDAOException {
+        Rating rating = new Rating();
+        try {
+            rating.setUuid(rs.getString("UUID"));
+            rating.setRating((int) Double.parseDouble(rs.getString("RATING")));
+            rating.setApiId(rs.getString("API_ID"));
+            rating.setUsername(rs.getString("USER_IDENTIFIER"));
+            rating.setCreatedUser(rs.getString("CREATED_BY"));
+            rating.setCreatedTime(rs.getTimestamp("CREATED_TIME").toLocalDateTime());
+            rating.setLastUpdatedUser(rs.getString("UPDATED_BY"));
+            rating.setLastUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toLocalDateTime());
+        } catch (SQLException e) {
+            String errorMessage = "Error while constructing comment object from resultset";
+            log.error(errorMessage, e);
+            throw new APIMgtDAOException(e);
+        }
+        return rating;
+    }
+
+    @Override
+    public void updateRating(String apiId, String ratingId, Rating rating) throws APIMgtDAOException {
+        final String updateRatingQuery = "UPDATE AM_API_RATINGS SET RATING = ? , UPDATED_BY = ? , LAST_UPDATED_TIME = ?"
+                + " WHERE API_ID = ? AND UUID = ?";
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(updateRatingQuery)) {
+            try {
+                connection.setAutoCommit(false);
+                statement.setInt(1, rating.getRating());
+                statement.setString(2, rating.getUsername());
+                statement.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+                statement.setString(4, apiId);
+                statement.setString(5, ratingId);
+                statement.execute();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                String errorMessage =
+                        "Error while updating comment for api id: " + apiId + " and comment id: " + rating.getUuid();
+                log.error(errorMessage, e);
+                throw new APIMgtDAOException(e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
+            }
+        } catch (SQLException e) {
+            log.error("Error while creating database connection/prepared-statement", e);
+            throw new APIMgtDAOException(e);
+        }
+
+    }
+
+    @Override
+    public List<Rating> getRatingsListForApi(String apiId) throws APIMgtDAOException {
+        final String query = "SELECT UUID, API_ID, RATING, USER_IDENTIFIER, " +
+                "CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME "
+                + "FROM AM_API_RATINGS WHERE API_ID = ?";
+        List<Rating> ratingsList = new ArrayList<>();
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(query)) {
+            try {
+                statement.setString(1, apiId);
+                statement.execute();
+                try (ResultSet rs = statement.getResultSet()) {
+                    while (rs.next()) {
+                        ratingsList.add(constructRatingFromResultSet(rs));
+                    }
+                }
+            } catch (SQLException e) {
+                String errorMessage =
+                        "Error while retrieving rating for api id: " + apiId;
+                log.error(errorMessage, e);
+                throw new APIMgtDAOException(e);
+            }
+        } catch (SQLException e) {
+            log.error("Error while creating database connection/prepared-statement", e);
+            throw new APIMgtDAOException(e);
+        }
+        return ratingsList;
+    }
+
+    @Override
+    public double getAverageRating(String apiId) throws APIMgtDAOException {
+        final String query = "SELECT AVG(RATING) FROM AM_API_RATINGS WHERE API_ID = ?";
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(query)) {
+            try {
+                statement.setString(1, apiId);
+                statement.execute();
+                try (ResultSet rs = statement.getResultSet()) {
+                    if (rs.next()) {
+                        return rs.getDouble(1);
+                    }
+                }
+            } catch (SQLException e) {
+                String errorMessage =
+                        "Error while retrieving average rating for api id: " + apiId;
+                log.error(errorMessage, e);
+                throw new APIMgtDAOException(e);
+            }
+        } catch (SQLException e) {
+            log.error("Error while creating database connection/prepared-statement", e);
+            throw new APIMgtDAOException(e);
+        }
+        return 0;
     }
 
     /**
@@ -1287,7 +1481,7 @@ public class ApiDAOImpl implements ApiDAO {
                                 ResourceCategory.IMAGE, dataType, image, updatedBy);
                     } else {
                         ApiResourceDAO.updateBinaryResourceForCategory(connection, apiID,
-                                ResourceCategory.IMAGE, image, updatedBy, ApiType.STANDARD);
+                                ResourceCategory.IMAGE, image, updatedBy);
                     }
                     connection.commit();
                 } catch (SQLException e) {
@@ -1805,7 +1999,7 @@ public class ApiDAOImpl implements ApiDAO {
     private void updateAPIDefinition(Connection connection, String apiID, String apiDefinition, String updatedBy)
             throws SQLException {
         ApiResourceDAO.updateBinaryResourceForCategory(connection, apiID, ResourceCategory.SWAGGER,
-                new ByteArrayInputStream(apiDefinition.getBytes(StandardCharsets.UTF_8)), updatedBy, ApiType.STANDARD);
+                new ByteArrayInputStream(apiDefinition.getBytes(StandardCharsets.UTF_8)), updatedBy);
     }
 
     private String getAPIDefinition(Connection connection, String apiID) throws SQLException, IOException {
@@ -1839,8 +2033,7 @@ public class ApiDAOImpl implements ApiDAO {
             throws SQLException {
         if (gatewayConfig != null && !gatewayConfig.isEmpty()) {
             ApiResourceDAO.updateBinaryResourceForCategory(connection, apiID, ResourceCategory.GATEWAY_CONFIG,
-                    new ByteArrayInputStream(gatewayConfig.getBytes(StandardCharsets.UTF_8)), updatedBy,
-                    ApiType.STANDARD);
+                    new ByteArrayInputStream(gatewayConfig.getBytes(StandardCharsets.UTF_8)), updatedBy);
         }
     }
 

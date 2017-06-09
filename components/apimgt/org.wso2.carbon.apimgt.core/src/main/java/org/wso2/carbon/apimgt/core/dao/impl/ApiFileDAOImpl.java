@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
@@ -348,15 +349,6 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void updateCompositeApiDefinition(String apiID, String swaggerDefinition, String updatedBy)
-            throws APIMgtDAOException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
      * @see ApiDAO#getGatewayConfigOfAPI(String apiID)
      */
     @Override
@@ -519,6 +511,36 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     @Override
+    public void addRating(String apiId, Rating rating) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Rating getRatingByUUID(String apiId, String ratingId) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Rating getUserRatingForApiFromUser(String apiId, String userId) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void updateRating(String apiId, String ratingId, Rating rating) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<Rating> getRatingsListForApi(String apiId) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public double getAverageRating(String apiId) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public List<UriTemplate> getResourcesOfApi(String apiContext, String apiVersion) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
@@ -542,6 +564,11 @@ public class ApiFileDAOImpl implements ApiDAO {
         }
         apiList.removeIf(Objects::isNull);
         return apiList;
+    }
+
+    @Override
+    public List<CompositeAPI> getCompositeAPIs(Set<String> roles, String user, int offset, int limit) {
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -580,17 +607,17 @@ public class ApiFileDAOImpl implements ApiDAO {
      * @see ApiDAO#attributeSearchAPIs(Set, String, Map, int, int)
      */
     @Override
-    public List<API> attributeSearchAPIs(Set<String> roles, String user, Map<String, String> attributeMap,
-                                         int offset, int limit) throws APIMgtDAOException {
+    public List<API> attributeSearchAPIs(Set<String> roles, String user, Map<String, String> attributeMap, int offset,
+            int limit) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * @see ApiDAO#attributeSearchAPIsStore(List roles, Map attributeMap, int offset, int limit)
+     * @see ApiDAO#searchAPIsByAttributeInStore(List roles, Map attributeMap, int offset, int limit)
      */
     @Override
-    public List<API> attributeSearchAPIsStore(List<String> roles, Map<String, String> attributeMap,
-                                              int offset, int limit) throws APIMgtDAOException {
+    public List<API> searchAPIsByAttributeInStore(List<String> roles, Map<String, String> attributeMap, int offset,
+            int limit) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 

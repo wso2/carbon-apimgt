@@ -23,6 +23,8 @@ import feign.Response;
 import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import org.wso2.carbon.apimgt.core.auth.DCRMServiceStub;
+import org.wso2.carbon.apimgt.core.auth.OAuth2ServiceStubs;
 import org.wso2.carbon.apimgt.core.auth.SCIMServiceStub;
 import org.wso2.carbon.apimgt.core.auth.dto.SCIMUser;
 import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
@@ -39,7 +41,10 @@ public class DefaultIdentityProviderImplTestCase {
     @Test
     public void testGetRolesOfUser() throws Exception {
         SCIMServiceStub scimServiceStub = Mockito.mock(SCIMServiceStub.class);
-        DefaultIdentityProviderImpl idpImpl = new DefaultIdentityProviderImpl(scimServiceStub);
+        DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
+        OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
+        DefaultIdentityProviderImpl idpImpl = new DefaultIdentityProviderImpl(scimServiceStub, dcrmServiceStub,
+                oAuth2ServiceStub);
 
         SCIMUser user = new SCIMUser();
         String user1Id = "a42b4760-120d-432e-8042-4a7f12e3346c";
@@ -81,7 +86,10 @@ public class DefaultIdentityProviderImplTestCase {
     @Test
     public void testIsValidRole() throws Exception {
         SCIMServiceStub scimServiceStub = Mockito.mock(SCIMServiceStub.class);
-        DefaultIdentityProviderImpl idpImpl = new DefaultIdentityProviderImpl(scimServiceStub);
+        DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
+        OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
+        DefaultIdentityProviderImpl idpImpl = new DefaultIdentityProviderImpl(scimServiceStub, dcrmServiceStub,
+                oAuth2ServiceStub);
 
         final String validRole = "engineer";
         final String validRoleSearchQuery = "displayName Eq " + validRole;
@@ -101,7 +109,10 @@ public class DefaultIdentityProviderImplTestCase {
     @Test
     public void testRegisterUser() throws Exception {
         SCIMServiceStub scimServiceStub = Mockito.mock(SCIMServiceStub.class);
-        DefaultIdentityProviderImpl idpImpl = new DefaultIdentityProviderImpl(scimServiceStub);
+        DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
+        OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
+        DefaultIdentityProviderImpl idpImpl = new DefaultIdentityProviderImpl(scimServiceStub, dcrmServiceStub,
+                oAuth2ServiceStub);
 
         User user = new User();
 
@@ -118,7 +129,8 @@ public class DefaultIdentityProviderImplTestCase {
 
         //error path
         final int errorSc = 409;
-        final String errorMsg = "User creation failed";
+        final String errorMsg = "{\"Errors\":[{\"code\":\"409\",\"description\":\"Error in adding the user: test to " +
+                "the user store.\"}]}";
         Response errorResponse = Response.builder().status(errorSc).headers(new HashMap<>())
                 .body(errorMsg.getBytes()).build();
         Mockito.when(scimServiceStub.addUser(any(SCIMUser.class))).thenReturn(errorResponse);
@@ -128,8 +140,7 @@ public class DefaultIdentityProviderImplTestCase {
             Assert.fail("Exception was expected, but wasn't thrown");
         } catch (Exception ex) {
             Assert.assertTrue(ex instanceof IdentityProviderException);
-            Assert.assertEquals(ex.getMessage(), "Error occurred while creating user. Status Code: " + errorSc + ' '
-                    + errorMsg);
+            Assert.assertTrue(ex.getMessage().startsWith("Error occurred while creating user."));
         }
     }
 

@@ -22,8 +22,6 @@ import org.wso2.carbon.apimgt.authenticator.constants.AuthenticatorConstants;
 import org.wso2.carbon.apimgt.authenticator.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
-import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
-import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.messaging.Headers;
 import org.wso2.msf4j.Request;
 
@@ -71,7 +69,7 @@ public class AuthUtil {
      *
      */
     public static AccessTokenRequest createAccessTokenRequest(String username, String password, String grantType,
-            String refreshToken, String accessToken, long validityPeriod, String[] scopes, String clientId, String
+            String refreshToken, String accessToken, long validityPeriod, String scopes, String clientId, String
             clientSecret) {
 
         AccessTokenRequest tokenRequest = new AccessTokenRequest();
@@ -86,31 +84,6 @@ public class AuthUtil {
         tokenRequest.setTokenToRevoke(accessToken);
         return tokenRequest;
 
-    }
-
-    /**
-     * This method will parse json String and set properties in  OAuthApplicationInfo object.
-     * Further it will initiate new OauthAppRequest  object and set applicationInfo object as its own property.
-     * @param clientName client Name.
-     * @param callbackURL This is the call back URL of the application
-     * @param tokenScope The token scope
-     * @param clientId The ID of the client
-     * @return appRequest object of OauthAppRequest.
-     */
-    public static OAuthAppRequest createOauthAppRequest(String clientName, String clientId, String callbackURL,
-            String tokenScope) {
-
-        OAuthAppRequest appRequest = new OAuthAppRequest();
-        OAuthApplicationInfo authApplicationInfo = new OAuthApplicationInfo();
-        authApplicationInfo.setClientName(clientName);
-        authApplicationInfo.setCallbackUrl(callbackURL);
-        //authApplicationInfo.addParameter(KeyManagerConstants.OAUTH_CLIENT_TOKEN_SCOPE, tokenScopeList);
-        authApplicationInfo.setClientId(clientId);
-        authApplicationInfo.setAppOwner(clientId);
-        authApplicationInfo.setGrantTypes(Arrays.asList("password", "refresh_token"));
-        //set applicationInfo object
-        appRequest.setOAuthApplicationInfo(authApplicationInfo);
-        return appRequest;
     }
 
     public static List<String> getRoleList() {

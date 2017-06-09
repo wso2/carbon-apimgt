@@ -24,9 +24,10 @@ package org.wso2.carbon.apimgt.core.util;
 public class KeyManagerConstants {
 
     public static final String OAUTH_CLIENT_ID = "client_id"; //  this means consumer key
+    public static final String OAUTH_CLIENT_ID_ISSUED_AT = "client_id_issued_at";
     public static final String OAUTH_CLIENT_SECRET = "client_secret";
+    public static final String OAUTH_CLIENT_SECRET_EXPIRES_AT = "client_secret_expires_at";
     public static final String OAUTH_REDIRECT_URIS = "redirect_uris";
-    public static final String OAUTH_CLIENT_OWNER = "ext_param_owner";
     public static final String OAUTH_CALLBACK_URIS = "callback_url";
     public static final String OAUTH_CLIENT_NAME = "client_name";
     public static final String OAUTH_CLIENT_TYPE = "client_type";
@@ -35,15 +36,16 @@ public class KeyManagerConstants {
     public static final String APP_CALLBACK_URL = "callback_url";
     public static final String APP_HOME_PAGE = "homepage";
     public static final String OAUTH_CLIENT_CONTACT = "contact";
-    public static final String APP_LOGOURI = "logouri";
     public static final String OAUTH_CLIENT_SCOPE = "scope";
     public static final String OAUTH_CLIENT_TOKEN_SCOPE = "tokenScope";
     public static final String OAUTH_CLIENT_GRANT = "grant_type";
     public static final String OAUTH_CLIENT_GRANTS = "grant_types";
-    public static final String OAUTH_CLIENT_RESPONSETYPE = "response_types";
-    public static final String OAUTH_CLIENT_AUTHMETHOD = "token_endpoint_auth_method";
+    public static final String OAUTH_CLIENT_RESPONSE_TYPES = "response_types";
+    public static final String OAUTH_CLIENT_TOKEN_ENDPOINT_AUTH_METHOD = "token_endpoint_auth_method";
+    public static final String OAUTH_CLIENT_REGISTRATION_ACCESS_TOKEN = "registration_access_token";
     public static final String OAUTH_CLIENT_REGISTRATION_CLIENT_URI = "registration_client_uri";
-    public static final String OAUTH_CLIENT_REGISTRATION_ACCESSTOKEN = "registration_access_token";
+    public static final String OAUTH_LOGO_URI = "logo_uri";
+    public static final String OAUTH_JWKS_URI = "jwks_uri";
     public static final String OAUTH_CLIENT_CONTACTS = "contacts";
     public static final String OAUTH_CLIENT_MANUAL = "MANUAL";
     public static final String OAUTH_CLIENT_PRODUCTION = "PRODUCTION";
@@ -53,9 +55,10 @@ public class KeyManagerConstants {
     public static final String OAUTH_CLIENT_USERNAME = "username";
     public static final String OAUTH_CLIENT_APPLICATION = "application";
     public static final String VALIDITY_PERIOD = "validityPeriod";
+    public static final String TOKEN_SCOPES = "scopes";
+    public static final String TOKEN_STATE = "tokenState";
     public static final String OAUTH_APP_DETAILS = "appDetails";
     public static final String IMPLICIT_CONST = "implicit";
-    public static final String AUTHORIZATION_CODE = "authorization_code";
     public static final String INBOUNT_AUTH_CONSUMER_SECRET = "oauthConsumerSecret";
     public static final String USERNAME = "username";
     public static final String OAUTH2_TOKEN_EXP_TIME = "exp";
@@ -64,9 +67,15 @@ public class KeyManagerConstants {
     public static final String TOKEN_ENDPOINT = "TokenEndpoint";
     public static final String REVOKE_ENDPOINT = "RevokeEndpoint";
     public static final String INTROSPECT_ENDPOINT = "introspectEndpoint";
-    public static final String DEFAULT_VALIDITY_PERIOD = "3600";
     public static final String OAUTH2_DEFAULT_SCOPE = "default";
-
+    public static final String OAUTH_RESPONSE_ACCESSTOKEN = "access_token";
+    public static final String OAUTH_RESPONSE_REFRESH_TOKEN = "refresh_token";
+    public static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
+    public static final String CLIENT_CREDENTIALS_GRANT_TYPE = "client_credentials";
+    public static final String PASSWORD_GRANT_TYPE = "password";
+    public static final String AUTHORIZATION_CODE_GRANT_TYPE = "authorization_code";
+    public static final String REFRESH_GRANT_TYPE = "refresh_token";
+    public static final String GRANT_TYPE_PARAM_VALIDITY = "validity_period";
 
     /**
      * Status codes used in key-validation process

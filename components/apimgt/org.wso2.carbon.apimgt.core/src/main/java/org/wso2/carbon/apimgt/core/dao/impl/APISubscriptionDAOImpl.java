@@ -64,7 +64,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
         final String getSubscriptionSql = "SELECT SUBS.UUID AS SUBS_UUID, SUBS.API_ID AS API_ID, " +
                 "SUBS.APPLICATION_ID AS APP_ID, SUBS.SUB_STATUS AS SUB_STATUS, API.PROVIDER AS API_PROVIDER, " +
                 "API.NAME AS API_NAME, API.CONTEXT AS API_CONTEXT, API.VERSION AS API_VERSION, APP.NAME AS APP_NAME, " +
-                "APP.CALLBACK_URL AS APP_CALLBACK_URL, APP.APPLICATION_STATUS AS APP_STATUS, " +
+                "APP.APPLICATION_STATUS AS APP_STATUS, " +
                 "APP.CREATED_BY AS APP_OWNER, POLICY.NAME AS SUBS_POLICY " +
                 "FROM AM_SUBSCRIPTION SUBS, AM_API API, AM_APPLICATION APP, AM_SUBSCRIPTION_POLICY POLICY " +
                 "WHERE SUBS.UUID = ? AND SUBS.API_ID = API.UUID AND SUBS.APPLICATION_ID = APP.UUID AND " +
@@ -93,7 +93,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
         final String getSubscriptionsByAPISql = "SELECT SUBS.UUID AS SUBS_UUID, SUBS.TIER_ID AS SUBS_TIER, " +
                 "SUBS.API_ID AS API_ID, SUBS.APPLICATION_ID AS APP_ID, SUBS.SUB_STATUS AS SUB_STATUS, " +
                 "SUBS.SUB_TYPE AS SUB_TYPE, APP.NAME AS APP_NAME, APP.APPLICATION_POLICY_ID AS APP_POLICY_ID, " +
-                "APP.CALLBACK_URL AS APP_CALLBACK_URL, APP.APPLICATION_STATUS AS APP_STATUS, " +
+                "APP.APPLICATION_STATUS AS APP_STATUS, " +
                 "APP.CREATED_BY AS APP_OWNER, POLICY.NAME AS SUBS_POLICY " +
                 "FROM AM_SUBSCRIPTION SUBS, AM_APPLICATION APP, AM_SUBSCRIPTION_POLICY POLICY " +
                 "WHERE SUBS.API_ID = ? AND SUBS.APPLICATION_ID = APP.UUID AND SUBS.TIER_ID = POLICY.UUID " +
@@ -274,7 +274,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
         final String getSubscriptionsByAPISql = "SELECT SUBS.UUID AS SUBS_UUID, SUBS.TIER_ID AS SUBS_TIER, " +
                 "SUBS.API_ID AS API_ID, SUBS.APPLICATION_ID AS APP_ID, SUBS.SUB_STATUS AS SUB_STATUS, " +
                 "SUBS.SUB_TYPE AS SUB_TYPE, APP.NAME AS APP_NAME, APP.APPLICATION_POLICY_ID AS APP_POLICY_ID, " +
-                "APP.CALLBACK_URL AS APP_CALLBACK_URL, APP.APPLICATION_STATUS AS APP_STATUS, " +
+                "APP.APPLICATION_STATUS AS APP_STATUS, " +
                 "APP.CREATED_BY AS APP_OWNER, POLICY.NAME AS SUBS_POLICY, API.PROVIDER AS API_PROVIDER, API.NAME " +
                 "AS API_NAME, API.CONTEXT AS API_CONTEXT, API.VERSION AS API_VERSION " +
                 "FROM AM_SUBSCRIPTION SUBS, AM_APPLICATION APP, AM_SUBSCRIPTION_POLICY POLICY, AM_API API " +
@@ -625,7 +625,6 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
 
                 Application app = new Application(rs.getString("APP_NAME"), rs.getString("APP_OWNER"));
                 app.setId(rs.getString("APP_ID"));
-                app.setCallbackUrl(rs.getString("APP_CALLBACK_URL"));
                 app.setStatus(rs.getString("APP_STATUS"));
 
                 subscription = new Subscription(subscriptionId, app, api, subscriptionTier);
@@ -673,7 +672,6 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
 
                 Application app = new Application(rs.getString("APP_NAME"), rs.getString("APP_OWNER"));
                 app.setId(rs.getString("APP_ID"));
-                app.setCallbackUrl(rs.getString("APP_CALLBACK_URL"));
                 app.setStatus(rs.getString("APP_STATUS"));
 
                 subscription = new Subscription(subscriptionId, app, null, subscriptionTier);

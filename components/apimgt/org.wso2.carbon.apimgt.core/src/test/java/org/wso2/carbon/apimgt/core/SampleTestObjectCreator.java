@@ -24,6 +24,8 @@ import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Application;
@@ -34,8 +36,8 @@ import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
+import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
-import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
@@ -52,6 +54,8 @@ import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
+import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationWorkflow;
+import org.wso2.carbon.apimgt.core.workflow.Workflow;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
 
 import java.io.IOException;
@@ -102,8 +106,6 @@ public class SampleTestObjectCreator {
     private static final String ALLOWED_HEADER_AUTHORIZATION = "Authorization";
     private static final String ALLOWED_HEADER_CUSTOM = "X-Custom";
     private static final String API_CREATOR = "Adam Doe";
-    private static final String CALLBACK_URL_1 = "http://localhost/myapp";
-    private static final String CALLBACK_URL_2 = "http://localhost/myapp2";
     private static final String GROUP_1 = "groupx";
     private static final String GROUP_2 = "groupx2";
     private static final String SAMPLE_DOC_NAME = "CalculatorDoc";
@@ -459,7 +461,6 @@ public class SampleTestObjectCreator {
         //created by admin
         Application application = new Application(TEST_APP_1, ADMIN);
         application.setId(UUID.randomUUID().toString());
-        application.setCallbackUrl(CALLBACK_URL_1);
         application.setDescription("This is a test application");
         application.setGroupId(GROUP_1);
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
@@ -474,7 +475,6 @@ public class SampleTestObjectCreator {
         //created by admin and updated by admin2
         Application application = new Application(TEST_APP_2, ADMIN);
         application.setId(UUID.randomUUID().toString());
-        application.setCallbackUrl(CALLBACK_URL_2);
         application.setDescription("This is test application 2");
         application.setGroupId(GROUP_2);
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_APPROVED);
@@ -487,7 +487,6 @@ public class SampleTestObjectCreator {
     public static Application createCustomApplication(String applicationName, String owner) {
         Application application = new Application(applicationName, owner);
         application.setId(UUID.randomUUID().toString());
-        application.setCallbackUrl(CALLBACK_URL_1);
         application.setDescription("This is a test application");
         application.setGroupId(GROUP_1);
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
@@ -504,7 +503,6 @@ public class SampleTestObjectCreator {
         permissionMap.put(APIMgtConstants.Permission.UPDATE, APIMgtConstants.Permission.UPDATE_PERMISSION);
         Application application = new Application(TEST_APP_1, ADMIN);
         application.setId(UUID.randomUUID().toString());
-        application.setCallbackUrl(CALLBACK_URL_1);
         application.setDescription("This is a test application");
         application.setGroupId(GROUP_1);
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
@@ -737,8 +735,9 @@ public class SampleTestObjectCreator {
                 accessUrls(accessUrls);
     }
 
-    public static Workflow createWorkflow(String workflowReferenceID) {
-        Workflow workflow = new Workflow();
+    public static Workflow createWorkflow(String workflowReferenceID) throws APIMgtDAOException {
+        Workflow workflow = new ApplicationCreationWorkflow(DAOFactory.getApplicationDAO(),
+                DAOFactory.getWorkflowDAO());
         workflow.setExternalWorkflowReference(workflowReferenceID);
         workflow.setStatus(WorkflowStatus.CREATED);
         workflow.setCreatedTime(LocalDateTime.now());
@@ -778,6 +777,18 @@ public class SampleTestObjectCreator {
         comment.setCreatedTime(LocalDateTime.now());
         comment.setUpdatedTime(LocalDateTime.now());
         return comment;
+    }
+
+    public static Rating createDefaultRating(String apiId) {
+        Rating rating = new Rating();
+        rating.setUuid(UUID.randomUUID().toString());
+        rating.setApiId(apiId);
+        rating.setRating(4);
+        rating.setUsername("john");
+        rating.setLastUpdatedUser("john");
+        rating.setCreatedTime(LocalDateTime.now());
+        rating.setLastUpdatedTime(LocalDateTime.now());
+        return rating;
     }
 
     public static API.APIBuilder createDefaultAPIWithApiLevelEndpoint() {

@@ -83,7 +83,7 @@ public class AuthenticatorAPI implements Microservice {
             }
             String tokens = loginTokenService
                     .getTokens(authResponseBean, appContext.substring(1), userName, password, grantType, refToken,
-                            scopesList.split("" + " "), Long.parseLong(validityPeriod));
+                            scopesList, Long.parseLong(validityPeriod));
             String accessToken = tokens.split(":")[0];
             String refreshToken = null;
             if (tokens.split(":").length > 1) {

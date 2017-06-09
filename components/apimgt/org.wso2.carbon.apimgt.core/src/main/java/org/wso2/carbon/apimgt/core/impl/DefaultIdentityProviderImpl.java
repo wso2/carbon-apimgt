@@ -18,10 +18,17 @@
 
 package org.wso2.carbon.apimgt.core.impl;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import feign.Response;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
+import org.wso2.carbon.apimgt.core.auth.DCRMServiceStub;
+import org.wso2.carbon.apimgt.core.auth.DCRMServiceStubFactory;
+import org.wso2.carbon.apimgt.core.auth.OAuth2ServiceStubs;
+import org.wso2.carbon.apimgt.core.auth.OAuth2ServiceStubsFactory;
 import org.wso2.carbon.apimgt.core.auth.SCIMServiceStub;
 import org.wso2.carbon.apimgt.core.auth.SCIMServiceStubFactory;
 import org.wso2.carbon.apimgt.core.auth.dto.SCIMUser;
@@ -29,6 +36,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
 import org.wso2.carbon.apimgt.core.models.User;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,11 +52,14 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
     private static final String FILTER_PREFIX = "displayName Eq ";
     private static final String HOME_EMAIL = "home";
 
-    public DefaultIdentityProviderImpl() throws APIManagementException {
-        this(SCIMServiceStubFactory.getSCIMServiceStub());
+    DefaultIdentityProviderImpl() throws APIManagementException {
+        this(SCIMServiceStubFactory.getSCIMServiceStub(), DCRMServiceStubFactory.getDCRMServiceStub(),
+                OAuth2ServiceStubsFactory.getOAuth2ServiceStubs());
     }
 
-    DefaultIdentityProviderImpl(SCIMServiceStub scimServiceStub) {
+    DefaultIdentityProviderImpl(SCIMServiceStub scimServiceStub, DCRMServiceStub dcrmServiceStub,
+                                OAuth2ServiceStubs oAuth2ServiceStubs) throws APIManagementException {
+        super(dcrmServiceStub, oAuth2ServiceStubs);
         this.scimServiceStub = scimServiceStub;
     }
 
@@ -71,26 +82,47 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
 
     @Override
     public boolean isValidRole(String roleName) {
-        return scimServiceStub.searchGroups(FILTER_PREFIX + roleName).status() == 200;
+        return scimServiceStub.searchGroups(FILTER_PREFIX + roleName).status()
+                == APIMgtConstants.HTTPStatusCodes.SC_200_OK;
     }
 
     @Override
     public void registerUser(User user) throws IdentityProviderException {
         SCIMUser scimUser = new SCIMUser();
         scimUser.setUsername(user.getUsername());
-        scimUser.setPassword(user.getPassword());
+        scimUser.setPassword(new String(user.getPassword()));
         scimUser.setName(new SCIMUser.SCIMName(user.getFirstName(), user.getLastName()));
         List<SCIMUser.SCIMUserEmails> emails = new ArrayList<>();
         emails.add(new SCIMUser.SCIMUserEmails(user.getEmail(), HOME_EMAIL, true));
         scimUser.setEmails(emails);
         Response response = scimServiceStub.addUser(scimUser);
-        if (response == null || response.status() != 201) {
-            String errorMessage = "Error occurred while creating user. "
-                    + ((response == null) ? "response is null" : "Status Code: " + response.status() + ' '
-                    + response.body().toString());
-            log.error(errorMessage);
-            throw new IdentityProviderException(errorMessage, ExceptionCodes.USER_CREATION_FAILED);
+        if (response == null || response.status() != APIMgtConstants.HTTPStatusCodes.SC_201_CREATED) {
+            StringBuilder errorMessage = new StringBuilder("Error occurred while creating user. ");
+            if (response == null) {
+                errorMessage.append("Response is null");
+            } else {
+                String msg = getErrorMessage(response);
+                if (!StringUtils.isEmpty(msg)) {
+                    errorMessage.append(msg);
+                }
+            }
+            throw new IdentityProviderException(errorMessage.toString(), ExceptionCodes.USER_CREATION_FAILED);
         }
+    }
+
+    private String getErrorMessage(Response response) {
+        StringBuilder errorMessage = new StringBuilder("");
+        if (response != null && response.body() != null) {
+            try {
+                String errorDescription = new Gson().fromJson(response.body().toString(), JsonElement.class)
+                        .getAsJsonObject().get("Errors").getAsJsonArray().get(0).getAsJsonObject()
+                        .get("description").getAsString();
+                errorMessage.append(errorDescription);
+            } catch (Exception ex) {
+                log.error("Error occurred while parsing error response", ex);
+            }
+        }
+        return errorMessage.toString();
     }
 
 }

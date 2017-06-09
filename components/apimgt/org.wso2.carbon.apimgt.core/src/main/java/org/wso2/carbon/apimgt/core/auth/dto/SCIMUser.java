@@ -18,19 +18,17 @@
 
 package org.wso2.carbon.apimgt.core.auth.dto;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 /**
- * This class contains the model of SCIM user
+ * Model of SCIM user
  */
 public class SCIMUser {
 
-    private static final char[] EMPTY_CHAR_ARRAY = new char[0];
     private List<String> schemas;
     private String userName;
-    private char[] password = EMPTY_CHAR_ARRAY;
+    private String password;  //note: this can't be a char[] because then feign reads is as a multi-valued attribute
     private String id;
     private SCIMName name;
     private List<SCIMUserEmails> emails;
@@ -68,12 +66,12 @@ public class SCIMUser {
         this.userName = userName;
     }
 
-    public char[] getPassword() {
-        return Arrays.copyOf(password, password.length);
+    public String getPassword() {
+        return password;
     }
 
-    public void setPassword(char[] password) {
-        this.password = Arrays.copyOf(password, password.length);
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public List<SCIMUserEmails> getEmails() {
@@ -102,14 +100,13 @@ public class SCIMUser {
         }
         SCIMUser scimUser = (SCIMUser) o;
         return Objects.equals(userName, scimUser.userName) &&
-                Arrays.equals(password, scimUser.password) &&
                 Objects.equals(id, scimUser.id) &&
                 Objects.equals(name, scimUser.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(userName, password, id, name);
+        return Objects.hash(userName, id, name);
     }
 
     /**
@@ -143,6 +140,24 @@ public class SCIMUser {
 
         public void setFamilyName(String familyName) {
             this.familyName = familyName;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof SCIMName)) {
+                return false;
+            }
+            SCIMName scimName = (SCIMName) o;
+            return Objects.equals(givenName, scimName.givenName) &&
+                    Objects.equals(familyName, scimName.familyName);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(givenName, familyName);
         }
     }
 

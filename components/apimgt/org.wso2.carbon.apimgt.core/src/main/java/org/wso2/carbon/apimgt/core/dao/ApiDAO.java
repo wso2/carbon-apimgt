@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.APILCWorkflowStatus;
 
@@ -82,6 +83,23 @@ public interface ApiDAO {
      */
     @CheckForNull
     CompositeAPI getCompositeAPI(String apiID) throws APIMgtDAOException;
+
+    /**
+     * Retrieves a paginated list of composite APIs. Resulting APIs will be filtered for
+     * PROVIDER name <code>user</code>.
+     *
+     * @param roles     If provided, results will be filtered for only the APIs with these roles.
+     *                  If not APIs with any role will be retrieved.
+     * @param user      Name of the PROVIDER who owns requested set of Composite APIs
+     * @param offset    Page number
+     *                  <p>(ex: <code>offset</code> 2 with <code>limit</code> 10 will retrieve 11-20th results)</p>
+     * @param limit     Number of results to be included in the resulting list
+     * @return
+     * @throws APIMgtDAOException if database error occurred while querying data
+     */
+    @CheckForNull
+    List<CompositeAPI> getCompositeAPIs(Set<String> roles, String user, int offset, int limit)
+            throws APIMgtDAOException;
 
     /**
      * Retrieves the last updated time of an API
@@ -198,8 +216,8 @@ public interface ApiDAO {
      * @return {@code List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    List<API> attributeSearchAPIsStore(List<String> roles, Map<String, String> attributeMap,
-                                       int offset, int limit) throws APIMgtDAOException;
+    List<API> searchAPIsByAttributeInStore(List<String> roles, Map<String, String> attributeMap,
+                                           int offset, int limit) throws APIMgtDAOException;
 
     /**
      * Checks if a given API which is uniquely identified by the Provider, API Name and Version combination already
@@ -491,18 +509,6 @@ public interface ApiDAO {
     void updateApiDefinition(String apiID, String swaggerDefinition, String updatedBy)
             throws APIMgtDAOException;
 
-
-    /**
-     * Update swagger definition of a given Composite API
-     *
-     * @param apiID             The UUID of the respective Composite API
-     * @param swaggerDefinition Swagger definition String
-     * @param updatedBy user who performs the update
-     * @throws APIMgtDAOException if error occurs while accessing data layer
-     */
-    void updateCompositeApiDefinition(String apiID, String swaggerDefinition, String updatedBy)
-            throws APIMgtDAOException;
-
     /**
      * Get gateway configuration of a given API
      *
@@ -693,4 +699,62 @@ public interface ApiDAO {
      *
      */
     List<API> getAPIsByGatewayLabel(List<String> gatewayLabels) throws APIMgtDAOException;
+
+    /**
+     * Add a rating for an api.
+     * By default the max rating value is 5. To update the max rating, add "ratingMaxValue" config to deployment.yaml
+     * and set a suitable value.
+     *
+     * @param apiId UUID of the api
+     * @param rating rating object
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    void addRating(String apiId, Rating rating) throws APIMgtDAOException;
+
+    /**
+     * Update an existing rating
+     *
+     * @param apiId  UUID of the api
+     * @param ratingId UUID of the rating
+     * @param ratingFromPayload Rating object from request payload
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    void updateRating(String apiId, String ratingId, Rating ratingFromPayload) throws APIMgtDAOException;
+
+    /**
+     * Retrieve user rating for a given api
+     *
+     * @param apiId UUID of the api
+     * @param userId unique userId of the user
+     * @return user rating for an api
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    Rating getUserRatingForApiFromUser(String apiId, String userId) throws APIMgtDAOException;
+
+    /**
+     * Retrieve rating given the uuid
+     *
+     * @param apiId  UUID of the api
+     * @param ratingId  UUID of the rating
+     * @return the rating object for a given uuid
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    Rating getRatingByUUID(String apiId, String ratingId) throws APIMgtDAOException;
+
+    /**
+     * Retrieve average rating for an api
+     *
+     * @param apiId  UUID of the api
+     * @return average rating of the api
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    double getAverageRating(String apiId) throws APIMgtDAOException;
+
+    /**
+     * @param apiId  UUID of the api
+     * @return list of ratings for an api
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    List<Rating> getRatingsListForApi(String apiId) throws APIMgtDAOException;
+
 }

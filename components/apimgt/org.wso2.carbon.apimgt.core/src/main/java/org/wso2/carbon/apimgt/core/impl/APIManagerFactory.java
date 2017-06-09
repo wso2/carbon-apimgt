@@ -22,6 +22,8 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.APIGateway;
+import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.api.APIStore;
@@ -53,6 +55,8 @@ public class APIManagerFactory {
     private APIMgtAdminService apiMgtAdminService;
     private IdentityProvider identityProvider;
     private KeyManager keyManager;
+    private APIGateway apiGateway;
+    private APILifecycleManager apiLifecycleManager;
 
     private static final int MAX_PROVIDERS = 50;
     private static final int MAX_CONSUMERS = 500;
@@ -98,9 +102,10 @@ public class APIManagerFactory {
 
     private APIPublisher newProvider(String username) throws APIManagementException {
         try {
-            UserAwareAPIPublisher userAwareAPIPublisher = new UserAwareAPIPublisher(username, DAOFactory.getApiDAO(),
-                    DAOFactory.getApplicationDAO(), DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO(),
-                    DAOFactory.getLabelDAO(), DAOFactory.getWorkflowDAO(), new GatewaySourceGeneratorImpl(),
+            UserAwareAPIPublisher userAwareAPIPublisher = new UserAwareAPIPublisher(username, getIdentityProvider(),
+                    DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(), DAOFactory.getAPISubscriptionDAO(),
+                    DAOFactory.getPolicyDAO(), geApiLifecycleManager(), DAOFactory.getLabelDAO(),
+                    DAOFactory.getWorkflowDAO(), DAOFactory.getTagDAO(), new GatewaySourceGeneratorImpl(),
                     new APIGatewayPublisherImpl());
 
             // Register all the observers which need to observe 'Publisher' component
@@ -133,8 +138,8 @@ public class APIManagerFactory {
         // username = null;
         // }
         try {
-            UserAwareAPIStore userAwareAPIStore = new UserAwareAPIStore(username, DAOFactory.getApiDAO(),
-                    DAOFactory.getApplicationDAO(), DAOFactory.getAPISubscriptionDAO(),
+            UserAwareAPIStore userAwareAPIStore = new UserAwareAPIStore(username, getIdentityProvider(),
+                    DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(), DAOFactory.getAPISubscriptionDAO(),
                     DAOFactory.getPolicyDAO(), DAOFactory.getTagDAO(), DAOFactory.getLabelDAO(),
                     DAOFactory.getWorkflowDAO(), new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
 
@@ -231,7 +236,8 @@ public class APIManagerFactory {
         if (identityProvider == null) {
             try {
                 identityProvider = (IdentityProvider) Class.forName(ServiceReferenceHolder.getInstance()
-                        .getAPIMConfiguration().getIdpImplClass()).newInstance();
+                        .getAPIMConfiguration().getIdentityProviderConfigs().getIdentityProviderImplClass())
+                        .newInstance();
             } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
                 throw new IdentityProviderException("Error occurred while initializing identity provider", e,
                         ExceptionCodes.IDP_INITIALIZATION_FAILED);
@@ -250,12 +256,38 @@ public class APIManagerFactory {
         if (keyManager == null) {
             try {
                 keyManager = (KeyManager) Class.forName(ServiceReferenceHolder.getInstance().getAPIMConfiguration()
-                        .getKeyManagerImplClass()).newInstance();
+                        .getKeyManagerConfigs().getKeyManagerImplClass()).newInstance();
             } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
                 throw new KeyManagementException("Error occurred while initializing key manager", e,
                         ExceptionCodes.KEY_MANAGER_INITIALIZATION_FAILED);
             }
         }
         return keyManager;
+    }
+
+    /**
+     * Get API gateway publisher implementation object
+     *
+     * @return APIGateway impl object
+     */
+    public APIGateway getApiGateway() {
+
+        if (apiGateway == null) {
+            apiGateway = new APIGatewayPublisherImpl();
+        }
+        return apiGateway;
+    }
+
+    /**
+     * Get API Lifecycle Manager implementation object
+     *
+     * @return APILifecycleManager impl object
+     */
+    public APILifecycleManager geApiLifecycleManager() {
+
+        if (apiLifecycleManager == null) {
+            apiLifecycleManager = new APILifeCycleManagerImpl();
+        }
+        return apiLifecycleManager;
     }
 }

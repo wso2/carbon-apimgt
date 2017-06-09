@@ -28,8 +28,6 @@ import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 
 import java.util.Map;
 
-
-
 /**
  * This Interface is  providing functionality to  key manager specific core operations.
  * You can implement create/update/delete/retrieve  oAuth Application by implementing this interface.
@@ -77,14 +75,14 @@ public interface KeyManager {
     OAuthApplicationInfo retrieveApplication(String consumerKey) throws KeyManagementException;
 
     /**
-     * Store calls this method to get a new Application Access Token. This will be called when getting the token for
-     * the first time and when Store needs to refresh the existing token.
+     * Generate a new OAuth2 Access Token by a given grant type. Supported grant types are
+     * Password, Authorization Code, Client Credentials and Refresh
      *
-     * @param tokenRequest AccessTokenRequest which encapsulates parameters sent from UI.
-     * @return Details of the Generated Token. AccessToken and Validity period are a must.
-     * @throws KeyManagementException   Error while generating new acess token
+     * @param tokenRequest parameters required to generate an access token.
+     * @return AccessTokenInfo object with details of the token. AccessToken and Validity period are must to have.
+     * @throws KeyManagementException if error occurred while generating token
      */
-    AccessTokenInfo getNewApplicationAccessToken(AccessTokenRequest tokenRequest) throws KeyManagementException;
+    AccessTokenInfo getNewAccessToken(AccessTokenRequest tokenRequest) throws KeyManagementException;
 
     /**
      * Get details about an access token. As a part of the response, consumer key against which token was obtained
@@ -101,19 +99,19 @@ public interface KeyManager {
      * @return {@code KeyManagerConfiguration}
      * @throws KeyManagementException error while getting key manager configuration.
      */
-
-    /**
-     * This method is called to revoke an existing access token which is used to log in to publisher,store or admin
-     * apps.
-     *
-     * @param tokenRequest AccessTokenRequest which encapsulates parameters sent from UI.
-     * @throws KeyManagementException   Exception while revoking the access token
-     */
-    void revokeLogInAccessToken(AccessTokenRequest tokenRequest) throws KeyManagementException;
-
     KeyManagerConfiguration getKeyManagerConfiguration() throws KeyManagementException;
 
-    /** 
+    /**
+     * Revoke an active access tokens
+     *
+     * @param accessToken  Access token that is required to be revoked.
+     * @param clientId     Consumer Key of the application
+     * @param clientSecret Consumer Secret of the application
+     * @throws KeyManagementException if error occurred while revoking the access token
+     */
+    void revokeAccessToken(String accessToken, String clientId, String clientSecret) throws KeyManagementException;
+
+    /**
      * This method will be used if you want to create a oAuth application in semi-manual mode
      * where you must input minimum consumer key and consumer secret.
      *
@@ -139,7 +137,6 @@ public interface KeyManager {
      * @return true if sucessfully registered. false if there is a error while registering a new resource.
      * @throws KeyManagementException   Error while registering new resource.
      */
-
     boolean registerNewResource(API api, Map resourceAttributes) throws KeyManagementException;
 
     /**
@@ -176,8 +173,6 @@ public interface KeyManager {
      * @throws KeyManagementException  Error while deleting mapped application.
      */
     void deleteMappedApplication(String consumerKey) throws KeyManagementException;
-
-   
 
 }
 
