@@ -427,7 +427,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 cleanupPendingTaskForSubscriptionDeletion(subscription);
 
                 SubscriptionDeletionWorkflow workflow = new SubscriptionDeletionWorkflow(getApiSubscriptionDAO(),
-                        getWorkflowDAO(), getApiGateway());
+                        getWorkflowDAO(), getApplicationDAO(), getApiGateway());
                 workflow.setWorkflowReference(subscriptionId);
                 workflow.setSubscription(subscription);
                 workflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);

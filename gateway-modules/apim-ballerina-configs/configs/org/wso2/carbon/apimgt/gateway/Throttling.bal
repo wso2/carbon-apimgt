@@ -125,7 +125,6 @@ function isrequestThrottled( message msg) (boolean){
     isSubscriptionLevelThrottled = throttle:isThrottled(subscriptionLevelThrottleKey);
     string stopOnQuotaReach = util:getStringProperty(msg, constants:STOP_ON_QUOTA_REACH);
 
-
     if(isSubscriptionLevelThrottled){
 
         if(stopOnQuotaReach == "true"){
@@ -136,7 +135,8 @@ function isrequestThrottled( message msg) (boolean){
             return true;
         }
         
-        system:println("Request throttled at subscription level for throttle key" + subscriptionLevelThrottleKey + ". But subscription policy " + subscriptionLevelPolicy + " allows to continue to serve requests");
+        system:println("Request throttled at subscription level for throttle key" + subscriptionLevelThrottleKey + ". But subscription policy " 
+                        + subscriptionLevelPolicy + " allows to continue to serve requests");
     }
 
     //TODO Spike Arrest
@@ -156,7 +156,8 @@ function isrequestThrottled( message msg) (boolean){
     // Data publishing to Traffic Manger
 
     try{
-        publishEvent(msg, authorizedUser, applicationId, apiContext, apiVersion, apiLevelPolicy, applicationLevelPolicy, subscriptionLevelPolicy, ipLevelBlockingKey);
+        publishEvent(msg, authorizedUser, applicationId, apiContext, apiVersion, apiLevelPolicy, applicationLevelPolicy, subscriptionLevelPolicy, 
+                     resourceLevelThrottleKey, resourceLevelPolicy, ipLevelBlockingKey);
     }catch(errors:Error e){
         system:println("Error occured while data publsihing " + e.msg);
     }
@@ -176,9 +177,9 @@ function setInvalidUser(message msg){
 }
 
 
-function publishEvent(message m, string userId, string applicationId, string apiContext, string apiVersion,string apiTier,string applicationTier, string subscriptionTier, string ip) {
+function publishEvent(message m, string userId, string applicationId, string apiContext, string apiVersion,string apiTier,
+            string applicationTier, string subscriptionTier, string resourceLevelThrottleKey, string resourceTier,string ip) {
 
-    string requestUrl = apiContext;
     json event = {};
 
     jsons:add (event, "$", "streamName", "PreRequestStream");
@@ -191,15 +192,13 @@ function publishEvent(message m, string userId, string applicationId, string api
 
     string messageID = "messageID";
     string appKey = applicationId+ ":" + userId;
-    string subscriptionKey = applicationId + ":" + requestUrl + ":" + apiVersion;
-    string apiKey = requestUrl + ":" + apiVersion;
+    string subscriptionKey = applicationId + ":" + apiContext + ":" + apiVersion;
+    string apiKey = apiContext + ":" + apiVersion;
 
-    string resourceKey = "sdsdskdskd";
-    string resourceTier = "Unlimited";
     string appTenant = "carbon.super";
     string apiTenant = "carbon.super";
     string apiName = "test";
-    string properties = "dsdsdsdsdsdsd";
+    string properties = "some_properties";
 
     jsons:add (dataArr, "$", messageID);
     jsons:add (dataArr, "$", appKey);
@@ -208,7 +207,7 @@ function publishEvent(message m, string userId, string applicationId, string api
     jsons:add (dataArr, "$", apiTier);
     jsons:add (dataArr, "$", subscriptionKey);
     jsons:add (dataArr, "$", subscriptionTier);
-    jsons:add (dataArr, "$", resourceKey);
+    jsons:add (dataArr, "$", resourceLevelThrottleKey);
     jsons:add (dataArr, "$", resourceTier);
     jsons:add (dataArr, "$", userId);
     jsons:add (dataArr, "$", apiContext);
@@ -222,7 +221,5 @@ function publishEvent(message m, string userId, string applicationId, string api
     jsons:add (event, "$", "data", dataArr);
 
     publisher:publish(event);
-
-    system:println("********** Throttle Event Published *******");
 }
 
