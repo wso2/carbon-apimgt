@@ -138,6 +138,9 @@ public class LoginTokenService {
         }
     }
 
+    /**
+     * Represents Payload of JWT
+     */
     private class JWTTokenPayload {
         private String sub;
         private String iss;
