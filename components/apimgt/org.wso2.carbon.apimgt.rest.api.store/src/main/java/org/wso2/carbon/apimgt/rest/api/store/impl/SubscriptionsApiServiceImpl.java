@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
@@ -59,7 +60,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      * @throws NotFoundException If failed to get the subscription
      */
     @Override
-    public Response subscriptionsGet(String apiId, String applicationId, Integer offset, Integer limit,
+    public Response subscriptionsGet(String apiId, String applicationId, String apiType, Integer offset, Integer limit,
                                      String accept, String ifNoneMatch, Request request) throws NotFoundException {
 
         List<Subscription> subscribedApiList = null;
@@ -77,7 +78,17 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             } else if (!StringUtils.isEmpty(applicationId)) {
                 Application application = apiStore.getApplicationByUuid(applicationId);
                 if (application != null) {
-                    subscribedApiList = apiStore.getAPISubscriptionsByApplication(application);
+                    if (!StringUtils.isEmpty(apiType)) {
+                        ApiType apiTypeEnum = ApiType.fromString(apiType);
+
+                        if (apiTypeEnum == null) {
+                            throw new APIManagementException("API Type specified is invalid",
+                                    ExceptionCodes.API_TYPE_INVALID);
+                        }
+                        subscribedApiList = apiStore.getAPISubscriptionsByApplication(application, apiTypeEnum);
+                    } else {
+                        subscribedApiList = apiStore.getAPISubscriptionsByApplication(application);
+                    }
                     subscriptionListDTO = SubscriptionMappingUtil.fromSubscriptionListToDTO(subscribedApiList, limit,
                             offset);
                 } else {

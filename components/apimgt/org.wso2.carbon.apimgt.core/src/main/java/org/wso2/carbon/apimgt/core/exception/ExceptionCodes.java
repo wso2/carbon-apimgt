@@ -61,6 +61,9 @@ public enum ExceptionCodes implements ErrorHandler {
             + "values"),
     COMMENT_LENGTH_EXCEEDED(900326, "Comment length exceeds max limit", 400, "Comment length exceeds allowed maximum "
             + "number of characters"),
+    API_TYPE_INVALID(900327, "API Type specified is invalid.", 400, "API Type specified is invalid"),
+    COMPOSITE_API_ALREADY_EXISTS(900328, "A Composite API already exists.", 409,
+            "A Composite API already exists for this application"),
 
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),
