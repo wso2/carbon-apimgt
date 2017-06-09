@@ -84,7 +84,7 @@ public class WorkflowExecutorFactory {
             workflow.setWorkflowType(workflowType);
         } else if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION.equals(workflowType)) {
             workflow = new SubscriptionDeletionWorkflow(DAOFactory.getAPISubscriptionDAO(), DAOFactory.getWorkflowDAO(),
-                    APIManagerFactory.getInstance().getApiGateway());
+                    DAOFactory.getApplicationDAO(), APIManagerFactory.getInstance().getApiGateway());
             workflow.setWorkflowType(workflowType);
         } else if (WorkflowConstants.WF_TYPE_AM_API_STATE.equals(workflowType)) {
             workflow = new APIStateChangeWorkflow(DAOFactory.getApiDAO(), DAOFactory.getAPISubscriptionDAO(),

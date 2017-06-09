@@ -380,6 +380,7 @@ public class APIMgtConstants {
         public static final String ENDPOINT_DELETE = "ENDPOINT_DELETE";
         public static final String SUBSCRIPTION_CREATE = "SUBSCRIPTION_CREATE";
         public static final String SUBSCRIPTION_DELETE = "SUBSCRIPTION_DELETE";
+        public static final String SUBSCRIPTION_STATE_CHANGE = "SUBSCRIPTION_STATE_CHANGE";
         public static final String APPLICATION_CREATE = "APPLICATION_CREATE";
         public static final String APPLICATION_UPDATE = "APPLICATION_UPDATE";
         public static final String APPLICATION_DELETE = "APPLICATION_DELETE";

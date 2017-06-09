@@ -120,8 +120,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     /**
      * Get a list of subscriptions for provider's APIs
      *
-     * @param offset Starting index of the search results
-     * @param limit Number of search results returned
+     * @param offset       Starting index of the search results
+     * @param limit        Number of search results returned
      * @param providerName if of the provider
      * @return {@code List<Subscriber>} List of subscriptions for provider's APIs
      * @throws APIManagementException
@@ -528,7 +528,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
 
-
     /**
      * @see org.wso2.carbon.apimgt.core.api.APIPublisher#updateAPIStatus(String, String, Map)
      */
@@ -537,7 +536,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             APIManagementException {
         WorkflowResponse workflowResponse = null;
         try {
-            API api = getApiDAO().getAPI(apiId);           
+            API api = getApiDAO().getAPI(apiId);
             if (api != null && !APILCWorkflowStatus.PENDING.toString().equals(api.getWorkflowStatus())) {
                 API.APIBuilder apiBuilder = new API.APIBuilder(api);
                 apiBuilder.lastUpdatedTime(LocalDateTime.now());
@@ -565,7 +564,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 workflow.setCreatedTime(LocalDateTime.now());
                 workflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_API_STATE);
                 workflow.setInvoker(getUsername());
-                
+
                 //setting attributes for internal use. These are set to use from outside the executor's method
                 //these will be saved in the AM_WORKFLOW table so these can be retrieved later
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_API_CUR_STATE, currentState.getState());
@@ -939,9 +938,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     getApiDAO().deleteAPI(identifier);
                     getApiLifecycleManager().removeLifecycle(apiBuilder.getLifecycleInstanceId());
                     APIUtils.logDebug("API with id " + identifier + " was deleted successfully.", log);
-                    
+
                     if (APILCWorkflowStatus.PENDING.toString().equals(apiWfStatus)) {
-                       cleanupPendingTaskForAPIStateChange(identifier);
+                        cleanupPendingTaskForAPIStateChange(identifier);
                     }
                     // 'API_M Functions' related code
                     //Create a payload with event specific details
@@ -1015,6 +1014,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             APIManagementException {
         try {
             getApiSubscriptionDAO().updateSubscriptionStatus(subId, subStatus);
+            Subscription subscription = getSubscriptionByUUID(subId);
+            getApiGateway().updateAPISubscriptionStatus(subscription);
         } catch (APIMgtDAOException e) {
             throw new APIManagementException(e);
         }
@@ -1268,7 +1269,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             String msg = "Protocol exception while getting the swagger resource from url";
             log.error(msg, e);
             throw new APIManagementException(msg, ExceptionCodes.API_DEFINITION_MALFORMED);
-        }  catch (IOException e) {
+        } catch (IOException e) {
             String msg = "Error while getting the swagger resource from url";
             log.error(msg, e);
             throw new APIManagementException(msg, ExceptionCodes.API_DEFINITION_MALFORMED);
@@ -1396,17 +1397,17 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public void removePendingLifecycleWorkflowTaskForAPI(String apiId) throws APIManagementException {
-        
+
         API api = getApiDAO().getAPI(apiId);
         if (api != null) {
             if (APILCWorkflowStatus.PENDING.toString().equals(api.getWorkflowStatus())) {
                 try {
                     //change the state back
                     getApiDAO().updateAPIWorkflowStatus(apiId, APILCWorkflowStatus.APPROVED);
-                    
+
                     // call executor's cleanup task
                     cleanupPendingTaskForAPIStateChange(apiId);
-                    
+
                 } catch (APIMgtDAOException e) {
                     String msg = "Error occurred while changing api lifecycle workflow status";
                     log.error(msg, e);
@@ -1421,9 +1422,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             String msg = "Couldn't found API with ID " + apiId;
             log.error(msg);
             throw new APIManagementException(msg, ExceptionCodes.API_NOT_FOUND);
-        }      
+        }
     }
-    
+
     private void cleanupPendingTaskForAPIStateChange(String apiId) throws APIManagementException {
         String workflowExtRef = getWorkflowDAO().getExternalWorkflowReferenceForPendingTask(apiId,
                 WorkflowConstants.WF_TYPE_AM_API_STATE);
