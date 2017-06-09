@@ -21,6 +21,9 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,6 +87,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -334,9 +338,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     apiBuilder.apiDefinition(apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder));
                 }
                 if (apiBuilder.getPermission() != null && !("").equals(apiBuilder.getPermission())) {
-                    HashMap roleNamePermissionList;
-                    roleNamePermissionList = APIUtils.getAPIPermissionArray(apiBuilder.getPermission());
+                    Map<String, Integer> roleNamePermissionList;
+                    roleNamePermissionList = getAPIPermissionArray(apiBuilder.getPermission());
                     apiBuilder.permissionMap(roleNamePermissionList);
+
                 }
 
                 createdAPI = apiBuilder.build();
@@ -346,6 +351,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 gateway.addAPI(createdAPI);
 
                 Set<String> apiRoleList;
+
                 //if the API has public visibility, add the API without any role checking
                 //if the API has role based visibility, add the API with role checking
                 if (API.Visibility.PUBLIC == createdAPI.getVisibility()) {
@@ -359,7 +365,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         getApiDAO().addAPI(createdAPI);
                     }
                 }
-
+                
                 APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
                         "successfully.", log);
                 // 'API_M Functions' related code
@@ -402,6 +408,34 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     /**
+     * This method is used to check whether the roles specified with permissions for a given API are valid
+     *
+     * @param permissionMap - The map containing the group IDs(roles) and their permissions
+     * @return validity of the roles
+     * @throws APIManagementException If one or more of the roles are invalid
+     */
+    private boolean checkRoleValidityForAPIPermissions(Map<String, Integer> permissionMap)
+            throws APIManagementException {
+        Set<String> allAvailableRoles = APIUtils.getAllAvailableRoles();
+        Set<String> permissionRoleList = getRolesFromPermissionMap(permissionMap);
+        return APIUtils.checkAllowedRoles(allAvailableRoles, permissionRoleList);
+    }
+
+    /**
+     * This method is used to extract the groupIds or roles from the permissionMap
+     *
+     * @param permissionMap - The map containing the group IDs(roles) and their permissions
+     * @return - The list of groupIds specified for permissions
+     */
+    private Set<String> getRolesFromPermissionMap(Map<String, Integer> permissionMap) {
+        Set<String> permissionRoleList = new HashSet<>();
+        for (String groupId : permissionMap.keySet()) {
+            permissionRoleList.add(groupId);
+        }
+        return permissionRoleList;
+    }
+
+    /**
      * @param api API Object
      * @return If api definition is valid or not.
      * @throws APIManagementException If failed to validate the API.
@@ -435,10 +469,12 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         (apiBuilder.getVersion())) && (originalAPI.getProvider().equals(apiBuilder.getProvider())) &&
                         originalAPI.getLifeCycleStatus().equalsIgnoreCase(apiBuilder.getLifeCycleStatus())) {
 
-                    if (apiBuilder.getPermission() != null && !("").equals(apiBuilder.getPermission())) {
-                        HashMap roleNamePermissionList;
-                        roleNamePermissionList = APIUtils.getAPIPermissionArray(apiBuilder.getPermission());
-                        apiBuilder.permissionMap(roleNamePermissionList);
+                    if (apiBuilder.getPermission() != null && !("[]").equals(apiBuilder.getPermission())) {
+                        Map<String, Integer> roleNamePermissionList;
+                        roleNamePermissionList = getAPIPermissionArray(apiBuilder.getPermission());
+                        if (checkRoleValidityForAPIPermissions(roleNamePermissionList)) {
+                            apiBuilder.permissionMap(roleNamePermissionList);
+                        }
                     }
 
                     String updatedSwagger = apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder);
@@ -534,7 +570,38 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
     }
 
+    /**
+     * This method will return map with role names and its permission values.
+     *
+     * @param permissionJsonString Permission json object a string
+     * @return Map of permission values.
+     * @throws ParseException If failed to parse the json string.
+     */
+    private HashMap<String, Integer> getAPIPermissionArray(String permissionJsonString) throws ParseException {
 
+        HashMap<String, Integer> roleNamePermissionList = new HashMap<String, Integer>();
+        JSONParser jsonParser = new JSONParser();
+
+        JSONArray baseJsonArray = (JSONArray) jsonParser.parse(permissionJsonString);
+        for (Object aBaseJsonArray : baseJsonArray) {
+            JSONObject jsonObject = (JSONObject) aBaseJsonArray;
+            String groupId = jsonObject.get(APIMgtConstants.Permission.GROUP_ID).toString();
+            JSONArray subJsonArray = (JSONArray) jsonObject.get(APIMgtConstants.Permission.PERMISSION);
+            int totalPermissionValue = 0;
+            for (Object aSubJsonArray : subJsonArray) {
+                if (APIMgtConstants.Permission.READ.equals(aSubJsonArray.toString().trim())) {
+                    totalPermissionValue += APIMgtConstants.Permission.READ_PERMISSION;
+                } else if (APIMgtConstants.Permission.UPDATE.equals(aSubJsonArray.toString().trim())) {
+                    totalPermissionValue += APIMgtConstants.Permission.UPDATE_PERMISSION;
+                } else if (APIMgtConstants.Permission.DELETE.equals(aSubJsonArray.toString().trim())) {
+                    totalPermissionValue += APIMgtConstants.Permission.DELETE_PERMISSION;
+                }
+            }
+            roleNamePermissionList.put(groupId, totalPermissionValue);
+        }
+
+        return roleNamePermissionList;
+    }
 
     /**
      * @see org.wso2.carbon.apimgt.core.api.APIPublisher#updateAPIStatus(String, String, Map)
@@ -995,8 +1062,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         try {
             //TODO: Need to validate users roles against results returned
             if (query != null && !query.isEmpty()) {
-                String user = "admin";
+                String user = getUsername();
                 Set<String> roles = APIUtils.getAllRolesOfUser(user);
+                
                 //TODO get the logged in user and user roles from key manager.
                 apiResults = getApiDAO().searchAPIs(roles, user, query, offset, limit);
             } else {
