@@ -4,6 +4,7 @@ $(
     function () {
         var roleIndex = 0;
 
+        //Handles the click event of the role Add button
         $('.add-role').on('click', function() {
             var role = $('#role-name').val().trim();
             if(role && role != ""){
@@ -32,6 +33,7 @@ $(
             }
         });
 
+        // Handles the click event of the role delete button
         $(document).on('click', '.delete-role', function() {
             $(this).closest('tr').remove();
         });

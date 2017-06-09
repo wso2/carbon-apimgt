@@ -2417,13 +2417,19 @@ public class ApiDAOImpl implements ApiDAO {
         return endpointList;
     }
 
+    /**
+     * This returns the json string containing the role permissions for a given API
+     * @param connection - DB connection
+     * @param apiId - apiId of the API
+     * @return permission string
+     * @throws SQLException - if error occurred while getting permissionMap of API from DB
+     */
     private StringBuilder getPermissionsStringForApi(Connection connection, String apiId) throws SQLException {
-        final String permission = "permission";
         JSONArray permissionArray = new JSONArray();
         Map<String, Integer> permissionMap = getPermissionMapForApi(connection, apiId);
         for (Map.Entry<String, Integer> entry : permissionMap.entrySet()) {
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("groupId", entry.getKey());
+            jsonObject.put(APIMgtConstants.Permission.GROUP_ID, entry.getKey());
             ArrayList<String> array = new ArrayList<String>();
             Integer permissionValue = entry.getValue();
             if (permissionValue == APIMgtConstants.Permission.READ_PERMISSION) {
@@ -2442,12 +2448,19 @@ public class ApiDAOImpl implements ApiDAO {
                 array.add(APIMgtConstants.Permission.UPDATE);
                 array.add(APIMgtConstants.Permission.DELETE);
             }
-            jsonObject.put(permission, array);
+            jsonObject.put(APIMgtConstants.Permission.PERMISSION, array);
             permissionArray.add(jsonObject);
         }
         return new StringBuilder(permissionArray.toString());
     }
 
+    /**
+     * This constructs and returns the API permissions map from the DB
+     * @param connection - DB connection
+     * @param apiId - apiId of the API
+     * @return permission map for the API
+     * @throws SQLException - if error occurred while getting permissionMap of API from DB
+     */
     private Map<String, Integer> getPermissionMapForApi(Connection connection, String apiId) throws SQLException {
         Map<String, Integer> permissionMap = new HashMap();
         final String query = "SELECT GROUP_ID,PERMISSION FROM AM_API_GROUP_PERMISSION WHERE API_ID=?";

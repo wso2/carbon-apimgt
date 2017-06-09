@@ -294,6 +294,10 @@ function subscriptionsTabHandler(event) {
 
 }
 
+/**
+ * Event handler for API access control detail tab onclick event;Get the current API access control tab HTML via UUFClient and display.
+ * @param event {object} Click event of the access control tab
+ */
 function accessControlTabHandler(event) {
     var api_client = event.data.api_client;
     var api_id = event.data.api_id;
@@ -677,6 +681,10 @@ function createRolePermissionJsonString() {
         return JSON.stringify(permissionJson);
 }
 
+/**
+ * Do the API permissions update when user clicks on the update permissions button.
+ * @param event {object} click event of the update permissions button
+ */
 function updatePermissionsHandler(event) {
     event.preventDefault();
     var api_client = event.data.api_client;
