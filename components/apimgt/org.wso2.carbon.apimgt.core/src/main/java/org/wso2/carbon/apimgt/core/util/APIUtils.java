@@ -280,6 +280,7 @@ public class APIUtils {
         availableRoles.add("manager");
         availableRoles.add("developer");
         availableRoles.add("lead");
+        availableRoles.add(APIMgtConstants.Permission.EVERYONE_GROUP);
         return availableRoles;
     }
 
@@ -378,6 +379,8 @@ public class APIUtils {
         return roleNamePermissionList;
 
     }
+
+
 
      /**
      * Verifies that fields that cannot be changed via an API update

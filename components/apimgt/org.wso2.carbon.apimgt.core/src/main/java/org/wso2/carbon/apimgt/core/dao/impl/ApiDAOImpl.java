@@ -23,6 +23,8 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
@@ -1766,6 +1768,8 @@ public class ApiDAOImpl implements ApiDAO {
                                         ResourceCategory.WSDL_URI)).
                         transport(getTransports(connection, apiPrimaryKey)).
                         endpoint(getEndPointsForApi(connection, apiPrimaryKey)).
+                        apiPermission(getPermissionsStringForApi(connection, apiPrimaryKey)).
+                        permissionMap(getPermissionMapForApi(connection, apiPrimaryKey)).
                         businessInformation(businessInformation).
                         lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
@@ -1788,14 +1792,16 @@ public class ApiDAOImpl implements ApiDAO {
         List<API> apiList = new ArrayList<>();
         try (ResultSet rs = statement.executeQuery()) {
             while (rs.next()) {
+                String apiPrimaryKey = rs.getString("UUID");
                 API apiSummary = new API.APIBuilder(rs.getString("PROVIDER"), rs.getString("NAME"),
                         rs.getString("VERSION")).
-                        id(rs.getString("UUID")).
+                        id(apiPrimaryKey).
                         context(rs.getString("CONTEXT")).
                         description(rs.getString("DESCRIPTION")).
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
                         lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
-                        workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).build();
+                        workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).
+                        permissionMap(getPermissionMapForApi(connection, apiPrimaryKey)).build();
 
                 apiList.add(apiSummary);
             }
@@ -2052,6 +2058,7 @@ public class ApiDAOImpl implements ApiDAO {
 
     /**
      * Adding API permission to database
+     *
      * @param connection connection to database
      * @param permissionMap permission map
      * @param apiId id of the API
@@ -2090,6 +2097,7 @@ public class ApiDAOImpl implements ApiDAO {
 
     /**
      * Update API permission
+     *
      * @param connection connection to database
      * @param permissionMap updated permission map
      * @param apiId id of API to be updated permission
@@ -2624,6 +2632,66 @@ public class ApiDAOImpl implements ApiDAO {
             throw new APIMgtDAOException(e);
         }
         return endpointList;
+    }
+
+    /**
+     * This returns the json string containing the role permissions for a given API
+     *
+     * @param connection - DB connection
+     * @param apiId - apiId of the API
+     * @return permission string
+     * @throws SQLException - if error occurred while getting permissionMap of API from DB
+     */
+    private StringBuilder getPermissionsStringForApi(Connection connection, String apiId) throws SQLException {
+        JSONArray permissionArray = new JSONArray();
+        Map<String, Integer> permissionMap = getPermissionMapForApi(connection, apiId);
+        for (Map.Entry<String, Integer> entry : permissionMap.entrySet()) {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put(APIMgtConstants.Permission.GROUP_ID, entry.getKey());
+            ArrayList<String> array = new ArrayList<String>();
+            Integer permissionValue = entry.getValue();
+            if (permissionValue == APIMgtConstants.Permission.READ_PERMISSION) {
+                array.add(APIMgtConstants.Permission.READ);
+            } else if (permissionValue == (APIMgtConstants.Permission.READ_PERMISSION
+                    + APIMgtConstants.Permission.UPDATE_PERMISSION)) {
+                array.add(APIMgtConstants.Permission.READ);
+                array.add(APIMgtConstants.Permission.UPDATE);
+            } else if (permissionValue == (APIMgtConstants.Permission.READ_PERMISSION
+                    + APIMgtConstants.Permission.DELETE_PERMISSION)) {
+                array.add(APIMgtConstants.Permission.READ);
+                array.add(APIMgtConstants.Permission.DELETE);
+            } else if (permissionValue == (APIMgtConstants.Permission.READ_PERMISSION
+                    + APIMgtConstants.Permission.UPDATE_PERMISSION + APIMgtConstants.Permission.DELETE_PERMISSION)) {
+                array.add(APIMgtConstants.Permission.READ);
+                array.add(APIMgtConstants.Permission.UPDATE);
+                array.add(APIMgtConstants.Permission.DELETE);
+            }
+            jsonObject.put(APIMgtConstants.Permission.PERMISSION, array);
+            permissionArray.add(jsonObject);
+        }
+        return new StringBuilder(permissionArray.toString());
+    }
+
+    /**
+     * This constructs and returns the API permissions map from the DB
+     *
+     * @param connection - DB connection
+     * @param apiId - apiId of the API
+     * @return permission map for the API
+     * @throws SQLException - if error occurred while getting permissionMap of API from DB
+     */
+    private Map<String, Integer> getPermissionMapForApi(Connection connection, String apiId) throws SQLException {
+        Map<String, Integer> permissionMap = new HashMap();
+        final String query = "SELECT GROUP_ID,PERMISSION FROM AM_API_GROUP_PERMISSION WHERE API_ID=?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, apiId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    permissionMap.put(resultSet.getString("GROUP_ID"), resultSet.getInt("PERMISSION"));
+                }
+            }
+        }
+        return permissionMap;
     }
 
     private Map<String, Endpoint> getEndPointsForApi(Connection connection, String apiId) throws SQLException,

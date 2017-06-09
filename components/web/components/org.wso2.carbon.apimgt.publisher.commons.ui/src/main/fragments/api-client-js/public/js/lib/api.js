@@ -286,6 +286,7 @@ class API {
             "name": null,
             "context": null,
             "version": null,
+            "permission": null,
             "endpoint": []
         };
         var user_keys = Object.keys(api_data);

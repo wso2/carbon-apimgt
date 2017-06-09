@@ -27,8 +27,10 @@ import org.wso2.carbon.lcm.core.exception.LifecycleException;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -79,11 +81,13 @@ public final class API {
         }
         permissionMap = builder.permissionMap;
         workflowStatus = builder.workflowStatus;
+        userSpecificApiPermissions = builder.userSpecificApiPermissions;
     }
 
     public Map getPermissionMap() {
         return permissionMap;
     }
+
     public String getId() {
         return id;
     }
@@ -212,6 +216,10 @@ public final class API {
         return applicationId;
     }
 
+    public List<String> getUserSpecificApiPermissions() {
+        return userSpecificApiPermissions;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -306,7 +314,8 @@ public final class API {
     private final String apiDefinition;
     private final Map permissionMap;
     private final String apiPermission;
-    private final String workflowStatus; 
+    private final String workflowStatus;
+    private List<String> userSpecificApiPermissions;
     
     public String getWorkflowStatus() {
         return workflowStatus;
@@ -410,6 +419,10 @@ public final class API {
             return businessInformation;
         }
 
+        public List<String> getUserSpecificApiPermissions() {
+            return userSpecificApiPermissions;
+        }
+
         private String version;
         private String context;
         private String description;
@@ -442,7 +455,8 @@ public final class API {
         private String copiedFromApiId;
         private String apiDefinition;
         private String workflowStatus;
-        
+        private List<String> userSpecificApiPermissions;
+
         public APIBuilder(String provider, String name, String version) {
             this.provider = provider;
             this.name = name;
@@ -486,6 +500,7 @@ public final class API {
             }
             this.permissionMap = new HashMap<>();
             this.workflowStatus = copy.workflowStatus;
+            this.userSpecificApiPermissions = new ArrayList<String>();
         }
 
         /**
@@ -1000,5 +1015,17 @@ public final class API {
         public String getWorkflowStatus() {
             return workflowStatus;
         }
+
+        public void setUserSpecificApiPermissions(List<String> userSpecificApiPermissions) {
+            this.userSpecificApiPermissions = userSpecificApiPermissions;
+        }
+    }
+
+    public void setCopiedFromApiId(String copiedFromApiId) {
+             this.copiedFromApiId = copiedFromApiId;
+    }
+
+    public void setUserSpecificApiPermissions(List<String> userSpecificApiPermissions) {
+        this.userSpecificApiPermissions = userSpecificApiPermissions;
     }
 }

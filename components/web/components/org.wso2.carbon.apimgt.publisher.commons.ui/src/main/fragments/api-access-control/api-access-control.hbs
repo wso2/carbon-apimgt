@@ -1,0 +1,86 @@
+{{js "js/permissions.js"}}
+{{css "css/permissions.css"}}
+<div class="page-header">
+    <h4 class="lead">{{i18n "API.Permissions"}}</h4>
+</div>
+
+<div class="row">
+    <div class="col-md-6 col-sm-6">
+        <form class="form-horizontal">
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3" for="role-name">
+                    {{i18n "Role"}} :
+                </label>
+                <div class=" col-xs-8 col-sm-6 col-md-6 col-lg-6">
+                    <div class="input-group">
+                        <input type="text" class="form-control"
+                               id="role-name"
+                               placeholder="role name">
+                        <span class="input-group-btn">
+                            <button class="btn btn-primary add-role" type="button">{{i18n "Add"}}</button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="col-md-6 col-sm-6">
+        <form class="form-horizontal">
+            <div class="form-group">
+                <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8" id="set-permissions-list">
+                    <div class="well">
+                        {{i18n "Role.permissions.for.API"}}
+                        <br/>
+                        <br/>
+                        <div class="message message-info hide" id="no-roles-msg">
+                            <p><i class="icon fw fw-info"></i>&emsp; {{i18n "No.roles.added"}}.</p>
+                        </div>
+                        <table style="width:100%" id="permissionTable">
+                            <tr>
+                                <th>Role</th>
+                                <th>Permissions</th>
+                                <th>Actions</th>
+                            </tr>
+
+                            {{#each @params.permission}}
+                                <tr class="permissions">
+                                    <td>
+                                        <label class="permission-options">{{this.groupId}}
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <input type="checkbox" value="READ" class="permissionCheck" {{#if this.isRead}}checked{{/if}}>&nbsp;{{i18n "Read"}} &nbsp; &nbsp;
+                                        <input type="checkbox" value="UPDATE" class="permissionCheck" {{#if this.isUpdate}}checked{{/if}}>&nbsp;{{i18n "Update"}} &nbsp; &nbsp;
+                                        <input type="checkbox" value="DELETE" class="permissionCheck" {{#if this.isDelete}}checked{{/if}}>&nbsp;{{i18n "Delete"}} &nbsp; &nbsp;
+                                    </td>
+                                    <td>
+                                        <span class="fw fw-delete delete-role"></span>
+                                    </td>
+                                <tr>
+                            {{/each}}
+                                <tr class="permissions hide" id="permission-div">
+                                    <td>
+                                        <label class="permission-options">
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <input type="checkbox" value="READ" class="permissionCheck">&nbsp;{{i18n "Read"}} &nbsp; &nbsp;
+                                        <input type="checkbox" value="UPDATE" class="permissionCheck">&nbsp;{{i18n "Update"}} &nbsp; &nbsp;
+                                        <input type="checkbox" value="DELETE" class="permissionCheck">&nbsp;{{i18n "Delete"}} &nbsp; &nbsp;
+                                    </td>
+                                    <td>
+                                        <span class="fw fw-delete delete-role"></span>
+                                    </td>
+                                </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-6 col-sm-9">
+                    <button id="update-api-permissions" class="btn btn-primary">{{i18n "Update.Permissions"}}</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
