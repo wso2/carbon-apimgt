@@ -179,8 +179,8 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                 return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
             }
 
-        } catch (GatewayException e){
-            String errorMessage = "Failed to add subscription of API : "+ body.getApiIdentifier() + " to gateway";
+        } catch (GatewayException e) {
+            String errorMessage = "Failed to add subscription of API : " + body.getApiIdentifier() + " to gateway";
             log.error(errorMessage, e);
             return Response.status(Response.Status.ACCEPTED).build();
         }
@@ -235,7 +235,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
             apiStore.deleteAPISubscription(subscriptionId);
         } catch (GatewayException e) {
-            String errorMessage = "Failed to remove subscription :" +subscriptionId + " from gateway";
+            String errorMessage = "Failed to remove subscription :" + subscriptionId + " from gateway";
             log.error(errorMessage, e);
             return Response.status(Response.Status.ACCEPTED).build();
         } catch (APIManagementException e) {

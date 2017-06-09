@@ -74,8 +74,8 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             Subscription newSubscription = apiPublisher.getSubscriptionByUUID(subscriptionId);
             SubscriptionDTO subscriptionDTO = MappingUtil.fromSubscription(newSubscription);
             return Response.ok().entity(subscriptionDTO).build();
-        } catch (GatewayException e){
-            String errorMessage = "Failed to block subscription :"+ subscriptionId + " in gateway";
+        } catch (GatewayException e) {
+            String errorMessage = "Failed to block subscription :" + subscriptionId + " in gateway";
             log.error(errorMessage, e);
             return Response.status(Response.Status.ACCEPTED).build();
         }
@@ -241,8 +241,8 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             Subscription newSubscription = apiPublisher.getSubscriptionByUUID(subscriptionId);
             SubscriptionDTO subscriptionDTO = MappingUtil.fromSubscription(newSubscription);
             return Response.ok().entity(subscriptionDTO).build();
-        } catch (GatewayException e){
-            String errorMessage = "Failed to unblock subscription :"+ subscriptionId + " in gateway";
+        } catch (GatewayException e) {
+            String errorMessage = "Failed to unblock subscription :" + subscriptionId + " in gateway";
             log.error(errorMessage, e);
             return Response.status(Response.Status.ACCEPTED).build();
         }
