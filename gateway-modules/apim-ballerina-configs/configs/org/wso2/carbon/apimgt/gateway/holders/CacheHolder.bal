@@ -3,16 +3,12 @@ import org.wso2.carbon.apimgt.gateway.dto as dto;
 import org.wso2.carbon.apimgt.ballerina.caching;
 import ballerina.lang.maps;
 import org.wso2.carbon.apimgt.gateway.constants;
-map tokenCacheMap = {};
-map subscriptionCache = {};
-map resourceCacheMap = {};
-map jwtTokenCache = {};
-map keyValidationInfoCache = {};
 map apiCache = {};
 dto:GatewayConfDTO gatewayConf = {};
+dto:KeyManagerInfoDTO keyManagerConf = {};
 map applicationCache = {};
 map userInfoCache = {};
-
+string apiCoreUrl;
 function getFromTokenCache (string key) (dto:IntrospectDto){
     any introspect = caching:getCacheEntry(constants:TOKEN_CACHE,key);
     if(introspect != null){
@@ -80,6 +76,7 @@ function getFromAPICache (string key) (dto:APIDTO){
 }
 function setGatewayConf (dto:GatewayConfDTO conf) {
     gatewayConf = conf;
+    keyManagerConf = conf.keyManagerInfo;
 }
 function getGatewayConf () (dto:GatewayConfDTO){
     return gatewayConf;

@@ -77,10 +77,9 @@ function fromJsonToResourceDto (json resourceResponse) (dto:ResourceDto){
     return resourceDto;
 }
 function retrieveSubscriptions () (boolean ){
-    string coreUrl = "https://localhost:9292/api/am/core/v1.0";
-    string query = "/subscriptions?limit=-1";
+    string query = "/api/am/core/v1.0/subscriptions?limit=-1";
     message request = {};
-    http:ClientConnector apiInfoConnector = create http:ClientConnector(coreUrl);
+    http:ClientConnector apiInfoConnector = create http:ClientConnector(holders:apiCoreUrl);
     messages:setHeader(request, "Content-Type", "application/json");
     message response = http:ClientConnector.get (apiInfoConnector, query, request);
     json subscriptions = messages:getJsonPayload(response);
@@ -95,10 +94,9 @@ function retrieveSubscriptions () (boolean ){
     return true;
 }
 function retrieveResources (string apiContext, string apiVersion) {
-    string coreUrl = "https://localhost:9292/api/am/core/v1.0";
-    string query = "/resources/?apiContext="+apiContext+"&apiVersion="+apiVersion;
+    string query = "/api/am/core/v1.0/resources/?apiContext="+apiContext+"&apiVersion="+apiVersion;
     message request = {};
-    http:ClientConnector apiInfoConnector = create http:ClientConnector(coreUrl);
+    http:ClientConnector apiInfoConnector = create http:ClientConnector(holders:apiCoreUrl);
     messages:setHeader(request, "Content-Type", "application/json");
     message response = http:ClientConnector.get (apiInfoConnector, query, request);
     json resources = messages:getJsonPayload(response);
@@ -111,10 +109,9 @@ function retrieveResources (string apiContext, string apiVersion) {
     }
 }
 function retrieveApplications ()(boolean) {
-    string coreUrl = "https://localhost:9292/api/am/core/v1.0";
-    string query = "/applications";
+    string query = "/api/am/core/v1.0/applications";
     message request = {};
-    http:ClientConnector apiInfoConnector = create http:ClientConnector(coreUrl);
+    http:ClientConnector apiInfoConnector = create http:ClientConnector(holders:apiCoreUrl);
     messages:setHeader(request, "Content-Type", "application/json");
     message response = http:ClientConnector.get (apiInfoConnector, query, request);
     json applications = messages:getJsonPayload(response);
