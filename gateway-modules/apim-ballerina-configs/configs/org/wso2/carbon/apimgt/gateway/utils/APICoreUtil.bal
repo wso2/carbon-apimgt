@@ -8,6 +8,7 @@ import ballerina.lang.messages;
 import org.wso2.carbon.apimgt.gateway.constants as Constants;
 import org.wso2.carbon.apimgt.gateway.dto as dto;
 import org.wso2.carbon.apimgt.gateway.holders as holder;
+import org.wso2.carbon.apimgt.ballerina.deployment;
 
 function registerGateway () (json) {
 
@@ -95,6 +96,7 @@ function getAPICoreURL () (string){
 
 function deployService (dto:APIDTO api, string config) {
     //TODO:To be implemented
+    deployment:deployService(api.id, config);
 }
 function undeployService (dto:APIDTO api) {
     //TODO:To be implemented
