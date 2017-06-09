@@ -2805,8 +2805,6 @@ definitions:
         type: string
       throttlingTier:
         type: string
-      callbackUrl:
-        type: string
       permission:
         type: string
         example: "[{\"groupId\" : 1000, \"permission\" : [\"READ\",\"UPDATE\"]},{\"groupId\" : 1001, \"permission\" : [\"READ\",\"UPDATE\"]}]"
@@ -3307,7 +3305,7 @@ definitions:
     required:
       - keyType
       - validityTime
-      - accessAllowDomains
+      - grantTypesToBeSupported
     properties:
       keyType:
         type: string
@@ -3319,11 +3317,11 @@ definitions:
       callbackUrl:
         type: string
         description: Callback URL
-      accessAllowDomains:
+      grantTypesToBeSupported:
         type: array
         items:
           type: string
-        description: Allowed domains for the access token
+        description: Grant types that should be supported by the application
       scopes:
         type: array
         items:

@@ -192,21 +192,20 @@ public interface APIStore extends APIManager {
     /**
      * Generates oAuth keys for an application.
      *
-     * @param userId          Subsriber name.
-     * @param applicationName name of the Application.
-     * @param applicationId   id of the Application.
+     * @param applicationName Name of the Application.
+     * @param applicationId   Id of the Application.
      * @param tokenType       Token type (PRODUCTION | SANDBOX)
-     * @param callbackUrl     callback URL
-     * @param allowedDomains  allowedDomains for token.
-     * @param validityTime    validity time period.
+     * @param callbackUrl     Callback URL
+     * @param grantTypes      List of grant types to be supported by the application
+     * @param validityTime    Validity time period.
      * @param groupingId      APIM application id.
-     * @param tokenScope      Scopes for the requested tokens.
+     * @param tokenScopes      Scopes for the requested tokens.
      * @return                {@code Map<String, Object>}  Map of generated keys.
      * @throws APIManagementException if failed to applications for given subscriber
      */
-    Map<String, Object> generateApplicationKeys(String userId, String applicationName, String applicationId,
-            String tokenType, String callbackUrl, String[] allowedDomains, String validityTime,
-            String tokenScope, String groupingId) throws APIManagementException;
+    Map<String, Object> generateApplicationKeys(String applicationName, String applicationId,
+            String tokenType, String callbackUrl, List<String> grantTypes, String validityTime,
+            String tokenScopes, String groupingId) throws APIManagementException;
 
     /**
      * Retrieve an application given the uuid.

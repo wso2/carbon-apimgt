@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * This class contains the model of SCIM user
+ * Model of SCIM user
  */
 public class SCIMUser {
 

@@ -832,7 +832,7 @@
         <andes.version>3.0.5</andes.version>
         <securevault.version>1.0.0-wso2v2</securevault.version>
         <slf4j.version>1.7.22</slf4j.version>
-        <feign.version>9.3.1</feign.version>
+        <feign.version>9.5.0</feign.version>
         <wiremock.version>2.5.0</wiremock.version>
         <lucene.version>3.6.2_1</lucene.version>
         <lucene.bundle.version>3.6.2.1</lucene.bundle.version>
