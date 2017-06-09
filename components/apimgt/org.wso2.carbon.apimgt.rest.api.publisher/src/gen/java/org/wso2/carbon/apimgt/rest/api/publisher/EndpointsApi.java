@@ -9,6 +9,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.factories.EndpointsApiServiceFa
 import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
 
+import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -32,6 +33,7 @@ import javax.ws.rs.core.Response;
 @Path("/api/am/publisher/v1.[\\d]+/endpoints")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
+@ApplicationPath("/endpoints")
 @io.swagger.annotations.Api(description = "the endpoints API")
 public class EndpointsApi implements Microservice  {
    private final EndpointsApiService delegate = EndpointsApiServiceFactory.getEndpointsApi();

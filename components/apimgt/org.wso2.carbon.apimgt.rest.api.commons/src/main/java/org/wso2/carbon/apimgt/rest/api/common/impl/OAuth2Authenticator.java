@@ -30,7 +30,6 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
-import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.rest.api.common.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.api.RESTAPIAuthenticator;
@@ -45,7 +44,6 @@ import org.wso2.msf4j.util.SystemVariableUtil;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -117,7 +115,7 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
      * Extract the accessToken from the give Authorization header value and validates the accessToken
      * with an external key manager.
      *
-     * @param accessToken  the access token
+     * @param accessToken the access token
      * @return responseData if the token is a valid token
      */
     private AccessTokenInfo validateToken(String accessToken) throws APIMgtSecurityException {
@@ -161,7 +159,7 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
         return null;
     }
 
-    private boolean isCookieExists (Headers headers, String cookieName) {
+    private boolean isCookieExists(Headers headers, String cookieName) {
         String cookie = headers.get(RestApiConstants.COOKIE_HEADER);
         cookie = cookie.trim();
         String[] cookies = cookie.split(";");
@@ -178,6 +176,7 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
     * @throws APIMgtSecurityException if resource could not be found.
     * */
     private String getRestAPIResource(Request request) throws APIMgtSecurityException {
+        //todo improve to get appname as a property in the Request
         String path = (String) request.getProperty("REQUEST_URL");
         String restAPIResource = null;
         //this is publisher API so pick that API
@@ -186,7 +185,7 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
                 restAPIResource = RestApiUtil.getPublisherRestAPIResource();
             } else if (path.contains(RestApiConstants.REST_API_STORE_CONTEXT)) {
                 restAPIResource = RestApiUtil.getStoreRestAPIResource();
-            } else if (path.contains(RestApiConstants.REST_API_ADMIN_CONTEXT))  {
+            } else if (path.contains(RestApiConstants.REST_API_ADMIN_CONTEXT)) {
                 restAPIResource = RestApiUtil.getAdminRestAPIResource();
             } else {
                 throw new APIMgtSecurityException("No matching Rest Api definition found for path:" + path);
@@ -213,39 +212,45 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
 
         String path = (String) request.getProperty("REQUEST_URL");
         String verb = (String) request.getProperty("HTTP_METHOD");
-        String resource = path.substring(path.length() - 1);
-
+        if (log.isDebugEnabled()) {
+            log.debug("Invoking rest api resource path " + verb + " " + path + " ");
+            log.debug("LoggedIn user scopes " + Arrays.toString(scopesToValidate));
+        }
         if (scopesToValidate.length > 0) {
             final List<String> scopes = Arrays.asList(scopesToValidate);
             if (restAPIResource != null) {
                 APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
                 try {
-                    Map<String, Scope> apiDefinitionScopes = apiDefinition.getScopes(restAPIResource);
-                    if (apiDefinitionScopes.isEmpty()) {
+                    String apiResourceDefinitionScopes = apiDefinition.getScopeOfResourcePath(restAPIResource, request,
+                            serviceMethodInfo);
+                    if (null == apiResourceDefinitionScopes) {
                         if (log.isDebugEnabled()) {
-                            log.debug("Scope not defined in swagger for matching resource " + resource + " and verb "
+                            log.debug("Scope not defined in swagger for matching resource " + path + " and verb "
                                     + verb + " . Hence consider as anonymous permission and let request to continue.");
                         }
                         // scope validation gets through if no scopes found in the api definition
                         authorized[0] = true;
+                    } else {
+                        Arrays.stream(apiResourceDefinitionScopes.split(" "))
+                                .forEach(scopeKey -> {
+                                    Optional<String> key = scopes.stream().filter(scp -> {
+                                        return scp.equalsIgnoreCase(scopeKey);
+                                    }).findAny();
+                                    if (key.isPresent()) {
+                                        authorized[0] = true;  //scope validation success if one of the
+                                        // apiResourceDefinitionScopes found.
+                                    }
+                                });
                     }
-                    apiDefinitionScopes.keySet()      //Only do the scope validation.hence key set is sufficient.
-                            .forEach(scopeKey -> {
-                                Optional<String> key = scopes.stream().filter(scp -> {
-                                    return scp.equalsIgnoreCase(scopeKey);
-                                }).findAny();
-                                if (key.isPresent()) {
-                                    authorized[0] = true;
-                                }
-                            });
+
                 } catch (APIManagementException e) {
                     String message = "Error while validating scopes";
                     log.error(message);
-                    throw new APIMgtSecurityException(message, ExceptionCodes.AUTH_GENERAL_ERROR);
+                    throw new APIMgtSecurityException(message, ExceptionCodes.INVALID_SCOPE);
                 }
             } else {
                 if (log.isDebugEnabled()) {
-                    log.debug("Rest API resource could not be found for resource '" + resource + "'");
+                    log.debug("Rest API resource could not be found for request path '" + path + "'");
                 }
             }
         } else { // scope validation gets through if access token does not contain scopes to validate

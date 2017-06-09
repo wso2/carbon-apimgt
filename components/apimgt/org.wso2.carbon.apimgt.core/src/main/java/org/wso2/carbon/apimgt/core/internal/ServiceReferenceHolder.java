@@ -23,6 +23,8 @@ import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
 import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
 import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 
+import java.util.Map;
+
 /**
  * Class used to hold the APIM configuration
  */
@@ -61,5 +63,23 @@ public class ServiceReferenceHolder {
         }
 
         return config;
+    }
+   /*
+   * This method is to get configuration map of a given namespace
+   *
+   * @param namespace namespace defined in deployment.yaml
+   * @return resource path to scope mapping
+   * */
+    public Map<String, String> getRestAPIConfigurationMap(String nameSpace) {
+        try {
+            if (configProvider != null) {
+                return configProvider.getConfigurationMap(nameSpace);
+            } else {
+                log.error("Configuration provider is null");
+            }
+        } catch (CarbonConfigurationException e) {
+            log.error("error getting config : org.wso2.carbon.apimgt.core.internal.APIMConfiguration", e);
+        }
+        return null;
     }
 }

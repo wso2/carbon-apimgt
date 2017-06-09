@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIDefinition;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIResource;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
@@ -54,7 +55,10 @@ import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
+import org.wso2.msf4j.Request;
+import org.wso2.msf4j.ServiceMethodInfo;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -71,12 +75,89 @@ import java.util.UUID;
 public class APIDefinitionFromSwagger20 implements APIDefinition {
 
     private static final Logger log = LoggerFactory.getLogger(APIDefinitionFromSwagger20.class);
+    private static Map<String, Map<String, String>> localConfigMap = new HashMap<>();
 
-    /**
-     * This method extracts the API resource related data which includes URI templates from the Swagger API definition
-     *
-     * @return SwaggerAPIResourceData
-     */
+    @Override
+    public String getScopeOfResourcePath(String resourceConfigsJSON, Request request,
+                                         ServiceMethodInfo serviceMethodInfo) throws APIManagementException {
+        SwaggerParser swaggerParser = new SwaggerParser();
+        Swagger swagger = swaggerParser.parse(resourceConfigsJSON);
+        String basepath = swagger.getBasePath();
+        String verb = (String) request.getProperty("HTTP_METHOD");
+//        Method resourceMethod = (Method) request.getProperty("method");todo change to this if msf4j2.3.0-m2 or higher
+        Method resourceMethod = serviceMethodInfo.getMethod();
+
+        if (resourceMethod == null || verb == null) {
+            String message = "Could not read required properties from HTTP Request. HTTP_METHOD=" + verb +
+                    " resourceTemplate=" + resourceMethod;
+            log.error(message);
+            throw new APIManagementException(message, ExceptionCodes.SWAGGER_URL_MALFORMED);
+        }
+        String apiPrefix = resourceMethod.getDeclaringClass().getAnnotation(javax.ws.rs.ApplicationPath.class).value();
+        String pathTemplate = "";
+        if (resourceMethod.getAnnotation(javax.ws.rs.Path.class) != null) {
+            pathTemplate = resourceMethod.getAnnotation(javax.ws.rs.Path.class).value();
+        }
+        String nameSpace = null;
+        if (basepath.contains("publisher")) {
+            nameSpace = APIMgtConstants.NAMESPACE_PUBLISHER_API;
+        } else if (basepath.contains("store")) {
+            nameSpace = APIMgtConstants.NAMESPACE_STORE_API;
+        } else if (basepath.contains("admin")) {
+            nameSpace = APIMgtConstants.NAMESPACE_ADMIN_API;
+        }
+
+        //if namespace is not available in local cache add it.
+        if (!localConfigMap.containsKey(nameSpace)) {
+            localConfigMap.put(nameSpace, new HashMap<>());
+        }
+
+        if (nameSpace != null && localConfigMap.get(nameSpace).isEmpty()) {
+            Map<String, String> configMap = ServiceReferenceHolder.getInstance().getRestAPIConfigurationMap(nameSpace);
+            //update local cache with configs defined in configuration file(dep.yaml)
+            if (configMap != null) {
+                localConfigMap.get(nameSpace).putAll(configMap);
+            }
+            //update local cache with the resource to scope mapping read from swagger
+            populateConfigMapForScopes(swagger, nameSpace);
+        }
+
+        String resourceConfig = verb + "_" + apiPrefix + pathTemplate;
+        if (localConfigMap.get(nameSpace).containsKey(resourceConfig)) {
+            return localConfigMap.get(nameSpace).get(resourceConfig);
+        }
+        return null;
+    }
+
+    /*
+    * This method populates resource to scope mappings into localConfigMap
+    *
+    * @param swagger swagger oc of the apis
+    * String namespacee unigue identifier of the api
+    *
+    * */
+    private void populateConfigMapForScopes(Swagger swagger, String namespace) {
+        if (null != swagger) {
+            for (Map.Entry<String, Path> entry : swagger.getPaths().entrySet()) {
+                Path resource = entry.getValue();
+                Map<HttpMethod, Operation> operationsMap = resource.getOperationMap();
+                for (Map.Entry<HttpMethod, Operation> httpverbEntry : operationsMap.entrySet()) {
+                    if (httpverbEntry.getValue().getVendorExtensions().size() > 0 &&
+                            null != httpverbEntry.getValue().getVendorExtensions().get("x-scope")) {
+                        StringBuffer resourceConfigPath = new StringBuffer().append(httpverbEntry.getKey()).append("_")
+                                .append(entry.getKey());
+                        String path = resourceConfigPath.toString();
+                        if (!localConfigMap.get(namespace).containsKey(path)) {
+                            localConfigMap.get(namespace).put(path,
+                                    httpverbEntry.getValue().getVendorExtensions().get("x-scope").toString());
+                        }
+                    }
+
+                }
+            }
+        }
+    }
+
     @Override
     public List<APIResource> parseSwaggerAPIResources(StringBuilder resourceConfigsJSON)
             throws APIManagementException {
@@ -157,10 +238,10 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
      * generate the swagger from uri templates.
      *
      * @param api API Object
-     * @return  Generated swagger resources as string.
+     * @return Generated swagger resources as string.
      */
     @Override
-    public String generateSwaggerFromResources(API.APIBuilder api)  {
+    public String generateSwaggerFromResources(API.APIBuilder api) {
         Swagger swagger = new Swagger();
         Info info = new Info();
         info.setTitle(api.getName());
@@ -205,10 +286,10 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
     /**
      * return API Object
      *
-     * @param provider  Provider of the API.
+     * @param provider      Provider of the API.
      * @param apiDefinition API definition as string
-     * @return  API object.
-     * @throws APIManagementException   If failed to generate API from swagger.
+     * @return API object.
+     * @throws APIManagementException If failed to generate API from swagger.
      */
     @Override
     public API.APIBuilder generateApiFromSwaggerResource(String provider, String apiDefinition) throws
