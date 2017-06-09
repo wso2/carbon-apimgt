@@ -88,8 +88,13 @@ function getAPIServiceConfig (string apiId) (string) {
 }
 
 function getAPICoreURL () (string){
-    string apiCoreURL = system:getEnv(Constants:API_CORE_URL);
-    return "https://localhost:9292";
+    string apiCoreURL;
+    if(system:getEnv(Constants:API_CORE_URL) != null) {
+        apiCoreURL = system:getEnv(Constants:API_CORE_URL);
+    } else {
+        apiCoreURL = "https://localhost:9292";
+    }
+    return apiCoreURL;
 }
 
 
