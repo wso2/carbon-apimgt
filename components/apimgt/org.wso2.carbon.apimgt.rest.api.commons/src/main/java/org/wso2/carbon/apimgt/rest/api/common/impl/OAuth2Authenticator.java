@@ -206,7 +206,7 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
     * @return true if scope validation successful
     * */
     @SuppressFBWarnings({"DLS_DEAD_LOCAL_STORE"})
-    private boolean validateScopes(Request request, ServiceMethodInfo serviceMethodInfo, String[] scopesToValidate,
+    private boolean validateScopes(Request request, ServiceMethodInfo serviceMethodInfo, String scopesToValidate,
                                    String restAPIResource) throws APIMgtSecurityException {
         final boolean authorized[] = {false};
 
@@ -214,9 +214,10 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
         String verb = (String) request.getProperty("HTTP_METHOD");
         if (log.isDebugEnabled()) {
             log.debug("Invoking rest api resource path " + verb + " " + path + " ");
-            log.debug("LoggedIn user scopes " + Arrays.toString(scopesToValidate));
+            log.debug("LoggedIn user scopes " + scopesToValidate);
         }
-        if (scopesToValidate.length > 0) {
+
+        if (scopesToValidate != null && scopesToValidate.split(" ").length > 0) {
             final List<String> scopes = Arrays.asList(scopesToValidate);
             if (restAPIResource != null) {
                 APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
@@ -258,7 +259,7 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
         }
 
         if (!authorized[0]) {
-            String message = "Scope validation fails for the scopes " + Arrays.toString(scopesToValidate);
+            String message = "Scope validation fails for the scopes " + scopesToValidate;
             throw new APIMgtSecurityException(message, ExceptionCodes.ACCESS_TOKEN_INACTIVE);
 
         }
