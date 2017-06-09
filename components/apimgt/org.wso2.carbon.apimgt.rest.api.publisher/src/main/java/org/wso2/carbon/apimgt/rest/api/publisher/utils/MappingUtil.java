@@ -93,6 +93,7 @@ public class MappingUtil {
         apidto.setTags(new ArrayList<>(api.getTags()));
         apidto.setLabels(new ArrayList<>(api.getLabels()));
         apidto.setTransport(new ArrayList<>(api.getTransport()));
+        apidto.setUserPermissionsForApi(api.getUserSpecificApiPermissions());
         api.getPolicies().forEach(apidto::addPoliciesItem);
         BusinessInformation businessInformation = api.getBusinessInformation();
         API_businessInformationDTO apiBusinessInformationDTO = new API_businessInformationDTO();
@@ -248,6 +249,7 @@ public class MappingUtil {
             apiInfo.setLifeCycleStatus(apiSummary.getLifeCycleStatus());
             apiInfo.setVersion(apiSummary.getVersion());
             apiInfo.setWorkflowStatus(apiSummary.getWorkflowStatus());
+            apiInfo.setUserPermissionsForApi(apiSummary.getUserSpecificApiPermissions());
             apiInfoList.add(apiInfo);
         }
         return apiInfoList;

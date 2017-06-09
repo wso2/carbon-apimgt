@@ -391,8 +391,10 @@ public class APIPublisherImplTestCase {
     public void testSearchAPIs() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        API api1 = SampleTestObjectCreator.createDefaultAPI().build();
         List<API> apimResultsFromDAO = new ArrayList<>();
-        Mockito.when(apiDAO.searchAPIs(new HashSet<>(), USER, QUERY_STRING, ApiType.STANDARD, 1, 2)).
+        apimResultsFromDAO.add(api1);
+        Mockito.when(apiDAO.searchAPIs(APIUtils.getAllRolesOfUser(USER), USER, QUERY_STRING, ApiType.STANDARD, 1, 2)).
                 thenReturn(apimResultsFromDAO);
         List<API> apis = apiPublisher.searchAPIs(2, 1, QUERY_STRING);
         Assert.assertNotNull(apis);
