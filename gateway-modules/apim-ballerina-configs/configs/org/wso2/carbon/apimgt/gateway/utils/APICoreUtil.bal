@@ -88,7 +88,7 @@ function getAPIServiceConfig (string apiId) (string) {
     return apiConfig;
 }
 
-function getAPICoreURL () (string){
+function getAPICoreURL () (string) {
     string apiCoreURL;
     if(getSystemProperty(Constants:API_CORE_URL) != "") {
         apiCoreURL = getSystemProperty(Constants:API_CORE_URL);

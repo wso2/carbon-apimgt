@@ -195,10 +195,10 @@ function getSystemProperty (string prop) (string) {
     string pathValue = "";
     try{
         pathValue = system:getEnv(prop);
-        if(pathValue != ""){
+        if(pathValue != "") {
             return pathValue;
         }
-    }catch (errors:Error e) {
+    } catch (errors:Error e) {
         return "";
     }
     return pathValue;
