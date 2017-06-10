@@ -349,8 +349,8 @@ public class APIGatewayPublisherImpl implements APIGateway {
         apiSummary.setName(api.getName());
         apiSummary.setVersion(api.getVersion());
         apiSummary.setContext(api.getContext());
-        apiSummary.setLifeCycleState(api.getLifeCycleStatus());
-        apiSummary.setLifeCycleState(api.getLifeCycleStatus());
+        apiSummary.setLifeCycleStatus(api.getLifeCycleStatus());
+        apiSummary.setLifeCycleStatus(api.getLifeCycleStatus());
         apiSummary.setCreatedTime(api.getCreatedTime());
         apiSummary.setLastUpdatedTime(api.getLastUpdatedTime());
         return apiSummary;

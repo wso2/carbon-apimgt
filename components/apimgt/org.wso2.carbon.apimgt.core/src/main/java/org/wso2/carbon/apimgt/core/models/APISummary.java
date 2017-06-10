@@ -35,7 +35,7 @@ public class APISummary {
 
     private String version;
 
-    private String lifeCycleState;
+    private String lifeCycleStatus;
 
     private LocalDateTime createdTime;
 
@@ -77,12 +77,12 @@ public class APISummary {
         this.version = version;
     }
 
-    public String getLifeCycleState() {
-        return lifeCycleState;
+    public String getLifeCycleStatus() {
+        return lifeCycleStatus;
     }
 
-    public void setLifeCycleState(String lifeCycleState) {
-        this.lifeCycleState = lifeCycleState;
+    public void setLifeCycleStatus(String lifeCycleStatus) {
+        this.lifeCycleStatus = lifeCycleStatus;
     }
 
     public LocalDateTime getCreatedTime() {
