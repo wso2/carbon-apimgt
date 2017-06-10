@@ -11,7 +11,7 @@ import org.wso2.carbon.apimgt.gateway.constants as Constants;
 import org.wso2.carbon.apimgt.gateway.utils as gatewayUtil;
 import org.wso2.carbon.apimgt.gateway.dto as dto;
 import org.wso2.carbon.apimgt.gateway.holders as holder;
-
+import org.wso2.carbon.apimgt.ballerina.util as apimgtUtil;
 
 @jms:JMSSource {
 factoryInitial : "org.apache.activemq.jndi.ActiveMQInitialContextFactory",
@@ -30,12 +30,23 @@ service jmsService {
 
             if (strings:equalsIgnoreCase(eventType, Constants:API_CREATE)) {
                 json apiSummary = jsons:getJson(event, "apiSummary");
-                system:println(apiSummary);
                 if(apiSummary != null){
 
                     dto:APIDTO api = gatewayUtil:fromJSONToAPIDTO(apiSummary);
                     //Retrieve API configuration
-                    string apiConfig = gatewayUtil:getAPIServiceConfig(api.id);
+                    string apiConfig ;
+                    int status;
+                    status,apiConfig = gatewayUtil:getAPIServiceConfig(api.id);
+                    int maxRetries = 5;
+                    int i =0;
+                    while(status == Constants:NOT_FOUND){
+                        apimgtUtil:wait(10000);
+                        status,apiConfig = gatewayUtil:getAPIServiceConfig(api.id);
+                            i = i+1;
+                        if(i>maxRetries){
+                            break;
+                        }
+                    }
                     //Deploy API service
                     gatewayUtil:deployService(api, apiConfig);
                     //Update API cache
@@ -51,8 +62,19 @@ service jmsService {
 
                     dto:APIDTO api = gatewayUtil:fromJSONToAPIDTO(apiSummary);
                     //Retrieve API configuration
-                    string apiConfig = gatewayUtil:getAPIServiceConfig(api.id);
-                    //Update API service
+                    string apiConfig ;
+                    int status;
+                    status,apiConfig = gatewayUtil:getAPIServiceConfig(api.id);
+                    int maxRetries = 10;
+                    int i =0;
+                    while(status == Constants:NOT_FOUND){
+                        apimgtUtil:wait(10000);
+                        status,apiConfig = gatewayUtil:getAPIServiceConfig(api.id);
+                        i = i+1;
+                        if(i>maxRetries){
+                            break;
+                        }
+                    }            //Update API service
                     gatewayUtil:updateService(api, apiConfig);
                     //Update API cache
                     holder:putIntoAPICache(api);
@@ -66,7 +88,19 @@ service jmsService {
 
                     dto:APIDTO api = gatewayUtil:fromJSONToAPIDTO(apiSummary);
                     //Retrieve API configuration
-                    string apiConfig = gatewayUtil:getAPIServiceConfig(api.id);
+                    string apiConfig ;
+                    int status;
+                    status,apiConfig = gatewayUtil:getAPIServiceConfig(api.id);
+                    int maxRetries = 10;
+                    int i =0;
+                    while(status == Constants:NOT_FOUND){
+                        apimgtUtil:wait(10000);
+                        status,apiConfig = gatewayUtil:getAPIServiceConfig(api.id);
+                        i = i+1;
+                        if(i>maxRetries){
+                            break;
+                        }
+                    }
                     //Undeploy API service
                     gatewayUtil:undeployService(api);
                     //Remove from API cache

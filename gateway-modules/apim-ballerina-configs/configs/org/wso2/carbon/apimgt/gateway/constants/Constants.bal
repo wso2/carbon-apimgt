@@ -59,7 +59,9 @@ const string BLOCKED_ERROR_CODE = "900805";
 const int HTTP_FORBIDDEN = 403;
 const int HTTP_TOO_MANY_REQUESTS = 429;
 const int HTTP_UNAUTHORIZED = 401;
+const int NOT_FOUND = 404;
 
 const string STOP_ON_QUOTA_REACH = "STOP_ON_QUOTA_REACH";
 const string MAINTENANCE = "Maintenance";
 const string BASE_PATH = "BASE_PATH";
+const string API_NOT_FOUND = "code: 900314";

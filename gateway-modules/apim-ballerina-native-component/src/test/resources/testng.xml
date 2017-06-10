@@ -25,9 +25,11 @@ under the License.
         <parameter name="enableNonBlocking" value="false"/>
         <packages>
             <package name="org.wso2.carbon.apimgt.ballerina.caching"/>
+            <package name="org.wso2.carbon.apimgt.ballerina.util"/>
         </packages>
         <classes>
             <class name="org.wso2.carbon.apimgt.ballerina.caching.CacheTest"/>
+            <class name="org.wso2.carbon.apimgt.ballerina.util.WaitTestCase"/>
         </classes>
     </test>
     <test name="apimgt-ballerina-native-cache-delete-unit-test" preserve-order="true" parallel="false">
