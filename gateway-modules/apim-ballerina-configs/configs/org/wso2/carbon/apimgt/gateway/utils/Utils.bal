@@ -186,7 +186,7 @@ function fromJSONToAPIDTO (json api) (dto:APIDTO){
     APIDTO.name = jsons:getString(api, "name");
     APIDTO.version = jsons:getString(api, "version");
     APIDTO.context = jsons:getString(api, "context");
-    APIDTO.lifeCycleStatus = jsons:getString(api, "lifeCycleState");
+    APIDTO.lifeCycleStatus = jsons:getString(api, "lifeCycleStatus");
     return APIDTO;
 
 }
