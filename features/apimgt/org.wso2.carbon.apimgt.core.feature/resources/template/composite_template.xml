@@ -1,0 +1,23 @@
+package $package;
+import ballerina.net.http;
+
+@http:BasePath{value:"$apiContext"}
+service $serviceName {
+
+#foreach($url in $apiResources)
+## https://wso2.org/jira/browse/APIMANAGER-5710
+	#if(!$StringUtils.isEmpty($url.httpVerb) && (($url.httpVerb == "GET") || ($url.httpVerb == "POST")))
+    @http:$url.httpVerb{}
+    #if(!$StringUtils.isEmpty($url.consumes))@Consumes ($url.consumes)#end
+    #if(!$StringUtils.isEmpty($url.produces))@Produces ($url.produces)#end
+	@http:Path{value:"$url.uriTemplate"}
+    resource $url.templateId (message m) {
+		message response;
+		#foreach($endpoint in $compositeApiEndpoints)
+		http:ClientConnector $endpoint.getEndpointName() = create http:ClientConnector("$endpoint.getEndpointUrl()");
+		#end
+		reply response;
+    }
+#end
+#end
+}
