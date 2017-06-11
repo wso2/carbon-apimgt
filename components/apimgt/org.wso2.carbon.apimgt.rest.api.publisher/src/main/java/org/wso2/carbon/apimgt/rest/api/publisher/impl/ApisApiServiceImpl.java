@@ -51,7 +51,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -725,8 +724,11 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     private List<String> getAPIPermissionsOfLoggedInUser(String loggedInUserId, API api) throws APIManagementException {
         IdentityProvider idp = APIManagerFactory.getInstance().getIdentityProvider();
-        List<String> permissionArrayForUser = new ArrayList<>();
-        Integer highestPermission = 7; //Default permissions for API
+        Set<String> permissionArrayForUser = new HashSet();
+        //Setting default permissions for API
+        permissionArrayForUser.add("READ");
+        permissionArrayForUser.add("UPDATE");
+        permissionArrayForUser.add("DELETE");
         Map<String, Integer> permissionMap = api.getPermissionMap();
 
         if (!permissionMap.isEmpty()) {
@@ -740,38 +742,38 @@ public class ApisApiServiceImpl extends ApisApiService {
                 rolesOfUserWithAPIPermissions = loggedInUserRoles;
             }
             if (rolesOfUserWithAPIPermissions != null) {
-                List<Integer> allPermissionsForUser = new ArrayList<>();
+                //remove all elements from set
+                permissionArrayForUser.clear();
                 for (String role : rolesOfUserWithAPIPermissions) {
                     Integer permission = permissionMap.get(role);
-                    allPermissionsForUser.add(permission);
+                    if (permission == APIMgtConstants.Permission.READ_PERMISSION) {
+                        permissionArrayForUser.add(APIMgtConstants.Permission.READ);
+                    } else if (permission == (APIMgtConstants.Permission.READ_PERMISSION
+                            + APIMgtConstants.Permission.UPDATE_PERMISSION)) {
+                        permissionArrayForUser.add(APIMgtConstants.Permission.READ);
+                        permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
+                    } else if (permission == (APIMgtConstants.Permission.READ_PERMISSION
+                            + APIMgtConstants.Permission.DELETE_PERMISSION)) {
+                        permissionArrayForUser.add(APIMgtConstants.Permission.READ);
+                        permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
+                    } else if (permission
+                            == APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.UPDATE_PERMISSION
+                            + APIMgtConstants.Permission.DELETE_PERMISSION) {
+                        permissionArrayForUser.add(APIMgtConstants.Permission.READ);
+                        permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
+                        permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
+                    }
                 }
-                //Determine maximum of all permissions
-                highestPermission = Collections.max(allPermissionsForUser);
             }
         }
-        if (highestPermission == APIMgtConstants.Permission.READ_PERMISSION) {
-            permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-        } else if (highestPermission == (APIMgtConstants.Permission.READ_PERMISSION
-                + APIMgtConstants.Permission.UPDATE_PERMISSION)) {
-            permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-            permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
-        } else if (highestPermission == (APIMgtConstants.Permission.READ_PERMISSION
-                + APIMgtConstants.Permission.DELETE_PERMISSION)) {
-            permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-            permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
-        } else if (highestPermission
-                == APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.UPDATE_PERMISSION
-                + APIMgtConstants.Permission.DELETE_PERMISSION) {
-            permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-            permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
-            permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
-        }
-
-        return permissionArrayForUser;
+        List<String> finalAggregatedPermissionList = new ArrayList<>();
+        finalAggregatedPermissionList.addAll(permissionArrayForUser);
+        return finalAggregatedPermissionList;
     }
 
     /**
      * This method is used to extract the groupIds or roles from the permissionMap
+     *
      * @param permissionMap - The map containing the group IDs(roles) and their permissions
      * @return - The list of groupIds specified for permissions
      */
@@ -783,6 +785,15 @@ public class ApisApiServiceImpl extends ApisApiService {
         return permissionRoleList;
     }
 
+    /**
+     * This method replaces the groupId field's value of the api permisisons string to the role name before sending to
+     * frontend
+     *
+     * @param permissionString - permissions string containing role ids in the groupId field
+     * @return the permission string replacing the groupId field's value to role name
+     * @throws ParseException - if there is an erro rparsing the permission json
+     * @throws APIManagementException - if there is an error getting the IdentityProvider instance
+     */
     private String replaceGroupIdWithName(String permissionString) throws ParseException, APIManagementException {
         IdentityProvider idp = APIManagerFactory.getInstance().getIdentityProvider();
         List<String> nonExistingRoleList = new ArrayList<>();
@@ -1316,11 +1327,12 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     /**
-     * Set user specific permissions for each API returned during search
+     * This method updates the list of apis searched, based on the permissions of the loggedin user
      *
-     * @param user - the logged in user name
-     * @param originalAPIList - original api list returned by search
-     * @return the updated list of APIs
+     * @param userId - id of the loggedin user
+     * @param originalAPIList - original api list returned from the search operation
+     * @return the updated list of apis based on user permissions
+     * @throws APIManagementException
      */
     private List<API> setAllApiPermissionsForUser(String userId, List<API> originalAPIList)
             throws APIManagementException {

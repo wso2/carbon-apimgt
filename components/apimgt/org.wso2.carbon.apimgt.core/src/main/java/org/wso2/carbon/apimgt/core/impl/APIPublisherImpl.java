@@ -443,6 +443,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         originalAPI.getLifeCycleStatus().equalsIgnoreCase(apiBuilder.getLifeCycleStatus())) {
 
                     if (!StringUtils.isEmpty(apiBuilder.getPermission())) {
+                        apiBuilder.setPermission(replaceGroupNamesWithId(apiBuilder.getPermission()));
                         Map<String, Integer> roleNamePermissionList;
                         roleNamePermissionList = getAPIPermissionArray(apiBuilder.getPermission());
                         apiBuilder.permissionMap(roleNamePermissionList);
@@ -574,6 +575,41 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
 
         return roleNamePermissionList;
+    }
+
+    /**
+     * This method replaces the groupId field's value to the role id instead of the name passed by the user
+     *
+     * @param permissionString - the permission json string which contains role names in groupId field
+     * @return permission string with replaced groupId
+     * @throws ParseException - if there is an error parsing the json string
+     * @throws APIManagementException - if there is an error getting the IdentityProvider instance
+     */
+    private String replaceGroupNamesWithId (String permissionString) throws ParseException, APIManagementException {
+        IdentityProvider idp = APIManagerFactory.getInstance().getIdentityProvider();
+        List<String> invalidRoleList = new ArrayList<>();
+        JSONArray newPermissionArray = new JSONArray();
+        JSONParser jsonParser = new JSONParser();
+        JSONArray permissionArray = (JSONArray) jsonParser.parse(permissionString);
+        for (Object permissionObj : permissionArray) {
+            JSONObject jsonObject = (JSONObject) permissionObj;
+            String groupName = (String) jsonObject.get(APIMgtConstants.Permission.GROUP_ID);
+            String groupId = idp.getRoleId(groupName);
+            if (groupId != null) {
+                JSONObject obj = new JSONObject();
+                obj.put(APIMgtConstants.Permission.GROUP_ID, groupId);
+                obj.put(APIMgtConstants.Permission.PERMISSION, jsonObject.get(APIMgtConstants.Permission.PERMISSION));
+                newPermissionArray.add(obj);
+            } else {
+                invalidRoleList.add(groupName);
+            }
+        }
+        if (!invalidRoleList.isEmpty()) {
+            String message = "The role(s) " + invalidRoleList.toString() + " is/are invalid.";
+            log.error(message);
+            throw new APIManagementException(message, ExceptionCodes.UNSUPPORTED_ROLE);
+        }
+        return newPermissionArray.toJSONString();
     }
 
     /**
@@ -1041,7 +1077,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             if (query != null && !query.isEmpty()) {
                 String user = getUsername();
                 Set<String> roles = APIUtils.getAllRolesOfUser(user);
-                //TODO get the logged in user and user roles from key manager.
                 apiResults = getApiDAO().searchAPIs(roles, user, query, offset, limit);
             } else {
                 apiResults = getApiDAO().getAPIs();
