@@ -54,8 +54,8 @@ public class ApplicationKeyGenerateRequestDTO   {
   @JsonProperty("callbackUrl")
   private String callbackUrl = null;
 
-  @JsonProperty("accessAllowDomains")
-  private List<String> accessAllowDomains = new ArrayList<String>();
+  @JsonProperty("grantTypesToBeSupported")
+  private List<String> grantTypesToBeSupported = new ArrayList<String>();
 
   @JsonProperty("scopes")
   private List<String> scopes = new ArrayList<String>();
@@ -114,27 +114,27 @@ public class ApplicationKeyGenerateRequestDTO   {
     this.callbackUrl = callbackUrl;
   }
 
-  public ApplicationKeyGenerateRequestDTO accessAllowDomains(List<String> accessAllowDomains) {
-    this.accessAllowDomains = accessAllowDomains;
+  public ApplicationKeyGenerateRequestDTO grantTypesToBeSupported(List<String> grantTypesToBeSupported) {
+    this.grantTypesToBeSupported = grantTypesToBeSupported;
     return this;
   }
 
-  public ApplicationKeyGenerateRequestDTO addAccessAllowDomainsItem(String accessAllowDomainsItem) {
-    this.accessAllowDomains.add(accessAllowDomainsItem);
+  public ApplicationKeyGenerateRequestDTO addGrantTypesToBeSupportedItem(String grantTypesToBeSupportedItem) {
+    this.grantTypesToBeSupported.add(grantTypesToBeSupportedItem);
     return this;
   }
 
    /**
-   * Allowed domains for the access token
-   * @return accessAllowDomains
+   * Grant types that should be supported by the application
+   * @return grantTypesToBeSupported
   **/
-  @ApiModelProperty(required = true, value = "Allowed domains for the access token")
-  public List<String> getAccessAllowDomains() {
-    return accessAllowDomains;
+  @ApiModelProperty(required = true, value = "Grant types that should be supported by the application")
+  public List<String> getGrantTypesToBeSupported() {
+    return grantTypesToBeSupported;
   }
 
-  public void setAccessAllowDomains(List<String> accessAllowDomains) {
-    this.accessAllowDomains = accessAllowDomains;
+  public void setGrantTypesToBeSupported(List<String> grantTypesToBeSupported) {
+    this.grantTypesToBeSupported = grantTypesToBeSupported;
   }
 
   public ApplicationKeyGenerateRequestDTO scopes(List<String> scopes) {
@@ -173,13 +173,13 @@ public class ApplicationKeyGenerateRequestDTO   {
     return Objects.equals(this.keyType, applicationKeyGenerateRequest.keyType) &&
         Objects.equals(this.validityTime, applicationKeyGenerateRequest.validityTime) &&
         Objects.equals(this.callbackUrl, applicationKeyGenerateRequest.callbackUrl) &&
-        Objects.equals(this.accessAllowDomains, applicationKeyGenerateRequest.accessAllowDomains) &&
+        Objects.equals(this.grantTypesToBeSupported, applicationKeyGenerateRequest.grantTypesToBeSupported) &&
         Objects.equals(this.scopes, applicationKeyGenerateRequest.scopes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyType, validityTime, callbackUrl, accessAllowDomains, scopes);
+    return Objects.hash(keyType, validityTime, callbackUrl, grantTypesToBeSupported, scopes);
   }
 
   @Override
@@ -190,7 +190,7 @@ public class ApplicationKeyGenerateRequestDTO   {
     sb.append("    keyType: ").append(toIndentedString(keyType)).append("\n");
     sb.append("    validityTime: ").append(toIndentedString(validityTime)).append("\n");
     sb.append("    callbackUrl: ").append(toIndentedString(callbackUrl)).append("\n");
-    sb.append("    accessAllowDomains: ").append(toIndentedString(accessAllowDomains)).append("\n");
+    sb.append("    grantTypesToBeSupported: ").append(toIndentedString(grantTypesToBeSupported)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("}");
     return sb.toString();

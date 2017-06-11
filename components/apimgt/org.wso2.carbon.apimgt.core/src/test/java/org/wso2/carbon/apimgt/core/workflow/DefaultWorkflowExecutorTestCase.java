@@ -20,13 +20,15 @@
 
 package org.wso2.carbon.apimgt.core.workflow;
 
+import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
+import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
+import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
-import org.wso2.carbon.apimgt.core.models.SubscriptionWorkflow;
-import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 
 public class DefaultWorkflowExecutorTestCase {
@@ -35,8 +37,11 @@ public class DefaultWorkflowExecutorTestCase {
     public void testWorkflowResponses() throws WorkflowException {
         
         WorkflowExecutor executor = new DefaultWorkflowExecutor();
-        
-        Workflow workflow = new SubscriptionWorkflow();
+
+        APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
+        WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
+        APIGateway apiGateway = Mockito.mock(APIGateway.class);
+        Workflow workflow = new SubscriptionCreationWorkflow(apiSubscriptionDAO, workflowDAO, apiGateway);
    
         WorkflowResponse respone = executor.execute(workflow);
         

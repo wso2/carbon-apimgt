@@ -922,7 +922,7 @@
         "parameters": [
           {
             "name": "action",
-            "description": "The action to demote or promote the state of the API.\n\nSupported actions are [ **Publish, Deploy as a Prototype, Demote to Created, Demote to Prototyped, Block, Deprecate, Re-Publish, Retire **]\n",
+            "description": "The action to demote or promote the state of the API.\n\nSupported actions are [ **Publish, Deploy as a Prototype, Demote to Created, Demote to Prototyped, Move to Maintenance, Deprecate, Re-Publish, Retire **]\n",
             "in": "query",
             "type": "string",
             "required": true,
@@ -931,7 +931,7 @@
               "Deploy as a Prototype",
               "Demote to Created",
               "Demote to Prototyped",
-              "Block",
+              "Move to Maintenance",
               "Deprecate",
               "Re-Publish",
               "Retire"

@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
@@ -24,7 +25,6 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ApplicationStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.SubscriptionStatus;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
-import org.wso2.carbon.apimgt.core.workflow.HttpWorkflowResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -34,7 +34,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.SubscriptionMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.store.mappings.WorkflowMappintUtil;
+import org.wso2.carbon.apimgt.rest.api.store.mappings.MiscMappingUtil;
 import org.wso2.msf4j.Request;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
@@ -60,7 +60,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      * @throws NotFoundException If failed to get the subscription
      */
     @Override
-    public Response subscriptionsGet(String apiId, String applicationId, Integer offset, Integer limit,
+    public Response subscriptionsGet(String apiId, String applicationId, String apiType, Integer offset, Integer limit,
                                      String accept, String ifNoneMatch, Request request) throws NotFoundException {
 
         List<Subscription> subscribedApiList = null;
@@ -78,7 +78,17 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             } else if (!StringUtils.isEmpty(applicationId)) {
                 Application application = apiStore.getApplicationByUuid(applicationId);
                 if (application != null) {
-                    subscribedApiList = apiStore.getAPISubscriptionsByApplication(application);
+                    if (!StringUtils.isEmpty(apiType)) {
+                        ApiType apiTypeEnum = ApiType.fromString(apiType);
+
+                        if (apiTypeEnum == null) {
+                            throw new APIManagementException("API Type specified is invalid",
+                                    ExceptionCodes.API_TYPE_INVALID);
+                        }
+                        subscribedApiList = apiStore.getAPISubscriptionsByApplication(application, apiTypeEnum);
+                    } else {
+                        subscribedApiList = apiStore.getAPISubscriptionsByApplication(application);
+                    }
                     subscriptionListDTO = SubscriptionMappingUtil.fromSubscriptionListToDTO(subscribedApiList, limit,
                             offset);
                 } else {
@@ -155,8 +165,8 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                 //if workflow is in pending state or if the executor sends any httpworklfowresponse (workflow state can 
                 //be in either pending or approved state) send back the workflow response 
                 if (SubscriptionStatus.ON_HOLD == subscription.getStatus()) {
-                    WorkflowResponseDTO workflowResponse = WorkflowMappintUtil
-                            .fromWorkflowResponsetoDTO(addSubResponse.getWorkflowResponse());
+                    WorkflowResponseDTO workflowResponse = MiscMappingUtil
+                            .fromWorkflowResponseToDTO(addSubResponse.getWorkflowResponse());
                     return Response.status(Response.Status.ACCEPTED).header(RestApiConstants.LOCATION_HEADER, location)
                             .entity(workflowResponse).build();
                 }               

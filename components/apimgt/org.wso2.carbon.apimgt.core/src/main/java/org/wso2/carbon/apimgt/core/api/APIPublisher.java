@@ -35,6 +35,7 @@ import org.wso2.carbon.lcm.core.impl.LifecycleState;
 import org.wso2.carbon.lcm.sql.beans.LifecycleHistoryBean;
 
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -363,13 +364,40 @@ public interface APIPublisher extends APIManager {
     String addApiFromDefinition(InputStream apiDefinition) throws APIManagementException;
 
     /**
-     * Create api from it's definition located in url
+     * Create api using HttpUrlConnection
      *
-     * @param swaggerResourceUrl url of the swagger resource
+     * @param httpURLConnection httpUrlConnection constructed by a url
      * @return details of the added API.
      * @throws APIManagementException If failed to add the API.
      */
-    String addApiFromDefinition(String swaggerResourceUrl) throws APIManagementException;
+    String addApiFromDefinition(HttpURLConnection httpURLConnection) throws APIManagementException;
+
+    /**
+     * This method updates gateway config in the database
+     *
+     * @param apiId        id of the String
+     * @param configString text to be saved in the registry
+     * @throws APIManagementException If failed to update gateway config.
+     */
+    void updateApiGatewayConfig(String apiId, String configString) throws APIManagementException;
+
+    /**
+     * This method retrieve gateway config in the database
+     *
+     * @param apiId id of the String
+     * @return API gateway config as a string
+     * @throws APIManagementException If failed to get gateway config of the API.
+     */
+    String getApiGatewayConfig(String apiId) throws APIManagementException;
+
+    /**
+     * This method updates Swagger 2.0 resource in the DB
+     *
+     * @param apiId    id of the String
+     * @param jsonText json text to be saved in the registry
+     * @throws APIManagementException If failed to save swagger definition.
+     */
+    void saveSwagger20Definition(String apiId, String jsonText) throws APIManagementException;
 
     /**
      * Get list of policies of an particular tier level.

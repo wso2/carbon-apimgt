@@ -19,10 +19,10 @@ import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.APIMConfigurationService;
-import org.wso2.carbon.apimgt.core.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.api.APIStore;
+import org.wso2.carbon.apimgt.core.configuration.APIMConfigurationService;
+import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
@@ -200,6 +200,16 @@ public class RestApiUtil {
      */
     public static APIStore getConsumer(String subscriberName) throws APIManagementException {
         return APIManagerFactory.getInstance().getAPIConsumer(subscriberName);
+    }
+
+    /**
+     * Returns an APIStore for anonymous user.
+     *
+     * @return  {@code APIStore}
+     * @throws APIManagementException if failed to get the consumer object.
+     */
+    public static APIStore getConsumer() throws APIManagementException {
+        return APIManagerFactory.getInstance().getAPIConsumer();
     }
 
     /**

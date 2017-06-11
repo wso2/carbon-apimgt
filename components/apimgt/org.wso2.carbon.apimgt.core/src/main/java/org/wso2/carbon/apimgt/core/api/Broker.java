@@ -33,6 +33,7 @@ public interface Broker {
      *
      * @return TopicConnection  new Topic connection to broker
      * @throws JMSException if a JMS related error occurred
+     * @throws BrokerException if broker related error occurred
      */
     TopicConnection getTopicConnection() throws JMSException, BrokerException;
 }

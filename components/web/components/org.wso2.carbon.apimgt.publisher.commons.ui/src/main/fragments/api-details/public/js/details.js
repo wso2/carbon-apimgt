@@ -34,6 +34,7 @@ function overviewTabHandler(event) {
     api_client.get(api_id).then(
         function (response) {
             var context = response.obj;
+            var api_data = JSON.parse(response.data);
             if (context.endpointConfig) {
                 var endpointConfig = $.parseJSON(context.endpointConfig);
                 context.productionEndpoint = endpointConfig.production_endpoints.url;
@@ -142,13 +143,21 @@ function lifecycleTabHandler(event) {
                     );
                 }
 
+                //Disable edit buttons based on logged in user role permissions
+                var userPermissions = api_data.userPermissionsForApi;
+                if(!userPermissions.includes("UPDATE")) {
+                    $('#update-tiers-button').addClass('not-active');
+                    $('#update-labels-button').addClass('not-active');
+                    $("input.lc-state-btn").addClass('not-active');
+                }
+
                 // Handle svg object
                 var svg_object = document.getElementById("lifecycle-svg");
                 var state_array = {
                     'Created': 'Prototyped,Published',
-                    'Published': 'Published,Created,Blocked,Deprecated,Prototyped',
+                    'Published': 'Published,Created,Maintenance,Deprecated,Prototyped',
                     'Prototyped': 'Published,Created,Prototyped',
-                    'Blocked': 'Published,Deprecated',
+                    'Maintenance': 'Published,Deprecated',
                     'Deprecated': 'Retired,',
                     'Retired': ','
                 };
@@ -283,6 +292,62 @@ function subscriptionsTabHandler(event) {
     };
     UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-subscriptions", {}, "subscriptions-tab-content", mode, callbacks);
 
+}
+
+/**
+ * Event handler for API access control detail tab onclick event;Get the current API access control tab HTML via UUFClient and display.
+ * @param event {object} Click event of the access control tab
+ */
+function accessControlTabHandler(event) {
+    var api_client = event.data.api_client;
+    var api_id = event.data.api_id;
+    api_client.get(api_id).then(
+        function (response) {
+            var api_data = JSON.parse(response.data);
+            var permission_data = api_data.permission;
+            var mode = "OVERWRITE"; // Available modes [OVERWRITE,APPEND, PREPEND]
+            var callbacks = {
+                onSuccess: function (data) {
+                    if (!permission_data || permission_data === "[]"){
+                        $('#no-roles-msg').removeClass('hide');
+                        $('#permissionTable').hide();
+                    }
+                },
+                onFailure: function (data) {
+                    console.debug("Failed");
+                }
+            };
+            var permissions = JSON.parse(permission_data);
+            //Processing the permission data to be sent to frontend
+            var permissionArray = [];
+            for(var role in permissions) {
+                var groupPermission = {};
+                var groupId = permissions[role].groupId;
+                groupPermission["groupId"] = groupId;
+                groupPermission["isRead"] = false;
+                groupPermission["isUpdate"] = false;
+                groupPermission["isDelete"] = false;
+                var permissionList = permissions[role].permission;
+                if(permissionList.includes("READ")) {
+                    groupPermission["isRead"] = true;
+                }
+                if (permissionList.includes("UPDATE")){
+                    groupPermission["isUpdate"] = true;
+                }
+                if (permissionList.includes("DELETE")) {
+                    groupPermission["isDelete"] = true;
+                }
+                permissionArray.push(groupPermission);
+            }
+
+            var data = {
+                permission: permissionArray
+            };
+
+            UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-access-control", data, "api-access-control-tab-content", mode, callbacks);
+            $(document).on('click', "#update-api-permissions", {api_client: api_client, api_id: api_id}, updatePermissionsHandler);
+        }
+    );
 }
 
 /**
@@ -595,6 +660,78 @@ function updateLabelsHandler(event) {
 }
 
 /**
+ * This function is called to get the role permissions of an API as entered by the user
+ */
+function createRolePermissionJsonString() {
+    var permissionJson = [];
+        $("#permissionTable tr.permissions").each(function(index) {
+            var jsonData = {};
+            var permissionArrayPerRole = [];
+            var obj = $(this);
+            var roleName = obj.find('label[class="permission-options"]').text().trim();
+            jsonData["groupId"] = roleName;
+            obj.find(".permissionCheck:checked").each(function(){
+                permissionArrayPerRole.push($(this).val());
+            });
+            jsonData["permission"] = permissionArrayPerRole;
+            permissionJson.push(jsonData);
+        });
+        //to remove the empty role getting added due to the hidden div
+        permissionJson.pop();
+        return JSON.stringify(permissionJson);
+}
+
+/**
+ * Do the API permissions update when user clicks on the update permissions button.
+ * @param event {object} click event of the update permissions button
+ */
+function updatePermissionsHandler(event) {
+    event.preventDefault();
+    var api_client = event.data.api_client;
+    var api_id = event.data.api_id;
+    var data = {
+        api_client: api_client,
+        api_id: api_id
+    };
+    api_client.get(api_id).then(
+        function (response) {
+            var api_data = JSON.parse(response.data);
+            api_data.permission = createRolePermissionJsonString();
+            var promised_update = this.api_client.update(api_data);
+            promised_update.then(
+                function () {
+                    var message = "Updated permissions successfully.";
+                    noty({
+                        text: message,
+                        type: 'success',
+                        dismissQueue: true,
+                        progressBar: true,
+                        timeout: 5000,
+                        layout: 'topCenter',
+                        theme: 'relax',
+                        maxVisible: 10,
+                    });
+                }
+            );
+            promised_update.catch(
+                function (error_response) {
+                    var message = "Error[" + error_response.status + "]: " + error_response.data;
+                    noty({
+                        text: message,
+                        type: 'error',
+                        dismissQueue: true,
+                        progressBar: true,
+                        timeout: 5000,
+                        layout: 'topCenter',
+                        theme: 'relax',
+                        maxVisible: 10,
+                    });
+                }
+            );
+        }.bind(data));
+}
+
+/**
  * Do the workflow cleanup for pending task
  * @param event {object} click event of the wf clean up button
  */
@@ -666,13 +803,14 @@ function resourcesTabHandler(event) {
     api_client.get(api_id).then(
         function (response) {
             api_context = response.obj.context;
-
+            var api_data = JSON.parse(response.data);
             api_client.getSwagger(api_id).then(
                 function (response) {
                     var api = response.obj;
                     var data = {
                         name: api.info.title,
                         id: api_id,
+                        isStandardAPI: true,
                         version: api.info.version,
                         context: api_context,
                         verbs: [ 'get' , 'post' , 'put' , 'delete', 'patch', 'head']
@@ -687,6 +825,12 @@ function resourcesTabHandler(event) {
                                     designer.initControllersCall = "";
                                     designer.load_api_document(api_doc_local);
                                 });
+                            //Disable edit buttons based on logged in user role permissions
+                            var userPermissions = api_data.userPermissionsForApi;
+                            if(!userPermissions.includes("UPDATE")) {
+                                $('#add_resource').addClass('not-active');
+                                $('#save_resources').addClass('not-active');
+                            }
                         }, onFailure: function (data) {
                         }
                     };
@@ -701,18 +845,28 @@ function resourcesTabHandler(event) {
 function documentTabHandler(event) {
     var api_client = event.data.api_client;
     var api_id = event.data.api_id;
-    var callbacks = {
-            onSuccess: function (data) {
-            api_client.getDocuments(api_id,getDocsCallback);
-            if(!hasValidScopes("/apis/{apiId}/documents", "post")) {
-              $('#add-new-doc').addClass('not-active');
+    api_client.get(api_id).then(
+            function (response) {
+               var api_data = JSON.parse(response.data);
+               var callbacks = {
+                   onSuccess: function (data) {
+                       api_client.getDocuments(api_id,getDocsCallback);
+                       if(!hasValidScopes("/apis/{apiId}/documents", "post")) {
+                         $('#add-new-doc').addClass('not-active');
+                       }
+                       //Disable edit buttons based on logged in user role permissions
+                       var userPermissions = api_data.userPermissionsForApi;
+                       if(!userPermissions.includes("UPDATE")) {
+                           $('#add-new-doc').addClass('not-active');
+                       }
+                   }, onFailure: function (data) {
+                }
+               };
+                var mode = "OVERWRITE";
+                var data = {};
+                UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-documents", data, "api-tab-doc-content", mode, callbacks);
             }
-            }, onFailure: function (data) {
-           }
-          };
-     var mode = "OVERWRITE";
-     var data = {};
-     UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-documents", data, "api-tab-doc-content", mode, callbacks);
+        ).catch(apiGetErrorHandler);
     }
     
 
@@ -805,6 +959,23 @@ function documentTabHandler(event) {
     	return null;
     }
 
+function disableTabsOnPermissions(client, apiId) {
+    var api_client = client;
+    var api_id = apiId;
+
+    api_client.get(api_id).then(
+        function (response) {
+            var api_data = JSON.parse(response.data);
+            var userPermissions = api_data.userPermissionsForApi;
+            if(!userPermissions.includes("UPDATE")) {
+                $('#tab-6 > a').addClass('not-active');
+                $('#tab-7 > a').addClass('not-active');
+                $('#tab-8 > a').addClass('not-active');
+                $('#tab-9 > a').addClass('not-active');
+            }
+        }
+    ).catch(apiGetErrorHandler);
+}
 
 /**
  * Execute once the page load is done.
@@ -824,6 +995,7 @@ $(function () {
     $('#tab-3').bind('show.bs.tab', {api_client: client, api_id: api_id}, endpointsTabHandler);
     $('#tab-4').bind('show.bs.tab', {api_client: client, api_id: api_id}, resourcesTabHandler);
     $('#tab-5').bind('show.bs.tab', {api_client: client, api_id: api_id}, documentTabHandler);
+    $('#tab-6').bind('show.bs.tab', {api_client: client, api_id: api_id}, accessControlTabHandler);
     $('#tab-9').bind('show.bs.tab', {api_client: client, api_id: api_id}, subscriptionsTabHandler);
     $('#tab-10').bind('show.bs.tab', {api_client: client, api_id: api_id}, apiConsoleTabHandler);
     $(document).on('click', ".lc-state-btn", {api_client: client, api_id: api_id}, updateLifecycleHandler);
@@ -831,4 +1003,5 @@ $(function () {
     $(document).on('click', "#checkItem", {api_client: client, api_id: api_id}, updateLifecycleCheckListHandler);
     $(document).on('click', "#update-labels-button", {api_client: client, api_id: api_id}, updateLabelsHandler);
     loadFromHash();
+    disableTabsOnPermissions(client, api_id);
 });

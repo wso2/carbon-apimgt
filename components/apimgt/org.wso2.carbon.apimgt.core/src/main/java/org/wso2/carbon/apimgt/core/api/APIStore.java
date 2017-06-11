@@ -20,18 +20,24 @@
 
 package org.wso2.carbon.apimgt.core.api;
 
+import org.wso2.carbon.apimgt.core.dao.ApiType;
+import org.wso2.carbon.apimgt.core.exception.APICommentException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.core.exception.APIRatingException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.models.ApplicationCreationResponse;
 import org.wso2.carbon.apimgt.core.models.Comment;
+import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
 import org.wso2.carbon.apimgt.core.models.Tag;
+import org.wso2.carbon.apimgt.core.models.User;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
+import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationResponse;
 
 import java.io.InputStream;
 import java.util.List;
@@ -42,6 +48,15 @@ import java.util.Map;
  *
  */
 public interface APIStore extends APIManager {
+
+    /**
+     * Returns details of an API
+     *
+     * @param id ID of the API
+     * @return An CompositeAPI object for the given id or null
+     * @throws APIManagementException if failed get CompositeAPI for given id
+     */
+    CompositeAPI getCompositeAPIbyId(String id) throws APIManagementException;
 
     /**
      * Returns a paginated list of all APIs in given Status list. If a given API has multiple APIs,
@@ -65,6 +80,64 @@ public interface APIStore extends APIManager {
      * @throws APIManagementException   If failed to search apis.
      */
     List<API> searchAPIs(String query, int offset, int limit) throws APIManagementException;
+
+    /**
+     * Returns a paginated list of all Composite APIs which match the given search criteria.
+     *
+     * @param query searchType
+     * @param limit limit
+     * @param offset offset
+     * @return {@code List<CompositeAPI>}
+     * @throws APIManagementException   If failed to search apis.
+     */
+    List<CompositeAPI> searchCompositeAPIs(String query, int offset, int limit) throws APIManagementException;
+
+
+    /**
+     * Returns Swagger definition of a Composite API
+     *
+     * @param id ID of the API
+     * @return The CompositeAPI Swagger definition
+     * @throws APIManagementException if failed get CompositeAPI implementation for given id
+     */
+    String getCompositeApiDefinition(String id) throws APIManagementException;
+
+    /**
+     * Checks the existence of a Composite API with {@code apiId}.
+     *
+     * @param apiId API id of the Composite API
+     * @return {@code true} if Composite API with {@code apiId} exists
+     * {@code false} otherwise.
+     * @throws APIManagementException if failed to retrieve summary of Composite API with {@code apiId}
+     */
+    boolean isCompositeAPIExist(String apiId) throws APIManagementException;
+
+    /**
+     * Update Swagger definition of a Composite API
+     *
+     * @param id ID of the API
+     * @param apiDefinition  CompositeAPI Swagger definition
+     * @throws APIManagementException if failed get CompositeAPI implementation for given id
+     */
+    void updateCompositeApiDefinition(String id, String apiDefinition) throws APIManagementException;
+
+    /**
+     * Returns Ballerina implementation of a Composite API
+     *
+     * @param id ID of the API
+     * @return File of the CompositeAPI implementation
+     * @throws APIManagementException if failed get CompositeAPI implementation for given id
+     */
+    InputStream getCompositeApiImplementation(String id) throws APIManagementException;
+
+    /**
+     * Update Ballerina implementation of a Composite API
+     *
+     * @param id ID of the API
+     * @param implementation  CompositeAPI Ballerina implementation file
+     * @throws APIManagementException if failed get CompositeAPI implementation for given id
+     */
+    void updateCompositeApiImplementation(String id, InputStream implementation) throws APIManagementException;
 
     /**
      * Function to remove an Application from the API Store
@@ -119,21 +192,20 @@ public interface APIStore extends APIManager {
     /**
      * Generates oAuth keys for an application.
      *
-     * @param userId          Subsriber name.
-     * @param applicationName name of the Application.
-     * @param applicationId   id of the Application.
+     * @param applicationName Name of the Application.
+     * @param applicationId   Id of the Application.
      * @param tokenType       Token type (PRODUCTION | SANDBOX)
-     * @param callbackUrl     callback URL
-     * @param allowedDomains  allowedDomains for token.
-     * @param validityTime    validity time period.
+     * @param callbackUrl     Callback URL
+     * @param grantTypes      List of grant types to be supported by the application
+     * @param validityTime    Validity time period.
      * @param groupingId      APIM application id.
-     * @param tokenScope      Scopes for the requested tokens.
+     * @param tokenScopes      Scopes for the requested tokens.
      * @return                {@code Map<String, Object>}  Map of generated keys.
      * @throws APIManagementException if failed to applications for given subscriber
      */
-    Map<String, Object> generateApplicationKeys(String userId, String applicationName, String applicationId,
-            String tokenType, String callbackUrl, String[] allowedDomains, String validityTime,
-            String tokenScope, String groupingId) throws APIManagementException;
+    Map<String, Object> generateApplicationKeys(String applicationName, String applicationId,
+            String tokenType, String callbackUrl, List<String> grantTypes, String validityTime,
+            String tokenScopes, String groupingId) throws APIManagementException;
 
     /**
      * Retrieve an application given the uuid.
@@ -152,6 +224,18 @@ public interface APIStore extends APIManager {
      * @throws APIManagementException If failed to get the subscriptions for the application.
      */
     List<Subscription> getAPISubscriptionsByApplication(Application application) throws APIManagementException;
+
+
+    /**
+     * Retrieve list of subscriptions given the application and the API Type.
+     *
+     * @param application   Application Object.
+     * @param apiType   API Type to filter subscriptions
+     * @return List of subscriptions objects of the given application made for the specified API Type.
+     * @throws APIManagementException If failed to get the subscriptions for the application.
+     */
+    List<Subscription> getAPISubscriptionsByApplication(Application application, ApiType apiType)
+                                                                                throws APIManagementException;
 
     /**
      * Add an api subscription.
@@ -210,81 +294,127 @@ public interface APIStore extends APIManager {
     List<Label> getLabelInfo(List<String> labels, String username) throws LabelException;
 
     /**
-     * Retrieve Individual Comment based on Comment ID
-     *
-     * @param commentId UUID od the comment
-     * @param apiId UUID of the API
-     * @return Comment Object.
-     * @throws APIManagementException if failed to get labels
-     */
-    Comment getCommentByUUID(String commentId, String apiId) throws APIManagementException;
-
-    /**
-     * Retrieve User Rating based on the API ID and User Name
-     *
-     * @param apiId UUID of the API
-     * @param username Name of the logged in user
-     * @return Average rating
-     * @throws APIManagementException if failed to get labels
-     */
-    double getUserRating(String apiId, String username) throws APIManagementException;
-
-    /**
-     * Retrieve Average Rating based on the API ID
-     *
-     * @param apiId UUID of the API
-     * @return Average Rating value
-     * @throws APIManagementException if failed to get labels
-     */
-    double getAvgRating(String apiId) throws APIManagementException;
-
-    /**
      * Retrieve List of all user Ratings based on API ID
      *
      * @param apiId UUID of the API
      * @return List of Rating Objects
      * @throws APIManagementException if failed to get labels
      */
-    List<Rating> getUserRatingDTOList(String apiId) throws APIManagementException;
+    List<Rating> getRatingsListForApi(String apiId) throws APIManagementException;
 
     /**
      * Add comment for an API
      *
      * @param comment the comment text
-     * @param apiId UUID of the API
+     * @param apiId   UUID of the API
      * @return String UUID of the created comment
-     * @throws APIManagementException if failed to add a comment
+     * @throws APICommentException if failed to add a comment
+     * @throws APIMgtResourceNotFoundException if api not found
      */
-    String addComment(Comment comment, String apiId) throws APIManagementException;
+    String addComment(Comment comment, String apiId) throws APICommentException, APIMgtResourceNotFoundException;
 
     /**
      * Delete a comment from an API given the commentId and apiId
      *
      * @param commentId UUID of the comment to be deleted
-     * @param apiId UUID of the api
-     * @throws APIManagementException if failed to delete a comment
+     * @param apiId     UUID of the api
+     * @param username username of the consumer
+     * @throws APICommentException if failed to delete a comment
+     * @throws  APIMgtResourceNotFoundException if api or comment not found
      */
-    void deleteComment(String commentId, String apiId) throws APIManagementException;
+    void deleteComment(String commentId, String apiId, String username) throws APICommentException,
+            APIMgtResourceNotFoundException;
 
     /**
      * Update a comment
      *
-     * @param comment new Comment object
+     * @param comment   new Comment object
      * @param commentId the id of the comment which needs to be updated
-     * @param apiId UUID of the api the comment belongs to
-     * @throws APIManagementException if failed to update a comment
+     * @param apiId     UUID of the api the comment belongs to
+     * @param username  username of the consumer
+     * @throws APICommentException if failed to update a comment
+     * @throws APIMgtResourceNotFoundException if api or comment not found
      */
-    void updateComment(Comment comment, String commentId, String apiId) throws APIManagementException;
+    void updateComment(Comment comment, String commentId, String apiId, String username) throws APICommentException,
+            APIMgtResourceNotFoundException;
 
     /**
      * Retrieve list of comments for a given apiId
      *
      * @param apiId UUID of the api
-     * @throws APIManagementException if failed to retrieve all comments for an api
      * @return a list of comments for the api
+     * @throws APICommentException if failed to retrieve all comments for an api
+     * @throws APIMgtResourceNotFoundException if api not found
      */
-    List<Comment> getCommentsForApi(String apiId) throws APIManagementException;
+    List<Comment> getCommentsForApi(String apiId) throws APICommentException, APIMgtResourceNotFoundException;
 
+    /**
+     * Retrieve Individual Comment based on Comment ID
+     *
+     * @param commentId UUID od the comment
+     * @param apiId     UUID of the API
+     * @return Comment Object.
+     * @throws APICommentException if failed to retrieve comment from data layer
+     * @throws APIMgtResourceNotFoundException if api or comment was not found
+     */
+    Comment getCommentByUUID(String commentId, String apiId) throws APICommentException,
+            APIMgtResourceNotFoundException;
+
+    /**
+     * Creates a new rating
+     *
+     * @param apiId  UUID of the api
+     * @param rating the rating object
+     * @return UUID of the newly created or updated rating
+     * @throws APIRatingException if failed to add rating
+     * @throws  APIMgtResourceNotFoundException if api not found
+     */
+    String addRating(String apiId, Rating rating) throws APIRatingException, APIMgtResourceNotFoundException;
+
+    /**
+     * Retrieves a rating given its UUID
+     *
+     * @param apiId    UUID of the api
+     * @param ratingId UUID of the rating
+     * @return rating object
+     * @throws APIRatingException if failed to get rating
+     * @throws  APIMgtResourceNotFoundException if api or rating not found
+     */
+    Rating getRatingByUUID(String apiId, String ratingId) throws APIRatingException, APIMgtResourceNotFoundException;
+
+    /**
+     * Retrieve Average Rating based of an api, up to one decimal point.
+     *
+     * @param apiId UUID of the API
+     * @return Average Rating value
+     * @throws APIRatingException if failed to get average rating
+     * @throws  APIMgtResourceNotFoundException if api not found
+     */
+    double getAvgRating(String apiId) throws APIRatingException, APIMgtResourceNotFoundException;
+
+    /**
+     * Get user rating for an api
+     *
+     * @param apiId  UUID of the api
+     * @param userId unique id of the user
+     * @return Rating of the user
+     * @throws APIRatingException if failed to retrieve user rating for the given api
+     * @throws APIMgtResourceNotFoundException if api or rating not found
+     */
+    Rating getRatingForApiFromUser(String apiId, String userId) throws APIRatingException,
+            APIMgtResourceNotFoundException;
+
+    /**
+     * Updates an already existing api
+     *
+     * @param apiId             UUID of the api
+     * @param ratingId          UUID of the rating
+     * @param ratingFromPayload Rating object created from the request payload
+     * @throws APIRatingException if failed to update a rating
+     * @throws  APIMgtResourceNotFoundException if api or rating not found
+     */
+    void updateRating(String apiId, String ratingId, Rating ratingFromPayload) throws APIRatingException,
+            APIMgtResourceNotFoundException;
     /**
      * Adds a new Composite API
      *
@@ -292,7 +422,7 @@ public interface APIStore extends APIManager {
      * @return Details of the added Composite API.
      * @throws APIManagementException if failed to add Composite API
      */
-    String addCompositeApi(API.APIBuilder apiBuilder) throws APIManagementException;
+    String addCompositeApi(CompositeAPI.Builder apiBuilder) throws APIManagementException;
 
     /**
      * Updates design and implementation of an existing Composite API.
@@ -300,7 +430,7 @@ public interface APIStore extends APIManager {
      * @param apiBuilder {@code org.wso2.carbon.apimgt.core.models.API.APIBuilder}
      * @throws APIManagementException if failed to update Composite API
      */
-    void updateCompositeApi(API.APIBuilder apiBuilder) throws APIManagementException;
+    void updateCompositeApi(CompositeAPI.Builder apiBuilder) throws APIManagementException;
 
     /**
      * Delete an existing Composite API.
@@ -338,4 +468,12 @@ public interface APIStore extends APIManager {
      * @throws APIManagementException If failed to add the Composite API.
      */
     String addCompositeApiFromDefinition(String swaggerResourceUrl) throws APIManagementException;
+
+    /**
+     * Store user self signup
+     *
+     * @param user User information object
+     * @throws APIManagementException if error occurred while registering the new user
+     */
+    void selfSignUp(User user) throws APIManagementException;
 }
