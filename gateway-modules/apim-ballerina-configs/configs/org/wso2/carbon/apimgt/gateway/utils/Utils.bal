@@ -192,7 +192,15 @@ function fromJSONToAPIDTO (json api) (dto:APIDTO){
 }
 
 function getSystemProperty (string prop) (string) {
-    string pathValue = system:getEnv(prop);
+    string pathValue = "";
+    try{
+        pathValue = system:getEnv(prop);
+        if(pathValue != "") {
+            return pathValue;
+        }
+    } catch (errors:Error e) {
+        return "";
+    }
     return pathValue;
 }
 

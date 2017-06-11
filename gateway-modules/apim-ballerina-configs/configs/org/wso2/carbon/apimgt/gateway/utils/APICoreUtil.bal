@@ -102,10 +102,11 @@ function getAPIServiceConfig (string apiId) (int,string) {
     return status,apiConfig;
 }
 
-function getAPICoreURL () (string){
+function getAPICoreURL () (string) {
     string apiCoreURL;
-    if(system:getEnv(Constants:API_CORE_URL) != "") {
-        apiCoreURL = system:getEnv(Constants:API_CORE_URL);
+
+    if(getSystemProperty(Constants:API_CORE_URL) != "") {
+        apiCoreURL = getSystemProperty(Constants:API_CORE_URL);
     } else {
         apiCoreURL = "https://localhost:9292";
     }
