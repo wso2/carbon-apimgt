@@ -102,7 +102,7 @@ public class APIMgtConstants {
     public static final String URL_PATTERN_COLUMN = "URL_PATTERN";
 
     public static final String SANDBOX_ENDPOINT = "sandbox";
-
+    public static final String GATEWAY_CONFIG = "GATEWAY_CONFIG";
     /**
      * Application statuses.
      */

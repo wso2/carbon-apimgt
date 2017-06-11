@@ -32,10 +32,10 @@ public class RegistrationSummaryDTO   {
     return this;
   }
 
-  /**
+   /**
    * Get keyManagerInfo
    * @return keyManagerInfo
-   **/
+  **/
   @ApiModelProperty(value = "")
   public KeyManagerInfoDTO getKeyManagerInfo() {
     return keyManagerInfo;
@@ -50,10 +50,10 @@ public class RegistrationSummaryDTO   {
     return this;
   }
 
-  /**
+   /**
    * Get jwTInfo
    * @return jwTInfo
-   **/
+  **/
   @ApiModelProperty(value = "")
   public JWTInfoDTO getJwTInfo() {
     return jwTInfo;
@@ -68,10 +68,10 @@ public class RegistrationSummaryDTO   {
     return this;
   }
 
-  /**
+   /**
    * Get analyticsInfo
    * @return analyticsInfo
-   **/
+  **/
   @ApiModelProperty(value = "")
   public AnalyticsInfoDTO getAnalyticsInfo() {
     return analyticsInfo;
@@ -86,10 +86,10 @@ public class RegistrationSummaryDTO   {
     return this;
   }
 
-  /**
+   /**
    * Get throttlingInfo
    * @return throttlingInfo
-   **/
+  **/
   @ApiModelProperty(value = "")
   public ThrottlingInfoDTO getThrottlingInfo() {
     return throttlingInfo;
@@ -110,9 +110,9 @@ public class RegistrationSummaryDTO   {
     }
     RegistrationSummaryDTO registrationSummary = (RegistrationSummaryDTO) o;
     return Objects.equals(this.keyManagerInfo, registrationSummary.keyManagerInfo) &&
-            Objects.equals(this.jwTInfo, registrationSummary.jwTInfo) &&
-            Objects.equals(this.analyticsInfo, registrationSummary.analyticsInfo) &&
-            Objects.equals(this.throttlingInfo, registrationSummary.throttlingInfo);
+        Objects.equals(this.jwTInfo, registrationSummary.jwTInfo) &&
+        Objects.equals(this.analyticsInfo, registrationSummary.analyticsInfo) &&
+        Objects.equals(this.throttlingInfo, registrationSummary.throttlingInfo);
   }
 
   @Override
@@ -124,7 +124,7 @@ public class RegistrationSummaryDTO   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class RegistrationSummaryDTO {\n");
-
+    
     sb.append("    keyManagerInfo: ").append(toIndentedString(keyManagerInfo)).append("\n");
     sb.append("    jwTInfo: ").append(toIndentedString(jwTInfo)).append("\n");
     sb.append("    analyticsInfo: ").append(toIndentedString(analyticsInfo)).append("\n");

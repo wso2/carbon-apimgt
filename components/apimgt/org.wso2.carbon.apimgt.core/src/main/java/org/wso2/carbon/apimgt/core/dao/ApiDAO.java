@@ -652,4 +652,18 @@ public interface ApiDAO {
      */
     List<Rating> getRatingsListForApi(String apiId) throws APIMgtDAOException;
 
+    /**
+     * Retrieve list of uuids of global endpoints
+     * @return list of global endpoint uuid
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    List<String> getUUIDsOfGlobalEndpoints() throws APIMgtDAOException;
+
+    /**
+     * Retrieve Gateway Configuration of Endpoint
+     * @param endpointId uuid of Endpoint
+     * @return Gateway Configuration of Endpoint
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    String getEndpointConfig(String endpointId) throws APIMgtDAOException;
 }
