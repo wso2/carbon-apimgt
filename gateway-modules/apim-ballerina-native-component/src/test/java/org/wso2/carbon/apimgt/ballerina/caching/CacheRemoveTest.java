@@ -18,9 +18,9 @@
 
 package org.wso2.carbon.apimgt.ballerina.caching;
 
-import org.ballerinalang.model.BLangProgram;
 import org.ballerinalang.model.values.BString;
 import org.ballerinalang.model.values.BValue;
+import org.ballerinalang.util.codegen.ProgramFile;
 import org.ballerinalang.util.program.BLangFunctions;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -33,7 +33,7 @@ import org.wso2.carbon.apimgt.ballerina.caching.util.BTestUtils;
  *  @since 0.10-SNAPSHOT
  */
 public class CacheRemoveTest {
-    private BLangProgram bLangProgram;
+    private ProgramFile bLangProgram;
     private static final String s1 = "WSO2 Inc.";
 
     @BeforeClass
@@ -48,7 +48,7 @@ public class CacheRemoveTest {
                 new BString("cacheKey"),
                 new BString("cacheValue")};
         //Test ballerina cache create, put and get
-        BValue[] returns = BLangFunctions.invoke(bLangProgram, "testRemoveCache", args);
+        BValue[] returns = BLangFunctions.invokeNew(bLangProgram, "testRemoveCache", args);
         //Assert if cache entry is BValue
         Assert.assertTrue(returns[0] instanceof BValue);
     }

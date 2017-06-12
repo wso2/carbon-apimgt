@@ -3,7 +3,6 @@ package org.wso2.carbon.apimgt.gateway;
 import ballerina.net.http;
 import ballerina.lang.messages;
 import ballerina.lang.system;
-import ballerina.lang.jsons;
 import ballerina.lang.errors;
 
 import org.wso2.carbon.apimgt.gateway.holders as throttle;
@@ -69,7 +68,7 @@ function isrequestThrottled( message msg) (boolean){
 
     // Blocking Condition
     boolean isBlocked = throttle:isRequestBlocked(apiLevelThrottleKey,subscriptionLevelThrottleKey,authorizedUser,ipLevelBlockingKey);
-    
+
     if (isBlocked) {
         http:setStatusCode( msg, constants:HTTP_FORBIDDEN);
         messages:setProperty(msg, constants:THROTTLED_ERROR_CODE, constants:BLOCKED_ERROR_CODE);
@@ -77,7 +76,7 @@ function isrequestThrottled( message msg) (boolean){
         setThrottledResponse(msg);
         return true;
     }
-   
+
     string httpMethod = util:getJsonString(keyValidationDto, "verb");
     string resourceLevelPolicy = util:getJsonString(keyValidationDto, "resourceLevelPolicy");
     string resourceUri = util:getJsonString(keyValidationDto, "resourcePath");
@@ -96,10 +95,10 @@ function isrequestThrottled( message msg) (boolean){
         return false;
     }
 
-    
+
     if ( resourceLevelPolicy == constants:UNLIMITED_TIER && !apiLevelThrottlingTriggered) {
         //If unlimited Policy throttling will not apply at resource level and pass it
-         system:println("Resource level throttling set as unlimited and request will pass resource level");
+        system:println("Resource level throttling set as unlimited and request will pass resource level");
     }else{
 
         // todo check for conditions
@@ -134,9 +133,9 @@ function isrequestThrottled( message msg) (boolean){
             setThrottledResponse(msg);
             return true;
         }
-        
-        system:println("Request throttled at subscription level for throttle key" + subscriptionLevelThrottleKey + ". But subscription policy " 
-                        + subscriptionLevelPolicy + " allows to continue to serve requests");
+
+        system:println("Request throttled at subscription level for throttle key" + subscriptionLevelThrottleKey + ". But subscription policy "
+                       + subscriptionLevelPolicy + " allows to continue to serve requests");
     }
 
     //TODO Spike Arrest
@@ -156,7 +155,7 @@ function isrequestThrottled( message msg) (boolean){
     // Data publishing to Traffic Manger
 
     try{
-        publishEvent(msg, authorizedUser, applicationId, apiContext, apiVersion, apiLevelPolicy, applicationLevelPolicy, subscriptionLevelPolicy, 
+        publishEvent(msg, authorizedUser, applicationId, apiContext, apiVersion, apiLevelPolicy, applicationLevelPolicy, subscriptionLevelPolicy,
                      resourceLevelThrottleKey, resourceLevelPolicy, ipLevelBlockingKey);
     }catch(errors:Error e){
         system:println("Error occured while data publsihing " + e.msg);
@@ -178,15 +177,15 @@ function setInvalidUser(message msg){
 
 
 function publishEvent(message m, string userId, string applicationId, string apiContext, string apiVersion,string apiTier,
-            string applicationTier, string subscriptionTier, string resourceLevelThrottleKey, string resourceTier,string ip) {
+                      string applicationTier, string subscriptionTier, string resourceLevelThrottleKey, string resourceTier,string ip) {
 
     json event = {};
 
-    jsons:add (event, "$", "streamName", "PreRequestStream");
-    jsons:add (event, "$", "executionPlanName", "requestPreProcessorExecutionPlan");
+    event.streamName= "PreRequestStream";
+    event.executionPlanName= "requestPreProcessorExecutionPlan";
     int currentTime = system:currentTimeMillis();
     string time = (string)currentTime;
-    jsons:add (event, "$", "timestamp", time);
+    event.timestamp = time;
 
     json dataArr = [];
 
@@ -200,25 +199,25 @@ function publishEvent(message m, string userId, string applicationId, string api
     string apiName = "test";
     string properties = "some_properties";
 
-    jsons:add (dataArr, "$", messageID);
-    jsons:add (dataArr, "$", appKey);
-    jsons:add (dataArr, "$", applicationTier);
-    jsons:add (dataArr, "$", apiKey);
-    jsons:add (dataArr, "$", apiTier);
-    jsons:add (dataArr, "$", subscriptionKey);
-    jsons:add (dataArr, "$", subscriptionTier);
-    jsons:add (dataArr, "$", resourceLevelThrottleKey);
-    jsons:add (dataArr, "$", resourceTier);
-    jsons:add (dataArr, "$", userId);
-    jsons:add (dataArr, "$", apiContext);
-    jsons:add (dataArr, "$", apiVersion);
-    jsons:add (dataArr, "$", appTenant);
-    jsons:add (dataArr, "$", apiTenant);
-    jsons:add (dataArr, "$", applicationId);
-    jsons:add (dataArr, "$", apiName);
-    jsons:add (dataArr, "$", properties);
+    dataArr[0] = messageID;
+    dataArr[1] = appKey;
+    dataArr[2] = applicationTier;
+    dataArr[3] = apiKey;
+    dataArr[4] = apiTier;
+    dataArr[5] = subscriptionKey;
+    dataArr[6] = subscriptionTier;
+    dataArr[7] = resourceLevelThrottleKey;
+    dataArr[8] = resourceTier;
+    dataArr[9] = userId;
+    dataArr[10] = apiContext;
+    dataArr[11] = apiVersion;
+    dataArr[12] = appTenant;
+    dataArr[13] = apiTenant;
+    dataArr[14] = applicationId;
+    dataArr[15] = apiName;
+    dataArr[16] = properties;
 
-    jsons:add (event, "$", "data", dataArr);
+    event.data = dataArr;
 
     publisher:publish(event);
 }

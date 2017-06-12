@@ -10,6 +10,7 @@ import org.wso2.carbon.apimgt.gateway.dto as dto;
 import org.wso2.carbon.apimgt.gateway.holders as holder;
 import org.wso2.carbon.apimgt.ballerina.deployment;
 import org.wso2.carbon.apimgt.ballerina.util as apimgtUtil;
+import ballerina.lang.strings;
 function registerGateway () (json) {
 
     json labelInfoPayload = {};
@@ -58,7 +59,8 @@ function loadAPIs () {
                 break;
             }
         }
-        deployService(api, apiConfig);
+        //todo : tobe implement
+       // deployService(api, apiConfig);
         //Update API cache
         holder:putIntoAPICache(api);
         index = index + 1;
@@ -118,7 +120,8 @@ function getAPICoreURL () (string) {
 
 function deployService (dto:APIDTO api, string config) {
     string fileName = api.id + ".bal";
-    deployment:deployService(fileName, config,"deployment/api");
+    string serviceName = api.name+"_"+strings:replace(api.id,"-","_");
+    deployment:deployService(fileName,serviceName,config,"deployment/api");
     }
 function undeployService (dto:APIDTO api) {
     //TODO:To be implemented

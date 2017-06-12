@@ -171,7 +171,7 @@
         </plugins>
     </build>
     <properties>
-        <ballerina.version>0.87</ballerina.version>
+        <ballerina.version>0.88</ballerina.version>
         <mvn.exec.plugin.version>1.5.0</mvn.exec.plugin.version>
         <mvn.processor.plugin.version>2.2.4</mvn.processor.plugin.version>
         <mvn.resource.plugins.version>3.0.2</mvn.resource.plugins.version>

@@ -66,9 +66,9 @@ public class DeployFile extends AbstractNativeFunction {
 
     @Override
     public BValue[] execute(Context context) {
-        String fileName = getArgument(context, 0).stringValue();
-        String config = getArgument(context, 1).stringValue();
-        String packageName = getArgument(context, 2).stringValue();
+        String fileName = getStringArgument(context, 0);
+        String config = getStringArgument(context, 1);
+        String packageName = getStringArgument(context, 2);
 
         Path path = Paths.get(packageName);
         String filePath = path.toAbsolutePath() + File.separator + fileName;

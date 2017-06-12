@@ -22,7 +22,7 @@ function authenticate (message m) (boolean, message) {
     //todo get this from ballerina property once they set versioning
     string version = "1.0.0";
     //todo need to have elected resource to be in properties
-    string uriTemplate = "/*";
+    string uriTemplate = "/";
     string httpVerb = strings:toUpperCase(http:getMethod(m));
     //check api status
     string apiKey = apiContext + ":" + version;
