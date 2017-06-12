@@ -148,7 +148,6 @@ function retrieveApplications () (boolean) {
 
 function putIntoApplicationCache (json application) {
     dto:ApplicationDto applicationDto = {};
-    system:println(application.throttlingTier);
     applicationDto.applicationId = (string)application.applicationId;
     applicationDto.applicationName = (string)application.name;
     applicationDto.applicationOwner = (string)application.subscriber;
