@@ -51,7 +51,7 @@ public class PolicyDAOImpl implements PolicyDAO {
     public static final String REQUEST_COUNT_TYPE = "requestCount";
     public static final String SECONDS_TIMUNIT = "s";
     public static final String MINUTE_TIMEUNIT = "min";
-    public static final String QUOTA_UNIT = "REQ";
+    public static final String REQUEST_QUOTA_UNIT = "REQ";
     public static final String TWENTY_PER_MIN_TIER = "20PerMin";
     public static final String FIFTY_PER_MIN_TIER_DESCRIPTION = "50PerMin Tier";
     public static final String TWENTY_PER_MIN_TIER_DESCRIPTION = "20PerMin Tier";
@@ -151,74 +151,119 @@ public class PolicyDAOImpl implements PolicyDAO {
         }
     }
 
-    private void addApplicationPolicy(Policy policy, Connection connection) throws SQLException {
+    private static void addApplicationPolicy(Policy policy, Connection connection) throws SQLException {
+
+        final String query = "INSERT INTO AM_APPLICATION_POLICY (UUID, NAME, DISPLAY_NAME, " +
+                "DESCRIPTION, QUOTA_TYPE, QUOTA, QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED) " +
+                "VALUES (?,?,?,?,?,?,?,?,?,?)";
+
         ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
         Limit limit = appPolicy.getDefaultQuotaPolicy().getLimit();
-        if (limit instanceof BandwidthLimit) {
-            BandwidthLimit bwLimit = (BandwidthLimit) limit;
-            addApplicationPolicy(connection, policy.getPolicyName(), policy.getDisplayName(),
-                    policy.getDescription(), policy.getDefaultQuotaPolicy().getType(), bwLimit.getDataAmount(),
-                    bwLimit.getDataUnit(), policy.getDefaultQuotaPolicy().getLimit().getUnitTime(),
-                    policy.getDefaultQuotaPolicy().getLimit().getTimeUnit(), policy.getUuid());
 
-        } else if (limit instanceof RequestCountLimit) {
-            RequestCountLimit reqCountLimit = (RequestCountLimit) limit;
-            addApplicationPolicy(connection, policy.getPolicyName(), policy.getDisplayName(),
-                    policy.getDescription(), policy.getDefaultQuotaPolicy().getType(),
-                    reqCountLimit.getRequestCount(), "",
-                    (int) policy.getDefaultQuotaPolicy().getLimit().getUnitTime(),
-                    policy.getDefaultQuotaPolicy().getLimit().getTimeUnit(), policy.getUuid());
-        }
-    }
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, policy.getUuid());
+            statement.setString(2, policy.getPolicyName());
+            statement.setString(3, policy.getDisplayName());
+            statement.setString(4, policy.getDescription());
+            statement.setString(5, policy.getDefaultQuotaPolicy().getType());
+            setDefaultThrottlePolicyDetailsPreparedStmt(limit, statement);
+            statement.setInt(8, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
+            statement.setString(9, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+            statement.setBoolean(10, policy.isDeployed());
 
-    private static void addApiPolicy(Policy policy, Connection connection) throws SQLException {
-        APIPolicy apiPolicy = (APIPolicy) policy;
-        Limit limit = apiPolicy.getDefaultQuotaPolicy().getLimit();
-        if (limit instanceof BandwidthLimit) {
-            BandwidthLimit bwLimit = (BandwidthLimit) limit;
-            addAPIPolicy(connection, policy.getPolicyName(), policy.getDisplayName(), policy.getDescription(),
-                    policy.getDefaultQuotaPolicy().getType(), bwLimit.getDataAmount(), bwLimit.getDataUnit(),
-                    policy.getDefaultQuotaPolicy().getLimit().getUnitTime(),
-                    policy.getDefaultQuotaPolicy().getLimit().getTimeUnit(), ((APIPolicy) policy).getPipelines(),
-                    API_TIER_LEVEL, policy.getUuid(), policy.isDeployed());
-
-        } else if (limit instanceof RequestCountLimit) {
-            RequestCountLimit reqCountLimit = (RequestCountLimit) limit;
-            addAPIPolicy(connection, policy.getPolicyName(), policy.getDisplayName(), policy.getDescription(),
-                    policy.getDefaultQuotaPolicy().getType(), reqCountLimit.getRequestCount(), "",
-                    policy.getDefaultQuotaPolicy().getLimit().getUnitTime(),
-                    policy.getDefaultQuotaPolicy().getLimit().getTimeUnit(), ((APIPolicy) policy).getPipelines(),
-                    API_TIER_LEVEL, policy.getUuid(), policy.isDeployed());
-        }
-    }
-
-    private void addSubscriptionPolicy(Policy policy, Connection connection) throws SQLException {
-        SubscriptionPolicy subscriptionPolicy = (SubscriptionPolicy) policy;
-        Limit limit = subscriptionPolicy.getDefaultQuotaPolicy().getLimit();
-        if (limit instanceof BandwidthLimit) {
-            BandwidthLimit bwLimit = (BandwidthLimit) limit;
-            addSubscriptionPolicy(connection, policy.getPolicyName(), policy.getDisplayName(),
-                    policy.getDescription(), policy.getDefaultQuotaPolicy().getType(), bwLimit.getDataAmount(),
-                    bwLimit.getDataUnit(), (int) policy.getDefaultQuotaPolicy().getLimit().getUnitTime(),
-                    policy.getDefaultQuotaPolicy().getLimit().getTimeUnit(), subscriptionPolicy.getRateLimitCount(),
-                    subscriptionPolicy.getRateLimitTimeUnit(), policy.isDeployed(), subscriptionPolicy
-                            .getCustomAttributes(), subscriptionPolicy.isStopOnQuotaReach(),
-                    subscriptionPolicy.getBillingPlan(), policy.getUuid());
-
-        } else if (limit instanceof RequestCountLimit) {
-            RequestCountLimit reqCountLimit = (RequestCountLimit) limit;
-            addSubscriptionPolicy(connection, policy.getPolicyName(), policy.getDisplayName(),
-                    policy.getDescription(), policy.getDefaultQuotaPolicy().getType(), reqCountLimit.getRequestCount(),
-                    "", (int) policy.getDefaultQuotaPolicy().getLimit().getUnitTime(),
-                    policy.getDefaultQuotaPolicy().getLimit().getTimeUnit(), subscriptionPolicy.getRateLimitCount(),
-                    subscriptionPolicy.getRateLimitTimeUnit(), policy.isDeployed(), subscriptionPolicy
-                            .getCustomAttributes(), subscriptionPolicy.isStopOnQuotaReach(),
-                    subscriptionPolicy.getBillingPlan(), policy.getUuid());
+            statement.execute();
         }
     }
 
     /**
-     *@see PolicyDAO#updatePolicy(String, Policy)
+     * sets the default throttling policy related information to the DB query
+     *
+     * @param limit {@link Limit} instance
+     * @param statement DB query related {@link PreparedStatement} instance
+     * @throws SQLException if any error occurs while setting default throttle policy related information
+     */
+    private static void setDefaultThrottlePolicyDetailsPreparedStmt(Limit limit, PreparedStatement statement)
+            throws SQLException {
+
+        boolean isBandwidthLimitPolicy = false, isRequestCountLimitPolicy = false;
+
+        if (limit instanceof BandwidthLimit) {
+            isBandwidthLimitPolicy = true;
+        } else if (limit instanceof RequestCountLimit) {
+            isRequestCountLimitPolicy = true;
+        }
+
+        if (isBandwidthLimitPolicy) {
+            statement.setInt(6, ((BandwidthLimit) limit).getDataAmount());
+            statement.setString(7, ((BandwidthLimit) limit).getDataUnit());
+        } else if (isRequestCountLimitPolicy) {
+            statement.setInt(6, ((RequestCountLimit) limit).getRequestCount());
+            statement.setString(7, REQUEST_QUOTA_UNIT);
+        }
+    }
+
+    private static void addApiPolicy(Policy policy, Connection connection) throws SQLException, APIMgtDAOException {
+
+        final String query = "INSERT INTO AM_API_POLICY (UUID, NAME, DISPLAY_NAME, DESCRIPTION, "
+                + "DEFAULT_QUOTA_TYPE, DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME,"
+                + " DEFAULT_TIME_UNIT, APPLICABLE_LEVEL, IS_DEPLOYED) " + "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+
+        APIPolicy apiPolicy = (APIPolicy) policy;
+        Limit limit = apiPolicy.getDefaultQuotaPolicy().getLimit();
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, policy.getUuid());
+            statement.setString(2, policy.getPolicyName());
+            statement.setString(3, policy.getDisplayName());
+            statement.setString(4, policy.getDescription());
+            statement.setString(5, policy.getDefaultQuotaPolicy().getType());
+            setDefaultThrottlePolicyDetailsPreparedStmt(limit, statement);
+            statement.setLong(8, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
+            statement.setString(9, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+            statement.setString(10, API_TIER_LEVEL);
+            statement.setBoolean(11, policy.isDeployed());
+            statement.execute();
+
+            if (apiPolicy.getPipelines() != null) {
+                addAPIPipeline(connection, apiPolicy.getPipelines(), policy.getUuid());
+            }
+        }
+    }
+
+    private static void addSubscriptionPolicy(Policy policy, Connection connection) throws SQLException {
+
+        String query;
+
+        query = "INSERT INTO AM_SUBSCRIPTION_POLICY (UUID, NAME, DISPLAY_NAME, DESCRIPTION, QUOTA_TYPE, QUOTA, "
+                + "QUOTA_UNIT, UNIT_TIME, TIME_UNIT, RATE_LIMIT_COUNT, RATE_LIMIT_TIME_UNIT, IS_DEPLOYED, "
+                + "CUSTOM_ATTRIBUTES, STOP_ON_QUOTA_REACH, BILLING_PLAN) "
+                + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+        SubscriptionPolicy subscriptionPolicy = (SubscriptionPolicy) policy;
+        Limit limit = subscriptionPolicy.getDefaultQuotaPolicy().getLimit();
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, policy.getUuid());
+            statement.setString(2, policy.getPolicyName());
+            statement.setString(3, policy.getDisplayName());
+            statement.setString(4, policy.getDescription());
+            statement.setString(5, policy.getDefaultQuotaPolicy().getType());
+            setDefaultThrottlePolicyDetailsPreparedStmt(limit, statement);
+            statement.setInt(8, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
+            statement.setString(9, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+            statement.setInt(10, subscriptionPolicy.getRateLimitCount());
+            statement.setString(11, subscriptionPolicy.getRateLimitTimeUnit());
+            statement.setBoolean(12, policy.isDeployed());
+            statement.setBytes(13, subscriptionPolicy.getCustomAttributes());
+            statement.setBoolean(14, subscriptionPolicy.isStopOnQuotaReach());
+            statement.setString(15, subscriptionPolicy.getBillingPlan());
+
+            statement.execute();
+        }
+    }
+
+    /**
+     * *@see PolicyDAO#updatePolicy(String, Policy)
      */
     @Override
     public void updatePolicy(String policyLevel, Policy policy) throws APIMgtDAOException {
@@ -540,7 +585,8 @@ public class PolicyDAOImpl implements PolicyDAO {
         } else if (resultSet.getString(prefix + APIMgtConstants.ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE)
                 .equalsIgnoreCase(PolicyConstants.BANDWIDTH_TYPE)) {
             BandwidthLimit bandLimit = new BandwidthLimit();
-            bandLimit.setUnitTime(resultSet.getInt(prefix + APIMgtConstants.ThrottlePolicyConstants.COLUMN_UNIT_TIME));
+            bandLimit.setUnitTime(
+            resultSet.getInt(prefix + APIMgtConstants.ThrottlePolicyConstants.COLUMN_UNIT_TIME));
             bandLimit.setTimeUnit(
                     resultSet.getString(prefix + APIMgtConstants.ThrottlePolicyConstants.COLUMN_TIME_UNIT));
             bandLimit.setDataAmount(resultSet.getInt(prefix + APIMgtConstants.ThrottlePolicyConstants.COLUMN_QUOTA));
@@ -834,7 +880,9 @@ public class PolicyDAOImpl implements PolicyDAO {
             byte[] customAttrib;
             try {
                 customAttrib = IOUtils.toByteArray(binary);
-                subscriptionPolicy.setCustomAttributes(customAttrib);
+                if (customAttrib.length > 0) {
+                    subscriptionPolicy.setCustomAttributes(customAttrib);
+                }
             } catch (IOException e) {
                 log.error("An Error occurred while retrieving custom attributes for subscription policy with "
                         + "identifier: " + identifier , e);
@@ -897,62 +945,82 @@ public class PolicyDAOImpl implements PolicyDAO {
         }
     }
 
+    /**
+     * Returns the last updated time of an API policy
+     *
+     * @param policyName name of the API policy
+     * @return  last updated time
+     * @throws APIMgtDAOException if an error occurs while retrieving the last updated time
+     */
     private String getLastUpdatedTimeOfAPIPolicy(String policyName)
             throws APIMgtDAOException {
         return EntityDAO.getLastUpdatedTimeOfResourceByName(AM_API_POLICY_TABLE_NAME, policyName);
     }
 
+    /**
+     * Returns the last updated time of an Application policy
+     *
+     * @param policyName name of the Application policy
+     * @return  last updated time
+     * @throws APIMgtDAOException if an error occurs while retrieving the last updated time
+     */
     private String getLastUpdatedTimeOfApplicationPolicy(String policyName)
             throws APIMgtDAOException {
         return EntityDAO.getLastUpdatedTimeOfResourceByName(AM_APPLICATION_POLICY_TABLE_NAME, policyName);
     }
 
+    /**
+     * Returns the last updated time of an Subscription policy
+     *
+     * @param policyName name of the Subscription policy
+     * @return  last updated time
+     * @throws APIMgtDAOException if an error occurs while retrieving the last updated time
+     */
     private String getLastUpdatedTimeOfSubscriptionPolicy(String policyName)
             throws APIMgtDAOException {
         return EntityDAO.getLastUpdatedTimeOfResourceByName(AM_SUBSCRIPTION_POLICY_TABLE_NAME, policyName);
     }
 
+    /**
+     * Adds the default policies
+     *
+     * @throws APIMgtDAOException if an error occurs while adding the default policies
+     */
     static void initDefaultPolicies() throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
             try {
                 if (!isDefaultPoliciesExist(connection)) {
                     connection.setAutoCommit(false);
 
-                    addAPIPolicy(connection, UNLIMITED_TIER, UNLIMITED_TIER, UNLIMITED_TIER, REQUEST_COUNT_TYPE, 1,
-                            PolicyConstants.MB, 60,
-                            SECONDS_TIMUNIT, null, API_TIER_LEVEL, UUID.randomUUID().toString(), false);
-                    addAPIPolicy(connection, GOLD_TIER, GOLD_TIER, GOLD_TIER, REQUEST_COUNT_TYPE, 1, PolicyConstants.MB,
-                            60,
-                            SECONDS_TIMUNIT, null, API_TIER_LEVEL, UUID.randomUUID().toString(), false);
-                    addAPIPolicy(connection, SILVER_TIER, SILVER_TIER, SILVER_TIER, REQUEST_COUNT_TYPE, 1,
-                            PolicyConstants.MB, 60,
-                            SECONDS_TIMUNIT, null, API_TIER_LEVEL, UUID.randomUUID().toString(), false);
-                    addAPIPolicy(connection, BRONZE_TIER, BRONZE_TIER, BRONZE_TIER, REQUEST_COUNT_TYPE, 1,
-                            PolicyConstants.MB, 60,
-                            SECONDS_TIMUNIT, null, API_TIER_LEVEL, UUID.randomUUID().toString(), false);
+                    APIPolicy unlimitedApiPolicy = createDefaultApiPolicyWithRequestCountLimit(UNLIMITED_TIER);
+                    addApiPolicy(unlimitedApiPolicy, connection);
+                    APIPolicy goldApiPolicy = createDefaultApiPolicyWithRequestCountLimit(GOLD_TIER);
+                    addApiPolicy(goldApiPolicy, connection);
+                    APIPolicy silverApiPolicy = createDefaultApiPolicyWithRequestCountLimit(SILVER_TIER);
+                    addApiPolicy(silverApiPolicy, connection);
+                    APIPolicy bronzeApiPolicy = createDefaultApiPolicyWithRequestCountLimit(BRONZE_TIER);
+                    addApiPolicy(bronzeApiPolicy, connection);
 
-                    addSubscriptionPolicy(connection, UNLIMITED_TIER, UNLIMITED_TIER, UNLIMITED_TIER,
-                            REQUEST_COUNT_TYPE,
-                            Integer.MAX_VALUE, QUOTA_UNIT, 1, MINUTE_TIMEUNIT, 0, null, false, null, false, null,
-                            UUID.randomUUID().toString());
-                    addSubscriptionPolicy(connection, GOLD_TIER, GOLD_TIER, GOLD_TIER, REQUEST_COUNT_TYPE, 5000,
-                            QUOTA_UNIT, 1,
-                            MINUTE_TIMEUNIT, 0, null, false, null, false, null, UUID.randomUUID().toString());
-                    addSubscriptionPolicy(connection, SILVER_TIER, SILVER_TIER, SILVER_TIER, REQUEST_COUNT_TYPE, 2000,
-                            QUOTA_UNIT, 1,
-                            MINUTE_TIMEUNIT, 0, null, false, null, false, null, UUID.randomUUID().toString());
-                    addSubscriptionPolicy(connection, BRONZE_TIER, BRONZE_TIER, BRONZE_TIER, REQUEST_COUNT_TYPE, 1000,
-                            QUOTA_UNIT, 1,
-                            MINUTE_TIMEUNIT, 0, null, false, null, false, null, UUID.randomUUID().toString());
+                    SubscriptionPolicy unlimitedSubscriptionPolicy =
+                            createDefaultSubscriptionPolicyWithRequestCountLimit(UNLIMITED_TIER);
+                    addSubscriptionPolicy(unlimitedSubscriptionPolicy, connection);
+                    SubscriptionPolicy goldSubscriptionPolicy =
+                            createDefaultSubscriptionPolicyWithRequestCountLimit
+                            (GOLD_TIER);
+                    addSubscriptionPolicy(goldSubscriptionPolicy, connection);
+                    SubscriptionPolicy silverSubscriptionPolicy =
+                            createDefaultSubscriptionPolicyWithRequestCountLimit(SILVER_TIER);
+                    addSubscriptionPolicy(silverSubscriptionPolicy, connection);
+                    SubscriptionPolicy bronzeSubscriptionPolicy =
+                            createDefaultSubscriptionPolicyWithRequestCountLimit(BRONZE_TIER);
+                    addSubscriptionPolicy(bronzeSubscriptionPolicy, connection);
 
-                    addApplicationPolicy(connection, FIFTY_PER_MIN_TIER, FIFTY_PER_MIN_TIER,
-                            FIFTY_PER_MIN_TIER_DESCRIPTION, REQUEST_COUNT_TYPE, 10,
-                            QUOTA_UNIT, 1,
-                            SECONDS_TIMUNIT, UUID.randomUUID().toString());
-                    addApplicationPolicy(connection, TWENTY_PER_MIN_TIER, TWENTY_PER_MIN_TIER,
-                            TWENTY_PER_MIN_TIER_DESCRIPTION, REQUEST_COUNT_TYPE, 50,
-                            QUOTA_UNIT, 1,
-                            SECONDS_TIMUNIT, UUID.randomUUID().toString());
+                    ApplicationPolicy fiftyPerMinApplicationPolicy =
+                            createDefaultApplicationPolicyWithRequestCountLimit(FIFTY_PER_MIN_TIER);
+                    addApplicationPolicy(fiftyPerMinApplicationPolicy, connection);
+                    ApplicationPolicy twentyPerMinApplicationPolicy =
+                            createDefaultApplicationPolicyWithRequestCountLimit(TWENTY_PER_MIN_TIER);
+                    addApplicationPolicy(twentyPerMinApplicationPolicy, connection);
                     connection.commit();
                 }
             } catch (SQLException e) {
@@ -966,6 +1034,85 @@ public class PolicyDAOImpl implements PolicyDAO {
         }
     }
 
+    /**
+     * util method for creating a default api policy
+     *
+     * @param tier tier
+     * @return {@link APIPolicy} instance
+     */
+    private static APIPolicy createDefaultApiPolicyWithRequestCountLimit(String tier) {
+        APIPolicy apiPolicy = new APIPolicy(tier);
+        apiPolicy.setDisplayName(tier);
+        apiPolicy.setDescription(tier);
+        apiPolicy.setDefaultQuotaPolicy(new QuotaPolicy());
+        apiPolicy.getDefaultQuotaPolicy().setType(REQUEST_COUNT_TYPE);
+        RequestCountLimit requestCountLimit = new RequestCountLimit();
+        requestCountLimit.setRequestCount(1);
+        requestCountLimit.setUnitTime(60);
+        requestCountLimit.setTimeUnit(SECONDS_TIMUNIT);
+        apiPolicy.setPipelines(null);
+        apiPolicy.setUuid(UUID.randomUUID().toString());
+        apiPolicy.setDeployed(false);
+        apiPolicy.getDefaultQuotaPolicy().setLimit(requestCountLimit);
+        return apiPolicy;
+    }
+
+    /**
+     * util method for creating a default application policy
+     *
+     * @param tier tier
+     * @return {@link ApplicationPolicy} instance
+     */
+    private static ApplicationPolicy createDefaultApplicationPolicyWithRequestCountLimit(String tier) {
+        ApplicationPolicy applicationPolicy = new ApplicationPolicy(tier);
+        applicationPolicy.setDisplayName(tier);
+        applicationPolicy.setDescription(tier);
+        applicationPolicy.setDefaultQuotaPolicy(new QuotaPolicy());
+        applicationPolicy.getDefaultQuotaPolicy().setType(REQUEST_COUNT_TYPE);
+        RequestCountLimit requestCountLimit = new RequestCountLimit();
+        requestCountLimit.setRequestCount(10);
+        requestCountLimit.setUnitTime(1);
+        requestCountLimit.setTimeUnit(SECONDS_TIMUNIT);
+        applicationPolicy.setUuid(UUID.randomUUID().toString());
+        applicationPolicy.setDeployed(false);
+        applicationPolicy.getDefaultQuotaPolicy().setLimit(requestCountLimit);
+        return applicationPolicy;
+    }
+
+    /**
+     * util method for creating a default subscription policy
+     *
+     * @param tier tier
+     * @return {@link SubscriptionPolicy} instance
+     */
+    private static SubscriptionPolicy createDefaultSubscriptionPolicyWithRequestCountLimit(String tier) {
+        SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(tier);
+        subscriptionPolicy.setDisplayName(tier);
+        subscriptionPolicy.setDescription(tier);
+        subscriptionPolicy.setDefaultQuotaPolicy(new QuotaPolicy());
+        subscriptionPolicy.getDefaultQuotaPolicy().setType(REQUEST_COUNT_TYPE);
+        RequestCountLimit requestCountLimit = new RequestCountLimit();
+        requestCountLimit.setRequestCount(Integer.MAX_VALUE);
+        requestCountLimit.setUnitTime(1);
+        requestCountLimit.setTimeUnit(MINUTE_TIMEUNIT);
+        subscriptionPolicy.setUuid(UUID.randomUUID().toString());
+        subscriptionPolicy.setDeployed(false);
+        subscriptionPolicy.getDefaultQuotaPolicy().setLimit(requestCountLimit);
+        subscriptionPolicy.setRateLimitCount(0);
+        subscriptionPolicy.setRateLimitTimeUnit(null);
+        subscriptionPolicy.setBillingPlan(null);
+        subscriptionPolicy.setStopOnQuotaReach(false);
+        subscriptionPolicy.setCustomAttributes(new byte[0]);
+        return subscriptionPolicy;
+    }
+
+    /**
+     * Checks if the default policies are already added
+     *
+     * @param connection DB Connection instance
+     * @return true if default policies already exists, else false
+     * @throws SQLException if an error occurs while checking the existence of the default policies
+     */
     private static boolean isDefaultPoliciesExist(Connection connection) throws SQLException {
         final String query = "SELECT 1 FROM AM_API_POLICY";
 
@@ -982,50 +1129,6 @@ public class PolicyDAOImpl implements PolicyDAO {
     }
 
     /**
-     * Adding api policy to db
-     *  @param connection connection to the db
-     * @param name  name of the policy to be added
-     * @param displayName display name of the policy
-     * @param description description about the policy
-     * @param quotaType quota type of the policy ( request count or bandwidth limit)
-     * @param quota amount of the quota
-     * @param quotaUnit unit of the quota (ex.: if quota type is {@link BandwidthLimit}, this should be KB/MB, etc.)
-     * @param unitTime time period
-     * @param timeUnit time unit
-     * @param pipelines pipelines of the api policy
-     * @param applicableLevel policy applicable level
-     * @param uuid unique id of the policy      @throws SQLException If error occurred while inserting policy to db
-     * @param isDeployed is the policy deployed or not
-     */
-    private static void addAPIPolicy(Connection connection, String name, String displayName, String description,
-            String quotaType, long quota, String quotaUnit, long unitTime, String timeUnit, List<Pipeline> pipelines,
-            String applicableLevel, String uuid, boolean isDeployed) throws SQLException {
-
-        final String query = "INSERT INTO AM_API_POLICY (UUID, NAME, DISPLAY_NAME, DESCRIPTION, "
-                + "DEFAULT_QUOTA_TYPE, DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME,"
-                + " DEFAULT_TIME_UNIT, APPLICABLE_LEVEL, IS_DEPLOYED) " + "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
-
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, uuid);
-            statement.setString(2, name);
-            statement.setString(3, displayName);
-            statement.setString(4, description);
-            statement.setString(5, quotaType);
-            statement.setLong(6, quota);
-            statement.setString(7, quotaUnit);
-            statement.setLong(8, unitTime);
-            statement.setString(9, timeUnit);
-            statement.setString(10, applicableLevel);
-            statement.setBoolean(11, isDeployed);
-            statement.execute();
-
-            if (pipelines != null) {
-                addAPIPipeline(connection, pipelines, uuid);
-            }
-        }
-    }
-
-    /**
      * Adding pipelines of API policy to database
      *
      * @param connection connection to db
@@ -1035,12 +1138,14 @@ public class PolicyDAOImpl implements PolicyDAO {
      */
 
     private static void addAPIPipeline(Connection connection, List<Pipeline> pipelines, String uuid)
-            throws SQLException {
+            throws SQLException, APIMgtDAOException {
 
         final String query =
                 "INSERT INTO AM_CONDITION_GROUP (UUID, QUOTA_TYPE, QUOTA, QUOTA_UNIT, UNIT_TIME, TIME_UNIT) "
                         + "VALUES (?,?,?,?,?,?)";
-        try (PreparedStatement statement = connection.prepareStatement(query, new String[]{"CONDITION_GROUP_ID"})) {
+        String dbProductName = connection.getMetaData().getDatabaseProductName();
+        try (PreparedStatement statement = connection.prepareStatement(query, new String[]{DAOUtil
+                .getConvertedAutoGeneratedColumnName(dbProductName, "CONDITION_GROUP_ID")})) {
             for (Pipeline pipeline : pipelines) {
                 statement.setString(1, uuid);
                 statement.setString(2, pipeline.getQuotaPolicy().getType());
@@ -1077,7 +1182,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                     }
                 } else {
                     String errorMsg = "Unable to retrieve auto incremented id, hence unable to add Pipeline Condition";
-                    throw new SQLException(errorMsg);
+                    throw new APIMgtDAOException(errorMsg);
                 }
             }
         }
@@ -1165,81 +1270,6 @@ public class PolicyDAOImpl implements PolicyDAO {
             statement.setString(2, queryParamCondition.getValue());
             statement.setInt(3, conID);         //Con id represents condition group id
             statement.setBoolean(4, queryParamCondition.isInvertCondition());
-            statement.execute();
-        }
-    }
-
-    /**
-     * add subscription throttle policy to the database
-     *  @param connection  connection to the database
-     * @param name        name of the policy
-     * @param displayName display name of the policy
-     * @param description description of the policy
-     * @param quotaType   quota tyoe of the policy ( request count/ bandwidth based)
-     * @param quota       quota (request count/ bandwidth volume)
-     * @param quotaUnit   data unit for bandwidth based quotapolicy
-     * @param unitTime    time period
-     * @param timeUnit    time unit
-     * @param rateLimitCount rate limit count
-     * @param rateLimitTimeUnit rate limit time unit
-     * @param isDeployed whether the policy is deployed or not
-     * @param customAttributes custom attributes specified with the policy
-     * @param stopOnQuotaReach whether to stop when policy quota is reached or not
-     * @param billingPlan @throws SQLException if error occurred when subscription policy is added to the database
-     * @param uuid policy uuid
-     */
-    private static void addSubscriptionPolicy(Connection connection, String name, String displayName,
-            String description, String quotaType, int quota, String quotaUnit, int unitTime, String timeUnit,
-            int rateLimitCount, String rateLimitTimeUnit, boolean isDeployed, byte[] customAttributes,
-            boolean stopOnQuotaReach, String billingPlan, String uuid)
-            throws SQLException {
-
-        String query;
-
-        query = "INSERT INTO AM_SUBSCRIPTION_POLICY (UUID, NAME, DISPLAY_NAME, DESCRIPTION, QUOTA_TYPE, QUOTA, "
-                + "QUOTA_UNIT, UNIT_TIME, TIME_UNIT, RATE_LIMIT_COUNT, RATE_LIMIT_TIME_UNIT, IS_DEPLOYED, "
-                + "CUSTOM_ATTRIBUTES, STOP_ON_QUOTA_REACH, BILLING_PLAN) "
-                + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, uuid);
-            statement.setString(2, name);
-            statement.setString(3, displayName);
-            statement.setString(4, description);
-            statement.setString(5, quotaType);
-            statement.setInt(6, quota);
-            statement.setString(7, quotaUnit);
-            statement.setInt(8, unitTime);
-            statement.setString(9, timeUnit);
-            statement.setInt(10, rateLimitCount);
-            statement.setString(11, rateLimitTimeUnit);
-            statement.setBoolean(12, isDeployed);
-            statement.setBytes(13, customAttributes);
-            statement.setBoolean(14, stopOnQuotaReach);
-            statement.setString(15, billingPlan);
-
-            statement.execute();
-        }
-    }
-
-    private static void addApplicationPolicy(Connection connection, String name, String displayName, String description,
-            String quotaType, int quota, String quotaUnit, int unitTime, String timeUnit, String uuid)
-                                                                                                throws SQLException {
-        final String query = "INSERT INTO AM_APPLICATION_POLICY (UUID, NAME, DISPLAY_NAME, " +
-                "DESCRIPTION, QUOTA_TYPE, QUOTA, QUOTA_UNIT, UNIT_TIME, TIME_UNIT) " +
-                "VALUES (?,?,?,?,?,?,?,?,?)";
-
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, uuid);
-            statement.setString(2, name);
-            statement.setString(3, displayName);
-            statement.setString(4, description);
-            statement.setString(5, quotaType);
-            statement.setInt(6, quota);
-            statement.setString(7, quotaUnit);
-            statement.setInt(8, unitTime);
-            statement.setString(9, timeUnit);
-
             statement.execute();
         }
     }
@@ -1503,25 +1533,13 @@ public class PolicyDAOImpl implements PolicyDAO {
         }
 
         Limit limit = applicationPolicy.getDefaultQuotaPolicy().getLimit();
-        boolean isBandwidthLimitPolicy = false, isRequestCountLimitPolicy = false;
-        if (limit instanceof BandwidthLimit) {
-            isBandwidthLimitPolicy = true;
-        } else if (limit instanceof RequestCountLimit) {
-            isRequestCountLimitPolicy = true;
-        }
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, applicationPolicy.getPolicyName());
             statement.setString(2, applicationPolicy.getDisplayName());
             statement.setString(3, applicationPolicy.getDescription());
             statement.setString(4, applicationPolicy.getDefaultQuotaPolicy().getType());
-            if (isBandwidthLimitPolicy) {
-                statement.setInt(5, ((BandwidthLimit) limit).getDataAmount());
-                statement.setString(6, ((BandwidthLimit) limit).getDataUnit());
-            } else if (isRequestCountLimitPolicy) {
-                statement.setInt(5, ((RequestCountLimit) limit).getRequestCount());
-                statement.setString(6, "");
-            }
+            setDefaultThrottlePolicyDetailsPreparedStmt(limit, statement);
             statement.setInt(7, applicationPolicy.getDefaultQuotaPolicy().getLimit().getUnitTime());
             statement.setString(8, applicationPolicy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
             statement.setString(9, applicationPolicy.getUuid());
@@ -1553,25 +1571,13 @@ public class PolicyDAOImpl implements PolicyDAO {
         }
 
         Limit limit = subscriptionPolicy.getDefaultQuotaPolicy().getLimit();
-        boolean isBandwidthLimitPolicy = false, isRequestCountLimitPolicy = false;
-        if (limit instanceof BandwidthLimit) {
-            isBandwidthLimitPolicy = true;
-        } else if (limit instanceof RequestCountLimit) {
-            isRequestCountLimitPolicy = true;
-        }
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, subscriptionPolicy.getPolicyName());
             statement.setString(2, subscriptionPolicy.getDisplayName());
             statement.setString(3, subscriptionPolicy.getDescription());
             statement.setString(4, subscriptionPolicy.getDefaultQuotaPolicy().getType());
-            if (isBandwidthLimitPolicy) {
-                statement.setInt(5, ((BandwidthLimit) limit).getDataAmount());
-                statement.setString(6, ((BandwidthLimit) limit).getDataUnit());
-            } else if (isRequestCountLimitPolicy) {
-                statement.setInt(5, ((RequestCountLimit) limit).getRequestCount());
-                statement.setString(6, "");
-            }
+            setDefaultThrottlePolicyDetailsPreparedStmt(limit, statement);
             statement.setInt(7, subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getUnitTime());
             statement.setString(8, subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
             statement.setInt(9, subscriptionPolicy.getRateLimitCount());
