@@ -117,8 +117,9 @@ function getAPICoreURL () (string) {
 
 
 function deployService (dto:APIDTO api, string config) {
-    deployment:deployService(api.id, config,"deployment/api");
-}
+    string fileName = api.id + ".bal";
+    deployment:deployService(fileName, config,"deployment/api");
+    }
 function undeployService (dto:APIDTO api) {
     //TODO:To be implemented
 }

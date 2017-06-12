@@ -12,14 +12,14 @@ service $serviceName {
 		#if($endpointEntry.value.applicableLevel == "API")
 		#set( $endpointConfig = '#set( $endpointConfig = ' + $endpointEntry.value.endpointConfig + ' )' )
 		#evaluate ($endpointConfig)
-		http:ClientConnector productionEndpoint = create http:ClientConnector($endpointConfig.get("url"));
+		http:ClientConnector productionEndpoint = create http:ClientConnector("$endpointConfig.get("serviceUrl")");
 		#end
 	#end
 	#if($endpointEntry.key == "sandbox")
 		#if($endpointEntry.value.applicableLevel == "API")
 		#set( $endpointConfig = '#set( $endpointConfig = ' + $endpointEntry.value.endpointConfig + ' )' )
 		#evaluate ($endpointConfig)
-		http:ClientConnector sandBoxEndpoint = create http:ClientConnector($endpointConfig.get("url"));
+		http:ClientConnector sandBoxEndpoint = create http:ClientConnector("$endpointConfig.get("serviceUrl")");
 		#end
 	#end
 #end
@@ -38,7 +38,7 @@ service $serviceName {
 		#if($apiResource.productionEndpoint.applicableLevel == "API")
 		#set( $endpointConfig = '#set( $endpointConfig = ' + $apiResource.productionEndpoint.endpointConfig + ' )' )
 		#evaluate ($endpointConfig)
-		http:ClientConnector ${apiResource.templateId}ProductionEndpoint = create http:ClientConnector($endpointConfig.get("url"));
+		http:ClientConnector ${apiResource.templateId}ProductionEndpoint = create http:ClientConnector("$endpointConfig.get("serviceUrl")");
 		#end
 		#else
 		#if($apiEndpoint.get("production") && $apiEndpoint.get("production").applicableLevel == "API")
@@ -50,11 +50,11 @@ service $serviceName {
 		#if($apiResource.sandBoxEndpoint.applicableLevel == "API")
 		#set( $endpointConfig = '#set( $endpointConfig = ' + $apiResource.sandBoxEndpoint.endpointConfig + ' )' )
 		#evaluate ($endpointConfig)
-		http:ClientConnector ${apiResource.templateId}SandBoxEndpoint = create http:ClientConnector($endpointConfig.get("url"));
+		http:ClientConnector ${apiResource.templateId}SandBoxEndpoint = create http:ClientConnector($endpointConfig.get("serviceUrl"));
 		#end
 		#else
 		#if($apiEndpoint.get("sandbox") && $apiEndpoint.get("sandbox").applicableLevel == "API")
-		http:ClientConnector ${apiResource.templateId}SandBoxEndpoint = sandboxEndpoint;
+		http:ClientConnector ${apiResource.templateId}SandBoxEndpoint = sandBoxEndpoint;
 		#end
 		#end
 		latency:mediateIn(m);

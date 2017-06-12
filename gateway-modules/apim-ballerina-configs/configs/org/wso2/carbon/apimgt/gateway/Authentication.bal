@@ -86,7 +86,7 @@ function authenticate (message m) (boolean, message) {
                             if (validateScopes(resourceDto, introspectDto)) {
                                 string keyValidationInfo = constructKeyValidationDto(authToken, introspectDto, subscriptionDto, resourceDto);
                                 messages:setProperty(m, "KEY_VALIDATION_INFO", jsons:toString(keyValidationInfo));
-                                messages:setProperty(constants:KEY_TYPE, subscriptionDto.keyEnvType);
+                                messages:setProperty(m, constants:KEY_TYPE, subscriptionDto.keyEnvType);
                                 state = true;
                                 response = m;
                             }
