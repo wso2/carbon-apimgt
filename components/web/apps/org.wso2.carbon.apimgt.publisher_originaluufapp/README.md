@@ -1,7 +1,7 @@
-#*** ***DEPRECATE WARNING*** ***
+# *** DEPRECATE WARNING ***
 
 This UUF app is no longer being used, Instead we have move the development of publisher App to 
-[here](features/apimgt/org.wso2.carbon.apimgt.publisher.feature/src/main/resources/publisher)
+[here](../../../../features/apimgt/org.wso2.carbon.apimgt.publisher.feature/src/main/resources/publisher)
 Which is a
-<img src="https://facebook.github.io/react/img/logo.svg" alt="ReactJs Logo" style="width: 100px;"/>
+<img src="https://facebook.github.io/react/img/logo.svg" alt="ReactJs Logo" width="48"/>
 Base SPA application
