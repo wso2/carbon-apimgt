@@ -165,16 +165,17 @@ function fromJsonToGatewayConfDTO (json conf) (dto:GatewayConfDTO){
     //Extract key manager information and populate KeyManageInfoDTO to be cached
     json keyManagerInfo = conf.keyManagerInfo;
     dto:KeyManagerInfoDTO keyManagerInfoDTO = {};
-    keyManagerInfoDTO.dcrEndpoint = jsons:getString(keyManagerInfo, "dcrEndpoint");
-    keyManagerInfoDTO.tokenEndpoint = jsons:getString(keyManagerInfo, "tokenEndpoint");
-    keyManagerInfoDTO.revokeEndpoint = jsons:getString(keyManagerInfo, "revokeEndpoint");
-    keyManagerInfoDTO.introspectEndpoint = jsons:getString(keyManagerInfo, "introspectEndpoint");
+    keyManagerInfoDTO.dcrEndpoint = (string)keyManagerInfo.dcrEndpoint;
+
+    keyManagerInfoDTO.tokenEndpoint = (string)keyManagerInfo.tokenEndpoint;
+    keyManagerInfoDTO.revokeEndpoint = (string)keyManagerInfo.revokeEndpoint;
+    keyManagerInfoDTO.introspectEndpoint = (string)keyManagerInfo.introspectEndpoint;
     dto:CredentialsDTO keyManagerCredentialsDTO = {};
     json keyManagerCredentials = keyManagerInfo.credentials;
-    keyManagerCredentialsDTO.username = jsons:getString(keyManagerCredentials, "username");
-    keyManagerCredentialsDTO.password = jsons:getString(keyManagerCredentials, "password");
+    keyManagerCredentialsDTO.username = (string)keyManagerCredentials.username;
+    keyManagerCredentialsDTO.password = (string)keyManagerCredentials.password;
     gatewayConf.keyManagerInfo = keyManagerInfoDTO;
-
+    keyManagerInfoDTO.credentials = keyManagerCredentialsDTO;
     //Extract JWT information and populate JWTInfoDTO to be cached
     json jwTInfo = conf.jwTInfo;
     dto:JWTInfoDTO jwtInfoDTO = {};

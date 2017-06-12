@@ -58,8 +58,10 @@ service $serviceName {
 		#end
 		#end
 		latency:mediateIn(m);
-		handler:mediateIn(m);
         message response;
+        boolean status;
+        status,response = authenticate(m);
+        if(status){
 		string endpointType = messages:getProperty(m,constants:KEY_TYPE);
 		if (endpointType == "production") {
 		#if($productionEndpoint.applicableLevel == "API")
@@ -79,8 +81,9 @@ service $serviceName {
 		latency:mediateEndpointResponse(m);
 		latency:mediateOut(m);
 		handler:mediateOut(m, response);
-        reply response;
-    }
+		}
+		reply response;
+}
 #end
 #end
 }
