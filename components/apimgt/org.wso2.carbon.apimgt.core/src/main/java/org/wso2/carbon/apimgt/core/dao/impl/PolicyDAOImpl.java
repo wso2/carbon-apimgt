@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Contains Implementation for policy
+ * DAO Layer implementation class for Throttling Policies
  */
 public class PolicyDAOImpl implements PolicyDAO {
 
