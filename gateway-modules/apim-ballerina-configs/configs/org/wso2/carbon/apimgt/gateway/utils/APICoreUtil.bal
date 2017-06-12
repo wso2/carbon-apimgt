@@ -117,7 +117,7 @@ function getAPICoreURL () (string) {
 
 
 function deployService (dto:APIDTO api, string config) {
-    deployment:deployService(api.id, config, "org/wso2/carbon/apimgt/gateway");
+    deployment:deployService(api.id, config,"deployment/api");
 }
 function undeployService (dto:APIDTO api) {
     //TODO:To be implemented
