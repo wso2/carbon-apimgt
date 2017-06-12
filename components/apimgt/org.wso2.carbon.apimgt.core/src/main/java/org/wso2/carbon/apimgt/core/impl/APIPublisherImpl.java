@@ -469,7 +469,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         (apiBuilder.getVersion())) && (originalAPI.getProvider().equals(apiBuilder.getProvider())) &&
                         originalAPI.getLifeCycleStatus().equalsIgnoreCase(apiBuilder.getLifeCycleStatus())) {
 
-                    if (apiBuilder.getPermission() != null && !("[]").equals(apiBuilder.getPermission())) {
+                    if (apiBuilder.getPermission() != null && !("").equals(apiBuilder.getPermission())) {
                         Map<String, Integer> roleNamePermissionList;
                         roleNamePermissionList = getAPIPermissionArray(apiBuilder.getPermission());
                         if (checkRoleValidityForAPIPermissions(roleNamePermissionList)) {

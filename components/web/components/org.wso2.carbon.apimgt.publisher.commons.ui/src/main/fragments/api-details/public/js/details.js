@@ -678,7 +678,11 @@ function createRolePermissionJsonString() {
         });
         //to remove the empty role getting added due to the hidden div
         permissionJson.pop();
-        return JSON.stringify(permissionJson);
+        if(permissionJson.length > 0) {
+            return JSON.stringify(permissionJson);
+        } else {
+            return "";
+        }
 }
 
 /**
