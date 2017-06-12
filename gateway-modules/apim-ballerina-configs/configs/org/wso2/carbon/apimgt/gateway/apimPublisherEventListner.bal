@@ -20,7 +20,7 @@ providerUrl : "tcp://localhost:61616"}
 @jms:ConnectionProperty {key:"destination", value:"PublisherTopic"}
 @jms:ConnectionProperty {key:"connectionFactoryJNDIName", value:"TopicConnectionFactory"}
 @jms:ConnectionProperty {key:"sessionAcknowledgement", value:"AUTO_ACKNOWLEDGE"}
-service jmsService {
+service apimPublisherEventListner {
 
     @http:GET {}
     resource onMessage (message m) {

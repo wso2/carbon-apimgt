@@ -6,6 +6,10 @@ const string API_CREATE = "API_CREATE";
 const string API_UPDATE = "API_UPDATE";
 const string API_DELETE = "API_DELETE";
 const string API_STATE_CHANGE = "API_STATE_CHANGE";
+const string SUBSCRIPTION_CREATE = "SUBSCRIPTION_CREATE";
+const string SUBSCRIPTION_STATUS_CHANGE = "SUBSCRIPTION_STATUS_CHANGE";
+const string SUBSCRIPTION_DELETE = "SUBSCRIPTION_DELETE";
+
 const string EVENT_TYPE = "eventType";
 const string INTROSPECT_CONTEXT = "/oauth2/introspect";
 const string USER_INFO_CONTEXT = "/oauth2/userinfo";

@@ -83,15 +83,20 @@ function retrieveSubscriptions () (boolean ){
     messages:setHeader(request, "Content-Type", "application/json");
     message response = http:ClientConnector.get (apiInfoConnector, query, request);
     json subscriptions = messages:getJsonPayload(response);
-    int length = jsons:getInt(subscriptions, "$.list.length()");
+    updateSubscriptionCache(subscriptions.list);
+    return true;
+}
+
+function updateSubscriptionCache(json subscriptions){
+    int length = jsons:getInt(subscriptions, "$.length()");
     int i = 0;
     while (i < length) {
-        json subscription = subscriptions.list[i];
+        json subscription = subscriptions[i];
         dto:SubscriptionDto subscriptionDto = fromJsonToSubscriptionDto(subscription);
         holders:putIntoSubscriptionCache(subscriptionDto);
         i = i + 1;
     }
-    return true;
+
 }
 function retrieveResources (string apiContext, string apiVersion) {
     string query = "/api/am/core/v1.0/resources/?apiContext="+apiContext+"&apiVersion="+apiVersion;
