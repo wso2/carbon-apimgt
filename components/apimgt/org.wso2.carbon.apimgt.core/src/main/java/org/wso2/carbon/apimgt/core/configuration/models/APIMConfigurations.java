@@ -40,7 +40,7 @@ public class APIMConfigurations {
     private String adminContext = "/api/am/admin/v1.0";
 
     @Element(description = "package name for gateway configs")
-    private String gatewayPackageName = "deployment.org.wso2.apim";
+    private String gatewayPackageName = "deployment.api";
 
     @Element(description = "package name path for gateway configs")
     private String gatewayPackageNamePath =
