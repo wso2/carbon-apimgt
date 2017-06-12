@@ -112,8 +112,7 @@ service apimPublisherEventListner {
             } else if (strings:equalsIgnoreCase(eventType, Constants:API_STATE_CHANGE)) {
                 json apiSummary = jsons:getJson(event, "apiSummary");
                 if (apiSummary != null) {
-                    //Update API cache
-                    system:println(apiSummary);
+
                     dto:APIDTO api = gatewayUtil:fromJSONToAPIDTO(apiSummary);
                     holder:putIntoAPICache(api);
                 } else {

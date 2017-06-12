@@ -74,6 +74,7 @@ public class ApplicationUpdateWorkflow extends Workflow {
         String updatedUser = getAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_UPDATEDBY);
         String applicationId = getWorkflowReference();
         String tier = getAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_TIER);
+        String policyId = getAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_POLICY_ID);
         String description = getAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_DESCRIPTION);
         String callbackUrl = getAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_CALLBACKURL);
         String groupId = getAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_GROUPID);
@@ -81,6 +82,7 @@ public class ApplicationUpdateWorkflow extends Workflow {
 
         Application application = new Application(name, updatedUser);
         application.setTier(tier);
+        application.setPolicyId(policyId);
         application.setCallbackUrl(callbackUrl);
         application.setDescription(description);
         application.setGroupId(groupId);

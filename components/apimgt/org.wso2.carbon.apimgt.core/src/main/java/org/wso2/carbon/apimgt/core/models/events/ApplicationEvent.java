@@ -22,21 +22,21 @@ package org.wso2.carbon.apimgt.core.models.events;
  * Holds the Application related details transferred to Gateway
  */
 public class ApplicationEvent extends GatewayEvent {
-    private String id;
+    private String applicationId;
     private String name;
-    private String createdUser;
-    private String policy;
+    private String subscriber;
+    private String throttlingTier;
 
     public ApplicationEvent(String eventType) {
         super(eventType);
     }
 
-    public String getId() {
-        return id;
+    public String getApplicationId() {
+        return applicationId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setApplicationId(String applicationId) {
+        this.applicationId = applicationId;
     }
 
     public String getName() {
@@ -47,19 +47,19 @@ public class ApplicationEvent extends GatewayEvent {
         this.name = name;
     }
 
-    public String getCreatedUser() {
-        return createdUser;
+    public String getSubscriber() {
+        return subscriber;
     }
 
-    public void setCreatedUser(String createdUser) {
-        this.createdUser = createdUser;
+    public void setSubscriber(String subscriber) {
+        this.subscriber = subscriber;
     }
 
-    public String getPolicy() {
-        return policy;
+    public String getThrottlingTier() {
+        return throttlingTier;
     }
 
-    public void setPolicy(String policy) {
-        this.policy = policy;
+    public void setThrottlingTier(String throttlingTier) {
+        this.throttlingTier = throttlingTier;
     }
 }

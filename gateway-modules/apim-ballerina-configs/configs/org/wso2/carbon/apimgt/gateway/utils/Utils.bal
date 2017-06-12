@@ -76,7 +76,7 @@ function fromJsonToResourceDto (json resourceResponse) (dto:ResourceDto){
     resourceDto.policy = (string)resourceResponse.policy;
     return resourceDto;
 }
-function retrieveSubscriptions () (boolean ){
+function retrieveSubscriptions () (boolean){
     string query = "/api/am/core/v1.0/subscriptions?limit=-1";
     message request = {};
     http:ClientConnector apiInfoConnector = create http:ClientConnector(holders:apiCoreUrl);
@@ -113,7 +113,7 @@ function removeFromSubscriptionCache (json subscriptions) {
 }
 
 function retrieveResources (string apiContext, string apiVersion) {
-    string query = "/api/am/core/v1.0/resources/?apiContext="+apiContext+"&apiVersion="+apiVersion;
+    string query = "/api/am/core/v1.0/resources/?apiContext=" + apiContext + "&apiVersion=" + apiVersion;
     message request = {};
     http:ClientConnector apiInfoConnector = create http:ClientConnector(holders:apiCoreUrl);
     messages:setHeader(request, "Content-Type", "application/json");
@@ -127,7 +127,7 @@ function retrieveResources (string apiContext, string apiVersion) {
         i = i + 1;
     }
 }
-function retrieveApplications ()(boolean) {
+function retrieveApplications () (boolean) {
     string query = "/api/am/core/v1.0/applications";
     message request = {};
     http:ClientConnector apiInfoConnector = create http:ClientConnector(holders:apiCoreUrl);
@@ -137,20 +137,28 @@ function retrieveApplications ()(boolean) {
     int length = jsons:getInt(applications, "$.list.length()");
     int i = 0;
     if (length > 0) {
-        while(i<length){
+        while (i < length) {
             json application = applications.list[i];
-            dto:ApplicationDto applicationDto = {};
-            applicationDto.applicationId = (string )application.applicationId;
-            applicationDto.applicationName = (string )application.name;
-            applicationDto.applicationOwner = (string )application.subscriber;
-            applicationDto.applicationPolicy = (string )application.throttlingTier;
-            holders:putIntoApplicationCache(applicationDto);
-            i=i+1;
+            putIntoApplicationCache(application);
+            i = i + 1;
         }
     }
     return true;
 }
 
+function putIntoApplicationCache (json application) {
+    dto:ApplicationDto applicationDto = {};
+    applicationDto.applicationId = (string)application.applicationId;
+    applicationDto.applicationName = (string)application.name;
+    applicationDto.applicationOwner = (string)application.subscriber;
+    applicationDto.applicationPolicy = (string)application.throttlingTier;
+    holders:putIntoApplicationCache(applicationDto);
+}
+
+function removeFromApplicationCache (json application) {
+    string applicationId = (string)application.applicationId;
+    holders:removeApplicationFromCache(applicationId);
+}
 function fromJsonToGatewayConfDTO (json conf) (dto:GatewayConfDTO){
     dto:GatewayConfDTO gatewayConf = {};
 
@@ -212,9 +220,9 @@ function fromJSONToAPIDTO (json api) (dto:APIDTO){
 
 function getSystemProperty (string prop) (string) {
     string pathValue = "";
-    try{
+    try {
         pathValue = system:getEnv(prop);
-        if(pathValue != "") {
+        if (pathValue != "") {
             return pathValue;
         }
     } catch (errors:Error e) {
@@ -223,24 +231,24 @@ function getSystemProperty (string prop) (string) {
     return pathValue;
 }
 
-function getStringProperty(message msg, string propertyKey)(string){
+function getStringProperty (message msg, string propertyKey) (string){
     string value = "";
-    try{
-        value = messages:getProperty(msg,propertyKey);
-        if(value != ""){
+    try {
+        value = messages:getProperty(msg, propertyKey);
+        if (value != "") {
             return value;
         }
-    }catch (errors:Error e) {
+    } catch (errors:Error e) {
         return "";
     }
     return value;
 }
 
-function getJsonString(json jsonObject, string jsonPath)(string){
+function getJsonString (json jsonObject, string jsonPath) (string){
     string value = "";
-    try{
-        value = jsons:getString(jsonObject, jsonPath) ;
-    }catch(errors:Error e){
+    try {
+        value = jsons:getString(jsonObject, jsonPath);
+    } catch (errors:Error e) {
         return "";
     }
     return value;

@@ -202,7 +202,18 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 application.setId(uuid);
                 application.setUpdatedUser(getUsername());
                 application.setUpdatedTime(LocalDateTime.now());
-                
+
+                String appTierName = application.getTier();
+                if (appTierName != null && !appTierName.equals(existingApplication.getTier())) {
+                    Policy policy = getPolicyDAO().getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL,
+                            appTierName);
+                    if (policy == null) {
+                        String message = "Specified tier " + appTierName + " is invalid";
+                        log.error(message);
+                        throw new APIManagementException(message, ExceptionCodes.TIER_NAME_INVALID);
+                    }
+                    application.setPolicyId(policy.getUuid());
+                }
                 workflow.setExistingApplication(existingApplication);
                 workflow.setUpdatedApplication(application);
                 workflow.setCreatedBy(getUsername());
@@ -220,6 +231,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_NAME, application.getName());
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_UPDATEDBY, application.getUpdatedUser());
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_TIER, application.getTier());
+                workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_POLICY_ID, application.getPolicyId());
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_DESCRIPTION,
                         application.getDescription());
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_CALLBACKURL,
@@ -1278,6 +1290,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                     log.error(message);
                     throw new APIManagementException(message, ExceptionCodes.TIER_CANNOT_BE_NULL);
                 }
+                application.setPolicyId(policy.getUuid());
             }
             // Generate UUID for application
             String generatedUuid = UUID.randomUUID().toString();
