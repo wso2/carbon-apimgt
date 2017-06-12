@@ -24,6 +24,8 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomAttributeDTO;
@@ -33,6 +35,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.exceptions.SubscriptionThrottlePoli
 import org.wso2.carbon.apimgt.rest.api.admin.exceptions.UnsupportedThrottleLimitTypeException;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -45,6 +48,8 @@ import java.util.List;
 public class SubscriptionThrottlePolicyMappingUtil {
 
     private static final Logger log = LoggerFactory.getLogger(SubscriptionThrottlePolicyMappingUtil.class);
+    protected static final String ENCODING_UTF_8 = "UTF-8";
+    protected static final String ENCODING_SYSTEM_PROPERTY = "file.encoding";
 
     /**
      * Converts an array of Subscription Policy objects into a List DTO
@@ -107,7 +112,7 @@ public class SubscriptionThrottlePolicyMappingUtil {
                     policyDTO.setCustomAttributes(customAttributeDTOs);
                 }
             } else {
-                log.error("policy object " + policy.toString() + " is not aa Subscription Policy, hence will not "
+                log.error("policy object " + policy.toString() + " is not a Subscription Policy, hence will not "
                         + "be considered");
             }
             if (policy.getDefaultQuotaPolicy() != null) {
@@ -127,7 +132,7 @@ public class SubscriptionThrottlePolicyMappingUtil {
      * @throws UnsupportedThrottleLimitTypeException
      */
     @SuppressWarnings("unchecked") public static SubscriptionPolicy fromSubscriptionThrottlePolicyDTOToModel(
-            SubscriptionThrottlePolicyDTO dto) throws UnsupportedThrottleLimitTypeException {
+            SubscriptionThrottlePolicyDTO dto) throws APIManagementException {
 
         SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(dto.getPolicyName());
         subscriptionPolicy = CommonThrottleMappingUtil.updateFieldsFromDTOToPolicy(dto, subscriptionPolicy);
@@ -145,7 +150,15 @@ public class SubscriptionThrottlePolicyMappingUtil {
                 attrJsonObj.put(RestApiConstants.THROTTLING_CUSTOM_ATTRIBUTE_VALUE, customAttributeDTO.getValue());
                 customAttrJsonArray.add(attrJsonObj);
             }
-            subscriptionPolicy.setCustomAttributes(customAttrJsonArray.toJSONString().getBytes(StandardCharsets.UTF_8));
+            try {
+                subscriptionPolicy.setCustomAttributes(customAttrJsonArray.toJSONString().
+                        getBytes(System.getProperty(ENCODING_SYSTEM_PROPERTY, ENCODING_UTF_8)));
+            } catch (UnsupportedEncodingException e) {
+                String errorMsg = "Error while setting custom attributes for Subscription Policy: " +
+                        dto.getPolicyName();
+                log.error(errorMsg, e);
+                throw new APIManagementException(errorMsg, e, ExceptionCodes.INTERNAL_ERROR);
+            }
         }
         if (dto.getDefaultLimit() != null) {
             subscriptionPolicy
