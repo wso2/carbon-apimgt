@@ -34,15 +34,20 @@ import org.wso2.carbon.apimgt.core.util.AMSSLSocketFactory;
 public class SCIMServiceStubFactory {
 
     private static final String WSO2_SCIM_BASE_PATH = "/wso2/scim";
-    private static final String DEFAULT_IDP_CERT_ALIAS = "wso2carbon";
 
+    /**
+     * Create and return SCIM service stubs
+     *
+     * @return SCIM Service client
+     * @throws APIManagementException if error occurs while crating SCIM service stub
+     */
     public static SCIMServiceStub getSCIMServiceStub() throws APIManagementException {
         IdentityProviderConfigurations idpConfigs = ServiceReferenceHolder.getInstance().getAPIMConfiguration()
                 .getIdentityProviderConfigs();
         return getSCIMServiceStub(idpConfigs.getIdentityProviderBaseUrl(),
                 idpConfigs.getIdentityProviderCredentials().getUsername(),
                 idpConfigs.getIdentityProviderCredentials().getPassword(),
-                DEFAULT_IDP_CERT_ALIAS);
+                idpConfigs.getIdpCertAlias());
     }
 
     /**
@@ -55,8 +60,8 @@ public class SCIMServiceStubFactory {
      * @return SCIM Service client
      * @throws APIManagementException if error occurs while crating SCIM service stub
      */
-    public static SCIMServiceStub getSCIMServiceStub(
-            String idpBaseUrl, String username, String password, String idpCertAlias) throws APIManagementException {
+    public static SCIMServiceStub getSCIMServiceStub(String idpBaseUrl, String username, String password,
+                                                     String idpCertAlias) throws APIManagementException {
         return Feign.builder()
                 .requestInterceptor(new BasicAuthRequestInterceptor(username, password))
                 .encoder(new GsonEncoder())

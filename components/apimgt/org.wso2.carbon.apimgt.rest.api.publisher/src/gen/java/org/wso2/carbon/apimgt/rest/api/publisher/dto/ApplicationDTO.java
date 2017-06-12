@@ -26,9 +26,6 @@ public class ApplicationDTO   {
   @JsonProperty("description")
   private String description = null;
 
-  @JsonProperty("groupId")
-  private String groupId = null;
-
   public ApplicationDTO applicationId(String applicationId) {
     this.applicationId = applicationId;
     return this;
@@ -119,24 +116,6 @@ public class ApplicationDTO   {
     this.description = description;
   }
 
-  public ApplicationDTO groupId(String groupId) {
-    this.groupId = groupId;
-    return this;
-  }
-
-   /**
-   * Get groupId
-   * @return groupId
-  **/
-  @ApiModelProperty(example = "", value = "")
-  public String getGroupId() {
-    return groupId;
-  }
-
-  public void setGroupId(String groupId) {
-    this.groupId = groupId;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -151,13 +130,12 @@ public class ApplicationDTO   {
         Objects.equals(this.name, application.name) &&
         Objects.equals(this.subscriber, application.subscriber) &&
         Objects.equals(this.throttlingTier, application.throttlingTier) &&
-        Objects.equals(this.description, application.description) &&
-        Objects.equals(this.groupId, application.groupId);
+        Objects.equals(this.description, application.description);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, name, subscriber, throttlingTier, description, groupId);
+    return Objects.hash(applicationId, name, subscriber, throttlingTier, description);
   }
 
   @Override
@@ -170,7 +148,6 @@ public class ApplicationDTO   {
     sb.append("    subscriber: ").append(toIndentedString(subscriber)).append("\n");
     sb.append("    throttlingTier: ").append(toIndentedString(throttlingTier)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
-    sb.append("    groupId: ").append(toIndentedString(groupId)).append("\n");
     sb.append("}");
     return sb.toString();
   }

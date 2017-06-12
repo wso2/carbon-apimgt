@@ -23,9 +23,13 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.TestUtil;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
+import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
+import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -74,8 +78,12 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
         ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
         //delete app
         applicationDAO.deleteApplication(app.getId());
-        Application appFromDB = applicationDAO.getApplication(app.getId());
-        Assert.assertNull(appFromDB);
+
+        try {
+            applicationDAO.getApplication(app.getId());
+        } catch (APIMgtDAOException ex) {
+            Assert.assertEquals(ex.getMessage(), "Application is not available in the system.");
+        }
     }
 
     @Test
@@ -194,6 +202,37 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
+    public void testGetAllApplicationsForValidation() throws Exception {
+
+        //add 4 apps
+        String username = "admin";
+        Application app1 = TestUtil.addCustomApplication("App1", username);
+        Application app2 = TestUtil.addCustomApplication("App2", username);
+        Application app3 = TestUtil.addCustomApplication("App3", username);
+        Application app4 = TestUtil.addCustomApplication("App4", username);
+        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
+        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        //get added apps
+        List<Application> appsFromDB = applicationDAO.getAllApplications();
+        Assert.assertNotNull(appsFromDB);
+        Assert.assertEquals(appsFromDB.size(), 4);
+        for (Application application : appsFromDB) {
+            Assert.assertNotNull(application);
+            if (application.getName().equals(app1.getName())) {
+                validateApp(application, app1, policyDAO);
+            } else if (application.getName().equals(app2.getName())) {
+                validateApp(application, app2, policyDAO);
+            } else if (application.getName().equals(app3.getName())) {
+                validateApp(application, app3, policyDAO);
+            } else if (application.getName().equals(app4.getName())) {
+                validateApp(application, app4, policyDAO);
+            } else {
+                Assert.fail("Invalid Application returned.");
+            }
+        }
+    }
+
+    @Test
     public void testFingerprintAfterUpdatingApplication() throws Exception {
         ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
 
@@ -220,24 +259,52 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testGetApplicationsForUser() throws Exception {
 
-
-    }
-
-    @Test
-    public void testGetApplicationsForGroup() throws Exception {
-
-
     }
 
     @Test
     public void testSearchApplicationsForUser() throws Exception {
 
-
     }
 
     @Test
-    public void testSearchApplicationsForGroup() throws Exception {
+    public void testAddAndGetApplicationKeys() throws Exception {
+        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
+        //add test app
+        Application app = TestUtil.addTestApplicationWithPermissions();
+        String appId = app.getId();
+        String prodConsumerKey = "prod-xxx";
+        String sandConsumerKey = "sand-yyy";
 
+        //add prod key
+        applicationDAO.addApplicationKeys(appId, KeyManagerConstants.OAUTH_CLIENT_PRODUCTION, prodConsumerKey);
+        //get by key type
+        OAuthApplicationInfo keysFromDB = applicationDAO.getApplicationKeys(appId,
+                KeyManagerConstants.OAUTH_CLIENT_PRODUCTION);
+        Assert.assertEquals(keysFromDB.getClientId(), prodConsumerKey);
+
+        //add sand key
+        applicationDAO.addApplicationKeys(appId, KeyManagerConstants.OAUTH_CLIENT_SANDBOX, sandConsumerKey);
+        //get all keys
+        List<OAuthApplicationInfo> allKeysFromDB = applicationDAO.getApplicationKeys(appId);
+        Assert.assertEquals(allKeysFromDB.size(), 2, "Wrong number of keys are returned.");
+
+        int i = 0; //this should stay 0 at the end
+        for (OAuthApplicationInfo oAuthApplicationInfo : allKeysFromDB) {
+            switch (oAuthApplicationInfo.getKeyType()) {
+                case KeyManagerConstants.OAUTH_CLIENT_PRODUCTION:
+                    Assert.assertEquals(oAuthApplicationInfo.getClientId(), prodConsumerKey);
+                    i++;
+                    break;
+                case KeyManagerConstants.OAUTH_CLIENT_SANDBOX:
+                    Assert.assertEquals(oAuthApplicationInfo.getClientId(), sandConsumerKey);
+                    i--;
+                    break;
+                default:
+                    Assert.fail("Invalid key type.");
+                    break;
+            }
+        }
+        Assert.assertEquals(i, 0, "Received key counts of each type is not 1");
     }
 
     private void validateAppTimestamps(Application appFromDB, Application expectedApp) {
@@ -247,4 +314,20 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
                 "Application updated time is not the same!");
     }
 
+    private void validateApp(Application appFromDB, Application expectedApp, PolicyDAO policyDAO) throws
+            APIMgtDAOException, IllegalAccessException {
+        Assert.assertEquals(appFromDB.getName(), expectedApp.getName(), TestUtil.printDiff(appFromDB.getName(),
+                expectedApp.getName()));
+        Assert.assertEquals(appFromDB.getStatus(), expectedApp.getStatus(), TestUtil.printDiff(appFromDB.getStatus(),
+                expectedApp.getStatus()));
+        Assert.assertEquals(appFromDB.getCreatedUser(), expectedApp.getCreatedUser(), TestUtil.printDiff(appFromDB
+                .getCreatedUser(), expectedApp.getCreatedUser()));
+        Assert.assertEquals(appFromDB.getId(), expectedApp.getId(), TestUtil.printDiff(appFromDB.getId(), expectedApp
+                .getId()));
+        Assert.assertEquals(policyDAO.getApplicationPolicyByUuid(appFromDB.getPolicy().getUuid()).getPolicyName(),
+                expectedApp
+                .getPolicy().getPolicyName(), TestUtil.printDiff(policyDAO.getApplicationPolicyByUuid(appFromDB
+                        .getPolicy().getUuid())
+                .getPolicyName(), expectedApp.getPolicy().getPolicyName()));
+    }
 }

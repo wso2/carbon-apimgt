@@ -1,0 +1,46 @@
+.MuiDrawer-docked-101 .MuiDrawer-paper-96{
+    background: rgb(236,239,241);
+}
+#react-root{
+    background: #fff;
+}
+header.MuiAppBar-colorPrimary-6{
+    background-color: rgb(9, 117, 239);
+}
+.selected-item{
+    width: 250px;
+    color: #fff;
+    background-color: #71ABFF;
+}
+.selected-item h3{
+    color:#fff;
+}
+.api-details-title{
+    color:#444;
+    font-size:20px;
+    height:40px;
+    line-height:50px;
+    font-weight: 300
+}
+.page-title{
+    font-weight: 300 ;
+    padding: 10px 0 0 30px;
+    margin: 0;
+    position: relative;
+    flex: 1;
+}
+.page-title-actions{
+    align-self: flex-end;
+    font-size: 11px;
+    margin: auto;
+    width: 800px;
+    display: block;
+    float: right;
+}
+.page-title-actions button{
+    margin: 0;
+    padding: 0;
+}
+.title-toolbar{
+    margin-left: 0;
+}

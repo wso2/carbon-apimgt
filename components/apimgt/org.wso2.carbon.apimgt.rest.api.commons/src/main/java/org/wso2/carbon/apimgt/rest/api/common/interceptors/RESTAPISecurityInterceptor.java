@@ -84,21 +84,28 @@ public class RESTAPISecurityInterceptor implements Interceptor {
         if (!requestURI.contains("/api/am/")) {
             return true;
         }
+        if (requestURI.contains("api/am/webserver/")) {
+            return true;
+        } else if (requestURI.contains("/login/token")) {
+            return true;
+        }
+
         String yamlContent = null;
         String protocol = (String) request.getProperty(PROTOCOL);
         Swagger swagger = null;
         if (requestURI.contains("/publisher")) {
-            if (requestURI.contains("swagger.json")) {
+            if (requestURI.contains("swagger.yaml")) {
                 try {
                     yamlContent = RestApiUtil.getPublisherRestAPIResource();
-                    swagger = new SwaggerParser().parse(yamlContent);
-                    swagger.setBasePath(RestApiUtil.getContext(RestApiConstants.APPType.PUBLISHER));
-                    swagger.setHost(RestApiUtil.getHost(protocol.toLowerCase(Locale.ENGLISH)));
+                    response.setStatus(javax.ws.rs.core.Response.Status.OK.getStatusCode()).setEntity(yamlContent)
+                            .setMediaType("text/x-yaml").send();
                 } catch (APIManagementException e) {
-                    log.error("Couldn't find swagger.json for publisher", e);
+                    String msg = "Couldn't find swagger.yaml for publisher";
+                    ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+                    log.error(msg, e);
+                    response.setStatus(javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
+                            .setEntity(errorDTO).send();
                 }
-                response.setStatus(javax.ws.rs.core.Response.Status.OK.getStatusCode()).setEntity(Json.pretty
-                        (swagger)).setMediaType(MediaType.APPLICATION_JSON).send();
                 return false;
             }
         } else if (requestURI.contains("/store")) {
@@ -108,29 +115,62 @@ public class RESTAPISecurityInterceptor implements Interceptor {
                     swagger = new SwaggerParser().parse(yamlContent);
                     swagger.setBasePath(RestApiUtil.getContext(RestApiConstants.APPType.STORE));
                     swagger.setHost(RestApiUtil.getHost(protocol.toLowerCase(Locale.ENGLISH)));
+                    response.setStatus(javax.ws.rs.core.Response.Status.OK.getStatusCode()).setEntity(Json.pretty
+                            (swagger)).setMediaType(MediaType.APPLICATION_JSON).send();
 
                 } catch (APIManagementException e) {
-                    log.error("Couldn't find swagger.json for store", e);
+                    String msg = "Couldn't find swagger.json for store";
+                    ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+                    log.error(msg, e);
+                    response.setStatus(javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
+                            .setEntity(errorDTO).send();
                 }
-                response.setStatus(javax.ws.rs.core.Response.Status.OK.getStatusCode()).setEntity(Json.pretty
-                        (swagger)).setMediaType(MediaType.APPLICATION_JSON).send();
+                return false;
+            } else if (requestURI.contains("swagger.yaml")) {
+                try {
+                    yamlContent = RestApiUtil.getStoreRestAPIResource();
+                    response.setStatus(javax.ws.rs.core.Response.Status.OK.getStatusCode()).setEntity(yamlContent)
+                            .setMediaType("text/x-yaml").send();
+                } catch (APIManagementException e) {
+                    String msg = "Couldn't find swagger.yaml for store";
+                    ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+                    log.error(msg, e);
+                    response.setStatus(javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
+                            .setEntity(errorDTO).send();
+                }
                 return false;
             }
         } else if (requestURI.contains("/editor") || requestURI.contains("keyserver") || requestURI.contains("core")) {
             return true;
-        } else if (requestURI.contains("/admin"))   {
+        } else if (requestURI.contains("/admin")) {
             if (requestURI.contains("swagger.json")) {
                 try {
                     yamlContent = RestApiUtil.getAdminRestAPIResource();
                     swagger = new SwaggerParser().parse(yamlContent);
                     swagger.setBasePath(RestApiUtil.getContext(RestApiConstants.APPType.ADMIN));
                     swagger.setHost(RestApiUtil.getHost(protocol.toLowerCase(Locale.ENGLISH)));
-
+                    response.setStatus(javax.ws.rs.core.Response.Status.OK.getStatusCode())
+                            .setEntity(Json.pretty(swagger)).setMediaType(MediaType.APPLICATION_JSON).send();
                 } catch (APIManagementException e) {
-                    log.error("Couldn't find swagger.json for admin", e);
+                    String msg = "Couldn't find swagger.yaml for admin";
+                    ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+                    log.error(msg, e);
+                    response.setStatus(javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
+                            .setEntity(errorDTO).send();
                 }
-                response.setStatus(javax.ws.rs.core.Response.Status.OK.getStatusCode()).setEntity(Json.pretty
-                        (swagger)).setMediaType(MediaType.APPLICATION_JSON).send();
+                return false;
+            } else if (requestURI.contains("swagger.yaml")) {
+                try {
+                    yamlContent = RestApiUtil.getAdminRestAPIResource();
+                    response.setStatus(javax.ws.rs.core.Response.Status.OK.getStatusCode()).setEntity(yamlContent)
+                            .setMediaType("text/x-yaml").send();
+                } catch (APIManagementException e) {
+                    String msg = "Couldn't find swagger.yaml for admin";
+                    ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+                    log.error(msg, e);
+                    response.setStatus(javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
+                            .setEntity(errorDTO).send();
+                }
                 return false;
             }
         }
@@ -192,6 +232,7 @@ public class RESTAPISecurityInterceptor implements Interceptor {
         responder.setStatus(errorHandler.getHttpStatusCode());
         responder.setHeader(javax.ws.rs.core.HttpHeaders.WWW_AUTHENTICATE, RestApiConstants.AUTH_TYPE_OAUTH2);
         responder.setEntity(errorDTO);
+        responder.setMediaType(MediaType.APPLICATION_JSON);
         responder.send();
     }
 }

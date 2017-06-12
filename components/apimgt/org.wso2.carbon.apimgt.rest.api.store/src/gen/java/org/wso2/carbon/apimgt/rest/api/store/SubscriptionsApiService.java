@@ -23,20 +23,18 @@ import javax.ws.rs.core.SecurityContext;
 public abstract class SubscriptionsApiService {
     public abstract Response subscriptionsGet(String apiId
  ,String applicationId
+ ,String apiType
  ,Integer offset
  ,Integer limit
- ,String accept
  ,String ifNoneMatch
  , Request request) throws NotFoundException;
     public abstract Response subscriptionsPost(SubscriptionDTO body
- ,String contentType
  , Request request) throws NotFoundException;
     public abstract Response subscriptionsSubscriptionIdDelete(String subscriptionId
  ,String ifMatch
  ,String ifUnmodifiedSince
  , Request request) throws NotFoundException;
     public abstract Response subscriptionsSubscriptionIdGet(String subscriptionId
- ,String accept
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;

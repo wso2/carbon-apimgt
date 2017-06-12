@@ -42,9 +42,10 @@ public class PostgresSQLStatements implements ApiDAOVendorSpecificStatements {
 
     private static final Logger log = LoggerFactory.getLogger(PostgresSQLStatements.class);
     private static final String API_SUMMARY_SELECT =
-            "SELECT API.UUID, API.PROVIDER, API.NAME, API.CONTEXT, API.VERSION, API.DESCRIPTION,"
-                    + "API.CURRENT_LC_STATUS, API.LIFECYCLE_INSTANCE_ID, API.LC_WORKFLOW_STATUS, API.API_TYPE_ID "
-                    + "FROM AM_API API LEFT JOIN AM_API_GROUP_PERMISSION PERMISSION ON UUID = API_ID";
+            "SELECT DISTINCT API.UUID, API.PROVIDER, API.NAME, API.CONTEXT, API.VERSION, API.DESCRIPTION,"
+                    + "API.CURRENT_LC_STATUS, API.LIFECYCLE_INSTANCE_ID, API.LC_WORKFLOW_STATUS, API.API_TYPE_ID, "
+                    + "API.SECURITY_SCHEME FROM AM_API API LEFT JOIN AM_API_GROUP_PERMISSION PERMISSION ON "
+                    + "UUID = API_ID";
 
     private static final String API_SUMMARY_SELECT_STORE = "SELECT UUID, PROVIDER, NAME, CONTEXT, " +
             "VERSION, DESCRIPTION, CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS " +
@@ -74,13 +75,15 @@ public class PostgresSQLStatements implements ApiDAOVendorSpecificStatements {
             return API_SUMMARY_SELECT +
                     " WHERE textsearchable_index_col @@ to_tsquery(replace(?, ' ', '+'))" +
                     " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
-                    " AND ((GROUP_ID IN (" + DAOUtil.getParameterString(roleCount) + ")) OR (PROVIDER = ?))" +
+                    " AND (((GROUP_ID IN (" + DAOUtil.getParameterString(roleCount) + "))" +
+                    " AND PERMISSION.PERMISSION >= " + APIMgtConstants.Permission.READ_PERMISSION +
+                    ") OR (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" +
                     " GROUP BY UUID ORDER BY NAME  OFFSET ? LIMIT ?";
         } else {
             return API_SUMMARY_SELECT +
                     " WHERE textsearchable_index_col @@ to_tsquery(replace(?, ' ', '+'))" +
                     " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
-                    " AND PROVIDER = ?" +
+                    " AND ((PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" +
                     " GROUP BY UUID ORDER BY NAME  OFFSET ? LIMIT ?";
         }
     }
@@ -128,16 +131,16 @@ public class PostgresSQLStatements implements ApiDAOVendorSpecificStatements {
         }
 
         if (roleCount > 0) {
-            return API_SUMMARY_SELECT +
-                    " WHERE " + searchQuery.toString() +
+            return API_SUMMARY_SELECT + " WHERE " + searchQuery.toString() +
                     " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
-                    " AND ((GROUP_ID IN (" + DAOUtil.getParameterString(roleCount) + ")) OR  (PROVIDER = ?))" +
+                    " AND (((GROUP_ID IN (" + DAOUtil.getParameterString(roleCount) +
+                    ")) AND PERMISSION.PERMISSION >= " + APIMgtConstants.Permission.READ_PERMISSION +
+                    ") OR  (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" +
                     " GROUP BY UUID ORDER BY NAME  OFFSET ? LIMIT ?";
         } else {
-            return API_SUMMARY_SELECT +
-                    " WHERE " + searchQuery.toString() +
+            return API_SUMMARY_SELECT + " WHERE " + searchQuery.toString() +
                     " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
-                    " AND PROVIDER = ?" +
+                    " AND ((PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" +
                     " GROUP BY UUID ORDER BY NAME  OFFSET ? LIMIT ?";
         }
     }

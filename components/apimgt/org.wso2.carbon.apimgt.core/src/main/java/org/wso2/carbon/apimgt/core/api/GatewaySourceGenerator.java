@@ -18,9 +18,10 @@
 */
 package org.wso2.carbon.apimgt.core.api;
 
-import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.template.APIConfigContext;
 import org.wso2.carbon.apimgt.core.template.APITemplateException;
+import org.wso2.carbon.apimgt.core.template.dto.CompositeAPIEndpointDTO;
 import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
 
 import java.util.List;
@@ -40,11 +41,11 @@ public interface GatewaySourceGenerator {
 
     /**
      * Generate initial endpoint config
-     * @param endpoints List of endpoints.
+     * @param endpoint List of endpoints.
      * @return endpoint source as Text
      * @throws APITemplateException throws if an error occurred
      */
-    String getEndpointConfigStringFromTemplate(List<Endpoint> endpoints) throws APITemplateException;
+    String getEndpointConfigStringFromTemplate(Endpoint endpoint) throws APITemplateException;
 
     /**
      * Used to update or create service implementation using a swagger
@@ -66,8 +67,20 @@ public interface GatewaySourceGenerator {
     String getSwaggerFromGatewayConfig(String gatewayConfig) throws APITemplateException;
 
     /**
-     * Used to set API Object.
-     * @param api
+     * Used to set API Config context.
+     * @param apiConfigContext  APIConfigContext instance
      */
-    public void setAPI(API api);
+    void setApiConfigContext(APIConfigContext apiConfigContext);
+
+    /**
+     * Generate initial service implementation for a composite API
+     *
+     * @param apiResources List of api resources.
+     * @param compositeApiEndpoints List of api endpoints of subscribed APIs.
+     * @return service impl as Text
+     * @throws APITemplateException throws if an error occurred
+     */
+    String getCompositeAPIConfigStringFromTemplate(List<TemplateBuilderDTO> apiResources,
+                                                   List<CompositeAPIEndpointDTO> compositeApiEndpoints)
+                                                   throws APITemplateException;
 }

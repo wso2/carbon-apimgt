@@ -7,7 +7,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeysDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationTokenDTO;
 import java.util.Objects;
 
 /**
@@ -26,9 +27,6 @@ public class ApplicationDTO   {
   @JsonProperty("throttlingTier")
   private String throttlingTier = null;
 
-  @JsonProperty("callbackUrl")
-  private String callbackUrl = null;
-
   @JsonProperty("permission")
   private String permission = null;
 
@@ -38,11 +36,11 @@ public class ApplicationDTO   {
   @JsonProperty("lifeCycleStatus")
   private String lifeCycleStatus = null;
 
-  @JsonProperty("groupId")
-  private String groupId = null;
+  @JsonProperty("token")
+  private ApplicationTokenDTO token = null;
 
   @JsonProperty("keys")
-  private List<ApplicationKeyDTO> keys = new ArrayList<ApplicationKeyDTO>();
+  private List<ApplicationKeysDTO> keys = new ArrayList<ApplicationKeysDTO>();
 
   public ApplicationDTO applicationId(String applicationId) {
     this.applicationId = applicationId;
@@ -116,24 +114,6 @@ public class ApplicationDTO   {
     this.throttlingTier = throttlingTier;
   }
 
-  public ApplicationDTO callbackUrl(String callbackUrl) {
-    this.callbackUrl = callbackUrl;
-    return this;
-  }
-
-   /**
-   * Get callbackUrl
-   * @return callbackUrl
-  **/
-  @ApiModelProperty(value = "")
-  public String getCallbackUrl() {
-    return callbackUrl;
-  }
-
-  public void setCallbackUrl(String callbackUrl) {
-    this.callbackUrl = callbackUrl;
-  }
-
   public ApplicationDTO permission(String permission) {
     this.permission = permission;
     return this;
@@ -188,30 +168,30 @@ public class ApplicationDTO   {
     this.lifeCycleStatus = lifeCycleStatus;
   }
 
-  public ApplicationDTO groupId(String groupId) {
-    this.groupId = groupId;
+  public ApplicationDTO token(ApplicationTokenDTO token) {
+    this.token = token;
     return this;
   }
 
    /**
-   * Get groupId
-   * @return groupId
+   * Get token
+   * @return token
   **/
   @ApiModelProperty(value = "")
-  public String getGroupId() {
-    return groupId;
+  public ApplicationTokenDTO getToken() {
+    return token;
   }
 
-  public void setGroupId(String groupId) {
-    this.groupId = groupId;
+  public void setToken(ApplicationTokenDTO token) {
+    this.token = token;
   }
 
-  public ApplicationDTO keys(List<ApplicationKeyDTO> keys) {
+  public ApplicationDTO keys(List<ApplicationKeysDTO> keys) {
     this.keys = keys;
     return this;
   }
 
-  public ApplicationDTO addKeysItem(ApplicationKeyDTO keysItem) {
+  public ApplicationDTO addKeysItem(ApplicationKeysDTO keysItem) {
     this.keys.add(keysItem);
     return this;
   }
@@ -221,11 +201,11 @@ public class ApplicationDTO   {
    * @return keys
   **/
   @ApiModelProperty(value = "")
-  public List<ApplicationKeyDTO> getKeys() {
+  public List<ApplicationKeysDTO> getKeys() {
     return keys;
   }
 
-  public void setKeys(List<ApplicationKeyDTO> keys) {
+  public void setKeys(List<ApplicationKeysDTO> keys) {
     this.keys = keys;
   }
 
@@ -243,17 +223,16 @@ public class ApplicationDTO   {
         Objects.equals(this.name, application.name) &&
         Objects.equals(this.subscriber, application.subscriber) &&
         Objects.equals(this.throttlingTier, application.throttlingTier) &&
-        Objects.equals(this.callbackUrl, application.callbackUrl) &&
         Objects.equals(this.permission, application.permission) &&
         Objects.equals(this.description, application.description) &&
         Objects.equals(this.lifeCycleStatus, application.lifeCycleStatus) &&
-        Objects.equals(this.groupId, application.groupId) &&
+        Objects.equals(this.token, application.token) &&
         Objects.equals(this.keys, application.keys);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, name, subscriber, throttlingTier, callbackUrl, permission, description, lifeCycleStatus, groupId, keys);
+    return Objects.hash(applicationId, name, subscriber, throttlingTier, permission, description, lifeCycleStatus, token, keys);
   }
 
   @Override
@@ -265,11 +244,10 @@ public class ApplicationDTO   {
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    subscriber: ").append(toIndentedString(subscriber)).append("\n");
     sb.append("    throttlingTier: ").append(toIndentedString(throttlingTier)).append("\n");
-    sb.append("    callbackUrl: ").append(toIndentedString(callbackUrl)).append("\n");
     sb.append("    permission: ").append(toIndentedString(permission)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
-    sb.append("    groupId: ").append(toIndentedString(groupId)).append("\n");
+    sb.append("    token: ").append(toIndentedString(token)).append("\n");
     sb.append("    keys: ").append(toIndentedString(keys)).append("\n");
     sb.append("}");
     return sb.toString();

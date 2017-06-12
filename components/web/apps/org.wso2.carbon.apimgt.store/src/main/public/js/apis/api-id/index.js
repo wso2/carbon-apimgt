@@ -11,6 +11,7 @@ $(function () {
                 {"responseContentType": 'application/json'},
                 function (jsonData) {
                     var api = jsonData.obj;
+                    api.isStandardAPI = true;
                     policies = api.policies;
                     var callbacks = {onSuccess: function () {
                         validateActionButtons("#subscribe-button");
@@ -201,14 +202,43 @@ $(function () {
                                 for (var i = 0; i < tabs.length; i++) {
                                     var tab = tabs[i];
                                     if (tab.id == "api-overview") {
+                                        context.basePath = swaggerClient.basePath;
                                     	context.api = api;
                                         context.labels = label_data;
+                                        if (api.wsdlUri) {
+                                            context.wsdlUrl = swaggerClient.basePath + api.wsdlUri;
+                                        }
+
                                         UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.api-overview", context, {
                                             onSuccess: function (renderedData) {
                                                 $("#api-overview").append(renderedData);
                                                 setOverviewTabData();
                                                 renderCommentsView();
                                                 validateActionButtons("#comment-add-button");
+                                                $(".wsdl_download").on("click", function () {
+                                                    let labelName = this.getAttribute('label_name');
+                                                    swaggerClient["API (individual)"].get_apis_apiId_wsdl({
+                                                            "apiId": apiId,
+                                                            "labelName": labelName},
+                                                        {"responseContentType": 'application/octet-stream'},
+                                                        function (blob) {
+                                                            let windowUrl = window.URL || window.webkitURL;
+                                                            let binary = new Blob([blob.data]);
+                                                            let url = windowUrl.createObjectURL(binary);
+                                                            let anchor = document.createElement('a');
+                                                            anchor.href = url;
+                                                            if (blob.headers['content-disposition']) {
+                                                                anchor.download = getWSDLFileName(blob.headers['content-disposition']);
+                                                            } else {
+                                                                //assumes a single WSDL in text format
+                                                                anchor.download = context.api.provider + 
+                                                                    "-" + context.api.name + "-" + context.api.version +
+                                                                    "-" + labelName + ".wsdl"
+                                                            }
+                                                            anchor.click();
+                                                            windowUrl.revokeObjectURL(url);
+                                                        });
+                                                });
 
                                             }.bind(context), onFailure: function (message, e) {
                                                 var message = "Error occurred while getting api overview details." + message;
@@ -566,7 +596,7 @@ $(function () {
                                             },
                                             {addClass: 'btn btn-default', text: 'Stay on this page', onClick: function($noty) {
                                                 $noty.close();
-                                                location.href = contextPath + "/apis/" + apiId;
+                                                location.href = contextPath + "/apis/" + apiIdentifier;
                                               }
                                             }
                                           ]
@@ -587,7 +617,7 @@ $(function () {
                                             },
                                             {addClass: 'btn btn-default', text: 'Stay on this page', onClick: function($noty) {
                                                 $noty.close();
-                                                location.href = contextPath + "/apis/" + apiId;
+                                                location.href = contextPath + "/apis/" + apiIdentifier;
                                               }
                                             }
                                           ]
@@ -609,7 +639,7 @@ $(function () {
                                         },
                                         {addClass: 'btn btn-default', text: 'Stay on this page', onClick: function($noty) {
                                             $noty.close();
-                                            location.href = contextPath + "/apis/" + apiId;
+                                            location.href = contextPath + "/apis/" + apiIdentifier;
                                           }
                                         }
                                       ]
@@ -1022,10 +1052,10 @@ var change_token = function() {
     	$("#access_token").val(key);
     	//Set changed token as the token for API calls
     	if(key && key.trim() != "") {
-    		swaggerUi.api.clientAuthorizations.add("key",
+    		swaggerUi.api.clientAuthorizations.add("OAuth2Security",
     				new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer "+ key, "header"));
     	} else{
-    		swaggerUi.api.clientAuthorizations.add("key",
+    		swaggerUi.api.clientAuthorizations.add("OAuth2Security",
     				new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer ", "header"));
     	}
     }
@@ -1061,5 +1091,17 @@ var select_environment = function(event) {
 function checkOnKeyPress(e) {
 	if (e.which == 13 ||e.keyCode == 13) {
 		return false;
-		}
 	}
+}
+
+function getWSDLFileName(content_disposition_header) {
+    let filename = "default.wsdl";
+    if (content_disposition_header && content_disposition_header.indexOf('attachment') !== -1) {
+        let filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+        let matches = filenameRegex.exec(content_disposition_header);
+        if (matches !== null && matches[1]) {
+            filename = matches[1].replace(/['"]/g, '');
+        }
+    }
+    return filename;
+}

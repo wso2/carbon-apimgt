@@ -1,3 +1,24 @@
+/*
+ *
+ *  Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied. See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ *
+ *
+ */
+
 package org.wso2.carbon.apimgt.rest.api.admin.impl;
 
 import java.util.HashMap;
@@ -10,6 +31,7 @@ import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.rest.api.admin.LabelsApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.NotFoundException;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.msf4j.Request;
@@ -53,5 +75,31 @@ public class LabelsApiServiceImpl extends LabelsApiService {
         }
 
         return Response.ok().build();
+    }
+
+    @Override
+    public Response labelsGet(String ifNoneMatch, String ifModifiedSince, Request request) throws NotFoundException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Response labelsLabelIdGet(String labelId, String ifNoneMatch, String ifModifiedSince, Request request)
+            throws NotFoundException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Response labelsLabelIdPut(String labelId, LabelDTO body, String ifMatch, String ifUnmodifiedSince,
+            Request request) throws NotFoundException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Response labelsPost(LabelDTO body, Request request) throws NotFoundException {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

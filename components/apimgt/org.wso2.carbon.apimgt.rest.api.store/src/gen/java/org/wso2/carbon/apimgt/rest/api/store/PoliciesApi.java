@@ -15,6 +15,7 @@ import org.wso2.msf4j.formparam.FormDataParam;
 import org.osgi.service.component.annotations.Component;
 
 import java.io.InputStream;
+import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -38,6 +39,7 @@ import javax.ws.rs.core.Response;
 @Path("/api/am/store/v1.[\\d]+/policies")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
+@ApplicationPath("/policies")
 @io.swagger.annotations.Api(description = "the policies API")
 public class PoliciesApi implements Microservice  {
    private final PoliciesApiService delegate = PoliciesApiServiceFactory.getPoliciesApi();
@@ -56,11 +58,10 @@ public class PoliciesApi implements Microservice  {
     public Response policiesTierLevelGet(@ApiParam(value = "List API or Application type policies. ",required=true, allowableValues="api, application") @PathParam("tierLevel") String tierLevel
 ,@ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit
 ,@ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
-,@ApiParam(value = "Media types acceptable for the response. Default is JSON. " , defaultValue="JSON")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 , @Context Request request)
     throws NotFoundException {
-        return delegate.policiesTierLevelGet(tierLevel,limit,offset,accept,ifNoneMatch, request);
+        return delegate.policiesTierLevelGet(tierLevel,limit,offset,ifNoneMatch, request);
     }
     @GET
     @Path("/{tierLevel}/{tierName}")
@@ -77,11 +78,10 @@ public class PoliciesApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported. ", response = TierDTO.class) })
     public Response policiesTierLevelTierNameGet(@ApiParam(value = "Tier name ",required=true) @PathParam("tierName") String tierName
 ,@ApiParam(value = "List API or Application type policies. ",required=true, allowableValues="api, application") @PathParam("tierLevel") String tierLevel
-,@ApiParam(value = "Media types acceptable for the response. Default is JSON. " , defaultValue="JSON")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
 , @Context Request request)
     throws NotFoundException {
-        return delegate.policiesTierLevelTierNameGet(tierName,tierLevel,accept,ifNoneMatch,ifModifiedSince, request);
+        return delegate.policiesTierLevelTierNameGet(tierName,tierLevel,ifNoneMatch,ifModifiedSince, request);
     }
 }

@@ -21,12 +21,12 @@
 package org.wso2.carbon.apimgt.core.dao.impl;
 
 import org.apache.commons.io.IOUtils;
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.models.ResourceCategory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -146,12 +146,17 @@ class ApiResourceDAO {
     }
 
     static InputStream getBinaryValueForCategory(Connection connection, String apiID,
-                                                 ResourceCategory category) throws SQLException, IOException {
-        final String query = "SELECT RESOURCE_BINARY_VALUE FROM AM_API_RESOURCES WHERE API_ID = ? AND " +
-                "RESOURCE_CATEGORY_ID = ?";
+                                                 ResourceCategory category, ApiType apiType)
+                                                                                throws SQLException, IOException {
+        final String query = "SELECT res.RESOURCE_BINARY_VALUE FROM AM_API_RESOURCES res " +
+                "INNER JOIN AM_API api ON res.API_ID = api.UUID " +
+                "WHERE res.API_ID = ? AND res.RESOURCE_CATEGORY_ID = ? AND " +
+                "api.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)";
+
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, apiID);
             statement.setInt(2, ResourceCategoryDAO.getResourceCategoryID(connection, category));
+            statement.setString(3, apiType.toString());
             statement.execute();
 
             try (ResultSet rs =  statement.getResultSet()) {
@@ -166,23 +171,22 @@ class ApiResourceDAO {
         return null;
     }
 
-    static InputStream getBinaryResource(Connection connection, String resourceID) throws SQLException {
+    static InputStream getBinaryResource(Connection connection, String resourceID) throws SQLException, IOException {
         final String query = "SELECT RESOURCE_BINARY_VALUE FROM AM_API_RESOURCES WHERE UUID = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, resourceID);
             statement.execute();
 
-            try (ResultSet rs =  statement.getResultSet()) {
+            try (ResultSet rs = statement.getResultSet()) {
                 if (rs.next()) {
-                    Blob blob = rs.getBlob("RESOURCE_BINARY_VALUE");
-                    if (blob != null) {
-                        return blob.getBinaryStream();
+                    InputStream inputStream = rs.getBinaryStream("RESOURCE_BINARY_VALUE");
+                    if (inputStream != null) {
+                        return new ByteArrayInputStream(IOUtils.toByteArray(inputStream));
                     }
                 }
             }
         }
-
         return null;
     }
 
@@ -204,9 +208,11 @@ class ApiResourceDAO {
     }
 
     static void updateBinaryResourceForCategory(Connection connection, String apiID, ResourceCategory category,
-            InputStream resourceValue, String updatedBy) throws SQLException {
-        final String query = "UPDATE AM_API_RESOURCES SET RESOURCE_BINARY_VALUE = ?, UPDATED_BY = ?, " 
+                                                InputStream resourceValue, String updatedBy)
+                                                                                                throws SQLException {
+        final String query = "UPDATE AM_API_RESOURCES SET RESOURCE_BINARY_VALUE = ?, UPDATED_BY = ?, "
                 + "LAST_UPDATED_TIME = ? WHERE API_ID = ? AND RESOURCE_CATEGORY_ID = ?";
+
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setBinaryStream(1, resourceValue);
             statement.setString(2, updatedBy);

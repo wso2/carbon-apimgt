@@ -20,13 +20,16 @@ package org.wso2.carbon.apimgt.core.workflow;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
+import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 
@@ -44,8 +47,8 @@ public class ApplicationUpdateWorkflow extends Workflow {
     private Application updatedApplication;
     private ApplicationDAO applicationDAO;
 
-    public ApplicationUpdateWorkflow(ApplicationDAO applicationDAO, WorkflowDAO workflowDAO) {
-        super(workflowDAO, Category.STORE);
+    public ApplicationUpdateWorkflow(ApplicationDAO applicationDAO, WorkflowDAO workflowDAO, APIGateway apiGateway) {
+        super(workflowDAO, Category.STORE, apiGateway);
         this.applicationDAO = applicationDAO;
         setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);
     }
@@ -72,16 +75,13 @@ public class ApplicationUpdateWorkflow extends Workflow {
         String updatedUser = getAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_UPDATEDBY);
         String applicationId = getWorkflowReference();
         String tier = getAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_TIER);
+        String policyId = getAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_POLICY_ID);
         String description = getAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_DESCRIPTION);
-        String callbackUrl = getAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_CALLBACKURL);
-        String groupId = getAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_GROUPID);
         String permission = getAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_PERMISSION);
 
         Application application = new Application(name, updatedUser);
-        application.setTier(tier);
-        application.setCallbackUrl(callbackUrl);
+        application.setPolicy(new ApplicationPolicy(policyId, tier));
         application.setDescription(description);
-        application.setGroupId(groupId);
         application.setId(applicationId);
         application.setUpdatedTime(LocalDateTime.now());
         application.setUpdatedUser(updatedUser);
@@ -101,6 +101,12 @@ public class ApplicationUpdateWorkflow extends Workflow {
             }
             application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_APPROVED);
             applicationDAO.updateApplication(appId, application);
+            try {
+                getApiGateway().updateApplication(application);
+            } catch (GatewayException ex) {
+                // This log is not harm to therefore not rethrow
+                log.warn("Failed to send the Application Update Event ", ex);
+            }
         } else if (WorkflowStatus.REJECTED == response.getWorkflowStatus()) {
             if (log.isDebugEnabled()) {
                 log.debug("Application update workflow complete: Rejected");

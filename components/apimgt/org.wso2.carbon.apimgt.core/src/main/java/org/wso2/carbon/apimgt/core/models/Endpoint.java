@@ -35,6 +35,22 @@ public class Endpoint implements Serializable {
     private final String name;
     private final String type;
     private final String applicableLevel;
+    private final String config;
+
+    private Endpoint(Builder builder) {
+        this.id = builder.id;
+        this.endpointConfig = builder.endpointConfig;
+        this.maxTps = builder.maxTps;
+        this.security = builder.security;
+        this.name = builder.name;
+        this.type = builder.type;
+        this.applicableLevel = builder.applicableLevel;
+        this.config = builder.config;
+    }
+
+    public static Builder newEndpoint() {
+        return new Builder();
+    }
 
     public String getId() {
         return id;
@@ -64,16 +80,6 @@ public class Endpoint implements Serializable {
         return applicableLevel;
     }
 
-    private Endpoint(Builder builder) {
-        id = builder.id;
-        endpointConfig = builder.endpointConfig;
-        maxTps = builder.maxTps;
-        security = builder.security;
-        name = builder.name;
-        type = builder.type;
-        applicableLevel = builder.applicableLevel;
-    }
-
     /**
      * {@code Endpoint} builder static inner class.
      */
@@ -85,6 +91,7 @@ public class Endpoint implements Serializable {
         public String name;
         public String type;
         private String applicableLevel;
+        private String config = "";
 
         public String getId() {
             return id;
@@ -217,6 +224,11 @@ public class Endpoint implements Serializable {
         public Endpoint build() {
             return new Endpoint(this);
         }
+
+        public Builder config(String config) {
+            this.config = config;
+            return this;
+        }
     }
 
     /**
@@ -288,4 +300,9 @@ public class Endpoint implements Serializable {
         int result = id.hashCode();
         return result;
     }
+
+    public String getConfig() {
+        return config;
+    }
+
 }

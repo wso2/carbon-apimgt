@@ -1,0 +1,73 @@
+.components-table-demo-nested .ant-table-expanded-row > td:last-child {
+    padding: 0 48px 0 8px;
+}
+
+.components-table-demo-nested .ant-table-expanded-row > td:last-child .ant-table-thead th {
+    border-bottom: 1px solid #e9e9e9;
+}
+
+.components-table-demo-nested .ant-table-expanded-row > td:last-child .ant-table-thead th:first-child {
+    padding-left: 0;
+}
+
+.components-table-demo-nested .ant-table-expanded-row > td:last-child .ant-table-row td:first-child {
+    padding-left: 0;
+}
+
+.components-table-demo-nested .ant-table-expanded-row .ant-table-row:last-child td {
+    border: none;
+}
+
+.components-table-demo-nested .ant-table-expanded-row .ant-table-thead > tr > th {
+    background: none;
+}
+
+.components-table-demo-nested .table-operation a:not(:last-child) {
+    margin-right: 24px;
+}
+h2{
+    font-weight: 200;
+}
+h2 span{
+    color:#ccc;
+    font-size: 11px;
+    display: block;
+}
+.api-type-selector{
+    float: right;
+}
+.ant-menu-item > a{
+    line-height: 20px;
+}
+
+/*card*/
+.custom-card.ant-card{
+    margin:10px;
+}
+.card-footer{
+    position: absolute;
+    bottom: 0;
+    padding: 10px 0;
+}
+.custom-card .custom-image img {
+    display: block;
+}
+.custom-card .description {
+    height: 40px;
+    min-height: 40px;
+    white-space: pre-wrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 6px;
+}
+.custom-card {
+    padding: 4px;
+}
+.custom-card p {
+    color: #999;
+}
+.api-action-container{
+    display: flex;
+    justify-content: space-between;
+    align-items:center;
+}

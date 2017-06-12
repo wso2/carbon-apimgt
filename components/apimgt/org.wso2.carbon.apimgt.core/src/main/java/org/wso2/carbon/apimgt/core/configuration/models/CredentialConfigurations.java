@@ -1,4 +1,3 @@
-package org.wso2.carbon.apimgt.core.configuration.models;
 /*
  * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -16,6 +15,8 @@ package org.wso2.carbon.apimgt.core.configuration.models;
  * specific language governing permissions and limitations
  * under the License.
  */
+
+package org.wso2.carbon.apimgt.core.configuration.models;
 
 import org.wso2.carbon.kernel.annotations.Configuration;
 import org.wso2.carbon.kernel.annotations.Element;
@@ -35,7 +36,15 @@ public class CredentialConfigurations {
         return username;
     }
 
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     public String getPassword() {
         return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

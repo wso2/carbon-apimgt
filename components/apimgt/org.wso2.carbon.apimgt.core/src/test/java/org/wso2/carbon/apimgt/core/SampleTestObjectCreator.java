@@ -22,19 +22,23 @@ package org.wso2.carbon.apimgt.core;
 
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.dao.ApiType;
+import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.BlockConditions;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.Comment;
+import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.Function;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
@@ -43,23 +47,30 @@ import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.core.models.policy.Condition;
+import org.wso2.carbon.apimgt.core.models.policy.CustomPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.HeaderCondition;
 import org.wso2.carbon.apimgt.core.models.policy.IPCondition;
 import org.wso2.carbon.apimgt.core.models.policy.JWTClaimsCondition;
 import org.wso2.carbon.apimgt.core.models.policy.Pipeline;
+import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.core.models.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.core.models.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationWorkflow;
 import org.wso2.carbon.apimgt.core.workflow.Workflow;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,6 +81,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
+import static org.wso2.carbon.apimgt.core.dao.impl.PolicyDAOImpl.SECONDS_TIMUNIT;
+import static org.wso2.carbon.apimgt.core.dao.impl.PolicyDAOImpl.UNLIMITED_TIER;
+import static org.wso2.carbon.apimgt.core.models.policy.PolicyConstants.REQUEST_COUNT_TYPE;
+import static org.wso2.carbon.apimgt.core.util.APIMgtConstants.SANDBOX_ENDPOINT;
 
 public class SampleTestObjectCreator {
 
@@ -94,8 +110,15 @@ public class SampleTestObjectCreator {
     private static final String SAMPLE_APP_POLICY_DESCRIPTION = "SampleAppPolicy Description";
     private static final String SAMPLE_SUBSCRIPTION_POLICY = "SampleSubscriptionPolicy";
     private static final String SAMPLE_SUBSCRIPTION_POLICY_DESCRIPTION = "SampleSubscriptionPolicy Description";
+    private static final String UPDATED_SAMPLE_API_POLICY = "UpdatedSampleAPIPolicy";
+    private static final String UPDATED_SAMPLE_API_POLICY_DESCRIPTION = "Updated NewSampleAPIPolicy Description";
+    private static final String UPDATED_SAMPLE_APP_POLICY = "UpdatedSampleAppPolicy";
+    private static final String UPDATED_SAMPLE_APP_POLICY_DESCRIPTION = "Updated SampleAppPolicy Description";
+    private static final String UPDATED_SAMPLE_SUBSCRIPTION_POLICY = "Updated SampleSubscriptionPolicy";
+    private static final String UPDATED_SAMPLE_SUBSCRIPTION_POLICY_DESCRIPTION = "Updated SampleSubscriptionPolicy "
+            + "Description";
+    private static final String SAMPLE_CUSTOM_ATTRIBUTE = "CUSTOM ATTRIBUTE SAMPLE";
     private static final String PRODUCTION_ENDPOINT = "production";
-    private static final String SAMPLE_API_WSDL = "http://www.webservicex.net/globalweather.asmx?op=GetWeather?wsdl";
     private static final String FIFTY_PER_MIN_TIER = "50PerMin";
     private static final String TWENTY_PER_MIN_TIER = "20PerMin";
     private static final String TIME_UNIT_SECONDS = "s";
@@ -106,15 +129,10 @@ public class SampleTestObjectCreator {
     private static final String ALLOWED_HEADER_AUTHORIZATION = "Authorization";
     private static final String ALLOWED_HEADER_CUSTOM = "X-Custom";
     private static final String API_CREATOR = "Adam Doe";
-    private static final String CALLBACK_URL_1 = "http://localhost/myapp";
-    private static final String CALLBACK_URL_2 = "http://localhost/myapp2";
-    private static final String GROUP_1 = "groupx";
-    private static final String GROUP_2 = "groupx2";
     private static final String SAMPLE_DOC_NAME = "CalculatorDoc";
     private static final String TEST_APP_1 = "TestApp";
     private static final String TEST_APP_2 = "TestApp2";
     private static final String TEMPLATE_ID = "getApisApiIdGet";
-    private static final String ACCESS_URL = "https://test.";
     private static final String ALT_SWAGGER_PATH = "api/alternativeSwagger.json";
     private static final String SAMPLE_GTW_CONFIG_PATH = "api/sampleGatewayConfig.bal";
     private static final String ALT_GTW_CONFIG_PATH = "api/alternativeGatewayConfig.bal";
@@ -122,7 +140,39 @@ public class SampleTestObjectCreator {
     private static final String PATH_THUMBNAIL_IMG_2 = "api/thumbnail2.jpg";
     private static final String PATH_INLINE_DOC_1 = "document/inline1.txt";
     private static final String PATH_INLINE_DOC_2 = "document/inline2.txt";
+    private static final String PATH_FILE_DOC_1 = "document/pdf-sample.pdf";
+    private static final String PATH_WSDL11_File_1 = "wsdl/WeatherForecast.wsdl";
+    private static final String PATH_WSDL11_File_2 = "wsdl/stockQuote.wsdl";
+    private static final String PATH_WSDL20_File_1 = "wsdl/myServiceWsdl2.wsdl";
+    private static final String PATH_WSDL11_ZIP_1 = "wsdl/WSDL11Files_1.zip";
+    private static final String PATH_WSDL11_ZIP_2 = "wsdl/WSDL11Files_2.zip";
+    private static final String PATH_WSDL20_ZIP_1 = "wsdl/WSDL20Files.zip";
+    private static final String SAMPLE_IP_1 = "12.32.45.3";
+    private static final String SAMPLE_IP_2 = "24.34.1.45";
+    private static final String SAMPLE_CUSTOM_RULE = "Sample Custom Rule";
+    public static final String ADMIN_ROLE_ID = "cfbde56e-4352-498e-b6dc-85a6f1f8b058";
+    public static final String DEVELOPER_ROLE_ID = "cfdce56e-8434-498e-b6dc-85a6f2d8f035";
 
+    public static final String ACCESS_URL = "https://test.";
+    public static final String ORIGINAL_ENDPOINT_WEATHER = "http://www.webservicex.net/WeatherForecast.asmx";
+    public static final String ORIGINAL_ENDPOINT_STOCK_QUOTE = "http://www.webservicex.net/stockquote.asmx";
+
+    public static  APIPolicy unlimitedApiPolicy = new APIPolicy(UUID.randomUUID().toString(), UNLIMITED_TIER);
+    public static  APIPolicy goldApiPolicy = new APIPolicy(UUID.randomUUID().toString(), GOLD_TIER);
+    public static  APIPolicy silverApiPolicy = new APIPolicy(UUID.randomUUID().toString(), SILVER_TIER);
+    public static  APIPolicy bronzeApiPolicy = new APIPolicy(UUID.randomUUID().toString(), BRONZE_TIER);
+    public static  SubscriptionPolicy unlimitedSubscriptionPolicy =
+            new SubscriptionPolicy(UUID.randomUUID().toString(), UNLIMITED_TIER);
+    public static  SubscriptionPolicy goldSubscriptionPolicy =
+            new SubscriptionPolicy(UUID.randomUUID().toString(), GOLD_TIER);
+    public static  SubscriptionPolicy silverSubscriptionPolicy =
+            new SubscriptionPolicy(UUID.randomUUID().toString(), SILVER_TIER);
+    public static  SubscriptionPolicy bronzeSubscriptionPolicy =
+            new SubscriptionPolicy(UUID.randomUUID().toString(), BRONZE_TIER);
+    public static  ApplicationPolicy fiftyPerMinApplicationPolicy =
+            new ApplicationPolicy(UUID.randomUUID().toString(), FIFTY_PER_MIN_TIER);
+    public static  ApplicationPolicy twentyPerMinApplicationPolicy =
+            new ApplicationPolicy(UUID.randomUUID().toString(), TWENTY_PER_MIN_TIER);
     public static String apiDefinition;
     public static InputStream inputStream;
     private static final Logger log = LoggerFactory.getLogger(SampleTestObjectCreator.class);
@@ -146,15 +196,16 @@ public class SampleTestObjectCreator {
         Set<String> tags = new HashSet<>();
         tags.add(TAG_CLIMATE);
 
-        Set<String> policies = new HashSet<>();
-        policies.add(GOLD_TIER);
-        policies.add(SILVER_TIER);
-        policies.add(BRONZE_TIER);
+        Set<Policy> policies = new HashSet<>();
+        policies.add(goldSubscriptionPolicy);
+        policies.add(silverSubscriptionPolicy);
+        policies.add(bronzeSubscriptionPolicy);
 
         BusinessInformation businessInformation = new BusinessInformation();
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        String permissionJson = "[{\"groupId\" : 1000, \"permission\" : "
-                + "[\"READ\",\"UPDATE\"]},{\"groupId\" : 1001, \"permission\" : [\"READ\",\"UPDATE\"]}]";
+        String permissionJson = "[{\"groupId\" : \"developer\", \"permission\" : "
+                + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\"," +
+                "\"DELETE\", \"MANAGE_SUBSCRIPTION\"]}]";
 
         API.APIBuilder apiBuilder = new API.APIBuilder(ADMIN, "WeatherAPI", API_VERSION).
                 id(UUID.randomUUID().toString()).
@@ -163,11 +214,10 @@ public class SampleTestObjectCreator {
                 lifeCycleStatus(APIStatus.CREATED.getStatus()).
                 lifecycleInstanceId(UUID.randomUUID().toString()).
                 endpoint(Collections.emptyMap()).
-                wsdlUri("http://localhost:9443/echo?wsdl").
                 isResponseCachingEnabled(false).
                 cacheTimeout(60).
                 isDefaultVersion(false).
-                apiPolicy(APIMgtConstants.DEFAULT_API_POLICY).
+                apiPolicy(unlimitedApiPolicy).
                 transport(transport).
                 tags(tags).
                 policies(policies).
@@ -175,17 +225,16 @@ public class SampleTestObjectCreator {
                 visibleRoles(new HashSet<>()).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
-                apiType(ApiType.STANDARD).
                 createdTime(LocalDateTime.now()).
                 createdBy(ADMIN).
                 updatedBy(ADMIN).
                 lastUpdatedTime(LocalDateTime.now()).
-                permission(permissionJson).
+                apiPermission(permissionJson).
                 uriTemplates(getMockUriTemplates()).
                 apiDefinition(apiDefinition);
-        HashMap map = new HashMap();
-        map.put("1000", 6);
-        map.put("1001", 4);
+        Map map = new HashMap();
+        map.put(DEVELOPER_ROLE_ID, 6);
+        map.put(ADMIN_ROLE_ID, 15);
         apiBuilder.permissionMap(map);
         return apiBuilder;
     }
@@ -195,7 +244,6 @@ public class SampleTestObjectCreator {
                 id(api.getId()).
                 context(api.getContext()).
                 description(api.getDescription()).
-                apiType(ApiType.STANDARD).
                 lifeCycleStatus(api.getLifeCycleStatus()).
                 lifecycleInstanceId(api.getLifecycleInstanceId()).build();
     }
@@ -208,7 +256,6 @@ public class SampleTestObjectCreator {
                 name(fromAPI.getName()).
                 version(fromAPI.getVersion()).
                 context(fromAPI.getContext()).
-                apiType(fromAPI.getApiType()).
                 createdTime(fromAPI.getCreatedTime()).
                 createdBy(fromAPI.getCreatedBy()).
                 lifecycleInstanceId(fromAPI.getLifecycleInstanceId()).
@@ -237,9 +284,9 @@ public class SampleTestObjectCreator {
         tags.add(TAG_FOOD);
         tags.add(TAG_BEVERAGE);
 
-        Set<String> policies = new HashSet<>();
-        policies.add(SILVER_TIER);
-        policies.add(BRONZE_TIER);
+        Set<Policy> policies = new HashSet<>();
+        policies.add(silverSubscriptionPolicy);
+        policies.add(bronzeSubscriptionPolicy);
 
         BusinessInformation businessInformation = new BusinessInformation();
         businessInformation.setBusinessOwner(NAME_BUSINESS_OWNER_1);
@@ -256,21 +303,24 @@ public class SampleTestObjectCreator {
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.setAllowOrigins(Arrays.asList("*"));
 
-        HashMap permissionMap = new HashMap();
-        permissionMap.put("1000", 6);
-        permissionMap.put("1001", 4);
+        String permissionJson = "[{\"groupId\" : \"developer\", \"permission\" : "
+                + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\"," +
+                "\"DELETE\", \"MANAGE_SUBSCRIPTION\"]}]";
 
-        API.APIBuilder apiBuilder = new API.APIBuilder("Adam", "restaurantAPI", "0.9").
+        Map permissionMap = new HashMap();
+        permissionMap.put(DEVELOPER_ROLE_ID, 6);
+        permissionMap.put(ADMIN_ROLE_ID, 15);
+
+        API.APIBuilder apiBuilder = new API.APIBuilder(ADMIN, "restaurantAPI", "0.9").
                 id(UUID.randomUUID().toString()).
                 context("weather").
                 description("Get Food & Beverage Info").
                 lifeCycleStatus(APIStatus.CREATED.getStatus()).
                 endpoint(Collections.emptyMap()).
-                wsdlUri(SAMPLE_API_WSDL).
                 isResponseCachingEnabled(true).
                 cacheTimeout(120).
                 isDefaultVersion(true).
-                apiPolicy(GOLD_TIER).
+                apiPolicy(goldApiPolicy).
                 transport(transport).
                 tags(tags).
                 policies(policies).
@@ -278,7 +328,7 @@ public class SampleTestObjectCreator {
                 visibleRoles(new HashSet<>(Arrays.asList(CUSTOMER_ROLE, MANAGER_ROLE, EMPLOYEE_ROLE))).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
-                apiType(ApiType.STANDARD).
+                apiPermission(permissionJson).
                 permissionMap(permissionMap).
                 createdTime(LocalDateTime.now()).
                 createdBy(API_CREATOR).
@@ -296,9 +346,9 @@ public class SampleTestObjectCreator {
         tags.add(TAG_FOOD);
         tags.add(TAG_BEVERAGE);
 
-        Set<String> policies = new HashSet<>();
-        policies.add(SILVER_TIER);
-        policies.add(BRONZE_TIER);
+        Set<Policy> policies = new HashSet<>();
+        policies.add(silverSubscriptionPolicy);
+        policies.add(bronzeSubscriptionPolicy);
 
         BusinessInformation businessInformation = new BusinessInformation();
         businessInformation.setBusinessOwner(NAME_BUSINESS_OWNER_1);
@@ -315,9 +365,13 @@ public class SampleTestObjectCreator {
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.setAllowOrigins(Arrays.asList("*"));
 
-        HashMap permissionMap = new HashMap();
-        permissionMap.put("1000", 6);
-        permissionMap.put("1001", 4);
+        String permissionJson = "[{\"groupId\" : \"developer\", \"permission\" : "
+                + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\"," +
+                "\"DELETE\", \"MANAGE_SUBSCRIPTION\"]}]";
+
+        Map permissionMap = new HashMap();
+        permissionMap.put(DEVELOPER_ROLE_ID, 6);
+        permissionMap.put(ADMIN_ROLE_ID, 15);
 
         API.APIBuilder apiBuilder = new API.APIBuilder(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
                 API_VERSION).
@@ -326,11 +380,10 @@ public class SampleTestObjectCreator {
                 description("Get Food & Beverage Info").
                 lifeCycleStatus(APIStatus.CREATED.getStatus()).
                 endpoint(Collections.emptyMap()).
-                wsdlUri(SAMPLE_API_WSDL).
                 isResponseCachingEnabled(true).
                 cacheTimeout(120).
                 isDefaultVersion(true).
-                apiPolicy(GOLD_TIER).
+                apiPolicy(goldApiPolicy).
                 transport(transport).
                 tags(tags).
                 policies(policies).
@@ -338,7 +391,7 @@ public class SampleTestObjectCreator {
                 visibleRoles(new HashSet<>(Arrays.asList(CUSTOMER_ROLE, MANAGER_ROLE, EMPLOYEE_ROLE))).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
-                apiType(ApiType.STANDARD).
+                apiPermission(permissionJson).
                 permissionMap(permissionMap).
                 createdTime(LocalDateTime.now()).
                 createdBy(API_CREATOR).
@@ -348,6 +401,43 @@ public class SampleTestObjectCreator {
 
         return apiBuilder;
     }
+
+    public static CompositeAPI.Builder createUniqueCompositeAPI() {
+        Set<String> transport = new HashSet<>();
+        transport.add(HTTP);
+
+        HashMap permissionMap = new HashMap();
+        permissionMap.put(DEVELOPER_ROLE_ID, 6);
+        permissionMap.put(ADMIN_ROLE_ID, 15);
+        permissionMap.put(ADMIN_ROLE_ID, 7);
+        Application app = createDefaultApplication();
+        //generate random name for each time when generating unique composite API
+        app.setName(UUID.randomUUID().toString());
+        try {
+            DAOFactory.getApplicationDAO().addApplication(app);
+        } catch (APIMgtDAOException e) {
+            log.error("Error adding application", e);
+        }
+
+        CompositeAPI.Builder apiBuilder = new CompositeAPI.Builder().
+                id(UUID.randomUUID().toString()).
+                name(UUID.randomUUID().toString()).
+                provider(UUID.randomUUID().toString()).
+                version(API_VERSION).
+                context(UUID.randomUUID().toString()).
+                description("Get Food & Beverage Info").
+                transport(transport).
+                permissionMap(permissionMap).
+                applicationId(app.getId()).
+                createdTime(LocalDateTime.now()).
+                createdBy(API_CREATOR).
+                uriTemplates(Collections.emptyMap()).
+                apiDefinition(apiDefinition).
+                lastUpdatedTime(LocalDateTime.now());
+
+        return apiBuilder;
+    }
+
 
     public static API.APIBuilder createCustomAPI(String name, String version, String context) {
         API.APIBuilder apiBuilder = createDefaultAPI();
@@ -364,7 +454,6 @@ public class SampleTestObjectCreator {
                 id(api.getId()).
                 context(api.getContext()).
                 description(api.getDescription()).
-                apiType(api.getApiType()).
                 lifeCycleStatus(api.getLifeCycleStatus()).
                 lifecycleInstanceId(api.getLifecycleInstanceId()).build();
     }
@@ -428,23 +517,64 @@ public class SampleTestObjectCreator {
         return builder.build();
     }
 
+    /**
+     * Creates a file type documentation info sample
+     *
+     * @return a file type documentation info sample
+     */
+    public static DocumentInfo createFileDocumentationInfo() {
+        //created by admin
+        DocumentInfo.Builder builder = new DocumentInfo.Builder();
+        builder.id(UUID.randomUUID().toString());
+        builder.name(SAMPLE_DOC_NAME);
+        builder.type(DocumentInfo.DocType.HOWTO);
+        builder.summary("Summary of PDF Type Documentation");
+        builder.sourceType(DocumentInfo.SourceType.FILE);
+        builder.sourceURL(EMPTY_STRING);
+        builder.otherType(EMPTY_STRING);
+        builder.visibility(DocumentInfo.Visibility.API_LEVEL);
+        builder.createdTime(LocalDateTime.now());
+        builder.lastUpdatedTime(LocalDateTime.now());
+        return builder.build();
+    }
+
+    /**
+     * Retrieves a sample file inline content string
+     *
+     * @return file inline content string
+     * @throws IOException If unable to read doc file resource
+     */
     public static String createDefaultInlineDocumentationContent() throws IOException {
         return IOUtils.toString(Thread.currentThread().getContextClassLoader().getResourceAsStream(PATH_INLINE_DOC_1));
     }
 
+    /**
+     * Retrieves a sample file inline content string
+     *
+     * @return file inline content string
+     * @throws IOException If unable to read doc file resource
+     */
     public static String createAlternativeInlineDocumentationContent() throws IOException {
         return IOUtils.toString(Thread.currentThread().getContextClassLoader().getResourceAsStream(PATH_INLINE_DOC_2));
+    }
+
+    /**
+     * Retrieves file content byte array
+     *
+     * @return file content byte array
+     * @throws IOException If unable to read doc file resource
+     */
+    public static byte[] createDefaultFileDocumentationContent() throws IOException {
+        return IOUtils.toByteArray(Thread.currentThread().getContextClassLoader().getResourceAsStream(PATH_FILE_DOC_1));
     }
 
     public static Application createDefaultApplication() {
         //created by admin
         Application application = new Application(TEST_APP_1, ADMIN);
         application.setId(UUID.randomUUID().toString());
-        application.setCallbackUrl(CALLBACK_URL_1);
         application.setDescription("This is a test application");
-        application.setGroupId(GROUP_1);
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
-        application.setTier(FIFTY_PER_MIN_TIER);
+        application.setPolicy(fiftyPerMinApplicationPolicy);
         application.setCreatedTime(LocalDateTime.now());
         application.setUpdatedUser(ADMIN);
         application.setUpdatedTime(LocalDateTime.now());
@@ -455,11 +585,9 @@ public class SampleTestObjectCreator {
         //created by admin and updated by admin2
         Application application = new Application(TEST_APP_2, ADMIN);
         application.setId(UUID.randomUUID().toString());
-        application.setCallbackUrl(CALLBACK_URL_2);
         application.setDescription("This is test application 2");
-        application.setGroupId(GROUP_2);
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_APPROVED);
-        application.setTier(TWENTY_PER_MIN_TIER);
+        application.setPolicy(twentyPerMinApplicationPolicy);
         application.setUpdatedUser("admin2");
         application.setUpdatedTime(LocalDateTime.now());
         return application;
@@ -468,11 +596,9 @@ public class SampleTestObjectCreator {
     public static Application createCustomApplication(String applicationName, String owner) {
         Application application = new Application(applicationName, owner);
         application.setId(UUID.randomUUID().toString());
-        application.setCallbackUrl(CALLBACK_URL_1);
         application.setDescription("This is a test application");
-        application.setGroupId(GROUP_1);
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
-        application.setTier(FIFTY_PER_MIN_TIER);
+        application.setPolicy(fiftyPerMinApplicationPolicy);
         application.setCreatedTime(LocalDateTime.now());
         application.setUpdatedUser(ADMIN);
         application.setUpdatedTime(LocalDateTime.now());
@@ -485,16 +611,138 @@ public class SampleTestObjectCreator {
         permissionMap.put(APIMgtConstants.Permission.UPDATE, APIMgtConstants.Permission.UPDATE_PERMISSION);
         Application application = new Application(TEST_APP_1, ADMIN);
         application.setId(UUID.randomUUID().toString());
-        application.setCallbackUrl(CALLBACK_URL_1);
         application.setDescription("This is a test application");
-        application.setGroupId(GROUP_1);
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
-        application.setTier(FIFTY_PER_MIN_TIER);
+        application.setPolicy(fiftyPerMinApplicationPolicy);
         application.setPermissionMap(permissionMap);
         application.setCreatedTime(LocalDateTime.now());
         application.setUpdatedUser(ADMIN);
         application.setUpdatedTime(LocalDateTime.now());
         return application;
+    }
+
+    /**
+     * Creates a sample function
+     *
+     * @return a sample function
+     * @throws URISyntaxException if error occurred while initializing the URI
+     */
+    public static Function createDefaultFunction() throws URISyntaxException {
+        return new Function("sampleFunction1", new URI("http://localhost/test1"));
+    }
+
+    /**
+     * Creates an alternative function
+     *
+     * @return an alternative function
+     * @throws URISyntaxException if error occurred while initializing the URI
+     */
+    public static Function createAlternativeFunction() throws URISyntaxException {
+        return new Function("alternativeFunction1", new URI("http://localhost/test-alternative1"));
+    }
+
+    /**
+     * Creates an alternative function
+     *
+     * @return an alternative function
+     * @throws URISyntaxException if error occurred while initializing the URI
+     */
+    public static Function createAlternativeFunction2() throws URISyntaxException {
+        return new Function("alternativeFunction2", new URI("http://localhost/test-alternative2"));
+    }
+
+    /**
+     * Returns default WSDL 1.1 file content stream
+     *
+     * @return default WSDL 1.1 file content stream
+     */
+    public static InputStream createDefaultWSDL11ContentInputStream() throws IOException {
+        return Thread.currentThread().getContextClassLoader().getResourceAsStream(PATH_WSDL11_File_1);
+    }
+
+    /**
+     * Returns default WSDL 1.1 file
+     *
+     * @return default WSDL 1.1 file
+     */
+    public static byte[] createDefaultWSDL11Content() throws IOException {
+        return IOUtils.toByteArray(createDefaultWSDL11ContentInputStream());
+    }
+
+    /**
+     * Returns alternative WSDL 1.1 file content stream
+     *
+     * @return alternative WSDL 1.1 file content stream
+     */
+    public static InputStream createAlternativeWSDL11ContentInputStream() throws IOException {
+        return Thread.currentThread().getContextClassLoader().getResourceAsStream(PATH_WSDL11_File_2);
+    }
+
+    /**
+     * Returns default WSDL 1.1 file
+     *
+     * @return default WSDL 1.1 file
+     */
+    public static byte[] createAlternativeWSDL11Content() throws IOException {
+        return IOUtils
+                .toByteArray(Thread.currentThread().getContextClassLoader().getResourceAsStream(PATH_WSDL11_File_2));
+    }
+
+    /**
+     * Returns default WSDL 2.0 file
+     *
+     * @return default WSDL 2.0 file
+     */
+    public static byte[] createDefaultWSDL20Content() throws IOException {
+        return IOUtils
+                .toByteArray(Thread.currentThread().getContextClassLoader().getResourceAsStream(PATH_WSDL20_File_1));
+    }
+
+    /**
+     * Returns default WSDL 1.0 archive's input stream
+     *
+     * @return default WSDL 1.0 archive's input stream
+     */
+    public static InputStream createDefaultWSDL11ArchiveInputStream() throws IOException, APIMgtDAOException {
+        return Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream(PATH_WSDL11_ZIP_1);
+    }
+
+    /**
+     * Returns alternative WSDL 1.0 archive's input stream
+     *
+     * @return alternative WSDL 1.0 archive's input stream
+     */
+    public static InputStream createAlternativeWSDL11ArchiveInputStream() throws IOException, APIMgtDAOException {
+        return Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream(PATH_WSDL11_ZIP_2);
+    }
+
+    /**
+     * Returns default WSDL 1.0 archive extracted path
+     *
+     * @return default WSDL 1.0 archive extracted path
+     */
+    public static String createDefaultWSDL11Archive() throws IOException, APIMgtDAOException {
+        InputStream zipInputStream = createDefaultWSDL11ArchiveInputStream();
+        final String tempFolderPath =
+                SystemUtils.getJavaIoTmpDir() + File.separator + UUID.randomUUID().toString();
+        String archivePath = tempFolderPath + File.separator + "wsdl11.zip";
+        return APIFileUtils.extractUploadedArchive(zipInputStream, "extracted", archivePath, tempFolderPath);
+    }
+
+    /**
+     * Returns default WSDL 2.0 archive extracted path
+     *
+     * @return default WSDL 2.0 archive extracted path
+     */
+    public static String createDefaultWSDL20Archive() throws APIMgtDAOException {
+        InputStream zipInputStream = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream(PATH_WSDL20_ZIP_1);
+        final String tempFolderPath =
+                SystemUtils.getJavaIoTmpDir() + File.separator + UUID.randomUUID().toString();
+        String archivePath = tempFolderPath + File.separator + "wsdl20.zip";
+        return APIFileUtils.extractUploadedArchive(zipInputStream, "extracted", archivePath, tempFolderPath);
     }
 
     /**
@@ -504,18 +752,35 @@ public class SampleTestObjectCreator {
      */
     public static APIPolicy createDefaultAPIPolicy() {
         APIPolicy apiPolicy = new APIPolicy(SAMPLE_API_POLICY);
+        apiPolicy.setUuid(UUID.randomUUID().toString());
         apiPolicy.setDisplayName(SAMPLE_API_POLICY);
         apiPolicy.setDescription(SAMPLE_API_POLICY_DESCRIPTION);
         apiPolicy.setUserLevel(APIMgtConstants.ThrottlePolicyConstants.API_LEVEL);
         QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
-        defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
-        RequestCountLimit requestCountLimit = new RequestCountLimit();
-        requestCountLimit.setTimeUnit(TIME_UNIT_SECONDS);
-        requestCountLimit.setRequestCount(10000);
-        requestCountLimit.setUnitTime(1000);
+        defaultQuotaPolicy.setType(REQUEST_COUNT_TYPE);
+        RequestCountLimit requestCountLimit = new RequestCountLimit(TIME_UNIT_SECONDS, 1000, 10000);
         defaultQuotaPolicy.setLimit(requestCountLimit);
         apiPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
         apiPolicy.setPipelines(createDefaultPipelines());
+        return apiPolicy;
+    }
+
+    /**
+     * Updated the given API policy
+     *
+     * @param apiPolicy {@link APIPolicy} instance to be updated
+     * @return updated {@link APIPolicy} instance
+     */
+    public static APIPolicy updateAPIPolicy(APIPolicy apiPolicy) {
+        apiPolicy.setDisplayName(UPDATED_SAMPLE_API_POLICY);
+        apiPolicy.setDescription(UPDATED_SAMPLE_API_POLICY_DESCRIPTION);
+        QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+        defaultQuotaPolicy.setType(PolicyConstants.BANDWIDTH_LIMIT_TYPE);
+        BandwidthLimit bandwidthLimit = new BandwidthLimit(TIME_UNIT_SECONDS, 1, 1000, "KB");
+        defaultQuotaPolicy.setLimit(bandwidthLimit);
+        apiPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+        apiPolicy.setPipelines(createDefaultPipelines());
+        apiPolicy.getPipelines().add(createNewIPRangePipeline());
         return apiPolicy;
     }
 
@@ -537,11 +802,7 @@ public class SampleTestObjectCreator {
         conditionsList.add(ipCondition);
         conditionsList.add(ipConditionSpecific);
         //set quota policy with bandwidth limit
-        BandwidthLimit bandwidthLimit = new BandwidthLimit();
-        bandwidthLimit.setDataAmount(1000);
-        bandwidthLimit.setDataUnit(PolicyConstants.MB);
-        bandwidthLimit.setUnitTime(1);
-        bandwidthLimit.setTimeUnit(TIME_UNIT_MONTH);
+        BandwidthLimit bandwidthLimit = new BandwidthLimit(TIME_UNIT_MONTH, 1, 1000, PolicyConstants.MB);
         QuotaPolicy quotaPolicy1 = new QuotaPolicy();
         quotaPolicy1.setType(PolicyConstants.BANDWIDTH_TYPE);
         quotaPolicy1.setLimit(bandwidthLimit);
@@ -567,12 +828,9 @@ public class SampleTestObjectCreator {
         conditionsList.add(jwtClaimsCondition);
         conditionsList.add(queryParameterCondition);
         //pipeline 2 with request count as quota policy
-        RequestCountLimit requestCountLimit = new RequestCountLimit();
-        requestCountLimit.setRequestCount(1000);
-        requestCountLimit.setUnitTime(1);
-        requestCountLimit.setTimeUnit(TIME_UNIT_SECONDS);
+        RequestCountLimit requestCountLimit = new RequestCountLimit(TIME_UNIT_SECONDS, 1, 1000);
         QuotaPolicy quotaPolicy2 = new QuotaPolicy();
-        quotaPolicy2.setType(PolicyConstants.REQUEST_COUNT_TYPE);
+        quotaPolicy2.setType(REQUEST_COUNT_TYPE);
         quotaPolicy2.setLimit(requestCountLimit);
 
         Pipeline pipeline2 = new Pipeline();
@@ -587,21 +845,39 @@ public class SampleTestObjectCreator {
     }
 
     /**
+     * Creates a new {@link Pipeline} instance
+     *
+     * @return created Pipeline instance
+     */
+    public static Pipeline createNewIPRangePipeline() {
+        IPCondition ipCondition = new IPCondition(PolicyConstants.IP_RANGE_TYPE);
+        ipCondition.setStartingIP("10.100.0.105");
+        ipCondition.setEndingIP("10.100.0.115");
+        Pipeline pipeline = new Pipeline();
+
+        RequestCountLimit requestCountLimit = new RequestCountLimit(TIME_UNIT_SECONDS, 1, 1000);
+        QuotaPolicy quotaPolicy = new QuotaPolicy();
+        quotaPolicy.setType(REQUEST_COUNT_TYPE);
+        quotaPolicy.setLimit(requestCountLimit);
+
+        pipeline.setQuotaPolicy(quotaPolicy);
+        pipeline.setConditions(Arrays.asList(ipCondition));
+        return pipeline;
+    }
+
+    /**
      * Create default api policy with bandwidth limit as quota policy
      *
      * @return APIPolicy object with bandwidth limit as quota policy is returned
      */
     public static APIPolicy createDefaultAPIPolicyWithBandwidthLimit() {
-        BandwidthLimit bandwidthLimit = new BandwidthLimit();
-        bandwidthLimit.setDataAmount(1000);
-        bandwidthLimit.setDataUnit(PolicyConstants.MB);
-        bandwidthLimit.setUnitTime(1);
-        bandwidthLimit.setTimeUnit(TIME_UNIT_MONTH);
+        BandwidthLimit bandwidthLimit = new BandwidthLimit(TIME_UNIT_MONTH, 1, 1000, PolicyConstants.MB);
         QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
         defaultQuotaPolicy.setType(PolicyConstants.BANDWIDTH_TYPE);
         defaultQuotaPolicy.setLimit(bandwidthLimit);
         //set default API Policy
         APIPolicy apiPolicy = new APIPolicy(SAMPLE_API_POLICY);
+        apiPolicy.setUuid(UUID.randomUUID().toString());
         apiPolicy.setDisplayName(SAMPLE_API_POLICY);
         apiPolicy.setDescription(SAMPLE_API_POLICY_DESCRIPTION);
         apiPolicy.setUserLevel(APIMgtConstants.ThrottlePolicyConstants.API_LEVEL);
@@ -611,30 +887,51 @@ public class SampleTestObjectCreator {
 
     public static ApplicationPolicy createDefaultApplicationPolicy() {
         ApplicationPolicy applicationPolicy = new ApplicationPolicy(SAMPLE_APP_POLICY);
+        applicationPolicy.setUuid(UUID.randomUUID().toString());
         applicationPolicy.setDisplayName(SAMPLE_APP_POLICY);
         applicationPolicy.setDescription(SAMPLE_APP_POLICY_DESCRIPTION);
+        applicationPolicy.setCustomAttributes(SAMPLE_CUSTOM_ATTRIBUTE.getBytes());
         QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
-        defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
-        RequestCountLimit requestCountLimit = new RequestCountLimit();
-        requestCountLimit.setTimeUnit(TIME_UNIT_SECONDS);
-        requestCountLimit.setRequestCount(10000);
-        requestCountLimit.setUnitTime(1000);
+        defaultQuotaPolicy.setType(REQUEST_COUNT_TYPE);
+        RequestCountLimit requestCountLimit = new RequestCountLimit(TIME_UNIT_SECONDS, 10000, 1000);
         defaultQuotaPolicy.setLimit(requestCountLimit);
+        applicationPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+        return applicationPolicy;
+    }
+
+
+    public static ApplicationPolicy updateApplicationPolicy(ApplicationPolicy applicationPolicy) {
+        applicationPolicy.setDisplayName(UPDATED_SAMPLE_APP_POLICY);
+        applicationPolicy.setDescription(UPDATED_SAMPLE_APP_POLICY_DESCRIPTION);
+        QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+        defaultQuotaPolicy.setType(PolicyConstants.BANDWIDTH_LIMIT_TYPE);
+        BandwidthLimit bandwidthLimit = new BandwidthLimit(TIME_UNIT_SECONDS, 10, 1000, "KB");
+        defaultQuotaPolicy.setLimit(bandwidthLimit);
         applicationPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
         return applicationPolicy;
     }
 
     public static SubscriptionPolicy createDefaultSubscriptionPolicy() {
         SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(SAMPLE_SUBSCRIPTION_POLICY);
+        subscriptionPolicy.setUuid(UUID.randomUUID().toString());
         subscriptionPolicy.setDisplayName(SAMPLE_SUBSCRIPTION_POLICY);
         subscriptionPolicy.setDescription(SAMPLE_SUBSCRIPTION_POLICY_DESCRIPTION);
+        subscriptionPolicy.setCustomAttributes(SAMPLE_CUSTOM_ATTRIBUTE.getBytes());
         QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
-        defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
-        RequestCountLimit requestCountLimit = new RequestCountLimit();
-        requestCountLimit.setTimeUnit(TIME_UNIT_SECONDS);
-        requestCountLimit.setRequestCount(10000);
-        requestCountLimit.setUnitTime(1000);
+        defaultQuotaPolicy.setType(REQUEST_COUNT_TYPE);
+        RequestCountLimit requestCountLimit = new RequestCountLimit(TIME_UNIT_SECONDS, 10000, 1000);
         defaultQuotaPolicy.setLimit(requestCountLimit);
+        subscriptionPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+        return subscriptionPolicy;
+    }
+
+    public static SubscriptionPolicy updateSubscriptionPolicy(SubscriptionPolicy subscriptionPolicy) {
+        subscriptionPolicy.setDisplayName(UPDATED_SAMPLE_SUBSCRIPTION_POLICY);
+        subscriptionPolicy.setDescription(UPDATED_SAMPLE_SUBSCRIPTION_POLICY_DESCRIPTION);
+        QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+        defaultQuotaPolicy.setType(PolicyConstants.BANDWIDTH_LIMIT_TYPE);
+        BandwidthLimit bandwidthLimit = new BandwidthLimit(TIME_UNIT_SECONDS, 1, 1000, "KB");
+        defaultQuotaPolicy.setLimit(bandwidthLimit);
         subscriptionPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
         return subscriptionPolicy;
     }
@@ -671,28 +968,32 @@ public class SampleTestObjectCreator {
 
     public static Endpoint createMockEndpoint() {
         return new Endpoint.Builder().endpointConfig("{'type':'http','url':'http://localhost:8280'}").id(endpointId)
-                .maxTps(1000L).security("{'enabled':false}").name("Endpoint1").applicableLevel(APIMgtConstants
-                        .GLOBAL_ENDPOINT).type("http").build();
+                .maxTps(1000L).security("{'enabled':false}").name("Endpoint1")
+                .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).type("http").build();
     }
 
     public static Endpoint createUpdatedEndpoint() {
         return new Endpoint.Builder().endpointConfig("{'type':'soap','url':'http://localhost:8280'}").id(endpointId)
-                .maxTps(1000L).security("{'enabled':false}").name("Endpoint1").applicableLevel(APIMgtConstants
-                        .GLOBAL_ENDPOINT).type("http").build();
+                .maxTps(1000L).security("{'enabled':false}").name("Endpoint1")
+                .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).type("http").build();
     }
 
     public static Endpoint createAlternativeEndpoint() {
         String uuid = UUID.randomUUID().toString();
         return new Endpoint.Builder().endpointConfig("{'type':'soap','url':'http://localhost:8280'}").id(uuid)
-                .name("Endpoint2").maxTps(1000L).security("{'enabled':false}").applicableLevel(APIMgtConstants
-                        .GLOBAL_ENDPOINT).build();
+                .name("Endpoint2").maxTps(1000L).security("{'enabled':false}")
+                .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).build();
 
     }
 
     public static Map<String, Endpoint> getMockEndpointMap() {
         Map<String, Endpoint> endpointMap = new HashedMap();
-        endpointMap.put(PRODUCTION_ENDPOINT, new Endpoint.Builder().id(endpointId).applicableLevel(APIMgtConstants
-                .GLOBAL_ENDPOINT).build());
+        endpointMap.put(PRODUCTION_ENDPOINT,
+                new Endpoint.Builder().id(endpointId).applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).name
+                        ("production").build());
+        endpointMap.put(SANDBOX_ENDPOINT,
+                new Endpoint.Builder().id(UUID.randomUUID().toString()).name("sandbox").applicableLevel(APIMgtConstants
+                        .API_SPECIFIC_ENDPOINT).build());
         return endpointMap;
     }
 
@@ -702,7 +1003,7 @@ public class SampleTestObjectCreator {
         uriTemplateBuilder.templateId(TEMPLATE_ID);
         uriTemplateBuilder.uriTemplate("/apis/");
         uriTemplateBuilder.authType(APIMgtConstants.AUTH_APPLICATION_LEVEL_TOKEN);
-        uriTemplateBuilder.policy(APIMgtConstants.DEFAULT_API_POLICY);
+        uriTemplateBuilder.policy(unlimitedApiPolicy);
         uriTemplateBuilder.httpVerb(APIMgtConstants.FunctionsConstants.GET);
         uriTemplateMap.put(TEMPLATE_ID, uriTemplateBuilder.build());
         return uriTemplateMap;
@@ -720,20 +1021,21 @@ public class SampleTestObjectCreator {
 
     public static Workflow createWorkflow(String workflowReferenceID) throws APIMgtDAOException {
         Workflow workflow = new ApplicationCreationWorkflow(DAOFactory.getApplicationDAO(),
-                DAOFactory.getWorkflowDAO());
+                DAOFactory.getWorkflowDAO(), null);
         workflow.setExternalWorkflowReference(workflowReferenceID);
         workflow.setStatus(WorkflowStatus.CREATED);
         workflow.setCreatedTime(LocalDateTime.now());
         workflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
         workflow.setWorkflowReference(UUID.randomUUID().toString());
-        
+
         Map<String, String> properties = new HashMap<>();
         properties.put("property1", "value1");
         properties.put("property2", "value2");
         workflow.setAttributes(properties);
-        
+
         return workflow;
     }
+
     public static DocumentInfo createDefaultFileDocumentationInfo() {
         //created by admin
         DocumentInfo.Builder builder = new DocumentInfo.Builder();
@@ -762,6 +1064,18 @@ public class SampleTestObjectCreator {
         return comment;
     }
 
+    public static Comment createAlternativeComment(String apiId) {
+        Comment comment = new Comment();
+        comment.setUuid(UUID.randomUUID().toString());
+        comment.setApiId(apiId);
+        comment.setCommentText("this is a sample comment - alternative");
+        comment.setCommentedUser("admin");
+        comment.setUpdatedUser("admin");
+        comment.setCreatedTime(LocalDateTime.now());
+        comment.setUpdatedTime(LocalDateTime.now());
+        return comment;
+    }
+
     public static Rating createDefaultRating(String apiId) {
         Rating rating = new Rating();
         rating.setUuid(UUID.randomUUID().toString());
@@ -782,18 +1096,21 @@ public class SampleTestObjectCreator {
         Set<String> tags = new HashSet<>();
         tags.add(TAG_CLIMATE);
 
-        Set<String> policies = new HashSet<>();
-        policies.add(GOLD_TIER);
-        policies.add(SILVER_TIER);
-        policies.add(BRONZE_TIER);
+        Set<Policy> policies = new HashSet<>();
+        policies.add(new SubscriptionPolicy(GOLD_TIER));
+        policies.add(new SubscriptionPolicy(SILVER_TIER));
+        policies.add(new SubscriptionPolicy(BRONZE_TIER));
 
         BusinessInformation businessInformation = new BusinessInformation();
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        String permissionJson = "[{\"groupId\" : 1000, \"permission\" : "
-                + "[\"READ\",\"UPDATE\"]},{\"groupId\" : 1001, \"permission\" : [\"READ\",\"UPDATE\"]}]";
+        String permissionJson = "[{\"groupId\" : \"developer\", \"permission\" : "
+                + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\"," +
+                "\"DELETE\", \"MANAGE_SUBSCRIPTION\"]}]";
+
         Map<String, Endpoint> endpointMap = new HashMap<>();
-        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT, new Endpoint.Builder().id(endpointId).name
-                ("api1-production--endpint").applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build());
+        endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT,
+                new Endpoint.Builder().id(endpointId).name("api1-production--endpint")
+                        .applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT).build());
         API.APIBuilder apiBuilder = new API.APIBuilder(ADMIN, "WeatherAPI", API_VERSION).
                 id(UUID.randomUUID().toString()).
                 context("weather").
@@ -805,7 +1122,7 @@ public class SampleTestObjectCreator {
                 isResponseCachingEnabled(false).
                 cacheTimeout(60).
                 isDefaultVersion(false).
-                apiPolicy(APIMgtConstants.DEFAULT_API_POLICY).
+                apiPolicy(APIUtils.getDefaultAPIPolicy()).
                 transport(transport).
                 tags(tags).
                 policies(policies).
@@ -813,18 +1130,288 @@ public class SampleTestObjectCreator {
                 visibleRoles(new HashSet<>()).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
-                apiType(ApiType.STANDARD).
                 createdTime(LocalDateTime.now()).
                 createdBy(ADMIN).
                 updatedBy(ADMIN).
                 lastUpdatedTime(LocalDateTime.now()).
-                permission(permissionJson).
+                apiPermission(permissionJson).
                 uriTemplates(getMockUriTemplates()).
                 apiDefinition(apiDefinition);
-        HashMap map = new HashMap();
-        map.put("1000", 6);
-        map.put("1001", 4);
+        Map map = new HashMap();
+        map.put(DEVELOPER_ROLE_ID, 6);
+        map.put(ADMIN_ROLE_ID, 15);
         apiBuilder.permissionMap(map);
         return apiBuilder;
+    }
+
+    public static BlockConditions createDefaultBlockCondition(String conditionType) {
+        BlockConditions blockConditions = new BlockConditions();
+        blockConditions.setConditionType(conditionType);
+        blockConditions.setEnabled(true);
+        if (conditionType.equals(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_IP)) {
+            blockConditions.setConditionValue(SAMPLE_IP_1);
+        } else if (conditionType.equals(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITION_IP_RANGE)) {
+            blockConditions.setStartingIP(SAMPLE_IP_1);
+            blockConditions.setEndingIP(SAMPLE_IP_2);
+        } else if (conditionType.equals(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_API)) {
+            try {
+                API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI();
+                API api = apiBuilder.build();
+                DAOFactory.getApiDAO().addAPI(api);
+                blockConditions.setConditionValue(api.getContext());
+            } catch (APIMgtDAOException e) {
+                log.error("Error while adding default api in default block condition", e);
+            }
+        } else if (conditionType.equals(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_APPLICATION)) {
+            try {
+                Application app = createDefaultApplication();
+                DAOFactory.getApplicationDAO().addApplication(app);
+                blockConditions.setConditionValue(app.getId() + ":" + app.getName());
+            } catch (APIMgtDAOException e) {
+                log.error("Error while adding default app in default block condition", e);
+            }
+        } else if (conditionType.equals(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_USER)) {
+            blockConditions.setConditionValue(ADMIN);
+        }
+        return blockConditions;
+    }
+
+    public static CustomPolicy createDefaultCustomPolicy() {
+        CustomPolicy customPolicy = new CustomPolicy(SAMPLE_CUSTOM_RULE);
+        customPolicy.setKeyTemplate("$userId");
+        String siddhiQuery = "FROM RequestStream SELECT userId, ( userId == 'admin@carbon.super' ) AS isEligible , "
+                + "str:concat('admin@carbon.super','') as throttleKey INSERT INTO EligibilityStream;"
+                + "FROM EligibilityStream[isEligible==true]#throttler:timeBatch(1 min) SELECT throttleKey, "
+                + "(count(userId) >= 5 as isThrottled, expiryTimeStamp group by throttleKey INSERT ALL EVENTS into "
+                + "ResultStream;";
+
+        customPolicy.setSiddhiQuery(siddhiQuery);
+        customPolicy.setDescription("Sample custom policy");
+        return customPolicy;
+    }
+
+    public static void createDefaultPolicy(PolicyDAO policyDAO) throws APIMgtDAOException {
+        QuotaPolicy quotaPolicy = new QuotaPolicy();
+        quotaPolicy.setType(REQUEST_COUNT_TYPE);
+        quotaPolicy.setLimit(new RequestCountLimit(SECONDS_TIMUNIT, 60, 1));
+        unlimitedApiPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        policyDAO.addApiPolicy(unlimitedApiPolicy);
+        goldApiPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        policyDAO.addApiPolicy(goldApiPolicy);
+        silverApiPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        policyDAO.addApiPolicy(silverApiPolicy);
+        bronzeApiPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        policyDAO.addApiPolicy(bronzeApiPolicy);
+        unlimitedSubscriptionPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        policyDAO.addSubscriptionPolicy(unlimitedSubscriptionPolicy);
+        goldSubscriptionPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        policyDAO.addSubscriptionPolicy(goldSubscriptionPolicy);
+        silverSubscriptionPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        policyDAO.addSubscriptionPolicy(silverSubscriptionPolicy);
+        bronzeSubscriptionPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        policyDAO.addSubscriptionPolicy(bronzeSubscriptionPolicy);
+        fiftyPerMinApplicationPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        policyDAO.addApplicationPolicy(fiftyPerMinApplicationPolicy);
+        twentyPerMinApplicationPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        policyDAO.addApplicationPolicy(twentyPerMinApplicationPolicy);
+    }
+    public static String createDefaultSiddhiAppforAppPolicy() {
+        ApplicationPolicy policy = createDefaultApplicationPolicy();
+        RequestCountLimit limit = (RequestCountLimit) createDefaultApplicationPolicy().getDefaultQuotaPolicy()
+                .getLimit();
+        String siddhiApp =
+                "@App:name('application_" + policy.getPolicyName() + "')\n" + "@App:description('ExecutionPlan for app_"
+                        + policy.getPolicyName() + "')\n" +
+
+                        "@source(type='inMemory', topic='apim', @map(type='passThrough'))\n"
+                        + "define stream RequestStream (messageID string, appKey string, appTier string, "
+                        + "subscriptionKey string,"
+                        + " apiKey string, apiTier string, subscriptionTier string, resourceKey string,"
+                        + " resourceTier string,"
+                        + " userId string,  apiContext string, apiVersion string, appTenant string, apiTenant string,"
+                        + " appId " + "string, apiName string, propertiesMap string);\n" +
+
+                        "@sink(type='jms', @map(type='text'),\n"
+                        + "factory.initial='org.apache.activemq.jndi.ActiveMQInitialContextFactory',"
+                        + " provider.url='tcp://localhost:61616', destination='TEST.FOO', connection.factory."
+                        + "type='topic',\n" + "connection.factory.jndi.name='TopicConnectionFactory')\n"
+                        + "define stream GlobalThrottleStream (throttleKey string, isThrottled bool"
+                        + ", expiryTimeStamp long);\n" +
+
+                        "FROM RequestStream\n" + "SELECT messageID, (appTier == '" + policy.getPolicyName()
+                        + "') AS isEligible, appKey AS throttleKey, " + "propertiesMap\n"
+                        + "INSERT INTO EligibilityStream;\n" +
+
+                        "FROM EligibilityStream[isEligible==true]#throttler:timeBatch(" + policy.getDefaultQuotaPolicy()
+                        .getLimit().getUnitTime() + " " + policy.getDefaultQuotaPolicy().getLimit().getTimeUnit()
+                        + ", 0)\n" + "select throttleKey, (count(messageID) >= " + limit.getRequestCount() + ")"
+                        + " as isThrottled, expiryTimeStamp group by throttleKey\n"
+                        + "INSERT ALL EVENTS into ResultStream;\n" +
+
+                        "from ResultStream#throttler:emitOnStateChange(throttleKey, isThrottled)\n" + "select *\n"
+                        + "insert into GlobalThrottleStream;\n";
+        return siddhiApp;
+    }
+
+    public static String createDefaultSiddhiAppforSubscriptionPolicy() {
+        SubscriptionPolicy policy = createDefaultSubscriptionPolicy();
+        RequestCountLimit limit = (RequestCountLimit) policy.getDefaultQuotaPolicy()
+                .getLimit();
+        String siddhiApp = "@App:name('subscription_" + policy.getPolicyName() + "')\n"
+                + "\n@App:description('ExecutionPlan for subscription_" + policy.getPolicyName() + "')\n" +
+
+                "\n@source(type='inMemory', topic='apim', @map(type='passThrough'))\n"
+                + "define stream RequestStream (messageID string, appKey string, appTier string,"
+                + " subscriptionKey string,"
+                + " apiKey string, apiTier string, subscriptionTier string, resourceKey string, resourceTier string,"
+                + " userId string,  apiContext string, apiVersion string, appTenant string, apiTenant string, "
+                + "appId string, apiName string, propertiesMap string);\n" +
+
+                "\n@sink(type='jms', @map(type='text'),\n"
+                + "factory.initial='org.apache.activemq.jndi.ActiveMQInitialContextFactory',"
+                + " provider.url='tcp://localhost:61616', destination='TEST.FOO', connection.factory."
+                + "type='topic',\n" + "connection.factory.jndi.name='TopicConnectionFactory')\n"
+                + "define stream GlobalThrottleStream (throttleKey string, isThrottled bool"
+                + ", expiryTimeStamp long);\n" +
+
+                "\nFROM RequestStream\n" + "SELECT messageID, (subscriptionTier == '" + policy.getPolicyName()
+                + "')" + " AS isEligible, subscriptionKey AS throttleKey, propertiesMap\n"
+                + "INSERT INTO EligibilityStream;\n" + "\nFROM EligibilityStream[isEligible==true]#throttler:timeBatch("
+                + policy.getDefaultQuotaPolicy().getLimit().getUnitTime() + " " + policy.getDefaultQuotaPolicy()
+                .getLimit().getTimeUnit() + ", 0)\n" + "select throttleKey, (count(messageID) >= " + limit
+                .getRequestCount() + ")" + " as isThrottled, expiryTimeStamp group by throttleKey\n"
+                + "INSERT ALL EVENTS into ResultStream;\n" +
+
+                "\nfrom ResultStream#throttler:emitOnStateChange(throttleKey, isThrottled)" + " select * "
+                + "insert into GlobalThrottleStream;";
+        return siddhiApp;
+    }
+
+    public static String createDefaultCustomPolicySiddhiApp() {
+        CustomPolicy policy = createDefaultCustomPolicy();
+        String siddhiApp =
+                "@App:name('custom_" + policy.getPolicyName() + "')" + "\n@App:description('ExecutionPlan for custom_"
+                        + policy.getPolicyName() + "')\n" +
+
+                        "\n@source(type='inMemory', topic='apim', @map(type='passThrough'))\n"
+                        + "define stream RequestStream (messageID string, appKey string, appTier string, "
+                        + "subscriptionKey string, apiKey string, apiTier string, subscriptionTier string,"
+                        + " resourceKey string, resourceTier string, userId string,  apiContext string, "
+                        + "apiVersion string, appTenant string, apiTenant string, appId string, apiName string, "
+                        + "propertiesMap string);\n" +
+
+                        "\n@sink(type='jms', @map(type='text'),\n"
+                        + "factory.initial='org.apache.activemq.jndi.ActiveMQInitialContextFactory',"
+                        + " provider.url='tcp://localhost:61616', destination='TEST.FOO',"
+                        + " connection.factory.type='topic',\n"
+                        + "connection.factory.jndi.name='TopicConnectionFactory')\n"
+                        + "define stream GlobalThrottleStream (throttleKey string, isThrottled bool, "
+                        + "expiryTimeStamp long);\n"
+                        +
+
+                        "\n" + policy.getSiddhiQuery() + "\n" +
+
+                        "\nfrom ResultStream#throttler:emitOnStateChange(throttleKey, isThrottled)" + "\nselect *\n"
+                        + "insert into GlobalThrottleStream;";
+
+        return siddhiApp;
+    }
+
+    public static String createDefaultSiddhiAppForAPIThrottlePolicy() {
+        APIPolicy apiPolicy = createDefaultAPIPolicy();
+        String siddhiApp = "\n@App:name('resource_" + apiPolicy.getPolicyName() + "_condition_0')"
+                + "\n@App:description('ExecutionPlan for resource_" + apiPolicy.getPolicyName() + "_condition_0')\n"
+
+                + "\n@source(type='inMemory', topic='apim', @map(type='passThrough'))"
+                + "\ndefine stream RequestStream (messageID string, appKey string, appTier string, "
+                + "subscriptionKey string,"
+                + " apiKey string, apiTier string, subscriptionTier string, resourceKey string,"
+                + " resourceTier string, userId string,  apiContext string, apiVersion string, "
+                + "appTenant string, apiTenant "
+                + "string, appId string, apiName string, propertiesMap string);\n"
+
+                + "\n@sink(type='jms', @map(type='text'),"
+                + "\nfactory.initial='org.apache.activemq.jndi.ActiveMQInitialContextFactory',"
+                + " provider.url='tcp://localhost:61616', "
+                + "destination='TEST.FOO', connection.factory.type='topic',"
+                + "\nconnection.factory.jndi.name='TopicConnectionFactory')"
+                + "\ndefine stream GlobalThrottleStream (throttleKey string, isThrottled bool,"
+                + " expiryTimeStamp long);\n"
+
+                + "\nFROM RequestStream"
+                + "\nSELECT messageID, (resourceTier == 'SampleAPIPolicy' AND (regex:find('Chrome',"
+                + "cast(map:get(propertiesMap,'Browser'),"
+                + "'string'))) AND (regex:find('attributed',"
+                + "cast(map:get(propertiesMap,'/path/path2'),'string'))) AND "
+                + "(cast(map:get(propertiesMap,'Location'),'string')=='Colombo'))"
+                + " AS isEligible, str:concat(resourceKey,"
+                + "'_condition_0') AS throttleKey, propertiesMap" + "\nINSERT INTO EligibilityStream;\n"
+
+                + "\nFROM EligibilityStream[isEligible==true]#throttler:timeBatch(1 s, 0)"
+                + "\nselect throttleKey, (count(messageID) >= 1000) as isThrottled,"
+                + " expiryTimeStamp group by throttleKey"
+                + "\nINSERT ALL EVENTS into ResultStream;\n"
+
+                + "\nfrom ResultStream#throttler:emitOnStateChange(throttleKey, isThrottled)" + "\nselect *"
+                + "\ninsert into GlobalThrottleStream;\n";
+
+        return siddhiApp;
+    }
+
+    public static String createDefaultSiddhiAppForAPILevelDefaultThrottlePolicy() {
+        APIPolicy apiPolicy = createDefaultAPIPolicy();
+        String siddhiApp = "\n@App:name('resource_" + apiPolicy.getPolicyName() + "_default')"
+                + "\n@App:description('ExecutionPlan for resource_" + apiPolicy.getPolicyName() + "_default')\n"
+
+                + "\n@source(type='inMemory', topic='apim', @map(type='passThrough'))"
+                + "\ndefine stream RequestStream (messageID string, appKey string,"
+                + " appTier string, subscriptionKey string,"
+                + " apiKey string, apiTier string, subscriptionTier string, resourceKey string,"
+                + " resourceTier string, userId string,  apiContext string, apiVersion string, appTenant string,"
+                + " apiTenant string,"
+                + " appId string, apiName string, propertiesMap string);\n"
+
+                + "\n@sink(type='jms', @map(type='text'),"
+                + "\nfactory.initial='org.apache.activemq.jndi.ActiveMQInitialContextFactory',"
+                + " provider.url='tcp://localhost:61616',"
+                + " destination='TEST.FOO', connection.factory.type='topic',"
+                + "\nconnection.factory.jndi.name='TopicConnectionFactory')"
+                + "\ndefine stream GlobalThrottleStream (throttleKey string, isThrottled bool,"
+                + " expiryTimeStamp long);\n"
+
+                + "\nFROM RequestStream"
+                + "\nSELECT messageID, (resourceTier == 'SampleAPIPolicy' AND "
+                + "NOT(((3232238595l<=cast(map:get(propertiesMap,'ip'),'Long')"
+                + " AND 3232258067l>=cast(map:get(propertiesMap,'ip'),'Long')) AND "
+                + "(cast(map:get(propertiesMap,'ip'),'Long')==2066353720l)) "
+                + "OR ((regex:find('Chrome',cast(map:get(propertiesMap,'Browser'),'string')))"
+                + " AND (regex:find('attributed',"
+                + "cast(map:get(propertiesMap,'/path/path2'),'string')))"
+                + " AND (cast(map:get(propertiesMap,'Location'),'string')=='Colombo'))))"
+                + " AS isEligible, resourceKey AS throttleKey, propertiesMap"
+                + "\nINSERT INTO EligibilityStream;\n"
+
+                + "\nFROM EligibilityStream[isEligible==true]#throttler:timeBatch(1000 s, 0)"
+                + "\nselect throttleKey, (count(messageID) >= 10000) as isThrottled,"
+                + " expiryTimeStamp group by throttleKey"
+                + "\nINSERT ALL EVENTS into ResultStream;\n"
+
+                + "\nfrom ResultStream#throttler:emitOnStateChange(throttleKey, isThrottled)" + "\nselect *"
+                + "\ninsert into GlobalThrottleStream;\n";
+
+        return siddhiApp;
+    }
+
+    public static String getSampleApiSwagger() throws IOException {
+        //swagger definition
+        InputStream stream = null;
+        String definition = null;
+        try {
+            stream = Thread.currentThread().getContextClassLoader().getResourceAsStream("sampleApi.yaml");
+            definition = IOUtils.toString(stream);
+        } finally {
+            stream.close();
+        }
+        return definition;
     }
 }

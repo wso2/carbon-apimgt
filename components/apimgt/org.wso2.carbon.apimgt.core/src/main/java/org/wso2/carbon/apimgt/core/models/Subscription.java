@@ -21,6 +21,7 @@
 package org.wso2.carbon.apimgt.core.models;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.util.Objects;
@@ -33,14 +34,14 @@ public final class Subscription {
     private String uuid;
     private API api;
     private Application application;
-    private String subscriptionTier;
+    private Policy policy;
     private APIMgtConstants.SubscriptionStatus status;
 
-    public Subscription(String uuid, Application application, API api, String subscriptionTier) {
+    public Subscription(String uuid, Application application, API api, Policy policy) {
         this.uuid = uuid;
         this.application = application;
         this.api = api;
-        this.subscriptionTier = subscriptionTier;
+        this.policy = policy;
     }
 
     public Application getApplication() {
@@ -55,8 +56,8 @@ public final class Subscription {
         return uuid;
     }
 
-    public String getSubscriptionTier() {
-        return subscriptionTier;
+    public Policy getPolicy() {
+        return policy;
     }
 
     public APIMgtConstants.SubscriptionStatus getStatus() {
@@ -81,13 +82,13 @@ public final class Subscription {
         return Objects.equals(uuid, that.uuid) &&
                 Objects.equals(api, that.api) &&
                 Objects.equals(application, that.application) &&
-                Objects.equals(subscriptionTier, that.subscriptionTier) &&
+                Objects.equals(policy, that.policy) &&
                 status == that.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uuid, api, application, subscriptionTier, status);
+        return Objects.hash(uuid, api, application, policy, status);
     }
 
     @Override
@@ -96,7 +97,7 @@ public final class Subscription {
                 .append("uuid", uuid)
                 .append("api", api)
                 .append("application", application)
-                .append("subscriptionTier", subscriptionTier)
+                .append("policy", policy)
                 .append("status", status)
                 .toString();
     }
