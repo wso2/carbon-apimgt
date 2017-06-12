@@ -14,8 +14,8 @@ import org.wso2.carbon.apimgt.gateway.holders as holder;
 import org.wso2.carbon.apimgt.ballerina.util as apimgtUtil;
 
 @jms:JMSSource {
-factoryInitial : "org.apache.activemq.jndi.ActiveMQInitialContextFactory",
-providerUrl : "tcp://localhost:61616"}
+    factoryInitial:"org.apache.activemq.jndi.ActiveMQInitialContextFactory",
+    providerUrl:"tcp://localhost:61616"}
 @jms:ConnectionProperty {key:"connectionFactoryType", value:"topic"}
 @jms:ConnectionProperty {key:"destination", value:"PublisherTopic"}
 @jms:ConnectionProperty {key:"connectionFactoryJNDIName", value:"TopicConnectionFactory"}
@@ -30,20 +30,20 @@ service apimPublisherEventListner {
 
             if (strings:equalsIgnoreCase(eventType, Constants:API_CREATE)) {
                 json apiSummary = jsons:getJson(event, "apiSummary");
-                if(apiSummary != null){
+                if (apiSummary != null) {
 
                     dto:APIDTO api = gatewayUtil:fromJSONToAPIDTO(apiSummary);
                     //Retrieve API configuration
-                    string apiConfig ;
+                    string apiConfig;
                     int status;
-                    status,apiConfig = gatewayUtil:getAPIServiceConfig(api.id);
+                    status, apiConfig = gatewayUtil:getAPIServiceConfig(api.id);
                     int maxRetries = 5;
-                    int i =0;
-                    while(status == Constants:NOT_FOUND){
+                    int i = 0;
+                    while (status == Constants:NOT_FOUND) {
                         apimgtUtil:wait(10000);
-                        status,apiConfig = gatewayUtil:getAPIServiceConfig(api.id);
-                            i = i+1;
-                        if(i>maxRetries){
+                        status, apiConfig = gatewayUtil:getAPIServiceConfig(api.id);
+                        i = i + 1;
+                        if (i > maxRetries) {
                             break;
                         }
                     }
@@ -58,20 +58,20 @@ service apimPublisherEventListner {
 
             } else if (strings:equalsIgnoreCase(eventType, Constants:API_UPDATE)) {
                 json apiSummary = jsons:getJson(event, "apiSummary");
-                if(apiSummary != null){
+                if (apiSummary != null) {
 
                     dto:APIDTO api = gatewayUtil:fromJSONToAPIDTO(apiSummary);
                     //Retrieve API configuration
-                    string apiConfig ;
+                    string apiConfig;
                     int status;
-                    status,apiConfig = gatewayUtil:getAPIServiceConfig(api.id);
+                    status, apiConfig = gatewayUtil:getAPIServiceConfig(api.id);
                     int maxRetries = 10;
-                    int i =0;
-                    while(status == Constants:NOT_FOUND){
+                    int i = 0;
+                    while (status == Constants:NOT_FOUND) {
                         apimgtUtil:wait(10000);
-                        status,apiConfig = gatewayUtil:getAPIServiceConfig(api.id);
-                        i = i+1;
-                        if(i>maxRetries){
+                        status, apiConfig = gatewayUtil:getAPIServiceConfig(api.id);
+                        i = i + 1;
+                        if (i > maxRetries) {
                             break;
                         }
                     }            //Update API service
@@ -82,22 +82,22 @@ service apimPublisherEventListner {
                     system:println("Invalid json received");
                 }
 
-            } else if (strings:equalsIgnoreCase(eventType, Constants:API_DELETE)){
+            } else if (strings:equalsIgnoreCase(eventType, Constants:API_DELETE)) {
                 json apiSummary = jsons:getJson(event, "apiSummary");
-                if(apiSummary != null){
+                if (apiSummary != null) {
 
                     dto:APIDTO api = gatewayUtil:fromJSONToAPIDTO(apiSummary);
                     //Retrieve API configuration
-                    string apiConfig ;
+                    string apiConfig;
                     int status;
-                    status,apiConfig = gatewayUtil:getAPIServiceConfig(api.id);
+                    status, apiConfig = gatewayUtil:getAPIServiceConfig(api.id);
                     int maxRetries = 10;
-                    int i =0;
-                    while(status == Constants:NOT_FOUND){
+                    int i = 0;
+                    while (status == Constants:NOT_FOUND) {
                         apimgtUtil:wait(10000);
-                        status,apiConfig = gatewayUtil:getAPIServiceConfig(api.id);
-                        i = i+1;
-                        if(i>maxRetries){
+                        status, apiConfig = gatewayUtil:getAPIServiceConfig(api.id);
+                        i = i + 1;
+                        if (i > maxRetries) {
                             break;
                         }
                     }
@@ -109,9 +109,9 @@ service apimPublisherEventListner {
                     system:println("Invalid json received");
                 }
 
-            } else if(strings:equalsIgnoreCase(eventType, Constants:API_STATE_CHANGE)){
+            } else if (strings:equalsIgnoreCase(eventType, Constants:API_STATE_CHANGE)) {
                 json apiSummary = jsons:getJson(event, "apiSummary");
-                if(apiSummary != null){
+                if (apiSummary != null) {
                     //Update API cache
                     system:println(apiSummary);
                     dto:APIDTO api = gatewayUtil:fromJSONToAPIDTO(apiSummary);
@@ -123,7 +123,7 @@ service apimPublisherEventListner {
                 system:println("Invalid event received");
             }
 
-        }catch(errors:Error e){
+        } catch (errors:Error e) {
             system:println(e.msg);
             system:println("[Error] : Error occurred while processing gateway event ");
         }

@@ -87,7 +87,7 @@ function retrieveSubscriptions () (boolean ){
     return true;
 }
 
-function putIntoSubscriptionCache(json subscriptions){
+function putIntoSubscriptionCache (json subscriptions) {
     int length = jsons:getInt(subscriptions, "$.length()");
     int i = 0;
     while (i < length) {

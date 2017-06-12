@@ -12,8 +12,8 @@ import org.wso2.carbon.apimgt.gateway.utils as gatewayUtil;
 
 
 @jms:JMSSource {
-    factoryInitial : "org.apache.activemq.jndi.ActiveMQInitialContextFactory",
-    providerUrl : "tcp://localhost:61616"}
+    factoryInitial:"org.apache.activemq.jndi.ActiveMQInitialContextFactory",
+    providerUrl:"tcp://localhost:61616"}
 @jms:ConnectionProperty {key:"connectionFactoryType", value:"topic"}
 @jms:ConnectionProperty {key:"destination", value:"StoreTopic"}
 @jms:ConnectionProperty {key:"connectionFactoryJNDIName", value:"TopicConnectionFactory"}
@@ -36,7 +36,7 @@ service apimStoreEventListner {
                 system:println("Invalid event received");
             }
 
-        }catch(errors:Error e){
+        } catch (errors:Error e) {
             system:println(e.msg);
             system:println("Error occurred while processing gateway event ");
         }
