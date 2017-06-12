@@ -3,20 +3,18 @@ package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.ThrottleLimitDTO;
 import java.util.Objects;
 
 /**
  * RequestCountLimitDTO
  */
-public class RequestCountLimitDTO extends ThrottleLimitDTO  {
+public class RequestCountLimitDTO   {
   @JsonProperty("requestCount")
-  private Long requestCount = 0l;
+  private Integer requestCount = 0;
 
-  public RequestCountLimitDTO requestCount(Long requestCount) {
+  public RequestCountLimitDTO requestCount(Integer requestCount) {
     this.requestCount = requestCount;
     return this;
   }
@@ -25,12 +23,12 @@ public class RequestCountLimitDTO extends ThrottleLimitDTO  {
    * Get requestCount
    * @return requestCount
   **/
-  @ApiModelProperty(value = "")
-  public Long getRequestCount() {
+  @ApiModelProperty(required = true, value = "")
+  public Integer getRequestCount() {
     return requestCount;
   }
 
-  public void setRequestCount(Long requestCount) {
+  public void setRequestCount(Integer requestCount) {
     this.requestCount = requestCount;
   }
 
@@ -44,20 +42,19 @@ public class RequestCountLimitDTO extends ThrottleLimitDTO  {
       return false;
     }
     RequestCountLimitDTO requestCountLimit = (RequestCountLimitDTO) o;
-    return Objects.equals(this.requestCount, requestCountLimit.requestCount) &&
-        super.equals(o);
+    return Objects.equals(this.requestCount, requestCountLimit.requestCount);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(requestCount, super.hashCode());
+    return Objects.hash(requestCount);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class RequestCountLimitDTO {\n");
-    sb.append("    ").append(toIndentedString(super.toString())).append("\n");
+    
     sb.append("    requestCount: ").append(toIndentedString(requestCount)).append("\n");
     sb.append("}");
     return sb.toString();

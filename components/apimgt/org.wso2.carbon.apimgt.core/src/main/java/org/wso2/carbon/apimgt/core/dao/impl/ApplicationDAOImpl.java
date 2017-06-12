@@ -459,7 +459,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             application.setCreatedTime(rs.getTimestamp("CREATED_TIME").toLocalDateTime());
             application.setUpdatedUser(rs.getString("UPDATED_BY"));
             application.setUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toLocalDateTime());
-            application.setTier(DAOFactory.getPolicyDAO().getApplicationPolicyById(
+            application.setTier(DAOFactory.getPolicyDAO().getPolicyByUuid("application",
                     rs.getString("APPLICATION_POLICY_ID")).getPolicyName());
         }
         return application;

@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -16,26 +16,13 @@
 * under the License.
 */
 
+package org.wso2.carbon.apimgt.rest.api.admin.exceptions;
 
-package org.wso2.carbon.apimgt.core.models.policy;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 
-/**
- * Contains request CountLimit based attributes
- */
-public class RequestCountLimit extends Limit {
-    private int requestCount;
+public class SubscriptionThrottlePolicyException extends APIManagementException {
 
-    public int getRequestCount() {
-        return requestCount;
+    public SubscriptionThrottlePolicyException(String message, Throwable cause) {
+        super(message, cause);
     }
-
-    public void setRequestCount(int requestCount) {
-        this.requestCount = requestCount;
-    }
-
-    @Override
-    public String toString() {
-        return "RequestCountLimit [requestCount=" + requestCount + ", toString()=" + super.toString() + "]";
-    }
-
 }

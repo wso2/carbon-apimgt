@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -39,7 +40,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
         policyDAO.addPolicy(APIMgtConstants.ThrottlePolicyConstants.API_LEVEL, policy);
         String fingerprintBeforeUpdatingPolicy = ETagUtils
-                .generateETag(policyDAO.getLastUpdatedTimeOfAPIPolicy(policy.getPolicyName()));
+                .generateETag(policyDAO.getLastUpdatedTimeOfThrottlingPolicy("api", policy.getPolicyName()));
         Assert.assertNotNull(fingerprintBeforeUpdatingPolicy);
         //todo: complete rest of the flow after PolicyDAO supports updating Policies
     }
@@ -50,7 +51,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
         policyDAO.addPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, policy);
         String fingerprintBeforeUpdatingPolicy = ETagUtils
-                .generateETag(policyDAO.getLastUpdatedTimeOfApplicationPolicy(policy.getPolicyName()));
+                .generateETag(policyDAO.getLastUpdatedTimeOfThrottlingPolicy("application", policy.getPolicyName()));
         Assert.assertNotNull(fingerprintBeforeUpdatingPolicy);
         //todo: complete rest of the flow after PolicyDAO supports updating Policies
     }
@@ -61,7 +62,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
         policyDAO.addPolicy(APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL, policy);
         String fingerprintBeforeUpdatingPolicy = ETagUtils
-                .generateETag(policyDAO.getLastUpdatedTimeOfSubscriptionPolicy(policy.getPolicyName()));
+                .generateETag(policyDAO.getLastUpdatedTimeOfThrottlingPolicy("subscription", policy.getPolicyName()));
         Assert.assertNotNull(fingerprintBeforeUpdatingPolicy);
         //todo: complete rest of the flow after PolicyDAO supports updating Policies
     }

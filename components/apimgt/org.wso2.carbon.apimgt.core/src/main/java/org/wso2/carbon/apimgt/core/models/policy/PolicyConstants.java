@@ -41,7 +41,11 @@ public class PolicyConstants {
 
     public static final String BANDWIDTH_TYPE = "bandwidthVolume";
 
+    public static final String BANDWIDTH_LIMIT_TYPE = "BandwidthLimit";
+
     public static final String REQUEST_COUNT_TYPE = "requestCount";
+
+    public static final String REQUEST_COUNT_LIMIT_TYPE = "RequestCountLimit";
 
     public static final String DATE_QUERY = "date";
 
@@ -114,5 +118,13 @@ public class PolicyConstants {
     public static final String MB = "MB";
 
     public static final String KB = "KB";
+
+    public static final String IP_CONDITION_TYPE = "IPCondition";
+
+    public static final String JWT_CLAIMS_CONDITION_TYPE = "JWTClaimsCondition";
+
+    public static final String QUERY_PARAMS_CONDITION_TYPE = "QueryParameterCondition";
+
+    public static final String HEADER_CONDITION_TYPE = "HeaderCondition";
 
 }

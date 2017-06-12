@@ -23,14 +23,14 @@ package org.wso2.carbon.apimgt.core.models.policy;
  * contains {@link BandwidthLimit} attributes
  */
 public class BandwidthLimit extends Limit {
-    private long dataAmount;
+    private int dataAmount;
     private String dataUnit;
 
-    public long getDataAmount() {
+    public int getDataAmount() {
         return dataAmount;
     }
 
-    public void setDataAmount(long dataAmount) {
+    public void setDataAmount(int dataAmount) {
         this.dataAmount = dataAmount;
     }
 
@@ -46,14 +46,5 @@ public class BandwidthLimit extends Limit {
     public String toString() {
         return "BandwidthLimit [dataAmount=" + dataAmount + ", dataUnit=" + dataUnit + ", toString()="
                 + super.toString() + "]";
-    }
-
-    public long getStandardDataAmount() {
-        if (PolicyConstants.MB.equalsIgnoreCase(dataUnit)) {
-            return dataAmount * 1024 * 1024;
-        } else if (PolicyConstants.KB.equalsIgnoreCase(dataUnit)) {
-            return dataAmount * 1024;
-        }
-        return dataAmount;
     }
 }

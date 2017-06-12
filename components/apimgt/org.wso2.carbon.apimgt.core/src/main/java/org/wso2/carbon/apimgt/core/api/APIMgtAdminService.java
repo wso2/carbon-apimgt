@@ -61,24 +61,26 @@ public interface APIMgtAdminService {
      * @return Subscription Validation Information
      * @throws APIManagementException If failed to get lAPI summary data
      */
-    public List<APISummary> getAPIInfo() throws APIManagementException;
+    List<APISummary> getAPIInfo() throws APIManagementException;
 
     /**
      * Adds new @{@link Policy} to the system
      *
      * @param policyLevel Tier level of the policy.
      * @param policy      Policy object to be added.
+     * @return created policy uuid
      * @throws APIManagementException If failed to add the policy.
      */
-    void addPolicy(String policyLevel, Policy policy) throws APIManagementException;
+    String addPolicy(String policyLevel, Policy policy) throws APIManagementException;
 
     /**
-     * Updates existing @{@link Policy} to the system
+     * Updates a @{@link Policy} instance
      *
-     * @param policy Policy object to be updated.
+     * @param policyLevel Tier level of the policy.
+     * @param policy      Policy object to be updated.
      * @throws APIManagementException If failed to update the policy.
      */
-    void updatePolicy(Policy policy) throws APIManagementException;
+    void updatePolicy(String policyLevel, Policy policy) throws APIManagementException;
 
     /**
      * Delete existing @{@link Policy} in the system
@@ -88,7 +90,6 @@ public interface APIMgtAdminService {
      * @throws APIManagementException   If failed to delete the policy.
      */
     void deletePolicy(String policyName, String policyLevel) throws APIManagementException;
-
 
     /**
      * Delete existing @{@link Policy} in the system
@@ -110,14 +111,14 @@ public interface APIMgtAdminService {
     Policy getPolicy(String policyLevel, String policyName) throws APIManagementException;
 
     /**
-     * Get a @{@link Policy} by policy uuid
+     * Get a @{@link Policy} by policy id
      *
-     * @param uuid Policy uuid
      * @param policyLevel Tier level of the policy.
+     * @param uuid  id of the policy
      * @return Policy object.
      * @throws APIManagementException If failed to get policy.
      */
-    Policy getPolicyByUuid(String uuid, String policyLevel) throws APIManagementException;
+    Policy getPolicyByUuid(String policyLevel, String uuid) throws APIManagementException;
 
     /**
      * Get a List of policies of a particular level

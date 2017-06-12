@@ -20,6 +20,7 @@ import org.wso2.carbon.apimgt.core.models.policy.Policy;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Implementation of APIMgtAdminService
@@ -80,16 +81,33 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
      * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#addPolicy(String, Policy)
      */
     @Override
-    public void addPolicy(String policyLevel, Policy policy) throws APIManagementException {
-        policyDAO.addPolicy(policyLevel, policy);
+    public String addPolicy(String policyLevel, Policy policy) throws APIManagementException {
+        try {
+            String policyUuid = policy.getUuid();
+            if (policyUuid == null) {
+                policyUuid = UUID.randomUUID().toString();
+                policy.setUuid(policyUuid);
+            }
+            policyDAO.addPolicy(policyLevel, policy);
+            return policyUuid;
+
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't add policy for uuid: " + policy.getUuid() + ", level: " + policyLevel;
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
     }
 
-    /**
-     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#updatePolicy(Policy)
-     */
     @Override
-    public void updatePolicy(Policy policy) throws APIManagementException {
-        policyDAO.updatePolicy(policy);
+    public void updatePolicy(String policyLevel, Policy policy) throws APIManagementException {
+        try {
+            policyDAO.updatePolicy(policyLevel, policy);
+
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't add policy for uuid: " + policy.getUuid() + ", level: " + policyLevel;
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
     }
 
     /**
@@ -97,14 +115,29 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
      */
     @Override
     public void deletePolicy(String policyName, String policyLevel) throws APIManagementException {
-        policyDAO.deletePolicy(policyName, policyLevel);
+        try {
+            policyDAO.deletePolicy(policyName, policyLevel);
+
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't update application policy with name: " + policyName + ", level: " +
+                    policyLevel;
+            log.error(errorMessage, e);
+            throw new APIConfigRetrievalException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
     }
 
     /**
      * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#deletePolicyByUuid(String, String)
      */
     @Override public void deletePolicyByUuid(String uuid, String policyLevel) throws APIManagementException {
-        policyDAO.deletePolicyByUuid(uuid, policyLevel);
+        try {
+            policyDAO.deletePolicyByUuid(uuid, policyLevel);
+
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't update application policy with id: " + uuid + ", level: " + policyLevel;
+            log.error(errorMessage, e);
+            throw new APIConfigRetrievalException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
     }
 
     /**
@@ -112,15 +145,43 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
      */
     @Override
     public Policy getPolicy(String policyLevel, String policyName) throws APIManagementException {
-        return policyDAO.getPolicy(policyLevel, policyName);
+
+        Policy policy;
+        try {
+            policy = policyDAO.getPolicy(policyLevel, policyName);
+
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't retrieve policy with name: " + policyName + ", level: " + policyLevel;
+            log.error(errorMessage, e);
+            throw new APIConfigRetrievalException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+
+        if (policy == null) {
+            throw new APIManagementException("Unable to find the policy by name: " + policyName + ", level: " +
+                    policyLevel, ExceptionCodes.POLICY_NOT_FOUND);
+        }
+
+        return policy;
     }
 
-    /**
-     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#getPolicyByUuid(String, String)
-     */
-    @Override
-    public Policy getPolicyByUuid(String uuid, String policyLevel) throws APIManagementException {
-        return policyDAO.getPolicyByUuid(uuid, policyLevel);
+    @Override public Policy getPolicyByUuid(String policyLevel, String uuid) throws APIManagementException {
+
+        Policy policy;
+        try {
+            policy = policyDAO.getPolicyByUuid(policyLevel, uuid);
+
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't retrieve policy with id: " + uuid + ", level: " + policyLevel;
+            log.error(errorMessage, e);
+            throw new APIConfigRetrievalException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+
+        if (policy == null) {
+            throw new APIManagementException("Unable to find the policy by id: " + uuid + ", level: " + policyLevel,
+                    ExceptionCodes.POLICY_NOT_FOUND);
+        }
+
+        return policy;
     }
 
     /**
