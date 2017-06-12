@@ -25,6 +25,17 @@ class Auth {
         this.token = "/publisher/auth/apis/login/token";
     }
 
+    /**
+     * TODO: Implement this method to return the user logged state by considering the cookies stored in the browser,
+     * This may give a partial indication of whether the user has logged in or not, The actual API call may get denied
+     * if the cookie stored access token is invalid/expired
+     *
+     * @returns {boolean} Is any user has logged in or not
+     */
+    static isLogged() {
+        return true;
+    }
+
     getTokenEndpoint() {
         return this.host + this.token;
     }

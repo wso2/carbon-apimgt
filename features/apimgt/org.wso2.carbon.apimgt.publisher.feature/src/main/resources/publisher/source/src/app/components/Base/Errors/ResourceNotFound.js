@@ -16,22 +16,21 @@
  * under the License.
  */
 
-import Auth from "./Auth";
+import React, {Component} from 'react'
 
-/**
- * Utility class for Publisher application
- */
-class PublisherUtils {
+const ResourceNotFound = (props) => {
+    return (
+        <div>
+            <div className="message message-danger">
+                <h4><i className="icon fw fw-error"/>404 Resource Not Found!</h4>
+                <p>
+                    Can't find the resource you are looking for
+                    <span style={{color: 'green'}}> {props.response.statusText} </span>
+                </p>
+            </div>
 
-    /**
-     * TODO: Remove this method one the initial phase is done, This is used to continue the API class until the login page is create
-     * @returns {promise}
-     */
-    static autoLogin() {
-        let auth = new Auth();
-        return auth.authenticateUser('admin', 'admin');
-    }
+        </div>
+    );
+};
 
-}
-
-export default PublisherUtils;
+export default ResourceNotFound

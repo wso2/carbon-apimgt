@@ -17,6 +17,6 @@
  */
 
 import PageNotFound from './PageNotfound'
-import APINotFound from './APINotfound'
+import ResourceNotFound from './ResourceNotFound'
 
-export {PageNotFound, APINotFound}
+export {PageNotFound, ResourceNotFound}

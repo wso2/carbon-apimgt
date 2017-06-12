@@ -136,7 +136,6 @@ class AuthClient {
      */
     static unauthorizedErrorHandler(error_response) {
         if (error_response.status !== 401) { /* Skip unrelated response code to handle in unauthorizedErrorHandler*/
-            console.log(error_response);
             throw error_response;
             /* re throwing the error since we don't handle it here and propagate to downstream error handlers in catch chain*/
         }
@@ -159,7 +158,7 @@ class AuthClient {
                 }
             });
         } else {
-            console.log(error_response);
+            throw error_response;
         }
     }
 
