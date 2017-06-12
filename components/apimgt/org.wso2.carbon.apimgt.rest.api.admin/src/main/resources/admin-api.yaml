@@ -1617,6 +1617,9 @@ definitions:
       status:
         type: boolean
         deafult: true
+      ipCondition:
+        type: object
+        $ref: '#/definitions/IPCondition'
 
 #-----------------------------------------------------
 # The Throttle Blocking Condition List resource

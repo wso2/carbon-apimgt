@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.core.models.BlockConditions;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.BlockingConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.BlockingConditionListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.IPConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.exceptions.UnsupportedThrottleLimitTypeException;
 
 import java.util.ArrayList;
@@ -67,7 +68,10 @@ public class BlockingConditionMappingUtil {
         dto.setConditionId(blockCondition.getUuid());
         dto.setConditionType(blockCondition.getConditionType());
         dto.setStatus(blockCondition.isEnabled());
-
+        if (blockCondition.getConditionType()
+                .equals(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITION_IP_RANGE)) {
+            dto.setIpCondition(fromBlockConditionToIpConditionDTO(blockCondition));
+        }
         String conditionValue = blockCondition.getConditionValue();
         if (APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_IP.equals(blockCondition.getConditionType())) {
             int index = conditionValue.indexOf(":");
@@ -78,6 +82,41 @@ public class BlockingConditionMappingUtil {
         }
         dto.setConditionValue(conditionValue);
         return dto;
+    }
+
+    /**
+     * Convert BlockingConditionDTO to BlockCondition.
+     *
+     * @param blockingConditionDTO blockindConditionDTO to be converted
+     * @return BlockCondition Object
+     * @throws UnsupportedThrottleLimitTypeException
+     */
+    public static BlockConditions fromBlockingConditionDTOToBlockCondition(BlockingConditionDTO blockingConditionDTO)
+            throws UnsupportedThrottleLimitTypeException {
+        BlockConditions blockConditions = new BlockConditions();
+        blockConditions.setUuid(blockingConditionDTO.getConditionId());
+        blockConditions.setConditionType(blockingConditionDTO.getConditionType());
+        blockConditions.setConditionValue(blockingConditionDTO.getConditionValue());
+        blockConditions.setEnabled(blockingConditionDTO.getStatus());
+        if (APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITION_IP_RANGE
+                .equals(blockConditions.getConditionType())) {
+            blockConditions.setStartingIP(blockingConditionDTO.getIpCondition().getStartingIP());
+            blockConditions.setEndingIP(blockingConditionDTO.getIpCondition().getEndingIP());
+        }
+        return blockConditions;
+    }
+
+    /**
+     * Block condition IP range details to IPConditionDTO.
+     *
+     * @param blockConditions blockCondition to be converted into IPConditionDTO.
+     * @return IPConditionDTO Object
+     */
+    private static IPConditionDTO fromBlockConditionToIpConditionDTO(BlockConditions blockConditions) {
+        IPConditionDTO ipConditionDTO = new IPConditionDTO();
+        ipConditionDTO.setStartingIP(blockConditions.getStartingIP());
+        ipConditionDTO.setEndingIP(blockConditions.getEndingIP());
+        return ipConditionDTO;
     }
 
 }

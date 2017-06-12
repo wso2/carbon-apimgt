@@ -27,6 +27,25 @@ public class BlockConditions {
     private int conditionId;
     private String uuid;
 
+    public String getStartingIP() {
+        return startingIP;
+    }
+
+    public void setStartingIP(String startingIP) {
+        this.startingIP = startingIP;
+    }
+
+    public String getEndingIP() {
+        return endingIP;
+    }
+
+    public void setEndingIP(String endingIP) {
+        this.endingIP = endingIP;
+    }
+
+    private String startingIP;
+    private String endingIP;
+
     public int getConditionId() {
         return conditionId;
     }

@@ -485,13 +485,9 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
 
     }
 
-    /**
-     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#addBlockCondition(String, String)
-     */
-    @Override public String addBlockCondition(String conditionType, String conditionValue)
-            throws APIManagementException {
+    @Override public String addBlockCondition(BlockConditions blockConditions) throws APIManagementException {
         try {
-            return policyDAO.addBlockConditions(conditionType, conditionValue);
+            return policyDAO.addBlockConditions(blockConditions);
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't add block condition.";
             log.error(errorMessage, e);
@@ -499,9 +495,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
     }
 
-    /**
-     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#updateBlockConditionStateByUUID(String, Boolean)
-     */
     @Override public boolean updateBlockConditionStateByUUID(String uuid, Boolean state) throws APIManagementException {
         try {
             return policyDAO.updateBlockConditionStateByUUID(uuid, state);
@@ -512,10 +505,8 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
     }
 
-    /**
-     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#deleteBlockConditionByUuid(String)
-     */
-    @Override public boolean deleteBlockConditionByUuid(String uuid) throws APIManagementException {
+    @Override
+    public boolean deleteBlockConditionByUuid(String uuid) throws APIManagementException {
         try {
             return policyDAO.deleteBlockConditionByUuid(uuid);
         } catch (APIMgtDAOException e) {
@@ -525,10 +516,8 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
     }
 
-    /**
-     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#getBlockConditions()
-     */
-    @Override public List<BlockConditions> getBlockConditions() throws APIManagementException {
+    @Override
+    public List<BlockConditions> getBlockConditions() throws APIManagementException {
         try {
             return policyDAO.getBlockConditions();
         } catch (APIMgtDAOException e) {
@@ -538,10 +527,8 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
     }
 
-    /**
-     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#getBlockConditionByUUID(String)
-     */
-    @Override public BlockConditions getBlockConditionByUUID(String uuid) throws APIManagementException {
+    @Override
+    public BlockConditions getBlockConditionByUUID(String uuid) throws APIManagementException {
         try {
             return policyDAO.getBlockConditionByUUID(uuid);
         } catch (APIMgtDAOException e) {

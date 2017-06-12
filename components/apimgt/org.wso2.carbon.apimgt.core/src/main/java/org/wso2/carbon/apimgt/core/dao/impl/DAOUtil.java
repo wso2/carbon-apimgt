@@ -110,9 +110,10 @@ public class DAOUtil {
 
     /**
      * Utility method to close the connection streams.
+     *
      * @param preparedStatement PreparedStatement
-     * @param connection Connection
-     * @param resultSet ResultSet
+     * @param connection        Connection
+     * @param resultSet         ResultSet
      */
     public static void closeAllConnections(PreparedStatement preparedStatement, Connection connection,
             ResultSet resultSet) {
@@ -122,7 +123,8 @@ public class DAOUtil {
     }
 
     /**
-     * Close Connection
+     * Close Connection.
+     *
      * @param dbConnection Connection
      */
     private static void closeConnection(Connection dbConnection) {
@@ -130,14 +132,15 @@ public class DAOUtil {
             try {
                 dbConnection.close();
             } catch (SQLException e) {
-                log.warn("Database error. Could not close database connection. Continuing with " +
-                        "others. - " + e.getMessage(), e);
+                log.warn("Database error. Could not close database connection. Continuing with " + "others. - " + e
+                        .getMessage(), e);
             }
         }
     }
 
     /**
-     * Close ResultSet
+     * Close ResultSet.
+     *
      * @param resultSet ResultSet
      */
     private static void closeResultSet(ResultSet resultSet) {
@@ -152,7 +155,8 @@ public class DAOUtil {
     }
 
     /**
-     * Close PreparedStatement
+     * Close PreparedStatement.
+     *
      * @param preparedStatement PreparedStatement
      */
     public static void closeStatement(PreparedStatement preparedStatement) {
@@ -160,8 +164,8 @@ public class DAOUtil {
             try {
                 preparedStatement.close();
             } catch (SQLException e) {
-                log.warn("Database error. Could not close PreparedStatement. Continuing with" +
-                        " others. - " + e.getMessage(), e);
+                log.warn("Database error. Could not close PreparedStatement. Continuing with" + " others. - " + e
+                        .getMessage(), e);
             }
         }
 

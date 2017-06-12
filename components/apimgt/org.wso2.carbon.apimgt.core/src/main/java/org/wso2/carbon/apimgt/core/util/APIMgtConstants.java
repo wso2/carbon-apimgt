@@ -270,11 +270,11 @@ public class APIMgtConstants {
         public static final String BLOCKING_CONDITION_STATE = "state";
         public static final String BLOCKING_CONDITION_KEY = "blockingCondition";
         public static final String BLOCKING_CONDITION_VALUE = "conditionValue";
-        public static final String BLOCKING_CONDITION_DOMAIN = "tenantDomain";
         public static final String BLOCKING_CONDITIONS_APPLICATION = "APPLICATION";
         public static final String BLOCKING_CONDITIONS_API = "API";
         public static final String BLOCKING_CONDITIONS_USER = "USER";
         public static final String BLOCKING_CONDITIONS_IP = "IP";
+        public static final String BLOCKING_CONDITION_IP_RANGE = "IP_RANGE";
     }
 
     /**

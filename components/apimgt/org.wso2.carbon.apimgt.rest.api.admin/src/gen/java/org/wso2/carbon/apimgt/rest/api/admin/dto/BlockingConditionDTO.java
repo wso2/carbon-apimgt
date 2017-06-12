@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.IPConditionDTO;
 import java.util.Objects;
 
 /**
@@ -23,6 +24,9 @@ public class BlockingConditionDTO   {
 
   @JsonProperty("status")
   private Boolean status = null;
+
+  @JsonProperty("ipCondition")
+  private IPConditionDTO ipCondition = null;
 
   public BlockingConditionDTO conditionId(String conditionId) {
     this.conditionId = conditionId;
@@ -96,6 +100,24 @@ public class BlockingConditionDTO   {
     this.status = status;
   }
 
+  public BlockingConditionDTO ipCondition(IPConditionDTO ipCondition) {
+    this.ipCondition = ipCondition;
+    return this;
+  }
+
+   /**
+   * Get ipCondition
+   * @return ipCondition
+  **/
+  @ApiModelProperty(value = "")
+  public IPConditionDTO getIpCondition() {
+    return ipCondition;
+  }
+
+  public void setIpCondition(IPConditionDTO ipCondition) {
+    this.ipCondition = ipCondition;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -109,12 +131,13 @@ public class BlockingConditionDTO   {
     return Objects.equals(this.conditionId, blockingCondition.conditionId) &&
         Objects.equals(this.conditionType, blockingCondition.conditionType) &&
         Objects.equals(this.conditionValue, blockingCondition.conditionValue) &&
-        Objects.equals(this.status, blockingCondition.status);
+        Objects.equals(this.status, blockingCondition.status) &&
+        Objects.equals(this.ipCondition, blockingCondition.ipCondition);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(conditionId, conditionType, conditionValue, status);
+    return Objects.hash(conditionId, conditionType, conditionValue, status, ipCondition);
   }
 
   @Override
@@ -126,6 +149,7 @@ public class BlockingConditionDTO   {
     sb.append("    conditionType: ").append(toIndentedString(conditionType)).append("\n");
     sb.append("    conditionValue: ").append(toIndentedString(conditionValue)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
+    sb.append("    ipCondition: ").append(toIndentedString(ipCondition)).append("\n");
     sb.append("}");
     return sb.toString();
   }

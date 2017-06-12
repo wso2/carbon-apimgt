@@ -101,12 +101,11 @@ public interface APIMgtAdminService {
     /**
      *  Add a block condition
      *
-     * @param conditionType type of the condition (IP, Context .. )
-     * @param conditionValue value of the condition
+     * @param blockConditions BlockConditions Object to be added
      * @return UUID of the new Block Condition
      * @throws APIManagementException
      */
-    String addBlockCondition(String conditionType, String conditionValue) throws APIManagementException;
+    String addBlockCondition(BlockConditions blockConditions) throws APIManagementException;
 
     /**
      * Adds new {@link SubscriptionPolicy} to the system
@@ -356,6 +355,7 @@ public interface APIMgtAdminService {
     List<SubscriptionPolicy> getAllSubscriptionPolicies() throws APIManagementException;
 
     /**
+     * Get a list of block conditions.
      *
      * @return List of block Conditions
      * @throws APIManagementException
@@ -363,7 +363,7 @@ public interface APIMgtAdminService {
     List<BlockConditions> getBlockConditions() throws APIManagementException;
 
     /**
-     * Retrieves a block condition by its UUID
+     * Retrieves a block condition by its UUID.
      *
      * @param uuid uuid of the block condition
      * @return Retrieve a block Condition

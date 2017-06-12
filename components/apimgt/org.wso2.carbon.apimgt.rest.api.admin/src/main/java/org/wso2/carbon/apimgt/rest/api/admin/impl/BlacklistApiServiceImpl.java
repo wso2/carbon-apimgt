@@ -170,7 +170,9 @@ public class BlacklistApiServiceImpl extends BlacklistApiService {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             //Add the block condition. It will throw BlockConditionAlreadyExistsException if the condition already
             //  exists in the system
-            String uuid = apiMgtAdminService.addBlockCondition(body.getConditionType(), body.getConditionValue());
+            BlockConditions blockConditions = BlockingConditionMappingUtil
+                    .fromBlockingConditionDTOToBlockCondition(body);
+            String uuid = apiMgtAdminService.addBlockCondition(blockConditions);
             //retrieve the new blocking condition and send back as the response
             BlockConditions newBlockingCondition = apiMgtAdminService.getBlockConditionByUUID(uuid);
             BlockingConditionDTO dto = BlockingConditionMappingUtil.fromBlockingConditionToDTO(newBlockingCondition);

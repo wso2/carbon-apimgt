@@ -223,12 +223,11 @@ public interface PolicyDAO {
     /**
      * Add a block condition
      *
-     * @param conditionType  Type of the block condition
-     * @param conditionValue value related to the type
+     * @param blockConditions BlockCondition object to be added
      * @return uuid of the block condition if successfully added
      * @throws APIMgtDAOException
      */
-    String addBlockConditions(String conditionType, String conditionValue) throws APIMgtDAOException;
+    String addBlockConditions(BlockConditions blockConditions) throws APIMgtDAOException;
 
     /**
      * Get details of a block condition by UUID
