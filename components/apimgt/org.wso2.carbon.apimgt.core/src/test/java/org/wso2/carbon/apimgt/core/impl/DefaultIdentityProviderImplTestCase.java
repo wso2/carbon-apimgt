@@ -40,7 +40,7 @@ import static org.mockito.Matchers.any;
 public class DefaultIdentityProviderImplTestCase {
 
     @Test
-    public void testGetRolesOfUser() throws Exception {
+    public void testGetRoleNamesOfUser() throws Exception {
         SCIMServiceStub scimServiceStub = Mockito.mock(SCIMServiceStub.class);
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
@@ -68,7 +68,7 @@ public class DefaultIdentityProviderImplTestCase {
 
         Mockito.when(scimServiceStub.getUser(user1Id)).thenReturn(user);
 
-        List<String> roles = idpImpl.getRolesOfUser(user1Id);
+        List<String> roles = idpImpl.getRoleNamesOfUser(user1Id);
         Assert.assertEquals(roleNames.size(), roles.size());
         roles.forEach(roleName -> Assert.assertTrue(roleNames.contains(roleName)));
 
@@ -77,7 +77,7 @@ public class DefaultIdentityProviderImplTestCase {
         Mockito.when(scimServiceStub.getUser(invalidUserId)).thenReturn(null);
 
         try {
-            idpImpl.getRolesOfUser(invalidUserId);
+            idpImpl.getRoleNamesOfUser(invalidUserId);
         } catch (Exception ex) {
             Assert.assertTrue(ex instanceof IdentityProviderException);
             Assert.assertEquals(ex.getMessage(), "User id " + invalidUserId + " does not exist in the system.");

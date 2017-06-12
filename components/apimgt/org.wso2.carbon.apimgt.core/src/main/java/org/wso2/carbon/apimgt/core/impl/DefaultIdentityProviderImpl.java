@@ -68,7 +68,7 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
     }
 
     @Override
-    public List<String> getRolesOfUser(String userId) throws IdentityProviderException {
+    public List<String> getRoleNamesOfUser(String userId) throws IdentityProviderException {
         List<String> roleNames = new ArrayList<>();
         SCIMUser scimUser = scimServiceStub.getUser(userId);
         if (scimUser != null) {

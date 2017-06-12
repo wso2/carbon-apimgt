@@ -30,13 +30,13 @@ import java.util.List;
 public interface IdentityProvider extends KeyManager {
 
     /**
-     * Get the role list of a user.
+     * Get the role name list of a user.
      *
      * @param userId User Id
-     * @return a list of roles
+     * @return a list of role names
      * @throws IdentityProviderException if error occurred while getting roles of the user
      */
-    public List<String> getRolesOfUser(String userId) throws IdentityProviderException;
+    public List<String> getRoleNamesOfUser(String userId) throws IdentityProviderException;
 
     /**
      * Validate role.
