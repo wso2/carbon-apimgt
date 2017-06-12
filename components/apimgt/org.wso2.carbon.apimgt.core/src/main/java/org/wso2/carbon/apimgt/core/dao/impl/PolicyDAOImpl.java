@@ -494,10 +494,8 @@ public class PolicyDAOImpl implements PolicyDAO {
                 PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
-                    SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(
-                            resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_NAME));
-                    setCommonPolicyDetails(subscriptionPolicy, resultSet);
-                    policyList.add(subscriptionPolicy);
+                    policyList.add(createSubscriptionPolicyFromResultSet(resultSet.getString(APIMgtConstants
+                            .ThrottlePolicyConstants.COLUMN_NAME), resultSet));
                 }
             }
         }
@@ -869,6 +867,14 @@ public class PolicyDAOImpl implements PolicyDAO {
         return null;
     }
 
+    /**
+     * Creates a Subscription Policy from the results set
+     *
+     * @param identifier policy id
+     * @param rs {@link ResultSet} instance
+     * @return {@link SubscriptionPolicy} instance
+     * @throws SQLException if any error occurs while creating the Subscription Policy from the result set
+     */
     private SubscriptionPolicy createSubscriptionPolicyFromResultSet (String identifier, ResultSet rs) throws
             SQLException {
 
