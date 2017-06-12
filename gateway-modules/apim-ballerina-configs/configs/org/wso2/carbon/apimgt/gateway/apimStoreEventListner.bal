@@ -12,8 +12,8 @@ import org.wso2.carbon.apimgt.gateway.utils as gatewayUtil;
 
 
 @jms:JMSSource {
-factoryInitial : "org.apache.activemq.jndi.ActiveMQInitialContextFactory",
-providerUrl : "tcp://localhost:61616"}
+    factoryInitial : "org.apache.activemq.jndi.ActiveMQInitialContextFactory",
+    providerUrl : "tcp://localhost:61616"}
 @jms:ConnectionProperty {key:"connectionFactoryType", value:"topic"}
 @jms:ConnectionProperty {key:"destination", value:"StoreTopic"}
 @jms:ConnectionProperty {key:"connectionFactoryJNDIName", value:"TopicConnectionFactory"}
@@ -28,7 +28,10 @@ service apimStoreEventListner {
 
             if (strings:equalsIgnoreCase(eventType, Constants:SUBSCRIPTION_CREATE)) {
                 json subscriptionsList = jsons:getJson(event, "subscriptionsList");
-                gatewayUtil:updateSubscriptionCache(subscriptionsList);
+                gatewayUtil:putIntoSubscriptionCache(subscriptionsList);
+            } else if (strings:equalsIgnoreCase(eventType, Constants:SUBSCRIPTION_DELETE)) {
+                json subscriptionsList = jsons:getJson(event, "subscriptionsList");
+                gatewayUtil:removeFromSubscriptionCache(subscriptionsList);
             } else {
                 system:println("Invalid event received");
             }
@@ -40,4 +43,3 @@ service apimStoreEventListner {
     }
 
 }
-
