@@ -339,51 +339,6 @@ public class DefaultKeyManagerImpl implements KeyManager {
     public AccessTokenInfo getTokenMetaData(String accessToken) throws KeyManagementException {
         log.debug("Token introspection request is being sent.");
         try {
-////<<<<<<< HEAD
-//            createSSLConnection();
-//            String introspectEndpoint = getKeyManagerEndPoint("/oauth2/introspect");
-//            //System.getProperty("introspectEndpoint", "https://localhost:9443/oauth2/introspect");
-//            url = new URL(introspectEndpoint);
-//            urlConn = (HttpURLConnection) url.openConnection();
-//            urlConn.setDoOutput(true);
-//            urlConn.setRequestMethod("POST");
-//            urlConn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-//            String clientEncoded = Base64.getEncoder().encodeToString((System.getProperty("systemUsername",
-//                    "admin") + ":" + System.getProperty("systemUserPwd", "admin"))
-//                    .getBytes(StandardCharsets.UTF_8));
-//            urlConn.setRequestProperty("Authorization", "Basic " + clientEncoded); //temp fix
-//            urlConn.getOutputStream().write(("token=" + accessToken).getBytes("UTF-8"));
-//            //String responseStr = new String(IOUtils.toByteArray(urlConn.getInputStream()), "UTF-8");
-//            String responseStr = "{\n" + "    \"active\": true,\n"
-//                    + "    \"scope\": \"apim:api_view apim:api_create apim:api_publish apim:tier_view
-            // apim:tier_manage "
-//                    + "apim:subscription_view apim:subscription_block apim:subscribe apim:workflow_approve\",\n"
-//                    + "    \"exp\": \"3600000\",\n" + "    \"iat\": \"1496115930752\"\n" + "}";
-//            JsonParser parser = new JsonParser();
-//            JsonObject jObj = parser.parse(responseStr).getAsJsonObject();
-//            boolean active = jObj.getAsJsonPrimitive("active").getAsBoolean();
-//            if (active) {
-//                //String consumerKey = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_ID).getAsString();
-//                //String endUser = jObj.getAsJsonPrimitive(KeyManagerConstants.USERNAME).getAsString();
-//                long exp = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH2_TOKEN_EXP_TIME).getAsLong();
-//                long issuedTime = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH2_TOKEN_ISSUED_TIME).getAsLong();
-//                String scopes = jObj.getAsJsonPrimitive(KeyManagerConstants.OAUTH_CLIENT_SCOPE).getAsString();
-//                if (scopes != null) {
-//                    String[] scopesArray = scopes.split(" ");
-//                    tokenInfo.setScopes(scopesArray);
-//                }
-//                tokenInfo.setTokenValid(true);
-//                tokenInfo.setAccessToken(accessToken);
-//                //tokenInfo.setConsumerKey(consumerKey);
-//                //tokenInfo.setEndUserName(endUser);
-//                tokenInfo.setIssuedTime(issuedTime);
-//
-//                // Convert Expiry Time to milliseconds.
-//                if (exp == Long.MAX_VALUE) {
-//                    tokenInfo.setValidityPeriod(Long.MAX_VALUE);
-//                } else {
-//                    tokenInfo.setValidityPeriod(exp * 1000);
-//=======
             Response response = oAuth2ServiceStubs.getIntrospectionServiceStub().introspectToken(accessToken);
             if (response == null) {
                 throw new KeyManagementException("Error occurred while introspecting access token. " +
@@ -417,7 +372,6 @@ public class DefaultKeyManagerImpl implements KeyManager {
                 } catch (IOException e) {
                     throw new KeyManagementException("Error occurred while parsing token introspection response", e,
                             ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
-//>>>>>>> master
                 }
             } else {
                 throw new KeyManagementException("Token introspection request failed. HTTP error code: "

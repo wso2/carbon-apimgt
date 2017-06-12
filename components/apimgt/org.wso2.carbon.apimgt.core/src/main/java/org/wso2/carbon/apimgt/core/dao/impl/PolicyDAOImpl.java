@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.BandwidthLimit;
@@ -1182,7 +1183,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                     }
                 } else {
                     String errorMsg = "Unable to retrieve auto incremented id, hence unable to add Pipeline Condition";
-                    throw new APIMgtDAOException(errorMsg);
+                    throw new APIMgtDAOException(errorMsg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
                 }
             }
         }
