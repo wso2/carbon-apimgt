@@ -6,6 +6,8 @@ import io.swagger.annotations.ApiParam;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CompositeAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CompositeAPIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
+import java.io.File;
+import org.wso2.carbon.apimgt.rest.api.store.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.factories.CompositeApisApiServiceFactory;
 
 import org.wso2.msf4j.Microservice;
@@ -84,6 +86,53 @@ public class CompositeApisApi implements Microservice  {
 , @Context Request request)
     throws NotFoundException {
         return delegate.compositeApisApiIdGet(apiId,accept,ifNoneMatch,ifModifiedSince, request);
+    }
+    @GET
+    @Path("/{apiId}/implementation")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Get Composite API implementation", notes = "This operation can be used to retrieve the Ballerina implementation of a Composite API. ", response = void.class, tags={ "CompositeAPI (Individual)", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Requested Ballerina implementation of the Composite API is returned ", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = void.class) })
+    public Response compositeApisApiIdImplementationGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
+,@ApiParam(value = "Media types acceptable for the response. Default is JSON. " , defaultValue="JSON")@HeaderParam("Accept") String accept
+,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
+,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
+, @Context Request request)
+    throws NotFoundException {
+        return delegate.compositeApisApiIdImplementationGet(apiId,accept,ifNoneMatch,ifModifiedSince, request);
+    }
+    @PUT
+    @Path("/{apiId}/implementation")
+    @Consumes({ "multipart/form-data" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Update Composite API implementation", notes = "This operation can be used to update the Ballerina implementation of a Composite API. Ballerina implementation to be updated is passed as a form data parameter `apiImplementation`. ", response = FileInfoDTO.class, tags={ "CompositeAPI (Individual)", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Successful response with updated Ballerina implementation ", response = FileInfoDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = FileInfoDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified. ", response = FileInfoDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = FileInfoDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = FileInfoDTO.class) })
+    public Response compositeApisApiIdImplementationPut(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
+,
+            @FormDataParam("apiImplementation") InputStream apiImplementationInputStream,
+            @FormDataParam("apiImplementation") FileInfo apiImplementationDetail
+,@ApiParam(value = "Media type of the entity in the body. Default is JSON. " ,required=true, defaultValue="JSON")@HeaderParam("Content-Type") String contentType
+,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
+,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
+, @Context Request request)
+    throws NotFoundException {
+        return delegate.compositeApisApiIdImplementationPut(apiId,apiImplementationInputStream, apiImplementationDetail,contentType,ifMatch,ifUnmodifiedSince, request);
     }
     @PUT
     @Path("/{apiId}")

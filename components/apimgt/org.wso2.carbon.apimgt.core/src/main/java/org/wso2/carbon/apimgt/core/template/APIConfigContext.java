@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.core.template;
 
 import org.apache.velocity.VelocityContext;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
-import org.wso2.carbon.apimgt.core.models.API;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -32,42 +31,49 @@ import java.util.Date;
  */
 public class APIConfigContext extends ConfigContext {
 
-    private API api;
+    private String apiName;
+    private String context;
+    private String version;
+    private LocalDateTime createdTime;
     private String packageName;
     private String serviceNamePrefix = "";
-    public APIConfigContext(API api, String packageName) {
-        this.api = api;
+    public APIConfigContext(String apiName, String context, String version, LocalDateTime createdTime,
+                            String packageName) {
+        this.apiName = apiName;
+        this.context = context;
+        this.version = version;
+        this.createdTime = createdTime;
         this.packageName = packageName;
     }
 
     @Override
     public void validate() throws APITemplateException {
         //see if api name ,version, context sets
-        if (api.getName().isEmpty() || api.getContext().isEmpty() || api.getVersion().isEmpty()) {
+        if (apiName.isEmpty() || context.isEmpty() || version.isEmpty()) {
             throw new APITemplateException("API property validation failed", ExceptionCodes.TEMPLATE_EXCEPTION);
         }
 
         //adding string prefix if api name starting with a number
-        if (api.getName().matches("^(\\d)+")) {
+        if (apiName.matches("^(\\d)+")) {
             serviceNamePrefix = "prefix_";
         }
     }
 
     @Override
     public VelocityContext getContext() {
-        VelocityContext context = new VelocityContext();
-        context.put("version", api.getVersion());
-        context.put("apiContext", api.getContext().startsWith("/") ? api.getContext() : "/" + api.getContext());
-        LocalDateTime ldt = api.getCreatedTime();
+        VelocityContext velocityContext = new VelocityContext();
+        velocityContext.put("version", version);
+        velocityContext.put("apiContext", context.startsWith("/") ? context : "/" + context);
+        LocalDateTime ldt = createdTime;
         Instant instant = ldt.atZone(ZoneId.systemDefault()).toInstant();
         Date res = Date.from(instant);
-        String serviceName = serviceNamePrefix + api.getName() + "_" + res.getTime();
+        String serviceName = serviceNamePrefix + apiName + "_" + res.getTime();
         if (serviceName.contains(" ")) {
             serviceName = serviceName.replaceAll(" ", "_");
         }
-        context.put("serviceName", serviceName);
-        context.put("package", packageName);
-        return context;
+        velocityContext.put("serviceName", serviceName);
+        velocityContext.put("package", packageName);
+        return velocityContext;
     }
 
 }

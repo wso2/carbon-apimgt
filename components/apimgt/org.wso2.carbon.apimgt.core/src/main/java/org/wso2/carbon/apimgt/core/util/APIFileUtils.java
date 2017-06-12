@@ -197,6 +197,7 @@ public class APIFileUtils {
      * Delete a given directory
      *
      * @param path Path to the directory to be deleted
+     * @throws APIMgtDAOException if unable to delete the directory
      */
     public static void deleteDirectory(String path) throws APIMgtDAOException {
         try {
@@ -308,6 +309,7 @@ public class APIFileUtils {
      *
      * @param thumbnailInputStream {@link InputStream} instance with thumbnail data
      * @param exportLocation       file system location to which the thumbnail will be written
+     * @throws APIMgtDAOException if unable to export thumbnail
      */
     public static void exportThumbnailToFileSystem(InputStream thumbnailInputStream, String exportLocation)
             throws APIMgtDAOException {
@@ -434,6 +436,7 @@ public class APIFileUtils {
      *
      * @param thumbnailFilePath path to file
      * @return thumbnail as a {@link InputStream} instance
+     * @throws APIMgtDAOException if an error occurs when getting thumbnail
      */
     public static InputStream getThumbnailImage(String thumbnailFilePath) throws APIMgtDAOException {
         File thumbnailFile = new File(thumbnailFilePath);

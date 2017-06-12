@@ -34,6 +34,8 @@ public class OAuth2TokenInfo {
     private String scope;
     @SerializedName("token_type")
     private String tokenType;
+    @SerializedName("id_token")
+    private String idToken;
     @SerializedName("expires_in")
     private long expiresIn;
 
@@ -55,5 +57,9 @@ public class OAuth2TokenInfo {
 
     public long getExpiresIn() {
         return expiresIn;
+    }
+
+    public String getIdToken() {
+        return idToken;
     }
 }

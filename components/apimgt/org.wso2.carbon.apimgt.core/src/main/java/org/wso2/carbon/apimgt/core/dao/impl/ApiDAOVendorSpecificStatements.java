@@ -64,6 +64,7 @@ public interface ApiDAOVendorSpecificStatements {
      * @param apiType API type to be considered for the search
      * @param offset result pagination offset
      * @param limit result pagination limit
+     * @throws SQLException if DB error occurs
      */
     void setApiSearchStatement(PreparedStatement statement, Set<String> roles, String user,
                            String searchString, ApiType apiType, int offset, int limit) throws SQLException;
@@ -77,6 +78,7 @@ public interface ApiDAOVendorSpecificStatements {
      * @param apiType API type to be considered for the search
      * @param offset result pagination offset
      * @param limit result pagination limit
+     * @throws SQLException if DB error occurs
      */
     void setApiAttributeSearchStatement(PreparedStatement statement, Set<String> roles, String user,
                                         Map<String, String> attributeMap, ApiType apiType, int offset, int limit)

@@ -33,13 +33,14 @@ import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.template.APIConfigContext;
 import org.wso2.carbon.apimgt.core.template.APITemplateException;
+import org.wso2.carbon.apimgt.core.template.CompositeAPIConfigContext;
 import org.wso2.carbon.apimgt.core.template.ConfigContext;
 import org.wso2.carbon.apimgt.core.template.EndpointContext;
 import org.wso2.carbon.apimgt.core.template.ResourceConfigContext;
+import org.wso2.carbon.apimgt.core.template.dto.CompositeAPIEndpointDTO;
 import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
 
 import java.io.File;
@@ -52,13 +53,8 @@ import java.util.List;
  */
 public class GatewaySourceGeneratorImpl implements GatewaySourceGenerator {
     private static final Logger log = LoggerFactory.getLogger(GatewaySourceGeneratorImpl.class);
-    private API api;
+    private APIConfigContext apiConfigContext;
     private String packageName;
-
-    public GatewaySourceGeneratorImpl(API api) {
-        this();
-        this.api = api;
-    }
 
     public GatewaySourceGeneratorImpl() {
         APIMConfigurations config = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
@@ -71,10 +67,9 @@ public class GatewaySourceGeneratorImpl implements GatewaySourceGenerator {
         String templatePath = "resources" + File.separator + "template" + File.separator + "template.xml";
         try {
             // build the context for template and apply the necessary decorators
-            ConfigContext configcontext = new APIConfigContext(this.api, packageName);
-            configcontext.validate();
-            configcontext = new ResourceConfigContext(configcontext, this.api, apiResources);
-            VelocityContext context = configcontext.getContext();
+            apiConfigContext.validate();
+            ConfigContext configContext = new ResourceConfigContext(apiConfigContext, apiResources);
+            VelocityContext context = configContext.getContext();
             VelocityEngine velocityengine = new VelocityEngine();
             velocityengine.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
             velocityengine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
@@ -120,8 +115,8 @@ public class GatewaySourceGeneratorImpl implements GatewaySourceGenerator {
     }
 
     @Override
-    public void setAPI(API api) {
-        this.api = api;
+    public void setApiConfigContext(APIConfigContext apiConfigContext) {
+        this.apiConfigContext = apiConfigContext;
     }
 
     @Override
@@ -149,4 +144,33 @@ public class GatewaySourceGeneratorImpl implements GatewaySourceGenerator {
         return writer.toString();
     }
 
+    @Override
+    public String getCompositeAPIConfigStringFromTemplate(List<TemplateBuilderDTO> apiResources,
+                                                          List<CompositeAPIEndpointDTO> compositeApiEndpoints)
+                                                          throws APITemplateException {
+        StringWriter writer = new StringWriter();
+        String templatePath = "resources" + File.separator + "template" + File.separator + "composite_template.xml";
+        try {
+            // build the context for template and apply the necessary decorators
+            apiConfigContext.validate();
+            CompositeAPIConfigContext configContext = new CompositeAPIConfigContext(apiConfigContext, apiResources,
+                                                                                    compositeApiEndpoints);
+            VelocityContext context = configContext.getContext();
+            VelocityEngine velocityengine = new VelocityEngine();
+            velocityengine.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
+            velocityengine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
+            velocityengine.setProperty(VelocityEngine.RUNTIME_LOG_LOGSYSTEM, new CommonsLogLogChute());
+            velocityengine.init();
+            Template template = velocityengine.getTemplate(templatePath);
+            template.merge(context, writer);
+        } catch (ResourceNotFoundException e) {
+            log.error("Template " + templatePath + " not Found", e);
+            throw new APITemplateException("Template " + templatePath + " not Found",
+                    ExceptionCodes.TEMPLATE_EXCEPTION);
+        } catch (ParseErrorException e) {
+            log.error("Syntax error in " + templatePath, e);
+            throw new APITemplateException("Syntax error in " + templatePath, ExceptionCodes.TEMPLATE_EXCEPTION);
+        }
+        return writer.toString();
+    }
 }

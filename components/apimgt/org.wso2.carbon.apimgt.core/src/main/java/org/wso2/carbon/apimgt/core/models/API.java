@@ -21,7 +21,6 @@
 package org.wso2.carbon.apimgt.core.models;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.lcm.core.ManagedLifecycle;
 import org.wso2.carbon.lcm.core.exception.LifecycleException;
@@ -66,7 +65,7 @@ public final class API {
         businessInformation = builder.businessInformation;
         corsConfiguration = builder.corsConfiguration;
         createdTime = builder.createdTime;
-        apiType = builder.apiType;
+        applicationId = builder.applicationId;
         createdBy = builder.createdBy;
         updatedBy = builder.updatedBy;
         lastUpdatedTime = builder.lastUpdatedTime;
@@ -205,6 +204,18 @@ public final class API {
         return apiPermission;
     }
 
+    public String getApiDefinition() {
+        return apiDefinition;
+    }
+
+    public String getCopiedFromApiId() {
+        return copiedFromApiId;
+    }
+
+    public String getApplicationId() {
+        return applicationId;
+    }
+
     public List<String> getUserSpecificApiPermissions() {
         return userSpecificApiPermissions;
     }
@@ -242,6 +253,7 @@ public final class API {
                 Objects.equals(visibleRoles, api.visibleRoles) &&
                 Objects.equals(businessInformation, api.businessInformation) &&
                 Objects.equals(corsConfiguration, api.corsConfiguration) &&
+                Objects.equals(applicationId, api.applicationId) &&
                 APIUtils.isTimeStampsEquals(createdTime, api.createdTime) &&
                 Objects.equals(createdBy, api.createdBy) &&
                 Objects.equals(updatedBy, api.updatedBy) &&
@@ -257,8 +269,8 @@ public final class API {
         return Objects.hash(id, provider, name, version, context, description, lifeCycleStatus, lifecycleInstanceId,
                 endpoint, gatewayConfig, wsdlUri, isResponseCachingEnabled, cacheTimeout, isDefaultVersion,
                 transport, tags, labels, policies, visibility, visibleRoles, businessInformation, corsConfiguration,
-                createdTime, createdBy, updatedBy, lastUpdatedTime, lifecycleState, uriTemplates, copiedFromApiId,
-                workflowStatus);
+                applicationId, createdTime, createdBy, updatedBy, lastUpdatedTime, lifecycleState,
+                uriTemplates, copiedFromApiId, workflowStatus);
     }
 
 
@@ -291,7 +303,7 @@ public final class API {
     private final Set<String> visibleRoles;
     private final BusinessInformation businessInformation;
     private final CorsConfiguration corsConfiguration;
-    private final ApiType apiType;
+    private final String applicationId;
     private final LocalDateTime createdTime;
     private final String createdBy;
     private final String updatedBy;
@@ -407,10 +419,6 @@ public final class API {
             return businessInformation;
         }
 
-        public ApiType getApiType() {
-            return apiType;
-        }
-
         public List<String> getUserSpecificApiPermissions() {
             return userSpecificApiPermissions;
         }
@@ -437,7 +445,7 @@ public final class API {
         private Set<String> visibleRoles = Collections.emptySet();
         private BusinessInformation businessInformation;
         private CorsConfiguration corsConfiguration;
-        private ApiType apiType;
+        private String applicationId;
         private LocalDateTime createdTime;
         private String createdBy;
         private String updatedBy;
@@ -477,7 +485,7 @@ public final class API {
             this.visibleRoles = copy.visibleRoles;
             this.businessInformation = copy.businessInformation;
             this.corsConfiguration = copy.corsConfiguration;
-            this.apiType = copy.apiType;
+            this.applicationId = copy.applicationId;
             this.createdTime = copy.createdTime;
             this.createdBy = copy.createdBy;
             this.lastUpdatedTime = copy.lastUpdatedTime;
@@ -808,14 +816,14 @@ public final class API {
         }
 
         /**
-         * Sets the {@code apiType} and returns a reference to this APIBuilder so that the methods can be chained
+         * Sets the {@code applicationId} and returns a reference to this APIBuilder so that the methods can be chained
          * together.
          *
-         * @param apiType the {@code apiType} to set
+         * @param applicationId the {@code applicationId} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder apiType(ApiType apiType) {
-            this.apiType = apiType;
+        public APIBuilder applicationId(String applicationId) {
+            this.applicationId = applicationId;
             return this;
         }
 
@@ -1011,18 +1019,6 @@ public final class API {
         public void setUserSpecificApiPermissions(List<String> userSpecificApiPermissions) {
             this.userSpecificApiPermissions = userSpecificApiPermissions;
         }
-    }
-
-    public String getApiDefinition() {
-        return apiDefinition;
-    }
-
-    public String getCopiedFromApiId() {
-        return copiedFromApiId;
-    }
-
-    public ApiType getApiType() {
-        return apiType;
     }
 
     public void setCopiedFromApiId(String copiedFromApiId) {

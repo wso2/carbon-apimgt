@@ -27,7 +27,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
-import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
@@ -203,7 +202,6 @@ public class MappingUtil {
                 policies(new HashSet<>(apidto.getPolicies())).
                 businessInformation(businessInformation).
                 uriTemplates(uriTemplateList).
-                apiType(ApiType.STANDARD).  // Support Standard API creation from publisher
                 corsConfiguration(corsConfiguration);
         if (apidto.getIsDefaultVersion() != null) {
             apiBuilder.isDefaultVersion(apidto.getIsDefaultVersion());

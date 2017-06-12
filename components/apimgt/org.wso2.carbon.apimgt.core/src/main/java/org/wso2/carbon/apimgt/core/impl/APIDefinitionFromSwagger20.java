@@ -51,6 +51,7 @@ import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIResource;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
+import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
@@ -283,6 +284,43 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         return Json.pretty(swagger);
     }
 
+    @Override
+    public String generateSwaggerFromResources(CompositeAPI.Builder api) {
+        Swagger swagger = new Swagger();
+        Info info = new Info();
+        info.setTitle(api.getName());
+        info.setDescription(api.getDescription());
+
+        info.setVersion(api.getVersion());
+        swagger.setInfo(info);
+        Map<String, Path> stringPathMap = new HashMap();
+        for (UriTemplate uriTemplate : api.getUriTemplates().values()) {
+            String uriTemplateString = uriTemplate.getUriTemplate();
+            List<Parameter> parameterList = getParameters(uriTemplateString);
+            if (!HttpMethod.GET.toString().equalsIgnoreCase(uriTemplate.getHttpVerb()) && !HttpMethod.DELETE.toString
+                    ().equalsIgnoreCase(uriTemplate.getHttpVerb()) && !HttpMethod.OPTIONS.toString().equalsIgnoreCase
+                    (uriTemplate.getHttpVerb()) && !HttpMethod.HEAD.toString().equalsIgnoreCase(uriTemplate
+                    .getHttpVerb())) {
+                parameterList.add(getDefaultBodyParameter());
+            }
+            Operation operation = new Operation();
+            operation.setParameters(parameterList);
+            operation.setOperationId(uriTemplate.getTemplateId());
+            operation.addResponse("200", getDefaultResponse());
+            if (stringPathMap.containsKey(uriTemplateString)) {
+                Path path = stringPathMap.get(uriTemplateString);
+                path.set(uriTemplate.getHttpVerb().toLowerCase(), operation);
+            } else {
+                Path path = new Path();
+                path.set(uriTemplate.getHttpVerb().toLowerCase(), operation);
+                stringPathMap.put(uriTemplateString, path);
+            }
+        }
+        swagger.setPaths(stringPathMap);
+        swagger.setPaths(stringPathMap);
+        return Json.pretty(swagger);
+    }
+
     /**
      * return API Object
      *
@@ -330,22 +368,40 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
     }
 
     @Override
-    public void setDefaultSwaggerDefinition(API.APIBuilder apiBuilder) {
-        Map<String, UriTemplate> uriTemplateMap = new HashMap<>();
-        UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
-        uriTemplateBuilder.uriTemplate("/*");
-        for (String httpVerb : APIMgtConstants.SUPPORTED_HTTP_VERBS.split(",")) {
-            if (!"OPTIONS".equals(httpVerb)) {
-                uriTemplateBuilder.httpVerb(httpVerb);
-                uriTemplateBuilder.templateId(APIUtils.generateOperationIdFromPath(uriTemplateBuilder.getUriTemplate
-                        (), httpVerb));
-                uriTemplateMap.put(uriTemplateBuilder.getTemplateId(), uriTemplateBuilder.build());
-            }
+    public CompositeAPI.Builder generateCompositeApiFromSwaggerResource(String provider, String apiDefinition)
+                                                                                    throws APIManagementException {
+        SwaggerParser swaggerParser = new SwaggerParser();
+        Swagger swagger = swaggerParser.parse(apiDefinition);
+
+        if (swagger == null) {
+            throw new APIManagementException("Swagger could not be generated from provided API definition");
         }
-        apiBuilder.uriTemplates(uriTemplateMap);
-        String swagger = generateSwaggerFromResources(apiBuilder);
-        apiBuilder.apiDefinition(swagger);
+
+        Info apiInfo = swagger.getInfo();
+        if (apiInfo == null) {
+            throw new APIManagementException("Provided Swagger definition doesn't contain API information");
+        } else {
+            String apiName = apiInfo.getTitle();
+            String apiVersion = apiInfo.getVersion();
+            String apiDescription = apiInfo.getDescription();
+            CompositeAPI.Builder apiBuilder = new CompositeAPI.Builder().
+                provider(provider).
+                name(apiName).
+                version(apiVersion).
+                description(apiDescription).
+                context(swagger.getBasePath());
+
+            List<APIResource> apiResourceList = parseSwaggerAPIResources(new StringBuilder(apiDefinition));
+            Map<String, UriTemplate> uriTemplateMap = new HashMap();
+            for (APIResource apiResource : apiResourceList) {
+                uriTemplateMap.put(apiResource.getUriTemplate().getTemplateId(), apiResource.getUriTemplate());
+            }
+            apiBuilder.uriTemplates(uriTemplateMap);
+            apiBuilder.id(UUID.randomUUID().toString());
+            return apiBuilder;
+        }
     }
+
 
     public static List<Parameter> getParameters(String uriTemplate) {
         List<Parameter> parameters = new ArrayList<>();

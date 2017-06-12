@@ -24,7 +24,6 @@ import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -32,6 +31,7 @@ import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.Comment;
+import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
@@ -173,7 +173,6 @@ public class SampleTestObjectCreator {
                 visibleRoles(new HashSet<>()).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
-                apiType(ApiType.STANDARD).
                 createdTime(LocalDateTime.now()).
                 createdBy(ADMIN).
                 updatedBy(ADMIN).
@@ -193,7 +192,6 @@ public class SampleTestObjectCreator {
                 id(api.getId()).
                 context(api.getContext()).
                 description(api.getDescription()).
-                apiType(ApiType.STANDARD).
                 lifeCycleStatus(api.getLifeCycleStatus()).
                 lifecycleInstanceId(api.getLifecycleInstanceId()).build();
     }
@@ -206,7 +204,6 @@ public class SampleTestObjectCreator {
                 name(fromAPI.getName()).
                 version(fromAPI.getVersion()).
                 context(fromAPI.getContext()).
-                apiType(fromAPI.getApiType()).
                 createdTime(fromAPI.getCreatedTime()).
                 createdBy(fromAPI.getCreatedBy()).
                 lifecycleInstanceId(fromAPI.getLifecycleInstanceId()).
@@ -276,7 +273,6 @@ public class SampleTestObjectCreator {
                 visibleRoles(new HashSet<>(Arrays.asList(CUSTOMER_ROLE, MANAGER_ROLE, EMPLOYEE_ROLE))).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
-                apiType(ApiType.STANDARD).
                 permissionMap(permissionMap).
                 createdTime(LocalDateTime.now()).
                 createdBy(API_CREATOR).
@@ -336,7 +332,6 @@ public class SampleTestObjectCreator {
                 visibleRoles(new HashSet<>(Arrays.asList(CUSTOMER_ROLE, MANAGER_ROLE, EMPLOYEE_ROLE))).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
-                apiType(ApiType.STANDARD).
                 permissionMap(permissionMap).
                 createdTime(LocalDateTime.now()).
                 createdBy(API_CREATOR).
@@ -346,6 +341,35 @@ public class SampleTestObjectCreator {
 
         return apiBuilder;
     }
+
+    public static CompositeAPI.Builder createUniqueCompositeAPI() {
+        Set<String> transport = new HashSet<>();
+        transport.add(HTTP);
+
+        HashMap permissionMap = new HashMap();
+        permissionMap.put("1000", 6);
+        permissionMap.put("1001", 4);
+
+        CompositeAPI.Builder apiBuilder = new CompositeAPI.Builder().
+                id(UUID.randomUUID().toString()).
+                name(UUID.randomUUID().toString()).
+                provider(UUID.randomUUID().toString()).
+                version(API_VERSION).
+                context(UUID.randomUUID().toString()).
+                description("Get Food & Beverage Info").
+                transport(transport).
+                permissionMap(permissionMap).
+                applicationId(UUID.randomUUID().toString()).
+                createdTime(LocalDateTime.now()).
+                createdBy(API_CREATOR).
+                uriTemplates(Collections.emptyMap()).
+                apiDefinition(apiDefinition).
+                lastUpdatedTime(LocalDateTime.now());
+
+        return apiBuilder;
+    }
+
+
 
     public static API.APIBuilder createCustomAPI(String name, String version, String context) {
         API.APIBuilder apiBuilder = createDefaultAPI();
@@ -362,7 +386,6 @@ public class SampleTestObjectCreator {
                 id(api.getId()).
                 context(api.getContext()).
                 description(api.getDescription()).
-                apiType(api.getApiType()).
                 lifeCycleStatus(api.getLifeCycleStatus()).
                 lifecycleInstanceId(api.getLifecycleInstanceId()).build();
     }
@@ -809,7 +832,6 @@ public class SampleTestObjectCreator {
                 visibleRoles(new HashSet<>()).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
-                apiType(ApiType.STANDARD).
                 createdTime(LocalDateTime.now()).
                 createdBy(ADMIN).
                 updatedBy(ADMIN).
