@@ -59,8 +59,8 @@ import javax.cache.Cache;
 public class GetCacheEntry extends AbstractNativeFunction {
     @Override
     public BValue[] execute(Context context) {
-        String cacheName = getArgument(context, 0).stringValue();
-        String cacheKey = getArgument(context, 1).stringValue();
+        String cacheName = getStringArgument(context, 0);
+        String cacheKey = getStringArgument(context, 1);
         Cache cache = (CacheManagerHolder.getInstance().getCacheManager().getCache(cacheName));
         BValue cacheEntry = (BValue) cache.get(cacheKey);
         //TODO build ballerina any type value based on the cache entry and return it.

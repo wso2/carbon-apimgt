@@ -18,11 +18,11 @@
 
 package org.wso2.carbon.apimgt.ballerina.caching;
 
-import org.ballerinalang.model.BLangProgram;
 import org.ballerinalang.model.values.BBoolean;
 import org.ballerinalang.model.values.BJSON;
 import org.ballerinalang.model.values.BString;
 import org.ballerinalang.model.values.BValue;
+import org.ballerinalang.util.codegen.ProgramFile;
 import org.ballerinalang.util.program.BLangFunctions;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -35,7 +35,7 @@ import org.wso2.carbon.apimgt.ballerina.caching.util.BTestUtils;
  *  @since 0.10-SNAPSHOT
  */
 public class CacheTest {
-    private BLangProgram bLangProgram;
+    private ProgramFile bLangProgram;
     private static final String s1 = "WSO2 Inc.";
 
     @BeforeClass
@@ -49,7 +49,7 @@ public class CacheTest {
         BValue[] args = {new BString("cacheName"), new BString("15"), new BString("cacheKey"),
                 new BString("cacheValue")};
         //Test ballerina cache create, put and get for BString
-        BValue[] returns = BLangFunctions.invoke(bLangProgram, "testCache", args);
+        BValue[] returns = BLangFunctions.invokeNew(bLangProgram, "testCache", args);
         //Assert if cache entry is BValue
         Assert.assertTrue(returns[0] instanceof BValue);
         final String expected = "cacheValue";
@@ -59,13 +59,13 @@ public class CacheTest {
         //Test ballerina Boolean values.
         BValue[] argsBoolean = {new BString("cacheName"), new BString("15"), new BString("cacheKey"),
                 new BBoolean(false)};
-        BValue[] returnsBoolean = BLangFunctions.invoke(bLangProgram, "testCache", argsBoolean);
+        BValue[] returnsBoolean = BLangFunctions.invokeNew(bLangProgram, "testCache", argsBoolean);
         Assert.assertTrue(returnsBoolean[0] instanceof BBoolean);
 
         //Test ballerina JSON values.
         BValue[] argsJSON = {new BString("cacheName"), new BString("15"), new BString("cacheKey"),
                 new BJSON("{}")};
-        BValue[] returnsJSON = BLangFunctions.invoke(bLangProgram, "testCache", argsJSON);
+        BValue[] returnsJSON = BLangFunctions.invokeNew(bLangProgram, "testCache", argsJSON);
         Assert.assertTrue(returnsJSON[0] instanceof BJSON);
     }
 }

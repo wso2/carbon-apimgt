@@ -53,8 +53,8 @@ import org.ballerinalang.natives.annotations.ReturnType;
 public class RemoveCacheEntry extends AbstractNativeFunction {
     @Override
     public BValue[] execute(Context context) {
-        String cacheName = getArgument(context, 0).stringValue();
-        String cacheKey = getArgument(context, 1).stringValue();
+        String cacheName = getStringArgument(context, 0);
+        String cacheKey = getStringArgument(context, 1);
         CacheManagerHolder.getInstance().getCacheManager().getCache(cacheName).remove(cacheKey);
         return getBValues(new BString(cacheName));
     }

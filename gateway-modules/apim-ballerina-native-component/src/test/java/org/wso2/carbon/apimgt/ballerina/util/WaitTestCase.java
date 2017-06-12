@@ -18,9 +18,9 @@
 
 package org.wso2.carbon.apimgt.ballerina.util;
 
-import org.ballerinalang.model.BLangProgram;
 import org.ballerinalang.model.values.BInteger;
 import org.ballerinalang.model.values.BValue;
+import org.ballerinalang.util.codegen.ProgramFile;
 import org.ballerinalang.util.program.BLangFunctions;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -33,7 +33,7 @@ import org.wso2.carbon.apimgt.ballerina.caching.util.BTestUtils;
  * @since 0.10-SNAPSHOT
  */
 public class WaitTestCase {
-    private BLangProgram bLangProgram;
+    private ProgramFile bLangProgram;
     private static final String s1 = "WSO2 Inc.";
 
     @BeforeClass
@@ -46,7 +46,7 @@ public class WaitTestCase {
         //Create arguments to initiate cache
         BValue[] args = {new BInteger(15)};
         //Test ballerina cache create, put and get
-        BValue[] returns = BLangFunctions.invoke(bLangProgram, "testWait", args);
+        BValue[] returns = BLangFunctions.invokeNew(bLangProgram, "testWait", args);
         //Assert if cache entry is BValue
         Assert.assertTrue(returns[0] instanceof BValue);
     }

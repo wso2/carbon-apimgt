@@ -22,11 +22,6 @@ import org.apache.velocity.VelocityContext;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
-
 /**
  * Used to generate API meta info related template
  */
@@ -35,6 +30,7 @@ public class APIConfigContext extends ConfigContext {
     private API api;
     private String packageName;
     private String serviceNamePrefix = "";
+
     public APIConfigContext(API api, String packageName) {
         this.api = api;
         this.packageName = packageName;
@@ -59,10 +55,7 @@ public class APIConfigContext extends ConfigContext {
         context.put("version", api.getVersion());
         context.put("apiContext", api.getContext().startsWith("/") ? api.getContext() : "/" + api.getContext());
         context.put("apiEndpoint", api.getEndpoint());
-        LocalDateTime ldt = api.getCreatedTime();
-        Instant instant = ldt.atZone(ZoneId.systemDefault()).toInstant();
-        Date res = Date.from(instant);
-        String serviceName = serviceNamePrefix + api.getName() + "_" + res.getTime();
+        String serviceName = serviceNamePrefix + api.getName() + "_" + api.getId().replaceAll("-", "_");
         if (serviceName.contains(" ")) {
             serviceName = serviceName.replaceAll(" ", "_");
         }

@@ -1,9 +1,6 @@
 package org.wso2.carbon.apimgt.gateway.handler;
 
-import org.wso2.carbon.apimgt.gateway.event.analytics.response;
 import org.wso2.carbon.apimgt.gateway.event.throttling;
-import org.wso2.carbon.apimgt.gateway.event.util;
-import org.wso2.carbon.apimgt.gateway.handler;
 import org.wso2.carbon.apimgt.gateway;
 
 function mediateIn (message m) {

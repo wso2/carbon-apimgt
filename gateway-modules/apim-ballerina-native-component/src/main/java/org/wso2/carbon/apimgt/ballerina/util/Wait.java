@@ -23,13 +23,9 @@ import org.ballerinalang.model.values.BInteger;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.natives.AbstractNativeFunction;
 import org.ballerinalang.natives.annotations.Argument;
-import org.ballerinalang.natives.annotations.Attribute;
-import org.ballerinalang.natives.annotations.BallerinaAnnotation;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.ReturnType;
 import org.ballerinalang.util.exceptions.BallerinaException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Native function org.wso2.carbon.apimgt.ballerina.util.Wait.{@link Wait}
@@ -44,24 +40,16 @@ import org.slf4j.LoggerFactory;
         returnType = {@ReturnType(type = TypeEnum.INT)},
         isPublic = true
 )
-@BallerinaAnnotation(annotationName = "Description", attributes = {@Attribute(name = "value",
-        value = "Program for apply wait")})
-@BallerinaAnnotation(annotationName = "Param", attributes = {@Attribute(name = "value",
-        value = "time for wait in milliseconds")})
-@BallerinaAnnotation(annotationName = "Return", attributes = {@Attribute(name = "string",
-        value = "wait Status")})
 public class Wait extends AbstractNativeFunction {
-
-    private static final Logger log = LoggerFactory.getLogger(Wait.class);
 
     @Override
     public BValue[] execute(Context context) {
-        BInteger value = (BInteger) getArgument(context, 0);
+        int value = getIntArgument(context, 0);
         try {
-            Thread.sleep(value.intValue());
+            Thread.sleep(value);
             return new BValue[] {new BInteger(0)};
         } catch (Throwable e) {
-            throw new BallerinaException("Couldn't wait for expected time : " + value.intValue());
+            throw new BallerinaException("Couldn't wait for expected time : " + value);
         }
     }
 }

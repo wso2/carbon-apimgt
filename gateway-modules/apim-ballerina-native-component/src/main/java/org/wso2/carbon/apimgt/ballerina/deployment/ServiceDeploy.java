@@ -19,11 +19,7 @@ package org.wso2.carbon.apimgt.ballerina.deployment;
 
 import org.ballerinalang.BLangProgramLoader;
 import org.ballerinalang.bre.Context;
-import org.ballerinalang.bre.RuntimeEnvironment;
-import org.ballerinalang.model.BLangPackage;
-import org.ballerinalang.model.BLangProgram;
-import org.ballerinalang.model.Service;
-import org.ballerinalang.model.builder.BLangExecutionFlowBuilder;
+import org.ballerinalang.bre.bvm.BLangVMErrors;
 import org.ballerinalang.model.types.TypeEnum;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.natives.AbstractNativeFunction;
@@ -33,6 +29,12 @@ import org.ballerinalang.natives.annotations.BallerinaAnnotation;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.ReturnType;
 import org.ballerinalang.services.dispatchers.DispatcherRegistry;
+import org.ballerinalang.util.codegen.PackageInfo;
+import org.ballerinalang.util.codegen.ProgramFile;
+import org.ballerinalang.util.codegen.ServiceInfo;
+import org.ballerinalang.util.exceptions.BLangRuntimeException;
+import org.ballerinalang.util.exceptions.BallerinaException;
+import org.ballerinalang.util.program.BLangFunctions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.ballerina.util.Util;
@@ -51,6 +53,7 @@ import java.nio.file.Paths;
         packageName = "org.wso2.carbon.apimgt.ballerina.deployment",
         functionName = "deployService",
         args = {@Argument(name = "fileName", type = TypeEnum.STRING),
+                @Argument(name = "serviceName", type = TypeEnum.STRING),
                 @Argument(name = "config", type = TypeEnum.STRING),
                 @Argument(name = "path", type = TypeEnum.STRING)},
         returnType = {@ReturnType(type = TypeEnum.STRING)},
@@ -60,6 +63,8 @@ import java.nio.file.Paths;
         value = " deployment service")})
 @BallerinaAnnotation(annotationName = "Param", attributes = {@Attribute(name = "fileName",
         value = "path to the service file")})
+@BallerinaAnnotation(annotationName = "Param", attributes = {@Attribute(name = "serviceName",
+        value = "serviceName")})
 @BallerinaAnnotation(annotationName = "Param", attributes = {@Attribute(name = "config",
         value = "ballerina source")})
 @BallerinaAnnotation(annotationName = "Param", attributes = {@Attribute(name = "path",
@@ -73,35 +78,49 @@ public class ServiceDeploy extends AbstractNativeFunction {
 
     @Override
     public BValue[] execute(Context context) {
-        String fileName = getArgument(context, 0).stringValue();
-        String config = getArgument(context, 1).stringValue();
-        String packageName = getArgument(context, 2).stringValue();
+        String fileName = getStringArgument(context, 0);
+        String serviceName = getStringArgument(context, 1);
+        String config = getStringArgument(context, 2);
+        String packageName = getStringArgument(context, 3);
 
         Path path = Paths.get(packageName);
         String filePath = path.toAbsolutePath() + File.separator + fileName;
         if (Util.saveFile(filePath, config)) {
-            BLangProgram bLangProgram = new BLangProgramLoader().loadService(programDirPath, path);
-            BLangExecutionFlowBuilder flowBuilder = new BLangExecutionFlowBuilder();
-            for (BLangPackage servicePackage : bLangProgram.getServicePackages()) {
-                for (Service service : servicePackage.getServices()) {
-                    service.setBLangProgram(bLangProgram);
-                    DispatcherRegistry.getInstance().getServiceDispatchers().forEach((protocol, dispatcher) ->
-                            dispatcher.serviceRegistered(service));
-                    // Build Flow for Non-Blocking execution.
-                    service.accept(flowBuilder);
-                }
-                RuntimeEnvironment runtimeEnv = RuntimeEnvironment.get(bLangProgram);
-                bLangProgram.setRuntimeEnvironment(runtimeEnv);
+            ProgramFile programFile = new BLangProgramLoader().loadServiceProgramFile(programDirPath, path);
+            String[] servicePackageNameList = programFile.getServicePackageNameList();
+            if (servicePackageNameList.length == 0) {
+                throw new BallerinaException("no service found in '" + programFile.getProgramFilePath() + "'");
             }
-            log.info("write config to File system");
 
-        } else {
-            log.error("Error saving API configuration in " + path);
+            // This is required to invoke package/service init functions;
+            Context bContext = new Context(programFile);
+            bContext.initFunction = true;
+            PackageInfo packageInfo = programFile.getPackageInfo(packageName.replace("/", "."));
+
+            // Invoke package init function
+            BLangFunctions.invokeFunction(programFile, packageInfo, packageInfo.getInitFunctionInfo(), bContext);
+            if (bContext.getError() != null) {
+                String stackTraceStr = BLangVMErrors.getPrintableStackTrace(bContext.getError());
+                throw new BLangRuntimeException("error: " + stackTraceStr);
+            }
+
+            for (ServiceInfo serviceInfo : packageInfo.getServiceInfoList()) {
+                // Invoke service init function
+                if (serviceName.equals(serviceInfo.getName())) {
+                    BLangFunctions.invokeFunction(programFile, packageInfo,
+                            serviceInfo.getInitFunctionInfo(), bContext);
+                    if (bContext.getError() != null) {
+                        String stackTraceStr = BLangVMErrors.getPrintableStackTrace(bContext.getError());
+                        throw new BLangRuntimeException("error: " + stackTraceStr);
+                    }
+
+                    // Deploy service
+                    DispatcherRegistry.getInstance().getServiceDispatchers().forEach((protocol, dispatcher) ->
+                            dispatcher.serviceRegistered(serviceInfo));
+                }
+            }
         }
-
         return new BValue[0];
     }
-
-
 }
 
