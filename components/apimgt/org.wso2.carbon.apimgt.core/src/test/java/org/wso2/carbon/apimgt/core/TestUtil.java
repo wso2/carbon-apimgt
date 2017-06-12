@@ -112,7 +112,6 @@ public class TestUtil {
     public static Application createSummaryApplication(Application app) {
         Application summaryApp = new Application(app.getName(), app.getCreatedUser());
         summaryApp.setId(app.getId());
-        summaryApp.setCallbackUrl(app.getCallbackUrl());
         summaryApp.setStatus(app.getStatus());
         return summaryApp;
     }

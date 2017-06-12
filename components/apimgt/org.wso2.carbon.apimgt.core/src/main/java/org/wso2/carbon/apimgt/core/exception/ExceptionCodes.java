@@ -61,6 +61,9 @@ public enum ExceptionCodes implements ErrorHandler {
             + "values"),
     COMMENT_LENGTH_EXCEEDED(900326, "Comment length exceeds max limit", 400, "Comment length exceeds allowed maximum "
             + "number of characters"),
+    API_TYPE_INVALID(900327, "API Type specified is invalid.", 400, "API Type specified is invalid"),
+    COMPOSITE_API_ALREADY_EXISTS(900328, "A Composite API already exists.", 409,
+            "A Composite API already exists for this application"),
 
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),
@@ -139,17 +142,17 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_AUTHORIZATION_HEADER(900911, "Invalid Authorization header", 401,
             " Please provide the Authorization : Bearer <> token to proceed."),
 
-    OAUTH2_APP_CREATION_FAILED(900950, "Keymanagement Error", 500, " Error while creating the consumer application."),
-    OAUTH2_APP_ALREADY_EXISTS(900951, "Keymanagement Error", 409, " OAuth2 application already created."),
-    OAUTH2_APP_DELETION_FAILED(900952, "Keymanagement Error", 500, " Error while deleting the consumer application."),
-    OAUTH2_APP_UPDATE_FAILED(900953, "Keymanagement Error", 500, " Error while updating the consumer application."),
-    OAUTH2_APP_RETRIEVAL_FAILED(900954, "Keymanagement Error", 500, " Error while retrieving the consumer application."
+    OAUTH2_APP_CREATION_FAILED(900950, "Key Management Error", 500, "Error while creating the consumer application."),
+    OAUTH2_APP_ALREADY_EXISTS(900951, "Key Management Error", 409, "OAuth2 application already created."),
+    OAUTH2_APP_DELETION_FAILED(900952, "Key Management Error", 500, "Error while deleting the consumer application."),
+    OAUTH2_APP_UPDATE_FAILED(900953, "Key Management Error", 500, "Error while updating the consumer application."),
+    OAUTH2_APP_RETRIEVAL_FAILED(900954, "Key Management Error", 500, "Error while retrieving the consumer application."
     ),
-    OAUTH2_APP_MAP_FAILED(900955, "Keymanagement Error", 500, " Error while mapping an existing consumer application."),
-    TOKEN_INTROSPECTION_FAILED(900956, "Keymanagement Error", 500, " Error while introspecting the access token."),
-    APPLICATION_TOKEN_GENERATION_FAILED(900957, "Keymanagement Error", 500, " Error while generating the application" +
-            "access token."),
-    ACCESS_TOKEN_REVOKE_FAILED(900958, "Keymanagement Error", 500, " Error while revoking the access token.");
+    OAUTH2_APP_MAP_FAILED(900955, "Key Management Error", 500, "Error while mapping an existing consumer application."),
+    TOKEN_INTROSPECTION_FAILED(900956, "Key Management Error", 500, "Error while introspecting the access token."),
+    ACCESS_TOKEN_GENERATION_FAILED(900957, "Key Management Error", 500, "Error while generating a new access token."),
+    INVALID_TOKEN_REQUEST(900958, "Key Management Error", 400, "Invalid access token request."),
+    ACCESS_TOKEN_REVOKE_FAILED(900959, "Key Management Error", 500, "Error while revoking the access token.");
 
 
     private final long errorCode;
