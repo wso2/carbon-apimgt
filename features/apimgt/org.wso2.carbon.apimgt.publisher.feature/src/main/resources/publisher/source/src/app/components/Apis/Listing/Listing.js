@@ -17,11 +17,14 @@
  */
 
 import React from 'react'
+import qs from 'qs'
 
 import ApiThumb from '../ApiThumb'
 import '../Apis.css'
 import API from '../../../data/api.js'
 import Loading from '../../Base/Loading/Loading'
+import ListingHeader from "./ListingHeader";
+import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 
 class Listing extends React.Component {
     constructor(props) {
@@ -35,33 +38,35 @@ class Listing extends React.Component {
         promised_apis.then((response) => {
             this.setState({apis: response.obj})
 
+        }).catch(error => {
+            if (process.env.NODE_ENV !== "production")
+                console.log(error);
+            let status = error.status;
+            if (status === 404) {
+                this.setState({notFound: true});
+            } else if (status === 401) {
+                this.setState({isAuthorize: false});
+                let params = qs.stringify({reference: this.props.location.pathname});
+                this.props.history.push({pathname: "/login", search: params});
+            }
         });
     }
 
     setListType = (value) => {
         this.setState({listType: value});
     }
+
     isActive = (value) => {
         return 'btn ' + ((value === this.state.listType) ? 'active' : 'default');
     }
 
     render() {
+        if (this.state.notFound) {
+            return <ResourceNotFound/>
+        }
         return (
             <div className="container-fluid">
-                <div className="well well-sm">
-                    <strong>Display</strong>
-                    <div className="btn-group">
-                        <a href="#" id="list" className={this.isActive('list')}
-                           onClick={() => this.setListType('list')}>
-                            <span className="glyphicon glyphicon-th-list"/>List
-                        </a>
-                        <a href="#" id="grid" className={this.isActive('grid')}
-                           onClick={() => this.setListType('grid')}>
-                            <span className="glyphicon glyphicon-th"/>Grid
-                        </a>
-                    </div>
-                </div>
-
+                <ListingHeader setListType={this.setListType.bind(this)} isActive={this.isActive.bind(this)} />
                 <div id="products" className="row list-group">
                     {this.state.apis ?
                         this.state.apis.list.map((api, i) => {
@@ -69,10 +74,7 @@ class Listing extends React.Component {
                         }) : <Loading/>
                     }
                 </div>
-
             </div>
-
-
         );
     }
 }

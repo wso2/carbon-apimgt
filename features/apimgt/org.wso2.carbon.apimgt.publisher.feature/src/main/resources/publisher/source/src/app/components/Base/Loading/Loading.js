@@ -17,6 +17,7 @@
  */
 
 import React from 'react'
+import PropTypes from 'prop-types'
 
 const LoadingAnimation = (props) => {
     return (
@@ -32,7 +33,7 @@ const LoadingAnimation = (props) => {
                         </svg>
                         <div className="signal"/>
                     </div>
-                    <p>LOADING</p></div>
+                    <p>{props.message}</p></div>
                 <div className="loading-bg"/>
             </div>
 
@@ -40,4 +41,10 @@ const LoadingAnimation = (props) => {
     );
 };
 
+LoadingAnimation.propTypes = {
+  message: PropTypes.string
+};
+LoadingAnimation.defaultProps = {
+  message: "Loading . . ."
+};
 export default LoadingAnimation
