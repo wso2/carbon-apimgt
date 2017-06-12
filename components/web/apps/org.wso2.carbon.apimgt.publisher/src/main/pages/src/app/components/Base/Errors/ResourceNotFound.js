@@ -22,10 +22,10 @@ const ResourceNotFound = (props) => {
     return (
         <div>
             <div className="message message-danger">
-                <h4><i className="icon fw fw-error"/>404 API Not Found!</h4>
+                <h4><i className="icon fw fw-error"/>404 Resource Not Found!</h4>
                 <p>
-                    Can't find an API associate with the given API ID <span
-                    style={{color: 'green'}}> {props.response.statusText} </span>
+                    Can't find the resource you are looking for
+                    <span style={{color: 'green'}}> {props.response.statusText} </span>
                 </p>
             </div>
 
