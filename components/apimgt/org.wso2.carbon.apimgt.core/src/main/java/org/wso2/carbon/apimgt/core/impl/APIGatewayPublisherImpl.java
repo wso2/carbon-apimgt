@@ -26,11 +26,9 @@ import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APIKey;
 import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
-import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.events.APIEvent;
 import org.wso2.carbon.apimgt.core.models.events.ApplicationEvent;
@@ -44,7 +42,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -129,11 +126,12 @@ public class APIGatewayPublisherImpl implements APIGateway {
      * {@inheritDoc}
      */
     @Override
-    public void addAPISubscription(Subscription subscription) throws GatewayException {
+    public void addAPISubscription(List<SubscriptionValidationData> subscriptionValidationDataList) throws
+            GatewayException {
         if (gwHome == null) {
             SubscriptionEvent subscriptionAddEvent = new SubscriptionEvent(APIMgtConstants.GatewayEventTypes
                     .SUBSCRIPTION_CREATE);
-            subscriptionAddEvent.setSubscriptionsList(toSubscriptionValidationData(subscription));
+            subscriptionAddEvent.setSubscriptionsList(subscriptionValidationDataList);
             publishToStoreTopic(subscriptionAddEvent);
         }
     }
@@ -142,11 +140,12 @@ public class APIGatewayPublisherImpl implements APIGateway {
      * {@inheritDoc}
      */
     @Override
-    public void updateAPISubscriptionStatus(Subscription subscription) throws GatewayException {
+    public void updateAPISubscriptionStatus(List<SubscriptionValidationData> subscriptionValidationDataList) throws
+            GatewayException {
         if (gwHome == null) {
             SubscriptionEvent subscriptionBlockEvent = new SubscriptionEvent(APIMgtConstants.GatewayEventTypes
-                    .SUBSCRIPTION_STATE_CHANGE);
-            subscriptionBlockEvent.setSubscriptionsList(toSubscriptionValidationData(subscription));
+                    .SUBSCRIPTION_STATUS_CHANGE);
+            subscriptionBlockEvent.setSubscriptionsList(subscriptionValidationDataList);
             publishToStoreTopic(subscriptionBlockEvent);
         }
     }
@@ -155,11 +154,12 @@ public class APIGatewayPublisherImpl implements APIGateway {
      * {@inheritDoc}
      */
     @Override
-    public void deleteAPISubscription(Subscription subscription) throws GatewayException {
+    public void deleteAPISubscription(List<SubscriptionValidationData> subscriptionValidationDataList) throws
+            GatewayException {
         if (gwHome == null) {
             SubscriptionEvent subscriptionDeleteEvent = new SubscriptionEvent(
                     APIMgtConstants.GatewayEventTypes.SUBSCRIPTION_DELETE);
-            subscriptionDeleteEvent.setSubscriptionsList(toSubscriptionValidationData(subscription));
+            subscriptionDeleteEvent.setSubscriptionsList(subscriptionValidationDataList);
             publishToStoreTopic(subscriptionDeleteEvent);
         }
     }
@@ -356,29 +356,4 @@ public class APIGatewayPublisherImpl implements APIGateway {
         return apiSummary;
     }
 
-    /**
-     * Converts Subscription into a list of SubscriptionValidationData
-     *
-     * @param subscription subscription details
-     * @return list of SubscriptionValidationData
-     */
-    private List<SubscriptionValidationData> toSubscriptionValidationData(Subscription subscription) {
-        List<SubscriptionValidationData> subscriptionDataList = new ArrayList<>();
-        API subscribedAPI = subscription.getApi();
-        Application subscribedApp = subscription.getApplication();
-        List<APIKey> keyList = subscribedApp.getKeys();
-        for (int i = 0; i < keyList.size(); i++) {
-            SubscriptionValidationData subscriptionValidationData = new SubscriptionValidationData(subscribedAPI
-                    .getContext(), subscribedAPI.getVersion(), keyList.get(i).getConsumerKey());
-            subscriptionValidationData.setKeyEnvType(keyList.get(i).getType());
-            subscriptionValidationData.setApiName(subscribedAPI.getName());
-            subscriptionValidationData.setApiProvider(subscribedAPI.getProvider());
-            subscriptionValidationData.setApplicationId(subscribedApp.getId());
-            subscriptionValidationData.setSubscriptionPolicy(subscription.getSubscriptionPolicyId());
-            subscriptionValidationData.setSubscriptionStatus(subscription.getStatus().name());
-            subscriptionDataList.add(subscriptionValidationData);
-        }
-        return subscriptionDataList;
-
-    }
 }

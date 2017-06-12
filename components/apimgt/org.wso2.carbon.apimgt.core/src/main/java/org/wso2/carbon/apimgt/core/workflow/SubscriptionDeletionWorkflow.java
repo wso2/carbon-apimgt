@@ -24,12 +24,13 @@ import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
-import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
+
+import java.util.List;
 
 /**
  * This model is used to gather subscription deletion related workflow data
@@ -42,13 +43,11 @@ public class SubscriptionDeletionWorkflow extends Workflow {
     private String subscriber;
     private APISubscriptionDAO apiSubscriptionDAO;
     private APIGateway apiGateway;
-    private ApplicationDAO applicationDAO;
 
-    public SubscriptionDeletionWorkflow(APISubscriptionDAO apiSubscriptionDAO, WorkflowDAO workflowDAO,
-                                        ApplicationDAO applicationDAO, APIGateway apiGateway) {
+    public SubscriptionDeletionWorkflow(APISubscriptionDAO apiSubscriptionDAO, WorkflowDAO workflowDAO, APIGateway
+            apiGateway) {
         super(workflowDAO, Category.STORE, apiGateway);
         this.apiSubscriptionDAO = apiSubscriptionDAO;
-        this.applicationDAO = applicationDAO;
         this.apiGateway = apiGateway;
     }
 
@@ -75,9 +74,15 @@ public class SubscriptionDeletionWorkflow extends Workflow {
         }
         WorkflowResponse response = workflowExecutor.complete(this);
         setStatus(response.getWorkflowStatus());
+        List<SubscriptionValidationData> subscriptionValidationDataList = null;
         if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
             if (log.isDebugEnabled()) {
                 log.debug("Subscription deletion workflow complete: Approved");
+            }
+            if (subscription.getApi() != null && subscription.getApplication() != null) {
+                subscriptionValidationDataList = apiSubscriptionDAO
+                        .getAPISubscriptionsOfAPIForValidation(subscription.getApi().getContext(), subscription.getApi()
+                                .getVersion(), subscription.getApplication().getId());
             }
             apiSubscriptionDAO.deleteAPISubscription(getWorkflowReference());
 
@@ -88,9 +93,9 @@ public class SubscriptionDeletionWorkflow extends Workflow {
         }
         updateWorkflowEntries(this);
         if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
-            Application application = applicationDAO.getApplication(subscription.getApplication().getId());
-            if (application != null && !application.getKeys().isEmpty()) {
-                apiGateway.deleteAPISubscription(subscription);
+
+            if (subscriptionValidationDataList != null && !subscriptionValidationDataList.isEmpty()) {
+                apiGateway.deleteAPISubscription(subscriptionValidationDataList);
             }
         }
         return response;

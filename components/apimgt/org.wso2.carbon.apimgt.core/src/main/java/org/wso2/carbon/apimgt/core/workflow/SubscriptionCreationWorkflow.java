@@ -26,10 +26,12 @@ import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+
+import java.util.List;
 
 /**
  * This model is used to gather subscription creation related workflow data
@@ -92,9 +94,13 @@ public class SubscriptionCreationWorkflow extends Workflow {
         apiSubscriptionDAO.updateSubscriptionStatus(getWorkflowReference(), subscriptionState);
         updateWorkflowEntries(this);
         if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
-            Application application = subscription.getApplication();
-            if (application != null && !application.getKeys().isEmpty()) {
-                apiGateway.addAPISubscription(subscription);
+            if (subscription.getApi() != null && subscription.getApplication() != null) {
+                List<SubscriptionValidationData> subscriptionValidationDataList = apiSubscriptionDAO
+                        .getAPISubscriptionsOfAPIForValidation(subscription.getApi().getContext(), subscription.getApi()
+                                .getVersion(), subscription.getApplication().getId());
+                if (subscriptionValidationDataList != null && !subscriptionValidationDataList.isEmpty()) {
+                    apiGateway.addAPISubscription(subscriptionValidationDataList);
+                }
             }
         }
         return response;

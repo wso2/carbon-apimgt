@@ -45,16 +45,16 @@ function loadAPIs () {
         dto:APIDTO api = fromJSONToAPIDTO(apiList[index]);
 
         //Retrieve API configuration
-        string apiConfig ;
+        string apiConfig;
         int status;
-        status,apiConfig = getAPIServiceConfig(api.id);
+        status, apiConfig = getAPIServiceConfig(api.id);
         int maxRetries = 3;
-        int i =0;
-        while(status == Constants:NOT_FOUND){
+        int i = 0;
+        while (status == Constants:NOT_FOUND) {
             apimgtUtil:wait(10000);
-            status,apiConfig = getAPIServiceConfig(api.id);
-            i = i+1;
-            if(i>maxRetries){
+            status, apiConfig = getAPIServiceConfig(api.id);
+            i = i + 1;
+            if (i > maxRetries) {
                 break;
             }
         }
@@ -85,7 +85,7 @@ function getAPIs () (json) {
 }
 
 
-function getAPIServiceConfig (string apiId) (int,string) {
+function getAPIServiceConfig (string apiId) (int, string) {
     message request = {};
     message response = {};
     string apiConfig;
@@ -99,13 +99,13 @@ function getAPIServiceConfig (string apiId) (int,string) {
         system:println("Error occurred while retrieving service configuration for API : " + apiId);
         throw e;
     }
-    return status,apiConfig;
+    return status, apiConfig;
 }
 
 function getAPICoreURL () (string) {
     string apiCoreURL;
 
-    if(getSystemProperty(Constants:API_CORE_URL) != "") {
+    if (getSystemProperty(Constants:API_CORE_URL) != "") {
         apiCoreURL = getSystemProperty(Constants:API_CORE_URL);
     } else {
         apiCoreURL = "https://localhost:9292";
@@ -117,7 +117,7 @@ function getAPICoreURL () (string) {
 
 
 function deployService (dto:APIDTO api, string config) {
-    deployment:deployService(api.id, config,"org/wso2/carbon/apimgt/gateway");
+    deployment:deployService(api.id, config, "org/wso2/carbon/apimgt/gateway");
 }
 function undeployService (dto:APIDTO api) {
     //TODO:To be implemented
