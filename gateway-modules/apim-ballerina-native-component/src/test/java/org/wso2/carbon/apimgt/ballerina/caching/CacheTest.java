@@ -68,4 +68,16 @@ public class CacheTest {
         BValue[] returnsJSON = BLangFunctions.invokeNew(bLangProgram, "testCache", argsJSON);
         Assert.assertTrue(returnsJSON[0] instanceof BJSON);
     }
+    @Test
+    public void testCacheForNonExistence() {
+        ProgramFile bLangProgram1 = BTestUtils.parseBalFile("samples/cache/nonExistenceEntryCacheTest.bal");
+
+        //Create arguments to initiate cache
+        BValue[] args = {new BString("cacheName"), new BString("15"), new BString("cacheKey")};
+        //Test ballerina cache create, put and get for BString
+        BValue[] returns = BLangFunctions.invokeNew(bLangProgram1, "testCacheForNonExistence", args);
+        Assert.assertTrue(returns[0] instanceof BBoolean);
+        BBoolean value = (BBoolean) returns[0];
+        Assert.assertFalse(value.booleanValue());
+    }
 }

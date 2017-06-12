@@ -129,7 +129,7 @@ function doIntrospect (string authToken) (dto:IntrospectDto) {
     messages:setHeader(request, "Content-Type", "application/x-www-form-urlencoded");
     messages:setHeader(request, constants:AUTHORIZATION, "Basic " + utils:base64encode(credentials.username + ":" + credentials.password));
     http:ClientConnector introspectConnector = create http:ClientConnector(keyManagerConf.introspectEndpoint);
-    message introspectResponse = http:ClientConnector.post (introspectConnector, constants:INTROSPECT_CONTEXT, request);
+    message introspectResponse = http:ClientConnector.post (introspectConnector,"/", request);
     dto:IntrospectDto introspectDto = gatewayUtil:fromJsonToIntrospectDto(messages:getJsonPayload(introspectResponse));
     return introspectDto;
 }

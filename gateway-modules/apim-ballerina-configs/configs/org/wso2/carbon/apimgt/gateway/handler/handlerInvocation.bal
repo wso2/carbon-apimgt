@@ -1,12 +1,10 @@
 package org.wso2.carbon.apimgt.gateway.handler;
 
-import org.wso2.carbon.apimgt.gateway.event.throttling;
-import org.wso2.carbon.apimgt.gateway;
 
-function mediateIn (message m) {
+function mediateIn (message m)(boolean ,message ) {
     boolean status = false;
-    status, m = gateway:authenticate(m);
-    throttling:mediate(m);
+    return status,m;
+    //todo: have to do throttling
 }
 
 function mediateOut (message m, message res) {

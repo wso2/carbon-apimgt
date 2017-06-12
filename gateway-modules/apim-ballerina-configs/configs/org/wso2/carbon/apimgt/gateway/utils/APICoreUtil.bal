@@ -121,7 +121,7 @@ function getAPICoreURL () (string) {
 function deployService (dto:APIDTO api, string config) {
     string fileName = api.id + ".bal";
     string serviceName = api.name+"_"+strings:replace(api.id,"-","_");
-    deployment:deployService(fileName,serviceName,config,"deployment/api");
+    deployment:deployService(fileName,serviceName,config,"org/wso2/carbon/apimgt/gateway");
     }
 function undeployService (dto:APIDTO api) {
     //TODO:To be implemented
