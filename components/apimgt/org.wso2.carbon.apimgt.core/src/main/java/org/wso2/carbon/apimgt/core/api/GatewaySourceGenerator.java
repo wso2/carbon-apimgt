@@ -40,11 +40,11 @@ public interface GatewaySourceGenerator {
 
     /**
      * Generate initial endpoint config
-     * @param endpoints List of endpoints.
+     * @param endpoint List of endpoints.
      * @return endpoint source as Text
      * @throws APITemplateException throws if an error occurred
      */
-    String getEndpointConfigStringFromTemplate(List<Endpoint> endpoints) throws APITemplateException;
+    String getEndpointConfigStringFromTemplate(Endpoint endpoint) throws APITemplateException;
 
     /**
      * Used to update or create service implementation using a swagger

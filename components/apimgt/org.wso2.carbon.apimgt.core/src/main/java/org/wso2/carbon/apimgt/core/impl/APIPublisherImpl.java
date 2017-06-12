@@ -235,6 +235,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
                     }
 
+                } else {
+                    apiEndpointMap.replace(entry.getKey(), getEndpoint(entry.getValue().getId()));
                 }
             }
         }
@@ -281,6 +283,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                                         log.error(msg, e);
                                         throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
                                     }
+                                } else {
+                                    uriTemplateBuilder.getEndpoint().replace(entry.getKey(), getEndpoint(entry
+                                            .getValue().getId()));
                                 }
                             }
                         }
@@ -302,19 +307,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     Map<String, Endpoint> map = uriTemplate.getEndpoint();
                     if (map.containsKey(APIMgtConstants.PRODUCTION_ENDPOINT)) {
                         Endpoint endpoint = map.get(APIMgtConstants.PRODUCTION_ENDPOINT);
-                        if (APIMgtConstants.API_SPECIFIC_ENDPOINT.equals(endpoint.getApplicableLevel())) {
-                            dto.setProductionEndpoint(endpoint.getName());
-                        } else {
-                            dto.setProductionEndpoint(getApiDAO().getEndpoint(endpoint.getId()).getName());
-                        }
+                        dto.setProductionEndpoint(endpoint);
                     }
                     if (map.containsKey(APIMgtConstants.SANDBOX_ENDPOINT)) {
                         Endpoint endpoint = map.get(APIMgtConstants.SANDBOX_ENDPOINT);
-                        if (APIMgtConstants.API_SPECIFIC_ENDPOINT.equals(endpoint.getApplicableLevel())) {
-                            dto.setSandboxEndpoint(endpoint.getName());
-                        } else {
-                            dto.setSandboxEndpoint(getApiDAO().getEndpoint(endpoint.getId()).getName());
-                        }
+                        dto.setSandboxEndpoint(endpoint);
                     }
                     resourceList.add(dto);
                 }
@@ -1161,12 +1158,13 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
         Endpoint endpoint2 = getApiDAO().getEndpointByName(endpoint.getName());
         if (endpoint2 != null) {
-            log.error("Endpoint already exist with name " + key);
+            log.error(String.format("Endpoint already exist with name %s", key));
             throw new APIManagementException("Endpoint already exist with name " + key,
                     ExceptionCodes.ENDPOINT_ALREADY_EXISTS);
         }
         gateway.addEndpoint(endpoint1);
-
+        String config = getGatewaySourceGenerator().getEndpointConfigStringFromTemplate(endpoint1);
+        endpoint1 = new Endpoint.Builder(endpoint1).config(config).build();
         try {
 
             getApiDAO().addEndpoint(endpoint1);
@@ -1189,7 +1187,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public void updateEndpoint(Endpoint endpoint) throws APIManagementException {
         APIGateway gateway = getApiGateway();
         gateway.updateEndpoint(endpoint);
-
+        String config = getGatewaySourceGenerator().getEndpointConfigStringFromTemplate(endpoint);
+        endpoint = new Endpoint.Builder(endpoint).config(config).build();
         try {
             getApiDAO().updateEndpoint(endpoint);
         } catch (APIMgtDAOException e) {

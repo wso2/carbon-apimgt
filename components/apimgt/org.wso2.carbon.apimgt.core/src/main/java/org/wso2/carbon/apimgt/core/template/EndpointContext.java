@@ -17,20 +17,17 @@ package org.wso2.carbon.apimgt.core.template;
  * under the License.
  */
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.VelocityContext;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
-
-import java.util.List;
 
 /**
  * Used to generate endpoint gateway service using template
  */
 public class EndpointContext extends ConfigContext {
-    private List<Endpoint> endpoints;
+    private Endpoint endpoint;
     private String packageName;
-    public EndpointContext(List<Endpoint> endpoints, String packageName) {
-        this.endpoints = endpoints;
+    public EndpointContext(Endpoint endpoint, String packageName) {
+        this.endpoint = endpoint;
         this.packageName = packageName;
     }
 
@@ -42,8 +39,7 @@ public class EndpointContext extends ConfigContext {
     @Override
     public VelocityContext getContext() {
         VelocityContext context = new VelocityContext();
-        context.put("StringUtils", StringUtils.class);
-        context.put("endpoints", this.endpoints);
+        context.put("endpoint", this.endpoint);
         context.put("package", packageName);
         return context;
     }

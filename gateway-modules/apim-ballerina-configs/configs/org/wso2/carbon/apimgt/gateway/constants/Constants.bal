@@ -65,3 +65,4 @@ const string STOP_ON_QUOTA_REACH = "STOP_ON_QUOTA_REACH";
 const string MAINTENANCE = "Maintenance";
 const string BASE_PATH = "BASE_PATH";
 const string API_NOT_FOUND = "code: 900314";
+const string KEY_TYPE = "KEY_TYPE";

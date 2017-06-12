@@ -12,11 +12,32 @@ import java.util.Objects;
  * AnalyticsInfoDTO
  */
 public class AnalyticsInfoDTO   {
+  @JsonProperty("enabled")
+  private Boolean enabled = null;
+
   @JsonProperty("serverURL")
   private String serverURL = null;
 
   @JsonProperty("credentials")
   private CredentialsDTO credentials = null;
+
+  public AnalyticsInfoDTO enabled(Boolean enabled) {
+    this.enabled = enabled;
+    return this;
+  }
+
+   /**
+   * Get enabled
+   * @return enabled
+  **/
+  @ApiModelProperty(example = "true", value = "")
+  public Boolean getEnabled() {
+    return enabled;
+  }
+
+  public void setEnabled(Boolean enabled) {
+    this.enabled = enabled;
+  }
 
   public AnalyticsInfoDTO serverURL(String serverURL) {
     this.serverURL = serverURL;
@@ -64,13 +85,14 @@ public class AnalyticsInfoDTO   {
       return false;
     }
     AnalyticsInfoDTO analyticsInfo = (AnalyticsInfoDTO) o;
-    return Objects.equals(this.serverURL, analyticsInfo.serverURL) &&
+    return Objects.equals(this.enabled, analyticsInfo.enabled) &&
+        Objects.equals(this.serverURL, analyticsInfo.serverURL) &&
         Objects.equals(this.credentials, analyticsInfo.credentials);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(serverURL, credentials);
+    return Objects.hash(enabled, serverURL, credentials);
   }
 
   @Override
@@ -78,6 +100,7 @@ public class AnalyticsInfoDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class AnalyticsInfoDTO {\n");
     
+    sb.append("    enabled: ").append(toIndentedString(enabled)).append("\n");
     sb.append("    serverURL: ").append(toIndentedString(serverURL)).append("\n");
     sb.append("    credentials: ").append(toIndentedString(credentials)).append("\n");
     sb.append("}");

@@ -185,4 +185,21 @@ public interface APIMgtAdminService {
      * @throws APIManagementException If failed to get Applications
      */
     List<Application> getAllApplications() throws APIManagementException;
+
+    /**
+     *
+     * Get List of Endpoints
+     * @return list of UUID of Global Endpoints
+     * @throws APIManagementException If failed to get Endpoints
+     */
+    List<String> getAllEndpoints() throws APIManagementException;
+
+    /**
+     * Return Gateway Configuration of Endpoint
+     *
+     * @param endpointId
+     * @return gateway Configuration of Endpoint
+     * @throws APIManagementException If failed to get Endpoints configuration
+     */
+    String getEndpointGatewayConfig(String endpointId) throws APIManagementException;
 }

@@ -266,4 +266,29 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
     }
 
+    @Override
+    public List<String> getAllEndpoints() throws APIManagementException {
+        try {
+            List<String> endpointList = apiDAO.getUUIDsOfGlobalEndpoints();
+            return endpointList;
+        } catch (APIMgtDAOException ex) {
+            String msg = "Error occurred while getting the Endpoint list";
+            log.error(msg, ex);
+            throw new APIManagementException(msg, ExceptionCodes.APIM_DAO_EXCEPTION);
+        }
+    }
+
+    @Override
+    public String getEndpointGatewayConfig(String endpointId) throws APIManagementException {
+        try {
+            String endpointConfig = apiDAO.getEndpointConfig(endpointId);
+            return endpointConfig;
+        } catch (APIMgtDAOException ex) {
+            String msg = "Error occurred while getting the Endpoint Configuration";
+            log.error(msg, ex);
+            throw new APIManagementException(msg, ExceptionCodes.APIM_DAO_EXCEPTION);
+        }
+
+    }
+
 }
