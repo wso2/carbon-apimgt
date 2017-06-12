@@ -116,29 +116,31 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-#  Retrieve API Infomation Summary
-#-----------------------------------------------------
+  /applications:
 
-  /apis-summary:
+#-----------------------------------------------------
+# Retrieve all applications
+#-----------------------------------------------------
     get:
-      x-wso2-curl: "curl -k https://localhost:9292/api/am/core/v1/apis-summary"
+      x-wso2-curl: "curl -k https://localhost:9292/api/am/core/v1/applications"
       x-wso2-request: |
-        GET https://localhost:9292/api/am/core/v1/apis-summary
-        Content-Type: application/json
-        {\r\n\"labelInfo\":{\r\n  \"overwriteLabels\":false,\r\n  \"labelList\":[\r\n     {\r\n        \"name\":\"Private\",\r\n        \"accessUrls\":[\r\n           \"https:\/\/local.privatfdsafe\"\r\n        ]\r\n     },\r\n     {\r\n        \"name\":\"Public\",\r\n        \"accessUrls\":[\r\n           \"http:\/\/local.private\",\r\n           \"https:\/\/local.public\"\r\n        ]\r\n     }\r\n  ]\r\
+        GET https://localhost:9292/api/am/core/v1/applications
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type:application/json"
-      summary: Summary of all available apis
-      description: Request summary of all available apis.
+      summary: |
+        Return the list of applications of an API
+      description: |
+        Return the list of applications
       parameters:
         - $ref : '#/parameters/Accept'
+      tags:
+        - Applications of API
       responses:
         200:
           description: |
             OK.
-            Subscription Validation Information.
+            The list of Applications.
           schema:
-            $ref: '#/definitions/APISummaryList'
+            $ref: '#/definitions/ApplicationList'
           headers:
             Content-Type:
               description: The content type of the body.
@@ -326,6 +328,66 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+################################################################
+# The gateway config resource of "Individual Endpoint" resource Endpoints
+################################################################
+
+  /endpoints/{endpointId}/gateway-config:
+#-----------------------------------------------------
+# Retrieve the API gateway configuration
+#-----------------------------------------------------
+    get:
+      x-wso2-curl: curl -k "https://localhost:9292/api/am/core/v1/endpoints/1461f570-1765-4467-aeb8-bc912833afaf/gateway-config"
+      x-wso2-request: |
+        GET https://localhost:9292/api/am/core/v1/apis/1461f570-1765-4467-aeb8-bc912833afaf/gateway-config
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 329\npackage deployment.org.wso2.apim;\r\nimport ballerina.net.http;\r\n\r\n@http:BasePath{value:\"/myYahoo\"}\r\nservice myYahoo_1493196161220 {\r\n\r\n\t    @http:POST{}\r\n        \t@http:Path{value:\"/*\"}\r\n    resource post_star_ (message m) {\r\n        http:ClientConnector productionEndpoint = create http:ClientConnector(getUrlFromKey(\"endpoint_myYahoo_v1\"));\r\n        http:ClientConnector sandboxEndpoint = create http:ClientConnector(getUrlFromKey(\"endpoint_myYahoo_v1\"));\r\n        message response;\r\n        string endpointType;\r\n        string productionType;\r\n\r\n\r\n        endpointType = \"production\";\r\n        productionType = \"production\";\r\n\r\n        if (endpointType == productionType) {\r\n            response = http:ClientConnector.execute(productionEndpoint, \"post\", \"\", m);\r\n        } else {\r\n            response = http:ClientConnector.execute(sandboxEndpoint, \"post\", \"\", m);\r\n        }\r\n\r\n        reply response;\r\n    }\r\n\t\t\t\t\t    @http:GET{}\r\n        \t@http:Path{value:\"/*\"}\r\n    resource get_star_ (message m) {\r\n        http:ClientConnector productionEndpoint = create http:ClientConnector(getUrlFromKey(\"endpoint_myYahoo_v1\"));\r\n        http:ClientConnector sandboxEndpoint = create http:ClientConnector(getUrlFromKey(\"endpoint_myYahoo_v1\"));\r\n        message response;\r\n        string endpointType;\r\n        string productionType;\r\n\r\n\r\n        endpointType = \"production\";\r\n        productionType = \"production\";\r\n\r\n        if (endpointType == productionType) {\r\n            response = http:ClientConnector.execute(productionEndpoint, \"get\", \"\", m);\r\n        } else {\r\n            response = http:ClientConnector.execute(sandboxEndpoint, \"get\", \"\", m);\r\n        }\r\n\r\n        reply response;\r\n    }\r\n}"
+      summary: Get gateway definition
+      produces:
+        - text/plain
+        - application/json
+      description: |
+        This operation can be used to retrieve the gateway configuration of an Endpoint.
+      parameters:
+        - $ref: '#/parameters/endpointId'
+        - $ref: '#/parameters/Accept'
+      tags:
+        - Endpoints (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Requested gateway configuration of the Endpoint is returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
 #-----------------------------------------------------
 #  Retrieve API list
 #-----------------------------------------------------
@@ -353,7 +415,35 @@ paths:
             Bad Request.
             Invalid request or validation error
           schema:
-$ref: '#/definitions/Error'
+            $ref: '#/definitions/Error'
+#-----------------------------------------------------
+#  Retrieve Endpoint list
+#-----------------------------------------------------
+
+  /endpoints:
+    get:
+      summary: Retrieve Endpoint list
+      description: Retrieve available Endpoint
+      parameters:
+        - $ref : '#/parameters/limit'
+        - $ref : '#/parameters/Accept'
+      responses:
+        200:
+          description: |
+            OK.
+            List of Endpoints.
+          schema:
+            $ref: '#/definitions/EndpointList'
+          headers:
+            Content-Type:
+              description: The content type of the body.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
 
 ######################################################
 # Parameters - required by some of the APIs above
@@ -366,6 +456,15 @@ parameters:
     in: path
     description: |
       The UUID of an API
+    required: true
+    type: string
+
+# Endpoint Identifier
+  endpointId:
+    name: endpointId
+    in: path
+    description: |
+      The UUID of an Endpoint
     required: true
     type: string
 
@@ -463,8 +562,6 @@ definitions:
       - apiProvider
       - consumerKey
       - subscriptionPolicy
-      - applicationName
-      - applicationOwner
       - keyEnvType
     properties:
       apiName:
@@ -491,18 +588,14 @@ definitions:
         type: string
         description: |
           Name of Subscription Policy.
-      applicationName:
-        type: string
-        description: |
-          Application Name.
-      applicationOwner:
-        type: string
-        description: |
-          Application Owner.
       keyEnvType:
         type: string
         description: |
           Key type (Production or Sandbox).
+      applicationId:
+        type: string
+        description: |
+          UUID of Application
 
 #-----------------------------------------------------
 # API Summary Info resource
@@ -526,10 +619,10 @@ definitions:
         type: string
         description: |
           policy of uri template.
-      scopes:
-        type: array
-        items:
-          type: string
+      scope:
+        type: string
+        description: |
+          scope for uri template.
   APISummary:
     title: APIs Summary Information
     properties:
@@ -674,9 +767,13 @@ definitions:
     title: Registration Summary Information
     properties:
       KeyManagerInfo:
-        type: string
-        description: |
-          Key Manager related information
+        $ref: '#/definitions/KeyManagerInfo'
+      JWTInfo:
+        $ref: '#/definitions/JWTInfo'
+      AnalyticsInfo:
+        $ref: '#/definitions/AnalyticsInfo'
+      ThrottlingInfo:
+        $ref: '#/definitions/ThrottlingInfo'
 
 #-----------------------------------------------------
 # The API List resource
@@ -693,6 +790,17 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/APIInfo'
+
+#-----------------------------------------------------
+# The Endpoint List resource
+#-----------------------------------------------------
+  EndpointList:
+    title: Endpoint List
+    properties:
+      list:
+        type: array
+        items:
+          type: string
 
 #-----------------------------------------------------
 # The API Info resource
@@ -714,8 +822,116 @@ definitions:
         example: 1.0.0
       lifeCycleStatus:
         type: string
-example: CREATED
+        example: 'CREATED'
 
+#-----------------------------------------------------
+# The Application resource
+#-----------------------------------------------------
+  Application:
+    title: Application
+    required:
+      - name
+      - throttlingTier
+    properties:
+      applicationId:
+        type: string
+        example: 01234567-0123-0123-0123-012345678901
+      name:
+        type: string
+        example: CalculatorApp
+      subscriber:
+        type: string
+        example: admin
+      throttlingTier:
+        type: string
+        example: Unlimited
+
+#-----------------------------------------------------
+# The Application List resource
+#-----------------------------------------------------
+  ApplicationList:
+    title: Application List
+    properties:
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/Application'
+
+
+#-----------------------------------------------------
+# Key Manager information
+#-----------------------------------------------------
+  KeyManagerInfo:
+    title: Key manager information
+    properties:
+      dcrEndpoint:
+        type: string
+        example: http://localhost:9763/identity/connect/register
+      tokenEndpoint:
+        type: string
+        example: https://localhost:9443/oauth2/token
+      revokeEndpoint:
+        type: string
+        example: https://localhost:9443/oauth2/revoke
+      introspectEndpoint:
+        type: string
+        example: http://localhost:9763/oauth2/introspect
+      defaultTokenValidityPeriod:
+        type: long
+        example: 3600
+      credentials:
+        $ref: '#/definitions/Credentials'
+
+#-----------------------------------------------------
+# JWT information
+#-----------------------------------------------------
+  JWTInfo:
+    title: JWT information
+    properties:
+      enableJWTGeneration:
+        type: boolean
+        example: false
+      jwtHeader:
+        type: string
+        example: X-JWT-Assertion
+
+#-----------------------------------------------------
+# Analytics information
+#-----------------------------------------------------
+  AnalyticsInfo:
+    title: Analytics information
+    properties:
+      enabled:
+        type: boolean
+        example: true
+      serverURL:
+        type: string
+        example: tcp://localhost:7612
+      credentials:
+        $ref: '#/definitions/Credentials'
+#-----------------------------------------------------
+# Throttling information
+#-----------------------------------------------------
+  ThrottlingInfo:
+    title: Throttling information
+    properties:
+      serverURL:
+        type: string
+        example:
+      credentials:
+        $ref: '#/definitions/Credentials'
+#-----------------------------------------------------
+# Credential information
+#-----------------------------------------------------
+  Credentials:
+    title: Credential information
+    properties:
+      username:
+        type: string
+        example: admin
+      password:
+        type: string
+        example: admin
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------

@@ -157,7 +157,7 @@ public interface ApplicationDAO {
      *
      * @param appID      The UUID of the Application that needs to be updated
      * @param state      State of the application
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException throws if any db level error occurred
      */
     void updateApplicationState(String appID, String state) throws APIMgtDAOException;
 
@@ -170,4 +170,13 @@ public interface ApplicationDAO {
      * @throws APIMgtDAOException if DB level exception occurred
      */
     String getLastUpdatedTimeOfApplication(String applicationId) throws APIMgtDAOException;
+
+    /**
+     * Retrieves all Applications
+     *
+     * @return List of Applications
+     * @throws APIMgtDAOException if DB level exception occurred
+     */
+    List<Application> getAllApplications() throws APIMgtDAOException;
+
 }

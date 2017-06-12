@@ -7,6 +7,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.Label;
+import org.wso2.carbon.apimgt.core.models.RegistrationSummary;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.core.GatewaysApiService;
 import org.wso2.carbon.apimgt.rest.api.core.NotFoundException;
@@ -40,7 +41,8 @@ public class GatewaysApiServiceImpl extends GatewaysApiService {
      * @throws NotFoundException If failed to register gateway
      */
     @Override
-    public Response gatewaysRegisterPost(RegistrationDTO body, String contentType, Request request) throws NotFoundException {
+    public Response gatewaysRegisterPost(RegistrationDTO body, String contentType, Request request)
+            throws NotFoundException {
 
         try {
             LabelInfoDTO labelInfoDTO = body.getLabelInfo();
@@ -50,9 +52,8 @@ public class GatewaysApiServiceImpl extends GatewaysApiService {
                 String overwriteLabels = labelInfoDTO.getOverwriteLabels();
                 List<Label> labels = MappingUtil.convertToLabels(labelInfoDTO.getLabelList());
                 adminService.registerGatewayLabels(labels, overwriteLabels);
-                //TODO : Add registration summary details based on the sharing values
-                RegistrationSummaryDTO registrationSummaryDTO = new RegistrationSummaryDTO();
-                return Response.ok().entity(registrationSummaryDTO).build();
+                RegistrationSummary registrationSummary = adminService.getRegistrationSummary();
+                return Response.ok().entity(MappingUtil.toRegistrationSummaryDTO(registrationSummary)).build();
             } else {
                 String errorMessage = "Label information cannot be null";
                 APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,

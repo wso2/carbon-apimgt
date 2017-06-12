@@ -23,6 +23,7 @@ import org.json.simple.JSONObject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Captures common attributes used in an OAuth Application.
@@ -34,9 +35,7 @@ public final class OAuthApplicationInfo {
     private String callBackURL;
     private List<String> grantTypes;
     private String clientSecret;
-    private Map<String, Object> parameters = new HashMap<String, Object>();
-    private boolean isSaasApplication;
-    private String appOwner;
+    private Map<String, Object> parameters = new HashMap<>();
 
     /**
      * get client Id (consumer id)
@@ -124,20 +123,43 @@ public final class OAuthApplicationInfo {
         this.parameters.remove(key);
     }
 
-    public boolean getIsSaasApplication() {
-        return isSaasApplication;
+    public Map<String, Object> getParameters() {
+        return parameters;
     }
 
-    public void setIsSaasApplication(boolean isSaasApplication) {
-        this.isSaasApplication = isSaasApplication;
+    public void setParameters(Map<String, Object> parameters) {
+        this.parameters = parameters;
     }
 
-    public String getAppOwner() {
-        return appOwner;
+    @Override
+    public String toString() {
+        return "OAuthApplicationInfo{" +
+                "clientId='" + clientId + '\'' +
+                ", clientName='" + clientName + '\'' +
+                ", callBackURL='" + callBackURL + '\'' +
+                ", parameters=" + parameters.toString() +
+                ", grantTypes=" + grantTypes +
+                '}';
     }
 
-    public void setAppOwner(String appOwner) {
-        this.appOwner = appOwner;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof OAuthApplicationInfo)) {
+            return false;
+        }
+        OAuthApplicationInfo that = (OAuthApplicationInfo) o;
+        return Objects.equals(clientId, that.clientId) &&
+                Objects.equals(clientName, that.clientName) &&
+                Objects.equals(callBackURL, that.callBackURL) &&
+                Objects.equals(grantTypes, that.grantTypes) &&
+                Objects.equals(clientSecret, that.clientSecret);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(clientId, clientName, callBackURL, grantTypes, clientSecret);
+    }
 }

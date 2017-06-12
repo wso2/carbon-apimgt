@@ -3158,6 +3158,13 @@ definitions:
       workflowStatus:
         type: string
         example: APPROVED
+      userPermissionsForApi:
+        type: array
+        description: |
+          LoggedIn user permissions for the API
+        items:
+          type: string
+        example: ["READ","UPDATE"]
 
 #-----------------------------------------------------
 # The API resource
@@ -3262,6 +3269,13 @@ definitions:
       permission:
         type: string
         example: "[{\"groupId\" : 1000, \"permission\" : [\"READ\",\"UPDATE\"]},{\"groupId\" : 1001, \"permission\" : [\"READ\",\"UPDATE\"]}]"
+      userPermissionsForApi:
+        type: array
+        description: |
+          LoggedIn user permissions for the API
+        items:
+          type: string
+        example: ["READ","UPDATE"]
       visibleTenants:
         type: array
         items:

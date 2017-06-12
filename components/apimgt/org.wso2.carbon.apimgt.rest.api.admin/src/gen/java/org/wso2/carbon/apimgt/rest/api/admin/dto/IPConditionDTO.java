@@ -3,49 +3,16 @@ package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.ThrottleConditionDTO;
 import java.util.Objects;
 
 /**
  * IPConditionDTO
  */
-public class IPConditionDTO extends ThrottleConditionDTO  {
-  /**
-   * Gets or Sets ipConditionType
-   */
-  public enum IpConditionTypeEnum {
-    IPRANGE("IPRange"),
-    
-    IPSPECIFIC("IPSpecific");
-
-    private String value;
-
-    IpConditionTypeEnum(String value) {
-      this.value = value;
-    }
-
-    @Override
-    @JsonValue
-    public String toString() {
-      return String.valueOf(value);
-    }
-
-    @JsonCreator
-    public static IpConditionTypeEnum fromValue(String text) {
-      for (IpConditionTypeEnum b : IpConditionTypeEnum.values()) {
-        if (String.valueOf(b.value).equals(text)) {
-          return b;
-        }
-      }
-      return null;
-    }
-  }
-
+public class IPConditionDTO   {
   @JsonProperty("ipConditionType")
-  private IpConditionTypeEnum ipConditionType = null;
+  private String ipConditionType = null;
 
   @JsonProperty("specificIP")
   private String specificIP = null;
@@ -56,21 +23,21 @@ public class IPConditionDTO extends ThrottleConditionDTO  {
   @JsonProperty("endingIP")
   private String endingIP = null;
 
-  public IPConditionDTO ipConditionType(IpConditionTypeEnum ipConditionType) {
+  public IPConditionDTO ipConditionType(String ipConditionType) {
     this.ipConditionType = ipConditionType;
     return this;
   }
 
    /**
-   * Get ipConditionType
+   * IPRange and IPSpecific are the supported values 
    * @return ipConditionType
   **/
-  @ApiModelProperty(value = "")
-  public IpConditionTypeEnum getIpConditionType() {
+  @ApiModelProperty(value = "IPRange and IPSpecific are the supported values ")
+  public String getIpConditionType() {
     return ipConditionType;
   }
 
-  public void setIpConditionType(IpConditionTypeEnum ipConditionType) {
+  public void setIpConditionType(String ipConditionType) {
     this.ipConditionType = ipConditionType;
   }
 
@@ -141,20 +108,19 @@ public class IPConditionDTO extends ThrottleConditionDTO  {
     return Objects.equals(this.ipConditionType, ipCondition.ipConditionType) &&
         Objects.equals(this.specificIP, ipCondition.specificIP) &&
         Objects.equals(this.startingIP, ipCondition.startingIP) &&
-        Objects.equals(this.endingIP, ipCondition.endingIP) &&
-        super.equals(o);
+        Objects.equals(this.endingIP, ipCondition.endingIP);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(ipConditionType, specificIP, startingIP, endingIP, super.hashCode());
+    return Objects.hash(ipConditionType, specificIP, startingIP, endingIP);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class IPConditionDTO {\n");
-    sb.append("    ").append(toIndentedString(super.toString())).append("\n");
+    
     sb.append("    ipConditionType: ").append(toIndentedString(ipConditionType)).append("\n");
     sb.append("    specificIP: ").append(toIndentedString(specificIP)).append("\n");
     sb.append("    startingIP: ").append(toIndentedString(startingIP)).append("\n");

@@ -1,18 +1,9 @@
 package $package;
-import ballerina.lang.jsons;
-
-function getUrlFromKey (string key) (string){
-    map endpointMap = {};
-#foreach($endpoint in $endpoints)
-    endpointMap["$endpoint.name"] = "$endpoint.endpointConfig";
-#end
-    string endpoint =  (string)endpointMap[key];
-    return endpoint;
-}
-
-function getEndpointFromKey (string key) (string){
-    string jsonEndpoint = getUrlFromKey(key);
-    json endpoint = (json) jsonEndpoint;
-    string url = jsons:getString(endpoint, "$.url");
-    return url;
-}
+import ballerina.net.http;
+#set( $endpointConfig = '#set( $endpointConfig = ' + $endpoint.endpointConfig + ' )' )
+#evaluate ($endpointConfig)
+http:ClientConnector client = create http:ClientConnector($endpointConfig.get("serviceUrl"));
+    function execute_${endpoint.name}_Endpoint(string httpVerb,string path, message m)(message){
+        message response = http:ClientConnector.execute(client,httpVerb, path,m);
+        return m;
+    }

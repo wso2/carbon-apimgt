@@ -1,7 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
-import org.wso2.carbon.apimgt.core.dao.ApiType;
-import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CompositeAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CompositeAPIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CompositeAPIListDTO;
@@ -13,12 +12,12 @@ import java.util.List;
 public class CompositeAPIMappingUtil {
 
     /**
-     * Converts {@link API} to a {@link CompositeAPIDTO}.
+     * Converts {@link CompositeAPI} to a {@link CompositeAPIDTO}.
      *
-     * @param api API
+     * @param api CompositeAPI
      * @return API DTO
      */
-    public static CompositeAPIDTO toCompositeAPIDTO(API api) {
+    public static CompositeAPIDTO toCompositeAPIDTO(CompositeAPI api) {
         CompositeAPIDTO compositeAPIDTO = new CompositeAPIDTO();
         compositeAPIDTO.setId(api.getId());
         compositeAPIDTO.setName(api.getName());
@@ -27,24 +26,28 @@ public class CompositeAPIMappingUtil {
         compositeAPIDTO.setContext(api.getContext());
         compositeAPIDTO.setDescription(api.getDescription());
         compositeAPIDTO.setLabels(new ArrayList<>(api.getLabels()));
+        compositeAPIDTO.setApplicationId(api.getApplicationId());
         return compositeAPIDTO;
     }
 
     /**
-     * This method converts the API model object from the DTO object.
+     * This method converts the CompositeAPI model object from the DTO object.
      *
-     * @param apidto CompositeAPIDTO object with API data
-     * @return APIBuilder object
+     * @param apidto CompositeAPIDTO object with CompositeAPI data
+     * @return CompositeAPI.Builder object
      */
-    public static API.APIBuilder toAPI(CompositeAPIDTO apidto) {
-        return new API.APIBuilder(apidto.getProvider(), apidto.getName(), apidto.getVersion()).
-                id(apidto.getId()).
+    public static CompositeAPI.Builder toAPI(CompositeAPIDTO apidto) {
+        return new CompositeAPI.Builder().id(apidto.getId()).
+                provider(apidto.getProvider()).
+                name(apidto.getName()).
+                version(apidto.getVersion()).
                 context(apidto.getContext()).
                 description(apidto.getDescription()).
                 labels(new HashSet<>(apidto.getLabels())).
                 transport(new HashSet<>(apidto.getTransport())).
-                apiType(ApiType.COMPOSITE).
-                apiDefinition(apidto.getApiDefinition());
+                apiDefinition(apidto.getApiDefinition()).
+                applicationId(apidto.getApplicationId());
+
     }
 
     /**
@@ -53,7 +56,7 @@ public class CompositeAPIMappingUtil {
      * @param apisResult List of APIs
      * @return CompositeAPIListDTO object
      */
-    public static CompositeAPIListDTO toCompositeAPIListDTO(List<API> apisResult) {
+    public static CompositeAPIListDTO toCompositeAPIListDTO(List<CompositeAPI> apisResult) {
         CompositeAPIListDTO apiListDTO = new CompositeAPIListDTO();
         apiListDTO.setCount(apisResult.size());
         // apiListDTO.setNext(next);
@@ -63,14 +66,14 @@ public class CompositeAPIMappingUtil {
     }
 
     /**
-     * Converts {@link API} List to an {@link CompositeAPIInfoDTO} List.
+     * Converts {@link CompositeAPI} List to an {@link CompositeAPIInfoDTO} List.
      *
      * @param apiSummaryList
      * @return
      */
-    private static List<CompositeAPIInfoDTO> toCompositeAPIInfo(List<API> apiSummaryList) {
+    private static List<CompositeAPIInfoDTO> toCompositeAPIInfo(List<CompositeAPI> apiSummaryList) {
         List<CompositeAPIInfoDTO> apiInfoList = new ArrayList<>();
-        for (API apiSummary : apiSummaryList) {
+        for (CompositeAPI apiSummary : apiSummaryList) {
             CompositeAPIInfoDTO apiInfo = new CompositeAPIInfoDTO();
             apiInfo.setId(apiSummary.getId());
             apiInfo.setContext(apiSummary.getContext());
@@ -78,6 +81,7 @@ public class CompositeAPIMappingUtil {
             apiInfo.setName(apiSummary.getName());
             apiInfo.setProvider(apiSummary.getProvider());
             apiInfo.setVersion(apiSummary.getVersion());
+            apiInfo.setApplicationId(apiSummary.getApplicationId());
             apiInfoList.add(apiInfo);
         }
         return apiInfoList;

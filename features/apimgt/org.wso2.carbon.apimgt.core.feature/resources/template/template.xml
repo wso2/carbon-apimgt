@@ -1,37 +1,85 @@
 package $package;
 import ballerina.net.http;
+import ballerina.lang.messages;
+import org.wso2.carbon.apimgt.gateway.constants;
 
 @http:BasePath{value:"$apiContext"}
 service $serviceName {
-
-#foreach($url in $apiResources)
+#foreach( $endpointEntry in $apiEndpoint.entrySet() )
+	#if($endpointEntry.key == "production")
+		#if($endpointEntry.value.applicableLevel == "API")
+		#set( $endpointConfig = '#set( $endpointConfig = ' + $endpointEntry.value.endpointConfig + ' )' )
+		#evaluate ($endpointConfig)
+		http:ClientConnector productionEndpoint = create http:ClientConnector("$endpointConfig.get("serviceUrl")");
+		#end
+	#end
+	#if($endpointEntry.key == "sandbox")
+		#if($endpointEntry.value.applicableLevel == "API")
+		#set( $endpointConfig = '#set( $endpointConfig = ' + $endpointEntry.value.endpointConfig + ' )' )
+		#evaluate ($endpointConfig)
+		http:ClientConnector sandBoxEndpoint = create http:ClientConnector("$endpointConfig.get("serviceUrl")");
+		#end
+	#end
+#end
+#foreach($apiResource in $apiResources)
+		#set( $productionEndpoint = $apiEndpoint.get("production"))
+		#set( $sandboxEndpoint = $apiEndpoint.get("sandbox"))
 ## https://wso2.org/jira/browse/APIMANAGER-5710
-	#if(!$StringUtils.isEmpty($url.httpVerb) && (($url.httpVerb == "GET") || ($url.httpVerb == "POST")))
-    @http:$url.httpVerb{}
-    #if(!$StringUtils.isEmpty($url.consumes))@Consumes ($url.consumes)#end
-    #if(!$StringUtils.isEmpty($url.produces))@Produces ($url.produces)#end
-	@http:Path{value:"$url.uriTemplate"}
-    resource $url.templateId (message m) {
-        #if($url.productionEndpoint)http:ClientConnector productionEndpoint = create http:ClientConnector(getUrlFromKey("$url.productionEndpoint"));#end
-
-        #if($url.sandboxEndpoint)http:ClientConnector sandboxEndpoint = create http:ClientConnector(getUrlFromKey("$url.sandboxEndpoint"));#end
-
+	#if(!$StringUtils.isEmpty($apiResource.httpVerb) && (($apiResource.httpVerb == "GET") || ($apiResource.httpVerb == "POST")))
+    @http:$apiResource.httpVerb{}
+    #if(!$StringUtils.isEmpty($apiResource.consumes))@Consumes ($apiResource.consumes)#end
+    #if(!$StringUtils.isEmpty($apiResource.produces))@Produces ($apiResource.produces)#end
+	@http:Path{value:"$apiResource.uriTemplate"}
+    resource $apiResource.templateId (message m) {
+		#if($apiResource.productionEndpoint)
+		#set( $productionEndpoint = $apiResource.productionEndpoint)
+		#if($apiResource.productionEndpoint.applicableLevel == "API")
+		#set( $endpointConfig = '#set( $endpointConfig = ' + $apiResource.productionEndpoint.endpointConfig + ' )' )
+		#evaluate ($endpointConfig)
+		http:ClientConnector ${apiResource.templateId}ProductionEndpoint = create http:ClientConnector("$endpointConfig.get("serviceUrl")");
+		#end
+		#else
+		#if($apiEndpoint.get("production") && $apiEndpoint.get("production").applicableLevel == "API")
+		http:ClientConnector ${apiResource.templateId}ProductionEndpoint = productionEndpoint;
+		#end
+		#end
+		#if($apiResource.sandBoxEndpoint)
+		#set( $sandboxEndpoint = $apiResource.sandBoxEndpoint)
+		#if($apiResource.sandBoxEndpoint.applicableLevel == "API")
+		#set( $endpointConfig = '#set( $endpointConfig = ' + $apiResource.sandBoxEndpoint.endpointConfig + ' )' )
+		#evaluate ($endpointConfig)
+		http:ClientConnector ${apiResource.templateId}SandBoxEndpoint = create http:ClientConnector($endpointConfig.get("serviceUrl"));
+		#end
+		#else
+		#if($apiEndpoint.get("sandbox") && $apiEndpoint.get("sandbox").applicableLevel == "API")
+		http:ClientConnector ${apiResource.templateId}SandBoxEndpoint = sandBoxEndpoint;
+		#end
+		#end
         message response;
-        string endpointType;
-        string productionType;
+        boolean status;
+        status,response = authenticate(m);
+        if(status){
+		boolean isThrottled = isrequestThrottled(m);
+		if(!isThrottled){
+		string endpointType = messages:getProperty(m,constants:KEY_TYPE);
+		if (endpointType == "production") {
+		#if($productionEndpoint.applicableLevel == "API")
+		response = http:ClientConnector.execute(${apiResource.templateId}ProductionEndpoint, "$apiResource.httpVerb.toLowerCase()", "", m);
+		#else
+		response = execute_${productionEndpoint.name}_Endpoint("$apiResource.httpverb.toLowerCase()", "", m);
+		#end
+		} else {
+		#if($sandboxEndpoint.applicableLevel == "API")
+		response = http:ClientConnector.execute(${apiResource.templateId}SandBoxEndpoint, "$apiResource.httpVerb.toLowerCase()", "", m);
+		#else
+		response = execute_${sandboxEndpoint.name}_Endpoint("$apiResource.httpverb.toLowerCase()", "", m);
+		#end
 
-
-        endpointType = "production";
-        productionType = "production";
-
-        if (endpointType == productionType) {
-            response = http:ClientConnector.execute(productionEndpoint, "$url.httpVerb.toLowerCase()", "", m);
-        } else {
-            response = http:ClientConnector.execute(sandboxEndpoint, "$url.httpVerb.toLowerCase()", "", m);
-        }
-
-        reply response;
-    }
+		}
+		}
+		}
+		reply response;
+}
 #end
 #end
 }

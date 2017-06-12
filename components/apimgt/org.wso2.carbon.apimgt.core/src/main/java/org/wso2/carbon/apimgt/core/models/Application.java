@@ -38,7 +38,6 @@ public final class Application {
     private String description;
     private String tier;
     private String status;
-    private String callbackUrl;
     private String createdUser;
     private LocalDateTime createdTime;
     private String updatedUser;
@@ -130,14 +129,6 @@ public final class Application {
         this.groupId = groupId;
     }
 
-    public String getCallbackUrl() {
-        return callbackUrl;
-    }
-
-    public void setCallbackUrl(String callbackUrl) {
-        this.callbackUrl = callbackUrl;
-    }
-
     public List<APIKey> getKeys() {
         return keys;
     }
@@ -170,14 +161,13 @@ public final class Application {
                 Objects.equals(description, that.description) &&
                 Objects.equals(tier, that.tier) &&
                 Objects.equals(status, that.status) &&
-                Objects.equals(callbackUrl, that.callbackUrl) &&
                 Objects.equals(permissionString, that.permissionString) &&
                 Objects.equals(createdUser, that.createdUser);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, groupId, uuid, policyId, description, tier, status, callbackUrl, createdUser);
+        return Objects.hash(name, groupId, uuid, policyId, description, tier, status, createdUser);
     }
 
     public String getPermissionString() {
@@ -199,8 +189,8 @@ public final class Application {
     @Override
     public String toString() {
         return "Application [name=" + name + ", groupId=" + groupId + ", uuid=" + uuid + ", policyId=" + policyId
-                + ", description=" + description + ", tier=" + tier + ", status=" + status + ", callbackUrl="
-                + callbackUrl + ", createdUser=" + createdUser + ", createdTime=" + createdTime + ", updatedUser="
+                + ", description=" + description + ", tier=" + tier + ", status=" + status + ", createdUser="
+                + createdUser + ", createdTime=" + createdTime + ", updatedUser="
                 + updatedUser + ", updatedTime=" + updatedTime + ", keys=" + keys + ", permissionString="
                 + permissionString + ", permissionMap=" + permissionMap + "]";
     }    

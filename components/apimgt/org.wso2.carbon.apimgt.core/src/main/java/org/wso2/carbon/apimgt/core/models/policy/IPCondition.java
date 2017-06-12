@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.apimgt.core.models.policy;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
 /**
  * contains {@link IPCondition} policy attributes
  */
@@ -31,6 +34,13 @@ public class IPCondition extends Condition {
         setType(conditionType);
         this.queryAttributeName = PolicyConstants.START_QUERY + PolicyConstants.IP_QUERY + PolicyConstants
                 .END_QUERY_LONG;
+    }
+
+    @Override
+    public void populateDataInPreparedStatement(PreparedStatement preparedStatement) throws SQLException {
+        preparedStatement.setString(1, getStartingIP());
+        preparedStatement.setString(2, getEndingIP());
+        preparedStatement.setString(3, getSpecificIP());
     }
 
     public String getSpecificIP() {

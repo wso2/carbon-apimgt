@@ -1,4 +1,3 @@
-package org.wso2.carbon.apimgt.core.configuration.models;
 /*
  * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -16,6 +15,8 @@ package org.wso2.carbon.apimgt.core.configuration.models;
  * specific language governing permissions and limitations
  * under the License.
  */
+
+package org.wso2.carbon.apimgt.core.configuration.models;
 
 import org.wso2.carbon.kernel.annotations.Configuration;
 import org.wso2.carbon.kernel.annotations.Element;
@@ -36,10 +37,14 @@ public class KeyMgtConfigurations {
     private String revokeEndpoint = "https://localhost:9443/oauth2/revoke";
     @Element(description = "Introspect Endpoint URL")
     private String introspectEndpoint = "http://localhost:9763/oauth2/introspect";
-    @Element(description = "OAuth app validity period")
-    private long defaultTokenValidityPeriod = 3600L;
     @Element(description = "Key manager Credentials")
     private CredentialConfigurations keyManagerCredentials = new CredentialConfigurations();
+    @Element(description = "Alias of Key Manager Certificate in Client Trust Store")
+    private String keyManagerCertAlias = "wso2carbon";
+    @Element(description = "OAuth app validity period")
+    private long defaultTokenValidityPeriod = 3600L;
+    @Element(description = "OpenId Connect Userinfo Response JWT Signing Algorithm")
+    private String oidcUserinfoJWTSigningAlgo = "SHA256withRSA";
 
     public String getKeyManagerImplClass() {
         return keyManagerImplClass;
@@ -67,5 +72,13 @@ public class KeyMgtConfigurations {
 
     public CredentialConfigurations getKeyManagerCredentials() {
         return keyManagerCredentials;
+    }
+
+    public String getKeyManagerCertAlias() {
+        return keyManagerCertAlias;
+    }
+
+    public String getOidcUserinfoJWTSigningAlgo() {
+        return oidcUserinfoJWTSigningAlgo;
     }
 }

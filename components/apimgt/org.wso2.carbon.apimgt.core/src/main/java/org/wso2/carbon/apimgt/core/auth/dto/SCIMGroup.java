@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.core.auth.dto;
 import java.util.List;
 
 /**
- * This class contains the model of SCIM group
+ * Model of SCIM group
  */
 public class SCIMGroup {
 

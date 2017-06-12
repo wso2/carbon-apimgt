@@ -102,6 +102,15 @@ public class APIMgtConstants {
     public static final String URL_PATTERN_COLUMN = "URL_PATTERN";
 
     public static final String SANDBOX_ENDPOINT = "sandbox";
+    public static final String GATEWAY_CONFIG = "GATEWAY_CONFIG";
+    public static final String HTTP = "http";
+    public static final String HTTPS = "https";
+
+    public static final String HTTP_METHOD = "HTTP_METHOD";
+
+    public static final String NAMESPACE_STORE_API = "wso2.carbon.apimgt.store.rest.api";
+    public static final String NAMESPACE_PUBLISHER_API = "wso2.carbon.apimgt.publisher.rest.api";
+    public static final String NAMESPACE_ADMIN_API = "wso2.carbon.apimgt.admin.rest.api";
 
     /**
      * Application statuses.
@@ -257,6 +266,15 @@ public class APIMgtConstants {
         public static final String API_LEVEL = "api";
         public static final String APPLICATION_LEVEL = "application";
         public static final String SUBSCRIPTION_LEVEL = "subscription";
+        public static final String COLUMN_CONDITION_GROUP_ID = "CONDITION_GROUP_ID";
+        public static final String BLOCKING_CONDITION_STATE = "state";
+        public static final String BLOCKING_CONDITION_KEY = "blockingCondition";
+        public static final String BLOCKING_CONDITION_VALUE = "conditionValue";
+        public static final String BLOCKING_CONDITIONS_APPLICATION = "APPLICATION";
+        public static final String BLOCKING_CONDITIONS_API = "API";
+        public static final String BLOCKING_CONDITIONS_USER = "USER";
+        public static final String BLOCKING_CONDITIONS_IP = "IP";
+        public static final String BLOCKING_CONDITION_IP_RANGE = "IP_RANGE";
     }
 
     /**
@@ -322,6 +340,8 @@ public class APIMgtConstants {
         public static final String POST = "POST";
         public static final String PUT = "PUT";
         public static final String DELETE = "DELETE";
+        public static final String HEAD = "HEAD";
+        public static final String OPTIONS = "OPTIONS";
         public static final String CONTENT_TYPE = "Content-Type";
         public static final String ACCEPT = "Accept";
         public static final String USERNAME = "username";
@@ -353,10 +373,10 @@ public class APIMgtConstants {
         public static final String ATTRIBUTE_APPLICATION_UPDATEDBY = "updatedUser";
         public static final String ATTRIBUTE_APPLICATION_TIER = "tier";
         public static final String ATTRIBUTE_APPLICATION_DESCRIPTION = "description";
-        public static final String ATTRIBUTE_APPLICATION_CALLBACKURL = "callbackUrl";
         public static final String ATTRIBUTE_APPLICATION_GROUPID = "groupId";
         public static final String ATTRIBUTE_APPLICATION_PERMISSION = "permission";
         public static final String ATTRIBUTE_APPLICATION_EXISTIN_APP_STATUS = "status";
+        public static final String ATTRIBUTE_APPLICATION_POLICY_ID = "policyId";
 
     }
 
@@ -380,6 +400,72 @@ public class APIMgtConstants {
         public static final String ENDPOINT_DELETE = "ENDPOINT_DELETE";
         public static final String SUBSCRIPTION_CREATE = "SUBSCRIPTION_CREATE";
         public static final String SUBSCRIPTION_DELETE = "SUBSCRIPTION_DELETE";
+        public static final String SUBSCRIPTION_STATUS_CHANGE = "SUBSCRIPTION_STATUS_CHANGE";
+        public static final String APPLICATION_CREATE = "APPLICATION_CREATE";
+        public static final String APPLICATION_UPDATE = "APPLICATION_UPDATE";
+        public static final String APPLICATION_DELETE = "APPLICATION_DELETE";
     }
 
+    /**
+     * HTTP Status Codes
+     */
+    public static class HTTPStatusCodes {
+        public static final int SC_100_CONTINUE = 100;
+        public static final int SC_101_SWITCHING_PROTOCOLS = 101;
+        public static final int SC_102_PROCESSING = 102;
+        public static final int SC_200_OK = 200;
+        public static final int SC_201_CREATED = 201;
+        public static final int SC_202_ACCEPTED = 202;
+        public static final int SC_203_NON_AUTHORITATIVE_INFORMATION = 203;
+        public static final int SC_204_NO_CONTENT = 204;
+        public static final int SC_205_RESET_CONTENT = 205;
+        public static final int SC_206_PARTIAL_CONTENT = 206;
+        public static final int SC_207_MULTI_STATUS = 207;
+        public static final int SC_300_MULTIPLE_CHOICES = 300;
+        public static final int SC_301_MOVED_PERMANENTLY = 301;
+        public static final int SC_302_MOVED_TEMPORARILY = 302;
+        public static final int SC_303_SEE_OTHER = 303;
+        public static final int SC_304_NOT_MODIFIED = 304;
+        public static final int SC_305_USE_PROXY = 305;
+        public static final int SC_307_TEMPORARY_REDIRECT = 307;
+        public static final int SC_400_BAD_REQUEST = 400;
+        public static final int SC_401_UNAUTHORIZED = 401;
+        public static final int SC_402_PAYMENT_REQUIRED = 402;
+        public static final int SC_403_FORBIDDEN = 403;
+        public static final int SC_404_NOT_FOUND = 404;
+        public static final int SC_405_METHOD_NOT_ALLOWED = 405;
+        public static final int SC_406_NOT_ACCEPTABLE = 406;
+        public static final int SC_407_PROXY_AUTHENTICATION_REQUIRED = 407;
+        public static final int SC_408_REQUEST_TIMEOUT = 408;
+        public static final int SC_409_CONFLICT = 409;
+        public static final int SC_410_GONE = 410;
+        public static final int SC_411_LENGTH_REQUIRED = 411;
+        public static final int SC_412_PRECONDITION_FAILED = 412;
+        public static final int SC_413_REQUEST_TOO_LONG = 413;
+        public static final int SC_414_REQUEST_URI_TOO_LONG = 414;
+        public static final int SC_415_UNSUPPORTED_MEDIA_TYPE = 415;
+        public static final int SC_416_REQUESTED_RANGE_NOT_SATISFIABLE = 416;
+        public static final int SC_417_EXPECTATION_FAILED = 417;
+        public static final int SC_419_INSUFFICIENT_SPACE_ON_RESOURCE = 419;
+        public static final int SC_420_METHOD_FAILURE = 420;
+        public static final int SC_422_UNPROCESSABLE_ENTITY = 422;
+        public static final int SC_423_LOCKED = 423;
+        public static final int SC_424_FAILED_DEPENDENCY = 424;
+        public static final int SC_500_INTERNAL_SERVER_ERROR = 500;
+        public static final int SC_501_NOT_IMPLEMENTED = 501;
+        public static final int SC_502_BAD_GATEWAY = 502;
+        public static final int SC_503_SERVICE_UNAVAILABLE = 503;
+        public static final int SC_504_GATEWAY_TIMEOUT = 504;
+        public static final int SC_505_HTTP_VERSION_NOT_SUPPORTED = 505;
+        public static final int SC_507_INSUFFICIENT_STORAGE = 507;
+    }
+
+    /**
+     * Type of UUF apps in system
+     */
+    public static class APPType {
+        public static final String PUBLISHER = "publisher";
+        public static final String STORE = "store";
+        public static final String ADMIN = "admin";
+    }
 }

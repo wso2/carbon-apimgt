@@ -19,41 +19,40 @@
 
 package org.wso2.carbon.apimgt.core.models.policy;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
 /**
  * contains {@link BandwidthLimit} attributes
  */
 public class BandwidthLimit extends Limit {
-    private long dataAmount;
+
+    private int dataAmount;
     private String dataUnit;
 
-    public long getDataAmount() {
-        return dataAmount;
+    public BandwidthLimit (String timeUnit, int unitTime, int dataAmount, String dataUnit) {
+        super(timeUnit, unitTime);
+        this.dataAmount = dataAmount;
+        this.dataUnit = dataUnit;
     }
 
-    public void setDataAmount(long dataAmount) {
-        this.dataAmount = dataAmount;
+    @Override
+    public void populateDataInPreparedStatement(PreparedStatement preparedStatement) throws SQLException {
+        preparedStatement.setInt(6, getDataAmount());
+        preparedStatement.setString(7, getDataUnit());
+    }
+
+    public int getDataAmount() {
+        return dataAmount;
     }
 
     public String getDataUnit() {
         return dataUnit;
     }
 
-    public void setDataUnit(String dataUnit) {
-        this.dataUnit = dataUnit;
-    }
-
     @Override
     public String toString() {
         return "BandwidthLimit [dataAmount=" + dataAmount + ", dataUnit=" + dataUnit + ", toString()="
                 + super.toString() + "]";
-    }
-
-    public long getStandardDataAmount() {
-        if (PolicyConstants.MB.equalsIgnoreCase(dataUnit)) {
-            return dataAmount * 1024 * 1024;
-        } else if (PolicyConstants.KB.equalsIgnoreCase(dataUnit)) {
-            return dataAmount * 1024;
-        }
-        return dataAmount;
     }
 }

@@ -1,4 +1,3 @@
-package org.wso2.carbon.apimgt.core.configuration.models;
 /*
  * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -17,6 +16,8 @@ package org.wso2.carbon.apimgt.core.configuration.models;
  * under the License.
  */
 
+package org.wso2.carbon.apimgt.core.configuration.models;
+
 import org.wso2.carbon.kernel.annotations.Configuration;
 import org.wso2.carbon.kernel.annotations.Element;
 
@@ -32,6 +33,8 @@ public class IdentityProviderConfigurations {
     private String identityProviderBaseUrl = "https://localhost:9443";
     @Element(description = "Identity Provider Credentials")
     private CredentialConfigurations identityProviderCredentials = new CredentialConfigurations();
+    @Element(description = "Alias of Identity Provider Certificate in Client Trust Store")
+    private String idpCertAlias = "wso2carbon";
 
     public String getIdentityProviderImplClass() {
         return identityProviderImplClass;
@@ -43,5 +46,9 @@ public class IdentityProviderConfigurations {
 
     public CredentialConfigurations getIdentityProviderCredentials() {
         return identityProviderCredentials;
+    }
+
+    public String getIdpCertAlias() {
+        return idpCertAlias;
     }
 }

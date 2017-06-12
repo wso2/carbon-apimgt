@@ -47,14 +47,19 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIDefinition;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIResource;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
+import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
+import org.wso2.msf4j.Request;
+import org.wso2.msf4j.ServiceMethodInfo;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -62,6 +67,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Implementation for Swagger 2.0
@@ -71,12 +77,85 @@ import java.util.UUID;
 public class APIDefinitionFromSwagger20 implements APIDefinition {
 
     private static final Logger log = LoggerFactory.getLogger(APIDefinitionFromSwagger20.class);
+    private static Map<String, Map<String, Object>> localConfigMap = new ConcurrentHashMap<>();
 
-    /**
-     * This method extracts the API resource related data which includes URI templates from the Swagger API definition
-     *
-     * @return SwaggerAPIResourceData
-     */
+    @Override
+    public String getScopeOfResourcePath(String resourceConfigsJSON, Request request,
+                                         ServiceMethodInfo serviceMethodInfo) throws APIManagementException {
+        SwaggerParser swaggerParser = new SwaggerParser();
+        Swagger swagger = swaggerParser.parse(resourceConfigsJSON);
+        String basepath = swagger.getBasePath();
+        String verb = (String) request.getProperty(APIMgtConstants.HTTP_METHOD);
+        //TODO change to this if msf4j2.3.0-m2 or higher
+//        Method resourceMethod = (Method) request.getProperty("method");
+        Method resourceMethod = serviceMethodInfo.getMethod();
+
+        if (resourceMethod == null || verb == null) {
+            String message = "Could not read required properties from HTTP Request. HTTP_METHOD=" + verb +
+                    " resourceTemplate=" + resourceMethod;
+            log.error(message);
+            throw new APIManagementException(message, ExceptionCodes.SWAGGER_URL_MALFORMED);
+        }
+        String apiPrefix = resourceMethod.getDeclaringClass().getAnnotation(javax.ws.rs.ApplicationPath.class).value();
+        String pathTemplate = "";
+        if (resourceMethod.getAnnotation(javax.ws.rs.Path.class) != null) {
+            pathTemplate = resourceMethod.getAnnotation(javax.ws.rs.Path.class).value();
+        }
+        String nameSpace = getNamespaceFromBasePath(basepath);
+
+        //if namespace is not available in local cache add it.
+        if (nameSpace != null && !localConfigMap.containsKey(nameSpace)) {
+            localConfigMap.put(nameSpace, new ConcurrentHashMap<>());
+        }
+
+        if (nameSpace != null && localConfigMap.containsKey(nameSpace) && localConfigMap.get(nameSpace).isEmpty()) {
+            populateConfigMapForScopes(swagger, nameSpace);
+        }
+
+        String resourceConfig = verb + "_" + apiPrefix + pathTemplate;
+        if (localConfigMap.get(nameSpace).containsKey(resourceConfig)) {
+            return localConfigMap.get(nameSpace).get(resourceConfig).toString();
+        }
+        return null;
+    }
+
+    /*
+    * This method populates resource to scope mappings into localConfigMap
+    *
+    * @param swagger swagger oc of the apis
+    * @param String namespacee unigue identifier of the api
+    *
+    * */
+    private void populateConfigMapForScopes(Swagger swagger, String namespace) {
+        Map<String, String> configMap = ServiceReferenceHolder.getInstance().getRestAPIConfigurationMap(namespace);
+        //update local cache with configs defined in configuration file(dep.yaml)
+        if (!localConfigMap.containsKey(namespace)) {
+            localConfigMap.put(namespace, new ConcurrentHashMap<>());
+        }
+        if (configMap != null) {
+            localConfigMap.get(namespace).putAll(configMap);
+        }
+        //update local cache with the resource to scope mapping read from swagger
+        if (swagger != null) {
+            for (Map.Entry<String, Path> entry : swagger.getPaths().entrySet()) {
+                Path resource = entry.getValue();
+                Map<HttpMethod, Operation> operationsMap = resource.getOperationMap();
+                for (Map.Entry<HttpMethod, Operation> httpverbEntry : operationsMap.entrySet()) {
+                    if (httpverbEntry.getValue().getVendorExtensions().size() > 0 && httpverbEntry.getValue()
+                            .getVendorExtensions().get(APIMgtConstants.SWAGGER_X_SCOPE) != null) {
+                        String path = httpverbEntry.getKey() + "_" + entry.getKey();
+                        if (!localConfigMap.get(namespace).containsKey(path)) {
+                            localConfigMap.get(namespace).put(path,
+                                    httpverbEntry.getValue().getVendorExtensions().get(APIMgtConstants.SWAGGER_X_SCOPE)
+                                            .toString());
+                        }
+                    }
+
+                }
+            }
+        }
+    }
+
     @Override
     public List<APIResource> parseSwaggerAPIResources(StringBuilder resourceConfigsJSON)
             throws APIManagementException {
@@ -127,40 +206,98 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
 
     @Override
     public Map<String, Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {
+
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(resourceConfigsJSON);
-        Map<String, Scope> scopeMap = new HashMap<>();
-        try {
-            if (swagger.getVendorExtensions() != null) {
-                String scopes = swagger.getVendorExtensions().get(APIMgtConstants.SWAGGER_X_WSO2_SECURITY).toString();
-                if (StringUtils.isNotEmpty(scopes)) {
-                    JSONObject scopesJson = (JSONObject) new JSONParser().parse(scopes);
-                    Iterator<?> scopesIterator = ((JSONArray) ((JSONObject) scopesJson
-                            .get(APIMgtConstants.SWAGGER_OBJECT_NAME_APIM)).get(APIMgtConstants.SWAGGER_X_WSO2_SCOPES))
-                            .iterator();
-                    while (scopesIterator.hasNext()) {
-                        Scope scope = new Gson().fromJson(((JSONObject) scopesIterator.next()).toJSONString(),
-                                Scope.class);
-                        scopeMap.put(scope.getKey(), scope);
-                    }
+        if (swagger.getVendorExtensions() != null) {
+            String basePath = swagger.getBasePath();
+            String nameSpace = getNamespaceFromBasePath(basePath);
+            String securityHeaderScopes = null;
+            //read security header from deployment.yaml
+            if (localConfigMap.containsKey(nameSpace)) {
+                if (localConfigMap.get(nameSpace).containsKey(APIMgtConstants.SWAGGER_X_WSO2_SCOPES)) {
+                    securityHeaderScopes = localConfigMap.get(nameSpace).
+                            get(APIMgtConstants.SWAGGER_X_WSO2_SCOPES).toString();
                 }
+            } else {
+                // rest api resource to scope mapping configurations have not been loaded.hence, populating
+                populateConfigMapForScopes(swagger, nameSpace);
             }
-        } catch (ParseException e) {
-            log.error("Couldn't extract scopes from swagger ");
-            throw new APIManagementException("Couldn't extract scopes from swagger ",
-                    ExceptionCodes.SWAGGER_PARSE_EXCEPTION);
+            if (securityHeaderScopes == null || StringUtils.isEmpty(securityHeaderScopes)) {
+                //security header is not found in deployment.yaml.hence, reading from swagger
+                securityHeaderScopes = swagger.getVendorExtensions().
+                        get(APIMgtConstants.SWAGGER_X_WSO2_SECURITY).toString();
+                localConfigMap.get(nameSpace).put(APIMgtConstants.SWAGGER_X_WSO2_SCOPES, securityHeaderScopes);
+            }
+            try {
+                JSONObject scopesJson = (JSONObject) new JSONParser().parse(securityHeaderScopes);
+                return extractScopesFromJson(scopesJson);
+            } catch (ParseException e) {
+                String msg = "invalid json : " + securityHeaderScopes;
+                log.error(msg, e);
+                throw new APIManagementException(msg, ExceptionCodes.SWAGGER_PARSE_EXCEPTION);
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("vendor extensions are not found in provided swagger json. resourceConfigsJSON = "
+                        + resourceConfigsJSON);
+            }
+        }
+        return new HashMap<>();
+    }
+
+    /*
+    *  This method extracts scopes from scoped json defined
+    *
+    *  @param  JSONObject scopes as a json object
+    *  @return Map<String, Scope> map of scopes
+    *
+    * */
+    private Map<String, Scope> extractScopesFromJson(JSONObject scopesJson) {
+        Map<String, Scope> scopeMap = new HashMap<>();
+        if (scopesJson != null) {
+            Iterator<?> scopesIterator = ((JSONArray) ((JSONObject) scopesJson
+                    .get(APIMgtConstants.SWAGGER_OBJECT_NAME_APIM)).get(APIMgtConstants.SWAGGER_X_WSO2_SCOPES))
+                    .iterator();
+            while (scopesIterator.hasNext()) {
+                Scope scope = new Gson().fromJson(((JSONObject) scopesIterator.next()).toJSONString(),
+                        Scope.class);
+                scopeMap.put(scope.getKey(), scope);
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Unable to extract scopes from provided json as it is null.");
+            }
         }
         return scopeMap;
+    }
+
+    /*
+    * Method to get namespace based on the specified basepath
+    *
+    * @param String basepath defined in sswagger definition
+    * @return String namespace value
+    *
+    * */
+    private String getNamespaceFromBasePath(String basePath) {
+        if (basePath.contains(APIMgtConstants.APPType.PUBLISHER)) {
+            return APIMgtConstants.NAMESPACE_PUBLISHER_API;
+        } else if (basePath.contains(APIMgtConstants.APPType.STORE)) {
+            return APIMgtConstants.NAMESPACE_STORE_API;
+        } else if (basePath.contains(APIMgtConstants.APPType.ADMIN)) {
+            return APIMgtConstants.NAMESPACE_ADMIN_API;
+        }
+        return null;
     }
 
     /**
      * generate the swagger from uri templates.
      *
      * @param api API Object
-     * @return  Generated swagger resources as string.
+     * @return Generated swagger resources as string.
      */
     @Override
-    public String generateSwaggerFromResources(API.APIBuilder api)  {
+    public String generateSwaggerFromResources(API.APIBuilder api) {
         Swagger swagger = new Swagger();
         Info info = new Info();
         info.setTitle(api.getName());
@@ -202,13 +339,50 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         return Json.pretty(swagger);
     }
 
+    @Override
+    public String generateSwaggerFromResources(CompositeAPI.Builder api) {
+        Swagger swagger = new Swagger();
+        Info info = new Info();
+        info.setTitle(api.getName());
+        info.setDescription(api.getDescription());
+
+        info.setVersion(api.getVersion());
+        swagger.setInfo(info);
+        Map<String, Path> stringPathMap = new HashMap();
+        for (UriTemplate uriTemplate : api.getUriTemplates().values()) {
+            String uriTemplateString = uriTemplate.getUriTemplate();
+            List<Parameter> parameterList = getParameters(uriTemplateString);
+            if (!HttpMethod.GET.toString().equalsIgnoreCase(uriTemplate.getHttpVerb()) && !HttpMethod.DELETE.toString
+                    ().equalsIgnoreCase(uriTemplate.getHttpVerb()) && !HttpMethod.OPTIONS.toString().equalsIgnoreCase
+                    (uriTemplate.getHttpVerb()) && !HttpMethod.HEAD.toString().equalsIgnoreCase(uriTemplate
+                    .getHttpVerb())) {
+                parameterList.add(getDefaultBodyParameter());
+            }
+            Operation operation = new Operation();
+            operation.setParameters(parameterList);
+            operation.setOperationId(uriTemplate.getTemplateId());
+            operation.addResponse("200", getDefaultResponse());
+            if (stringPathMap.containsKey(uriTemplateString)) {
+                Path path = stringPathMap.get(uriTemplateString);
+                path.set(uriTemplate.getHttpVerb().toLowerCase(), operation);
+            } else {
+                Path path = new Path();
+                path.set(uriTemplate.getHttpVerb().toLowerCase(), operation);
+                stringPathMap.put(uriTemplateString, path);
+            }
+        }
+        swagger.setPaths(stringPathMap);
+        swagger.setPaths(stringPathMap);
+        return Json.pretty(swagger);
+    }
+
     /**
      * return API Object
      *
-     * @param provider  Provider of the API.
+     * @param provider      Provider of the API.
      * @param apiDefinition API definition as string
-     * @return  API object.
-     * @throws APIManagementException   If failed to generate API from swagger.
+     * @return API object.
+     * @throws APIManagementException If failed to generate API from swagger.
      */
     @Override
     public API.APIBuilder generateApiFromSwaggerResource(String provider, String apiDefinition) throws
@@ -249,22 +423,40 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
     }
 
     @Override
-    public void setDefaultSwaggerDefinition(API.APIBuilder apiBuilder) {
-        Map<String, UriTemplate> uriTemplateMap = new HashMap<>();
-        UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
-        uriTemplateBuilder.uriTemplate("/*");
-        for (String httpVerb : APIMgtConstants.SUPPORTED_HTTP_VERBS.split(",")) {
-            if (!"OPTIONS".equals(httpVerb)) {
-                uriTemplateBuilder.httpVerb(httpVerb);
-                uriTemplateBuilder.templateId(APIUtils.generateOperationIdFromPath(uriTemplateBuilder.getUriTemplate
-                        (), httpVerb));
-                uriTemplateMap.put(uriTemplateBuilder.getTemplateId(), uriTemplateBuilder.build());
-            }
+    public CompositeAPI.Builder generateCompositeApiFromSwaggerResource(String provider, String apiDefinition)
+                                                                                         throws APIManagementException {
+        SwaggerParser swaggerParser = new SwaggerParser();
+        Swagger swagger = swaggerParser.parse(apiDefinition);
+
+        if (swagger == null) {
+            throw new APIManagementException("Swagger could not be generated from provided API definition");
         }
-        apiBuilder.uriTemplates(uriTemplateMap);
-        String swagger = generateSwaggerFromResources(apiBuilder);
-        apiBuilder.apiDefinition(swagger);
+
+        Info apiInfo = swagger.getInfo();
+        if (apiInfo == null) {
+            throw new APIManagementException("Provided Swagger definition doesn't contain API information");
+        } else {
+            String apiName = apiInfo.getTitle();
+            String apiVersion = apiInfo.getVersion();
+            String apiDescription = apiInfo.getDescription();
+            CompositeAPI.Builder apiBuilder = new CompositeAPI.Builder().
+                provider(provider).
+                name(apiName).
+                version(apiVersion).
+                description(apiDescription).
+                context(swagger.getBasePath());
+
+            List<APIResource> apiResourceList = parseSwaggerAPIResources(new StringBuilder(apiDefinition));
+            Map<String, UriTemplate> uriTemplateMap = new HashMap();
+            for (APIResource apiResource : apiResourceList) {
+                uriTemplateMap.put(apiResource.getUriTemplate().getTemplateId(), apiResource.getUriTemplate());
+            }
+            apiBuilder.uriTemplates(uriTemplateMap);
+            apiBuilder.id(UUID.randomUUID().toString());
+            return apiBuilder;
+        }
     }
+
 
     public static List<Parameter> getParameters(String uriTemplate) {
         List<Parameter> parameters = new ArrayList<>();

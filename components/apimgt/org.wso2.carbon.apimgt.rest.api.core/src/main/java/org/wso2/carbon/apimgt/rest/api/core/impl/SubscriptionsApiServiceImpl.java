@@ -48,7 +48,8 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             } else {
                 subscriptionsOfApi = apiMgtAdminService.getAPISubscriptionsOfApi(apiContext, apiVersion);
             }
-            SubscriptionListDTO subscriptionsList = MappingUtil.convertToSubscriptionListDto(subscriptionsOfApi);
+            SubscriptionListDTO subscriptionsList = new SubscriptionListDTO();
+            subscriptionsList.setList(MappingUtil.convertToSubscriptionListDto(subscriptionsOfApi));
             return Response.ok(subscriptionsList).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving subscriptions.";

@@ -61,6 +61,9 @@ public enum ExceptionCodes implements ErrorHandler {
             + "values"),
     COMMENT_LENGTH_EXCEEDED(900326, "Comment length exceeds max limit", 400, "Comment length exceeds allowed maximum "
             + "number of characters"),
+    API_TYPE_INVALID(900327, "API Type specified is invalid.", 400, "API Type specified is invalid"),
+    COMPOSITE_API_ALREADY_EXISTS(900328, "A Composite API already exists.", 409,
+            "A Composite API already exists for this application"),
 
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),
@@ -112,6 +115,11 @@ public enum ExceptionCodes implements ErrorHandler {
             "Identity provider initialization failed"),
     KEY_MANAGER_INITIALIZATION_FAILED(900606, "Key Manager initialization failed", 500,
             "Key Manager initialization failed"),
+    ROLE_DOES_NOT_EXIST(900607, "Role does not exist in the system", 404, "Role does not exist in the system"),
+    MULTIPLE_ROLES_EXIST(900608, "Multiple roles with the same display name exist in the system", 500, "Multiple " +
+            "roles with the same display name exist in the system"),
+    MULTIPLE_USERS_EXIST(900609, "Multiple users with the same username exist in the system", 500, "Multiple " +
+            "users with the same username exist in the system"),
 
 
     // Labels related codes
@@ -139,18 +147,28 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_AUTHORIZATION_HEADER(900911, "Invalid Authorization header", 401,
             " Please provide the Authorization : Bearer <> token to proceed."),
 
-    OAUTH2_APP_CREATION_FAILED(900950, "Keymanagement Error", 500, " Error while creating the consumer application."),
-    OAUTH2_APP_ALREADY_EXISTS(900951, "Keymanagement Error", 409, " OAuth2 application already created."),
-    OAUTH2_APP_DELETION_FAILED(900952, "Keymanagement Error", 500, " Error while deleting the consumer application."),
-    OAUTH2_APP_UPDATE_FAILED(900953, "Keymanagement Error", 500, " Error while updating the consumer application."),
-    OAUTH2_APP_RETRIEVAL_FAILED(900954, "Keymanagement Error", 500, " Error while retrieving the consumer application."
+    OAUTH2_APP_CREATION_FAILED(900950, "Key Management Error", 500, "Error while creating the consumer application."),
+    OAUTH2_APP_ALREADY_EXISTS(900951, "Key Management Error", 409, "OAuth2 application already created."),
+    OAUTH2_APP_DELETION_FAILED(900952, "Key Management Error", 500, "Error while deleting the consumer application."),
+    OAUTH2_APP_UPDATE_FAILED(900953, "Key Management Error", 500, "Error while updating the consumer application."),
+    OAUTH2_APP_RETRIEVAL_FAILED(900954, "Key Management Error", 500, "Error while retrieving the consumer application."
     ),
-    OAUTH2_APP_MAP_FAILED(900955, "Keymanagement Error", 500, " Error while mapping an existing consumer application."),
-    TOKEN_INTROSPECTION_FAILED(900956, "Keymanagement Error", 500, " Error while introspecting the access token."),
     APPLICATION_TOKEN_GENERATION_FAILED(900957, "Keymanagement Error", 500, " Error while generating the application" +
             "access token."),
-    ACCESS_TOKEN_REVOKE_FAILED(900958, "Keymanagement Error", 500, " Error while revoking the access token.");
-
+    UNSUPPORTED_THROTTLE_LIMIT_TYPE(900960, "Throttle Policy Error", 400, "Throttle Limit type is not supported"),
+    POLICY_NOT_FOUND(900961, "Policy Not found", 404, "Failed to retrieve Policy Definition"),
+    OAUTH2_APP_MAP_FAILED(900962, "Key Management Error", 500, "Error while mapping an existing consumer application."),
+    TOKEN_INTROSPECTION_FAILED(900963, "Key Management Error", 500, "Error while introspecting the access token."),
+    ACCESS_TOKEN_GENERATION_FAILED(900964, "Key Management Error", 500, "Error while generating a new access token."),
+    INVALID_TOKEN_REQUEST(900965, "Key Management Error", 400, "Invalid access token request."),
+    ACCESS_TOKEN_REVOKE_FAILED(900966, "Key Management Error", 500, "Error while revoking the access token."),
+    INTERNAL_ERROR(900967, "General Error", 500, "Server Error Occurred"),
+    POLICY_LEVEL_NOT_SUPPORTED(900968, "Throttle Policy level invalid", 400, "Specified Throttle policy level is not "
+            + "valid"),
+    //Throttle related codes
+    THROTTLE_TEMPLATE_EXCEPTION(900969, "Policy Generating Error", 500, " Error while generate policy configuration"),
+    ENDPOINT_CONFIG_NOT_FOUND(90070, "Endpoint Config Not found", 404, "Error while retrieving Endpoint " +
+            "Configuration");
 
     private final long errorCode;
     private final String errorMessage;

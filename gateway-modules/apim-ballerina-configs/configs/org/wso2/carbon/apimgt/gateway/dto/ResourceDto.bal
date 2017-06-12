@@ -5,5 +5,5 @@ struct ResourceDto{
     string httpVerb;
     string authType;
     string policy;
-    string [] scopes;
+    string scope;
 }

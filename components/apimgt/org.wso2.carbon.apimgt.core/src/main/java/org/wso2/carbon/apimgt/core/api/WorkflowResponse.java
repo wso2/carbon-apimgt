@@ -30,7 +30,7 @@ public interface WorkflowResponse {
 
     /**
      * set the workflow status
-     * @param workflowStatus
+     * @param workflowStatus  WorkflowStatus object
      */
     void setWorkflowStatus(WorkflowStatus workflowStatus);
     

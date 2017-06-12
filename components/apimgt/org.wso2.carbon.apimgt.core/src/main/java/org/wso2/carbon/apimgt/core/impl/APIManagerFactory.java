@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
+import org.wso2.carbon.apimgt.core.api.ThrottlePolicyDeploymentManager;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
@@ -124,7 +125,7 @@ public class APIManagerFactory {
     private APIMgtAdminServiceImpl newAPIMgtAdminService() throws APIManagementException {
         try {
             return new APIMgtAdminServiceImpl(DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO(),
-                    DAOFactory.getApiDAO(), DAOFactory.getLabelDAO());
+                    DAOFactory.getApiDAO(), DAOFactory.getLabelDAO(), DAOFactory.getApplicationDAO());
         } catch (APIMgtDAOException e) {
             log.error("Couldn't create API Management Admin Service", e);
             throw new APIMgtDAOException("Couldn't create API Management Admin Service",
@@ -263,6 +264,15 @@ public class APIManagerFactory {
             }
         }
         return keyManager;
+    }
+
+    /**
+     * Get Throttle Policy Deployment Manager object
+     *
+     * @return ThrottlePolicyDeploymentManager object
+     */
+    public ThrottlePolicyDeploymentManager getThrottlePolicyDeploymentManager() {
+        return new ThrottlePolicyDeploymentManagerImpl();
     }
 
     /**

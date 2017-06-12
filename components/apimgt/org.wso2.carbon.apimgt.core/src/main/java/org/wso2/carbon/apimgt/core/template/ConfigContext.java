@@ -28,8 +28,18 @@ import org.slf4j.LoggerFactory;
 public abstract class ConfigContext {
     private static final Logger log = LoggerFactory.getLogger(ConfigContext.class);
 
+    /**
+     * Method used to perform pre validations before template generation
+     *
+     * @throws APITemplateException in case of validation failure
+     */
     public abstract void validate() throws APITemplateException;
 
+    /**
+     * Get the velocity context which holds the data to pass into the template
+     *
+     * @return VelocityContext object
+     */
     public abstract VelocityContext getContext();
 
     protected void handleException(String msg) throws Exception {

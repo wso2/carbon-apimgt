@@ -29,14 +29,11 @@ public class SubscriptionDTO   {
   @JsonProperty("subscriptionPolicy")
   private String subscriptionPolicy = null;
 
-  @JsonProperty("applicationName")
-  private String applicationName = null;
-
-  @JsonProperty("applicationOwner")
-  private String applicationOwner = null;
-
   @JsonProperty("keyEnvType")
   private String keyEnvType = null;
+
+  @JsonProperty("applicationId")
+  private String applicationId = null;
 
   public SubscriptionDTO apiName(String apiName) {
     this.apiName = apiName;
@@ -146,42 +143,6 @@ public class SubscriptionDTO   {
     this.subscriptionPolicy = subscriptionPolicy;
   }
 
-  public SubscriptionDTO applicationName(String applicationName) {
-    this.applicationName = applicationName;
-    return this;
-  }
-
-   /**
-   * Application Name. 
-   * @return applicationName
-  **/
-  @ApiModelProperty(required = true, value = "Application Name. ")
-  public String getApplicationName() {
-    return applicationName;
-  }
-
-  public void setApplicationName(String applicationName) {
-    this.applicationName = applicationName;
-  }
-
-  public SubscriptionDTO applicationOwner(String applicationOwner) {
-    this.applicationOwner = applicationOwner;
-    return this;
-  }
-
-   /**
-   * Application Owner. 
-   * @return applicationOwner
-  **/
-  @ApiModelProperty(required = true, value = "Application Owner. ")
-  public String getApplicationOwner() {
-    return applicationOwner;
-  }
-
-  public void setApplicationOwner(String applicationOwner) {
-    this.applicationOwner = applicationOwner;
-  }
-
   public SubscriptionDTO keyEnvType(String keyEnvType) {
     this.keyEnvType = keyEnvType;
     return this;
@@ -200,6 +161,24 @@ public class SubscriptionDTO   {
     this.keyEnvType = keyEnvType;
   }
 
+  public SubscriptionDTO applicationId(String applicationId) {
+    this.applicationId = applicationId;
+    return this;
+  }
+
+   /**
+   * UUID of Application 
+   * @return applicationId
+  **/
+  @ApiModelProperty(value = "UUID of Application ")
+  public String getApplicationId() {
+    return applicationId;
+  }
+
+  public void setApplicationId(String applicationId) {
+    this.applicationId = applicationId;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -216,14 +195,13 @@ public class SubscriptionDTO   {
         Objects.equals(this.apiProvider, subscription.apiProvider) &&
         Objects.equals(this.consumerKey, subscription.consumerKey) &&
         Objects.equals(this.subscriptionPolicy, subscription.subscriptionPolicy) &&
-        Objects.equals(this.applicationName, subscription.applicationName) &&
-        Objects.equals(this.applicationOwner, subscription.applicationOwner) &&
-        Objects.equals(this.keyEnvType, subscription.keyEnvType);
+        Objects.equals(this.keyEnvType, subscription.keyEnvType) &&
+        Objects.equals(this.applicationId, subscription.applicationId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiName, apiContext, apiVersion, apiProvider, consumerKey, subscriptionPolicy, applicationName, applicationOwner, keyEnvType);
+    return Objects.hash(apiName, apiContext, apiVersion, apiProvider, consumerKey, subscriptionPolicy, keyEnvType, applicationId);
   }
 
   @Override
@@ -237,9 +215,8 @@ public class SubscriptionDTO   {
     sb.append("    apiProvider: ").append(toIndentedString(apiProvider)).append("\n");
     sb.append("    consumerKey: ").append(toIndentedString(consumerKey)).append("\n");
     sb.append("    subscriptionPolicy: ").append(toIndentedString(subscriptionPolicy)).append("\n");
-    sb.append("    applicationName: ").append(toIndentedString(applicationName)).append("\n");
-    sb.append("    applicationOwner: ").append(toIndentedString(applicationOwner)).append("\n");
     sb.append("    keyEnvType: ").append(toIndentedString(keyEnvType)).append("\n");
+    sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
     sb.append("}");
     return sb.toString();
   }

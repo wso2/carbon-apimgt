@@ -10,6 +10,8 @@ import org.wso2.msf4j.Request;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CompositeAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CompositeAPIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
+import java.io.File;
+import org.wso2.carbon.apimgt.rest.api.store.dto.FileInfoDTO;
 
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
@@ -28,6 +30,17 @@ public abstract class CompositeApisApiService {
  ,String accept
  ,String ifNoneMatch
  ,String ifModifiedSince
+ , Request request) throws NotFoundException;
+    public abstract Response compositeApisApiIdImplementationGet(String apiId
+ ,String accept
+ ,String ifNoneMatch
+ ,String ifModifiedSince
+ , Request request) throws NotFoundException;
+    public abstract Response compositeApisApiIdImplementationPut(String apiId
+ ,InputStream apiImplementationInputStream, FileInfo apiImplementationDetail
+ ,String contentType
+ ,String ifMatch
+ ,String ifUnmodifiedSince
  , Request request) throws NotFoundException;
     public abstract Response compositeApisApiIdPut(String apiId
  ,CompositeAPIDTO body
