@@ -521,6 +521,7 @@ public class SampleTestObjectCreator {
      */
     public static APIPolicy createDefaultAPIPolicy() {
         APIPolicy apiPolicy = new APIPolicy(SAMPLE_API_POLICY);
+        apiPolicy.setUuid(UUID.randomUUID().toString());
         apiPolicy.setDisplayName(SAMPLE_API_POLICY);
         apiPolicy.setDescription(SAMPLE_API_POLICY_DESCRIPTION);
         apiPolicy.setUserLevel(APIMgtConstants.ThrottlePolicyConstants.API_LEVEL);
@@ -619,6 +620,7 @@ public class SampleTestObjectCreator {
         defaultQuotaPolicy.setLimit(bandwidthLimit);
         //set default API Policy
         APIPolicy apiPolicy = new APIPolicy(SAMPLE_API_POLICY);
+        apiPolicy.setUuid(UUID.randomUUID().toString());
         apiPolicy.setDisplayName(SAMPLE_API_POLICY);
         apiPolicy.setDescription(SAMPLE_API_POLICY_DESCRIPTION);
         apiPolicy.setUserLevel(APIMgtConstants.ThrottlePolicyConstants.API_LEVEL);
@@ -628,6 +630,7 @@ public class SampleTestObjectCreator {
 
     public static ApplicationPolicy createDefaultApplicationPolicy() {
         ApplicationPolicy applicationPolicy = new ApplicationPolicy(SAMPLE_APP_POLICY);
+        applicationPolicy.setUuid(UUID.randomUUID().toString());
         applicationPolicy.setDisplayName(SAMPLE_APP_POLICY);
         applicationPolicy.setDescription(SAMPLE_APP_POLICY_DESCRIPTION);
         QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
@@ -643,6 +646,7 @@ public class SampleTestObjectCreator {
 
     public static SubscriptionPolicy createDefaultSubscriptionPolicy() {
         SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(SAMPLE_SUBSCRIPTION_POLICY);
+        subscriptionPolicy.setUuid(UUID.randomUUID().toString());
         subscriptionPolicy.setDisplayName(SAMPLE_SUBSCRIPTION_POLICY);
         subscriptionPolicy.setDescription(SAMPLE_SUBSCRIPTION_POLICY_DESCRIPTION);
         QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();

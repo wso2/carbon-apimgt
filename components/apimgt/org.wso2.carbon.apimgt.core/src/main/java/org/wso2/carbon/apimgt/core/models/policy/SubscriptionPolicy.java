@@ -18,18 +18,21 @@
 
 package org.wso2.carbon.apimgt.core.models.policy;
 
+import java.util.Arrays;
+
 /**
  * Contains subscription policy based attributes
  */
 public class SubscriptionPolicy extends Policy {
     private int rateLimitCount;
     private String rateLimitTimeUnit;
-    private String customAttributes;
+    private byte[] customAttributes;
     private boolean stopOnQuotaReach;
     private String billingPlan;
 
     public SubscriptionPolicy(String name) {
         super(name);
+        customAttributes = null;
     }
 
     public int getRateLimitCount() {
@@ -64,12 +67,12 @@ public class SubscriptionPolicy extends Policy {
         this.stopOnQuotaReach = stopOnQuotaReach;
     }
 
-    public String getCustomAttributes() {
-        return customAttributes;
+    public byte[] getCustomAttributes() {
+        return customAttributes != null ? Arrays.copyOf(customAttributes, customAttributes.length) : new byte[0];
     }
 
-    public void setCustomAttributes(String customAttributes) {
-        this.customAttributes = customAttributes;
+    public void setCustomAttributes(byte[] customAttributes) {
+        this.customAttributes = Arrays.copyOf(customAttributes, customAttributes.length);
     }
 
     @Override
