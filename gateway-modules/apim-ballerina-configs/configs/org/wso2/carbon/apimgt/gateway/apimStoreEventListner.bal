@@ -23,6 +23,7 @@ service apimStoreEventListner {
     @http:GET {}
     resource onMessage (message m) {
         try {
+
             json event = messages:getJsonPayload(m);
             string eventType = jsons:getString(event, Constants:EVENT_TYPE);
 
@@ -32,6 +33,12 @@ service apimStoreEventListner {
             } else if (strings:equalsIgnoreCase(eventType, Constants:SUBSCRIPTION_DELETE)) {
                 json subscriptionsList = jsons:getJson(event, "subscriptionsList");
                 gatewayUtil:removeFromSubscriptionCache(subscriptionsList);
+            } else if (strings:equalsIgnoreCase(eventType, Constants:APPLICATION_CREATE)) {
+                gatewayUtil:putIntoApplicationCache(event);
+            } else if (strings:equalsIgnoreCase(eventType, Constants:APPLICATION_UPDATE)) {
+                gatewayUtil:putIntoApplicationCache(event);
+            } else if (strings:equalsIgnoreCase(eventType, Constants:APPLICATION_DELETE)) {
+                gatewayUtil:removeFromApplicationCache(event);
             } else {
                 system:println("Invalid event received");
             }

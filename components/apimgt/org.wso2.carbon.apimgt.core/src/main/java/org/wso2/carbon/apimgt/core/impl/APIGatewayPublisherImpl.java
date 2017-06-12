@@ -304,10 +304,10 @@ public class APIGatewayPublisherImpl implements APIGateway {
         if (application != null) {
             ApplicationEvent applicationEvent = new ApplicationEvent(APIMgtConstants.GatewayEventTypes
                     .APPLICATION_CREATE);
-            applicationEvent.setId(application.getId());
+            applicationEvent.setApplicationId(application.getId());
             applicationEvent.setName(application.getName());
-            applicationEvent.setPolicy(application.getPolicyId());
-            applicationEvent.setCreatedUser(application.getCreatedUser());
+            applicationEvent.setThrottlingTier(application.getPolicyId());
+            applicationEvent.setSubscriber(application.getCreatedUser());
             publishToStoreTopic(applicationEvent);
         }
     }
@@ -318,21 +318,20 @@ public class APIGatewayPublisherImpl implements APIGateway {
         if (application != null) {
             ApplicationEvent applicationEvent = new ApplicationEvent(APIMgtConstants.GatewayEventTypes
                     .APPLICATION_UPDATE);
-            applicationEvent.setId(application.getId());
+            applicationEvent.setApplicationId(application.getId());
             applicationEvent.setName(application.getName());
-            applicationEvent.setPolicy(application.getPolicyId());
-            applicationEvent.setCreatedUser(application.getCreatedUser());
+            applicationEvent.setThrottlingTier(application.getPolicyId());
+            applicationEvent.setSubscriber(application.getCreatedUser());
             publishToStoreTopic(applicationEvent);
         }
     }
-
 
     @Override
     public void deleteApplication(String applicationId) throws GatewayException {
         if (applicationId != null) {
             ApplicationEvent applicationEvent = new ApplicationEvent(APIMgtConstants.GatewayEventTypes
                     .APPLICATION_DELETE);
-            applicationEvent.setId(applicationId);
+            applicationEvent.setApplicationId(applicationId);
             publishToStoreTopic(applicationEvent);
         }
     }
