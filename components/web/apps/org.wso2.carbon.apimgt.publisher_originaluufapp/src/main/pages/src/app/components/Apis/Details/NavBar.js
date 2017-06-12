@@ -24,14 +24,14 @@ export default class NavBar extends Component {
         super(props);
         const path_sections = props.location.pathname.split('/');
         let details_action = path_sections[path_sections.indexOf("apis") + 2];
-        let active_tab = (Object.values(NavBar.CONS).includes(details_action)) ? details_action : NavBar.CONS.OVERVIEW;
+        let active_tab = (Object.values(NavBar.CONST).includes(details_action)) ? details_action : NavBar.CONST.OVERVIEW;
         this.state = {
             activeTab: active_tab
         };
         this.setActive = this.setActive.bind(this);
     }
 
-    static get CONS() {
+    static get CONST() {
         return {
             OVERVIEW: "overview",
             LIFECYCLE: "lifecycle",
@@ -54,25 +54,25 @@ export default class NavBar extends Component {
                 <div className="tabs-holder" style={{background: 'floralwhite'}}>
                     <div className="button-bar">
                         <ul className="nav nav-pills tab-effect">
-                            <li className={this.isActive(NavBar.CONS.OVERVIEW)}>
-                                <Link name={NavBar.CONS.OVERVIEW} onClick={this.setActive}
+                            <li className={this.isActive(NavBar.CONST.OVERVIEW)}>
+                                <Link name={NavBar.CONST.OVERVIEW} onClick={this.setActive}
                                       to={"/apis/" + this.props.match.params.api_uuid + "/overview"}>
                                     <i className="fw fw-view"/>&nbsp;Overview
                                 </Link>
                             </li>
-                            <li className={this.isActive(NavBar.CONS.LIFECYCLE)}>
-                                <Link name={NavBar.CONS.LIFECYCLE} onClick={this.setActive}
+                            <li className={this.isActive(NavBar.CONST.LIFECYCLE)}>
+                                <Link name={NavBar.CONST.LIFECYCLE} onClick={this.setActive}
                                       to={"/apis/" + this.props.match.params.api_uuid + "/lifecycle"}>
                                     <i className="fw fw-lifecycle"/>&nbsp;Life-Cycle
                                 </Link>
                             </li>
-                            <li className={this.isActive(NavBar.CONS.ENDPOINTS)}>
-                                <Link name={NavBar.CONS.ENDPOINTS} onClick={this.setActive}
+                            <li className={this.isActive(NavBar.CONST.ENDPOINTS)}>
+                                <Link name={NavBar.CONST.ENDPOINTS} onClick={this.setActive}
                                       to={"/apis/" + this.props.match.params.api_uuid + "/endpoints"}>
                                     <i className="fw fw-endpoint"/>&nbsp; Endpoints
                                 </Link>
                             </li>
-                            <li className={this.isActive(NavBar.CONS.RESOURCE)}>
+                            <li className={this.isActive(NavBar.CONST.RESOURCE)}>
                                 <Link onClick={this.setActive}
                                       to={"/apis/" + this.props.match.params.api_uuid + "/resource"}>
                                     <i className="fw fw-resource"/>&nbsp;Resources
