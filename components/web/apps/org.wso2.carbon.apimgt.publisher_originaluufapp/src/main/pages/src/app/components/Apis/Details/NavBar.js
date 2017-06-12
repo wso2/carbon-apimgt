@@ -17,8 +17,36 @@
  */
 
 import React, {Component} from 'react'
+import {Link} from 'react-router-dom'
 
 export default class NavBar extends Component {
+    constructor(props) {
+        super(props);
+        const path_sections = props.location.pathname.split('/');
+        let details_action = path_sections[path_sections.indexOf("apis") + 2];
+        let active_tab = (Object.values(NavBar.CONS).includes(details_action)) ? details_action : NavBar.CONS.OVERVIEW;
+        this.state = {
+            activeTab: active_tab
+        };
+        this.setActive = this.setActive.bind(this);
+    }
+
+    static get CONS() {
+        return {
+            OVERVIEW: "overview",
+            LIFECYCLE: "lifecycle",
+            ENDPOINTS: "endpoints",
+            RESOURCE: "resource"
+        }
+    }
+
+    isActive(tab) {
+        return this.state.activeTab === tab ? "active" : "";
+    }
+
+    setActive(event) {
+        this.setState({activeTab: event.target.name});
+    }
 
     render() {
         return (
@@ -26,26 +54,30 @@ export default class NavBar extends Component {
                 <div className="tabs-holder" style={{background: 'floralwhite'}}>
                     <div className="button-bar">
                         <ul className="nav nav-pills tab-effect">
-                            <li id="tab-1" role="presentation" className="active"><a href="#overview-tab"
-                                                                                     aria-controls="overview-tab"
-                                                                                     role="tab" data-toggle="tab"
-                                                                                     aria-expanded="true">
-                                <i className="fw fw-view"/>
-                                &nbsp;Overview</a>
+                            <li className={this.isActive(NavBar.CONS.OVERVIEW)}>
+                                <Link name={NavBar.CONS.OVERVIEW} onClick={this.setActive}
+                                      to={"/apis/" + this.props.match.params.api_uuid + "/overview"}>
+                                    <i className="fw fw-view"/>&nbsp;Overview
+                                </Link>
                             </li>
-                            <li id="tab-2" role="presentation"><a href="#lc-tab" aria-controls="lc-tab" role="tab"
-                                                                  data-toggle="tab"><i
-                                className="fw fw-lifecycle"/>&nbsp;
-                                Life-Cycle</a>
+                            <li className={this.isActive(NavBar.CONS.LIFECYCLE)}>
+                                <Link name={NavBar.CONS.LIFECYCLE} onClick={this.setActive}
+                                      to={"/apis/" + this.props.match.params.api_uuid + "/lifecycle"}>
+                                    <i className="fw fw-lifecycle"/>&nbsp;Life-Cycle
+                                </Link>
                             </li>
-                            <li id="tab-3" role="presentation"><a href="#endpoints-tab" role="tab"
-                                                                  aria-controls="endpoints-tab" data-toggle="tab"><i
-                                className="fw fw-endpoint"/>&nbsp; Endpoints</a>
+                            <li className={this.isActive(NavBar.CONS.ENDPOINTS)}>
+                                <Link name={NavBar.CONS.ENDPOINTS} onClick={this.setActive}
+                                      to={"/apis/" + this.props.match.params.api_uuid + "/endpoints"}>
+                                    <i className="fw fw-endpoint"/>&nbsp; Endpoints
+                                </Link>
                             </li>
-                            <li id="tab-4" role="presentation"><a href="#resources-tab" role="tab"
-                                                                  aria-controls="resources-tab" data-toggle="tab"><i
-                                className="fw fw-resource"/>&nbsp;
-                                Resources</a></li>
+                            <li className={this.isActive(NavBar.CONS.RESOURCE)}>
+                                <Link onClick={this.setActive}
+                                      to={"/apis/" + this.props.match.params.api_uuid + "/resource"}>
+                                    <i className="fw fw-resource"/>&nbsp;Resources
+                                </Link>
+                            </li>
                             <li id="tab-5" role="presentation"><a href="#documents-tab" role="tab"
                                                                   aria-controls="documents-tab" data-toggle="tab"><i
                                 className="fw fw-document"/>&nbsp; Documents</a>
