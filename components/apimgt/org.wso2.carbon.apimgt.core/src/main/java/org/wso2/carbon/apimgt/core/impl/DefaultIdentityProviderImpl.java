@@ -19,7 +19,10 @@
 package org.wso2.carbon.apimgt.core.impl;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import feign.Response;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -31,6 +34,7 @@ import org.wso2.carbon.apimgt.core.auth.OAuth2ServiceStubs;
 import org.wso2.carbon.apimgt.core.auth.OAuth2ServiceStubsFactory;
 import org.wso2.carbon.apimgt.core.auth.SCIMServiceStub;
 import org.wso2.carbon.apimgt.core.auth.SCIMServiceStubFactory;
+import org.wso2.carbon.apimgt.core.auth.dto.SCIMGroup;
 import org.wso2.carbon.apimgt.core.auth.dto.SCIMUser;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
@@ -84,6 +88,54 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
     public boolean isValidRole(String roleName) {
         return scimServiceStub.searchGroups(FILTER_PREFIX + roleName).status()
                 == APIMgtConstants.HTTPStatusCodes.SC_200_OK;
+    }
+
+    @Override
+    public List<String> getRoleIdsOfUser(String userId) throws IdentityProviderException {
+        List<String> roleIds = new ArrayList<>();
+        SCIMUser scimUser = scimServiceStub.getUser(userId);
+        if (scimUser != null) {
+            List<SCIMUser.SCIMUserGroups> roles = scimUser.getGroups();
+            if (roles != null) {
+                roles.forEach(role -> roleIds.add(role.getValue()));
+            }
+        } else {
+            String errorMessage = "User id " + userId + " does not exist in the system.";
+            log.error(errorMessage);
+            throw new IdentityProviderException(errorMessage, ExceptionCodes.USER_DOES_NOT_EXIST);
+        }
+        return roleIds;
+    }
+
+    @Override
+    public String getRoleId(String roleName) throws IdentityProviderException {
+        Response role = scimServiceStub.searchGroups(FILTER_PREFIX + roleName);
+        String roleId = null;
+        if (role.status() == 200) {
+            String responseBody = role.body().toString();
+            JsonParser parser = new JsonParser();
+            JsonObject parsedResponseBody = (JsonObject) parser.parse(responseBody);
+            JsonArray roleList = (JsonArray) parsedResponseBody.get("Resources");
+            if (roleList.size() == 1) {
+                JsonObject scimGroup = (JsonObject) roleList.get(0);
+                roleId = scimGroup.get("id").getAsString();
+            }
+        }
+        return roleId;
+    }
+
+    @Override
+    public String getRoleName(String roleId) throws IdentityProviderException {
+        SCIMGroup scimGroup = scimServiceStub.getGroup(roleId);
+        String displayName;
+        if (scimGroup != null) {
+            displayName = scimGroup.getDisplayName();
+        } else {
+            String errorMessage = "Role with role Id " + roleId + " does not exist in the system.";
+            log.error(errorMessage);
+            throw new IdentityProviderException(errorMessage, ExceptionCodes.ROLE_DOES_NOT_EXIST);
+        }
+        return displayName;
     }
 
     @Override
