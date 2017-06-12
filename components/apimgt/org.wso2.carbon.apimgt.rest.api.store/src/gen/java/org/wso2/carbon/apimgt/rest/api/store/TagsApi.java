@@ -14,6 +14,7 @@ import org.wso2.msf4j.formparam.FormDataParam;
 import org.osgi.service.component.annotations.Component;
 
 import java.io.InputStream;
+import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -37,6 +38,7 @@ import javax.ws.rs.core.Response;
 @Path("/api/am/store/v1.[\\d]+/tags")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
+@ApplicationPath("/tags")
 @io.swagger.annotations.Api(description = "the tags API")
 public class TagsApi implements Microservice  {
    private final TagsApiService delegate = TagsApiServiceFactory.getTagsApi();
@@ -56,10 +58,9 @@ public class TagsApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = TagListDTO.class) })
     public Response tagsGet(@ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit
 ,@ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
-,@ApiParam(value = "Media types acceptable for the response. Default is JSON. " , defaultValue="JSON")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 , @Context Request request)
     throws NotFoundException {
-        return delegate.tagsGet(limit,offset,accept,ifNoneMatch, request);
+        return delegate.tagsGet(limit,offset,ifNoneMatch, request);
     }
 }

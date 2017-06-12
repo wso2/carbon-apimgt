@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+
+WSO2 Inc. licenses this file to you under the Apache License,
+Version 2.0 (the "License"); you may not use this file except
+in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="apimgt-ballerina-native-test-suite">
+    <!-- Native Cache Related Test Cases -->
+    <test name="apimgt-ballerina-native-cache-unit-tests" preserve-order="true" parallel="false">
+        <parameter name="enableNonBlocking" value="false"/>
+        <packages>
+            <package name="org.wso2.carbon.apimgt.ballerina.caching"/>
+            <package name="org.wso2.carbon.apimgt.ballerina.util"/>
+            <package name="org.wso2.carbon.apimgt.ballerina.maps"/>
+        </packages>
+        <classes>
+            <class name="org.wso2.carbon.apimgt.ballerina.caching.CacheTest"/>
+            <class name="org.wso2.carbon.apimgt.ballerina.util.WaitTestCase"/>
+            <class name="org.wso2.carbon.apimgt.ballerina.caching.CacheRemoveTest"/>
+            <class name="org.wso2.carbon.apimgt.ballerina.util.SetPropertyCase"/>
+            <class name="org.wso2.carbon.apimgt.ballerina.util.GetPropertyTestCase"/>
+            <class name="org.wso2.carbon.apimgt.ballerina.util.SaveFileTestCase"/>
+            <class name="org.wso2.carbon.apimgt.ballerina.maps.MapPutAndGetTestCase"/>
+            <class name="org.wso2.carbon.apimgt.ballerina.maps.MapRemoveTestCase"/>
+        </classes>
+    </test>
+</suite>

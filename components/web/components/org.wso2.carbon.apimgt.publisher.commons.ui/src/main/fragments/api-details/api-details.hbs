@@ -50,10 +50,12 @@
                                 class="fw fw-document"></i>&nbsp; {{i18n "Documents"}}</a>
                         </li>
                     {{/if}}
-                    <li id="tab-6" role="presentation"><a href="#actrl-tab" role="tab" aria-controls="actrl-tab"
-                                                          data-toggle="tab"><i
-                            class="fw fw-contract"></i>&nbsp; {{i18n "Access Control"}}</a>
-                    </li>
+                    {{#if @params.publisher_app}}
+                        <li id="tab-6" role="presentation"><a href="#actrl-tab" role="tab" aria-controls="actrl-tab"
+                                                              data-toggle="tab"><i
+                                class="fw fw-contract"></i>&nbsp; {{i18n "Access Control"}}</a>
+                        </li>
+                    {{/if}}
                     <li id="tab-7" role="presentation"><a href="#mediation-tab" role="tab" aria-controls="mediation-tab"
                                                           data-toggle="tab"><i
                             class="fw fw-sequence"></i>&nbsp;
@@ -111,9 +113,7 @@
             </div>
             <div role="tabpanel" class="tab-pane fade" id="actrl-tab">
                 <div class="card">
-                    <div class="message message-info">
-                        <h4><i class="icon fw fw-info"></i>This feature is not supported yet.</h4>
-                    </div>
+                    {{defineZone "api-access-control-tab-content"}}
                 </div>
             </div>
             <div role="tabpanel" class="tab-pane fade" id="mediation-tab">

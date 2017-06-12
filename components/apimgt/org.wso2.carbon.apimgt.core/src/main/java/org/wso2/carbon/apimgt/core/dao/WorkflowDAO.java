@@ -23,6 +23,8 @@ package org.wso2.carbon.apimgt.core.dao;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.workflow.Workflow;
 
+import java.util.List;
+
 /**
  * Provides access to the Workflow data layer
  */
@@ -44,7 +46,7 @@ public interface WorkflowDAO {
     /**
      * Returns a workflow object for a given external workflow reference.
      *
-     * @param workflowReference
+     * @param workflowReference internal wfReference id
      * @return Workflow workflow data
      * @throws APIMgtDAOException if API Manager core level exception occurred
      */
@@ -52,7 +54,8 @@ public interface WorkflowDAO {
 
     /**
      * Get the external reference id for tasks in Created state for a given workflow reference id. 
-     * @param wfReference internal wfReference id 
+     * @param wfReference internal wfReference id
+     * @param workflowType work flow type
      * @return String external reference id
      * @throws APIMgtDAOException if API Manager core level exception occurred
      */
@@ -61,8 +64,25 @@ public interface WorkflowDAO {
 
     /**
      * Remove workflow entry related to the provided external ref from the database 
-     * @param externalReferenceId
-     * @throws APIMgtDAOException
+     * @param externalReferenceId  external wfReference id
+     * @throws APIMgtDAOException if API Manager core level exception occurred
      */
     void deleteWorkflowEntryforExternalReference(String externalReferenceId) throws APIMgtDAOException;
+    
+    /**
+     * Returns Uncompleted list of workflow entries for the given workflow type.
+     *
+     * @param type workflow type
+     * @return {@code List<Workflow>} list of workflows
+     * @throws APIMgtDAOException if API Manager core level exception occurred
+     */
+    public List<Workflow> retrieveUncompleteWorkflows(String type) throws APIMgtDAOException;
+    
+    /**
+     * Returns all the Uncomplete workflows 
+     *
+     * @return {@code List<Workflow>} list of workflows
+     * @throws APIMgtDAOException if API Manager core level exception occurred
+     */
+    public List<Workflow> retrieveUncompleteWorkflows() throws APIMgtDAOException;
 }

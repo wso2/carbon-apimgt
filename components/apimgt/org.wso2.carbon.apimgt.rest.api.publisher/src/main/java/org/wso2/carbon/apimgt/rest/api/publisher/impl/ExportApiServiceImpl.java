@@ -29,7 +29,6 @@ public class ExportApiServiceImpl extends ExportApiService {
     /**
      * Exports an existing API
      *
-     * @param contentType Content-Type header value
      * @param query       Search query
      * @param limit       maximum APIs to export
      * @param offset      Starting position of the search
@@ -37,8 +36,9 @@ public class ExportApiServiceImpl extends ExportApiService {
      * @return Zip file containing the exported APIs
      * @throws NotFoundException When the particular resource does not exist in the system
      */
+
     @Override
-    public Response exportApisGet(String query, String contentType, Integer limit, Integer offset, Request request)
+    public Response exportApisGet(String query, Integer limit, Integer offset, Request request)
             throws NotFoundException {
 
         APIPublisher publisher = null;
@@ -48,7 +48,7 @@ public class ExportApiServiceImpl extends ExportApiService {
         String pathToExportDir = System.getProperty("java.io.tmpdir") + File.separator + "exported-api-archives-" +
                 UUID.randomUUID().toString();
         try {
-            publisher = RestAPIPublisherUtil.getApiPublisher(RestApiUtil.getLoggedInUsername());
+            publisher = RestAPIPublisherUtil.getApiPublisher(RestApiUtil.getLoggedInUsername(request));
             FileBasedApiImportExportManager importExportManager = new FileBasedApiImportExportManager(publisher,
                     pathToExportDir);
             apiDetails = importExportManager.getAPIDetails(limit, offset, query);

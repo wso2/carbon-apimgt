@@ -3,16 +3,14 @@ package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.ThrottleConditionDTO;
 import java.util.Objects;
 
 /**
  * QueryParameterConditionDTO
  */
-public class QueryParameterConditionDTO extends ThrottleConditionDTO  {
+public class QueryParameterConditionDTO   {
   @JsonProperty("parameterName")
   private String parameterName = null;
 
@@ -28,7 +26,7 @@ public class QueryParameterConditionDTO extends ThrottleConditionDTO  {
    * Get parameterName
    * @return parameterName
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   public String getParameterName() {
     return parameterName;
   }
@@ -46,7 +44,7 @@ public class QueryParameterConditionDTO extends ThrottleConditionDTO  {
    * Get parameterValue
    * @return parameterValue
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   public String getParameterValue() {
     return parameterValue;
   }
@@ -66,20 +64,19 @@ public class QueryParameterConditionDTO extends ThrottleConditionDTO  {
     }
     QueryParameterConditionDTO queryParameterCondition = (QueryParameterConditionDTO) o;
     return Objects.equals(this.parameterName, queryParameterCondition.parameterName) &&
-        Objects.equals(this.parameterValue, queryParameterCondition.parameterValue) &&
-        super.equals(o);
+        Objects.equals(this.parameterValue, queryParameterCondition.parameterValue);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(parameterName, parameterValue, super.hashCode());
+    return Objects.hash(parameterName, parameterValue);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class QueryParameterConditionDTO {\n");
-    sb.append("    ").append(toIndentedString(super.toString())).append("\n");
+    
     sb.append("    parameterName: ").append(toIndentedString(parameterName)).append("\n");
     sb.append("    parameterValue: ").append(toIndentedString(parameterValue)).append("\n");
     sb.append("}");

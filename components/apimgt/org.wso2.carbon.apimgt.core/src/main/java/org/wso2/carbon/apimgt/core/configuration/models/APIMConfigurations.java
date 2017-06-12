@@ -1,4 +1,3 @@
-package org.wso2.carbon.apimgt.core.configuration.models;
 /*
  * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -17,10 +16,14 @@ package org.wso2.carbon.apimgt.core.configuration.models;
  * under the License.
  */
 
+package org.wso2.carbon.apimgt.core.configuration.models;
+
 import org.wso2.carbon.kernel.annotations.Configuration;
 import org.wso2.carbon.kernel.annotations.Element;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Class to hold APIM configuration parameters and generate yaml file
@@ -28,22 +31,7 @@ import java.io.File;
 
 @Configuration(namespace = "wso2.carbon.apimgt", description = "APIM Configuration Parameters")
 public class APIMConfigurations {
-    private String carbonClientId = "carbon";
-    @Element(description = "server version")
-    private String carbonVirtualHostName = "carbon";
-    @Element(description = "topic server host")
-    private String topicServerHost = "localhost";
-    @Element(description = "topic server port")
-    private String topicServerPort = "5672";
-    @Element(description = "publisher topic name")
-    private String publisherTopic = "PublisherTopic";
-    @Element(description = "store topic name")
-    private String storeTopic = "StoreTopic";
-    @Element(description = "username for topic")
-    private String username = "admin";
-    @Element(description = "password for topic")
-    private String password = "admin";
-    @Element(description = "password for topic")
+
     private boolean reverseProxyEnabled = false;
     @Element(description = "hostname")
     private String hostname = "localhost";
@@ -55,7 +43,7 @@ public class APIMConfigurations {
     private String adminContext = "/api/am/admin/v1.0";
 
     @Element(description = "package name for gateway configs")
-    private String gatewayPackageName = "deployment.org.wso2.apim";
+    private String gatewayPackageName = "org.wso2.carbon.apimgt.gateway";
 
     @Element(description = "package name path for gateway configs")
     private String gatewayPackageNamePath =
@@ -70,6 +58,22 @@ public class APIMConfigurations {
     @Element(description = "Identity Provider Configurations")
     private IdentityProviderConfigurations identityProviderConfigs = new IdentityProviderConfigurations();
 
+    @Element(description = "Broker Configurations")
+    private BrokerConfigurations brokerConfigurations = new BrokerConfigurations();
+
+    @Element(description = "Notificaton Configurations")
+    private NotificationConfigurations notificationConfigurations = new NotificationConfigurations();
+
+
+    @Element(description = "JWT Configurations")
+    private JWTConfigurations jwtConfigurations = new JWTConfigurations();
+
+    @Element(description = "Analytics Configurations")
+    private AnalyticsConfigurations analyticsConfigurations = new AnalyticsConfigurations();
+
+    @Element(description = "Throttling Configurations")
+    private ThrottlingConfigurations throttlingConfigurations = new ThrottlingConfigurations();
+
     @Element(description = "comment moderator role")
     private String commentModeratorRole = "comment-moderator";
 
@@ -79,87 +83,161 @@ public class APIMConfigurations {
     @Element(description = "rating upper limit")
     private int ratingMaxValue = 5;
 
-    public String getHostname() {
-        return hostname;
-    }
+    @Element(description = "WSDL processor implementations")
+    private List<String> wsdlProcessors = Arrays.asList(
+            "org.wso2.carbon.apimgt.core.impl.WSDL11ProcessorImpl",
+            "org.wso2.carbon.apimgt.core.impl.WSDL20ProcessorImpl");
 
     public boolean isReverseProxyEnabled() {
         return reverseProxyEnabled;
     }
 
-    public String getLabelExtractorImplClass() {
-        return labelExtractorImplClass;
+    public void setReverseProxyEnabled(boolean reverseProxyEnabled) {
+        this.reverseProxyEnabled = reverseProxyEnabled;
+    }
+
+    public String getHostname() {
+        return hostname;
+    }
+
+    public void setHostname(String hostname) {
+        this.hostname = hostname;
     }
 
     public String getPublisherContext() {
         return publisherContext;
     }
 
+    public void setPublisherContext(String publisherContext) {
+        this.publisherContext = publisherContext;
+    }
+
     public String getStoreContext() {
         return storeContext;
+    }
+
+    public void setStoreContext(String storeContext) {
+        this.storeContext = storeContext;
     }
 
     public String getAdminContext() {
         return adminContext;
     }
 
-    public String getCarbonClientId() {
-        return carbonClientId;
-    }
-
-    public String getCarbonVirtualHostName() {
-        return carbonVirtualHostName;
-    }
-
-    public String getTopicServerHost() {
-        return topicServerHost;
-    }
-
-    public String getTopicServerPort() {
-        return topicServerPort;
-    }
-
-    public String getPublisherTopic() {
-        return publisherTopic;
-    }
-
-    public String getStoreTopic() {
-        return storeTopic;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
+    public void setAdminContext(String adminContext) {
+        this.adminContext = adminContext;
     }
 
     public String getGatewayPackageName() {
         return gatewayPackageName;
     }
 
+    public void setGatewayPackageName(String gatewayPackageName) {
+        this.gatewayPackageName = gatewayPackageName;
+    }
+
     public String getGatewayPackageNamePath() {
         return gatewayPackageNamePath;
+    }
+
+    public void setGatewayPackageNamePath(String gatewayPackageNamePath) {
+        this.gatewayPackageNamePath = gatewayPackageNamePath;
+    }
+
+    public NotificationConfigurations getNotificationConfigurations() {
+        return notificationConfigurations;
+    }
+
+    public void setNotificationConfigurations(NotificationConfigurations notificationConfigurations) {
+        this.notificationConfigurations = notificationConfigurations;
+    }
+
+    public String getLabelExtractorImplClass() {
+        return labelExtractorImplClass;
+    }
+
+    public void setLabelExtractorImplClass(String labelExtractorImplClass) {
+        this.labelExtractorImplClass = labelExtractorImplClass;
     }
 
     public KeyMgtConfigurations getKeyManagerConfigs() {
         return keyManagerConfigs;
     }
 
+    public void setKeyManagerConfigs(KeyMgtConfigurations keyManagerConfigs) {
+        this.keyManagerConfigs = keyManagerConfigs;
+    }
+
     public IdentityProviderConfigurations getIdentityProviderConfigs() {
         return identityProviderConfigs;
+    }
+
+    public void setIdentityProviderConfigs(IdentityProviderConfigurations identityProviderConfigs) {
+        this.identityProviderConfigs = identityProviderConfigs;
+    }
+
+    public BrokerConfigurations getBrokerConfigurations() {
+        return brokerConfigurations;
+    }
+
+    public void setBrokerConfigurations(BrokerConfigurations brokerConfigurations) {
+        this.brokerConfigurations = brokerConfigurations;
+    }
+
+    public JWTConfigurations getJwtConfigurations() {
+        return jwtConfigurations;
+    }
+
+    public void setJwtConfigurations(JWTConfigurations jwtConfigurations) {
+        this.jwtConfigurations = jwtConfigurations;
+    }
+
+    public AnalyticsConfigurations getAnalyticsConfigurations() {
+        return analyticsConfigurations;
+    }
+
+    public void setAnalyticsConfigurations(AnalyticsConfigurations analyticsConfigurations) {
+        this.analyticsConfigurations = analyticsConfigurations;
+    }
+
+    public ThrottlingConfigurations getThrottlingConfigurations() {
+        return throttlingConfigurations;
+    }
+
+    public void setThrottlingConfigurations(ThrottlingConfigurations throttlingConfigurations) {
+        this.throttlingConfigurations = throttlingConfigurations;
     }
 
     public String getCommentModeratorRole() {
         return commentModeratorRole;
     }
 
+    public void setCommentModeratorRole(String commentModeratorRole) {
+        this.commentModeratorRole = commentModeratorRole;
+    }
+
+
+    public int getCommentMaxLength() {
+        return commentMaxLength;
+    }
+
+    public void setCommentMaxLength(int commentMaxLength) {
+        this.commentMaxLength = commentMaxLength;
+    }
+
     public int getRatingMaxValue() {
         return ratingMaxValue;
     }
 
-    public int getCommentMaxLength() {
-        return commentMaxLength;
+    public void setRatingMaxValue(int ratingMaxValue) {
+        this.ratingMaxValue = ratingMaxValue;
+    }
+
+    public List<String> getWsdlProcessors() {
+        return wsdlProcessors;
+    }
+
+    public void setWsdlProcessors(List<String> wsdlProcessors) {
+        this.wsdlProcessors = wsdlProcessors;
     }
 }

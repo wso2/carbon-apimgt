@@ -127,6 +127,7 @@ public class WorkflowConfigHolder {
      * @param name name of the setter field
      * @param val  value to be set
      * @param obj  POJO instance
+     * @throws WorkflowException if error occurred when setting instance property
      */
     public void setInstanceProperty(String name, Object val, Object obj) throws WorkflowException {
 

@@ -18,38 +18,34 @@
 
 package org.wso2.carbon.apimgt.core.models.policy;
 
+import java.util.Arrays;
+
 /**
  * contains {@link ApplicationPolicy} attributes
  */
 public class ApplicationPolicy extends Policy {
-    private int applicationId;
 
-    private String customAttributes;
+    private byte[] customAttributes;
 
     public ApplicationPolicy(String name) {
         super(name);
     }
 
-    public int getApplicationId() {
-        return applicationId;
+    public ApplicationPolicy(String uuid, String policyName) {
+        super(uuid, policyName);
     }
 
-    public void setApplicationId(int applicationId) {
-        this.applicationId = applicationId;
+    public byte[] getCustomAttributes() {
+        return customAttributes != null ? Arrays.copyOf(customAttributes, customAttributes.length) : new byte[0];
     }
 
-    public String getCustomAttributes() {
-        return customAttributes;
+    public void setCustomAttributes(byte[] customAttributes) {
+        this.customAttributes = Arrays.copyOf(customAttributes, customAttributes.length);
     }
-
-    public void setCustomAttributes(String customAttributes) {
-        this.customAttributes = customAttributes;
-    }
-
     @Override
     public String toString() {
         return "ApplicationPolicy [policyName=" + getPolicyName()
-                + ", applicationId =" + applicationId + ", description=" + getDescription() + ", defaultQuotaPolicy="
+                + ", policyUUID =" + getUuid() + ", description=" + getDescription() + ", defaultQuotaPolicy="
                 + getDefaultQuotaPolicy() + "]";
     }
 }

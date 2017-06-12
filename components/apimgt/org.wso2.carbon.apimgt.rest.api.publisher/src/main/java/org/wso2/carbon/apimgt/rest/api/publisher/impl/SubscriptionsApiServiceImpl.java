@@ -7,6 +7,7 @@ import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
@@ -45,7 +46,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
     public Response subscriptionsBlockSubscriptionPost(String subscriptionId, String blockState, String ifMatch,
                                                        String ifUnmodifiedSince, Request request) throws
             NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             Subscription subscription = apiPublisher.getSubscriptionByUUID(subscriptionId);
@@ -73,7 +74,12 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             Subscription newSubscription = apiPublisher.getSubscriptionByUUID(subscriptionId);
             SubscriptionDTO subscriptionDTO = MappingUtil.fromSubscription(newSubscription);
             return Response.ok().entity(subscriptionDTO).build();
-        } catch (APIManagementException e) {
+        } catch (GatewayException e) {
+            String errorMessage = "Failed to block subscription :" + subscriptionId + " in gateway";
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.ACCEPTED).build();
+        }
+        catch (APIManagementException e) {
             String errorMessage = "Error while blocking the subscription " + subscriptionId;
             HashMap<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.SUBSCRIPTION_ID, subscriptionId);
@@ -89,16 +95,15 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      * @param apiId       ID of the API
      * @param limit       Maximum subscriptions to return
      * @param offset      Starting position of the pagination
-     * @param accept      Accept header value
      * @param ifNoneMatch If-Match header value
      * @param request     ms4j request object
      * @return List of qualifying subscriptions DTOs as the response
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response subscriptionsGet(String apiId, Integer limit, Integer offset, String accept, String ifNoneMatch,
-                                     Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+    public Response subscriptionsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch,
+            Request request) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername(request);
         List<Subscription> subscriptionList;
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -126,7 +131,6 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      * Retrieves a single subscription
      *
      * @param subscriptionId  ID of the subscription
-     * @param accept          Accept header value
      * @param ifNoneMatch     If-Match header value
      * @param ifModifiedSince If-Modified-Since value
      * @param request         ms4j request object
@@ -134,13 +138,12 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response subscriptionsSubscriptionIdGet(String subscriptionId, String accept, String ifNoneMatch, String
-            ifModifiedSince, Request request) throws
-            NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+    public Response subscriptionsSubscriptionIdGet(String subscriptionId, String ifNoneMatch,
+            String ifModifiedSince, Request request) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            String existingFingerprint = subscriptionsSubscriptionIdGetFingerprint(subscriptionId, accept, ifNoneMatch,
+            String existingFingerprint = subscriptionsSubscriptionIdGetFingerprint(subscriptionId, ifNoneMatch,
                     ifModifiedSince, request);
             if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
                     .contains(existingFingerprint)) {
@@ -175,15 +178,14 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      * Retrieve the fingerprint of the subscription
      *
      * @param subscriptionId  ID of the subscription
-     * @param accept          Accept header value
      * @param ifNoneMatch     If-Match header value
      * @param ifModifiedSince If-Modified-Since value
      * @param request         ms4j request object
      * @return Fingerprint of the subscription
      */
-    public String subscriptionsSubscriptionIdGetFingerprint(String subscriptionId, String accept, String ifNoneMatch,
-                                                            String ifModifiedSince, Request request) {
-        String username = RestApiUtil.getLoggedInUsername();
+    public String subscriptionsSubscriptionIdGetFingerprint(String subscriptionId, String ifNoneMatch,
+            String ifModifiedSince, Request request) {
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username)
                     .getLastUpdatedTimeOfSubscription(subscriptionId);
@@ -208,7 +210,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
     public Response subscriptionsUnblockSubscriptionPost(String subscriptionId, String ifMatch, String
             ifUnmodifiedSince, Request request) throws
             NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             Subscription subscription = apiPublisher.getSubscriptionByUUID(subscriptionId);
@@ -235,6 +237,10 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             Subscription newSubscription = apiPublisher.getSubscriptionByUUID(subscriptionId);
             SubscriptionDTO subscriptionDTO = MappingUtil.fromSubscription(newSubscription);
             return Response.ok().entity(subscriptionDTO).build();
+        } catch (GatewayException e) {
+            String errorMessage = "Failed to unblock subscription :" + subscriptionId + " in gateway";
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.ACCEPTED).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while unblocking the subscription " + subscriptionId;
             HashMap<String, String> paramList = new HashMap<String, String>();

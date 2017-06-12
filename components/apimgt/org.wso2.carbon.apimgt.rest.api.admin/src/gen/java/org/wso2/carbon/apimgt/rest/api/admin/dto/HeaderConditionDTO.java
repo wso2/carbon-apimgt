@@ -3,16 +3,14 @@ package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.ThrottleConditionDTO;
 import java.util.Objects;
 
 /**
  * HeaderConditionDTO
  */
-public class HeaderConditionDTO extends ThrottleConditionDTO  {
+public class HeaderConditionDTO   {
   @JsonProperty("headerName")
   private String headerName = null;
 
@@ -28,7 +26,7 @@ public class HeaderConditionDTO extends ThrottleConditionDTO  {
    * Get headerName
    * @return headerName
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   public String getHeaderName() {
     return headerName;
   }
@@ -46,7 +44,7 @@ public class HeaderConditionDTO extends ThrottleConditionDTO  {
    * Get headerValue
    * @return headerValue
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   public String getHeaderValue() {
     return headerValue;
   }
@@ -66,20 +64,19 @@ public class HeaderConditionDTO extends ThrottleConditionDTO  {
     }
     HeaderConditionDTO headerCondition = (HeaderConditionDTO) o;
     return Objects.equals(this.headerName, headerCondition.headerName) &&
-        Objects.equals(this.headerValue, headerCondition.headerValue) &&
-        super.equals(o);
+        Objects.equals(this.headerValue, headerCondition.headerValue);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(headerName, headerValue, super.hashCode());
+    return Objects.hash(headerName, headerValue);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class HeaderConditionDTO {\n");
-    sb.append("    ").append(toIndentedString(super.toString())).append("\n");
+    
     sb.append("    headerName: ").append(toIndentedString(headerName)).append("\n");
     sb.append("    headerValue: ").append(toIndentedString(headerValue)).append("\n");
     sb.append("}");

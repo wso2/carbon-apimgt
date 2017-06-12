@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.FileApi;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -44,6 +45,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
@@ -197,6 +199,7 @@ public class APIFileUtils {
      * Delete a given directory
      *
      * @param path Path to the directory to be deleted
+     * @throws APIMgtDAOException if unable to delete the directory
      */
     public static void deleteDirectory(String path) throws APIMgtDAOException {
         try {
@@ -227,11 +230,11 @@ public class APIFileUtils {
     /**
      * write the given API definition to file system
      *
-     * @param api            {@link API} object to be exported
+     * @param api            {@link FileApi} object to be exported
      * @param exportLocation file system location to write the API definition
      * @throws APIMgtDAOException if an error occurs while writing the API definition
      */
-    public static void exportApiDefinitionToFileSystem(API api, String exportLocation) throws APIMgtDAOException {
+    public static void exportApiDefinitionToFileSystem(FileApi api, String exportLocation) throws APIMgtDAOException {
         String apiFileLocation = exportLocation + File.separator + APIMgtConstants.APIFileUtilConstants
                 .API_DEFINITION_FILE_PREFIX + api.getId() + APIMgtConstants.APIFileUtilConstants.JSON_EXTENSION;
         APIFileUtils.writeObjectAsJsonToFile(api, apiFileLocation);
@@ -308,6 +311,7 @@ public class APIFileUtils {
      *
      * @param thumbnailInputStream {@link InputStream} instance with thumbnail data
      * @param exportLocation       file system location to which the thumbnail will be written
+     * @throws APIMgtDAOException if unable to export thumbnail
      */
     public static void exportThumbnailToFileSystem(InputStream thumbnailInputStream, String exportLocation)
             throws APIMgtDAOException {
@@ -434,6 +438,7 @@ public class APIFileUtils {
      *
      * @param thumbnailFilePath path to file
      * @return thumbnail as a {@link InputStream} instance
+     * @throws APIMgtDAOException if an error occurs when getting thumbnail
      */
     public static InputStream getThumbnailImage(String thumbnailFilePath) throws APIMgtDAOException {
         File thumbnailFile = new File(thumbnailFilePath);
@@ -451,7 +456,7 @@ public class APIFileUtils {
      * @param api      api to get details
      * @return Directory path of the api
      */
-    public static String getAPIBaseDirectory(String basePath, API api) {
+    public static String getAPIBaseDirectory(String basePath, FileApi api) {
         return basePath + File.separator + api.getProvider() + "-" + api.getName() + "-" + api.getVersion();
     }
 
@@ -536,6 +541,10 @@ public class APIFileUtils {
             throw new APIMgtDAOException(errorMsg, e);
         }
         return directoryNames;
+    }
+
+    public static Collection<File> searchFilesWithMatchingExtension(File folder, String extension) {
+        return FileUtils.listFiles(folder, new String[] {extension}, true);
     }
 
     /**

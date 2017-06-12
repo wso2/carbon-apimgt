@@ -7,9 +7,10 @@
     <ul class="nav nav-tabs" role="tablist" id="tabs">
         <li role="presentation" id="details-tab" class="active"><a title="Details" href="#appdetails" aria-controls="profile" role="tab" data-toggle="tab">{{i18n "Details"}}</a></li>
         {{#if @params.isApplicationActive}}
-        <li role="presentation" id="production-keys-tab"><a title="Production Keys>" href="#production" aria-controls="profile" role="tab" data-toggle="tab">{{i18n "Production Keys"}}</a></li>
-        <li role="presentation" id="sandbox-keys-tab"><a title="Sandbox Keys" href="#sandbox" aria-controls="profile" role="tab" data-toggle="tab">{{i18n "Sandbox Keys"}}</a></li>
-        <li role="presentation" id="subscriptions-tab"><a title="Subscriptions" href="#subscription" aria-controls="profile" role="tab" data-toggle="tab">{{i18n "Subscriptions"}}</a></li>
+            <li role="presentation" id="production-keys-tab"><a title="Production Keys>" href="#production" aria-controls="profile" role="tab" data-toggle="tab">{{i18n "Production Keys"}}</a></li>
+            <li role="presentation" id="sandbox-keys-tab"><a title="Sandbox Keys" href="#sandbox" aria-controls="profile" role="tab" data-toggle="tab">{{i18n "Sandbox Keys"}}</a></li>
+            <li role="presentation" id="subscriptions-tab"><a title="Subscriptions" href="#subscription" aria-controls="profile" role="tab" data-toggle="tab">{{i18n "Subscriptions"}}</a></li>
+            <li role="presentation" id="composite-api-tab"><a title="Composite APIs" href="#composite-api" aria-controls="profile" role="tab" data-toggle="tab">{{i18n "Composite APIs"}}</a></li>
         {{/if}}
     </ul>
 
@@ -40,12 +41,14 @@
             </form>
         </div>
         {{#if @params.isApplicationActive}}
-        <div role="tabpanel" class="tab-pane fade production-keys" id="production">
-        </div>
-        <div role="tabpanel" class="tab-pane fade sandbox-keys" id="sandbox">
-        </div>
-        <div role="tabpanel" class="tab-pane fade" id="subscription">
-        </div>
+            <div role="tabpanel" class="tab-pane fade production-keys" id="production">
+            </div>
+            <div role="tabpanel" class="tab-pane fade sandbox-keys" id="sandbox">
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="subscription">
+            </div>
+            <div role="tabpanel" class="tab-pane fade" id="composite-api">
+            </div>
         {{/if}}
     </div>
 </div>

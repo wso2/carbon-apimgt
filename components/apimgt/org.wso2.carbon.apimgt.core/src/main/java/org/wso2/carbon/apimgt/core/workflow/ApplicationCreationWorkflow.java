@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.core.workflow;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
@@ -41,8 +42,8 @@ public class ApplicationCreationWorkflow extends Workflow {
     private Application application;
     private ApplicationDAO applicationDAO;
 
-    public ApplicationCreationWorkflow(ApplicationDAO applicationDAO, WorkflowDAO workflowDAO) {
-        super(workflowDAO, Category.STORE);
+    public ApplicationCreationWorkflow(ApplicationDAO applicationDAO, WorkflowDAO workflowDAO, APIGateway apiGateway) {
+        super(workflowDAO, Category.STORE, apiGateway);
         this.applicationDAO = applicationDAO;
         setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
     }
@@ -71,6 +72,7 @@ public class ApplicationCreationWorkflow extends Workflow {
             if (log.isDebugEnabled()) {
                 log.debug("Application Creation workflow complete: Approved");
             }
+            getApiGateway().addApplication(application);
             applicationState = APIMgtConstants.ApplicationStatus.APPLICATION_APPROVED;
 
         } else if (WorkflowStatus.REJECTED == response.getWorkflowStatus()) {

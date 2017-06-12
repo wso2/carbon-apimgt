@@ -112,9 +112,20 @@ public class TestUtil {
     public static Application createSummaryApplication(Application app) {
         Application summaryApp = new Application(app.getName(), app.getCreatedUser());
         summaryApp.setId(app.getId());
-        summaryApp.setCallbackUrl(app.getCallbackUrl());
         summaryApp.setStatus(app.getStatus());
         return summaryApp;
+    }
+
+    /**
+     * Lazy test for equality of given two APIs using its name, provider and version attributes
+     * 
+     * @param api1 API 1
+     * @param api2 API 2
+     * @return returns the equality of the given two APIs
+     */
+    public static boolean testAPIEqualsLazy(API api1, API api2) {
+        return api1.getName().equals(api2.getName()) && api1.getVersion().equals(api2.getVersion()) && api1
+                .getProvider().equals(api2.getProvider());
     }
 
     public static <T> String printDiff(T obj1, T obj2) throws IllegalAccessException {

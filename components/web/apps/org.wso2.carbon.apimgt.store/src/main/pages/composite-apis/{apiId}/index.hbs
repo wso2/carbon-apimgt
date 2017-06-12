@@ -1,0 +1,32 @@
+{{layout "main"}}
+{{title @config.appName " - " apiId}}
+{{fragment "org.wso2.carbon.uuf.common.foundation.ui.uuf-client"}}
+{{fragment "org.wso2.carbon.apimgt.publisher.commons.ui.api-client-js"}}
+{{fragment "org.wso2.carbon.apimgt.publisher.commons.ui.json-path"}}
+{{fragment "action-buttons"}}
+{{js "js/main.js"}}
+{{js "js/left-navigation.js"}}
+{{js "js/script.js"}}
+{{js "js/common.js"}}
+{{js "js/composite-apis/api-id/index.js"}}
+{{css "css/custom.css"}}
+{{css "css/api-designer.css"}}
+{{#fillZone "contentTop"}}
+    {{fragment "back-nav-bar"}}
+{{/fillZone}}
+{{#fillZone "content"}}
+    <input type="hidden" id="apiId" value="{{apiId}}"/>
+    <div class="page-header">
+        {{defineZone "api-header"}}
+    </div>
+    <div class="page-content">
+        <div class="row">
+            <div class="row-height">
+                {{defineZone "api-info"}}
+                <!-- fake div to mimic api-subscription zone -->
+                <div class="col-xs-12 col-sm-12 col-md-8 col-lg-5 col-xl-5 col-md-height col-md-top"></div>
+            </div>
+        </div>
+        <div class="row" id="tab-list"></div>
+    </div>
+{{/fillZone}}

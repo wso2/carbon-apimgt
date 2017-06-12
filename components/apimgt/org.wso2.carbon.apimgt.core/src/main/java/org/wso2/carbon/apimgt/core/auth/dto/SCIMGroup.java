@@ -18,16 +18,22 @@
 
 package org.wso2.carbon.apimgt.core.auth.dto;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 /**
- * This class contains the model of SCIM group
+ * Model of SCIM group
  */
 public class SCIMGroup {
 
+    @SerializedName("schemas")
     private List<String> schemas;
+    @SerializedName("id")
     private String id;
+    @SerializedName("displayName")
     private String displayName;
+    @SerializedName("members")
     private List<SCIMGroupMembers> members;
 
     public String getId() {

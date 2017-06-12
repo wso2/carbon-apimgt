@@ -15,6 +15,7 @@ import org.wso2.msf4j.formparam.FormDataParam;
 import org.osgi.service.component.annotations.Component;
 
 import java.io.InputStream;
+import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -38,6 +39,7 @@ import javax.ws.rs.core.Response;
 @Path("/api/am/store/v1.[\\d]+/self-signup")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
+@ApplicationPath("/self-signup")
 @io.swagger.annotations.Api(description = "the self-signup API")
 public class SelfSignupApi implements Microservice  {
    private final SelfSignupApiService delegate = SelfSignupApiServiceFactory.getSelfSignupApi();
@@ -46,7 +48,11 @@ public class SelfSignupApi implements Microservice  {
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "User self signup API ", response = UserDTO.class, tags={ "Signup", })
+    @io.swagger.annotations.ApiOperation(value = "", notes = "User self signup API ", response = UserDTO.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:self-signup", description = "Self Sign-up")
+        })
+    }, tags={ "Signup", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = UserDTO.class),
         
@@ -54,9 +60,8 @@ public class SelfSignupApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = UserDTO.class) })
     public Response selfSignupPost(@ApiParam(value = "User object to represent the new user " ,required=true) UserDTO body
-,@ApiParam(value = "Media type of the entity in the body. Default is JSON. " ,required=true, defaultValue="JSON")@HeaderParam("Content-Type") String contentType
 , @Context Request request)
     throws NotFoundException {
-        return delegate.selfSignupPost(body,contentType, request);
+        return delegate.selfSignupPost(body, request);
     }
 }

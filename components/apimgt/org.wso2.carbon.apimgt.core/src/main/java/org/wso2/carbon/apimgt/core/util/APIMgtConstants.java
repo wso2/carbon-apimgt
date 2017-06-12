@@ -25,6 +25,8 @@ package org.wso2.carbon.apimgt.core.util;
  */
 public class APIMgtConstants {
 
+    public static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
+    public static final String ENCODING_UTF_8 = "UTF-8";
     public static final String DEPRECATE_PREVIOUS_VERSIONS = "Deprecate old versions after publish the API";
     public static final String REQUIRE_RE_SUBSCRIPTIONS = "Require re-subscription when publish the API";
     public static final String CHECK_LIST_ITEM_CHANGE_EVENT = "CheckListItemChange";
@@ -51,6 +53,8 @@ public class APIMgtConstants {
     public static final String SWAGGER_V2 = "2.0";
     public static final String SWAGGER_INFO = "info";
     public static final String SWAGGER_RESPONSE_200 = "200";
+    public static final String SWAGGER_APIKEY = "apikey";
+    public static final String SWAGGER_OAUTH2 = "oauth2";
     public static final String API = "API";
     public static final String API_LIFECYCLE = "API_LIFECYCLE";
     public static final String AUTH_NO_AUTHENTICATION = "None";
@@ -62,6 +66,11 @@ public class APIMgtConstants {
     public static final String API_SPECIFIC_ENDPOINT = "API";
     public static final String RESOURCE_SPECIFIC_ENDPOINT = "RESOURCE";
     public static final String PRODUCTION_ENDPOINT = "production";
+    public static final String OAUTH2SECURITY = "OAuth2Security";
+    public static final String SCOPES = "scopes";
+
+    public static final String DEFAULT_LABEL_NAME = "Default";
+    public static final String DEFAULT_LABEL_ACCESS_URL = "https://localhost:9092";
 
     //workflow executor default executors
     public static final String WF_DEFAULT_APPCREATION_EXEC =
@@ -102,6 +111,15 @@ public class APIMgtConstants {
     public static final String URL_PATTERN_COLUMN = "URL_PATTERN";
 
     public static final String SANDBOX_ENDPOINT = "sandbox";
+    public static final String GATEWAY_CONFIG = "GATEWAY_CONFIG";
+    public static final String HTTP = "http";
+    public static final String HTTPS = "https";
+
+    public static final String HTTP_METHOD = "HTTP_METHOD";
+
+    public static final String NAMESPACE_STORE_API = "wso2.carbon.apimgt.store.rest.api";
+    public static final String NAMESPACE_PUBLISHER_API = "wso2.carbon.apimgt.publisher.rest.api";
+    public static final String NAMESPACE_ADMIN_API = "wso2.carbon.apimgt.admin.rest.api";
 
     /**
      * Application statuses.
@@ -164,6 +182,19 @@ public class APIMgtConstants {
         public static final String THUMBNAIL_FILE_NAME = "thumbnail";
         public static final String ENDPOINTS_ROOT_DIRECTORY = "Endpoints";
     }
+
+
+    /**
+     * WSDL Constants
+     */
+    public static class WSDLConstants {
+        public static final String WSDL_ARCHIVES_FOLDERNAME = "WSDL-archives";
+        public static final String WSDL_ARCHIVE_FILENAME = "wsdl-archive.zip";
+        public static final String EXTRACTED_WSDL_ARCHIVE_FOLDERNAME = "extracted";
+        public static final String WSDL_VERSION_11 = "1.1";
+        public static final String WSDL_VERSION_20 = "2.0";
+    }
+
 
     /**
      * Throttle policy related constants
@@ -257,6 +288,15 @@ public class APIMgtConstants {
         public static final String API_LEVEL = "api";
         public static final String APPLICATION_LEVEL = "application";
         public static final String SUBSCRIPTION_LEVEL = "subscription";
+        public static final String COLUMN_CONDITION_GROUP_ID = "CONDITION_GROUP_ID";
+        public static final String BLOCKING_CONDITION_STATE = "state";
+        public static final String BLOCKING_CONDITION_KEY = "blockingCondition";
+        public static final String BLOCKING_CONDITION_VALUE = "conditionValue";
+        public static final String BLOCKING_CONDITIONS_APPLICATION = "APPLICATION";
+        public static final String BLOCKING_CONDITIONS_API = "API";
+        public static final String BLOCKING_CONDITIONS_USER = "USER";
+        public static final String BLOCKING_CONDITIONS_IP = "IP";
+        public static final String BLOCKING_CONDITION_IP_RANGE = "IP_RANGE";
     }
 
     /**
@@ -270,6 +310,9 @@ public class APIMgtConstants {
         public static final String APPLICATION_NAME = "APPLICATION_NAME";
         public static final String CONSUMER_KEY = "CONSUMER_KEY";
         public static final String APPLICATION_ID = "APPLICATION_ID";
+        public static final String KEY_TYPE = "KEY_TYPE";
+        public static final String GRANT_TYPES = "GRANT_TYPES";
+        public static final String CALLBACK_URL = "CALLBACK_URL";
         public static final String APPLICATION_QUERY = "APPLICATION_QUERY";
         public static final String API_ID = "API_ID";
         public static final String TIER = "TIER";
@@ -289,10 +332,11 @@ public class APIMgtConstants {
      * Permission related constants
      */
     public static class Permission {
-        public static final int SUBSCRIBE_PERMISSION = 8;
-        public static final int READ_PERMISSION = 4;
+        public static final int MANAGE_SUBSCRIPTION_PERMISSION = 8; //Publisher side API permission
+        public static final int SUBSCRIBE_PERMISSION = 8; //Store side permission
+        public static final int READ_PERMISSION = 1;
         public static final int UPDATE_PERMISSION = 2;
-        public static final int DELETE_PERMISSION = 1;
+        public static final int DELETE_PERMISSION = 4;
         public static final String EVERYONE_GROUP = "EVERYONE";
         public static final String GROUP_ID = "groupId";
         public static final String PERMISSION = "permission";
@@ -300,7 +344,7 @@ public class APIMgtConstants {
         public static final String UPDATE = "UPDATE";
         public static final String DELETE = "DELETE";
         public static final String SUBSCRIPTION = "SUBSCRIPTION";
-
+        public static final String MANAGE_SUBSCRIPTION = "MANAGE_SUBSCRIPTION";
     }
 
     /**
@@ -322,6 +366,8 @@ public class APIMgtConstants {
         public static final String POST = "POST";
         public static final String PUT = "PUT";
         public static final String DELETE = "DELETE";
+        public static final String HEAD = "HEAD";
+        public static final String OPTIONS = "OPTIONS";
         public static final String CONTENT_TYPE = "Content-Type";
         public static final String ACCEPT = "Accept";
         public static final String USERNAME = "username";
@@ -353,10 +399,9 @@ public class APIMgtConstants {
         public static final String ATTRIBUTE_APPLICATION_UPDATEDBY = "updatedUser";
         public static final String ATTRIBUTE_APPLICATION_TIER = "tier";
         public static final String ATTRIBUTE_APPLICATION_DESCRIPTION = "description";
-        public static final String ATTRIBUTE_APPLICATION_CALLBACKURL = "callbackUrl";
-        public static final String ATTRIBUTE_APPLICATION_GROUPID = "groupId";
         public static final String ATTRIBUTE_APPLICATION_PERMISSION = "permission";
         public static final String ATTRIBUTE_APPLICATION_EXISTIN_APP_STATUS = "status";
+        public static final String ATTRIBUTE_APPLICATION_POLICY_ID = "policyId";
 
     }
 
@@ -380,6 +425,87 @@ public class APIMgtConstants {
         public static final String ENDPOINT_DELETE = "ENDPOINT_DELETE";
         public static final String SUBSCRIPTION_CREATE = "SUBSCRIPTION_CREATE";
         public static final String SUBSCRIPTION_DELETE = "SUBSCRIPTION_DELETE";
+        public static final String SUBSCRIPTION_STATUS_CHANGE = "SUBSCRIPTION_STATUS_CHANGE";
+        public static final String APPLICATION_CREATE = "APPLICATION_CREATE";
+        public static final String APPLICATION_UPDATE = "APPLICATION_UPDATE";
+        public static final String APPLICATION_DELETE = "APPLICATION_DELETE";
+        public static final String POLICY_CREATE = "POLICY_CREATE";
+        public static final String POLICY_UPDATE = "POLICY_UPDATE";
+        public static final String POLICY_DELETE = "POLICY_DELETE";
+        public static final String BLOCK_CONDITION_ADD = "BLOCK_CONDITION_ADD";
+        public static final String BLOCK_CONDITION_UPDATE = "BLOCK_CONDITION_UPDATE";
+        public static final String BLOCK_CONDITION_DELETE = "BLOCK_CONDITION_DELETE";
+
     }
 
+    /**
+     * HTTP Status Codes
+     */
+    public static class HTTPStatusCodes {
+        public static final int SC_100_CONTINUE = 100;
+        public static final int SC_101_SWITCHING_PROTOCOLS = 101;
+        public static final int SC_102_PROCESSING = 102;
+        public static final int SC_200_OK = 200;
+        public static final int SC_201_CREATED = 201;
+        public static final int SC_202_ACCEPTED = 202;
+        public static final int SC_203_NON_AUTHORITATIVE_INFORMATION = 203;
+        public static final int SC_204_NO_CONTENT = 204;
+        public static final int SC_205_RESET_CONTENT = 205;
+        public static final int SC_206_PARTIAL_CONTENT = 206;
+        public static final int SC_207_MULTI_STATUS = 207;
+        public static final int SC_300_MULTIPLE_CHOICES = 300;
+        public static final int SC_301_MOVED_PERMANENTLY = 301;
+        public static final int SC_302_MOVED_TEMPORARILY = 302;
+        public static final int SC_303_SEE_OTHER = 303;
+        public static final int SC_304_NOT_MODIFIED = 304;
+        public static final int SC_305_USE_PROXY = 305;
+        public static final int SC_307_TEMPORARY_REDIRECT = 307;
+        public static final int SC_400_BAD_REQUEST = 400;
+        public static final int SC_401_UNAUTHORIZED = 401;
+        public static final int SC_402_PAYMENT_REQUIRED = 402;
+        public static final int SC_403_FORBIDDEN = 403;
+        public static final int SC_404_NOT_FOUND = 404;
+        public static final int SC_405_METHOD_NOT_ALLOWED = 405;
+        public static final int SC_406_NOT_ACCEPTABLE = 406;
+        public static final int SC_407_PROXY_AUTHENTICATION_REQUIRED = 407;
+        public static final int SC_408_REQUEST_TIMEOUT = 408;
+        public static final int SC_409_CONFLICT = 409;
+        public static final int SC_410_GONE = 410;
+        public static final int SC_411_LENGTH_REQUIRED = 411;
+        public static final int SC_412_PRECONDITION_FAILED = 412;
+        public static final int SC_413_REQUEST_TOO_LONG = 413;
+        public static final int SC_414_REQUEST_URI_TOO_LONG = 414;
+        public static final int SC_415_UNSUPPORTED_MEDIA_TYPE = 415;
+        public static final int SC_416_REQUESTED_RANGE_NOT_SATISFIABLE = 416;
+        public static final int SC_417_EXPECTATION_FAILED = 417;
+        public static final int SC_419_INSUFFICIENT_SPACE_ON_RESOURCE = 419;
+        public static final int SC_420_METHOD_FAILURE = 420;
+        public static final int SC_422_UNPROCESSABLE_ENTITY = 422;
+        public static final int SC_423_LOCKED = 423;
+        public static final int SC_424_FAILED_DEPENDENCY = 424;
+        public static final int SC_500_INTERNAL_SERVER_ERROR = 500;
+        public static final int SC_501_NOT_IMPLEMENTED = 501;
+        public static final int SC_502_BAD_GATEWAY = 502;
+        public static final int SC_503_SERVICE_UNAVAILABLE = 503;
+        public static final int SC_504_GATEWAY_TIMEOUT = 504;
+        public static final int SC_505_HTTP_VERSION_NOT_SUPPORTED = 505;
+        public static final int SC_507_INSUFFICIENT_STORAGE = 507;
+    }
+
+    /**
+     * Type of UUF apps in system
+     */
+    public static class APPType {
+        public static final String PUBLISHER = "publisher";
+        public static final String STORE = "store";
+        public static final String ADMIN = "admin";
+    }
+
+    /**
+     * Label related constants
+     */
+    public static class LabelConstants {
+        public static final String DEFAULT = "Default";
+    }
+    
 }

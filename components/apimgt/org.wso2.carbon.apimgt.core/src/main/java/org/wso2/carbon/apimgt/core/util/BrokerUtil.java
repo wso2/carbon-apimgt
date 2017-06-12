@@ -22,10 +22,10 @@ import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.Broker;
-import org.wso2.carbon.apimgt.core.dto.GatewayDTO;
 import org.wso2.carbon.apimgt.core.exception.BrokerException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
+import org.wso2.carbon.apimgt.core.models.events.GatewayEvent;
 
 import javax.jms.JMSException;
 import javax.jms.Session;
@@ -58,23 +58,24 @@ public class BrokerUtil {
      * Publish to broker topic
      *
      * @param topicName     publishing topic name
-     * @param gatewayDTO    topic message data object
+     * @param gatewayEvent    topic message data object
      */
-    public static void publishToTopic(String topicName, GatewayDTO gatewayDTO) throws GatewayException {
+    public static void publishToTopic(String topicName, GatewayEvent gatewayEvent) throws GatewayException {
         TopicSession topicSession = null;
         Topic topic = null;
         TopicPublisher topicPublisher = null;
         TopicConnection topicConnection = null;
         try {
             topicConnection = getTopicConnection();
+            topicConnection.start();
             topicSession = topicConnection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
 
             topic = topicSession.createTopic(topicName);
             topicPublisher = topicSession.createPublisher(topic);
-            TextMessage textMessage = topicSession.createTextMessage(new Gson().toJson(gatewayDTO));
+            TextMessage textMessage = topicSession.createTextMessage(new Gson().toJson(gatewayEvent));
             topicPublisher.publish(textMessage);
         } catch (JMSException e) {
-            String errorMessage = "Error occurred while publishing " + gatewayDTO.getEventType() + " event to JMS " +
+            String errorMessage = "Error occurred while publishing " + gatewayEvent.getEventType() + " event to JMS " +
                     "topic :" + topicName;
             log.error(errorMessage, e);
             throw new GatewayException(errorMessage, ExceptionCodes.GATEWAY_EXCEPTION);
@@ -112,7 +113,7 @@ public class BrokerUtil {
      * Retrieve a new TopicConnection from broker connection pool
      *
      * @return  topicConnection  new topic connection to broker
-     * @throws BrokerException  If there is a failure to initialize broker connection factory
+     * @throws BrokerException  If there is a failure to init broker connection factory
      * @throws JMSException     If there is a failure to obtain topic connection
      */
     private static TopicConnection getTopicConnection() throws BrokerException, JMSException {

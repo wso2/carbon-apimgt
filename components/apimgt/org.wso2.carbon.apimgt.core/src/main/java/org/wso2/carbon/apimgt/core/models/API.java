@@ -21,15 +21,20 @@
 package org.wso2.carbon.apimgt.core.models;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.wso2.carbon.apimgt.core.dao.ApiType;
+import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.Policy;
+import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.lcm.core.ManagedLifecycle;
 import org.wso2.carbon.lcm.core.exception.LifecycleException;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -64,7 +69,7 @@ public final class API {
         businessInformation = builder.businessInformation;
         corsConfiguration = builder.corsConfiguration;
         createdTime = builder.createdTime;
-        apiType = builder.apiType;
+        applicationId = builder.applicationId;
         createdBy = builder.createdBy;
         updatedBy = builder.updatedBy;
         lastUpdatedTime = builder.lastUpdatedTime;
@@ -74,17 +79,21 @@ public final class API {
         gatewayConfig = builder.gatewayConfig;
         apiDefinition = builder.apiDefinition;
         if (builder.apiPermission != null) {
-            apiPermission = builder.apiPermission.toString();
+            apiPermission = builder.apiPermission;
         } else {
             apiPermission = "";
         }
         permissionMap = builder.permissionMap;
         workflowStatus = builder.workflowStatus;
+        apiPolicy = builder.apiPolicy;
+        userSpecificApiPermissions = builder.userSpecificApiPermissions;
+        securityScheme = builder.securityScheme;
     }
 
     public Map getPermissionMap() {
         return permissionMap;
     }
+
     public String getId() {
         return id;
     }
@@ -103,6 +112,10 @@ public final class API {
 
     public String getContext() {
         return context;
+    }
+
+    public Policy getApiPolicy() {
+        return apiPolicy;
     }
 
     public String getDescription() {
@@ -153,7 +166,7 @@ public final class API {
         return labels;
     }
 
-    public Set<String> getPolicies() {
+    public Set<Policy> getPolicies() {
         return policies;
     }
 
@@ -201,6 +214,26 @@ public final class API {
         return apiPermission;
     }
 
+    public String getApiDefinition() {
+        return apiDefinition;
+    }
+
+    public String getCopiedFromApiId() {
+        return copiedFromApiId;
+    }
+
+    public String getApplicationId() {
+        return applicationId;
+    }
+
+    public List<String> getUserSpecificApiPermissions() {
+        return userSpecificApiPermissions;
+    }
+
+    public int getSecurityScheme() {
+        return securityScheme;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -229,11 +262,11 @@ public final class API {
                 Objects.equals(transport, api.transport) &&
                 Objects.equals(tags, api.tags) &&
                 Objects.equals(labels, api.labels) &&
-                Objects.equals(policies, api.policies) &&
                 visibility == api.visibility &&
                 Objects.equals(visibleRoles, api.visibleRoles) &&
                 Objects.equals(businessInformation, api.businessInformation) &&
                 Objects.equals(corsConfiguration, api.corsConfiguration) &&
+                Objects.equals(applicationId, api.applicationId) &&
                 APIUtils.isTimeStampsEquals(createdTime, api.createdTime) &&
                 Objects.equals(createdBy, api.createdBy) &&
                 Objects.equals(updatedBy, api.updatedBy) &&
@@ -241,16 +274,17 @@ public final class API {
                 Objects.equals(lifecycleState, api.lifecycleState) &&
                 Objects.equals(uriTemplates, api.uriTemplates) &&
                 Objects.equals(copiedFromApiId, api.copiedFromApiId) &&
-                Objects.equals(endpoint, api.endpoint);
+                Objects.equals(endpoint, api.endpoint) &&
+                Objects.equals(securityScheme, api.securityScheme);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, provider, name, version, context, description, lifeCycleStatus, lifecycleInstanceId,
                 endpoint, gatewayConfig, wsdlUri, isResponseCachingEnabled, cacheTimeout, isDefaultVersion,
-                transport, tags, labels, policies, visibility, visibleRoles, businessInformation, corsConfiguration,
-                createdTime, createdBy, updatedBy, lastUpdatedTime, lifecycleState, uriTemplates, copiedFromApiId,
-                workflowStatus);
+                transport, tags, labels, visibility, visibleRoles, businessInformation, corsConfiguration,
+                applicationId, createdTime, createdBy, updatedBy, lastUpdatedTime, lifecycleState,
+                uriTemplates, copiedFromApiId, workflowStatus, securityScheme);
     }
 
 
@@ -278,12 +312,12 @@ public final class API {
     private final Set<String> transport;
     private final Set<String> tags;
     private final Set<String> labels;
-    private final Set<String> policies;
+    private final Set<Policy> policies;
     private final Visibility visibility;
     private final Set<String> visibleRoles;
     private final BusinessInformation businessInformation;
     private final CorsConfiguration corsConfiguration;
-    private final ApiType apiType;
+    private final String applicationId;
     private final LocalDateTime createdTime;
     private final String createdBy;
     private final String updatedBy;
@@ -293,9 +327,12 @@ public final class API {
     private String copiedFromApiId;
     private final String apiDefinition;
     private final Map permissionMap;
-    private final String apiPermission;
-    private final String workflowStatus; 
-    
+    private String apiPermission;
+    private final String workflowStatus;
+    private final Policy apiPolicy;
+    private List<String> userSpecificApiPermissions;
+    private int securityScheme;
+
     public String getWorkflowStatus() {
         return workflowStatus;
     }
@@ -308,7 +345,56 @@ public final class API {
         private String id;
         private String provider;
         private String name;
-        private String permission;
+
+        public APIBuilder(FileApi api) {
+            id = api.getId();
+            provider = api.getProvider();
+            name = api.getName();
+            version = api.getVersion();
+            context = api.getContext();
+            description = api.getDescription();
+            lifeCycleStatus = api.getLifeCycleStatus();
+            lifecycleInstanceId = api.getLifecycleInstanceId();
+            securityScheme = api.getSecurityScheme();
+            endpoint = api.getEndpoint();
+            wsdlUri = api.getWsdlUri();
+            isResponseCachingEnabled = api.isResponseCachingEnabled();
+            cacheTimeout = api.getCacheTimeout();
+            isDefaultVersion = api.isDefaultVersion();
+            transport = api.getTransport();
+            tags = api.getTags();
+            labels = api.getLabels();
+            policies = new HashSet<>();
+            api.getPolicies().forEach(v -> policies.add(new SubscriptionPolicy(v)));
+            visibility = api.getVisibility();
+            visibleRoles = api.getVisibleRoles();
+            businessInformation = api.getBusinessInformation();
+            corsConfiguration = api.getCorsConfiguration();
+            createdTime = api.getCreatedTime();
+            applicationId = api.getApplicationId();
+            createdBy = api.getCreatedBy();
+            updatedBy = api.getUpdatedBy();
+            lastUpdatedTime = api.getLastUpdatedTime();
+            lifecycleState = api.getLifecycleState();
+            uriTemplates = new HashMap<>();
+            api.getUriTemplates().forEach((s, uriTemplate) -> {
+                uriTemplates.put(s, new UriTemplate.UriTemplateBuilder(uriTemplate).build());
+            });
+            copiedFromApiId = api.getCopiedFromApiId();
+            gatewayConfig = api.getGatewayConfig();
+            apiDefinition = api.getApiDefinition();
+            if (api.getApiPermission() != null) {
+                apiPermission = api.getApiPermission();
+            } else {
+                apiPermission = "";
+            }
+            permissionMap = api.getPermissionMap();
+            workflowStatus = api.getWorkflowStatus();
+            if (api.getApiPolicy() != null) {
+                apiPolicy = new APIPolicy(api.getApiPolicy());
+            }
+            userSpecificApiPermissions = api.getUserSpecificApiPermissions();
+        }
 
         public String getId() {
             return id;
@@ -346,7 +432,7 @@ public final class API {
             return gatewayConfig;
         }
 
-        public StringBuilder getApiPermission() {
+        public String getApiPermission() {
             return apiPermission;
         }
 
@@ -366,7 +452,7 @@ public final class API {
             return isDefaultVersion;
         }
 
-        public String getApiPolicy() {
+        public Policy getApiPolicy() {
             return apiPolicy;
         }
 
@@ -382,7 +468,7 @@ public final class API {
             return labels;
         }
 
-        public Set<String> getPolicies() {
+        public Set<Policy> getPolicies() {
             return policies;
         }
 
@@ -398,8 +484,12 @@ public final class API {
             return businessInformation;
         }
 
-        public ApiType getApiType() {
-            return apiType;
+        public List<String> getUserSpecificApiPermissions() {
+            return userSpecificApiPermissions;
+        }
+
+        public int getSecurityScheme() {
+            return securityScheme;
         }
 
         private String version;
@@ -408,23 +498,23 @@ public final class API {
         private String lifeCycleStatus;
         private String lifecycleInstanceId;
         private Map permissionMap;
-        private StringBuilder apiPermission;
+        private String apiPermission;
         private Map<String, Endpoint> endpoint = Collections.EMPTY_MAP;
         private String gatewayConfig;
-        private String wsdlUri = "";
+        private String wsdlUri;
         private boolean isResponseCachingEnabled;
         private int cacheTimeout;
         private boolean isDefaultVersion;
-        private String apiPolicy;
+        private Policy apiPolicy;
         private Set<String> transport = Collections.emptySet();
         private Set<String> tags = Collections.emptySet();
         private Set<String> labels = Collections.emptySet();
-        private Set<String> policies = Collections.emptySet();
+        private Set<Policy> policies = Collections.emptySet();
         private Visibility visibility = Visibility.PUBLIC;
         private Set<String> visibleRoles = Collections.emptySet();
         private BusinessInformation businessInformation;
         private CorsConfiguration corsConfiguration;
-        private ApiType apiType;
+        private String applicationId;
         private LocalDateTime createdTime;
         private String createdBy;
         private String updatedBy;
@@ -434,7 +524,9 @@ public final class API {
         private String copiedFromApiId;
         private String apiDefinition;
         private String workflowStatus;
-        
+        private List<String> userSpecificApiPermissions;
+        private int securityScheme;
+
         public APIBuilder(String provider, String name, String version) {
             this.provider = provider;
             this.name = name;
@@ -463,7 +555,7 @@ public final class API {
             this.visibleRoles = copy.visibleRoles;
             this.businessInformation = copy.businessInformation;
             this.corsConfiguration = copy.corsConfiguration;
-            this.apiType = copy.apiType;
+            this.applicationId = copy.applicationId;
             this.createdTime = copy.createdTime;
             this.createdBy = copy.createdBy;
             this.lastUpdatedTime = copy.lastUpdatedTime;
@@ -472,12 +564,15 @@ public final class API {
             this.copiedFromApiId = copy.copiedFromApiId;
             this.apiDefinition = copy.apiDefinition;
             if (copy.apiPermission != null) {
-                this.apiPermission = new StringBuilder(copy.apiPermission);
+                this.apiPermission = copy.apiPermission;
             } else {
-                this.apiPermission = new StringBuilder();
+                this.apiPermission = "";
             }
+            this.apiPolicy = copy.apiPolicy;
             this.permissionMap = new HashMap<>();
             this.workflowStatus = copy.workflowStatus;
+            this.userSpecificApiPermissions = new ArrayList<String>();
+            this.securityScheme = copy.securityScheme;
         }
 
         /**
@@ -546,7 +641,7 @@ public final class API {
          * @return a reference to this APIBuilder
          */
         public APIBuilder description(String description) {
-           this.description = description;
+            this.description = description;
             return this;
         }
 
@@ -577,7 +672,7 @@ public final class API {
         /**
          * Sets the lifecycleState and return a reference to this APIBuilder
          *
-         * @param lifecycleState    Lifecycle state object.
+         * @param lifecycleState Lifecycle state object.
          * @return a reference to APIBuilder
          */
         public APIBuilder lifecycleState(LifecycleState lifecycleState) {
@@ -597,7 +692,7 @@ public final class API {
             return this;
         }
 
-        public APIBuilder apiPermission(StringBuilder apiPermission) {
+        public APIBuilder apiPermission(String apiPermission) {
             this.apiPermission = apiPermission;
             return this;
         }
@@ -669,7 +764,7 @@ public final class API {
          * @param apiPolicy the {@code apiPolicy} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder apiPolicy(String apiPolicy) {
+        public APIBuilder apiPolicy(Policy apiPolicy) {
             this.apiPolicy = apiPolicy;
             return this;
         }
@@ -716,16 +811,10 @@ public final class API {
          * @param policies the {@code policies} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder policies(Set<String> policies) {
+        public APIBuilder policies(Set<Policy> policies) {
             this.policies = policies;
             return this;
         }
-
-        public APIBuilder permission(String permission) {
-            this.permission = permission;
-            return this;
-        }
-
 
         /**
          * Sets the {@code policies} and returns a reference to this APIBuilder so that the methods can be chained
@@ -793,14 +882,14 @@ public final class API {
         }
 
         /**
-         * Sets the {@code apiType} and returns a reference to this APIBuilder so that the methods can be chained
+         * Sets the {@code applicationId} and returns a reference to this APIBuilder so that the methods can be chained
          * together.
          *
-         * @param apiType the {@code apiType} to set
+         * @param applicationId the {@code applicationId} to set
          * @return a reference to this APIBuilder
          */
-        public APIBuilder apiType(ApiType apiType) {
-            this.apiType = apiType;
+        public APIBuilder applicationId(String applicationId) {
+            this.applicationId = applicationId;
             return this;
         }
 
@@ -888,13 +977,18 @@ public final class API {
             return this;
         }
 
+        public APIBuilder securityScheme(int securityScheme) {
+            this.securityScheme = securityScheme;
+            return this;
+        }
+
         /**
          * Returns a {@code API} built from the parameters previously set.
          *
          * @return a {@code API} built with parameters of this {@code API.APIBuilder}
          */
 
-        public API build()  {
+        public API build() {
             return new API(this);
         }
 
@@ -974,39 +1068,31 @@ public final class API {
         }
 
         public void setPermissionMap(HashMap permissionMap) {
-            this.permissionMap =  permissionMap;
+            this.permissionMap = permissionMap;
         }
 
         public Map getPermissionMap() {
             return permissionMap;
         }
 
-        public String getPermission() {
-            return permission;
-        }
-
-        public void setPermission(String permission) {
-            this.permission = permission;
-        }
-
         public String getWorkflowStatus() {
             return workflowStatus;
         }
-    }
 
-    public String getApiDefinition() {
-        return apiDefinition;
-    }
-
-    public String getCopiedFromApiId() {
-        return copiedFromApiId;
-    }
-
-    public ApiType getApiType() {
-        return apiType;
+        public void setUserSpecificApiPermissions(List<String> userSpecificApiPermissions) {
+            this.userSpecificApiPermissions = userSpecificApiPermissions;
+        }
     }
 
     public void setCopiedFromApiId(String copiedFromApiId) {
-             this.copiedFromApiId = copiedFromApiId;
+        this.copiedFromApiId = copiedFromApiId;
+    }
+
+    public void setUserSpecificApiPermissions(List<String> userSpecificApiPermissions) {
+        this.userSpecificApiPermissions = userSpecificApiPermissions;
+    }
+
+    public void setApiPermission(String apiPermission) {
+        this.apiPermission = apiPermission;
     }
 }

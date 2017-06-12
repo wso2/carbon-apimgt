@@ -115,6 +115,7 @@ function initDataTable(raw_data) {
                 .text('Delete ')
                 .addClass(cssDelete)
                 .append(icon.clone().removeClass("fw-edit").addClass("fw-delete"));
+
             return $('<div></div>').append(edit_button).append(delete_button).html();
         } else {
             return data;

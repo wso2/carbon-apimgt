@@ -19,14 +19,13 @@
 package org.wso2.carbon.apimgt.core.models;
 
 
-import org.json.simple.JSONObject;
-
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
 /**
  * Details about an Access Token.
  */
-
 public class AccessTokenInfo {
     private boolean isTokenValid;
 
@@ -36,7 +35,7 @@ public class AccessTokenInfo {
 
     private String consumerSecret;
 
-    private String[] scopes;
+    private String scopes;
 
     private String tokenState;
 
@@ -44,32 +43,34 @@ public class AccessTokenInfo {
 
     private String refreshToken;
 
+    private String idToken;
+
     private long issuedTime;
+
+    private long expiryTime;
 
     private long validityPeriod;
 
-    private int errorcode;
+    private int errorCode;
 
     private String endUserName;
 
-    public String[] getScopes() {
-        if (scopes != null) {
-            return scopes.clone();
-        } else {
-            return new String[0];
-        }
+    private Map<String, Object> parameters = new HashMap<>();
+
+    public int getErrorCode() {
+        return errorCode;
     }
 
-    public int getErrorcode() {
-        return errorcode;
+    public void setErrorCode(int errorCode) {
+        this.errorCode = errorCode;
     }
 
-    public void setErrorcode(int errorcode) {
-        this.errorcode = errorcode;
+    public String getScopes() {
+        return scopes;
     }
 
-    public void setScopes(String[] scope) {
-        this.scopes = scope.clone();
+    public void setScopes(String scopes) {
+        this.scopes = scopes;
     }
 
     public String getTokenState() {
@@ -96,7 +97,21 @@ public class AccessTokenInfo {
         return validityPeriod;
     }
 
-    private HashMap<String, Object> parameters = new HashMap<String, Object>();
+    public boolean isTokenValid() {
+        return isTokenValid;
+    }
+
+    public void setTokenValid(boolean tokenValid) {
+        isTokenValid = tokenValid;
+    }
+
+    public boolean isApplicationToken() {
+        return isApplicationToken;
+    }
+
+    public void setApplicationToken(boolean applicationToken) {
+        isApplicationToken = applicationToken;
+    }
 
     public String getConsumerKey() {
         return consumerKey;
@@ -106,72 +121,44 @@ public class AccessTokenInfo {
         this.consumerKey = consumerKey;
     }
 
-    /**
-     * Get consumer secret corresponding to the access token
-     *
-     * @return consumer secret
-     */
     public String getConsumerSecret() {
         return consumerSecret;
     }
 
-    /**
-     * Set consumer secret corresponding to the access token
-     *
-     * @param consumerSecret consumer secret to set
-     */
     public void setConsumerSecret(String consumerSecret) {
         this.consumerSecret = consumerSecret;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
+    public String getIdToken() {
+        return idToken;
+    }
+
+    public void setIdToken(String idToken) {
+        this.idToken = idToken;
     }
 
     public void setIssuedTime(long issuedTime) {
         this.issuedTime = issuedTime;
     }
 
+    public long getExpiryTime() {
+        return expiryTime;
+    }
+
+    public void setExpiryTime(long expiryTime) {
+        this.expiryTime = expiryTime;
+    }
+
     public void setValidityPeriod(long validityPeriod) {
         this.validityPeriod = validityPeriod;
-    }
-
-    public void addParameter(String paramName, Object paramValue) {
-        parameters.put(paramName, paramValue);
-    }
-
-    public Object getParameter(String paramName) {
-        return parameters.get(paramName);
-    }
-
-    public boolean isTokenValid() {
-        return isTokenValid;
-    }
-
-    public void setTokenValid(boolean isTokenValid) {
-        this.isTokenValid = isTokenValid;
-    }
-
-    public boolean isApplicationToken() {
-        return isApplicationToken;
-    }
-
-    public void setApplicationToken(boolean isApplicationToken) {
-        this.isApplicationToken = isApplicationToken;
-    }
-
-    /**
-     * Sending additional properties as a JSON String.
-     * @return  Json object as string.
-     */
-    public String getJSONString() {
-
-        // TODO:Need to add other parameters into the param Map.
-        if (!parameters.containsKey("scopes") && scopes != null) {
-            parameters.put("scopes", Arrays.toString(scopes));
-        }
-
-        if (!parameters.containsKey("tokenState")) {
-            parameters.put("tokenState", tokenState);
-        }
-
-        return JSONObject.toJSONString(parameters);
     }
 
     public String getEndUserName() {
@@ -182,11 +169,50 @@ public class AccessTokenInfo {
         this.endUserName = endUserName;
     }
 
-    public String getRefreshToken() {
-        return refreshToken;
+    public Map<String, Object> getParameters() {
+        return parameters;
     }
 
-    public void setRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
+    public void setParameters(Map<String, Object> parameters) {
+        this.parameters = parameters;
+    }
+
+    public Object getParameter(String paramName) {
+        return parameters.get(paramName);
+    }
+
+    public void addParameter(String paramName, Object paramValue) {
+        parameters.put(paramName, paramValue);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AccessTokenInfo)) {
+            return false;
+        }
+        AccessTokenInfo that = (AccessTokenInfo) o;
+        return isTokenValid == that.isTokenValid &&
+                isApplicationToken == that.isApplicationToken &&
+                issuedTime == that.issuedTime &&
+                expiryTime == that.expiryTime &&
+                validityPeriod == that.validityPeriod &&
+                Objects.equals(consumerKey, that.consumerKey) &&
+                Objects.equals(consumerSecret, that.consumerSecret) &&
+                Objects.equals(scopes, that.scopes) &&
+                Objects.equals(tokenState, that.tokenState) &&
+                Objects.equals(accessToken, that.accessToken) &&
+                Objects.equals(refreshToken, that.refreshToken) &&
+                Objects.equals(idToken, that.idToken) &&
+                Objects.equals(errorCode, that.errorCode) &&
+                Objects.equals(endUserName, that.endUserName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(isTokenValid, isApplicationToken, consumerKey, consumerSecret, scopes, tokenState,
+                accessToken, refreshToken, idToken, issuedTime, expiryTime, validityPeriod, endUserName);
     }
 }

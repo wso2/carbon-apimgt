@@ -20,32 +20,48 @@
 
 package org.wso2.carbon.apimgt.core.api;
 
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.exception.APICommentException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
+import org.wso2.carbon.apimgt.core.exception.APINotFoundException;
 import org.wso2.carbon.apimgt.core.exception.APIRatingException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.ApplicationToken;
 import org.wso2.carbon.apimgt.core.models.Comment;
+import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.Label;
+import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
 import org.wso2.carbon.apimgt.core.models.Tag;
 import org.wso2.carbon.apimgt.core.models.User;
+import org.wso2.carbon.apimgt.core.models.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationResponse;
 
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This interface used to write Store specific methods.
  *
  */
 public interface APIStore extends APIManager {
+
+    /**
+     * Returns details of an API
+     *
+     * @param id ID of the API
+     * @return An CompositeAPI object for the given id or null
+     * @throws APIManagementException if failed get CompositeAPI for given id
+     */
+    CompositeAPI getCompositeAPIbyId(String id) throws APIManagementException;
 
     /**
      * Returns a paginated list of all APIs in given Status list. If a given API has multiple APIs,
@@ -71,6 +87,64 @@ public interface APIStore extends APIManager {
     List<API> searchAPIs(String query, int offset, int limit) throws APIManagementException;
 
     /**
+     * Returns a paginated list of all Composite APIs which match the given search criteria.
+     *
+     * @param query searchType
+     * @param limit limit
+     * @param offset offset
+     * @return {@code List<CompositeAPI>}
+     * @throws APIManagementException   If failed to search apis.
+     */
+    List<CompositeAPI> searchCompositeAPIs(String query, int offset, int limit) throws APIManagementException;
+
+
+    /**
+     * Returns Swagger definition of a Composite API
+     *
+     * @param id ID of the API
+     * @return The CompositeAPI Swagger definition
+     * @throws APIManagementException if failed get CompositeAPI implementation for given id
+     */
+    String getCompositeApiDefinition(String id) throws APIManagementException;
+
+    /**
+     * Checks the existence of a Composite API with {@code apiId}.
+     *
+     * @param apiId API id of the Composite API
+     * @return {@code true} if Composite API with {@code apiId} exists
+     * {@code false} otherwise.
+     * @throws APIManagementException if failed to retrieve summary of Composite API with {@code apiId}
+     */
+    boolean isCompositeAPIExist(String apiId) throws APIManagementException;
+
+    /**
+     * Update Swagger definition of a Composite API
+     *
+     * @param id ID of the API
+     * @param apiDefinition  CompositeAPI Swagger definition
+     * @throws APIManagementException if failed get CompositeAPI implementation for given id
+     */
+    void updateCompositeApiDefinition(String id, String apiDefinition) throws APIManagementException;
+
+    /**
+     * Returns Ballerina implementation of a Composite API
+     *
+     * @param id ID of the API
+     * @return File of the CompositeAPI implementation
+     * @throws APIManagementException if failed get CompositeAPI implementation for given id
+     */
+    InputStream getCompositeApiImplementation(String id) throws APIManagementException;
+
+    /**
+     * Update Ballerina implementation of a Composite API
+     *
+     * @param id ID of the API
+     * @param implementation  CompositeAPI Ballerina implementation file
+     * @throws APIManagementException if failed get CompositeAPI implementation for given id
+     */
+    void updateCompositeApiImplementation(String id, InputStream implementation) throws APIManagementException;
+
+    /**
      * Function to remove an Application from the API Store
      *
      * @param appId - The Application id of the Application
@@ -93,23 +167,20 @@ public interface APIStore extends APIManager {
      *
      * @param applicationName APIM application name
      * @param ownerId          Application owner ID.
-     * @param groupId         Group id.
      * @return it will return Application.
      * @throws APIManagementException Failed to get application by name.
      */
-    Application getApplicationByName(String applicationName, String ownerId, String groupId)
-            throws APIManagementException;
+    Application getApplicationByName(String applicationName, String ownerId) throws APIManagementException;
 
     /**
      * Returns a list of applications for a given subscriber
      *
      * @param subscriber Subscriber
-     * @param groupId    the groupId to which the applications must belong.
      * @return Applications
      * @throws APIManagementException if failed to applications for given subscriber
      */
 
-    List<Application> getApplications(String subscriber, String groupId) throws APIManagementException;
+    List<Application> getApplications(String subscriber) throws APIManagementException;
 
     /**
      * Updates the details of the specified user application.
@@ -123,21 +194,75 @@ public interface APIStore extends APIManager {
     /**
      * Generates oAuth keys for an application.
      *
-     * @param userId          Subsriber name.
-     * @param applicationName name of the Application.
-     * @param applicationId   id of the Application.
-     * @param tokenType       Token type (PRODUCTION | SANDBOX)
-     * @param callbackUrl     callback URL
-     * @param allowedDomains  allowedDomains for token.
-     * @param validityTime    validity time period.
-     * @param groupingId      APIM application id.
-     * @param tokenScope      Scopes for the requested tokens.
-     * @return                {@code Map<String, Object>}  Map of generated keys.
-     * @throws APIManagementException if failed to applications for given subscriber
+     * @param applicationId Id of the Application.
+     * @param keyType       Key type (PRODUCTION | SANDBOX)
+     * @param callbackUrl   Callback URL
+     * @param grantTypes    List of grant types to be supported by the application
+     * @return {@link OAuthApplicationInfo}  Generated OAuth client information
+     * @throws APIManagementException If oauth application creation was failed
      */
-    Map<String, Object> generateApplicationKeys(String userId, String applicationName, String applicationId,
-            String tokenType, String callbackUrl, String[] allowedDomains, String validityTime,
-            String tokenScope, String groupingId) throws APIManagementException;
+    OAuthApplicationInfo generateApplicationKeys(String applicationId, String keyType,
+                                                 String callbackUrl, List<String> grantTypes)
+            throws APIManagementException;
+
+    /**
+     * Provision out-of-band OAuth clients (Semi-manual client registration)
+     *
+     * @param applicationId Application ID
+     * @param keyType       Key type (PRODUCTION | SANDBOX)
+     * @param clientId      Client ID of the OAuth application
+     * @param clientSecret  Client secret of the OAuth application
+     * @return {@link OAuthApplicationInfo}  Existing OAuth client information
+     * @throws APIManagementException If oauth application mapping was failed
+     */
+    OAuthApplicationInfo mapApplicationKeys(String applicationId, String keyType, String clientId,
+                                            String clientSecret) throws APIManagementException;
+
+    /**
+     * Get application key information
+     *
+     * @param applicationId Application Id
+     * @return {@link OAuthApplicationInfo}  Application key information list
+     * @throws APIManagementException if error occurred while retrieving application keys
+     */
+    List<OAuthApplicationInfo> getApplicationKeys(String applicationId) throws APIManagementException;
+
+    /**
+     * Get application key information of a given key type
+     *
+     * @param applicationId Application Id
+     * @param keyType       Key Type (Production | Sandbox)
+     * @return {@link OAuthApplicationInfo}  Application key information
+     * @throws APIManagementException if error occurred while retrieving application keys
+     */
+    OAuthApplicationInfo getApplicationKeys(String applicationId, String keyType) throws APIManagementException;
+
+    /**
+     * Update grantTypes and callback URL of an application
+     *
+     * @param applicationId Application Id
+     * @param keyType       Key Type (Production | Sandbox)
+     * @param grantTypes    New Grant Type list
+     * @param callbackURL   New callback URL
+     * @return {@link OAuthApplicationInfo}  Application key information list
+     * @throws APIManagementException if error occurred while retrieving application keys
+     */
+    OAuthApplicationInfo updateGrantTypesAndCallbackURL(String applicationId, String keyType, List<String> grantTypes,
+                                                        String callbackURL) throws APIManagementException;
+
+    /**
+     * Generate an application access token (and revoke current token, if any)
+     *
+     * @param clientId         Consumer Key
+     * @param clientSecret     Consumer Secret
+     * @param scopes           Scope of the token
+     * @param validityPeriod   Token validity period
+     * @param tokenToBeRevoked Current access token which needs to be revoked
+     * @return {@link ApplicationToken} object which contains access token, scopes and validity period
+     * @throws APIManagementException if error occurred while generating access token
+     */
+    ApplicationToken generateApplicationToken(String clientId, String clientSecret, String scopes, long validityPeriod,
+                                              String tokenToBeRevoked) throws APIManagementException;
 
     /**
      * Retrieve an application given the uuid.
@@ -156,6 +281,18 @@ public interface APIStore extends APIManager {
      * @throws APIManagementException If failed to get the subscriptions for the application.
      */
     List<Subscription> getAPISubscriptionsByApplication(Application application) throws APIManagementException;
+
+
+    /**
+     * Retrieve list of subscriptions given the application and the API Type.
+     *
+     * @param application   Application Object.
+     * @param apiType   API Type to filter subscriptions
+     * @return List of subscriptions objects of the given application made for the specified API Type.
+     * @throws APIManagementException If failed to get the subscriptions for the application.
+     */
+    List<Subscription> getAPISubscriptionsByApplication(Application application, ApiType apiType)
+                                                                                throws APIManagementException;
 
     /**
      * Add an api subscription.
@@ -192,7 +329,7 @@ public interface APIStore extends APIManager {
      * @return  List of policies for the given tier level.
      * @throws APIManagementException   If failed to get policies.
      */
-    List<Policy> getPolicies(String tierLevel) throws APIManagementException;
+    List<Policy> getPolicies(APIMgtAdminService.PolicyLevel tierLevel) throws APIManagementException;
 
     /**
      * Retrieve all policies of given tier level.
@@ -201,7 +338,7 @@ public interface APIStore extends APIManager {
      * @return  Policy object.
      * @throws APIManagementException   If failed to get the policy.
      */
-    Policy getPolicy(String tierLevel, String tierName) throws APIManagementException;
+    Policy getPolicy(APIMgtAdminService.PolicyLevel tierLevel, String tierName) throws APIManagementException;
 
     /**
      * Retrieve Label information based on the label name
@@ -342,7 +479,7 @@ public interface APIStore extends APIManager {
      * @return Details of the added Composite API.
      * @throws APIManagementException if failed to add Composite API
      */
-    String addCompositeApi(API.APIBuilder apiBuilder) throws APIManagementException;
+    String addCompositeApi(CompositeAPI.Builder apiBuilder) throws APIManagementException;
 
     /**
      * Updates design and implementation of an existing Composite API.
@@ -350,7 +487,7 @@ public interface APIStore extends APIManager {
      * @param apiBuilder {@code org.wso2.carbon.apimgt.core.models.API.APIBuilder}
      * @throws APIManagementException if failed to update Composite API
      */
-    void updateCompositeApi(API.APIBuilder apiBuilder) throws APIManagementException;
+    void updateCompositeApi(CompositeAPI.Builder apiBuilder) throws APIManagementException;
 
     /**
      * Delete an existing Composite API.
@@ -388,6 +525,34 @@ public interface APIStore extends APIManager {
      * @throws APIManagementException If failed to add the Composite API.
      */
     String addCompositeApiFromDefinition(String swaggerResourceUrl) throws APIManagementException;
+
+    /**
+     * Returns the WSDL of a given API UUID and gateway label name
+     * 
+     * @param apiId API Id
+     * @param labelName gateway label name
+     * @return WSDL of the API as {@link String}
+     * @throws APIMgtDAOException if error occurs while accessing the WSDL from the data layer
+     * @throws APIMgtWSDLException if error occurs while parsing/manipulating the WSDL
+     * @throws APINotFoundException If API cannot be found
+     * @throws LabelException If Label related error occurs
+     */
+    String getAPIWSDL(String apiId, String labelName)
+            throws APIMgtDAOException, APIMgtWSDLException, APINotFoundException, LabelException;
+
+    /**
+     * Returns the WSDL archive info of a given API UUID and gateway label name
+     *
+     * @param apiId API Id
+     * @param labelName gateway label name
+     * @return WSDL archive information {@link WSDLArchiveInfo}
+     * @throws APIMgtDAOException if error occurs while accessing the WSDL from the data layer
+     * @throws APIMgtWSDLException if error occurs while parsing/manipulating the WSDL
+     * @throws APINotFoundException If API cannot be found
+     * @throws LabelException If Label related error occurs
+     */
+    WSDLArchiveInfo getAPIWSDLArchive(String apiId, String labelName)
+            throws APIMgtDAOException, APIMgtWSDLException, APINotFoundException, LabelException;
 
     /**
      * Store user self signup

@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.apimgt.core.models.policy;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
 /**
  * Contains {@link JWTClaimsCondition} attributes
  */
@@ -26,7 +29,7 @@ public class JWTClaimsCondition extends Condition {
     private String attribute;
 
     public JWTClaimsCondition() {
-        setType(PolicyConstants.JWT_CLAIMS_TYPE);
+        setType(PolicyConstants.JWT_CLAIMS_CONDITION_TYPE);
     }
 
     public String getClaimUrl() {
@@ -36,6 +39,12 @@ public class JWTClaimsCondition extends Condition {
     public void setClaimUrl(String claimUrl) {
         this.claimUrl = claimUrl;
         this.queryAttributeName = PolicyConstants.START_QUERY + this.claimUrl + PolicyConstants.END_QUERY;
+    }
+
+    @Override
+    public void populateDataInPreparedStatement(PreparedStatement preparedStatement) throws SQLException {
+        preparedStatement.setString(1, getClaimUrl());
+        preparedStatement.setString(2, getAttribute());
     }
 
     public String getAttribute() {

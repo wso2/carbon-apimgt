@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>7.0.24-SNAPSHOT</version>
+        <version>7.0.41-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -133,6 +133,18 @@
             <groupId>io.github.openfeign</groupId>
             <artifactId>feign-gson</artifactId>
         </dependency>
+        <dependency>
+            <groupId>wsdl4j.wso2</groupId>
+            <artifactId>wsdl4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.woden.wso2</groupId>
+            <artifactId>woden</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ws.commons.schema.wso2</groupId>
+            <artifactId>XmlSchema</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -181,7 +193,7 @@
                                     <path refid="maven.compile.classpath" />
                                 </path>
                                 <echo message="########### Creating Carbon APIM Database ##############" />
-                                <sql driver="org.h2.Driver" url="jdbc:h2:${basedir}/resources/database/AM_DB;create=true" userid="wso2carbon" password="wso2carbon" autocommit="true" onerror="continue">
+                                <sql driver="org.h2.Driver" url="jdbc:h2:${basedir}/resources/database/AM_DB;create=true;MV_STORE=TRUE" userid="wso2carbon" password="wso2carbon" autocommit="true" onerror="continue">
 
                                     <classpath>
                                         <path refid="h2.classpath" />
@@ -293,7 +305,7 @@
                                 </bundle>
                                 <bundle>
                                     <symbolicName>nimbus-jose-jwt</symbolicName>
-                                    <version>2.26.1.wso2v2</version>
+                                    <version>${nimbusds.version}</version>
                                 </bundle>
                                 <bundle>
                                     <symbolicName>com.fasterxml.jackson.jaxrs.jackson-jaxrs-base</symbolicName>
@@ -358,6 +370,18 @@
                                 <bundle>
                                     <symbolicName>io.github.openfeign.feign-gson</symbolicName>
                                     <version>${feign.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>wsdl4j</symbolicName>
+                                    <version>${wsdl4j.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>woden</symbolicName>
+                                    <version>${apache.woden.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>XmlSchema</symbolicName>
+                                    <version>${xmlschema.version}</version>
                                 </bundle>
                             </bundles>
                         </configuration>
