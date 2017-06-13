@@ -34,7 +34,7 @@ import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 import java.io.File;
 import java.util.Map;
 
-public class APIGatewayPublisherImplTestCase {
+public class APIGatewayPublisherImplTestCaseIT {
 
     @BeforeClass
     void init() {
@@ -64,18 +64,8 @@ public class APIGatewayPublisherImplTestCase {
     public void testPublishToGateway() throws GatewayException {
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         APIGatewayPublisherImpl apiGatewayPublisher = new APIGatewayPublisherImpl();
-
         apiGatewayPublisher.addAPI(api);
 
-    }
-
-    // need to be test with a MB
-    @Test(enabled = false, description = "Publish API artifacts with gwHome == null")
-    public void testPublishToGatewayWithNogwHome() throws GatewayException {
-        System.clearProperty("gwHome");
-        API api = SampleTestObjectCreator.createDefaultAPI().build();
-        APIGatewayPublisherImpl apiGatewayPublisher = new APIGatewayPublisherImpl();
-        apiGatewayPublisher.addAPI(api);
     }
 
     @Test(description = "Publish API artifacts with API in defaultVerison")
