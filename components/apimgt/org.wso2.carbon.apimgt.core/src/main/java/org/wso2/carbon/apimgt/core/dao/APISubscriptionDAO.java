@@ -74,7 +74,18 @@ public interface APISubscriptionDAO {
      * @return List of {@link Subscription} objects
      * @throws APIMgtDAOException   If failed to get subscription data.
      */
-    public List<Subscription> getAPISubscriptionsByApplication(String applicationId) throws APIMgtDAOException;
+    List<Subscription> getAPISubscriptionsByApplication(String applicationId) throws APIMgtDAOException;
+
+    /**
+     * Retrieve list of subscriptions given the application and the API Type.
+     *
+     * @param applicationId The UUID of Application
+     * @param apiType   API Type to filter subscriptions
+     * @return List of {@link Subscription} objects
+     * @throws APIMgtDAOException   If failed to get subscription data.
+     */
+    List<Subscription> getAPISubscriptionsByApplication(String applicationId, ApiType apiType)
+                                                                                throws APIMgtDAOException;
 
     /**
      * Retrieve all API Subscriptions for validation

@@ -28,7 +28,7 @@
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
-    <version>7.0.21-SNAPSHOT</version>
+    <version>7.0.24-SNAPSHOT</version>
 
     <name>WSO2 Carbon - API Management Aggregator POM</name>
 
@@ -724,7 +724,7 @@
         <!-- Dependencies -->
         <carbon.kernel.version>5.2.0-m3</carbon.kernel.version>
         <carbon.kernel.package.import.version.range>[5.1.0, 6.0.0)</carbon.kernel.package.import.version.range>
-        <carbon.apimgt.version>7.0.21-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.version>7.0.24-SNAPSHOT</carbon.apimgt.version>
 
         <carbon.datasources.version>1.0.0</carbon.datasources.version>
 
@@ -812,7 +812,7 @@
         <snakeyaml.version.range>[1.16, 2.0.0)</snakeyaml.version.range>
         <carbon.uuf.version>1.0.0-m14</carbon.uuf.version>
         <carbon-uuf-maven-plugin.version>1.0.0-m13</carbon-uuf-maven-plugin.version>
-        <carbon.uuf.common.version>1.0.0-m7</carbon.uuf.common.version>
+        <carbon.uuf.common.version>1.0.0-m8</carbon.uuf.common.version>
         <findbug.exclude.version>3.0.0</findbug.exclude.version>
         <!--Start of Dependency for integration gateway extension-->
         <carbon.messaging.version>2.3.0</carbon.messaging.version>
@@ -832,7 +832,7 @@
         <andes.version>3.0.5</andes.version>
         <securevault.version>1.0.0-wso2v2</securevault.version>
         <slf4j.version>1.7.22</slf4j.version>
-        <feign.version>9.3.1</feign.version>
+        <feign.version>9.5.0</feign.version>
         <wiremock.version>2.5.0</wiremock.version>
         <lucene.version>3.6.2_1</lucene.version>
         <lucene.bundle.version>3.6.2.1</lucene.bundle.version>

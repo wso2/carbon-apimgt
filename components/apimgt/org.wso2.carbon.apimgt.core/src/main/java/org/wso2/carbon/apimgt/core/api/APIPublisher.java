@@ -373,6 +373,33 @@ public interface APIPublisher extends APIManager {
     String addApiFromDefinition(HttpURLConnection httpURLConnection) throws APIManagementException;
 
     /**
+     * This method updates gateway config in the database
+     *
+     * @param apiId        id of the String
+     * @param configString text to be saved in the registry
+     * @throws APIManagementException If failed to update gateway config.
+     */
+    void updateApiGatewayConfig(String apiId, String configString) throws APIManagementException;
+
+    /**
+     * This method retrieve gateway config in the database
+     *
+     * @param apiId id of the String
+     * @return API gateway config as a string
+     * @throws APIManagementException If failed to get gateway config of the API.
+     */
+    String getApiGatewayConfig(String apiId) throws APIManagementException;
+
+    /**
+     * This method updates Swagger 2.0 resource in the DB
+     *
+     * @param apiId    id of the String
+     * @param jsonText json text to be saved in the registry
+     * @throws APIManagementException If failed to save swagger definition.
+     */
+    void saveSwagger20Definition(String apiId, String jsonText) throws APIManagementException;
+
+    /**
      * Get list of policies of an particular tier level.
      *
      * @param tierLevel Tier level.

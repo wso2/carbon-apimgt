@@ -19,7 +19,7 @@
 package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
-import org.wso2.carbon.apimgt.core.models.Workflow;
+import org.wso2.carbon.apimgt.core.workflow.Workflow;
 
 /**
  * This is the workflow interface.
@@ -48,7 +48,7 @@ public interface WorkflowExecutor {
      * Clean up pending task with workflowExtRef from workflow server
      *
      * @param workflowExtRef workflow external reference to match with workflow server process
-     * @throws WorkflowException
+     * @throws WorkflowException  - Thrown when the workflow cleanup pending tasks was not fully performed.
      */
     public abstract void cleanUpPendingTask(String workflowExtRef) throws WorkflowException;
 }

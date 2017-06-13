@@ -24,9 +24,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
-import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.WorkflowUtils;
+import org.wso2.carbon.apimgt.core.workflow.Workflow;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExecutorFactory;
 
 import java.sql.Connection;

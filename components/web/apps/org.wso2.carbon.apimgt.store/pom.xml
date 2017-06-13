@@ -27,7 +27,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>web-parent</artifactId>
-        <version>7.0.21-SNAPSHOT</version>
+        <version>7.0.24-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -54,6 +54,12 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.authenticator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.publisher.commons.ui</artifactId>
+            <type>zip</type>
+            <classifier>uuf-component</classifier>
         </dependency>
 
     </dependencies>

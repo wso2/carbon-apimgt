@@ -26,10 +26,11 @@ public class AuthResponseBean {
 
     private boolean isTokenValid;
     private String type;
-    private String[] scopes;
+    private String scopes;
     private long validityPeriod;
     private String createdDate;
     private String authUser;
+    private String idToken;
 
     public boolean isTokenValid() {
         return isTokenValid;
@@ -47,16 +48,12 @@ public class AuthResponseBean {
         this.type = type;
     }
 
-    public String[] getScopes() {
-        if (scopes != null) {
-            return scopes.clone();
-        } else {
-            return new String[0];
-        }
+    public String getScopes() {
+        return scopes;
     }
 
-    public void setScopes(String[] scopes) {
-        this.scopes = scopes.clone();
+    public void setScopes(String scopes) {
+        this.scopes = scopes;
     }
 
     public long getValidityPeriod() {
@@ -83,5 +80,11 @@ public class AuthResponseBean {
         this.authUser = authUser;
     }
 
+    public String getIdToken() {
+        return idToken;
+    }
 
+    public void setIdToken(String idToken) {
+        this.idToken = idToken;
+    }
 }
