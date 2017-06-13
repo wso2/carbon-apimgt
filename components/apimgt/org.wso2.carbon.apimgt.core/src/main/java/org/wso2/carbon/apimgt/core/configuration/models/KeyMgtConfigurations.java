@@ -42,6 +42,8 @@ public class KeyMgtConfigurations {
     private String keyManagerCertAlias = "wso2carbon";
     @Element(description = "OAuth app validity period")
     private long defaultTokenValidityPeriod = 3600L;
+    @Element(description = "OpenId Connect Userinfo Response JWT Signing Algorithm")
+    private String oidcUserinfoJWTSigningAlgo = "SHA256withRSA";
 
     public String getKeyManagerImplClass() {
         return keyManagerImplClass;
@@ -75,4 +77,7 @@ public class KeyMgtConfigurations {
         return keyManagerCertAlias;
     }
 
+    public String getOidcUserinfoJWTSigningAlgo() {
+        return oidcUserinfoJWTSigningAlgo;
+    }
 }

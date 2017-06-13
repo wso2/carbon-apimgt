@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.core.auth.dto.OAuth2TokenInfo;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
+import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
@@ -97,6 +98,8 @@ public class DefaultKeyManagerImpl implements KeyManager {
         dcrClientInfo.setClientName(applicationName);
         dcrClientInfo.setGrantTypes(oAuthApplicationInfo.getGrantTypes());
         dcrClientInfo.addCallbackUrl(oAuthApplicationInfo.getCallbackUrl());
+        dcrClientInfo.setUserinfoSignedResponseAlg(ServiceReferenceHolder.getInstance().getAPIMConfiguration()
+                .getKeyManagerConfigs().getOidcUserinfoJWTSigningAlgo());
 
         Response response = dcrmServiceStub.registerApplication(dcrClientInfo);
         if (response == null) {
