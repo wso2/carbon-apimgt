@@ -1,7 +1,6 @@
 package org.wso2.carbon.apimgt.gateway.holders;
 import org.wso2.carbon.apimgt.gateway.dto as dto;
 import org.wso2.carbon.apimgt.ballerina.caching;
-import ballerina.lang.maps;
 import org.wso2.carbon.apimgt.gateway.constants;
 map apiCache = {};
 dto:GatewayConfDTO gatewayConf = {};
