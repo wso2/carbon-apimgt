@@ -346,7 +346,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
                 //Add API to gateway
                 gateway.addAPI(createdAPI);
-                if(log.isDebugEnabled()){
+                if (log.isDebugEnabled()) {
                     log.debug("API : " + apiBuilder.getName() + " has been identifier published to gateway");
                 }
 
@@ -490,7 +490,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
                     //Add API to gateway
                     gateway.updateAPI(api);
-                    if(log.isDebugEnabled()){
+                    if (log.isDebugEnabled()) {
                         log.debug("API : " + apiBuilder.getName() + " has been successfully updated in gateway");
                     }
 

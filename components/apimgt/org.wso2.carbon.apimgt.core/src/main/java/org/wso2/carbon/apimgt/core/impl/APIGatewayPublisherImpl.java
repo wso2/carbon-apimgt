@@ -137,7 +137,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
 
         } else {
             String gatewayConfig = api.getGatewayConfig();
-            saveApi(api, gwHome, gatewayConfig, false);
+            saveApi(api.getName(), api.getVersion(), gwHome, gatewayConfig, false);
             if (log.isDebugEnabled()) {
                 log.debug("API : " + api.getName() + " configuration update is successfully persisted in local file" +
                         " syetem in editor mode");
@@ -147,14 +147,15 @@ public class APIGatewayPublisherImpl implements APIGateway {
 
     @Override
     public void deleteAPI(API api) throws GatewayException {
-
-        // build the message to send
-        APIEvent apiDeleteEvent = new APIEvent(APIMgtConstants.GatewayEventTypes.API_DELETE);
-        apiDeleteEvent.setLabels(api.getLabels());
-        apiDeleteEvent.setApiSummary(toAPISummary(api));
-        publishToPublisherTopic(apiDeleteEvent);
-        if (log.isDebugEnabled()) {
-            log.debug("API : " + api.getName() + " deleted event has been successfully published to broker");
+        if (gwHome == null) {
+            // build the message to send
+            APIEvent apiDeleteEvent = new APIEvent(APIMgtConstants.GatewayEventTypes.API_DELETE);
+            apiDeleteEvent.setLabels(api.getLabels());
+            apiDeleteEvent.setApiSummary(toAPISummary(api));
+            publishToPublisherTopic(apiDeleteEvent);
+            if (log.isDebugEnabled()) {
+                log.debug("API : " + api.getName() + " deleted event has been successfully published to broker");
+            }
         }
     }
 
