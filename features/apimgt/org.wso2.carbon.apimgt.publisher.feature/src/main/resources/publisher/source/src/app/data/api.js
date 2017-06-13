@@ -187,7 +187,9 @@ class API {
         this.auth_client = new AuthClient();
         this.client.then(
             (swagger) => {
-                swagger.setHost(window.location.host);
+                // debugger;
+                swagger.setHost("localhost:9292");
+                swagger.setSchemes(["https"]);
                 this.keyMan = new KeyManager(access_key);
                 let scopes = swagger.swaggerObject["x-wso2-security"].apim["x-wso2-scopes"];
                 for (let index in scopes) {
@@ -259,7 +261,8 @@ class API {
     }
 
     _getSwaggerURL() {
-        return "/api/am/publisher/v1.0/apis/swagger.json";
+        /* TODO: Read this from configuration ~tmkb*/
+        return "https://localhost:9292/api/am/publisher/v1.0/apis/swagger.json";
     }
 
     /**
