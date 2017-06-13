@@ -717,9 +717,9 @@ public class ApisApiServiceImpl extends ApisApiService {
 
         Set<String> permissionArrayForUser = new HashSet<>();
         //Setting default permissions for API
-        permissionArrayForUser.add("READ");
-        permissionArrayForUser.add("UPDATE");
-        permissionArrayForUser.add("DELETE");
+        permissionArrayForUser.add(APIMgtConstants.Permission.READ);
+        permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
+        permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
         Map<String, Integer> permissionMap = api.getPermissionMap();
         if (!permissionMap.isEmpty()) {
             Set<String> loggedInUserRoles = APIUtils.getAllRolesOfUser(loggedInUser);
