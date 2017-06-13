@@ -1807,7 +1807,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                     insertPreparedStatement = connection.prepareStatement(query);
                     insertPreparedStatement.setString(1, conditionType);
                     insertPreparedStatement.setString(2, conditionValue);
-                    insertPreparedStatement.setString(3, "TRUE");
+                    insertPreparedStatement.setBoolean(3, blockConditions.isEnabled());
                     insertPreparedStatement.setString(4, uuid);
                     insertPreparedStatement.execute();
                     if (APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITION_IP_RANGE.equals(conditionType)) {
@@ -1869,20 +1869,20 @@ public class PolicyDAOImpl implements PolicyDAO {
                 blockCondition.setConditionValue(resultSet.getString("VALUE"));
                 blockCondition.setConditionId(resultSet.getInt("CONDITION_ID"));
                 blockCondition.setUuid(resultSet.getString("UUID"));
-            }
-            if (blockCondition.getConditionType()
-                    .equals(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITION_IP_RANGE)) {
-                String ipQuery = "SELECT STARTING_IP, ENDING_IP FROM AM_IP_RANGE_CONDITION WHERE UUID = ?";
-                try (PreparedStatement selectIpStatement = connection.prepareStatement(ipQuery)) {
-                    selectIpStatement.setString(1, uuid);
-                    ResultSet rs = selectIpStatement.executeQuery();
-                    if (rs.next()) {
-                        blockCondition.setStartingIP(rs.getString("STARTING_IP"));
-                        blockCondition.setEndingIP(rs.getString("ENDING_IP"));
+                if (blockCondition.getConditionType()
+                        .equals(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITION_IP_RANGE)) {
+                    String ipQuery = "SELECT STARTING_IP, ENDING_IP FROM AM_IP_RANGE_CONDITION WHERE UUID = ?";
+                    try (PreparedStatement selectIpStatement = connection.prepareStatement(ipQuery)) {
+                        selectIpStatement.setString(1, uuid);
+                        ResultSet rs = selectIpStatement.executeQuery();
+                        if (rs.next()) {
+                            blockCondition.setStartingIP(rs.getString("STARTING_IP"));
+                            blockCondition.setEndingIP(rs.getString("ENDING_IP"));
+                        }
+                        rs.close();
+                    } catch (SQLException e) {
+                        connection.rollback();
                     }
-                    rs.close();
-                } catch (SQLException e) {
-                    connection.rollback();
                 }
             }
         } catch (SQLException e) {
@@ -1897,7 +1897,7 @@ public class PolicyDAOImpl implements PolicyDAO {
         } finally {
             DAOUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
         }
-            return blockCondition;
+        return blockCondition;
     }
 
     @Override
