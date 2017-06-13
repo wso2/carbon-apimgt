@@ -952,8 +952,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             resourceList.add(dto);
         }
         GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
-        APIConfigContext apiConfigContext = new APIConfigContext(apiBuilder.getName(), apiBuilder.getContext(),
-                apiBuilder.getVersion(), apiBuilder.getCreatedTime(), config.getGatewayPackageName());
+        APIConfigContext apiConfigContext = new APIConfigContext(apiBuilder.build(), config.getGatewayPackageName());
 
         gatewaySourceGenerator.setApiConfigContext(apiConfigContext);
         String gatewayConfig = gatewaySourceGenerator.getCompositeAPIConfigStringFromTemplate(resourceList,
@@ -984,8 +983,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 String updatedSwagger = apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder);
                 InputStream gatewayConfig = getApiDAO().getCompositeAPIGatewayConfig(apiBuilder.getId());
                 GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
-                APIConfigContext apiConfigContext = new APIConfigContext(apiBuilder.getName(), apiBuilder.getContext(),
-                        apiBuilder.getVersion(), apiBuilder.getCreatedTime(), config.getGatewayPackageName());
+                APIConfigContext apiConfigContext = new APIConfigContext(apiBuilder.build(), config
+                        .getGatewayPackageName());
 
                 gatewaySourceGenerator.setApiConfigContext(apiConfigContext);
                 String updatedGatewayConfig = gatewaySourceGenerator

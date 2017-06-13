@@ -98,9 +98,9 @@ public class APIGatewayPublisherImpl implements APIGateway {
         if (gwHome == null) {
 
             // build the message to send
-            APIDTO gatewayDTO = new APIDTO(APIMgtConstants.GatewayEventTypes.API_CREATE);
+            APIEvent gatewayDTO = new APIEvent(APIMgtConstants.GatewayEventTypes.API_CREATE);
             gatewayDTO.setLabels(api.getLabels());
-            APISummary apiSummary = new APISummary(api.getId());
+            APISummary apiSummary = new APISummary();
             apiSummary.setName(api.getName());
             apiSummary.setVersion(api.getVersion());
             apiSummary.setContext(api.getContext());
@@ -139,9 +139,9 @@ public class APIGatewayPublisherImpl implements APIGateway {
     public void deleteCompositeAPI(CompositeAPI api) throws GatewayException {
         if (gwHome == null) {
             // build the message to send
-            APIDTO gatewayDTO = new APIDTO(APIMgtConstants.GatewayEventTypes.API_DELETE);
+            APIEvent gatewayDTO = new APIEvent(APIMgtConstants.GatewayEventTypes.API_DELETE);
             gatewayDTO.setLabels(api.getLabels());
-            APISummary apiSummary = new APISummary(api.getId());
+            APISummary apiSummary = new APISummary();
             apiSummary.setName(api.getName());
             apiSummary.setVersion(api.getVersion());
             apiSummary.setContext(api.getContext());
@@ -250,11 +250,14 @@ public class APIGatewayPublisherImpl implements APIGateway {
     /**
      * Save API into FS
      *
-     * @param api     API object
-     * @param gwHome  path of the gateway
-     * @param content API config
+     * @param apiName      API Name
+     * @param apiVersion   API Version
+     * @param gwHome       path of the gateway
+     * @param content      API config
+     * @param isDefaultApi mark this as the default version of this API. Setting this to <code>true</code>
+     *                     will allow accessing API without version number prefix in the URL
      */
-    private void saveApi(API api, String gwHome, String content, boolean isDefaultApi) {
+    private void saveApi(String apiName, String apiVersion, String gwHome, String content, boolean isDefaultApi) {
         String deploymentDirPath = gwHome + File.separator + config.getGatewayPackageNamePath();
         File deploymentDir = new File(deploymentDirPath);
         if (!deploymentDir.exists()) {
@@ -267,9 +270,9 @@ public class APIGatewayPublisherImpl implements APIGateway {
 
         String path;
         if (isDefaultApi) {
-            path = deploymentDirPath + File.separator + api.getName() + gatewayFileExtension;
+            path = deploymentDirPath + File.separator + apiName + gatewayFileExtension;
         } else {
-            path = deploymentDirPath + File.separator + api.getName() + '_' + api.getVersion() + gatewayFileExtension;
+            path = deploymentDirPath + File.separator + apiName + '_' + apiVersion + gatewayFileExtension;
         }
         try (OutputStream outputStream = new FileOutputStream(path)) {
             IOUtils.write(content, outputStream, "UTF-8");

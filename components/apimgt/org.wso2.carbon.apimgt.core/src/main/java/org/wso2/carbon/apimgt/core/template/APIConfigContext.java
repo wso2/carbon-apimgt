@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.core.template;
 import org.apache.velocity.VelocityContext;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 
 /**
  * Used to generate API meta info related template
@@ -34,6 +35,13 @@ public class APIConfigContext extends ConfigContext {
     public APIConfigContext(API api, String packageName) {
         this.api = api;
         this.packageName = packageName;
+    }
+
+    public APIConfigContext(CompositeAPI compositeAPI, String gatewayPackageName) {
+
+        this.api = new API.APIBuilder(compositeAPI.getProvider(), compositeAPI.getName(), compositeAPI.getVersion())
+                .context(compositeAPI.getContext()).build();
+        this.packageName = gatewayPackageName;
     }
 
     @Override

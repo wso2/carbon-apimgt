@@ -322,8 +322,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     resourceList.add(dto);
                 }
                 GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
-                APIConfigContext apiConfigContext = new APIConfigContext(apiBuilder.getName(), apiBuilder.getContext(),
-                        apiBuilder.getVersion(), apiBuilder.getCreatedTime(), config.getGatewayPackageName());
+                APIConfigContext apiConfigContext = new APIConfigContext(apiBuilder.build(), config
+                        .getGatewayPackageName());
                 gatewaySourceGenerator.setApiConfigContext(apiConfigContext);
                 String gatewayConfig = gatewaySourceGenerator.getConfigStringFromTemplate(resourceList);
                 if (log.isDebugEnabled()) {
@@ -477,9 +477,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     String updatedSwagger = apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder);
                     String gatewayConfig = getApiGatewayConfig(apiBuilder.getId());
                     GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
-                    APIConfigContext apiConfigContext = new APIConfigContext(apiBuilder.getName(),
-                            apiBuilder.getContext(),
-                            apiBuilder.getVersion(), apiBuilder.getCreatedTime(), config.getGatewayPackageName());
+                    APIConfigContext apiConfigContext = new APIConfigContext(apiBuilder.build(), config
+                            .getGatewayPackageName());
                     gatewaySourceGenerator.setApiConfigContext(apiConfigContext);
                     String updatedGatewayConfig = gatewaySourceGenerator
                             .getGatewayConfigFromSwagger(gatewayConfig, updatedSwagger);
@@ -1373,8 +1372,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
             api = apiBuilder.build();
             GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
-            APIConfigContext apiConfigContext = new APIConfigContext(apiBuilder.getName(), apiBuilder.getContext(),
-                    apiBuilder.getVersion(), apiBuilder.getCreatedTime(), config.getGatewayPackageName());
+            APIConfigContext apiConfigContext = new APIConfigContext(apiBuilder.build(), config.getGatewayPackageName
+                    ());
             gatewaySourceGenerator.setApiConfigContext(apiConfigContext);
             String existingGatewayConfig = getApiGatewayConfig(apiId);
             String updatedGatewayConfig = gatewaySourceGenerator
@@ -1396,8 +1395,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public void updateApiGatewayConfig(String apiId, String configString) throws APIManagementException {
         API api = getAPIbyUUID(apiId);
         GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
-        APIConfigContext apiConfigContext = new APIConfigContext(api.getName(), api.getContext(),
-                api.getVersion(), api.getCreatedTime(), config.getGatewayPackageName());
+        APIConfigContext apiConfigContext = new APIConfigContext(api, config.getGatewayPackageName());
         gatewaySourceGenerator.setApiConfigContext(apiConfigContext);
         try {
             String swagger = gatewaySourceGenerator.getSwaggerFromGatewayConfig(configString);
