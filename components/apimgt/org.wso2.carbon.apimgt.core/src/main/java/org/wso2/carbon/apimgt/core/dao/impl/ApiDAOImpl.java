@@ -1400,11 +1400,12 @@ public class ApiDAOImpl implements ApiDAO {
                     if (inputStream != null) {
                         return IOUtils.toString(inputStream, StandardCharsets.UTF_8);
                     } else {
-                        return "";
+                        throw new APIMgtDAOException("Couldn't Find Endpoint Config", ExceptionCodes
+                                .ENDPOINT_CONFIG_NOT_FOUND);
                     }
                 } else {
-                    return "";
-                }
+                    throw new APIMgtDAOException("Couldn't Find Endpoint Config", ExceptionCodes
+                            .ENDPOINT_CONFIG_NOT_FOUND);                }
             }
         } catch (SQLException | IOException e) {
             String msg = "Couldn't get Endpoints Gateway Config";

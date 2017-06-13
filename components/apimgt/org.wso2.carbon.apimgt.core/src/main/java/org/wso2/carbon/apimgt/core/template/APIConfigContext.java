@@ -22,37 +22,50 @@ import org.apache.velocity.VelocityContext;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
+import org.wso2.carbon.apimgt.core.models.Endpoint;
+
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * Used to generate API meta info related template
  */
 public class APIConfigContext extends ConfigContext {
 
-    private API api;
+    private String name;
+    private String context;
+    private String version;
+    private String id;
     private String packageName;
     private String serviceNamePrefix = "";
+    private Map<String, Endpoint> apiEndpoints = Collections.emptyMap();
 
     public APIConfigContext(API api, String packageName) {
-        this.api = api;
+        this.name = api.getName();
+        this.context = api.getContext();
+        this.version = api.getVersion();
         this.packageName = packageName;
+        this.id = api.getId();
+        apiEndpoints = api.getEndpoint();
     }
 
     public APIConfigContext(CompositeAPI compositeAPI, String gatewayPackageName) {
-
-        this.api = new API.APIBuilder(compositeAPI.getProvider(), compositeAPI.getName(), compositeAPI.getVersion())
-                .context(compositeAPI.getContext()).id(compositeAPI.getId()).build();
+        this.id = compositeAPI.getId();
+        this.name = compositeAPI.getName();
+        this.context = compositeAPI.getContext();
+        this.version = compositeAPI.getVersion();
         this.packageName = gatewayPackageName;
     }
 
     @Override
     public void validate() throws APITemplateException {
         //see if api name ,version, context sets
-        if (api.getName().isEmpty() || api.getContext().isEmpty() || api.getVersion().isEmpty()) {
+        if (name.isEmpty() || context.isEmpty() || version.isEmpty()) {
             throw new APITemplateException("API property validation failed", ExceptionCodes.TEMPLATE_EXCEPTION);
         }
 
         //adding string prefix if api name starting with a number
-        if (api.getName().matches("^(\\d)+")) {
+        if (name.matches("^(\\d)+")) {
             serviceNamePrefix = "prefix_";
         }
     }
@@ -60,10 +73,10 @@ public class APIConfigContext extends ConfigContext {
     @Override
     public VelocityContext getContext() {
         VelocityContext context = new VelocityContext();
-        context.put("version", api.getVersion());
-        context.put("apiContext", api.getContext().startsWith("/") ? api.getContext() : "/" + api.getContext());
-        context.put("apiEndpoint", api.getEndpoint());
-        String serviceName = serviceNamePrefix + api.getName() + "_" + api.getId().replaceAll("-", "_");
+        context.put("version", version);
+        context.put("apiContext", this.context.startsWith("/") ? this.context : "/" + this.context);
+        context.put("apiEndpoint", apiEndpoints);
+        String serviceName = serviceNamePrefix + this.name + "_" + id.replaceAll("-", "_");
         if (serviceName.contains(" ")) {
             serviceName = serviceName.replaceAll(" ", "_");
         }
