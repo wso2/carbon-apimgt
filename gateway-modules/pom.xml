@@ -29,7 +29,6 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <version>0.10-SNAPSHOT</version>
     <artifactId>apimgt-gateway-modules</artifactId>
     <packaging>pom</packaging>
 
