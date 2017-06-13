@@ -1,4 +1,3 @@
-package org.wso2.carbon.apimgt.core.impl;
 /*
  * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -16,6 +15,8 @@ package org.wso2.carbon.apimgt.core.impl;
  * specific language governing permissions and limitations
  * under the License.
  */
+
+package org.wso2.carbon.apimgt.core.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

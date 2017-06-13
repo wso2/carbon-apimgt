@@ -17,6 +17,8 @@
  */
 package org.wso2.carbon.apimgt.core.api;
 
+package org.wso2.carbon.apimgt.core.api;
+
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 
