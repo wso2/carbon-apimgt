@@ -54,10 +54,14 @@ public class APIGatewayPublisherImpl implements APIGateway {
     private String gatewayFileExtension = ".bal";
     private String endpointConfigName = "endpoint";
     private String gwHome;
+    private String publisherTopic;
+    private String storeTopic;
 
     public APIGatewayPublisherImpl() {
         config = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
         gwHome = System.getProperty("gwHome");
+        publisherTopic = config.getBrokerConfiguration().getPublisherTopic();
+        storeTopic = config.getBrokerConfiguration().getStoreTopic();
     }
 
     @Override
@@ -81,11 +85,18 @@ public class APIGatewayPublisherImpl implements APIGateway {
             apiCreateEvent.setLabels(api.getLabels());
             apiCreateEvent.setApiSummary(toAPISummary(api));
             publishToPublisherTopic(apiCreateEvent);
+            if (log.isDebugEnabled()) {
+                log.debug("API : " + api.getName() + " created event has been successfully published to broker");
+            }
 
         } else {
             saveApi(api.getName(), api.getVersion(), gwHome, gatewayConfig, false);
             if (api.isDefaultVersion()) {
                 saveApi(api.getName(), api.getVersion(), gwHome, defaultConfig, true);
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("API : " + api.getName() + " configuration is successfully persisted in local file system " +
+                        "in editor mode");
             }
         }
     }
@@ -120,18 +131,30 @@ public class APIGatewayPublisherImpl implements APIGateway {
             apiUpdateEvent.setLabels(api.getLabels());
             apiUpdateEvent.setApiSummary(toAPISummary(api));
             publishToPublisherTopic(apiUpdateEvent);
+            if (log.isDebugEnabled()) {
+                log.debug("API : " + api.getName() + " updated event has been successfully published to broker");
+            }
+
+        } else {
+            String gatewayConfig = api.getGatewayConfig();
+            saveApi(api, gwHome, gatewayConfig, false);
+            if (log.isDebugEnabled()) {
+                log.debug("API : " + api.getName() + " configuration update is successfully persisted in local file" +
+                        " syetem in editor mode");
+            }
         }
     }
 
     @Override
     public void deleteAPI(API api) throws GatewayException {
 
-        if (gwHome == null) {
-            // build the message to send
-            APIEvent apiDeleteEvent = new APIEvent(APIMgtConstants.GatewayEventTypes.API_DELETE);
-            apiDeleteEvent.setLabels(api.getLabels());
-            apiDeleteEvent.setApiSummary(toAPISummary(api));
-            publishToPublisherTopic(apiDeleteEvent);
+        // build the message to send
+        APIEvent apiDeleteEvent = new APIEvent(APIMgtConstants.GatewayEventTypes.API_DELETE);
+        apiDeleteEvent.setLabels(api.getLabels());
+        apiDeleteEvent.setApiSummary(toAPISummary(api));
+        publishToPublisherTopic(apiDeleteEvent);
+        if (log.isDebugEnabled()) {
+            log.debug("API : " + api.getName() + " deleted event has been successfully published to broker");
         }
     }
 
@@ -157,22 +180,24 @@ public class APIGatewayPublisherImpl implements APIGateway {
     @Override
     public void addAPISubscription(List<SubscriptionValidationData> subscriptionValidationDataList) throws
             GatewayException {
-        if (gwHome == null) {
-            SubscriptionEvent subscriptionAddEvent = new SubscriptionEvent(APIMgtConstants.GatewayEventTypes
-                    .SUBSCRIPTION_CREATE);
-            subscriptionAddEvent.setSubscriptionsList(subscriptionValidationDataList);
-            publishToStoreTopic(subscriptionAddEvent);
+        SubscriptionEvent subscriptionAddEvent = new SubscriptionEvent(APIMgtConstants.GatewayEventTypes
+                .SUBSCRIPTION_CREATE);
+        subscriptionAddEvent.setSubscriptionsList(subscriptionValidationDataList);
+        publishToStoreTopic(subscriptionAddEvent);
+        if (log.isDebugEnabled()) {
+            log.debug("Subscription created event has been successfully published to broker");
         }
     }
 
     @Override
     public void updateAPISubscriptionStatus(List<SubscriptionValidationData> subscriptionValidationDataList) throws
             GatewayException {
-        if (gwHome == null) {
-            SubscriptionEvent subscriptionBlockEvent = new SubscriptionEvent(APIMgtConstants.GatewayEventTypes
-                    .SUBSCRIPTION_STATUS_CHANGE);
-            subscriptionBlockEvent.setSubscriptionsList(subscriptionValidationDataList);
-            publishToStoreTopic(subscriptionBlockEvent);
+        SubscriptionEvent subscriptionBlockEvent = new SubscriptionEvent(APIMgtConstants.GatewayEventTypes
+                .SUBSCRIPTION_STATUS_CHANGE);
+        subscriptionBlockEvent.setSubscriptionsList(subscriptionValidationDataList);
+        publishToStoreTopic(subscriptionBlockEvent);
+        if (log.isDebugEnabled()) {
+            log.debug("Subscription updated event has been successfully published to broker");
         }
     }
 
@@ -182,11 +207,12 @@ public class APIGatewayPublisherImpl implements APIGateway {
     @Override
     public void deleteAPISubscription(List<SubscriptionValidationData> subscriptionValidationDataList) throws
             GatewayException {
-        if (gwHome == null) {
-            SubscriptionEvent subscriptionDeleteEvent = new SubscriptionEvent(
-                    APIMgtConstants.GatewayEventTypes.SUBSCRIPTION_DELETE);
-            subscriptionDeleteEvent.setSubscriptionsList(subscriptionValidationDataList);
-            publishToStoreTopic(subscriptionDeleteEvent);
+        SubscriptionEvent subscriptionDeleteEvent = new SubscriptionEvent(
+                APIMgtConstants.GatewayEventTypes.SUBSCRIPTION_DELETE);
+        subscriptionDeleteEvent.setSubscriptionsList(subscriptionValidationDataList);
+        publishToStoreTopic(subscriptionDeleteEvent);
+        if (log.isDebugEnabled()) {
+            log.debug("Subscription deleted event has been successfully published to broker");
         }
     }
 
@@ -234,7 +260,12 @@ public class APIGatewayPublisherImpl implements APIGateway {
      * @throws GatewayException If there is a failure to publish to gateway
      */
     private void publishToPublisherTopic(GatewayEvent gatewayDTO) throws GatewayException {
-        BrokerUtil.publishToTopic(config.getBrokerConfiguration().getPublisherTopic(), gatewayDTO);
+
+        BrokerUtil.publishToTopic(publisherTopic, gatewayDTO);
+        if (log.isDebugEnabled()) {
+            log.debug("Gateway event : " + gatewayDTO.getEventType() + " has been published to publisher topic : " +
+                    publisherTopic);
+        }
     }
 
     /**
@@ -244,7 +275,11 @@ public class APIGatewayPublisherImpl implements APIGateway {
      * @throws GatewayException If there is a failure to publish to gateway
      */
     private void publishToStoreTopic(GatewayEvent gatewayDTO) throws GatewayException {
-        BrokerUtil.publishToTopic(config.getBrokerConfiguration().getStoreTopic(), gatewayDTO);
+        BrokerUtil.publishToTopic(storeTopic, gatewayDTO);
+        if (log.isDebugEnabled()) {
+            log.debug("Gateway event : " + gatewayDTO.getEventType() + " has been published to store topic : " +
+                    storeTopic);
+        }
     }
 
     /**
@@ -333,6 +368,10 @@ public class APIGatewayPublisherImpl implements APIGateway {
             applicationEvent.setThrottlingTier(application.getPolicyId());
             applicationEvent.setSubscriber(application.getCreatedUser());
             publishToStoreTopic(applicationEvent);
+            if (log.isDebugEnabled()) {
+                log.debug("Application : " + application.getName() + " created event has been successfully published " +
+                        "to broker");
+            }
         }
     }
 
@@ -347,6 +386,10 @@ public class APIGatewayPublisherImpl implements APIGateway {
             applicationEvent.setThrottlingTier(application.getPolicyId());
             applicationEvent.setSubscriber(application.getCreatedUser());
             publishToStoreTopic(applicationEvent);
+            if (log.isDebugEnabled()) {
+                log.debug("Application : " + application.getName() + " updated event has been successfully published " +
+                        "to broker");
+            }
         }
     }
 
@@ -357,6 +400,10 @@ public class APIGatewayPublisherImpl implements APIGateway {
                     .APPLICATION_DELETE);
             applicationEvent.setApplicationId(applicationId);
             publishToStoreTopic(applicationEvent);
+            if (log.isDebugEnabled()) {
+                log.debug("Application : " + applicationId + " deleted event has been successfully published " +
+                        "to broker");
+            }
         }
     }
 
