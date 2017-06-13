@@ -715,35 +715,41 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     private List<String> getAPIPermissionsOfLoggedInUser(String loggedInUser, API api) {
 
-        Map<String, Integer> permissionMap = api.getPermissionMap();
-        Set<String> loggedInUserRoles = APIUtils.getAllRolesOfUser(loggedInUser);
-        Set<String> permissionRoleList = getRolesFromPermissionMap(permissionMap);
-        Set<String> rolesOfUserWithAPIPermissions = null;
         Set<String> permissionArrayForUser = new HashSet<>();
-        loggedInUserRoles.retainAll(
-                permissionRoleList); //get the intersection - retainAll() transforms first set to the intersection
-        if (!loggedInUserRoles.isEmpty()) {
-            rolesOfUserWithAPIPermissions = loggedInUserRoles;
-        }
-        if (rolesOfUserWithAPIPermissions != null) {
-            for (String role : rolesOfUserWithAPIPermissions) {
-                Integer permission = permissionMap.get(role);
-                if (permission == APIMgtConstants.Permission.READ_PERMISSION) {
-                    permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-                } else if (permission == (APIMgtConstants.Permission.READ_PERMISSION
-                        + APIMgtConstants.Permission.UPDATE_PERMISSION)) {
-                    permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-                    permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
-                } else if (permission == (APIMgtConstants.Permission.READ_PERMISSION
-                        + APIMgtConstants.Permission.DELETE_PERMISSION)) {
-                    permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-                    permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
-                } else if (permission
-                        == APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.UPDATE_PERMISSION
-                        + APIMgtConstants.Permission.DELETE_PERMISSION) {
-                    permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-                    permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
-                    permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
+        //Setting default permissions for API
+        permissionArrayForUser.add(APIMgtConstants.Permission.READ);
+        permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
+        permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
+        Map<String, Integer> permissionMap = api.getPermissionMap();
+        if (!permissionMap.isEmpty()) {
+            Set<String> loggedInUserRoles = APIUtils.getAllRolesOfUser(loggedInUser);
+            Set<String> permissionRoleList = getRolesFromPermissionMap(permissionMap);
+            Set<String> rolesOfUserWithAPIPermissions = null;
+            //get the intersection - retainAll() transforms first set to the intersection
+            loggedInUserRoles.retainAll(permissionRoleList);
+
+            if (!loggedInUserRoles.isEmpty()) {
+                rolesOfUserWithAPIPermissions = loggedInUserRoles;
+            }
+            if (rolesOfUserWithAPIPermissions != null) {
+                //remove all elements from set
+                permissionArrayForUser.clear();
+                for (String role : rolesOfUserWithAPIPermissions) {
+                    Integer permission = permissionMap.get(role);
+                    if (permission == APIMgtConstants.Permission.READ_PERMISSION) {
+                        permissionArrayForUser.add(APIMgtConstants.Permission.READ);
+                    } else if (permission == (APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.UPDATE_PERMISSION)) {
+                        permissionArrayForUser.add(APIMgtConstants.Permission.READ);
+                        permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
+                    } else if (permission == (APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.DELETE_PERMISSION)) {
+                        permissionArrayForUser.add(APIMgtConstants.Permission.READ);
+                        permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
+                    } else if (permission == APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.UPDATE_PERMISSION
+                            + APIMgtConstants.Permission.DELETE_PERMISSION) {
+                        permissionArrayForUser.add(APIMgtConstants.Permission.READ);
+                        permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
+                        permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
+                    }
                 }
             }
         }
