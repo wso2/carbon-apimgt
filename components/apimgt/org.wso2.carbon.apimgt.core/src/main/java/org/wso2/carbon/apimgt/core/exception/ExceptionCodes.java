@@ -156,7 +156,9 @@ public enum ExceptionCodes implements ErrorHandler {
 
 
     //Throttle related codes
-    THROTTLE_TEMPLATE_EXCEPTION(900959, "Policy Generating Error", 500, " Error while generate policy configuration");
+    THROTTLE_TEMPLATE_EXCEPTION(900960, "Policy Generating Error", 500, " Error while generate policy configuration"),
+    ENDPOINT_CONFIG_NOT_FOUND(900961, "Endpoint Config Not found", 404, "Error while retrieving Endpoint " +
+            "Configuration");
 
     private final long errorCode;
     private final String errorMessage;
