@@ -2,8 +2,10 @@ package org.wso2.carbon.apimgt.gateway.event.analytics.latency;
 
 import ballerina.lang.messages;
 import ballerina.lang.system;
+import org.wso2.carbon.apimgt.gateway.event.util;
 
 function mediateIn (message m) {
+    util:simulate(m);
     messages:setProperty(m, "am.request_start_time", system:currentTimeMillis());
 }
 

@@ -9,7 +9,7 @@ import org.wso2.carbon.apimgt.gateway.holders as throttle;
 import org.wso2.carbon.apimgt.gateway.utils as util;
 import org.wso2.carbon.apimgt.gateway.constants as constants;
 import org.wso2.carbon.apimgt.gateway.event.publisher;
-
+import org.wso2.carbon.apimgt.gateway.dto;
 
 function isrequestThrottled( message msg) (boolean){
     // will return true if the request is throttled
@@ -179,16 +179,6 @@ function setInvalidUser(message msg){
 function publishEvent(message m, string userId, string applicationId, string apiContext, string apiVersion,string apiTier,
                       string applicationTier, string subscriptionTier, string resourceLevelThrottleKey, string resourceTier,string ip) {
 
-    json event = {};
-
-    event.streamName= "PreRequestStream";
-    event.executionPlanName= "requestPreProcessorExecutionPlan";
-    int currentTime = system:currentTimeMillis();
-    string time = (string)currentTime;
-    event.timestamp = time;
-
-    json dataArr = [];
-
     string messageID = "messageID";
     string appKey = applicationId+ ":" + userId;
     string subscriptionKey = applicationId + ":" + apiContext + ":" + apiVersion;
@@ -199,26 +189,33 @@ function publishEvent(message m, string userId, string applicationId, string api
     string apiName = "test";
     string properties = "some_properties";
 
-    dataArr[0] = messageID;
-    dataArr[1] = appKey;
-    dataArr[2] = applicationTier;
-    dataArr[3] = apiKey;
-    dataArr[4] = apiTier;
-    dataArr[5] = subscriptionKey;
-    dataArr[6] = subscriptionTier;
-    dataArr[7] = resourceLevelThrottleKey;
-    dataArr[8] = resourceTier;
-    dataArr[9] = userId;
-    dataArr[10] = apiContext;
-    dataArr[11] = apiVersion;
-    dataArr[12] = appTenant;
-    dataArr[13] = apiTenant;
-    dataArr[14] = applicationId;
-    dataArr[15] = apiName;
-    dataArr[16] = properties;
+    dto:ThrottleEventHolderDTO throttleEventHolderDTO = {};
+    dto:ThrottleEventDTO throttleEventDTO = {};
 
-    event.data = dataArr;
+    throttleEventHolderDTO.streamName = "PreRequestStream";
+    throttleEventHolderDTO.executionPlanName = "requestPreProcessorExecutionPlan";
+    throttleEventHolderDTO.timestamp = system:currentTimeMillis();
 
-    publisher:publish(event);
+    throttleEventDTO.messageID = messageID;
+    throttleEventDTO.appKey = appKey;
+    throttleEventDTO.applicationTier = applicationTier;
+    throttleEventDTO.apiKey = apiKey;
+    throttleEventDTO.apiTier = apiTier;
+    throttleEventDTO.subscriptionKey = subscriptionKey;
+    throttleEventDTO.subscriptionTier = subscriptionTier;
+    throttleEventDTO.resourceLevelThrottleKey = resourceLevelThrottleKey;
+    throttleEventDTO.resourceTier = resourceTier;
+    throttleEventDTO.userId = userId;
+    throttleEventDTO.apiContext = apiContext;
+    throttleEventDTO.apiVersion = apiVersion;
+    throttleEventDTO.appTenant = appTenant;
+    throttleEventDTO.apiTenant = apiTenant;
+    throttleEventDTO.applicationId = applicationId;
+    throttleEventDTO.apiName = apiName;
+    throttleEventDTO.properties = properties;
+
+    throttleEventHolderDTO.throttleEventDTO = throttleEventDTO;
+
+    publisher:publishThrottleEvent(throttleEventHolderDTO);
 }
 

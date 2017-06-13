@@ -2,18 +2,16 @@ package org.wso2.carbon.apimgt.gateway.event.analytics.response;
 
 import org.wso2.carbon.apimgt.gateway.event.publisher;
 import ballerina.lang.messages;
-import ballerina.lang.jsons;
 import ballerina.lang.system;
 import ballerina.net.http;
-import org.wso2.carbon.apimgt.gateway.holders as holder;
 import org.wso2.carbon.apimgt.gateway.dto;
 
 function mediate (message m, message res) {
-    dto:AnalyticsInfoDTO analyticsConf = holder:getAnalyticsConf();
-    if (!analyticsConf.enabled) {
-        system:println("Analytics is Disabled");
-        return;
-    }
+    //dto:AnalyticsInfoDTO analyticsConf = holder:getAnalyticsConf();
+    //if (!analyticsConf.enabled) {
+    //    system:println("Analytics is Disabled");
+    //    return;
+    //}
     int request_start_time = (int)messages:getProperty(m, "am.request_start_time");
     int request_end_time = (int)messages:getProperty(m, "am.request_end_time");
     int backend_start_time = (int)messages:getProperty(m, "am.backend_start_time");
@@ -24,60 +22,64 @@ function mediate (message m, message res) {
     int response_mediation_latency = (int)messages:getProperty(m, "am.response_mediation_latency");
     int other_latency = (int)messages:getProperty(m, "am.other_latency");
     int current_time = system:currentTimeMillis();
-    int response_time =  request_end_time - request_start_time;
+    int response_time = request_end_time - request_start_time;
     int backend_time = backend_end_time - backend_start_time;
     int service_time = response_time - backend_time;
     int backend_latency = current_time - backend_start_time;
 
-    json event = {};
+    dto:EventHolderDTO eventHolderDTO = {};
+    eventHolderDTO.streamName = "ResponseStream";
+    eventHolderDTO.executionPlanName = "analytics_events_pre_process";
+    eventHolderDTO.timestamp = system:currentTimeMillis();
 
-    jsons:add (event, "$", "streamName", "ResponseStream");
-    jsons:add (event, "$", "executionPlanName", "analytics_events_pre_process");
-    jsons:add (event, "$", "timestamp", "123456789");
+    dto:RequestEventDTO requestEventDTO = {};
+    requestEventDTO.api = messages:getProperty(m, "api");
+    requestEventDTO.context = messages:getProperty(m, "REQUEST_URL");
+    requestEventDTO.version = messages:getProperty(m, "version");
+    requestEventDTO.publisher = messages:getProperty(m, "publisher");
+    requestEventDTO.subscriptionPolicy = messages:getProperty(m, "subscription_policy");
+    requestEventDTO.uriTemplate = messages:getProperty(m, "SUB_PATH");
+    requestEventDTO.httpMethod = messages:getProperty(m, "HTTP_METHOD");
+    requestEventDTO.consumerKey = messages:getProperty(m, "consumer_key");
+    requestEventDTO.applicationName = messages:getProperty(m, "application_name");
+    requestEventDTO.applicationId = messages:getProperty(m, "application_id");
+    requestEventDTO.applicationOwner = messages:getProperty(m, "application_owner");
+    requestEventDTO.userId = messages:getProperty(m, "user_id");
+    requestEventDTO.subscriber = messages:getProperty(m, "subscriber");
+    requestEventDTO.requestCount = 1;
+    requestEventDTO.requestTime = request_start_time;
+    requestEventDTO.gatewayDomain = messages:getProperty(m, "gateway_domain");
+    requestEventDTO.gatewayIp = messages:getProperty(m, "gateway_ip");
+    requestEventDTO.isThrottled = false; //(boolean)messages:getProperty(m, "is_throttled");
+    requestEventDTO.throttledReason = messages:getProperty(m, "throttled_reason");
+    requestEventDTO.throttledPolicy = messages:getProperty(m, "throttled_policy");
+    requestEventDTO.clientIp = messages:getProperty(m, "client_ip");
+    requestEventDTO.userAgent = messages:getProperty(m, "user_agent");
+    requestEventDTO.hostName = messages:getProperty(m, "host_name");
 
-    json dataArr = [];
-    jsons:add (dataArr, "$", messages:getProperty(m, "api"));
-    jsons:add (dataArr, "$", messages:getProperty(m, "REQUEST_URL"));
-    jsons:add (dataArr, "$", messages:getProperty(m, "version"));
-    jsons:add (dataArr, "$", messages:getProperty(m, "publisher"));
-    jsons:add (dataArr, "$", messages:getProperty(m, "subscription_policy"));
-    jsons:add (dataArr, "$", messages:getProperty(m, "SUB_PATH"));
-    jsons:add (dataArr, "$", messages:getProperty(m, "HTTP_METHOD"));
-    jsons:add (dataArr, "$", messages:getProperty(m, "consumer_key"));
-    jsons:add (dataArr, "$", messages:getProperty(m, "application_name"));
-    jsons:add (dataArr, "$", messages:getProperty(m, "application_id"));
-    jsons:add (dataArr, "$", messages:getProperty(m, "application_owner"));
-    jsons:add (dataArr, "$", messages:getProperty(m, "user_id"));
-    jsons:add (dataArr, "$", messages:getProperty(m, "subscriber"));
-    jsons:add (dataArr, "$", messages:getProperty(m, "request_count"));
-    jsons:add (dataArr, "$", messages:getProperty(m, "response_count"));
-    jsons:add (dataArr, "$", request_start_time+"");   //request event type
-    jsons:add (dataArr, "$", backend_end_time+"");     //response event type
-    jsons:add (dataArr, "$", messages:getProperty(m, "gateway_domain"));
-    jsons:add (dataArr, "$", messages:getProperty(m, "gateway_ip"));
-    jsons:add (dataArr, "$", messages:getProperty(m, "is_throttled"));
-    jsons:add (dataArr, "$", messages:getProperty(m, "throttled_reason"));
-    jsons:add (dataArr, "$", messages:getProperty(m, "throttled_policy"));
-    jsons:add (dataArr, "$", messages:getProperty(m, "client_ip"));
-    jsons:add (dataArr, "$", messages:getProperty(m, "user_agent"));
-    jsons:add (dataArr, "$", messages:getProperty(m, "host_name"));
+    dto:ResponseEventDTO responseEventDTO = {};
+    responseEventDTO.responseCount = 1;
+    responseEventDTO.responseTime = backend_end_time;
+    responseEventDTO.cacheHit = false; //messages:getProperty(m, "cache_hit");
+    responseEventDTO.contentLength = http:getContentLength(res);
+    responseEventDTO.protocol = messages:getProperty(m, "PROTOCOL");
+    responseEventDTO.statusCode = http:getStatusCode(res);
+    responseEventDTO.destination = messages:getProperty(m, "destination");
 
-    jsons:add (dataArr, "$", messages:getProperty(m, "cache_hit"));
-    jsons:add (dataArr, "$", http:getContentLength(res)+"");
-    jsons:add (dataArr, "$", messages:getProperty(m, "PROTOCOL"));
-    jsons:add (dataArr, "$", http:getStatusCode(res)+"");
-    jsons:add (dataArr, "$", messages:getProperty(m, "destination"));
-    jsons:add (dataArr, "$", response_time+"");
-    jsons:add (dataArr, "$", service_time+"");
-    jsons:add (dataArr, "$", backend_time+"");
-    jsons:add (dataArr, "$", backend_latency+"");
-    jsons:add (dataArr, "$", security_latency+"");
-    jsons:add (dataArr, "$", throttling_latency+"");
-    jsons:add (dataArr, "$", request_mediation_latency+"");
-    jsons:add (dataArr, "$", response_mediation_latency+"");
-    jsons:add (dataArr, "$", other_latency+"");
+    dto:LatencyEventDTO latencyEventDTO = {};
+    latencyEventDTO.responseTime = response_time;
+    latencyEventDTO.serviceTime = service_time;
+    latencyEventDTO.backendTime = backend_time;
+    latencyEventDTO.backendLatency = backend_latency;
+    latencyEventDTO.securityLatency = security_latency;
+    latencyEventDTO.throttlingLatency = throttling_latency;
+    latencyEventDTO.request_mediationLatency = request_mediation_latency;
+    latencyEventDTO.response_mediationLatency = response_mediation_latency;
+    latencyEventDTO.otherLatency = other_latency;
 
-    jsons:add (event, "$", "data", dataArr);
+    eventHolderDTO.requestEventDTO = requestEventDTO;
+    eventHolderDTO.responseEventDTO = responseEventDTO;
+    eventHolderDTO.latencyEventDTO = latencyEventDTO;
 
-    publisher:publish(event);
+    publisher:publishRequestEvent(eventHolderDTO);
 }
