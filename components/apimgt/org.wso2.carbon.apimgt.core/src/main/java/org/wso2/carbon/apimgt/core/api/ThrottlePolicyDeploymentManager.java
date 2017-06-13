@@ -1,4 +1,3 @@
-package org.wso2.carbon.apimgt.core.api;
 /*
  * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -16,6 +15,7 @@ package org.wso2.carbon.apimgt.core.api;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
