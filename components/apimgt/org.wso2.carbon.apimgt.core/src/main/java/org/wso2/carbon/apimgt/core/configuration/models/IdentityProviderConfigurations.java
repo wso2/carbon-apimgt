@@ -32,6 +32,8 @@ public class IdentityProviderConfigurations {
     private String identityProviderBaseUrl = "https://localhost:9443";
     @Element(description = "Identity Provider Credentials")
     private CredentialConfigurations identityProviderCredentials = new CredentialConfigurations();
+    @Element(description = "Alias of Identity Provider Certificate in Client Trust Store")
+    private String idpCertAlias = "wso2carbon";
 
     public String getIdentityProviderImplClass() {
         return identityProviderImplClass;
@@ -43,5 +45,9 @@ public class IdentityProviderConfigurations {
 
     public CredentialConfigurations getIdentityProviderCredentials() {
         return identityProviderCredentials;
+    }
+
+    public String getIdpCertAlias() {
+        return idpCertAlias;
     }
 }

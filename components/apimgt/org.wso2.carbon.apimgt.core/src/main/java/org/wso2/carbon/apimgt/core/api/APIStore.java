@@ -20,6 +20,7 @@
 
 package org.wso2.carbon.apimgt.core.api;
 
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.exception.APICommentException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
@@ -28,6 +29,7 @@ import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Comment;
+import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.Subscription;
@@ -46,6 +48,15 @@ import java.util.Map;
  *
  */
 public interface APIStore extends APIManager {
+
+    /**
+     * Returns details of an API
+     *
+     * @param id ID of the API
+     * @return An CompositeAPI object for the given id or null
+     * @throws APIManagementException if failed get CompositeAPI for given id
+     */
+    CompositeAPI getCompositeAPIbyId(String id) throws APIManagementException;
 
     /**
      * Returns a paginated list of all APIs in given Status list. If a given API has multiple APIs,
@@ -69,6 +80,64 @@ public interface APIStore extends APIManager {
      * @throws APIManagementException   If failed to search apis.
      */
     List<API> searchAPIs(String query, int offset, int limit) throws APIManagementException;
+
+    /**
+     * Returns a paginated list of all Composite APIs which match the given search criteria.
+     *
+     * @param query searchType
+     * @param limit limit
+     * @param offset offset
+     * @return {@code List<CompositeAPI>}
+     * @throws APIManagementException   If failed to search apis.
+     */
+    List<CompositeAPI> searchCompositeAPIs(String query, int offset, int limit) throws APIManagementException;
+
+
+    /**
+     * Returns Swagger definition of a Composite API
+     *
+     * @param id ID of the API
+     * @return The CompositeAPI Swagger definition
+     * @throws APIManagementException if failed get CompositeAPI implementation for given id
+     */
+    String getCompositeApiDefinition(String id) throws APIManagementException;
+
+    /**
+     * Checks the existence of a Composite API with {@code apiId}.
+     *
+     * @param apiId API id of the Composite API
+     * @return {@code true} if Composite API with {@code apiId} exists
+     * {@code false} otherwise.
+     * @throws APIManagementException if failed to retrieve summary of Composite API with {@code apiId}
+     */
+    boolean isCompositeAPIExist(String apiId) throws APIManagementException;
+
+    /**
+     * Update Swagger definition of a Composite API
+     *
+     * @param id ID of the API
+     * @param apiDefinition  CompositeAPI Swagger definition
+     * @throws APIManagementException if failed get CompositeAPI implementation for given id
+     */
+    void updateCompositeApiDefinition(String id, String apiDefinition) throws APIManagementException;
+
+    /**
+     * Returns Ballerina implementation of a Composite API
+     *
+     * @param id ID of the API
+     * @return File of the CompositeAPI implementation
+     * @throws APIManagementException if failed get CompositeAPI implementation for given id
+     */
+    InputStream getCompositeApiImplementation(String id) throws APIManagementException;
+
+    /**
+     * Update Ballerina implementation of a Composite API
+     *
+     * @param id ID of the API
+     * @param implementation  CompositeAPI Ballerina implementation file
+     * @throws APIManagementException if failed get CompositeAPI implementation for given id
+     */
+    void updateCompositeApiImplementation(String id, InputStream implementation) throws APIManagementException;
 
     /**
      * Function to remove an Application from the API Store
@@ -123,21 +192,20 @@ public interface APIStore extends APIManager {
     /**
      * Generates oAuth keys for an application.
      *
-     * @param userId          Subsriber name.
-     * @param applicationName name of the Application.
-     * @param applicationId   id of the Application.
+     * @param applicationName Name of the Application.
+     * @param applicationId   Id of the Application.
      * @param tokenType       Token type (PRODUCTION | SANDBOX)
-     * @param callbackUrl     callback URL
-     * @param allowedDomains  allowedDomains for token.
-     * @param validityTime    validity time period.
+     * @param callbackUrl     Callback URL
+     * @param grantTypes      List of grant types to be supported by the application
+     * @param validityTime    Validity time period.
      * @param groupingId      APIM application id.
-     * @param tokenScope      Scopes for the requested tokens.
+     * @param tokenScopes      Scopes for the requested tokens.
      * @return                {@code Map<String, Object>}  Map of generated keys.
      * @throws APIManagementException if failed to applications for given subscriber
      */
-    Map<String, Object> generateApplicationKeys(String userId, String applicationName, String applicationId,
-            String tokenType, String callbackUrl, String[] allowedDomains, String validityTime,
-            String tokenScope, String groupingId) throws APIManagementException;
+    Map<String, Object> generateApplicationKeys(String applicationName, String applicationId,
+            String tokenType, String callbackUrl, List<String> grantTypes, String validityTime,
+            String tokenScopes, String groupingId) throws APIManagementException;
 
     /**
      * Retrieve an application given the uuid.
@@ -156,6 +224,18 @@ public interface APIStore extends APIManager {
      * @throws APIManagementException If failed to get the subscriptions for the application.
      */
     List<Subscription> getAPISubscriptionsByApplication(Application application) throws APIManagementException;
+
+
+    /**
+     * Retrieve list of subscriptions given the application and the API Type.
+     *
+     * @param application   Application Object.
+     * @param apiType   API Type to filter subscriptions
+     * @return List of subscriptions objects of the given application made for the specified API Type.
+     * @throws APIManagementException If failed to get the subscriptions for the application.
+     */
+    List<Subscription> getAPISubscriptionsByApplication(Application application, ApiType apiType)
+                                                                                throws APIManagementException;
 
     /**
      * Add an api subscription.
@@ -342,7 +422,7 @@ public interface APIStore extends APIManager {
      * @return Details of the added Composite API.
      * @throws APIManagementException if failed to add Composite API
      */
-    String addCompositeApi(API.APIBuilder apiBuilder) throws APIManagementException;
+    String addCompositeApi(CompositeAPI.Builder apiBuilder) throws APIManagementException;
 
     /**
      * Updates design and implementation of an existing Composite API.
@@ -350,7 +430,7 @@ public interface APIStore extends APIManager {
      * @param apiBuilder {@code org.wso2.carbon.apimgt.core.models.API.APIBuilder}
      * @throws APIManagementException if failed to update Composite API
      */
-    void updateCompositeApi(API.APIBuilder apiBuilder) throws APIManagementException;
+    void updateCompositeApi(CompositeAPI.Builder apiBuilder) throws APIManagementException;
 
     /**
      * Delete an existing Composite API.

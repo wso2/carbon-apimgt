@@ -43,7 +43,7 @@ import javax.ws.rs.core.Response;
  * This class provides access token during login from store app.
  *
  */
-@Path("/oauth")
+@Path("/login")
 public class AuthenticatorAPI implements Microservice {
 
     private static final Logger log = LoggerFactory.getLogger(AuthenticatorAPI.class);
@@ -83,7 +83,7 @@ public class AuthenticatorAPI implements Microservice {
             }
             String tokens = loginTokenService
                     .getTokens(authResponseBean, appContext.substring(1), userName, password, grantType, refToken,
-                            scopesList.split("" + " "), Long.parseLong(validityPeriod));
+                            scopesList, Long.parseLong(validityPeriod));
             String accessToken = tokens.split(":")[0];
             String refreshToken = null;
             if (tokens.split(":").length > 1) {

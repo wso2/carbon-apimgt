@@ -405,7 +405,25 @@ APIDesigner.prototype.load_api_document = function(api_document){
                     theme: 'relax',
                     maxVisible: 10
                 });
-            }).catch(apiGetErrorHandler);
+            }).catch(function (error_response) {
+                var message;
+                if (error_response.data) {
+                    message = "Error[" + error_response.status + "]: " + error_response.data;
+                } else {
+                    message = error_response;
+                }
+                noty({
+                    text: message,
+                    type: 'error',
+                    dismissQueue: true,
+                    modal: true,
+                    progressBar: true,
+                    timeout: 5000,
+                    layout: 'top',
+                    theme: 'relax',
+                    maxVisible: 10
+                });
+            });
     });
     validateActionButtons('#add_resource', '#save_resources');
 };
