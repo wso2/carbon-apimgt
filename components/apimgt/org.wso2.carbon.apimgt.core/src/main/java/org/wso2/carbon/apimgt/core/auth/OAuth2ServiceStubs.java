@@ -163,7 +163,7 @@ public class OAuth2ServiceStubs {
                                                                 String clientId, String clientSecret) {
             String credentials = clientId + ':' + clientSecret;
             String authToken = Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
-            return generateAccessToken(authToken, KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE, null,
+            return generateAccessToken(authToken, KeyManagerConstants.REFRESH_GRANT_TYPE, null,
                     null, refreshToken, null, null, scopes, validityPeriod);
         }
     }
