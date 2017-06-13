@@ -142,7 +142,7 @@ public interface APIGateway {
      * Publish the update application change to Gateway
      *
      * @param application {@link Application}
-     * @throws GatewayException
+     * @throws GatewayException If there is a failure in notifying update to gateway
      */
     void updateApplication(Application application) throws GatewayException;
 
@@ -151,7 +151,7 @@ public interface APIGateway {
      * Publish the delete application change to Gateway
      *
      * @param applicationId applicationId of application
-     * @throws GatewayException
+     * @throws GatewayException If there is a failure in notifying deletion to gateway
      */
     void deleteApplication(String applicationId) throws GatewayException;
 
