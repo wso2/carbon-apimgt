@@ -346,6 +346,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
                 //Add API to gateway
                 gateway.addAPI(createdAPI);
+                if (log.isDebugEnabled()) {
+                    log.debug("API : " + apiBuilder.getName() + " has been identifier published to gateway");
+                }
 
                 Set<String> apiRoleList;
 
@@ -487,6 +490,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
                     //Add API to gateway
                     gateway.updateAPI(api);
+                    if (log.isDebugEnabled()) {
+                        log.debug("API : " + apiBuilder.getName() + " has been successfully updated in gateway");
+                    }
 
                     if (originalAPI.getContext() != null && !originalAPI.getContext().equals(apiBuilder.getContext())) {
                         if (!checkIfAPIContextExists(api.getContext())) {
@@ -1006,6 +1012,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     //Delete API in gateway
 
                     gateway.deleteAPI(api);
+                    if (log.isDebugEnabled()) {
+                        log.debug("API : " + api.getName() + " has been successfully removed from the gateway");
+                    }
+
                     getApiDAO().deleteAPI(identifier);
                     getApiLifecycleManager().removeLifecycle(apiBuilder.getLifecycleInstanceId());
                     APIUtils.logDebug("API with id " + identifier + " was deleted successfully.", log);

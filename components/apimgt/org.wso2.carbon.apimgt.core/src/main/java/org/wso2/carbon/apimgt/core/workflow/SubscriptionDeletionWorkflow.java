@@ -96,6 +96,11 @@ public class SubscriptionDeletionWorkflow extends Workflow {
 
             if (subscriptionValidationDataList != null && !subscriptionValidationDataList.isEmpty()) {
                 apiGateway.deleteAPISubscription(subscriptionValidationDataList);
+                if (log.isDebugEnabled()) {
+                    log.debug("Subscription for API : " + subscription.getApi().getName() + " with " +
+                            "application : " + subscription.getApplication().getName() + " has been successfully " +
+                            "removed from gateway");
+                }
             }
         }
         return response;

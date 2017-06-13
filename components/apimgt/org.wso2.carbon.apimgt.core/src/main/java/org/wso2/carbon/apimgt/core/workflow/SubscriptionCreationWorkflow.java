@@ -100,6 +100,11 @@ public class SubscriptionCreationWorkflow extends Workflow {
                                 .getVersion(), subscription.getApplication().getId());
                 if (subscriptionValidationDataList != null && !subscriptionValidationDataList.isEmpty()) {
                     apiGateway.addAPISubscription(subscriptionValidationDataList);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Subscription created for API : " + subscription.getApi().getName() + " with " +
+                                "application : " + subscription.getApplication().getName() + " has been successfully " +
+                                "published to gateway");
+                    }
                 }
             }
         }

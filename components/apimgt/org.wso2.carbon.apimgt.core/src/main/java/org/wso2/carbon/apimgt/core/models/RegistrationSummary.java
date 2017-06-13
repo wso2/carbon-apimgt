@@ -1,5 +1,3 @@
-package org.wso2.carbon.apimgt.core.models;
-
 /*
 * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
@@ -15,6 +13,8 @@ package org.wso2.carbon.apimgt.core.models;
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
+
+package org.wso2.carbon.apimgt.core.models;
 
 import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.configuration.models.AnalyticsConfigurations;
