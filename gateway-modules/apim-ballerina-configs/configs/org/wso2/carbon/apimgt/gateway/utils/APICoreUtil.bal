@@ -112,8 +112,6 @@ function getAPICoreURL () (string) {
     } else {
         apiCoreURL = "https://localhost:9292";
     }
-    holder:apiCoreUrl = apiCoreURL;
-
     return apiCoreURL;
 }
 

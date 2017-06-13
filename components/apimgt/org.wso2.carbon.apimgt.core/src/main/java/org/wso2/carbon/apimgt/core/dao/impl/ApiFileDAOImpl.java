@@ -22,11 +22,11 @@ import com.google.gson.stream.JsonReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
-import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Comment;
+import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Rating;
@@ -77,6 +77,14 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void addApplicationAssociatedAPI(CompositeAPI api) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * @see ApiDAO#updateAPI(String apiID, API substituteAPI)
      */
     @Override
@@ -120,10 +128,18 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#getSwaggerDefinition(String apiID)
+     * {@inheritDoc}
      */
     @Override
-    public String getSwaggerDefinition(String apiID) throws APIMgtDAOException {
+    public void deleteCompositeApi(String apiId) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @see ApiDAO#getApiSwaggerDefinition(String apiID)
+     */
+    @Override
+    public String getApiSwaggerDefinition(String apiID) throws APIMgtDAOException {
         String swaggerFileName = APIMgtConstants.APIFileUtilConstants.SWAGGER_DEFINITION_FILE_PREFIX + apiID +
                 APIMgtConstants.APIFileUtilConstants.JSON_EXTENSION;
         String swaggerFilepath = APIFileUtils.findInFileSystem(new File(storagePath), swaggerFileName);
@@ -131,6 +147,14 @@ public class ApiFileDAOImpl implements ApiDAO {
             return APIFileUtils.readFileContentAsText(swaggerFilepath);
         }
         return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getCompositeApiSwaggerDefinition(String apiID) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -316,19 +340,27 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#updateSwaggerDefinition(String apiID, String swaggerDefinition, String updatedBy)
+     * @see ApiDAO#updateApiDefinition(String apiID, String swaggerDefinition, String updatedBy)
      */
     @Override
-    public void updateSwaggerDefinition(String apiID, String swaggerDefinition, String updatedBy)
+    public void updateApiDefinition(String apiID, String swaggerDefinition, String updatedBy)
             throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * @see ApiDAO#getGatewayConfig(String apiID)
+     * @see ApiDAO#getGatewayConfigOfAPI(String apiID)
      */
     @Override
-    public String getGatewayConfig(String apiID) throws APIMgtDAOException {
+    public String getGatewayConfigOfAPI(String apiID) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public InputStream getCompositeAPIGatewayConfig(String apiID) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
@@ -342,11 +374,20 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void updateCompositeAPIGatewayConfig(String apiID, InputStream gatewayConfig, String updatedBy)
+            throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
      * @see ApiDAO#getLastUpdatedTimeOfDocument(String documentId)
      */
     @Override
     public String getLastUpdatedTimeOfDocument(String documentId) throws APIMgtDAOException {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -355,7 +396,7 @@ public class ApiFileDAOImpl implements ApiDAO {
     @Override
     public String getLastUpdatedTimeOfDocumentContent(String apiId, String documentId)
             throws APIMgtDAOException {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -363,7 +404,7 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public String getLastUpdatedTimeOfAPIThumbnailImage(String apiId) throws APIMgtDAOException {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -371,7 +412,7 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public String getLastUpdatedTimeOfEndpoint(String endpointId) throws APIMgtDAOException {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -515,10 +556,10 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#getAPIs(ApiType)
+     * @see ApiDAO#getAPIs()
      */
     @Override
-    public List<API> getAPIs(ApiType apiType) throws APIMgtDAOException {
+    public List<API> getAPIs() throws APIMgtDAOException {
 
         File[] files = new File(storagePath).listFiles();
         List<API> apiList = new ArrayList<>();
@@ -535,46 +576,49 @@ public class ApiFileDAOImpl implements ApiDAO {
         return apiList;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public List<API> getAPIsForProvider(String providerName, ApiType apiType) throws APIMgtDAOException {
+    public List<CompositeAPI> getCompositeAPIs(Set<String> roles, String user, int offset, int limit) {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * @see ApiDAO#getAPIsByStatus(List, ApiType)
+     * @see ApiDAO#getAPIsByStatus(List)
      */
     @Override
-    public List<API> getAPIsByStatus(List<String> statuses, ApiType apiType) throws APIMgtDAOException {
+    public List<API> getAPIsByStatus(List<String> statuses) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * @see ApiDAO#getAPIsByStatus(Set, List, ApiType)
+     * @see ApiDAO#getAPIsByStatus(Set, List)
      */
     @Override
-    public List<API> getAPIsByStatus(Set<String> roles, List<String> statuses, ApiType apiType)
+    public List<API> getAPIsByStatus(Set<String> roles, List<String> statuses)
             throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * @see ApiDAO#searchAPIs(Set roles, String user, String searchString, ApiType apiType, int offset, int limit)
+     * @see ApiDAO#searchAPIs(Set, String, String, int, int)
      */
     @Override
     public List<API> searchAPIs(Set<String> roles, String user, String searchString,
-            ApiType apiType, int offset, int limit) throws APIMgtDAOException {
+                                int offset, int limit) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<CompositeAPI> searchCompositeAPIs(Set<String> roles, String user, String searchString, int offset,
+                                                  int limit) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * @see ApiDAO#attributeSearchAPIs(Set roles, String user, Map attributeMap, ApiType apiType, int offset, int limit)
+     * @see ApiDAO#attributeSearchAPIs(Set, String, Map, int, int)
      */
     @Override
-    public List<API> attributeSearchAPIs(Set<String> roles, String user, Map<String, String> attributeMap,
-            ApiType apiType, int offset, int limit) throws APIMgtDAOException {
+    public List<API> attributeSearchAPIs(Set<String> roles, String user, Map<String, String> attributeMap, int offset,
+            int limit) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
@@ -582,25 +626,16 @@ public class ApiFileDAOImpl implements ApiDAO {
      * @see ApiDAO#searchAPIsByAttributeInStore(List roles, Map attributeMap, int offset, int limit)
      */
     @Override
-    public List<API> searchAPIsByAttributeInStore(List<String> roles, Map<String, String> attributeMap,
-                                                  int offset, int limit) throws APIMgtDAOException {
+    public List<API> searchAPIsByAttributeInStore(List<String> roles, Map<String, String> attributeMap, int offset,
+            int limit) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * @see ApiDAO#searchAPIsByStatus(String searchString, List statuses, ApiType apiType)
+     * @see ApiDAO#isAPINameExists(String, String)
      */
     @Override
-    public List<API> searchAPIsByStatus(String searchString, List<String> statuses, ApiType apiType)
-            throws APIMgtDAOException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @see ApiDAO#isAPINameExists(String apiName, String providerName, ApiType apiType)
-     */
-    @Override
-    public boolean isAPINameExists(String apiName, String providerName, ApiType apiType) throws APIMgtDAOException {
+    public boolean isAPINameExists(String apiName, String providerName) throws APIMgtDAOException {
         return false;
     }
 
@@ -638,6 +673,16 @@ public class ApiFileDAOImpl implements ApiDAO {
             return (API) constructObjectSummaryFromFile(apiFilePath, API.class);
         }
         return null;
+    }
+
+    @Override
+    public CompositeAPI getCompositeAPISummary(String apiID) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public CompositeAPI getCompositeAPI(String apiID) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
     }
 
     /**

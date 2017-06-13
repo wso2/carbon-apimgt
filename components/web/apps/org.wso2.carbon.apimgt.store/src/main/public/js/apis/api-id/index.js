@@ -11,6 +11,7 @@ $(function () {
                 {"responseContentType": 'application/json'},
                 function (jsonData) {
                     var api = jsonData.obj;
+                    api.isStandardAPI = true;
                     policies = api.policies;
                     var callbacks = {onSuccess: function () {
                         validateActionButtons("#subscribe-button");
@@ -566,7 +567,7 @@ $(function () {
                                             },
                                             {addClass: 'btn btn-default', text: 'Stay on this page', onClick: function($noty) {
                                                 $noty.close();
-                                                location.href = contextPath + "/apis/" + apiId;
+                                                location.href = contextPath + "/apis/" + apiIdentifier;
                                               }
                                             }
                                           ]
@@ -587,7 +588,7 @@ $(function () {
                                             },
                                             {addClass: 'btn btn-default', text: 'Stay on this page', onClick: function($noty) {
                                                 $noty.close();
-                                                location.href = contextPath + "/apis/" + apiId;
+                                                location.href = contextPath + "/apis/" + apiIdentifier;
                                               }
                                             }
                                           ]
@@ -609,7 +610,7 @@ $(function () {
                                         },
                                         {addClass: 'btn btn-default', text: 'Stay on this page', onClick: function($noty) {
                                             $noty.close();
-                                            location.href = contextPath + "/apis/" + apiId;
+                                            location.href = contextPath + "/apis/" + apiIdentifier;
                                           }
                                         }
                                       ]

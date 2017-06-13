@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.events.APIEvent;
@@ -59,9 +60,6 @@ public class APIGatewayPublisherImpl implements APIGateway {
         gwHome = System.getProperty("gwHome");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void addAPI(API api) throws GatewayException {
 
@@ -85,16 +83,34 @@ public class APIGatewayPublisherImpl implements APIGateway {
             publishToPublisherTopic(apiCreateEvent);
 
         } else {
-            saveApi(api, gwHome, gatewayConfig, false);
+            saveApi(api.getName(), api.getVersion(), gwHome, gatewayConfig, false);
             if (api.isDefaultVersion()) {
-                saveApi(api, gwHome, defaultConfig, true);
+                saveApi(api.getName(), api.getVersion(), gwHome, defaultConfig, true);
             }
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
+    public void addCompositeAPI(CompositeAPI api) throws GatewayException {
+        String gatewayConfig = api.getGatewayConfig();
+        String defaultConfig = null;
+
+        if (gwHome == null) {
+
+            // build the message to send
+            APIEvent gatewayDTO = new APIEvent(APIMgtConstants.GatewayEventTypes.API_CREATE);
+            gatewayDTO.setLabels(api.getLabels());
+            APISummary apiSummary = new APISummary();
+            apiSummary.setName(api.getName());
+            apiSummary.setVersion(api.getVersion());
+            apiSummary.setContext(api.getContext());
+            gatewayDTO.setApiSummary(apiSummary);
+            publishToPublisherTopic(gatewayDTO);
+        } else {
+            saveApi(api.getName(), api.getVersion(), gwHome, gatewayConfig, false);
+        }
+    }
+
     @Override
     public void updateAPI(API api) throws GatewayException {
 
@@ -107,9 +123,6 @@ public class APIGatewayPublisherImpl implements APIGateway {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void deleteAPI(API api) throws GatewayException {
 
@@ -122,9 +135,25 @@ public class APIGatewayPublisherImpl implements APIGateway {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
+    public void deleteCompositeAPI(CompositeAPI api) throws GatewayException {
+        if (gwHome == null) {
+            // build the message to send
+            APIEvent gatewayDTO = new APIEvent(APIMgtConstants.GatewayEventTypes.API_DELETE);
+            gatewayDTO.setLabels(api.getLabels());
+            APISummary apiSummary = new APISummary();
+            apiSummary.setName(api.getName());
+            apiSummary.setVersion(api.getVersion());
+            apiSummary.setContext(api.getContext());
+            gatewayDTO.setApiSummary(apiSummary);
+            publishToPublisherTopic(gatewayDTO);
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Gateway home is not properly configured (null)");
+            }
+        }
+    }
+
     @Override
     public void addAPISubscription(List<SubscriptionValidationData> subscriptionValidationDataList) throws
             GatewayException {
@@ -136,9 +165,6 @@ public class APIGatewayPublisherImpl implements APIGateway {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void updateAPISubscriptionStatus(List<SubscriptionValidationData> subscriptionValidationDataList) throws
             GatewayException {
@@ -164,9 +190,6 @@ public class APIGatewayPublisherImpl implements APIGateway {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void addEndpoint(Endpoint endpoint) throws GatewayException {
 
@@ -179,9 +202,6 @@ public class APIGatewayPublisherImpl implements APIGateway {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void updateEndpoint(Endpoint endpoint) throws GatewayException {
         if (gwHome == null) {
@@ -193,9 +213,6 @@ public class APIGatewayPublisherImpl implements APIGateway {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void deleteEndpoint(Endpoint endpoint) throws GatewayException {
 
@@ -203,6 +220,10 @@ public class APIGatewayPublisherImpl implements APIGateway {
             EndpointEvent dto = new EndpointEvent(APIMgtConstants.GatewayEventTypes.ENDPOINT_DELETE);
             dto.setEndpoint(endpoint);
             publishToPublisherTopic(dto);
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Gateway home is not properly configured (null)");
+            }
         }
     }
 
@@ -229,11 +250,14 @@ public class APIGatewayPublisherImpl implements APIGateway {
     /**
      * Save API into FS
      *
-     * @param api     API object
-     * @param gwHome  path of the gateway
-     * @param content API config
+     * @param apiName      API Name
+     * @param apiVersion   API Version
+     * @param gwHome       path of the gateway
+     * @param content      API config
+     * @param isDefaultApi mark this as the default version of this API. Setting this to <code>true</code>
+     *                     will allow accessing API without version number prefix in the URL
      */
-    private void saveApi(API api, String gwHome, String content, boolean isDefaultApi) {
+    private void saveApi(String apiName, String apiVersion, String gwHome, String content, boolean isDefaultApi) {
         String deploymentDirPath = gwHome + File.separator + config.getGatewayPackageNamePath();
         File deploymentDir = new File(deploymentDirPath);
         if (!deploymentDir.exists()) {
@@ -246,9 +270,9 @@ public class APIGatewayPublisherImpl implements APIGateway {
 
         String path;
         if (isDefaultApi) {
-            path = deploymentDirPath + File.separator + api.getName() + gatewayFileExtension;
+            path = deploymentDirPath + File.separator + apiName + gatewayFileExtension;
         } else {
-            path = deploymentDirPath + File.separator + api.getName() + '_' + api.getVersion() + gatewayFileExtension;
+            path = deploymentDirPath + File.separator + apiName + '_' + apiVersion + gatewayFileExtension;
         }
         try (OutputStream outputStream = new FileOutputStream(path)) {
             IOUtils.write(content, outputStream, "UTF-8");
@@ -282,9 +306,6 @@ public class APIGatewayPublisherImpl implements APIGateway {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void changeAPIState(API api, String status) throws GatewayException {
         if (gwHome == null) {
@@ -296,6 +317,9 @@ public class APIGatewayPublisherImpl implements APIGateway {
             publishToPublisherTopic(gatewayDTO);
         } else {
             //TODO save to file system: need to consider editor mode scenario
+            if (log.isDebugEnabled()) {
+                log.debug("Gateway home is not properly configured (null)");
+            }
         }
     }
 

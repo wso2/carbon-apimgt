@@ -7,8 +7,8 @@ import org.wso2.carbon.apimgt.gateway.holders as holder;
 
 
 service gatewayInitService {
-    boolean isReady = initGateway();
     boolean isCacheInitialized = holder:initializeCache();
+    boolean isReady = initGateway();
     boolean subscriptionsInitialized = gatewayUtil:retrieveSubscriptions();
     boolean applicationsInitialized = gatewayUtil:retrieveApplications();
 }

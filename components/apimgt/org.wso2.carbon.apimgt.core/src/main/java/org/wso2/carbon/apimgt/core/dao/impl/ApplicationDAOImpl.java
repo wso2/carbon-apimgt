@@ -44,7 +44,7 @@ import java.util.Map;
  */
 public class ApplicationDAOImpl implements ApplicationDAO {
 
-    private static final String GET_APPS_QUERY = "SELECT NAME, APPLICATION_POLICY_ID, CALLBACK_URL, DESCRIPTION, " +
+    private static final String GET_APPS_QUERY = "SELECT NAME, APPLICATION_POLICY_ID, DESCRIPTION, " +
             "APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME, UUID " +
             "FROM AM_APPLICATION";
     private static final String AM_APPLICATION_TABLE_NAME = "AM_APPLICATION";
@@ -190,30 +190,29 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      */
     @Override
     public void addApplication(Application application) throws APIMgtDAOException {
-        final String addAppQuery = "INSERT INTO AM_APPLICATION (UUID, NAME, APPLICATION_POLICY_ID, CALLBACK_URL, " +
+        final String addAppQuery = "INSERT INTO AM_APPLICATION (UUID, NAME, APPLICATION_POLICY_ID, " +
                 "DESCRIPTION, APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_BY, " +
                 "LAST_UPDATED_TIME) VALUES (?, ?, (SELECT UUID FROM AM_APPLICATION_POLICY " +
-                "WHERE NAME = ?),?,?,?,?,?,?,?,?)";
+                "WHERE NAME = ?),?,?,?,?,?,?,?)";
         try (Connection conn = DAOUtil.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement ps = conn.prepareStatement(addAppQuery)) {
                 ps.setString(1, application.getId());
                 ps.setString(2, application.getName());
                 ps.setString(3, application.getTier());
-                ps.setString(4, application.getCallbackUrl());
-                ps.setString(5, application.getDescription());
+                ps.setString(4, application.getDescription());
 
                 if (APIMgtConstants.DEFAULT_APPLICATION_NAME.equals(application.getName())) {
-                    ps.setString(6, APIMgtConstants.ApplicationStatus.APPLICATION_APPROVED);
+                    ps.setString(5, APIMgtConstants.ApplicationStatus.APPLICATION_APPROVED);
                 } else {
-                    ps.setString(6, APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
+                    ps.setString(5, APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
                 }
 
-                ps.setString(7, application.getGroupId());
-                ps.setString(8, application.getCreatedUser());
-                ps.setTimestamp(9, Timestamp.valueOf(application.getCreatedTime()));
-                ps.setString(10, application.getCreatedUser());
-                ps.setTimestamp(11, Timestamp.valueOf(application.getCreatedTime()));
+                ps.setString(6, application.getGroupId());
+                ps.setString(7, application.getCreatedUser());
+                ps.setTimestamp(8, Timestamp.valueOf(application.getCreatedTime()));
+                ps.setString(9, application.getCreatedUser());
+                ps.setTimestamp(10, Timestamp.valueOf(application.getCreatedTime()));
                 ps.executeUpdate();
                 addApplicationPermission(conn, application.getPermissionMap(), application.getId());
                 conn.commit();
@@ -306,20 +305,19 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             throws APIMgtDAOException {
         final String updateAppQuery = "UPDATE AM_APPLICATION SET NAME=?, APPLICATION_POLICY_ID=" +
                 "(SELECT UUID FROM AM_APPLICATION_POLICY WHERE NAME=?), " +
-                "CALLBACK_URL=?, DESCRIPTION=?, APPLICATION_STATUS=?, GROUP_ID=?, UPDATED_BY=?, " +
+                "DESCRIPTION=?, APPLICATION_STATUS=?, GROUP_ID=?, UPDATED_BY=?, " +
                 "LAST_UPDATED_TIME=? WHERE UUID=?";
         try (Connection conn = DAOUtil.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement ps = conn.prepareStatement(updateAppQuery)) {
                 ps.setString(1, updatedApp.getName());
                 ps.setString(2, updatedApp.getTier());
-                ps.setString(3, updatedApp.getCallbackUrl());
-                ps.setString(4, updatedApp.getDescription());
-                ps.setString(5, updatedApp.getStatus());
-                ps.setString(6, updatedApp.getGroupId());
-                ps.setString(7, updatedApp.getUpdatedUser());
-                ps.setTimestamp(8, Timestamp.valueOf(updatedApp.getUpdatedTime()));
-                ps.setString(9, appID);
+                ps.setString(3, updatedApp.getDescription());
+                ps.setString(4, updatedApp.getStatus());
+                ps.setString(5, updatedApp.getGroupId());
+                ps.setString(6, updatedApp.getUpdatedUser());
+                ps.setTimestamp(7, Timestamp.valueOf(updatedApp.getUpdatedTime()));
+                ps.setString(8, appID);
                 ps.executeUpdate();
                 updateApplicationPermission(conn, updatedApp.getPermissionMap(), updatedApp.getId());
                 conn.commit();
@@ -467,7 +465,6 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             String createdUser = rs.getString("CREATED_BY");
             application = new Application(rs.getString("NAME"), createdUser);
             application.setId(rs.getString("UUID"));
-            application.setCallbackUrl(rs.getString("CALLBACK_URL"));
             application.setDescription(rs.getString("DESCRIPTION"));
             application.setGroupId(rs.getString("GROUP_ID"));
             application.setStatus(rs.getString("APPLICATION_STATUS"));

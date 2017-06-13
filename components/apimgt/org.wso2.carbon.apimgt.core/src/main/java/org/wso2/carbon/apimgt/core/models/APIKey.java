@@ -27,7 +27,6 @@ public class APIKey {
     private long validityPeriod;
     private String createdDate;
     private String authUser;
-    private String authorizedDomains;
     private String state;
 
 
@@ -98,13 +97,5 @@ public class APIKey {
 
     public void setTokenScope(String tokenScope) {
         this.tokenScope = tokenScope;
-    }
-
-    public String getAuthorizedDomains() {
-        return authorizedDomains;
-    }
-
-    public void setAuthorizedDomains(String authorizedDomains) {
-        this.authorizedDomains = authorizedDomains;
     }
 }

@@ -26,6 +26,7 @@ const string SUBSCRIPTION_CACHE = "SUBSCRIPTION_CACHE";
 const string APPLICATION_CACHE = "APPLICATION_CACHE";
 const string RESOURCE_CACHE = "RESOURCE_CACHE";
 const string POLICY_CACHE = "POLICY_CACHE";
+const string API_CACHE = "API_CACHE";
 
 const string THROTTLE_KEY = "throttleKey";
 const string POLICY_TEMPLATE_KEY = "keyTemplateValue";

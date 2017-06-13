@@ -715,7 +715,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 return Response.notModified().build();
             }
 
-            String swagger = apiStore.getSwagger20Definition(apiId);
+            String swagger = apiStore.getApiSwaggerDefinition(apiId);
             return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(swagger).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving swagger definition of API : " + apiId;

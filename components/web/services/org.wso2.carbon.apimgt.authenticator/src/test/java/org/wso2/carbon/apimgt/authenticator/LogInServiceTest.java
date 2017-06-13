@@ -77,8 +77,8 @@ public class LogInServiceTest {
         wireMockRule.start();
 
         // Mock service for key manager DCR endpoint
-        wireMockRule.stubFor(post(urlEqualTo("/identity/connect/register")).withBasicAuth("admin", "admin")
-                .withRequestBody(equalToJson("{\"client_name\":\"oauth_application\"}", true, true)).willReturn(
+        wireMockRule.stubFor(post(urlEqualTo("/identity/connect/register/")).withBasicAuth("admin", "admin")
+                .withRequestBody(equalToJson("{\"client_name\":\"login_application\"}", true, true)).willReturn(
                         aResponse().withStatus(201).withHeader("Content-Type", "application/json").withBody(
                                 "{\"client_name\":\"publisher_application\","
                                         + "\"client_id\":\"09261007-fd34-45c7-b950-c08f194773e7\","
@@ -87,7 +87,7 @@ public class LogInServiceTest {
                                         + "\"refresh_token\"]}")));
 
         // Mock service for key manager token endpoint
-        wireMockRule.stubFor(post(urlEqualTo("/oauth2/token"))
+        wireMockRule.stubFor(post(urlEqualTo("/oauth2/token/"))
                 .willReturn(
                         aResponse().withStatus(200).withHeader("Content-Type", "application/x-www-form-urlencoded")
                                 .withBody("{\"access_token\":\"8d4f62ea-edc5-419d-a898-a517f9d3d6f9\","
@@ -98,7 +98,7 @@ public class LogInServiceTest {
                                         + "\"apim:workflow_approve\"],\"expiresTimestamp\":1490615736702}")));
 
         // Mock service for key manager revoke endpoint
-        wireMockRule.stubFor(post(urlEqualTo("/oauth2/revoke")).willReturn(aResponse().withStatus(200)));
+        wireMockRule.stubFor(post(urlEqualTo("/oauth2/revoke/")).willReturn(aResponse().withStatus(200)));
 
         baseURI = URI.create(String.format("http://%s:%d", HOSTNAME, PORT));
         microservicesRunner = new MicroservicesRunner(PORT);
@@ -131,7 +131,7 @@ public class LogInServiceTest {
 
     @Test
     public void testLogin() throws IOException {
-        HttpURLConnection urlConn = request("/oauth/token", HttpMethod.POST, true);
+        HttpURLConnection urlConn = request("/login/token", HttpMethod.POST, true);
         String postParams = "username=admin&password=admin&grant_type=password"
                 + "&validity_period=3600&scopes=apim:api_view";
         urlConn.getOutputStream().write((postParams).getBytes(Charsets.UTF_8));
@@ -147,7 +147,7 @@ public class LogInServiceTest {
 
     @Test
     public void testLogOut() throws IOException {
-        HttpURLConnection urlConn = request("/oauth/revoke", HttpMethod.POST, true);
+        HttpURLConnection urlConn = request("/login/revoke", HttpMethod.POST, true);
         urlConn.setRequestProperty("Authorization", "Bearer 1234");
         urlConn.setRequestProperty("Cookie", "WSO2_AM_TOKEN_2=2345");
         assertEquals(200, urlConn.getResponseCode());
@@ -157,7 +157,7 @@ public class LogInServiceTest {
 
     @Test
     public void testRefresh() throws IOException {
-        HttpURLConnection urlConn = request("/oauth/token", HttpMethod.POST, true);
+        HttpURLConnection urlConn = request("/login/token", HttpMethod.POST, true);
         String postParams = "grant_type=refresh_token&validity_period=3600&scopes=apim:api_view";
         urlConn.setRequestProperty("Authorization", "Bearer 1234");
         urlConn.setRequestProperty("Cookie", "WSO2_AM_REFRESH_TOKEN_2=2345");

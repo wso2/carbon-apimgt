@@ -27,7 +27,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
-import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
@@ -93,6 +92,7 @@ public class MappingUtil {
         apidto.setTags(new ArrayList<>(api.getTags()));
         apidto.setLabels(new ArrayList<>(api.getLabels()));
         apidto.setTransport(new ArrayList<>(api.getTransport()));
+        apidto.setUserPermissionsForApi(api.getUserSpecificApiPermissions());
         api.getPolicies().forEach(apidto::addPoliciesItem);
         BusinessInformation businessInformation = api.getBusinessInformation();
         API_businessInformationDTO apiBusinessInformationDTO = new API_businessInformationDTO();
@@ -202,7 +202,6 @@ public class MappingUtil {
                 policies(new HashSet<>(apidto.getPolicies())).
                 businessInformation(businessInformation).
                 uriTemplates(uriTemplateList).
-                apiType(ApiType.STANDARD).  // Support Standard API creation from publisher
                 corsConfiguration(corsConfiguration);
         if (apidto.getIsDefaultVersion() != null) {
             apiBuilder.isDefaultVersion(apidto.getIsDefaultVersion());
@@ -249,6 +248,7 @@ public class MappingUtil {
             apiInfo.setLifeCycleStatus(apiSummary.getLifeCycleStatus());
             apiInfo.setVersion(apiSummary.getVersion());
             apiInfo.setWorkflowStatus(apiSummary.getWorkflowStatus());
+            apiInfo.setUserPermissionsForApi(apiSummary.getUserSpecificApiPermissions());
             apiInfoList.add(apiInfo);
         }
         return apiInfoList;

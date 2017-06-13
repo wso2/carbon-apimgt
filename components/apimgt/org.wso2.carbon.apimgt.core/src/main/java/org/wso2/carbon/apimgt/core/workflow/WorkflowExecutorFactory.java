@@ -67,6 +67,7 @@ public class WorkflowExecutorFactory {
      * Create a DTO object related to a given workflow type.
      *
      * @param workflowType Type of the workflow.
+     * @return WorkFlow instance
      */
     public Workflow createWorkflow(String workflowType) throws APIMgtDAOException {
         Workflow workflow = null;

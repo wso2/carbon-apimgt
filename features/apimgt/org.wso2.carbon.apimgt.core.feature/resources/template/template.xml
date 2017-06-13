@@ -65,13 +65,13 @@ service $serviceName {
 		handler:mediateEndpointRequest(m);
 		if (endpointType == "production") {
 		#if($productionEndpoint.applicableLevel == "API")
-		response = http:ClientConnector.execute(${apiResource.templateId}ProductionEndpoint, "$apiResource.httpverb.toLowerCase()", "", m);
+		response = http:ClientConnector.execute(${apiResource.templateId}ProductionEndpoint, "$apiResource.httpVerb.toLowerCase()", "", m);
 		#else
 		response = execute_${productionEndpoint.name}_Endpoint("$apiResource.httpverb.toLowerCase()", "", m);
 		#end
 		} else {
 		#if($sandboxEndpoint.applicableLevel == "API")
-		response = http:ClientConnector.execute(${apiResource.templateId}SandBoxEndpoint, "$apiResource.httpverb.toLowerCase()", "", m);
+		response = http:ClientConnector.execute(${apiResource.templateId}SandBoxEndpoint, "$apiResource.httpVerb.toLowerCase()", "", m);
 		#else
 		response = execute_${sandboxEndpoint.name}_Endpoint("$apiResource.httpverb.toLowerCase()", "", m);
 		#end

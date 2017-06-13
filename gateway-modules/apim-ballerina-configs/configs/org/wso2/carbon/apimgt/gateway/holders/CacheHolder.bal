@@ -63,16 +63,21 @@ function putIntoResourceCache (string apiContext, string apiVersion, dto:Resourc
 function removeFromTokenCache (string key) {
     caching:removeCacheEntry(constants:TOKEN_CACHE,key);
 }
-function putIntoAPICache (dto:APIDTO APIDTO) {
-    string key = APIDTO.context + ":" + APIDTO.version;
-    apiCache[key] = APIDTO;
+function putIntoAPICache (dto:APIDTO apidto) {
+    string key = apidto.context + ":" + apidto.version;
+    caching:putCacheEntry(constants:API_CACHE,key,apidto);
 }
-function removeFromAPICache (dto:APIDTO APIDTO) {
-    string key = APIDTO.context + ":" + APIDTO.version;
-    maps:remove(apiCache, key);
+function removeFromAPICache (dto:APIDTO apidto) {
+    string key = apidto.context + ":" + apidto.version;
+    caching:removeCacheEntry(constants:API_CACHE,key);
 }
 function getFromAPICache (string key) (dto:APIDTO){
-    return (dto:APIDTO)apiCache[key];
+    any api = caching:getCacheEntry(constants:API_CACHE,key);
+    if(api != null){
+        return (dto:APIDTO)api;
+    }else{
+        return null;
+    }
 }
 function setGatewayConf (dto:GatewayConfDTO conf) {
     gatewayConf = conf;
@@ -122,6 +127,9 @@ function initializeCache()(boolean ){
     caching:createCache(constants:POLICY_CACHE,"15");
     //cache for userinfo
     caching:createCache(constants:USER_INFO_CACHE,"15");
+    //cache for api
+    caching:createCache(constants:API_CACHE,"15");
+
     return true;
 }
 function getFromUserInfoCache (string userId) (json){

@@ -79,7 +79,7 @@ function fromJsonToResourceDto (json resourceResponse) (dto:ResourceDto){
 function retrieveSubscriptions () (boolean){
     string query = "/api/am/core/v1.0/subscriptions?limit=-1";
     message request = {};
-    http:ClientConnector apiInfoConnector = create http:ClientConnector(holders:apiCoreUrl);
+    http:ClientConnector apiInfoConnector = create http:ClientConnector(getAPICoreURL());
     messages:setHeader(request, "Content-Type", "application/json");
     message response = http:ClientConnector.get (apiInfoConnector, query, request);
     json subscriptions = messages:getJsonPayload(response);
@@ -115,7 +115,7 @@ function removeFromSubscriptionCache (json subscriptions) {
 function retrieveResources (string apiContext, string apiVersion) {
     string query = "/api/am/core/v1.0/resources/?apiContext=" + apiContext + "&apiVersion=" + apiVersion;
     message request = {};
-    http:ClientConnector apiInfoConnector = create http:ClientConnector(holders:apiCoreUrl);
+    http:ClientConnector apiInfoConnector = create http:ClientConnector(getAPICoreURL());
     messages:setHeader(request, "Content-Type", "application/json");
     message response = http:ClientConnector.get (apiInfoConnector, query, request);
     json resources = messages:getJsonPayload(response);
@@ -130,7 +130,7 @@ function retrieveResources (string apiContext, string apiVersion) {
 function retrieveApplications () (boolean) {
     string query = "/api/am/core/v1.0/applications";
     message request = {};
-    http:ClientConnector apiInfoConnector = create http:ClientConnector(holders:apiCoreUrl);
+    http:ClientConnector apiInfoConnector = create http:ClientConnector(getAPICoreURL());
     messages:setHeader(request, "Content-Type", "application/json");
     message response = http:ClientConnector.get (apiInfoConnector, query, request);
     json applications = messages:getJsonPayload(response);
