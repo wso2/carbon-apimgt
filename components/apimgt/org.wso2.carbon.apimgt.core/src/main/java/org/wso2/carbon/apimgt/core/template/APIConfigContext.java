@@ -40,7 +40,7 @@ public class APIConfigContext extends ConfigContext {
     public APIConfigContext(CompositeAPI compositeAPI, String gatewayPackageName) {
 
         this.api = new API.APIBuilder(compositeAPI.getProvider(), compositeAPI.getName(), compositeAPI.getVersion())
-                .context(compositeAPI.getContext()).build();
+                .context(compositeAPI.getContext()).id(compositeAPI.getId()).build();
         this.packageName = gatewayPackageName;
     }
 
