@@ -2,7 +2,6 @@ package $package;
 import ballerina.net.http;
 import ballerina.lang.messages;
 import org.wso2.carbon.apimgt.gateway.handler;
-import org.wso2.carbon.apimgt.gateway.event.analytics.latency;
 import org.wso2.carbon.apimgt.gateway.constants;
 
 @http:BasePath{value:"$apiContext"}
@@ -57,12 +56,13 @@ service $serviceName {
 		http:ClientConnector ${apiResource.templateId}SandBoxEndpoint = sandBoxEndpoint;
 		#end
 		#end
-		latency:mediateIn(m);
+		handler:mediateIn(m);
         message response;
         boolean status;
         status,response = authenticate(m);
         if(status){
 		string endpointType = messages:getProperty(m,constants:KEY_TYPE);
+		handler:mediateEndpointRequest(m);
 		if (endpointType == "production") {
 		#if($productionEndpoint.applicableLevel == "API")
 		response = http:ClientConnector.execute(${apiResource.templateId}ProductionEndpoint, "$apiResource.httpverb.toLowerCase()", "", m);
@@ -78,8 +78,7 @@ service $serviceName {
 
 		}
 
-		latency:mediateEndpointResponse(m);
-		latency:mediateOut(m);
+		handler:mediateEndpointResponse(m);
 		handler:mediateOut(m, response);
 		}
 		reply response;
