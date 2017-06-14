@@ -98,7 +98,9 @@ public class LoginTokenService {
             });
             scopes = allScopes.toString();
         } catch (APIManagementException e) {
-            throw new KeyManagementException("Error while reading scopes", e);
+            String message = "Error while reading scopes from swagger definition";
+            log.error(message, e);
+            throw new KeyManagementException(message, e);
         }
         //set openid scope
         if (StringUtils.isEmpty(scopes)) {
