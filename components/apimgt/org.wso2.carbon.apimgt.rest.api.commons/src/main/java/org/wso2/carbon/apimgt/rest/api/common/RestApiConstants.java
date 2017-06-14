@@ -116,7 +116,6 @@ public class RestApiConstants {
      */
     public static class APPType {
         public static final String PUBLISHER = "publisher";
-
         public static final String STORE = "store";
         public static final String ADMIN = "admin";
     }

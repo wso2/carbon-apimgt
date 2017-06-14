@@ -120,12 +120,12 @@ public class GatewaySourceGeneratorImpl implements GatewaySourceGenerator {
     }
 
     @Override
-    public String getEndpointConfigStringFromTemplate(List<Endpoint> endpoints) throws APITemplateException {
+    public String getEndpointConfigStringFromTemplate(Endpoint endpoint) throws APITemplateException {
         StringWriter writer = new StringWriter();
         String templatePath = "resources" + File.separator + "template" + File.separator + "endpoint.xml";
         try {
             // build the context for template and apply the necessary decorators
-            ConfigContext configcontext = new EndpointContext(endpoints, packageName);
+            ConfigContext configcontext = new EndpointContext(endpoint, packageName);
             VelocityContext context = configcontext.getContext();
             VelocityEngine velocityengine = new VelocityEngine();
             velocityengine.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");

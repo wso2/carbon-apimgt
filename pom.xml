@@ -44,6 +44,7 @@
         <module>components/web</module>
         <module>features/apimgt</module>
         <module>gateway-modules</module>
+        <module>analyzer-modules</module>
     </modules>
 
     <profiles>

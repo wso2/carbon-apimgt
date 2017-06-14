@@ -535,6 +535,95 @@ public class PolicyDAOImpl implements PolicyDAO {
     }
 
     /**
+     * @see PolicyDAO#policyExists(APIMgtAdminService.PolicyLevel, String)
+     */
+    @Override
+    public boolean policyExists(APIMgtAdminService.PolicyLevel policyLevel, String policyName)
+            throws APIMgtDAOException {
+
+        if (APIMgtAdminService.PolicyLevel.api == policyLevel) {
+            return apiPolicyExists(policyName);
+        } else if (APIMgtAdminService.PolicyLevel.application == policyLevel) {
+            return applicationPolicyExists(policyName);
+        } else if (APIMgtAdminService.PolicyLevel.subscription == policyLevel) {
+            return subscriptionPolicyExists(policyName);
+        } else {
+            String msg = "Invalid Policy level: " + policyLevel;
+            log.warn(msg);
+            throw new APIMgtDAOException(msg, ExceptionCodes.POLICY_LEVEL_NOT_SUPPORTED);
+        }
+    }
+
+    /**
+     * Check if the particular API Policy for the given name exists
+     *
+     * @param policyName policy name
+     * @return true if the API policy exists, else false
+     * @throws APIMgtDAOException if an error occurs while checking the policy existence
+     */
+    private static boolean apiPolicyExists(String policyName) throws APIMgtDAOException {
+
+        String sqlQuery = "SELECT * from AM_API_POLICY WHERE NAME = ?";
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
+            preparedStatement.setString(1, policyName);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return resultSet.next();
+            }
+        } catch (SQLException e) {
+            String errorMsg = "Error in checking whether API Policy exists";
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e);
+        }
+    }
+
+    /**
+     * Check if the particular Application Policy for the given name exists
+     *
+     * @param policyName policy name
+     * @return true if the Application policy exists, else false
+     * @throws APIMgtDAOException if an error occurs while checking the policy existence
+     */
+    private static boolean applicationPolicyExists(String policyName) throws APIMgtDAOException {
+
+        String sqlQuery = "SELECT * from AM_APPLICATION_POLICY WHERE NAME = ?";
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
+            preparedStatement.setString(1, policyName);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return resultSet.next();
+            }
+        } catch (SQLException e) {
+            String errorMsg = "Error in checking whether Application Policy exists";
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e);
+        }
+    }
+
+    /**
+     * Check if the particular Subscription Policy for the given name exists
+     *
+     * @param policyName policy name
+     * @return true if the Subscription policy exists, else false
+     * @throws APIMgtDAOException if an error occurs while checking the policy existence
+     */
+    private static boolean subscriptionPolicyExists (String policyName) throws APIMgtDAOException {
+
+        String sqlQuery = "SELECT * from AM_SUBSCRIPTION_POLICY WHERE NAME = ?";
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
+            preparedStatement.setString(1, policyName);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return resultSet.next();
+            }
+        } catch (SQLException e) {
+            String errorMsg = "Error in checking whether Subscription Policy exists";
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e);
+        }
+    }
+
+    /**
      *@see PolicyDAO#getPoliciesByLevel(APIMgtAdminService.PolicyLevel)
      */
     @Override
@@ -547,6 +636,10 @@ public class PolicyDAOImpl implements PolicyDAO {
             policies.addAll(getApplicationPolicies());
         } else if (APIMgtAdminService.PolicyLevel.subscription == policyLevel) {
             policies.addAll(getSubscriptionPolicies());
+        } else {
+            String msg = "Invalid Policy level: " + policyLevel;
+            log.warn(msg);
+            throw new APIMgtDAOException(msg, ExceptionCodes.POLICY_LEVEL_NOT_SUPPORTED);
         }
 
         return policies;
@@ -566,7 +659,9 @@ public class PolicyDAOImpl implements PolicyDAO {
         } else if (APIMgtAdminService.PolicyLevel.subscription == policyLevel) {
             return getSubscriptionPolicy(policyName);
         } else {
-            throw new APIMgtDAOException("Unable to find policy for level: " + policyLevel + ", name: " + policyName);
+            String msg = "Invalid Policy level: " + policyLevel;
+            log.warn(msg);
+            throw new APIMgtDAOException(msg, ExceptionCodes.POLICY_LEVEL_NOT_SUPPORTED);
         }
     }
 
@@ -1142,7 +1237,9 @@ public class PolicyDAOImpl implements PolicyDAO {
         } else if (APIMgtAdminService.PolicyLevel.subscription == policyLevel) {
             return getLastUpdatedTimeOfSubscriptionPolicy(policyName);
         } else {
-            throw new APIMgtDAOException("Invalid policy level " + policyLevel);
+            String msg = "Invalid Policy level: " + policyLevel;
+            log.warn(msg);
+            throw new APIMgtDAOException(msg, ExceptionCodes.POLICY_LEVEL_NOT_SUPPORTED);
         }
     }
 

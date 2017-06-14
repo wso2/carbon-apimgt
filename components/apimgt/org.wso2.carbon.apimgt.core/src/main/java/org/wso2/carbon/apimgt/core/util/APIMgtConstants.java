@@ -102,8 +102,15 @@ public class APIMgtConstants {
     public static final String URL_PATTERN_COLUMN = "URL_PATTERN";
 
     public static final String SANDBOX_ENDPOINT = "sandbox";
+    public static final String GATEWAY_CONFIG = "GATEWAY_CONFIG";
     public static final String HTTP = "http";
     public static final String HTTPS = "https";
+
+    public static final String HTTP_METHOD = "HTTP_METHOD";
+
+    public static final String NAMESPACE_STORE_API = "wso2.carbon.apimgt.store.rest.api";
+    public static final String NAMESPACE_PUBLISHER_API = "wso2.carbon.apimgt.publisher.rest.api";
+    public static final String NAMESPACE_ADMIN_API = "wso2.carbon.apimgt.admin.rest.api";
 
     /**
      * Application statuses.
@@ -324,6 +331,8 @@ public class APIMgtConstants {
         public static final String POST = "POST";
         public static final String PUT = "PUT";
         public static final String DELETE = "DELETE";
+        public static final String HEAD = "HEAD";
+        public static final String OPTIONS = "OPTIONS";
         public static final String CONTENT_TYPE = "Content-Type";
         public static final String ACCEPT = "Accept";
         public static final String USERNAME = "username";
@@ -358,6 +367,7 @@ public class APIMgtConstants {
         public static final String ATTRIBUTE_APPLICATION_GROUPID = "groupId";
         public static final String ATTRIBUTE_APPLICATION_PERMISSION = "permission";
         public static final String ATTRIBUTE_APPLICATION_EXISTIN_APP_STATUS = "status";
+        public static final String ATTRIBUTE_APPLICATION_POLICY_ID = "policyId";
 
     }
 
@@ -381,6 +391,10 @@ public class APIMgtConstants {
         public static final String ENDPOINT_DELETE = "ENDPOINT_DELETE";
         public static final String SUBSCRIPTION_CREATE = "SUBSCRIPTION_CREATE";
         public static final String SUBSCRIPTION_DELETE = "SUBSCRIPTION_DELETE";
+        public static final String SUBSCRIPTION_STATUS_CHANGE = "SUBSCRIPTION_STATUS_CHANGE";
+        public static final String APPLICATION_CREATE = "APPLICATION_CREATE";
+        public static final String APPLICATION_UPDATE = "APPLICATION_UPDATE";
+        public static final String APPLICATION_DELETE = "APPLICATION_DELETE";
     }
 
     /**
@@ -435,5 +449,14 @@ public class APIMgtConstants {
         public static final int SC_504_GATEWAY_TIMEOUT = 504;
         public static final int SC_505_HTTP_VERSION_NOT_SUPPORTED = 505;
         public static final int SC_507_INSUFFICIENT_STORAGE = 507;
+    }
+
+    /**
+     * Type of UUF apps in system
+     */
+    public static class APPType {
+        public static final String PUBLISHER = "publisher";
+        public static final String STORE = "store";
+        public static final String ADMIN = "admin";
     }
 }

@@ -22,8 +22,9 @@ package org.wso2.carbon.apimgt.core.api;
 import org.wso2.carbon.apimgt.core.exception.APIConfigRetrievalException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APISummary;
+import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Label;
+import org.wso2.carbon.apimgt.core.models.RegistrationSummary;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
@@ -77,14 +78,6 @@ public interface APIMgtAdminService {
      */
     List<SubscriptionValidationData> getAPISubscriptionsOfApi(String apiContext, String apiVersion)
             throws APIManagementException;
-
-    /**
-     * Load api info from db
-     *
-     * @return Subscription Validation Information
-     * @throws APIManagementException If failed to get lAPI summary data
-     */
-    List<APISummary> getAPIInfo() throws APIManagementException;
 
     /**
      * Adds new {@link APIPolicy} to the system
@@ -287,6 +280,38 @@ public interface APIMgtAdminService {
      * @throws APIManagementException If failed to get API list
      */
     List<API> getAPIsByGatewayLabel(List<String> gatewayLabels) throws APIManagementException;
+
+    /**
+     * Retrieve API Gateway registration summary
+     *
+     * @return RegistrationSummary
+     */
+    RegistrationSummary getRegistrationSummary();
+
+    /**
+     * Get list of Applications
+     *
+     * @return list of {@link Application}
+     * @throws APIManagementException If failed to get Applications
+     */
+    List<Application> getAllApplications() throws APIManagementException;
+
+    /**
+     *
+     * Get List of Endpoints
+     * @return list of UUID of Global Endpoints
+     * @throws APIManagementException If failed to get Endpoints
+     */
+    List<String> getAllEndpoints() throws APIManagementException;
+
+    /**
+     * Return Gateway Configuration of Endpoint
+     *
+     * @param endpointId
+     * @return gateway Configuration of Endpoint
+     * @throws APIManagementException If failed to get Endpoints configuration
+     */
+    String getEndpointGatewayConfig(String endpointId) throws APIManagementException;
 
     /**
      * Policy Level enum

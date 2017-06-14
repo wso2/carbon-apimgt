@@ -115,6 +115,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "Identity provider initialization failed"),
     KEY_MANAGER_INITIALIZATION_FAILED(900606, "Key Manager initialization failed", 500,
             "Key Manager initialization failed"),
+    ROLE_DOES_NOT_EXIST(900607, "Role does not exist in the system", 404, "Role does not exist in the system"),
 
 
     // Labels related codes
@@ -159,7 +160,11 @@ public enum ExceptionCodes implements ErrorHandler {
     ACCESS_TOKEN_REVOKE_FAILED(900959, "Key Management Error", 500, "Error while revoking the access token."),
     INTERNAL_ERROR(900963, "General Error", 500, "Server Error Occurred"),
     POLICY_LEVEL_NOT_SUPPORTED(900965, "Throttle Policy level invalid", 400, "Specified Throttle policy level is not "
-            + "valid");
+            + "valid"),
+    //Throttle related codes
+    THROTTLE_TEMPLATE_EXCEPTION(900960, "Policy Generating Error", 500, " Error while generate policy configuration"),
+    ENDPOINT_CONFIG_NOT_FOUND(900961, "Endpoint Config Not found", 404, "Error while retrieving Endpoint " +
+            "Configuration");
 
     private final long errorCode;
     private final String errorMessage;

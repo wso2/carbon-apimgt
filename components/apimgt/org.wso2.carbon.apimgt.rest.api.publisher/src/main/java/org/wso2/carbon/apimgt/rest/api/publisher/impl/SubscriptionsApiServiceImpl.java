@@ -7,6 +7,7 @@ import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
@@ -73,7 +74,12 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             Subscription newSubscription = apiPublisher.getSubscriptionByUUID(subscriptionId);
             SubscriptionDTO subscriptionDTO = MappingUtil.fromSubscription(newSubscription);
             return Response.ok().entity(subscriptionDTO).build();
-        } catch (APIManagementException e) {
+        } catch (GatewayException e) {
+            String errorMessage = "Failed to block subscription :" + subscriptionId + " in gateway";
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.ACCEPTED).build();
+        }
+        catch (APIManagementException e) {
             String errorMessage = "Error while blocking the subscription " + subscriptionId;
             HashMap<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.SUBSCRIPTION_ID, subscriptionId);
@@ -235,7 +241,12 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             Subscription newSubscription = apiPublisher.getSubscriptionByUUID(subscriptionId);
             SubscriptionDTO subscriptionDTO = MappingUtil.fromSubscription(newSubscription);
             return Response.ok().entity(subscriptionDTO).build();
-        } catch (APIManagementException e) {
+        } catch (GatewayException e) {
+            String errorMessage = "Failed to unblock subscription :" + subscriptionId + " in gateway";
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.ACCEPTED).build();
+        }
+         catch (APIManagementException e) {
             String errorMessage = "Error while unblocking the subscription " + subscriptionId;
             HashMap<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.SUBSCRIPTION_ID, subscriptionId);

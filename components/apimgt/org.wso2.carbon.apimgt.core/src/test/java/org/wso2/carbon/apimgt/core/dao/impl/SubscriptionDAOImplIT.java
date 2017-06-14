@@ -177,49 +177,49 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         //validate subscriptions
         for (SubscriptionValidationData subscription : subscriptions) {
             Assert.assertNotNull(subscription);
-            if (subscription.getApplicationName().equals(app1.getName()) &&
+            if (subscription.getApplicationId().equals(app1.getId()) &&
                     subscription.getApiName().equals(api2.getName())) {
                 //app1  & api 2
                 validateSubscriptionsOfApi(subscription, api2, app1);
-            } else if (subscription.getApplicationName().equals(app2.getName()) &&
+            } else if (subscription.getApplicationId().equals(app2.getId()) &&
                     subscription.getApiName().equals(api1.getName())) {
                 //app2  & api 1
                 validateSubscriptionsOfApi(subscription, api1, app2);
-            } else if (subscription.getApplicationName().equals(app2.getName()) &&
+            } else if (subscription.getApplicationId().equals(app2.getId()) &&
                     subscription.getApiName().equals(api2.getName())) {
                 //app2  & api 2
                 validateSubscriptionsOfApi(subscription, api2, app2);
-            } else if (subscription.getApplicationName().equals(app2.getName()) &&
+            } else if (subscription.getApplicationId().equals(app2.getId()) &&
                     subscription.getApiName().equals(api3.getName())) {
                 //app2  & api 3
                 validateSubscriptionsOfApi(subscription, api3, app2);
-            } else if (subscription.getApplicationName().equals(app2.getName()) &&
+            } else if (subscription.getApplicationId().equals(app2.getId()) &&
                     subscription.getApiName().equals(api4.getName())) {
                 //app2  & api 4
                 validateSubscriptionsOfApi(subscription, api4, app2);
-            } else if (subscription.getApplicationName().equals(app3.getName()) &&
+            } else if (subscription.getApplicationId().equals(app3.getId()) &&
                     subscription.getApiName().equals(api3.getName())) {
                 //app3  & api 3
                 validateSubscriptionsOfApi(subscription, api3, app3);
-            } else if (subscription.getApplicationName().equals(app4.getName()) &&
+            } else if (subscription.getApplicationId().equals(app4.getId()) &&
                     subscription.getApiName().equals(api1.getName())) {
                 //app4  & api 1
                 validateSubscriptionsOfApi(subscription, api1, app4);
-            } else if (subscription.getApplicationName().equals(app4.getName()) &&
+            } else if (subscription.getApplicationId().equals(app4.getId()) &&
                     subscription.getApiName().equals(api2.getName())) {
                 //app4  & api 2
                 validateSubscriptionsOfApi(subscription, api2, app4);
-            } else if (subscription.getApplicationName().equals(app4.getName()) &&
+            } else if (subscription.getApplicationId().equals(app4.getId()) &&
                     subscription.getApiName().equals(api3.getName())) {
                 //app4  & api 3
                 validateSubscriptionsOfApi(subscription, api3, app4);
-            } else if (subscription.getApplicationName().equals(app4.getName()) &&
+            } else if (subscription.getApplicationId().equals(app4.getId()) &&
                     subscription.getApiName().equals(api4.getName())) {
                 //app4  & api 4
                 validateSubscriptionsOfApi(subscription, api4, app4);
             } else {
                 Assert.fail("Invalid subscription found!!! API: " + subscription.getApiName()
-                        + " Application: " + subscription.getApplicationName());
+                        + " Application: " + subscription.getApplicationId());
             }
         }
     }
@@ -266,9 +266,9 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         //validate subscriptions
         for (SubscriptionValidationData subscription : subscriptions) {
             Assert.assertNotNull(subscription);
-            if (subscription.getApplicationName().equals(app2.getName())) {
+            if (subscription.getApplicationId().equals(app2.getId())) {
                 validateSubscriptionsOfApi(subscription, api1, app2);
-            } else if (subscription.getApplicationName().equals(app4.getName())) {
+            } else if (subscription.getApplicationId().equals(app4.getId())) {
                 validateSubscriptionsOfApi(subscription, api1, app4);
             } else {
                 Assert.fail(INVALID_SUBSCRIPTION_FOUND);
@@ -284,11 +284,11 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         //validate subscriptions
         for (SubscriptionValidationData subscription : subscriptions) {
             Assert.assertNotNull(subscription);
-            if (subscription.getApplicationName().equals(app1.getName())) {
+            if (subscription.getApplicationId().equals(app1.getId())) {
                 validateSubscriptionsOfApi(subscription, api2, app1);
-            } else if (subscription.getApplicationName().equals(app2.getName())) {
+            } else if (subscription.getApplicationId().equals(app2.getId())) {
                 validateSubscriptionsOfApi(subscription, api2, app2);
-            } else if (subscription.getApplicationName().equals(app4.getName())) {
+            } else if (subscription.getApplicationId().equals(app4.getId())) {
                 validateSubscriptionsOfApi(subscription, api2, app4);
             } else {
                 Assert.fail(INVALID_SUBSCRIPTION_FOUND);
@@ -304,11 +304,11 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         //validate subscriptions
         for (SubscriptionValidationData subscription : subscriptions) {
             Assert.assertNotNull(subscription);
-            if (subscription.getApplicationName().equals(app2.getName())) {
+            if (subscription.getApplicationId().equals(app2.getId())) {
                 validateSubscriptionsOfApi(subscription, api3, app2);
-            } else if (subscription.getApplicationName().equals(app3.getName())) {
+            } else if (subscription.getApplicationId().equals(app3.getId())) {
                 validateSubscriptionsOfApi(subscription, api3, app3);
-            } else if (subscription.getApplicationName().equals(app4.getName())) {
+            } else if (subscription.getApplicationId().equals(app4.getId())) {
                 validateSubscriptionsOfApi(subscription, api3, app4);
             } else {
                 Assert.fail(INVALID_SUBSCRIPTION_FOUND);
@@ -324,7 +324,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         //validate subscriptions
         for (SubscriptionValidationData subscription : subscriptions) {
             Assert.assertNotNull(subscription);
-            if (subscription.getApplicationName().equals(app4.getName())) {
+            if (subscription.getApplicationId().equals(app4.getId())) {
                 validateSubscriptionsOfApi(subscription, api4, app4);
             } else {
                 Assert.fail(INVALID_SUBSCRIPTION_FOUND);
@@ -336,8 +336,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertEquals(validationData.getApiContext(), api.getContext());
         Assert.assertEquals(validationData.getApiProvider(), api.getProvider());
         Assert.assertEquals(validationData.getApiVersion(), api.getVersion());
-        Assert.assertEquals(validationData.getApplicationOwner(), app.getCreatedUser());
-        Assert.assertEquals(validationData.getSubscriptionPolicy(), GOLD_TIER);
+        Assert.assertEquals(validationData.getApplicationId(), app.getId());
     }
 
     @Test

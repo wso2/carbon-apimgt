@@ -35,6 +35,16 @@ import java.util.List;
 public interface PolicyDAO {
 
     /**
+     * Checks whether the Throttling Policy exists for the gen policy level and name
+     *
+     * @param policyLevel policy level {@link APIMgtAdminService.PolicyLevel}
+     * @param policyName polcy name
+     * @return true if the policy exists, else false
+     * @throws APIMgtDAOException if any error occurs while checking the Policy existence
+     */
+    boolean policyExists (APIMgtAdminService.PolicyLevel policyLevel, String policyName) throws APIMgtDAOException;
+
+    /**
      * Gets all Policies by level
      *
      * @param policyLevel policy level
