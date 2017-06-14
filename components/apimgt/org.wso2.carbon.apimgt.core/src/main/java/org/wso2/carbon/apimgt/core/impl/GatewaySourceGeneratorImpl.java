@@ -26,7 +26,6 @@ import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.log.CommonsLogLogChute;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
-import org.ballerinalang.composer.service.workspace.swagger.SwaggerConverterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
@@ -44,7 +43,6 @@ import org.wso2.carbon.apimgt.core.template.dto.CompositeAPIEndpointDTO;
 import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
 
@@ -105,13 +103,14 @@ public class GatewaySourceGeneratorImpl implements GatewaySourceGenerator {
 
     @Override
     public String getSwaggerFromGatewayConfig(String gatewayConfig) throws APITemplateException {
-        try {
-            return SwaggerConverterUtils.generateSwaggerDataModel(gatewayConfig);
+        /*try {
+//            return SwaggerConverterUtils.generateSwaggerDataModel(gatewayConfig);
         } catch (IOException e) {
             log.error("Error while generating swagger from ballerina", e);
             throw new APITemplateException("Error while generating swagger from ballerina",
                     ExceptionCodes.TEMPLATE_EXCEPTION);
-        }
+        }*/
+        return null;
     }
 
     @Override
