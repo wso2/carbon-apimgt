@@ -23,7 +23,7 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
 
 
-class ApiCreateEndpoint extends React.Component {
+class ApiCreateSwagger extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -64,6 +64,7 @@ class ApiCreateEndpoint extends React.Component {
         const opts = {
             position: toast.POSITION.TOP_CENTER,
             onClose: () => {
+                debugger;
                 let uuid = JSON.parse(response.data).id;
                 let redirect_url = "/apis/" + uuid + "/overview";
                 that.props.history.push(redirect_url);
@@ -149,7 +150,7 @@ class ApiCreateEndpoint extends React.Component {
                             </div>
                         </form>
                     </div>
-                <span className="ink animate"></span>
+                    <span className="ink animate"></span>
                 </div>
 
 
@@ -159,4 +160,4 @@ class ApiCreateEndpoint extends React.Component {
     }
 }
 
-export default ApiCreateEndpoint;
+export default ApiCreateSwagger;
