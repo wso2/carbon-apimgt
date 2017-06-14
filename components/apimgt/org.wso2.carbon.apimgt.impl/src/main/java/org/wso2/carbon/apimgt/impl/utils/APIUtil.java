@@ -644,11 +644,7 @@ public final class APIUtil {
 
             Set<Tier> availableTier = new HashSet<Tier>();
             String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
-<<<<<<< Updated upstream
-            if (tiers != null) {                
-=======
             if (tiers != null) {
->>>>>>> Stashed changes
                 String[] tierNames = tiers.split("\\|\\|");
                 for (String tierName : tierNames) {
                     Tier tier = new Tier(tierName);
@@ -1619,11 +1615,7 @@ public final class APIUtil {
         } catch (RegistryException e) {
             log.error(APIConstants.MSG_TIER_RET_ERROR, e);
             throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
-<<<<<<< Updated upstream
-        } catch (XMLStreamException e) {           
-=======
         } catch (XMLStreamException e) {
->>>>>>> Stashed changes
             log.error(APIConstants.MSG_MALFORMED_XML_ERROR, e);
             throw new APIManagementException(APIConstants.MSG_MALFORMED_XML_ERROR, e);
         }
@@ -2965,13 +2957,8 @@ public final class APIUtil {
     }
 
     /**
-<<<<<<< Updated upstream
-     * Add all the custom sequences of given type to registry 
-     * 
-=======
      * Add all the custom sequences of given type to registry
      *
->>>>>>> Stashed changes
      * @param registry Registry instance
      * @param customSequenceType Custom sequence type which is in/out or fault
      * @throws APIManagementException
