@@ -148,24 +148,30 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
      * @throws APIMgtSecurityException if the Authorization header is invalid
      */
     private String extractPartialAccessTokenFromCookie(String cookie) {
-        cookie = cookie.trim();
-        String[] cookies = cookie.split(";");
-        String token2 = Arrays.stream(cookies)
-                .filter(name -> name.contains(APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J))
-                .findFirst().orElse("");
-        if (token2.split("=").length == 2) {
-            return token2.split("=")[1];
+        if (cookie != null) {
+            cookie = cookie.trim();
+            String[] cookies = cookie.split(";");
+
+            String token2 = Arrays.stream(cookies)
+                    .filter(name -> name.contains(APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J))
+                    .findFirst().orElse("");
+            if (token2.split("=").length == 2) {
+                return token2.split("=")[1];
+            }
         }
         return null;
     }
 
     private boolean isCookieExists(Headers headers, String cookieName) {
         String cookie = headers.get(RestApiConstants.COOKIE_HEADER);
-        cookie = cookie.trim();
-        String[] cookies = cookie.split(";");
-        String token2 = Arrays.stream(cookies)
-                .filter(name -> name.contains(cookieName))
-                .findFirst().orElse(null);
+        String token2 = null;
+        if (cookie != null) {
+            cookie = cookie.trim();
+            String[] cookies = cookie.split(";");
+            token2 = Arrays.stream(cookies)
+                    .filter(name -> name.contains(cookieName))
+                    .findFirst().orElse(null);
+        }
         return (token2 != null);
     }
 
@@ -216,9 +222,12 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
             log.debug("Invoking rest api resource path " + verb + " " + path + " ");
             log.debug("LoggedIn user scopes " + scopesToValidate);
         }
-
-        if (scopesToValidate != null && scopesToValidate.split(" ").length > 0) {
-            final List<String> scopes = Arrays.asList(scopesToValidate.split(" "));
+        String[] scopesArr = new String[0];
+        if (scopesToValidate != null) {
+            scopesArr = scopesToValidate.split(" ");
+        }
+        if (scopesToValidate != null && scopesArr.length > 0) {
+            final List<String> scopes = Arrays.asList(scopesArr);
             if (restAPIResource != null) {
                 APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
                 try {
