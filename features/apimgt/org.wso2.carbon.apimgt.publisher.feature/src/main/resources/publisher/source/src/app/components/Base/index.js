@@ -21,12 +21,15 @@ import Footer from './Footer/Footer'
 import Header from './Header/Header'
 
 import LeftNav from './Navigation/LeftNav'
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.min.css';
 
 class Base extends Component {
 
     render() {
         return (
             <div>
+                <ToastContainer />
                 <Header/>
                 <div className="page-content-wrapper sidebar-target">
                     <LeftNav/>

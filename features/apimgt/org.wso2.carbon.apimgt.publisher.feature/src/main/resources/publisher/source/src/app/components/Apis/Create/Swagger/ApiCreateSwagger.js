@@ -23,7 +23,7 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
 
 
-class ApiCreateEndpoint extends React.Component {
+class ApiCreateSwagger extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -150,7 +150,7 @@ class ApiCreateEndpoint extends React.Component {
                             </div>
                         </form>
                     </div>
-                <span className="ink animate"></span>
+                    <span className="ink animate"></span>
                 </div>
 
 
@@ -160,4 +160,4 @@ class ApiCreateEndpoint extends React.Component {
     }
 }
 
-export default ApiCreateEndpoint;
+export default ApiCreateSwagger;
