@@ -61,6 +61,8 @@ service $serviceName {
         boolean status;
         status,response = authenticate(m);
         if(status){
+		boolean isThrottled = isrequestThrottled(m);
+		if(!isThrottled){
 		string endpointType = messages:getProperty(m,constants:KEY_TYPE);
 		handler:mediateEndpointRequest(m);
 		if (endpointType == "production") {
@@ -76,6 +78,7 @@ service $serviceName {
 		response = execute_${sandboxEndpoint.name}_Endpoint("$apiResource.httpverb.toLowerCase()", "", m);
 		#end
 
+		}
 		}
 
 		handler:mediateEndpointResponse(m);
