@@ -88,7 +88,6 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -551,11 +550,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @return Map of permission values.
      * @throws ParseException If failed to parse the json string.
      */
-    private HashMap<String, Integer> getAPIPermissionArray(String permissionJsonString) throws ParseException {
+    private HashMap<String, Integer> getAPIPermissionArray(String permissionJsonString)
+            throws ParseException, APIManagementException {
 
-        HashMap<String, Integer> roleNamePermissionList = new HashMap<String, Integer>();
+        HashMap<String, Integer> rolePermissionList = new HashMap<String, Integer>();
         JSONParser jsonParser = new JSONParser();
-
         JSONArray baseJsonArray = (JSONArray) jsonParser.parse(permissionJsonString);
         for (Object aBaseJsonArray : baseJsonArray) {
             JSONObject jsonObject = (JSONObject) aBaseJsonArray;
@@ -571,10 +570,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     totalPermissionValue += APIMgtConstants.Permission.DELETE_PERMISSION;
                 }
             }
-            roleNamePermissionList.put(groupId, totalPermissionValue);
+            rolePermissionList.put(groupId, totalPermissionValue);
         }
 
-        return roleNamePermissionList;
+        return rolePermissionList;
     }
 
     /**

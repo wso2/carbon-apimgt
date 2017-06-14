@@ -34,7 +34,6 @@ function overviewTabHandler(event) {
     api_client.get(api_id).then(
         function (response) {
             var context = response.obj;
-            var api_data = JSON.parse(response.data);
             if (context.endpointConfig) {
                 var endpointConfig = $.parseJSON(context.endpointConfig);
                 context.productionEndpoint = endpointConfig.production_endpoints.url;
@@ -308,7 +307,7 @@ function accessControlTabHandler(event) {
             var mode = "OVERWRITE"; // Available modes [OVERWRITE,APPEND, PREPEND]
             var callbacks = {
                 onSuccess: function (data) {
-                    if (!permission_data || permission_data === "[]"){
+                    if (!permission_data || permission_data === ""){
                         $('#no-roles-msg').removeClass('hide');
                         $('#permissionTable').hide();
                     }
@@ -963,6 +962,9 @@ function documentTabHandler(event) {
     	return null;
     }
 
+/**
+ * Disables specific tabs if user doesn't have UPDATE permission for the API
+ */
 function disableTabsOnPermissions(client, apiId) {
     var api_client = client;
     var api_id = apiId;

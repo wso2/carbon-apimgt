@@ -688,7 +688,6 @@ public class ApisApiServiceImpl extends ApisApiService {
                     .contains(existingFingerprint)) {
                 return Response.notModified().build();
             }
-
             API api = RestAPIPublisherUtil.getApiPublisher(username).getAPIbyUUID(apiId);
             api.setUserSpecificApiPermissions(getAPIPermissionsOfLoggedInUser(username, api));
             APIDTO apidto = MappingUtil.toAPIDto(api);
@@ -702,7 +701,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-        }catch (ParseException e) {
+        } catch (ParseException e) {
             String errorMessage = "Parse Exception while retrieving API : " + apiId;
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
             log.error(errorMessage, e);
