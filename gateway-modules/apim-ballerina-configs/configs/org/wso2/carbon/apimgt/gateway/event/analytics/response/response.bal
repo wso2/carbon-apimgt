@@ -1,17 +1,19 @@
 package org.wso2.carbon.apimgt.gateway.event.analytics.response;
 
 import org.wso2.carbon.apimgt.gateway.event.publisher;
+import org.wso2.carbon.apimgt.gateway.holders;
 import ballerina.lang.messages;
 import ballerina.lang.system;
 import ballerina.net.http;
 import org.wso2.carbon.apimgt.gateway.dto;
 
 function mediate (message m, message res) {
-    //dto:AnalyticsInfoDTO analyticsConf = holder:getAnalyticsConf();
-    //if (!analyticsConf.enabled) {
-    //    system:println("Analytics is Disabled");
-    //    return;
-    //}
+    dto:AnalyticsInfoDTO analyticsConf = holders:getAnalyticsConf();
+    system:println(analyticsConf);
+    if (!analyticsConf.enabled) {
+        system:println("Analytics is Disabled");
+        return;
+    }
     int request_start_time = (int)messages:getProperty(m, "am.request_start_time");
     int request_end_time = (int)messages:getProperty(m, "am.request_end_time");
     int backend_start_time = (int)messages:getProperty(m, "am.backend_start_time");
