@@ -25,8 +25,8 @@ import org.wso2.carbon.kernel.annotations.Element;
  */
 public class PolicyDeployerConfiguration {
 
-    @Element(description = "Server URL")
-    private String serverURL = "https://localhost:9445/services/";
+    @Element(description = "DAS execution plan REST API")
+    private String serverURL = "http://localhost:9091";
     @Element(description = "Policy deployer credentials")
     private CredentialConfigurations policyDeployerCredentials = new CredentialConfigurations();
 
