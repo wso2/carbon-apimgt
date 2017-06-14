@@ -64,7 +64,6 @@ class ApiCreateEndpoint extends React.Component {
         const opts = {
             position: toast.POSITION.TOP_CENTER,
             onClose: () => {
-                debugger;
                 let uuid = JSON.parse(response.data).id;
                 let redirect_url = "/apis/" + uuid + "/overview";
                 that.props.history.push(redirect_url);
