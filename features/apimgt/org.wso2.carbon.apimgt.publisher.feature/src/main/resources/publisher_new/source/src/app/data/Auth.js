@@ -21,8 +21,26 @@ import qs from 'qs';
 
 class Auth {
     constructor() {
+        /* TODO: Move this to configuration ~tmkb*/
         this.host = "https://localhost:9292";
         this.token = "/publisher/auth/apis/login/token";
+    }
+
+    static getCookie(name) {
+        var value = "; " + document.cookie;
+        var parts = value.split("; " + name + "=");
+        if (parts.length === 2) return parts.pop().split(";").shift();
+    }
+
+
+    static setCookie(name, value, days) {
+        let expires = "";
+        if (days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + value + expires + "; path=/";
     }
 
     /**
@@ -53,7 +71,12 @@ class Auth {
             validity_period: 3600,
             scopes: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage apim:subscription_view apim:subscription_block apim:subscribe'
         };
-        return axios.post(this.getTokenEndpoint(), qs.stringify(data), {headers: headers});
+        let promised_response = axios.post(this.getTokenEndpoint(), qs.stringify(data), {headers: headers});
+        promised_response.then(response => {
+            let WSO2_AM_TOKEN_1 = response.data.partialToken;
+            Auth.setCookie('WSO2_AM_TOKEN_1', WSO2_AM_TOKEN_1);
+        });
+        return promised_response;
     }
 }
 
