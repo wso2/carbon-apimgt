@@ -17,7 +17,6 @@
  */
 
 import React, {Component} from 'react'
-import ReactDom from 'react-dom'
 import {BrowserRouter as Router, Route, Link, Switch} from 'react-router-dom'
 
 import {Apis, Landing, Base} from './app/components/index'
