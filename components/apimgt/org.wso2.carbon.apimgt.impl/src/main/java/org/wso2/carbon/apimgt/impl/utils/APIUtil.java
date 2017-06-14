@@ -146,6 +146,14 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
 
 import javax.cache.*;
+<<<<<<< Updated upstream
+=======
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+>>>>>>> Stashed changes
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -157,6 +165,7 @@ import javax.xml.stream.XMLStreamReader;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -171,6 +180,12 @@ import java.net.SocketException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.rmi.RemoteException;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -638,7 +653,11 @@ public final class APIUtil {
 
             Set<Tier> availableTier = new HashSet<Tier>();
             String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
+<<<<<<< Updated upstream
             if (tiers != null) {                
+=======
+            if (tiers != null) {
+>>>>>>> Stashed changes
                 String[] tierNames = tiers.split("\\|\\|");
                 for (String tierName : tierNames) {
                     Tier tier = new Tier(tierName);
@@ -1609,7 +1628,11 @@ public final class APIUtil {
         } catch (RegistryException e) {
             log.error(APIConstants.MSG_TIER_RET_ERROR, e);
             throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
+<<<<<<< Updated upstream
         } catch (XMLStreamException e) {           
+=======
+        } catch (XMLStreamException e) {
+>>>>>>> Stashed changes
             log.error(APIConstants.MSG_MALFORMED_XML_ERROR, e);
             throw new APIManagementException(APIConstants.MSG_MALFORMED_XML_ERROR, e);
         }
@@ -2951,8 +2974,13 @@ public final class APIUtil {
     }
 
     /**
+<<<<<<< Updated upstream
      * Add all the custom sequences of given type to registry 
      * 
+=======
+     * Add all the custom sequences of given type to registry
+     *
+>>>>>>> Stashed changes
      * @param registry Registry instance
      * @param customSequenceType Custom sequence type which is in/out or fault
      * @throws APIManagementException
@@ -4853,12 +4881,30 @@ public final class APIUtil {
         SchemeRegistry registry = new SchemeRegistry();
         X509HostnameVerifier hostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
         SSLSocketFactory socketFactory = SSLSocketFactory.getSocketFactory();
+        String sslValue = null;
+
+        AxisConfiguration axis2Config = ServiceReferenceHolder.getContextService().getServerConfigContext()
+                .getAxisConfiguration();
+        org.apache.axis2.description.Parameter sslVerifyClient = axis2Config.getTransportIn(APIConstants.HTTPS_PROTOCOL)
+                .getParameter(APIConstants.SSL_VERIFY_CLIENT);
+        if (sslVerifyClient != null) {
+            sslValue = (String) sslVerifyClient.getValue();
+        }
+
         socketFactory.setHostnameVerifier(hostnameVerifier);
         if (APIConstants.HTTPS_PROTOCOL.equals(protocol)) {
-            if (port >= 0) {
-                registry.register(new Scheme(APIConstants.HTTPS_PROTOCOL, port, socketFactory));
-            } else {
-                registry.register(new Scheme(APIConstants.HTTPS_PROTOCOL, 443, socketFactory));
+            try {
+                if (APIConstants.SSL_VERIFY_CLIENT_STATUS_REQUIRE.equals(sslValue)) {
+                    socketFactory = createSocketFactory();
+                    socketFactory.setHostnameVerifier(hostnameVerifier);
+                }
+                if (port >= 0) {
+                    registry.register(new Scheme(APIConstants.HTTPS_PROTOCOL, port, socketFactory));
+                } else {
+                    registry.register(new Scheme(APIConstants.HTTPS_PROTOCOL, 443, socketFactory));
+                }
+            } catch (APIManagementException e) {
+                log.error(e);
             }
         } else if (APIConstants.HTTP_PROTOCOL.equals(protocol)) {
             if (port >= 0) {
@@ -4871,6 +4917,36 @@ public final class APIUtil {
         ThreadSafeClientConnManager tcm = new ThreadSafeClientConnManager(registry);
         return new DefaultHttpClient(tcm, params);
 
+    }
+
+    private static SSLSocketFactory createSocketFactory() throws APIManagementException {
+        KeyStore keyStore;
+        String keyStorePath = null;
+        String keyStorePassword;
+        try {
+            keyStorePath = CarbonUtils.getServerConfiguration().getFirstProperty("Security.KeyStore.Location");
+            keyStorePassword = CarbonUtils.getServerConfiguration()
+                    .getFirstProperty("Security.KeyStore.Password");
+            keyStore = KeyStore.getInstance("JKS");
+            keyStore.load(new FileInputStream(keyStorePath), keyStorePassword.toCharArray());
+            SSLSocketFactory sslSocketFactory = new SSLSocketFactory(keyStore, keyStorePassword);
+
+            return sslSocketFactory;
+
+        } catch (KeyStoreException e) {
+            handleException("Failed to read from Key Store", e);
+        } catch (CertificateException e) {
+            handleException("Failed to read Certificate", e);
+        } catch (NoSuchAlgorithmException e) {
+            handleException("Failed to load Key Store from " + keyStorePath, e);
+        } catch (IOException e) {
+            handleException("Key Store not found in " + keyStorePath, e);
+        } catch (UnrecoverableKeyException e) {
+            handleException("Failed to load key from" + keyStorePath, e);
+        } catch (KeyManagementException e) {
+            handleException("Failed to load key from" + keyStorePath, e);
+        }
+        return null;
     }
 
     /**
