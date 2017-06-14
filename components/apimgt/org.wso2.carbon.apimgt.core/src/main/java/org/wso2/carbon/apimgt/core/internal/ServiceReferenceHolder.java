@@ -70,15 +70,16 @@ public class ServiceReferenceHolder {
    * @param namespace namespace defined in deployment.yaml
    * @return resource path to scope mapping
    * */
-    public Map<String, String> getRestAPIConfigurationMap(String nameSpace) {
+    public Map<String, String> getRestAPIConfigurationMap(String namespace) {
         try {
             if (configProvider != null) {
-                return configProvider.getConfigurationMap(nameSpace);
+                return configProvider.getConfigurationMap(namespace);
             } else {
                 log.error("Configuration provider is null");
             }
         } catch (CarbonConfigurationException e) {
-            log.error("error getting config : org.wso2.carbon.apimgt.core.internal.APIMConfiguration", e);
+            log.error("Error while reading the configurations map of namespace : " +
+                    "org.wso2.carbon.apimgt.core.internal.APIMConfiguration", e);
         }
         return null;
     }
