@@ -8,7 +8,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>web-parent</artifactId>
-        <version>7.0.24-SNAPSHOT</version>
+        <version>7.0.26-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -70,6 +70,7 @@
                         <Import-Package>
                             org.wso2.msf4j.*;version="${msf4j.package.import.version.range}",
                             org.wso2.carbon.apimgt.core.*;version="${carbon.apimgt.import.pkg.version}",
+                            org.wso2.carbon.apimgt.rest.api.common.*;version="${carbon.apimgt.version}",
                             org.slf4j.*;version="${slf4j.logging.package.import.version.range}",
                             org.wso2.carbon.messaging.*;version="${carbon.messaging.package.import.version.range}",
                             javax.ws.rs.*,
