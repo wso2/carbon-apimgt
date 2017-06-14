@@ -1,19 +1,18 @@
 package org.wso2.carbon.apimgt.gateway.dto;
-struct APIKeyValidationInfoDTO {
+struct KeyValidationDto {
     string username;
-    string applicationTier;
-    string tier;
-    string apiTier;
-    boolean isContentAwareTierPresent;
-    string apiKey;
-    string keyType;
-    string callerToken;
+    string applicationPolicy;
+    string subscriptionPolicy;
+    string apiLevelPolicy;
+    string resourceLevelPolicy;
+    string verb;
+    string apiName;
+    string apiProvider;
+    string apiContext;
+    string apiVersion;
     string applicationId;
     string applicationName;
-    string consumerKey;
+    string keyType;
     string subscriber;
-    string[] throttlingDataList;
-    int spikeArrestLimit;
-    string spikeArrestUnit;
-    boolean stopOnQuotaReach;
+    string resourcePath;
 }

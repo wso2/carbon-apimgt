@@ -6,10 +6,11 @@ import ballerina.lang.system;
 import ballerina.lang.errors;
 
 import org.wso2.carbon.apimgt.gateway.holders as throttle;
-import org.wso2.carbon.apimgt.gateway.utils as util;
+import org.wso2.carbon.apimgt.gateway.utils as gatewayUtil;
 import org.wso2.carbon.apimgt.gateway.constants as constants;
 import org.wso2.carbon.apimgt.gateway.event.publisher;
 import org.wso2.carbon.apimgt.gateway.dto;
+import org.wso2.carbon.apimgt.ballerina.util;
 
 function isrequestThrottled( message msg) (boolean){
     // will return true if the request is throttled
@@ -41,17 +42,17 @@ function isrequestThrottled( message msg) (boolean){
     string apiLevelBlockingKey = "";
     string userLevelBlockingKey = "";
 
-    json keyValidationDto = (json)messages:getProperty(msg, "KEY_VALIDATION_INFO");
+    dto:KeyValidationDto keyValidationDto = (dto:KeyValidationDto)util:getProperty(msg, "KEY_VALIDATION_INFO");
 
-    authorizedUser = util:getJsonString(keyValidationDto, "username");
+    authorizedUser = keyValidationDto.username;
     //Throttle Policies
-    string applicationLevelPolicy = util:getJsonString(keyValidationDto, "applicationPolicy");
-    string subscriptionLevelPolicy = util:getJsonString(keyValidationDto, "subscriptionPolicy");
-    string apiLevelPolicy =  util:getJsonString(keyValidationDto, "apiLevelPolicy");
+    string applicationLevelPolicy = keyValidationDto.applicationPolicy;
+    string subscriptionLevelPolicy = keyValidationDto.subscriptionPolicy;
+    string apiLevelPolicy = keyValidationDto.apiLevelPolicy;
 
-    string apiContext = util:getJsonString(keyValidationDto, "apiContext");
-    string apiVersion = util:getJsonString(keyValidationDto, "apiVersion");
-    string applicationId = util:getJsonString(keyValidationDto, "applicationId");
+    string apiContext = keyValidationDto.apiContext;
+    string apiVersion = keyValidationDto.apiVersion;
+    string applicationId = keyValidationDto.applicationId;
 
     if (authorizedUser == ""){
         http:setStatusCode( msg, constants:HTTP_UNAUTHORIZED);
@@ -62,7 +63,7 @@ function isrequestThrottled( message msg) (boolean){
     }
 
     //todo get the correct key value
-    ipLevelBlockingKey = util:getStringProperty(msg, "CLIENT_IP_ADDRESS");
+    ipLevelBlockingKey = gatewayUtil:getStringProperty(msg, "CLIENT_IP_ADDRESS");
     apiLevelThrottleKey = apiContext + ":" + apiVersion;
     subscriptionLevelThrottleKey = applicationId + ":" + apiContext + ":" + apiVersion;
 
@@ -77,9 +78,9 @@ function isrequestThrottled( message msg) (boolean){
         return true;
     }
 
-    string httpMethod = util:getJsonString(keyValidationDto, "verb");
-    string resourceLevelPolicy = util:getJsonString(keyValidationDto, "resourceLevelPolicy");
-    string resourceUri = util:getJsonString(keyValidationDto, "resourcePath");
+    string httpMethod = keyValidationDto.verb;
+    string resourceLevelPolicy = keyValidationDto.resourceLevelPolicy;
+    string resourceUri = keyValidationDto.resourcePath;
     resourceLevelThrottleKey = apiContext + "/" + apiVersion + resourceUri + ":" + httpMethod;
 
     //Check API Level is Applied
@@ -122,7 +123,7 @@ function isrequestThrottled( message msg) (boolean){
 
     // Subscription Level throttling
     isSubscriptionLevelThrottled = throttle:isThrottled(subscriptionLevelThrottleKey);
-    string stopOnQuotaReach = util:getStringProperty(msg, constants:STOP_ON_QUOTA_REACH);
+    string stopOnQuotaReach = gatewayUtil:getStringProperty(msg, constants:STOP_ON_QUOTA_REACH);
 
     if(isSubscriptionLevelThrottled){
 
