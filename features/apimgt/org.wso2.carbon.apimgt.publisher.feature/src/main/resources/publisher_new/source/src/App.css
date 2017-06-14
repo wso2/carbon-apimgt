@@ -13,3 +13,6 @@ header.header{
 .content-section{
   margin-left: 350px;
 }
+div.toastify{
+    z-index: 1001;
+}

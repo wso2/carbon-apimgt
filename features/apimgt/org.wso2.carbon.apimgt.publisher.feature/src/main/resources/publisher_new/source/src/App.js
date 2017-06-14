@@ -38,11 +38,12 @@ class Publisher extends Component {
 
     render() {
         return (
-            <Router basename="/publisher_new">
+            <Router basename="/publisher">
                 <Base>
                     <Switch>
                         <Route exact path={"/"} component={ApiCreate}/>
                         <Route path={"/apis"} component={Apis}/>
+                        <Route path={"/api/create"} component={ApiCreate}/>
                         <Route component={PageNotFound}/>
                     </Switch>
                 </Base>

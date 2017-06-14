@@ -22,6 +22,8 @@ import {Route, Switch, BrowserRouter as Router} from 'react-router-dom'
 import Listing from './Listing/Listing'
 import Details from './Details/index'
 import {PageNotFound} from '../Base/Errors/index'
+import 'react-toastify/dist/ReactToastify.min.css';
+
 
 const Apis = (props) => {
     return (
