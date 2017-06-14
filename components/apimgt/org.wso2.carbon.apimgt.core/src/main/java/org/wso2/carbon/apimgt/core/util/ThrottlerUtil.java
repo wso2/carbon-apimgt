@@ -135,6 +135,14 @@ public class ThrottlerUtil {
         }
     }
 
+    /**
+     * Utility for check policy Exist
+     *
+     * @param policyLevel Level of policy
+     * @param policyName policy Name
+     * @return existence of policy
+     * @throws APIManagementException throws if any exception occured
+     */
     public static boolean isPolicyExist(String policyLevel, String policyName) throws APIManagementException {
         PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
         Policy policy = policyDAO.getPolicy(policyLevel, policyName);
