@@ -24,14 +24,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.authenticator.utils.AuthUtil;
 import org.wso2.carbon.apimgt.authenticator.utils.bean.AuthResponseBean;
+import org.wso2.carbon.apimgt.core.api.APIDefinition;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
+import org.wso2.carbon.apimgt.core.impl.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
+import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -71,7 +76,30 @@ public class LoginTokenService {
      *
      */
     public String getTokens(AuthResponseBean authResponseBean, String appName, String userName, String password,
-            String grantType, String refreshToken, String scopes, long validityPeriod) throws KeyManagementException {
+            String grantType, String refreshToken, long validityPeriod) throws KeyManagementException {
+        String scopes = "";
+        try {
+            String publisherRestAPI = RestApiUtil.getPublisherRestAPIResource();
+            String storeRestAPI = RestApiUtil.getStoreRestAPIResource();
+            String adminRestAPI = RestApiUtil.getAdminRestAPIResource();
+            APIDefinition apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
+            Map<String, Scope> publisherScopes = apiDefinitionFromSwagger20.getScopes(publisherRestAPI);
+            Map<String, Scope> storeScopes = apiDefinitionFromSwagger20.getScopes(storeRestAPI);
+            Map<String, Scope> adminScopes = apiDefinitionFromSwagger20.getScopes(adminRestAPI);
+            final StringBuffer allScopes = new StringBuffer();
+            publisherScopes.keySet().forEach(key -> {
+                allScopes.append(key).append(" ");
+            });
+            storeScopes.keySet().forEach(key -> {
+                allScopes.append(key).append(" ");
+            });
+            adminScopes.keySet().forEach(key -> {
+                allScopes.append(key).append(" ");
+            });
+            scopes = allScopes.toString();
+        } catch (APIManagementException e) {
+            throw new KeyManagementException("Error while reading scopes", e);
+        }
         //set openid scope
         if (StringUtils.isEmpty(scopes)) {
             scopes = KeyManagerConstants.OPEN_ID_CONNECT_SCOPE;
