@@ -33,7 +33,7 @@ public class PublisherApiServiceImpl extends PublisherApiService {
         String filePath = "./deployment/webapps/" + context + "public/index.html";
 
         //#TODO read from config file
-        if ("publisher".equals(context)) {
+        if ("publisher_new".equals(context)) {
             if (rawUri.contains(".")) {
                 filePath = "./deployment/webapps/" + rawUri;
             } else {
