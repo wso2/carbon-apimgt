@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
 import org.wso2.carbon.apimgt.core.api.APIMObservable;
+import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
@@ -1439,14 +1440,26 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
 
     @Override
-    public List<Policy> getAllPoliciesByLevel(String tierLevel) throws APIManagementException {
-        return getPolicyDAO().getPolicies(tierLevel);
+    public List<Policy> getAllPoliciesByLevel(APIMgtAdminService.PolicyLevel tierLevel) throws APIManagementException {
+        try {
+            return getPolicyDAO().getPoliciesByLevel(tierLevel);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error while retrieving Policies for level: " + tierLevel;
+            log.error(errorMsg);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIM_DAO_EXCEPTION);
+        }
     }
 
-
     @Override
-    public Policy getPolicyByName(String tierLevel, String tierName) throws APIManagementException {
-        return getPolicyDAO().getPolicy(tierLevel, tierName);
+    public Policy getPolicyByName(APIMgtAdminService.PolicyLevel tierLevel, String tierName)
+            throws APIManagementException {
+        try {
+            return getPolicyDAO().getPolicyByLevelAndName(tierLevel, tierName);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error while retrieving Policy for level: " + tierLevel + ", name: " + tierName;
+            log.error(errorMsg);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIM_DAO_EXCEPTION);
+        }
     }
 
     @Override

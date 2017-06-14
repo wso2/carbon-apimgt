@@ -22,12 +22,13 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
+import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 
 import java.util.List;
@@ -38,9 +39,10 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
     public void testFingerprintAfterUpdatingAPIPolicy() throws Exception {
         APIPolicy policy = SampleTestObjectCreator.createDefaultAPIPolicy();
         PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
-        policyDAO.addPolicy(APIMgtConstants.ThrottlePolicyConstants.API_LEVEL, policy);
+        policyDAO.addApiPolicy(policy);
         String fingerprintBeforeUpdatingPolicy = ETagUtils
-                .generateETag(policyDAO.getLastUpdatedTimeOfThrottlingPolicy("api", policy.getPolicyName()));
+                .generateETag(policyDAO.getLastUpdatedTimeOfThrottlingPolicy(APIMgtAdminService.PolicyLevel.api,
+                        policy.getPolicyName()));
         Assert.assertNotNull(fingerprintBeforeUpdatingPolicy);
         //todo: complete rest of the flow after PolicyDAO supports updating Policies
     }
@@ -49,9 +51,10 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
     public void testFingerprintAfterUpdatingApplicationPolicy() throws Exception {
         ApplicationPolicy policy = SampleTestObjectCreator.createDefaultApplicationPolicy();
         PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
-        policyDAO.addPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, policy);
+        policyDAO.addApplicationPolicy(policy);
         String fingerprintBeforeUpdatingPolicy = ETagUtils
-                .generateETag(policyDAO.getLastUpdatedTimeOfThrottlingPolicy("application", policy.getPolicyName()));
+                .generateETag(policyDAO.getLastUpdatedTimeOfThrottlingPolicy(APIMgtAdminService.PolicyLevel.application,
+                        policy.getPolicyName()));
         Assert.assertNotNull(fingerprintBeforeUpdatingPolicy);
         //todo: complete rest of the flow after PolicyDAO supports updating Policies
     }
@@ -60,46 +63,46 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
     public void testFingerprintAfterUpdatingSubscriptionPolicy() throws Exception {
         SubscriptionPolicy policy = SampleTestObjectCreator.createDefaultSubscriptionPolicy();
         PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
-        policyDAO.addPolicy(APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL, policy);
+        policyDAO.addSubscriptionPolicy(policy);
         String fingerprintBeforeUpdatingPolicy = ETagUtils
-                .generateETag(policyDAO.getLastUpdatedTimeOfThrottlingPolicy("subscription", policy.getPolicyName()));
+                .generateETag(policyDAO.getLastUpdatedTimeOfThrottlingPolicy(APIMgtAdminService.PolicyLevel
+                                .subscription, policy.getPolicyName()));
         Assert.assertNotNull(fingerprintBeforeUpdatingPolicy);
         //todo: complete rest of the flow after PolicyDAO supports updating Policies
     }
 
-    @Test (description = "Add, Get and Delete an API policy")
+    @Test (description = "Add, Get and Delete an API policy", expectedExceptions = APIMgtDAOException.class)
     public void testAddGetAndDeleteApiPolicy() throws Exception {
         APIPolicy policy = SampleTestObjectCreator.createDefaultAPIPolicy();
         PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
         //add policy
-        policyDAO.addPolicy(APIMgtConstants.ThrottlePolicyConstants.API_LEVEL, policy);
+        policyDAO.addApiPolicy(policy);
         //get added policy
-        Policy addedPolicy = policyDAO.getPolicy(policy.getUserLevel(), policy.getPolicyName());
+        Policy addedPolicy = policyDAO.getApiPolicy(policy.getPolicyName());
         Assert.assertNotNull(addedPolicy);
         Assert.assertEquals(addedPolicy.getPolicyName(), policy.getPolicyName());
         //delete policy
-        policyDAO.deletePolicy(policy.getPolicyName(), policy.getUserLevel());
+        policyDAO.deletePolicy(APIMgtAdminService.PolicyLevel.api, policy.getPolicyName());
         //get policy after deletion
-        Policy policyAfterDeletion = policyDAO.getPolicy(policy.getUserLevel(), policy.getPolicyName());
+        Policy policyAfterDeletion = policyDAO.getApiPolicy(policy.getPolicyName());
         Assert.assertNull(policyAfterDeletion);
     }
 
-    @Test(description = "Add, Get and Delete an Application policy")
+    @Test(description = "Add, Get and Delete an Application policy", expectedExceptions = APIMgtDAOException.class)
     public void testAddGetAndDeleteApplicationPolicy() throws Exception {
         ApplicationPolicy policy = SampleTestObjectCreator.createDefaultApplicationPolicy();
         PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
         //add policy
-        policyDAO.addPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, policy);
+        policyDAO.addApplicationPolicy(policy);
         //get added policy
         Policy addedPolicy = policyDAO
-                .getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, policy.getPolicyName());
+                .getApplicationPolicy(policy.getPolicyName());
         Assert.assertNotNull(addedPolicy);
         Assert.assertEquals(addedPolicy.getPolicyName(), policy.getPolicyName());
         //delete policy
-        policyDAO.deletePolicy(policy.getPolicyName(), APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL);
+        policyDAO.deletePolicy(APIMgtAdminService.PolicyLevel.application, policy.getPolicyName());
         //get policy after deletion
-        Policy policyAfterDeletion = policyDAO
-                .getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, policy.getPolicyName());
+        Policy policyAfterDeletion = policyDAO.getApplicationPolicy(policy.getPolicyName());
         Assert.assertNull(policyAfterDeletion);
     }
 
@@ -108,8 +111,8 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         APIPolicy policy = SampleTestObjectCreator.createDefaultAPIPolicy();
         PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
         //add policy
-        policyDAO.addPolicy(APIMgtConstants.ThrottlePolicyConstants.API_LEVEL, policy);
-        List<Policy> policyList = policyDAO.getPolicies(APIMgtConstants.ThrottlePolicyConstants.API_LEVEL);
+        policyDAO.addApiPolicy(policy);
+        List<APIPolicy> policyList = policyDAO.getApiPolicies();
         Assert.assertNotNull(policyList);
     }
 
@@ -118,8 +121,8 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         ApplicationPolicy policy = SampleTestObjectCreator.createDefaultApplicationPolicy();
         PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
         //add policy
-        policyDAO.addPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, policy);
-        List<Policy> policyList = policyDAO.getPolicies(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL);
+        policyDAO.addApplicationPolicy(policy);
+        List<ApplicationPolicy> policyList = policyDAO.getApplicationPolicies();
         Assert.assertNotNull(policyList);
     }
     @Test(description = "Get Subscription Policies")
@@ -127,29 +130,27 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         SubscriptionPolicy policy = SampleTestObjectCreator.createDefaultSubscriptionPolicy();
         PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
         //add policy
-        policyDAO.addPolicy(APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL, policy);
-        List<Policy> policyList = policyDAO.getPolicies(APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL);
+        policyDAO.addSubscriptionPolicy(policy);
+        List<SubscriptionPolicy> policyList = policyDAO.getSubscriptionPolicies();
         Assert.assertNotNull(policyList);
     }
 
-    @Test(description = "Add,Get and Delete Subscription Policies")
+    @Test(description = "Add,Get and Delete Subscription Policies", expectedExceptions = APIMgtDAOException.class)
     public void testAddGetDeleteSubscriptionPolicies()
             throws Exception {
         SubscriptionPolicy policy = SampleTestObjectCreator.createDefaultSubscriptionPolicy();
         policy.setUuid("3d253272-25b3-11e7-93ae-92361f002671");
         PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
         //add policy
-        policyDAO.addPolicy(APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL, policy);
+        policyDAO.addSubscriptionPolicy(policy);
         //get added policy
-        Policy addedPolicy = policyDAO.
-                getPolicy(APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL, policy.getPolicyName());
+        Policy addedPolicy = policyDAO.getSubscriptionPolicy(policy.getPolicyName());
         Assert.assertNotNull(addedPolicy);
         Assert.assertEquals(addedPolicy.getPolicyName(), policy.getPolicyName());
         //delete policy
-        policyDAO.deletePolicy(policy.getPolicyName(), APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL);
+        policyDAO.deletePolicy(APIMgtAdminService.PolicyLevel.subscription, policy.getPolicyName());
         //get policy after deletion
-        Policy policyAfterDeletion = policyDAO
-                .getPolicy(APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL, policy.getPolicyName());
+        Policy policyAfterDeletion = policyDAO.getSubscriptionPolicy(policy.getPolicyName());
         Assert.assertNull(policyAfterDeletion);
 
     }
@@ -160,9 +161,8 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         APIPolicy policy = SampleTestObjectCreator.createDefaultAPIPolicyWithBandwidthLimit();
         PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
         //add policy
-        policyDAO.addPolicy(APIMgtConstants.ThrottlePolicyConstants.API_LEVEL, policy);
-        Policy policyAdded = policyDAO
-                .getPolicy(APIMgtConstants.ThrottlePolicyConstants.API_LEVEL, policy.getPolicyName());
+        policyDAO.addApiPolicy(policy);
+        Policy policyAdded = policyDAO.getApiPolicy(policy.getPolicyName());
         Assert.assertNotNull(policyAdded);
         Assert.assertEquals(policyAdded.getPolicyName(), policy.getPolicyName());
 

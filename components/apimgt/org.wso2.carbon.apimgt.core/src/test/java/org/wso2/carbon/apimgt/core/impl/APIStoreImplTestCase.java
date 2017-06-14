@@ -29,6 +29,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.api.APIGateway;
+import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
@@ -306,7 +307,7 @@ public class APIStoreImplTestCase {
         application.setPermissionString(
                 "[{\"groupId\": \"testGroup\",\"permission\":[\"READ\",\"UPDATE\",\"DELETE\",\"SUBSCRIPTION\"]}]");
         Mockito.when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
-        Mockito.when(policyDAO.getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, TIER)).thenReturn
+        Mockito.when(policyDAO.getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, TIER)).thenReturn
                 (policy);
         ApplicationCreationResponse response = apiStore.addApplication(application);
         Assert.assertNotNull(response.getApplicationUUID());
@@ -324,7 +325,7 @@ public class APIStoreImplTestCase {
         application.setTier(TIER);
         application.setPermissionString(null);
         Mockito.when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
-        Mockito.when(policyDAO.getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, TIER)).thenReturn
+        Mockito.when(policyDAO.getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, TIER)).thenReturn
                 (policy);
         ApplicationCreationResponse applicationResponse = apiStore.addApplication(application);
         String applicationUuid = applicationResponse.getApplicationUUID();
@@ -343,7 +344,7 @@ public class APIStoreImplTestCase {
         application.setTier(TIER);
         application.setPermissionString("");
         Mockito.when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
-        Mockito.when(policyDAO.getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, TIER)).thenReturn
+        Mockito.when(policyDAO.getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, TIER)).thenReturn
                 (policy);
         ApplicationCreationResponse applicationResponse = apiStore.addApplication(application);
         String applicationUuid = applicationResponse.getApplicationUUID();
@@ -362,7 +363,7 @@ public class APIStoreImplTestCase {
         application.setTier(TIER);
         application.setPermissionString("[{\"groupId\": \"testGroup\",\"permission\":[\"TESTREAD\",\"TESTUPDATE\"]}]");
         Mockito.when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
-        Mockito.when(policyDAO.getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, TIER)).thenReturn
+        Mockito.when(policyDAO.getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, TIER)).thenReturn
                 (policy);
         ApplicationCreationResponse applicationResponse = apiStore.addApplication(application);
         String applicationUuid = applicationResponse.getApplicationUUID();
@@ -526,7 +527,7 @@ public class APIStoreImplTestCase {
         Application application = new Application(APP_NAME, USER_NAME);
         application.setTier(TIER);
         Mockito.when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
-        Mockito.when(policyDAO.getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, TIER)).thenReturn
+        Mockito.when(policyDAO.getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, TIER)).thenReturn
                 (null);
         apiStore.addApplication(application);
     }
@@ -613,16 +614,17 @@ public class APIStoreImplTestCase {
     public void testGetPolicies() throws APIManagementException {
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
         APIStore apiStore = getApiStoreImpl(policyDAO);
-        apiStore.getPolicies(APPLICATION_POLICY_LEVEL);
-        Mockito.verify(policyDAO, Mockito.times(1)).getPolicies(APPLICATION_POLICY_LEVEL);
+        apiStore.getPolicies(APIMgtAdminService.PolicyLevel.application);
+        Mockito.verify(policyDAO, Mockito.times(1)).getPoliciesByLevel(APIMgtAdminService.PolicyLevel.application);
     }
 
     @Test(description = "Get policy given policy name and policy level")
     public void testGetPolicy() throws APIManagementException {
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
         APIStore apiStore = getApiStoreImpl(policyDAO);
-        apiStore.getPolicy(APPLICATION_POLICY_LEVEL, POLICY_NAME);
-        Mockito.verify(policyDAO, Mockito.times(1)).getPolicy(APPLICATION_POLICY_LEVEL, POLICY_NAME);
+        apiStore.getPolicy(APIMgtAdminService.PolicyLevel.application, POLICY_NAME);
+        Mockito.verify(policyDAO, Mockito.times(1)).getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application,
+                POLICY_NAME);
     }
 
     @Test(description = "Retrieve labels")
@@ -991,9 +993,10 @@ public class APIStoreImplTestCase {
     public void testGetPoliciesException() throws APIManagementException {
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
         APIStore apiStore = getApiStoreImpl(policyDAO);
-        Mockito.when(policyDAO.getPolicies(APPLICATION_POLICY_LEVEL)).thenThrow(new APIMgtDAOException(
+        Mockito.when(policyDAO.getPoliciesByLevel(APIMgtAdminService.PolicyLevel.application)).
+                thenThrow(new APIMgtDAOException(
                 "Error occurred while retrieving policies for policy level - " + APPLICATION_POLICY_LEVEL));
-        apiStore.getPolicies(APPLICATION_POLICY_LEVEL);
+        apiStore.getPolicies(APIMgtAdminService.PolicyLevel.application);
     }
 
     @Test(description = "Exception when getting policy given policy name and policy level",
@@ -1001,9 +1004,9 @@ public class APIStoreImplTestCase {
     public void testGetPolicyException() throws APIManagementException {
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
         APIStore apiStore = getApiStoreImpl(policyDAO);
-        Mockito.when(policyDAO.getPolicy(APPLICATION_POLICY_LEVEL, POLICY_NAME))
+        Mockito.when(policyDAO.getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, POLICY_NAME))
                 .thenThrow(new APIMgtDAOException("Error occurred while retrieving policy - " + POLICY_NAME));
-        apiStore.getPolicy(APPLICATION_POLICY_LEVEL, POLICY_NAME);
+        apiStore.getPolicy(APIMgtAdminService.PolicyLevel.application, POLICY_NAME);
     }
 
     @Test(description = "Exception when deleting an application", expectedExceptions = APIManagementException.class)
@@ -1096,7 +1099,7 @@ public class APIStoreImplTestCase {
         Application application = new Application(APP_NAME, USER_NAME);
         application.setTier(TIER);
         Mockito.when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
-        Mockito.when(policyDAO.getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, TIER)).thenReturn
+        Mockito.when(policyDAO.getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, TIER)).thenReturn
                 (policy);
         Mockito.doThrow(new APIMgtDAOException("Error occurred while creating the application - " + application
                 .getName()))
@@ -1114,7 +1117,7 @@ public class APIStoreImplTestCase {
         application.setTier(TIER);
         application.setPermissionString("data");
         Mockito.when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
-        Mockito.when(policyDAO.getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, TIER)).thenReturn
+        Mockito.when(policyDAO.getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, TIER)).thenReturn
                 (policy);
         apiStore.addApplication(application);
     }
@@ -1157,7 +1160,7 @@ public class APIStoreImplTestCase {
         application.setPermissionString(
                 "[{\"groupId\": \"testGroup\",\"permission\":[\"READ\",\"UPDATE\",\"DELETE\",\"SUBSCRIPTION\"]}]");
         Mockito.when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
-        Mockito.when(policyDAO.getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, TIER)).thenReturn
+        Mockito.when(policyDAO.getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, TIER)).thenReturn
                 (policy);
 
         apiStore.addApplication(application);
@@ -1192,7 +1195,7 @@ public class APIStoreImplTestCase {
         application.setPermissionString(
                 "[{\"groupId\": \"testGroup\",\"permission\":[\"READ\",\"UPDATE\",\"DELETE\",\"SUBSCRIPTION\"]}]");
         Mockito.when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
-        Mockito.when(policyDAO.getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL, TIER)).thenReturn
+        Mockito.when(policyDAO.getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, TIER)).thenReturn
                 (policy);
 
 

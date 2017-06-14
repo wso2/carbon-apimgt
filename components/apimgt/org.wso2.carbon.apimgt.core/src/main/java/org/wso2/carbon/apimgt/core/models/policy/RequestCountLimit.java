@@ -19,18 +19,31 @@
 
 package org.wso2.carbon.apimgt.core.models.policy;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
 /**
  * Contains request CountLimit based attributes
  */
 public class RequestCountLimit extends Limit {
+
+    public static final String REQUEST_QUOTA_UNIT = "REQ";
+
     private int requestCount;
+
+    public RequestCountLimit (String timeUnit, int unitTime, int requestCount) {
+        super(timeUnit, unitTime);
+        this.requestCount = requestCount;
+    }
+
+    @Override
+    public void populateDataInPreparedStatement(PreparedStatement preparedStatement) throws SQLException {
+        preparedStatement.setInt(6, getRequestCount());
+        preparedStatement.setString(7, REQUEST_QUOTA_UNIT);
+    }
 
     public int getRequestCount() {
         return requestCount;
-    }
-
-    public void setRequestCount(int requestCount) {
-        this.requestCount = requestCount;
     }
 
     @Override

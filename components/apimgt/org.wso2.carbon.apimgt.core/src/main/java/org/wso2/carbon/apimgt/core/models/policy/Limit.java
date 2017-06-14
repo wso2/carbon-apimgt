@@ -18,33 +18,34 @@
 
 package org.wso2.carbon.apimgt.core.models.policy;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
 /**
  * Contains {@link Limit} based attributes
  */
-public class Limit {
+public abstract class Limit {
 
     private String timeUnit;
     private int unitTime;
 
-    public String getTimeUnit() {
-        return timeUnit;
+    public Limit (String timeUnit, int unitTime) {
+        this.timeUnit = timeUnit;
+        this.unitTime = unitTime;
     }
 
-    public void setTimeUnit(String timeUnit) {
-        this.timeUnit = timeUnit;
+    public String getTimeUnit() {
+        return timeUnit;
     }
 
     public int getUnitTime() {
         return unitTime;
     }
 
-    public void setUnitTime(int unitTime) {
-        this.unitTime = unitTime;
-    }
+    public abstract void populateDataInPreparedStatement(PreparedStatement preparedStatement) throws SQLException;
 
     @Override
     public String toString() {
         return "Limit [timeUnit=" + timeUnit + ", unitTime=" + unitTime + "]";
     }
-
 }

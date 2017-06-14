@@ -48,12 +48,12 @@ public class AdvancedThrottlePolicyMappingUtil {
      * @throws UnsupportedThrottleLimitTypeException
      * @throws UnsupportedThrottleConditionTypeException
      */
-    public static AdvancedThrottlePolicyListDTO fromAPIPolicyArrayToListDTO(List<Policy> policies)
+    public static AdvancedThrottlePolicyListDTO fromAPIPolicyArrayToListDTO(List<APIPolicy> policies)
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
         AdvancedThrottlePolicyListDTO listDTO = new AdvancedThrottlePolicyListDTO();
         List<AdvancedThrottlePolicyDTO> advancedPolicyDTOs = new ArrayList<>();
         if (policies != null) {
-            for (Policy policy : policies) {
+            for (APIPolicy policy : policies) {
                 advancedPolicyDTOs.add(fromAdvancedPolicyToDTO(policy));
             }
         }
@@ -94,18 +94,13 @@ public class AdvancedThrottlePolicyMappingUtil {
      * @throws UnsupportedThrottleLimitTypeException
      * @throws UnsupportedThrottleConditionTypeException
      */
-    public static AdvancedThrottlePolicyDTO fromAdvancedPolicyToDTO(Policy policy)
+    public static AdvancedThrottlePolicyDTO fromAdvancedPolicyToDTO(APIPolicy policy)
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
         AdvancedThrottlePolicyDTO policyDTO = new AdvancedThrottlePolicyDTO();
         policyDTO = CommonThrottleMappingUtil.updateFieldsFromToPolicyToDTO(policy, policyDTO);
-        if (policy instanceof APIPolicy) {
-            List<ConditionalGroupDTO> groupDTOs = CommonThrottleMappingUtil.fromPipelineListToConditionalGroupDTOList
-                    (((APIPolicy) policy).getPipelines());
-            policyDTO.setConditionalGroups(groupDTOs);
-        } else {
-            log.error("policy object " + policy.toString() + " is not an APIPolicy, hence will not be "
-                    + "considered");
-        }
+        List<ConditionalGroupDTO> groupDTOs = CommonThrottleMappingUtil
+                .fromPipelineListToConditionalGroupDTOList(policy.getPipelines());
+        policyDTO.setConditionalGroups(groupDTOs);
 
         if (policy.getDefaultQuotaPolicy() != null) {
             policyDTO.setDefaultLimit(CommonThrottleMappingUtil.fromQuotaPolicyToDTO(policy.getDefaultQuotaPolicy()));

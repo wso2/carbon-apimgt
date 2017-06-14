@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.core.models.policy;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Arrays;
 
 /**
@@ -73,6 +75,15 @@ public class SubscriptionPolicy extends Policy {
 
     public void setCustomAttributes(byte[] customAttributes) {
         this.customAttributes = Arrays.copyOf(customAttributes, customAttributes.length);
+    }
+
+    @Override
+    public void populateDataInPreparedStatement(PreparedStatement preparedStatement) throws SQLException {
+        preparedStatement.setInt(9, getRateLimitCount());
+        preparedStatement.setString(10, getRateLimitTimeUnit());
+        preparedStatement.setBytes(11, getCustomAttributes());
+        preparedStatement.setBoolean(12, isStopOnQuotaReach());
+        preparedStatement.setString(13, getBillingPlan());
     }
 
     @Override

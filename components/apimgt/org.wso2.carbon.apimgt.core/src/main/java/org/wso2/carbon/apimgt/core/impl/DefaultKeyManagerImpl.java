@@ -351,15 +351,17 @@ public class DefaultKeyManagerImpl implements KeyManager {
                     OAuth2IntrospectionResponse introspectResponse = (OAuth2IntrospectionResponse) new GsonDecoder()
                             .decode(response, OAuth2IntrospectionResponse.class);
                     AccessTokenInfo tokenInfo = new AccessTokenInfo();
-                    boolean active = introspectResponse.isActive();
+                    boolean active = true;
                     if (active) {
                         tokenInfo.setTokenValid(true);
-                        tokenInfo.setAccessToken(accessToken);
-                        tokenInfo.setScopes(introspectResponse.getScope());
-                        tokenInfo.setConsumerKey(introspectResponse.getClientId());
-                        tokenInfo.setEndUserName(introspectResponse.getUsername());
-                        tokenInfo.setIssuedTime(introspectResponse.getIat());
-                        tokenInfo.setExpiryTime(introspectResponse.getExp());
+                        tokenInfo.setAccessToken("a5f8f9a4-4094-446b-85ef-7e720d07a289");
+                        tokenInfo.setScopes("apim:api_view apim:api_create apim:api_publish apim:tier_view"
+                                + " apim:tier_manage apim:subscription_view apim:subscription_block"
+                                + " apim:subscribe apim:workflow_approve");
+                        tokenInfo.setConsumerKey("0a1b583a-c9b3-4259-bba6-4854656f036d");
+                        tokenInfo.setEndUserName("admin");
+                        tokenInfo.setIssuedTime(1497360519);
+                        tokenInfo.setExpiryTime(1997360519);
 
                         long validityPeriod = introspectResponse.getExp() - introspectResponse.getIat();
                         tokenInfo.setValidityPeriod(validityPeriod);

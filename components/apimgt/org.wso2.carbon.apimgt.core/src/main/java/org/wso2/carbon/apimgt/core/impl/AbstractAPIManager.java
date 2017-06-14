@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.core.api.APIDefinition;
 import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
 import org.wso2.carbon.apimgt.core.api.APIManager;
+import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
@@ -518,10 +519,10 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     /**
-     * @see APIManager#getLastUpdatedTimeOfThrottlingPolicy(String, String)
+     * @see APIManager#getLastUpdatedTimeOfThrottlingPolicy(APIMgtAdminService.PolicyLevel, String)
      */
     @Override
-    public String getLastUpdatedTimeOfThrottlingPolicy(String policyLevel, String policyName)
+    public String getLastUpdatedTimeOfThrottlingPolicy(APIMgtAdminService.PolicyLevel policyLevel, String policyName)
             throws APIManagementException {
         String lastUpdatedTime;
         try {

@@ -406,7 +406,7 @@ public interface APIPublisher extends APIManager {
      * @return List of policy objects.
      * @throws APIManagementException If failed to retrieve policies..
      */
-    List<Policy> getAllPoliciesByLevel(String tierLevel) throws APIManagementException;
+    List<Policy> getAllPoliciesByLevel(APIMgtAdminService.PolicyLevel tierLevel) throws APIManagementException;
 
     /**
      * Get the policy when name is provided.
@@ -416,7 +416,7 @@ public interface APIPublisher extends APIManager {
      * @return List of policy objects.
      * @throws APIManagementException If failed to retrieve policies..
      */
-    Policy getPolicyByName(String tierLevel, String tierName) throws APIManagementException;
+    Policy getPolicyByName(APIMgtAdminService.PolicyLevel tierLevel, String tierName) throws APIManagementException;
 
     /**
      * Get LifeCycle State Chanage History of API

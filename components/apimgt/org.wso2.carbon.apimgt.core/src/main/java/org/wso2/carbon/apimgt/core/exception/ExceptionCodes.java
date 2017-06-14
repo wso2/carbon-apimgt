@@ -157,7 +157,9 @@ public enum ExceptionCodes implements ErrorHandler {
     ACCESS_TOKEN_GENERATION_FAILED(900957, "Key Management Error", 500, "Error while generating a new access token."),
     INVALID_TOKEN_REQUEST(900958, "Key Management Error", 400, "Invalid access token request."),
     ACCESS_TOKEN_REVOKE_FAILED(900959, "Key Management Error", 500, "Error while revoking the access token."),
-    INTERNAL_ERROR(900961, "General Error", 500, "Server Error Occurred");
+    INTERNAL_ERROR(900963, "General Error", 500, "Server Error Occurred"),
+    POLICY_LEVEL_NOT_SUPPORTED(900965, "Throttle Policy level invalid", 400, "Specified Throttle policy level is not "
+            + "valid");
 
     private final long errorCode;
     private final String errorMessage;

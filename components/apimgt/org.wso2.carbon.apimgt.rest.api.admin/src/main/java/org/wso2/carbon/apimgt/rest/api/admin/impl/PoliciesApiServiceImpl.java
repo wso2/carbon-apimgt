@@ -44,7 +44,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         }
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
-            List<Policy> policies = apiMgtAdminService.getAllPoliciesByLevel(APIMgtConstants.ThrottlePolicyConstants.API_LEVEL);
+            List<APIPolicy> policies = apiMgtAdminService.getApiPolicies();
             AdvancedThrottlePolicyListDTO advancedThrottlePolicyListDTO = AdvancedThrottlePolicyMappingUtil
                     .fromAPIPolicyArrayToListDTO(policies);
             return Response.ok().entity(advancedThrottlePolicyListDTO).build();
@@ -67,7 +67,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
      */
     @Override public Response policiesThrottlingAdvancedPolicyIdDelete(String policyId, String ifMatch,
             String ifUnmodifiedSince, Request request) throws NotFoundException {
-        String tierLevel = APIMgtConstants.ThrottlePolicyConstants.API_LEVEL;
+        APIMgtAdminService.PolicyLevel tierLevel = APIMgtAdminService.PolicyLevel.api;
         if (log.isDebugEnabled()) {
             log.info("Received Advance Policy DELETE request with uuid: " + policyId);
         }
@@ -90,8 +90,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         }
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
-            Policy policy = apiMgtAdminService.getPolicyByUuid(APIMgtConstants.ThrottlePolicyConstants
-                    .API_LEVEL, policyId);
+            APIPolicy policy = apiMgtAdminService.getApiPolicyByUuid(policyId);
             return Response.status(Response.Status.OK).entity(AdvancedThrottlePolicyMappingUtil.
                     fromAdvancedPolicyToDTO(policy)).build();
 
@@ -117,7 +116,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
     @Override
     public Response policiesThrottlingAdvancedPolicyIdPut(String policyId, AdvancedThrottlePolicyDTO body,
             String contentType, String ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
-        String tierLevel = APIMgtConstants.ThrottlePolicyConstants.API_LEVEL;
+        APIMgtAdminService.PolicyLevel tierLevel = APIMgtAdminService.PolicyLevel.api;
         if (log.isDebugEnabled()) {
             log.info("Received Advance Policy PUT request " + body + " with tierLevel = " + tierLevel);
         }
@@ -125,9 +124,9 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             APIPolicy apiPolicy = AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyDTOToPolicy(body);
             apiPolicy.setUuid(policyId);
-            apiMgtAdminService.updatePolicy(tierLevel, apiPolicy);
+            apiMgtAdminService.updateApiPolicy(apiPolicy);
             return Response.status(Response.Status.CREATED).entity(AdvancedThrottlePolicyMappingUtil
-                    .fromAdvancedPolicyToDTO(apiMgtAdminService.getPolicyByUuid(tierLevel, policyId))).build();
+                    .fromAdvancedPolicyToDTO(apiMgtAdminService.getApiPolicyByUuid(policyId))).build();
 
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while updating Advanced Policy. policy uuid: " + policyId;
@@ -148,7 +147,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
      */
     @Override public Response policiesThrottlingAdvancedPost(AdvancedThrottlePolicyDTO body, String contentType,
             Request request) throws NotFoundException {
-        String tierLevel = APIMgtConstants.ThrottlePolicyConstants.API_LEVEL;
+        APIMgtAdminService.PolicyLevel tierLevel = APIMgtAdminService.PolicyLevel.api;
         if (log.isDebugEnabled()) {
             log.info("Received Advance Policy POST request " + body + " with tierLevel = " + tierLevel);
         }
@@ -159,9 +158,9 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             APIPolicy apiPolicy = AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyDTOToPolicy(body);
-            String policyId = apiMgtAdminService.addPolicy(tierLevel, apiPolicy);
+            String policyId = apiMgtAdminService.addApiPolicy(apiPolicy);
             return Response.status(Response.Status.CREATED).entity(AdvancedThrottlePolicyMappingUtil
-                    .fromAdvancedPolicyToDTO(apiMgtAdminService.getPolicyByUuid(tierLevel, policyId)))
+                    .fromAdvancedPolicyToDTO(apiMgtAdminService.getApiPolicyByUuid(policyId)))
                     .build();
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while adding Advanced Throttle Policy, policy name: " + body
@@ -190,8 +189,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         }
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
-            List<Policy> policies = apiMgtAdminService.getAllPoliciesByLevel(APIMgtConstants
-                    .ThrottlePolicyConstants.APPLICATION_LEVEL);
+            List<ApplicationPolicy> policies = apiMgtAdminService.getApplicationPolicies();
             ApplicationThrottlePolicyListDTO applicationThrottlePolicyListDTO = ApplicationThrottlePolicyMappingUtil
                     .fromApplicationPolicyArrayToListDTO(policies);
             return Response.ok().entity(applicationThrottlePolicyListDTO).build();
@@ -217,7 +215,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
     @Override public Response policiesThrottlingApplicationPolicyIdDelete(String policyId, String ifMatch,
             String ifUnmodifiedSince, Request request) throws NotFoundException {
 
-        String tierLevel = APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL;
+        APIMgtAdminService.PolicyLevel tierLevel = APIMgtAdminService.PolicyLevel.application;
         if (log.isDebugEnabled()) {
             log.info("Received Advance Policy DELETE request with uuid: " + policyId);
         }
@@ -242,8 +240,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         }
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
-            Policy applicationPolicy = apiMgtAdminService.getPolicyByUuid(APIMgtConstants
-                    .ThrottlePolicyConstants.APPLICATION_LEVEL, policyId);
+            Policy applicationPolicy = apiMgtAdminService.getApplicationPolicyByUuid(policyId);
             return Response.status(Response.Status.OK).entity(ApplicationThrottlePolicyMappingUtil.
                     fromApplicationThrottlePolicyToDTO(applicationPolicy)).build();
 
@@ -271,7 +268,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             ApplicationThrottlePolicyDTO body, String contentType, String ifMatch, String ifUnmodifiedSince,
             Request request) throws NotFoundException {
 
-        String tierLevel = APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL;
+        APIMgtAdminService.PolicyLevel tierLevel = APIMgtAdminService.PolicyLevel.application;
         if (log.isDebugEnabled()) {
             log.info("Received Application Policy PUT request " + body + " with tierLevel = " + tierLevel);
         }
@@ -281,9 +278,9 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             ApplicationPolicy applicationPolicy = ApplicationThrottlePolicyMappingUtil
                     .fromApplicationThrottlePolicyDTOToModel(body);
             applicationPolicy.setUuid(policyId);
-            apiMgtAdminService.updatePolicy(tierLevel, applicationPolicy);
+            apiMgtAdminService.updateApplicationPolicy(applicationPolicy);
             return Response.status(Response.Status.OK).entity(ApplicationThrottlePolicyMappingUtil.
-                    fromApplicationThrottlePolicyToDTO(apiMgtAdminService.getPolicyByUuid(tierLevel, policyId))).
+                    fromApplicationThrottlePolicyToDTO(apiMgtAdminService.getApplicationPolicyByUuid(policyId))).
                     build();
 
         } catch (APIManagementException e) {
@@ -306,7 +303,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
     @Override public Response policiesThrottlingApplicationPost(ApplicationThrottlePolicyDTO body, String contentType,
             Request request) throws NotFoundException {
 
-        String tierLevel = APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL;
+        APIMgtAdminService.PolicyLevel tierLevel = APIMgtAdminService.PolicyLevel.application;
         if (log.isDebugEnabled()) {
             log.info("Received Application Policy PUT request " + body + " with tierLevel = " + tierLevel);
         }
@@ -317,10 +314,10 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             ApplicationPolicy applicationPolicy = ApplicationThrottlePolicyMappingUtil.
                     fromApplicationThrottlePolicyDTOToModel(body);
             policyName = applicationPolicy.getPolicyName();
-            String applicationPolicyUuid = apiMgtAdminService.addPolicy(tierLevel, applicationPolicy);
+            String applicationPolicyUuid = apiMgtAdminService.addApplicationPolicy(applicationPolicy);
             return Response.status(Response.Status.CREATED).entity(ApplicationThrottlePolicyMappingUtil
-                    .fromApplicationThrottlePolicyToDTO(apiMgtAdminService.getPolicyByUuid(tierLevel,
-                            applicationPolicyUuid))).build();
+                    .fromApplicationThrottlePolicyToDTO(apiMgtAdminService
+                            .getApplicationPolicyByUuid(applicationPolicyUuid))).build();
 
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while adding Application Policy. policy name: " + policyName;
@@ -346,8 +343,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         }
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
-            List<Policy> policies = apiMgtAdminService.getAllPoliciesByLevel(APIMgtConstants
-                    .ThrottlePolicyConstants.SUBSCRIPTION_LEVEL);
+            List<SubscriptionPolicy> policies = apiMgtAdminService.getSubscriptionPolicies();
             SubscriptionThrottlePolicyListDTO subscriptionThrottlePolicyListDTO = SubscriptionThrottlePolicyMappingUtil
                     .fromSubscriptionPolicyArrayToListDTO(policies);
             return Response.ok().entity(subscriptionThrottlePolicyListDTO).build();
@@ -371,7 +367,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
      */
     @Override public Response policiesThrottlingSubscriptionPolicyIdDelete(String policyId, String ifMatch,
             String ifUnmodifiedSince, Request request) throws NotFoundException {
-        String tierLevel = APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL;
+        APIMgtAdminService.PolicyLevel tierLevel = APIMgtAdminService.PolicyLevel.subscription;
         if (log.isDebugEnabled()) {
             log.info("Received Advance Policy DELETE request with uuid: " + policyId);
         }
@@ -394,8 +390,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         }
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
-            Policy subscriptionPolicy = apiMgtAdminService.getPolicyByUuid(APIMgtConstants
-                    .ThrottlePolicyConstants.SUBSCRIPTION_LEVEL, policyId);
+            SubscriptionPolicy subscriptionPolicy = apiMgtAdminService.getSubscriptionPolicyByUuid(policyId);
             SubscriptionThrottlePolicyDTO subscriptionThrottlePolicyDTO = SubscriptionThrottlePolicyMappingUtil
                     .fromSubscriptionThrottlePolicyToDTO(subscriptionPolicy);
             return Response.status(Response.Status.OK).entity(subscriptionThrottlePolicyDTO).build();
@@ -423,7 +418,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
     public Response policiesThrottlingSubscriptionPolicyIdPut(String policyId,
             SubscriptionThrottlePolicyDTO body, String contentType, String ifMatch, String ifUnmodifiedSince,
             Request request) throws NotFoundException {
-        String tierLevel = APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL;
+        APIMgtAdminService.PolicyLevel tierLevel = APIMgtAdminService.PolicyLevel.subscription;
         if (log.isDebugEnabled()) {
             log.info("Received Subscription Policy PUT request " + body + " with tierLevel = " + tierLevel);
         }
@@ -432,10 +427,10 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             SubscriptionPolicy subscriptionPolicy = SubscriptionThrottlePolicyMappingUtil
                     .fromSubscriptionThrottlePolicyDTOToModel(body);
             subscriptionPolicy.setUuid(policyId);
-            apiMgtAdminService.updatePolicy(tierLevel, subscriptionPolicy);
+            apiMgtAdminService.updateSubscriptionPolicy(subscriptionPolicy);
             return Response.status(Response.Status.CREATED).entity(SubscriptionThrottlePolicyMappingUtil
                     .fromSubscriptionThrottlePolicyToDTO(apiMgtAdminService.
-                            getPolicyByUuid(tierLevel, subscriptionPolicy.getUuid()))).build();
+                            getSubscriptionPolicyByUuid(subscriptionPolicy.getUuid()))).build();
 
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while updating Application Policy. policy uuid: " + policyId;
@@ -456,7 +451,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
      */
     @Override public Response policiesThrottlingSubscriptionPost(SubscriptionThrottlePolicyDTO body, String contentType,
             Request request) throws NotFoundException {
-        String tierLevel = APIMgtConstants.ThrottlePolicyConstants.SUBSCRIPTION_LEVEL;
+        APIMgtAdminService.PolicyLevel tierLevel = APIMgtAdminService.PolicyLevel.subscription;
         if (log.isDebugEnabled()) {
             log.info("Received Subscription Policy POST request " + body + " with tierLevel = " + tierLevel);
         }
@@ -464,10 +459,10 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             SubscriptionPolicy subscriptionPolicy = SubscriptionThrottlePolicyMappingUtil.
                     fromSubscriptionThrottlePolicyDTOToModel(body);
-            String policyId = apiMgtAdminService.addPolicy(tierLevel, subscriptionPolicy);
+            String policyId = apiMgtAdminService.addSubscriptionPolicy(subscriptionPolicy);
             return Response.status(Response.Status.CREATED).entity(SubscriptionThrottlePolicyMappingUtil
-                    .fromSubscriptionThrottlePolicyToDTO(apiMgtAdminService.getPolicyByUuid(tierLevel, policyId)))
-                    .build();
+                    .fromSubscriptionThrottlePolicyToDTO(apiMgtAdminService
+                            .getSubscriptionPolicyByUuid(policyId))).build();
 
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while adding Subscription Policy. policy name: " +
@@ -478,7 +473,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         }
     }
 
-    private Response deletePolicy(String policyId, String tierLevel) {
+    private Response deletePolicy(String policyId, APIMgtAdminService.PolicyLevel tierLevel) {
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             apiMgtAdminService.deletePolicyByUuid(policyId, tierLevel);

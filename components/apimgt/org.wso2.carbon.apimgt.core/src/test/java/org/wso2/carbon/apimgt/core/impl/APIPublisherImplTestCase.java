@@ -27,6 +27,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
+import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
@@ -87,7 +88,7 @@ public class APIPublisherImplTestCase {
     private static final String TIER = "Gold";
     private static final String API_ID = "apiId";
     private static final String DOC_ID = "docId";
-    private static final String POLICY_LEVEL = "policyLevel";
+    private static final String POLICY_LEVEL = APIMgtAdminService.PolicyLevel.application.name();
     private static final String POLICY_NAME = "policyName";
     private static final String SUB_ID = "subId";
     private static final String ENDPOINT_ID = "endpointId";
@@ -1466,10 +1467,11 @@ public class APIPublisherImplTestCase {
     public void testGetLastUpdatedTimeOfThrottlingPolicy() throws APIManagementException {
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(policyDAO);
-        Mockito.when(policyDAO.getLastUpdatedTimeOfThrottlingPolicy(POLICY_LEVEL, POLICY_NAME))
-                .thenReturn("2017-03-19T13:45:30");
-        apiPublisher.getLastUpdatedTimeOfThrottlingPolicy(POLICY_LEVEL, POLICY_NAME);
-        Mockito.verify(policyDAO, Mockito.times(1)).getLastUpdatedTimeOfThrottlingPolicy(POLICY_LEVEL, POLICY_NAME);
+        Mockito.when(policyDAO.getLastUpdatedTimeOfThrottlingPolicy(APIMgtAdminService.PolicyLevel.application,
+                POLICY_NAME)).thenReturn("2017-03-19T13:45:30");
+        apiPublisher.getLastUpdatedTimeOfThrottlingPolicy(APIMgtAdminService.PolicyLevel.application, POLICY_NAME);
+        Mockito.verify(policyDAO, Mockito.times(1))
+                .getLastUpdatedTimeOfThrottlingPolicy(APIMgtAdminService.PolicyLevel.application, POLICY_NAME);
     }
 
     @Test(description = "Get last updated time of Gateway Config")
@@ -1497,10 +1499,11 @@ public class APIPublisherImplTestCase {
     public void testGetLastUpdatedTimeOfThrottlingPolicyException() throws APIManagementException {
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(policyDAO);
-        Mockito.when(policyDAO.getLastUpdatedTimeOfThrottlingPolicy(POLICY_LEVEL, POLICY_NAME)).thenThrow(
+        Mockito.when(policyDAO.getLastUpdatedTimeOfThrottlingPolicy(APIMgtAdminService.PolicyLevel.application,
+                POLICY_NAME)).thenThrow(
                 new APIMgtDAOException(
                         "Error while retrieving last updated time of policy :" + POLICY_LEVEL + "/" + POLICY_LEVEL));
-        apiPublisher.getLastUpdatedTimeOfThrottlingPolicy(POLICY_LEVEL, POLICY_NAME);
+        apiPublisher.getLastUpdatedTimeOfThrottlingPolicy(APIMgtAdminService.PolicyLevel.application, POLICY_NAME);
     }
 
     @Test(description = "Get all policies by level")
@@ -1511,9 +1514,9 @@ public class APIPublisherImplTestCase {
         policy.setPolicyName(POLICY_NAME);
         policies.add(policy);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(policyDAO);
-        Mockito.when(policyDAO.getPolicies(POLICY_LEVEL)).thenReturn(policies);
-        apiPublisher.getAllPoliciesByLevel(POLICY_LEVEL);
-        Mockito.verify(policyDAO, Mockito.times(1)).getPolicies(POLICY_LEVEL);
+        Mockito.when(policyDAO.getPoliciesByLevel(APIMgtAdminService.PolicyLevel.application)).thenReturn(policies);
+        apiPublisher.getAllPoliciesByLevel(APIMgtAdminService.PolicyLevel.application);
+        Mockito.verify(policyDAO, Mockito.times(1)).getPoliciesByLevel(APIMgtAdminService.PolicyLevel.application);
     }
 
     @Test(description = "Get all policy by name")
@@ -1522,9 +1525,11 @@ public class APIPublisherImplTestCase {
         Policy policy = Mockito.mock(Policy.class);
         policy.setPolicyName(POLICY_NAME);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(policyDAO);
-        Mockito.when(policyDAO.getPolicy(POLICY_LEVEL, POLICY_NAME)).thenReturn(policy);
-        apiPublisher.getPolicyByName(POLICY_LEVEL, POLICY_NAME);
-        Mockito.verify(policyDAO, Mockito.times(1)).getPolicy(POLICY_LEVEL, POLICY_NAME);
+        Mockito.when(policyDAO
+                .getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, POLICY_NAME)).thenReturn(policy);
+        apiPublisher.getPolicyByName(APIMgtAdminService.PolicyLevel.application, POLICY_NAME);
+        Mockito.verify(policyDAO, Mockito.times(1))
+                .getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, POLICY_NAME);
     }
 
     @Test(description = "Save swagger definition for API")

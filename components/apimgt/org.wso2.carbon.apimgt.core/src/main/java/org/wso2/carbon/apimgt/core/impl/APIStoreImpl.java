@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.api.APIMObservable;
+import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
@@ -510,10 +511,10 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
     @Override
-    public List<Policy> getPolicies(String policyLevel) throws APIManagementException {
+    public List<Policy> getPolicies(APIMgtAdminService.PolicyLevel policyLevel) throws APIManagementException {
         List<Policy> policyList = null;
         try {
-            policyList = getPolicyDAO().getPolicies(policyLevel);
+            policyList = getPolicyDAO().getPoliciesByLevel(policyLevel);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while retrieving policies for policy level - " + policyLevel;
             log.error(errorMsg, e);
@@ -523,10 +524,11 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
     @Override
-    public Policy getPolicy(String policyLevel, String policyName) throws APIManagementException {
-        Policy policy = null;
+    public Policy getPolicy(APIMgtAdminService.PolicyLevel policyLevel, String policyName)
+            throws APIManagementException {
+        Policy policy;
         try {
-            policy = getPolicyDAO().getPolicy(policyLevel, policyName);
+            policy = getPolicyDAO().getPolicyByLevelAndName(policyLevel, policyName);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while retrieving policy - " + policyName;
             log.error(errorMsg, e);
@@ -1384,7 +1386,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 log.error(message);
                 throw new APIManagementException(message, ExceptionCodes.TIER_CANNOT_BE_NULL);
             } else {
-                Policy policy = getPolicyDAO().getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL,
+                Policy policy = getPolicyDAO().getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application,
                         tierName);
                 if (policy == null) {
                     String message = "Specified tier " + tierName + " is invalid";

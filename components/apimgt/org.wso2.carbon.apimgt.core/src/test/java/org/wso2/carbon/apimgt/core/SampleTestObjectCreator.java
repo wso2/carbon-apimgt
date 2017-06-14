@@ -527,10 +527,7 @@ public class SampleTestObjectCreator {
         apiPolicy.setUserLevel(APIMgtConstants.ThrottlePolicyConstants.API_LEVEL);
         QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
         defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
-        RequestCountLimit requestCountLimit = new RequestCountLimit();
-        requestCountLimit.setTimeUnit(TIME_UNIT_SECONDS);
-        requestCountLimit.setRequestCount(10000);
-        requestCountLimit.setUnitTime(1000);
+        RequestCountLimit requestCountLimit = new RequestCountLimit(TIME_UNIT_SECONDS, 1000, 10000);
         defaultQuotaPolicy.setLimit(requestCountLimit);
         apiPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
         apiPolicy.setPipelines(createDefaultPipelines());
@@ -555,11 +552,7 @@ public class SampleTestObjectCreator {
         conditionsList.add(ipCondition);
         conditionsList.add(ipConditionSpecific);
         //set quota policy with bandwidth limit
-        BandwidthLimit bandwidthLimit = new BandwidthLimit();
-        bandwidthLimit.setDataAmount(1000);
-        bandwidthLimit.setDataUnit(PolicyConstants.MB);
-        bandwidthLimit.setUnitTime(1);
-        bandwidthLimit.setTimeUnit(TIME_UNIT_MONTH);
+        BandwidthLimit bandwidthLimit = new BandwidthLimit(TIME_UNIT_MONTH, 1, 1000, PolicyConstants.MB);
         QuotaPolicy quotaPolicy1 = new QuotaPolicy();
         quotaPolicy1.setType(PolicyConstants.BANDWIDTH_TYPE);
         quotaPolicy1.setLimit(bandwidthLimit);
@@ -585,10 +578,7 @@ public class SampleTestObjectCreator {
         conditionsList.add(jwtClaimsCondition);
         conditionsList.add(queryParameterCondition);
         //pipeline 2 with request count as quota policy
-        RequestCountLimit requestCountLimit = new RequestCountLimit();
-        requestCountLimit.setRequestCount(1000);
-        requestCountLimit.setUnitTime(1);
-        requestCountLimit.setTimeUnit(TIME_UNIT_SECONDS);
+        RequestCountLimit requestCountLimit = new RequestCountLimit(TIME_UNIT_SECONDS, 1, 1000);
         QuotaPolicy quotaPolicy2 = new QuotaPolicy();
         quotaPolicy2.setType(PolicyConstants.REQUEST_COUNT_TYPE);
         quotaPolicy2.setLimit(requestCountLimit);
@@ -610,11 +600,7 @@ public class SampleTestObjectCreator {
      * @return APIPolicy object with bandwidth limit as quota policy is returned
      */
     public static APIPolicy createDefaultAPIPolicyWithBandwidthLimit() {
-        BandwidthLimit bandwidthLimit = new BandwidthLimit();
-        bandwidthLimit.setDataAmount(1000);
-        bandwidthLimit.setDataUnit(PolicyConstants.MB);
-        bandwidthLimit.setUnitTime(1);
-        bandwidthLimit.setTimeUnit(TIME_UNIT_MONTH);
+        BandwidthLimit bandwidthLimit = new BandwidthLimit(TIME_UNIT_MONTH, 1, 1000, PolicyConstants.MB);
         QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
         defaultQuotaPolicy.setType(PolicyConstants.BANDWIDTH_TYPE);
         defaultQuotaPolicy.setLimit(bandwidthLimit);
@@ -635,10 +621,7 @@ public class SampleTestObjectCreator {
         applicationPolicy.setDescription(SAMPLE_APP_POLICY_DESCRIPTION);
         QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
         defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
-        RequestCountLimit requestCountLimit = new RequestCountLimit();
-        requestCountLimit.setTimeUnit(TIME_UNIT_SECONDS);
-        requestCountLimit.setRequestCount(10000);
-        requestCountLimit.setUnitTime(1000);
+        RequestCountLimit requestCountLimit = new RequestCountLimit(TIME_UNIT_SECONDS, 10000, 1000);
         defaultQuotaPolicy.setLimit(requestCountLimit);
         applicationPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
         return applicationPolicy;
@@ -651,10 +634,7 @@ public class SampleTestObjectCreator {
         subscriptionPolicy.setDescription(SAMPLE_SUBSCRIPTION_POLICY_DESCRIPTION);
         QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
         defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
-        RequestCountLimit requestCountLimit = new RequestCountLimit();
-        requestCountLimit.setTimeUnit(TIME_UNIT_SECONDS);
-        requestCountLimit.setRequestCount(10000);
-        requestCountLimit.setUnitTime(1000);
+        RequestCountLimit requestCountLimit = new RequestCountLimit(TIME_UNIT_SECONDS, 10000, 1000);
         defaultQuotaPolicy.setLimit(requestCountLimit);
         subscriptionPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
         return subscriptionPolicy;

@@ -23,22 +23,6 @@ package org.wso2.carbon.apimgt.core.models.policy;
  */
 public class PolicyConstants {
 
-    public static final String IP_RANGE_TYPE = "IPRange";
-
-    public static final String IP_SPECIFIC_TYPE = "IPSpecific";
-
-    public static final String HEADER_TYPE = "Header";
-
-    public static final String DATE_RANGE_TYPE = "DateRage";
-
-    public static final String DATE_SPECIFIC_TYPE = "DateSpecific";
-
-    public static final String JWT_CLAIMS_TYPE = "JWTClaims";
-
-    public static final String HTTP_VERB_TYPE = "HTTPVerb";
-
-    public static final String QUERY_PARAMETER_TYPE = "QueryParameterType";
-
     public static final String BANDWIDTH_TYPE = "bandwidthVolume";
 
     public static final String BANDWIDTH_LIMIT_TYPE = "BandwidthLimit";
@@ -127,4 +111,13 @@ public class PolicyConstants {
 
     public static final String HEADER_CONDITION_TYPE = "HeaderCondition";
 
+    public static final String DATE_RANGE_CONDITION_TYPE = "DateRangeCondition";
+
+    public static final String DATE_SPECIFIC_CONDITION_TYPE = "DateSpecificCondition";
+
+    public static final String HTTP_VERB_CONDITION_TYPE = "HTTPVerbCondition";
+
+    public static final String IP_RANGE_TYPE = "IPRange";
+
+    public static final String IP_SPECIFIC_TYPE = "IPSpecific";
 }

@@ -312,11 +312,8 @@ public class CommonThrottleMappingUtil {
      * @return Bandwidth Limit model object derived from DTO
      */
     public static BandwidthLimit fromDTOToBandwidthLimit(ThrottleLimitDTO dto) {
-        BandwidthLimit bandwidthLimit = new BandwidthLimit();
-        bandwidthLimit = updateFieldsFromDTOToLimit(dto, bandwidthLimit);
-        bandwidthLimit.setDataAmount(dto.getBandwidthLimit().getDataAmount());
-        bandwidthLimit.setDataUnit(dto.getBandwidthLimit().getDataUnit());
-        return bandwidthLimit;
+        return new BandwidthLimit(dto.getTimeUnit(), dto.getUnitTime(), dto
+                .getBandwidthLimit().getDataAmount(), dto.getBandwidthLimit().getDataUnit());
     }
 
     /**
@@ -326,10 +323,8 @@ public class CommonThrottleMappingUtil {
      * @return Request Count model object derived from DTO
      */
     public static RequestCountLimit fromDTOToRequestCountLimit(ThrottleLimitDTO dto) {
-        RequestCountLimit requestCountLimit = new RequestCountLimit();
-        requestCountLimit = updateFieldsFromDTOToLimit(dto, requestCountLimit);
-        requestCountLimit.setRequestCount(dto.getRequestCountLimit().getRequestCount());
-        return requestCountLimit;
+        return new RequestCountLimit(dto.getTimeUnit(), dto.getUnitTime(),
+                dto.getRequestCountLimit().getRequestCount());
     }
 
     /**
@@ -515,21 +510,6 @@ public class CommonThrottleMappingUtil {
     public static <T extends ThrottleConditionDTO> T updateFieldsFromConditionToDTO(Condition condition, T dto) {
         dto.setInvertCondition(condition.isInvertCondition());
         return dto;
-    }
-
-    /**
-     * Update common fields of Limit model object using Throttle Limit DTO object
-     * Fields update: timeUnit, unitTime
-     *
-     * @param dto   Throttle limit DTO object
-     * @param limit Limit object
-     * @param <T>   Type of Limit
-     * @return Limit model object with common fields updated
-     */
-    public static <T extends Limit> T updateFieldsFromDTOToLimit(ThrottleLimitDTO dto, T limit) {
-        limit.setTimeUnit(dto.getTimeUnit());
-        limit.setUnitTime(dto.getUnitTime());
-        return limit;
     }
 
     /**
