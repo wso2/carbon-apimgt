@@ -257,8 +257,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public List<Application> getAllApplications() throws APIManagementException {
         try {
-            List<Application> applicationList = applicationDAO.getAllApplications();
-            return applicationList;
+            return applicationDAO.getAllApplications();
         } catch (APIMgtDAOException ex) {
             String msg = "Error occurred while getting the Application list";
             log.error(msg, ex);
@@ -269,8 +268,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public List<String> getAllEndpoints() throws APIManagementException {
         try {
-            List<String> endpointList = apiDAO.getUUIDsOfGlobalEndpoints();
-            return endpointList;
+            return apiDAO.getUUIDsOfGlobalEndpoints();
         } catch (APIMgtDAOException ex) {
             String msg = "Error occurred while getting the Endpoint list";
             log.error(msg, ex);
@@ -281,8 +279,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public String getEndpointGatewayConfig(String endpointId) throws APIManagementException {
         try {
-            String endpointConfig = apiDAO.getEndpointConfig(endpointId);
-            return endpointConfig;
+            return apiDAO.getEndpointConfig(endpointId);
         } catch (APIMgtDAOException ex) {
             String msg = "Error occurred while getting the Endpoint Configuration";
             log.error(msg, ex);

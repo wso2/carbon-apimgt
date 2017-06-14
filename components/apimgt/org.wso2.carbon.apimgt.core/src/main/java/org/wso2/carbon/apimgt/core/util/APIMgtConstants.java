@@ -106,6 +106,13 @@ public class APIMgtConstants {
     public static final String HTTP = "http";
     public static final String HTTPS = "https";
 
+    public static final String HTTP_METHOD = "HTTP_METHOD";
+
+
+    public static final String NAMESPACE_STORE_API = "wso2.carbon.apimgt.store.rest.api";
+    public static final String NAMESPACE_PUBLISHER_API = "wso2.carbon.apimgt.publisher.rest.api";
+    public static final String NAMESPACE_ADMIN_API = "wso2.carbon.apimgt.admin.rest.api";
+
     /**
      * Application statuses.
      */
@@ -325,6 +332,8 @@ public class APIMgtConstants {
         public static final String POST = "POST";
         public static final String PUT = "PUT";
         public static final String DELETE = "DELETE";
+        public static final String HEAD = "HEAD";
+        public static final String OPTIONS = "OPTIONS";
         public static final String CONTENT_TYPE = "Content-Type";
         public static final String ACCEPT = "Accept";
         public static final String USERNAME = "username";
@@ -441,5 +450,14 @@ public class APIMgtConstants {
         public static final int SC_504_GATEWAY_TIMEOUT = 504;
         public static final int SC_505_HTTP_VERSION_NOT_SUPPORTED = 505;
         public static final int SC_507_INSUFFICIENT_STORAGE = 507;
+    }
+
+    /**
+     * Type of UUF apps in system
+     */
+    public static class APPType {
+        public static final String PUBLISHER = "publisher";
+        public static final String STORE = "store";
+        public static final String ADMIN = "admin";
     }
 }
