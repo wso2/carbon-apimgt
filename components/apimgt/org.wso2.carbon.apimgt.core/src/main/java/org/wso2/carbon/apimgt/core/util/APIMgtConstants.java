@@ -443,4 +443,13 @@ public class APIMgtConstants {
         public static final int SC_505_HTTP_VERSION_NOT_SUPPORTED = 505;
         public static final int SC_507_INSUFFICIENT_STORAGE = 507;
     }
+
+    /**
+     * Type of UUF apps in system
+     */
+    public static class APPType {
+        public static final String PUBLISHER = "publisher";
+        public static final String STORE = "store";
+        public static final String ADMIN = "admin";
+    }
 }

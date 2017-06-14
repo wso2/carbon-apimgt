@@ -177,7 +177,7 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
     * */
     private String getRestAPIResource(Request request) throws APIMgtSecurityException {
         //todo improve to get appname as a property in the Request
-        String path = (String) request.getProperty("REQUEST_URL");
+        String path = (String) request.getProperty(APIConstants.REQUEST_URL);
         String restAPIResource = null;
         //this is publisher API so pick that API
         try {
@@ -210,21 +210,21 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
                                    String restAPIResource) throws APIMgtSecurityException {
         final boolean authorized[] = {false};
 
-        String path = (String) request.getProperty("REQUEST_URL");
-        String verb = (String) request.getProperty("HTTP_METHOD");
+        String path = (String) request.getProperty(APIConstants.REQUEST_URL);
+        String verb = (String) request.getProperty(APIConstants.HTTP_METHOD);
         if (log.isDebugEnabled()) {
             log.debug("Invoking rest api resource path " + verb + " " + path + " ");
             log.debug("LoggedIn user scopes " + scopesToValidate);
         }
 
         if (scopesToValidate != null && scopesToValidate.split(" ").length > 0) {
-            final List<String> scopes = Arrays.asList(scopesToValidate);
+            final List<String> scopes = Arrays.asList(scopesToValidate.split(" "));
             if (restAPIResource != null) {
                 APIDefinition apiDefinition = new APIDefinitionFromSwagger20();
                 try {
                     String apiResourceDefinitionScopes = apiDefinition.getScopeOfResourcePath(restAPIResource, request,
                             serviceMethodInfo);
-                    if (null == apiResourceDefinitionScopes) {
+                    if (apiResourceDefinitionScopes == null) {
                         if (log.isDebugEnabled()) {
                             log.debug("Scope not defined in swagger for matching resource " + path + " and verb "
                                     + verb + " . Hence consider as anonymous permission and let request to continue.");
@@ -246,7 +246,7 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
 
                 } catch (APIManagementException e) {
                     String message = "Error while validating scopes";
-                    log.error(message);
+                    log.error(message, e);
                     throw new APIMgtSecurityException(message, ExceptionCodes.INVALID_SCOPE);
                 }
             } else {

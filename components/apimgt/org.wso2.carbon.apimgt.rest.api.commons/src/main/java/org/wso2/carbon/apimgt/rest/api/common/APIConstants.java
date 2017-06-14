@@ -26,6 +26,9 @@ public class APIConstants {
     public static final String PROTOTYPED = "PROTOTYPED";
     public static final String VERB_INFO_DTO = "VERB_INFO";
 
+    public static final String HTTP_METHOD = "HTTP_METHOD";
+    public static final String REQUEST_URL = "REQUEST_URL";
+
     /**
      * Represents Frontend Constants related to an API.
      */

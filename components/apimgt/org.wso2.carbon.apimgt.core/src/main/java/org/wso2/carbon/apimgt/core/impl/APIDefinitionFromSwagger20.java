@@ -67,6 +67,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Implementation for Swagger 2.0
@@ -76,7 +77,7 @@ import java.util.UUID;
 public class APIDefinitionFromSwagger20 implements APIDefinition {
 
     private static final Logger log = LoggerFactory.getLogger(APIDefinitionFromSwagger20.class);
-    private static Map<String, Map<String, String>> localConfigMap = new HashMap<>();
+    private static Map<String, Map<String, String>> localConfigMap = new ConcurrentHashMap<>();
 
     @Override
     public String getScopeOfResourcePath(String resourceConfigsJSON, Request request,
@@ -85,7 +86,8 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         Swagger swagger = swaggerParser.parse(resourceConfigsJSON);
         String basepath = swagger.getBasePath();
         String verb = (String) request.getProperty("HTTP_METHOD");
-//        Method resourceMethod = (Method) request.getProperty("method");todo change to this if msf4j2.3.0-m2 or higher
+        //TODO change to this if msf4j2.3.0-m2 or higher
+//        Method resourceMethod = (Method) request.getProperty("method");
         Method resourceMethod = serviceMethodInfo.getMethod();
 
         if (resourceMethod == null || verb == null) {
@@ -100,20 +102,20 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
             pathTemplate = resourceMethod.getAnnotation(javax.ws.rs.Path.class).value();
         }
         String nameSpace = null;
-        if (basepath.contains("publisher")) {
+        if (basepath.contains(APIMgtConstants.APPType.PUBLISHER)) {
             nameSpace = APIMgtConstants.NAMESPACE_PUBLISHER_API;
-        } else if (basepath.contains("store")) {
+        } else if (basepath.contains(APIMgtConstants.APPType.STORE)) {
             nameSpace = APIMgtConstants.NAMESPACE_STORE_API;
-        } else if (basepath.contains("admin")) {
+        } else if (basepath.contains(APIMgtConstants.APPType.ADMIN)) {
             nameSpace = APIMgtConstants.NAMESPACE_ADMIN_API;
         }
 
         //if namespace is not available in local cache add it.
-        if (!localConfigMap.containsKey(nameSpace)) {
-            localConfigMap.put(nameSpace, new HashMap<>());
+        if (nameSpace != null && !localConfigMap.containsKey(nameSpace)) {
+            localConfigMap.put(nameSpace, new ConcurrentHashMap<>());
         }
 
-        if (nameSpace != null && localConfigMap.get(nameSpace).isEmpty()) {
+        if (nameSpace != null && localConfigMap.containsKey(nameSpace) && localConfigMap.get(nameSpace).isEmpty()) {
             Map<String, String> configMap = ServiceReferenceHolder.getInstance().getRestAPIConfigurationMap(nameSpace);
             //update local cache with configs defined in configuration file(dep.yaml)
             if (configMap != null) {
@@ -134,23 +136,22 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
     * This method populates resource to scope mappings into localConfigMap
     *
     * @param swagger swagger oc of the apis
-    * String namespacee unigue identifier of the api
+    * @param String namespacee unigue identifier of the api
     *
     * */
     private void populateConfigMapForScopes(Swagger swagger, String namespace) {
-        if (null != swagger) {
+        if (swagger != null) {
             for (Map.Entry<String, Path> entry : swagger.getPaths().entrySet()) {
                 Path resource = entry.getValue();
                 Map<HttpMethod, Operation> operationsMap = resource.getOperationMap();
                 for (Map.Entry<HttpMethod, Operation> httpverbEntry : operationsMap.entrySet()) {
-                    if (httpverbEntry.getValue().getVendorExtensions().size() > 0 &&
-                            null != httpverbEntry.getValue().getVendorExtensions().get("x-scope")) {
-                        StringBuffer resourceConfigPath = new StringBuffer().append(httpverbEntry.getKey()).append("_")
-                                .append(entry.getKey());
-                        String path = resourceConfigPath.toString();
+                    if (httpverbEntry.getValue().getVendorExtensions().size() > 0 && httpverbEntry.getValue()
+                            .getVendorExtensions().get(APIMgtConstants.SWAGGER_X_SCOPE) != null) {
+                        String path = httpverbEntry.getKey() + "_" + entry.getKey();
                         if (!localConfigMap.get(namespace).containsKey(path)) {
                             localConfigMap.get(namespace).put(path,
-                                    httpverbEntry.getValue().getVendorExtensions().get("x-scope").toString());
+                                    httpverbEntry.getValue().getVendorExtensions().get(APIMgtConstants.SWAGGER_X_SCOPE)
+                                            .toString());
                         }
                     }
 
