@@ -15,6 +15,7 @@ import org.wso2.msf4j.formparam.FormDataParam;
 import org.osgi.service.component.annotations.Component;
 
 import java.io.InputStream;
+import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -38,6 +39,7 @@ import javax.ws.rs.core.Response;
 @Path("/api/am/store/v1.[\\d]+/self-signup")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
+@ApplicationPath("/self-signup")
 @io.swagger.annotations.Api(description = "the self-signup API")
 public class SelfSignupApi implements Microservice  {
    private final SelfSignupApiService delegate = SelfSignupApiServiceFactory.getSelfSignupApi();
