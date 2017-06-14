@@ -1381,7 +1381,7 @@ public class ApiDAOImpl implements ApiDAO {
                 endpointList.add(resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_UUID));
             }
         } catch (SQLException e) {
-            String msg = "Couldn't get Endpoints";
+            String msg = "Couldn't get all UUIDs of Endpoints";
             log.error(msg, e);
             throw new APIMgtDAOException(e);
         }
