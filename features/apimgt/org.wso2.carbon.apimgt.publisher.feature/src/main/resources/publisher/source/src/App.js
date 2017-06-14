@@ -24,7 +24,6 @@ import {Apis, Landing, Base} from './app/components/index'
 import {PageNotFound} from './app/components/Base/Errors/index'
 import Utils from '../src/app/data/utils.js'
 import ApiCreate from './app/components/Apis/Create/ApiCreate'
-import createBrowserHistory from 'history/createBrowserHistory'
 
 import './App.css'
 
@@ -38,9 +37,8 @@ class Publisher extends Component {
     }
 
     render() {
-        const customHistory = createBrowserHistory();
         return (
-            <Router basename="/publisher" history={customHistory}>
+            <Router basename="/publisher">
                 <Base>
                     <Switch>
                         <Route exact path={"/"} component={ApiCreate}/>
