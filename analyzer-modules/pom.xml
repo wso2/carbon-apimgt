@@ -18,7 +18,9 @@
 
     <properties>
         <siddhi.version>4.0.0-M3</siddhi.version>
+        <siddhi.import.version>4.0.0</siddhi.import.version>
         <junit.version>4.12</junit.version>
+        <log4j.imp.pkg.version.range>[1.2.17, 1.3.0)</log4j.imp.pkg.version.range>
     </properties>
 
 </project>

@@ -72,6 +72,7 @@ import java.util.Map;
 public class ThrottleStreamProcessor extends StreamProcessor implements SchedulingProcessor, FindableProcessor {
 
     private static final Logger log = Logger.getLogger(ThrottleStreamProcessor.class);
+    private static final String EXPIRY_TIME_STAMP = "expiryTimeStamp";
     private long timeInMilliSeconds;
     private ComplexEventChunk<StreamEvent> expiredEventChunk = new ComplexEventChunk<StreamEvent>(true);
     private Scheduler scheduler;
@@ -157,7 +158,7 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
         }
 
         List<Attribute> attributeList = new ArrayList<Attribute>();
-        attributeList.add(new Attribute("expiryTimeStamp", Attribute.Type.LONG));
+        attributeList.add(new Attribute(EXPIRY_TIME_STAMP, Attribute.Type.LONG));
         return attributeList;
     }
 
