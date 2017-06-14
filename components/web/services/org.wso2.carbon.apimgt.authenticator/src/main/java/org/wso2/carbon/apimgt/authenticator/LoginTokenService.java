@@ -106,7 +106,7 @@ public class LoginTokenService {
         if (StringUtils.isEmpty(scopes)) {
             scopes = KeyManagerConstants.OPEN_ID_CONNECT_SCOPE;
         } else {
-            scopes = scopes + ' ' + KeyManagerConstants.OPEN_ID_CONNECT_SCOPE;
+            scopes = scopes + KeyManagerConstants.OPEN_ID_CONNECT_SCOPE;
         }
 
         //TODO - implement a storing mechanism for client_id and secret
