@@ -101,15 +101,21 @@ public class RegistrationSummary {
      */
     public static class AnalyticsInfo {
         private String dasServerURL;
+        private boolean enabled;
         private Credentials dasServerCredentials;
 
         AnalyticsInfo(AnalyticsConfigurations analyticsConfigurations) {
+            this.enabled = analyticsConfigurations.isEnabled();
             this.dasServerURL = analyticsConfigurations.getDasServerURL();
             this.dasServerCredentials = new Credentials(analyticsConfigurations.getDasServerCredentials());
         }
 
         public String getDasServerURL() {
             return dasServerURL;
+        }
+
+        public boolean isEnabled() {
+            return enabled;
         }
 
         public Credentials getDasServerCredentials() {
