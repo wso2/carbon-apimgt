@@ -105,6 +105,8 @@ public class APIMgtConstants {
     public static final String HTTP = "http";
     public static final String HTTPS = "https";
 
+    public static final String HTTP_METHOD = "HTTP_METHOD";
+
 
     public static final String NAMESPACE_STORE_API = "wso2.carbon.apimgt.store.rest.api";
     public static final String NAMESPACE_PUBLISHER_API = "wso2.carbon.apimgt.publisher.rest.api";

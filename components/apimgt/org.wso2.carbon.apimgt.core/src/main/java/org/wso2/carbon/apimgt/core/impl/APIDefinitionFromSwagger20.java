@@ -85,7 +85,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(resourceConfigsJSON);
         String basepath = swagger.getBasePath();
-        String verb = (String) request.getProperty("HTTP_METHOD");
+        String verb = (String) request.getProperty(APIMgtConstants.HTTP_METHOD);
         //TODO change to this if msf4j2.3.0-m2 or higher
 //        Method resourceMethod = (Method) request.getProperty("method");
         Method resourceMethod = serviceMethodInfo.getMethod();
