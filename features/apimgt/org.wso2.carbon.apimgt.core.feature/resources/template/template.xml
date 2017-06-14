@@ -1,7 +1,6 @@
 package $package;
 import ballerina.net.http;
 import ballerina.lang.messages;
-import org.wso2.carbon.apimgt.gateway.handler;
 import org.wso2.carbon.apimgt.gateway.constants;
 
 @http:BasePath{value:"$apiContext"}
@@ -56,7 +55,6 @@ service $serviceName {
 		http:ClientConnector ${apiResource.templateId}SandBoxEndpoint = sandBoxEndpoint;
 		#end
 		#end
-		handler:mediateIn(m);
         message response;
         boolean status;
         status,response = authenticate(m);
@@ -64,7 +62,6 @@ service $serviceName {
 		boolean isThrottled = isrequestThrottled(m);
 		if(!isThrottled){
 		string endpointType = messages:getProperty(m,constants:KEY_TYPE);
-		handler:mediateEndpointRequest(m);
 		if (endpointType == "production") {
 		#if($productionEndpoint.applicableLevel == "API")
 		response = http:ClientConnector.execute(${apiResource.templateId}ProductionEndpoint, "$apiResource.httpVerb.toLowerCase()", "", m);
@@ -80,9 +77,6 @@ service $serviceName {
 
 		}
 		}
-
-		handler:mediateEndpointResponse(m);
-		handler:mediateOut(m, response);
 		}
 		reply response;
 }
