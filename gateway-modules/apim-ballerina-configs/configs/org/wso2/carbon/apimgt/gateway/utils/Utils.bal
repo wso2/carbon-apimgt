@@ -170,6 +170,7 @@ function fromJsonToGatewayConfDTO (json conf) (dto:GatewayConfDTO){
     keyManagerInfoDTO.tokenEndpoint = (string)keyManagerInfo.tokenEndpoint;
     keyManagerInfoDTO.revokeEndpoint = (string)keyManagerInfo.revokeEndpoint;
     keyManagerInfoDTO.introspectEndpoint = (string)keyManagerInfo.introspectEndpoint;
+
     dto:CredentialsDTO keyManagerCredentialsDTO = {};
     json keyManagerCredentials = keyManagerInfo.credentials;
     keyManagerCredentialsDTO.username = (string)keyManagerCredentials.username;

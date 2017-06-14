@@ -124,7 +124,7 @@ function authenticate (message m) (boolean, message) {
 
 function doIntrospect (string authToken) (dto:IntrospectDto) {
     message request = {};
-    dto:KeyManagerInfoDTO keyManagerConf = holder:keyManagerConf;
+    dto:KeyManagerInfoDTO keyManagerConf = holder:getKeyManagerConf();
     dto:CredentialsDTO credentials = keyManagerConf.credentials;
     messages:setStringPayload(request, "token=" + authToken);
     messages:setHeader(request, "Content-Type", "application/x-www-form-urlencoded");
