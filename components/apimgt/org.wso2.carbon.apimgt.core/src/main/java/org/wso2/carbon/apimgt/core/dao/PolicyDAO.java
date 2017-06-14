@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.BlockConditions;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.CustomPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 
@@ -221,47 +222,90 @@ public interface PolicyDAO {
             throws APIMgtDAOException;
 
     /**
-     * Add a block condition
+     * Add a block condition.
      *
      * @param blockConditions BlockCondition object to be added
      * @return uuid of the block condition if successfully added
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException if failed to add block condition
      */
     String addBlockConditions(BlockConditions blockConditions) throws APIMgtDAOException;
 
     /**
-     * Get details of a block condition by UUID
+     * Get details of a block condition by UUID.
      *
      * @param uuid uuid of the block condition
      * @return Block conditoin represented by the UUID
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException if getting a block condition from uuid failed
      */
     BlockConditions getBlockConditionByUUID(String uuid) throws APIMgtDAOException;
 
     /**
-     * Return all block conditions
+     * Return all block conditions.
      *
      * @return list of BlockConditions
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException if getting all block conditions failed
      */
     List<BlockConditions> getBlockConditions() throws APIMgtDAOException;
 
     /**
-     * Update the block condition state true (Enabled) /false (Disabled) given the UUID
+     * Update the block condition state true (Enabled) /false (Disabled) given the UUID.
      *
      * @param uuid  UUID of the block condition
      * @param state blocking state
      * @return true if the operation was success
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException if updating state of the block condition failed
      */
     boolean updateBlockConditionStateByUUID(String uuid, Boolean state) throws APIMgtDAOException;
 
     /**
-     * Delete the block condition given the id
+     * Delete the block condition given the id.
      *
      * @param uuid UUID of the block condition
      * @return true if successfully deleted
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException if deletion failed
      */
     boolean deleteBlockConditionByUuid(String uuid) throws APIMgtDAOException;
+
+    /**
+     * Adding a custom policy to database.
+     *
+     * @param customPolicy CustomPolicy object to be added
+     * @return uuid of the added policy
+     * @throws APIMgtDAOException if policy adding failed
+     */
+    String addCustomPolicy(CustomPolicy customPolicy) throws APIMgtDAOException;
+
+    /**
+     * get all custom policies.
+     *
+     * @return List of CustomPolicy objects
+     * @throws APIMgtDAOException if getting all custom policies failed
+     */
+    List<CustomPolicy> getCustomPolicies() throws APIMgtDAOException;
+
+    /**
+     * get custom policy by uuid.
+     *
+     * @param uuid uuid of the policy to be retrieved.
+     * @return CustomPolicy object
+     * @throws APIMgtDAOException if getting custom policy failed
+     */
+    CustomPolicy getCustomPolicyByUuid(String uuid) throws APIMgtDAOException;
+
+    /**
+     * Update custom policy.
+     *
+     * @param customPolicy CustomPolicy object to be updated
+     * @throws APIMgtDAOException if update custom policy failed
+     */
+    void updateCustomPolicy(CustomPolicy customPolicy) throws APIMgtDAOException;
+
+    /**
+     * Delete Custom policy from database.
+     *
+     * @param uuid uuid of the policy to be deleted
+     * @throws APIMgtDAOException if policy deletion failed
+     */
+    void deleteCustomPolicy(String uuid) throws APIMgtDAOException;
+
 }

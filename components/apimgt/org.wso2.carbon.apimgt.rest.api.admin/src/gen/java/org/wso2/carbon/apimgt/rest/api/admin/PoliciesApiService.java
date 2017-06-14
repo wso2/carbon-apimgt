@@ -11,6 +11,8 @@ import org.wso2.carbon.apimgt.rest.api.admin.dto.AdvancedThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.AdvancedThrottlePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationThrottlePolicyListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomRuleDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomRuleListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyListDTO;
@@ -65,6 +67,27 @@ public abstract class PoliciesApiService {
  , Request request) throws NotFoundException;
     public abstract Response policiesThrottlingApplicationPost(ApplicationThrottlePolicyDTO body
  ,String contentType
+ , Request request) throws NotFoundException;
+    public abstract Response policiesThrottlingCustomGet(String accept
+ ,String ifNoneMatch
+ ,String ifModifiedSince
+ , Request request) throws NotFoundException;
+    public abstract Response policiesThrottlingCustomPost(CustomRuleDTO body
+ ,String contentType
+ , Request request) throws NotFoundException;
+    public abstract Response policiesThrottlingCustomRuleIdDelete(String ruleId
+ ,String ifMatch
+ ,String ifUnmodifiedSince
+ , Request request) throws NotFoundException;
+    public abstract Response policiesThrottlingCustomRuleIdGet(String ruleId
+ ,String ifNoneMatch
+ ,String ifModifiedSince
+ , Request request) throws NotFoundException;
+    public abstract Response policiesThrottlingCustomRuleIdPut(String ruleId
+ ,CustomRuleDTO body
+ ,String contentType
+ ,String ifMatch
+ ,String ifUnmodifiedSince
  , Request request) throws NotFoundException;
     public abstract Response policiesThrottlingSubscriptionGet(String accept
  ,String ifNoneMatch

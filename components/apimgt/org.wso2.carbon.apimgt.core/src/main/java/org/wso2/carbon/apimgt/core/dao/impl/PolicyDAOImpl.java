@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.core.models.policy.Condition;
+import org.wso2.carbon.apimgt.core.models.policy.CustomPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.HeaderCondition;
 import org.wso2.carbon.apimgt.core.models.policy.IPCondition;
 import org.wso2.carbon.apimgt.core.models.policy.JWTClaimsCondition;
@@ -44,8 +45,10 @@ import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -2007,6 +2010,140 @@ public class PolicyDAOImpl implements PolicyDAO {
             DAOUtil.closeAllConnections(deleteBlockConditionPreparedStatement, connection, null);
         }
         return status;
+    }
+
+    @Override
+    public String addCustomPolicy(CustomPolicy customPolicy) throws APIMgtDAOException {
+        String addQuery = "INSERT INTO AM_CUSTOM_POLICY (NAME , KEY_TEMPLATE, DESCRIPTION ,SIDDHI_QUERY,"
+                + "IS_DEPLOYED, UUID) VALUES (?,?,?,?,?,?)";
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement policyStatement = connection.prepareStatement(addQuery)) {
+            policyStatement.setString(1, customPolicy.getPolicyName());
+            policyStatement.setString(2, customPolicy.getKeyTemplate());
+            policyStatement.setString(3, customPolicy.getDescription());
+
+            String uuid = UUID.randomUUID().toString();
+            byte[] byteArray = customPolicy.getSiddhiQuery().getBytes(Charset.defaultCharset());
+            policyStatement.setBinaryStream(4, new ByteArrayInputStream(byteArray));
+            //todo:change IS_DEPLOYED status after publishing policy to gateway
+            policyStatement.setBoolean(5, false);
+            policyStatement.setString(6, uuid);
+            policyStatement.executeUpdate();
+            return uuid;
+        } catch (SQLException e) {
+            log.error("An Error occurred while adding custom policy with name " + customPolicy.getPolicyName(), e);
+            throw new APIMgtDAOException(
+                    "Error occurred while adding custom policy with name " + customPolicy.getPolicyName(), e);
+        }
+    }
+
+    @Override
+    public List<CustomPolicy> getCustomPolicies() throws APIMgtDAOException {
+        List<CustomPolicy> customPolicyList = new ArrayList<>();
+        String getQuery = "SELECT * FROM AM_CUSTOM_POLICY";
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(getQuery)) {
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                String siddhiQuery = null;
+                CustomPolicy customPolicy = new CustomPolicy(resultSet.getString("NAME"));
+                customPolicy.setDescription(resultSet.getString("DESCRIPTION"));
+                customPolicy.setUuid(resultSet.getString("UUID"));
+                customPolicy.setKeyTemplate(resultSet.getString("KEY_TEMPLATE"));
+                customPolicy.setDeployed(resultSet.getBoolean("IS_DEPLOYED"));
+                InputStream siddhiQueryBlob = resultSet.getBinaryStream("SIDDHI_QUERY");
+                if (siddhiQueryBlob != null) {
+                    try {
+                        siddhiQuery = IOUtils.toString(siddhiQueryBlob);
+                    } catch (IOException e) {
+                        log.error("Error in converting siddhi query blob", e);
+                        handleException("Error in converting siddhi query blob", e);
+                    }
+                }
+                customPolicy.setSiddhiQuery(siddhiQuery);
+                customPolicyList.add(customPolicy);
+            }
+            resultSet.close();
+            return customPolicyList;
+        } catch (SQLException e) {
+            log.error("An Error occurred while getting custom policies", e);
+            throw new APIMgtDAOException("Error occurred while getting custom policies", e);
+        }
+    }
+
+    @Override
+    public CustomPolicy getCustomPolicyByUuid(String uuid) throws APIMgtDAOException {
+        String query = "SELECT * FROM AM_CUSTOM_POLICY WHERE UUID = ? ";
+        CustomPolicy customPolicy = null;
+        ResultSet resultSet = null;
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, uuid);
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                String siddhiQuery = null;
+                customPolicy = new CustomPolicy(resultSet.getString("NAME"));
+                customPolicy.setDescription(resultSet.getString("DESCRIPTION"));
+                customPolicy.setUuid(resultSet.getString("UUID"));
+                customPolicy.setKeyTemplate(resultSet.getString("KEY_TEMPLATE"));
+                customPolicy.setDeployed(resultSet.getBoolean("IS_DEPLOYED"));
+                InputStream siddhiQueryBlob = resultSet.getBinaryStream("SIDDHI_QUERY");
+                if (siddhiQueryBlob != null) {
+                    try {
+                        siddhiQuery = IOUtils.toString(siddhiQueryBlob);
+                    } catch (IOException e) {
+                        log.error("Error in converting siddhi query blob", e);
+                        handleException("Error in converting siddhi query blob", e);
+                    }
+                }
+                customPolicy.setSiddhiQuery(siddhiQuery);
+            }
+        } catch (SQLException e) {
+            log.error("An Error occurred while getting custom policy with UUID [" + uuid + "], ", e);
+            throw new APIMgtDAOException("Error occurred while getting custom policy with UUID : " + uuid, e);
+        } finally {
+            if (resultSet != null) {
+                try {
+                    resultSet.close();
+                } catch (SQLException e) {
+                    handleException("Error while closing the result set", e);
+                }
+            }
+        }
+        return customPolicy;
+    }
+
+    @Override
+    public void updateCustomPolicy(CustomPolicy customPolicy) throws APIMgtDAOException {
+        String query = "UPDATE AM_CUSTOM_POLICY SET DESCRIPTION = ?, SIDDHI_QUERY = ?, KEY_TEMPLATE = ?, NAME = ? "
+                + "WHERE UUID = ?";
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement updateStatement = connection.prepareStatement(query)) {
+            byte[] byteArray = customPolicy.getSiddhiQuery().getBytes(Charset.defaultCharset());
+            updateStatement.setString(1, customPolicy.getDescription());
+            updateStatement.setBinaryStream(2, new ByteArrayInputStream(byteArray));
+            updateStatement.setString(3, customPolicy.getKeyTemplate());
+            updateStatement.setString(4, customPolicy.getPolicyName());
+            updateStatement.setString(5, customPolicy.getUuid());
+            updateStatement.executeUpdate();
+        } catch (SQLException e) {
+            log.error("An Error occurred while updating custom policy with UUID [" + customPolicy.getUuid() + "], ", e);
+            throw new APIMgtDAOException(
+                    "Error occurred while updating custom policy with UUID : " + customPolicy.getUuid(), e);
+        }
+    }
+
+    @Override
+    public void deleteCustomPolicy(String uuid) throws APIMgtDAOException {
+        String deleteQuery = "DELETE FROM AM_CUSTOM_POLICY WHERE UUID = ?";
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(deleteQuery)) {
+            preparedStatement.setString(1, uuid);
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            log.error("An Error occurred while deleting custom policy with UUID [" + uuid + "], ", e);
+            throw new APIMgtDAOException("Error occurred while deleting custom policy with UUID : " + uuid, e);
+        }
     }
 
     /**

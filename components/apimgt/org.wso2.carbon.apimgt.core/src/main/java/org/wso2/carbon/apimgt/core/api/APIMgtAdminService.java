@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.CustomPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 
@@ -345,13 +346,11 @@ public interface APIMgtAdminService {
     /**
      * Policy Level enum
      */
-<<<<<<< fa2fe480f6fd3d66f9b14330e5b0bbc3ffef255e
     enum PolicyLevel {
         api,
         application,
         subscription
     }
-=======
     List<SubscriptionPolicy> getAllSubscriptionPolicies() throws APIManagementException;
 
     /**
@@ -370,5 +369,47 @@ public interface APIMgtAdminService {
      * @throws APIManagementException
      */
     BlockConditions getBlockConditionByUUID(String uuid) throws APIManagementException;
->>>>>>> Fixing end to end blacklist condition adding,updating and deleting.
+
+    /**
+     * Adding custom policy.
+     *
+     * @param customPolicy CustomPolicy object to be added
+     * @return uuid of the added custom policy
+     * @throws APIManagementException if failed adding custom policy
+     */
+    String addCustomRule(CustomPolicy customPolicy) throws APIManagementException;
+
+    /**
+     * Update custom policy.
+     *
+     * @param customPolicy CustomPolicy to be updated
+     * @throws APIManagementException if failed updating custom policy
+     */
+    void updateCustomRule(CustomPolicy customPolicy) throws APIManagementException;
+
+    /**
+     * Delete custom rule.
+     *
+     * @param uuid uuid of the custom policy to be deleted
+     * @throws APIManagementException if failed delete custom rule
+     */
+    void deleteCustomRule(String uuid) throws APIManagementException;
+
+    /**
+     * Get all custom policies
+     *
+     * @return list of custom policies available
+     * @throws APIManagementException if failed getting all custom policies
+     */
+    List<CustomPolicy> getCustomRules() throws APIManagementException;
+
+    /**
+     * Get custom policy by uuid
+     *
+     * @param uuid uuid of the custom policy to be retrieved
+     * @return CustomPolicy object
+     * @throws APIManagementException if failed getting custom policy
+     */
+    CustomPolicy getCustomRuleByUUID(String uuid) throws APIManagementException;
+
 }
