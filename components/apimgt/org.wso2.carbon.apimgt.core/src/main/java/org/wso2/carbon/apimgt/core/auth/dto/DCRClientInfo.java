@@ -52,6 +52,8 @@ public final class DCRClientInfo {
     private String logoUri;
     @SerializedName("jwks_uri")
     private String jwksUri;
+    @SerializedName("userinfo_signed_response_alg")
+    private String userinfoSignedResponseAlg;
 
     public String getClientId() {
         return clientId;
@@ -147,6 +149,14 @@ public final class DCRClientInfo {
 
     public void setJwksUri(String jwksUri) {
         this.jwksUri = jwksUri;
+    }
+
+    public String getUserinfoSignedResponseAlg() {
+        return userinfoSignedResponseAlg;
+    }
+
+    public void setUserinfoSignedResponseAlg(String userinfoSignedResponseAlg) {
+        this.userinfoSignedResponseAlg = userinfoSignedResponseAlg;
     }
 
     public void addGrantType(String grantType) {

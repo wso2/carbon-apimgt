@@ -115,6 +115,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "Identity provider initialization failed"),
     KEY_MANAGER_INITIALIZATION_FAILED(900606, "Key Manager initialization failed", 500,
             "Key Manager initialization failed"),
+    ROLE_DOES_NOT_EXIST(900607, "Role does not exist in the system", 404, "Role does not exist in the system"),
 
 
     // Labels related codes
