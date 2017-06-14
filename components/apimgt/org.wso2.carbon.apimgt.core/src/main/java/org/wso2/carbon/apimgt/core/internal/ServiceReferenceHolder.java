@@ -78,7 +78,7 @@ public class ServiceReferenceHolder {
                 log.error("Configuration provider is null");
             }
         } catch (CarbonConfigurationException e) {
-            log.error("Error while reading the configurations map of name space : " +
+            log.error("Error while reading the configurations map of namespace : " +
                     "org.wso2.carbon.apimgt.core.internal.APIMConfiguration", e);
         }
         return null;
