@@ -54,7 +54,7 @@ public class SetProperty extends AbstractNativeFunction {
     public BValue[] execute(Context context) {
         BMessage msg = (BMessage) getRefArgument(context, 0);
         String propertyName = getStringArgument(context, 0);
-        BValue propertyValue = getRefArgument(context, 0);
+        BValue propertyValue = getRefArgument(context, 1);
 
         if (propertyName != null && propertyValue != null) {
             msg.setProperty(propertyName, propertyValue);
