@@ -218,12 +218,22 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 WorkflowExecutor executor = WorkflowExecutorFactory.getInstance()
                         .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);
                 ApplicationUpdateWorkflow workflow = new ApplicationUpdateWorkflow(getApplicationDAO(),
-                        getWorkflowDAO());
-                
+                        getWorkflowDAO(), getApiGateway());
                 application.setId(uuid);
                 application.setUpdatedUser(getUsername());
                 application.setUpdatedTime(LocalDateTime.now());
-                
+
+                String appTierName = application.getTier();
+                if (appTierName != null && !appTierName.equals(existingApplication.getTier())) {
+                    Policy policy = getPolicyDAO().getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL,
+                                    appTierName);
+                    if (policy == null) {
+                        String message = "Specified tier " + appTierName + " is invalid";
+                        log.error(message);
+                        throw new APIManagementException(message, ExceptionCodes.TIER_NAME_INVALID);
+                    }
+                    application.setPolicyId(policy.getUuid());
+                }
                 workflow.setExistingApplication(existingApplication);
                 workflow.setUpdatedApplication(application);
                 workflow.setCreatedBy(getUsername());
@@ -241,6 +251,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_NAME, application.getName());
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_UPDATEDBY, application.getUpdatedUser());
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_TIER, application.getTier());
+                workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_POLICY_ID, application.getPolicyId());
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_DESCRIPTION,
                         application.getDescription());
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_GROUPID, application.getGroupId());
@@ -941,8 +952,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             resourceList.add(dto);
         }
         GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
-        APIConfigContext apiConfigContext = new APIConfigContext(apiBuilder.getName(), apiBuilder.getContext(),
-                apiBuilder.getVersion(), apiBuilder.getCreatedTime(), config.getGatewayPackageName());
+        APIConfigContext apiConfigContext = new APIConfigContext(apiBuilder.build(), config.getGatewayPackageName());
 
         gatewaySourceGenerator.setApiConfigContext(apiConfigContext);
         String gatewayConfig = gatewaySourceGenerator.getCompositeAPIConfigStringFromTemplate(resourceList,
@@ -973,8 +983,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 String updatedSwagger = apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder);
                 InputStream gatewayConfig = getApiDAO().getCompositeAPIGatewayConfig(apiBuilder.getId());
                 GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
-                APIConfigContext apiConfigContext = new APIConfigContext(apiBuilder.getName(), apiBuilder.getContext(),
-                        apiBuilder.getVersion(), apiBuilder.getCreatedTime(), config.getGatewayPackageName());
+                APIConfigContext apiConfigContext = new APIConfigContext(apiBuilder.build(), config
+                        .getGatewayPackageName());
 
                 gatewaySourceGenerator.setApiConfigContext(apiConfigContext);
                 String updatedGatewayConfig = gatewaySourceGenerator
@@ -1294,7 +1304,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                     getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
 
             ApplicationDeletionWorkflow workflow = new ApplicationDeletionWorkflow(getApplicationDAO(),
-                    getWorkflowDAO());
+                    getWorkflowDAO(), getApiGateway());
             workflow.setApplication(application);
             workflow.setWorkflowType(APIMgtConstants.WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
             workflow.setWorkflowReference(application.getId());
@@ -1391,6 +1401,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                     log.error(message);
                     throw new APIManagementException(message, ExceptionCodes.TIER_CANNOT_BE_NULL);
                 }
+                application.setPolicyId(policy.getUuid());
             }
             // Generate UUID for application
             String generatedUuid = UUID.randomUUID().toString();
@@ -1410,7 +1421,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                     .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
 
             ApplicationCreationWorkflow workflow = new ApplicationCreationWorkflow(getApplicationDAO(),
-                    getWorkflowDAO());
+                    getWorkflowDAO(), getApiGateway());
 
             workflow.setApplication(application);
             workflow.setCreatedBy(getUsername());

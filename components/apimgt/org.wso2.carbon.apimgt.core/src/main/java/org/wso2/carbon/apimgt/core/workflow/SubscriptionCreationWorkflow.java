@@ -27,8 +27,11 @@ import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+
+import java.util.List;
 
 /**
  * This model is used to gather subscription creation related workflow data
@@ -44,7 +47,7 @@ public class SubscriptionCreationWorkflow extends Workflow {
 
     public SubscriptionCreationWorkflow(APISubscriptionDAO apiSubscriptionDAO, WorkflowDAO workflowDAO,
                                         APIGateway apiGateway) {
-        super(workflowDAO, Category.STORE);
+        super(workflowDAO, Category.STORE, apiGateway);
         this.apiSubscriptionDAO = apiSubscriptionDAO;
         this.apiGateway = apiGateway;
     }
@@ -88,9 +91,23 @@ public class SubscriptionCreationWorkflow extends Workflow {
         }
 
         //Add subscription to gateway
-        apiGateway.addAPISubscription(subscription);
         apiSubscriptionDAO.updateSubscriptionStatus(getWorkflowReference(), subscriptionState);
         updateWorkflowEntries(this);
+        if (WorkflowStatus.APPROVED == response.getWorkflowStatus()) {
+            if (subscription.getApi() != null && subscription.getApplication() != null) {
+                List<SubscriptionValidationData> subscriptionValidationDataList = apiSubscriptionDAO
+                        .getAPISubscriptionsOfAPIForValidation(subscription.getApi().getContext(), subscription.getApi()
+                                .getVersion(), subscription.getApplication().getId());
+                if (subscriptionValidationDataList != null && !subscriptionValidationDataList.isEmpty()) {
+                    apiGateway.addAPISubscription(subscriptionValidationDataList);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Subscription created for API : " + subscription.getApi().getName() + " with " +
+                                "application : " + subscription.getApplication().getName() + " has been successfully " +
+                                "published to gateway");
+                    }
+                }
+            }
+        }
         return response;
     }
 

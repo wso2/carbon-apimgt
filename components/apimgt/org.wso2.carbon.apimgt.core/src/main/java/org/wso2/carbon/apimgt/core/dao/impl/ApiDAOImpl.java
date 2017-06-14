@@ -1370,6 +1370,51 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     @Override
+    public List<String> getUUIDsOfGlobalEndpoints() throws APIMgtDAOException {
+        final String query = "SELECT UUID FROM AM_ENDPOINT WHERE APPLICABLE_LEVEL='" + APIMgtConstants
+                .GLOBAL_ENDPOINT + "'";
+        List<String> endpointList = new ArrayList<>();
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query);
+             ResultSet resultSet = statement.executeQuery()) {
+            while (resultSet.next()) {
+                endpointList.add(resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_UUID));
+            }
+        } catch (SQLException e) {
+            String msg = "Couldn't get all UUIDs of Endpoints";
+            log.error(msg, e);
+            throw new APIMgtDAOException(e);
+        }
+        return endpointList;
+    }
+
+    @Override
+    public String getEndpointConfig(String endpointId) throws APIMgtDAOException {
+        final String query = "SELECT GATEWAY_CONFIG FROM AM_ENDPOINT WHERE UUID = ?";
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, endpointId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    InputStream inputStream = resultSet.getBinaryStream(APIMgtConstants.GATEWAY_CONFIG);
+                    if (inputStream != null) {
+                        return IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+                    } else {
+                        throw new APIMgtDAOException("Couldn't Find Endpoint Config", ExceptionCodes
+                                .ENDPOINT_CONFIG_NOT_FOUND);
+                    }
+                } else {
+                    throw new APIMgtDAOException("Couldn't Find Endpoint Config", ExceptionCodes
+                            .ENDPOINT_CONFIG_NOT_FOUND);                }
+            }
+        } catch (SQLException | IOException e) {
+            String msg = "Couldn't get Endpoints Gateway Config";
+            log.error(msg, e);
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    @Override
     public double getAverageRating(String apiId) throws APIMgtDAOException {
         final String query = "SELECT AVG(RATING) FROM AM_API_RATINGS WHERE API_ID = ?";
         try (Connection connection = DAOUtil.getConnection();
@@ -2338,7 +2383,7 @@ public class ApiDAOImpl implements ApiDAO {
 
     private void addEndpoint(Connection connection, Endpoint endpoint) throws SQLException {
         final String query = "INSERT INTO AM_ENDPOINT (UUID,NAME,ENDPOINT_CONFIGURATION,"
-                + "TPS,TYPE,SECURITY_CONFIGURATION,APPLICABLE_LEVEL) VALUES (?,?,?,?,?,?,?)";
+                + "TPS,TYPE,SECURITY_CONFIGURATION,APPLICABLE_LEVEL,GATEWAY_CONFIG) VALUES (?,?,?,?,?,?,?,?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, endpoint.getId());
             statement.setString(2, endpoint.getName());
@@ -2352,6 +2397,7 @@ public class ApiDAOImpl implements ApiDAO {
             statement.setString(5, endpoint.getType());
             statement.setBinaryStream(6, IOUtils.toInputStream(endpoint.getSecurity()));
             statement.setString(7, endpoint.getApplicableLevel());
+            statement.setBinaryStream(8, IOUtils.toInputStream(endpoint.getConfig()));
             statement.execute();
         }
     }
@@ -2494,7 +2540,7 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     public boolean updateEndpoint(Endpoint endpoint) throws APIMgtDAOException {
         final String query = "UPDATE AM_ENDPOINT SET ENDPOINT_CONFIGURATION = ?,TPS = ?,TYPE = " +
-                "?,SECURITY_CONFIGURATION =?, LAST_UPDATED_TIME = ? WHERE UUID = ?";
+                "?,SECURITY_CONFIGURATION =?, LAST_UPDATED_TIME = ?, GATEWAY_CONFIG = ? WHERE UUID = ?";
         try (Connection connection = DAOUtil.getConnection()) {
             connection.setAutoCommit(false);
             try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -2508,7 +2554,8 @@ public class ApiDAOImpl implements ApiDAO {
                 statement.setString(3, endpoint.getType());
                 statement.setBinaryStream(4, IOUtils.toInputStream(endpoint.getSecurity()));
                 statement.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
-                statement.setString(6, endpoint.getId());
+                statement.setBinaryStream(6, IOUtils.toInputStream(endpoint.getConfig()));
+                statement.setString(7, endpoint.getId());
                 statement.execute();
                 connection.commit();
                 return true;
@@ -2537,7 +2584,7 @@ public class ApiDAOImpl implements ApiDAO {
         try (Connection connection = DAOUtil.getConnection()) {
             return getEndpoint(connection, endpointId);
         } catch (SQLException | IOException e) {
-            String msg = "Couldn't Get Endpoint " + endpointId;
+            String msg = "Couldn't get Endpoint " + endpointId;
             log.error(msg, e);
             throw new APIMgtDAOException(e);
         }
@@ -2603,7 +2650,7 @@ public class ApiDAOImpl implements ApiDAO {
                 }
             }
         } catch (SQLException | IOException e) {
-            String msg = "Couldn't Get Endpoint By name" + name;
+            String msg = "Couldn't get Endpoint By name" + name;
             log.error(msg, e);
             throw new APIMgtDAOException(e);
         }
@@ -2627,7 +2674,7 @@ public class ApiDAOImpl implements ApiDAO {
                 endpointList.add(constructEndPointDetails(resultSet));
             }
         } catch (SQLException | IOException e) {
-            String msg = "Couldn't Get Endpoints";
+            String msg = "Couldn't get Endpoints";
             log.error(msg, e);
             throw new APIMgtDAOException(e);
         }

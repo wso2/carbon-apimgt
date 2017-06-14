@@ -68,6 +68,19 @@ public interface APISubscriptionDAO {
             throws APIMgtDAOException;
 
     /**
+     * Retrieve the list of subscriptions of an API for validation
+     *
+     * @param apiContext    Context of the API
+     * @param apiVersion    Version of the API.
+     * @param applicationId UUID of the application
+     * @return A list of {@link SubscriptionValidationData} objects
+     * @throws APIMgtDAOException If failed to get subscriptions.
+     */
+    @CheckForNull
+    List<SubscriptionValidationData> getAPISubscriptionsOfAPIForValidation(String apiContext, String
+            apiVersion, String applicationId) throws APIMgtDAOException;
+
+    /**
      * Retrieve the list of subscriptions of an Application
      *
      * @param applicationId The UUID of Application

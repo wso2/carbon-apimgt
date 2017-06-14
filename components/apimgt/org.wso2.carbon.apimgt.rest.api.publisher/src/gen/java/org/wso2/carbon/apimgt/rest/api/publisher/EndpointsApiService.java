@@ -19,7 +19,6 @@ import java.io.InputStream;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date = "2017-05-04T18:05:59.301+05:30")
 public abstract class EndpointsApiService {
     public abstract Response endpointsEndpointIdDelete(String endpointId
  ,String contentType

@@ -229,7 +229,7 @@ public class APIUtils {
     public static Map<String, UriTemplate> getDefaultUriTemplates() {
         Map<String, UriTemplate> uriTemplateMap = new HashMap<>();
         UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
-        uriTemplateBuilder.uriTemplate("/*");
+        uriTemplateBuilder.uriTemplate("/");
         for (String httpVerb : APIMgtConstants.SUPPORTED_HTTP_VERBS.split(",")) {
             if (!HttpMethod.OPTIONS.toString().equals(httpVerb)) {
                 uriTemplateBuilder.httpVerb(httpVerb);

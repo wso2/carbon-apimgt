@@ -222,7 +222,8 @@ public class MappingUtil {
             if (!StringUtils.isEmpty(endpointDTO.getKey())){
                 endpointMap.put(endpointDTO.getType(), new Endpoint.Builder().id(endpointDTO.getKey())
                         .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).build());
-            }if (endpointDTO.getInline() != null){
+            }
+            if (endpointDTO.getInline() != null) {
                 endpointMap.put(endpointDTO.getType(), toEndpoint(endpointDTO.getInline()));
             }
         }
@@ -324,7 +325,7 @@ public class MappingUtil {
 
 
     /**
-     * This method convert Application model to ApplicationDTO
+     * This method convert Application model to ApplicationEvent
      * @param application Contains application data
      * @return DTO containing application data
      */

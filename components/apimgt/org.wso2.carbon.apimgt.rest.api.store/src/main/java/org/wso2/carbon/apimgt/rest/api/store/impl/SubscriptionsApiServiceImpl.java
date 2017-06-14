@@ -1,13 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +9,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Subscription;
@@ -33,9 +26,17 @@ import org.wso2.carbon.apimgt.rest.api.store.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.store.mappings.SubscriptionMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.MiscMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.store.mappings.SubscriptionMappingUtil;
 import org.wso2.msf4j.Request;
+
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
         "2016-11-01T13:48:55.078+05:30")
@@ -189,7 +190,12 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                 return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
             }
 
-        } catch (APIManagementException e) {
+        } catch (GatewayException e) {
+            String errorMessage = "Failed to add subscription of API : " + body.getApiIdentifier() + " to gateway";
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.ACCEPTED).build();
+        }
+        catch (APIManagementException e) {
             String errorMessage = "Error while adding subscriptions";
             Map<String, String> paramList = new HashMap<>();
             paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, body.getApiIdentifier());
@@ -239,6 +245,10 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             }
 
             apiStore.deleteAPISubscription(subscriptionId);
+        } catch (GatewayException e) {
+            String errorMessage = "Failed to remove subscription :" + subscriptionId + " from gateway";
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.ACCEPTED).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting subscription";
             HashMap<String, String> paramList = new HashMap<String, String>();
