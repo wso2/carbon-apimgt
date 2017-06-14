@@ -226,7 +226,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 String appTierName = application.getTier();
                 if (appTierName != null && !appTierName.equals(existingApplication.getTier())) {
                     Policy policy = getPolicyDAO().getPolicy(APIMgtConstants.ThrottlePolicyConstants.APPLICATION_LEVEL,
-                            appTierName);
+                                    appTierName);
                     if (policy == null) {
                         String message = "Specified tier " + appTierName + " is invalid";
                         log.error(message);

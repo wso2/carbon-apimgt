@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Stream processor for Throttling
  *
  */
 @Extension(name = "timeBatch", namespace = "throttler", description =
