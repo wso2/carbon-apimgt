@@ -1,4 +1,3 @@
-package org.wso2.carbon.apimgt.core.configuration.models;
 /*
  * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -17,6 +16,8 @@ package org.wso2.carbon.apimgt.core.configuration.models;
  * under the License.
  */
 
+package org.wso2.carbon.apimgt.core.configuration.models;
+
 import org.wso2.carbon.kernel.annotations.Configuration;
 import org.wso2.carbon.kernel.annotations.Element;
 
@@ -28,22 +29,7 @@ import java.io.File;
 
 @Configuration(namespace = "wso2.carbon.apimgt", description = "APIM Configuration Parameters")
 public class APIMConfigurations {
-    private String carbonClientId = "carbon";
-    @Element(description = "server version")
-    private String carbonVirtualHostName = "carbon";
-    @Element(description = "topic server host")
-    private String topicServerHost = "localhost";
-    @Element(description = "topic server port")
-    private String topicServerPort = "5672";
-    @Element(description = "publisher topic name")
-    private String publisherTopic = "PublisherTopic";
-    @Element(description = "store topic name")
-    private String storeTopic = "StoreTopic";
-    @Element(description = "username for topic")
-    private String username = "admin";
-    @Element(description = "password for topic")
-    private String password = "admin";
-    @Element(description = "password for topic")
+
     private boolean reverseProxyEnabled = false;
     @Element(description = "hostname")
     private String hostname = "localhost";
@@ -55,7 +41,7 @@ public class APIMConfigurations {
     private String adminContext = "/api/am/admin/v1.0";
 
     @Element(description = "package name for gateway configs")
-    private String gatewayPackageName = "deployment.org.wso2.apim";
+    private String gatewayPackageName = "org.wso2.carbon.apimgt.gateway";
 
     @Element(description = "package name path for gateway configs")
     private String gatewayPackageNamePath =
@@ -69,6 +55,18 @@ public class APIMConfigurations {
 
     @Element(description = "Identity Provider Configurations")
     private IdentityProviderConfigurations identityProviderConfigs = new IdentityProviderConfigurations();
+
+    @Element(description = "Broker Configurations")
+    private BrokerConfigurations brokerConfiguration = new BrokerConfigurations();
+
+    @Element(description = "JWT Configurations")
+    private JWTConfigurations jwtConfigurations = new JWTConfigurations();
+
+    @Element(description = "Analytics Configurations")
+    private AnalyticsConfigurations analyticsConfigurations = new AnalyticsConfigurations();
+
+    @Element(description = "Throttling Configurations")
+    private ThrottlingConfigurations throttlingConfigurations = new ThrottlingConfigurations();
 
     @Element(description = "comment moderator role")
     private String commentModeratorRole = "comment-moderator";
@@ -103,38 +101,6 @@ public class APIMConfigurations {
         return adminContext;
     }
 
-    public String getCarbonClientId() {
-        return carbonClientId;
-    }
-
-    public String getCarbonVirtualHostName() {
-        return carbonVirtualHostName;
-    }
-
-    public String getTopicServerHost() {
-        return topicServerHost;
-    }
-
-    public String getTopicServerPort() {
-        return topicServerPort;
-    }
-
-    public String getPublisherTopic() {
-        return publisherTopic;
-    }
-
-    public String getStoreTopic() {
-        return storeTopic;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
     public String getGatewayPackageName() {
         return gatewayPackageName;
     }
@@ -149,6 +115,22 @@ public class APIMConfigurations {
 
     public IdentityProviderConfigurations getIdentityProviderConfigs() {
         return identityProviderConfigs;
+    }
+
+    public BrokerConfigurations getBrokerConfiguration() {
+        return brokerConfiguration;
+    }
+
+    public JWTConfigurations getJwtConfigurations() {
+        return jwtConfigurations;
+    }
+
+    public AnalyticsConfigurations getAnalyticsConfigurations() {
+        return analyticsConfigurations;
+    }
+
+    public ThrottlingConfigurations getThrottlingConfigurations() {
+        return throttlingConfigurations;
     }
 
     public String getCommentModeratorRole() {

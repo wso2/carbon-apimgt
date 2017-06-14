@@ -153,8 +153,13 @@ public enum ExceptionCodes implements ErrorHandler {
     TOKEN_INTROSPECTION_FAILED(900956, "Key Management Error", 500, "Error while introspecting the access token."),
     ACCESS_TOKEN_GENERATION_FAILED(900957, "Key Management Error", 500, "Error while generating a new access token."),
     INVALID_TOKEN_REQUEST(900958, "Key Management Error", 400, "Invalid access token request."),
-    ACCESS_TOKEN_REVOKE_FAILED(900959, "Key Management Error", 500, "Error while revoking the access token.");
+    ACCESS_TOKEN_REVOKE_FAILED(900959, "Key Management Error", 500, "Error while revoking the access token."),
 
+
+    //Throttle related codes
+    THROTTLE_TEMPLATE_EXCEPTION(900960, "Policy Generating Error", 500, " Error while generate policy configuration"),
+    ENDPOINT_CONFIG_NOT_FOUND(900961, "Endpoint Config Not found", 404, "Error while retrieving Endpoint " +
+            "Configuration");
 
     private final long errorCode;
     private final String errorMessage;

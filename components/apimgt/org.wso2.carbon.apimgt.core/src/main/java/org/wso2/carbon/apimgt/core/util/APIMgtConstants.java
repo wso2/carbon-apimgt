@@ -102,6 +102,7 @@ public class APIMgtConstants {
     public static final String URL_PATTERN_COLUMN = "URL_PATTERN";
 
     public static final String SANDBOX_ENDPOINT = "sandbox";
+    public static final String GATEWAY_CONFIG = "GATEWAY_CONFIG";
     public static final String HTTP = "http";
     public static final String HTTPS = "https";
 
@@ -366,6 +367,7 @@ public class APIMgtConstants {
         public static final String ATTRIBUTE_APPLICATION_GROUPID = "groupId";
         public static final String ATTRIBUTE_APPLICATION_PERMISSION = "permission";
         public static final String ATTRIBUTE_APPLICATION_EXISTIN_APP_STATUS = "status";
+        public static final String ATTRIBUTE_APPLICATION_POLICY_ID = "policyId";
 
     }
 
@@ -389,6 +391,10 @@ public class APIMgtConstants {
         public static final String ENDPOINT_DELETE = "ENDPOINT_DELETE";
         public static final String SUBSCRIPTION_CREATE = "SUBSCRIPTION_CREATE";
         public static final String SUBSCRIPTION_DELETE = "SUBSCRIPTION_DELETE";
+        public static final String SUBSCRIPTION_STATUS_CHANGE = "SUBSCRIPTION_STATUS_CHANGE";
+        public static final String APPLICATION_CREATE = "APPLICATION_CREATE";
+        public static final String APPLICATION_UPDATE = "APPLICATION_UPDATE";
+        public static final String APPLICATION_DELETE = "APPLICATION_DELETE";
     }
 
     /**

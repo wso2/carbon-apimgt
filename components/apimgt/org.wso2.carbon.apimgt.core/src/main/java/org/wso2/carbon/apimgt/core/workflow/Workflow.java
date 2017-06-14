@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.core.workflow;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
@@ -56,10 +57,12 @@ public abstract class Workflow {
     private String callbackURL;
     private String createdBy;
     private WorkflowDAO workflowDAO;
+    private APIGateway apiGateway;
 
-    public Workflow(WorkflowDAO workflowDAO, Category category) {
+    public Workflow(WorkflowDAO workflowDAO, Category category, APIGateway apiGateway) {
         this.workflowDAO = workflowDAO;
         this.category = category;
+        this.apiGateway = apiGateway;
     }
 
     //to pass any additional parameters. This can be used to pass parameters to the executor's complete() method
@@ -213,4 +216,7 @@ public abstract class Workflow {
         STORE, PUBLISHER
     }
 
+    public APIGateway getApiGateway() {
+        return apiGateway;
+    }
 }

@@ -737,7 +737,7 @@ public class SampleTestObjectCreator {
 
     public static Workflow createWorkflow(String workflowReferenceID) throws APIMgtDAOException {
         Workflow workflow = new ApplicationCreationWorkflow(DAOFactory.getApplicationDAO(),
-                DAOFactory.getWorkflowDAO());
+                DAOFactory.getWorkflowDAO(), null);
         workflow.setExternalWorkflowReference(workflowReferenceID);
         workflow.setStatus(WorkflowStatus.CREATED);
         workflow.setCreatedTime(LocalDateTime.now());

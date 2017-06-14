@@ -536,6 +536,16 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     @Override
+    public List<String> getUUIDsOfGlobalEndpoints() throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getEndpointConfig(String endpointId) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public double getAverageRating(String apiId) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }

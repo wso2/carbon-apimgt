@@ -72,10 +72,12 @@ public class WorkflowExecutorFactory {
     public Workflow createWorkflow(String workflowType) throws APIMgtDAOException {
         Workflow workflow = null;
         if (WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION.equals(workflowType)) {
-            workflow = new ApplicationCreationWorkflow(DAOFactory.getApplicationDAO(), DAOFactory.getWorkflowDAO());
+            workflow = new ApplicationCreationWorkflow(DAOFactory.getApplicationDAO(), DAOFactory.getWorkflowDAO(),
+                    APIManagerFactory.getInstance().getApiGateway());
             workflow.setWorkflowType(workflowType);
         } else if (WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION.equals(workflowType)) {
-            workflow = new ApplicationDeletionWorkflow(DAOFactory.getApplicationDAO(), DAOFactory.getWorkflowDAO());
+            workflow = new ApplicationDeletionWorkflow(DAOFactory.getApplicationDAO(), DAOFactory.getWorkflowDAO(),
+                    APIManagerFactory.getInstance().getApiGateway());
             workflow.setWorkflowType(workflowType);
         } else if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION.equals(workflowType)) {
             workflow = new SubscriptionCreationWorkflow(DAOFactory.getAPISubscriptionDAO(), DAOFactory.getWorkflowDAO(),
@@ -91,7 +93,8 @@ public class WorkflowExecutorFactory {
                     APIManagerFactory.getInstance().getApiGateway());
             workflow.setWorkflowType(workflowType);
         } else if (WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE.equals(workflowType)) {
-            workflow = new ApplicationUpdateWorkflow(DAOFactory.getApplicationDAO(), DAOFactory.getWorkflowDAO());
+            workflow = new ApplicationUpdateWorkflow(DAOFactory.getApplicationDAO(), DAOFactory.getWorkflowDAO(),
+                    APIManagerFactory.getInstance().getApiGateway());
             workflow.setWorkflowType(workflowType);
         }
         return workflow;
