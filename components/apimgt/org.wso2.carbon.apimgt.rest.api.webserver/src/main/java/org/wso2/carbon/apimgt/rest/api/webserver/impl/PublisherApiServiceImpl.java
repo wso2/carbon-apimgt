@@ -41,7 +41,7 @@ public class PublisherApiServiceImpl extends PublisherApiService {
         String filePath = "./deployment/webapps/" + context + "public/index.html";
         if (context.toLowerCase(Locale.ENGLISH).equals("publisher_new")) {
             context = "publisher";
-            path = context + "/" + String.join("/", Arrays.copyOfRange(parts, 2, parts.length));
+            path = "/" + context + "/" + String.join("/", Arrays.copyOfRange(parts, 2, parts.length));
         }
         //#TODO read from config file
         /* TODO: Check the dot containment in last segment separated by '/' or use regex to capture file extension */
