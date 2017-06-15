@@ -89,7 +89,7 @@
                         </goals>
                         <phase>initialize</phase>
                         <configuration>
-                            <workingDirectory>${basedir}/src/main/resources/publisher_new</workingDirectory>
+                            <workingDirectory>${basedir}/src/main/resources/publisher</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
                                 <argument>install</argument>
@@ -133,7 +133,7 @@
                         </goals>
                         <phase>compile</phase>
                         <configuration>
-                            <workingDirectory>${basedir}/src/main/resources/publisher_new</workingDirectory>
+                            <workingDirectory>${basedir}/src/main/resources/publisher</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
                                 <argument>run</argument>
