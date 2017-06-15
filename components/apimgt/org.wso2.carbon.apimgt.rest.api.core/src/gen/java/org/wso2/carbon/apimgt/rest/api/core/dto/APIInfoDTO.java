@@ -107,7 +107,7 @@ public class APIInfoDTO   {
    * Get lifeCycleStatus
    * @return lifeCycleStatus
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "CREATED", value = "")
   public String getLifeCycleStatus() {
     return lifeCycleStatus;
   }

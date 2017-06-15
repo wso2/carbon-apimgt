@@ -27,8 +27,8 @@ public class Rating {
 
     private String uuid;
     private String apiId;
-    private String rating;
-    private String subscriber;
+    private int rating;
+    private String username;
     private String createdUser;
     private LocalDateTime createdTime;
     private String lastUpdatedUser;
@@ -50,20 +50,20 @@ public class Rating {
         this.apiId = apiId;
     }
 
-    public String getRating() {
+    public int getRating() {
         return rating;
     }
 
-    public void setRating(String rating) {
+    public void setRating(int rating) {
         this.rating = rating;
     }
 
-    public String getSubscriber() {
-        return subscriber;
+    public String getUsername() {
+        return username;
     }
 
-    public void setSubscriber(String subscriber) {
-        this.subscriber = subscriber;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getCreatedUser() {

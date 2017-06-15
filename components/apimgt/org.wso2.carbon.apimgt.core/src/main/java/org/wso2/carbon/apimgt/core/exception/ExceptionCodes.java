@@ -54,6 +54,16 @@ public enum ExceptionCodes implements ErrorHandler {
     APIM_DAO_EXCEPTION(900320, "Internal server error.", 500, " Error occurred while retrieving data"),
     GATEWAY_LABELS_CANNOT_BE_NULL(900321, "Gateway labels cannot be null.", 400, "Gateway labels cannot be null"),
     STATUS_CANNOT_BE_NULL(900322, "Status cannot be null.", 400, " Status cannot be null"),
+    NEED_COMMENT_MODERATOR_PERMISSION(900323, "Comment moderator permission needed", 403,
+            "This user is not a comment moderator"),
+    RATING_NOT_FOUND(900324, "Rating not found", 404, "Couldn't retrieve rating"),
+    RATING_VALUE_INVALID(900325, "Rating value invalid", 400, "Provided rating value does not fall in between min max "
+            + "values"),
+    COMMENT_LENGTH_EXCEEDED(900326, "Comment length exceeds max limit", 400, "Comment length exceeds allowed maximum "
+            + "number of characters"),
+    API_TYPE_INVALID(900327, "API Type specified is invalid.", 400, "API Type specified is invalid"),
+    COMPOSITE_API_ALREADY_EXISTS(900328, "A Composite API already exists.", 409,
+            "A Composite API already exists for this application"),
 
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),
@@ -71,6 +81,7 @@ public enum ExceptionCodes implements ErrorHandler {
     TEMPLATE_EXCEPTION(900501, "Service configuration Error", 500, " Error generate service config"),
     GATEWAY_EXCEPTION(900502, "Gateway publishing Error", 500, " Error occurred while publishing to Gateway"),
     BROKER_EXCEPTION(900503, "Broker Connection Error", 500, " Error occurred while obtaining broker connection"),
+    SWAGGER_URL_MALFORMED(900504, "Swagger url malformed", 400, "swagger url is malformed"),
 
 
     // Workflow related codes
@@ -88,6 +99,10 @@ public enum ExceptionCodes implements ErrorHandler {
     WORKFLOW_NO_PENDING_TASK(900557, "Workflow error", 412,
             "Requested resource does not have a pending workflow task"),
     WORKFLOW_REJCECTED(900558, "Workflow error", 403, "Requested action is rejected"),
+    INCOMPATIBLE_WORKFLOW_REQUEST_FOR_PUBLISHER(900559, "Incompatible workflow request", 400, "Incompatible workflow " +
+            "request received by publisher"),
+    INCOMPATIBLE_WORKFLOW_REQUEST_FOR_STORE(900560, "Incompatible workflow request", 400, "Incompatible workflow " +
+            "request received by store"),
 
     // Auth related codes
     ROLES_CANNOT_BE_EMPTY(900600, "Role list cannot be empty", 400, "Role list cannot be empty"),
@@ -100,6 +115,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "Identity provider initialization failed"),
     KEY_MANAGER_INITIALIZATION_FAILED(900606, "Key Manager initialization failed", 500,
             "Key Manager initialization failed"),
+    ROLE_DOES_NOT_EXIST(900607, "Role does not exist in the system", 404, "Role does not exist in the system"),
 
 
     // Labels related codes
@@ -127,18 +143,23 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_AUTHORIZATION_HEADER(900911, "Invalid Authorization header", 401,
             " Please provide the Authorization : Bearer <> token to proceed."),
 
-    OAUTH2_APP_CREATION_FAILED(900950, "Keymanagement Error", 500, " Error while creating the consumer application."),
-    OAUTH2_APP_ALREADY_EXISTS(900951, "Keymanagement Error", 409, " OAuth2 application already created."),
-    OAUTH2_APP_DELETION_FAILED(900952, "Keymanagement Error", 500, " Error while deleting the consumer application."),
-    OAUTH2_APP_UPDATE_FAILED(900953, "Keymanagement Error", 500, " Error while updating the consumer application."),
-    OAUTH2_APP_RETRIEVAL_FAILED(900954, "Keymanagement Error", 500, " Error while retrieving the consumer application."
+    OAUTH2_APP_CREATION_FAILED(900950, "Key Management Error", 500, "Error while creating the consumer application."),
+    OAUTH2_APP_ALREADY_EXISTS(900951, "Key Management Error", 409, "OAuth2 application already created."),
+    OAUTH2_APP_DELETION_FAILED(900952, "Key Management Error", 500, "Error while deleting the consumer application."),
+    OAUTH2_APP_UPDATE_FAILED(900953, "Key Management Error", 500, "Error while updating the consumer application."),
+    OAUTH2_APP_RETRIEVAL_FAILED(900954, "Key Management Error", 500, "Error while retrieving the consumer application."
     ),
-    OAUTH2_APP_MAP_FAILED(900955, "Keymanagement Error", 500, " Error while mapping an existing consumer application."),
-    TOKEN_INTROSPECTION_FAILED(900956, "Keymanagement Error", 500, " Error while introspecting the access token."),
-    APPLICATION_TOKEN_GENERATION_FAILED(900957, "Keymanagement Error", 500, " Error while generating the application" +
-            "access token."),
-    ACCESS_TOKEN_REVOKE_FAILED(900958, "Keymanagement Error", 500, " Error while revoking the access token.");
+    OAUTH2_APP_MAP_FAILED(900955, "Key Management Error", 500, "Error while mapping an existing consumer application."),
+    TOKEN_INTROSPECTION_FAILED(900956, "Key Management Error", 500, "Error while introspecting the access token."),
+    ACCESS_TOKEN_GENERATION_FAILED(900957, "Key Management Error", 500, "Error while generating a new access token."),
+    INVALID_TOKEN_REQUEST(900958, "Key Management Error", 400, "Invalid access token request."),
+    ACCESS_TOKEN_REVOKE_FAILED(900959, "Key Management Error", 500, "Error while revoking the access token."),
 
+
+    //Throttle related codes
+    THROTTLE_TEMPLATE_EXCEPTION(900960, "Policy Generating Error", 500, " Error while generate policy configuration"),
+    ENDPOINT_CONFIG_NOT_FOUND(900961, "Endpoint Config Not found", 404, "Error while retrieving Endpoint " +
+            "Configuration");
 
     private final long errorCode;
     private final String errorMessage;

@@ -20,8 +20,12 @@ package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
-import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
+
+import java.util.List;
 
 /**
  * The interface used to manage APIs in gateway
@@ -35,6 +39,14 @@ public interface APIGateway {
      * @throws GatewayException     If there is a failure while adding API to gateway
      */
     void addAPI(API api) throws GatewayException;
+
+    /**
+     * Add CompositeAPI in gateway
+     *
+     * @param api   CompositeAPI artifact
+     * @throws GatewayException     If there is a failure while adding CompositeAPI to gateway
+     */
+    void addCompositeAPI(CompositeAPI api) throws GatewayException;
 
     /**
      * Update API in gateway
@@ -53,20 +65,37 @@ public interface APIGateway {
     void deleteAPI(API api) throws GatewayException;
 
     /**
+     * Delete CompositeAPI in gateway
+     *
+     * @param api   API artifact
+     * @throws GatewayException     If there is a failure to delete API in gateway
+     */
+    void deleteCompositeAPI(CompositeAPI api) throws GatewayException;
+
+    /**
      * Add API subscription to gateway
      *
-     * @param subscription  Subscription details
+     * @param subscriptionValidationDataList  Subscription validation details
      * @throws GatewayException     If there is a failure to update subscription
      */
-    void addAPISubscription(Subscription subscription) throws GatewayException;
+    void addAPISubscription(List<SubscriptionValidationData> subscriptionValidationDataList) throws GatewayException;
+
+    /**
+     * Update API subscription status in gateway
+     *
+     * @param subscriptionValidationDataList  Subscription validation details
+     * @throws GatewayException     If there is a failure to update subscription status
+     */
+    void updateAPISubscriptionStatus(List<SubscriptionValidationData> subscriptionValidationDataList) throws
+            GatewayException;
 
     /**
      * Delete API subscription from gateway
      *
-     * @param subscription  Subscription details
+     * @param subscriptionValidationDataList  Subscription validation details
      * @throws GatewayException     If there is a failure to update subscription
      */
-    void deleteAPISubscription(Subscription subscription) throws GatewayException;
+    void deleteAPISubscription(List<SubscriptionValidationData> subscriptionValidationDataList) throws GatewayException;
 
     /**
      * Add endpoint to gateway
@@ -91,5 +120,39 @@ public interface APIGateway {
      * @throws GatewayException     If there is a failure to delete endpoint in gateway
      */
     void deleteEndpoint(Endpoint endpoint) throws GatewayException;
+
+    /**
+     * Publish the lifecycle state change of an API to gateway
+     *
+     * @param api API artifact
+     * @param status Target lifecycle status to be changed
+     * @throws GatewayException If there is a failure to notify state change to gateway
+     */
+    void changeAPIState(API api, String status) throws GatewayException;
+
+    /**
+     * Publish Application Creation into Gateway
+     *
+     * @param application {@link Application}
+     * @throws GatewayException If there is a failure in notifying creation to gateway
+     */
+    void addApplication(Application application) throws GatewayException;
+
+    /**
+     * Publish the update application change to Gateway
+     *
+     * @param application {@link Application}
+     * @throws GatewayException If there is a failure in notifying update to gateway
+     */
+    void updateApplication(Application application) throws GatewayException;
+
+
+    /**
+     * Publish the delete application change to Gateway
+     *
+     * @param applicationId applicationId of application
+     * @throws GatewayException If there is a failure in notifying deletion to gateway
+     */
+    void deleteApplication(String applicationId) throws GatewayException;
 
 }

@@ -20,6 +20,8 @@ $(function(){
     if(authManager.getAuthStatus()){
         route.routTo(loginRedirectUri);
     }
+    var async = true;
+    authManager.loadSwaggerJson(async);
     var doLogin = function(){
         var loginPromise = authManager.login();
         loginPromise.then(function(data,status,xhr){
@@ -30,7 +32,9 @@ $(function(){
             window.localStorage.setItem("expiresIn", expiresIn);
             window.localStorage.setItem("user", data.authUser);
             window.localStorage.setItem("rememberMe", $("#rememberMe").is(':checked'));
-            window.localStorage.setItem("userScopes", data.scopes);
+            if(data.scopes !== null) {
+                window.localStorage.setItem("userScopes", data.scopes.split(" "));
+            }
             /*$.cookie('token', data.access_token, { path: '/' });
             $.cookie('user', 'admin', { path: '/' });
             $.cookie('userScope', data.scope, { path: '/' });*/

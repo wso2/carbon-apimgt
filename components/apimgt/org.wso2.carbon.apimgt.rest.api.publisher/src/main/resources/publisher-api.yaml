@@ -984,7 +984,7 @@ paths:
           description: |
             The action to demote or promote the state of the API.
 
-            Supported actions are [ **Publish, Deploy as a Prototype, Demote to Created, Demote to Prototyped, Block, Deprecate, Re-Publish, Retire **]
+            Supported actions are [ **Publish, Deploy as a Prototype, Demote to Created, Demote to Prototyped, Move to Maintenance, Deprecate, Re-Publish, Retire **]
 
           in: query
           type: string
@@ -994,7 +994,7 @@ paths:
             - Deploy as a Prototype
             - Demote to Created
             - Demote to Prototyped
-            - Block
+            - Move to Maintenance
             - Deprecate
             - Re-Publish
             - Retire
@@ -1150,7 +1150,7 @@ paths:
             GET http://127.0.0.1:9090/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle
             Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-response: "HTTP/1.1 200 OK\n Content-Type: application/json \n Content-Encoding: gzip \n Transfer-Encoding:
-      chunked \n\n {  \n   \"lcName\":\"API_LIFECYCLE\",\n   \"state\":\"Published\",\n   \"lifecycleId\":\"2febf145f07e457c9643100b6ec60679\",\n   \"checkItemBeanList\":[  \n\n   ],\n   \"inputBeanList\":[  \n\n   ],\n   \"customCodeBeanList\":[  \n      {  \n         \"classObject\":{  \n\n         },\n         \"targetName\":\"Blocked\"\n      },\n      {  \n         \"classObject\":{  \n\n         },\n         \"targetName\":\"Deprecated\"\n      },\n      {  \n         \"classObject\":{  \n\n         },\n         \"targetName\":\"Created\"\n      },\n      {  \n         \"classObject\":{  \n\n         },\n         \"targetName\":\"Prototyped\"\n      }\n   ],\n   \"availableTransitionBeanList\":[  \n      {  \n         \"event\":\"Block\",\n         \"targetState\":\"Blocked\"\n      },\n      {  \n         \"event\":\"Deploy as a Prototype\",\n         \"targetState\":\"Prototyped\"\n      },\n      {  \n         \"event\":\"Demote to Created\",\n         \"targetState\":\"Created\"\n      },\n      {  \n         \"event\":\"Deprecate\",\n         \"targetState\":\"Deprecated\"\n      },\n      {  \n         \"event\":\"Publish\",\n         \"targetState\":\"Published\"\n      }\n   ],\n   \"permissionBeanList\":[  \n\n   ]\n}"
+      chunked \n\n {  \n   \"lcName\":\"API_LIFECYCLE\",\n   \"state\":\"Published\",\n   \"lifecycleId\":\"2febf145f07e457c9643100b6ec60679\",\n   \"checkItemBeanList\":[  \n\n   ],\n   \"inputBeanList\":[  \n\n   ],\n   \"customCodeBeanList\":[  \n      {  \n         \"classObject\":{  \n\n         },\n         \"targetName\":\"Maintenance\"\n      },\n      {  \n         \"classObject\":{  \n\n         },\n         \"targetName\":\"Deprecated\"\n      },\n      {  \n         \"classObject\":{  \n\n         },\n         \"targetName\":\"Created\"\n      },\n      {  \n         \"classObject\":{  \n\n         },\n         \"targetName\":\"Prototyped\"\n      }\n   ],\n   \"availableTransitionBeanList\":[  \n      {  \n         \"event\":\"Move to Maintenance\",\n         \"targetState\":\"Maintenance\"\n      },\n      {  \n         \"event\":\"Deploy as a Prototype\",\n         \"targetState\":\"Prototyped\"\n      },\n      {  \n         \"event\":\"Demote to Created\",\n         \"targetState\":\"Created\"\n      },\n      {  \n         \"event\":\"Deprecate\",\n         \"targetState\":\"Deprecated\"\n      },\n      {  \n         \"event\":\"Publish\",\n         \"targetState\":\"Published\"\n      }\n   ],\n   \"permissionBeanList\":[  \n\n   ]\n}"
       summary: Get Lifecycle state data of the API.
       description: |
             This operation can be used to retrieve Lifecycle state data of the API.
@@ -1782,6 +1782,12 @@ paths:
     get:
       produces:
         - application/zip
+      x-scope: apim:api_view
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/publisher/v1.0/export/apis?query=xxx > exported-apis.zip"
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/publisher/v1.0/export/apis?query=xxx
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\n Connection: keep-alive\n  Content-Disposition: attachment; filename=\"exported-apis.zip\"\n  Content-Type: application/zip"
       summary: Export information related to an API.
       description: |
         This operation can be used to export information related to a particular API.
@@ -1836,6 +1842,12 @@ paths:
     put:
       consumes:
         - multipart/form-data
+      x-scope: apim:api_create
+      x-wso2-curl: "curl -k -F \"file=@exported.zip\" -X PUT -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/publisher/v1.0/import/apis"
+      x-wso2-request: |
+        PUT https://127.0.0.1:9292/api/am/publisher/v1.0/import/apis
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\"count\":2,\"list\":[{\"id\":\"4df90edc-f76b-4b19-bf57-7d161fa04467\",\"name\":\"testApi2\",\"context\":\"/test2\",\"version\":\"2.0.3\",\"provider\":\"admin\",\"lifeCycleStatus\":\"Created\",\"workflowStatus\":\"APPROVED\"},{\"id\":\"4066bc9e-1d87-4296-bcca-f6e38d3da6d0\",\"name\":\"testApi\",\"context\":\"/testApi\",\"version\":\"1.0.0\",\"provider\":\"admin\",\"lifeCycleStatus\":\"Created\",\"workflowStatus\":\"APPROVED\"}]}"
       summary: Imports API(s).
       description: |
         This operation can be used to import one or more existing APIs.
@@ -1889,59 +1901,65 @@ paths:
             $ref: '#/definitions/Error'
 
     post:
-          consumes:
-            - multipart/form-data
-          summary: Imports API(s).
+      consumes:
+        - multipart/form-data
+      x-scope: apim:api_create
+      x-wso2-curl: "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/publisher/v1.0/import/apis"
+      x-wso2-request: |
+        POST https://127.0.0.1:9292/api/am/publisher/v1.0/import/apis
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\"count\":2,\"list\":[{\"id\":\"4df90edc-f76b-4b19-bf57-7d161fa04467\",\"name\":\"testApi2\",\"context\":\"/test2\",\"version\":\"2.0.3\",\"provider\":\"admin\",\"lifeCycleStatus\":\"Created\",\"workflowStatus\":\"APPROVED\"},{\"id\":\"4066bc9e-1d87-4296-bcca-f6e38d3da6d0\",\"name\":\"testApi\",\"context\":\"/testApi\",\"version\":\"1.0.0\",\"provider\":\"admin\",\"lifeCycleStatus\":\"Created\",\"workflowStatus\":\"APPROVED\"}]}"
+      summary: Imports API(s).
+      description: |
+        This operation can be used to import one or more existing APIs.
+      parameters:
+        - name: file
+          in: formData
           description: |
-            This operation can be used to import one or more existing APIs.
-          parameters:
-            - name: file
-              in: formData
+            Zip archive consisting on exported api configuration
+          required: true
+          type: file
+        - name: provider
+          in: query
+          description: |
+            If defined, updates the existing provider of each API with the specified provider.
+            This is to cater scenarios where the current API provider does not exist in the environment
+            that the API is imported to.
+          required: false
+          type: string
+        - $ref: '#/parameters/Content-Type'
+      tags:
+        - Import Configuration
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with the updated object as entity in the body.
+          schema:
+            $ref: '#/definitions/APIList'
+          headers:
+            Content-Type:
               description: |
-                Zip archive consisting on exported api configuration
-              required: true
-              type: file
-            - name: provider
-              in: query
-              description: |
-                If defined, updates the existing provider of each API with the specified provider.
-                This is to cater scenarios where the current API provider does not exist in the environment
-                that the API is imported to.
-              required: false
+                The content type of the body.
               type: string
-            - $ref: '#/parameters/Content-Type'
-          tags:
-            - Import Configuration
-          responses:
-            200:
-              description: |
-                OK.
-                Successful response with the updated object as entity in the body.
-              schema:
-                $ref: '#/definitions/APIList'
-              headers:
-                Content-Type:
-                  description: |
-                    The content type of the body.
-                  type: string
-            400:
-              description: |
-                Bad Request.
-                Invalid request or validation error
-              schema:
-                $ref: '#/definitions/Error'
-            406:
-              description: |
-                Not Acceptable.
-                The requested media type is not supported
-              schema:
-                $ref: '#/definitions/Error'
-            412:
-              description: |
-                Precondition Failed.
-                The request has not been performed because one of the preconditions is not met.
-              schema:
-                $ref: '#/definitions/Error'
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
 ######################################################
 # The "Individual Application" resource APIs
 ######################################################
@@ -3140,6 +3158,13 @@ definitions:
       workflowStatus:
         type: string
         example: APPROVED
+      userPermissionsForApi:
+        type: array
+        description: |
+          LoggedIn user permissions for the API
+        items:
+          type: string
+        example: ["READ","UPDATE"]
 
 #-----------------------------------------------------
 # The API resource
@@ -3244,6 +3269,13 @@ definitions:
       permission:
         type: string
         example: "[{\"groupId\" : 1000, \"permission\" : [\"READ\",\"UPDATE\"]},{\"groupId\" : 1001, \"permission\" : [\"READ\",\"UPDATE\"]}]"
+      userPermissionsForApi:
+        type: array
+        description: |
+          LoggedIn user permissions for the API
+        items:
+          type: string
+        example: ["READ","UPDATE"]
       visibleTenants:
         type: array
         items:

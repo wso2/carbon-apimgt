@@ -1,0 +1,41 @@
+@Plan:name('response_summarization')
+
+@Store(type="rdbms", jdbc.url="jdbc:h2:./database/AM_STAT_DB;DB_CLOSE_ON_EXIT=FALSE;LOCK_TIMEOUT=60000;AUTO_SERVER=TRUE",
+username="wso2carbon",
+password="wso2carbon",field.length="api:254", pool.properties="driverClassName:org.h2.Driver" )
+@PrimaryKey("api, version, publisher, context, consumer_key, application_name, user_id, uri_template, method,response_code, destination, year, month, day, hour, minute")
+define table api_response_summary (api string, version string, publisher string, context string, consumer_key string,
+application_name string, user_id string, uri_template string, method string, response_code int, destination string,
+response_count long, time long, year int ,month int, day int, hour int, minute int);
+
+@source(type='inMemory', topic='apim.analytics.response', @map(type='passThrough'))
+Define stream perMinuteResponses (
+api STRING, context STRING, version STRING, publisher STRING,
+uri_template STRING, method STRING, consumer_key STRING, application_name STRING, user_id STRING,
+response_code INT, destination STRING, total_response_count LONG, response_time LONG,
+year INT, month INT, day INT, hour INT, minute INT
+);
+
+@info(name = 'query1')
+from perMinuteResponses
+select api, version, publisher, context, consumer_key, application_name, user_id , uri_template, method,
+response_code, destination, total_response_count as response_count, response_time as time,
+year, month, day, hour, minute
+update or insert into api_response_summary
+on api_response_summary.api == api
+and api_response_summary.version == version
+and api_response_summary.publisher == publisher
+and api_response_summary.context == context
+and api_response_summary.consumer_key == consumer_key
+and api_response_summary.application_name == application_name
+and api_response_summary.user_id == user_id
+and api_response_summary.uri_template == uri_template
+and api_response_summary.method == method
+and api_response_summary.response_code == response_code
+and api_response_summary.destination == destination
+and api_response_summary.year == year
+and api_response_summary.month == month
+and api_response_summary.day == day
+and api_response_summary.hour == hour
+and api_response_summary.minute == minute
+;

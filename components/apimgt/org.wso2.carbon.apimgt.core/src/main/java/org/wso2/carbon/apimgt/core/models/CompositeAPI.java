@@ -20,11 +20,10 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
-import org.wso2.carbon.lcm.core.impl.LifecycleState;
-
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -41,21 +40,14 @@ public class CompositeAPI {
     private final String version;
     private final String context;
     private final String description;
-    private final String lifeCycleStatus;
-    private final String lifecycleInstanceId;
     private final String gatewayConfig;
-    private final boolean isResponseCachingEnabled;
-    private final int cacheTimeout;
-    private final boolean isDefaultVersion;
     private final Set<String> transport;
     private final Set<String> labels;
-    private final BusinessInformation businessInformation;
-    private final CorsConfiguration corsConfiguration;
+    private final String applicationId;
     private final LocalDateTime createdTime;
     private final String createdBy;
     private final String updatedBy;
     private final LocalDateTime lastUpdatedTime;
-    private final LifecycleState lifecycleState;
     private final Map<String, UriTemplate> uriTemplates;
     private final String copiedFromApiId;
     private final String apiDefinition;
@@ -63,28 +55,21 @@ public class CompositeAPI {
     private final String apiPermission;
     private final String workflowStatus;
 
-    private CompositeAPI(APIBuilder builder) {
+    private CompositeAPI(Builder builder) {
         id = builder.id;
         provider = builder.provider;
         name = builder.name;
         version = builder.version;
         context = builder.context;
         description = builder.description;
-        lifeCycleStatus = builder.lifeCycleStatus;
-        lifecycleInstanceId = builder.lifecycleInstanceId;
         gatewayConfig = builder.gatewayConfig;
-        isResponseCachingEnabled = builder.isResponseCachingEnabled;
-        cacheTimeout = builder.cacheTimeout;
-        isDefaultVersion = builder.isDefaultVersion;
         transport = builder.transport;
         labels = builder.labels;
-        businessInformation = builder.businessInformation;
-        corsConfiguration = builder.corsConfiguration;
+        applicationId = builder.applicationId;
         createdTime = builder.createdTime;
         createdBy = builder.createdBy;
         updatedBy = builder.updatedBy;
         lastUpdatedTime = builder.lastUpdatedTime;
-        lifecycleState = builder.lifecycleState;
         uriTemplates = builder.uriTemplates;
         copiedFromApiId = builder.copiedFromApiId;
         apiDefinition = builder.apiDefinition;
@@ -93,31 +78,143 @@ public class CompositeAPI {
         workflowStatus = builder.workflowStatus;
     }
 
+
+    public String getId() {
+        return id;
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public String getContext() {
+        return context;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getGatewayConfig() {
+        return gatewayConfig;
+    }
+
+    public Set<String> getTransport() {
+        return transport;
+    }
+
+    public Set<String> getLabels() {
+        return labels;
+    }
+
+    public String getApplicationId() {
+        return applicationId;
+    }
+
+    public LocalDateTime getCreatedTime() {
+        return createdTime;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public String getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public LocalDateTime getLastUpdatedTime() {
+        return lastUpdatedTime;
+    }
+
+    public Map<String, UriTemplate> getUriTemplates() {
+        return uriTemplates;
+    }
+
+    public String getCopiedFromApiId() {
+        return copiedFromApiId;
+    }
+
+    public String getApiDefinition() {
+        return apiDefinition;
+    }
+
+    public HashMap getPermissionMap() {
+        return permissionMap;
+    }
+
+    public String getApiPermission() {
+        return apiPermission;
+    }
+
+    public String getWorkflowStatus() {
+        return workflowStatus;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        CompositeAPI that = (CompositeAPI) o;
+        return Objects.equals(id, that.id) &&
+                Objects.equals(provider, that.provider) &&
+                Objects.equals(name, that.name) &&
+                Objects.equals(version, that.version) &&
+                Objects.equals(context, that.context) &&
+                Objects.equals(description, that.description) &&
+                Objects.equals(gatewayConfig, that.gatewayConfig) &&
+                Objects.equals(transport, that.transport) &&
+                Objects.equals(labels, that.labels) &&
+                Objects.equals(applicationId, that.applicationId) &&
+                Objects.equals(createdTime, that.createdTime) &&
+                Objects.equals(createdBy, that.createdBy) &&
+                Objects.equals(updatedBy, that.updatedBy) &&
+                Objects.equals(lastUpdatedTime, that.lastUpdatedTime) &&
+                Objects.equals(uriTemplates, that.uriTemplates) &&
+                Objects.equals(copiedFromApiId, that.copiedFromApiId) &&
+                Objects.equals(apiDefinition, that.apiDefinition) &&
+                Objects.equals(permissionMap, that.permissionMap) &&
+                Objects.equals(apiPermission, that.apiPermission) &&
+                Objects.equals(workflowStatus, that.workflowStatus);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, provider, name, version, context, description, gatewayConfig, transport, labels,
+                applicationId, createdTime, createdBy, updatedBy, lastUpdatedTime, uriTemplates, copiedFromApiId,
+                apiDefinition, permissionMap, apiPermission, workflowStatus);
+    }
+
     /**
      * {@code CompositeAPI} builder static inner class.
      */
-    public static final class APIBuilder {
+    public static final class Builder {
         private String id;
         private String provider;
         private String name;
         private String version;
         private String context;
         private String description;
-        private String lifeCycleStatus;
-        private String lifecycleInstanceId;
         private String gatewayConfig;
-        private boolean isResponseCachingEnabled;
-        private int cacheTimeout;
-        private boolean isDefaultVersion;
         private Set<String> transport;
         private Set<String> labels;
-        private BusinessInformation businessInformation;
-        private CorsConfiguration corsConfiguration;
+        private String applicationId;
         private LocalDateTime createdTime;
         private String createdBy;
         private String updatedBy;
         private LocalDateTime lastUpdatedTime;
-        private LifecycleState lifecycleState;
         private Map<String, UriTemplate> uriTemplates;
         private String copiedFromApiId;
         private String apiDefinition;
@@ -125,34 +222,24 @@ public class CompositeAPI {
         private String apiPermission;
         private String workflowStatus;
 
-        public APIBuilder(String provider, String name, String version) {
-            this.provider = provider;
-            this.name = name;
-            this.version = version;
+        public Builder() {
         }
 
-        public APIBuilder(CompositeAPI copy) {
+        public Builder(CompositeAPI copy) {
             this.id = copy.id;
             this.provider = copy.provider;
             this.name = copy.name;
             this.version = copy.version;
             this.context = copy.context;
             this.description = copy.description;
-            this.lifeCycleStatus = copy.lifeCycleStatus;
-            this.lifecycleInstanceId = copy.lifecycleInstanceId;
             this.gatewayConfig = copy.gatewayConfig;
-            this.isResponseCachingEnabled = copy.isResponseCachingEnabled;
-            this.cacheTimeout = copy.cacheTimeout;
-            this.isDefaultVersion = copy.isDefaultVersion;
             this.transport = copy.transport;
             this.labels = copy.labels;
-            this.businessInformation = copy.businessInformation;
-            this.corsConfiguration = copy.corsConfiguration;
+            this.applicationId = copy.applicationId;
             this.createdTime = copy.createdTime;
             this.createdBy = copy.createdBy;
             this.updatedBy = copy.updatedBy;
             this.lastUpdatedTime = copy.lastUpdatedTime;
-            this.lifecycleState = copy.lifecycleState;
             this.uriTemplates = copy.uriTemplates;
             this.copiedFromApiId = copy.copiedFromApiId;
             this.apiDefinition = copy.apiDefinition;
@@ -162,323 +249,236 @@ public class CompositeAPI {
         }
 
         /**
-         * Sets the {@code id} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code id} and returns a reference to this Builder so that the methods can be chained together.
          *
          * @param id the {@code id} to set
-         * @return a reference to this APIBuilder
+         * @return a reference to this Builder
          */
-        public APIBuilder id(String id) {
+        public Builder id(String id) {
             this.id = id;
             return this;
         }
 
         /**
-         * Sets the {@code provider} and returns a reference to this APIBuilder so that the methods can be chained
+         * Sets the {@code provider} and returns a reference to this Builder so that the methods can be chained
          * together.
          *
          * @param provider the {@code provider} to set
-         * @return a reference to this APIBuilder
+         * @return a reference to this Builder
          */
-        public APIBuilder provider(String provider) {
+        public Builder provider(String provider) {
             this.provider = provider;
             return this;
         }
 
         /**
-         * Sets the {@code name} and returns a reference to this APIBuilder so that the methods can be chained together.
+         * Sets the {@code name} and returns a reference to this Builder so that the methods can be chained together.
          *
          * @param name the {@code name} to set
-         * @return a reference to this APIBuilder
+         * @return a reference to this Builder
          */
-        public APIBuilder name(String name) {
+        public Builder name(String name) {
             this.name = name;
             return this;
         }
 
         /**
-         * Sets the {@code version} and returns a reference to this APIBuilder so that the methods can be
-         * chained together.
+         * Sets the {@code version} and returns a reference to this Builder so that the methods can be chained together.
          *
          * @param version the {@code version} to set
-         * @return a reference to this APIBuilder
+         * @return a reference to this Builder
          */
-        public APIBuilder version(String version) {
+        public Builder version(String version) {
             this.version = version;
             return this;
         }
 
         /**
-         * Sets the {@code context} and returns a reference to this APIBuilder so that the methods can be
-         * chained together.
+         * Sets the {@code context} and returns a reference to this Builder so that the methods can be chained together.
          *
          * @param context the {@code context} to set
-         * @return a reference to this APIBuilder
+         * @return a reference to this Builder
          */
-        public APIBuilder context(String context) {
+        public Builder context(String context) {
             this.context = context;
             return this;
         }
 
         /**
-         * Sets the {@code description} and returns a reference to this APIBuilder so that the methods can be
+         * Sets the {@code description} and returns a reference to this Builder so that the methods can be
          * chained together.
          *
          * @param description the {@code description} to set
-         * @return a reference to this APIBuilder
+         * @return a reference to this Builder
          */
-        public APIBuilder description(String description) {
+        public Builder description(String description) {
             this.description = description;
             return this;
         }
 
         /**
-         * Sets the {@code lifeCycleStatus} and returns a reference to this APIBuilder so that the methods can be
-         * chained together.
-         *
-         * @param lifeCycleStatus the {@code lifeCycleStatus} to set
-         * @return a reference to this APIBuilder
-         */
-        public APIBuilder lifeCycleStatus(String lifeCycleStatus) {
-            this.lifeCycleStatus = lifeCycleStatus;
-            return this;
-        }
-
-        /**
-         * Sets the {@code lifecycleInstanceId} and returns a reference to this APIBuilder so that the methods can be
-         * chained together.
-         *
-         * @param lifecycleInstanceId the {@code lifecycleInstanceId} to set
-         * @return a reference to this APIBuilder
-         */
-        public APIBuilder lifecycleInstanceId(String lifecycleInstanceId) {
-            this.lifecycleInstanceId = lifecycleInstanceId;
-            return this;
-        }
-
-        /**
-         * Sets the {@code gatewayConfig} and returns a reference to this APIBuilder so that the methods can be
+         * Sets the {@code gatewayConfig} and returns a reference to this Builder so that the methods can be
          * chained together.
          *
          * @param gatewayConfig the {@code gatewayConfig} to set
-         * @return a reference to this APIBuilder
+         * @return a reference to this Builder
          */
-        public APIBuilder gatewayConfig(String gatewayConfig) {
+        public Builder gatewayConfig(String gatewayConfig) {
             this.gatewayConfig = gatewayConfig;
             return this;
         }
 
         /**
-         * Sets the {@code isResponseCachingEnabled} and returns a reference to this APIBuilder so that the methods
-         * can be chained together.
-         *
-         * @param isResponseCachingEnabled the {@code isResponseCachingEnabled} to set
-         * @return a reference to this APIBuilder
-         */
-        public APIBuilder isResponseCachingEnabled(boolean isResponseCachingEnabled) {
-            this.isResponseCachingEnabled = isResponseCachingEnabled;
-            return this;
-        }
-
-        /**
-         * Sets the {@code cacheTimeout} and returns a reference to this APIBuilder so that the methods can be
-         * chained together.
-         *
-         * @param cacheTimeout the {@code cacheTimeout} to set
-         * @return a reference to this APIBuilder
-         */
-        public APIBuilder cacheTimeout(int cacheTimeout) {
-            this.cacheTimeout = cacheTimeout;
-            return this;
-        }
-
-        /**
-         * Sets the {@code isDefaultVersion} and returns a reference to this APIBuilder so that the methods can be
-         * chained together.
-         *
-         * @param isDefaultVersion the {@code isDefaultVersion} to set
-         * @return a reference to this APIBuilder
-         */
-        public APIBuilder isDefaultVersion(boolean isDefaultVersion) {
-            this.isDefaultVersion = isDefaultVersion;
-            return this;
-        }
-
-        /**
-         * Sets the {@code transport} and returns a reference to this APIBuilder so that the methods can be
+         * Sets the {@code transport} and returns a reference to this Builder so that the methods can be
          * chained together.
          *
          * @param transport the {@code transport} to set
-         * @return a reference to this APIBuilder
+         * @return a reference to this Builder
          */
-        public APIBuilder transport(Set<String> transport) {
+        public Builder transport(Set<String> transport) {
             this.transport = transport;
             return this;
         }
 
         /**
-         * Sets the {@code labels} and returns a reference to this APIBuilder so that the methods can be
-         * chained together.
+         * Sets the {@code labels} and returns a reference to this Builder so that the methods can be chained together.
          *
          * @param labels the {@code labels} to set
-         * @return a reference to this APIBuilder
+         * @return a reference to this Builder
          */
-        public APIBuilder labels(Set<String> labels) {
+        public Builder labels(Set<String> labels) {
             this.labels = labels;
             return this;
         }
 
         /**
-         * Sets the {@code businessInformation} and returns a reference to this APIBuilder so that the methods can be
+         * Sets the {@code applicationId} and returns a reference to this Builder so that the methods can be
          * chained together.
          *
-         * @param businessInformation the {@code businessInformation} to set
-         * @return a reference to this APIBuilder
+         * @param applicationId the {@code applicationId} to set
+         * @return a reference to this Builder
          */
-        public APIBuilder businessInformation(BusinessInformation businessInformation) {
-            this.businessInformation = businessInformation;
+        public Builder applicationId(String applicationId) {
+            this.applicationId = applicationId;
             return this;
         }
 
         /**
-         * Sets the {@code corsConfiguration} and returns a reference to this APIBuilder so that the methods can be
-         * chained together.
-         *
-         * @param corsConfiguration the {@code corsConfiguration} to set
-         * @return a reference to this APIBuilder
-         */
-        public APIBuilder corsConfiguration(CorsConfiguration corsConfiguration) {
-            this.corsConfiguration = corsConfiguration;
-            return this;
-        }
-
-        /**
-         * Sets the {@code createdTime} and returns a reference to this APIBuilder so that the methods can be
+         * Sets the {@code createdTime} and returns a reference to this Builder so that the methods can be
          * chained together.
          *
          * @param createdTime the {@code createdTime} to set
-         * @return a reference to this APIBuilder
+         * @return a reference to this Builder
          */
-        public APIBuilder createdTime(LocalDateTime createdTime) {
+        public Builder createdTime(LocalDateTime createdTime) {
             this.createdTime = createdTime;
             return this;
         }
 
         /**
-         * Sets the {@code createdBy} and returns a reference to this APIBuilder so that the methods can be
+         * Sets the {@code createdBy} and returns a reference to this Builder so that the methods can be
          * chained together.
          *
          * @param createdBy the {@code createdBy} to set
-         * @return a reference to this APIBuilder
+         * @return a reference to this Builder
          */
-        public APIBuilder createdBy(String createdBy) {
+        public Builder createdBy(String createdBy) {
             this.createdBy = createdBy;
             return this;
         }
 
         /**
-         * Sets the {@code updatedBy} and returns a reference to this APIBuilder so that the methods can be
+         * Sets the {@code updatedBy} and returns a reference to this Builder so that the methods can be
          * chained together.
          *
          * @param updatedBy the {@code updatedBy} to set
-         * @return a reference to this APIBuilder
+         * @return a reference to this Builder
          */
-        public APIBuilder updatedBy(String updatedBy) {
+        public Builder updatedBy(String updatedBy) {
             this.updatedBy = updatedBy;
             return this;
         }
 
         /**
-         * Sets the {@code lastUpdatedTime} and returns a reference to this APIBuilder so that the methods can be
+         * Sets the {@code lastUpdatedTime} and returns a reference to this Builder so that the methods can be
          * chained together.
          *
          * @param lastUpdatedTime the {@code lastUpdatedTime} to set
-         * @return a reference to this APIBuilder
+         * @return a reference to this Builder
          */
-        public APIBuilder lastUpdatedTime(LocalDateTime lastUpdatedTime) {
+        public Builder lastUpdatedTime(LocalDateTime lastUpdatedTime) {
             this.lastUpdatedTime = lastUpdatedTime;
             return this;
         }
 
         /**
-         * Sets the {@code lifecycleState} and returns a reference to this APIBuilder so that the methods can be
-         * chained together.
-         *
-         * @param lifecycleState the {@code lifecycleState} to set
-         * @return a reference to this APIBuilder
-         */
-        public APIBuilder lifecycleState(LifecycleState lifecycleState) {
-            this.lifecycleState = lifecycleState;
-            return this;
-        }
-
-        /**
-         * Sets the {@code uriTemplates} and returns a reference to this APIBuilder so that the methods can be
+         * Sets the {@code uriTemplates} and returns a reference to this Builder so that the methods can be
          * chained together.
          *
          * @param uriTemplates the {@code uriTemplates} to set
-         * @return a reference to this APIBuilder
+         * @return a reference to this Builder
          */
-        public APIBuilder uriTemplates(Map<String, UriTemplate> uriTemplates) {
+        public Builder uriTemplates(Map<String, UriTemplate> uriTemplates) {
             this.uriTemplates = uriTemplates;
             return this;
         }
 
         /**
-         * Sets the {@code copiedFromApiId} and returns a reference to this APIBuilder so that the methods can be
+         * Sets the {@code copiedFromApiId} and returns a reference to this Builder so that the methods can be
          * chained together.
          *
          * @param copiedFromApiId the {@code copiedFromApiId} to set
-         * @return a reference to this APIBuilder
+         * @return a reference to this Builder
          */
-        public APIBuilder copiedFromApiId(String copiedFromApiId) {
+        public Builder copiedFromApiId(String copiedFromApiId) {
             this.copiedFromApiId = copiedFromApiId;
             return this;
         }
 
         /**
-         * Sets the {@code apiDefinition} and returns a reference to this APIBuilder so that the methods can be
+         * Sets the {@code apiDefinition} and returns a reference to this Builder so that the methods can be
          * chained together.
          *
          * @param apiDefinition the {@code apiDefinition} to set
-         * @return a reference to this APIBuilder
+         * @return a reference to this Builder
          */
-        public APIBuilder apiDefinition(String apiDefinition) {
+        public Builder apiDefinition(String apiDefinition) {
             this.apiDefinition = apiDefinition;
             return this;
         }
 
         /**
-         * Sets the {@code permissionMap} and returns a reference to this APIBuilder so that the methods can be
+         * Sets the {@code permissionMap} and returns a reference to this Builder so that the methods can be
          * chained together.
          *
          * @param permissionMap the {@code permissionMap} to set
-         * @return a reference to this APIBuilder
+         * @return a reference to this Builder
          */
-        public APIBuilder permissionMap(HashMap permissionMap) {
+        public Builder permissionMap(HashMap permissionMap) {
             this.permissionMap = permissionMap;
             return this;
         }
 
         /**
-         * Sets the {@code apiPermission} and returns a reference to this APIBuilder so that the methods can be
+         * Sets the {@code apiPermission} and returns a reference to this Builder so that the methods can be
          * chained together.
          *
          * @param apiPermission the {@code apiPermission} to set
-         * @return a reference to this APIBuilder
+         * @return a reference to this Builder
          */
-        public APIBuilder apiPermission(String apiPermission) {
+        public Builder apiPermission(String apiPermission) {
             this.apiPermission = apiPermission;
             return this;
         }
 
         /**
-         * Sets the {@code workflowStatus} and returns a reference to this APIBuilder so that the methods can be
+         * Sets the {@code workflowStatus} and returns a reference to this Builder so that the methods can be
          * chained together.
          *
          * @param workflowStatus the {@code workflowStatus} to set
-         * @return a reference to this APIBuilder
+         * @return a reference to this Builder
          */
-        public APIBuilder workflowStatus(String workflowStatus) {
+        public Builder workflowStatus(String workflowStatus) {
             this.workflowStatus = workflowStatus;
             return this;
         }
@@ -486,10 +486,90 @@ public class CompositeAPI {
         /**
          * Returns a {@code CompositeAPI} built from the parameters previously set.
          *
-         * @return a {@code CompositeAPI} built with parameters of this {@code CompositeAPI.APIBuilder}
+         * @return a {@code CompositeAPI} built with parameters of this {@code CompositeAPI.Builder}
          */
         public CompositeAPI build() {
             return new CompositeAPI(this);
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public String getProvider() {
+            return provider;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getVersion() {
+            return version;
+        }
+
+        public String getContext() {
+            return context;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public String getGatewayConfig() {
+            return gatewayConfig;
+        }
+
+        public Set<String> getTransport() {
+            return transport;
+        }
+
+        public Set<String> getLabels() {
+            return labels;
+        }
+
+        public String getApplicationId() {
+            return applicationId;
+        }
+
+        public LocalDateTime getCreatedTime() {
+            return createdTime;
+        }
+
+        public String getCreatedBy() {
+            return createdBy;
+        }
+
+        public String getUpdatedBy() {
+            return updatedBy;
+        }
+
+        public LocalDateTime getLastUpdatedTime() {
+            return lastUpdatedTime;
+        }
+
+        public Map<String, UriTemplate> getUriTemplates() {
+            return uriTemplates;
+        }
+
+        public String getCopiedFromApiId() {
+            return copiedFromApiId;
+        }
+
+        public String getApiDefinition() {
+            return apiDefinition;
+        }
+
+        public HashMap getPermissionMap() {
+            return permissionMap;
+        }
+
+        public String getApiPermission() {
+            return apiPermission;
+        }
+
+        public String getWorkflowStatus() {
+            return workflowStatus;
         }
     }
 }

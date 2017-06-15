@@ -24,17 +24,17 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>carbon-apimgt</artifactId>
-        <version>7.0.18-SNAPSHOT</version>
+        <version>7.0.26-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>apimgt-gateway-modules</artifactId>
     <packaging>pom</packaging>
 
     <modules>
         <module>apim-ballerina-configs</module>
+        <module>apim-ballerina-native-component</module>
     </modules>
 
 </project>

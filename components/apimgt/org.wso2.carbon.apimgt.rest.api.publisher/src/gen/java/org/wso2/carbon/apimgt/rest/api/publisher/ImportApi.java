@@ -15,6 +15,7 @@ import org.wso2.msf4j.formparam.FormDataParam;
 import org.osgi.service.component.annotations.Component;
 
 import java.io.InputStream;
+import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -38,6 +39,7 @@ import javax.ws.rs.core.Response;
 @Path("/api/am/publisher/v1.[\\d]+/import")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
+@ApplicationPath("/import")
 @io.swagger.annotations.Api(description = "the import API")
 public class ImportApi implements Microservice  {
    private final ImportApiService delegate = ImportApiServiceFactory.getImportApi();

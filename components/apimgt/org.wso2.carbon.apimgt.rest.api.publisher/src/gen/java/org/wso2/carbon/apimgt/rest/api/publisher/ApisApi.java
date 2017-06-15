@@ -21,6 +21,7 @@ import org.wso2.msf4j.formparam.FormDataParam;
 import org.osgi.service.component.annotations.Component;
 
 import java.io.InputStream;
+import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -44,6 +45,7 @@ import javax.ws.rs.core.Response;
 @Path("/api/am/publisher/v1.[\\d]+/apis")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
+@ApplicationPath("/apis")
 @io.swagger.annotations.Api(description = "the apis API")
 public class ApisApi implements Microservice  {
    private final ApisApiService delegate = ApisApiServiceFactory.getApisApi();
@@ -479,7 +481,7 @@ public class ApisApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 409, message = "Conflict. Pending workflow task exists. ", response = WorkflowResponseDTO.class),
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = WorkflowResponseDTO.class) })
-    public Response apisChangeLifecyclePost(@ApiParam(value = "The action to demote or promote the state of the API.  Supported actions are [ **Publish, Deploy as a Prototype, Demote to Created, Demote to Prototyped, Block, Deprecate, Re-Publish, Retire **] ",required=true, allowableValues="Publish, Deploy as a Prototype, Demote to Created, Demote to Prototyped, Block, Deprecate, Re-Publish, Retire") @QueryParam("action") String action
+    public Response apisChangeLifecyclePost(@ApiParam(value = "The action to demote or promote the state of the API.  Supported actions are [ **Publish, Deploy as a Prototype, Demote to Created, Demote to Prototyped, Move to Maintenance, Deprecate, Re-Publish, Retire **] ",required=true, allowableValues="Publish, Deploy as a Prototype, Demote to Created, Demote to Prototyped, Move to Maintenance, Deprecate, Re-Publish, Retire") @QueryParam("action") String action
 ,@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API I. Should be formatted as **provider-name-version**. ",required=true) @QueryParam("apiId") String apiId
 ,@ApiParam(value = " You can specify additional checklist items by using an **\"attribute:\"** modifier.  Eg: \"Deprecate Old Versions:true\" will deprecate older versions of a particular API when it is promoted to Published state from Created state. Multiple checklist items can be given in \"attribute1:true, attribute2:false\" format.  Supported checklist items are as follows. 1. **Deprecate Old Versions**: Setting this to true will deprecate older versions of a particular API when it is promoted to Published state from Created state. 2. **Require Re-Subscription**: If you set this to true, users need to re subscribe to the API although they may have subscribed to an older version. ") @QueryParam("lifecycleChecklist") String lifecycleChecklist
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch

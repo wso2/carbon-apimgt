@@ -22,8 +22,9 @@ package org.wso2.carbon.apimgt.core.api;
 import org.wso2.carbon.apimgt.core.exception.APIConfigRetrievalException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.APISummary;
+import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Label;
+import org.wso2.carbon.apimgt.core.models.RegistrationSummary;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
@@ -54,14 +55,6 @@ public interface APIMgtAdminService {
      */
     List<SubscriptionValidationData> getAPISubscriptionsOfApi(String apiContext, String apiVersion)
             throws APIManagementException;
-
-    /**
-     * Load api info from db
-     *
-     * @return Subscription Validation Information
-     * @throws APIManagementException If failed to get lAPI summary data
-     */
-    public List<APISummary> getAPIInfo() throws APIManagementException;
 
     /**
      * Adds new @{@link Policy} to the system
@@ -156,6 +149,7 @@ public interface APIMgtAdminService {
 
     /**
      * Retrieve Resources for API
+     *
      * @param apiContext Context of API
      * @param apiVersion Version of API
      * @return list of API Resources
@@ -165,8 +159,10 @@ public interface APIMgtAdminService {
 
     /**
      * Get a list of APIs with given gateway labels and status
-     *@param gatewayLabels A list of gateway labels
-     * @param status Lifecycle status
+     *
+     * @param gatewayLabels A list of gateway labels
+     * @param status        Lifecycle status
+     * @return list of API Resources
      * @throws APIManagementException If failed to get API list
      */
     List<API> getAPIsByStatus(List<String> gatewayLabels, String status) throws APIManagementException;
@@ -174,7 +170,41 @@ public interface APIMgtAdminService {
     /**
      * Get a list of APIs with given gateway labels
      *
+     * @param gatewayLabels List of labels
+     * @return list of API Resources
      * @throws APIManagementException If failed to get API list
      */
     List<API> getAPIsByGatewayLabel(List<String> gatewayLabels) throws APIManagementException;
+
+    /**
+     * Retrieve API Gateway registration summary
+     *
+     * @return  RegistrationSummary
+     */
+    RegistrationSummary getRegistrationSummary();
+
+    /**
+     * Get list of Applications
+     *
+     * @return list of {@link Application}
+     * @throws APIManagementException If failed to get Applications
+     */
+    List<Application> getAllApplications() throws APIManagementException;
+
+    /**
+     *
+     * Get List of Endpoints
+     * @return list of UUID of Global Endpoints
+     * @throws APIManagementException If failed to get Endpoints
+     */
+    List<String> getAllEndpoints() throws APIManagementException;
+
+    /**
+     * Return Gateway Configuration of Endpoint
+     *
+     * @param endpointId
+     * @return gateway Configuration of Endpoint
+     * @throws APIManagementException If failed to get Endpoints configuration
+     */
+    String getEndpointGatewayConfig(String endpointId) throws APIManagementException;
 }

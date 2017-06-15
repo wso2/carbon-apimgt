@@ -32,7 +32,7 @@ import java.util.List;
 public class CommentMappingUtil {
 
     /**
-     * Converts an Comment object into corresponding REST API Comment DTO object
+     * Converts a Comment object into corresponding REST API CommentDTO object
      *
      * @param comment comment object
      * @return CommentDTO
@@ -41,8 +41,7 @@ public class CommentMappingUtil {
 
         CommentDTO commentDTO = new CommentDTO();
         commentDTO.setCommentId(comment.getUuid());
-        commentDTO.setApiId(comment.getApiId());
-        commentDTO.setSubscriberName(comment.getCommentedUser());
+        commentDTO.setUsername(comment.getCommentedUser());
         commentDTO.setCommentText(comment.getCommentText());
         commentDTO.setCreatedBy(comment.getCreatedUser());
         commentDTO.setLastUpdatedBy(comment.getUpdatedUser());

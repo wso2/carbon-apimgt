@@ -19,9 +19,11 @@ package org.wso2.carbon.apimgt.core.internal;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.APIMConfigurations;
+import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
 import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
 import org.wso2.carbon.kernel.configprovider.ConfigProvider;
+
+import java.util.Map;
 
 /**
  * Class used to hold the APIM configuration
@@ -44,23 +46,41 @@ public class ServiceReferenceHolder {
         this.configProvider = configProvider;
     }
 
-    public ConfigProvider getConfigProvider() {
-        return configProvider;
-    }
-
     public APIMConfigurations getAPIMConfiguration() {
         try {
-            config = ServiceReferenceHolder.getInstance().getConfigProvider()
-                    .getConfigurationObject(APIMConfigurations.class);
+            if (configProvider != null) {
+                config = configProvider.getConfigurationObject(APIMConfigurations.class);
+            } else {
+                log.error("Configuration provider is null");
+            }
         } catch (CarbonConfigurationException e) {
             log.error("error getting config : org.wso2.carbon.apimgt.core.internal.APIMConfiguration", e);
         }
 
         if (config == null) {
             config = new APIMConfigurations();
-            log.info("Setting default configurations");
+            log.info("Setting default configurations...");
         }
 
         return config;
+    }
+   /*
+   * This method is to get configuration map of a given namespace
+   *
+   * @param namespace namespace defined in deployment.yaml
+   * @return resource path to scope mapping
+   * */
+    public Map<String, String> getRestAPIConfigurationMap(String namespace) {
+        try {
+            if (configProvider != null) {
+                return configProvider.getConfigurationMap(namespace);
+            } else {
+                log.error("Configuration provider is null");
+            }
+        } catch (CarbonConfigurationException e) {
+            log.error("Error while reading the configurations map of namespace : " +
+                    "org.wso2.carbon.apimgt.core.internal.APIMConfiguration", e);
+        }
+        return null;
     }
 }

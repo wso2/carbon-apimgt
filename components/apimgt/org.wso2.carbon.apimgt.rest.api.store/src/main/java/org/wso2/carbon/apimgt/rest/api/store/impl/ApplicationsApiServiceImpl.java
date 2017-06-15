@@ -15,7 +15,7 @@ import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.APIKey;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.models.ApplicationCreationResponse;
+import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationResponse;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
@@ -34,7 +34,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.store.mappings.WorkflowMappintUtil;
+import org.wso2.carbon.apimgt.rest.api.store.mappings.MiscMappingUtil;
 import org.wso2.msf4j.Request;
 
 import java.net.URI;
@@ -123,7 +123,7 @@ public class ApplicationsApiServiceImpl
                             OAuthApplicationInfo oAuthApplicationInfo = keyManager
                                     .retrieveApplication(apiKey.getConsumerKey());
                             apiKey.setConsumerSecret(oAuthApplicationInfo.getClientSecret());
-                            AccessTokenInfo accessTokenInfo = keyManager.getNewApplicationAccessToken(
+                            AccessTokenInfo accessTokenInfo = keyManager.getNewAccessToken(
                                     ApplicationUtils.createAccessTokenRequest(oAuthApplicationInfo));
                             apiKey.setAccessToken(accessTokenInfo.getAccessToken());
                             apiKey.setValidityPeriod(accessTokenInfo.getValidityPeriod());
@@ -246,8 +246,8 @@ public class ApplicationsApiServiceImpl
             //be in either pending or approved state) send back the workflow response 
             if (ApplicationStatus.APPLICATION_ONHOLD.equals(updatedApplication.getStatus())) {
                 
-                WorkflowResponseDTO workflowResponse = WorkflowMappintUtil
-                        .fromWorkflowResponsetoDTO(updateResponse);
+                WorkflowResponseDTO workflowResponse = MiscMappingUtil
+                        .fromWorkflowResponseToDTO(updateResponse);
                 URI location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" + applicationId);
                 return Response.status(Response.Status.ACCEPTED).header(RestApiConstants.LOCATION_HEADER, location)
                         .entity(workflowResponse).build();
@@ -294,7 +294,7 @@ public class ApplicationsApiServiceImpl
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
             Application application = apiConsumer.getApplication(applicationId, username, null);
             if (application != null && !ApplicationStatus.APPLICATION_APPROVED.equals(application.getStatus())) {
-                String errorMessage = "Application " + applicationId + " is not active";
+                String errorMessage = "Application " + applicationId + " is not active/available";
                 ExceptionCodes exceptionCode = ExceptionCodes.APPLICATION_INACTIVE;
                 APIManagementException e = new APIManagementException(errorMessage, exceptionCode);
                 HashMap<String, String> paramList = new HashMap<String, String>();
@@ -305,21 +305,18 @@ public class ApplicationsApiServiceImpl
                 
             }
             if (application != null) {
-                String[] accessAllowDomainsArray = body.getAccessAllowDomains().toArray(new String[1]);
                 String tokenScopes = StringUtils.join(body.getScopes(), " ");
-
                 Map<String, Object> keyDetails = apiConsumer
-                        .generateApplicationKeys(username, application.getName(), applicationId, body.getKeyType()
-                                        .toString(),
-                                body.getCallbackUrl(), accessAllowDomainsArray, body.getValidityTime(), tokenScopes,
-                                application.getGroupId());
+                        .generateApplicationKeys(application.getName(), applicationId, body.getKeyType().toString(),
+                                body.getCallbackUrl(), body.getGrantTypesToBeSupported(), body.getValidityTime(),
+                                tokenScopes, application.getGroupId());
                 applicationKeyDTO = ApplicationKeyMappingUtil
                         .fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
             } else {
                 String errorMessage = "Application not found for key geneation: " + applicationId;
                 APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
                         ExceptionCodes.APPLICATION_NOT_FOUND);
-                HashMap<String, String> paramList = new HashMap<String, String>();
+                Map<String, String> paramList = new HashMap<>();
                 paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
                 log.error(errorMessage, e);
@@ -418,8 +415,8 @@ public class ApplicationsApiServiceImpl
             //be in either pending or approved state) send back the workflow response 
             if (ApplicationStatus.APPLICATION_ONHOLD.equals(createdApplication.getStatus())) {
                 
-                WorkflowResponseDTO workflowResponse = WorkflowMappintUtil
-                        .fromWorkflowResponsetoDTO(applicationResponse.getWorkflowResponse());
+                WorkflowResponseDTO workflowResponse = MiscMappingUtil
+                        .fromWorkflowResponseToDTO(applicationResponse.getWorkflowResponse());
                 return Response.status(Response.Status.ACCEPTED).header(RestApiConstants.LOCATION_HEADER, location)
                         .entity(workflowResponse).build();
             }    

@@ -1,0 +1,73 @@
+{{js "js/create.js"}}
+{{#if @params.compositeAPIAvailable}}
+    <div class="row">
+        <div class="col-xs-4 col-sm-4 col-md-3 col-lg-2">
+            <div class="white-wrapper add-margin-bottom-4x">
+                <div class="thumbnail icon">
+                    <div class="square-element setbgcolor">
+                        <div class="api-name-icon"
+                             onclick="location.href='{{@contextPath}}/composite-apis/{{@params.id}}'"></div>
+                        <div style="display: none">
+                            <a href="{{@contextPath}}/composite-apis/{{@params.id}}" class="api-name"
+                               title="{{@params.name}}">{{@params.name}}</a>
+                        </div>
+                    </div>
+                    <a href="{{@contextPath}}/composite-apis/{{@params.id}}" title="{{i18n "Browse APIs"}}">
+                        <div class="after">
+	                                    <span class="fw-stack fw-lg">
+	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+	                                    <i class="fw fw-view fw-stack-1x"></i>
+	                                    </span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-4 col-sm-4 col-md-3 col-lg-2">
+            <div class="add-padding-2x app-data ">
+                <h4 class="truncate"><a href="{{@contextPath}}/composite-apis/{{@params.id}}"
+                                        title="API Name: {{@params.name}}">{{@params.name}}</a></h4>
+                <h5><a href="{{@contextPath}}/composite-apis/{{@params.id}}" title="Version">{{@params.version}}</a>
+                </h5>
+
+                <p class="truncate">{{@params.provider}}</p>
+                <input type="hidden" class="rating" disabled="disabled" value="ss"/>
+
+            </div>
+        </div>
+    </div>
+{{else}}
+    <!-- Create composite API input fields-->
+    <form>
+    <div class="row form-group">
+        <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+            <div class="input-group input-wrap res-wrap">
+                <label class="control-label">{{i18n "API Name"}}</label><span class="requiredAstrix">*</span>
+                <input id="composite-api-name" type="text" class="form-control" placeholder="{{i18n "API Name"}}"
+                       autocomplete="off" required>
+            </div>
+        </div>
+        <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+            <div class="input-group input-wrap res-wrap">
+                <label class="control-label">{{i18n "Context"}}</label><span class="requiredAstrix">*</span>
+                <input id="composite-api-context" type="text" class="form-control"
+                       placeholder="{{i18n "Context"}}"
+                       autocomplete="off" required>
+            </div>
+        </div>
+        <div class="col-12 col-sm-12 col-md-4 col-lg-4 col-xl-4">
+            <div class="input-group input-wrap res-wrap">
+                <label class="control-label">{{i18n "Version"}}</label><span class="requiredAstrix">*</span>
+                <input id="composite-api-version" type="text" class="form-control" placeholder="1.0.0"
+                       autocomplete="off" required>
+            </div>
+        </div>
+    </div>
+
+    <hr/>
+    <button id="#composite-api-submit" class="btn btn-primary" data-resource-path="/composite-apis"
+            data-resource-method="post" onclick="createCompositeAPI(); return false;">
+        {{i18n "Create Composite API"}}
+    </button>
+    </form>
+{{/if}}

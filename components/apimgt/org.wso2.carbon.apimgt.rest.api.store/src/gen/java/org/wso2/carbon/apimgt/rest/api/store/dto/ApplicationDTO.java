@@ -11,7 +11,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 import java.util.Objects;
 
 /**
- * ApplicationDTO
+ * ApplicationEvent
  */
 public class ApplicationDTO   {
   @JsonProperty("applicationId")
@@ -25,9 +25,6 @@ public class ApplicationDTO   {
 
   @JsonProperty("throttlingTier")
   private String throttlingTier = null;
-
-  @JsonProperty("callbackUrl")
-  private String callbackUrl = null;
 
   @JsonProperty("permission")
   private String permission = null;
@@ -114,24 +111,6 @@ public class ApplicationDTO   {
 
   public void setThrottlingTier(String throttlingTier) {
     this.throttlingTier = throttlingTier;
-  }
-
-  public ApplicationDTO callbackUrl(String callbackUrl) {
-    this.callbackUrl = callbackUrl;
-    return this;
-  }
-
-   /**
-   * Get callbackUrl
-   * @return callbackUrl
-  **/
-  @ApiModelProperty(value = "")
-  public String getCallbackUrl() {
-    return callbackUrl;
-  }
-
-  public void setCallbackUrl(String callbackUrl) {
-    this.callbackUrl = callbackUrl;
   }
 
   public ApplicationDTO permission(String permission) {
@@ -243,7 +222,6 @@ public class ApplicationDTO   {
         Objects.equals(this.name, application.name) &&
         Objects.equals(this.subscriber, application.subscriber) &&
         Objects.equals(this.throttlingTier, application.throttlingTier) &&
-        Objects.equals(this.callbackUrl, application.callbackUrl) &&
         Objects.equals(this.permission, application.permission) &&
         Objects.equals(this.description, application.description) &&
         Objects.equals(this.lifeCycleStatus, application.lifeCycleStatus) &&
@@ -253,19 +231,18 @@ public class ApplicationDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, name, subscriber, throttlingTier, callbackUrl, permission, description, lifeCycleStatus, groupId, keys);
+    return Objects.hash(applicationId, name, subscriber, throttlingTier, permission, description, lifeCycleStatus, groupId, keys);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ApplicationDTO {\n");
+    sb.append("class ApplicationEvent {\n");
     
     sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    subscriber: ").append(toIndentedString(subscriber)).append("\n");
     sb.append("    throttlingTier: ").append(toIndentedString(throttlingTier)).append("\n");
-    sb.append("    callbackUrl: ").append(toIndentedString(callbackUrl)).append("\n");
     sb.append("    permission: ").append(toIndentedString(permission)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
