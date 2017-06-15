@@ -35,7 +35,8 @@ public class ResourcesApiServiceImpl extends ResourcesApiService {
             if (!StringUtils.isEmpty(apiContext) && !StringUtils.isEmpty(apiVersion)) {
                 resourcesOfApi = apiMgtAdminService.getAllResourcesForApi(apiContext, apiVersion);
             }
-            ResourcesListDTO resourcesListDTO = MappingUtil.convertToResourceListDto(resourcesOfApi);
+            ResourcesListDTO resourcesListDTO = new ResourcesListDTO();
+            resourcesListDTO.setList(MappingUtil.convertToResourceListDto(resourcesOfApi));
             return Response.ok(resourcesListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving resources.";

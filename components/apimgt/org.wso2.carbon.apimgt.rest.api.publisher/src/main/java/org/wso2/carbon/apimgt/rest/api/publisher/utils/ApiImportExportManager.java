@@ -20,7 +20,6 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.utils;
 
-import com.sun.jndi.toolkit.url.Uri;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
@@ -126,7 +125,7 @@ public class ApiImportExportManager {
             // get swagger definition
             String swaggerDefinition;
             try {
-                swaggerDefinition = apiPublisher.getSwagger20Definition(api.getId());
+                swaggerDefinition = apiPublisher.getApiSwaggerDefinition(api.getId());
             } catch (APIManagementException e) {
                 log.error("Error in getting Swagger configuration for api: " + api.getName() + ", version: " +
                         api.getVersion(), e);

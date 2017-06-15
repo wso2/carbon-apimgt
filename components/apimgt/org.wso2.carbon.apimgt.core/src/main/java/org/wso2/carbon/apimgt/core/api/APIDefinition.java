@@ -20,7 +20,10 @@ package org.wso2.carbon.apimgt.core.api;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIResource;
+import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.Scope;
+import org.wso2.msf4j.Request;
+import org.wso2.msf4j.ServiceMethodInfo;
 
 import java.util.List;
 import java.util.Map;
@@ -52,11 +55,30 @@ public interface APIDefinition {
     Map<String, Scope> getScopes(String resourceConfigsJSON) throws APIManagementException;
 
     /**
+     * This method extracts the scope from the API definition matching to a resource path
+     *
+     * @param resourceConfigsJSON resource json
+     * @return request   HttpRequest being processed.
+     * @throws APIManagementException   If error occurs while parsing swagger resources.
+     */
+    String getScopeOfResourcePath(String resourceConfigsJSON, Request request, ServiceMethodInfo serviceMethodInfo)
+            throws APIManagementException;
+
+    /**
      * generate the swagger from uri templates.
-     * @param api   API object
-     * @return      generated swagger as a string.
+     *
+     * @param api API object
+     * @return generated swagger as a string.
      */
     String generateSwaggerFromResources(API.APIBuilder api);
+
+    /**
+     * generate the swagger from uri templates.
+     *
+     * @param api CompositeAPI.Builder object
+     * @return generated swagger as a string.
+     */
+    String generateSwaggerFromResources(CompositeAPI.Builder api);
 
     /**
      * return API Object
@@ -69,8 +91,13 @@ public interface APIDefinition {
     API.APIBuilder generateApiFromSwaggerResource(String provider, String apiDefinition) throws APIManagementException;
 
     /**
-     * Set the default swagger and uri templates
-     * @param apiBuilder    API object.
+     * return CompositeAPI Object
+     *
+     * @param apiDefinition     API definition as a string
+     * @param provider          Provider of the API
+     * @return                  CompositeAPI.Builder object.
+     * @throws APIManagementException   If error occurs while generate swagger from resources.
      */
-    void setDefaultSwaggerDefinition(API.APIBuilder apiBuilder);
+    CompositeAPI.Builder generateCompositeApiFromSwaggerResource(String provider, String apiDefinition)
+            throws APIManagementException;
 }

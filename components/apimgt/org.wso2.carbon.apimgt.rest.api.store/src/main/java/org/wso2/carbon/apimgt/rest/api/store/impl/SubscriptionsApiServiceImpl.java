@@ -1,21 +1,15 @@
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
+import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Subscription;
@@ -24,7 +18,6 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ApplicationStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.SubscriptionStatus;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
-import org.wso2.carbon.apimgt.core.workflow.HttpWorkflowResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -33,9 +26,17 @@ import org.wso2.carbon.apimgt.rest.api.store.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.store.mappings.MiscMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.SubscriptionMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.store.mappings.WorkflowMappintUtil;
 import org.wso2.msf4j.Request;
+
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
         "2016-11-01T13:48:55.078+05:30")
@@ -60,7 +61,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      * @throws NotFoundException If failed to get the subscription
      */
     @Override
-    public Response subscriptionsGet(String apiId, String applicationId, Integer offset, Integer limit,
+    public Response subscriptionsGet(String apiId, String applicationId, String apiType, Integer offset, Integer limit,
                                      String accept, String ifNoneMatch, Request request) throws NotFoundException {
 
         List<Subscription> subscribedApiList = null;
@@ -78,7 +79,17 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             } else if (!StringUtils.isEmpty(applicationId)) {
                 Application application = apiStore.getApplicationByUuid(applicationId);
                 if (application != null) {
-                    subscribedApiList = apiStore.getAPISubscriptionsByApplication(application);
+                    if (!StringUtils.isEmpty(apiType)) {
+                        ApiType apiTypeEnum = ApiType.fromString(apiType);
+
+                        if (apiTypeEnum == null) {
+                            throw new APIManagementException("API Type specified is invalid",
+                                    ExceptionCodes.API_TYPE_INVALID);
+                        }
+                        subscribedApiList = apiStore.getAPISubscriptionsByApplication(application, apiTypeEnum);
+                    } else {
+                        subscribedApiList = apiStore.getAPISubscriptionsByApplication(application);
+                    }
                     subscriptionListDTO = SubscriptionMappingUtil.fromSubscriptionListToDTO(subscribedApiList, limit,
                             offset);
                 } else {
@@ -155,8 +166,8 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                 //if workflow is in pending state or if the executor sends any httpworklfowresponse (workflow state can 
                 //be in either pending or approved state) send back the workflow response 
                 if (SubscriptionStatus.ON_HOLD == subscription.getStatus()) {
-                    WorkflowResponseDTO workflowResponse = WorkflowMappintUtil
-                            .fromWorkflowResponsetoDTO(addSubResponse.getWorkflowResponse());
+                    WorkflowResponseDTO workflowResponse = MiscMappingUtil
+                            .fromWorkflowResponseToDTO(addSubResponse.getWorkflowResponse());
                     return Response.status(Response.Status.ACCEPTED).header(RestApiConstants.LOCATION_HEADER, location)
                             .entity(workflowResponse).build();
                 }               
@@ -179,7 +190,12 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                 return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
             }
 
-        } catch (APIManagementException e) {
+        } catch (GatewayException e) {
+            String errorMessage = "Failed to add subscription of API : " + body.getApiIdentifier() + " to gateway";
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.ACCEPTED).build();
+        }
+        catch (APIManagementException e) {
             String errorMessage = "Error while adding subscriptions";
             Map<String, String> paramList = new HashMap<>();
             paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, body.getApiIdentifier());
@@ -229,6 +245,10 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             }
 
             apiStore.deleteAPISubscription(subscriptionId);
+        } catch (GatewayException e) {
+            String errorMessage = "Failed to remove subscription :" + subscriptionId + " from gateway";
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.ACCEPTED).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting subscription";
             HashMap<String, String> paramList = new HashMap<String, String>();

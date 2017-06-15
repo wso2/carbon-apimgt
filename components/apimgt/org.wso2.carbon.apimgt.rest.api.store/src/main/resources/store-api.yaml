@@ -57,7 +57,7 @@ x-wso2-security:
   apim:
     x-wso2-scopes:
       - description: ""
-        roles: Internal/subscriber
+        roles: Internal/username
         name: apim:subscribe
         key: apim:subscribe
       - description: ""
@@ -426,10 +426,10 @@ paths:
 ######################################################
 # The "API Rating" resource APIs
 ######################################################
-  '/apis/{apiId}/rating':
+  '/apis/{apiId}/ratings':
 
 #-----------------------------------------------------
-# Retrieve the Rating of a certain API
+# Retrieve the Ratings of a certain API
 #-----------------------------------------------------
     get:
       description: |
@@ -468,12 +468,68 @@ paths:
             $ref: '#/definitions/Error'
 
 #-----------------------------------------------------
-# Add a new Rating
+# Retrieve a specific rating of an API
 #-----------------------------------------------------
-    post:
+  '/apis/{apiId}/ratings/{ratingId}':
+    get:
+      description: |
+            Get a specific rating of an API.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/ratingId'
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
+      tags:
+        - API (individual)
+        - Retrieve Rating
+      responses:
+        200:
+          description: |
+            OK.
+            Rating returned.
+          schema:
+            $ref: '#/definitions/Rating'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests.
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests.
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+        404:
+          description: |
+            Not Found.
+            Requested rating does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# Add or update rating
+#-----------------------------------------------------
+  '/apis/{apiId}/user-rating':
+    put:
       x-scope: apim:subscribe
       description: |
-        Add a new Rating
+        Adds or updates a rating
       parameters:
         - $ref: '#/parameters/apiId'
         - in: body
@@ -622,7 +678,7 @@ paths:
     get:
       x-scope: apim:subscribe
       description: |
-        Get the individual comment given by a subscriber for a certain API.
+        Get the individual comment given by a username for a certain API.
       parameters:
         - $ref: '#/parameters/commentId'
         - $ref: '#/parameters/apiId'
@@ -1230,6 +1286,152 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+###################################################################
+# The ballerina implementation resource of "Individual Composite API" resource APIs
+###################################################################
+
+  /composite-apis/{apiId}/implementation:
+#-----------------------------------------------------
+# Retrieve the Composite API swagger definition
+#-----------------------------------------------------
+    get:
+      x-scope: apim:subscribe
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9090/api/am/store/v1/composite-apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/implementation"
+      x-wso2-request: |
+        GET https://127.0.0.1:9090/api/am/store/v1/composite-apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/implementation
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 329\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"x-wso2-security\": {\"apim\": {\"x-wso2-scopes\": []}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}"
+      summary: Get Composite API implementation
+      description: |
+        This operation can be used to retrieve the Ballerina implementation of a Composite API.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
+      tags:
+        - CompositeAPI (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Requested Ballerina implementation of the Composite API is returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# Update the Composite API implementation
+#-----------------------------------------------------
+    put:
+      consumes:                                  
+        - multipart/form-data
+      x-scope: apim:subscribe
+      x-wso2-curl: "curl -k -H \"Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\" -F endpointId=\"{\\\"paths\\\":{\\\"\\/*\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"responses\\\":{\\\"200\\\":{\\\"description\\\":\\\"OK\\\"}}}}},\\\"x-wso2-security\\\":{\\\"apim\\\":{\\\"x-wso2-scopes\\\":[]}},\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"PhoneVerification\\\",\\\"description\\\":\\\"Verify a phone number\\\",\\\"contact\\\":{\\\"email\\\":\\\"xx@ee.com\\\",\\\"name\\\":\\\"xx\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\" -X PUT \"https://127.0.0.1:9090/api/am/store/v1/composite-apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/implementation\""
+      x-wso2-request: |
+       PUT https://127.0.0.1:9090/api/am/store/v1/composite-apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/implementation
+       Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013
+       Content-Length: 477
+       Content-Type: multipart/form-data; boundary=------------------------4f51e636c0003d99
+
+       --------------------------4f51e636c0003d99
+       Content-Disposition: form-data; name="apiImplementation"
+
+       {"paths":{"\/*":{"get":{"x-auth-type":"Application","x-throttling-policy":"Unlimited","responses":{"200":{"description":"OK"}}}}},"x-wso2-security":{"apim":{"x-wso2-scopes":[]}},"swagger":"2.0","info":{"title":"PhoneVerification","description":"Verify a phone number","contact":{"email":"xx@ee.com","name":"xx"},"version":"1.0.0"}}
+       --------------------------4f51e636c0003d99--
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"x-wso2-security\": {\"apim\": {\"x-wso2-scopes\": []}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}"
+      summary: Update Composite API implementation
+      description: |
+        This operation can be used to update the Ballerina implementation of a Composite API. Ballerina implementation to be updated is passed as a form data parameter `apiImplementation`.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - in: formData
+          name: apiImplementation
+          description: Ballerina implementation of the Composite API
+          type: file
+          required: true
+        - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
+      tags:
+        - CompositeAPI (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with updated Ballerina implementation
+          schema:
+            $ref : '#/definitions/FileInfo'
+          headers:
+            Location:
+              description: |
+                The URL of the newly created resource.
+              type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        403:
+          description: |
+            Forbidden.
+            The request must be conditional but no condition has been specified.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
 
 ######################################################
 # The "Application Collection" resource APIs
@@ -1619,6 +1821,7 @@ paths:
       parameters:
         - $ref: '#/parameters/apiId-Q'
         - $ref: '#/parameters/applicationId-Q'
+        - $ref: '#/parameters/apiType'
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/Accept'
@@ -2062,6 +2265,50 @@ paths:
             $ref: '#/definitions/Error'
 
 ######################################################
+# The "Self Signup" functional resource APIs
+######################################################
+  /self-signup:
+
+#-----------------------------------------------------
+# Register a new user
+#-----------------------------------------------------
+    post:
+      x-scope: apim:signup
+      description: |
+        User self signup API
+      parameters:
+        - in: body
+          name: body
+          description: |
+            User object to represent the new user
+          required: true
+          schema:
+            $ref: '#/definitions/User'
+        - $ref: '#/parameters/Content-Type'
+      tags:
+        - Signup
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created object as entity in the body.
+            Location header contains URL of newly created entity.
+          schema:
+            $ref: '#/definitions/User'
+        202:
+          description: |
+            Accepted.
+            The request has been accepted.
+          schema:
+            $ref: '#/definitions/WorkflowResponse'
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
 # Parameters - required by some of the APIs above
 ######################################################
 parameters:
@@ -2121,6 +2368,19 @@ parameters:
     required: true
     type: string
 
+# API Type
+# Specified as part of the query string
+  apiType:
+    name: apiType
+    in: query
+    description: |
+      **API Type** filters information pertaining to a specific type of API
+    required: false
+    type: string
+    enum:
+      - STANDARD
+      - COMPOSITE
+
 # Group Identifier of the application
   groupId:
     name: groupId
@@ -2147,6 +2407,16 @@ parameters:
     in: path
     description: |
       Comment Id
+    required: true
+    type: string
+
+# Rating Identifier
+# Specified as part of the path expression
+  ratingId:
+    name: ratingId
+    in: path
+    description: |
+      Rating Id
     required: true
     type: string
 
@@ -2391,6 +2661,10 @@ definitions:
     required:
     allOf:
       - $ref: '#/definitions/BaseAPIInfo'
+      - properties:
+          applicationId:
+            type: string
+
 
 #-----------------------------------------------------
 # The Base API resource
@@ -2483,6 +2757,9 @@ definitions:
     required:
     allOf:
       - $ref: '#/definitions/BaseAPI'
+      - properties:
+          applicationId:
+            type: string
 
 #-----------------------------------------------------
 # The Application List resource
@@ -2527,8 +2804,6 @@ definitions:
           If subscriber is not given user invoking the API will be taken as the subscriber.
         type: string
       throttlingTier:
-        type: string
-      callbackUrl:
         type: string
       permission:
         type: string
@@ -2704,6 +2979,21 @@ definitions:
         type: boolean
 
 #-----------------------------------------------------
+# The File Information resource
+#-----------------------------------------------------
+  FileInfo :
+    title: File Information including meta data
+    properties:
+      relativePath:
+        type: string
+        description: relative location of the file (excluding the base context and host of the Publisher API)
+        example: "apis/01234567-0123-0123-0123-012345678901/thumbnail"
+      mediaType:
+        type: string
+        description: media-type of the file
+        example: "image/jpeg"
+        
+#-----------------------------------------------------
 # The Subscription List resource
 #-----------------------------------------------------
   SubscriptionList:
@@ -2808,17 +3098,17 @@ definitions:
     required:
       - ratingId
       - apiId
-      - subscriberName
+      - username
       - rating
     properties:
       ratingId:
         type: string
       apiId:
         type: string
-      subscriberName:
+      username:
         type: string
         description: |
-          If subscriberName is not given user invoking the API will be taken as the subscriberName.
+          If username is not given user invoking the API will be taken as the username.
       rating:
         type: integer
 
@@ -2863,17 +3153,17 @@ definitions:
     required:
       - commentId
       - apiId
-      - subscriberName
+      - username
       - commentText
     properties:
       commentId:
         type: string
       apiId:
         type: string
-      subscriberName:
+      username:
         type: string
         description: |
-          If subscriberName is not given user invoking the API will be taken as the subscriberName.
+          If username is not given user invoking the API will be taken as the username.
       commentText:
         type: string
       createdTime:
@@ -3015,7 +3305,7 @@ definitions:
     required:
       - keyType
       - validityTime
-      - accessAllowDomains
+      - grantTypesToBeSupported
     properties:
       keyType:
         type: string
@@ -3027,11 +3317,11 @@ definitions:
       callbackUrl:
         type: string
         description: Callback URL
-      accessAllowDomains:
+      grantTypesToBeSupported:
         type: array
         items:
           type: string
-        description: Allowed domains for the access token
+        description: Grant types that should be supported by the application
       scopes:
         type: array
         items:
@@ -3130,6 +3420,29 @@ definitions:
       jsonPayload:
         description: |
           Attributes that returned after the workflow execution
+        type: string
+
+#-----------------------------------------------------
+# The Self Signup User resource
+#-----------------------------------------------------
+  User:
+    title: User
+    required:
+      - username
+      - password
+      - firstName
+      - lastName
+      - email
+    properties:
+      username:
+        type: string
+      password:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      email:
         type: string
        
 #-----------------------------------------------------

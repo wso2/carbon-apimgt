@@ -16,6 +16,7 @@ import org.wso2.msf4j.formparam.FormDataParam;
 import org.osgi.service.component.annotations.Component;
 
 import java.io.InputStream;
+import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -39,6 +40,7 @@ import javax.ws.rs.core.Response;
 @Path("/api/am/store/v1.[\\d]+/subscriptions")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
+@ApplicationPath("/subscriptions")
 @io.swagger.annotations.Api(description = "the subscriptions API")
 public class SubscriptionsApi implements Microservice  {
    private final SubscriptionsApiService delegate = SubscriptionsApiServiceFactory.getSubscriptionsApi();
@@ -56,13 +58,14 @@ public class SubscriptionsApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = SubscriptionListDTO.class) })
     public Response subscriptionsGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API I. Should be formatted as **provider-name-version**. ",required=true) @QueryParam("apiId") String apiId
 ,@ApiParam(value = "**Application Identifier** consisting of the UUID of the Application. ",required=true) @QueryParam("applicationId") String applicationId
+,@ApiParam(value = "**API Type** filters information pertaining to a specific type of API ", allowableValues="STANDARD, COMPOSITE") @QueryParam("apiType") String apiType
 ,@ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
 ,@ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit
 ,@ApiParam(value = "Media types acceptable for the response. Default is JSON. " , defaultValue="JSON")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 , @Context Request request)
     throws NotFoundException {
-        return delegate.subscriptionsGet(apiId,applicationId,offset,limit,accept,ifNoneMatch, request);
+        return delegate.subscriptionsGet(apiId,applicationId,apiType,offset,limit,accept,ifNoneMatch, request);
     }
     @POST
     

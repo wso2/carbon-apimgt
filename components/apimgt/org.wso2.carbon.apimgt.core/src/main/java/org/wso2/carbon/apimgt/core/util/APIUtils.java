@@ -19,6 +19,7 @@
 
 package org.wso2.carbon.apimgt.core.util;
 
+import io.swagger.models.HttpMethod;
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -29,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
@@ -84,6 +86,7 @@ public class APIUtils {
      * Returns a map of API availability tiers of the tenant as defined in the underlying governance
      * registry.
      *
+     * @param policyType Policy Type
      * @return a Map of tier names and Tier objects - possibly empty
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
@@ -98,7 +101,8 @@ public class APIUtils {
 
     /**
      * Validate the API object
-     * @throws APIManagementException
+     * @param api API object
+     * @throws APIManagementException if mandatory field is not set
      */
     public static void validate(API api) throws APIManagementException {
         if (StringUtils.isEmpty(api.getId())) {
@@ -113,10 +117,30 @@ public class APIUtils {
     }
 
     /**
+     * Validate the CompositeAPI object
+     * @param api CompositeAPI object
+     * @throws APIManagementException if mandatory field is not set
+     */
+    public static void validate(CompositeAPI api) throws APIManagementException {
+        if (StringUtils.isEmpty(api.getId())) {
+            throw new APIManagementException("Couldn't find UUID of CompositeAPI");
+        }
+        if (StringUtils.isEmpty(api.getName())) {
+            throw new APIManagementException("Couldn't find Name of CompositeAPI ");
+        }
+        if (StringUtils.isEmpty(api.getVersion())) {
+            throw new APIManagementException("Couldn't find Version of CompositeAPI ");
+        }
+    }
+
+    /**
      * Checks String lists for equality independent of the order of elements in the lists.
      *
      * Note that order of the elements in the lists will be changed as a result of sorting,
      * but this is not a concern usually since the order does not matter.
+     * @param list1 String list
+     * @param list2 String list
+     * @return true if elements in lists are equal irrespective of order
      */
     public static boolean isListsEqualIgnoreOrder(List<String> list1, List<String> list2) {
         if (list1 == null && list2 == null) {
@@ -140,6 +164,10 @@ public class APIUtils {
      *
      * Note that order of the elements in the lists will be changed as a result of sorting,
      * but this is not a concern usually since the order does not matter.
+     * @param list1 T list
+     * @param list2 T list
+     * @param comparator Comparator class
+     * @return true if elements in lists are equal irrespective of order
      */
     public static <T> boolean isListsEqualIgnoreOrder(List<T> list1, List<T> list2, Comparator<T> comparator) {
         if (list1 == null && list2 == null) {
@@ -193,6 +221,27 @@ public class APIUtils {
         return stringBuilder.toString();
     }
 
+
+    /**
+     * Generates default URI templates to be assigned to an API
+     * @return  Map of URI Templates
+     */
+    public static Map<String, UriTemplate> getDefaultUriTemplates() {
+        Map<String, UriTemplate> uriTemplateMap = new HashMap<>();
+        UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
+        uriTemplateBuilder.uriTemplate("/");
+        for (String httpVerb : APIMgtConstants.SUPPORTED_HTTP_VERBS.split(",")) {
+            if (!HttpMethod.OPTIONS.toString().equals(httpVerb)) {
+                uriTemplateBuilder.httpVerb(httpVerb);
+                uriTemplateBuilder.templateId(APIUtils.generateOperationIdFromPath(uriTemplateBuilder.getUriTemplate
+                        (), httpVerb));
+                uriTemplateMap.put(uriTemplateBuilder.getTemplateId(), uriTemplateBuilder.build());
+            }
+        }
+
+        return uriTemplateMap;
+    }
+
     public static Map<String, UriTemplate> getMergedUriTemplates(Map<String, UriTemplate> oldUriTemplateMap,
                                                                  Map<String, UriTemplate> updatedUriTemplateMap) {
         Map<String, UriTemplate> uriTemplateMap = new HashMap<>();
@@ -231,6 +280,7 @@ public class APIUtils {
         availableRoles.add("manager");
         availableRoles.add("developer");
         availableRoles.add("lead");
+        availableRoles.add(APIMgtConstants.Permission.EVERYONE_GROUP);
         return availableRoles;
     }
 
@@ -246,6 +296,7 @@ public class APIUtils {
         Set<String> userRoles = new HashSet<>();
         if ("admin".equalsIgnoreCase(username)) {
             userRoles.add("admin");
+            userRoles.add("comment-moderator");
             userRoles.add(APIMgtConstants.Permission.EVERYONE_GROUP);
         } else if ("subscriber".equalsIgnoreCase(username)) {
             userRoles.add("subscriber");
@@ -329,6 +380,8 @@ public class APIUtils {
 
     }
 
+
+
      /**
      * Verifies that fields that cannot be changed via an API update
      * do not differ from the values in the original API
@@ -340,7 +393,7 @@ public class APIUtils {
     public static void verifyValidityOfApiUpdate(API.APIBuilder apiBuilder, API originalAPI)
                                                                                     throws APIManagementException {
         if (!originalAPI.getLifeCycleStatus().equals(apiBuilder.getLifeCycleStatus())) {
-            String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as" +
+            String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " Couldn't update as " +
                     "the API Status cannot be changed";
             if (log.isDebugEnabled()) {
                 log.debug(msg);
@@ -388,10 +441,52 @@ public class APIUtils {
 
             throw new APIManagementException(msg, ExceptionCodes.COULD_NOT_UPDATE_API);
         }
+    }
 
-        if (originalAPI.getApiType() != apiBuilder.getApiType()) {
+    /**
+     * Verifies that fields that cannot be changed via an API update
+     * do not differ from the values in the original API
+     *
+     * @param apiBuilder Updated APIBuilder object
+     * @param originalAPI Original API being updated
+     * @throws APIManagementException If non modifiable field update is detected
+     */
+    public static void verifyValidityOfApiUpdate(CompositeAPI.Builder apiBuilder, CompositeAPI originalAPI)
+            throws APIManagementException {
+
+        if (!originalAPI.getName().equals(apiBuilder.getName())) {
             String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " update not allowed, " +
-                    "the API Type cannot be changed";
+                    "the API Name cannot be changed";
+            if (log.isDebugEnabled()) {
+                log.debug(msg);
+            }
+
+            throw new APIManagementException(msg, ExceptionCodes.COULD_NOT_UPDATE_API);
+        }
+
+        if (!originalAPI.getContext().equals(apiBuilder.getContext())) {
+            String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " update not allowed, " +
+                    "the API Context cannot be changed";
+            if (log.isDebugEnabled()) {
+                log.debug(msg);
+            }
+
+            throw new APIManagementException(msg, ExceptionCodes.COULD_NOT_UPDATE_API);
+        }
+
+        if (!originalAPI.getVersion().equals(apiBuilder.getVersion())) {
+            String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " update not allowed, " +
+                    "the API Version cannot be changed";
+            if (log.isDebugEnabled()) {
+                log.debug(msg);
+            }
+
+            throw new APIManagementException(msg, ExceptionCodes.COULD_NOT_UPDATE_API);
+        }
+
+        if (!originalAPI.getProvider().equals(apiBuilder.getProvider())) {
+            String msg = "API " + apiBuilder.getName() + "-" + apiBuilder.getVersion() + " update not allowed, " +
+                    "the API Provider cannot be changed";
             if (log.isDebugEnabled()) {
                 log.debug(msg);
             }
