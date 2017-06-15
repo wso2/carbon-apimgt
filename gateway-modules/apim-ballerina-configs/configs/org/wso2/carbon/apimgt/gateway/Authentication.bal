@@ -9,7 +9,8 @@ import org.wso2.carbon.apimgt.gateway.dto as dto;
 import org.wso2.carbon.apimgt.gateway.utils as gatewayUtil;
 import org.wso2.carbon.apimgt.gateway.holders as holder;
 import org.wso2.carbon.apimgt.gateway.constants;
-import ballerina.lang.jsons;
+import org.wso2.carbon.apimgt.ballerina.util;
+
 function authenticate (message m) (boolean, message) {
     message response = {};
     message request = {};
@@ -84,8 +85,8 @@ function authenticate (message m) (boolean, message) {
                         subscriptionDto = validateSubscription(apiContext, version, introspectDto);
                         if (subscriptionDto != null) {
                             if (validateScopes(resourceDto, introspectDto)) {
-                                string keyValidationInfo = constructKeyValidationDto(authToken, introspectDto, subscriptionDto, resourceDto);
-                                messages:setProperty(m, "KEY_VALIDATION_INFO", jsons:toString(keyValidationInfo));
+                                dto:KeyValidationDto keyValidationInfo = constructKeyValidationDto(authToken, introspectDto, subscriptionDto, resourceDto);
+                                util:setProperty(m, "KEY_VALIDATION_INFO", keyValidationInfo);
                                 messages:setProperty(m, constants:KEY_TYPE, subscriptionDto.keyEnvType);
                                 state = true;
                                 response = m;
@@ -123,7 +124,7 @@ function authenticate (message m) (boolean, message) {
 
 function doIntrospect (string authToken) (dto:IntrospectDto) {
     message request = {};
-    dto:KeyManagerInfoDTO keyManagerConf = holder:keyManagerConf;
+    dto:KeyManagerInfoDTO keyManagerConf = holder:getKeyManagerConf();
     dto:CredentialsDTO credentials = keyManagerConf.credentials;
     messages:setStringPayload(request, "token=" + authToken);
     messages:setHeader(request, "Content-Type", "application/x-www-form-urlencoded");
@@ -160,8 +161,8 @@ function validateScopes (dto:ResourceDto resourceDto, dto:IntrospectDto introspe
     }
     return state;
 }
-function constructKeyValidationDto (string token, dto:IntrospectDto introspectDto, dto:SubscriptionDto subscriptionDto, dto:ResourceDto resourceDto) (string){
-    json keyValidationInfoDTO = {};
+function constructKeyValidationDto (string token, dto:IntrospectDto introspectDto, dto:SubscriptionDto subscriptionDto, dto:ResourceDto resourceDto) (dto:KeyValidationDto ){
+    dto:KeyValidationDto keyValidationInfoDTO = {};
     dto:ApplicationDto applicationDto = holder:getFromApplicationCache(subscriptionDto.applicationId);
     keyValidationInfoDTO.username = introspectDto.username;
     keyValidationInfoDTO.applicationPolicy = applicationDto.applicationPolicy;
@@ -174,13 +175,11 @@ function constructKeyValidationDto (string token, dto:IntrospectDto introspectDt
     keyValidationInfoDTO.apiContext = subscriptionDto.apiContext;
     keyValidationInfoDTO.apiVersion = subscriptionDto.apiVersion;
     keyValidationInfoDTO.applicationId = subscriptionDto.applicationId;
-    keyValidationInfoDTO.apiKey = token;
     keyValidationInfoDTO.applicationName = applicationDto.applicationName;
-    keyValidationInfoDTO.consumerKey = subscriptionDto.consumerKey;
     keyValidationInfoDTO.keyType = subscriptionDto.keyEnvType;
     keyValidationInfoDTO.subscriber = applicationDto.applicationOwner;
     keyValidationInfoDTO.resourcePath = resourceDto.uriTemplate;
-    return jsons:toString(keyValidationInfoDTO);
+    return keyValidationInfoDTO;
 }
 function retrieveUserInfo (string token) (json) {
     message request = {};

@@ -26,7 +26,7 @@ public class DateCondition extends Condition {
     private String specificDate;
 
     public DateCondition() {
-        setType(PolicyConstants.DATE_SPECIFIC_TYPE);
+        setType(PolicyConstants.DATE_SPECIFIC_CONDITION_TYPE);
         this.queryAttributeName = PolicyConstants.START_QUERY + PolicyConstants.DATE_QUERY + PolicyConstants.END_QUERY;
         // "cast(map:get(properties,’"+value+"’),’string’)";
     }

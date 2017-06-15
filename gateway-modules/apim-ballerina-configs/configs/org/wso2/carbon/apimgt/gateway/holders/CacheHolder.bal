@@ -1,7 +1,7 @@
 package org.wso2.carbon.apimgt.gateway.holders;
 import org.wso2.carbon.apimgt.gateway.dto as dto;
-import org.wso2.carbon.apimgt.ballerina.caching;
 import org.wso2.carbon.apimgt.gateway.constants;
+import org.wso2.carbon.apimgt.ballerina.caching;
 map apiCache = {};
 dto:GatewayConfDTO gatewayConf = {};
 dto:KeyManagerInfoDTO keyManagerConf = {};
@@ -85,13 +85,15 @@ function setGatewayConf (dto:GatewayConfDTO conf) {
 function getGatewayConf () (dto:GatewayConfDTO){
     return gatewayConf;
 }
-
+function  getKeyManagerConf() (dto:KeyManagerInfoDTO){
+    return keyManagerConf;
+}
 function getAnalyticsConf () (dto:AnalyticsInfoDTO){
     return gatewayConf.analyticsInfo;
 }
 
 function putIntoApplicationCache (dto:ApplicationDto applicationDto) {
-    caching:putCacheEntry(constants:APPLICATION_CACHE,applicationDto.applicationId,applicationDto);
+    caching:putCacheEntry("APPLICATION_CACHE",applicationDto.applicationId,applicationDto);
 }
 function getFromApplicationCache (string applicationId) (dto:ApplicationDto){
     any application = caching:getCacheEntry(constants:APPLICATION_CACHE,applicationId);

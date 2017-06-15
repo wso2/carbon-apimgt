@@ -28,7 +28,7 @@
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
-    <version>7.0.24-SNAPSHOT</version>
+    <version>7.0.29-SNAPSHOT</version>
 
     <name>WSO2 Carbon - API Management Aggregator POM</name>
 
@@ -725,7 +725,7 @@
         <!-- Dependencies -->
         <carbon.kernel.version>5.2.0-m3</carbon.kernel.version>
         <carbon.kernel.package.import.version.range>[5.1.0, 6.0.0)</carbon.kernel.package.import.version.range>
-        <carbon.apimgt.version>7.0.24-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.version>7.0.29-SNAPSHOT</carbon.apimgt.version>
 
         <carbon.datasources.version>1.0.0</carbon.datasources.version>
 
@@ -778,7 +778,7 @@
         <carbon.deployment.export.version>5.0.0</carbon.deployment.export.version>
         <rxjava.export.version>1.2.0.wso2v1</rxjava.export.version>
         <json-simple.wso2.version>1.1.wso2v1</json-simple.wso2.version>
-        <json-simple.wso2.export.version>1.1.0.wso2v1</json-simple.wso2.export.version>
+        <json-simple.wso2.export.version>1.1.wso2v1</json-simple.wso2.export.version>
         <com.h2database.wso2.version>1.2.140.wso2v3</com.h2database.wso2.version>
         <io.swagger.version>1.5.10</io.swagger.version>
         <org.hibernate.version>5.2.4.Final</org.hibernate.version>

@@ -241,7 +241,8 @@ public interface APIManager {
      * @return last updated time 
      * @throws APIManagementException if API Manager core level exception occurred
      */
-    String getLastUpdatedTimeOfThrottlingPolicy(String policyLevel, String policyName) throws APIManagementException;
+    String getLastUpdatedTimeOfThrottlingPolicy(APIMgtAdminService.PolicyLevel policyLevel, String policyName)
+            throws APIManagementException;
 
     /**
      * Retrieves the last updated time of the application
