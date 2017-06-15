@@ -56,6 +56,13 @@
                                 </li>
                                 <li class="">
                                     <label class="radio apim-pub-new-api no-border">
+                                        <input type="radio" name="implementation-options" value="wsdl-option"
+                                               data-tab="wsdlTab">
+                                        <span class="helper">Import WSDL</span>
+                                    </label>
+                                </li>
+                                <li class="">
+                                    <label class="radio apim-pub-new-api no-border">
                                         <input type="radio" name="implementation-options" value="mock-option"
                                                data-tab="mockTab">
                                         <span class="helper">Mock</span>
@@ -115,6 +122,9 @@
                                         </div>
                                     </div>
                                 </form>
+                            </div>
+                            <div class="tab-pane" id="wsdlTab">
+                                {{fragment "org.wso2.carbon.apimgt.publisher.commons.ui.api-endpoint-create-wsdl"}}
                             </div>
                             <div class="tab-pane" id="mockTab"></div>
                         </div>
