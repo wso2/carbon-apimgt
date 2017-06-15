@@ -22,7 +22,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 /**
- * Contains {@link Limit} based attributes
+ * Contains Limit based attributes
  */
 public abstract class Limit {
 

@@ -73,9 +73,6 @@ public class PolicyDAOImpl implements PolicyDAO {
     public static final String MINUTE_TIMEUNIT = "min";
     public static final String TWENTY_PER_MIN_TIER = "20PerMin";
 
-    /**
-     *@see PolicyDAO#getApiPolicy(String)
-     */
     @Override
     public APIPolicy getApiPolicy(String policyName) throws APIMgtDAOException {
         try {
@@ -87,9 +84,6 @@ public class PolicyDAOImpl implements PolicyDAO {
         }
     }
 
-    /**
-     *@see PolicyDAO#getApiPolicyByUuid(String)
-     */
     @Override
     public APIPolicy getApiPolicyByUuid(String uuid) throws APIMgtDAOException {
         try {
@@ -101,9 +95,6 @@ public class PolicyDAOImpl implements PolicyDAO {
         }
     }
 
-    /**
-     *@see PolicyDAO#addApplicationPolicy(ApplicationPolicy)
-     */
     @Override
     public void addApplicationPolicy(ApplicationPolicy policy) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
@@ -129,9 +120,6 @@ public class PolicyDAOImpl implements PolicyDAO {
         }
     }
 
-    /**
-     *@see PolicyDAO#addApiPolicy(APIPolicy)
-     */
     @Override
     public void addApiPolicy(APIPolicy policy) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
@@ -157,9 +145,6 @@ public class PolicyDAOImpl implements PolicyDAO {
         }
     }
 
-    /**
-     *@see PolicyDAO#addSubscriptionPolicy(SubscriptionPolicy)
-     */
     @Override
     public void addSubscriptionPolicy(SubscriptionPolicy policy) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
@@ -185,9 +170,6 @@ public class PolicyDAOImpl implements PolicyDAO {
         }
     }
 
-    /**
-     *@see PolicyDAO#updateApplicationPolicy(ApplicationPolicy)
-     */
     @Override
     public void updateApplicationPolicy(ApplicationPolicy policy) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
@@ -212,9 +194,6 @@ public class PolicyDAOImpl implements PolicyDAO {
         }
     }
 
-    /**
-     *@see PolicyDAO#updateSubscriptionPolicy(SubscriptionPolicy)
-     */
     @Override
     public void updateSubscriptionPolicy(SubscriptionPolicy policy) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
@@ -342,9 +321,6 @@ public class PolicyDAOImpl implements PolicyDAO {
         }
     }
 
-    /**
-     *@see PolicyDAO#updateApiPolicy(APIPolicy)
-     */
     @Override
     public void updateApiPolicy(APIPolicy policy) throws APIMgtDAOException {
 
@@ -370,9 +346,6 @@ public class PolicyDAOImpl implements PolicyDAO {
         }
     }
 
-    /**
-     *@see PolicyDAO#deletePolicy(APIMgtAdminService.PolicyLevel, String)
-     */
     @Override
     public void deletePolicy(APIMgtAdminService.PolicyLevel policyLevel, String policyName)
             throws APIMgtDAOException {
@@ -406,9 +379,6 @@ public class PolicyDAOImpl implements PolicyDAO {
         }
     }
 
-    /**
-     *@see PolicyDAO#deletePolicyByUuid(APIMgtAdminService.PolicyLevel, String)
-     */
     @Override
     public void deletePolicyByUuid(APIMgtAdminService.PolicyLevel policyLevel, String uuid)
             throws APIMgtDAOException {
@@ -450,14 +420,16 @@ public class PolicyDAOImpl implements PolicyDAO {
      */
     private APIPolicy getAPIPolicy(String policyName) throws APIMgtDAOException, SQLException {
         APIPolicy policy;
-        String sqlQuery = "SELECT * from AM_API_POLICY WHERE NAME = ?";
+        String sqlQuery = "SELECT UUID, DEFAULT_QUOTA_TYPE, DEFAULT_TIME_UNIT, DEFAULT_UNIT_TIME, DEFAULT_QUOTA, "
+                + "DEFAULT_QUOTA_UNIT, DESCRIPTION, DISPLAY_NAME, IS_DEPLOYED, APPLICABLE_LEVEL "
+                + "from AM_API_POLICY WHERE NAME = ?";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
             preparedStatement.setString(1, policyName);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    policy = new APIPolicy(resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_NAME));
+                    policy = new APIPolicy(policyName);
                     setCommonPolicyDetails(policy, resultSet);
                     policy.setUserLevel(resultSet.getString(APIMgtConstants.ThrottlePolicyConstants
                             .COLUMN_APPLICABLE_LEVEL));
@@ -482,7 +454,9 @@ public class PolicyDAOImpl implements PolicyDAO {
      */
     private APIPolicy getAPIPolicyById(String uuid) throws SQLException, APIMgtDAOException {
         APIPolicy apiPolicy = null;
-        String sqlQuery = "SELECT * from AM_API_POLICY WHERE UUID = ?";
+        String sqlQuery = "SELECT NAME, DEFAULT_QUOTA_TYPE, DEFAULT_TIME_UNIT, DEFAULT_UNIT_TIME, DEFAULT_QUOTA, "
+                + "DEFAULT_QUOTA_UNIT, DESCRIPTION, DISPLAY_NAME, IS_DEPLOYED, APPLICABLE_LEVEL from "
+                + "AM_API_POLICY WHERE UUID = ?";
 
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
@@ -513,7 +487,9 @@ public class PolicyDAOImpl implements PolicyDAO {
      */
     private List<APIPolicy> getAllApiPolicies() throws SQLException {
         List<APIPolicy> policyList = new ArrayList<>();
-        String sqlQuery = "SELECT * from AM_API_POLICY";
+        String sqlQuery = "SELECT UUID, NAME, DEFAULT_QUOTA_TYPE, DEFAULT_TIME_UNIT, DEFAULT_UNIT_TIME, "
+                + "DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DESCRIPTION, DISPLAY_NAME, IS_DEPLOYED, APPLICABLE_LEVEL "
+                + "from AM_API_POLICY";
 
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
@@ -534,9 +510,6 @@ public class PolicyDAOImpl implements PolicyDAO {
         return policyList;
     }
 
-    /**
-     * @see PolicyDAO#policyExists(APIMgtAdminService.PolicyLevel, String)
-     */
     @Override
     public boolean policyExists(APIMgtAdminService.PolicyLevel policyLevel, String policyName)
             throws APIMgtDAOException {
@@ -563,7 +536,7 @@ public class PolicyDAOImpl implements PolicyDAO {
      */
     private static boolean apiPolicyExists(String policyName) throws APIMgtDAOException {
 
-        String sqlQuery = "SELECT * from AM_API_POLICY WHERE NAME = ?";
+        String sqlQuery = "SELECT 1 from AM_API_POLICY WHERE NAME = ?";
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
             preparedStatement.setString(1, policyName);
@@ -586,7 +559,7 @@ public class PolicyDAOImpl implements PolicyDAO {
      */
     private static boolean applicationPolicyExists(String policyName) throws APIMgtDAOException {
 
-        String sqlQuery = "SELECT * from AM_APPLICATION_POLICY WHERE NAME = ?";
+        String sqlQuery = "SELECT 1 from AM_APPLICATION_POLICY WHERE NAME = ?";
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
             preparedStatement.setString(1, policyName);
@@ -609,7 +582,7 @@ public class PolicyDAOImpl implements PolicyDAO {
      */
     private static boolean subscriptionPolicyExists (String policyName) throws APIMgtDAOException {
 
-        String sqlQuery = "SELECT * from AM_SUBSCRIPTION_POLICY WHERE NAME = ?";
+        String sqlQuery = "SELECT 1 from AM_SUBSCRIPTION_POLICY WHERE NAME = ?";
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
             preparedStatement.setString(1, policyName);
@@ -623,9 +596,6 @@ public class PolicyDAOImpl implements PolicyDAO {
         }
     }
 
-    /**
-     *@see PolicyDAO#getPoliciesByLevel(APIMgtAdminService.PolicyLevel)
-     */
     @Override
     public List<Policy> getPoliciesByLevel(APIMgtAdminService.PolicyLevel policyLevel) throws APIMgtDAOException {
 
@@ -645,9 +615,6 @@ public class PolicyDAOImpl implements PolicyDAO {
         return policies;
     }
 
-    /**
-     *@see PolicyDAO#getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel, String)
-     */
     @Override
     public Policy getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel policyLevel,
             String policyName) throws APIMgtDAOException {
@@ -665,9 +632,6 @@ public class PolicyDAOImpl implements PolicyDAO {
         }
     }
 
-    /**
-     *@see PolicyDAO#getApplicationPolicies()
-     */
     @Override
     public List<ApplicationPolicy> getApplicationPolicies() throws APIMgtDAOException {
         try {
@@ -679,9 +643,6 @@ public class PolicyDAOImpl implements PolicyDAO {
         }
     }
 
-    /**
-     *@see PolicyDAO#getApiPolicies()
-     */
     @Override
     public ApplicationPolicy getApplicationPolicy(String policyName) throws APIMgtDAOException {
         try {
@@ -693,9 +654,6 @@ public class PolicyDAOImpl implements PolicyDAO {
         }
     }
 
-    /**
-     *@see PolicyDAO#getApplicationPolicyByUuid(String)
-     */
     @Override
     public ApplicationPolicy getApplicationPolicyByUuid(String uuid) throws APIMgtDAOException {
         try {
@@ -707,9 +665,6 @@ public class PolicyDAOImpl implements PolicyDAO {
         }
     }
 
-    /**
-     *@see PolicyDAO#getSubscriptionPolicies()
-     */
     @Override
     public List<SubscriptionPolicy> getSubscriptionPolicies() throws APIMgtDAOException {
         try {
@@ -721,9 +676,6 @@ public class PolicyDAOImpl implements PolicyDAO {
         }
     }
 
-    /**
-     *@see PolicyDAO#getSubscriptionPolicy(String)
-     */
     @Override
     public SubscriptionPolicy getSubscriptionPolicy(String policyName) throws APIMgtDAOException {
         try {
@@ -743,7 +695,8 @@ public class PolicyDAOImpl implements PolicyDAO {
      */
     private List<ApplicationPolicy> getAllApplicationPolicies() throws SQLException {
         List<ApplicationPolicy> policyList = new ArrayList<>();
-        String sqlQuery = "SELECT * from AM_APPLICATION_POLICY";
+        String sqlQuery = "SELECT UUID, NAME, QUOTA_TYPE, TIME_UNIT, UNIT_TIME, QUOTA, QUOTA_UNIT, DESCRIPTION, "
+                + "DISPLAY_NAME, IS_DEPLOYED from AM_APPLICATION_POLICY";
 
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
@@ -765,9 +718,10 @@ public class PolicyDAOImpl implements PolicyDAO {
      * @return  List of subscriptions.
      * @throws SQLException     If error occurs while retrieving subscription level policies.
      */
-    private List<SubscriptionPolicy> getAllSubscriptionPolicies() throws SQLException {
+    private List<SubscriptionPolicy> getAllSubscriptionPolicies() throws SQLException, APIMgtDAOException {
         List<SubscriptionPolicy> policyList = new ArrayList<>();
-        String sqlQuery = "SELECT * from AM_SUBSCRIPTION_POLICY";
+        String sqlQuery = "SELECT UUID, NAME, QUOTA_TYPE, TIME_UNIT, UNIT_TIME, QUOTA, QUOTA_UNIT, DESCRIPTION, "
+                + "DISPLAY_NAME, CUSTOM_ATTRIBUTES, IS_DEPLOYED from AM_SUBSCRIPTION_POLICY";
 
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
@@ -790,7 +744,8 @@ public class PolicyDAOImpl implements PolicyDAO {
      */
     private ApplicationPolicy getApplicationPolicyByName(String policyName) throws SQLException, APIMgtDAOException {
         ApplicationPolicy policy;
-        String sqlQuery = "SELECT * from AM_APPLICATION_POLICY WHERE NAME = ?";
+        String sqlQuery = "SELECT UUID, QUOTA_TYPE, TIME_UNIT, UNIT_TIME, QUOTA, QUOTA_UNIT, DESCRIPTION, "
+                + "DISPLAY_NAME, IS_DEPLOYED from AM_APPLICATION_POLICY WHERE NAME = ?";
 
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
@@ -1071,7 +1026,8 @@ public class PolicyDAOImpl implements PolicyDAO {
      * @throws SQLException if an error occurs while retrieving the policy
      */
     private SubscriptionPolicy getSubscriptionPolicyByName(String policyName) throws SQLException, APIMgtDAOException {
-        final String query = "SELECT * FROM AM_SUBSCRIPTION_POLICY WHERE NAME = ?";
+        final String query = "SELECT UUID, QUOTA_TYPE, TIME_UNIT, UNIT_TIME, QUOTA, QUOTA_UNIT, DESCRIPTION, "
+                + "DISPLAY_NAME, CUSTOM_ATTRIBUTES, IS_DEPLOYED FROM AM_SUBSCRIPTION_POLICY WHERE NAME = ?";
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement statement = conn.prepareStatement(query)) {
             statement.setString(1, policyName);
@@ -1089,13 +1045,6 @@ public class PolicyDAOImpl implements PolicyDAO {
         }
     }
 
-    /**
-     * Retrieves a Subscription Policy
-     *
-     * @param uuid policy id
-     * @return {@link SubscriptionPolicy} instance
-     * @throws APIMgtDAOException if an error occurs when retrieving Subscription Policy
-     */
     @Override
     public SubscriptionPolicy getSubscriptionPolicyByUuid(String uuid) throws APIMgtDAOException {
         try {
@@ -1107,12 +1056,6 @@ public class PolicyDAOImpl implements PolicyDAO {
         }
     }
 
-    /**
-     * Retrieve an API Policy
-     *
-     * @return {@link APIPolicy} instance
-     * @throws APIMgtDAOException if an error occurs when retrieving Subscription Policy
-     */
     @Override
     public List<APIPolicy> getApiPolicies() throws APIMgtDAOException {
         try {
@@ -1132,7 +1075,8 @@ public class PolicyDAOImpl implements PolicyDAO {
      * @return {@link SubscriptionPolicy}
      */
     private SubscriptionPolicy getSubscriptionPolicyById(String uuid) throws SQLException, APIMgtDAOException {
-        final String query = "SELECT * FROM AM_SUBSCRIPTION_POLICY WHERE UUID = ?";
+        final String query = "SELECT NAME, QUOTA_TYPE, TIME_UNIT, UNIT_TIME, QUOTA, QUOTA_UNIT, DESCRIPTION, "
+                + "DISPLAY_NAME, CUSTOM_ATTRIBUTES, IS_DEPLOYED FROM AM_SUBSCRIPTION_POLICY WHERE UUID = ?";
         try (Connection conn = DAOUtil.getConnection();
                 PreparedStatement statement = conn.prepareStatement(query)) {
             statement.setString(1, uuid);
@@ -1157,9 +1101,10 @@ public class PolicyDAOImpl implements PolicyDAO {
      * @param rs {@link ResultSet} instance
      * @return {@link SubscriptionPolicy} instance
      * @throws SQLException if any error occurs while creating the Subscription Policy from the result set
+     * @throws APIMgtDAOException if any error occurs while retrieving custom attributes for this Subscription Policy
      */
-    private SubscriptionPolicy createSubscriptionPolicyFromResultSet (String identifier, ResultSet rs) throws
-            SQLException {
+    private SubscriptionPolicy createSubscriptionPolicyFromResultSet (String identifier, ResultSet rs)
+            throws SQLException, APIMgtDAOException {
 
         SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(rs.getString(APIMgtConstants.
                 ThrottlePolicyConstants.COLUMN_NAME));
@@ -1174,8 +1119,10 @@ public class PolicyDAOImpl implements PolicyDAO {
                     subscriptionPolicy.setCustomAttributes(customAttrib);
                 }
             } catch (IOException e) {
-                log.error("An Error occurred while retrieving custom attributes for subscription policy with "
-                        + "identifier: " + identifier , e);
+                String errorMsg = "An Error occurred while retrieving custom attributes for subscription policy with "
+                        + "identifier: " + identifier;
+                log.error(errorMsg, e);
+                throw new APIMgtDAOException(errorMsg, e);
             }
         }
         return subscriptionPolicy;
@@ -1224,9 +1171,6 @@ public class PolicyDAOImpl implements PolicyDAO {
         }
     }
 
-    /**
-     * @see PolicyDAO#getLastUpdatedTimeOfThrottlingPolicy(APIMgtAdminService.PolicyLevel, String)
-     */
     @Override
     public String getLastUpdatedTimeOfThrottlingPolicy(APIMgtAdminService.PolicyLevel policyLevel, String policyName)
             throws APIMgtDAOException {
@@ -1433,7 +1377,8 @@ public class PolicyDAOImpl implements PolicyDAO {
                         + "QUOTA_UNIT) VALUES (?,?,?,?,?,?,?)";
         String dbProductName = connection.getMetaData().getDatabaseProductName();
         try (PreparedStatement statement = connection.prepareStatement(query, new String[]{DAOUtil
-                .getConvertedAutoGeneratedColumnName(dbProductName, "CONDITION_GROUP_ID")})) {
+                .getConvertedAutoGeneratedColumnName(dbProductName,
+                APIMgtConstants.ThrottlePolicyConstants.COLUMN_CONDITION_GROUP_ID)})) {
             for (Pipeline pipeline : pipelines) {
                 statement.setString(1, uuid);
                 statement.setString(2, pipeline.getQuotaPolicy().getType());
@@ -1449,7 +1394,6 @@ public class PolicyDAOImpl implements PolicyDAO {
                     int conditionId = rs.getInt(1);
                     List<Condition> conditionList = pipeline.getConditions();
                     for (Condition condition : conditionList) {
-                        condition.populateDataInPreparedStatement(statement);
                         if (PolicyConstants.IP_CONDITION_TYPE.equals(condition.getType()) ||
                                 PolicyConstants.IP_SPECIFIC_TYPE.equals(condition.getType()) ||
                                 PolicyConstants.IP_RANGE_TYPE.equals(condition.getType())) {
@@ -1793,7 +1737,7 @@ public class PolicyDAOImpl implements PolicyDAO {
      */
     private void updateAPIPolicy(APIPolicy policy, Connection connection) throws SQLException, APIMgtDAOException {
 
-        String queryFindPolicyName = "SELECT * from AM_API_POLICY WHERE UUID = ?";
+        String queryFindPolicyName = "SELECT NAME from AM_API_POLICY WHERE UUID = ?";
 
         if (policy.getUuid() == null || policy.getUuid().isEmpty()) {
             String errorMsg = "Policy uuid is not found, unable to update policy: " + policy.getPolicyName();

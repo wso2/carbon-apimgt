@@ -53,9 +53,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         this.applicationDAO = applicationDAO;
     }
 
-    /**
-     * @see APIMgtAdminService#getPoliciesByLevel(PolicyLevel)
-     */
     @Override
     public List<Policy> getPoliciesByLevel(PolicyLevel policyLevel) throws APIManagementException {
         try {
@@ -68,9 +65,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
     }
 
-    /**
-     * @see APIMgtAdminService#getPolicyByLevelAndName(PolicyLevel, String)
-     */
     @Override
     public Policy getPolicyByLevelAndName(PolicyLevel policyLevel, String policyName) throws APIManagementException {
         try {
@@ -84,31 +78,26 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
     }
 
-    /**
-     * @see APIMgtAdminService#getAPISubscriptions(int)
-     */
     @Override
     public List<SubscriptionValidationData> getAPISubscriptions(int limit) throws APIManagementException {
         return apiSubscriptionDAO.getAPISubscriptionsOfAPIForValidation(limit);
     }
 
-    /**
-     * @see APIMgtAdminService#getAPISubscriptionsOfApi(String, String)
-     */
     @Override
     public List<SubscriptionValidationData> getAPISubscriptionsOfApi(String apiContext, String apiVersion)
             throws APIManagementException {
         return apiSubscriptionDAO.getAPISubscriptionsOfAPIForValidation(apiContext, apiVersion);
     }
 
-    /**
-     * @see APIMgtAdminService#addApiPolicy(APIPolicy)
-     */
     @Override
     public String addApiPolicy(APIPolicy policy) throws APIManagementException {
         try {
             String policyUuid = policy.getUuid();
             if (policyUuid == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Policy id is null, hence generating a new UUID for the policy with name: " + policy
+                            .getPolicyName());
+                }
                 policyUuid = UUID.randomUUID().toString();
                 policy.setUuid(policyUuid);
             }
@@ -122,14 +111,15 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
     }
 
-    /**
-     * @see APIMgtAdminService#addApplicationPolicy(ApplicationPolicy)
-     */
     @Override
     public String addApplicationPolicy(ApplicationPolicy policy) throws APIManagementException {
         try {
             String policyUuid = policy.getUuid();
             if (policyUuid == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Policy id is null, hence generating a new UUID for the policy with name: " + policy
+                            .getPolicyName());
+                }
                 policyUuid = UUID.randomUUID().toString();
                 policy.setUuid(policyUuid);
             }
@@ -143,14 +133,15 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
     }
 
-    /**
-     * @see APIMgtAdminService#addSubscriptionPolicy(SubscriptionPolicy)
-     */
     @Override
     public String addSubscriptionPolicy(SubscriptionPolicy policy) throws APIManagementException {
         try {
             String policyUuid = policy.getUuid();
             if (policyUuid == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Policy id is null, hence generating a new UUID for the policy with name: " + policy
+                            .getPolicyName());
+                }
                 policyUuid = UUID.randomUUID().toString();
                 policy.setUuid(policyUuid);
             }
@@ -164,9 +155,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
     }
 
-    /**
-     * @see APIMgtAdminService#updateApiPolicy(APIPolicy)
-     */
     @Override
     public void updateApiPolicy(APIPolicy policy) throws APIManagementException {
         try {
@@ -179,9 +167,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
     }
 
-    /**
-     * @see APIMgtAdminService#updateSubscriptionPolicy(SubscriptionPolicy)
-     */
     @Override
     public void updateSubscriptionPolicy(SubscriptionPolicy policy) throws APIManagementException {
         try {
@@ -194,9 +179,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
     }
 
-    /**
-     * @see APIMgtAdminService#updateApplicationPolicy(ApplicationPolicy)
-     */
     @Override
     public void updateApplicationPolicy(ApplicationPolicy policy) throws APIManagementException {
         try {
@@ -209,9 +191,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
     }
 
-    /**
-     * @see APIMgtAdminService#deletePolicy(String, PolicyLevel)
-     */
     @Override
     public void deletePolicy(String policyName, PolicyLevel policyLevel) throws APIManagementException {
         try {
@@ -225,9 +204,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
     }
 
-    /**
-     * @see APIMgtAdminService#deletePolicyByUuid(String, PolicyLevel)
-     */
     @Override
     public void deletePolicyByUuid(String uuid, PolicyLevel policyLevel) throws APIManagementException {
         try {
@@ -240,9 +216,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
     }
 
-    /**
-     * @see APIMgtAdminService#getApiPolicy(String)
-     */
     @Override
     public APIPolicy getApiPolicy(String policyName) throws APIManagementException {
 
@@ -256,9 +229,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
     }
 
-    /**
-     * @see APIMgtAdminService#getSubscriptionPolicy(String)
-     */
     @Override
     public SubscriptionPolicy getSubscriptionPolicy(String policyName) throws APIManagementException {
 
@@ -272,9 +242,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
     }
 
-    /**
-     * @see APIMgtAdminService#getApplicationPolicy(String)
-     */
     @Override
     public ApplicationPolicy getApplicationPolicy(String policyName) throws APIManagementException {
 
@@ -288,9 +255,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
     }
 
-    /**
-     * @see APIMgtAdminService#getApiPolicyByUuid(String)
-     */
     @Override
     public APIPolicy getApiPolicyByUuid(String uuid) throws APIManagementException {
         try {
@@ -303,9 +267,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
     }
 
-    /**
-     * @see APIMgtAdminService#getApplicationPolicyByUuid(String)
-     */
     @Override
     public ApplicationPolicy getApplicationPolicyByUuid(String uuid) throws APIManagementException {
         try {
@@ -319,9 +280,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
 
     }
 
-    /**
-     * @see APIMgtAdminService#getSubscriptionPolicyByUuid(String)
-     */
     @Override
     public SubscriptionPolicy getSubscriptionPolicyByUuid(String uuid) throws APIManagementException {
         try {
@@ -334,9 +292,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
     }
 
-    /**
-     * @see APIMgtAdminService#getApiPolicies()
-     */
     @Override
     public List<APIPolicy> getApiPolicies() throws APIManagementException {
         try {
@@ -348,9 +303,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
     }
 
-    /**
-     * @see APIMgtAdminService#getApplicationPolicies()
-     */
     @Override
     public List<ApplicationPolicy> getApplicationPolicies() throws APIManagementException {
         try {
@@ -362,9 +314,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
     }
 
-    /**
-     * @see APIMgtAdminService#getSubscriptionPolicies()
-     */
     @Override
     public List<SubscriptionPolicy> getSubscriptionPolicies() throws APIManagementException {
         try {
@@ -376,9 +325,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
     }
 
-    /**
-     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#deleteLabel(String)
-     */
     @Override
     public void deleteLabel(String labelId) throws APIManagementException {
 
@@ -391,9 +337,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
     }
 
-    /**
-     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#registerGatewayLabels(List, String)
-     */
     @Override
     public void registerGatewayLabels(List<Label> labels, String overwriteLabels) throws APIManagementException {
 
@@ -433,9 +376,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
 
     }
 
-    /**
-     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#getAPIGatewayServiceConfig(String) (String)
-     */
     @Override
     public String getAPIGatewayServiceConfig(String apiId) throws APIConfigRetrievalException {
         try {
@@ -447,9 +387,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
     }
 
-    /**
-     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#getAllResourcesForApi(String, String)
-     */
     @Override
     public List<UriTemplate> getAllResourcesForApi(String apiContext, String apiVersion) throws APIManagementException {
         try {
