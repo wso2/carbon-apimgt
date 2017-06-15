@@ -29,7 +29,7 @@ function authenticate (message m) (boolean, message) {
     string apiKey = apiContext + ":" + version;
     dto:APIDTO apiDto = holder:getFromAPICache(apiKey);
 
-    if (apiDto != null) {
+    if (apiDto.name != "") {
         if (constants:MAINTENANCE == apiDto.lifeCycleStatus) {
             gatewayUtil:constructAPIIsInMaintenance(response);
             return false, response;

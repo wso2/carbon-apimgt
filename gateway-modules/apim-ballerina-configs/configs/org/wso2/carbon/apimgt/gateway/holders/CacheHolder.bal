@@ -29,7 +29,7 @@ function getFromSubscriptionCache (string apiContext, string version, string con
     }
 }
 function putIntoSubscriptionCache (dto:SubscriptionDto subscriptionDto) {
-    string key = subscriptionDto.apiContext + ":" + subscriptionDto.apiVersion + ":" + subscriptionDto.consumerKey;
+    string key = "/" + subscriptionDto.apiContext + ":" + subscriptionDto.apiVersion + ":" + subscriptionDto.consumerKey;
     caching:putCacheEntry(constants:SUBSCRIPTION_CACHE,key,subscriptionDto);
 }
 function getFromResourceCache (string apiContext, string apiVersion, string resourceUri, string httpVerb) (dto:ResourceDto){
@@ -49,7 +49,7 @@ function getFromResourceCache (string apiContext, string apiVersion, string reso
 }
 function putIntoResourceCache (string apiContext, string apiVersion, dto:ResourceDto resourceDto) {
     string internalKey = resourceDto.uriTemplate + ":" + resourceDto.httpVerb;
-    string key = apiContext + ":" + apiVersion;
+    string key = "/" + apiContext + ":" + apiVersion;
     map resourceMap = {};
     any resourceMapEntry = caching:getCacheEntry(constants:RESOURCE_CACHE,key);
     if (resourceMapEntry != null) {
@@ -63,7 +63,7 @@ function removeFromTokenCache (string key) {
     caching:removeCacheEntry(constants:TOKEN_CACHE,key);
 }
 function putIntoAPICache (dto:APIDTO apidto) {
-    string key = apidto.context + ":" + apidto.version;
+    string key = "/" + apidto.context + ":" + apidto.version;
     caching:putCacheEntry(constants:API_CACHE,key,apidto);
 }
 function removeFromAPICache (dto:APIDTO apidto) {
