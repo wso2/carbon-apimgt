@@ -420,7 +420,7 @@ public class PolicyDAOImpl implements PolicyDAO {
      */
     private APIPolicy getAPIPolicy(String policyName) throws APIMgtDAOException, SQLException {
         APIPolicy policy;
-        String sqlQuery = "SELECT UUID, DEFAULT_QUOTA_TYPE, DEFAULT_TIME_UNIT, DEFAULT_UNIT_TIME, DEFAULT_QUOTA, "
+        String sqlQuery = "SELECT UUID, NAME, DEFAULT_QUOTA_TYPE, DEFAULT_TIME_UNIT, DEFAULT_UNIT_TIME, DEFAULT_QUOTA, "
                 + "DEFAULT_QUOTA_UNIT, DESCRIPTION, DISPLAY_NAME, IS_DEPLOYED, APPLICABLE_LEVEL "
                 + "from AM_API_POLICY WHERE NAME = ?";
 
@@ -648,7 +648,7 @@ public class PolicyDAOImpl implements PolicyDAO {
         try {
             return getApplicationPolicyByName(policyName);
         } catch (SQLException e) {
-            String errorMsg = "Error in retrieving Subscription policy with name: " + policyName;
+            String errorMsg = "Error in retrieving Application policy with name: " + policyName;
             log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e);
         }
@@ -744,7 +744,7 @@ public class PolicyDAOImpl implements PolicyDAO {
      */
     private ApplicationPolicy getApplicationPolicyByName(String policyName) throws SQLException, APIMgtDAOException {
         ApplicationPolicy policy;
-        String sqlQuery = "SELECT UUID, QUOTA_TYPE, TIME_UNIT, UNIT_TIME, QUOTA, QUOTA_UNIT, DESCRIPTION, "
+        String sqlQuery = "SELECT UUID, NAME, QUOTA_TYPE, TIME_UNIT, UNIT_TIME, QUOTA, QUOTA_UNIT, DESCRIPTION, "
                 + "DISPLAY_NAME, IS_DEPLOYED from AM_APPLICATION_POLICY WHERE NAME = ?";
 
         try (Connection connection = DAOUtil.getConnection();
@@ -1026,7 +1026,7 @@ public class PolicyDAOImpl implements PolicyDAO {
      * @throws SQLException if an error occurs while retrieving the policy
      */
     private SubscriptionPolicy getSubscriptionPolicyByName(String policyName) throws SQLException, APIMgtDAOException {
-        final String query = "SELECT UUID, QUOTA_TYPE, TIME_UNIT, UNIT_TIME, QUOTA, QUOTA_UNIT, DESCRIPTION, "
+        final String query = "SELECT UUID, NAME, QUOTA_TYPE, TIME_UNIT, UNIT_TIME, QUOTA, QUOTA_UNIT, DESCRIPTION, "
                 + "DISPLAY_NAME, CUSTOM_ATTRIBUTES, IS_DEPLOYED FROM AM_SUBSCRIPTION_POLICY WHERE NAME = ?";
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement statement = conn.prepareStatement(query)) {
