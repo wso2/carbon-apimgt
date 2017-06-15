@@ -26,10 +26,12 @@ public class AuthResponseBean {
 
     private boolean isTokenValid;
     private String type;
-    private String[] scopes;
+    private String scopes;
     private long validityPeriod;
     private String createdDate;
     private String authUser;
+    private String idToken;
+    private String partialToken;
 
     public boolean isTokenValid() {
         return isTokenValid;
@@ -77,6 +79,14 @@ public class AuthResponseBean {
 
     public void setAuthUser(String authUser) {
         this.authUser = authUser;
+    }
+
+    public String getIdToken() {
+        return idToken;
+    }
+
+    public void setIdToken(String idToken) {
+        this.idToken = idToken;
     }
 
     public String getPartialToken() {
