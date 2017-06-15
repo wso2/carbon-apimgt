@@ -205,6 +205,7 @@ public class MappingUtil {
     private static AnalyticsInfoDTO toAnalyticsDTO(RegistrationSummary registrationSummary) {
         AnalyticsInfoDTO analyticsInfoDTO = new AnalyticsInfoDTO();
         analyticsInfoDTO.serverURL(registrationSummary.getAnalyticsInfo().getDasServerURL());
+        analyticsInfoDTO.setEnabled(registrationSummary.getAnalyticsInfo().isEnabled());
         CredentialsDTO analyticsServerCredentials = new CredentialsDTO();
         analyticsServerCredentials.setUsername(registrationSummary.getAnalyticsInfo().getDasServerCredentials()
                 .getUsername());
