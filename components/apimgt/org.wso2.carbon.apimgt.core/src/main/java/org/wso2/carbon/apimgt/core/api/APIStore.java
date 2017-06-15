@@ -272,7 +272,7 @@ public interface APIStore extends APIManager {
      * @return  List of policies for the given tier level.
      * @throws APIManagementException   If failed to get policies.
      */
-    List<Policy> getPolicies(String tierLevel) throws APIManagementException;
+    List<Policy> getPolicies(APIMgtAdminService.PolicyLevel tierLevel) throws APIManagementException;
 
     /**
      * Retrieve all policies of given tier level.
@@ -281,7 +281,7 @@ public interface APIStore extends APIManager {
      * @return  Policy object.
      * @throws APIManagementException   If failed to get the policy.
      */
-    Policy getPolicy(String tierLevel, String tierName) throws APIManagementException;
+    Policy getPolicy(APIMgtAdminService.PolicyLevel tierLevel, String tierName) throws APIManagementException;
 
     /**
      * Retrieve Label information based on the label name

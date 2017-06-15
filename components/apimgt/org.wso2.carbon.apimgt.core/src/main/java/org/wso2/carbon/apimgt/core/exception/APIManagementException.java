@@ -48,6 +48,7 @@ public class APIManagementException extends Exception {
      */
     public APIManagementException(Throwable cause) {
         super(cause);
+        this.errorHandler = ExceptionCodes.INTERNAL_ERROR;
     }
 
     /**

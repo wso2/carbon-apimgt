@@ -27,7 +27,10 @@ import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.RegistrationSummary;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
+import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
+import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 
 import java.util.List;
 
@@ -35,6 +38,26 @@ import java.util.List;
  * This interface used to have API core services
  */
 public interface APIMgtAdminService {
+
+    /**
+     * Gets all Policies by level
+     *
+     * @param policyLevel policy level
+     * @return list of {@link Policy} instance
+     * @throws APIManagementException If failed to get the Policies
+     */
+    List<Policy> getPoliciesByLevel(APIMgtAdminService.PolicyLevel policyLevel) throws APIManagementException;
+
+    /**
+     * Gets all Policies by level and name
+     *
+     * @param policyLevel policy level
+     * @param policyName Policy Name
+     * @return {@link Policy} instance
+     * @throws APIManagementException If failed to get the Policies
+     */
+    Policy getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel policyLevel, String policyName)
+            throws APIManagementException;
 
     /**
      * Return all API subscriptions
@@ -57,69 +80,151 @@ public interface APIMgtAdminService {
             throws APIManagementException;
 
     /**
-     * Adds new @{@link Policy} to the system
+     * Adds new {@link APIPolicy} to the system
      *
-     * @param policyLevel Tier level of the policy.
      * @param policy      Policy object to be added.
+     * @return created policy uuid
      * @throws APIManagementException If failed to add the policy.
      */
-    void addPolicy(String policyLevel, Policy policy) throws APIManagementException;
+    String addApiPolicy(APIPolicy policy) throws APIManagementException;
 
     /**
-     * Updates existing @{@link Policy} to the system
+     * Adds new {@link ApplicationPolicy} to the system
      *
-     * @param policy Policy object to be updated.
+     * @param policy      Policy object to be added.
+     * @return created policy uuid
+     * @throws APIManagementException If failed to add the policy.
+     */
+    String addApplicationPolicy(ApplicationPolicy policy) throws APIManagementException;
+
+    /**
+     * Adds new {@link SubscriptionPolicy} to the system
+     *
+     * @param policy      Policy object to be added.
+     * @return created policy uuid
+     * @throws APIManagementException If failed to add the policy.
+     */
+    String addSubscriptionPolicy(SubscriptionPolicy policy) throws APIManagementException;
+
+    /**
+     * Updates a {@link APIPolicy} instance
+     *
+     * @param policy      Policy object to be updated.
      * @throws APIManagementException If failed to update the policy.
      */
-    void updatePolicy(Policy policy) throws APIManagementException;
+    void updateApiPolicy(APIPolicy policy) throws APIManagementException;
 
     /**
-     * Delete existing @{@link Policy} in the system
+     * Updates a {@link SubscriptionPolicy} instance
+     *
+     * @param policy      Policy object to be updated.
+     * @throws APIManagementException If failed to update the policy.
+     */
+    void updateSubscriptionPolicy(SubscriptionPolicy policy) throws APIManagementException;
+
+    /**
+     * Updates a {@link ApplicationPolicy} instance
+     *
+     * @param policy      Policy object to be updated.
+     * @throws APIManagementException If failed to update the policy.
+     */
+    void updateApplicationPolicy(ApplicationPolicy policy) throws APIManagementException;
+
+    /**
+     * Delete an existing Policy in the system
      *
      * @param policyName    Policy Name to be deleted.
      * @param policyLevel Policy Level to which above Policy belongs to
      * @throws APIManagementException   If failed to delete the policy.
      */
-    void deletePolicy(String policyName, String policyLevel) throws APIManagementException;
-
+    void deletePolicy(String policyName, APIMgtAdminService.PolicyLevel policyLevel) throws APIManagementException;
 
     /**
-     * Delete existing @{@link Policy} in the system
+     * Delete an existing Plicy in the system using the policy id
      *
      * @param uuid    Policy uuid to be deleted.
      * @param policyLevel Policy Level to which above Policy belongs to
      * @throws APIManagementException   If failed to delete the policy.
      */
-    void deletePolicyByUuid(String uuid, String policyLevel) throws APIManagementException;
+    void deletePolicyByUuid(String uuid, APIMgtAdminService.PolicyLevel policyLevel) throws APIManagementException;
 
     /**
-     * Get a @{@link Policy} by policy name
+     * Gets a {@link APIPolicy} by policy name
      *
-     * @param policyLevel Tier level of the policy.
      * @param policyName  Name of the policy
      * @return Policy object.
      * @throws APIManagementException If failed to get policy.
      */
-    Policy getPolicy(String policyLevel, String policyName) throws APIManagementException;
+    APIPolicy getApiPolicy(String policyName) throws APIManagementException;
 
     /**
-     * Get a @{@link Policy} by policy uuid
+     * Returns a {@link SubscriptionPolicy} by policy name
      *
-     * @param uuid Policy uuid
-     * @param policyLevel Tier level of the policy.
+     * @param policyName  Name of the policy                                                                        DAO
      * @return Policy object.
      * @throws APIManagementException If failed to get policy.
      */
-    Policy getPolicyByUuid(String uuid, String policyLevel) throws APIManagementException;
+    SubscriptionPolicy getSubscriptionPolicy(String policyName) throws APIManagementException;
 
     /**
-     * Get a List of policies of a particular level
+     * Returns a {@link ApplicationPolicy} by policy name
      *
-     * @param policyLevel Tier level of the policy.
-     * @return List of Policy objects of the given level.
+     * @param policyName  Name of the policy
+     * @return Policy object.
+     * @throws APIManagementException If failed to get policy.
+     */
+    ApplicationPolicy getApplicationPolicy(String policyName) throws APIManagementException;
+
+    /**
+     * Returns a {@link APIPolicy} by policy id
+     *
+     * @param uuid  id of the policy
+     * @return Policy object.
+     * @throws APIManagementException If failed to get policy.
+     */
+    APIPolicy getApiPolicyByUuid(String uuid) throws APIManagementException;
+
+    /**
+     * Returns a {@link ApplicationPolicy} by policy id
+     *
+     * @param uuid  id of the policy
+     * @return Policy object.
+     * @throws APIManagementException If failed to get policy.
+     */
+    ApplicationPolicy getApplicationPolicyByUuid(String uuid) throws APIManagementException;
+
+    /**
+     * Get a {@link SubscriptionPolicy} by policy id
+     *
+     * @param uuid  id of the policy
+     * @return Policy object.
+     * @throws APIManagementException If failed to get policy.
+     */
+    SubscriptionPolicy getSubscriptionPolicyByUuid(String uuid) throws APIManagementException;
+
+    /**
+     * Get a List of API policies
+     *
+     * @return List of {@link APIPolicy} instances
      * @throws APIManagementException If failed to get policies.
      */
-    List<Policy> getAllPoliciesByLevel(String policyLevel) throws APIManagementException;
+    List<APIPolicy> getApiPolicies() throws APIManagementException;
+
+    /**
+     * Get a List of API policies
+     *
+     * @return List of {@link ApplicationPolicy} instances
+     * @throws APIManagementException If failed to get policies.
+     */
+    List<ApplicationPolicy> getApplicationPolicies() throws APIManagementException;
+
+    /**
+     * Get a List of API policies
+     *
+     * @return List of {@link SubscriptionPolicy} instances
+     * @throws APIManagementException If failed to get policies.
+     */
+    List<SubscriptionPolicy> getSubscriptionPolicies() throws APIManagementException;
 
     /**
      * Delete existing label in the system by labelId
@@ -179,7 +284,7 @@ public interface APIMgtAdminService {
     /**
      * Retrieve API Gateway registration summary
      *
-     * @return  RegistrationSummary
+     * @return RegistrationSummary
      */
     RegistrationSummary getRegistrationSummary();
 
@@ -207,4 +312,13 @@ public interface APIMgtAdminService {
      * @throws APIManagementException If failed to get Endpoints configuration
      */
     String getEndpointGatewayConfig(String endpointId) throws APIManagementException;
+
+    /**
+     * Policy Level enum
+     */
+    enum PolicyLevel {
+        api,
+        application,
+        subscription
+    }
 }

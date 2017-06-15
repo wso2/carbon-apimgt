@@ -447,4 +447,21 @@ public class RestApiUtil {
         }
         return host;
     }
+
+    /**
+     * Util method for mapping from rest API policy level String to {@link APIMgtAdminService.PolicyLevel} enum
+     */
+    public static APIMgtAdminService.PolicyLevel mapRestApiPolicyLevelToPolicyLevelEnum (String level)
+            throws APIManagementException {
+        if (APIMgtAdminService.PolicyLevel.api.name().equals(level)) {
+            return APIMgtAdminService.PolicyLevel.api;
+        } else if (APIMgtAdminService.PolicyLevel.application.name().equals(level)) {
+            return APIMgtAdminService.PolicyLevel.application;
+        } else if (APIMgtAdminService.PolicyLevel.subscription.name().equals(level)) {
+            return APIMgtAdminService.PolicyLevel.subscription;
+        } else {
+            throw new APIManagementException("Policy Level " + level + " not supported",
+                    ExceptionCodes.POLICY_LEVEL_NOT_SUPPORTED);
+        }
+    }
 }
