@@ -6,6 +6,7 @@ import ballerina.lang.system;
 import ballerina.net.http;
 import org.wso2.carbon.apimgt.gateway.dto as dto;
 import org.wso2.carbon.apimgt.gateway.holders as holders;
+import ballerina.lang.strings;
 
 function constructAccessTokenNotFoundPayload (message response) {
     json payload = {"code":900902, "message":"accessToken invalid"};
@@ -113,6 +114,7 @@ function removeFromSubscriptionCache (json subscriptions) {
 }
 
 function retrieveResources (string apiContext, string apiVersion) {
+    apiContext = strings:replaceFirst(apiContext, "/", "");
     string query = "/api/am/core/v1.0/resources/?apiContext=" + apiContext + "&apiVersion=" + apiVersion;
     message request = {};
     http:ClientConnector apiInfoConnector = create http:ClientConnector(getAPICoreURL());
