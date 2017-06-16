@@ -117,11 +117,31 @@ public class ApiDAOImpl implements ApiDAO {
         this.sqlStatements = sqlStatements;
     }
 
+    @Override
+    public boolean isAPIExists(String apiID) throws APIMgtDAOException {
+        final String query = "SELECT 1 FROM AM_API WHERE UUID = ?";
+
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, apiID);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return true;
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new APIMgtDAOException("Database error while checking if API ID " + apiID + " exists", e);
+        }
+
+        return false;
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
-    @CheckForNull
     public API getAPI(String apiID) throws APIMgtDAOException {
         final String query = API_SELECT + " WHERE UUID = ? AND API_TYPE_ID = " +
                 "(SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)";
@@ -131,9 +151,15 @@ public class ApiDAOImpl implements ApiDAO {
             statement.setString(1, apiID);
             statement.setString(2, ApiType.STANDARD.toString());
 
-            return constructAPIFromResultSet(connection, statement);
+            API api = constructAPIFromResultSet(connection, statement);
+
+            if (api == null) {
+                throw new APIMgtDAOException("API with ID " + apiID + " does not exist", ExceptionCodes.API_NOT_FOUND);
+            }
+
+            return api;
         } catch (SQLException | IOException e) {
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException("Database error while getting API ID " + apiID, e);
         }
     }
 
@@ -141,7 +167,6 @@ public class ApiDAOImpl implements ApiDAO {
      * {@inheritDoc}
      */
     @Override
-    @CheckForNull
     public API getAPISummary(String apiID) throws APIMgtDAOException {
         final String query = API_SUMMARY_SELECT + " WHERE UUID = ? AND API_TYPE_ID = " +
                 "(SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)";
@@ -153,17 +178,16 @@ public class ApiDAOImpl implements ApiDAO {
 
             List<API> apiResults = constructAPISummaryList(connection, statement);
             if (apiResults.isEmpty()) {
-                return null;
+                throw new APIMgtDAOException("API with ID " + apiID + " does not exist", ExceptionCodes.API_NOT_FOUND);
             }
 
             return apiResults.get(0);
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException("Database error while getting API ID " + apiID, e);
         }
     }
 
     @Override
-    @CheckForNull
     public CompositeAPI getCompositeAPISummary(String apiID) throws APIMgtDAOException {
         final String query = COMPOSITE_API_SUMMARY_SELECT + " WHERE UUID = ? AND API_TYPE_ID = " +
                 "(SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)";
@@ -175,13 +199,13 @@ public class ApiDAOImpl implements ApiDAO {
 
             List<CompositeAPI> apiResults = getCompositeAPISummaryList(connection, statement);
             if (apiResults.isEmpty()) {
-                return null;
+                throw new APIMgtDAOException("API with ID " + apiID + " does not exist", ExceptionCodes.API_NOT_FOUND);
             }
 
             // there should be only 1 result from the database
             return apiResults.get(0);
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException("Database error while getting Composite API ID " + apiID, e);
         }
     }
 
@@ -196,9 +220,16 @@ public class ApiDAOImpl implements ApiDAO {
             statement.setString(1, apiID);
             statement.setString(2, ApiType.COMPOSITE.toString());
 
-            return getCompositeAPIFromResultSet(connection, statement);
+            CompositeAPI api = getCompositeAPIFromResultSet(connection, statement);
+
+            if (api == null) {
+                throw new APIMgtDAOException("Composite API ID " + apiID + " does not exist",
+                                                                        ExceptionCodes.API_NOT_FOUND);
+            }
+
+            return api;
         } catch (SQLException | IOException e) {
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException("Database error while getting Composite API ID " + apiID, e);
         }
     }
 
@@ -206,23 +237,34 @@ public class ApiDAOImpl implements ApiDAO {
      * @see ApiDAO#getLastUpdatedTimeOfAPI(java.lang.String)
      */
     @Override
-    @CheckForNull
     public String getLastUpdatedTimeOfAPI(String apiId) throws APIMgtDAOException {
-        return EntityDAO.getLastUpdatedTimeOfResourceByUUID(AM_API_TABLE_NAME, apiId);
+        String lastUpdatedTime = EntityDAO.getLastUpdatedTimeOfResourceByUUID(AM_API_TABLE_NAME, apiId);
+
+        if (lastUpdatedTime == null) {
+            throw new APIMgtDAOException("API with ID " + apiId + " does not exist", ExceptionCodes.API_NOT_FOUND);
+        }
+
+        return lastUpdatedTime;
     }
 
     /**
      * @see ApiDAO#getLastUpdatedTimeOfSwaggerDefinition(String)
      */
     @Override
-    @CheckForNull
     public String getLastUpdatedTimeOfSwaggerDefinition(String apiId) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
-            return ApiResourceDAO.getAPIUniqueResourceLastUpdatedTime(connection, apiId, ResourceCategory.SWAGGER);
+            String lastUpdatedTime = ApiResourceDAO.getAPIUniqueResourceLastUpdatedTime(connection, apiId,
+                                        ResourceCategory.SWAGGER);
+
+            if (lastUpdatedTime == null) {
+                throw new APIMgtDAOException("Swagger Definition of API with ID " + apiId + " does not exist",
+                        ExceptionCodes.SWAGGER_NOT_FOUND);
+            }
+
+            return lastUpdatedTime;
         } catch (SQLException e) {
-            String errorMessage = "Error while retrieving last updated time of swagger definition. API ID: " + apiId;
-            log.error(errorMessage, e);
-            throw new APIMgtDAOException(errorMessage, e);
+            String error = "Database error while getting last updated time of swagger definition. API ID: " + apiId;
+            throw new APIMgtDAOException(error, e);
         }
     }
 
@@ -233,8 +275,15 @@ public class ApiDAOImpl implements ApiDAO {
     @CheckForNull
     public String getLastUpdatedTimeOfGatewayConfig(String apiId) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
-            return ApiResourceDAO
+            String lastUpdatedTime = ApiResourceDAO
                     .getAPIUniqueResourceLastUpdatedTime(connection, apiId, ResourceCategory.GATEWAY_CONFIG);
+
+            if (lastUpdatedTime == null) {
+                throw new APIMgtDAOException("API Definition of API with ID " + apiId + " does not exist",
+                        ExceptionCodes.API_DEFINITION_NOT_FOUND);
+            }
+
+            return lastUpdatedTime;
         } catch (SQLException e) {
             String errorMessage = "Error while retrieving last updated time of gateway config. API ID: " + apiId;
             log.error(errorMessage, e);
@@ -269,7 +318,7 @@ public class ApiDAOImpl implements ApiDAO {
             statement.setString(++index, user);
             return constructAPISummaryList(connection, statement);
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException("Database error while getting APIs", e);
         }
     }
 
@@ -290,7 +339,7 @@ public class ApiDAOImpl implements ApiDAO {
 
             return getCompositeAPISummaryList(connection, statement);
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException("Database error while getting Composite APIs", e);
         }
     }
 
@@ -581,7 +630,8 @@ public class ApiDAOImpl implements ApiDAO {
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                throw new APIMgtDAOException(e);
+                throw new APIMgtDAOException("Failed to add API: " + api.getProvider() + "-" +
+                        api.getName() + "-" + api.getVersion(), e);
             } finally {
                 connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
@@ -880,7 +930,14 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     public String getApiSwaggerDefinition(String apiID) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
-            return getAPIDefinition(connection, apiID);
+            String apiDefinition = getAPIDefinition(connection, apiID);
+
+            if (apiDefinition == null) {
+                throw new APIMgtDAOException("Swagger Definition of API with ID " + apiID + " does not exist",
+                        ExceptionCodes.SWAGGER_NOT_FOUND);
+            }
+
+            return apiDefinition;
         } catch (SQLException | IOException e) {
             throw new APIMgtDAOException(e);
         }
@@ -892,6 +949,10 @@ public class ApiDAOImpl implements ApiDAO {
             InputStream apiDefinition = ApiResourceDAO.getBinaryValueForCategory(connection, apiID,
                     ResourceCategory.SWAGGER, ApiType.COMPOSITE);
 
+            if (apiDefinition == null) {
+                throw new APIMgtDAOException("Composite Swagger Definition of API with ID " + apiID + " does not exist",
+                        ExceptionCodes.SWAGGER_NOT_FOUND);
+            }
             return IOUtils.toString(apiDefinition, StandardCharsets.UTF_8);
         } catch (SQLException | IOException e) {
             throw new APIMgtDAOException(e);
@@ -1050,7 +1111,14 @@ public class ApiDAOImpl implements ApiDAO {
      */
     public String getGatewayConfigOfAPI(String apiID) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
-            return getGatewayConfig(connection, apiID);
+            String gatewayConfig = getGatewayConfig(connection, apiID);
+
+            if (gatewayConfig == null) {
+                throw new APIMgtDAOException("Gateway config of API with ID " + apiID + " does not exist",
+                        ExceptionCodes.API_DEFINITION_NOT_FOUND);
+            }
+
+            return gatewayConfig;
         } catch (SQLException | IOException e) {
             throw new APIMgtDAOException(e);
         }
@@ -1059,8 +1127,15 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     public InputStream getCompositeAPIGatewayConfig(String apiID) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
-            return ApiResourceDAO
+            InputStream gatewayConfig = ApiResourceDAO
                     .getBinaryValueForCategory(connection, apiID, ResourceCategory.GATEWAY_CONFIG, ApiType.COMPOSITE);
+
+            if (gatewayConfig == null) {
+                throw new APIMgtDAOException("Gateway config of Composite API with ID " + apiID + " does not exist",
+                        ExceptionCodes.API_DEFINITION_NOT_FOUND);
+            }
+
+            return gatewayConfig;
         } catch (SQLException | IOException e) {
             throw new APIMgtDAOException(e);
         }
@@ -1912,7 +1987,7 @@ public class ApiDAOImpl implements ApiDAO {
     private API constructAPIFromResultSet(Connection connection, PreparedStatement statement) throws SQLException,
             IOException {
         try (ResultSet rs = statement.executeQuery()) {
-            while (rs.next()) {
+            if (rs.next()) {
                 BusinessInformation businessInformation = new BusinessInformation();
                 businessInformation.setTechnicalOwner(rs.getString("TECHNICAL_OWNER"));
                 businessInformation.setTechnicalOwnerEmail(rs.getString("TECHNICAL_EMAIL"));

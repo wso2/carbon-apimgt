@@ -1451,15 +1451,19 @@ public class APIPublisherImplTestCase {
         Assert.assertNotEquals(uuid, newUUid);
     }
 
-    @Test(description = "Create new  API version with invalid APIID",
-            expectedExceptions = APIMgtResourceNotFoundException.class)
+    @Test(description = "Create new  API version with invalid APIID")
     public void testCreateNewAPIVersionWithInvalidUUID() throws APIManagementException, LifecycleException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gateway);
-        Mockito.when(apiDAO.getAPI("xxxxxx")).thenReturn(null);
-        apiPublisher.createNewAPIVersion("xxxxxx", "2.0.0");
+        Mockito.when(apiDAO.getAPI("xxxxxx")).thenThrow(new APIMgtDAOException("API with ID does not exist",
+                ExceptionCodes.API_NOT_FOUND));
+        try {
+            apiPublisher.createNewAPIVersion("xxxxxx", "2.0.0");
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getErrorHandler(), ExceptionCodes.API_NOT_FOUND);
+        }
     }
 
     @Test(description = "Create new  API version with empty APIID")
