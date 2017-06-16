@@ -732,12 +732,16 @@ public class ApisApiServiceImpl extends ApisApiService {
         permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
         Map<String, Integer> permissionMap = api.getPermissionMap();
 
-        if (!permissionMap.isEmpty()) {  //&& !loggedInUserName.equals("admin")  ---- Put thisconditionhereaftertesting
-            String userName = "tharika";
-            String userId = idp.getIdOfUser(userName);
+        if (!permissionMap.isEmpty()) { //&& !"admin".equals(loggedInUserName)
+            String username = "tharika";
+            String userId = idp.getIdOfUser(username);
             List<String> loggedInUserRoles = idp.getRoleIdsOfUser(userId);
             List<String> permissionRoleList = getRolesFromPermissionMap(permissionMap);
             List<String> rolesOfUserWithAPIPermissions = null;
+            //To prevent a possible null pointer exception
+            if (loggedInUserRoles == null) {
+                loggedInUserRoles = new ArrayList<>();
+            }
             //get the intersection - retainAll() transforms first set to the result of intersection
             loggedInUserRoles.retainAll(permissionRoleList);
             if (!loggedInUserRoles.isEmpty()) {
