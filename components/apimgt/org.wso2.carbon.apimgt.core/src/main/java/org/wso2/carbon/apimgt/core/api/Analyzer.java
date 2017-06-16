@@ -15,5 +15,16 @@
 */
 package org.wso2.carbon.apimgt.core.api;
 
-public interface Analyyzer {
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
+
+import java.util.List;
+
+/**
+ * Interface for analytics specific methods
+ */
+public interface Analyzer {
+
+    List<ApplicationCount> getApplicationCount(String createdBy, String subscribedTo, String fromTime, String toTime)
+            throws APIManagementException;
 }

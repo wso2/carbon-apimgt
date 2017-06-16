@@ -1421,7 +1421,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 application.setPermissionMap(roleNamePermissionList);
             }
 
-            application.setCreatedTime(LocalDateTime.now());
             getApplicationDAO().addApplication(application);
 
             WorkflowExecutor appCreationWFExecutor = WorkflowExecutorFactory.getInstance()

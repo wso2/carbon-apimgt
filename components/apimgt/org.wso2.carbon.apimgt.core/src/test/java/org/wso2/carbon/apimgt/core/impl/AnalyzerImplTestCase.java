@@ -15,5 +15,45 @@
 */
 package org.wso2.carbon.apimgt.core.impl;
 
+import org.mockito.Mockito;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+import org.wso2.carbon.apimgt.core.api.Analyzer;
+import org.wso2.carbon.apimgt.core.dao.AnalyticsDAO;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 public class AnalyzerImplTestCase {
+
+    private static final String USER_NAME = "john";
+    private static final String FROM_TIMESTAMP = "2017-06-30 2:32:41.972";
+    private static final String TO_TIMESTAMP = "2017-07-30 2:32:41.972";
+
+    @Test(description = "get application count test")
+    public void testGetApplicationCount()
+            throws APIManagementException {
+        AnalyticsDAO analyticsDAO = Mockito.mock(AnalyticsDAO.class);
+        ApplicationCount applicationCount1 = new ApplicationCount();
+        ApplicationCount applicationCount2 = new ApplicationCount();
+        List<ApplicationCount> dummyApplicationCountList = new ArrayList<>();
+        dummyApplicationCountList.add(applicationCount1);
+        dummyApplicationCountList.add(applicationCount2);
+        Analyzer analyzer = getAnalyzerImpl(analyticsDAO);
+        when(analyticsDAO.getApplicationCount(USER_NAME, null, FROM_TIMESTAMP, TO_TIMESTAMP))
+                .thenReturn(dummyApplicationCountList);
+        List<ApplicationCount> applicationCountListFromDB = analyzer
+                .getApplicationCount(USER_NAME, null, FROM_TIMESTAMP, TO_TIMESTAMP);
+        Assert.assertNotNull(applicationCountListFromDB);
+        verify(analyticsDAO, Mockito.times(1)).getApplicationCount(USER_NAME, null, FROM_TIMESTAMP, TO_TIMESTAMP);
+    }
+
+    private AnalyzerImpl getAnalyzerImpl(AnalyticsDAO analyticsDAO) {
+        return new AnalyzerImpl("john", analyticsDAO);
+    }
 }

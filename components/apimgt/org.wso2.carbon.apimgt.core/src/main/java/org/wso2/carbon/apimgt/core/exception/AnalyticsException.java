@@ -15,5 +15,16 @@
 */
 package org.wso2.carbon.apimgt.core.exception;
 
-public class AnalyticsrException {
+/**
+ *  Exception class for analytics related errors
+ */
+public class AnalyticsException extends APIManagementException {
+
+    public AnalyticsException(String msg, Throwable e, ExceptionCodes code) {
+        super(msg, e, code);
+    }
+
+    public AnalyticsException(String msg, ExceptionCodes code) {
+        super(msg, code);
+    }
 }

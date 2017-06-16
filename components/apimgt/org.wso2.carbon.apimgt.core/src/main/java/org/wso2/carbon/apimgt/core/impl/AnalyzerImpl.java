@@ -15,8 +15,50 @@
 */
 package org.wso2.carbon.apimgt.core.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.Analyzer;
+import org.wso2.carbon.apimgt.core.dao.AnalyticsDAO;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.AnalyticsException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
 
-public class AnalyzerImpl implements Analyzer{
+import java.util.List;
 
+/**
+ * Implementation class of Analyzer operations
+ */
+public class AnalyzerImpl implements Analyzer {
+
+    private static final Logger log = LoggerFactory.getLogger(AnalyzerImpl.class);
+
+    private String username;
+    private AnalyticsDAO analyticsDAO;
+
+    public AnalyzerImpl(String username, AnalyticsDAO analyticsDAO) {
+        this.username = username;
+        this.analyticsDAO = analyticsDAO;
+    }
+
+    public List<ApplicationCount> getApplicationCount(String createdBy, String subscribedTo, String fromTime,
+            String toTime) throws APIManagementException {
+        List<ApplicationCount> applicationCountList;
+        try {
+            applicationCountList = getAnalyticsDAO().getApplicationCount(createdBy, subscribedTo, fromTime, toTime);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while fetching application count information";
+            throw new AnalyticsException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return applicationCountList;
+    }
+
+    public AnalyticsDAO getAnalyticsDAO() {
+        return analyticsDAO;
+    }
+
+    public String getUsername() {
+        return username;
+    }
 }

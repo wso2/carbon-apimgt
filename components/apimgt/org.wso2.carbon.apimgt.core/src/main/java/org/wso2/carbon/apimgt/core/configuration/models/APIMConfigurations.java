@@ -77,6 +77,9 @@ public class APIMConfigurations {
     @Element(description = "rating upper limit")
     private int ratingMaxValue = 5;
 
+    @Element(description = "enable/disable analytics")
+    private boolean isAnalyticsEnabled = false;
+
     public String getHostname() {
         return hostname;
     }
@@ -143,5 +146,9 @@ public class APIMConfigurations {
 
     public int getCommentMaxLength() {
         return commentMaxLength;
+    }
+
+    public boolean isAnalyticsEnabled() {
+        return isAnalyticsEnabled;
     }
 }

@@ -492,7 +492,7 @@ public class SampleTestObjectCreator {
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
         application.setTier(FIFTY_PER_MIN_TIER);
         application.setCreatedTime(LocalDateTime.now());
-        application.setUpdatedUser(ADMIN);
+        application.setUpdatedUser(owner);
         application.setUpdatedTime(LocalDateTime.now());
         return application;
     }
