@@ -692,7 +692,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             api.setUserSpecificApiPermissions(getAPIPermissionsOfLoggedInUser(username, api));
             APIDTO apidto = MappingUtil.toAPIDto(api);
             String permissionString = apidto.getPermission();
-            apidto.setPermission(replaceGroupIdWithName(permissionString));
+            if (!StringUtils.isEmpty(permissionString)) {
+                apidto.setPermission(replaceGroupIdWithName(permissionString));
+            }
             return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(apidto).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving API : " + apiId;
@@ -717,24 +719,24 @@ public class ApisApiServiceImpl extends ApisApiService {
     /**
      * This method retrieves the set of overall permissions for a given api for the logged in user
      *
-     * @param loggedInUserId - Logged in user
+     * @param loggedInUserName - Logged in user
      * @param api - The API whose permissions for the logged in user is retrieved
      * @return The overall list of permissions for the given API for the logged in user
      */
-    private List<String> getAPIPermissionsOfLoggedInUser(String loggedInUserId, API api) throws APIManagementException {
+    private List<String> getAPIPermissionsOfLoggedInUser(String loggedInUserName, API api) throws APIManagementException {
         IdentityProvider idp = APIManagerFactory.getInstance().getIdentityProvider();
         Set<String> permissionArrayForUser = new HashSet();
         //Setting default permissions for API
-        permissionArrayForUser.add("READ");
-        permissionArrayForUser.add("UPDATE");
-        permissionArrayForUser.add("DELETE");
+        permissionArrayForUser.add(APIMgtConstants.Permission.READ);
+        permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
+        permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
         Map<String, Integer> permissionMap = api.getPermissionMap();
 
-        if (!permissionMap.isEmpty()) {
+        if (!permissionMap.isEmpty()) {  //&& !loggedInUserName.equals("admin")  ---- Put thisconditionhereaftertesting
+            /////////////Call IS and get loggedIn user ID and pass it to get RoleIdsOfUser///////////////
             List<String> loggedInUserRoles = idp.getRoleIdsOfUser("cfbde56e-8422-498e-b6dc-85a6f1f8b058");
             List<String> permissionRoleList = getRolesFromPermissionMap(permissionMap);
             List<String> rolesOfUserWithAPIPermissions = null;
-
             //get the intersection - retainAll() transforms first set to the result of intersection
             loggedInUserRoles.retainAll(permissionRoleList);
             if (!loggedInUserRoles.isEmpty()) {
@@ -747,16 +749,13 @@ public class ApisApiServiceImpl extends ApisApiService {
                     Integer permission = permissionMap.get(role);
                     if (permission == APIMgtConstants.Permission.READ_PERMISSION) {
                         permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-                    } else if (permission == (APIMgtConstants.Permission.READ_PERMISSION
-                            + APIMgtConstants.Permission.UPDATE_PERMISSION)) {
+                    } else if (permission == (APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.UPDATE_PERMISSION)) {
                         permissionArrayForUser.add(APIMgtConstants.Permission.READ);
                         permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
-                    } else if (permission == (APIMgtConstants.Permission.READ_PERMISSION
-                            + APIMgtConstants.Permission.DELETE_PERMISSION)) {
+                    } else if (permission == (APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.DELETE_PERMISSION)) {
                         permissionArrayForUser.add(APIMgtConstants.Permission.READ);
                         permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
-                    } else if (permission
-                            == APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.UPDATE_PERMISSION
+                    } else if (permission == APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.UPDATE_PERMISSION
                             + APIMgtConstants.Permission.DELETE_PERMISSION) {
                         permissionArrayForUser.add(APIMgtConstants.Permission.READ);
                         permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
@@ -1328,16 +1327,16 @@ public class ApisApiServiceImpl extends ApisApiService {
     /**
      * This method updates the list of apis searched, based on the permissions of the loggedin user
      *
-     * @param userId - id of the loggedin user
+     * @param loggedInUserName - Logged in user name
      * @param originalAPIList - original api list returned from the search operation
      * @return the updated list of apis based on user permissions
      * @throws APIManagementException
      */
-    private List<API> setAllApiPermissionsForUser(String userId, List<API> originalAPIList)
+    private List<API> setAllApiPermissionsForUser(String loggedInUserName, List<API> originalAPIList)
             throws APIManagementException {
         List<API> updatedAPIList = new ArrayList<API>();
         for (API api : originalAPIList) {
-            List<String> aggregatedApiPermissions = getAPIPermissionsOfLoggedInUser(userId, api);
+            List<String> aggregatedApiPermissions = getAPIPermissionsOfLoggedInUser(loggedInUserName, api);
             if (!aggregatedApiPermissions.isEmpty()) {
                 api.setUserSpecificApiPermissions(aggregatedApiPermissions);
                 updatedAPIList.add(api);

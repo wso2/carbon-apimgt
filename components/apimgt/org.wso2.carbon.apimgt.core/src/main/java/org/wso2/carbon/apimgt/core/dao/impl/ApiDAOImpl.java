@@ -2721,7 +2721,11 @@ public class ApiDAOImpl implements ApiDAO {
             jsonObject.put(APIMgtConstants.Permission.PERMISSION, array);
             permissionArray.add(jsonObject);
         }
-        return new StringBuilder(permissionArray.toString());
+        if (!permissionArray.isEmpty()) {
+            return new StringBuilder(permissionArray.toString());
+        } else {
+            return new StringBuilder("");
+        }
     }
 
     /**

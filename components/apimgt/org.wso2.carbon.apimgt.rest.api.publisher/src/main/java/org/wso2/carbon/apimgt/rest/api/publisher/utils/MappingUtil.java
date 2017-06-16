@@ -92,7 +92,7 @@ public class MappingUtil {
         apidto.setTags(new ArrayList<>(api.getTags()));
         apidto.setLabels(new ArrayList<>(api.getLabels()));
         apidto.setTransport(new ArrayList<>(api.getTransport()));
-        //apidto.setUserPermissionsForApi(api.getUserSpecificApiPermissions());
+        apidto.setUserPermissionsForApi(api.getUserSpecificApiPermissions());
         api.getPolicies().forEach(apidto::addPoliciesItem);
         BusinessInformation businessInformation = api.getBusinessInformation();
         API_businessInformationDTO apiBusinessInformationDTO = new API_businessInformationDTO();

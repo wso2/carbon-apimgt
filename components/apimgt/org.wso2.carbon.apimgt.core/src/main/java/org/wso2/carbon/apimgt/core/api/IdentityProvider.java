@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.core.api;
 
-import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
 import org.wso2.carbon.apimgt.core.models.User;
 
@@ -63,7 +62,7 @@ public interface IdentityProvider extends KeyManager {
      * @return the roleId if the role is available else null
      * @throws IdentityProviderException if error occurred while getting role Id for role name
      */
-    public String getRoleId(String roleName) throws IdentityProviderException, ParseException;
+    public String getRoleId(String roleName) throws IdentityProviderException;
 
     /**
      * Get displayName of given role Id.
@@ -72,7 +71,7 @@ public interface IdentityProvider extends KeyManager {
      * @return the displayName of role if the role is available else null
      * @throws IdentityProviderException if error occurred while getting displayName for roleId
      */
-    public String getRoleName(String roleId) throws IdentityProviderException, ParseException;
+    public String getRoleName(String roleId) throws IdentityProviderException;
 
     /**
      * Register a new user to the system
