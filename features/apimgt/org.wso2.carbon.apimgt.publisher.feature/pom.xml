@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>7.0.26-SNAPSHOT</version>
+        <version>7.0.29-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -89,7 +89,7 @@
                         </goals>
                         <phase>initialize</phase>
                         <configuration>
-                            <workingDirectory>${basedir}/src/main/resources/publisher_new</workingDirectory>
+                            <workingDirectory>${basedir}/src/main/resources/publisher</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
                                 <argument>install</argument>
@@ -133,7 +133,7 @@
                         </goals>
                         <phase>compile</phase>
                         <configuration>
-                            <workingDirectory>${basedir}/src/main/resources/publisher_new</workingDirectory>
+                            <workingDirectory>${basedir}/src/main/resources/publisher</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
                                 <argument>run</argument>

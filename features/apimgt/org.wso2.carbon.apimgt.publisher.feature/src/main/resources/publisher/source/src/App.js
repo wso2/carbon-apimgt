@@ -17,6 +17,7 @@
  */
 
 import React, {Component} from 'react'
+import ReactDom from 'react-dom'
 import {BrowserRouter as Router, Route, Link, Switch} from 'react-router-dom'
 
 import {Apis, Landing, Base} from './app/components/index'
@@ -37,7 +38,7 @@ class Publisher extends Component {
 
     render() {
         return (
-            <Router basename="/publisher">
+            <Router basename="/publisher_new">
                 <Base>
                     <Switch>
                         <Route exact path={"/"} component={ApiCreate}/>
