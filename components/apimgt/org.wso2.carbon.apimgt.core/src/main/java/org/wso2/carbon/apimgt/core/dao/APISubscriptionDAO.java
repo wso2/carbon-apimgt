@@ -81,6 +81,17 @@ public interface APISubscriptionDAO {
             apiVersion, String applicationId) throws APIMgtDAOException;
 
     /**
+     * Retrieve the list of subscriptions with a given application and key type for validation
+     *
+     * @param applicationId UUID of the application
+     * @param keyType       Application key type
+     * @return A list of {@link SubscriptionValidationData} objects
+     * @throws APIMgtDAOException If failed to get subscriptions.
+     */
+    List<SubscriptionValidationData> getAPISubscriptionsOfAppForValidation(String applicationId, String keyType)
+            throws APIMgtDAOException;
+
+    /**
      * Retrieve the list of subscriptions of an Application
      *
      * @param applicationId The UUID of Application
