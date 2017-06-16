@@ -283,6 +283,34 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
         }
     }
 
+    /**
+     * Retrieve the list of subscriptions with a given application and key type for validation
+     *
+     * @param applicationId UUID of the application
+     * @param keyType       Application key type
+     * @return A list of {@link SubscriptionValidationData} objects
+     * @throws APIMgtDAOException If failed to get subscriptions.
+     */
+    public List<SubscriptionValidationData> getAPISubscriptionsOfAppForValidation(String applicationId, String keyType)
+            throws APIMgtDAOException {
+        final String getSubscriptionsByAPISql = "SELECT SUBS.API_ID AS API_ID, SUBS.APPLICATION_ID AS APP_ID,SUBS" +
+                ".SUB_STATUS AS SUB_STATUS, API.PROVIDER AS API_PROVIDER, API.NAME AS API_NAME, API.CONTEXT AS " +
+                "API_CONTEXT, API.VERSION AS API_VERSION, SUBS.TIER_ID AS SUBS_POLICY , KEY_MAP.CLIENT_ID AS " +
+                "CLIENT_ID,KEY_MAP.KEY_TYPE AS KEY_ENV_TYPE FROM AM_SUBSCRIPTION SUBS, AM_API API,AM_APP_KEY_MAPPING " +
+                "KEY_MAP WHERE SUBS.API_ID = API.UUID AND KEY_MAP.APPLICATION_ID = SUBS.APPLICATION_ID AND SUBS" +
+                ".APPLICATION_ID = ? AND KEY_MAP.KEY_TYPE = ?";
+        try (Connection conn = DAOUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(getSubscriptionsByAPISql)) {
+            ps.setString(1, applicationId);
+            ps.setString(2, keyType);
+            try (ResultSet rs = ps.executeQuery()) {
+                return createSubscriptionValidationDataFromResultSet(rs);
+            }
+        } catch (SQLException e) {
+            log.error("Error while executing sql query", e);
+            throw new APIMgtDAOException(e);
+        }
+    }
 
     /**
      * Retrieves all available API Subscriptions. This method supports result pagination and ensuring results
