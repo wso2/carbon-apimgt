@@ -20,12 +20,29 @@ import React, {Component} from 'react'
 import ReactDom from 'react-dom'
 import {BrowserRouter as Router, Route, Link, Switch} from 'react-router-dom'
 
-import {Apis, Landing, Base} from './app/components/index'
+import {Apis, Landing, Base, Login, Logout} from './app/components/index'
 import {PageNotFound} from './app/components/Base/Errors/index'
 import Utils from '../src/app/data/utils.js'
 import ApiCreate from './app/components/Apis/Create/ApiCreate'
 
 import './App.css'
+
+
+const BApis = (props) => {
+    return (
+        <Base>
+            <Apis/>
+        </Base>
+    );
+}
+
+const BApiCreate = (props) => {
+    return (
+        <Base>
+            <ApiCreate/>
+        </Base>
+    );
+}
 
 class Publisher extends Component {
     constructor() {
@@ -33,20 +50,21 @@ class Publisher extends Component {
     }
 
     componentDidMount() {
-        Utils.autoLogin(); // TODO: Remove once login page is implemented
+        //Utils.autoLogin(); // TODO: Remove once login page is implemented
+
     }
 
     render() {
         return (
             <Router basename="/publisher_new">
-                <Base>
                     <Switch>
-                        <Route exact path={"/"} component={ApiCreate}/>
-                        <Route path={"/apis"} component={Apis}/>
-                        <Route path={"/api/create"} component={ApiCreate}/>
+                        <Route exact path={"/"} component={BApiCreate}/>
+                        <Route path={"/apis"} component={BApis}/>
+                        <Route path={"/api/create"} component={BApiCreate}/>
+                        <Route path={"/login"} component={Login}/>
+                        <Route path={"/logout"} component={Logout}/>
                         <Route component={PageNotFound}/>
                     </Switch>
-                </Base>
             </Router>
         );
     }
