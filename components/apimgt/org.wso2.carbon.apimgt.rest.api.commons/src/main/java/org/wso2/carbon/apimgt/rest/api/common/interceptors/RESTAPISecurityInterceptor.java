@@ -86,7 +86,7 @@ public class RESTAPISecurityInterceptor implements Interceptor {
         }
         if (requestURI.contains("api/am/webserver/")) {
             return true;
-        } else if (requestURI.contains("api/am/authenticator/")) {
+        } else if (requestURI.contains("/login/token")) {
             return true;
         }
         String yamlContent = null;
