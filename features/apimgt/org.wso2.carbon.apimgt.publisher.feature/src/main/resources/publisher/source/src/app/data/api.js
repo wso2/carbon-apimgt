@@ -163,9 +163,19 @@ class AuthClient {
     }
 
     static getCookie(name) {
-        let value = "; " + document.cookie;
-        let parts = value.split("; " + name + "=");
-        if (parts.length === 2) return parts.pop().split(";").shift();
+        let pairs = document.cookie.split(";");
+        const cookies = {};
+        for (let pair of pairs) {
+            pair = pair.split("=");
+            let cookie_name = pair[0].trim();
+            let value = encodeURIComponent(pair[1]);
+            if (cookie_name === name) {
+                return value;
+            } else {
+                cookies[cookie_name] = value;
+            }
+        }
+        return cookies;
     }
 
 }
