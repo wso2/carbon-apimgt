@@ -1,0 +1,143 @@
+swagger: '2.0'
+######################################################
+# Prolog
+######################################################
+info:
+  version: "v1.0"
+  title: "WSO2 API Manager - Analytics"
+  description: |
+    This document specifies a **RESTful API** for WSO2 **API Manager** - Analytics.
+    It is written with [swagger 2](http://swagger.io/).
+  contact:
+    name: "WSO2"
+    url: "http://wso2.com/products/api-manager/"
+    email: "architecture@wso2.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+######################################################
+# The fixed parts of the URLs of the API
+######################################################
+
+# The schemes supported by the API
+schemes:
+  - https
+  - http
+
+# The domain of the API.
+# This is configured by the customer during deployment.
+# The given host is just an example.
+host: apis.wso2.com
+
+# The base path of the API.
+# Will be prefixed to all paths.
+basePath: /api/am/analytics/v1.0
+
+# The following media types can be passed as input in message bodies of the API.
+# The actual media type must be specified in the Content-Type header field of the request.
+# The default is json, i.e. the Content-Type header is not needed to
+# be set, but supporting it serves extensibility.
+consumes:
+  - application/json
+
+# The following media types may be passed as output in message bodies of the API.
+# The media type(s) consumable by the requestor is specified in the Accept header field
+# of the corresponding request.
+# The actual media type returned will be specfied in the Content-Type header field
+# of the of the response.
+# The default of the Accept header is json, i.e. there is not needed to
+# set the value, but supporting it serves extensibility.
+produces:
+  - application/json
+
+
+######################################################
+# API Usage
+######################################################
+paths:
+  /api/api_usage:
+  
+#-----------------------------------------------------
+#  Retrieve api usage details
+#-----------------------------------------------------
+    get:
+      summary: |
+        Retrieve api usage details
+      description: |
+        Get api usage information from summarized data.
+      parameters:
+        - $ref: '#/parameters/from'
+        - $ref: '#/parameters/to'
+      responses:
+        200:
+          description: |
+            OK.
+            Requested swagger document of the API is returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+            
+
+#-----------------------------------------------------
+#  Retrieve application created over time details
+#-----------------------------------------------------   
+
+  /application/applications_created_over_time:
+    get:
+      summary: |
+        Retrieve application created over time details
+      description: |
+        Get application created over time details from summarized data.
+      parameters:
+        - $ref: '#/parameters/from'
+        - $ref: '#/parameters/to'
+      responses:
+        200:
+          description: |
+            OK.
+            Requested swagger document of the API is returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+  
+      
+      
+######################################################
+# Parameter definitions
+######################################################      
+parameters:            
+       
+# Specified as part of the query string
+  from:
+    name: from
+    in: query
+    description: |
+      Defines the ending timestamp of the interval
+    required: true
+    type: string
+  
+  to:
+    name: to
+    in: query
+    description: |
+      Defines the ending timestamp of the interval
+    required: true
+    type: string  
+
+
+            
+              
+   
