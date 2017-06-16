@@ -733,8 +733,9 @@ public class ApisApiServiceImpl extends ApisApiService {
         Map<String, Integer> permissionMap = api.getPermissionMap();
 
         if (!permissionMap.isEmpty()) {  //&& !loggedInUserName.equals("admin")  ---- Put thisconditionhereaftertesting
-            /////////////Call IS and get loggedIn user ID and pass it to get RoleIdsOfUser///////////////
-            List<String> loggedInUserRoles = idp.getRoleIdsOfUser("cfbde56e-8422-498e-b6dc-85a6f1f8b058");
+            String userName = "tharika";
+            String userId = idp.getIdOfUser(userName);
+            List<String> loggedInUserRoles = idp.getRoleIdsOfUser(userId);
             List<String> permissionRoleList = getRolesFromPermissionMap(permissionMap);
             List<String> rolesOfUserWithAPIPermissions = null;
             //get the intersection - retainAll() transforms first set to the result of intersection

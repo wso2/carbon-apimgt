@@ -29,6 +29,15 @@ import java.util.List;
 public interface IdentityProvider extends KeyManager {
 
     /**
+     * Get the user ID of SCIM user.
+     *
+     * @param userName Username of user
+     * @return the ID of the user
+     * @throws IdentityProviderException if error occurred while getting user ID of user
+     */
+    public String getIdOfUser(String userName) throws IdentityProviderException;
+
+    /**
      * Get the role name list of a user.
      *
      * @param userId User Id

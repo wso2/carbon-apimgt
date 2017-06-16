@@ -40,6 +40,69 @@ import static org.mockito.Matchers.any;
 public class DefaultIdentityProviderImplTestCase {
 
     @Test
+    public void testGetIdOfUser() throws Exception {
+        SCIMServiceStub scimServiceStub = Mockito.mock(SCIMServiceStub.class);
+        DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
+        OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
+        DefaultIdentityProviderImpl idpImpl = new DefaultIdentityProviderImpl(scimServiceStub, dcrmServiceStub,
+                oAuth2ServiceStub);
+
+        String validUserName = "John";
+        final String validUserSearchQuery = "userName Eq " + validUserName;
+        final String expectedUserId = "cfbde56e-8422-498e-b6dc-85a6f1f8b058";
+
+        String invalidUserName = "invalid_user";
+        final String invalidUserSearchQuery = "userName Eq " + invalidUserName;
+
+        //happy path
+        String responseBody = "{\"totalResults\":1,\"schemas\":[\"urn:scim:schemas:core:1.0\"],\"Resources\":"
+                + "[{\"meta\":{\"created\":\"2017-06-02T10:12:26\",\"location\":"
+                + "\"https://localhost:9443/wso2/scim/Users/cfbde56e-8422-498e-b6dc-85a6f1f8b058\",\"lastModified\":"
+                + "\"2017-06-02T10:12:26\"},\"id\":\"cfbde56e-8422-498e-b6dc-85a6f1f8b058\",\"userName\":\"John\"}]}";
+        Response createdResponse = Response.builder().status(200).headers(new HashMap<>()).body(responseBody.getBytes())
+                .build();
+        Mockito.when(scimServiceStub.searchUsers(validUserSearchQuery)).thenReturn(createdResponse);
+
+        try {
+            String userId = idpImpl.getIdOfUser(validUserName);
+            Assert.assertEquals(userId, expectedUserId);
+        } catch (Exception ex) {
+            Assert.fail(ex.getMessage());
+        }
+
+        //error path
+        //Assuming the user cannot be found
+        Response createdResponseNoSuchUser = Response.builder().status(404).headers(new HashMap<>()).build();
+        Mockito.when(scimServiceStub.searchUsers(invalidUserSearchQuery)).thenReturn(createdResponseNoSuchUser);
+
+        try {
+            idpImpl.getIdOfUser(invalidUserName);
+        } catch (Exception ex) {
+            Assert.assertTrue(ex instanceof IdentityProviderException);
+            Assert.assertEquals(ex.getMessage(), "User " + invalidUserName + " does not exist in the system.");
+        }
+
+        //Assuming there are multiple users returned
+        String responseBodyMultipleResults = "{\"totalResults\":2,\"schemas\":[\"urn:scim:schemas:core:1.0\"],"
+                + "\"Resources\":[{\"meta\":{\"created\":\"2017-06-02T14:05:08\",\"location\":"
+                + "\"https://localhost:9443/wso2/scim/Users/84c54947-513b-48df-8c49-7121932ffea8\",\"lastModified\":"
+                + "\"2017-06-02T14:05:08\"},\"id\":\"84c54947-513b-48df-8c49-7121932ffea8\",\"userName\":\"John\"},"
+                + "{\"meta\":{\"created\":\"2017-06-02T10:12:26\",\"location\":"
+                + "\"https://localhost:9443/wso2/scim/Users/cfbde56e-8422-498e-b6dc-85a6f1f8b058\",\"lastModified\":"
+                + "\"2017-06-02T10:12:26\"},\"id\":\"cfbde56e-8422-498e-b6dc-85a6f1f8b058\",\"userName\":\"John\"}]}";
+        Response createdResponseMultipleResults = Response.builder().status(200).headers(new HashMap<>())
+                .body(responseBodyMultipleResults.getBytes()).build();
+        Mockito.when(scimServiceStub.searchUsers(validUserSearchQuery)).thenReturn(createdResponseMultipleResults);
+
+        try {
+            idpImpl.getIdOfUser(validUserName);
+        } catch (Exception ex) {
+            Assert.assertTrue(ex instanceof IdentityProviderException);
+            Assert.assertEquals(ex.getMessage(), "Multiple users with " + validUserName + " exist.");
+        }
+    }
+
+    @Test
     public void testGetRoleNamesOfUser() throws Exception {
         SCIMServiceStub scimServiceStub = Mockito.mock(SCIMServiceStub.class);
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
@@ -176,7 +239,6 @@ public class DefaultIdentityProviderImplTestCase {
 
         try {
             String roleId = idpImpl.getRoleId(validRoleName);
-            Assert.assertNotNull(roleId);
             Assert.assertEquals(roleId, expectedRoleId);
         } catch (Exception ex) {
             Assert.fail(ex.getMessage());
@@ -188,10 +250,11 @@ public class DefaultIdentityProviderImplTestCase {
         Mockito.when(scimServiceStub.searchGroups(invalidRoleSearchQuery)).thenReturn(createdResponseNoSuchRole);
 
         try {
-            String roleId = idpImpl.getRoleId(invalidRoleName);
-            Assert.assertNull(roleId);
+            idpImpl.getRoleId(invalidRoleName);
         } catch (Exception ex) {
-            Assert.fail(ex.getMessage());
+            Assert.assertTrue(ex instanceof IdentityProviderException);
+            Assert.assertEquals(ex.getMessage(),
+                    "Role with name " + invalidRoleName + " does not exist in the system.");
         }
 
         //Assuming there are multiple roles returned
@@ -207,10 +270,10 @@ public class DefaultIdentityProviderImplTestCase {
         Mockito.when(scimServiceStub.searchGroups(validRoleSearchQuery)).thenReturn(createdResponseMultipleResults);
 
         try {
-            String roleId = idpImpl.getRoleId(validRoleName);
-            Assert.assertNull(roleId);
+            idpImpl.getRoleId(validRoleName);
         } catch (Exception ex) {
-            Assert.fail(ex.getMessage());
+            Assert.assertTrue(ex instanceof IdentityProviderException);
+            Assert.assertEquals(ex.getMessage(), "More than one role with role name " + validRoleName + " exist.");
         }
     }
 

@@ -42,6 +42,9 @@ public interface SCIMServiceStub {
 
     @RequestLine("GET /Groups/{id}")
     SCIMGroup getGroup(@Param("id") String id);
+
+    @RequestLine("GET /Users?filter={query}")
+    Response searchUsers(@Param("query") String query);
 }
 
 
