@@ -15,5 +15,29 @@
 */
 package org.wso2.carbon.apimgt.core.models.analytics;
 
+/**
+ *
+ */
 public class ApplicationCount {
+
+    private long timestamp;
+    private long count;
+
+
+
+    public long getCount() {
+        return count;
+    }
+
+    public void setCount(long count) {
+        this.count = count;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
 }

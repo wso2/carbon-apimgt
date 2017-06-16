@@ -73,7 +73,7 @@ paths:
         200:
           description: |
             OK.
-            Requested swagger document of the API is returned
+            Requested api usage information is returned
           headers:
             Content-Type:
               description: |
@@ -98,28 +98,33 @@ paths:
       parameters:
         - $ref: '#/parameters/from'
         - $ref: '#/parameters/to'
+        - $ref: '#/parameters/created_by'
+        - $ref: '#/parameters/subscribed_to'
+        - $ref: '#/parameters/api_filter'
       responses:
         200:
           description: |
             OK.
-            Requested swagger document of the API is returned
+            Requested applications created over time information is returned
           headers:
             Content-Type:
               description: |
                 The content type of the body.
               type: string
+          schema:
+            $ref: '#/definitions/ApplicationCountList'
         406:
           description: |
             Not Acceptable.
             The requested media type is not supported
-  
-      
-      
+
+
+
 ######################################################
 # Parameter definitions
-######################################################      
-parameters:            
-       
+######################################################
+parameters:
+
 # Specified as part of the query string
   from:
     name: from
@@ -128,16 +133,107 @@ parameters:
       Defines the ending timestamp of the interval
     required: true
     type: string
-  
+
   to:
     name: to
     in: query
     description: |
       Defines the ending timestamp of the interval
     required: true
-    type: string  
+    type: string
+
+  created_by:
+    name: created_by
+    in: query
+    description: |
+     application creator name. In case of any creator, the value shold be equal to 'all'
+    required: true
+    type: string
+
+  subscribed_to:
+    name: subscribed_to
+    in: query
+    description: |
+      api name. In case of any api the value should be equal to 'all'
+    required: true
+    type: string
+
+  api_filter:
+    name: api_filter
+    in: query
+    description: |
+      api_filter could take two possible values. 'All' or 'My'. In case of 'My', only the current user's Apis will be filtered.
+    required: true
+    type: string
+
+######################################################
+# The resources used by some of the APIs above within the message body
+######################################################
+
+definitions:
+
+#-----------------------------------------------------
+# The APIUsage resource
+#-----------------------------------------------------
+  APIUsage:
+    title: API Usage
+    properties:
+      appName:
+        type: string
+        description: |
+          Name of the application.
+      apiName:
+        type: string
+        description: |
+          Name of the api
+      consumerKey:
+        type: string
+        description: |
+          consumer key of the application
+      count:
+        type: integer
+        description: |
+          Number of requests
 
 
-            
-              
-   
+#-----------------------------------------------------
+# The ApplicationCount resource
+#-----------------------------------------------------
+  ApplicationCount:
+    title: Applications Created Over Time
+    properties:
+      time:
+        type: integer
+        format: int64
+        description: |
+          Timestamp
+      count:
+        type: integer
+        format: int64
+        description: |
+          Number of application registrations
+
+#-----------------------------------------------------
+# The ApplicationCount List resource
+#-----------------------------------------------------
+  ApplicationCountList:
+    title: ApplicationCount List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of applications.
+      next:
+        type: string
+        description: |
+          Link to the next subset of resources qualified.
+          Empty if no more resources are to be returned.
+      previous:
+        type: string
+        description: |
+          Link to the previous subset of resources qualified.
+          Empty if current subset is the first subset returned.
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/ApplicationCount'

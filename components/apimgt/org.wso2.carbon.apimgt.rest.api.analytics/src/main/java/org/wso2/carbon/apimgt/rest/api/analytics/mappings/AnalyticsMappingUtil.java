@@ -15,5 +15,34 @@
 */
 package org.wso2.carbon.apimgt.rest.api.analytics.mappings;
 
+import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
+import org.wso2.carbon.apimgt.rest.api.analytics.dto.ApplicationCountDTO;
+import org.wso2.carbon.apimgt.rest.api.analytics.dto.ApplicationCountListDTO;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class AnalyticsMappingUtil {
+
+    public static ApplicationCountListDTO fromApplicationCountToListDTO(List<ApplicationCount> applicationCountList) {
+        ApplicationCountListDTO applicationCountListDTO = new ApplicationCountListDTO();
+        List<ApplicationCountDTO> applicationCountDTOList = new ArrayList<>();
+        applicationCountListDTO.setCount(applicationCountList.size());
+
+        for (int i = 0; i < applicationCountList.size(); i++) {
+            applicationCountDTOList.add(fromApplicationCountToDTO(applicationCountList.get(i)));
+        }
+
+        applicationCountListDTO.setList(applicationCountDTOList);
+        return applicationCountListDTO;
+    }
+
+    private static ApplicationCountDTO fromApplicationCountToDTO(ApplicationCount applicationCount) {
+        ApplicationCountDTO applicationCountDTO = new ApplicationCountDTO();
+
+        applicationCountDTO.setTime(applicationCount.getTimestamp());
+        applicationCountDTO.setCount(applicationCount.getCount());
+
+        return applicationCountDTO;
+    }
 }
