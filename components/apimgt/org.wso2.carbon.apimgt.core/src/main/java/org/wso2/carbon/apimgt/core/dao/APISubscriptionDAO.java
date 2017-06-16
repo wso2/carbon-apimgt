@@ -27,8 +27,8 @@ import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationResult;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
-import javax.annotation.CheckForNull;
 import java.util.List;
+import javax.annotation.CheckForNull;
 
 
 /**
