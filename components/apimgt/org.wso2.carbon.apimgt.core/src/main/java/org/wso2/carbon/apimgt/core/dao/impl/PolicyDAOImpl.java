@@ -744,7 +744,7 @@ public class PolicyDAOImpl implements PolicyDAO {
      */
     private ApplicationPolicy getApplicationPolicyByName(String policyName) throws SQLException, APIMgtDAOException {
         ApplicationPolicy policy;
-        String sqlQuery = "SELECT UUID, NAME, QUOTA_TYPE, TIME_UNIT, UNIT_TIME, QUOTA, QUOTA_UNIT, DESCRIPTION, "
+        String sqlQuery = "SELECT UUID, QUOTA_TYPE, TIME_UNIT, UNIT_TIME, QUOTA, QUOTA_UNIT, DESCRIPTION, "
                 + "DISPLAY_NAME, IS_DEPLOYED from AM_APPLICATION_POLICY WHERE NAME = ?";
 
         try (Connection connection = DAOUtil.getConnection();
@@ -752,8 +752,7 @@ public class PolicyDAOImpl implements PolicyDAO {
             preparedStatement.setString(1, policyName);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    policy = new ApplicationPolicy(
-                            resultSet.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_NAME));
+                    policy = new ApplicationPolicy(policyName);
                     setCommonPolicyDetails(policy, resultSet);
                     return policy;
                 } else {
