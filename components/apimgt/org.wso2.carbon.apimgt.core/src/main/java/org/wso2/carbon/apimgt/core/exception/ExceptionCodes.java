@@ -51,8 +51,7 @@ public enum ExceptionCodes implements ErrorHandler {
     SUBSCRIPTION_STATE_INVALID(900318, "Invalid state change for subscription", 400, "Invalid state change for " +
             "subscription"),
     COMMENT_NOT_FOUND(900319, "Comment not found", 404, "Couldn't retrieve comment"),
-    COMPOSITE_API_ALREADY_EXISTS(900320, "A Composite API already exists.", 409,
-            "A Composite API already exists for this application"),
+    APIM_DAO_EXCEPTION(900320, "Internal server error.", 500, " Error occurred while retrieving data"),
     GATEWAY_LABELS_CANNOT_BE_NULL(900321, "Gateway labels cannot be null.", 400, "Gateway labels cannot be null"),
     STATUS_CANNOT_BE_NULL(900322, "Status cannot be null.", 400, " Status cannot be null"),
     NEED_COMMENT_MODERATOR_PERMISSION(900323, "Comment moderator permission needed", 403,
@@ -63,12 +62,17 @@ public enum ExceptionCodes implements ErrorHandler {
     COMMENT_LENGTH_EXCEEDED(900326, "Comment length exceeds max limit", 400, "Comment length exceeds allowed maximum "
             + "number of characters"),
     API_TYPE_INVALID(900327, "API Type specified is invalid.", 400, "API Type specified is invalid"),
-    APPLICATION_KEY_MAPPING_NOT_FOUND(900328, "Application Key mapping not found", 404, "Application Key mapping not " +
+    COMPOSITE_API_ALREADY_EXISTS(900328, "A Composite API already exists.", 409,
+            "A Composite API already exists for this application"),
+    SWAGGER_NOT_FOUND(900329, "Swagger definition not found", 404, "Swagger definition not found"),
+    API_DEFINITION_NOT_FOUND(900330, "API definition not found", 404, "API definition not found"),
+    APPLICATION_KEY_MAPPING_NOT_FOUND(900331, "Application Key mapping not found", 404, "Application Key mapping not " +
             "found"),
-    NO_UPDATE_PERMISSIONS(900329, "No permissions to update API.", 403, "No permissions to update API."),
-    NO_DELETE_PERMISSIONS(900330, "No permissions to delete API.", 403, "No permissions to delete API."),
-    UNSUPPORTED_API_DEFINITION_TYPE(900331, "Unsupported Definition Type", 400,
+    NO_UPDATE_PERMISSIONS(900332, "No permissions to update API.", 403, "No permissions to update API."),
+    NO_DELETE_PERMISSIONS(900333, "No permissions to delete API.", 403, "No permissions to delete API."),
+    UNSUPPORTED_API_DEFINITION_TYPE(900334, "Unsupported Definition Type", 400,
             "Unsupported Definition Type. Only SWAGGER and WSDL are allowed."),
+
 
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),
@@ -124,6 +128,10 @@ public enum ExceptionCodes implements ErrorHandler {
     KEY_MANAGER_INITIALIZATION_FAILED(900606, "Key Manager initialization failed", 500,
             "Key Manager initialization failed"),
     ROLE_DOES_NOT_EXIST(900607, "Role does not exist in the system", 404, "Role does not exist in the system"),
+    MULTIPLE_ROLES_EXIST(900608, "Multiple roles with the same display name exist in the system", 500, "Multiple " +
+            "roles with the same display name exist in the system"),
+    MULTIPLE_USERS_EXIST(900609, "Multiple users with the same username exist in the system", 500, "Multiple " +
+            "users with the same username exist in the system"),
 
 
     // Labels related codes
