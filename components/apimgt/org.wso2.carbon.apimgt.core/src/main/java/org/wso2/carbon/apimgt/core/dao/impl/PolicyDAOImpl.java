@@ -1791,8 +1791,8 @@ public class PolicyDAOImpl implements PolicyDAO {
                         valid = true;
                     } else {
                         throw new APIMgtDAOException(
-                                "Couldn't Save Block Condition Due to Invalid Application " + "name " + appName
-                                        + "from Application " + "Owner " + appUuid);
+                                "Couldn't Save Block Condition Due to Invalid Application " + appName + " UUID :"
+                                        + appUuid);
                     }
                 }
             } else if (APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_USER.equals(conditionType)) {
@@ -2040,7 +2040,8 @@ public class PolicyDAOImpl implements PolicyDAO {
     @Override
     public List<CustomPolicy> getCustomPolicies() throws APIMgtDAOException {
         List<CustomPolicy> customPolicyList = new ArrayList<>();
-        String getQuery = "SELECT * FROM AM_CUSTOM_POLICY";
+        String getQuery = "SELECT NAME, DESCRIPTION, UUID, KEY_TEMPLATE, IS_DEPLOYED, SIDDHI_QUERY FROM "
+                + "AM_CUSTOM_POLICY";
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(getQuery)) {
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -2073,7 +2074,8 @@ public class PolicyDAOImpl implements PolicyDAO {
 
     @Override
     public CustomPolicy getCustomPolicyByUuid(String uuid) throws APIMgtDAOException {
-        String query = "SELECT * FROM AM_CUSTOM_POLICY WHERE UUID = ? ";
+        String query = "SELECT NAME, DESCRIPTION, UUID, KEY_TEMPLATE, IS_DEPLOYED, SIDDHI_QUERY FROM AM_CUSTOM_POLICY"
+                + " WHERE UUID = ? ";
         CustomPolicy customPolicy = null;
         ResultSet resultSet = null;
         try (Connection connection = DAOUtil.getConnection();

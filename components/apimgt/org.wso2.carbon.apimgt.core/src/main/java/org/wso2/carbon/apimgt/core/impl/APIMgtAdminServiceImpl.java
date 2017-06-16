@@ -540,6 +540,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public String addCustomRule(CustomPolicy customPolicy) throws APIManagementException {
         try {
+            //todo: deploy policy in CEP
             return policyDAO.addCustomPolicy(customPolicy);
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't add custom policy.";

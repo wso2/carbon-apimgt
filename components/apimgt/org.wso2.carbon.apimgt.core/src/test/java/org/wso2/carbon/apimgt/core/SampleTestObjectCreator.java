@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.BlockConditions;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
@@ -43,6 +44,7 @@ import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.core.models.policy.Condition;
+import org.wso2.carbon.apimgt.core.models.policy.CustomPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.HeaderCondition;
 import org.wso2.carbon.apimgt.core.models.policy.IPCondition;
 import org.wso2.carbon.apimgt.core.models.policy.JWTClaimsCondition;
@@ -127,6 +129,9 @@ public class SampleTestObjectCreator {
     private static final String PATH_THUMBNAIL_IMG_2 = "api/thumbnail2.jpg";
     private static final String PATH_INLINE_DOC_1 = "document/inline1.txt";
     private static final String PATH_INLINE_DOC_2 = "document/inline2.txt";
+    private static final String SAMPLE_IP_1 = "12.32.45.3";
+    private static final String SAMPLE_IP_2 = "24.34.1.45";
+    private static final String SAMPLE_CUSTOM_RULE = "Sample Custom Rule";
 
     public static String apiDefinition;
     public static InputStream inputStream;
@@ -899,4 +904,51 @@ public class SampleTestObjectCreator {
         apiBuilder.permissionMap(map);
         return apiBuilder;
     }
+
+    public static BlockConditions createDefaultBlockCondition(String conditionType) {
+        BlockConditions blockConditions = new BlockConditions();
+        blockConditions.setConditionType(conditionType);
+        blockConditions.setEnabled(true);
+        if (conditionType.equals(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_IP)) {
+            blockConditions.setConditionValue(SAMPLE_IP_1);
+        } else if (conditionType.equals(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITION_IP_RANGE)) {
+            blockConditions.setStartingIP(SAMPLE_IP_1);
+            blockConditions.setEndingIP(SAMPLE_IP_2);
+        } else if (conditionType.equals(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_API)) {
+            try {
+                API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI();
+                API api = apiBuilder.build();
+                DAOFactory.getApiDAO().addAPI(api);
+                blockConditions.setConditionValue(api.getContext());
+            } catch (APIMgtDAOException e) {
+                log.error("Error while adding default api in default block condition", e);
+            }
+        } else if (conditionType.equals(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_APPLICATION)) {
+            try {
+                Application app = createDefaultApplication();
+                DAOFactory.getApplicationDAO().addApplication(app);
+                blockConditions.setConditionValue(app.getId() + ":" + app.getName());
+            } catch (APIMgtDAOException e) {
+                log.error("Error while adding default app in default block condition", e);
+            }
+        } else if (conditionType.equals(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_USER)) {
+            blockConditions.setConditionValue(ADMIN);
+        }
+        return blockConditions;
+    }
+
+    public static CustomPolicy createDefaultCustomPolicy() {
+        CustomPolicy customPolicy = new CustomPolicy(SAMPLE_CUSTOM_RULE);
+        customPolicy.setKeyTemplate("$userId");
+        String siddhiQuery = "FROM RequestStream SELECT userId, ( userId == 'admin@carbon.super' ) AS isEligible , "
+                + "str:concat('admin@carbon.super','') as throttleKey INSERT INTO EligibilityStream;"
+                + "FROM EligibilityStream[isEligible==true]#throttler:timeBatch(1 min) SELECT throttleKey, "
+                + "(count(userId) >= 5 as isThrottled, expiryTimeStamp group by throttleKey INSERT ALL EVENTS into "
+                + "ResultStream;";
+
+        customPolicy.setSiddhiQuery(siddhiQuery);
+        customPolicy.setDescription("Sample custom policy");
+        return customPolicy;
+    }
+
 }
