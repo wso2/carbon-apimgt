@@ -732,9 +732,8 @@ public class ApisApiServiceImpl extends ApisApiService {
         permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
         Map<String, Integer> permissionMap = api.getPermissionMap();
 
-        if (!permissionMap.isEmpty()) { //&& !"admin".equals(loggedInUserName)
-            String username = "tharika";
-            String userId = idp.getIdOfUser(username);
+        if (!permissionMap.isEmpty() && !"admin".equals(loggedInUserName)) {
+            String userId = idp.getIdOfUser(loggedInUserName);
             List<String> loggedInUserRoles = idp.getRoleIdsOfUser(userId);
             List<String> permissionRoleList = getRolesFromPermissionMap(permissionMap);
             List<String> rolesOfUserWithAPIPermissions = null;
