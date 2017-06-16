@@ -27,8 +27,8 @@ import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationResult;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
-import java.util.List;
 import javax.annotation.CheckForNull;
+import java.util.List;
 
 
 /**
@@ -79,6 +79,17 @@ public interface APISubscriptionDAO {
     @CheckForNull
     List<SubscriptionValidationData> getAPISubscriptionsOfAPIForValidation(String apiContext, String
             apiVersion, String applicationId) throws APIMgtDAOException;
+
+    /**
+     * Retrieve the list of subscriptions with a given application and key type for validation
+     *
+     * @param applicationId UUID of the application
+     * @param keyType       Application key type
+     * @return A list of {@link SubscriptionValidationData} objects
+     * @throws APIMgtDAOException If failed to get subscriptions.
+     */
+    List<SubscriptionValidationData> getAPISubscriptionsOfAppForValidation(String applicationId, String keyType)
+            throws APIMgtDAOException;
 
     /**
      * Retrieve the list of subscriptions of an Application
