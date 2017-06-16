@@ -3,7 +3,7 @@
     <parent>
         <artifactId>apimgt-analyzer-modules</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>7.0.32-SNAPSHOT</version>
+        <version>7.0.33-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
