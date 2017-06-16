@@ -83,6 +83,9 @@ public class APIMConfigurations {
     @Element(description = "rating upper limit")
     private int ratingMaxValue = 5;
 
+    @Element(description = "enable/disable analytics")
+    private boolean isAnalyticsEnabled = false;
+
     @Element(description = "WSDL processor implementations")
     private List<String> wsdlProcessors = Arrays.asList(
             "org.wso2.carbon.apimgt.core.impl.WSDL11ProcessorImpl",
@@ -219,6 +222,10 @@ public class APIMConfigurations {
 
     public int getCommentMaxLength() {
         return commentMaxLength;
+    }
+
+    public boolean isAnalyticsEnabled() {
+        return isAnalyticsEnabled;
     }
 
     public void setCommentMaxLength(int commentMaxLength) {

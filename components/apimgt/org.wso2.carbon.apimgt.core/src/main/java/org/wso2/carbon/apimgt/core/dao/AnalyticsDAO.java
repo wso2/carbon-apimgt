@@ -15,5 +15,16 @@
 */
 package org.wso2.carbon.apimgt.core.dao;
 
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
+
+import java.util.List;
+
+/**
+ * Provides access to API Analytics data layer
+ */
 public interface AnalyticsDAO {
+
+    List<ApplicationCount> getApplicationCount(String createdBy, String subscribedTo, String fromTimestamp,
+            String toTimestamp) throws APIMgtDAOException;
 }

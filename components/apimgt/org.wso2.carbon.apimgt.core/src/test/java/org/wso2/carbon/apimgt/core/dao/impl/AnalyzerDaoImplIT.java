@@ -17,27 +17,27 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
+import org.wso2.carbon.apimgt.core.TestUtil;
 import org.wso2.carbon.apimgt.core.dao.AnalyticsDAO;
 import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
 
 import java.sql.Timestamp;
 import java.util.List;
 
-public class AnalyzerDaoImplIt extends DAOIntegrationTestBase {
+public class AnalyzerDaoImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testGetApplicationCount() throws Exception {
 
-        String fromTimeStamp = (new Timestamp(System.currentTimeMillis())).toString();
-        SampleTestObjectCreator.createCustomApplication("app1", "john");
-        SampleTestObjectCreator.createCustomApplication("app2", "john");
-        String toTimeStamp = (new Timestamp(System.currentTimeMillis())).toString();
+        String fromTimeStamp = (new Timestamp(System.currentTimeMillis() - 1000)).toString();
+        TestUtil.addCustomApplication("app1", "john");
+        TestUtil.addCustomApplication("app2", "john");
+        String toTimeStamp = (new Timestamp(System.currentTimeMillis() + 1000)).toString();
 
         AnalyticsDAO analyticsDAO = DAOFactory.getAnalyticsDAO();
         List<ApplicationCount> applicationCountList = analyticsDAO
                 .getApplicationCount("john", null, fromTimeStamp, toTimeStamp);
-        Assert.assertEquals(2, applicationCountList.size());
+        Assert.assertEquals(applicationCountList.size(), 2);
     }
 
 }

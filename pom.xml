@@ -89,6 +89,11 @@
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.rest.api.analytics</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.rest.api.admin</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>

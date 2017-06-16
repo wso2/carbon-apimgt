@@ -33,8 +33,6 @@ import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 
-import java.time.LocalDateTime;
-
 /**
  * Application update model class for workflow
  */
@@ -83,7 +81,6 @@ public class ApplicationUpdateWorkflow extends Workflow {
         application.setPolicy(new ApplicationPolicy(policyId, tier));
         application.setDescription(description);
         application.setId(applicationId);
-        application.setUpdatedTime(LocalDateTime.now());
         application.setUpdatedUser(updatedUser);
         application.setPermissionString(permission);
 

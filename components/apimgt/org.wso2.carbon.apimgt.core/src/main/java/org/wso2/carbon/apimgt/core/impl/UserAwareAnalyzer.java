@@ -15,5 +15,14 @@
 */
 package org.wso2.carbon.apimgt.core.impl;
 
-public class UserAwareAnalyzer {
+import org.wso2.carbon.apimgt.core.dao.AnalyticsDAO;
+
+/**
+ *
+ */
+public class UserAwareAnalyzer extends AnalyzerImpl {
+
+    public UserAwareAnalyzer(String username, AnalyticsDAO analyticsDAO) {
+        super(username, analyticsDAO);
+    }
 }

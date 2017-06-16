@@ -63,8 +63,16 @@ public class BundleActivator {
     protected void start(BundleContext bundleContext) {
         try {
             Context ctx = jndiContextManager.newInitialContext();
-            DataSource dataSource = new DataSourceImpl((HikariDataSource) ctx.lookup("java:comp/env/jdbc/WSO2AMDB"));
-            DAOUtil.initialize(dataSource);
+            DataSource dataSourceAMDB = new DataSourceImpl(
+                    (HikariDataSource) ctx.lookup("java:comp/env/jdbc/WSO2AMDB"));
+            DAOUtil.initialize(dataSourceAMDB);
+            boolean isAnalyticsEnabled = ServiceReferenceHolder.getInstance().getAPIMConfiguration()
+                    .isAnalyticsEnabled();
+            if (isAnalyticsEnabled) {
+                DataSource dataSourceStatDB = new DataSourceImpl(
+                        (HikariDataSource) ctx.lookup("java:comp/env/jdbc/WSO2AMSTATSDB"));
+                DAOUtil.initializeAnalyticsDataSource(dataSourceStatDB);
+            }
             WorkflowExtensionsConfigBuilder.build(configProvider);
             Broker broker = new BrokerImpl();
             BrokerUtil.initialize(broker);
