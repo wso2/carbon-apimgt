@@ -78,8 +78,7 @@ public class DefaultIdentityProviderImplTestCase {
 
         try {
             idpImpl.getRoleNamesOfUser(invalidUserId);
-        } catch (Exception ex) {
-            Assert.assertTrue(ex instanceof IdentityProviderException);
+        } catch (IdentityProviderException ex) {
             Assert.assertEquals(ex.getMessage(), "User id " + invalidUserId + " does not exist in the system.");
         }
     }
@@ -146,8 +145,7 @@ public class DefaultIdentityProviderImplTestCase {
 
         try {
             idpImpl.getRoleIdsOfUser(invalidUserId);
-        } catch (Exception ex) {
-            Assert.assertTrue(ex instanceof IdentityProviderException);
+        } catch (IdentityProviderException ex) {
             Assert.assertEquals(ex.getMessage(), "User id " + invalidUserId + " does not exist in the system.");
         }
     }
@@ -299,8 +297,7 @@ public class DefaultIdentityProviderImplTestCase {
         try {
             idpImpl.registerUser(user);
             Assert.fail("Exception was expected, but wasn't thrown");
-        } catch (Exception ex) {
-            Assert.assertTrue(ex instanceof IdentityProviderException);
+        } catch (IdentityProviderException ex) {
             Assert.assertTrue(ex.getMessage().startsWith("Error occurred while creating user."));
         }
     }

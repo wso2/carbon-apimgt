@@ -121,8 +121,7 @@ public class DefaultKeyManagerImplTestCase {
         try {
             kmImpl.createApplication(oauthAppRequest);
             Assert.fail("Exception was expected, but wasn't thrown");
-        } catch (Exception ex) {
-            Assert.assertTrue(ex instanceof KeyManagementException);
+        } catch (KeyManagementException ex) {
             Assert.assertTrue(ex.getMessage().startsWith("Error occurred while DCR application creation."));
         }
 
@@ -135,8 +134,7 @@ public class DefaultKeyManagerImplTestCase {
         try {
             kmImpl.createApplication(oauthAppRequest);
             Assert.fail("Exception was expected, but wasn't thrown");
-        } catch (Exception ex) {
-            Assert.assertTrue(ex instanceof KeyManagementException);
+        } catch (KeyManagementException ex) {
             Assert.assertTrue(ex.getMessage().startsWith("Error occurred while DCR application creation."));
         }
     }
@@ -216,8 +214,7 @@ public class DefaultKeyManagerImplTestCase {
         try {
             kmImpl.updateApplication(oauthAppRequest);
             Assert.fail("Exception was expected, but wasn't thrown");
-        } catch (Exception ex) {
-            Assert.assertTrue(ex instanceof KeyManagementException);
+        } catch (KeyManagementException ex) {
             Assert.assertTrue(ex.getMessage().startsWith("Error occurred while updating DCR application."));
         }
 
@@ -230,8 +227,7 @@ public class DefaultKeyManagerImplTestCase {
         try {
             kmImpl.updateApplication(oauthAppRequest);
             Assert.fail("Exception was expected, but wasn't thrown");
-        } catch (Exception ex) {
-            Assert.assertTrue(ex instanceof KeyManagementException);
+        } catch (KeyManagementException ex) {
             Assert.assertTrue(ex.getMessage().startsWith("Error occurred while updating DCR application."));
         }
     }
@@ -257,8 +253,7 @@ public class DefaultKeyManagerImplTestCase {
         try {
             kmImpl.deleteApplication("");
             Assert.fail("Exception was expected, but wasn't thrown");
-        } catch (Exception ex) {
-            Assert.assertTrue(ex instanceof KeyManagementException);
+        } catch (KeyManagementException ex) {
             Assert.assertTrue(ex.getMessage().equals("Unable to delete OAuth Application. Consumer Key is null " +
                     "or empty"));
         }
@@ -267,8 +262,7 @@ public class DefaultKeyManagerImplTestCase {
         try {
             kmImpl.deleteApplication(null);
             Assert.fail("Exception was expected, but wasn't thrown");
-        } catch (Exception ex) {
-            Assert.assertTrue(ex instanceof KeyManagementException);
+        } catch (KeyManagementException ex) {
             Assert.assertTrue(ex.getMessage().equals("Unable to delete OAuth Application. Consumer Key is null " +
                     "or empty"));
         }
@@ -282,8 +276,7 @@ public class DefaultKeyManagerImplTestCase {
         try {
             kmImpl.deleteApplication(consumerKey);
             Assert.fail("Exception was expected, but wasn't thrown");
-        } catch (Exception ex) {
-            Assert.assertTrue(ex instanceof KeyManagementException);
+        } catch (KeyManagementException ex) {
             Assert.assertTrue(ex.getMessage().startsWith("Error occurred while deleting DCR application."));
         }
 
@@ -336,8 +329,7 @@ public class DefaultKeyManagerImplTestCase {
         try {
             kmImpl.retrieveApplication("");
             Assert.fail("Exception was expected, but wasn't thrown");
-        } catch (Exception ex) {
-            Assert.assertTrue(ex instanceof KeyManagementException);
+        } catch (KeyManagementException ex) {
             Assert.assertTrue(ex.getMessage().equals("Unable to retrieve OAuth Application. Consumer Key is null " +
                     "or empty"));
         }
@@ -346,8 +338,7 @@ public class DefaultKeyManagerImplTestCase {
         try {
             kmImpl.retrieveApplication(null);
             Assert.fail("Exception was expected, but wasn't thrown");
-        } catch (Exception ex) {
-            Assert.assertTrue(ex instanceof KeyManagementException);
+        } catch (KeyManagementException ex) {
             Assert.assertTrue(ex.getMessage().equals("Unable to retrieve OAuth Application. Consumer Key is null " +
                     "or empty"));
         }
@@ -361,8 +352,7 @@ public class DefaultKeyManagerImplTestCase {
         try {
             kmImpl.retrieveApplication(consumerKey);
             Assert.fail("Exception was expected, but wasn't thrown");
-        } catch (Exception ex) {
-            Assert.assertTrue(ex instanceof KeyManagementException);
+        } catch (KeyManagementException ex) {
             Assert.assertTrue(ex.getMessage().startsWith("Error occurred while retrieving DCR application."));
         }
     }
@@ -544,8 +534,7 @@ public class DefaultKeyManagerImplTestCase {
         try {
             kmImpl.getNewAccessToken(null);
             Assert.fail("Exception was expected, but wasn't thrown");
-        } catch (Exception ex) {
-            Assert.assertTrue(ex instanceof KeyManagementException);
+        } catch (KeyManagementException ex) {
             Assert.assertTrue(ex.getMessage().equals("No information available to generate Token. " +
                     "AccessTokenRequest is null"));
         }
@@ -557,8 +546,7 @@ public class DefaultKeyManagerImplTestCase {
         try {
             kmImpl.getNewAccessToken(tokenRequest);
             Assert.fail("Exception was expected, but wasn't thrown");
-        } catch (Exception ex) {
-            Assert.assertTrue(ex instanceof KeyManagementException);
+        } catch (KeyManagementException ex) {
             Assert.assertTrue(ex.getMessage().contains("Invalid access token request. Unsupported grant type: " +
                     invalidGrantType));
         }
@@ -575,8 +563,7 @@ public class DefaultKeyManagerImplTestCase {
         try {
             kmImpl.getNewAccessToken(tokenRequest);
             Assert.fail("Exception was expected, but wasn't thrown");
-        } catch (Exception ex) {
-            Assert.assertTrue(ex instanceof KeyManagementException);
+        } catch (KeyManagementException ex) {
             Assert.assertTrue(ex.getMessage().equals("Error occurred while generating an access token. " +
                     "Response is null"));
         }
@@ -600,8 +587,7 @@ public class DefaultKeyManagerImplTestCase {
         try {
             kmImpl.getNewAccessToken(tokenRequest);
             Assert.fail("Exception was expected, but wasn't thrown");
-        } catch (Exception ex) {
-            Assert.assertTrue(ex instanceof KeyManagementException);
+        } catch (KeyManagementException ex) {
             Assert.assertTrue(ex.getMessage().startsWith("Token generation request failed. HTTP error code: "
                     + errorCode));
         }
@@ -675,8 +661,7 @@ public class DefaultKeyManagerImplTestCase {
         try {
             kmImpl.getTokenMetaData(accessToken);
             Assert.fail("Exception was expected, but wasn't thrown");
-        } catch (Exception ex) {
-            Assert.assertTrue(ex instanceof KeyManagementException);
+        } catch (KeyManagementException ex) {
             Assert.assertTrue(ex.getMessage().startsWith("Error occurred while introspecting access token. " +
                     "Response is null"));
         }
@@ -693,8 +678,7 @@ public class DefaultKeyManagerImplTestCase {
         try {
             kmImpl.getTokenMetaData(accessToken);
             Assert.fail("Exception was expected, but wasn't thrown");
-        } catch (Exception ex) {
-            Assert.assertTrue(ex instanceof KeyManagementException);
+        } catch (KeyManagementException ex) {
             Assert.assertTrue(ex.getMessage().startsWith("Token introspection request failed. HTTP error code: "
                     + errorCode));
         }
@@ -729,8 +713,7 @@ public class DefaultKeyManagerImplTestCase {
         try {
             kmImpl.revokeAccessToken(revokeToken, consumerKey, consumerSecret);
             Assert.fail("Exception was expected, but wasn't thrown");
-        } catch (Exception ex) {
-            Assert.assertTrue(ex instanceof KeyManagementException);
+        } catch (KeyManagementException ex) {
             Assert.assertTrue(ex.getMessage().equals("Error occurred while revoking current access token. " +
                     "Response is null"));
         }
@@ -747,8 +730,7 @@ public class DefaultKeyManagerImplTestCase {
         try {
             kmImpl.revokeAccessToken(revokeToken, consumerKey, consumerSecret);
             Assert.fail("Exception was expected, but wasn't thrown");
-        } catch (Exception ex) {
-            Assert.assertTrue(ex instanceof KeyManagementException);
+        } catch (KeyManagementException ex) {
             Assert.assertTrue(ex.getMessage().startsWith("Token revocation failed. HTTP error code: " + errorCode));
         }
     }
