@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.core.TestUtil;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Comment;
@@ -415,7 +416,12 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         API apiFromDB = apiDAO.getAPI(api.getId());
 
-        Assert.assertNull(apiDAO.getAPI(duplicateAPI.getId()));
+        try {
+            apiDAO.getAPI(duplicateAPI.getId());
+        } catch (APIMgtDAOException e) {
+            Assert.assertEquals(e.getErrorHandler(), ExceptionCodes.API_NOT_FOUND);
+        }
+
         Assert.assertEquals(apiDAO.getAPIs().size(), 1);
         Assert.assertEquals(apiFromDB, api, TestUtil.printDiff(apiFromDB, api));
     }
@@ -463,7 +469,12 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         API apiFromDB = apiDAO.getAPI(api.getId());
 
-        Assert.assertNull(apiDAO.getAPI(duplicateAPI.getId()));
+        try {
+            apiDAO.getAPI(duplicateAPI.getId());
+        } catch (APIMgtDAOException e) {
+            Assert.assertEquals(e.getErrorHandler(), ExceptionCodes.API_NOT_FOUND);
+        }
+
         Assert.assertEquals(apiDAO.getAPIs().size(), 1);
         Assert.assertEquals(apiFromDB, api, TestUtil.printDiff(apiFromDB, api));
     }
@@ -879,8 +890,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         apiDAO.deleteAPI(api.getId());
 
-        API deletedAPI = apiDAO.getAPI(api.getId());
-        Assert.assertNull(deletedAPI);
+        Assert.assertFalse(apiDAO.isAPIExists(api.getId()));
     }
 
     @Test
@@ -1112,8 +1122,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
             // Just catch the exception so that we can continue execution
         }
 
-        API apiFromDB = apiDAO.getAPI(api.getId());
-        Assert.assertNull(apiFromDB);
+        Assert.assertFalse(apiDAO.isAPIExists(api.getId()));
     }
 
     @Test

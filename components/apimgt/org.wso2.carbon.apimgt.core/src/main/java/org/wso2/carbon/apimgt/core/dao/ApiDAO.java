@@ -40,26 +40,33 @@ import javax.annotation.CheckForNull;
  * Provides access to API data layer
  */
 public interface ApiDAO {
+
+    /**
+     * Check if an API exists for a given apiID
+     * @param apiID The UUID that uniquely identifies an API
+     * @return true if API exists else false
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    boolean isAPIExists(String apiID) throws APIMgtDAOException;
+
     /**
      * Retrieve a given instance of an API
      *
      * @param apiID The UUID that uniquely identifies an API
-     * @return valid {@link API} object or null
+     * @return valid {@link API} object or throws APIMgtDAOException
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    @CheckForNull
     API getAPI(String apiID) throws APIMgtDAOException;
 
     /**
      * Retrieve a given instance of an APISummary object
      *
      * @param apiID The UUID that uniquely identifies an API
-     * @return valid {@link API} object or null
+     * @return valid {@link API} object or throws APIMgtDAOException
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    @CheckForNull
     API getAPISummary(String apiID) throws APIMgtDAOException;
 
     /**
@@ -67,21 +74,19 @@ public interface ApiDAO {
      * of the API. To get the complete API details, use {@link #getAPI(String)}
      *
      * @param apiID ID of the Composite API
-     * @return Basic information about the Composite API with {@code apiID}
+     * @return Basic information about the Composite API with {@code apiID} or throws APIMgtDAOException
      * @throws APIMgtDAOException if failed to retrieve/create API summary
      */
-    @CheckForNull
     CompositeAPI getCompositeAPISummary(String apiID) throws APIMgtDAOException;
 
     /**
      * Retrieve a given instance of a Composite API
      *
      * @param apiID The UUID that uniquely identifies a Composite API
-     * @return valid {@link CompositeAPI} object or null
+     * @return valid {@link CompositeAPI} object or throws APIMgtDAOException
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    @CheckForNull
     CompositeAPI getCompositeAPI(String apiID) throws APIMgtDAOException;
 
     /**
@@ -97,7 +102,6 @@ public interface ApiDAO {
      * @return list of Composite APIs
      * @throws APIMgtDAOException if database error occurred while querying data
      */
-    @CheckForNull
     List<CompositeAPI> getCompositeAPIs(Set<String> roles, String user, int offset, int limit)
             throws APIMgtDAOException;
 
@@ -105,7 +109,7 @@ public interface ApiDAO {
      * Retrieves the last updated time of an API
      *
      * @param apiId UUID of API
-     * @return Last updated time of API given its uuid
+     * @return Last updated time of API given its uuid or throws APIMgtDAOException
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     String getLastUpdatedTimeOfAPI(String apiId) throws APIMgtDAOException;
@@ -114,7 +118,7 @@ public interface ApiDAO {
      * Retrieves the last updated time of the swagger definition of an API
      *
      * @param apiId UUID of API
-     * @return Last updated time of Swagger definition given the uuid of API
+     * @return Last updated time of Swagger definition given the uuid of API or throws APIMgtDAOException
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     String getLastUpdatedTimeOfSwaggerDefinition(String apiId) throws APIMgtDAOException;
@@ -123,7 +127,7 @@ public interface ApiDAO {
      * Retrieves the last updated time of the gateway config of an API
      *
      * @param apiId UUID of API
-     * @return Last updated time of gateway configuration given the uuid of API
+     * @return Last updated time of gateway configuration given the uuid of API or throws APIMgtDAOException
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */ 
     String getLastUpdatedTimeOfGatewayConfig(String apiId) throws APIMgtDAOException;

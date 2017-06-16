@@ -746,32 +746,29 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
         try {
             API api = getApiDAO().getAPI(apiId);
-            if (api != null) {
-                if (api.getVersion().equals(newVersion)) {
-                    String errMsg = "New API version " + newVersion + " cannot be same as the previous version for " +
-                            "API " + api.getName();
-                    log.error(errMsg);
-                    throw new APIManagementException(errMsg, ExceptionCodes.API_ALREADY_EXISTS);
-                }
-                API.APIBuilder apiBuilder = new API.APIBuilder(api);
-                apiBuilder.id(UUID.randomUUID().toString());
-                apiBuilder.version(newVersion);
-                apiBuilder.context(api.getContext().replace(api.getVersion(), newVersion));
-                lifecycleState = getApiLifecycleManager().addLifecycle(APIMgtConstants.API_LIFECYCLE, getUsername());
-                apiBuilder.associateLifecycle(lifecycleState);
-                apiBuilder.copiedFromApiId(api.getId());
-                if (StringUtils.isEmpty(apiBuilder.getApiDefinition())) {
-                    apiBuilder.apiDefinition(apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder));
-                }
-                getApiDAO().addAPI(apiBuilder.build());
-                newVersionedId = apiBuilder.getId();
-            } else {
-                throw new APIMgtResourceNotFoundException("Requested API on UUID " + apiId + "Couldn't be found");
+
+            if (api.getVersion().equals(newVersion)) {
+                String errMsg = "New API version " + newVersion + " cannot be same as the previous version for " +
+                        "API " + api.getName();
+                log.error(errMsg);
+                throw new APIManagementException(errMsg, ExceptionCodes.API_ALREADY_EXISTS);
             }
+            API.APIBuilder apiBuilder = new API.APIBuilder(api);
+            apiBuilder.id(UUID.randomUUID().toString());
+            apiBuilder.version(newVersion);
+            apiBuilder.context(api.getContext().replace(api.getVersion(), newVersion));
+            lifecycleState = getApiLifecycleManager().addLifecycle(APIMgtConstants.API_LIFECYCLE, getUsername());
+            apiBuilder.associateLifecycle(lifecycleState);
+            apiBuilder.copiedFromApiId(api.getId());
+            if (StringUtils.isEmpty(apiBuilder.getApiDefinition())) {
+                apiBuilder.apiDefinition(apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder));
+            }
+            getApiDAO().addAPI(apiBuilder.build());
+            newVersionedId = apiBuilder.getId();
         } catch (APIMgtDAOException e) {
             String errorMsg = "Couldn't create new API version from " + apiId;
             log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         } catch (LifecycleException e) {
             String errorMsg = "Couldn't Associate  new API Lifecycle from " + apiId;
             log.error(errorMsg, e);

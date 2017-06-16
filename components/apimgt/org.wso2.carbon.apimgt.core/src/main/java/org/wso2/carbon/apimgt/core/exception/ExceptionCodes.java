@@ -64,6 +64,8 @@ public enum ExceptionCodes implements ErrorHandler {
     API_TYPE_INVALID(900327, "API Type specified is invalid.", 400, "API Type specified is invalid"),
     COMPOSITE_API_ALREADY_EXISTS(900328, "A Composite API already exists.", 409,
             "A Composite API already exists for this application"),
+    SWAGGER_NOT_FOUND(900329, "Swagger definition not found", 404, "Swagger definition not found"),
+    API_DEFINITION_NOT_FOUND(900330, "API definition not found", 404, "API definition not found"),
 
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),
