@@ -23,7 +23,7 @@ class Auth {
     constructor() {
         /* TODO: Move this to configuration ~tmkb*/
         this.host = "https://localhost:9292";
-        this.token = "/publisher/auth/apis/login/token";
+        this.token = "/login/token/publisher";
         this.isLogged = false;
         this.user = {};
         this.bearer = "Bearer ";

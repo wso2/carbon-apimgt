@@ -19,13 +19,12 @@
 import React, {Component} from 'react'
 import './login.css'
 import {Switch, Redirect} from 'react-router-dom'
-import Auth from '../../data/Auth';
+import Auth from '../../data/Auth.js';
 
-class Login extends React.Component {
+class Login extends Component {
 
     constructor(props) {
         super(props);
-        console.log("inn construct");
         this.auth = new Auth();
         this.state = {
             isLogin: false
@@ -82,7 +81,8 @@ class Login extends React.Component {
                             <div className="pull-left brand float-remove-xs text-center-xs">
                                 <a href="/publisher/">
                                     <img
-                                        src="/publisher/public/components/root/base/images/logo.svg"
+                                        src="/publisher/public/images/logo.svg"
+
                                         className="logo"/>
                                     <h1>API Publisher</h1>
                                 </a>
@@ -117,7 +117,7 @@ class Login extends React.Component {
                                 float-remove-xs pull-right-md pull-right-lg">
                                                             <img
                                                                 className="img-responsive brand-spacer"
-                                                                src="/publisher/public/components/root/base/images/logo.svg"
+                                                                src="/publisher/public/images/logo.svg"
                                                                 alt="wso2-logo"/>
                                                         </div>
                                                     </div>
@@ -131,7 +131,6 @@ class Login extends React.Component {
                                                           id="loginForm"
                                                           onKeyDown={ (e) => {
                                                               if (e.keyCode == '13') {
-                                                                  console.log("In iff");
                                                                   this.doLogin();
                                                               }
                                                           }
@@ -225,7 +224,6 @@ class Login extends React.Component {
                     <Redirect from={'/login'} to={"/apis"}/>
                 </Switch>
             );
-
     }
 }
 

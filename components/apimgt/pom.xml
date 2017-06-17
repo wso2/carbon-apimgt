@@ -40,10 +40,11 @@
         <module>org.wso2.carbon.apimgt.rest.api.store</module>
         <module>org.wso2.carbon.apimgt.rest.api.admin</module>
         <module>org.wso2.carbon.apimgt.rest.api.core</module>
-        <module>org.wso2.carbon.apimgt.rest.api.webserver</module>
         <module>org.wso2.carbon.apimgt.indexing</module>
         <module>org.wso2.carbon.apimgt.gateway.extension</module>
         <module>org.wso2.carbon.apimgt.keymanager</module>
+        <module>org.wso2.carbon.apimgt.rest.api.webserver</module>
+        <module>org.wso2.carbon.apimgt.rest.api.authenticator</module>
     </modules>
 
 </project>
