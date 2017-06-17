@@ -70,7 +70,7 @@ class Listing extends React.Component {
                 <div id="products" className="row list-group">
                     {this.state.apis ?
                         this.state.apis.list.map((api, i) => {
-                            return <ApiThumb listType={this.state.listType} api={api}/>
+                            return <ApiThumb key={api.id} listType={this.state.listType} api={api}/>
                         }) : <Loading/>
                     }
                 </div>
