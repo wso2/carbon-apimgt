@@ -30,6 +30,78 @@ class Auth {
         this.contextPath = "/publisher";
     }
 
+
+    static refreshTokenOnExpire() {
+        var timestampSkew = 100;
+        var currentTimestamp = Math.floor(Date.now() / 1000);
+        var tokenTimestamp = localStorage.getItem("expiresIn");
+        var rememberMe = (localStorage.getItem("rememberMe") == 'true');
+        if (rememberMe && (tokenTimestamp - currentTimestamp < timestampSkew)) {
+            var bearerToken = "Bearer " + AuthClient.getCookie("WSO2_AM_REFRESH_TOKEN_1");
+            var loginPromise = authManager.refresh(bearerToken);
+            loginPromise.then(function (data, status, xhr) {
+                authManager.setAuthStatus(true);
+                var expiresIn = data.validityPeriod + Math.floor(Date.now() / 1000);
+                window.localStorage.setItem("expiresIn", expiresIn);
+            });
+            loginPromise.error(
+                function (error) {
+                    var error_data = JSON.parse(error.responseText);
+                    var message = "Error while refreshing token" + "<br/> You will be redirect to the login page ...";
+                    noty({
+                        text: message,
+                        type: 'error',
+                        dismissQueue: true,
+                        modal: true,
+                        progressBar: true,
+                        timeout: 5000,
+                        layout: 'top',
+                        theme: 'relax',
+                        maxVisible: 10,
+                        callback: {
+                            afterClose: function () {
+                                window.location = loginPageUri;
+                            },
+                        }
+                    });
+
+                }
+            );
+        }
+    }
+
+    /**
+     * Static method to handle unauthorized user action error catch, It will look for response status code and skip !401 errors
+     * @param {object} error_response
+     */
+    static unauthorizedErrorHandler(error_response) {
+        if (error_response.status !== 401) { /* Skip unrelated response code to handle in unauthorizedErrorHandler*/
+            throw error_response;
+            /* re throwing the error since we don't handle it here and propagate to downstream error handlers in catch chain*/
+        }
+        let message = "The session has expired" + ".<br/> You will be redirect to the login page ...";
+        if (typeof noty !== 'undefined') {
+            noty({
+                text: message,
+                type: 'error',
+                dismissQueue: true,
+                modal: true,
+                progressBar: true,
+                timeout: 5000,
+                layout: 'top',
+                theme: 'relax',
+                maxVisible: 10,
+                callback: {
+                    afterClose: function () {
+                        window.location = loginPageUri;
+                    },
+                }
+            });
+        } else {
+            throw error_response;
+        }
+    }
+
     /**
      * Get JavaScript accessible cookies saved in browser, by giving the cooke name.
      * @param {String} name : Name of the cookie which need to be retrived
