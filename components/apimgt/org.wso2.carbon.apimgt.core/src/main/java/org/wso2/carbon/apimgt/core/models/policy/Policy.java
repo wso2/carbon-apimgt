@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.apimgt.core.models.policy;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
 /**
  * Contains the common model attributes for policy
  */
@@ -74,6 +77,9 @@ public abstract class Policy {
         isDeployed = deployed;
     }
 
+    public void populateDataInPreparedStatement(PreparedStatement preparedStatement) throws SQLException {
+        // not implemented
+    }
 
     @Override
     public String toString() {

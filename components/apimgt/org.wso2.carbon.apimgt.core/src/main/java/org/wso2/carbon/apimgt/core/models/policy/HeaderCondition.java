@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.apimgt.core.models.policy;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
 /**
  * contains {@link HeaderCondition} attributes
  */
@@ -26,7 +29,7 @@ public class HeaderCondition extends Condition {
     private String value;
 
     public HeaderCondition() {
-        setType(PolicyConstants.HEADER_TYPE);
+        setType(PolicyConstants.HEADER_CONDITION_TYPE);
     }
 
     public String getHeaderName() {
@@ -36,6 +39,11 @@ public class HeaderCondition extends Condition {
     public void setHeader(String headerName) {
         this.headerName = headerName;
         this.queryAttributeName = PolicyConstants.START_QUERY + this.headerName + PolicyConstants.END_QUERY;
+    }
+
+    public void populateDataInPreparedStatement(PreparedStatement preparedStatement) throws SQLException {
+        preparedStatement.setString(1, getHeaderName());
+        preparedStatement.setString(2, getValue());
     }
 
     public String getValue() {
