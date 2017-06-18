@@ -351,7 +351,6 @@ public interface APIMgtAdminService {
         application,
         subscription
     }
-    List<SubscriptionPolicy> getAllSubscriptionPolicies() throws APIManagementException;
 
     /**
      * Get a list of block conditions.
