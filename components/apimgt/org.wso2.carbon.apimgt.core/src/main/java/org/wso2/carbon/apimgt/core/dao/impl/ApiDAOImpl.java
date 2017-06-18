@@ -2457,21 +2457,25 @@ public class ApiDAOImpl implements ApiDAO {
     public boolean isEndpointAssociated(String endpointId) throws APIMgtDAOException {
         final String apiLevelQuery = "Select 1 FROM AM_API_ENDPOINT_MAPPING WHERE ENDPOINT_ID = ?";
         try (Connection connection = DAOUtil.getConnection()) {
-
-            try (PreparedStatement statement = connection.prepareStatement(apiLevelQuery)) {
-                statement.setString(1, endpointId);
-                try (ResultSet resultSet = statement.executeQuery()) {
-                    if (resultSet.next() || isEndpointAssociatedToOperation(connection, endpointId)) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-            }
+            return isEndpointAssociated(connection, endpointId);
         } catch (SQLException e) {
             String msg = "Error while Checking existence of endpoint usage for " + endpointId;
             log.error(msg, e);
             throw new APIMgtDAOException(msg, e);
+        }
+    }
+
+    public boolean isEndpointAssociated(Connection connection, String endpointId) throws SQLException {
+        final String apiLevelQuery = "Select 1 FROM AM_API_ENDPOINT_MAPPING WHERE ENDPOINT_ID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(apiLevelQuery)) {
+            statement.setString(1, endpointId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next() || isEndpointAssociatedToOperation(connection, endpointId)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
         }
     }
 
@@ -2774,7 +2778,9 @@ public class ApiDAOImpl implements ApiDAO {
                     String endpointId;
                     Endpoint endpoint = entry.getValue();
                     if (APIMgtConstants.API_SPECIFIC_ENDPOINT.equals(endpoint.getApplicableLevel())) {
-                        addEndpoint(connection, endpoint);
+                        if (!isEndpointExist(connection, endpoint.getName())) {
+                            addEndpoint(connection, endpoint);
+                        }
                     }
                     endpointId = endpoint.getId();
                     preparedStatement.setString(1, apiId);
@@ -2796,7 +2802,9 @@ public class ApiDAOImpl implements ApiDAO {
             apiEndPointMap.forEach((k, v) -> {
                 if (APIMgtConstants.API_SPECIFIC_ENDPOINT.equals(v.getApplicableLevel())) {
                     try {
-                        deleteEndpoint(connection, v.getId());
+                        if (!isEndpointAssociated(connection, k)) {
+                            deleteEndpoint(connection, v.getId());
+                        }
                     } catch (SQLException e) {
                         log.error("Endpoint Couldn't Delete", e);
                     }
@@ -2825,7 +2833,9 @@ public class ApiDAOImpl implements ApiDAO {
             preparedStatement.execute();
             endpoints.forEach((value) -> {
                 try {
-                    deleteEndpoint(connection, value);
+                    if (!isEndpointAssociated(connection, value)) {
+                        deleteEndpoint(connection, value);
+                    }
                 } catch (SQLException e) {
                     log.error("Couldn't delete Endpoint", e);
                 }
@@ -2869,7 +2879,9 @@ public class ApiDAOImpl implements ApiDAO {
                     String endpointId;
                     Endpoint endpoint = entry.getValue();
                     if (APIMgtConstants.API_SPECIFIC_ENDPOINT.equals(endpoint.getApplicableLevel())) {
-                        addEndpoint(connection, endpoint);
+                        if (!isEndpointExist(connection, endpoint.getName())) {
+                            addEndpoint(connection, endpoint);
+                        }
                     }
                     endpointId = endpoint.getId();
                     preparedStatement.setString(1, apiId);
