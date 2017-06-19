@@ -271,13 +271,12 @@ public class DefaultIdentityProviderImplTestCase {
 
         try {
             idpImpl.getRoleId(validRoleName);
-        } catch (Exception ex) {
-            Assert.assertTrue(ex instanceof IdentityProviderException);
+        } catch (IdentityProviderException ex) {
             Assert.assertEquals(ex.getMessage(), "More than one role with role name " + validRoleName + " exist.");
         }
     }
 
-    @Test(expectedExceptions = IdentityProviderException.class)
+    @Test
     public void testGetRoleName() throws Exception {
         SCIMServiceStub scimServiceStub = Mockito.mock(SCIMServiceStub.class);
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
@@ -307,8 +306,12 @@ public class DefaultIdentityProviderImplTestCase {
         //error path
         Mockito.when(scimServiceStub.getGroup(nonExistingRoleId)).thenReturn(null);
 
-        String roleName = idpImpl.getRoleName(nonExistingRoleId);
-        Assert.assertNull(roleName);
+        try {
+            idpImpl.getRoleName(nonExistingRoleId);
+        } catch (IdentityProviderException ex) {
+            Assert.assertEquals(ex.getMessage(),
+                    "Role with role Id " + nonExistingRoleId + " does not exist in the system.");
+        }
     }
 
     @Test
