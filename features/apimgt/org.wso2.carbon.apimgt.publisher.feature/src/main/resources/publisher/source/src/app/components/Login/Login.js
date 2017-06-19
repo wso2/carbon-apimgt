@@ -19,7 +19,7 @@
 import React, {Component} from 'react'
 import './login.css'
 import {Switch, Redirect} from 'react-router-dom'
-import AuthManager from '../../data/AuthManager.js';
+import AuthManager from '../../data/AuthManager';
 
 class Login extends Component {
 

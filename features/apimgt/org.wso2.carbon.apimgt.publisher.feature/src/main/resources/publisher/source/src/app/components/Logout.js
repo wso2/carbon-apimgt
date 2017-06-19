@@ -17,7 +17,7 @@
  */
 
 import React, {Component} from 'react'
-import AuthManager from '../data/AuthManager.js'
+import AuthManager from '../data/AuthManager'
 import {Redirect} from 'react-router-dom';
 
 class Logout extends Component {

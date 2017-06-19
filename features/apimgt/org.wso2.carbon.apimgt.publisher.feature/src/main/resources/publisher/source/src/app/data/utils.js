@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import AuthManager from "./AuthManager.js";
+import AuthManager from "./AuthManager";
 
 /**
  * Utility class for Publisher application
