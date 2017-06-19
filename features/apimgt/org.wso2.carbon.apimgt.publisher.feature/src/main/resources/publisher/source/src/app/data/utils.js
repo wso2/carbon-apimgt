@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import Auth from "./Auth";
+import AuthManager from "./AuthManager.js";
 
 /**
  * Utility class for Publisher application
@@ -28,7 +28,7 @@ class PublisherUtils {
      * @returns {promise}
      */
     static autoLogin() {
-        let auth = new Auth();
+        let auth = new AuthManager();
         return auth.authenticateUser('admin', 'admin');
     }
 

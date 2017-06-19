@@ -19,7 +19,7 @@
 import axios from 'axios';
 import qs from 'qs';
 
-class Auth {
+class AuthManager {
     constructor() {
         /* TODO: Move this to configuration ~tmkb*/
         this.host = "https://localhost:9292";
@@ -103,13 +103,13 @@ class Auth {
         let promised_response = axios.post(this.getTokenEndpoint(), qs.stringify(data), {headers: headers});
         promised_response.then(response => {
             let WSO2_AM_TOKEN_1 = response.data.partialToken;
-            Auth.setCookie('WSO2_AM_TOKEN_1', WSO2_AM_TOKEN_1);
+            AuthManager.setCookie('WSO2_AM_TOKEN_1', WSO2_AM_TOKEN_1);
         });
         return promised_response;
     }
 
     logout() {
-        var authzHeader = this.bearer + Auth.getCookie("WSO2_AM_TOKEN_1");
+        var authzHeader = this.bearer + AuthManager.getCookie("WSO2_AM_TOKEN_1");
         var url = this.contextPath + '/auth/apis/login/revoke';
         var headers = {
             'Accept': 'application/json',
@@ -137,4 +137,4 @@ class Auth {
     }
 }
 
-export default Auth;
+export default AuthManager;

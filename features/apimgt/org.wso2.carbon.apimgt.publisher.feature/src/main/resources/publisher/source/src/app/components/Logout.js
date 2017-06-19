@@ -17,13 +17,13 @@
  */
 
 import React, {Component} from 'react'
-import Auth from '../data/Auth.js'
+import AuthManager from '../data/AuthManager.js'
 import {Redirect} from 'react-router-dom';
 
 class Logout extends Component {
     constructor(props) {
         super(props);
-        this.auth = new Auth();
+        this.authManager = new AuthManager();
         this.state = {
             redirectTo: null
         }
@@ -31,9 +31,9 @@ class Logout extends Component {
     }
 
     doLogout() {
-        var logoutPromise = this.auth.logout();
+        var logoutPromise = this.authManager.logout();
         logoutPromise.then(() => {
-            this.auth.delete_cookie("WSO2_AM_TOKEN_1");
+            this.authManager.delete_cookie("WSO2_AM_TOKEN_1");
             this.setState({redirectTo: '/login'});
         });
         logoutPromise.catch((error) => {

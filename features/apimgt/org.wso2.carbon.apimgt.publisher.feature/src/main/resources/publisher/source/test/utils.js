@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import Auth from "../src/app/data/Auth.js";
+import AuthManager from "../src/app/data/AuthManager.js";
 class TestUtils {
     static setupMockEnviroment() {
         global.window = {
@@ -44,7 +44,7 @@ class TestUtils {
     }
 
     static userLogin(username = 'admin', password = 'admin') {
-        let authenticator = new Auth();
+        let authenticator = new AuthManager();
         return authenticator.authenticateUser(username, password);
     }
 }

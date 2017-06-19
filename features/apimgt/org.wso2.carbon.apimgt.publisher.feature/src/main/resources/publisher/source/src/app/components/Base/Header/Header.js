@@ -18,7 +18,7 @@
 
 import React from 'react'
 import {Link} from "react-router-dom";
-import AuthManager from '../../../data/Auth.js';
+import AuthManager from '../../../data/AuthManager.js';
 
 const Header = (props) => {
     return (
