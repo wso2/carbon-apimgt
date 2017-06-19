@@ -72,6 +72,7 @@ import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
+import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.Tag;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.User;
@@ -323,6 +324,11 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
         try {
             getApplicationDAO().addApplicationKeys(applicationId, oauthAppInfo);
+            List<SubscriptionValidationData> subscriptionValidationData = getApiSubscriptionDAO()
+                    .getAPISubscriptionsOfAppForValidation(applicationId, tokenType);
+            if (subscriptionValidationData != null && !subscriptionValidationData.isEmpty()) {
+                getApiGateway().addAPISubscription(subscriptionValidationData);
+            }
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while saving key data - " + applicationId;
             log.error(errorMsg, e);

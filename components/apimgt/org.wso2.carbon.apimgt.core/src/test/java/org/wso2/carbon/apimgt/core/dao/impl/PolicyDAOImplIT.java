@@ -71,7 +71,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         //todo: complete rest of the flow after PolicyDAO supports updating Policies
     }
 
-    @Test (description = "Add, Get and Delete an API policy", expectedExceptions = APIMgtDAOException.class)
+    @Test (description = "Add, Get and Delete an API policy")
     public void testAddGetAndDeleteApiPolicy() throws Exception {
         APIPolicy policy = SampleTestObjectCreator.createDefaultAPIPolicy();
         PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
@@ -84,11 +84,15 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         //delete policy
         policyDAO.deletePolicy(APIMgtAdminService.PolicyLevel.api, policy.getPolicyName());
         //get policy after deletion
-        Policy policyAfterDeletion = policyDAO.getApiPolicy(policy.getPolicyName());
-        Assert.assertNull(policyAfterDeletion);
+        try {
+            policyDAO.getApiPolicy(policy.getPolicyName());
+            Assert.fail("Exception expected, but not thrown.");
+        } catch (APIMgtDAOException ex) {
+            Assert.assertEquals(ex.getMessage(), "API Policy not found for name: " + addedPolicy.getPolicyName());
+        }
     }
 
-    @Test(description = "Add, Get and Delete an Application policy", expectedExceptions = APIMgtDAOException.class)
+    @Test(description = "Add, Get and Delete an Application policy")
     public void testAddGetAndDeleteApplicationPolicy() throws Exception {
         ApplicationPolicy policy = SampleTestObjectCreator.createDefaultApplicationPolicy();
         PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
@@ -102,8 +106,13 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         //delete policy
         policyDAO.deletePolicy(APIMgtAdminService.PolicyLevel.application, policy.getPolicyName());
         //get policy after deletion
-        Policy policyAfterDeletion = policyDAO.getApplicationPolicy(policy.getPolicyName());
-        Assert.assertNull(policyAfterDeletion);
+        try {
+            policyDAO.getApplicationPolicy(policy.getPolicyName());
+            Assert.fail("Exception expected, but not thrown.");
+        } catch (APIMgtDAOException ex) {
+            Assert.assertEquals(ex.getMessage(), "Application Policy not found for name: " +
+                    addedPolicy.getPolicyName());
+        }
     }
 
     @Test(description = "Get API Policies")
@@ -135,7 +144,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNotNull(policyList);
     }
 
-    @Test(description = "Add,Get and Delete Subscription Policies", expectedExceptions = APIMgtDAOException.class)
+    @Test(description = "Add,Get and Delete Subscription Policies")
     public void testAddGetDeleteSubscriptionPolicies()
             throws Exception {
         SubscriptionPolicy policy = SampleTestObjectCreator.createDefaultSubscriptionPolicy();
@@ -150,9 +159,13 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         //delete policy
         policyDAO.deletePolicy(APIMgtAdminService.PolicyLevel.subscription, policy.getPolicyName());
         //get policy after deletion
-        Policy policyAfterDeletion = policyDAO.getSubscriptionPolicy(policy.getPolicyName());
-        Assert.assertNull(policyAfterDeletion);
-
+        try {
+            policyDAO.getSubscriptionPolicy(policy.getPolicyName());
+            Assert.fail("Exception expected, but not thrown.");
+        } catch (APIMgtDAOException ex) {
+            Assert.assertEquals(ex.getMessage(), "Subscription Policy not found for name: "
+                    + addedPolicy.getPolicyName());
+        }
     }
 
     @Test(description = "Get API Policies with bandwidth limit")
@@ -165,6 +178,5 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         Policy policyAdded = policyDAO.getApiPolicy(policy.getPolicyName());
         Assert.assertNotNull(policyAdded);
         Assert.assertEquals(policyAdded.getPolicyName(), policy.getPolicyName());
-
     }
 }
