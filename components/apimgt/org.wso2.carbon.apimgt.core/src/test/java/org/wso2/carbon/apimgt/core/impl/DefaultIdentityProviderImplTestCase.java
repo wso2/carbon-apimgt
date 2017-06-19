@@ -78,8 +78,7 @@ public class DefaultIdentityProviderImplTestCase {
 
         try {
             idpImpl.getRoleNamesOfUser(invalidUserId);
-        } catch (Exception ex) {
-            Assert.assertTrue(ex instanceof IdentityProviderException);
+        } catch (IdentityProviderException ex) {
             Assert.assertEquals(ex.getMessage(), "User id " + invalidUserId + " does not exist in the system.");
         }
     }
@@ -146,8 +145,7 @@ public class DefaultIdentityProviderImplTestCase {
 
         try {
             idpImpl.getRoleIdsOfUser(invalidUserId);
-        } catch (Exception ex) {
-            Assert.assertTrue(ex instanceof IdentityProviderException);
+        } catch (IdentityProviderException ex) {
             Assert.assertEquals(ex.getMessage(), "User id " + invalidUserId + " does not exist in the system.");
         }
     }
@@ -258,11 +256,28 @@ public class DefaultIdentityProviderImplTestCase {
         DefaultIdentityProviderImpl idpImpl = new DefaultIdentityProviderImpl(scimServiceStub, dcrmServiceStub,
                 oAuth2ServiceStub);
 
-        User user = new User();
-
         //happy path
+        User user = new User();
+        user.setFirstName("john");
+        user.setLastName("doe");
+        user.setUsername("johnd");
+        user.setEmail("john@wso2.com");
+        user.setPassword(new char[] {'p', 'a', 's', 's'});
+
+        SCIMUser scimUser = new SCIMUser();
+        SCIMUser.SCIMName scimName = new SCIMUser.SCIMName();
+        scimName.setGivenName(user.getFirstName());
+        scimName.setFamilyName(user.getLastName());
+        scimUser.setName(scimName);
+        SCIMUser.SCIMUserEmails scimUserEmails = new SCIMUser.SCIMUserEmails(user.getEmail(), "home", true);
+        List<SCIMUser.SCIMUserEmails> scimUserEmailList = new ArrayList<>();
+        scimUserEmailList.add(scimUserEmails);
+        scimUser.setEmails(scimUserEmailList);
+        scimUser.setUsername(user.getUsername());
+        scimUser.setPassword(String.valueOf(user.getPassword()));
+
         Response createdResponse = Response.builder().status(201).headers(new HashMap<>()).build();
-        Mockito.when(scimServiceStub.addUser(any(SCIMUser.class))).thenReturn(createdResponse);
+        Mockito.when(scimServiceStub.addUser(scimUser)).thenReturn(createdResponse);
 
         try {
             idpImpl.registerUser(user);
@@ -282,8 +297,7 @@ public class DefaultIdentityProviderImplTestCase {
         try {
             idpImpl.registerUser(user);
             Assert.fail("Exception was expected, but wasn't thrown");
-        } catch (Exception ex) {
-            Assert.assertTrue(ex instanceof IdentityProviderException);
+        } catch (IdentityProviderException ex) {
             Assert.assertTrue(ex.getMessage().startsWith("Error occurred while creating user."));
         }
     }

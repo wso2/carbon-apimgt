@@ -23,6 +23,7 @@ import org.json.simple.JSONObject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Captures common attributes used in an OAuth Application.
@@ -139,5 +140,26 @@ public final class OAuthApplicationInfo {
                 ", parameters=" + parameters.toString() +
                 ", grantTypes=" + grantTypes +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof OAuthApplicationInfo)) {
+            return false;
+        }
+        OAuthApplicationInfo that = (OAuthApplicationInfo) o;
+        return Objects.equals(clientId, that.clientId) &&
+                Objects.equals(clientName, that.clientName) &&
+                Objects.equals(callBackURL, that.callBackURL) &&
+                Objects.equals(grantTypes, that.grantTypes) &&
+                Objects.equals(clientSecret, that.clientSecret);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(clientId, clientName, callBackURL, grantTypes, clientSecret);
     }
 }
