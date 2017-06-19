@@ -16,6 +16,7 @@
 "use strict";
 import SwaggerClient from 'swagger-client'
 import AuthClient from './Auth'
+import SingleClient from './SingleClient'
 /**
  * Manage API access keys with corresponding keys,Not related to the keymanager used in backend
  */
@@ -99,42 +100,11 @@ class API {
      * @param {string} access_key - Access key for invoking the backend REST API call.
      */
     constructor(access_key) {
-        this.client = new SwaggerClient({
-            url: this._getSwaggerURL(),
-            usePromise: true,
+        let args = {
             requestInterceptor: this._getRequestInterceptor(),
             responseInterceptor: this._getResponseInterceptor()
-        });
-        this.auth_client = new AuthClient();
-        this.client.then(
-            (swagger) => {
-                swagger.setHost("localhost:9292");
-                swagger.setSchemes(["https"]);
-                this.keyMan = new KeyManager(access_key);
-                let scopes = swagger.swaggerObject["x-wso2-security"].apim["x-wso2-scopes"];
-                for (let index in scopes) {
-                    if (scopes.hasOwnProperty(index)) {
-                        let scope_key = scopes[index].key;
-                        this.keyMan.addKey(null, scope_key);
-                        /* Fill with available scopes */
-                    }
-                }
-            }
-        );
-        this.client.catch(
-            error => {
-                var n = noty({
-                    text: error,
-                    type: 'warning',
-                    dismissQueue: true,
-                    layout: 'top',
-                    theme: 'relax',
-                    progressBar: true,
-                    timeout: 5000,
-                    closeWith: ['click']
-                });
-            }
-        );
+        };
+        this.client = new SingleClient(args).client;
     }
 
     /**
@@ -156,7 +126,7 @@ class API {
     }
 
     _getResponseInterceptor() {
-        var responseInterceptor = {
+        let responseInterceptor = {
             apply: function (data) {
                 if (data.headers.etag) {
                     API.addETag(data.url, data.headers.etag);
@@ -168,7 +138,7 @@ class API {
     }
 
     _getRequestInterceptor() {
-        var requestInterceptor = {
+        let requestInterceptor = {
             apply: function (data) {
                 if (API.getETag(data.url) && (data.method == "PUT" || data.method == "DELETE"
                     || data.method == "POST")) {
@@ -178,11 +148,6 @@ class API {
             }
         };
         return requestInterceptor;
-    }
-
-    _getSwaggerURL() {
-        /* TODO: Read this from configuration ~tmkb*/
-        return "https://localhost:9292/api/am/publisher/v1.0/apis/swagger.json";
     }
 
     /**
