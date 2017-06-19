@@ -25,7 +25,8 @@ class Auth {
         this.host = "https://localhost:9292";
         this.token = "/login/token/publisher";
         this.isLogged = false;
-        this.user = {};
+        this.username = null;
+        this.userscope = null;
         this.bearer = "Bearer ";
         this.contextPath = "/publisher";
     }
@@ -66,16 +67,16 @@ class Auth {
         return this.isLogged;
     }
 
-    setUserName(username) {
-        this.user.username = username;
+    static setUserName(username) {
+        this.username = username;
     }
 
-    getUserName() {
-        return this.user.username;
+    static getUserName() {
+        return this.username;
     }
 
     setUserScope(scope) {
-        this.user.scope = scope;
+        this.userscope = scope;
     }
 
     getUserScope() {

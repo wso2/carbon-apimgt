@@ -37,7 +37,6 @@ class Listing extends React.Component {
         let promised_apis = api.getAll();
         promised_apis.then((response) => {
             this.setState({apis: response.obj})
-
         }).catch(error => {
             if (process.env.NODE_ENV !== "production")
                 console.log(error);

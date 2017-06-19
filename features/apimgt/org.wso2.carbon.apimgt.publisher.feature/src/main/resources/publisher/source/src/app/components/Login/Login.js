@@ -38,8 +38,8 @@ class Login extends Component {
         var loginPromise = this.auth.authenticateUser(username, password);
         loginPromise.then((data) => {
             Auth.setAuthStatus(true);
-            this.auth.setUserName(data.authUser);
-            this.auth.setUserScope(data.scopes);
+            Auth.setUserName(data.data.authUser);
+            this.auth.setUserScope(data.data.scopes);
             var expiresIn = data.validityPeriod + Math.floor(Date.now() / 1000);
             window.localStorage.setItem("expiresIn", expiresIn);
             window.localStorage.setItem("user", data.authUser);
@@ -66,7 +66,7 @@ class Login extends Component {
     };
 
     render() {
-        if (!this.state.isLogin) {
+        if (!this.state.isLogin) { // If not logged in, go to login page
             return (
                 <div>
                     <meta charSet="utf-8"/>
@@ -218,7 +218,7 @@ class Login extends Component {
                     </footer>
                 </div>
             )
-        } else
+        } else // If logged in, redirect to /apis page
             return (
                 <Switch>
                     <Redirect from={'/login'} to={"/apis"}/>

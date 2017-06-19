@@ -18,6 +18,7 @@
 
 import React from 'react'
 import {Link} from "react-router-dom";
+import AuthManager from '../../../data/Auth.js';
 
 const Header = (props) => {
     return (
@@ -42,7 +43,9 @@ const Header = (props) => {
                   <i className="fw fw-circle fw-stack-2x"/>
                   <i className="fw fw-user fw-stack-1x fw-inverse"/>
                 </span>
-                            <span className="hidden-xs add-margin-left-1x">John Doe <span className="caret"/></span>
+                            <span className="hidden-xs add-margin-left-1x" id="logged-in-username">
+                                { AuthManager.getUserName()}
+                            <span className="caret"/></span>
                         </a>
                         <ul className="dropdown-menu dropdown-menu-right slideInDown" role="menu">
                             <li><a href="#">Profile Settings</a></li>
