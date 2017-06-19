@@ -50,6 +50,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
+import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -572,7 +573,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             }
             rolePermissionList.put(groupId, totalPermissionValue);
         }
-
         return rolePermissionList;
     }
 
@@ -585,28 +585,23 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @throws APIManagementException - if there is an error getting the IdentityProvider instance
      */
     private String replaceGroupNamesWithId (String permissionString) throws ParseException, APIManagementException {
-        IdentityProvider idp = APIManagerFactory.getInstance().getIdentityProvider();
-        List<String> invalidRoleList = new ArrayList<>();
         JSONArray newPermissionArray = new JSONArray();
         JSONParser jsonParser = new JSONParser();
         JSONArray permissionArray = (JSONArray) jsonParser.parse(permissionString);
-        for (Object permissionObj : permissionArray) {
-            JSONObject jsonObject = (JSONObject) permissionObj;
-            String groupName = (String) jsonObject.get(APIMgtConstants.Permission.GROUP_ID);
-            String groupId = idp.getRoleId(groupName);
-            if (groupId != null) {
+        try {
+            for (Object permissionObj : permissionArray) {
+                JSONObject jsonObject = (JSONObject) permissionObj;
+                String groupName = (String) jsonObject.get(APIMgtConstants.Permission.GROUP_ID);
+                String groupId = getIdentityProvider().getRoleId(groupName);
                 JSONObject obj = new JSONObject();
                 obj.put(APIMgtConstants.Permission.GROUP_ID, groupId);
                 obj.put(APIMgtConstants.Permission.PERMISSION, jsonObject.get(APIMgtConstants.Permission.PERMISSION));
                 newPermissionArray.add(obj);
-            } else {
-                invalidRoleList.add(groupName);
             }
-        }
-        if (!invalidRoleList.isEmpty()) {
-            String message = "The role(s) " + invalidRoleList.toString() + " is/are invalid.";
-            log.error(message);
-            throw new APIManagementException(message, ExceptionCodes.UNSUPPORTED_ROLE);
+        } catch (IdentityProviderException e) {
+            String errorMessage = "There are invalid roles in the permission string";
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, ExceptionCodes.UNSUPPORTED_ROLE);
         }
         return newPermissionArray.toJSONString();
     }
