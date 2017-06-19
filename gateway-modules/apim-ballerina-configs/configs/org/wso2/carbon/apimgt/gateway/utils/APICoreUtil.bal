@@ -2,7 +2,6 @@ package org.wso2.carbon.apimgt.gateway.utils;
 
 import ballerina.lang.errors;
 import ballerina.lang.system;
-import ballerina.lang.jsons;
 import ballerina.net.http;
 import ballerina.lang.messages;
 import org.wso2.carbon.apimgt.gateway.constants as Constants;
@@ -38,7 +37,7 @@ function loadAPIs () {
 
     json apis = getAPIs();
     int index = 0;
-    int count = jsons:getInt(apis, "count");
+    int count = (int)apis.count;
     json apiList = apis.list;
 
     while (index < count) {

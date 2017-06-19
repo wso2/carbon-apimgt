@@ -6,7 +6,6 @@ import ballerina.net.http;
 import ballerina.lang.system;
 import ballerina.lang.errors;
 import ballerina.lang.strings;
-import ballerina.lang.jsons;
 import org.wso2.carbon.apimgt.gateway.constants as Constants;
 import org.wso2.carbon.apimgt.gateway.holders as throttle;
 import org.wso2.carbon.apimgt.gateway.utils as util;
@@ -93,7 +92,7 @@ function handleThrottleUpdateMessage(json event){
 
 function handleBlockingMessage(json event) {
 
-    system:println("Received Key -  blockingCondition : " + jsons:getString(event, Constants:BLOCKING_CONDITION_KEY) + " , " +
+    system:println("Received Key -  blockingCondition : " + (string )event[Constants:BLOCKING_CONDITION_KEY] + " , " +
               "conditionValue :" + util:getJsonString(event, Constants:BLOCKING_CONDITION_VALUE));
     
     string condition = util:getJsonString(event, Constants:BLOCKING_CONDITION_KEY);
@@ -129,7 +128,7 @@ function handleBlockingMessage(json event) {
 
 function handleKeyTemplateMessage(json event) {
     
-    system:println("Received Key -  KeyTemplate : " + jsons:getString(event, Constants:KEY_TEMPLATE_KEY));
+    system:println("Received Key -  KeyTemplate : " + (string )event[Constants:KEY_TEMPLATE_KEY]);
     
     string keyTemplateValue = util:getJsonString(event, Constants:KEY_TEMPLATE_KEY);
     string keyTemplateState = util:getJsonString(event, Constants:KEY_TEMPLATE_KEY_STATE);
