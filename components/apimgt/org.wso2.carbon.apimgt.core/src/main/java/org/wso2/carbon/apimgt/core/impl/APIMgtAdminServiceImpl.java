@@ -20,10 +20,14 @@ import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.RegistrationSummary;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
+import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
+import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Implementation of APIMgtAdminService
@@ -49,81 +53,278 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         this.applicationDAO = applicationDAO;
     }
 
-    /**
-     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#getAPISubscriptions(int)
-     */
+    @Override
+    public List<Policy> getPoliciesByLevel(PolicyLevel policyLevel) throws APIManagementException {
+        try {
+            return policyDAO.getPoliciesByLevel(policyLevel);
+
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't retrieve Throttle Policies with level: " + policyLevel.name();
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e, e.getErrorHandler());
+        }
+    }
+
+    @Override
+    public Policy getPolicyByLevelAndName(PolicyLevel policyLevel, String policyName) throws APIManagementException {
+        try {
+            return policyDAO.getPolicyByLevelAndName(policyLevel, policyName);
+
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't retrieve Throttle Policy with level: " + policyLevel.name() + ", name: "
+                    + policyName;
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e.getErrorHandler());
+        }
+    }
+
     @Override
     public List<SubscriptionValidationData> getAPISubscriptions(int limit) throws APIManagementException {
         return apiSubscriptionDAO.getAPISubscriptionsOfAPIForValidation(limit);
     }
 
-    /**
-     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#getAPISubscriptionsOfApi(String, String)
-     */
     @Override
     public List<SubscriptionValidationData> getAPISubscriptionsOfApi(String apiContext, String apiVersion)
             throws APIManagementException {
         return apiSubscriptionDAO.getAPISubscriptionsOfAPIForValidation(apiContext, apiVersion);
     }
 
-    /**
-     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#addPolicy(String, Policy)
-     */
     @Override
-    public void addPolicy(String policyLevel, Policy policy) throws APIManagementException {
-        policyDAO.addPolicy(policyLevel, policy);
+    public String addApiPolicy(APIPolicy policy) throws APIManagementException {
+        try {
+            String policyUuid = policy.getUuid();
+            if (policyUuid == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Policy id is null, hence generating a new UUID for the policy with name: " + policy
+                            .getPolicyName());
+                }
+                policyUuid = UUID.randomUUID().toString();
+                policy.setUuid(policyUuid);
+            }
+            policyDAO.addApiPolicy(policy);
+            return policyUuid;
+
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't add API policy for uuid: " + policy.getUuid();
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e, e.getErrorHandler());
+        }
     }
 
-    /**
-     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#updatePolicy(Policy)
-     */
     @Override
-    public void updatePolicy(Policy policy) throws APIManagementException {
-        policyDAO.updatePolicy(policy);
+    public String addApplicationPolicy(ApplicationPolicy policy) throws APIManagementException {
+        try {
+            String policyUuid = policy.getUuid();
+            if (policyUuid == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Policy id is null, hence generating a new UUID for the policy with name: " + policy
+                            .getPolicyName());
+                }
+                policyUuid = UUID.randomUUID().toString();
+                policy.setUuid(policyUuid);
+            }
+            policyDAO.addApplicationPolicy(policy);
+            return policyUuid;
+
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't add Application for uuid: " + policy.getUuid();
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e, e.getErrorHandler());
+        }
     }
 
-    /**
-     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#deletePolicy(String, String)
-     */
     @Override
-    public void deletePolicy(String policyName, String policyLevel) throws APIManagementException {
-        policyDAO.deletePolicy(policyName, policyLevel);
+    public String addSubscriptionPolicy(SubscriptionPolicy policy) throws APIManagementException {
+        try {
+            String policyUuid = policy.getUuid();
+            if (policyUuid == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Policy id is null, hence generating a new UUID for the policy with name: " + policy
+                            .getPolicyName());
+                }
+                policyUuid = UUID.randomUUID().toString();
+                policy.setUuid(policyUuid);
+            }
+            policyDAO.addSubscriptionPolicy(policy);
+            return policyUuid;
+
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't add Subscription policy for uuid: " + policy.getUuid();
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e, e.getErrorHandler());
+        }
     }
 
-    /**
-     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#deletePolicyByUuid(String, String)
-     */
-    @Override public void deletePolicyByUuid(String uuid, String policyLevel) throws APIManagementException {
-        policyDAO.deletePolicyByUuid(uuid, policyLevel);
-    }
-
-    /**
-     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#getPolicy(String, String)
-     */
     @Override
-    public Policy getPolicy(String policyLevel, String policyName) throws APIManagementException {
-        return policyDAO.getPolicy(policyLevel, policyName);
+    public void updateApiPolicy(APIPolicy policy) throws APIManagementException {
+        try {
+            policyDAO.updateApiPolicy(policy);
+
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't update API policy for uuid: " + policy.getUuid();
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e, e.getErrorHandler());
+        }
     }
 
-    /**
-     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#getPolicyByUuid(String, String)
-     */
     @Override
-    public Policy getPolicyByUuid(String uuid, String policyLevel) throws APIManagementException {
-        return policyDAO.getPolicyByUuid(uuid, policyLevel);
+    public void updateSubscriptionPolicy(SubscriptionPolicy policy) throws APIManagementException {
+        try {
+            policyDAO.updateSubscriptionPolicy(policy);
+
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't update Subscription policy for uuid: " + policy.getUuid();
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e, e.getErrorHandler());
+        }
     }
 
-    /**
-     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#getAllPoliciesByLevel(String)
-     */
     @Override
-    public List<Policy> getAllPoliciesByLevel(String policyLevel) throws APIManagementException {
-        return policyDAO.getPolicies(policyLevel);
+    public void updateApplicationPolicy(ApplicationPolicy policy) throws APIManagementException {
+        try {
+            policyDAO.updateApplicationPolicy(policy);
+
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't update Application policy for uuid: " + policy.getUuid();
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e, e.getErrorHandler());
+        }
     }
 
-    /**
-     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#deleteLabel(String)
-     */
+    @Override
+    public void deletePolicy(String policyName, PolicyLevel policyLevel) throws APIManagementException {
+        try {
+            policyDAO.deletePolicy(policyLevel, policyName);
+
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't update application policy with name: " + policyName + ", level: " +
+                    policyLevel;
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e, e.getErrorHandler());
+        }
+    }
+
+    @Override
+    public void deletePolicyByUuid(String uuid, PolicyLevel policyLevel) throws APIManagementException {
+        try {
+            policyDAO.deletePolicyByUuid(policyLevel, uuid);
+
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't update application policy with id: " + uuid + ", level: " + policyLevel;
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e, e.getErrorHandler());
+        }
+    }
+
+    @Override
+    public APIPolicy getApiPolicy(String policyName) throws APIManagementException {
+
+        try {
+            return policyDAO.getApiPolicy(policyName);
+
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't retrieve API policy with name: " + policyName;
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e, e.getErrorHandler());
+        }
+    }
+
+    @Override
+    public SubscriptionPolicy getSubscriptionPolicy(String policyName) throws APIManagementException {
+
+        try {
+            return policyDAO.getSubscriptionPolicy(policyName);
+
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't retrieve Subscription policy with name: " + policyName;
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e, e.getErrorHandler());
+        }
+    }
+
+    @Override
+    public ApplicationPolicy getApplicationPolicy(String policyName) throws APIManagementException {
+
+        try {
+            return policyDAO.getApplicationPolicy(policyName);
+
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't retrieve Application policy with name: " + policyName;
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e, e.getErrorHandler());
+        }
+    }
+
+    @Override
+    public APIPolicy getApiPolicyByUuid(String uuid) throws APIManagementException {
+        try {
+            return policyDAO.getApiPolicyByUuid(uuid);
+
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't retrieve API policy with id: " + uuid;
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e, e.getErrorHandler());
+        }
+    }
+
+    @Override
+    public ApplicationPolicy getApplicationPolicyByUuid(String uuid) throws APIManagementException {
+        try {
+            return policyDAO.getApplicationPolicyByUuid(uuid);
+
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't retrieve Application policy with id: " + uuid;
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e, e.getErrorHandler());
+        }
+
+    }
+
+    @Override
+    public SubscriptionPolicy getSubscriptionPolicyByUuid(String uuid) throws APIManagementException {
+        try {
+            return policyDAO.getSubscriptionPolicyByUuid(uuid);
+
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't retrieve Subscription policy with id: " + uuid;
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e, e.getErrorHandler());
+        }
+    }
+
+    @Override
+    public List<APIPolicy> getApiPolicies() throws APIManagementException {
+        try {
+            return policyDAO.getApiPolicies();
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't retrieve API policies";
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e, e.getErrorHandler());
+        }
+    }
+
+    @Override
+    public List<ApplicationPolicy> getApplicationPolicies() throws APIManagementException {
+        try {
+            return policyDAO.getApplicationPolicies();
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't retrieve Application policies";
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e, e.getErrorHandler());
+        }
+    }
+
+    @Override
+    public List<SubscriptionPolicy> getSubscriptionPolicies() throws APIManagementException {
+        try {
+            return policyDAO.getSubscriptionPolicies();
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't retrieve Subscription policies";
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e, e.getErrorHandler());
+        }
+    }
+
     @Override
     public void deleteLabel(String labelId) throws APIManagementException {
 
@@ -136,9 +337,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
     }
 
-    /**
-     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#registerGatewayLabels(List, String)
-     */
     @Override
     public void registerGatewayLabels(List<Label> labels, String overwriteLabels) throws APIManagementException {
 
@@ -178,9 +376,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
 
     }
 
-    /**
-     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#getAPIGatewayServiceConfig(String) (String)
-     */
     @Override
     public String getAPIGatewayServiceConfig(String apiId) throws APIConfigRetrievalException {
         try {
@@ -192,9 +387,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
     }
 
-    /**
-     * @see org.wso2.carbon.apimgt.core.api.APIMgtAdminService#getAllResourcesForApi(String, String)
-     */
     @Override
     public List<UriTemplate> getAllResourcesForApi(String apiContext, String apiVersion) throws APIManagementException {
         try {

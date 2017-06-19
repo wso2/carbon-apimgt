@@ -7,29 +7,29 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomRuleDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationThrottlePolicyDTO;
 import java.util.Objects;
 
 /**
- * CustomRuleListDTO
+ * ApplicationThrottlePolicyListDTO
  */
-public class CustomRuleListDTO   {
+public class ApplicationThrottlePolicyListDTO   {
   @JsonProperty("count")
   private Integer count = null;
 
   @JsonProperty("list")
-  private List<CustomRuleDTO> list = new ArrayList<CustomRuleDTO>();
+  private List<ApplicationThrottlePolicyDTO> list = new ArrayList<ApplicationThrottlePolicyDTO>();
 
-  public CustomRuleListDTO count(Integer count) {
+  public ApplicationThrottlePolicyListDTO count(Integer count) {
     this.count = count;
     return this;
   }
 
    /**
-   * Number of Custom Rules returned. 
+   * Number of Application throttle policies returned. 
    * @return count
   **/
-  @ApiModelProperty(example = "1", value = "Number of Custom Rules returned. ")
+  @ApiModelProperty(example = "1", value = "Number of Application throttle policies returned. ")
   public Integer getCount() {
     return count;
   }
@@ -38,12 +38,12 @@ public class CustomRuleListDTO   {
     this.count = count;
   }
 
-  public CustomRuleListDTO list(List<CustomRuleDTO> list) {
+  public ApplicationThrottlePolicyListDTO list(List<ApplicationThrottlePolicyDTO> list) {
     this.list = list;
     return this;
   }
 
-  public CustomRuleListDTO addListItem(CustomRuleDTO listItem) {
+  public ApplicationThrottlePolicyListDTO addListItem(ApplicationThrottlePolicyDTO listItem) {
     this.list.add(listItem);
     return this;
   }
@@ -53,11 +53,11 @@ public class CustomRuleListDTO   {
    * @return list
   **/
   @ApiModelProperty(value = "")
-  public List<CustomRuleDTO> getList() {
+  public List<ApplicationThrottlePolicyDTO> getList() {
     return list;
   }
 
-  public void setList(List<CustomRuleDTO> list) {
+  public void setList(List<ApplicationThrottlePolicyDTO> list) {
     this.list = list;
   }
 
@@ -70,9 +70,9 @@ public class CustomRuleListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    CustomRuleListDTO customRuleList = (CustomRuleListDTO) o;
-    return Objects.equals(this.count, customRuleList.count) &&
-        Objects.equals(this.list, customRuleList.list);
+    ApplicationThrottlePolicyListDTO applicationThrottlePolicyList = (ApplicationThrottlePolicyListDTO) o;
+    return Objects.equals(this.count, applicationThrottlePolicyList.count) &&
+        Objects.equals(this.list, applicationThrottlePolicyList.list);
   }
 
   @Override
@@ -83,7 +83,7 @@ public class CustomRuleListDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class CustomRuleListDTO {\n");
+    sb.append("class ApplicationThrottlePolicyListDTO {\n");
     
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
     sb.append("    list: ").append(toIndentedString(list)).append("\n");

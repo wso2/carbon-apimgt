@@ -149,16 +149,21 @@ public enum ExceptionCodes implements ErrorHandler {
     OAUTH2_APP_UPDATE_FAILED(900953, "Key Management Error", 500, "Error while updating the consumer application."),
     OAUTH2_APP_RETRIEVAL_FAILED(900954, "Key Management Error", 500, "Error while retrieving the consumer application."
     ),
-    OAUTH2_APP_MAP_FAILED(900955, "Key Management Error", 500, "Error while mapping an existing consumer application."),
-    TOKEN_INTROSPECTION_FAILED(900956, "Key Management Error", 500, "Error while introspecting the access token."),
-    ACCESS_TOKEN_GENERATION_FAILED(900957, "Key Management Error", 500, "Error while generating a new access token."),
-    INVALID_TOKEN_REQUEST(900958, "Key Management Error", 400, "Invalid access token request."),
-    ACCESS_TOKEN_REVOKE_FAILED(900959, "Key Management Error", 500, "Error while revoking the access token."),
-
-
+    APPLICATION_TOKEN_GENERATION_FAILED(900957, "Keymanagement Error", 500, " Error while generating the application" +
+            "access token."),
+    UNSUPPORTED_THROTTLE_LIMIT_TYPE(900960, "Throttle Policy Error", 400, "Throttle Limit type is not supported"),
+    POLICY_NOT_FOUND(900961, "Policy Not found", 404, "Failed to retrieve Policy Definition"),
+    OAUTH2_APP_MAP_FAILED(900962, "Key Management Error", 500, "Error while mapping an existing consumer application."),
+    TOKEN_INTROSPECTION_FAILED(900963, "Key Management Error", 500, "Error while introspecting the access token."),
+    ACCESS_TOKEN_GENERATION_FAILED(900964, "Key Management Error", 500, "Error while generating a new access token."),
+    INVALID_TOKEN_REQUEST(900965, "Key Management Error", 400, "Invalid access token request."),
+    ACCESS_TOKEN_REVOKE_FAILED(900966, "Key Management Error", 500, "Error while revoking the access token."),
+    INTERNAL_ERROR(900967, "General Error", 500, "Server Error Occurred"),
+    POLICY_LEVEL_NOT_SUPPORTED(900968, "Throttle Policy level invalid", 400, "Specified Throttle policy level is not "
+            + "valid"),
     //Throttle related codes
-    THROTTLE_TEMPLATE_EXCEPTION(900960, "Policy Generating Error", 500, " Error while generate policy configuration"),
-    ENDPOINT_CONFIG_NOT_FOUND(900961, "Endpoint Config Not found", 404, "Error while retrieving Endpoint " +
+    THROTTLE_TEMPLATE_EXCEPTION(900969, "Policy Generating Error", 500, " Error while generate policy configuration"),
+    ENDPOINT_CONFIG_NOT_FOUND(90070, "Endpoint Config Not found", 404, "Error while retrieving Endpoint " +
             "Configuration");
 
     private final long errorCode;

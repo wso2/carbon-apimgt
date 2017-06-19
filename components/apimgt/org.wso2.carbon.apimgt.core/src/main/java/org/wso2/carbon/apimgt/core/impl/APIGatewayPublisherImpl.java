@@ -51,8 +51,8 @@ public class APIGatewayPublisherImpl implements APIGateway {
 
     public APIGatewayPublisherImpl() {
         config = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
-        publisherTopic = config.getBrokerConfiguration().getPublisherTopic();
-        storeTopic = config.getBrokerConfiguration().getStoreTopic();
+        publisherTopic = config.getBrokerConfigurations().getPublisherTopic();
+        storeTopic = config.getBrokerConfigurations().getStoreTopic();
     }
 
     @Override
