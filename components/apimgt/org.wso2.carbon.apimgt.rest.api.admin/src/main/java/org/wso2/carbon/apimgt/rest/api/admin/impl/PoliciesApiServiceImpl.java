@@ -307,7 +307,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
     public Response policiesThrottlingCustomGet(String accept, String ifNoneMatch, String ifModifiedSince,
             Request request) throws NotFoundException {
         if (log.isDebugEnabled()) {
-            log.info("Received Custom Policy GET request.");
+            log.debug("Received Custom Policy GET request.");
         }
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
@@ -336,7 +336,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
     public Response policiesThrottlingCustomPost(CustomRuleDTO body, String contentType, Request request)
             throws NotFoundException {
         if (log.isDebugEnabled()) {
-            log.info("Received Custom Policy POST request " + body);
+            log.debug("Received Custom Policy POST request " + body);
         }
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
@@ -367,7 +367,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
     public Response policiesThrottlingCustomRuleIdDelete(String ruleId, String ifMatch,
             String ifUnmodifiedSince, Request request) throws NotFoundException {
         if (log.isDebugEnabled()) {
-            log.info("Received Custom Policy DELETE request with rule ID = " + ruleId);
+            log.debug("Received Custom Policy DELETE request with rule ID = " + ruleId);
         }
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
@@ -398,7 +398,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
     public Response policiesThrottlingCustomRuleIdGet(String ruleId, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
         if (log.isDebugEnabled()) {
-            log.info("Received Custom Policy GET request with rule ID = " + ruleId);
+            log.debug("Received Custom Policy GET request with rule ID = " + ruleId);
         }
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
@@ -429,7 +429,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
     public Response policiesThrottlingCustomRuleIdPut(String ruleId, CustomRuleDTO body, String contentType,
             String ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
         if (log.isDebugEnabled()) {
-            log.info("Received Custom Policy PUT request " + body + " with rule ID = " + ruleId);
+            log.debug("Received Custom Policy PUT request " + body + " with rule ID = " + ruleId);
         }
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();

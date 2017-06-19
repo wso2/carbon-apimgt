@@ -41,7 +41,7 @@ public class BlacklistApiServiceImpl extends BlacklistApiService {
     public Response blacklistConditionIdDelete(String conditionId, String ifMatch, String ifUnmodifiedSince,
             Request request) throws NotFoundException {
         if (log.isDebugEnabled()) {
-            log.info("Received Blacklist Condition DELETE request with id: " + conditionId);
+            log.debug("Received Blacklist Condition DELETE request with id: " + conditionId);
         }
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
@@ -69,7 +69,7 @@ public class BlacklistApiServiceImpl extends BlacklistApiService {
     public Response blacklistConditionIdGet(String conditionId, String ifNoneMatch, String ifModifiedSince,
             Request request) throws NotFoundException {
         if (log.isDebugEnabled()) {
-            log.info("Received BlockCondition GET request with id: " + conditionId);
+            log.debug("Received BlockCondition GET request with id: " + conditionId);
         }
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
@@ -101,7 +101,7 @@ public class BlacklistApiServiceImpl extends BlacklistApiService {
     public Response blacklistConditionIdPut(String conditionId, BlockingConditionDTO body, String contentType,
             String ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
         if (log.isDebugEnabled()) {
-            log.info("Received BlockCondition GET request with id: " + conditionId);
+            log.debug("Received BlockCondition GET request with id: " + conditionId);
         }
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
@@ -135,7 +135,7 @@ public class BlacklistApiServiceImpl extends BlacklistApiService {
     public Response blacklistGet(String accept, String ifNoneMatch, String ifModifiedSince, Request request)
             throws NotFoundException {
         if (log.isDebugEnabled()) {
-            log.info("Received BlockCondition GET request");
+            log.debug("Received BlockCondition GET request");
         }
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
@@ -164,7 +164,7 @@ public class BlacklistApiServiceImpl extends BlacklistApiService {
     public Response blacklistPost(BlockingConditionDTO body, String contentType, Request request)
             throws NotFoundException {
         if (log.isDebugEnabled()) {
-            log.info("Received BlockCondition POST request with body: " + body);
+            log.debug("Received BlockCondition POST request with body: " + body);
         }
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();

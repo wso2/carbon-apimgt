@@ -217,7 +217,6 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertEquals(policyAdded.getPolicyName(), policy.getPolicyName());
     }
 
-<<<<<<< 455285148bfc7892f9ab8ebcca1385f3140938cb
     @Test(description = "policy exists test")
     public void testPolicyExists () throws Exception {
         PolicyDAO policyDAO = DAOFactory.getPolicyDAO();

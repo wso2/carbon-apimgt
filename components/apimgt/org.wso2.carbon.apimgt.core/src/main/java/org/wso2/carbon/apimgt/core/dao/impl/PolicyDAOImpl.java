@@ -1765,8 +1765,6 @@ public class PolicyDAOImpl implements PolicyDAO {
 
     @Override
     public String addBlockConditions(BlockConditions blockConditions) throws APIMgtDAOException {
-        Connection connection = null;
-        PreparedStatement insertPreparedStatement = null;
         boolean status = false;
         boolean valid = false;
         String uuid = null;
@@ -1779,7 +1777,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                     valid = true;
                 } else {
                     throw new APIMgtDAOException(
-                            "Couldn't Save Block Condition Due to Invalid API Context " + conditionValue);
+                            "Couldn't Save Block Condition Due to Invalid API Context : " + conditionValue);
                 }
             } else if (APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_APPLICATION.equals(conditionType)) {
                 String appArray[] = conditionValue.split(":");
@@ -1791,7 +1789,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                         valid = true;
                     } else {
                         throw new APIMgtDAOException(
-                                "Couldn't Save Block Condition Due to Invalid Application " + appName + " UUID :"
+                                "Couldn't Save Block Condition Due to Invalid Application : " + appName + ", UUID :"
                                         + appUuid);
                     }
                 }
@@ -1803,48 +1801,39 @@ public class PolicyDAOImpl implements PolicyDAO {
                 valid = isIPRangeConditionValid(blockConditions.getStartingIP(), blockConditions.getEndingIP());
             }
             if (valid) {
-                connection = DAOUtil.getConnection();
-                connection.setAutoCommit(false);
-                if (!isBlockConditionExist(blockConditions)) {
-                    uuid = UUID.randomUUID().toString();
-                    insertPreparedStatement = connection.prepareStatement(query);
-                    insertPreparedStatement.setString(1, conditionType);
-                    insertPreparedStatement.setString(2, conditionValue);
-                    insertPreparedStatement.setBoolean(3, blockConditions.isEnabled());
-                    insertPreparedStatement.setString(4, uuid);
-                    insertPreparedStatement.execute();
-                    if (APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITION_IP_RANGE.equals(conditionType)) {
-                        String ipConditionQuery = "INSERT INTO AM_IP_RANGE_CONDITION (STARTING_IP, ENDING_IP, UUID)"
-                                + " VALUES (?, ?, ?)";
-                        try (PreparedStatement ipStatement = connection.prepareStatement(ipConditionQuery)) {
-                            ipStatement.setString(1, blockConditions.getStartingIP());
-                            ipStatement.setString(2, blockConditions.getEndingIP());
-                            ipStatement.setString(3, uuid);
-                            ipStatement.execute();
-                        } catch (SQLException e) {
-                            connection.rollback();
+                try (Connection connection = DAOUtil.getConnection();
+                        PreparedStatement insertPreparedStatement = connection.prepareStatement(query)) {
+                    connection.setAutoCommit(false);
+                    if (!isBlockConditionExist(blockConditions)) {
+                        uuid = UUID.randomUUID().toString();
+                        insertPreparedStatement.setString(1, conditionType);
+                        insertPreparedStatement.setString(2, conditionValue);
+                        insertPreparedStatement.setBoolean(3, blockConditions.isEnabled());
+                        insertPreparedStatement.setString(4, uuid);
+                        insertPreparedStatement.execute();
+                        if (APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITION_IP_RANGE.equals(conditionType)) {
+                            String ipConditionQuery = "INSERT INTO AM_IP_RANGE_CONDITION (STARTING_IP, ENDING_IP, UUID)"
+                                    + " VALUES (?, ?, ?)";
+                            try (PreparedStatement ipStatement = connection.prepareStatement(ipConditionQuery)) {
+                                ipStatement.setString(1, blockConditions.getStartingIP());
+                                ipStatement.setString(2, blockConditions.getEndingIP());
+                                ipStatement.setString(3, uuid);
+                                ipStatement.execute();
+                            } catch (SQLException e) {
+                                connection.rollback();
+                            }
                         }
+                        connection.commit();
+                        status = true;
+                    } else {
+                        throw new BlockConditionAlreadyExistsException(
+                                "Condition with type: " + conditionType + ", value: " + conditionValue
+                                        + " already exists");
                     }
-                    connection.commit();
-                    status = true;
-                } else {
-                    throw new BlockConditionAlreadyExistsException(
-                            "Condition with type: " + conditionType + ", value: " + conditionValue + " already exists");
                 }
             }
         } catch (SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ex) {
-                    handleException(
-                            "Failed to rollback adding Block condition : " + conditionType + " and " + conditionValue,
-                            ex);
-                }
-            }
             handleException("Failed to add Block condition : " + conditionType + " and " + conditionValue, e);
-        } finally {
-            DAOUtil.closeAllConnections(insertPreparedStatement, connection, null);
         }
         if (status) {
             return uuid;
@@ -1855,136 +1844,99 @@ public class PolicyDAOImpl implements PolicyDAO {
 
     @Override
     public BlockConditions getBlockConditionByUUID(String uuid) throws APIMgtDAOException {
-        Connection connection = null;
-        PreparedStatement selectPreparedStatement = null;
-        ResultSet resultSet = null;
         BlockConditions blockCondition = new BlockConditions();
-        try {
-            String query = "SELECT CONDITION_ID,TYPE,VALUE,ENABLED,UUID FROM AM_BLOCK_CONDITIONS WHERE UUID =?";
-            connection = DAOUtil.getConnection();
+        String query = "SELECT CONDITION_ID,TYPE,VALUE,ENABLED,UUID FROM AM_BLOCK_CONDITIONS WHERE UUID =?";
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement selectPreparedStatement = connection.prepareStatement(query)) {
             connection.setAutoCommit(true);
-            selectPreparedStatement = connection.prepareStatement(query);
             selectPreparedStatement.setString(1, uuid);
-            resultSet = selectPreparedStatement.executeQuery();
-            if (resultSet.next()) {
-                blockCondition.setEnabled(resultSet.getBoolean("ENABLED"));
-                blockCondition.setConditionType(resultSet.getString("TYPE"));
-                blockCondition.setConditionValue(resultSet.getString("VALUE"));
-                blockCondition.setConditionId(resultSet.getInt("CONDITION_ID"));
-                blockCondition.setUuid(resultSet.getString("UUID"));
-                if (blockCondition.getConditionType()
-                        .equals(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITION_IP_RANGE)) {
-                    String ipQuery = "SELECT STARTING_IP, ENDING_IP FROM AM_IP_RANGE_CONDITION WHERE UUID = ?";
-                    try (PreparedStatement selectIpStatement = connection.prepareStatement(ipQuery)) {
-                        selectIpStatement.setString(1, uuid);
-                        ResultSet rs = selectIpStatement.executeQuery();
-                        if (rs.next()) {
-                            blockCondition.setStartingIP(rs.getString("STARTING_IP"));
-                            blockCondition.setEndingIP(rs.getString("ENDING_IP"));
+            try (ResultSet resultSet = selectPreparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    blockCondition.setEnabled(resultSet.getBoolean("ENABLED"));
+                    blockCondition.setConditionType(resultSet.getString("TYPE"));
+                    blockCondition.setConditionValue(resultSet.getString("VALUE"));
+                    blockCondition.setConditionId(resultSet.getInt("CONDITION_ID"));
+                    blockCondition.setUuid(resultSet.getString("UUID"));
+                    if (blockCondition.getConditionType()
+                            .equals(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITION_IP_RANGE)) {
+                        String ipQuery = "SELECT STARTING_IP, ENDING_IP FROM AM_IP_RANGE_CONDITION WHERE UUID = ?";
+                        try (PreparedStatement selectIpStatement = connection.prepareStatement(ipQuery)) {
+                            selectIpStatement.setString(1, uuid);
+                            ResultSet rs = selectIpStatement.executeQuery();
+                            if (rs.next()) {
+                                blockCondition.setStartingIP(rs.getString("STARTING_IP"));
+                                blockCondition.setEndingIP(rs.getString("ENDING_IP"));
+                            }
+                            rs.close();
+                        } catch (SQLException e) {
+                            connection.rollback();
                         }
-                        rs.close();
-                    } catch (SQLException e) {
-                        connection.rollback();
                     }
                 }
             }
         } catch (SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ex) {
-                    handleException("Failed to rollback getting Block condition by uuid " + uuid, ex);
-                }
-            }
             handleException("Failed to get Block condition by uuid " + uuid, e);
-        } finally {
-            DAOUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
         }
         return blockCondition;
     }
 
     @Override
     public List<BlockConditions> getBlockConditions() throws APIMgtDAOException {
-        Connection connection = null;
-        PreparedStatement selectPreparedStatement = null;
-        ResultSet resultSet = null;
         List<BlockConditions> blockConditionsList = new ArrayList<BlockConditions>();
-        try {
-            String query =
-                    "SELECT CONDITION_ID, TYPE, VALUE, ENABLED, AM_BLOCK_CONDITIONS.UUID, STARTING_IP, ENDING_IP "
-                            + "FROM AM_BLOCK_CONDITIONS LEFT JOIN AM_IP_RANGE_CONDITION ON "
-                            + "AM_BLOCK_CONDITIONS.UUID = AM_IP_RANGE_CONDITION.UUID";
-
-            connection = DAOUtil.getConnection();
+        String query = "SELECT CONDITION_ID, TYPE, VALUE, ENABLED, AM_BLOCK_CONDITIONS.UUID, STARTING_IP, ENDING_IP "
+                + "FROM AM_BLOCK_CONDITIONS LEFT JOIN AM_IP_RANGE_CONDITION ON "
+                + "AM_BLOCK_CONDITIONS.UUID = AM_IP_RANGE_CONDITION.UUID";
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement selectPreparedStatement = connection.prepareStatement(query)) {
             connection.setAutoCommit(true);
-            selectPreparedStatement = connection.prepareStatement(query);
-            resultSet = selectPreparedStatement.executeQuery();
-            while (resultSet.next()) {
-                BlockConditions blockConditions = new BlockConditions();
-                blockConditions.setEnabled(resultSet.getBoolean("ENABLED"));
-                blockConditions.setConditionType(resultSet.getString("TYPE"));
-                blockConditions.setConditionValue(resultSet.getString("VALUE"));
-                blockConditions.setConditionId(resultSet.getInt("CONDITION_ID"));
-                blockConditions.setUuid(resultSet.getString("UUID"));
-                blockConditions.setStartingIP(resultSet.getString("STARTING_IP"));
-                blockConditions.setEndingIP(resultSet.getString("ENDING_IP"));
-                blockConditionsList.add(blockConditions);
-            }
-        } catch (SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ex) {
-                    handleException("Failed to rollback getting Block conditions ", ex);
+            try (ResultSet resultSet = selectPreparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    BlockConditions blockConditions = new BlockConditions();
+                    blockConditions.setEnabled(resultSet.getBoolean("ENABLED"));
+                    blockConditions.setConditionType(resultSet.getString("TYPE"));
+                    blockConditions.setConditionValue(resultSet.getString("VALUE"));
+                    blockConditions.setConditionId(resultSet.getInt("CONDITION_ID"));
+                    blockConditions.setUuid(resultSet.getString("UUID"));
+                    blockConditions.setStartingIP(resultSet.getString("STARTING_IP"));
+                    blockConditions.setEndingIP(resultSet.getString("ENDING_IP"));
+                    blockConditionsList.add(blockConditions);
                 }
             }
+        } catch (SQLException e) {
             handleException("Failed to get Block conditions", e);
-        } finally {
-            DAOUtil.closeAllConnections(selectPreparedStatement, connection, resultSet);
         }
         return blockConditionsList;
     }
 
     @Override
     public boolean updateBlockConditionStateByUUID(String uuid, Boolean state) throws APIMgtDAOException {
-        Connection connection = null;
-        PreparedStatement updateBlockConditionPreparedStatement = null;
         boolean status = false;
-        try {
-            String query = "UPDATE AM_BLOCK_CONDITIONS SET ENABLED = ? WHERE UUID = ?";
-            connection = DAOUtil.getConnection();
+        String query = "UPDATE AM_BLOCK_CONDITIONS SET ENABLED = ? WHERE UUID = ?";
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement updateBlockConditionPreparedStatement = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
-            updateBlockConditionPreparedStatement = connection.prepareStatement(query);
             updateBlockConditionPreparedStatement.setBoolean(1, state);
             updateBlockConditionPreparedStatement.setString(2, uuid);
             updateBlockConditionPreparedStatement.executeUpdate();
             connection.commit();
             status = true;
         } catch (SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ex) {
-                    handleException("Failed to rollback updating Block condition with condition UUID " + uuid, ex);
-                }
-            }
             handleException("Failed to update Block condition with condition UUID " + uuid, e);
-        } finally {
-            DAOUtil.closeAllConnections(updateBlockConditionPreparedStatement, connection, null);
         }
         return status;
     }
 
     @Override
     public boolean deleteBlockConditionByUuid(String uuid) throws APIMgtDAOException {
-        Connection connection = null;
-        PreparedStatement deleteBlockConditionPreparedStatement = null;
         boolean status = false;
-        try {
+        try (Connection connection = DAOUtil.getConnection()) {
             String query = "DELETE FROM AM_BLOCK_CONDITIONS WHERE UUID=?";
             String ipRangeQuery = "DELETE FROM AM_IP_RANGE_CONDITION WHERE UUID = ?";
-            connection = DAOUtil.getConnection();
             connection.setAutoCommit(false);
+            try (PreparedStatement deleteBlockConditionPreparedStatement = connection.prepareStatement(query)) {
+                deleteBlockConditionPreparedStatement.setString(1, uuid);
+                deleteBlockConditionPreparedStatement.execute();
+            }
             try (PreparedStatement deleteIpRangeStatement = connection.prepareStatement(ipRangeQuery)) {
                 deleteIpRangeStatement.setString(1, uuid);
                 deleteIpRangeStatement.execute();
@@ -1992,22 +1944,10 @@ public class PolicyDAOImpl implements PolicyDAO {
             } catch (SQLException e) {
                 connection.rollback();
             }
-            deleteBlockConditionPreparedStatement = connection.prepareStatement(query);
-            deleteBlockConditionPreparedStatement.setString(1, uuid);
-            deleteBlockConditionPreparedStatement.execute();
             connection.commit();
             status = true;
         } catch (SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ex) {
-                    handleException("Failed to rollback deleting Block condition with condition UUID " + uuid, ex);
-                }
-            }
             handleException("Failed to delete Block condition with condition UUID " + uuid, e);
-        } finally {
-            DAOUtil.closeAllConnections(deleteBlockConditionPreparedStatement, connection, null);
         }
         return status;
     }
@@ -2040,31 +1980,31 @@ public class PolicyDAOImpl implements PolicyDAO {
     @Override
     public List<CustomPolicy> getCustomPolicies() throws APIMgtDAOException {
         List<CustomPolicy> customPolicyList = new ArrayList<>();
-        String getQuery = "SELECT NAME, DESCRIPTION, UUID, KEY_TEMPLATE, IS_DEPLOYED, SIDDHI_QUERY FROM "
-                + "AM_CUSTOM_POLICY";
+        String getQuery =
+                "SELECT NAME, DESCRIPTION, UUID, KEY_TEMPLATE, IS_DEPLOYED, SIDDHI_QUERY FROM " + "AM_CUSTOM_POLICY";
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(getQuery)) {
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                String siddhiQuery = null;
-                CustomPolicy customPolicy = new CustomPolicy(resultSet.getString("NAME"));
-                customPolicy.setDescription(resultSet.getString("DESCRIPTION"));
-                customPolicy.setUuid(resultSet.getString("UUID"));
-                customPolicy.setKeyTemplate(resultSet.getString("KEY_TEMPLATE"));
-                customPolicy.setDeployed(resultSet.getBoolean("IS_DEPLOYED"));
-                InputStream siddhiQueryBlob = resultSet.getBinaryStream("SIDDHI_QUERY");
-                if (siddhiQueryBlob != null) {
-                    try {
-                        siddhiQuery = IOUtils.toString(siddhiQueryBlob);
-                    } catch (IOException e) {
-                        log.error("Error in converting siddhi query blob", e);
-                        handleException("Error in converting siddhi query blob", e);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    String siddhiQuery = null;
+                    CustomPolicy customPolicy = new CustomPolicy(resultSet.getString("NAME"));
+                    customPolicy.setDescription(resultSet.getString("DESCRIPTION"));
+                    customPolicy.setUuid(resultSet.getString("UUID"));
+                    customPolicy.setKeyTemplate(resultSet.getString("KEY_TEMPLATE"));
+                    customPolicy.setDeployed(resultSet.getBoolean("IS_DEPLOYED"));
+                    InputStream siddhiQueryBlob = resultSet.getBinaryStream("SIDDHI_QUERY");
+                    if (siddhiQueryBlob != null) {
+                        try {
+                            siddhiQuery = IOUtils.toString(siddhiQueryBlob);
+                        } catch (IOException e) {
+                            log.error("Error in converting siddhi query blob", e);
+                            handleException("Error in converting siddhi query blob", e);
+                        }
                     }
+                    customPolicy.setSiddhiQuery(siddhiQuery);
+                    customPolicyList.add(customPolicy);
                 }
-                customPolicy.setSiddhiQuery(siddhiQuery);
-                customPolicyList.add(customPolicy);
             }
-            resultSet.close();
             return customPolicyList;
         } catch (SQLException e) {
             log.error("An Error occurred while getting custom policies", e);
@@ -2077,40 +2017,32 @@ public class PolicyDAOImpl implements PolicyDAO {
         String query = "SELECT NAME, DESCRIPTION, UUID, KEY_TEMPLATE, IS_DEPLOYED, SIDDHI_QUERY FROM AM_CUSTOM_POLICY"
                 + " WHERE UUID = ? ";
         CustomPolicy customPolicy = null;
-        ResultSet resultSet = null;
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, uuid);
-            resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                String siddhiQuery = null;
-                customPolicy = new CustomPolicy(resultSet.getString("NAME"));
-                customPolicy.setDescription(resultSet.getString("DESCRIPTION"));
-                customPolicy.setUuid(resultSet.getString("UUID"));
-                customPolicy.setKeyTemplate(resultSet.getString("KEY_TEMPLATE"));
-                customPolicy.setDeployed(resultSet.getBoolean("IS_DEPLOYED"));
-                InputStream siddhiQueryBlob = resultSet.getBinaryStream("SIDDHI_QUERY");
-                if (siddhiQueryBlob != null) {
-                    try {
-                        siddhiQuery = IOUtils.toString(siddhiQueryBlob);
-                    } catch (IOException e) {
-                        log.error("Error in converting siddhi query blob", e);
-                        handleException("Error in converting siddhi query blob", e);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    String siddhiQuery = null;
+                    customPolicy = new CustomPolicy(resultSet.getString("NAME"));
+                    customPolicy.setDescription(resultSet.getString("DESCRIPTION"));
+                    customPolicy.setUuid(resultSet.getString("UUID"));
+                    customPolicy.setKeyTemplate(resultSet.getString("KEY_TEMPLATE"));
+                    customPolicy.setDeployed(resultSet.getBoolean("IS_DEPLOYED"));
+                    InputStream siddhiQueryBlob = resultSet.getBinaryStream("SIDDHI_QUERY");
+                    if (siddhiQueryBlob != null) {
+                        try {
+                            siddhiQuery = IOUtils.toString(siddhiQueryBlob);
+                        } catch (IOException e) {
+                            log.error("Error in converting siddhi query blob", e);
+                            handleException("Error in converting siddhi query blob", e);
+                        }
                     }
+                    customPolicy.setSiddhiQuery(siddhiQuery);
                 }
-                customPolicy.setSiddhiQuery(siddhiQuery);
             }
         } catch (SQLException e) {
             log.error("An Error occurred while getting custom policy with UUID [" + uuid + "], ", e);
             throw new APIMgtDAOException("Error occurred while getting custom policy with UUID : " + uuid, e);
-        } finally {
-            if (resultSet != null) {
-                try {
-                    resultSet.close();
-                } catch (SQLException e) {
-                    handleException("Error while closing the result set", e);
-                }
-            }
         }
         return customPolicy;
     }
@@ -2156,32 +2088,18 @@ public class PolicyDAOImpl implements PolicyDAO {
      * @throws APIMgtDAOException
      */
     private boolean isValidContext(String context) throws APIMgtDAOException {
-        Connection connection = null;
-        PreparedStatement validateContextPreparedStatement = null;
-        ResultSet resultSet = null;
+        String query = "select count(*) COUNT from AM_API where CONTEXT=?";
         boolean status = false;
-        try {
-            String query = "select count(*) COUNT from AM_API where CONTEXT=?";
-            connection = DAOUtil.getConnection();
-            connection.setAutoCommit(false);
-            validateContextPreparedStatement = connection.prepareStatement(query);
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement validateContextPreparedStatement = connection.prepareStatement(query)) {
             validateContextPreparedStatement.setString(1, context);
-            resultSet = validateContextPreparedStatement.executeQuery();
-            connection.commit();
-            if (resultSet.next() && resultSet.getInt("COUNT") > 0) {
-                status = true;
-            }
-        } catch (SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ex) {
-                    handleException("Failed to rollback checking Block condition with context " + context, ex);
+            try (ResultSet resultSet = validateContextPreparedStatement.executeQuery()) {
+                if (resultSet.next() && resultSet.getInt("COUNT") > 0) {
+                    status = true;
                 }
             }
+        } catch (SQLException e) {
             handleException("Failed to check Block condition with context " + context, e);
-        } finally {
-            DAOUtil.closeAllConnections(validateContextPreparedStatement, connection, resultSet);
         }
         return status;
     }
@@ -2189,41 +2107,26 @@ public class PolicyDAOImpl implements PolicyDAO {
     /**
      * validate the blocking application.
      *
-     * @param appName  name of the application
-     * @param uuid uuid of the application
+     * @param appName name of the application
+     * @param uuid    uuid of the application
      * @return return true/false depends of the success
      * @throws APIMgtDAOException if failed validating application
      */
     private boolean isValidApplication(String appName, String uuid) throws APIMgtDAOException {
-        Connection connection = null;
-        PreparedStatement validateContextPreparedStatement = null;
-        ResultSet resultSet = null;
         boolean status = false;
-        try {
+        String query = "SELECT * FROM AM_APPLICATION WHERE UUID = ? ";
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement validateApplicationPreparedStatement = connection.prepareStatement(query)) {
             //todo:Decide a unique field to get applications
-            String query = "SELECT * FROM AM_APPLICATION WHERE UUID = ? ";
-            connection = DAOUtil.getConnection();
             connection.setAutoCommit(false);
-            validateContextPreparedStatement = connection.prepareStatement(query);
-            validateContextPreparedStatement.setString(1, uuid);
-            resultSet = validateContextPreparedStatement.executeQuery();
-            connection.commit();
-            if (resultSet.next()) {
-                status = true;
-            }
-        } catch (SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ex) {
-                    handleException(
-                            "Failed to rollback checking Block condition with Application Name " + appName, ex);
+            validateApplicationPreparedStatement.setString(1, uuid);
+            try (ResultSet resultSet = validateApplicationPreparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    status = true;
                 }
             }
-            handleException(
-                    "Failed to check Block condition with Application Name " + appName, e);
-        } finally {
-                DAOUtil.closeAllConnections(validateContextPreparedStatement, connection, resultSet);
+        } catch (SQLException e) {
+            handleException("Failed to check Block condition with Application Name " + appName, e);
         }
         return status;
     }
@@ -2236,24 +2139,19 @@ public class PolicyDAOImpl implements PolicyDAO {
      * @throws APIMgtDAOException If failed to check if block condition exist
      */
     private boolean isBlockConditionExist(BlockConditions blockConditions) throws APIMgtDAOException {
-        PreparedStatement checkIsExistPreparedStatement = null;
-        ResultSet checkIsResultSet = null;
         boolean status = false;
-        Connection connection = null;
         if (blockConditions.getConditionType()
                 .equals(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITION_IP_RANGE)) {
-            try {
-                connection = DAOUtil.getConnection();
-                connection.setAutoCommit(false);
-                String isExistQuery = "SELECT STARTING_IP, ENDING_IP FROM AM_IP_RANGE_CONDITION WHERE STARTING_IP =? "
-                        + "AND ENDING_IP =?";
-                checkIsExistPreparedStatement = connection.prepareStatement(isExistQuery);
+            String isExistQuery = "SELECT STARTING_IP, ENDING_IP FROM AM_IP_RANGE_CONDITION WHERE STARTING_IP =? "
+                    + "AND ENDING_IP =?";
+            try (Connection connection = DAOUtil.getConnection();
+                    PreparedStatement checkIsExistPreparedStatement = connection.prepareStatement(isExistQuery)) {
                 checkIsExistPreparedStatement.setString(1, blockConditions.getStartingIP());
                 checkIsExistPreparedStatement.setString(2, blockConditions.getEndingIP());
-                checkIsResultSet = checkIsExistPreparedStatement.executeQuery();
-                connection.commit();
-                if (checkIsResultSet.next()) {
-                    status = true;
+                try (ResultSet checkIsResultSet = checkIsExistPreparedStatement.executeQuery()) {
+                    if (checkIsResultSet.next()) {
+                        status = true;
+                    }
                 }
             } catch (SQLException e) {
                 String msg =
@@ -2261,31 +2159,25 @@ public class PolicyDAOImpl implements PolicyDAO {
                                 .getStartingIP() + ", ending IP: " + blockConditions.getEndingIP();
                 log.error(msg, e);
                 handleException(msg, e);
-            } finally {
-                DAOUtil.closeAllConnections(checkIsExistPreparedStatement, connection, checkIsResultSet);
             }
         } else {
-            try {
-                connection = DAOUtil.getConnection();
+            String isExistQuery = "SELECT CONDITION_ID,TYPE,VALUE,ENABLED,UUID FROM AM_BLOCK_CONDITIONS WHERE TYPE =? "
+                    + "AND VALUE =?";
+            try (Connection connection = DAOUtil.getConnection();
+                    PreparedStatement checkIsExistPreparedStatement = connection.prepareStatement(isExistQuery)) {
                 connection.setAutoCommit(false);
-                String isExistQuery =
-                        "SELECT CONDITION_ID,TYPE,VALUE,ENABLED,UUID FROM AM_BLOCK_CONDITIONS WHERE TYPE =? "
-                                + "AND VALUE =?";
-                checkIsExistPreparedStatement = connection.prepareStatement(isExistQuery);
                 checkIsExistPreparedStatement.setString(1, blockConditions.getConditionType());
                 checkIsExistPreparedStatement.setString(2, blockConditions.getConditionValue());
-                checkIsResultSet = checkIsExistPreparedStatement.executeQuery();
-                connection.commit();
-                if (checkIsResultSet.next()) {
-                    status = true;
+                try (ResultSet checkIsResultSet = checkIsExistPreparedStatement.executeQuery()) {
+                    if (checkIsResultSet.next()) {
+                        status = true;
+                    }
                 }
             } catch (SQLException e) {
                 String msg = "Couldn't check the Block Condition Exist with condition type: " + blockConditions
                         .getConditionType() + ", condition value: " + blockConditions.getConditionValue();
                 log.error(msg, e);
                 handleException(msg, e);
-            } finally {
-                DAOUtil.closeAllConnections(checkIsExistPreparedStatement, connection, checkIsResultSet);
             }
         }
         return status;
