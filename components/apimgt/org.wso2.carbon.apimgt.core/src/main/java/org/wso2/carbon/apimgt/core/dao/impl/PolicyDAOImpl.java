@@ -48,6 +48,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -109,7 +111,8 @@ public class PolicyDAOImpl implements PolicyDAO {
     @Override
     public APIPolicy getApiPolicyByUuid(String uuid) throws APIMgtDAOException {
         try {
-            String sqlQuery = "SELECT NAME, DEFAULT_QUOTA_TYPE, DEFAULT_TIME_UNIT, DEFAULT_UNIT_TIME, DEFAULT_QUOTA, "
+            String sqlQuery = "SELECT UUID, NAME, DEFAULT_QUOTA_TYPE, DEFAULT_TIME_UNIT, DEFAULT_UNIT_TIME, "
+                    + "DEFAULT_QUOTA, "
                     + "DEFAULT_QUOTA_UNIT, DESCRIPTION, DISPLAY_NAME, IS_DEPLOYED, APPLICABLE_LEVEL from "
                     + "AM_API_POLICY WHERE UUID = ?";
 
@@ -1039,7 +1042,7 @@ public class PolicyDAOImpl implements PolicyDAO {
      * @return {@link SubscriptionPolicy}
      */
     private SubscriptionPolicy getSubscriptionPolicyById(String uuid) throws SQLException, APIMgtDAOException {
-        final String query = "SELECT NAME, QUOTA_TYPE, TIME_UNIT, UNIT_TIME, QUOTA, QUOTA_UNIT, DESCRIPTION, "
+        final String query = "SELECT NAME, UUID, QUOTA_TYPE, TIME_UNIT, UNIT_TIME, QUOTA, QUOTA_UNIT, DESCRIPTION, "
                 + "DISPLAY_NAME, CUSTOM_ATTRIBUTES, IS_DEPLOYED FROM AM_SUBSCRIPTION_POLICY WHERE UUID = ?";
         try (Connection conn = DAOUtil.getConnection();
                 PreparedStatement statement = conn.prepareStatement(query)) {
@@ -1689,7 +1692,8 @@ public class PolicyDAOImpl implements PolicyDAO {
             throws APIMgtDAOException, SQLException {
 
         final String query = "UPDATE AM_APPLICATION_POLICY SET NAME = ?, DISPLAY_NAME = ?, DESCRIPTION = ?, "
-                + "QUOTA_TYPE = ?, UNIT_TIME = ?, QUOTA = ?, QUOTA_UNIT = ?, TIME_UNIT = ? WHERE UUID = ?";
+                + "QUOTA_TYPE = ?, UNIT_TIME = ?, QUOTA = ?, QUOTA_UNIT = ?, TIME_UNIT = ?, LAST_UPDATED_TIME = ? "
+                + "WHERE UUID = ?";
 
         if (applicationPolicy.getUuid() == null || applicationPolicy.getUuid().isEmpty()) {
             String errorMsg = "Policy uuid is not found, unable to update policy: " + applicationPolicy.getPolicyName();
@@ -1706,7 +1710,8 @@ public class PolicyDAOImpl implements PolicyDAO {
             statement.setInt(5, applicationPolicy.getDefaultQuotaPolicy().getLimit().getUnitTime());
             setDefaultThrottlePolicyDetailsPreparedStmt(limit, statement);
             statement.setString(8, applicationPolicy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
-            statement.setString(9, applicationPolicy.getUuid());
+            statement.setTimestamp(9, Timestamp.valueOf(LocalDateTime.now()));
+            statement.setString(10, applicationPolicy.getUuid());
 
             statement.execute();
         }
@@ -1726,7 +1731,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                 "UPDATE AM_SUBSCRIPTION_POLICY SET NAME = ?, DISPLAY_NAME = ?, DESCRIPTION = ?, QUOTA_TYPE = ?, "
                         + "UNIT_TIME = ?, QUOTA = ?, QUOTA_UNIT = ?, TIME_UNIT = ?, RATE_LIMIT_COUNT = ?, "
                         + "RATE_LIMIT_TIME_UNIT = ?, CUSTOM_ATTRIBUTES = ?, STOP_ON_QUOTA_REACH = ?, "
-                        + "BILLING_PLAN = ?, IS_DEPLOYED = ? WHERE UUID = ?";
+                        + "BILLING_PLAN = ?, IS_DEPLOYED = ?, LAST_UPDATED_TIME = ? WHERE UUID = ?";
 
         if (subscriptionPolicy.getUuid() == null || subscriptionPolicy.getUuid().isEmpty()) {
             String errorMsg = "Policy uuid is not found, unable to update policy: " +
@@ -1746,7 +1751,8 @@ public class PolicyDAOImpl implements PolicyDAO {
             statement.setString(8, subscriptionPolicy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
             subscriptionPolicy.populateDataInPreparedStatement(statement);
             statement.setBoolean(14, subscriptionPolicy.isDeployed());
-            statement.setString(15, subscriptionPolicy.getUuid());
+            statement.setTimestamp(15, Timestamp.valueOf(LocalDateTime.now()));
+            statement.setString(16, subscriptionPolicy.getUuid());
 
             statement.execute();
         }
