@@ -35,6 +35,9 @@ public class SubscriptionDTO   {
   @JsonProperty("applicationId")
   private String applicationId = null;
 
+  @JsonProperty("status")
+  private String status = null;
+
   public SubscriptionDTO apiName(String apiName) {
     this.apiName = apiName;
     return this;
@@ -179,6 +182,24 @@ public class SubscriptionDTO   {
     this.applicationId = applicationId;
   }
 
+  public SubscriptionDTO status(String status) {
+    this.status = status;
+    return this;
+  }
+
+   /**
+   * Subscription Status 
+   * @return status
+  **/
+  @ApiModelProperty(value = "Subscription Status ")
+  public String getStatus() {
+    return status;
+  }
+
+  public void setStatus(String status) {
+    this.status = status;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -196,12 +217,13 @@ public class SubscriptionDTO   {
         Objects.equals(this.consumerKey, subscription.consumerKey) &&
         Objects.equals(this.subscriptionPolicy, subscription.subscriptionPolicy) &&
         Objects.equals(this.keyEnvType, subscription.keyEnvType) &&
-        Objects.equals(this.applicationId, subscription.applicationId);
+        Objects.equals(this.applicationId, subscription.applicationId) &&
+        Objects.equals(this.status, subscription.status);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiName, apiContext, apiVersion, apiProvider, consumerKey, subscriptionPolicy, keyEnvType, applicationId);
+    return Objects.hash(apiName, apiContext, apiVersion, apiProvider, consumerKey, subscriptionPolicy, keyEnvType, applicationId, status);
   }
 
   @Override
@@ -217,6 +239,7 @@ public class SubscriptionDTO   {
     sb.append("    subscriptionPolicy: ").append(toIndentedString(subscriptionPolicy)).append("\n");
     sb.append("    keyEnvType: ").append(toIndentedString(keyEnvType)).append("\n");
     sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
+    sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("}");
     return sb.toString();
   }
