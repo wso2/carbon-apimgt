@@ -62,6 +62,7 @@ import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
 import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
@@ -1097,6 +1098,14 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             APIManagementException {
         try {
             getApiSubscriptionDAO().updateSubscriptionStatus(subId, subStatus);
+            Subscription subscription = getApiSubscriptionDAO().getAPISubscription(subId);
+            if (subscription != null) {
+                API subscribedApi = subscription.getApi();
+                List<SubscriptionValidationData> subscriptionValidationDataList = getApiSubscriptionDAO()
+                        .getAPISubscriptionsOfAPIForValidation(subscribedApi.getContext(), subscribedApi
+                                .getVersion(), subscription.getApplication().getId());
+                getApiGateway().updateAPISubscriptionStatus(subscriptionValidationDataList);
+            }
         } catch (APIMgtDAOException e) {
             throw new APIManagementException(e);
         }
@@ -1272,9 +1281,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         APIGateway gateway = getApiGateway();
         gateway.updateEndpoint(endpoint);
         String config = getGatewaySourceGenerator().getEndpointConfigStringFromTemplate(endpoint);
-        endpoint = new Endpoint.Builder(endpoint).config(config).build();
+        Endpoint updatedEndpoint = new Endpoint.Builder(endpoint).config(config).build();
         try {
-            getApiDAO().updateEndpoint(endpoint);
+            getApiDAO().updateEndpoint(updatedEndpoint);
         } catch (APIMgtDAOException e) {
             String msg = "Failed to update Endpoint : " + endpoint.getName();
             log.error(msg, e);

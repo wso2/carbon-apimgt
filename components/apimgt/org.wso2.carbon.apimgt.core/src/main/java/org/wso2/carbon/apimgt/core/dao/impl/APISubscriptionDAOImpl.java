@@ -642,6 +642,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 subValidationData.setApiProvider(rs.getString("API_PROVIDER"));
                 subValidationData.setKeyEnvType(rs.getString("KEY_ENV_TYPE"));
                 subValidationData.setApplicationId(rs.getString("APP_ID"));
+                subValidationData.setStatus(rs.getString("SUB_STATUS"));
                 subscriptionList.add(subValidationData);
             }
         } catch (SQLException e) {

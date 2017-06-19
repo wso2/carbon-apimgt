@@ -19,7 +19,17 @@ function constructSubscriptionNotFound (message response) {
     json payload = {"code":900903, "message":"subscription not found"};
     messages:setJsonPayload(response, payload);
 }
-
+function constructSubscriptionBlocked (message response,string context,string version) {
+    json payload = {
+                       "fault": {
+                                    "code": 900907,
+                                    "message": "The requested API is temporarily blocked",
+                                    "description":"Access failure for API: " + context + ", version: " + version + " status: (900907) - The requested API is temporarily blocked"
+                                }
+                   };
+    http:setStatusCode(response, 401);
+    messages:setJsonPayload(response, payload);
+}
 function constructAPIIsInMaintenance (message response) {
     messages:setHeader(response, "Content-Type", "application/json");
     http:setStatusCode(response, 503);
@@ -65,6 +75,7 @@ function fromJsonToSubscriptionDto (json subscriptionResponse) (dto:Subscription
     subscriptionDto.subscriptionPolicy = (string)subscriptionResponse.subscriptionPolicy;
     subscriptionDto.keyEnvType = (string)subscriptionResponse.keyEnvType;
     subscriptionDto.applicationId = (string)subscriptionResponse.applicationId;
+    subscriptionDto.status = (string)subscriptionResponse.status;
     return subscriptionDto;
 }
 function fromJsonToResourceDto (json resourceResponse) (dto:ResourceDto){
@@ -180,29 +191,29 @@ function fromJsonToGatewayConfDTO (json conf) (dto:GatewayConfDTO){
     //Extract JWT information and populate JWTInfoDTO to be cached
     json jwTInfo = conf.jwTInfo;
     dto:JWTInfoDTO jwtInfoDTO = {};
-    jwtInfoDTO.enableJWTGeneration = jsons:getBoolean(jwTInfo, "enableJWTGeneration");
-    jwtInfoDTO.jwtHeader = jsons:getString(jwTInfo, "jwtHeader");
+    jwtInfoDTO.enableJWTGeneration = (boolean )jwTInfo.enableJWTGeneration;
+    jwtInfoDTO.jwtHeader = (string )jwTInfo.jwtHeader;
     gatewayConf.jwtInfo = jwtInfoDTO;
 
     //Extract Analytics Server information and populate AnalyticsInfoDTO to be cached
     json analyticsInfo = conf.analyticsInfo;
     dto:AnalyticsInfoDTO analyticsInfoDTO = {};
-    analyticsInfoDTO.serverURL = jsons:getString(analyticsInfo, "serverURL");
+    analyticsInfoDTO.serverURL = (string )analyticsInfo.serverURL;
     dto:CredentialsDTO analyticsServerCredentialsDTO = {};
     json analyticsServerCredentials = analyticsInfo.credentials;
-    analyticsServerCredentialsDTO.username = jsons:getString(analyticsServerCredentials, "username");
-    analyticsServerCredentialsDTO.password = jsons:getString(analyticsServerCredentials, "password");
+    analyticsServerCredentialsDTO.username = (string )analyticsServerCredentials.username;
+    analyticsServerCredentialsDTO.password = (string )analyticsServerCredentials.password;
     analyticsInfoDTO.credentials = analyticsServerCredentialsDTO;
     gatewayConf.analyticsInfo = analyticsInfoDTO;
 
     //Extract Throttling Server information and populate ThrottlingInfoDTO to be cached
     json throttlingInfo = conf.throttlingInfo;
     dto:ThrottlingInfoDTO throttlingInfoDTO = {};
-    throttlingInfoDTO.serverURL = jsons:getString(throttlingInfo, "serverURL");
+    throttlingInfoDTO.serverURL = (string )throttlingInfo.serverURL;
     json throttlingServerCredentials = throttlingInfo.credentials;
     dto:CredentialsDTO throttlingServerCredentialsDTO = {};
-    throttlingServerCredentialsDTO.username = jsons:getString(throttlingServerCredentials, "username");
-    throttlingServerCredentialsDTO.password = jsons:getString(throttlingServerCredentials, "password");
+    throttlingServerCredentialsDTO.username = (string)throttlingServerCredentials.username;
+    throttlingServerCredentialsDTO.password = (string)throttlingServerCredentials.password;
     throttlingInfoDTO.credentials = throttlingServerCredentialsDTO;
     gatewayConf.throttlingInfo = throttlingInfoDTO;
 
@@ -211,11 +222,11 @@ function fromJsonToGatewayConfDTO (json conf) (dto:GatewayConfDTO){
 
 function fromJSONToAPIDTO (json api) (dto:APIDTO){
     dto:APIDTO APIDTO = {};
-    APIDTO.id = jsons:getString(api, "id");
-    APIDTO.name = jsons:getString(api, "name");
-    APIDTO.version = jsons:getString(api, "version");
-    APIDTO.context = jsons:getString(api, "context");
-    APIDTO.lifeCycleStatus = jsons:getString(api, "lifeCycleStatus");
+    APIDTO.id = (string)api.id;
+    APIDTO.name = (string)api.name;
+    APIDTO.version = (string)api.version;
+    APIDTO.context = (string)api.context;
+    APIDTO.lifeCycleStatus = (string)api.lifeCycleStatus;
     return APIDTO;
 
 }
@@ -249,7 +260,7 @@ function getStringProperty (message msg, string propertyKey) (string){
 function getJsonString (json jsonObject, string jsonPath) (string){
     string value = "";
     try {
-        value = jsons:getString(jsonObject, jsonPath);
+        value = (string )jsonObject.jsonPath;
     } catch (errors:Error e) {
         return "";
     }
