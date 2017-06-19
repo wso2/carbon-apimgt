@@ -46,7 +46,9 @@ const Header = (props) => {
                         </a>
                         <ul className="dropdown-menu dropdown-menu-right slideInDown" role="menu">
                             <li><a href="#">Profile Settings</a></li>
-                            <li><a href="#">Logout</a></li>
+                            <li>
+                                <Link to="/logout">Logout</Link>
+                            </li>
                         </ul>
                     </li>
                 </ul>

@@ -24,6 +24,10 @@ class Auth {
         /* TODO: Move this to configuration ~tmkb*/
         this.host = "https://localhost:9292";
         this.token = "/login/token/publisher";
+        this.isLogged = false;
+        this.user = {};
+        this.bearer = "Bearer ";
+        this.contextPath = "/publisher";
     }
 
     static getCookie(name) {
@@ -31,7 +35,6 @@ class Auth {
         var parts = value.split("; " + name + "=");
         if (parts.length === 2) return parts.pop().split(";").shift();
     }
-
 
     static setCookie(name, value, days) {
         let expires = "";
@@ -43,6 +46,14 @@ class Auth {
         document.cookie = name + "=" + value + expires + "; path=/";
     }
 
+    delete_cookie(name) {
+        document.cookie = name + '=; Path=' + this.contextPath + '; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    }
+
+    static setAuthStatus(status) {
+        this.isLogged = status;
+    };
+
     /**
      * TODO: Implement this method to return the user logged state by considering the cookies stored in the browser,
      * This may give a partial indication of whether the user has logged in or not, The actual API call may get denied
@@ -50,8 +61,25 @@ class Auth {
      *
      * @returns {boolean} Is any user has logged in or not
      */
-    static isLogged() {
-        return true;
+    static getAuthStatus() {
+        //this.isLogged = !(!$.cookie('token') && !$.cookie('user'));
+        return this.isLogged;
+    }
+
+    setUserName(username) {
+        this.user.username = username;
+    }
+
+    getUserName() {
+        return this.user.username;
+    }
+
+    setUserScope(scope) {
+        this.user.scope = scope;
+    }
+
+    getUserScope() {
+        return this.user.scope;
     }
 
     getTokenEndpoint() {
@@ -77,6 +105,34 @@ class Auth {
             Auth.setCookie('WSO2_AM_TOKEN_1', WSO2_AM_TOKEN_1);
         });
         return promised_response;
+    }
+
+    logout() {
+        var authzHeader = this.bearer + Auth.getCookie("WSO2_AM_TOKEN_1");
+        var url = this.contextPath + '/auth/apis/login/revoke';
+        var headers = {
+            'Accept': 'application/json',
+            'Authorization': authzHeader
+        };
+        return axios.post(url, null, {headers: headers});
+    }
+
+    refresh(authzHeader) {
+        var params = {
+            grant_type: 'refresh_token',
+            validity_period: '3600',
+            scopes: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage' +
+            ' apim:subscription_view apim:subscription_block apim:subscribe'
+        };
+        var referrer = (document.referrer.indexOf("https") !== -1) ? document.referrer : null;
+        var url = this.contextPath + '/auth/apis/login/token';
+        var headers = {
+            'Authorization': authzHeader,
+            'Accept': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Alt-Referer': referrer
+        };
+        return axios.post(url, qs.stringify(params), {headers: headers});
     }
 }
 

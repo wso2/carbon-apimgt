@@ -89,6 +89,7 @@ public class RESTAPISecurityInterceptor implements Interceptor {
         } else if (requestURI.contains("/login/token")) {
             return true;
         }
+
         String yamlContent = null;
         String protocol = (String) request.getProperty(PROTOCOL);
         Swagger swagger = null;
