@@ -2192,7 +2192,7 @@ public class PolicyDAOImpl implements PolicyDAO {
      * @param appName  name of the application
      * @param uuid uuid of the application
      * @return return true/false depends of the success
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException if failed validating application
      */
     private boolean isValidApplication(String appName, String uuid) throws APIMgtDAOException {
         Connection connection = null;
@@ -2233,7 +2233,7 @@ public class PolicyDAOImpl implements PolicyDAO {
      *
      * @param blockConditions BlockConditions object to be added
      * @return true/false depending on the success
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException If failed to check if block condition exist
      */
     private boolean isBlockConditionExist(BlockConditions blockConditions) throws APIMgtDAOException {
         PreparedStatement checkIsExistPreparedStatement = null;
@@ -2256,7 +2256,9 @@ public class PolicyDAOImpl implements PolicyDAO {
                     status = true;
                 }
             } catch (SQLException e) {
-                String msg = "Couldn't check the IP range blacllist condition exist";
+                String msg =
+                        "Couldn't check the IP range blacklist condition exist with starting IP: " + blockConditions
+                                .getStartingIP() + ", ending IP: " + blockConditions.getEndingIP();
                 log.error(msg, e);
                 handleException(msg, e);
             } finally {
@@ -2278,7 +2280,8 @@ public class PolicyDAOImpl implements PolicyDAO {
                     status = true;
                 }
             } catch (SQLException e) {
-                String msg = "Couldn't check the Block Condition Exist";
+                String msg = "Couldn't check the Block Condition Exist with condition type: " + blockConditions
+                        .getConditionType() + ", condition value: " + blockConditions.getConditionValue();
                 log.error(msg, e);
                 handleException(msg, e);
             } finally {
@@ -2288,14 +2291,21 @@ public class PolicyDAOImpl implements PolicyDAO {
         return status;
     }
 
-    private boolean isIPRangeConditionValid(String startingIp, String endingIp) throws APIMgtDAOException {
+    /**
+     * Check whether given ip address are valid.
+     *
+     * @param startingIp starting IP address
+     * @param endingIp   ending IP address
+     * @return true/false depending on the validity
+     */
+    private boolean isIPRangeConditionValid(String startingIp, String endingIp) {
         Boolean status = false;
         Long startingIP = ipToLong(startingIp);
         Long endingIP = ipToLong(endingIp);
         if (startingIP < endingIP) {
             status = true;
         } else {
-            log.error("IR Range is not valid");
+            log.error("IR Range is not valid. starting IP :" + startingIp + ", ending IP :" + endingIp);
         }
         return status;
     }
@@ -2305,7 +2315,7 @@ public class PolicyDAOImpl implements PolicyDAO {
      *
      * @param msg message to be shown in console
      * @param t   exception to throw
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException if failed to execute
      */
     private void handleException(String msg, Throwable t) throws APIMgtDAOException {
         log.error(msg, t);
@@ -2315,8 +2325,8 @@ public class PolicyDAOImpl implements PolicyDAO {
     /**
      * Convert IP address to long
      *
-     * @param ip
-     * @return
+     * @param ip ip address to be converted to long
+     * @return ip address in long
      */
     private long ipToLong(String ip) {
         long ipAddressinLong = 0;

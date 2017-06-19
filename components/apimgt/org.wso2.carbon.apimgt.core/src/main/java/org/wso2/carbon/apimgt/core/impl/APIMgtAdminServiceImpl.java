@@ -487,7 +487,9 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         try {
             return policyDAO.addBlockConditions(blockConditions);
         } catch (APIMgtDAOException e) {
-            String errorMessage = "Couldn't add block condition.";
+            String errorMessage =
+                    "Couldn't add block condition with condition type: " + blockConditions.getConditionType()
+                            + ", condition value: " + blockConditions.getConditionValue();
             log.error(errorMessage, e);
             throw new APIManagementException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
@@ -498,7 +500,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         try {
             return policyDAO.updateBlockConditionStateByUUID(uuid, state);
         } catch (APIMgtDAOException e) {
-            String errorMessage = "Couldn't update block condition.";
+            String errorMessage = "Couldn't update block condition with UUID: " + uuid + ", state: " + state;
             log.error(errorMessage, e);
             throw new APIManagementException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
@@ -509,7 +511,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         try {
             return policyDAO.deleteBlockConditionByUuid(uuid);
         } catch (APIMgtDAOException e) {
-            String errorMessage = "Couldn't delete block condition.";
+            String errorMessage = "Couldn't delete block condition with UUID: " + uuid;
             log.error(errorMessage, e);
             throw new APIManagementException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
@@ -531,7 +533,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         try {
             return policyDAO.getBlockConditionByUUID(uuid);
         } catch (APIMgtDAOException e) {
-            String errorMessage = "Couldn't get block condition by UUID.";
+            String errorMessage = "Couldn't get block condition by UUID: " + uuid;
             log.error(errorMessage, e);
             throw new APIManagementException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
@@ -543,7 +545,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
             //todo: deploy policy in CEP
             return policyDAO.addCustomPolicy(customPolicy);
         } catch (APIMgtDAOException e) {
-            String errorMessage = "Couldn't add custom policy.";
+            String errorMessage = "Couldn't add custom policy with policy name: " + customPolicy.getPolicyName();
             log.error(errorMessage, e);
             throw new APIManagementException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
@@ -554,7 +556,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         try {
             policyDAO.updateCustomPolicy(customPolicy);
         } catch (APIMgtDAOException e) {
-            String errorMessage = "Couldn't update custom policy.";
+            String errorMessage = "Couldn't update custom policy with UUID: " + customPolicy.getUuid();
             log.error(errorMessage, e);
             throw new APIManagementException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
@@ -565,7 +567,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         try {
             policyDAO.deleteCustomPolicy(uuid);
         } catch (APIMgtDAOException e) {
-            String errorMessage = "Couldn't delete custom policy.";
+            String errorMessage = "Couldn't delete custom policy with UUID: " + uuid;
             log.error(errorMessage, e);
             throw new APIManagementException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
@@ -587,7 +589,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         try {
             return policyDAO.getCustomPolicyByUuid(uuid);
         } catch (APIMgtDAOException e) {
-            String errorMessage = "Couldn't get custom policy by UUID.";
+            String errorMessage = "Couldn't get custom policy by UUID: " + uuid;
             log.error(errorMessage, e);
             throw new APIManagementException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
