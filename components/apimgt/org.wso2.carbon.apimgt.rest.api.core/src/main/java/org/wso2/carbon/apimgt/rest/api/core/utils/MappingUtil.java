@@ -31,10 +31,8 @@ import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.rest.api.core.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.core.dto.ApplicationDTO;
-import org.wso2.carbon.apimgt.rest.api.core.dto.APISummaryDTO;
-import org.wso2.carbon.apimgt.rest.api.core.dto.APISummaryListDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.AnalyticsInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.CredentialsDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.JWTInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.KeyManagerInfoDTO;
@@ -69,6 +67,7 @@ public class MappingUtil {
             subscriptionDTO.setSubscriptionPolicy(subscriptionData.getSubscriptionPolicy());
             subscriptionDTO.setKeyEnvType(subscriptionData.getKeyEnvType());
             subscriptionDTO.setApplicationId(subscriptionData.getApplicationId());
+            subscriptionDTO.setStatus(subscriptionData.getStatus());
             subscriptionDTOList.add(subscriptionDTO);
         }
         return subscriptionDTOList;

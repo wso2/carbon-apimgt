@@ -3657,7 +3657,7 @@ definitions:
       subscriptionTier:
         type: string
         example: Unlimited
-      subscriptionStatus:
+      status:
         type: string
         enum:
           - BLOCKED
