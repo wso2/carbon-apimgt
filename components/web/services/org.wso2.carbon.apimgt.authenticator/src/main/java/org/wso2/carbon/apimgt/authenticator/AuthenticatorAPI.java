@@ -40,6 +40,8 @@ import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.formparam.FormDataParam;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -168,13 +170,17 @@ public class AuthenticatorAPI implements Microservice {
     public Response redirect(@Context Request request) {
         String appContext = AuthUtil.getAppContext(request);
         String userName = "admin";
+        List<String> grantTypes = new ArrayList<>();
+        grantTypes.add("password");
+        grantTypes.add("authorization_code");
+        grantTypes.add("refresh_token");
         String scopes =
                 "apim:api_view,apim:api_create,apim:api_publish,apim:tier_view,apim:tier_manage," +
                         "apim:subscription_view,apim:subscription_block,apim:subscribe,openid";
         Long validityPeriod = 3600L;
         OAuthApplicationInfo oAuthApplicationInfo;
         try {
-            oAuthApplicationInfo = createDCRApplication(appContext.substring(1) , userName , validityPeriod);
+            oAuthApplicationInfo = createDCRApplication(appContext.substring(1), grantTypes, validityPeriod);
             if (oAuthApplicationInfo != null) {
                 String oAuthApplicationClientId = oAuthApplicationInfo.getClientId();
                 String oAuthApplicationCallBackURL = oAuthApplicationInfo.getCallbackUrl();
@@ -210,10 +216,9 @@ public class AuthenticatorAPI implements Microservice {
         String callbackURI = "https://localhost:9292/editor/apis";
         String userName = "admin";
         Long validityPeriod = 3600L;
-        String[] scopes = {
-                "apim:api_view" , "apim:api_create" , "apim:api_publish" ,
-                "apim:tier_view" , "apim:tier_manage" ,
-                "apim:subscription_view" , "apim:subscription_block" , "apim:subscribe" , "openid"};
+        String scopes =
+                "apim:api_view,apim:api_create,apim:api_publish,apim:tier_view,apim:tier_manage," +
+                        "apim:subscription_view,apim:subscription_block,apim:subscribe,openid";
         // Get the Autherization Code
         String requestURL = (String) request.getProperty("REQUEST_URL");
         String authorizationCode = requestURL.split("=")[1];
@@ -232,7 +237,7 @@ public class AuthenticatorAPI implements Microservice {
             accessTokenRequest.setScopes(scopes);
             accessTokenRequest.addRequestParam("code" , authorizationCode);
             AccessTokenInfo accessTokenInfo = APIManagerFactory.getInstance().getKeyManager()
-                    .getNewApplicationAccessToken(accessTokenRequest);
+                    .getNewAccessToken(accessTokenRequest);
             loginTokenService.setAccessTokenData(authResponseBean, accessTokenInfo);
             authResponseBean.setAuthUser(userName);
             String accessToken = accessTokenInfo.getAccessToken();
@@ -251,14 +256,14 @@ public class AuthenticatorAPI implements Microservice {
      * This method creates a DCR application.
      * @return OAUthApplicationInfo - An object with DCR Application information
      */
-    private OAuthApplicationInfo createDCRApplication(String clientName, String userName, Long validityPeriod)
+    private OAuthApplicationInfo createDCRApplication(String clientName, List<String> grantTypes, Long validityPeriod)
             throws APIManagementException {
         KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();
         OAuthAppRequest oAuthAppRequest = null;
         OAuthApplicationInfo oAuthApplicationInfo;
         try {
             oAuthAppRequest = ApplicationUtils.createOauthAppRequest(
-                    clientName, userName, "https://localhost:9292/store/auth/apis/login/callback", null);
+                    clientName, "https://localhost:9292/store/auth/apis/login/callback", grantTypes);
             oAuthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.VALIDITY_PERIOD, validityPeriod);
             oAuthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.APP_KEY_TYPE, "application");
             oAuthApplicationInfo = keyManager.createApplication(oAuthAppRequest);
