@@ -5,7 +5,6 @@ import ballerina.net.jms;
 import ballerina.net.http;
 import ballerina.lang.system;
 import ballerina.lang.errors;
-import ballerina.lang.jsons;
 import ballerina.lang.strings;
 import org.wso2.carbon.apimgt.gateway.constants as Constants;
 import org.wso2.carbon.apimgt.gateway.utils as gatewayUtil;
@@ -26,10 +25,10 @@ service apimPublisherEventListner {
     resource onMessage (message m) {
         try {
             json event = messages:getJsonPayload(m);
-            string eventType = jsons:getString(event, Constants:EVENT_TYPE);
+            string eventType = (string)event[Constants:EVENT_TYPE];
 
             if (strings:equalsIgnoreCase(eventType, Constants:API_CREATE)) {
-                json apiSummary = jsons:getJson(event, "apiSummary");
+                json apiSummary = event.apiSummary;
                 if (apiSummary != null) {
 
                     dto:APIDTO api = gatewayUtil:fromJSONToAPIDTO(apiSummary);
@@ -57,7 +56,7 @@ service apimPublisherEventListner {
 
 
             } else if (strings:equalsIgnoreCase(eventType, Constants:API_UPDATE)) {
-                json apiSummary = jsons:getJson(event, "apiSummary");
+                json apiSummary = event.apiSummary;
                 if (apiSummary != null) {
 
                     dto:APIDTO api = gatewayUtil:fromJSONToAPIDTO(apiSummary);
@@ -77,13 +76,14 @@ service apimPublisherEventListner {
                     }            //Update API service
                     gatewayUtil:updateService(api, apiConfig);
                     //Update API cache
+                    holder:removeFromAPICache(api);
                     holder:putIntoAPICache(api);
                 } else {
                     system:println("Invalid json received");
                 }
 
             } else if (strings:equalsIgnoreCase(eventType, Constants:API_DELETE)) {
-                json apiSummary = jsons:getJson(event, "apiSummary");
+                json apiSummary = event.apiSummary;
                 if (apiSummary != null) {
 
                     dto:APIDTO api = gatewayUtil:fromJSONToAPIDTO(apiSummary);
@@ -110,10 +110,11 @@ service apimPublisherEventListner {
                 }
 
             } else if (strings:equalsIgnoreCase(eventType, Constants:API_STATE_CHANGE)) {
-                json apiSummary = jsons:getJson(event, "apiSummary");
+                json apiSummary = event.apiSummary;
                 if (apiSummary != null) {
 
                     dto:APIDTO api = gatewayUtil:fromJSONToAPIDTO(apiSummary);
+                    holder:removeFromAPICache(api);
                     holder:putIntoAPICache(api);
                 } else {
                     system:println("Invalid json received");

@@ -84,6 +84,20 @@ function authenticate (message m) (boolean, message) {
                         // validating subscription
                         subscriptionDto = validateSubscription(apiContext, version, introspectDto);
                         if (subscriptionDto != null) {
+                            if (subscriptionDto.status == constants:SUBSCRIPTION_STATUS_BLOCKED) {
+                                gatewayUtil:constructSubscriptionBlocked(response,apiDto.context,apiDto.version);
+                                return false,response;
+                            }else if (subscriptionDto.status == constants:SUBSCRIPTION_STATUS_PROD_ONLY_BLOCKED){
+                                if(subscriptionDto.keyEnvType == constants:ENV_TYPE_PRODUCTION){
+                                    gatewayUtil:constructSubscriptionBlocked(response,apiDto.context,apiDto.version);
+                                    return false,response;
+                                }
+                            }else if (subscriptionDto.status == constants:SUBSCRIPTION_STATUS_SANDBOX_ONLY_BLOCKED){
+                                if(subscriptionDto.keyEnvType == constants:ENV_TYPE_SANDBOX){
+                                    gatewayUtil:constructSubscriptionBlocked(response,apiDto.context,apiDto.version);
+                                    return false,response;
+                                }
+                            }
                             if (validateScopes(resourceDto, introspectDto)) {
                                 dto:KeyValidationDto keyValidationInfo = constructKeyValidationDto(authToken, introspectDto, subscriptionDto, resourceDto);
                                 util:setProperty(m, "KEY_VALIDATION_INFO", keyValidationInfo);

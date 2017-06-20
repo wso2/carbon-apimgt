@@ -596,6 +596,10 @@ definitions:
         type: string
         description: |
           UUID of Application
+      status:
+        type: string
+        description: |
+          Subscription Status
 
 #-----------------------------------------------------
 # API Summary Info resource
