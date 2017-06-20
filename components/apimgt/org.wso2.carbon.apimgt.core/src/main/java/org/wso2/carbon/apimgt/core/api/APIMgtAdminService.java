@@ -23,12 +23,14 @@ import org.wso2.carbon.apimgt.core.exception.APIConfigRetrievalException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.BlockConditions;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.RegistrationSummary;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.CustomPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 
@@ -98,6 +100,15 @@ public interface APIMgtAdminService {
     String addApplicationPolicy(ApplicationPolicy policy) throws APIManagementException;
 
     /**
+     *  Add a block condition
+     *
+     * @param blockConditions BlockConditions Object to be added
+     * @return UUID of the new Block Condition
+     * @throws APIManagementException
+     */
+    String addBlockCondition(BlockConditions blockConditions) throws APIManagementException;
+
+    /**
      * Adds new {@link SubscriptionPolicy} to the system
      *
      * @param policy      Policy object to be added.
@@ -131,13 +142,32 @@ public interface APIMgtAdminService {
     void updateApplicationPolicy(ApplicationPolicy policy) throws APIManagementException;
 
     /**
-     * Delete an existing Policy in the system
+     * Updates a block condition given its UUID
+     *
+     * @param uuid uuid of the block condition
+     * @param state state of condition
+     * @return state change success or not
+     * @throws APIManagementException
+     */
+    boolean updateBlockConditionStateByUUID(String uuid, Boolean state) throws APIManagementException;
+
+    /**
+     * Delete existing @{@link Policy} in the system
      *
      * @param policyName    Policy Name to be deleted.
      * @param policyLevel Policy Level to which above Policy belongs to
      * @throws APIManagementException   If failed to delete the policy.
      */
     void deletePolicy(String policyName, APIMgtAdminService.PolicyLevel policyLevel) throws APIManagementException;
+
+    /**
+     * Delete existing @{@link BlockConditions} in the system
+     *
+     * @param uuid uuid of the block condition to be deleted
+     * @return true if successfully deleted
+     * @throws APIManagementException If failed to delete the block condition
+     */
+    boolean deleteBlockConditionByUuid(String uuid) throws APIManagementException;
 
     /**
      * Delete an existing Plicy in the system using the policy id
@@ -321,4 +351,64 @@ public interface APIMgtAdminService {
         application,
         subscription
     }
+
+    /**
+     * Get a list of block conditions.
+     *
+     * @return List of block Conditions
+     * @throws APIManagementException
+     */
+    List<BlockConditions> getBlockConditions() throws APIManagementException;
+
+    /**
+     * Retrieves a block condition by its UUID.
+     *
+     * @param uuid uuid of the block condition
+     * @return Retrieve a block Condition
+     * @throws APIManagementException
+     */
+    BlockConditions getBlockConditionByUUID(String uuid) throws APIManagementException;
+
+    /**
+     * Adding custom policy.
+     *
+     * @param customPolicy CustomPolicy object to be added
+     * @return uuid of the added custom policy
+     * @throws APIManagementException if failed adding custom policy
+     */
+    String addCustomRule(CustomPolicy customPolicy) throws APIManagementException;
+
+    /**
+     * Update custom policy.
+     *
+     * @param customPolicy CustomPolicy to be updated
+     * @throws APIManagementException if failed updating custom policy
+     */
+    void updateCustomRule(CustomPolicy customPolicy) throws APIManagementException;
+
+    /**
+     * Delete custom rule.
+     *
+     * @param uuid uuid of the custom policy to be deleted
+     * @throws APIManagementException if failed delete custom rule
+     */
+    void deleteCustomRule(String uuid) throws APIManagementException;
+
+    /**
+     * Get all custom policies
+     *
+     * @return list of custom policies available
+     * @throws APIManagementException if failed getting all custom policies
+     */
+    List<CustomPolicy> getCustomRules() throws APIManagementException;
+
+    /**
+     * Get custom policy by uuid
+     *
+     * @param uuid uuid of the custom policy to be retrieved
+     * @return CustomPolicy object
+     * @throws APIManagementException if failed getting custom policy
+     */
+    CustomPolicy getCustomRuleByUUID(String uuid) throws APIManagementException;
+
 }

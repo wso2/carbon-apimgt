@@ -27,10 +27,13 @@ import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.models.BlockConditions;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.CustomPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 
 import java.util.List;
@@ -245,5 +248,60 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         policyDAO.deletePolicyByUuid(APIMgtAdminService.PolicyLevel.api, apiPolicy.getUuid());
         Assert.assertFalse(policyDAO.policyExists(APIMgtAdminService.PolicyLevel.api, apiPolicy.getPolicyName()),
                 "Deleted API policy with name: " + apiPolicy.getPolicyName() + " still exists");
+    }
+
+    @Test(description = "Add, Get, Delete block condition")
+    public void testAddGetDeleteBlockConditions() throws Exception {
+
+        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+
+        BlockConditions blockConditionsIP = SampleTestObjectCreator
+                .createDefaultBlockCondition(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_IP);
+        BlockConditions blockConditionsIpRange = SampleTestObjectCreator
+                .createDefaultBlockCondition(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITION_IP_RANGE);
+        BlockConditions blockConditionsApi = SampleTestObjectCreator
+                .createDefaultBlockCondition(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_API);
+        BlockConditions blockConditionsApp = SampleTestObjectCreator
+                .createDefaultBlockCondition(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_APPLICATION);
+        BlockConditions blockConditionsUser = SampleTestObjectCreator
+                .createDefaultBlockCondition(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_USER);
+
+        String uuidIp = policyDAO.addBlockConditions(blockConditionsIP);
+        String uuidIpRange = policyDAO.addBlockConditions(blockConditionsIpRange);
+        String uuidApi = policyDAO.addBlockConditions(blockConditionsApi);
+        String uuidApp = policyDAO.addBlockConditions(blockConditionsApp);
+        String uuidUser = policyDAO.addBlockConditions(blockConditionsUser);
+
+        BlockConditions blockConditionsAddedIP = policyDAO.getBlockConditionByUUID(uuidIp);
+        BlockConditions blockConditionsAddedIpRange = policyDAO.getBlockConditionByUUID(uuidIpRange);
+        BlockConditions blockConditionsAddedApi = policyDAO.getBlockConditionByUUID(uuidApi);
+        BlockConditions blockConditionsAddedApp = policyDAO.getBlockConditionByUUID(uuidApp);
+        BlockConditions blockConditionsAddedUser = policyDAO.getBlockConditionByUUID(uuidUser);
+
+        Assert.assertEquals(blockConditionsIP.getConditionValue(), blockConditionsAddedIP.getConditionValue());
+        Assert.assertEquals(blockConditionsApi.getConditionValue(), blockConditionsAddedApi.getConditionValue());
+        Assert.assertEquals(blockConditionsApp.getConditionValue(), blockConditionsAddedApp.getConditionValue());
+        Assert.assertEquals(blockConditionsUser.getConditionValue(), blockConditionsAddedUser.getConditionValue());
+        Assert.assertEquals(blockConditionsIpRange.getStartingIP(), blockConditionsAddedIpRange.getStartingIP());
+
+        Assert.assertTrue(policyDAO.deleteBlockConditionByUuid(uuidIp));
+        Assert.assertTrue(policyDAO.deleteBlockConditionByUuid(uuidIpRange));
+        Assert.assertTrue(policyDAO.deleteBlockConditionByUuid(uuidApi));
+        Assert.assertTrue(policyDAO.deleteBlockConditionByUuid(uuidApp));
+        Assert.assertTrue(policyDAO.deleteBlockConditionByUuid(uuidUser));
+    }
+
+    @Test
+    public void testAddGetDeleteCustomPolicy() throws Exception {
+        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        CustomPolicy customPolicy = SampleTestObjectCreator.createDefaultCustomPolicy();
+        String uuid = policyDAO.addCustomPolicy(customPolicy);
+
+        CustomPolicy policyAdded = policyDAO.getCustomPolicyByUuid(uuid);
+        Assert.assertEquals(customPolicy.getSiddhiQuery(), policyAdded.getSiddhiQuery());
+
+        policyDAO.deleteCustomPolicy(uuid);
+        CustomPolicy policyDeletion = policyDAO.getCustomPolicyByUuid(uuid);
+        Assert.assertNull(policyDeletion);
     }
 }
