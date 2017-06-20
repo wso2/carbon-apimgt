@@ -15,6 +15,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
@@ -799,30 +800,26 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     private String replaceGroupIdWithName(String permissionString) throws ParseException, APIManagementException {
         IdentityProvider idp = APIManagerFactory.getInstance().getIdentityProvider();
-        List<String> nonExistingRoleList = new ArrayList<>();
-        JSONArray newPermissionArray = new JSONArray();
+        JSONArray updatedPermissionArray = new JSONArray();
         JSONParser jsonParser = new JSONParser();
-        JSONArray permissionArray = (JSONArray) jsonParser.parse(permissionString);
+        JSONArray originalPermissionArray = (JSONArray) jsonParser.parse(permissionString);
 
-        for (Object permissionObj : permissionArray) {
+        for (Object permissionObj : originalPermissionArray) {
             JSONObject jsonObject = (JSONObject) permissionObj;
             String groupId = (String) jsonObject.get(APIMgtConstants.Permission.GROUP_ID);
-            String groupName = idp.getRoleName(groupId);
-            if (groupName != null) {
-                JSONObject obj = new JSONObject();
-                obj.put(APIMgtConstants.Permission.GROUP_ID, groupName);
-                obj.put(APIMgtConstants.Permission.PERMISSION, jsonObject.get(APIMgtConstants.Permission.PERMISSION));
-                newPermissionArray.add(obj);
-            } else {
-                nonExistingRoleList.add(groupId);
+            try {
+                String groupName = idp.getRoleName(groupId);
+                JSONObject updatedPermissionJsonObj = new JSONObject();
+                updatedPermissionJsonObj.put(APIMgtConstants.Permission.GROUP_ID, groupName);
+                updatedPermissionJsonObj.put(APIMgtConstants.Permission.PERMISSION, jsonObject.get(APIMgtConstants.Permission.PERMISSION));
+                updatedPermissionArray.add(updatedPermissionJsonObj);
+            } catch (IdentityProviderException e) {
+                //lets the execution continue after logging the exception
+                String errorMessage = "Role with ID " + groupId +" no longer exists in the system";
+                log.error(errorMessage, e);
             }
         }
-        if (!nonExistingRoleList.isEmpty()) {
-            String message = "The roles with role Ids " + nonExistingRoleList.toString() + " does not exist.";
-            log.error(message);
-            throw new APIManagementException(message, ExceptionCodes.ROLE_DOES_NOT_EXIST);
-        }
-        return newPermissionArray.toJSONString();
+        return updatedPermissionArray.toJSONString();
     }
 
     /**

@@ -585,25 +585,25 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @throws APIManagementException - if there is an error getting the IdentityProvider instance
      */
     private String replaceGroupNamesWithId (String permissionString) throws ParseException, APIManagementException {
-        JSONArray newPermissionArray = new JSONArray();
+        JSONArray updatedPermissionArray = new JSONArray();
         JSONParser jsonParser = new JSONParser();
-        JSONArray permissionArray = (JSONArray) jsonParser.parse(permissionString);
+        JSONArray originalPermissionArray = (JSONArray) jsonParser.parse(permissionString);
         try {
-            for (Object permissionObj : permissionArray) {
+            for (Object permissionObj : originalPermissionArray) {
                 JSONObject jsonObject = (JSONObject) permissionObj;
                 String groupName = (String) jsonObject.get(APIMgtConstants.Permission.GROUP_ID);
                 String groupId = getIdentityProvider().getRoleId(groupName);
-                JSONObject obj = new JSONObject();
-                obj.put(APIMgtConstants.Permission.GROUP_ID, groupId);
-                obj.put(APIMgtConstants.Permission.PERMISSION, jsonObject.get(APIMgtConstants.Permission.PERMISSION));
-                newPermissionArray.add(obj);
+                JSONObject updatedPermissionJsonObj = new JSONObject();
+                updatedPermissionJsonObj.put(APIMgtConstants.Permission.GROUP_ID, groupId);
+                updatedPermissionJsonObj.put(APIMgtConstants.Permission.PERMISSION, jsonObject.get(APIMgtConstants.Permission.PERMISSION));
+                updatedPermissionArray.add(updatedPermissionJsonObj);
             }
         } catch (IdentityProviderException e) {
             String errorMessage = "There are invalid roles in the permission string";
             log.error(errorMessage, e);
             throw new APIManagementException(errorMessage, ExceptionCodes.UNSUPPORTED_ROLE);
         }
-        return newPermissionArray.toJSONString();
+        return updatedPermissionArray.toJSONString();
     }
 
     /**
