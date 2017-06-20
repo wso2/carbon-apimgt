@@ -734,8 +734,9 @@ public class ApisApiServiceImpl extends ApisApiService {
         Map<String, Integer> permissionMap = api.getPermissionMap();
 
         //TODO: Remove the check for admin after IS adds an ID to admin user
-        if (!permissionMap.isEmpty() && !"admin".equals(loggedInUserName)) {
-            String userId = idp.getIdOfUser(loggedInUserName);
+        if (!permissionMap.isEmpty()) {
+            String userName = "tharika";
+            String userId = idp.getIdOfUser(userName);
             List<String> loggedInUserRoles = idp.getRoleIdsOfUser(userId);
             List<String> permissionRoleList = getRolesFromPermissionMap(permissionMap);
             List<String> rolesOfUserWithAPIPermissions = null;
