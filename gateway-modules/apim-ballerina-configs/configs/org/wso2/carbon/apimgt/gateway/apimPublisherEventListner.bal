@@ -19,6 +19,9 @@ import org.wso2.carbon.apimgt.ballerina.util as apimgtUtil;
 @jms:ConnectionProperty {key:"connectionFactoryType", value:"topic"}
 @jms:ConnectionProperty {key:"destination", value:"PublisherTopic"}
 @jms:ConnectionProperty {key:"connectionFactoryJNDIName", value:"TopicConnectionFactory"}
+@jms:ConnectionProperty {key:"subscriptionDurable", value:"true"}
+@jms:ConnectionProperty {key:"durableSubscriberClientID", value:"apimPublisherEventListner"}
+@jms:ConnectionProperty {key:"durableSubscriberName", value:"apimPublisherEventListner"}
 @jms:ConnectionProperty {key:"sessionAcknowledgement", value:"AUTO_ACKNOWLEDGE"}
 service apimPublisherEventListner {
 
