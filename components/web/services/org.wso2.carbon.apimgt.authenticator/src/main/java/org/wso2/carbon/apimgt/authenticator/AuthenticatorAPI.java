@@ -29,6 +29,8 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
+import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
@@ -38,6 +40,7 @@ import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.formparam.FormDataParam;
 
+import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -170,40 +173,73 @@ public class AuthenticatorAPI implements Microservice {
                         "apim:subscription_view,apim:subscription_block,apim:subscribe,openid";
         Long validityPeriod = 3600L;
         OAuthApplicationInfo oAuthApplicationInfo;
-        SSOLoginServiceStub ssoLoginServiceStub;
-        feign.Response response;
         try {
             oAuthApplicationInfo = createDCRApplication(appContext.substring(1) , userName , validityPeriod);
             if (oAuthApplicationInfo != null) {
                 String oAuthApplicationClientId = oAuthApplicationInfo.getClientId();
                 String oAuthApplicationCallBackURL = oAuthApplicationInfo.getCallbackUrl();
-                // String oAuthApplicationClientSecret = oAuthApplicationInfo.getClientSecret();
-                // List<String> oAuthApplicationGrantTypes = oAuthApplicationInfo.getGrantTypes();
+                String oAuthApplicationClientSecret = oAuthApplicationInfo.getClientSecret();
 
-                ssoLoginServiceStub = SSOLoginServiceStubFactory.getSSOLoginServiceStub();
-                response = ssoLoginServiceStub.getAutherizationCode(
-                        "code", oAuthApplicationClientId,
-                        oAuthApplicationCallBackURL, "read");
-                if (response == null) {
-                    System.out.print("Error");
-                } else if (response.status() == 200) {
-                    JsonObject oAuthData = new JsonObject();
-                    oAuthData.addProperty("client_id" , oAuthApplicationClientId);
-                    oAuthData.addProperty("callback_URL" , oAuthApplicationCallBackURL);
-                    oAuthData.addProperty("scopes" , scopes);
-                    String responseBody = response.body().toString();
-                    System.out.print(responseBody);
-                    return Response.ok().entity(oAuthData).build();
-                }
-                // Get the Autherization Code
-                // Get Access Token
-                // Redirect to the store/apis page (callback URL)
+                JsonObject oAuthData = new JsonObject();
+                oAuthData.addProperty("client_id" , oAuthApplicationClientId);
+                oAuthData.addProperty("callback_URL" , oAuthApplicationCallBackURL);
+                oAuthData.addProperty("scopes" , scopes);
+                oAuthData.addProperty("client_secret" , oAuthApplicationClientSecret);
+                return Response.ok().entity(oAuthData).build();
+            } else {
+                log.warn("No information available in OAuth application.");
+                return Response.status(500).entity("Error while creating the OAuth application!").build();
             }
-            return Response.ok(oAuthApplicationInfo).build();
-        } catch (KeyManagementException e) {
+        } catch (APIManagementException e) {
             ErrorDTO errorDTO = AuthUtil.getErrorDTO(e.getErrorHandler(), null);
             log.error(e.getMessage(), e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+    /**
+     * This method requests the Access Token and redirects user to the Callback URL.
+     */
+    @GET
+    @Path("/callback")
+    @Produces(MediaType.TEXT_HTML)
+    public Response callback(@Context Request request) {
+        String appContext = AuthUtil.getAppContext(request);
+        String appName = appContext.substring(1);
+        String grantType = "authorization_code";
+        String callbackURI = "https://localhost:9292/editor/apis";
+        String userName = "admin";
+        Long validityPeriod = 3600L;
+        String[] scopes = {
+                "apim:api_view" , "apim:api_create" , "apim:api_publish" ,
+                "apim:tier_view" , "apim:tier_manage" ,
+                "apim:subscription_view" , "apim:subscription_block" , "apim:subscribe" , "openid"};
+        // Get the Autherization Code
+        String requestURL = (String) request.getProperty("REQUEST_URL");
+        String authorizationCode = requestURL.split("=")[1];
+        try {
+            // Get Access & Refresh Tokens
+            // Redirect to the store/apis page (callback URL)
+            LoginTokenService loginTokenService = new LoginTokenService();
+            AccessTokenRequest accessTokenRequest = new AccessTokenRequest();
+            AuthResponseBean authResponseBean = new AuthResponseBean();
+            Map<String, String> consumerKeySecretMap = loginTokenService.getConsumerKeySecret(appName);
+            accessTokenRequest.setClientId(consumerKeySecretMap.get("CONSUMER_KEY"));
+            accessTokenRequest.setClientSecret(consumerKeySecretMap.get("CONSUMER_SECRET"));
+            accessTokenRequest.setGrantType(grantType);
+            accessTokenRequest.setCallbackURI(callbackURI);
+            accessTokenRequest.setValidityPeriod(validityPeriod);
+            accessTokenRequest.setScopes(scopes);
+            accessTokenRequest.addRequestParam("code" , authorizationCode);
+            AccessTokenInfo accessTokenInfo = APIManagerFactory.getInstance().getKeyManager()
+                    .getNewApplicationAccessToken(accessTokenRequest);
+            loginTokenService.setAccessTokenData(authResponseBean, accessTokenInfo);
+            authResponseBean.setAuthUser(userName);
+            String accessToken = accessTokenInfo.getAccessToken();
+            String refreshToken = accessTokenInfo.getRefreshToken();
+            System.out.print(accessToken);
+            System.out.print(refreshToken);
+            return Response.ok().entity(authorizationCode).build();
         } catch (APIManagementException e) {
             ErrorDTO errorDTO = AuthUtil.getErrorDTO(e.getErrorHandler(), null);
             log.error(e.getMessage(), e);
@@ -221,9 +257,8 @@ public class AuthenticatorAPI implements Microservice {
         OAuthAppRequest oAuthAppRequest = null;
         OAuthApplicationInfo oAuthApplicationInfo;
         try {
-            oAuthAppRequest = ApplicationUtils
-                    .createOauthAppRequest(clientName, userName, "https://localhost:9443/carbon/admin/login.jsp",
-                            null);
+            oAuthAppRequest = ApplicationUtils.createOauthAppRequest(
+                    clientName, userName, "https://localhost:9292/store/auth/apis/login/callback", null);
             oAuthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.VALIDITY_PERIOD, validityPeriod);
             oAuthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.APP_KEY_TYPE, "application");
             oAuthApplicationInfo = keyManager.createApplication(oAuthAppRequest);

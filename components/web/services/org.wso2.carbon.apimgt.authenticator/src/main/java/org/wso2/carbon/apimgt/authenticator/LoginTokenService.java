@@ -125,7 +125,7 @@ public class LoginTokenService {
                 consumerKeySecretMap.get("CONSUMER_KEY"), consumerKeySecretMap.get("CONSUMER_SECRET"));
     }
 
-    private Map<String, String> getConsumerKeySecret(String appName) throws KeyManagementException {
+    public Map<String, String> getConsumerKeySecret(String appName) throws KeyManagementException {
 
         HashMap<String, String> consumerKeySecretMap;
         if (!AuthUtil.getConsumerKeySecretMap().containsKey(appName)) {
