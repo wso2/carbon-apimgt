@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>apimgt-analyzer-modules</artifactId>
+        <artifactId>org.wso2.carbon.apimgt.analyzer</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <version>7.0.34-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
@@ -43,26 +43,25 @@
                             org.wso2.carbon.apimgt.throttling.siddhi.extension.*,
                         </Export-Package>
                         <Import-Package>
-                            org.apache.log4j.*;version="${log4j.imp.pkg.version.range}",
-                            org.wso2.siddhi.annotation.*;version="${siddhi.import.version}",
-                            org.wso2.siddhi.annotation.util.*;version="${siddhi.import.version}",
-                            org.wso2.siddhi.core.config.*;version="${siddhi.import.version}",
-                            org.wso2.siddhi.core.executor.*;version="${siddhi.import.version}",
-                            org.wso2.siddhi.core.event.*;version="${siddhi.import.version}",
-                            org.wso2.siddhi.core.event.state.*;version="${siddhi.import.version}",
-                            org.wso2.siddhi.core.event.stream.*;version="${siddhi.import.version}",
-                            org.wso2.siddhi.core.event.stream.populater.*;version="${siddhi.import.version}",
-                            org.wso2.siddhi.core.query.processor.*;version="${siddhi.import.version}",
-                            org.wso2.siddhi.core.query.processor.stream.*;version="${siddhi.import.version}",
-                            org.wso2.siddhi.core.query.processor.stream.window.*;version="${siddhi.import.version}",
-                            org.wso2.siddhi.core.table.*;version="${siddhi.import.version}",
-                            org.wso2.siddhi.core.util.*;version="${siddhi.import.version}",
-                            org.wso2.siddhi.core.util.config.*;version="${siddhi.import.version}",
-                            org.wso2.siddhi.core.util.collection.operator.*;version="${siddhi.import.version}",
-                            org.wso2.siddhi.core.util.parser.*;version="${siddhi.import.version}",
-                            org.wso2.siddhi.query.api.definition.*;version="${siddhi.import.version}",
-                            org.wso2.siddhi.query.api.exception.*;version="${siddhi.import.version}",
-                            org.wso2.siddhi.query.api.expression.*;version="${siddhi.import.version}",
+                            org.wso2.siddhi.annotation.*;version="${siddhi.import.version.range}",
+                            org.wso2.siddhi.annotation.util.*;version="${siddhi.import.version.range}",
+                            org.wso2.siddhi.core.config.*;version="${siddhi.import.version.range}",
+                            org.wso2.siddhi.core.executor.*;version="${siddhi.import.version.range}",
+                            org.wso2.siddhi.core.event.*;version="${siddhi.import.version.range}",
+                            org.wso2.siddhi.core.event.state.*;version="${siddhi.import.version.range}",
+                            org.wso2.siddhi.core.event.stream.*;version="${siddhi.import.version.range}",
+                            org.wso2.siddhi.core.event.stream.populater.*;version="${siddhi.import.version.range}",
+                            org.wso2.siddhi.core.query.processor.*;version="${siddhi.import.version.range}",
+                            org.wso2.siddhi.core.query.processor.stream.*;version="${siddhi.import.version.range}",
+                            org.wso2.siddhi.core.query.processor.stream.window.*;version="${siddhi.import.version.range}",
+                            org.wso2.siddhi.core.table.*;version="${siddhi.import.version.range}",
+                            org.wso2.siddhi.core.util.*;version="${siddhi.import.version.range}",
+                            org.wso2.siddhi.core.util.config.*;version="${siddhi.import.version.range}",
+                            org.wso2.siddhi.core.util.collection.operator.*;version="${siddhi.import.version.range}",
+                            org.wso2.siddhi.core.util.parser.*;version="${siddhi.import.version.range}",
+                            org.wso2.siddhi.query.api.definition.*;version="${siddhi.import.version.range}",
+                            org.wso2.siddhi.query.api.exception.*;version="${siddhi.import.version.range}",
+                            org.wso2.siddhi.query.api.expression.*;version="${siddhi.import.version.range}",
                         </Import-Package>
                         <Include-Resource>
                             META-INF=target/classes/META-INF
