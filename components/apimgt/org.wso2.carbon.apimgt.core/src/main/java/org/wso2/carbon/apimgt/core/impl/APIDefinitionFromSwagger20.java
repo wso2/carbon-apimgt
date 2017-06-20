@@ -415,7 +415,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
 
     @Override
     public CompositeAPI.Builder generateCompositeApiFromSwaggerResource(String provider, String apiDefinition)
-                                                                                         throws APIManagementException {
+                                                                                    throws APIManagementException {
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(apiDefinition);
 
