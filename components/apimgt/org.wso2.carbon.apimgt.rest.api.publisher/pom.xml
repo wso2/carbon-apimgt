@@ -190,14 +190,16 @@
             org.json.simple.*,
 	        org.apache.commons.io.*,
             com.fasterxml.jackson.core.*,
-            com.fasterxml.jackson.databind.*
+            com.fasterxml.jackson.databind.*,
+            javax.wsdl.*,
+            org.apache.woden.*
         </import.package>
         <export.package>
             !org.wso2.carbon.apimgt.rest.api.publisher.internal,
             org.wso2.carbon.apimgt.rest.api.publisher.*; version="${carbon.apimgt.version}",
         </export.package>
         <carbon.component>
-            osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="10"
+            osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="11"
         </carbon.component>
     </properties>
 </project>

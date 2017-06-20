@@ -20,7 +20,7 @@
                        title="wsdl url"
                        type="text"
                        checked="checked"
-                       placeholder="http://petstore.swagger.io/v2/swagger.json">
+                       placeholder="http://petstore.swagger.io/v2/swagger.json1" onfocusout="validateWSDL(this)">
             </div>
         </div>
     </div>
@@ -57,7 +57,7 @@
                         </div>
                     </div>
                     <div class="col-sm-9" id="wsdl-create-new-endpoint-production">
-                        {{fragment "endpoint-create" type="production"}}
+                        {{fragment "endpoint-create" type="production-wsdl"}}
                     </div>
                     <div class="col-sm-9 hidden" id="wsdl-select-global-endpoint-production">
                         <select id="wsdl-global-endpoint-production" name="global-endpoint" class="form-control">
@@ -101,7 +101,7 @@
                         </div>
                     </div>
                     <div class="col-sm-9" id="wsdl-create-new-endpoint-sandbox">
-                        {{fragment "endpoint-create" type="sandbox"}}
+                        {{fragment "endpoint-create" type="sandbox-wsdl"}}
                     </div>
                     <div class="col-sm-9 hidden" id="wsdl-select-global-endpoint-sandbox">
                         <select id="wsdl-global-endpoint-sandbox" name="global-endpoint" class="form-control">

@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.core.models.WSDLInfo;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
@@ -57,6 +58,9 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.WSDLValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.WSDLValidationResponse_wsdlInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.WSDLValidationResponse_wsdlInfo_endpointsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowResponseDTO.WorkflowStatusEnum;
 
@@ -481,4 +485,24 @@ public class MappingUtil {
         return responseDTO;
     }
 
+    public static WSDLValidationResponseDTO toWSDLValidationResponseDTO(WSDLInfo info) {
+        WSDLValidationResponseDTO wsdlValidationResponseDTO = new WSDLValidationResponseDTO();
+        wsdlValidationResponseDTO.setIsValid(info.getVersion() != null);
+
+        WSDLValidationResponse_wsdlInfoDTO infoDTO = new WSDLValidationResponse_wsdlInfoDTO();
+        infoDTO.setVersion(info.getVersion());
+        WSDLValidationResponse_wsdlInfo_endpointsDTO endpointsDTO;
+
+        if (info.getEndpoints() != null) {
+            for (String endpointName : info.getEndpoints().keySet()) {
+                endpointsDTO = new WSDLValidationResponse_wsdlInfo_endpointsDTO();
+                endpointsDTO.setName(endpointName);
+                endpointsDTO.setLocation(info.getEndpoints().get(endpointName));
+                infoDTO.addEndpointsItem(endpointsDTO);
+            }
+        }
+        wsdlValidationResponseDTO.setWsdlInfo(infoDTO);
+        return wsdlValidationResponseDTO;
+    }
+    
 }

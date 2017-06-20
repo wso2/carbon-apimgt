@@ -816,4 +816,19 @@ class API {
         );
         return promised_delete;
     }
+
+    validateWSDL(wsdlUrl, callback) {
+        var promised_validateWSDL = this.client.then(
+            (client) => {
+            return client["WSDLs (Individual)"].post_wsdls_validate({wsdlUrl:wsdlUrl,"Content-Type": "application/json"},
+                this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+            }
+        );
+
+        if (callback) {
+            return promised_validateWSDL.then(callback);
+        } else {
+            return promised_validateWSDL;
+        }
+    }
 }

@@ -2861,6 +2861,52 @@ paths:
             $ref: '#/definitions/Error'
 
 ######################################################
+# The "WSDLs" resource API
+######################################################
+  /wsdls/validate:
+#-------------------------------------------------------------------
+# Resume the workflow by approving or rejecting the workflow request
+#-------------------------------------------------------------------
+    post:
+      x-scope: apim:api_create
+      summary: Validate a WSDL and retrieve a summary
+      description: |
+        This operation can be used to validate a WSDL and retrieve a summary
+      parameters:
+        - name : wsdlUrl
+          in: query
+          description: |
+            URL of the WSDL
+          type: string
+      tags:
+        - WSDLs (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            WSDL validation information is returned
+          schema:
+            $ref: '#/definitions/WSDLValidationResponse'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Workflow for the given reference in not found.
+          schema:
+            $ref: '#/definitions/Error'
+
+
+######################################################
 # Parameters - required by some of the APIs above
 ######################################################
 parameters:
@@ -4064,7 +4110,42 @@ definitions:
         description: |
           Attributes that returned after the workflow execution
         type: string
-       
-
+        
+#-----------------------------------------------------
+# The workflow executor's response resource
+#-----------------------------------------------------        
+  WSDLValidationResponse:
+    title: WSDL validation Response
+    required:
+      - isValid
+    properties:
+      isValid:
+        description: |
+          This attribute declares whether this WSDL is valid or not.
+        type: boolean
+        example: true
+      wsdlInfo:
+        description:
+          Summary of the WSDL including the basic information
+        properties:
+          version:
+            description: |
+              WSDL version
+            type: string
+            example: "1.1"
+          endpoints:
+            description: |
+              A list of endpoints the service exposes
+            type: array
+            items:
+              properties:
+                name:
+                  type: string
+                  description: "Name of the endpoint"
+                  example: "StockQuoteSoap"
+                location:
+                  type: string
+                  description: "Endpoint URL"
+                  example: "http://www.webservicex.net/stockquote.asmx"
 
 
