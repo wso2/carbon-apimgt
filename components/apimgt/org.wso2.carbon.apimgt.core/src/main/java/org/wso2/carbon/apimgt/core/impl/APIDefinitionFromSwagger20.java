@@ -415,7 +415,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
 
     @Override
     public CompositeAPI.Builder generateCompositeApiFromSwaggerResource(String provider, String apiDefinition)
-            throws APIManagementException {
+                                                                                         throws APIManagementException {
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(apiDefinition);
 
@@ -431,11 +431,11 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
             String apiVersion = apiInfo.getVersion();
             String apiDescription = apiInfo.getDescription();
             CompositeAPI.Builder apiBuilder = new CompositeAPI.Builder().
-                    provider(provider).
-                    name(apiName).
-                    version(apiVersion).
-                    description(apiDescription).
-                    context(swagger.getBasePath());
+                provider(provider).
+                name(apiName).
+                version(apiVersion).
+                description(apiDescription).
+                context(swagger.getBasePath());
 
             List<APIResource> apiResourceList = parseSwaggerAPIResources(new StringBuilder(apiDefinition));
             Map<String, UriTemplate> uriTemplateMap = new HashMap();
