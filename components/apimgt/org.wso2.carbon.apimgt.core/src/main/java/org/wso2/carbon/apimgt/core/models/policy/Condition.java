@@ -19,6 +19,9 @@
 
 package org.wso2.carbon.apimgt.core.models.policy;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
 /**
  * Contains {@link Condition} attributes
  */
@@ -59,6 +62,10 @@ public abstract class Condition  {
     public abstract String getCondition();
 
     public abstract String getNullCondition();
+
+    public void populateDataInPreparedStatement(PreparedStatement preparedStatement) throws SQLException {
+        // not implemented
+    }
 
     @Override
     public String toString() {

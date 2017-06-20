@@ -94,6 +94,13 @@ public class SampleTestObjectCreator {
     private static final String SAMPLE_APP_POLICY_DESCRIPTION = "SampleAppPolicy Description";
     private static final String SAMPLE_SUBSCRIPTION_POLICY = "SampleSubscriptionPolicy";
     private static final String SAMPLE_SUBSCRIPTION_POLICY_DESCRIPTION = "SampleSubscriptionPolicy Description";
+    private static final String UPDATED_SAMPLE_API_POLICY = "UpdatedSampleAPIPolicy";
+    private static final String UPDATED_SAMPLE_API_POLICY_DESCRIPTION = "Updated NewSampleAPIPolicy Description";
+    private static final String UPDATED_SAMPLE_APP_POLICY = "UpdatedSampleAppPolicy";
+    private static final String UPDATED_SAMPLE_APP_POLICY_DESCRIPTION = "Updated SampleAppPolicy Description";
+    private static final String UPDATED_SAMPLE_SUBSCRIPTION_POLICY = "Updated SampleSubscriptionPolicy";
+    private static final String UPDATED_SAMPLE_SUBSCRIPTION_POLICY_DESCRIPTION = "Updated SampleSubscriptionPolicy "
+            + "Description";
     private static final String PRODUCTION_ENDPOINT = "production";
     private static final String SAMPLE_API_WSDL = "http://www.webservicex.net/globalweather.asmx?op=GetWeather?wsdl";
     private static final String FIFTY_PER_MIN_TIER = "50PerMin";
@@ -521,18 +528,35 @@ public class SampleTestObjectCreator {
      */
     public static APIPolicy createDefaultAPIPolicy() {
         APIPolicy apiPolicy = new APIPolicy(SAMPLE_API_POLICY);
+        apiPolicy.setUuid(UUID.randomUUID().toString());
         apiPolicy.setDisplayName(SAMPLE_API_POLICY);
         apiPolicy.setDescription(SAMPLE_API_POLICY_DESCRIPTION);
         apiPolicy.setUserLevel(APIMgtConstants.ThrottlePolicyConstants.API_LEVEL);
         QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
         defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
-        RequestCountLimit requestCountLimit = new RequestCountLimit();
-        requestCountLimit.setTimeUnit(TIME_UNIT_SECONDS);
-        requestCountLimit.setRequestCount(10000);
-        requestCountLimit.setUnitTime(1000);
+        RequestCountLimit requestCountLimit = new RequestCountLimit(TIME_UNIT_SECONDS, 1000, 10000);
         defaultQuotaPolicy.setLimit(requestCountLimit);
         apiPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
         apiPolicy.setPipelines(createDefaultPipelines());
+        return apiPolicy;
+    }
+
+    /**
+     * Updated the given API policy
+     *
+     * @param apiPolicy {@link APIPolicy} instance to be updated
+     * @return updated {@link APIPolicy} instance
+     */
+    public static APIPolicy updateAPIPolicy (APIPolicy apiPolicy) {
+        apiPolicy.setDisplayName(UPDATED_SAMPLE_API_POLICY);
+        apiPolicy.setDescription(UPDATED_SAMPLE_API_POLICY_DESCRIPTION);
+        QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+        defaultQuotaPolicy.setType(PolicyConstants.BANDWIDTH_LIMIT_TYPE);
+        BandwidthLimit bandwidthLimit = new BandwidthLimit(TIME_UNIT_SECONDS, 1, 1000, "KB");
+        defaultQuotaPolicy.setLimit(bandwidthLimit);
+        apiPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+        apiPolicy.setPipelines(createDefaultPipelines());
+        apiPolicy.getPipelines().add(createNewIPRangePipeline());
         return apiPolicy;
     }
 
@@ -554,11 +578,7 @@ public class SampleTestObjectCreator {
         conditionsList.add(ipCondition);
         conditionsList.add(ipConditionSpecific);
         //set quota policy with bandwidth limit
-        BandwidthLimit bandwidthLimit = new BandwidthLimit();
-        bandwidthLimit.setDataAmount(1000);
-        bandwidthLimit.setDataUnit(PolicyConstants.MB);
-        bandwidthLimit.setUnitTime(1);
-        bandwidthLimit.setTimeUnit(TIME_UNIT_MONTH);
+        BandwidthLimit bandwidthLimit = new BandwidthLimit(TIME_UNIT_MONTH, 1, 1000, PolicyConstants.MB);
         QuotaPolicy quotaPolicy1 = new QuotaPolicy();
         quotaPolicy1.setType(PolicyConstants.BANDWIDTH_TYPE);
         quotaPolicy1.setLimit(bandwidthLimit);
@@ -584,10 +604,7 @@ public class SampleTestObjectCreator {
         conditionsList.add(jwtClaimsCondition);
         conditionsList.add(queryParameterCondition);
         //pipeline 2 with request count as quota policy
-        RequestCountLimit requestCountLimit = new RequestCountLimit();
-        requestCountLimit.setRequestCount(1000);
-        requestCountLimit.setUnitTime(1);
-        requestCountLimit.setTimeUnit(TIME_UNIT_SECONDS);
+        RequestCountLimit requestCountLimit = new RequestCountLimit(TIME_UNIT_SECONDS, 1, 1000);
         QuotaPolicy quotaPolicy2 = new QuotaPolicy();
         quotaPolicy2.setType(PolicyConstants.REQUEST_COUNT_TYPE);
         quotaPolicy2.setLimit(requestCountLimit);
@@ -604,21 +621,39 @@ public class SampleTestObjectCreator {
     }
 
     /**
+     * Creates a new {@link Pipeline} instance
+     *
+     * @return created Pipeline instance
+     */
+    public static Pipeline createNewIPRangePipeline () {
+        IPCondition ipCondition = new IPCondition(PolicyConstants.IP_RANGE_TYPE);
+        ipCondition.setStartingIP("10.100.0.105");
+        ipCondition.setEndingIP("10.100.0.115");
+        Pipeline pipeline = new Pipeline();
+
+        RequestCountLimit requestCountLimit = new RequestCountLimit(TIME_UNIT_SECONDS, 1, 1000);
+        QuotaPolicy quotaPolicy = new QuotaPolicy();
+        quotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
+        quotaPolicy.setLimit(requestCountLimit);
+
+        pipeline.setQuotaPolicy(quotaPolicy);
+        pipeline.setConditions(Arrays.asList(ipCondition));
+        return pipeline;
+    }
+
+    /**
      * Create default api policy with bandwidth limit as quota policy
      *
      * @return APIPolicy object with bandwidth limit as quota policy is returned
      */
     public static APIPolicy createDefaultAPIPolicyWithBandwidthLimit() {
-        BandwidthLimit bandwidthLimit = new BandwidthLimit();
-        bandwidthLimit.setDataAmount(1000);
-        bandwidthLimit.setDataUnit(PolicyConstants.MB);
-        bandwidthLimit.setUnitTime(1);
-        bandwidthLimit.setTimeUnit(TIME_UNIT_MONTH);
+        BandwidthLimit bandwidthLimit = new BandwidthLimit(TIME_UNIT_MONTH, 1, 1000, PolicyConstants.MB);
         QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
         defaultQuotaPolicy.setType(PolicyConstants.BANDWIDTH_TYPE);
         defaultQuotaPolicy.setLimit(bandwidthLimit);
         //set default API Policy
         APIPolicy apiPolicy = new APIPolicy(SAMPLE_API_POLICY);
+        apiPolicy.setUuid(UUID.randomUUID().toString());
         apiPolicy.setDisplayName(SAMPLE_API_POLICY);
         apiPolicy.setDescription(SAMPLE_API_POLICY_DESCRIPTION);
         apiPolicy.setUserLevel(APIMgtConstants.ThrottlePolicyConstants.API_LEVEL);
@@ -628,30 +663,49 @@ public class SampleTestObjectCreator {
 
     public static ApplicationPolicy createDefaultApplicationPolicy() {
         ApplicationPolicy applicationPolicy = new ApplicationPolicy(SAMPLE_APP_POLICY);
+        applicationPolicy.setUuid(UUID.randomUUID().toString());
         applicationPolicy.setDisplayName(SAMPLE_APP_POLICY);
         applicationPolicy.setDescription(SAMPLE_APP_POLICY_DESCRIPTION);
         QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
         defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
-        RequestCountLimit requestCountLimit = new RequestCountLimit();
-        requestCountLimit.setTimeUnit(TIME_UNIT_SECONDS);
-        requestCountLimit.setRequestCount(10000);
-        requestCountLimit.setUnitTime(1000);
+        RequestCountLimit requestCountLimit = new RequestCountLimit(TIME_UNIT_SECONDS, 10000, 1000);
         defaultQuotaPolicy.setLimit(requestCountLimit);
+        applicationPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+        return applicationPolicy;
+    }
+
+
+    public static ApplicationPolicy updateApplicationPolicy(ApplicationPolicy applicationPolicy) {
+        applicationPolicy.setDisplayName(UPDATED_SAMPLE_APP_POLICY);
+        applicationPolicy.setDescription(UPDATED_SAMPLE_APP_POLICY_DESCRIPTION);
+        QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+        defaultQuotaPolicy.setType(PolicyConstants.BANDWIDTH_LIMIT_TYPE);
+        BandwidthLimit bandwidthLimit = new BandwidthLimit(TIME_UNIT_SECONDS, 10, 1000, "KB");
+        defaultQuotaPolicy.setLimit(bandwidthLimit);
         applicationPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
         return applicationPolicy;
     }
 
     public static SubscriptionPolicy createDefaultSubscriptionPolicy() {
         SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(SAMPLE_SUBSCRIPTION_POLICY);
+        subscriptionPolicy.setUuid(UUID.randomUUID().toString());
         subscriptionPolicy.setDisplayName(SAMPLE_SUBSCRIPTION_POLICY);
         subscriptionPolicy.setDescription(SAMPLE_SUBSCRIPTION_POLICY_DESCRIPTION);
         QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
         defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
-        RequestCountLimit requestCountLimit = new RequestCountLimit();
-        requestCountLimit.setTimeUnit(TIME_UNIT_SECONDS);
-        requestCountLimit.setRequestCount(10000);
-        requestCountLimit.setUnitTime(1000);
+        RequestCountLimit requestCountLimit = new RequestCountLimit(TIME_UNIT_SECONDS, 10000, 1000);
         defaultQuotaPolicy.setLimit(requestCountLimit);
+        subscriptionPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+        return subscriptionPolicy;
+    }
+
+    public static SubscriptionPolicy updateSubscriptionPolicy(SubscriptionPolicy subscriptionPolicy) {
+        subscriptionPolicy.setDisplayName(UPDATED_SAMPLE_SUBSCRIPTION_POLICY);
+        subscriptionPolicy.setDescription(UPDATED_SAMPLE_SUBSCRIPTION_POLICY_DESCRIPTION);
+        QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+        defaultQuotaPolicy.setType(PolicyConstants.BANDWIDTH_LIMIT_TYPE);
+        BandwidthLimit bandwidthLimit = new BandwidthLimit(TIME_UNIT_SECONDS, 1, 1000, "KB");
+        defaultQuotaPolicy.setLimit(bandwidthLimit);
         subscriptionPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
         return subscriptionPolicy;
     }

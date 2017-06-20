@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>7.0.26-SNAPSHOT</version>
+        <version>7.0.34-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -293,7 +293,7 @@
                                 </bundle>
                                 <bundle>
                                     <symbolicName>nimbus-jose-jwt</symbolicName>
-                                    <version>2.26.1.wso2v2</version>
+                                    <version>${nimbusds.version}</version>
                                 </bundle>
                                 <bundle>
                                     <symbolicName>com.fasterxml.jackson.jaxrs.jackson-jaxrs-base</symbolicName>

@@ -25,7 +25,7 @@ public class HTTPVerbCondition extends Condition {
     private String httpVerb;
 
     public HTTPVerbCondition() {
-        setType(PolicyConstants.HTTP_VERB_TYPE);
+        setType(PolicyConstants.HTTP_VERB_CONDITION_TYPE);
         this.queryAttributeName = PolicyConstants.START_QUERY + PolicyConstants.HTTP_VERB_QUERY
                 + PolicyConstants.END_QUERY;
         // "cast(map:get(properties,’"+value+"’),’string’)";
