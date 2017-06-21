@@ -269,7 +269,7 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
 
         if (!authorized[0]) {
             String message = "Scope validation fails for the scopes " + scopesToValidate;
-            throw new APIMgtSecurityException(message, ExceptionCodes.ACCESS_TOKEN_INACTIVE);
+            throw new APIMgtSecurityException(message, ExceptionCodes.INVALID_SCOPE);
 
         }
         return authorized[0];

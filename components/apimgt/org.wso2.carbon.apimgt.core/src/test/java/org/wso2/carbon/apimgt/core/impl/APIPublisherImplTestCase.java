@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
+import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
@@ -40,6 +41,8 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.API.APIBuilder;
@@ -93,6 +96,8 @@ public class APIPublisherImplTestCase {
     private static final String SUB_ID = "subId";
     private static final String ENDPOINT_ID = "endpointId";
     private static final String QUERY_STRING = "queryString";
+    private static final String ADMIN_ROLE_ID = "cfbde56e-4352-498e-b6dc-85a6f1f8b058";
+    private static final String DEVELOPER_ROLE_ID = "cfdce56e-8434-498e-b6dc-85a6f2d8f035";
 
     @BeforeClass
     void init() {
@@ -497,13 +502,16 @@ public class APIPublisherImplTestCase {
     public void testUpdateAPIWithStatusUnchanged() throws APIManagementException, LifecycleException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
         API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI();
         String uuid = api.getId();
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGatewayPublisherImpl gateway = Mockito.mock(APIGatewayPublisherImpl.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
-                gateway);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager,
+                gatewaySourceGenerator, gateway);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.lifeCycleStatus(APIStatus.CREATED.getStatus()).build());
+        Mockito.when(identityProvider.getRoleId("admin")).thenReturn(ADMIN_ROLE_ID);
+        Mockito.when(identityProvider.getRoleId("developer")).thenReturn(DEVELOPER_ROLE_ID);
         Mockito.when(apiDAO.isAPIContextExists(api.getContext())).thenReturn(true);
         String configString = SampleTestObjectCreator.createSampleGatewayConfig();
         Mockito.when(apiDAO.getGatewayConfigOfAPI(uuid)).thenReturn(configString);
@@ -532,11 +540,14 @@ public class APIPublisherImplTestCase {
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGatewayPublisherImpl gateway = Mockito.mock(APIGatewayPublisherImpl.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
-                gateway);
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager,
+                gatewaySourceGenerator, gateway);
         API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI();
         String uuid = api.getId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
+        Mockito.when(identityProvider.getRoleId("admin")).thenReturn(ADMIN_ROLE_ID);
+        Mockito.when(identityProvider.getRoleId("developer")).thenReturn(DEVELOPER_ROLE_ID);
         apiPublisher.updateAPI(api.context("test"));
         Mockito.verify(apiDAO, Mockito.times(1)).updateAPI(uuid, api.context("test").build());
     }
@@ -598,11 +609,14 @@ public class APIPublisherImplTestCase {
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGatewayPublisherImpl gateway = Mockito.mock(APIGatewayPublisherImpl.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
-                gateway);
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager,
+                gatewaySourceGenerator, gateway);
         API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI();
         String uuid = api.getId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
+        Mockito.when(identityProvider.getRoleId("admin")).thenReturn(ADMIN_ROLE_ID);
+        Mockito.when(identityProvider.getRoleId("developer")).thenReturn(DEVELOPER_ROLE_ID);
         Mockito.doThrow(new APIMgtDAOException("Error occurred while updating the API - " + api.getName())).when(apiDAO)
                 .updateAPI(uuid, api.build());
         apiPublisher.updateAPI(api);
@@ -628,9 +642,12 @@ public class APIPublisherImplTestCase {
         API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI();
         String uuid = api.getId();
         APIGatewayPublisherImpl gateway = Mockito.mock(APIGatewayPublisherImpl.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
-                gateway);
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager,
+                gatewaySourceGenerator, gateway);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
+        Mockito.when(identityProvider.getRoleId("admin")).thenReturn(ADMIN_ROLE_ID);
+        Mockito.when(identityProvider.getRoleId("developer")).thenReturn(DEVELOPER_ROLE_ID);
         apiPublisher.updateAPI(api.context("testContext"));
         Mockito.verify(apiDAO, Mockito.times(1)).getAPI(uuid);
         Mockito.verify(apiDAO, Mockito.times(1)).isAPIContextExists(api.getContext());
@@ -646,10 +663,13 @@ public class APIPublisherImplTestCase {
         API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI();
         String uuid = api.getId();
         APIGatewayPublisherImpl gateway = Mockito.mock(APIGatewayPublisherImpl.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
-                gateway);
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager,
+                gatewaySourceGenerator, gateway);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
         Mockito.when(apiDAO.isAPIContextExists("testContext")).thenReturn(true);
+        Mockito.when(identityProvider.getRoleId("admin")).thenReturn(ADMIN_ROLE_ID);
+        Mockito.when(identityProvider.getRoleId("developer")).thenReturn(DEVELOPER_ROLE_ID);
         apiPublisher.updateAPI(api.context("testContext"));
     }
 
@@ -677,12 +697,15 @@ public class APIPublisherImplTestCase {
         String uuid = api.getId();
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGatewayPublisherImpl gateway = Mockito.mock(APIGatewayPublisherImpl.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
-                gateway);
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager,
+                gatewaySourceGenerator, gateway);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.lifeCycleStatus(APIStatus.CREATED.getStatus()).build());
         Mockito.when(apiDAO.isAPIContextExists(api.getContext())).thenReturn(true);
         String configString = SampleTestObjectCreator.createSampleGatewayConfig();
         Mockito.when(apiDAO.getGatewayConfigOfAPI(uuid)).thenReturn(configString);
+        Mockito.when(identityProvider.getRoleId("admin")).thenReturn(ADMIN_ROLE_ID);
+        Mockito.when(identityProvider.getRoleId("developer")).thenReturn(DEVELOPER_ROLE_ID);
         apiPublisher.updateAPI(api.lifeCycleStatus(APIStatus.CREATED.getStatus()).id(uuid));
         Mockito.verify(apiDAO, Mockito.times(1)).getAPI(uuid);
         Mockito.verify(apiDAO, Mockito.times(0)).isAPIContextExists(api.getContext());
@@ -697,13 +720,16 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
         API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI().visibility(API.Visibility.RESTRICTED)
                 .visibleRoles(visibleRoles);
         String uuid = api.getId();
         APIGatewayPublisherImpl gateway = Mockito.mock(APIGatewayPublisherImpl.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
-                gateway);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager,
+                gatewaySourceGenerator, gateway);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
+        Mockito.when(identityProvider.getRoleId("admin")).thenReturn(ADMIN_ROLE_ID);
+        Mockito.when(identityProvider.getRoleId("developer")).thenReturn(DEVELOPER_ROLE_ID);
         apiPublisher.updateAPI(api.context("testContext"));
         Mockito.verify(apiDAO, Mockito.times(1)).getAPI(uuid);
         Mockito.verify(apiDAO, Mockito.times(1)).isAPIContextExists(api.getContext());
@@ -916,6 +942,34 @@ public class APIPublisherImplTestCase {
         Mockito.verify(apiLifecycleManager, Mockito.times(1))
                 .checkListItemEvent(lifecycleId, APIStatus.CREATED.getStatus(),
                         APIMgtConstants.DEPRECATE_PREVIOUS_VERSIONS, true);
+    }
+
+    @Test(description = "Update API when there is a list of invalid roles specified for permission")
+    public void testReplaceGroupNamesWithIdWithInvalidRoles() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+        String permissionString = "[{\"groupId\" : \"developer\", \"permission\" : [\"READ\",\"UPDATE\"]},"
+                + "{\"groupId\" : \"invalid_role\", \"permission\" : [\"READ\",\"UPDATE\",\"DELETE\"]}]";
+        String errorMessage = "There are invalid roles in the permission string";
+        API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI().permission(permissionString);
+        String uuid = api.getId();
+        GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
+        APIGatewayPublisherImpl gateway = Mockito.mock(APIGatewayPublisherImpl.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager,
+                gatewaySourceGenerator, gateway);
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.lifeCycleStatus(APIStatus.CREATED.getStatus()).build());
+        Mockito.when(identityProvider.getRoleId("invalid_role"))
+                .thenThrow(new IdentityProviderException(errorMessage, ExceptionCodes.ROLE_DOES_NOT_EXIST));
+        Mockito.when(identityProvider.getRoleId("developer")).thenReturn(DEVELOPER_ROLE_ID);
+        Mockito.when(apiDAO.isAPIContextExists(api.getContext())).thenReturn(true);
+        String configString = SampleTestObjectCreator.createSampleGatewayConfig();
+        Mockito.when(apiDAO.getGatewayConfigOfAPI(uuid)).thenReturn(configString);
+        try {
+            apiPublisher.updateAPI(api.lifeCycleStatus(APIStatus.CREATED.getStatus()).id(uuid));
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "There are invalid roles in the permission string");
+        }
     }
 
     @Test(description = "Remove api pending lc status change request")
@@ -2208,5 +2262,12 @@ public class APIPublisherImplTestCase {
                                                  APIGatewayPublisherImpl apiGatewayPublisher) {
         return new APIPublisherImpl(USER, null, apiDAO, applicationDAO, apiSubscriptionDAO, null, apiLifecycleManager,
                 null, workflowDAO, null, gatewaySourceGenerator, apiGatewayPublisher);
+    }
+
+    private APIPublisherImpl getApiPublisherImpl(IdentityProvider idp, ApiDAO apiDAO,
+            APILifecycleManager apiLifecycleManager, GatewaySourceGenerator gatewaySourceGenerator,
+            APIGatewayPublisherImpl gatewayPublisher) {
+        return new APIPublisherImpl(USER, idp, apiDAO, null, null, null, apiLifecycleManager, null, null, null,
+                gatewaySourceGenerator, gatewayPublisher);
     }
 }
