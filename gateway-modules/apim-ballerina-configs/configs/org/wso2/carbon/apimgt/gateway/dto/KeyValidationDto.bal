@@ -15,4 +15,5 @@ struct KeyValidationDto {
     string keyType;
     string subscriber;
     string resourcePath;
+    boolean stopOnQuotaReach;
 }

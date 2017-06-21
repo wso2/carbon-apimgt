@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.PolicyValidationData;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 
 import java.util.List;
@@ -154,5 +155,28 @@ public interface APIGateway {
      * @throws GatewayException If there is a failure in notifying deletion to gateway
      */
     void deleteApplication(String applicationId) throws GatewayException;
+
+    /**
+     * Publish policy add event to Gateway
+     *
+     * @param policyValidationData policy Data
+     * @throws GatewayException If there is a failure in notifying add policy to gateway
+     */
+    void addPolicy(PolicyValidationData policyValidationData) throws GatewayException;
+
+    /**
+     *Publish policy update event to gateway
+     *
+     * @param policyValidationData policy Data
+     * @throws GatewayException If there is a failure in notifying update policy to gateway
+     */
+    void updatePolicy(PolicyValidationData policyValidationData) throws GatewayException;
+    /**
+     *Publish policy delete event to gateway
+     *
+     * @param policyValidationData policy Data
+     * @throws GatewayException If there is a failure in notifying delete policy to gateway
+     */
+    void deletePolicy(PolicyValidationData policyValidationData) throws GatewayException;
 
 }
