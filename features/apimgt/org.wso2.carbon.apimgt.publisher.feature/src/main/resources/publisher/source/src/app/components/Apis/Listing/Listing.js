@@ -19,12 +19,14 @@
 import React from 'react'
 import qs from 'qs'
 
-import ApiThumb from '../ApiThumb'
+import ApiThumb from './ApiThumb'
 import '../Apis.css'
 import API from '../../../data/api.js'
 import Loading from '../../Base/Loading/Loading'
 import ListingHeader from "./ListingHeader";
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
+import { Link } from 'react-router-dom'
+import ApiProgress from './ApiProgress';
 
 class Listing extends React.Component {
     constructor(props) {
@@ -66,13 +68,69 @@ class Listing extends React.Component {
         }
         return (
             <div className="container-fluid">
-                <ListingHeader setListType={this.setListType.bind(this)} isActive={this.isActive.bind(this)} />
-                <div id="products" className="row list-group">
-                    {this.state.apis ?
-                        this.state.apis.list.map((api, i) => {
-                            return <ApiThumb key={api.id} listType={this.state.listType} api={api}/>
-                        }) : <Loading/>
-                    }
+                <div className="ibox">
+                    <div className="ibox-title">
+                        <h2 className="pull-left">
+                            All APIs
+                            <h5>All APIs visible to this account</h5>
+                        </h2>
+
+                        <Link className="pull-right btn btn-primary" to="/api/create">Create new API</Link>
+                    </div>
+                    <div className="clearfix"></div>
+                    <nav className="navbar navbar-default" role="navigation">
+                        {/* Collect the nav links, forms, and other content for toggling */}
+                        <div className="collapse navbar-collapse">
+                            <ul className="nav navbar-nav">
+                                <li>
+                                    <button type="button" className="btn">
+                                        <i className="fw fw-delete"></i>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button type="button" className="btn">
+                                        <i className="fw fw-refresh"></i>
+                                    </button>
+                                </li>
+                            </ul>
+                            <div className="col-sm-6">
+                                <form className="navbar-form" role="search">
+                                    <div className="input-group">
+                                        <input type="text" placeholder="Search" className="input-sm form-control" />
+                                        <div className="input-group-btn">
+                                            <button className="btn btn-default" type="submit"><i className="glyphicon glyphicon-search" /></button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <ul className="nav navbar-nav navbar-right">
+                                <li><button type="button"
+                                            className={this.isActive('grid')}
+                                            onClick={() => this.setListType('grid')} > <i className="fw fw-grid"></i>
+                                </button></li>
+                                <li>
+                                    <button type="button"
+                                            className={this.isActive('list')}
+                                            onClick={() => this.setListType('list')} > <i className="fw fw-list"></i>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>{/* /.navbar-collapse */}
+                    </nav>
+
+                    <div className="ibox-content">
+                        <div className="apis-list">
+                            <table className="table table-hover">
+                                <tbody>
+                                    {this.state.apis ?
+                                        this.state.apis.list.map((api, i) => {
+                                            return <ApiThumb listType={this.state.listType} api={api}/>
+                                        }) : <Loading/>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         );

@@ -32,6 +32,7 @@ class ApiCreate extends Component {
                     <div className="ch-grid-container">
                         <ul className="ch-grid">
                             <li>
+                                <Link to="/api/create/swagger">
                                 <div className="test_button ch-item depth-1">
                                     <div className="ch-info-wrap">
                                         <div className="ch-info">
@@ -47,8 +48,10 @@ class ApiCreate extends Component {
                                         </div>
                                     </div>
                                 </div>
+                                </Link>
                             </li>
                             <li>
+                                <Link to="/api/create/rest">
                                 <div className="test_button ch-item depth-1 ripple-effect">
                                     <div className="ch-info-wrap">
                                         <div className="ch-info">
@@ -64,6 +67,7 @@ class ApiCreate extends Component {
                                         </div>
                                     </div>
                                 </div>
+                                </Link>
                             </li>
                             <li>
                                 <Link to="/api/create/rest">
@@ -83,6 +87,7 @@ class ApiCreate extends Component {
                                 </Link>
                             </li>
                             <li>
+                                <Link to="/api/create/rest">
                                 <div className="test_button ch-item depth-1 ripple-effect">
                                     <div className="ch-info-wrap">
                                         <div className="ch-info">
@@ -96,6 +101,7 @@ class ApiCreate extends Component {
                                         </div>
                                     </div>
                                 </div>
+                                </Link>
                             </li>
                         </ul>
                     </div>
