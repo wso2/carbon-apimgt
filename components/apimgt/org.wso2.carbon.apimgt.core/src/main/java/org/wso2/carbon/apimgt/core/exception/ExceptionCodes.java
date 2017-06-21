@@ -116,6 +116,10 @@ public enum ExceptionCodes implements ErrorHandler {
     KEY_MANAGER_INITIALIZATION_FAILED(900606, "Key Manager initialization failed", 500,
             "Key Manager initialization failed"),
     ROLE_DOES_NOT_EXIST(900607, "Role does not exist in the system", 404, "Role does not exist in the system"),
+    MULTIPLE_ROLES_EXIST(900608, "Multiple roles with the same display name exist in the system", 500, "Multiple " +
+            "roles with the same display name exist in the system"),
+    MULTIPLE_USERS_EXIST(900609, "Multiple users with the same username exist in the system", 500, "Multiple " +
+            "users with the same username exist in the system"),
 
 
     // Labels related codes
