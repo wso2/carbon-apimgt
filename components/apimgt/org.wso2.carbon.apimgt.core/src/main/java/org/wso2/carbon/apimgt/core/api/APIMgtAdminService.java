@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.BlockConditions;
 import org.wso2.carbon.apimgt.core.models.Label;
+import org.wso2.carbon.apimgt.core.models.PolicyValidationData;
 import org.wso2.carbon.apimgt.core.models.RegistrationSummary;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
@@ -35,6 +36,7 @@ import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * This interface used to have API core services
@@ -342,6 +344,14 @@ public interface APIMgtAdminService {
      * @throws APIManagementException If failed to get Endpoints configuration
      */
     String getEndpointGatewayConfig(String endpointId) throws APIManagementException;
+
+    /**
+     * Return simple Policy related details
+     *
+     * @return policy related information for gateway
+     * @throws APIManagementException If failed to get Policies
+     */
+    Set<PolicyValidationData> getAllPolicies() throws APIManagementException;
 
     /**
      * Policy Level enum

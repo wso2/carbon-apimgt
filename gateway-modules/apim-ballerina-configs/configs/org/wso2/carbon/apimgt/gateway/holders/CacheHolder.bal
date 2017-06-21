@@ -93,7 +93,7 @@ function getAnalyticsConf () (dto:AnalyticsInfoDTO){
 }
 
 function putIntoApplicationCache (dto:ApplicationDto applicationDto) {
-    caching:putCacheEntry("APPLICATION_CACHE",applicationDto.applicationId,applicationDto);
+    caching:putCacheEntry(constants:APPLICATION_CACHE,applicationDto.applicationId,applicationDto);
 }
 function getFromApplicationCache (string applicationId) (dto:ApplicationDto){
     any application = caching:getCacheEntry(constants:APPLICATION_CACHE,applicationId);
@@ -144,4 +144,18 @@ function putIntoUserInfoCache (string userId, json userInfo) {
     if (userInfoCache[userId] == null) {
         userInfoCache[userId] = userInfo;
     }
+}
+function putIntoPolicyCache (dto:PolicyDto policyDto) {
+    caching:putCacheEntry(constants:POLICY_CACHE,policyDto.id,policyDto);
+}
+function getFromPolicyCache (string id) (dto:PolicyDto) {
+    any policy = caching:getCacheEntry(constants:POLICY_CACHE,id);
+    if (policy != null) {
+        return (dto:PolicyDto)policy;
+    }else{
+        return null;
+    }
+}
+function removeFromPolicyCache (string id) {
+    caching:removeCacheEntry(constants:POLICY_CACHE, id);
 }

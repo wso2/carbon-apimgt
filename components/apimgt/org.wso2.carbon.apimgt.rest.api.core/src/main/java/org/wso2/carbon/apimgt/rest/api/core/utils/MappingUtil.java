@@ -26,6 +26,7 @@ package org.wso2.carbon.apimgt.rest.api.core.utils;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Label;
+import org.wso2.carbon.apimgt.core.models.PolicyValidationData;
 import org.wso2.carbon.apimgt.core.models.RegistrationSummary;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
@@ -37,6 +38,8 @@ import org.wso2.carbon.apimgt.rest.api.core.dto.CredentialsDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.JWTInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.KeyManagerInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.LabelDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.PolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.PolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.RegistrationSummaryDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.ThrottlingInfoDTO;
@@ -44,6 +47,7 @@ import org.wso2.carbon.apimgt.rest.api.core.dto.UriTemplateDTO;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class MappingUtil {
@@ -243,5 +247,22 @@ public class MappingUtil {
                 .getCredentials().getPassword());
         throttlingInfoDTO.setCredentials(throttlingServerCredentials);
         return throttlingInfoDTO;
+    }
+
+    /**
+     * Convert policy validation data list to policy dto list
+     * @param allPolicies all policies
+     * @return PolicyDTO list
+     */
+    public static List<PolicyDTO> convertToPolicyDtoList(Set<PolicyValidationData> allPolicies) {
+        List<PolicyDTO> policyDTOList = new ArrayList<>();
+        allPolicies.forEach(v->{
+            PolicyDTO policyDTO = new PolicyDTO();
+            policyDTO.setId(v.getId());
+            policyDTO.setName(v.getName());
+            policyDTO.setStopOnQuotaReach(v.isStopOnQuotaReach());
+            policyDTOList.add(policyDTO);
+        });
+        return policyDTOList;
     }
 }

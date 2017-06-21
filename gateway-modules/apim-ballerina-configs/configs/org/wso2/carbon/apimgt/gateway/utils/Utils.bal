@@ -156,6 +156,26 @@ function retrieveApplications () (boolean) {
     }
     return true;
 }
+function retrievePolicies () (boolean) {
+    string query = "/api/am/core/v1.0/policies";
+    message request = {};
+    http:ClientConnector apiInfoConnector = create http:ClientConnector(getAPICoreURL());
+    messages:setHeader(request, "Content-Type", "application/json");
+    message response = http:ClientConnector.get (apiInfoConnector, query, request);
+    json policies = messages:getJsonPayload(response);
+    int length = (int)policies.count;
+    system:println(length);
+    system:println(policies);
+    int i = 0;
+    if (length > 0) {
+        while (i < length) {
+            json policy = policies.list[i];
+            putIntoPolicyCache(policy);
+            i = i + 1;
+        }
+    }
+    return true;
+}
 
 function putIntoApplicationCache (json application) {
     dto:ApplicationDto applicationDto = {};
@@ -165,7 +185,13 @@ function putIntoApplicationCache (json application) {
     applicationDto.applicationPolicy = (string)application.throttlingTier;
     holders:putIntoApplicationCache(applicationDto);
 }
-
+function putIntoPolicyCache (json policy) {
+    dto:PolicyDto policyDto = {};
+    policyDto.id = (string )policy.id;
+    policyDto.name = (string )policy.name;
+    policyDto.stopOnQuotaReach = (boolean )policy.stopOnQuotaReach;
+    holders:putIntoPolicyCache(policyDto);
+}
 function removeFromApplicationCache (json application) {
     string applicationId = (string)application.applicationId;
     holders:removeApplicationFromCache(applicationId);

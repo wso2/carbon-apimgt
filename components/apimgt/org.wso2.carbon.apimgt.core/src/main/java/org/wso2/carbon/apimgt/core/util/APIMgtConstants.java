@@ -404,6 +404,9 @@ public class APIMgtConstants {
         public static final String APPLICATION_CREATE = "APPLICATION_CREATE";
         public static final String APPLICATION_UPDATE = "APPLICATION_UPDATE";
         public static final String APPLICATION_DELETE = "APPLICATION_DELETE";
+        public static final String POLICY_CREATE = "POLICY_CREATE";
+        public static final String POLICY_UPDATE = "POLICY_UPDATE";
+        public static final String POLICY_DELETE = "POLICY_DELETE";
     }
 
     /**
