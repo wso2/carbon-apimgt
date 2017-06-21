@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 
 const ListingHeader = (props) => {
     return (
@@ -14,6 +15,7 @@ const ListingHeader = (props) => {
                     <span className="glyphicon glyphicon-th"/>Grid
                 </a>
             </div>
+            <Link className="pull-right btn btn-primary" to="/api/create">Create</Link>
         </div>
     );
 };
