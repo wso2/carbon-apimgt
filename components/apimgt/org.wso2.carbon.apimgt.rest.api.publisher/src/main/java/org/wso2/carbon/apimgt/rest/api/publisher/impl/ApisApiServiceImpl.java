@@ -724,7 +724,8 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param api - The API whose permissions for the logged in user is retrieved
      * @return The overall list of permissions for the given API for the logged in user
      */
-    private List<String> getAPIPermissionsOfLoggedInUser(String loggedInUserName, API api) throws APIManagementException {
+    private List<String> getAPIPermissionsOfLoggedInUser(String loggedInUserName, API api)
+            throws APIManagementException {
         IdentityProvider idp = APIManagerFactory.getInstance().getIdentityProvider();
         Set<String> permissionArrayForUser = new HashSet();
         //Setting default permissions for API
@@ -755,13 +756,16 @@ public class ApisApiServiceImpl extends ApisApiService {
                     Integer permission = permissionMap.get(role);
                     if (permission == APIMgtConstants.Permission.READ_PERMISSION) {
                         permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-                    } else if (permission == (APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.UPDATE_PERMISSION)) {
+                    } else if (permission == (APIMgtConstants.Permission.READ_PERMISSION
+                            + APIMgtConstants.Permission.UPDATE_PERMISSION)) {
                         permissionArrayForUser.add(APIMgtConstants.Permission.READ);
                         permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
-                    } else if (permission == (APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.DELETE_PERMISSION)) {
+                    } else if (permission == (APIMgtConstants.Permission.READ_PERMISSION
+                            + APIMgtConstants.Permission.DELETE_PERMISSION)) {
                         permissionArrayForUser.add(APIMgtConstants.Permission.READ);
                         permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
-                    } else if (permission == APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.UPDATE_PERMISSION
+                    } else if (permission
+                            == APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.UPDATE_PERMISSION
                             + APIMgtConstants.Permission.DELETE_PERMISSION) {
                         permissionArrayForUser.add(APIMgtConstants.Permission.READ);
                         permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
@@ -811,11 +815,12 @@ public class ApisApiServiceImpl extends ApisApiService {
                 String groupName = idp.getRoleName(groupId);
                 JSONObject updatedPermissionJsonObj = new JSONObject();
                 updatedPermissionJsonObj.put(APIMgtConstants.Permission.GROUP_ID, groupName);
-                updatedPermissionJsonObj.put(APIMgtConstants.Permission.PERMISSION, jsonObject.get(APIMgtConstants.Permission.PERMISSION));
+                updatedPermissionJsonObj.put(APIMgtConstants.Permission.PERMISSION,
+                        jsonObject.get(APIMgtConstants.Permission.PERMISSION));
                 updatedPermissionArray.add(updatedPermissionJsonObj);
             } catch (IdentityProviderException e) {
                 //lets the execution continue after logging the exception
-                String errorMessage = "Role with ID " + groupId +" no longer exists in the system";
+                String errorMessage = "Role with ID " + groupId + " no longer exists in the system";
                 log.error(errorMessage, e);
             }
         }
