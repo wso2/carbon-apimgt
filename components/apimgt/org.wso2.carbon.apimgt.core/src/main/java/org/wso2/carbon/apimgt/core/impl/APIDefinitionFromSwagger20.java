@@ -237,6 +237,11 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
                 log.error(msg, e);
                 throw new APIManagementException(msg, ExceptionCodes.SWAGGER_PARSE_EXCEPTION);
             }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("vendor extensions are not found in provided swagger json. resourceConfigsJSON = "
+                        + resourceConfigsJSON);
+            }
         }
         return new HashMap<>();
     }
@@ -258,6 +263,10 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
                 Scope scope = new Gson().fromJson(((JSONObject) scopesIterator.next()).toJSONString(),
                         Scope.class);
                 scopeMap.put(scope.getKey(), scope);
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Unable to extract scopes from provided json as it is null.");
             }
         }
         return scopeMap;
@@ -415,7 +424,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
 
     @Override
     public CompositeAPI.Builder generateCompositeApiFromSwaggerResource(String provider, String apiDefinition)
-                                                                                    throws APIManagementException {
+                                                                                         throws APIManagementException {
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(apiDefinition);
 
