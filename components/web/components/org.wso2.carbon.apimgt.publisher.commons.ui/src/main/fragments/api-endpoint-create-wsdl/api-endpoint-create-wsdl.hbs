@@ -20,7 +20,7 @@
                        title="wsdl url"
                        type="text"
                        checked="checked"
-                       placeholder="http://petstore.swagger.io/v2/swagger.json1" onfocusout="validateWSDL(this)">
+                       placeholder="http://petstore.swagger.io/v2/swagger.json">
             </div>
         </div>
     </div>
@@ -28,14 +28,14 @@
 
 <div class="panel-group accordion" role="tablist">
     <div class="panel panel-default" id="production">
-        <div class="panel-heading collapsed" role="tab" id="headingOne" data-toggle="collapse" data-parent=".accordion" href="#wsdl-production-endpoint-create" aria-expanded="false" aria-controls="production-endpoint-create-wsdl">
+        <div class="panel-heading collapsed" role="tab" id="headingOne" data-toggle="collapse" data-parent=".accordion" href="#production-endpoint-create-wsdl" aria-expanded="false" aria-controls="production-endpoint-create-wsdl">
             <h4 class="panel-title">
                 <div>
                     <div class="heading">{{i18n "Production.Endpoint"}}</div>
                 </div>
             </h4>
         </div>
-        <div id="wsdl-production-endpoint-create" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne" aria-expanded="false">
+        <div id="production-endpoint-create-wsdl" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne" aria-expanded="false">
         <div class="panel-body">
                 <form class="form-horizontal sub-implementation-option" id="accordion1-collapse1">
                     <div>
@@ -43,26 +43,26 @@
                             <label class="control-label col-xs-3 col-sm-3 col-md-3 col-lg-3"></label>
                             <div class="radio radio-inline">
                                 <label class="checkbox-inline">
-                                    <input type="radio" name="wsdl-endpoint-select-production" value="global" onchange="showHideCreateEndpointWSDL(this)"/>
+                                    <input type="radio" name="endpoint-select-production-wsdl" value="global" onchange="showHideCreateEndpointWSDL(this)"/>
                                     {{i18n "Select.From.Endpoint"}}
                                 </label>
                             </div>
                             <div class="radio radio-inline">
                                 <label class="checkbox-inline">
-                                    <input type="radio" name="wsdl-endpoint-select-production" value="api" id="api"
+                                    <input type="radio" name="endpoint-select-production-wsdl" value="api" id="api"
                                            onchange="showHideCreateEndpointWSDL(this)" checked="checked"/>
                                     {{i18n "Create.New.Endpoint"}}
                                 </label>
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-9" id="wsdl-create-new-endpoint-production">
+                    <div class="col-sm-9" id="create-new-endpoint-production-wsdl">
                         {{fragment "endpoint-create" type="production-wsdl"}}
                     </div>
-                    <div class="col-sm-9 hidden" id="wsdl-select-global-endpoint-production">
-                        <select id="wsdl-global-endpoint-production" name="global-endpoint" class="form-control">
+                    <div class="col-sm-9 hidden" id="select-global-endpoint-production-wsdl">
+                        <select id="global-endpoint-production-wsdl" name="global-endpoint-wsdl" class="form-control">
                         </select>
-                        <div id="wsdl-no-global-endpoint-message-production" class="col-sm-9 hidden">
+                        <div id="no-global-endpoint-message-production-wsdl" class="col-sm-9 hidden">
                             <div class="message message-success">
                                 <h4><i class="icon fw fw-success"></i>{{i18n "No.Endpoints.to.list"}}</h4>
                             </div>
@@ -73,14 +73,14 @@
         </div>
     </div>
     <div class="panel panel-default" id="sandbox">
-        <div class="panel-heading collapsed" role="tab" id="headingTwo" data-toggle="collapse" data-parent=".accordion" href="#wsdl-sandbox-endpoint-create" aria-expanded="false" aria-controls="wsdl-sandbox-endpoint-create">
+        <div class="panel-heading collapsed" role="tab" id="headingTwo" data-toggle="collapse" data-parent=".accordion" href="#sandbox-endpoint-create-wsdl" aria-expanded="false" aria-controls="sandbox-endpoint-create-wsdl">
             <h4 class="panel-title">
                 <div>
                     <div class="heading">{{i18n "SandBox.Endpoint"}}</div>
                 </div>
             </h4>
         </div>
-        <div id="wsdl-sandbox-endpoint-create" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo" aria-expanded="false">
+        <div id="sandbox-endpoint-create-wsdl" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo" aria-expanded="false">
             <div class="panel-body">
                 <form class="form-horizontal sub-implementation-option" id="accordion1-collapse1">
                     <div>
@@ -88,25 +88,25 @@
                             <label class="control-label col-xs-3 col-sm-3 col-md-3 col-lg-3"></label>
                             <div class="radio radio-inline">
                                 <label class="checkbox-inline">
-                                    <input type="radio" name="wsdl-endpoint-select-sandbox" value="global" onchange="showHideCreateEndpointWSDL(this)"/>
+                                    <input type="radio" name="endpoint-select-sandbox-wsdl" value="global" onchange="showHideCreateEndpointWSDL(this)"/>
                                     {{i18n "Select.From.Endpoint"}}
                                 </label>
                             </div>
                             <div class="radio radio-inline">
                                 <label class="checkbox-inline">
-                                    <input type="radio" name="wsdl-endpoint-select-sandbox" value="api" onchange="showHideCreateEndpointWSDL(this)" checked="checked"/>
+                                    <input type="radio" name="endpoint-select-sandbox-wsdl" value="api" onchange="showHideCreateEndpointWSDL(this)" checked="checked"/>
                                     {{i18n "Create.New.Endpoint"}}
                                 </label>
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-9" id="wsdl-create-new-endpoint-sandbox">
+                    <div class="col-sm-9" id="create-new-endpoint-sandbox-wsdl">
                         {{fragment "endpoint-create" type="sandbox-wsdl"}}
                     </div>
-                    <div class="col-sm-9 hidden" id="wsdl-select-global-endpoint-sandbox">
-                        <select id="wsdl-global-endpoint-sandbox" name="global-endpoint" class="form-control">
+                    <div class="col-sm-9 hidden" id="select-global-endpoint-sandbox-wsdl">
+                        <select id="global-endpoint-sandbox-wsdl" name="global-endpoint-wsdl" class="form-control">
                         </select>
-                        <div id="wsdl-no-global-endpoint-message-sandbox" class="col-sm-9 hidden">
+                        <div id="no-global-endpoint-message-sandbox-wsdl" class="col-sm-9 hidden">
                             <div class="message message-success">
                                 <h4><i class="icon fw fw-success"></i>{{i18n "No.Endpoints.to.list"}}</h4>
                             </div>

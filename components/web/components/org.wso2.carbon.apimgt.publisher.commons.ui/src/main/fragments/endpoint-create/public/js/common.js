@@ -125,9 +125,8 @@ $('#endpoint-security-password-'+type).val(endpointSecurity.password);
 $("input[name=endpoint-security-"+type+"][value=false]").prop('checked', true);
 }
 }
-function renderAdvanceOptions(obj){
+function renderAdvanceOptions(obj, type){
 var elementName = obj.id;
-var type = elementName.substring(elementName.lastIndexOf('-')+1,elementName.length);
     if(elementName.indexOf('show-advance-option') != -1 ){
         $('#'+elementName).addClass('hidden');
         $('#more-options-endpoints-'+type).removeClass('hidden');

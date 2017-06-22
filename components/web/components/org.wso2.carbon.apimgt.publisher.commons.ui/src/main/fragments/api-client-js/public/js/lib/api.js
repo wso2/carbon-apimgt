@@ -287,7 +287,8 @@ class API {
             "context": null,
             "version": null,
             "permission": null,
-            "endpoint": []
+            "endpoint": [],
+            "wsdlUri": null
         };
         var user_keys = Object.keys(api_data);
         for (var index in user_keys) {
