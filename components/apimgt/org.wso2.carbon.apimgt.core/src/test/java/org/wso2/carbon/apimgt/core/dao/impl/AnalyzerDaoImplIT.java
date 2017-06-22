@@ -31,13 +31,11 @@ public class AnalyzerDaoImplIT extends DAOIntegrationTestBase {
 
         String fromTimeStamp = (new Timestamp(System.currentTimeMillis() - 1000)).toString();
         TestUtil.addCustomApplication("app1", "john");
-        TestUtil.addCustomApplication("app2", "john");
         String toTimeStamp = (new Timestamp(System.currentTimeMillis() + 1000)).toString();
-
         AnalyticsDAO analyticsDAO = DAOFactory.getAnalyticsDAO();
         List<ApplicationCount> applicationCountList = analyticsDAO
                 .getApplicationCount("john", null, fromTimeStamp, toTimeStamp);
-        Assert.assertEquals(applicationCountList.size(), 2);
+        Assert.assertEquals(applicationCountList.size(), 1);
     }
 
 }
