@@ -17,128 +17,174 @@
  */
 import React from 'react';
 import SingleInput from '../FormComponents/SingleInput';
-import {Redirect} from 'react-router-dom'
+import CheckboxOrRadioGroup from '../FormComponents/CheckboxOrRadioGroup';
 import API from '../../../../data/api.js'
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
+import './ApiCreateSwagger.css'
+import Dropzone from 'react-dropzone'
 
 
 class ApiCreateSwagger extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            apiName: '',
-            apiContext: '',
-            apiVersion: ''
+            swaggerUrl: '',
+            swaggerTypes: ["Swagger File", "Swagger URL"],
+            swaggerTypeSelected: ['Swagger File'],
+            files: []
         };
         this.handleFormSubmit = this.handleFormSubmit.bind(this);
         this.handleClearForm = this.handleClearForm.bind(this);
-        this.handleApiNameChange = this.handleApiNameChange.bind(this);
-        this.handleApiContextChange = this.handleApiContextChange.bind(this);
-        this.handleApiVersionChange = this.handleApiVersionChange.bind(this);
+        this.handleSwaggerTypeSelection = this.handleSwaggerTypeSelection.bind(this);
     }
-
-    handleApiNameChange(e) {
-        this.setState({ apiName: e.target.value }, () => console.log('name:', this.state.apiName));
-    }
-    handleApiContextChange(e) {
-        this.setState({ apiContext: e.target.value }, () => console.log('name:', this.state.apiContext));
-    }
-    handleApiVersionChange(e) {
-        this.setState({ apiVersion: e.target.value }, () => console.log('name:', this.state.apiVersion));
+    handleSwaggerTypeSelection(e) {
+        this.setState({swaggerTypeSelected: [e.target.value]})
     }
 
     handleClearForm(e) {
         e.preventDefault();
         this.setState({
-            apiName: '',
-            apiContext: '',
-            apiVersion: ''
-
+            swaggerUrl: '',
+            swaggerTypeSelected: ['Swagger File'],
+            files: []
         });
     }
-    componentDidMount(){
+
+    handleSwaggerUrlChange() {
+        this.state.swaggerUrl = this.target.value;
     }
     createAPICallback = (response) => {
         let that = this;
         const opts = {
             position: toast.POSITION.TOP_CENTER,
             onClose: () => {
-                debugger;
                 let uuid = JSON.parse(response.data).id;
                 let redirect_url = "/apis/" + uuid + "/overview";
                 that.props.history.push(redirect_url);
             }
         };
 
-        toast.success("Api Created Successfully. Now you can add resources, define endpoints etc..",opts);
-    }
-
+        toast.success("Api Created Successfully. Now you can add resources, define endpoints etc..", opts);
+    };
+    toggleSwaggerType = (containerType) =>  {
+        return this.state.swaggerTypeSelected[0] === containerType ? '' : 'hidden';
+    };
+    /**
+     * Do create API from either swagger URL or swagger file upload.In case of URL pre fetch the swagger file and make a blob
+     * and the send it over REST API.
+     * @param e {Event}
+     */
     handleFormSubmit(e) {
         e.preventDefault();
 
-        let api_data = {
-            name: this.state.apiName,
-            context: this.state.apiContext,
-            version: this.state.apiVersion
-            //endpoint: this.constructEndpointsForApi()
-        };
-        let new_api = new API('');
-        let promised_create = new_api.create(api_data);
-        promised_create
-            .then(this.createAPICallback)
-            .catch(
-                function (error_response) {
-                    let error_data = JSON.parse(error_response.data);
-                    let message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+        let input_type = this.state.swaggerTypeSelected[0];
+        if (input_type === "Swagger URL") {
+            let url = this.state.swaggerUrl;
+            let data = {};
+            data.url = url;
+            data.type = 'swagger-url';
+            let new_api = new API('');
+            new_api.create(data)
+                .then(this.createAPICallback)
+                .catch(
+                    function (error_response) {
+                        let error_data = JSON.parse(error_response.data);
+                        let message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+                        const opts = {
+                            position: toast.POSITION.TOP_CENTER
+                        };
+                        toast.error(message, opts);
+                        console.debug(error_response);
+                    });
+        } else if (input_type === "Swagger File") {
+            let swagger = this.state.files[0];
+            let new_api = new API('');
+            new_api.create(swagger)
+                .then(this.createAPICallback)
+                .catch(
+                    function (error_response) {
+                        let error_data;
+                        let message;
+                        if (error_response.obj) {
+                            error_data = error_response.obj;
+                            message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+                        } else {
+                            error_data = error_response.data;
+                            message = "Error: " + error_data + ".";
 
-                    alert(message);
-                });
-
-        console.log('Send this in a POST request:', api_data);
+                        }
+                        const opts = {
+                            position: toast.POSITION.TOP_CENTER
+                        };
+                        toast.error(message, opts);
+                        console.debug(error_response);
+                    });
+        }
         this.handleClearForm(e);
     }
+
+    onDrop(files) {
+        this.setState({
+            files: files
+        })
+    }
+
+
     render() {
         return (
             <div>
                 <div className="ch-info-wrap tmp-form-style">
-                    <div className="ch-info flex-stay-200">
-                        <div className="ch-info-front ch-img-3">
-                            <i className="fw fw-rest-api fw-4x"></i>
-                            <span>Design New REST API</span>
-                        </div>
-                        <div className="ch-info-back">
-                            <p className="unselectable">Design and prototype a new REST API</p>
+                    <div className="ch-info-wrap">
+                        <div className="ch-info">
+                            <div className="ch-info-front ch-img-1">
+                                <i className="fw fw-document fw-4x"/>
+                                <span>I Have an Existing API</span>
+                            </div>
+                            <div className="ch-info-back">
+                                <p className="unselectable">Use an existing API's endpoint or the API
+                                    Swagger
+                                    definition to create an API</p>
+                            </div>
                         </div>
                     </div>
-                    <div id="rest-form-container" className="form-container flex-1">
+                    <div className="form-container swagger-form-container">
 
                         <form onSubmit={this.handleFormSubmit} className="bs-component text-left">
-                            <SingleInput
-                                inputType={'text'}
-                                title={'Api name'}
-                                name={'apiName'}
-                                controlFunc={this.handleApiNameChange}
-                                content={this.state.apiName}
-                                helpText="Display name to be shown in the API Store."
-                                placeholder={'Type api name here'} />
-                            <SingleInput
-                                inputType={'text'}
-                                title={'Api Context'}
-                                name={'apiContext'}
-                                controlFunc={this.handleApiContextChange}
-                                content={this.state.apiContext}
-                                helpText="URI context path of the API (case sensitive)."
-                                placeholder={'Type api context here'} />
+                            <CheckboxOrRadioGroup
+                                title={'Select a method to provide the swagger definition.'}
+                                setName={'siblings'}
+                                controlFunc={this.handleSwaggerTypeSelection}
+                                type={'radio'}
+                                options={this.state.swaggerTypes}
+                                selectedOptions={this.state.swaggerTypeSelected} />
 
-                            <SingleInput
-                                inputType={'text'}
-                                title={'Api Version'}
-                                name={'apiVersion'}
-                                controlFunc={this.handleApiVersionChange}
-                                content={this.state.apiVersion}
-                                helpText=""
-                                placeholder={'Type api version here'} />
+                                <div className={this.toggleSwaggerType("Swagger File")}>
+                                    <Dropzone onDrop={this.onDrop.bind(this)}>
+                                        <p>Try dropping some files here, or click to select files to upload.</p>
+                                    </Dropzone>
+
+                                    <h2>Dropped files</h2>
+                                    <ul>
+                                        {
+                                            this.state.files.map(f => <li>{f.name} - {f.size} bytes</li>)
+                                        }
+                                    </ul>
+                                </div>
+                                <div className={this.toggleSwaggerType("Swagger URL")}>
+                                    <SingleInput
+                                        inputType={'text'}
+                                        title={'swagger url'}
+                                        name={'swagger-url'}
+                                        controlFunc={this.handleSwaggerUrlChange}
+                                        content={this.state.swaggerURL}
+                                        helpText="URL of the swagger file."
+                                        placeholder={'http://petstore.swagger.io/v2/swagger.json'} />
+
+
+                                </div>
+
+
 
 
 
