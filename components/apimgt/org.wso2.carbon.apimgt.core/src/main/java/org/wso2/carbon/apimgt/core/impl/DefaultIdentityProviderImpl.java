@@ -23,6 +23,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import feign.FeignException;
 import feign.Response;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -53,7 +54,8 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
     private static final Logger log = LoggerFactory.getLogger(DefaultIdentityProviderImpl.class);
 
     private SCIMServiceStub scimServiceStub;
-    private static final String FILTER_PREFIX = "displayName Eq ";
+    private static final String FILTER_PREFIX_USER = "userName Eq ";
+    private static final String FILTER_PREFIX_ROLE = "displayName Eq ";
     private static final String HOME_EMAIL = "home";
 
     DefaultIdentityProviderImpl() throws APIManagementException {
@@ -65,6 +67,31 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
                                 OAuth2ServiceStubs oAuth2ServiceStubs) throws APIManagementException {
         super(dcrmServiceStub, oAuth2ServiceStubs);
         this.scimServiceStub = scimServiceStub;
+    }
+
+    @Override
+    public String getIdOfUser(String userName) throws IdentityProviderException {
+        Response user = scimServiceStub.searchUsers(FILTER_PREFIX_USER + userName);
+        String userId;
+        if (user.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
+            String responseBody = user.body().toString();
+            JsonParser parser = new JsonParser();
+            JsonObject parsedResponseBody = (JsonObject) parser.parse(responseBody);
+            JsonArray userList = (JsonArray) parsedResponseBody.get("Resources");
+            if (userList.size() == 1) {
+                JsonObject scimUser = (JsonObject) userList.get(0);
+                userId = scimUser.get("id").getAsString();
+            } else {
+                String errorMessage = "Multiple users with " + userName + " exist.";
+                log.error(errorMessage);
+                throw new IdentityProviderException(errorMessage, ExceptionCodes.MULTIPLE_USERS_EXIST);
+            }
+        } else {
+            String errorMessage = "User " + userName + " does not exist in the system.";
+            log.error(errorMessage);
+            throw new IdentityProviderException(errorMessage, ExceptionCodes.USER_DOES_NOT_EXIST);
+        }
+        return userId;
     }
 
     @Override
@@ -86,7 +113,7 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
 
     @Override
     public boolean isValidRole(String roleName) {
-        return scimServiceStub.searchGroups(FILTER_PREFIX + roleName).status()
+        return scimServiceStub.searchGroups(FILTER_PREFIX_ROLE + roleName).status()
                 == APIMgtConstants.HTTPStatusCodes.SC_200_OK;
     }
 
@@ -109,9 +136,9 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
 
     @Override
     public String getRoleId(String roleName) throws IdentityProviderException {
-        Response role = scimServiceStub.searchGroups(FILTER_PREFIX + roleName);
-        String roleId = null;
-        if (role.status() == 200) {
+        Response role = scimServiceStub.searchGroups(FILTER_PREFIX_ROLE + roleName);
+        String roleId;
+        if (role.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
             String responseBody = role.body().toString();
             JsonParser parser = new JsonParser();
             JsonObject parsedResponseBody = (JsonObject) parser.parse(responseBody);
@@ -119,23 +146,37 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
             if (roleList.size() == 1) {
                 JsonObject scimGroup = (JsonObject) roleList.get(0);
                 roleId = scimGroup.get("id").getAsString();
+            } else {
+                String errorMessage = "More than one role with role name " + roleName + " exist.";
+                log.error(errorMessage);
+                throw new IdentityProviderException(errorMessage, ExceptionCodes.MULTIPLE_ROLES_EXIST);
             }
+        } else {
+            String errorMessage = "Role with name " + roleName + " does not exist in the system.";
+            log.error(errorMessage);
+            throw new IdentityProviderException(errorMessage, ExceptionCodes.ROLE_DOES_NOT_EXIST);
         }
         return roleId;
     }
 
     @Override
     public String getRoleName(String roleId) throws IdentityProviderException {
-        SCIMGroup scimGroup = scimServiceStub.getGroup(roleId);
-        String displayName;
-        if (scimGroup != null) {
-            displayName = scimGroup.getDisplayName();
-        } else {
+        try {
+            SCIMGroup scimGroup = scimServiceStub.getGroup(roleId);
+            String displayName;
+            if (scimGroup != null) {
+                displayName = scimGroup.getDisplayName();
+            } else {
+                String errorMessage = "Role with role Id " + roleId + " does not exist in the system.";
+                log.error(errorMessage);
+                throw new IdentityProviderException(errorMessage, ExceptionCodes.ROLE_DOES_NOT_EXIST);
+            }
+            return displayName;
+        } catch (FeignException e) {
             String errorMessage = "Role with role Id " + roleId + " does not exist in the system.";
-            log.error(errorMessage);
+            log.error(errorMessage, e);
             throw new IdentityProviderException(errorMessage, ExceptionCodes.ROLE_DOES_NOT_EXIST);
         }
-        return displayName;
     }
 
     @Override

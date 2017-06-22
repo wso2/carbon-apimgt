@@ -445,6 +445,54 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  /policies:
+
+  #-----------------------------------------------------
+  # Retrieve all policies
+  #-----------------------------------------------------
+      get:
+        x-wso2-curl: "curl -k https://localhost:9292/api/am/core/v1/policies"
+        x-wso2-request: |
+          GET https://localhost:9292/api/am/core/v1/policies
+        x-wso2-response: "HTTP/1.1 200 OK\nContent-Type:application/json"
+        summary: |
+          Return the list of policies
+        description: |
+          Return the list of policies
+        parameters:
+          - $ref : '#/parameters/Accept'
+        tags:
+          - Policies
+        responses:
+          200:
+            description: |
+              OK.
+              The list of Policies.
+            schema:
+              $ref: '#/definitions/PolicyList'
+            headers:
+              Content-Type:
+                description: The content type of the body.
+                type: string
+          400:
+            description: |
+              Bad Request.
+              Invalid request or validation error
+            schema:
+              $ref: '#/definitions/Error'
+          404:
+            description: |
+              Not Found.
+              The resource to be updated does not exist.
+            schema:
+              $ref: '#/definitions/Error'
+          406:
+            description: |
+              Not Acceptable.
+              The requested media type is not supported
+            schema:
+              $ref: '#/definitions/Error'
+
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
@@ -796,6 +844,22 @@ definitions:
           $ref: '#/definitions/APIInfo'
 
 #-----------------------------------------------------
+# The POLICY List resource
+#-----------------------------------------------------
+  PolicyList:
+    title: Policy List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of Polcies returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/Policy'
+
+#-----------------------------------------------------
 # The Endpoint List resource
 #-----------------------------------------------------
   EndpointList:
@@ -827,6 +891,22 @@ definitions:
       lifeCycleStatus:
         type: string
         example: 'CREATED'
+
+#-----------------------------------------------------
+# The Policy resource
+#-----------------------------------------------------
+  Policy:
+    title: API Info object with basic Policy details.
+    properties:
+      id:
+        type: string
+        example: 01234567-0123-0123-0123-012345678901
+      name:
+        type: string
+        example: CalculatorAPI
+      stopOnQuotaReach:
+        type: boolean
+        example: false
 
 #-----------------------------------------------------
 # The Application resource

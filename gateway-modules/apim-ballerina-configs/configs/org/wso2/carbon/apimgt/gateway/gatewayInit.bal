@@ -11,6 +11,8 @@ service gatewayInitService {
     boolean isReady = initGateway();
     boolean subscriptionsInitialized = gatewayUtil:retrieveSubscriptions();
     boolean applicationsInitialized = gatewayUtil:retrieveApplications();
+    boolean policiesInitialized = gatewayUtil:retrievePolicies();
+
 }
 
 function initGateway () (boolean) {

@@ -267,6 +267,14 @@ public class APIMgtConstants {
         public static final String APPLICATION_LEVEL = "application";
         public static final String SUBSCRIPTION_LEVEL = "subscription";
         public static final String COLUMN_CONDITION_GROUP_ID = "CONDITION_GROUP_ID";
+        public static final String BLOCKING_CONDITION_STATE = "state";
+        public static final String BLOCKING_CONDITION_KEY = "blockingCondition";
+        public static final String BLOCKING_CONDITION_VALUE = "conditionValue";
+        public static final String BLOCKING_CONDITIONS_APPLICATION = "APPLICATION";
+        public static final String BLOCKING_CONDITIONS_API = "API";
+        public static final String BLOCKING_CONDITIONS_USER = "USER";
+        public static final String BLOCKING_CONDITIONS_IP = "IP";
+        public static final String BLOCKING_CONDITION_IP_RANGE = "IP_RANGE";
     }
 
     /**
@@ -396,6 +404,9 @@ public class APIMgtConstants {
         public static final String APPLICATION_CREATE = "APPLICATION_CREATE";
         public static final String APPLICATION_UPDATE = "APPLICATION_UPDATE";
         public static final String APPLICATION_DELETE = "APPLICATION_DELETE";
+        public static final String POLICY_CREATE = "POLICY_CREATE";
+        public static final String POLICY_UPDATE = "POLICY_UPDATE";
+        public static final String POLICY_DELETE = "POLICY_DELETE";
     }
 
     /**

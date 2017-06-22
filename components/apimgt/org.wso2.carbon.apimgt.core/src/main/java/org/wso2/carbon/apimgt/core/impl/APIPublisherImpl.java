@@ -50,6 +50,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
+import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -89,7 +90,6 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -410,34 +410,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     /**
-     * This method is used to check whether the roles specified with permissions for a given API are valid
-     *
-     * @param permissionMap - The map containing the group IDs(roles) and their permissions
-     * @return validity of the roles
-     * @throws APIManagementException If one or more of the roles are invalid
-     */
-    private boolean checkRoleValidityForAPIPermissions(Map<String, Integer> permissionMap)
-            throws APIManagementException {
-        Set<String> allAvailableRoles = APIUtils.getAllAvailableRoles();
-        Set<String> permissionRoleList = getRolesFromPermissionMap(permissionMap);
-        return APIUtils.checkAllowedRoles(allAvailableRoles, permissionRoleList);
-    }
-
-    /**
-     * This method is used to extract the groupIds or roles from the permissionMap
-     *
-     * @param permissionMap - The map containing the group IDs(roles) and their permissions
-     * @return - The list of groupIds specified for permissions
-     */
-    private Set<String> getRolesFromPermissionMap(Map<String, Integer> permissionMap) {
-        Set<String> permissionRoleList = new HashSet<>();
-        for (String groupId : permissionMap.keySet()) {
-            permissionRoleList.add(groupId);
-        }
-        return permissionRoleList;
-    }
-
-    /**
      * @param api API Object
      * @return If api definition is valid or not.
      * @throws APIManagementException If failed to validate the API.
@@ -472,11 +444,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         originalAPI.getLifeCycleStatus().equalsIgnoreCase(apiBuilder.getLifeCycleStatus())) {
 
                     if (!StringUtils.isEmpty(apiBuilder.getPermission())) {
+                        apiBuilder.setPermission(replaceGroupNamesWithId(apiBuilder.getPermission()));
                         Map<String, Integer> roleNamePermissionList;
                         roleNamePermissionList = getAPIPermissionArray(apiBuilder.getPermission());
-                        if (checkRoleValidityForAPIPermissions(roleNamePermissionList)) {
-                            apiBuilder.permissionMap(roleNamePermissionList);
-                        }
+                        apiBuilder.permissionMap(roleNamePermissionList);
                     }
 
                     String updatedSwagger = apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder);
@@ -581,11 +552,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @return Map of permission values.
      * @throws ParseException If failed to parse the json string.
      */
-    private HashMap<String, Integer> getAPIPermissionArray(String permissionJsonString) throws ParseException {
+    private HashMap<String, Integer> getAPIPermissionArray(String permissionJsonString)
+            throws ParseException, APIManagementException {
 
-        HashMap<String, Integer> roleNamePermissionList = new HashMap<String, Integer>();
+        HashMap<String, Integer> rolePermissionList = new HashMap<String, Integer>();
         JSONParser jsonParser = new JSONParser();
-
         JSONArray baseJsonArray = (JSONArray) jsonParser.parse(permissionJsonString);
         for (Object aBaseJsonArray : baseJsonArray) {
             JSONObject jsonObject = (JSONObject) aBaseJsonArray;
@@ -601,10 +572,40 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     totalPermissionValue += APIMgtConstants.Permission.DELETE_PERMISSION;
                 }
             }
-            roleNamePermissionList.put(groupId, totalPermissionValue);
+            rolePermissionList.put(groupId, totalPermissionValue);
         }
+        return rolePermissionList;
+    }
 
-        return roleNamePermissionList;
+    /**
+     * This method replaces the groupId field's value to the role id instead of the name passed by the user
+     *
+     * @param permissionString - the permission json string which contains role names in groupId field
+     * @return permission string with replaced groupId
+     * @throws ParseException         - if there is an error parsing the json string
+     * @throws APIManagementException - if there is an error getting the IdentityProvider instance
+     */
+    private String replaceGroupNamesWithId(String permissionString) throws ParseException, APIManagementException {
+        JSONArray updatedPermissionArray = new JSONArray();
+        JSONParser jsonParser = new JSONParser();
+        JSONArray originalPermissionArray = (JSONArray) jsonParser.parse(permissionString);
+        try {
+            for (Object permissionObj : originalPermissionArray) {
+                JSONObject jsonObject = (JSONObject) permissionObj;
+                String groupName = (String) jsonObject.get(APIMgtConstants.Permission.GROUP_ID);
+                String groupId = getIdentityProvider().getRoleId(groupName);
+                JSONObject updatedPermissionJsonObj = new JSONObject();
+                updatedPermissionJsonObj.put(APIMgtConstants.Permission.GROUP_ID, groupId);
+                updatedPermissionJsonObj.put(APIMgtConstants.Permission.PERMISSION,
+                        jsonObject.get(APIMgtConstants.Permission.PERMISSION));
+                updatedPermissionArray.add(updatedPermissionJsonObj);
+            }
+        } catch (IdentityProviderException e) {
+            String errorMessage = "There are invalid roles in the permission string";
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, ExceptionCodes.UNSUPPORTED_ROLE);
+        }
+        return updatedPermissionArray.toJSONString();
     }
 
     /**
@@ -1072,8 +1073,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             if (query != null && !query.isEmpty()) {
                 String user = getUsername();
                 Set<String> roles = APIUtils.getAllRolesOfUser(user);
-
-                //TODO get the logged in user and user roles from key manager.
                 apiResults = getApiDAO().searchAPIs(roles, user, query, offset, limit);
             } else {
                 apiResults = getApiDAO().getAPIs();

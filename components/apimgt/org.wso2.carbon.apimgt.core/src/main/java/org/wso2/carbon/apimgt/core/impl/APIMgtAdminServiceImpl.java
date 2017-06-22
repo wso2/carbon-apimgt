@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
@@ -16,17 +17,21 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.BlockConditions;
 import org.wso2.carbon.apimgt.core.models.Label;
+import org.wso2.carbon.apimgt.core.models.PolicyValidationData;
 import org.wso2.carbon.apimgt.core.models.RegistrationSummary;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.CustomPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -42,15 +47,17 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     private LabelDAO labelDAO;
     private ApplicationDAO applicationDAO;
     private APIMConfigurations apimConfiguration;
+    private APIGateway apiGateway;
 
     public APIMgtAdminServiceImpl(APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, ApiDAO apiDAO,
-                                  LabelDAO labelDAO , ApplicationDAO applicationDAO) {
+                                  LabelDAO labelDAO, ApplicationDAO applicationDAO, APIGateway apiGateway) {
         this.apiSubscriptionDAO = apiSubscriptionDAO;
         this.policyDAO = policyDAO;
         this.apiDAO = apiDAO;
         this.labelDAO = labelDAO;
         this.apimConfiguration = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
         this.applicationDAO = applicationDAO;
+        this.apiGateway = apiGateway;
     }
 
     @Override
@@ -102,6 +109,9 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
                 policy.setUuid(policyUuid);
             }
             policyDAO.addApiPolicy(policy);
+            PolicyValidationData policyValidationData = new PolicyValidationData(policyUuid, policy.getPolicyName(),
+                    false);
+            apiGateway.addPolicy(policyValidationData);
             return policyUuid;
 
         } catch (APIMgtDAOException e) {
@@ -124,6 +134,9 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
                 policy.setUuid(policyUuid);
             }
             policyDAO.addApplicationPolicy(policy);
+            PolicyValidationData policyValidationData = new PolicyValidationData(policyUuid, policy.getPolicyName(),
+                    false);
+            apiGateway.addPolicy(policyValidationData);
             return policyUuid;
 
         } catch (APIMgtDAOException e) {
@@ -146,6 +159,9 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
                 policy.setUuid(policyUuid);
             }
             policyDAO.addSubscriptionPolicy(policy);
+            PolicyValidationData policyValidationData = new PolicyValidationData(policyUuid, policy.getPolicyName(),
+                    policy.isStopOnQuotaReach());
+            apiGateway.addPolicy(policyValidationData);
             return policyUuid;
 
         } catch (APIMgtDAOException e) {
@@ -159,7 +175,9 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     public void updateApiPolicy(APIPolicy policy) throws APIManagementException {
         try {
             policyDAO.updateApiPolicy(policy);
-
+            PolicyValidationData policyValidationData = new PolicyValidationData(policy.getUuid(), policy
+                    .getPolicyName(), false);
+            apiGateway.updatePolicy(policyValidationData);
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't update API policy for uuid: " + policy.getUuid();
             log.error(errorMessage, e);
@@ -171,7 +189,9 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     public void updateSubscriptionPolicy(SubscriptionPolicy policy) throws APIManagementException {
         try {
             policyDAO.updateSubscriptionPolicy(policy);
-
+            PolicyValidationData policyValidationData = new PolicyValidationData(policy.getUuid(), policy
+                    .getPolicyName(), policy.isStopOnQuotaReach());
+            apiGateway.updatePolicy(policyValidationData);
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't update Subscription policy for uuid: " + policy.getUuid();
             log.error(errorMessage, e);
@@ -183,7 +203,9 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     public void updateApplicationPolicy(ApplicationPolicy policy) throws APIManagementException {
         try {
             policyDAO.updateApplicationPolicy(policy);
-
+            PolicyValidationData policyValidationData = new PolicyValidationData(policy.getUuid(), policy
+                    .getPolicyName(), false);
+            apiGateway.updatePolicy(policyValidationData);
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't update Application policy for uuid: " + policy.getUuid();
             log.error(errorMessage, e);
@@ -194,8 +216,11 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public void deletePolicy(String policyName, PolicyLevel policyLevel) throws APIManagementException {
         try {
+            Policy policy = policyDAO.getPolicyByLevelAndName(policyLevel, policyName);
             policyDAO.deletePolicy(policyLevel, policyName);
-
+            PolicyValidationData policyValidationData = new PolicyValidationData(policy.getUuid(), policy
+                    .getPolicyName(), false);
+            apiGateway.deletePolicy(policyValidationData);
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't update application policy with name: " + policyName + ", level: " +
                     policyLevel;
@@ -208,7 +233,8 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     public void deletePolicyByUuid(String uuid, PolicyLevel policyLevel) throws APIManagementException {
         try {
             policyDAO.deletePolicyByUuid(policyLevel, uuid);
-
+            PolicyValidationData policyValidationData = new PolicyValidationData(uuid, "", false);
+            apiGateway.deletePolicy(policyValidationData);
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't update application policy with id: " + uuid + ", level: " + policyLevel;
             log.error(errorMessage, e);
@@ -480,4 +506,127 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
 
     }
 
+    @Override
+    public Set<PolicyValidationData> getAllPolicies() throws APIManagementException {
+        try {
+            return policyDAO.getAllPolicies();
+        } catch (APIMgtDAOException ex) {
+            String msg = "Error occurred while retrieving policies";
+            log.error(msg, ex);
+            throw new APIManagementException(msg, ExceptionCodes.APIM_DAO_EXCEPTION);
+        }
+    }
+
+    @Override
+    public String addBlockCondition(BlockConditions blockConditions) throws APIManagementException {
+        try {
+            return policyDAO.addBlockConditions(blockConditions);
+        } catch (APIMgtDAOException e) {
+            String errorMessage =
+                    "Couldn't add block condition with condition type: " + blockConditions.getConditionType()
+                            + ", condition value: " + blockConditions.getConditionValue();
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    @Override
+    public boolean updateBlockConditionStateByUUID(String uuid, Boolean state) throws APIManagementException {
+        try {
+            return policyDAO.updateBlockConditionStateByUUID(uuid, state);
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't update block condition with UUID: " + uuid + ", state: " + state;
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    @Override
+    public boolean deleteBlockConditionByUuid(String uuid) throws APIManagementException {
+        try {
+            return policyDAO.deleteBlockConditionByUuid(uuid);
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't delete block condition with UUID: " + uuid;
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    @Override
+    public List<BlockConditions> getBlockConditions() throws APIManagementException {
+        try {
+            return policyDAO.getBlockConditions();
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't get list of block conditions.";
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    @Override
+    public BlockConditions getBlockConditionByUUID(String uuid) throws APIManagementException {
+        try {
+            return policyDAO.getBlockConditionByUUID(uuid);
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't get block condition by UUID: " + uuid;
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    @Override
+    public String addCustomRule(CustomPolicy customPolicy) throws APIManagementException {
+        try {
+            //todo: deploy policy in CEP
+            return policyDAO.addCustomPolicy(customPolicy);
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't add custom policy with policy name: " + customPolicy.getPolicyName();
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    @Override
+    public void updateCustomRule(CustomPolicy customPolicy) throws APIManagementException {
+        try {
+            policyDAO.updateCustomPolicy(customPolicy);
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't update custom policy with UUID: " + customPolicy.getUuid();
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    @Override
+    public void deleteCustomRule(String uuid) throws APIManagementException {
+        try {
+            policyDAO.deleteCustomPolicy(uuid);
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't delete custom policy with UUID: " + uuid;
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    @Override
+    public List<CustomPolicy> getCustomRules() throws APIManagementException {
+        try {
+            return policyDAO.getCustomPolicies();
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't get list of custom policy.";
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    @Override
+    public CustomPolicy getCustomRuleByUUID(String uuid) throws APIManagementException {
+        try {
+            return policyDAO.getCustomPolicyByUuid(uuid);
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Couldn't get custom policy by UUID: " + uuid;
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
 }

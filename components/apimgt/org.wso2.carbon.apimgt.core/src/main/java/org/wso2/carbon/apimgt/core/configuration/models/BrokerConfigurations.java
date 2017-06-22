@@ -33,7 +33,8 @@ public class BrokerConfigurations {
     private String storeTopic = "StoreTopic";
     @Element(description = "Publisher topic name")
     private String publisherTopic = "PublisherTopic";
-
+    @Element(description = "Throttle topic name")
+    private String throttleTopic = "ThrottleTopic";
     public JMSConnectionConfiguration getJmsConnectionConfiguration() {
         return jmsConnectionConfiguration;
     }
@@ -44,5 +45,9 @@ public class BrokerConfigurations {
 
     public String getPublisherTopic() {
         return publisherTopic;
+    }
+
+    public String getThrottleTopic() {
+        return throttleTopic;
     }
 }
