@@ -153,6 +153,10 @@ class AuthManager {
         return this.isLogged;
     }
 
+    static setAuthStatus(status) {
+        this.isLogged = status;
+    }
+
     static setUserName(username) {
         this.username = username;
     }
@@ -166,7 +170,7 @@ class AuthManager {
     }
 
     getUserScope() {
-        return this.user.scope;
+        return this.userscope;
     }
 
     getTokenEndpoint() {

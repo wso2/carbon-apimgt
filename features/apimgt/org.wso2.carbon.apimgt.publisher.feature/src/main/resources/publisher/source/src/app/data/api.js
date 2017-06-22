@@ -15,7 +15,7 @@
  */
 "use strict";
 import SwaggerClient from 'swagger-client'
-import AuthClient from './Auth'
+import AuthClient from './AuthManager'
 import SingleClient from './SingleClient'
 /**
  * Manage API access keys with corresponding keys,Not related to the keymanager used in backend
