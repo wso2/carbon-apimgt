@@ -1445,22 +1445,27 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public List<UriTemplate> getResourcesOfApi(String apiContext, String apiVersion) throws APIMgtDAOException {
-        final String apiIdFromContextQuery = "SELECT UUID FROM AM_API WHERE CONTEXT = ? AND VERSION = ?";
+        final String query = "SELECT operationMapping.OPERATION_ID AS OPERATION_ID,operationMapping.HTTP_METHOD AS " +
+                "HTTP_METHOD,operationMapping.URL_PATTERN AS URL_PATTERN,operationMapping.AUTH_SCHEME AS AUTH_SCHEME," +
+                "operationMapping.API_POLICY_ID AS API_POLICY_ID FROM AM_API_OPERATION_MAPPING AS operationMapping," +
+                "AM_API AS api WHERE operationMapping.API_ID = api.UUID AND api.CONTEXT = ? AND api.VERSION = ?";
         List<UriTemplate> uriTemplates = new ArrayList<>();
         try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(apiIdFromContextQuery)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, apiContext);
             preparedStatement.setString(2, apiVersion);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next()) {
-                    Map<String, UriTemplate> uriTemplateMap = getUriTemplates(connection,
-                            resultSet.getString("UUID"));
-                    uriTemplateMap.forEach((k, v) -> {
-                        uriTemplates.add(v);
-                    });
+                while (resultSet.next()) {
+                    UriTemplate uriTemplate = new UriTemplate.UriTemplateBuilder()
+                            .uriTemplate(resultSet.getString("URL_PATTERN")).authType(resultSet.getString
+                                    ("AUTH_SCHEME"))
+                            .httpVerb(resultSet.getString("HTTP_METHOD"))
+                            .policy(resultSet.getString("API_POLICY_ID")).templateId
+                                    (resultSet.getString("OPERATION_ID")).build();
+                    uriTemplates.add(uriTemplate);
                 }
             }
-        } catch (SQLException | IOException e) {
+        } catch (SQLException e) {
             String msg = "Couldn't retrieve resources for Api Name: " + apiContext;
             log.error(msg, e);
             throw new APIMgtDAOException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);

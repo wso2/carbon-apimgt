@@ -44,9 +44,16 @@ import java.util.Map;
  */
 public class ApplicationDAOImpl implements ApplicationDAO {
 
-    private static final String GET_APPS_QUERY = "SELECT NAME, APPLICATION_POLICY_ID, DESCRIPTION, " +
-            "APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME, UUID " +
-            "FROM AM_APPLICATION";
+    private static final String GET_APPS_QUERY = "SELECT NAME, APPLICATION_POLICY_ID AS APPLICATION_POLICY_NAME, " +
+            "DESCRIPTION, APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME, UUID" +
+            " FROM AM_APPLICATION";
+    private static final String GET_APPS_WITH_POLICY_QUERY = "SELECT APPLICATION.NAME AS NAME, APPLICATION_POLICY" +
+            ".NAME AS APPLICATION_POLICY_NAME, APPLICATION.DESCRIPTION AS DESCRIPTION," +
+            "APPLICATION.APPLICATION_STATUS AS APPLICATION_STATUS, APPLICATION.GROUP_ID, APPLICATION.CREATED_BY AS " +
+            "CREATED_BY,APPLICATION.CREATED_TIME AS CREATED_TIME , APPLICATION.UPDATED_BY AS UPDATED_BY, APPLICATION" +
+            ".LAST_UPDATED_TIME AS LAST_UPDATED_TIME, APPLICATION.UUID AS UUID FROM AM_APPLICATION AS APPLICATION," +
+            "AM_APPLICATION_POLICY AS APPLICATION_POLICY " +
+            "WHERE APPLICATION.APPLICATION_POLICY_ID = APPLICATION_POLICY.UUID ";
     private static final String AM_APPLICATION_TABLE_NAME = "AM_APPLICATION";
 
     ApplicationDAOImpl() {
@@ -61,7 +68,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      */
     @Override
     public Application getApplication(String appId) throws APIMgtDAOException {
-        final String completeGetAppQuery = GET_APPS_QUERY + " WHERE UUID = ?";
+        final String completeGetAppQuery = GET_APPS_WITH_POLICY_QUERY + " AND APPLICATION.UUID = ?";
         Application application;
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(completeGetAppQuery)) {
@@ -86,7 +93,8 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      */
     @Override
     public Application getApplicationByName(String appName, String ownerId) throws APIMgtDAOException {
-        final String completeGetAppQuery = GET_APPS_QUERY + " WHERE NAME = ? AND CREATED_BY = ?";
+        final String completeGetAppQuery = GET_APPS_WITH_POLICY_QUERY + "AND APPLICATION.NAME = ? AND APPLICATION" +
+                ".CREATED_BY = ?";
         Application application;
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(completeGetAppQuery)) {
@@ -110,7 +118,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      */
     @Override
     public List<Application> getApplications(String ownerId) throws APIMgtDAOException {
-        final String completeGetAppsQuery = GET_APPS_QUERY + " WHERE CREATED_BY = ?";
+        final String completeGetAppsQuery = GET_APPS_WITH_POLICY_QUERY + " AND APPLICATION.CREATED_BY = ?";
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(completeGetAppsQuery)) {
             ps.setString(1, ownerId);
@@ -471,8 +479,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             application.setCreatedTime(rs.getTimestamp("CREATED_TIME").toLocalDateTime());
             application.setUpdatedUser(rs.getString("UPDATED_BY"));
             application.setUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toLocalDateTime());
-            application.setTier(DAOFactory.getPolicyDAO().
-                    getApplicationPolicyByUuid(rs.getString("APPLICATION_POLICY_ID")).getPolicyName());
+            application.setTier(rs.getString("APPLICATION_POLICY_NAME"));
         }
         return application;
     }
