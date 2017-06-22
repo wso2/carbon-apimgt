@@ -24,6 +24,7 @@ import NavBar from './NavBar'
 import LifeCycle from './LifeCycle'
 import {PageNotFound} from '../../Base/Errors/index'
 import Loading from '../../Base/Loading/Loading'
+import Resources from './Resources'
 
 import Api from '../../../data/api'
 import AuthCheck from "../../Base/Auth/AuthCheck";
@@ -70,6 +71,7 @@ export default class Details extends Component {
                             <Route path="/apis/:api_uuid/overview"
                                    render={ props => <Overview api={this.state.response.obj} {...props} /> }/>
                             <Route path="/apis/:api_uuid/lifecycle" component={LifeCycle}/>
+                            <Route path="/apis/:api_uuid/resources" component={Resources}/>
                             <Route component={PageNotFound}/>
                         </Switch>
                     </div>

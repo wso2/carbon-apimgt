@@ -36,7 +36,7 @@ export default class NavBar extends Component {
             OVERVIEW: "overview",
             LIFECYCLE: "lifecycle",
             ENDPOINTS: "endpoints",
-            RESOURCE: "resource"
+            RESOURCES: "resources"
         }
     }
 
@@ -72,9 +72,9 @@ export default class NavBar extends Component {
                                     <i className="fw fw-endpoint"/>&nbsp; Endpoints
                                 </Link>
                             </li>
-                            <li className={this.isActive(NavBar.CONST.RESOURCE)}>
+                            <li className={this.isActive(NavBar.CONST.RESOURCES)}>
                                 <Link onClick={this.setActive}
-                                      to={"/apis/" + this.props.match.params.api_uuid + "/resource"}>
+                                      to={"/apis/" + this.props.match.params.api_uuid + "/resources"}>
                                     <i className="fw fw-resource"/>&nbsp;Resources
                                 </Link>
                             </li>

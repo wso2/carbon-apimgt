@@ -54,3 +54,32 @@
 {
     margin: 0 0 11px;
 }
+.api-box-white{
+    background: #ddd;
+    padding:10px;
+}
+.api-box-white h3{
+    padding-top:0;
+    margin-top:0;
+}
+a.btn-primary, button.btn-primary{
+    background: #444;
+}
+a.btn-default{
+    background-color: #ccc;
+}
+.api-detail-table{
+    margin-top:5px;
+}
+.api-box-title{
+    padding-bottom:5px;
+}
+span.view-in-store{
+    text-align:right;
+    display: inline-block;
+    width: 133px;
+    padding-right: 20px;
+}
+div.api-box-content div .btn-dangerr{
+    color:#fff;
+}
