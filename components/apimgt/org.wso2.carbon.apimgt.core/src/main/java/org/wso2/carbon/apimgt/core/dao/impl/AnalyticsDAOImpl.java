@@ -45,11 +45,12 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
 
         final String query;
         if (createdBy.equals("all")) {
-            query = "SELECT COUNT(UUID) as count, CREATED_TIME as time FROM AM_APPLICATION WHERE "
+            query = "SELECT COUNT(UUID) AS count, CREATED_TIME AS time FROM AM_APPLICATION WHERE "
                     + "CREATED_TIME BETWEEN ? AND ? GROUP BY CREATED_TIME ORDER BY CREATED_TIME ASC";
         } else {
-            query = "SELECT COUNT(UUID) as count, CREATED_TIME as time FROM AM_APPLICATION WHERE "
-                    + "CREATED_TIME BETWEEN ? AND ? AND CREATED_BY = ? GROUP BY CREATED_TIME ORDER BY CREATED_TIME ASC";
+            query = "SELECT COUNT(UUID) AS count, CREATED_TIME AS time FROM AM_APPLICATION WHERE "
+                    + "(CREATED_TIME BETWEEN ? AND ?) AND CREATED_BY = ? GROUP BY CREATED_TIME ORDER BY "
+                    + "CREATED_TIME ASC";
         }
 
         List<ApplicationCount> applicationCountList = new ArrayList<>();

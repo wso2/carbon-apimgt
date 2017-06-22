@@ -4,12 +4,12 @@
 
     <test name="org.wso2.am">
         <classes>
-            <!--<class name="org.wso2.carbon.apimgt.core.dao.impl.ApiDAOImplIT" />-->
-            <!--<class name="org.wso2.carbon.apimgt.core.dao.impl.ApplicationDAOImplIT" />-->
-            <!--<class name="org.wso2.carbon.apimgt.core.dao.impl.SubscriptionDAOImplIT" />-->
-            <!--<class name="org.wso2.carbon.apimgt.core.dao.impl.LabelDAOImplIT" />-->
-            <!--<class name="org.wso2.carbon.apimgt.core.dao.impl.WorkflowDAOIT" />-->
-            <!--<class name="org.wso2.carbon.apimgt.core.dao.impl.PolicyDAOImplIT" />-->
+            <class name="org.wso2.carbon.apimgt.core.dao.impl.ApiDAOImplIT" />
+            <class name="org.wso2.carbon.apimgt.core.dao.impl.ApplicationDAOImplIT" />
+            <class name="org.wso2.carbon.apimgt.core.dao.impl.SubscriptionDAOImplIT" />
+            <class name="org.wso2.carbon.apimgt.core.dao.impl.LabelDAOImplIT" />
+            <class name="org.wso2.carbon.apimgt.core.dao.impl.WorkflowDAOIT" />
+            <class name="org.wso2.carbon.apimgt.core.dao.impl.PolicyDAOImplIT" />
             <class name="org.wso2.carbon.apimgt.core.dao.impl.AnalyzerDaoImplIT" />
         </classes>
     </test>

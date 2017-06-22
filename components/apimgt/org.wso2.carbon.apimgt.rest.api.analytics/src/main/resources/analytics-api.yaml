@@ -56,16 +56,16 @@ produces:
 # API Usage
 ######################################################
 paths:
-  /api/api_usage:
+  /api/api_usage_across_user_agent:
   
 #-----------------------------------------------------
-#  Retrieve api usage details
+#  Retrieve api usage details across user agent
 #-----------------------------------------------------
     get:
       summary: |
-        Retrieve api usage details
+        Retrieve api usage details per user agent
       description: |
-        Get api usage information from summarized data.
+        Get api usage information across user agent.
       parameters:
         - $ref: '#/parameters/from'
         - $ref: '#/parameters/to'
@@ -173,27 +173,49 @@ parameters:
 definitions:
 
 #-----------------------------------------------------
-# The APIUsage resource
+# The APIUsagePerUserAgent resource
 #-----------------------------------------------------
-  APIUsage:
-    title: API Usage
+  APIUsagePerUserAgent:
+    title: API Usage Per User Agent
     properties:
-      appName:
+      browser:
         type: string
         description: |
-          Name of the application.
-      apiName:
+          Name of the browser of the user
+      os:
         type: string
         description: |
-          Name of the api
-      consumerKey:
-        type: string
-        description: |
-          consumer key of the application
+          Name of the operating system of the user
       count:
         type: integer
+        format: int64
         description: |
           Number of requests
+
+#-----------------------------------------------------
+# The APIUsagePerUserAgentList resource
+#-----------------------------------------------------
+  APIUsagePerUserAgentList:
+    title: ApplicationCount List
+    properties:
+        count:
+          type: integer
+          description: |
+            Number of requests.
+        next:
+          type: string
+          description: |
+            Link to the next subset of resources qualified.
+            Empty if no more resources are to be returned.
+        previous:
+          type: string
+          description: |
+            Link to the previous subset of resources qualified.
+            Empty if current subset is the first subset returned.
+        list:
+          type: array
+          items:
+            $ref: '#/definitions/APIUsagePerUserAgent'
 
 
 #-----------------------------------------------------
@@ -214,7 +236,7 @@ definitions:
           Number of application registrations
 
 #-----------------------------------------------------
-# The ApplicationCount List resource
+# The ApplicationCountList resource
 #-----------------------------------------------------
   ApplicationCountList:
     title: ApplicationCount List
