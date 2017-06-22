@@ -104,7 +104,7 @@ function isrequestThrottled( message msg) (boolean){
 
         // todo check for conditions
         // resource level + API level condition checking
-        if (throttle:isThrottled(resourceLevelThrottleKey)) {
+        if (throttle:isThrottled(resourceLevelThrottleKey, msg)) {
 
             if(apiLevelThrottlingTriggered){
                 messages:setProperty(msg, constants:THROTTLED_ERROR_CODE, constants:API_THROTTLE_OUT_ERROR_CODE);
@@ -122,7 +122,7 @@ function isrequestThrottled( message msg) (boolean){
     }
 
     // Subscription Level throttling
-    isSubscriptionLevelThrottled = throttle:isThrottled(subscriptionLevelThrottleKey);
+    isSubscriptionLevelThrottled = throttle:isThrottled(subscriptionLevelThrottleKey, msg);
     string stopOnQuotaReach = gatewayUtil:getStringProperty(msg, constants:STOP_ON_QUOTA_REACH);
 
     if(isSubscriptionLevelThrottled){
@@ -143,7 +143,7 @@ function isrequestThrottled( message msg) (boolean){
 
     // Application Level Throttling
     applicationLevelThrottleKey = applicationId + ":" + authorizedUser;
-    isApplicationLevelThrottled = throttle:isThrottled(applicationLevelThrottleKey);
+    isApplicationLevelThrottled = throttle:isThrottled(applicationLevelThrottleKey, msg);
 
     if(isApplicationLevelThrottled){
         http:setStatusCode( msg, constants:HTTP_TOO_MANY_REQUESTS );
@@ -169,6 +169,7 @@ function setThrottledResponse(message msg){
     json jsonPayload = {};
     jsonPayload.Error_Code =(string)messages:getProperty(msg, constants:THROTTLED_ERROR_CODE);
     jsonPayload.Error_Message = (string)messages:getProperty(msg, constants:THROTTLED_OUT_REASON);
+    jsonPayload.Expiry_Time = (string)messages:getProperty(msg, constants:THROTTLE_EXPIRE_TIME);
     messages:setJsonPayload(msg, jsonPayload);
 }
 

@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.gateway.holders;
 
 import ballerina.lang.maps;
 import ballerina.lang.system;
+import ballerina.lang.messages;
 
 map blockedAPIConditionsMap = {};
 map blockedApplicationConditionsMap = {};
@@ -132,18 +133,18 @@ function isRequestBlocked(string apiBlockingKey, string applicationBlockingKey, 
              blockedApplicationConditionsMap[ipBlockingKey] != null );
 }
 
-function isThrottled(string throttleKey)(boolean){
+function isThrottled (string throttleKey, message msg) (boolean) {
 
-    if (throttleDataMap[throttleKey] != null){
+    if (throttleDataMap[throttleKey] != null) {
 
         int currentTime = system:currentTimeMillis();
-        string expiryTime=(string)throttleDataMap[throttleKey];
-        int expiryStamp =(int)expiryTime;
-
-        if( expiryStamp >= currentTime ) {
+        string expiryTime = (string)throttleDataMap[throttleKey];
+        int expiryStamp = (int)expiryTime;
+        messages:setProperty(msg, "THROTTLE_EXPIRE_TIME", expiryTime);
+        if (expiryStamp >= currentTime) {
             return true;
         } else {
-            maps:remove(throttleDataMap,throttleKey);
+            maps:remove(throttleDataMap, throttleKey);
             return false;
         }
     }
