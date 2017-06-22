@@ -179,7 +179,8 @@ function constructKeyValidationDto (string token, dto:IntrospectDto introspectDt
     dto:KeyValidationDto keyValidationInfoDTO = {};
     dto:ApplicationDto applicationDto = holder:getFromApplicationCache(subscriptionDto.applicationId);
     keyValidationInfoDTO.username = introspectDto.username;
-    keyValidationInfoDTO.applicationPolicy = applicationDto.applicationPolicy;
+    dto:PolicyDto applicationPolicy = holder:getFromPolicyCache(applicationDto.applicationPolicy);
+    keyValidationInfoDTO.applicationPolicy = applicationPolicy.name;
     dto:PolicyDto subscriptionPolicy = holder:getFromPolicyCache(subscriptionDto.subscriptionPolicy);
     keyValidationInfoDTO.subscriptionPolicy = subscriptionPolicy.name;
     keyValidationInfoDTO.stopOnQuotaReach = subscriptionPolicy.stopOnQuotaReach;
