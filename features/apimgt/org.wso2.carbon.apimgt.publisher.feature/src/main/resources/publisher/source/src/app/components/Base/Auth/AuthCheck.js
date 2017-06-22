@@ -21,7 +21,7 @@ import {Switch, Redirect} from 'react-router-dom'
 import PropTypes from 'prop-types'
 import qs from 'qs'
 
-import AuthManager from '../../../data/Auth'
+import AuthManager from '../../../data/AuthManager.js'
 import ResourceNotFound from "../Errors/ResourceNotFound";
 
 class AuthCheck extends Component {

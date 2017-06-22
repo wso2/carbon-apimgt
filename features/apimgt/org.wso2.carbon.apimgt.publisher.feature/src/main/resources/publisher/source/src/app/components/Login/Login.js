@@ -19,13 +19,13 @@
 import React, {Component} from 'react'
 import './login.css'
 import {Switch, Redirect} from 'react-router-dom'
-import Auth from '../../data/Auth.js';
+import AuthManager from '../../data/AuthManager';
 
 class Login extends Component {
 
     constructor(props) {
         super(props);
-        this.auth = new Auth();
+        this.authManager = new AuthManager();
         this.state = {
             isLogin: false
         }
@@ -34,18 +34,17 @@ class Login extends Component {
     doLogin() {
         var username = document.getElementById('username').value;
         var password = document.getElementById('password').value;
-
-        var loginPromise = this.auth.authenticateUser(username, password);
+        var loginPromise = this.authManager.authenticateUser(username, password);
         loginPromise.then((data) => {
-            Auth.setAuthStatus(true);
-            this.auth.setUserName(data.authUser);
-            this.auth.setUserScope(data.scopes);
+            AuthManager.setAuthStatus(true);
+            AuthManager.setUserName(data.data.authUser);
+            this.authManager.setUserScope(data.data.scopes);
             var expiresIn = data.validityPeriod + Math.floor(Date.now() / 1000);
             window.localStorage.setItem("expiresIn", expiresIn);
             window.localStorage.setItem("user", data.authUser);
             window.localStorage.setItem("rememberMe", document.getElementById("rememberMe").checked);
             window.localStorage.setItem("userScopes", data.scopes);
-            this.setState({isLogin: Auth.getAuthStatus()});
+            this.setState({isLogin: AuthManager.getAuthStatus()});
         });
         loginPromise.catch(function (error) {
                 var error_data = JSON.parse(error.responseText);
@@ -66,7 +65,7 @@ class Login extends Component {
     };
 
     render() {
-        if (!this.state.isLogin) {
+        if (!this.state.isLogin) { // If not logged in, go to login page
             return (
                 <div>
                     <meta charSet="utf-8"/>
@@ -218,7 +217,7 @@ class Login extends Component {
                     </footer>
                 </div>
             )
-        } else
+        } else // If logged in, redirect to /apis page
             return (
                 <Switch>
                     <Redirect from={'/login'} to={"/apis"}/>

@@ -19,13 +19,14 @@
 import axios from 'axios';
 import qs from 'qs';
 
-class Auth {
+class AuthManager {
     constructor() {
         /* TODO: Move this to configuration ~tmkb*/
         this.host = "https://localhost:9292";
         this.token = "/login/token/publisher";
         this.isLogged = false;
-        this.user = {};
+        this.username = null;
+        this.userscope = null;
         this.bearer = "Bearer ";
         this.contextPath = "/publisher";
     }
@@ -152,20 +153,24 @@ class Auth {
         return this.isLogged;
     }
 
-    setUserName(username) {
-        this.user.username = username;
+    static setAuthStatus(status) {
+        this.isLogged = status;
     }
 
-    getUserName() {
-        return this.user.username;
+    static setUserName(username) {
+        this.username = username;
+    }
+
+    static getUserName() {
+        return this.username;
     }
 
     setUserScope(scope) {
-        this.user.scope = scope;
+        this.userscope = scope;
     }
 
     getUserScope() {
-        return this.user.scope;
+        return this.userscope;
     }
 
     getTokenEndpoint() {
@@ -194,13 +199,13 @@ class Auth {
         let promised_response = axios.post(this.getTokenEndpoint(), qs.stringify(data), {headers: headers});
         promised_response.then(response => {
             let WSO2_AM_TOKEN_1 = response.data.partialToken;
-            Auth.setCookie('WSO2_AM_TOKEN_1', WSO2_AM_TOKEN_1);
+            AuthManager.setCookie('WSO2_AM_TOKEN_1', WSO2_AM_TOKEN_1);
         });
         return promised_response;
     }
 
     logout() {
-        var authzHeader = this.bearer + Auth.getCookie("WSO2_AM_TOKEN_1");
+        var authzHeader = this.bearer + AuthManager.getCookie("WSO2_AM_TOKEN_1");
         var url = this.contextPath + '/auth/apis/login/revoke';
         var headers = {
             'Accept': 'application/json',
@@ -228,4 +233,4 @@ class Auth {
     }
 }
 
-export default Auth;
+export default AuthManager;
