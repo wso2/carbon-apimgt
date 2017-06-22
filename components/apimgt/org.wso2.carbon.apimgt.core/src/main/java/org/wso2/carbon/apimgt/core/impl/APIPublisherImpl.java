@@ -627,7 +627,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (IdentityProviderException e) {
             String errorMessage = "There are invalid roles in the permission string";
             log.error(errorMessage, e);
-            throw new APIManagementException(errorMessage, ExceptionCodes.UNSUPPORTED_ROLE);
+            throw new APIManagementException(errorMessage, e, ExceptionCodes.UNSUPPORTED_ROLE);
         }
         return updatedPermissionArray.toJSONString();
     }

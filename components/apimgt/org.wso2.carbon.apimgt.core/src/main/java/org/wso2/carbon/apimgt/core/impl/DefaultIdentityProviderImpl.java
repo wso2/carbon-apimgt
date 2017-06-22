@@ -175,7 +175,7 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
         } catch (FeignException e) {
             String errorMessage = "Role with role Id " + roleId + " does not exist in the system.";
             log.error(errorMessage, e);
-            throw new IdentityProviderException(errorMessage, ExceptionCodes.ROLE_DOES_NOT_EXIST);
+            throw new IdentityProviderException(errorMessage, e, ExceptionCodes.ROLE_DOES_NOT_EXIST);
         }
     }
 
