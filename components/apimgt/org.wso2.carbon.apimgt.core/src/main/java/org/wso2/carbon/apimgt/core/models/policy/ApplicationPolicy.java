@@ -22,20 +22,11 @@ package org.wso2.carbon.apimgt.core.models.policy;
  * contains {@link ApplicationPolicy} attributes
  */
 public class ApplicationPolicy extends Policy {
-    private int applicationId;
 
     private String customAttributes;
 
     public ApplicationPolicy(String name) {
         super(name);
-    }
-
-    public int getApplicationId() {
-        return applicationId;
-    }
-
-    public void setApplicationId(int applicationId) {
-        this.applicationId = applicationId;
     }
 
     public String getCustomAttributes() {
@@ -49,7 +40,7 @@ public class ApplicationPolicy extends Policy {
     @Override
     public String toString() {
         return "ApplicationPolicy [policyName=" + getPolicyName()
-                + ", applicationId =" + applicationId + ", description=" + getDescription() + ", defaultQuotaPolicy="
+                + ", applicationId =" + getUuid() + ", description=" + getDescription() + ", defaultQuotaPolicy="
                 + getDefaultQuotaPolicy() + "]";
     }
 }
