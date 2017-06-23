@@ -56,7 +56,7 @@ class Publisher extends Component {
 
     render() {
         return (
-            <Router basename="/publisher_new">
+            <Router basename="/publisher">
                     <Switch>
                         <Route exact path={"/"} component={BApiCreate}/>
                         <Route path={"/apis"} component={BApis}/>
