@@ -35,7 +35,6 @@ import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
-import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.api.LabelExtractor;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
@@ -63,6 +62,7 @@ import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.ApplicationToken;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.Event;
@@ -85,7 +85,6 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ApplicationStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
-import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationResponse;
 import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationWorkflow;
@@ -208,9 +207,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         return applicationList;
     }
 
-    /**
-     * @see APIStore#updateApplication(String, Application)
-     */
     @Override
     public WorkflowResponse updateApplication(String uuid, Application application) throws APIManagementException {
         try {
@@ -284,62 +280,125 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
     @Override
-    public Map<String, Object> generateApplicationKeys(String applicationName, String applicationId,
-            String tokenType, String callbackUrl, List<String> grantTypes, String validityTime, String tokenScopes,
-            String groupingId) throws APIManagementException {
+    public OAuthApplicationInfo generateApplicationKeys(String applicationId, String tokenType,
+                                                        String callbackUrl, List<String> grantTypes)
+            throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Generating application keys for application: " + applicationId);
+        }
 
         //todo: remove this temporary line when UI is fixed to send grant type list, which does not happen yet
         grantTypes.add(KeyManagerConstants.CLIENT_CREDENTIALS_GRANT_TYPE);
 
-        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, callbackUrl,
+        Application application = getApplicationByUuid(applicationId);
+
+        OAuthAppRequest oauthAppRequest = new OAuthAppRequest(application.getName(), callbackUrl, tokenType,
                 grantTypes);
-        oauthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.VALIDITY_PERIOD, validityTime);
-        oauthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.APP_KEY_TYPE, tokenType);
-        oauthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.TOKEN_SCOPES, tokenScopes);
-        KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();
 
-        OAuthApplicationInfo oauthAppInfo = keyManager.createApplication(oauthAppRequest);
-        Map<String, Object> keyDetails = new HashMap<>();
-        if (oauthAppInfo != null) {
-            APIUtils.logDebug("Successfully created OAuth application", log);
-            keyDetails.put(KeyManagerConstants.KeyDetails.CONSUMER_KEY, oauthAppInfo.getClientId());
-            keyDetails.put(KeyManagerConstants.KeyDetails.CONSUMER_SECRET, oauthAppInfo.getClientSecret());
-            keyDetails.put(KeyManagerConstants.KeyDetails.SUPPORTED_GRANT_TYPES, oauthAppInfo.getGrantTypes());
-            keyDetails.put(KeyManagerConstants.KeyDetails.APP_DETAILS, oauthAppInfo.getJSONString());
-        } else {
-            throw new KeyManagementException("Error occurred while creating OAuth application");
-        }
+        OAuthApplicationInfo oauthAppInfo = getIdentityProvider().createApplication(oauthAppRequest);
 
-        AccessTokenRequest accessTokenRequest = ApplicationUtils.createAccessTokenRequest(oauthAppInfo);
-        AccessTokenInfo accessTokenInfo = keyManager.getNewAccessToken(accessTokenRequest);
-        // adding access token information to key details
-        if (accessTokenInfo != null) {
-            APIUtils.logDebug("Successfully created OAuth access token", log);
-            keyDetails.put(KeyManagerConstants.KeyDetails.ACCESS_TOKEN, accessTokenInfo.getAccessToken());
-            keyDetails.put(KeyManagerConstants.KeyDetails.VALIDITY_TIME, accessTokenInfo.getValidityPeriod());
-            keyDetails.put(KeyManagerConstants.KeyDetails.TOKEN_SCOPES, accessTokenInfo.getScopes());
-        } else {
-            throw new KeyManagementException("Error occurred while generating access token for OAuth application");
+        if (log.isDebugEnabled()) {
+            log.debug("Application key generation was successful for application: " + application.getName()
+                    + " Client Id: " + oauthAppInfo.getClientId());
         }
 
         try {
             getApplicationDAO().addApplicationKeys(applicationId, oauthAppInfo);
-            List<SubscriptionValidationData> subscriptionValidationData = getApiSubscriptionDAO()
-                    .getAPISubscriptionsOfAppForValidation(applicationId, tokenType);
-            if (subscriptionValidationData != null && !subscriptionValidationData.isEmpty()) {
-                getApiGateway().addAPISubscription(subscriptionValidationData);
-            }
         } catch (APIMgtDAOException e) {
-            String errorMsg = "Error occurred while saving key data - " + applicationId;
+            String errorMsg = "Error occurred while saving key data for application: " + application.getName();
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
-        return keyDetails;
+
+        if (log.isDebugEnabled()) {
+            log.debug("Application keys are successfully saved in the database for application: "
+                    + application.getName() + " Client Id: " + oauthAppInfo.getClientId());
+        }
+
+        List<SubscriptionValidationData> subscriptionValidationData = getApiSubscriptionDAO()
+                .getAPISubscriptionsOfAppForValidation(applicationId, tokenType);
+        if (subscriptionValidationData != null && !subscriptionValidationData.isEmpty()) {
+            getApiGateway().addAPISubscription(subscriptionValidationData);
+        }
+
+        return oauthAppInfo;
+    }
+
+    @Override
+    public OAuthApplicationInfo provideApplicationKeys(String applicationId, String tokenType, String clientId,
+                                                       String clientSecret) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Semi-manual client registering for App: " + applicationId + " and Client ID: " + clientId);
+        }
+
+        if (StringUtils.isEmpty(applicationId) || StringUtils.isEmpty(clientId) || StringUtils.isEmpty(clientSecret)) {
+            String msg = "One of input values is null or empty. Application Id: " + applicationId + " Client Id: "
+                    + clientId + (StringUtils.isEmpty(clientSecret) ? " Client Secret: " + clientSecret : "");
+            log.error(msg);
+            throw new KeyManagementException(msg, ExceptionCodes.OAUTH2_APP_MAP_FAILED);
+        }
+
+        //Checking whether given consumer key and secret match with an existing OAuth app.
+        //If they does not match, throw an exception.
+        OAuthApplicationInfo oAuthApp = getIdentityProvider().retrieveApplication(clientId);
+        if (oAuthApp == null || !clientSecret.equals(oAuthApp.getClientSecret())) {
+            String msg = "Unable to find OAuth app. The provided Client Id is invalid. Client Id: " + clientId;
+            throw new KeyManagementException(msg, ExceptionCodes.OAUTH2_APP_MAP_FAILED);
+        }
+
+        try {
+            getApplicationDAO().addApplicationKeys(applicationId, oAuthApp);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while saving key data.";
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+
+        log.debug("Application keys are successfully saved in the database");
+
+        List<SubscriptionValidationData> subscriptionValidationData = getApiSubscriptionDAO()
+                .getAPISubscriptionsOfAppForValidation(applicationId, tokenType);
+        if (subscriptionValidationData != null && !subscriptionValidationData.isEmpty()) {
+            getApiGateway().addAPISubscription(subscriptionValidationData);
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Semi-manual client registration was successful for application: " + applicationId
+                    + " and Client ID: " + clientId);
+        }
+        return oAuthApp;
+    }
+
+    @Override
+    public ApplicationToken generateApplicationToken(String clientId, String clientSecret, String scopes,
+                                                     long validityPeriod, String tokenToBeRevoked)
+            throws APIManagementException {
+        log.debug("Generating a new application access token");
+        AccessTokenRequest accessTokenRequest = new AccessTokenRequest();
+        accessTokenRequest.setClientId(clientId);
+        accessTokenRequest.setClientSecret(clientSecret);
+        accessTokenRequest.setGrantType(KeyManagerConstants.CLIENT_CREDENTIALS_GRANT_TYPE);
+        if (StringUtils.isEmpty(scopes)) {
+            scopes = KeyManagerConstants.OAUTH2_DEFAULT_SCOPE;
+        }
+        accessTokenRequest.setScopes(scopes);
+        accessTokenRequest.setValidityPeriod(validityPeriod);
+        accessTokenRequest.setTokenToRevoke(tokenToBeRevoked);
+
+        AccessTokenInfo newToken = getIdentityProvider().getNewAccessToken(accessTokenRequest);
+
+        ApplicationToken applicationToken = new ApplicationToken();
+        applicationToken.setAccessToken(newToken.getAccessToken());
+        applicationToken.setValidityPeriod(newToken.getValidityPeriod());
+        applicationToken.setScopes(newToken.getScopes());
+
+        log.debug("Successfully created a new application access token.");
+        return applicationToken;
     }
 
     @Override
     public Application getApplicationByUuid(String uuid) throws APIManagementException {
-        Application application = null;
+        Application application;
         try {
             application = getApplicationDAO().getApplication(uuid);
         } catch (APIMgtDAOException e) {
@@ -1122,7 +1181,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             addCompositeApi(apiBuilder);
             return apiBuilder.getId();
         } catch (IOException e) {
-            throw new APIManagementException("Couldn't Generate ApiDefinition from file", ExceptionCodes
+            throw new APIManagementException("Couldn't Generate ApiDefinition from file", e, ExceptionCodes
                     .API_DEFINITION_MALFORMED);
         }
     }
@@ -1470,6 +1529,11 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         return applicationResponse;
     }
 
+    @Override
+    public void selfSignUp(User user) throws APIManagementException {
+        getIdentityProvider().registerUser(user);
+    }
+
     /**
      * This method will return map with role names and its permission values.
      *
@@ -1547,11 +1611,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         if (observer != null) {
             eventObservers.remove(observer.getClass().getName());
         }
-    }
-
-    @Override
-    public void selfSignUp(User user) throws APIManagementException {
-        getIdentityProvider().registerUser(user);
     }
 
     /**

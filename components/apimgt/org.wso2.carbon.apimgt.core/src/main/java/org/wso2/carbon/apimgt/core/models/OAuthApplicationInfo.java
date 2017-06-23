@@ -37,20 +37,10 @@ public final class OAuthApplicationInfo {
     private String clientSecret;
     private Map<String, Object> parameters = new HashMap<>();
 
-    /**
-     * get client Id (consumer id)
-     *
-     * @return clientId
-     */
     public String getClientId() {
         return clientId;
     }
 
-    /**
-     * set client Id
-     *
-     * @param clientId  Key of the client.
-     */
     public void setClientId(String clientId) {
         this.clientId = clientId;
     }
@@ -63,29 +53,18 @@ public final class OAuthApplicationInfo {
         this.clientSecret = clientSecret;
     }
 
-    /**
-     * Set client Name of OAuthApplication.
-     *
-     * @param clientName    Name of the application.
-     */
     public void setClientName(String clientName) {
         this.clientName = clientName;
     }
 
-    /**
-     * Set callback URL of OAuthapplication.
-     *
-     * @param callBackURL   call back uris of the application.
-     */
-    public void setCallbackUrl(String callBackURL) {
+    public void setCallbackURL(String callBackURL) {
         this.callBackURL = callBackURL;
     }
 
-    /**
-     * Set grant types of OAuth Application.
-     *
-     * @param grantTypes grant types
-     */
+    public String getCallbackURL() {
+        return callBackURL;
+    }
+
     public void setGrantTypes(List<String> grantTypes) {
         this.grantTypes = grantTypes;
     }
@@ -105,10 +84,6 @@ public final class OAuthApplicationInfo {
 
     public String getClientName() {
         return clientName;
-    }
-
-    public String getCallbackUrl() {
-        return callBackURL;
     }
 
     public List<String> getGrantTypes() {

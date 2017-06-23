@@ -387,16 +387,14 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     @Override
     public void addApplicationKeys(String appId, OAuthApplicationInfo oAuthAppDetails)
             throws APIMgtDAOException {
-        final String addApplicationKeysQuery = "INSERT INTO AM_APP_KEY_MAPPING (APPLICATION_ID, CLIENT_ID, KEY_TYPE,"
-                + "STATE, CREATE_MODE) VALUES (?, ?, ?, ?, ?)";
+        final String addApplicationKeysQuery = "INSERT INTO AM_APP_KEY_MAPPING (APPLICATION_ID, CLIENT_ID, KEY_TYPE) " +
+                "VALUES (?, ?, ?)";
         try (Connection conn = DAOUtil.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement ps = conn.prepareStatement(addApplicationKeysQuery)) {
                 ps.setString(1, appId);
                 ps.setString(2, oAuthAppDetails.getClientId());
                 ps.setString(3, oAuthAppDetails.getParameter(KeyManagerConstants.APP_KEY_TYPE).toString());
-                ps.setString(4, "COMPLETED"); //temporary fix
-                ps.setString(5, "CREATED"); //temporary fix
                 ps.executeUpdate();
                 conn.commit();
             } catch (SQLException ex) {
@@ -433,7 +431,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     private void setApplicationKeys(Connection conn, Application application, String applicationId)
             throws APIMgtDAOException {
         final String getApplicationKeysQuery =
-                "SELECT CLIENT_ID, KEY_TYPE, STATE FROM AM_APP_KEY_MAPPING WHERE " + "APPLICATION_ID = ?";
+                "SELECT CLIENT_ID, KEY_TYPE FROM AM_APP_KEY_MAPPING WHERE " + "APPLICATION_ID = ?";
         try (PreparedStatement ps = conn.prepareStatement(getApplicationKeysQuery)) {
             ps.setString(1, applicationId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -441,7 +439,6 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                     APIKey apiKey = new APIKey();
                     apiKey.setConsumerKey(rs.getString("CLIENT_ID"));
                     apiKey.setType(rs.getString("KEY_TYPE"));
-                    apiKey.setState(rs.getString("STATE"));
                     application.addKey(apiKey);
                 }
             }

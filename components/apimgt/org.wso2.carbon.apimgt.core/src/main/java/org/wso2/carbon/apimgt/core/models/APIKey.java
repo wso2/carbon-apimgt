@@ -27,16 +27,6 @@ public class APIKey {
     private long validityPeriod;
     private String createdDate;
     private String authUser;
-    private String state;
-
-
-    public String getState() {
-        return state;
-    }
-
-    public void setState(String state) {
-        this.state = state;
-    }
 
     public String getConsumerKey() {
         return consumerKey;
@@ -69,6 +59,7 @@ public class APIKey {
     public void setType(String type) {
         this.type = type;
     }
+
     public String getAuthUser() {
         return authUser;
     }
@@ -76,6 +67,7 @@ public class APIKey {
     public void setAuthUser(String userId) {
         this.authUser = userId;
     }
+
     public long getValidityPeriod() {
         return validityPeriod;
     }
@@ -91,6 +83,7 @@ public class APIKey {
     public void setCreatedDate(String createdDate) {
         this.createdDate = createdDate;
     }
+
     public String getTokenScope() {
         return tokenScope;
     }

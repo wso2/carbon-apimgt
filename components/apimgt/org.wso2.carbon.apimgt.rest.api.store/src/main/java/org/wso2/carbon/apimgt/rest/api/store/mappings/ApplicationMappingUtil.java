@@ -22,7 +22,7 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeysDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
 
 import java.util.ArrayList;
@@ -57,7 +57,7 @@ public class ApplicationMappingUtil {
         return applicationListDTO;
     }
 
-    public static ApplicationDTO fromApplicationtoDTO (Application application) {
+    public static ApplicationDTO fromApplicationToDTO(Application application) {
         ApplicationDTO applicationDTO = new ApplicationDTO();
         applicationDTO.setApplicationId(application.getId());
         applicationDTO.setThrottlingTier(application.getTier());
@@ -67,10 +67,10 @@ public class ApplicationMappingUtil {
         applicationDTO.setPermission(application.getPermissionString());
         applicationDTO.setGroupId(application.getGroupId());
         applicationDTO.setSubscriber(application.getCreatedUser());
-        List<ApplicationKeyDTO> applicationKeyDTOs = new ArrayList<>();
+        List<ApplicationKeysDTO> applicationKeyDTOs = new ArrayList<>();
         for(APIKey apiKey : application.getKeys()) {
-            ApplicationKeyDTO applicationKeyDTO = ApplicationKeyMappingUtil.fromApplicationKeyToDTO(apiKey);
-            applicationKeyDTOs.add(applicationKeyDTO);
+            ApplicationKeysDTO applicationKeysDTO = ApplicationKeyMappingUtil.fromApplicationKeysToDTO(apiKey);
+            applicationKeyDTOs.add(applicationKeysDTO);
         }
         applicationDTO.setKeys(applicationKeyDTOs);
         return applicationDTO;

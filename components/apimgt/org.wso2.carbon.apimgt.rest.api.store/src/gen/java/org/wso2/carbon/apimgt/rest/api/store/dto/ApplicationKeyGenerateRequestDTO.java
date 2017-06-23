@@ -1,11 +1,11 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -14,6 +14,9 @@ import java.util.Objects;
  * ApplicationKeyGenerateRequestDTO
  */
 public class ApplicationKeyGenerateRequestDTO   {
+  @JsonProperty("applicationId")
+  private String applicationId = null;
+
   /**
    * Gets or Sets keyType
    */
@@ -48,17 +51,29 @@ public class ApplicationKeyGenerateRequestDTO   {
   @JsonProperty("keyType")
   private KeyTypeEnum keyType = null;
 
-  @JsonProperty("validityTime")
-  private String validityTime = null;
-
   @JsonProperty("callbackUrl")
   private String callbackUrl = null;
 
   @JsonProperty("grantTypesToBeSupported")
   private List<String> grantTypesToBeSupported = new ArrayList<String>();
 
-  @JsonProperty("scopes")
-  private List<String> scopes = new ArrayList<String>();
+  public ApplicationKeyGenerateRequestDTO applicationId(String applicationId) {
+    this.applicationId = applicationId;
+    return this;
+  }
+
+   /**
+   * Application ID
+   * @return applicationId
+  **/
+  @ApiModelProperty(required = true, value = "Application ID")
+  public String getApplicationId() {
+    return applicationId;
+  }
+
+  public void setApplicationId(String applicationId) {
+    this.applicationId = applicationId;
+  }
 
   public ApplicationKeyGenerateRequestDTO keyType(KeyTypeEnum keyType) {
     this.keyType = keyType;
@@ -76,24 +91,6 @@ public class ApplicationKeyGenerateRequestDTO   {
 
   public void setKeyType(KeyTypeEnum keyType) {
     this.keyType = keyType;
-  }
-
-  public ApplicationKeyGenerateRequestDTO validityTime(String validityTime) {
-    this.validityTime = validityTime;
-    return this;
-  }
-
-   /**
-   * Get validityTime
-   * @return validityTime
-  **/
-  @ApiModelProperty(required = true, value = "")
-  public String getValidityTime() {
-    return validityTime;
-  }
-
-  public void setValidityTime(String validityTime) {
-    this.validityTime = validityTime;
   }
 
   public ApplicationKeyGenerateRequestDTO callbackUrl(String callbackUrl) {
@@ -137,29 +134,6 @@ public class ApplicationKeyGenerateRequestDTO   {
     this.grantTypesToBeSupported = grantTypesToBeSupported;
   }
 
-  public ApplicationKeyGenerateRequestDTO scopes(List<String> scopes) {
-    this.scopes = scopes;
-    return this;
-  }
-
-  public ApplicationKeyGenerateRequestDTO addScopesItem(String scopesItem) {
-    this.scopes.add(scopesItem);
-    return this;
-  }
-
-   /**
-   * Allowed scopes for the access token
-   * @return scopes
-  **/
-  @ApiModelProperty(value = "Allowed scopes for the access token")
-  public List<String> getScopes() {
-    return scopes;
-  }
-
-  public void setScopes(List<String> scopes) {
-    this.scopes = scopes;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -170,16 +144,15 @@ public class ApplicationKeyGenerateRequestDTO   {
       return false;
     }
     ApplicationKeyGenerateRequestDTO applicationKeyGenerateRequest = (ApplicationKeyGenerateRequestDTO) o;
-    return Objects.equals(this.keyType, applicationKeyGenerateRequest.keyType) &&
-        Objects.equals(this.validityTime, applicationKeyGenerateRequest.validityTime) &&
+    return Objects.equals(this.applicationId, applicationKeyGenerateRequest.applicationId) &&
+        Objects.equals(this.keyType, applicationKeyGenerateRequest.keyType) &&
         Objects.equals(this.callbackUrl, applicationKeyGenerateRequest.callbackUrl) &&
-        Objects.equals(this.grantTypesToBeSupported, applicationKeyGenerateRequest.grantTypesToBeSupported) &&
-        Objects.equals(this.scopes, applicationKeyGenerateRequest.scopes);
+        Objects.equals(this.grantTypesToBeSupported, applicationKeyGenerateRequest.grantTypesToBeSupported);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyType, validityTime, callbackUrl, grantTypesToBeSupported, scopes);
+    return Objects.hash(applicationId, keyType, callbackUrl, grantTypesToBeSupported);
   }
 
   @Override
@@ -187,11 +160,10 @@ public class ApplicationKeyGenerateRequestDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApplicationKeyGenerateRequestDTO {\n");
     
+    sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
     sb.append("    keyType: ").append(toIndentedString(keyType)).append("\n");
-    sb.append("    validityTime: ").append(toIndentedString(validityTime)).append("\n");
     sb.append("    callbackUrl: ").append(toIndentedString(callbackUrl)).append("\n");
     sb.append("    grantTypesToBeSupported: ").append(toIndentedString(grantTypesToBeSupported)).append("\n");
-    sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("}");
     return sb.toString();
   }

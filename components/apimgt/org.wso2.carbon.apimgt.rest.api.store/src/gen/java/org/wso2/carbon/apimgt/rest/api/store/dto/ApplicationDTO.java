@@ -2,16 +2,14 @@ package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 import java.util.Objects;
 
 /**
- * ApplicationEvent
+ * ApplicationDTO
  */
 public class ApplicationDTO   {
   @JsonProperty("applicationId")
@@ -39,7 +37,7 @@ public class ApplicationDTO   {
   private String groupId = null;
 
   @JsonProperty("keys")
-  private List<ApplicationKeyDTO> keys = new ArrayList<ApplicationKeyDTO>();
+  private List<ApplicationKeysDTO> keys = new ArrayList<ApplicationKeysDTO>();
 
   public ApplicationDTO applicationId(String applicationId) {
     this.applicationId = applicationId;
@@ -185,12 +183,12 @@ public class ApplicationDTO   {
     this.groupId = groupId;
   }
 
-  public ApplicationDTO keys(List<ApplicationKeyDTO> keys) {
+  public ApplicationDTO keys(List<ApplicationKeysDTO> keys) {
     this.keys = keys;
     return this;
   }
 
-  public ApplicationDTO addKeysItem(ApplicationKeyDTO keysItem) {
+  public ApplicationDTO addKeysItem(ApplicationKeysDTO keysItem) {
     this.keys.add(keysItem);
     return this;
   }
@@ -200,11 +198,11 @@ public class ApplicationDTO   {
    * @return keys
   **/
   @ApiModelProperty(value = "")
-  public List<ApplicationKeyDTO> getKeys() {
+  public List<ApplicationKeysDTO> getKeys() {
     return keys;
   }
 
-  public void setKeys(List<ApplicationKeyDTO> keys) {
+  public void setKeys(List<ApplicationKeysDTO> keys) {
     this.keys = keys;
   }
 
@@ -237,7 +235,7 @@ public class ApplicationDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ApplicationEvent {\n");
+    sb.append("class ApplicationDTO {\n");
     
     sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
