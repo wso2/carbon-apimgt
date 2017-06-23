@@ -59,7 +59,8 @@ public class AuthenticatorAPI implements Microservice {
     public Response authenticate(@Context Request request, @FormDataParam ("username") String userName,
             @FormDataParam ("password") String password, @FormDataParam ("grant_type") String grantType,
             @FormDataParam ("validity_period") String validityPeriod,
-            @FormDataParam ("remember_me") boolean isRememberMe, @FormDataParam ("scopes") String scopesList) {
+            @FormDataParam ("remember_me") boolean isRememberMe, @FormDataParam ("scopes") String scopesList,
+            @FormDataParam ("environment") String environment) {
         try {
             LoginTokenService loginTokenService = new LoginTokenService();
             AuthResponseBean authResponseBean = new AuthResponseBean();
@@ -83,7 +84,7 @@ public class AuthenticatorAPI implements Microservice {
             }
             String tokens = loginTokenService
                     .getTokens(authResponseBean, appContext.substring(1), userName, password, grantType, refToken,
-                            Long.parseLong(validityPeriod));
+                            Long.parseLong(validityPeriod), environment);
             String accessToken = tokens.split(":")[0];
             String refreshToken = null;
             if (tokens.split(":").length > 1) {
@@ -163,6 +164,7 @@ public class AuthenticatorAPI implements Microservice {
             try {
                 LoginTokenService loginTokenService = new LoginTokenService();
                 loginTokenService.revokeAccessToken(appContext.substring(1), accessToken);
+                //todo added a environment as default for the time being
                 // Lets invalidate all the cookies saved.
                 NewCookie appContextCookie = AuthUtil
                         .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_2, "", appContext, true, true,

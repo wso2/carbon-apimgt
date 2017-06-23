@@ -25,6 +25,7 @@ import java.util.HashMap;
  */
 public class AccessTokenRequest {
     private String clientId;
+    private String environment;
     private String clientSecret;
     private String grantType;
     private String scopes;
@@ -132,6 +133,13 @@ public class AccessTokenRequest {
         return authorizationCode;
     }
 
+    public String getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(String environment) {
+        this.environment = environment;
+    }
     public void setAuthorizationCode(String authorizationCode) {
         this.authorizationCode = authorizationCode;
     }

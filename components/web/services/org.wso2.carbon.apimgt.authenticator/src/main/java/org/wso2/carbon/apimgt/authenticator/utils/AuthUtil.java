@@ -70,7 +70,7 @@ public class AuthUtil {
      */
     public static AccessTokenRequest createAccessTokenRequest(String username, String password, String grantType,
             String refreshToken, String accessToken, long validityPeriod, String scopes, String clientId, String
-            clientSecret) {
+            clientSecret, String environment) {
 
         AccessTokenRequest tokenRequest = new AccessTokenRequest();
         tokenRequest.setClientId(clientId);
@@ -82,6 +82,7 @@ public class AuthUtil {
         tokenRequest.setScopes(scopes);
         tokenRequest.setValidityPeriod(validityPeriod);
         tokenRequest.setTokenToRevoke(accessToken);
+        tokenRequest.setEnvironment(environment);
         return tokenRequest;
 
     }
