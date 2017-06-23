@@ -109,6 +109,15 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
             pathTemplate = resourceMethod.getAnnotation(javax.ws.rs.Path.class).value();
         }
         String nameSpace = getNamespaceFromBasePath(basepath);
+        if (basepath.contains(APIMgtConstants.APPType.PUBLISHER)) {
+            nameSpace = APIMgtConstants.NAMESPACE_PUBLISHER_API;
+        } else if (basepath.contains(APIMgtConstants.APPType.STORE)) {
+            nameSpace = APIMgtConstants.NAMESPACE_STORE_API;
+        } else if (basepath.contains(APIMgtConstants.APPType.ADMIN)) {
+            nameSpace = APIMgtConstants.NAMESPACE_ADMIN_API;
+        } else if (basepath.contains(APIMgtConstants.APPType.ANALYTICS)) {
+            nameSpace = APIMgtConstants.NAMESPACE_ANALYTICS_API;
+        }
 
         //if namespace is not available in local cache add it.
         if (nameSpace != null && !localConfigMap.containsKey(nameSpace)) {
