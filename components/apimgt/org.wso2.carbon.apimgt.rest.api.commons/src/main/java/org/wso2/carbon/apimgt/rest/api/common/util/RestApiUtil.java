@@ -195,8 +195,9 @@ public class RestApiUtil {
     /**
      * Returns an Analyzer for a specific user.
      *
-     * @return  {@code APIStore}
-     * @throws APIManagementException if failed to get the Analytics object.
+     * @param username
+     * @return {@code Analyzer}
+     * @throws APIManagementException if failed to get Analyzer
      */
     public static Analyzer getAnalyzer(String username) throws APIManagementException {
         return APIManagerFactory.getInstance().getAnalyzer(username);
@@ -435,10 +436,14 @@ public class RestApiUtil {
         return host;
     }
 
+    /**
+     * This method return API swagger definition of Analytics REST API
+     *
+     * @return swagger definition as a String
+     * @throws APIMgtSecurityException if failed to get analytics api resource
+     */
     public static String getAnalyticsRestAPIResource() throws APIMgtSecurityException {
         if (analyticsRestApiDefinition == null) {
-            //if(basePath.contains("/api/am/analytics/")){
-            //this is Analytics API and pick resources accordingly
             try {
                 analyticsRestApiDefinition = IOUtils
                         .toString(RestApiUtil.class.getResourceAsStream(RestApiConstants.ANALYTICS_API_YAML), "UTF-8");

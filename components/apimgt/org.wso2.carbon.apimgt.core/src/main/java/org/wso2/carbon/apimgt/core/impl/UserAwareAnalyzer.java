@@ -18,7 +18,7 @@ package org.wso2.carbon.apimgt.core.impl;
 import org.wso2.carbon.apimgt.core.dao.AnalyticsDAO;
 
 /**
- *
+ * This class used to check the permissions for users
  */
 public class UserAwareAnalyzer extends AnalyzerImpl {
 
