@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.rest.api.admin.exceptions;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 
 public class UnsupportedThrottleConditionTypeException extends APIManagementException {
 
@@ -28,5 +29,9 @@ public class UnsupportedThrottleConditionTypeException extends APIManagementExce
 
     public UnsupportedThrottleConditionTypeException(String message, Throwable cause) {
         super(message, cause);
+    }
+
+    public UnsupportedThrottleConditionTypeException(String msg, ExceptionCodes code) {
+        super(msg, code);
     }
 }

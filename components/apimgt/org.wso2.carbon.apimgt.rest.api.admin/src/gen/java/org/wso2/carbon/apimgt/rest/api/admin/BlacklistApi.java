@@ -82,6 +82,28 @@ public class BlacklistApi implements Microservice  {
     throws NotFoundException {
         return delegate.blacklistConditionIdGet(conditionId,ifNoneMatch,ifModifiedSince, request);
     }
+    @PUT
+    @Path("/{conditionId}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Update a blacklist condition", notes = "Update a blacklist condition ", response = BlockingConditionDTO.class, tags={ "Blacklist condition", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Blacklist updated. ", response = BlockingConditionDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = BlockingConditionDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = BlockingConditionDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = BlockingConditionDTO.class) })
+    public Response blacklistConditionIdPut(@ApiParam(value = "Blocking condition identifier ",required=true) @PathParam("conditionId") String conditionId
+,@ApiParam(value = "Blacklist condition object that needs to be modified " ,required=true) BlockingConditionDTO body
+,@ApiParam(value = "Media type of the entity in the body. Default is JSON. " ,required=true, defaultValue="JSON")@HeaderParam("Content-Type") String contentType
+,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
+,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
+, @Context Request request)
+    throws NotFoundException {
+        return delegate.blacklistConditionIdPut(conditionId,body,contentType,ifMatch,ifUnmodifiedSince, request);
+    }
     @GET
     
     @Consumes({ "application/json" })

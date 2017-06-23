@@ -7,6 +7,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
+import org.wso2.carbon.apimgt.core.models.policy.CustomPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.admin.NotFoundException;
@@ -14,6 +15,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.PoliciesApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.*;
 import org.wso2.carbon.apimgt.rest.api.admin.mappings.AdvancedThrottlePolicyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.mappings.ApplicationThrottlePolicyMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.admin.mappings.CustomPolicyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.mappings.SubscriptionThrottlePolicyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -285,6 +287,159 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
 
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while updating Application Policy. policy uuid: " + policyId;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+    /**
+     * Retrieves all custom policies.
+     *
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param request         msf4j request object
+     * @return All matched Global Throttle policies to the given request
+     * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
+     */
+    @Override
+    public Response policiesThrottlingCustomGet(String accept, String ifNoneMatch, String ifModifiedSince,
+            Request request) throws NotFoundException {
+        if (log.isDebugEnabled()) {
+            log.debug("Received Custom Policy GET request.");
+        }
+        try {
+            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
+            List<CustomPolicy> policies = apiMgtAdminService.getCustomRules();
+            CustomRuleListDTO customRuleListDTO = CustomPolicyMappingUtil.fromCustomPolicyArrayToListDTO(policies);
+            return Response.ok().entity(customRuleListDTO).build();
+
+        } catch (APIManagementException e) {
+            String errorMessage = "Error occurred while retrieving custom policies";
+            org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+    /**
+     * Add a Custom Policy.
+     *
+     * @param body        DTO of new policy to be created
+     * @param contentType Content-Type header
+     * @param request     msf4j request object
+     * @return Created policy along with the location of it with Location header
+     * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
+     */
+    @Override
+    public Response policiesThrottlingCustomPost(CustomRuleDTO body, String contentType, Request request)
+            throws NotFoundException {
+        if (log.isDebugEnabled()) {
+            log.debug("Received Custom Policy POST request " + body);
+        }
+        try {
+            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
+            CustomPolicy customPolicy = CustomPolicyMappingUtil.fromCustomPolicyDTOToModel(body);
+            String uuid = apiMgtAdminService.addCustomRule(customPolicy);
+            return Response.status(Response.Status.CREATED)
+                    .entity(CustomPolicyMappingUtil.fromCustomPolicyToDTO(apiMgtAdminService.getCustomRuleByUUID(uuid)))
+                    .build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error occurred while adding custom policy, policy name: " + body.getPolicyName();
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+    /**
+     * Delete a custom rule specified by uuid.
+     *
+     * @param ruleId            uuid of the policy
+     * @param ifMatch           If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param request           msf4j request object
+     * @return 200 OK response if successfully deleted the policy
+     * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
+     */
+    @Override
+    public Response policiesThrottlingCustomRuleIdDelete(String ruleId, String ifMatch,
+            String ifUnmodifiedSince, Request request) throws NotFoundException {
+        if (log.isDebugEnabled()) {
+            log.debug("Received Custom Policy DELETE request with rule ID = " + ruleId);
+        }
+        try {
+            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
+            apiMgtAdminService.deleteCustomRule(ruleId);
+            return Response.ok().build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error occurred while deleting a custom policy uuid : " + ruleId;
+            Map<String, String> paramList = new HashMap<>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.TIER, ruleId);
+            org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil
+                    .getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+    /**
+     * Get a specific custom rule by its id.
+     *
+     * @param ruleId          uuid of the policy
+     * @param ifNoneMatch     If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param request         msf4j request object
+     * @return Matched Global Throttle Policy by the given name
+     * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
+     */
+    @Override
+    public Response policiesThrottlingCustomRuleIdGet(String ruleId, String ifNoneMatch,
+            String ifModifiedSince, Request request) throws NotFoundException {
+        if (log.isDebugEnabled()) {
+            log.debug("Received Custom Policy GET request with rule ID = " + ruleId);
+        }
+        try {
+            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
+            CustomPolicy customPolicy = apiMgtAdminService.getCustomRuleByUUID(ruleId);
+            CustomRuleDTO dto = CustomPolicyMappingUtil.fromCustomPolicyToDTO(customPolicy);
+            return Response.status(Response.Status.OK).entity(dto).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error occurred while getting custom policy. policy uuid: " + ruleId;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+    /**
+     * Updates a given Global level policy/custom rule specified by uuid.
+     *
+     * @param ruleId            uuid of the policy
+     * @param body              DTO of policy to be updated
+     * @param contentType       Content-Type header
+     * @param ifMatch           If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param request           msf4j request object
+     * @return Updated policy
+     * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
+     */
+    @Override
+    public Response policiesThrottlingCustomRuleIdPut(String ruleId, CustomRuleDTO body, String contentType,
+            String ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
+        if (log.isDebugEnabled()) {
+            log.debug("Received Custom Policy PUT request " + body + " with rule ID = " + ruleId);
+        }
+        try {
+            APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
+            CustomPolicy customPolicy = CustomPolicyMappingUtil.fromCustomPolicyDTOToModel(body);
+            customPolicy.setUuid(ruleId);
+            apiMgtAdminService.updateCustomRule(customPolicy);
+            return Response.status(Response.Status.OK).entity(CustomPolicyMappingUtil
+                    .fromCustomPolicyToDTO(apiMgtAdminService.getCustomRuleByUUID(ruleId))).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error occurred while updating Custom Policy. policy ID: " + ruleId;
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();

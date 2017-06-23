@@ -17,6 +17,9 @@ import org.wso2.carbon.apimgt.gateway.utils as gatewayUtil;
 @jms:ConnectionProperty {key:"connectionFactoryType", value:"topic"}
 @jms:ConnectionProperty {key:"destination", value:"StoreTopic"}
 @jms:ConnectionProperty {key:"connectionFactoryJNDIName", value:"TopicConnectionFactory"}
+@jms:ConnectionProperty {key:"subscriptionDurable", value:"true"}
+@jms:ConnectionProperty {key:"durableSubscriberClientID", value:"apimStoreEventListner"}
+@jms:ConnectionProperty {key:"durableSubscriberName", value:"apimStoreEventListner"}
 @jms:ConnectionProperty {key:"sessionAcknowledgement", value:"AUTO_ACKNOWLEDGE"}
 service apimStoreEventListner {
 

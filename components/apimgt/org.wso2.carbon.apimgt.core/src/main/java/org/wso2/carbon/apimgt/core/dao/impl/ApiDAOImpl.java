@@ -2129,15 +2129,7 @@ public class ApiDAOImpl implements ApiDAO {
                     statement.executeBatch();
                 }
             }
-        } else {
-            try (PreparedStatement statement = connection.prepareStatement(query)) {
-                statement.setString(1, apiId);
-                statement.setString(2, APIMgtConstants.Permission.EVERYONE_GROUP);
-                statement.setInt(3, 7);
-                statement.execute();
-            }
         }
-
     }
 
     /**
@@ -2720,7 +2712,11 @@ public class ApiDAOImpl implements ApiDAO {
             jsonObject.put(APIMgtConstants.Permission.PERMISSION, array);
             permissionArray.add(jsonObject);
         }
-        return new StringBuilder(permissionArray.toString());
+        if (!permissionArray.isEmpty()) {
+            return new StringBuilder(permissionArray.toString());
+        } else {
+            return new StringBuilder("");
+        }
     }
 
     /**
