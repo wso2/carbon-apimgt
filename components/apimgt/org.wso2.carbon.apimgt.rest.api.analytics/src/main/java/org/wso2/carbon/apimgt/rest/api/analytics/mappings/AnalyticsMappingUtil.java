@@ -24,6 +24,12 @@ import java.util.List;
 
 public class AnalyticsMappingUtil {
 
+    /**
+     * Converts and ApplicationCountList to if failed to get admin api resource
+     *
+     * @param applicationCountList list of ApplicationCount objects
+     * @return corresponding ApplicationCountListDTO object
+     */
     public static ApplicationCountListDTO fromApplicationCountToListDTO(List<ApplicationCount> applicationCountList) {
         ApplicationCountListDTO applicationCountListDTO = new ApplicationCountListDTO();
         List<ApplicationCountDTO> applicationCountDTOList = new ArrayList<>();

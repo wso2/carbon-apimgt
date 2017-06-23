@@ -42,6 +42,7 @@ public class AnalyzerImpl implements Analyzer {
         this.analyticsDAO = analyticsDAO;
     }
 
+    @Override
     public List<ApplicationCount> getApplicationCount(String createdBy, String subscribedTo, String fromTime,
             String toTime) throws APIManagementException {
         List<ApplicationCount> applicationCountList;
