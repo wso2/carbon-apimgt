@@ -162,7 +162,7 @@ public class AuthenticatorAPI implements Microservice {
     }
 
     /**
-     * This method redirects the user to the IS-SSO Login.
+     * This method provides the DCR application information to the SSO-IS login.
      */
     @GET
     @Path("/dcr")
@@ -175,8 +175,9 @@ public class AuthenticatorAPI implements Microservice {
         grantTypes.add("authorization_code");
         grantTypes.add("refresh_token");
         String scopes =
-                "apim:api_view,apim:api_create,apim:api_publish,apim:tier_view,apim:tier_manage," +
-                        "apim:subscription_view,apim:subscription_block,apim:subscribe,openid";
+                "apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage" +
+                        " apim:subscription_view apim:subscription_block apim:subscribe openid";
+        //String scopes = "openid,apim:api_view,apim:api_publish";
         Long validityPeriod = 3600L;
         OAuthApplicationInfo oAuthApplicationInfo;
         try {
@@ -204,7 +205,7 @@ public class AuthenticatorAPI implements Microservice {
     }
 
     /**
-     * This method requests the Access Token and redirects user to the Callback URL.
+     * This method requests the access token and redirects the user to a given URL.
      */
     @GET
     @Path("/callback")
@@ -213,18 +214,17 @@ public class AuthenticatorAPI implements Microservice {
         String appContext = AuthUtil.getAppContext(request);
         String appName = appContext.substring(1);
         String grantType = "authorization_code";
-        String callbackURI = "https://localhost:9292/editor/apis";
+        String callbackURI = "https://localhost:9292/store/auth/apis/login/callback";
         String userName = "admin";
         Long validityPeriod = 3600L;
         String scopes =
-                "apim:api_view,apim:api_create,apim:api_publish,apim:tier_view,apim:tier_manage," +
-                        "apim:subscription_view,apim:subscription_block,apim:subscribe,openid";
+                "apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage" +
+                        " apim:subscription_view apim:subscription_block apim:subscribe openid";
         // Get the Autherization Code
         String requestURL = (String) request.getProperty("REQUEST_URL");
-        String authorizationCode = requestURL.split("=")[1];
+        String authorizationCode = requestURL.split("=")[1].split("&")[0];
         try {
             // Get Access & Refresh Tokens
-            // Redirect to the store/apis page (callback URL)
             LoginTokenService loginTokenService = new LoginTokenService();
             AccessTokenRequest accessTokenRequest = new AccessTokenRequest();
             AuthResponseBean authResponseBean = new AuthResponseBean();
@@ -232,18 +232,19 @@ public class AuthenticatorAPI implements Microservice {
             accessTokenRequest.setClientId(consumerKeySecretMap.get("CONSUMER_KEY"));
             accessTokenRequest.setClientSecret(consumerKeySecretMap.get("CONSUMER_SECRET"));
             accessTokenRequest.setGrantType(grantType);
-            accessTokenRequest.setCallbackURI(callbackURI);
+            accessTokenRequest.setAuthorizationCode(authorizationCode);
             accessTokenRequest.setValidityPeriod(validityPeriod);
             accessTokenRequest.setScopes(scopes);
-            accessTokenRequest.addRequestParam("code" , authorizationCode);
+            accessTokenRequest.setCallbackURI(callbackURI);
             AccessTokenInfo accessTokenInfo = APIManagerFactory.getInstance().getKeyManager()
                     .getNewAccessToken(accessTokenRequest);
             loginTokenService.setAccessTokenData(authResponseBean, accessTokenInfo);
             authResponseBean.setAuthUser(userName);
             String accessToken = accessTokenInfo.getAccessToken();
             String refreshToken = accessTokenInfo.getRefreshToken();
-            System.out.print(accessToken);
-            System.out.print(refreshToken);
+            log.info("Access Token: " + accessToken);
+            log.info("Refresh Token: " + refreshToken);
+            // Redirect to the store/apis page (callback URL)
             return Response.ok().entity(authorizationCode).build();
         } catch (APIManagementException e) {
             ErrorDTO errorDTO = AuthUtil.getErrorDTO(e.getErrorHandler(), null);
