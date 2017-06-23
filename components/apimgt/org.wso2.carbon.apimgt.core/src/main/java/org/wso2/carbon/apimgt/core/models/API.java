@@ -321,7 +321,7 @@ public final class API {
     private String copiedFromApiId;
     private final String apiDefinition;
     private final Map permissionMap;
-    private final String apiPermission;
+    private String apiPermission;
     private final String workflowStatus;
     private final Policy apiPolicy;
     private List<String> userSpecificApiPermissions;
@@ -1086,5 +1086,9 @@ public final class API {
 
     public void setUserSpecificApiPermissions(List<String> userSpecificApiPermissions) {
         this.userSpecificApiPermissions = userSpecificApiPermissions;
+    }
+
+    public void setApiPermission(String apiPermission) {
+        this.apiPermission = apiPermission;
     }
 }

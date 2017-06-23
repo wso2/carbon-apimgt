@@ -1853,17 +1853,14 @@ public class ApiDAOImpl implements ApiDAO {
         List<API> apiList = new ArrayList<>();
         try (ResultSet rs = statement.executeQuery()) {
             while (rs.next()) {
-                String apiPrimaryKey = rs.getString("UUID");
                 API apiSummary = new API.APIBuilder(rs.getString("PROVIDER"), rs.getString("NAME"),
                         rs.getString("VERSION")).
-                        id(apiPrimaryKey).
+                        id(rs.getString("UUID")).
                         context(rs.getString("CONTEXT")).
                         description(rs.getString("DESCRIPTION")).
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
                         lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
-                        workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).
-                        permissionMap(getPermissionMapForApi(connection, apiPrimaryKey)).build();
-
+                        workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).build();
                 apiList.add(apiSummary);
             }
         }
