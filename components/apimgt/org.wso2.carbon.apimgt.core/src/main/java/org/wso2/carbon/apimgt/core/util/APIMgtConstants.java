@@ -111,6 +111,7 @@ public class APIMgtConstants {
     public static final String NAMESPACE_STORE_API = "wso2.carbon.apimgt.store.rest.api";
     public static final String NAMESPACE_PUBLISHER_API = "wso2.carbon.apimgt.publisher.rest.api";
     public static final String NAMESPACE_ADMIN_API = "wso2.carbon.apimgt.admin.rest.api";
+    public static final String NAMESPACE_ANALYTICS_API = "wso2.carbon.apimgt.analytics.rest.api";
 
     /**
      * Application statuses.
@@ -459,5 +460,6 @@ public class APIMgtConstants {
         public static final String PUBLISHER = "publisher";
         public static final String STORE = "store";
         public static final String ADMIN = "admin";
+        public static final String ANALYTICS = "analytics";
     }
 }

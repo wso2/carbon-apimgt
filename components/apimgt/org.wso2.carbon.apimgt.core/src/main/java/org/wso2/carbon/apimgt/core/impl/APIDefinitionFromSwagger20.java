@@ -108,6 +108,8 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
             nameSpace = APIMgtConstants.NAMESPACE_STORE_API;
         } else if (basepath.contains(APIMgtConstants.APPType.ADMIN)) {
             nameSpace = APIMgtConstants.NAMESPACE_ADMIN_API;
+        } else if (basepath.contains(APIMgtConstants.APPType.ANALYTICS)) {
+            nameSpace = APIMgtConstants.NAMESPACE_ANALYTICS_API;
         }
 
         //if namespace is not available in local cache add it.
