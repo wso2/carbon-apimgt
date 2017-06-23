@@ -758,7 +758,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             } catch (IdentityProviderException e) {
                 //lets the execution continue after logging the exception
                 String errorMessage = "Role with ID " + groupId + " no longer exists in the system";
-                log.error(errorMessage, e);
+                log.warn(errorMessage, e);
             }
         }
         return updatedPermissionArray.toJSONString();
