@@ -224,7 +224,7 @@ public class DefaultKeyManagerImpl implements KeyManager {
         }
 
         if (StringUtils.isEmpty(consumerKey)) {
-            throw new KeyManagementException("Consumer Key is null or empty",
+            throw new KeyManagementException("Unable to retrieve OAuth Application. Consumer Key is null or empty",
                     ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
         }
 
@@ -243,16 +243,6 @@ public class DefaultKeyManagerImpl implements KeyManager {
             } catch (IOException e) {
                 throw new KeyManagementException("Error occurred while parsing the DCR application retrieval " +
                         "response message.", e, ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
-            }
-        } else if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_400_BAD_REQUEST) {  //400 - Known Error
-            try {
-                DCRError error = (DCRError) new GsonDecoder().decode(response, DCRError.class);
-                throw new KeyManagementException("Error occurred while retrieving DCR application. Error: " +
-                        error.getError() + ". Error Description: " + error.getErrorDescription() + ". Status Code: " +
-                        response.status(), ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
-            } catch (IOException e) {
-                throw new KeyManagementException("Error occurred while parsing the DCR error message.", e,
-                        ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
             }
         } else {  //Unknown Error
             throw new KeyManagementException("Error occurred while retrieving DCR application. Error: " +
@@ -341,48 +331,48 @@ public class DefaultKeyManagerImpl implements KeyManager {
     @Override
     public AccessTokenInfo getTokenMetaData(String accessToken) throws KeyManagementException {
         log.debug("Token introspection request is being sent.");
+        Response response;
         try {
-            Response response = oAuth2ServiceStubs.getIntrospectionServiceStub().introspectToken(accessToken);
-            if (response == null) {
-                throw new KeyManagementException("Error occurred while introspecting access token. " +
-                        "Response is null", ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
-            }
-            if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
-                log.debug("Token introspection is successful");
-
-                try {
-                    OAuth2IntrospectionResponse introspectResponse = (OAuth2IntrospectionResponse) new GsonDecoder()
-                            .decode(response, OAuth2IntrospectionResponse.class);
-                    AccessTokenInfo tokenInfo = new AccessTokenInfo();
-                    boolean active = introspectResponse.isActive();
-                    if (active) {
-                        tokenInfo.setTokenValid(true);
-                        tokenInfo.setAccessToken(accessToken);
-                        tokenInfo.setScopes(introspectResponse.getScope());
-                        tokenInfo.setConsumerKey(introspectResponse.getClientId());
-                        tokenInfo.setEndUserName(introspectResponse.getUsername());
-                        tokenInfo.setIssuedTime(introspectResponse.getIat());
-                        tokenInfo.setExpiryTime(introspectResponse.getExp());
-
-                        long validityPeriod = introspectResponse.getExp() - introspectResponse.getIat();
-                        tokenInfo.setValidityPeriod(validityPeriod);
-                    } else {
-                        tokenInfo.setTokenValid(false);
-                        log.error("Invalid or expired access token received.");
-                        tokenInfo.setErrorCode(KeyManagerConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
-                    }
-                    return tokenInfo;
-                } catch (IOException e) {
-                    throw new KeyManagementException("Error occurred while parsing token introspection response", e,
-                            ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
-                }
-            } else {
-                throw new KeyManagementException("Token introspection request failed. HTTP error code: "
-                        + response.status() + " Error Response Body: " + response.body().toString(),
-                        ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
-            }
+            response = oAuth2ServiceStubs.getIntrospectionServiceStub().introspectToken(accessToken);
         } catch (APIManagementException e) {
             throw new KeyManagementException("Error occurred while introspecting access token.", e,
+                    ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
+        }
+        if (response == null) {
+            throw new KeyManagementException("Error occurred while introspecting access token. " +
+                    "Response is null", ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
+        }
+        if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
+            log.debug("Token introspection is successful");
+            try {
+                OAuth2IntrospectionResponse introspectResponse = (OAuth2IntrospectionResponse) new GsonDecoder()
+                        .decode(response, OAuth2IntrospectionResponse.class);
+                AccessTokenInfo tokenInfo = new AccessTokenInfo();
+                boolean active = introspectResponse.isActive();
+                if (active) {
+                    tokenInfo.setTokenValid(true);
+                    tokenInfo.setAccessToken(accessToken);
+                    tokenInfo.setScopes(introspectResponse.getScope());
+                    tokenInfo.setConsumerKey(introspectResponse.getClientId());
+                    tokenInfo.setEndUserName(introspectResponse.getUsername());
+                    tokenInfo.setIssuedTime(introspectResponse.getIat());
+                    tokenInfo.setExpiryTime(introspectResponse.getExp());
+
+                    long validityPeriod = introspectResponse.getExp() - introspectResponse.getIat();
+                    tokenInfo.setValidityPeriod(validityPeriod);
+                } else {
+                    tokenInfo.setTokenValid(false);
+                    log.error("Invalid or expired access token received.");
+                    tokenInfo.setErrorCode(KeyManagerConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
+                }
+                return tokenInfo;
+            } catch (IOException e) {
+                throw new KeyManagementException("Error occurred while parsing token introspection response", e,
+                        ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
+            }
+        } else {
+            throw new KeyManagementException("Token introspection request failed. HTTP error code: "
+                    + response.status() + " Error Response Body: " + response.body().toString(),
                     ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
         }
     }
@@ -391,24 +381,25 @@ public class DefaultKeyManagerImpl implements KeyManager {
     public void revokeAccessToken(String accessToken, String clientId, String clientSecret)
             throws KeyManagementException {
         log.debug("Revoking access token");
+        Response response;
         try {
-            Response response = oAuth2ServiceStubs.getRevokeServiceStub().revokeAccessToken(accessToken, clientId,
+            response = oAuth2ServiceStubs.getRevokeServiceStub().revokeAccessToken(accessToken, clientId,
                     clientSecret);
-            if (response == null) {
-                throw new KeyManagementException("Error occurred while revoking current access token. " +
-                        "Response is null", ExceptionCodes.ACCESS_TOKEN_REVOKE_FAILED);
-            }
-            if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Successfully revoked access token: " + accessToken);
-                }
-            } else {
-                throw new KeyManagementException("Token revocation failed. HTTP error code: " + response.status()
-                        + " Error Response Body: " + response.body().toString(),
-                        ExceptionCodes.ACCESS_TOKEN_REVOKE_FAILED);
-            }
         } catch (APIManagementException e) {
             throw new KeyManagementException("Error occurred while revoking current access token", e,
+                    ExceptionCodes.ACCESS_TOKEN_REVOKE_FAILED);
+        }
+        if (response == null) {
+            throw new KeyManagementException("Error occurred while revoking current access token. " +
+                    "Response is null", ExceptionCodes.ACCESS_TOKEN_REVOKE_FAILED);
+        }
+        if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully revoked access token: " + accessToken);
+            }
+        } else {
+            throw new KeyManagementException("Token revocation failed. HTTP error code: " + response.status()
+                    + " Error Response Body: " + response.body().toString(),
                     ExceptionCodes.ACCESS_TOKEN_REVOKE_FAILED);
         }
     }

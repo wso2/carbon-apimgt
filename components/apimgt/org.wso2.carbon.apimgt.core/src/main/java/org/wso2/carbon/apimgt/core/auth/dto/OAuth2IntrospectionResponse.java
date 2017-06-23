@@ -49,35 +49,71 @@ public class OAuth2IntrospectionResponse {
         return active;
     }
 
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
     public String getClientId() {
         return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
     }
 
     public String getUsername() {
         return username;
     }
 
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     public String getScope() {
         return scope;
+    }
+
+    public void setScope(String scope) {
+        this.scope = scope;
     }
 
     public String getSub() {
         return sub;
     }
 
+    public void setSub(String sub) {
+        this.sub = sub;
+    }
+
     public String getAud() {
         return aud;
+    }
+
+    public void setAud(String aud) {
+        this.aud = aud;
     }
 
     public String getIss() {
         return iss;
     }
 
+    public void setIss(String iss) {
+        this.iss = iss;
+    }
+
     public long getExp() {
         return exp;
     }
 
+    public void setExp(long exp) {
+        this.exp = exp;
+    }
+
     public long getIat() {
         return iat;
+    }
+
+    public void setIat(long iat) {
+        this.iat = iat;
     }
 }

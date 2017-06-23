@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.BlockConditions;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
@@ -43,6 +44,7 @@ import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.core.models.policy.Condition;
+import org.wso2.carbon.apimgt.core.models.policy.CustomPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.HeaderCondition;
 import org.wso2.carbon.apimgt.core.models.policy.IPCondition;
 import org.wso2.carbon.apimgt.core.models.policy.JWTClaimsCondition;
@@ -94,6 +96,13 @@ public class SampleTestObjectCreator {
     private static final String SAMPLE_APP_POLICY_DESCRIPTION = "SampleAppPolicy Description";
     private static final String SAMPLE_SUBSCRIPTION_POLICY = "SampleSubscriptionPolicy";
     private static final String SAMPLE_SUBSCRIPTION_POLICY_DESCRIPTION = "SampleSubscriptionPolicy Description";
+    private static final String UPDATED_SAMPLE_API_POLICY = "UpdatedSampleAPIPolicy";
+    private static final String UPDATED_SAMPLE_API_POLICY_DESCRIPTION = "Updated NewSampleAPIPolicy Description";
+    private static final String UPDATED_SAMPLE_APP_POLICY = "UpdatedSampleAppPolicy";
+    private static final String UPDATED_SAMPLE_APP_POLICY_DESCRIPTION = "Updated SampleAppPolicy Description";
+    private static final String UPDATED_SAMPLE_SUBSCRIPTION_POLICY = "Updated SampleSubscriptionPolicy";
+    private static final String UPDATED_SAMPLE_SUBSCRIPTION_POLICY_DESCRIPTION = "Updated SampleSubscriptionPolicy "
+            + "Description";
     private static final String PRODUCTION_ENDPOINT = "production";
     private static final String SAMPLE_API_WSDL = "http://www.webservicex.net/globalweather.asmx?op=GetWeather?wsdl";
     private static final String FIFTY_PER_MIN_TIER = "50PerMin";
@@ -120,6 +129,11 @@ public class SampleTestObjectCreator {
     private static final String PATH_THUMBNAIL_IMG_2 = "api/thumbnail2.jpg";
     private static final String PATH_INLINE_DOC_1 = "document/inline1.txt";
     private static final String PATH_INLINE_DOC_2 = "document/inline2.txt";
+    private static final String SAMPLE_IP_1 = "12.32.45.3";
+    private static final String SAMPLE_IP_2 = "24.34.1.45";
+    private static final String SAMPLE_CUSTOM_RULE = "Sample Custom Rule";
+    private static final String ADMIN_ROLE_ID = "cfbde56e-4352-498e-b6dc-85a6f1f8b058";
+    private static final String DEVELOPER_ROLE_ID = "cfdce56e-8434-498e-b6dc-85a6f2d8f035";
 
     public static String apiDefinition;
     public static InputStream inputStream;
@@ -152,7 +166,7 @@ public class SampleTestObjectCreator {
         BusinessInformation businessInformation = new BusinessInformation();
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         String permissionJson = "[{\"groupId\" : \"developer\", \"permission\" : "
-              + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\",\"DELETE\"]}]";
+        + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\",\"DELETE\"]}]";
 
         API.APIBuilder apiBuilder = new API.APIBuilder(ADMIN, "WeatherAPI", API_VERSION).
                 id(UUID.randomUUID().toString()).
@@ -181,8 +195,8 @@ public class SampleTestObjectCreator {
                 uriTemplates(getMockUriTemplates()).
                 apiDefinition(apiDefinition);
         HashMap map = new HashMap();
-        map.put("developer", 6);
-        map.put("admin", 7);
+        map.put(DEVELOPER_ROLE_ID, 6);
+        map.put(ADMIN_ROLE_ID, 7);
         apiBuilder.permissionMap(map);
         return apiBuilder;
     }
@@ -252,8 +266,8 @@ public class SampleTestObjectCreator {
         corsConfiguration.setAllowOrigins(Arrays.asList("*"));
 
         HashMap permissionMap = new HashMap();
-        permissionMap.put("developer", 6);
-        permissionMap.put("admin", 7);
+        permissionMap.put(DEVELOPER_ROLE_ID, 6);
+        permissionMap.put(ADMIN_ROLE_ID, 7);
 
         API.APIBuilder apiBuilder = new API.APIBuilder("Adam", "restaurantAPI", "0.9").
                 id(UUID.randomUUID().toString()).
@@ -310,8 +324,8 @@ public class SampleTestObjectCreator {
         corsConfiguration.setAllowOrigins(Arrays.asList("*"));
 
         HashMap permissionMap = new HashMap();
-        permissionMap.put("developer", 6);
-        permissionMap.put("admin", 7);
+        permissionMap.put(DEVELOPER_ROLE_ID, 6);
+        permissionMap.put(ADMIN_ROLE_ID, 7);
 
         API.APIBuilder apiBuilder = new API.APIBuilder(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
                 API_VERSION).
@@ -347,8 +361,8 @@ public class SampleTestObjectCreator {
         transport.add(HTTP);
 
         HashMap permissionMap = new HashMap();
-        permissionMap.put("1000", 6);
-        permissionMap.put("1001", 4);
+        permissionMap.put(DEVELOPER_ROLE_ID, 6);
+        permissionMap.put(ADMIN_ROLE_ID, 7);
 
         CompositeAPI.Builder apiBuilder = new CompositeAPI.Builder().
                 id(UUID.randomUUID().toString()).
@@ -535,6 +549,25 @@ public class SampleTestObjectCreator {
     }
 
     /**
+     * Updated the given API policy
+     *
+     * @param apiPolicy {@link APIPolicy} instance to be updated
+     * @return updated {@link APIPolicy} instance
+     */
+    public static APIPolicy updateAPIPolicy (APIPolicy apiPolicy) {
+        apiPolicy.setDisplayName(UPDATED_SAMPLE_API_POLICY);
+        apiPolicy.setDescription(UPDATED_SAMPLE_API_POLICY_DESCRIPTION);
+        QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+        defaultQuotaPolicy.setType(PolicyConstants.BANDWIDTH_LIMIT_TYPE);
+        BandwidthLimit bandwidthLimit = new BandwidthLimit(TIME_UNIT_SECONDS, 1, 1000, "KB");
+        defaultQuotaPolicy.setLimit(bandwidthLimit);
+        apiPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+        apiPolicy.setPipelines(createDefaultPipelines());
+        apiPolicy.getPipelines().add(createNewIPRangePipeline());
+        return apiPolicy;
+    }
+
+    /**
      * create default pipeline for api policy
      *
      * @return list of Pipeline objects is returned
@@ -595,6 +628,27 @@ public class SampleTestObjectCreator {
     }
 
     /**
+     * Creates a new {@link Pipeline} instance
+     *
+     * @return created Pipeline instance
+     */
+    public static Pipeline createNewIPRangePipeline () {
+        IPCondition ipCondition = new IPCondition(PolicyConstants.IP_RANGE_TYPE);
+        ipCondition.setStartingIP("10.100.0.105");
+        ipCondition.setEndingIP("10.100.0.115");
+        Pipeline pipeline = new Pipeline();
+
+        RequestCountLimit requestCountLimit = new RequestCountLimit(TIME_UNIT_SECONDS, 1, 1000);
+        QuotaPolicy quotaPolicy = new QuotaPolicy();
+        quotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
+        quotaPolicy.setLimit(requestCountLimit);
+
+        pipeline.setQuotaPolicy(quotaPolicy);
+        pipeline.setConditions(Arrays.asList(ipCondition));
+        return pipeline;
+    }
+
+    /**
      * Create default api policy with bandwidth limit as quota policy
      *
      * @return APIPolicy object with bandwidth limit as quota policy is returned
@@ -627,6 +681,18 @@ public class SampleTestObjectCreator {
         return applicationPolicy;
     }
 
+
+    public static ApplicationPolicy updateApplicationPolicy(ApplicationPolicy applicationPolicy) {
+        applicationPolicy.setDisplayName(UPDATED_SAMPLE_APP_POLICY);
+        applicationPolicy.setDescription(UPDATED_SAMPLE_APP_POLICY_DESCRIPTION);
+        QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+        defaultQuotaPolicy.setType(PolicyConstants.BANDWIDTH_LIMIT_TYPE);
+        BandwidthLimit bandwidthLimit = new BandwidthLimit(TIME_UNIT_SECONDS, 10, 1000, "KB");
+        defaultQuotaPolicy.setLimit(bandwidthLimit);
+        applicationPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+        return applicationPolicy;
+    }
+
     public static SubscriptionPolicy createDefaultSubscriptionPolicy() {
         SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(SAMPLE_SUBSCRIPTION_POLICY);
         subscriptionPolicy.setUuid(UUID.randomUUID().toString());
@@ -636,6 +702,17 @@ public class SampleTestObjectCreator {
         defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
         RequestCountLimit requestCountLimit = new RequestCountLimit(TIME_UNIT_SECONDS, 10000, 1000);
         defaultQuotaPolicy.setLimit(requestCountLimit);
+        subscriptionPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+        return subscriptionPolicy;
+    }
+
+    public static SubscriptionPolicy updateSubscriptionPolicy(SubscriptionPolicy subscriptionPolicy) {
+        subscriptionPolicy.setDisplayName(UPDATED_SAMPLE_SUBSCRIPTION_POLICY);
+        subscriptionPolicy.setDescription(UPDATED_SAMPLE_SUBSCRIPTION_POLICY_DESCRIPTION);
+        QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+        defaultQuotaPolicy.setType(PolicyConstants.BANDWIDTH_LIMIT_TYPE);
+        BandwidthLimit bandwidthLimit = new BandwidthLimit(TIME_UNIT_SECONDS, 1, 1000, "KB");
+        defaultQuotaPolicy.setLimit(bandwidthLimit);
         subscriptionPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
         return subscriptionPolicy;
     }
@@ -792,7 +869,7 @@ public class SampleTestObjectCreator {
         BusinessInformation businessInformation = new BusinessInformation();
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         String permissionJson = "[{\"groupId\" : \"developer\", \"permission\" : "
-              + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\",\"DELETE\"]}]";
+            + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\",\"DELETE\"]}]";
         Map<String, Endpoint> endpointMap = new HashMap<>();
         endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT,
                 new Endpoint.Builder().id(endpointId).name("api1-production--endpint")
@@ -824,9 +901,56 @@ public class SampleTestObjectCreator {
                 uriTemplates(getMockUriTemplates()).
                 apiDefinition(apiDefinition);
         HashMap map = new HashMap();
-        map.put("developer", 6);
-        map.put("admin", 7);
+        map.put(DEVELOPER_ROLE_ID, 6);
+        map.put(ADMIN_ROLE_ID, 7);
         apiBuilder.permissionMap(map);
         return apiBuilder;
     }
+
+    public static BlockConditions createDefaultBlockCondition(String conditionType) {
+        BlockConditions blockConditions = new BlockConditions();
+        blockConditions.setConditionType(conditionType);
+        blockConditions.setEnabled(true);
+        if (conditionType.equals(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_IP)) {
+            blockConditions.setConditionValue(SAMPLE_IP_1);
+        } else if (conditionType.equals(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITION_IP_RANGE)) {
+            blockConditions.setStartingIP(SAMPLE_IP_1);
+            blockConditions.setEndingIP(SAMPLE_IP_2);
+        } else if (conditionType.equals(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_API)) {
+            try {
+                API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI();
+                API api = apiBuilder.build();
+                DAOFactory.getApiDAO().addAPI(api);
+                blockConditions.setConditionValue(api.getContext());
+            } catch (APIMgtDAOException e) {
+                log.error("Error while adding default api in default block condition", e);
+            }
+        } else if (conditionType.equals(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_APPLICATION)) {
+            try {
+                Application app = createDefaultApplication();
+                DAOFactory.getApplicationDAO().addApplication(app);
+                blockConditions.setConditionValue(app.getId() + ":" + app.getName());
+            } catch (APIMgtDAOException e) {
+                log.error("Error while adding default app in default block condition", e);
+            }
+        } else if (conditionType.equals(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_USER)) {
+            blockConditions.setConditionValue(ADMIN);
+        }
+        return blockConditions;
+    }
+
+    public static CustomPolicy createDefaultCustomPolicy() {
+        CustomPolicy customPolicy = new CustomPolicy(SAMPLE_CUSTOM_RULE);
+        customPolicy.setKeyTemplate("$userId");
+        String siddhiQuery = "FROM RequestStream SELECT userId, ( userId == 'admin@carbon.super' ) AS isEligible , "
+                + "str:concat('admin@carbon.super','') as throttleKey INSERT INTO EligibilityStream;"
+                + "FROM EligibilityStream[isEligible==true]#throttler:timeBatch(1 min) SELECT throttleKey, "
+                + "(count(userId) >= 5 as isThrottled, expiryTimeStamp group by throttleKey INSERT ALL EVENTS into "
+                + "ResultStream;";
+
+        customPolicy.setSiddhiQuery(siddhiQuery);
+        customPolicy.setDescription("Sample custom policy");
+        return customPolicy;
+    }
+
 }

@@ -116,6 +116,10 @@ public enum ExceptionCodes implements ErrorHandler {
     KEY_MANAGER_INITIALIZATION_FAILED(900606, "Key Manager initialization failed", 500,
             "Key Manager initialization failed"),
     ROLE_DOES_NOT_EXIST(900607, "Role does not exist in the system", 404, "Role does not exist in the system"),
+    MULTIPLE_ROLES_EXIST(900608, "Multiple roles with the same display name exist in the system", 500, "Multiple " +
+            "roles with the same display name exist in the system"),
+    MULTIPLE_USERS_EXIST(900609, "Multiple users with the same username exist in the system", 500, "Multiple " +
+            "users with the same username exist in the system"),
 
 
     // Labels related codes
@@ -164,7 +168,9 @@ public enum ExceptionCodes implements ErrorHandler {
     //Throttle related codes
     THROTTLE_TEMPLATE_EXCEPTION(900969, "Policy Generating Error", 500, " Error while generate policy configuration"),
     ENDPOINT_CONFIG_NOT_FOUND(90070, "Endpoint Config Not found", 404, "Error while retrieving Endpoint " +
-            "Configuration");
+            "Configuration"),
+    UNSUPPORTED_THROTTLE_CONDITION_TYPE(900975, "Throttle Condition Error", 400, "Throttle Condition type is not "
+            + "supported");
 
     private final long errorCode;
     private final String errorMessage;

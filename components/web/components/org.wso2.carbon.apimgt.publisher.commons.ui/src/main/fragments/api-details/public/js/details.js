@@ -34,7 +34,6 @@ function overviewTabHandler(event) {
     api_client.get(api_id).then(
         function (response) {
             var context = response.obj;
-            var api_data = JSON.parse(response.data);
             if (context.endpointConfig) {
                 var endpointConfig = $.parseJSON(context.endpointConfig);
                 context.productionEndpoint = endpointConfig.production_endpoints.url;
@@ -308,7 +307,7 @@ function accessControlTabHandler(event) {
             var mode = "OVERWRITE"; // Available modes [OVERWRITE,APPEND, PREPEND]
             var callbacks = {
                 onSuccess: function (data) {
-                    if (!permission_data || permission_data === "[]"){
+                    if (!permission_data){
                         $('#no-roles-msg').removeClass('hide');
                         $('#permissionTable').hide();
                     }
@@ -317,33 +316,33 @@ function accessControlTabHandler(event) {
                     console.debug("Failed");
                 }
             };
-            var permissions = JSON.parse(permission_data);
-            //Processing the permission data to be sent to frontend
             var permissionArray = [];
-            for(var role in permissions) {
-                var groupPermission = {};
-                var groupId = permissions[role].groupId;
-                groupPermission["groupId"] = groupId;
-                groupPermission["isRead"] = false;
-                groupPermission["isUpdate"] = false;
-                groupPermission["isDelete"] = false;
-                var permissionList = permissions[role].permission;
-                if(permissionList.includes("READ")) {
-                    groupPermission["isRead"] = true;
+            if (permission_data) {
+                var permissions = JSON.parse(permission_data);
+                //Processing the permission data to be sent to frontend
+                for(var role in permissions) {
+                    var groupPermission = {};
+                    var groupId = permissions[role].groupId;
+                    groupPermission["groupId"] = groupId;
+                    groupPermission["isRead"] = false;
+                    groupPermission["isUpdate"] = false;
+                    groupPermission["isDelete"] = false;
+                    var permissionList = permissions[role].permission;
+                    if(permissionList.includes("READ")) {
+                        groupPermission["isRead"] = true;
+                    }
+                    if (permissionList.includes("UPDATE")){
+                        groupPermission["isUpdate"] = true;
+                    }
+                    if (permissionList.includes("DELETE")) {
+                        groupPermission["isDelete"] = true;
+                    }
+                    permissionArray.push(groupPermission);
                 }
-                if (permissionList.includes("UPDATE")){
-                    groupPermission["isUpdate"] = true;
-                }
-                if (permissionList.includes("DELETE")) {
-                    groupPermission["isDelete"] = true;
-                }
-                permissionArray.push(groupPermission);
             }
-
             var data = {
                 permission: permissionArray
             };
-
             UUFClient.renderFragment("org.wso2.carbon.apimgt.publisher.commons.ui.api-access-control", data, "api-access-control-tab-content", mode, callbacks);
             $(document).on('click', "#update-api-permissions", {api_client: api_client, api_id: api_id}, updatePermissionsHandler);
         }
@@ -963,6 +962,9 @@ function documentTabHandler(event) {
     	return null;
     }
 
+/**
+ * Disables specific tabs if user doesn't have UPDATE permission for the API
+ */
 function disableTabsOnPermissions(client, apiId) {
     var api_client = client;
     var api_id = apiId;
