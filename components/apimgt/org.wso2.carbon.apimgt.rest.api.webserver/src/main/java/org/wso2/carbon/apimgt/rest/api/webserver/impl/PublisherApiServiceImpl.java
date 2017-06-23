@@ -39,7 +39,7 @@ public class PublisherApiServiceImpl extends PublisherApiService {
         // folder name ex: publisher or store or admin
         String context = parts[1];
         String filePath = "./deployment/webapps/" + context + "public/index.html";
-        if (context.toLowerCase(Locale.ENGLISH).equals("publisher_new")) {
+        if (context.toLowerCase(Locale.ENGLISH).equals("publisher")) {
             context = "publisher";
             path = "/" + context + "/" + String.join("/", Arrays.copyOfRange(parts, 2, parts.length));
         }
