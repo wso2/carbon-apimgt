@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
+import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
 
@@ -94,9 +95,8 @@ public class APIUtils {
         return null;
     }
 
-    public static String getDefaultAPIPolicy() {
-        // TODO: 11/25/16 need to implement logic
-        return "Unlimited";
+    public static Policy getDefaultAPIPolicy() {
+        return new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY);
     }
 
     /**

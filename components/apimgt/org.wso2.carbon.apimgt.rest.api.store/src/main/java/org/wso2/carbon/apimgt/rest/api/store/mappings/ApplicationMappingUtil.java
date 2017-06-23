@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
 import org.wso2.carbon.apimgt.core.models.APIKey;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
@@ -60,7 +61,7 @@ public class ApplicationMappingUtil {
     public static ApplicationDTO fromApplicationtoDTO (Application application) {
         ApplicationDTO applicationDTO = new ApplicationDTO();
         applicationDTO.setApplicationId(application.getId());
-        applicationDTO.setThrottlingTier(application.getTier());
+        applicationDTO.setThrottlingTier(application.getPolicy().getPolicyName());
         applicationDTO.setDescription(application.getDescription());
         applicationDTO.setName(application.getName());
         applicationDTO.setLifeCycleStatus(application.getStatus());
@@ -68,7 +69,7 @@ public class ApplicationMappingUtil {
         applicationDTO.setGroupId(application.getGroupId());
         applicationDTO.setSubscriber(application.getCreatedUser());
         List<ApplicationKeyDTO> applicationKeyDTOs = new ArrayList<>();
-        for(APIKey apiKey : application.getKeys()) {
+        for (APIKey apiKey : application.getKeys()) {
             ApplicationKeyDTO applicationKeyDTO = ApplicationKeyMappingUtil.fromApplicationKeyToDTO(apiKey);
             applicationKeyDTOs.add(applicationKeyDTO);
         }
@@ -110,7 +111,7 @@ public class ApplicationMappingUtil {
     public static ApplicationInfoDTO fromApplicationToInfoDTO (Application application) {
         ApplicationInfoDTO applicationInfoDTO = new ApplicationInfoDTO();
         applicationInfoDTO.setApplicationId(application.getId());
-        applicationInfoDTO.setThrottlingTier(application.getTier());
+        applicationInfoDTO.setThrottlingTier(application.getPolicy().getPolicyName());
         applicationInfoDTO.setDescription(application.getDescription());
         applicationInfoDTO.setLifeCycleStatus(application.getStatus());
         applicationInfoDTO.setName(application.getName());
@@ -122,7 +123,7 @@ public class ApplicationMappingUtil {
     public static Application fromDTOtoApplication (ApplicationDTO applicationDTO, String createdUser) {
         //subscriber field of the body is not honored
         Application application = new Application(applicationDTO.getName(), createdUser);
-        application.setTier(applicationDTO.getThrottlingTier());
+        application.setPolicy(new ApplicationPolicy(applicationDTO.getThrottlingTier()));
         application.setDescription(applicationDTO.getDescription());
         application.setId(applicationDTO.getApplicationId());
         application.setPermissionString(applicationDTO.getPermission());

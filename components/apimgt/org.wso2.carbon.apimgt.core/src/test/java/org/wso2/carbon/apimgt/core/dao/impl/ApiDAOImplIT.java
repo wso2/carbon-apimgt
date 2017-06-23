@@ -310,7 +310,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
             String randomIdString = UUID.randomUUID().toString();
             uriTemplateBuilder.endpoint(Collections.emptyMap()).
                     templateId(randomIdString).uriTemplate(resource).
-                    authType(APIMgtConstants.AUTH_APPLICATION_LEVEL_TOKEN).policy("Unlimited").
+                    authType(APIMgtConstants.AUTH_APPLICATION_LEVEL_TOKEN).policy(APIUtils.getDefaultAPIPolicy()).
                     httpVerb(APIMgtConstants.FunctionsConstants.GET);
             uriTemplateMap.put(randomIdString, uriTemplateBuilder.build());
         }
@@ -1533,10 +1533,9 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
                             .getHttpVerb(), v.getHttpVerb()));
                     Assert.assertEquals(uriTemplate.getUriTemplate(), v.getUriTemplate(), TestUtil.printDiff
                             (uriTemplate.getUriTemplate(), v.getUriTemplate()));
-                    Assert.assertEquals(uriTemplate.getPolicy(), policyDAO.getApiPolicyByUuid(v.getPolicy())
-                            .getDisplayName(), TestUtil.printDiff(uriTemplate.getPolicy(), policyDAO
-                            .getApiPolicyByUuid(v.getPolicy())
-                            .getDisplayName()));
+                    Assert.assertEquals(uriTemplate.getPolicy().getPolicyName(), policyDAO.getApiPolicyByUuid(v
+                            .getPolicy().getUuid()).getPolicyName(), TestUtil.printDiff(uriTemplate.getPolicy()
+                            .getPolicyName(), policyDAO.getApiPolicyByUuid(v.getPolicy().getUuid()).getPolicyName()));
                 }
             }
         }

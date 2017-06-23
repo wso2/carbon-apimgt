@@ -90,6 +90,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -305,13 +306,32 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 List<UriTemplate> list = new ArrayList<>(apiBuilder.getUriTemplates().values());
                 List<TemplateBuilderDTO> resourceList = new ArrayList<>();
 
+                if (apiBuilder.getApiPolicy() != null) {
+                    Policy apiPolicy = getPolicyByName(APIMgtAdminService.PolicyLevel.api, apiBuilder.getApiPolicy()
+                            .getPolicyName());
+                    if (apiPolicy == null) {
+                        throw new APIManagementException("Api Policy " + apiBuilder.getApiPolicy() + "Couldn't find",
+                                ExceptionCodes.POLICY_NOT_FOUND);
+                    }
+                    apiBuilder.apiPolicy(apiPolicy);
+                }
+                Set<Policy> subPolicies = new HashSet();
+                for (Policy subscriptionPolicy : apiBuilder.getPolicies()) {
+                    Policy policy = getPolicyByName(APIMgtAdminService.PolicyLevel.subscription,
+                            subscriptionPolicy.getPolicyName());
+                    if (policy == null) {
+                        throw new APIManagementException("Api Policy " + subscriptionPolicy.getPolicyName() +
+                                "Couldn't find",
+                                ExceptionCodes.POLICY_NOT_FOUND);
+                    }
+                    subPolicies.add(policy);
+                }
+                apiBuilder.policies(subPolicies);
                 for (UriTemplate uriTemplate : list) {
                     TemplateBuilderDTO dto = new TemplateBuilderDTO();
                     dto.setTemplateId(uriTemplate.getTemplateId());
                     dto.setUriTemplate(uriTemplate.getUriTemplate());
                     dto.setHttpVerb(uriTemplate.getHttpVerb());
-                    dto.setAuthType(uriTemplate.getAuthType());
-                    dto.setPolicy(uriTemplate.getPolicy());
                     Map<String, Endpoint> map = uriTemplate.getEndpoint();
                     if (map.containsKey(APIMgtConstants.PRODUCTION_ENDPOINT)) {
                         Endpoint endpoint = map.get(APIMgtConstants.PRODUCTION_ENDPOINT);
@@ -449,7 +469,28 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         roleNamePermissionList = getAPIPermissionArray(apiBuilder.getPermission());
                         apiBuilder.permissionMap(roleNamePermissionList);
                     }
-
+                    if (apiBuilder.getApiPolicy() != null) {
+                        Policy apiPolicy = getPolicyByName(APIMgtAdminService.PolicyLevel.api, apiBuilder
+                                .getApiPolicy().getPolicyName());
+                        if (apiPolicy == null) {
+                            throw new APIManagementException("Api Policy " + apiBuilder.getApiPolicy() + "Couldn't " +
+                                    "find",
+                                    ExceptionCodes.POLICY_NOT_FOUND);
+                        }
+                        apiBuilder.apiPolicy(apiPolicy);
+                    }
+                    Set<Policy> subPolicies = new HashSet();
+                    for (Policy subscriptionPolicy : apiBuilder.getPolicies()) {
+                        Policy policy = getPolicyByName(APIMgtAdminService.PolicyLevel.subscription,
+                                subscriptionPolicy.getPolicyName());
+                        if (policy == null) {
+                            throw new APIManagementException("Api Policy " + apiBuilder.getApiPolicy() + "Couldn't " +
+                                    "find",
+                                    ExceptionCodes.POLICY_NOT_FOUND);
+                        }
+                        subPolicies.add(policy);
+                    }
+                    apiBuilder.policies(subPolicies);
                     String updatedSwagger = apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder);
                     String gatewayConfig = getApiGatewayConfig(apiBuilder.getId());
                     GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
@@ -1469,7 +1510,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public Policy getPolicyByName(APIMgtAdminService.PolicyLevel tierLevel, String tierName)
             throws APIManagementException {
         try {
-            return getPolicyDAO().getPolicyByLevelAndName(tierLevel, tierName);
+            return getPolicyDAO().getSimplifiedPolicyByLevelAndName(tierLevel, tierName);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error while retrieving Policy for level: " + tierLevel + ", name: " + tierName;
             log.error(errorMsg);

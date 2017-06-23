@@ -329,4 +329,15 @@ public interface PolicyDAO {
      */
     void deleteCustomPolicy(String uuid) throws APIMgtDAOException;
 
+    /**
+     * Gets Policy by level and name
+     *
+     * @param policyLevel policy level
+     * @param policyName  Policy Name
+     * @return {@link Policy} instance
+     * @throws APIMgtDAOException If failed to get the Policies
+     */
+    Policy getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel policyLevel, String policyName)
+            throws APIMgtDAOException;
+
 }

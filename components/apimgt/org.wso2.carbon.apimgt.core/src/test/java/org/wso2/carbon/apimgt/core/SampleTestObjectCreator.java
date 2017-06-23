@@ -24,6 +24,7 @@ import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -49,6 +50,7 @@ import org.wso2.carbon.apimgt.core.models.policy.HeaderCondition;
 import org.wso2.carbon.apimgt.core.models.policy.IPCondition;
 import org.wso2.carbon.apimgt.core.models.policy.JWTClaimsCondition;
 import org.wso2.carbon.apimgt.core.models.policy.Pipeline;
+import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.core.models.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.core.models.policy.QuotaPolicy;
@@ -56,6 +58,7 @@ import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationWorkflow;
 import org.wso2.carbon.apimgt.core.workflow.Workflow;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
@@ -72,6 +75,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
+import static org.wso2.carbon.apimgt.core.dao.impl.PolicyDAOImpl.SECONDS_TIMUNIT;
+import static org.wso2.carbon.apimgt.core.dao.impl.PolicyDAOImpl.UNLIMITED_TIER;
+import static org.wso2.carbon.apimgt.core.models.policy.PolicyConstants.REQUEST_COUNT_TYPE;
 
 public class SampleTestObjectCreator {
 
@@ -134,7 +141,22 @@ public class SampleTestObjectCreator {
     private static final String SAMPLE_CUSTOM_RULE = "Sample Custom Rule";
     private static final String ADMIN_ROLE_ID = "cfbde56e-4352-498e-b6dc-85a6f1f8b058";
     private static final String DEVELOPER_ROLE_ID = "cfdce56e-8434-498e-b6dc-85a6f2d8f035";
-
+    public static  APIPolicy unlimitedApiPolicy = new APIPolicy(UUID.randomUUID().toString(), UNLIMITED_TIER);
+    public static  APIPolicy goldApiPolicy = new APIPolicy(UUID.randomUUID().toString(), GOLD_TIER);
+    public static  APIPolicy silverApiPolicy = new APIPolicy(UUID.randomUUID().toString(), SILVER_TIER);
+    public static  APIPolicy bronzeApiPolicy = new APIPolicy(UUID.randomUUID().toString(), BRONZE_TIER);
+    public static  SubscriptionPolicy unlimitedSubscriptionPolicy =
+            new SubscriptionPolicy(UUID.randomUUID().toString(), UNLIMITED_TIER);
+    public static  SubscriptionPolicy goldSubscriptionPolicy =
+            new SubscriptionPolicy(UUID.randomUUID().toString(), GOLD_TIER);
+    public static  SubscriptionPolicy silverSubscriptionPolicy =
+            new SubscriptionPolicy(UUID.randomUUID().toString(), SILVER_TIER);
+    public static  SubscriptionPolicy bronzeSubscriptionPolicy =
+            new SubscriptionPolicy(UUID.randomUUID().toString(), BRONZE_TIER);
+    public static  ApplicationPolicy fiftyPerMinApplicationPolicy =
+            new ApplicationPolicy(UUID.randomUUID().toString(), FIFTY_PER_MIN_TIER);
+    public static  ApplicationPolicy twentyPerMinApplicationPolicy =
+            new ApplicationPolicy(UUID.randomUUID().toString(), TWENTY_PER_MIN_TIER);
     public static String apiDefinition;
     public static InputStream inputStream;
     private static final Logger log = LoggerFactory.getLogger(SampleTestObjectCreator.class);
@@ -158,15 +180,16 @@ public class SampleTestObjectCreator {
         Set<String> tags = new HashSet<>();
         tags.add(TAG_CLIMATE);
 
-        Set<String> policies = new HashSet<>();
-        policies.add(GOLD_TIER);
-        policies.add(SILVER_TIER);
-        policies.add(BRONZE_TIER);
+        Set<Policy> policies = new HashSet<>();
+        policies.add(goldSubscriptionPolicy);
+        policies.add(silverSubscriptionPolicy);
+        policies.add(bronzeSubscriptionPolicy);
 
         BusinessInformation businessInformation = new BusinessInformation();
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         String permissionJson = "[{\"groupId\" : \"developer\", \"permission\" : "
-        + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\",\"DELETE\"]}]";
+                + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\"," +
+                "\"DELETE\"]}]";
 
         API.APIBuilder apiBuilder = new API.APIBuilder(ADMIN, "WeatherAPI", API_VERSION).
                 id(UUID.randomUUID().toString()).
@@ -179,10 +202,9 @@ public class SampleTestObjectCreator {
                 isResponseCachingEnabled(false).
                 cacheTimeout(60).
                 isDefaultVersion(false).
-                apiPolicy(APIMgtConstants.DEFAULT_API_POLICY).
+                apiPolicy(unlimitedApiPolicy).
                 transport(transport).
                 tags(tags).
-                policies(policies).
                 visibility(API.Visibility.PUBLIC).
                 visibleRoles(new HashSet<>()).
                 businessInformation(businessInformation).
@@ -246,9 +268,9 @@ public class SampleTestObjectCreator {
         tags.add(TAG_FOOD);
         tags.add(TAG_BEVERAGE);
 
-        Set<String> policies = new HashSet<>();
-        policies.add(SILVER_TIER);
-        policies.add(BRONZE_TIER);
+        Set<Policy> policies = new HashSet<>();
+        policies.add(silverSubscriptionPolicy);
+        policies.add(bronzeSubscriptionPolicy);
 
         BusinessInformation businessInformation = new BusinessInformation();
         businessInformation.setBusinessOwner(NAME_BUSINESS_OWNER_1);
@@ -279,7 +301,7 @@ public class SampleTestObjectCreator {
                 isResponseCachingEnabled(true).
                 cacheTimeout(120).
                 isDefaultVersion(true).
-                apiPolicy(GOLD_TIER).
+                apiPolicy(goldApiPolicy).
                 transport(transport).
                 tags(tags).
                 policies(policies).
@@ -304,9 +326,9 @@ public class SampleTestObjectCreator {
         tags.add(TAG_FOOD);
         tags.add(TAG_BEVERAGE);
 
-        Set<String> policies = new HashSet<>();
-        policies.add(SILVER_TIER);
-        policies.add(BRONZE_TIER);
+        Set<Policy> policies = new HashSet<>();
+        policies.add(silverSubscriptionPolicy);
+        policies.add(bronzeSubscriptionPolicy);
 
         BusinessInformation businessInformation = new BusinessInformation();
         businessInformation.setBusinessOwner(NAME_BUSINESS_OWNER_1);
@@ -338,7 +360,7 @@ public class SampleTestObjectCreator {
                 isResponseCachingEnabled(true).
                 cacheTimeout(120).
                 isDefaultVersion(true).
-                apiPolicy(GOLD_TIER).
+                apiPolicy(goldApiPolicy).
                 transport(transport).
                 tags(tags).
                 policies(policies).
@@ -382,7 +404,6 @@ public class SampleTestObjectCreator {
 
         return apiBuilder;
     }
-
 
 
     public static API.APIBuilder createCustomAPI(String name, String version, String context) {
@@ -478,7 +499,7 @@ public class SampleTestObjectCreator {
         application.setDescription("This is a test application");
         application.setGroupId(GROUP_1);
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
-        application.setTier(FIFTY_PER_MIN_TIER);
+        application.setPolicy(fiftyPerMinApplicationPolicy);
         application.setCreatedTime(LocalDateTime.now());
         application.setUpdatedUser(ADMIN);
         application.setUpdatedTime(LocalDateTime.now());
@@ -492,7 +513,7 @@ public class SampleTestObjectCreator {
         application.setDescription("This is test application 2");
         application.setGroupId(GROUP_2);
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_APPROVED);
-        application.setTier(TWENTY_PER_MIN_TIER);
+        application.setPolicy(twentyPerMinApplicationPolicy);
         application.setUpdatedUser("admin2");
         application.setUpdatedTime(LocalDateTime.now());
         return application;
@@ -504,7 +525,7 @@ public class SampleTestObjectCreator {
         application.setDescription("This is a test application");
         application.setGroupId(GROUP_1);
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
-        application.setTier(FIFTY_PER_MIN_TIER);
+        application.setPolicy(fiftyPerMinApplicationPolicy);
         application.setCreatedTime(LocalDateTime.now());
         application.setUpdatedUser(ADMIN);
         application.setUpdatedTime(LocalDateTime.now());
@@ -520,7 +541,7 @@ public class SampleTestObjectCreator {
         application.setDescription("This is a test application");
         application.setGroupId(GROUP_1);
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
-        application.setTier(FIFTY_PER_MIN_TIER);
+        application.setPolicy(fiftyPerMinApplicationPolicy);
         application.setPermissionMap(permissionMap);
         application.setCreatedTime(LocalDateTime.now());
         application.setUpdatedUser(ADMIN);
@@ -540,7 +561,7 @@ public class SampleTestObjectCreator {
         apiPolicy.setDescription(SAMPLE_API_POLICY_DESCRIPTION);
         apiPolicy.setUserLevel(APIMgtConstants.ThrottlePolicyConstants.API_LEVEL);
         QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
-        defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
+        defaultQuotaPolicy.setType(REQUEST_COUNT_TYPE);
         RequestCountLimit requestCountLimit = new RequestCountLimit(TIME_UNIT_SECONDS, 1000, 10000);
         defaultQuotaPolicy.setLimit(requestCountLimit);
         apiPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
@@ -554,7 +575,7 @@ public class SampleTestObjectCreator {
      * @param apiPolicy {@link APIPolicy} instance to be updated
      * @return updated {@link APIPolicy} instance
      */
-    public static APIPolicy updateAPIPolicy (APIPolicy apiPolicy) {
+    public static APIPolicy updateAPIPolicy(APIPolicy apiPolicy) {
         apiPolicy.setDisplayName(UPDATED_SAMPLE_API_POLICY);
         apiPolicy.setDescription(UPDATED_SAMPLE_API_POLICY_DESCRIPTION);
         QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
@@ -613,7 +634,7 @@ public class SampleTestObjectCreator {
         //pipeline 2 with request count as quota policy
         RequestCountLimit requestCountLimit = new RequestCountLimit(TIME_UNIT_SECONDS, 1, 1000);
         QuotaPolicy quotaPolicy2 = new QuotaPolicy();
-        quotaPolicy2.setType(PolicyConstants.REQUEST_COUNT_TYPE);
+        quotaPolicy2.setType(REQUEST_COUNT_TYPE);
         quotaPolicy2.setLimit(requestCountLimit);
 
         Pipeline pipeline2 = new Pipeline();
@@ -632,7 +653,7 @@ public class SampleTestObjectCreator {
      *
      * @return created Pipeline instance
      */
-    public static Pipeline createNewIPRangePipeline () {
+    public static Pipeline createNewIPRangePipeline() {
         IPCondition ipCondition = new IPCondition(PolicyConstants.IP_RANGE_TYPE);
         ipCondition.setStartingIP("10.100.0.105");
         ipCondition.setEndingIP("10.100.0.115");
@@ -640,7 +661,7 @@ public class SampleTestObjectCreator {
 
         RequestCountLimit requestCountLimit = new RequestCountLimit(TIME_UNIT_SECONDS, 1, 1000);
         QuotaPolicy quotaPolicy = new QuotaPolicy();
-        quotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
+        quotaPolicy.setType(REQUEST_COUNT_TYPE);
         quotaPolicy.setLimit(requestCountLimit);
 
         pipeline.setQuotaPolicy(quotaPolicy);
@@ -674,7 +695,7 @@ public class SampleTestObjectCreator {
         applicationPolicy.setDisplayName(SAMPLE_APP_POLICY);
         applicationPolicy.setDescription(SAMPLE_APP_POLICY_DESCRIPTION);
         QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
-        defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
+        defaultQuotaPolicy.setType(REQUEST_COUNT_TYPE);
         RequestCountLimit requestCountLimit = new RequestCountLimit(TIME_UNIT_SECONDS, 10000, 1000);
         defaultQuotaPolicy.setLimit(requestCountLimit);
         applicationPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
@@ -699,7 +720,7 @@ public class SampleTestObjectCreator {
         subscriptionPolicy.setDisplayName(SAMPLE_SUBSCRIPTION_POLICY);
         subscriptionPolicy.setDescription(SAMPLE_SUBSCRIPTION_POLICY_DESCRIPTION);
         QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
-        defaultQuotaPolicy.setType(PolicyConstants.REQUEST_COUNT_TYPE);
+        defaultQuotaPolicy.setType(REQUEST_COUNT_TYPE);
         RequestCountLimit requestCountLimit = new RequestCountLimit(TIME_UNIT_SECONDS, 10000, 1000);
         defaultQuotaPolicy.setLimit(requestCountLimit);
         subscriptionPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
@@ -780,7 +801,7 @@ public class SampleTestObjectCreator {
         uriTemplateBuilder.templateId(TEMPLATE_ID);
         uriTemplateBuilder.uriTemplate("/apis/");
         uriTemplateBuilder.authType(APIMgtConstants.AUTH_APPLICATION_LEVEL_TOKEN);
-        uriTemplateBuilder.policy(APIMgtConstants.DEFAULT_API_POLICY);
+        uriTemplateBuilder.policy(unlimitedApiPolicy);
         uriTemplateBuilder.httpVerb(APIMgtConstants.FunctionsConstants.GET);
         uriTemplateMap.put(TEMPLATE_ID, uriTemplateBuilder.build());
         return uriTemplateMap;
@@ -861,15 +882,16 @@ public class SampleTestObjectCreator {
         Set<String> tags = new HashSet<>();
         tags.add(TAG_CLIMATE);
 
-        Set<String> policies = new HashSet<>();
-        policies.add(GOLD_TIER);
-        policies.add(SILVER_TIER);
-        policies.add(BRONZE_TIER);
+        Set<Policy> policies = new HashSet<>();
+        policies.add(new SubscriptionPolicy(GOLD_TIER));
+        policies.add(new SubscriptionPolicy(SILVER_TIER));
+        policies.add(new SubscriptionPolicy(BRONZE_TIER));
 
         BusinessInformation businessInformation = new BusinessInformation();
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         String permissionJson = "[{\"groupId\" : \"developer\", \"permission\" : "
-            + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\",\"DELETE\"]}]";
+                + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\"," +
+                "\"DELETE\"]}]";
         Map<String, Endpoint> endpointMap = new HashMap<>();
         endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT,
                 new Endpoint.Builder().id(endpointId).name("api1-production--endpint")
@@ -885,7 +907,7 @@ public class SampleTestObjectCreator {
                 isResponseCachingEnabled(false).
                 cacheTimeout(60).
                 isDefaultVersion(false).
-                apiPolicy(APIMgtConstants.DEFAULT_API_POLICY).
+                apiPolicy(APIUtils.getDefaultAPIPolicy()).
                 transport(transport).
                 tags(tags).
                 policies(policies).
@@ -953,4 +975,29 @@ public class SampleTestObjectCreator {
         return customPolicy;
     }
 
+    public static void createDefaultPolicy(PolicyDAO policyDAO) throws APIMgtDAOException {
+        QuotaPolicy quotaPolicy = new QuotaPolicy();
+        quotaPolicy.setType(REQUEST_COUNT_TYPE);
+        quotaPolicy.setLimit(new RequestCountLimit(SECONDS_TIMUNIT, 60, 1));
+        unlimitedApiPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        policyDAO.addApiPolicy(unlimitedApiPolicy);
+        goldApiPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        policyDAO.addApiPolicy(goldApiPolicy);
+        silverApiPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        policyDAO.addApiPolicy(silverApiPolicy);
+        bronzeApiPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        policyDAO.addApiPolicy(bronzeApiPolicy);
+        unlimitedSubscriptionPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        policyDAO.addSubscriptionPolicy(unlimitedSubscriptionPolicy);
+        goldSubscriptionPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        policyDAO.addSubscriptionPolicy(goldSubscriptionPolicy);
+        silverSubscriptionPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        policyDAO.addSubscriptionPolicy(silverSubscriptionPolicy);
+        bronzeSubscriptionPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        policyDAO.addSubscriptionPolicy(bronzeSubscriptionPolicy);
+        fiftyPerMinApplicationPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        policyDAO.addApplicationPolicy(fiftyPerMinApplicationPolicy);
+        twentyPerMinApplicationPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        policyDAO.addApplicationPolicy(twentyPerMinApplicationPolicy);
+    }
 }

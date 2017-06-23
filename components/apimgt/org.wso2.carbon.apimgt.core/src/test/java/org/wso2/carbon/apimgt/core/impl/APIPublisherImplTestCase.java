@@ -55,7 +55,9 @@ import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.WorkflowConfig;
+import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
+import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.APILCWorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
@@ -85,6 +87,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
+import static org.wso2.carbon.apimgt.core.dao.impl.PolicyDAOImpl.BRONZE_TIER;
+import static org.wso2.carbon.apimgt.core.dao.impl.PolicyDAOImpl.GOLD_TIER;
+import static org.wso2.carbon.apimgt.core.dao.impl.PolicyDAOImpl.SILVER_TIER;
 
 public class APIPublisherImplTestCase {
     private static final String USER = "admin";
@@ -135,8 +141,17 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, USER))
                 .thenReturn(new LifecycleState());
         APIGatewayPublisherImpl gateway = Mockito.mock(APIGatewayPublisherImpl.class);
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api, APIMgtConstants
+                .DEFAULT_API_POLICY)).thenReturn(new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                GOLD_TIER)).thenReturn(new SubscriptionPolicy(GOLD_TIER));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                SILVER_TIER)).thenReturn(new SubscriptionPolicy(SILVER_TIER));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                BRONZE_TIER)).thenReturn(new SubscriptionPolicy(BRONZE_TIER));
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
-                gateway);
+                gateway, policyDAO);
         String endpointId = apiBuilder.getEndpoint().get("production").getId();
         Endpoint endpoint = new Endpoint.Builder().id(endpointId).name("testEndpoint").build();
         Mockito.when(apiDAO.getEndpoint(endpointId)).thenReturn(endpoint);
@@ -155,7 +170,7 @@ public class APIPublisherImplTestCase {
         uriTemplateBuilder.templateId("getApisApiIdGet");
         uriTemplateBuilder.uriTemplate("/apis/");
         uriTemplateBuilder.authType(APIMgtConstants.AUTH_APPLICATION_LEVEL_TOKEN);
-        uriTemplateBuilder.policy("Unlimited");
+        uriTemplateBuilder.policy(APIUtils.getDefaultAPIPolicy());
         uriTemplateBuilder.httpVerb("GET");
         uriTemplateMap.put("getApisApiIdGet", uriTemplateBuilder.build());
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().id("").endpoint(endpointMap)
@@ -169,8 +184,17 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiDAO.getEndpoint(endpointId)).thenReturn(endpoint);
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGatewayPublisherImpl gateway = Mockito.mock(APIGatewayPublisherImpl.class);
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api, APIMgtConstants
+                .DEFAULT_API_POLICY)).thenReturn(new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                GOLD_TIER)).thenReturn(new SubscriptionPolicy(GOLD_TIER));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                SILVER_TIER)).thenReturn(new SubscriptionPolicy(SILVER_TIER));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                BRONZE_TIER)).thenReturn(new SubscriptionPolicy(BRONZE_TIER));
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
-                gateway);
+                gateway, policyDAO);
         apiPublisher.addAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
         Mockito.verify(apiLifecycleManager, Mockito.times(1)).addLifecycle(APIMgtConstants.API_LIFECYCLE, USER);
@@ -185,8 +209,17 @@ public class APIPublisherImplTestCase {
                 .thenReturn(new LifecycleState());
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGatewayPublisherImpl gateway = Mockito.mock(APIGatewayPublisherImpl.class);
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api, APIMgtConstants
+                .DEFAULT_API_POLICY)).thenReturn(new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                GOLD_TIER)).thenReturn(new SubscriptionPolicy(GOLD_TIER));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                SILVER_TIER)).thenReturn(new SubscriptionPolicy(SILVER_TIER));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                BRONZE_TIER)).thenReturn(new SubscriptionPolicy(BRONZE_TIER));
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
-                gateway);
+                gateway, policyDAO);
         apiPublisher.addAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
         Mockito.verify(apiLifecycleManager, Mockito.times(1)).addLifecycle(APIMgtConstants.API_LIFECYCLE, USER);
@@ -200,7 +233,7 @@ public class APIPublisherImplTestCase {
         uriTemplateBuilder.templateId("");
         uriTemplateBuilder.uriTemplate("/apis/");
         uriTemplateBuilder.authType(APIMgtConstants.AUTH_APPLICATION_LEVEL_TOKEN);
-        uriTemplateBuilder.policy("Unlimited");
+        uriTemplateBuilder.policy(APIUtils.getDefaultAPIPolicy());
         uriTemplateBuilder.httpVerb("GET");
         uriTemplateMap.put("", uriTemplateBuilder.build());
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().uriTemplates(uriTemplateMap)
@@ -211,8 +244,17 @@ public class APIPublisherImplTestCase {
                 .thenReturn(new LifecycleState());
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGatewayPublisherImpl gateway = Mockito.mock(APIGatewayPublisherImpl.class);
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api, APIMgtConstants
+                .DEFAULT_API_POLICY)).thenReturn(new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                GOLD_TIER)).thenReturn(new SubscriptionPolicy(GOLD_TIER));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                SILVER_TIER)).thenReturn(new SubscriptionPolicy(SILVER_TIER));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                BRONZE_TIER)).thenReturn(new SubscriptionPolicy(BRONZE_TIER));
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
-                gateway);
+                gateway, policyDAO);
         apiPublisher.addAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
         Mockito.verify(apiLifecycleManager, Mockito.times(1)).addLifecycle(APIMgtConstants.API_LIFECYCLE, USER);
@@ -310,8 +352,17 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, USER))
                 .thenReturn(new LifecycleState());
         APIGatewayPublisherImpl gateway = Mockito.mock(APIGatewayPublisherImpl.class);
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api, APIMgtConstants
+                .DEFAULT_API_POLICY)).thenReturn(new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                GOLD_TIER)).thenReturn(new SubscriptionPolicy(GOLD_TIER));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                SILVER_TIER)).thenReturn(new SubscriptionPolicy(SILVER_TIER));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                BRONZE_TIER)).thenReturn(new SubscriptionPolicy(BRONZE_TIER));
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
-                gateway);
+                gateway, policyDAO);
         String endpointId = apiBuilder.getEndpoint().get("production").getId();
         Endpoint endpoint = new Endpoint.Builder().id(endpointId).name("testEndpoint").build();
         Mockito.when(apiDAO.getEndpoint(endpointId)).thenReturn(endpoint);
@@ -507,8 +558,17 @@ public class APIPublisherImplTestCase {
         String uuid = api.getId();
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGatewayPublisherImpl gateway = Mockito.mock(APIGatewayPublisherImpl.class);
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api, APIMgtConstants
+                .DEFAULT_API_POLICY)).thenReturn(new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                GOLD_TIER)).thenReturn(new SubscriptionPolicy(GOLD_TIER));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                SILVER_TIER)).thenReturn(new SubscriptionPolicy(SILVER_TIER));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                BRONZE_TIER)).thenReturn(new SubscriptionPolicy(BRONZE_TIER));
         APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager,
-                gatewaySourceGenerator, gateway);
+                gatewaySourceGenerator, gateway, policyDAO);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.lifeCycleStatus(APIStatus.CREATED.getStatus()).build());
         Mockito.when(identityProvider.getRoleId("admin")).thenReturn(ADMIN_ROLE_ID);
         Mockito.when(identityProvider.getRoleId("developer")).thenReturn(DEVELOPER_ROLE_ID);
@@ -541,8 +601,18 @@ public class APIPublisherImplTestCase {
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGatewayPublisherImpl gateway = Mockito.mock(APIGatewayPublisherImpl.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api, APIMgtConstants
+                .DEFAULT_API_POLICY)).thenReturn(new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                GOLD_TIER)).thenReturn(new SubscriptionPolicy(GOLD_TIER));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                SILVER_TIER)).thenReturn(new SubscriptionPolicy(SILVER_TIER));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                BRONZE_TIER)).thenReturn(new SubscriptionPolicy(BRONZE_TIER));
         APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager,
-                gatewaySourceGenerator, gateway);
+                gatewaySourceGenerator,
+                gateway, policyDAO);
         API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI();
         String uuid = api.getId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
@@ -610,8 +680,13 @@ public class APIPublisherImplTestCase {
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGatewayPublisherImpl gateway = Mockito.mock(APIGatewayPublisherImpl.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        Policy apiPolicy = new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY);
+        apiPolicy.setUuid(UUID.randomUUID().toString());
+        Mockito.when(policyDAO.getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api, APIMgtConstants
+                .DEFAULT_API_POLICY)).thenReturn(apiPolicy);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager,
-                gatewaySourceGenerator, gateway);
+                gatewaySourceGenerator, gateway, policyDAO);
         API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI();
         String uuid = api.getId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
@@ -643,8 +718,17 @@ public class APIPublisherImplTestCase {
         String uuid = api.getId();
         APIGatewayPublisherImpl gateway = Mockito.mock(APIGatewayPublisherImpl.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api, APIMgtConstants
+                .DEFAULT_API_POLICY)).thenReturn(new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                GOLD_TIER)).thenReturn(new SubscriptionPolicy(GOLD_TIER));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                SILVER_TIER)).thenReturn(new SubscriptionPolicy(SILVER_TIER));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                BRONZE_TIER)).thenReturn(new SubscriptionPolicy(BRONZE_TIER));
         APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager,
-                gatewaySourceGenerator, gateway);
+                gatewaySourceGenerator, gateway, policyDAO);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
         Mockito.when(identityProvider.getRoleId("admin")).thenReturn(ADMIN_ROLE_ID);
         Mockito.when(identityProvider.getRoleId("developer")).thenReturn(DEVELOPER_ROLE_ID);
@@ -664,8 +748,13 @@ public class APIPublisherImplTestCase {
         String uuid = api.getId();
         APIGatewayPublisherImpl gateway = Mockito.mock(APIGatewayPublisherImpl.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        Policy apiPolicy = new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY);
+        apiPolicy.setUuid(UUID.randomUUID().toString());
+        Mockito.when(policyDAO.getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api, APIMgtConstants
+                .DEFAULT_API_POLICY)).thenReturn(apiPolicy);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager,
-                gatewaySourceGenerator, gateway);
+                gatewaySourceGenerator, gateway, policyDAO);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
         Mockito.when(apiDAO.isAPIContextExists("testContext")).thenReturn(true);
         Mockito.when(identityProvider.getRoleId("admin")).thenReturn(ADMIN_ROLE_ID);
@@ -698,8 +787,17 @@ public class APIPublisherImplTestCase {
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGatewayPublisherImpl gateway = Mockito.mock(APIGatewayPublisherImpl.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api, APIMgtConstants
+                .DEFAULT_API_POLICY)).thenReturn(new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                GOLD_TIER)).thenReturn(new SubscriptionPolicy(GOLD_TIER));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                SILVER_TIER)).thenReturn(new SubscriptionPolicy(SILVER_TIER));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                BRONZE_TIER)).thenReturn(new SubscriptionPolicy(BRONZE_TIER));
         APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager,
-                gatewaySourceGenerator, gateway);
+                gatewaySourceGenerator, gateway, policyDAO);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.lifeCycleStatus(APIStatus.CREATED.getStatus()).build());
         Mockito.when(apiDAO.isAPIContextExists(api.getContext())).thenReturn(true);
         String configString = SampleTestObjectCreator.createSampleGatewayConfig();
@@ -725,8 +823,17 @@ public class APIPublisherImplTestCase {
                 .visibleRoles(visibleRoles);
         String uuid = api.getId();
         APIGatewayPublisherImpl gateway = Mockito.mock(APIGatewayPublisherImpl.class);
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api, APIMgtConstants
+                .DEFAULT_API_POLICY)).thenReturn(new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                GOLD_TIER)).thenReturn(new SubscriptionPolicy(GOLD_TIER));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                SILVER_TIER)).thenReturn(new SubscriptionPolicy(SILVER_TIER));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                BRONZE_TIER)).thenReturn(new SubscriptionPolicy(BRONZE_TIER));
         APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager,
-                gatewaySourceGenerator, gateway);
+                gatewaySourceGenerator, gateway, policyDAO);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
         Mockito.when(identityProvider.getRoleId("admin")).thenReturn(ADMIN_ROLE_ID);
         Mockito.when(identityProvider.getRoleId("developer")).thenReturn(DEVELOPER_ROLE_ID);
@@ -853,7 +960,8 @@ public class APIPublisherImplTestCase {
         Application application = SampleTestObjectCreator.createDefaultApplication();
 
         List<Subscription> subscriptions = new ArrayList<>();
-        Subscription subscription = new Subscription(previousApiUUID, application, previousApi, TIER);
+        Subscription subscription = new Subscription(previousApiUUID, application, previousApi, new
+                SubscriptionPolicy(TIER));
         subscriptions.add(subscription);
         Mockito.when(apiSubscriptionDAO.getAPISubscriptionsByAPI(previousApiUUID)).thenReturn(subscriptions);
         apiPublisher.updateAPIStatus(uuid, APIStatus.PUBLISHED.getStatus(), checklist);
@@ -1647,10 +1755,11 @@ public class APIPublisherImplTestCase {
         policy.setPolicyName(POLICY_NAME);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(policyDAO);
         Mockito.when(policyDAO
-                .getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, POLICY_NAME)).thenReturn(policy);
+                .getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, POLICY_NAME))
+                .thenReturn(policy);
         apiPublisher.getPolicyByName(APIMgtAdminService.PolicyLevel.application, POLICY_NAME);
         Mockito.verify(policyDAO, Mockito.times(1))
-                .getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, POLICY_NAME);
+                .getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, POLICY_NAME);
     }
 
     @Test(description = "Save swagger definition for API")
@@ -1910,8 +2019,13 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, USER))
                 .thenReturn(new LifecycleState());
         APIGatewayPublisherImpl gateway = Mockito.mock(APIGatewayPublisherImpl.class);
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        Policy apiPolicy = new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY);
+        apiPolicy.setUuid(UUID.randomUUID().toString());
+        Mockito.when(policyDAO.getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api, APIMgtConstants
+                .DEFAULT_API_POLICY)).thenReturn(apiPolicy);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
-                gateway);
+                gateway, policyDAO);
         Mockito.when(apiDAO.getEndpoint(globalEndpoint.getId())).thenReturn(globalEndpoint);
         Mockito.when(apiDAO.getEndpointByName(apiEndpoint.getName())).thenReturn(null);
         Mockito.when(apiDAO.isAPINameExists(apiBuilder.getName(), USER)).thenReturn(false);
@@ -2015,8 +2129,17 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, USER))
                 .thenReturn(new LifecycleState());
         APIGatewayPublisherImpl gateway = Mockito.mock(APIGatewayPublisherImpl.class);
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api, APIMgtConstants
+                .DEFAULT_API_POLICY)).thenReturn(new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                GOLD_TIER)).thenReturn(new SubscriptionPolicy(GOLD_TIER));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                SILVER_TIER)).thenReturn(new SubscriptionPolicy(SILVER_TIER));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                BRONZE_TIER)).thenReturn(new SubscriptionPolicy(BRONZE_TIER));
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
-                gateway);
+                gateway, policyDAO);
         Mockito.when(apiDAO.getEndpoint(globalEndpoint.getId())).thenReturn(globalEndpoint);
         Mockito.when(apiDAO.getEndpointByName(apiEndpoint.getName())).thenReturn(null);
         Mockito.when(apiDAO.getEndpointByName(resourceEndpoint.getName())).thenReturn(null);
@@ -2148,8 +2271,17 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, USER))
                 .thenReturn(new LifecycleState());
         APIGatewayPublisherImpl gateway = Mockito.mock(APIGatewayPublisherImpl.class);
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api, APIMgtConstants
+                .DEFAULT_API_POLICY)).thenReturn(new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                GOLD_TIER)).thenReturn(new SubscriptionPolicy(GOLD_TIER));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                SILVER_TIER)).thenReturn(new SubscriptionPolicy(SILVER_TIER));
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                BRONZE_TIER)).thenReturn(new SubscriptionPolicy(BRONZE_TIER));
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
-                gateway);
+                gateway, policyDAO);
         Mockito.when(apiDAO.getEndpoint(globalEndpoint.getId())).thenReturn(globalEndpoint);
         Mockito.when(apiDAO.getEndpointByName(apiEndpoint.getName())).thenReturn(null);
         Mockito.when(apiDAO.getEndpointByName(resourceEndpoint.getName())).thenReturn(null);
@@ -2265,9 +2397,25 @@ public class APIPublisherImplTestCase {
     }
 
     private APIPublisherImpl getApiPublisherImpl(IdentityProvider idp, ApiDAO apiDAO,
-            APILifecycleManager apiLifecycleManager, GatewaySourceGenerator gatewaySourceGenerator,
-            APIGatewayPublisherImpl gatewayPublisher) {
+                                                 APILifecycleManager apiLifecycleManager, GatewaySourceGenerator
+                                                         gatewaySourceGenerator,
+                                                 APIGatewayPublisherImpl gatewayPublisher) {
         return new APIPublisherImpl(USER, idp, apiDAO, null, null, null, apiLifecycleManager, null, null, null,
                 gatewaySourceGenerator, gatewayPublisher);
+    }
+
+    private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APILifecycleManager apiLifecycleManager,
+                                                 GatewaySourceGenerator gatewaySourceGenerator,
+                                                 APIGatewayPublisherImpl gateway, PolicyDAO policyDAO) {
+        return new APIPublisherImpl(USER, null, apiDAO, null, null, policyDAO, apiLifecycleManager, null, null, null,
+                gatewaySourceGenerator, gateway);
+    }
+
+    private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider, ApiDAO apiDAO, APILifecycleManager
+            apiLifecycleManager, GatewaySourceGenerator gatewaySourceGenerator, APIGatewayPublisherImpl gateway,
+                                                 PolicyDAO policyDAO) {
+        return new APIPublisherImpl(USER, identityProvider, apiDAO, null, null, policyDAO, apiLifecycleManager, null,
+                null, null,
+                gatewaySourceGenerator, gateway);
     }
 }

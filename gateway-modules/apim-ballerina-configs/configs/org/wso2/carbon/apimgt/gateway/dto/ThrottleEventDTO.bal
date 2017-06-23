@@ -7,7 +7,7 @@ struct ThrottleEventDTO {
     string apiKey;
     string apiTier;
     string subscriptionKey;
-    string subscriptionTier;
+    string policy;
     string resourceLevelThrottleKey;
     string resourceTier;
     string userId;

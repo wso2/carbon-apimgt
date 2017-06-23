@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
+import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.lcm.core.beans.CheckItemBean;
@@ -208,11 +209,12 @@ public class APIStateChangeWorkflow extends Workflow {
                                 api.getCopiedFromApiId());
                         List<Subscription> subscriptionList = new ArrayList<>();
                         for (Subscription subscription : subscriptions) {
-                            if (api.getPolicies().contains(subscription.getSubscriptionTier())) {
+                            if (api.getPolicies().contains(new SubscriptionPolicy(subscription.getPolicy()
+                                    .getPolicyName()))) {
                                 if (!APIMgtConstants.SubscriptionStatus.ON_HOLD.equals(subscription.getStatus())) {
                                     subscriptionList.add(new Subscription(UUID.randomUUID().toString(),
                                             subscription.getApplication(), subscription.getApi(),
-                                            subscription.getSubscriptionTier()));
+                                            subscription.getPolicy()));
                                 }
                             }
                             apiSubscriptionDAO.copySubscriptions(subscriptionList);

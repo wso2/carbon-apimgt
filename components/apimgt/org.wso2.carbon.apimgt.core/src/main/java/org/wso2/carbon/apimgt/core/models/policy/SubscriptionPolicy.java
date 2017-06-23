@@ -37,6 +37,10 @@ public class SubscriptionPolicy extends Policy {
         customAttributes = null;
     }
 
+    public SubscriptionPolicy(String uuid, String policyName) {
+        super(uuid, policyName);
+    }
+
     public int getRateLimitCount() {
         return rateLimitCount;
     }

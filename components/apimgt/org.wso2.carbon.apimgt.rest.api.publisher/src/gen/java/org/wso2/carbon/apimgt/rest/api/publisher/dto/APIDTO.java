@@ -49,6 +49,9 @@ public class APIDTO   {
   @JsonProperty("createdTime")
   private String createdTime = null;
 
+  @JsonProperty("apiPolicy")
+  private String apiPolicy = null;
+
   @JsonProperty("lastUpdatedTime")
   private String lastUpdatedTime = null;
 
@@ -322,6 +325,24 @@ public class APIDTO   {
 
   public void setCreatedTime(String createdTime) {
     this.createdTime = createdTime;
+  }
+
+  public APIDTO apiPolicy(String apiPolicy) {
+    this.apiPolicy = apiPolicy;
+    return this;
+  }
+
+   /**
+   * Get apiPolicy
+   * @return apiPolicy
+  **/
+  @ApiModelProperty(example = "UNLIMITED", value = "")
+  public String getApiPolicy() {
+    return apiPolicy;
+  }
+
+  public void setApiPolicy(String apiPolicy) {
+    this.apiPolicy = apiPolicy;
   }
 
   public APIDTO lastUpdatedTime(String lastUpdatedTime) {
@@ -754,6 +775,7 @@ public class APIDTO   {
         Objects.equals(this.lifeCycleStatus, API.lifeCycleStatus) &&
         Objects.equals(this.workflowStatus, API.workflowStatus) &&
         Objects.equals(this.createdTime, API.createdTime) &&
+        Objects.equals(this.apiPolicy, API.apiPolicy) &&
         Objects.equals(this.lastUpdatedTime, API.lastUpdatedTime) &&
         Objects.equals(this.responseCaching, API.responseCaching) &&
         Objects.equals(this.cacheTimeout, API.cacheTimeout) &&
@@ -778,7 +800,7 @@ public class APIDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, wsdlUri, lifeCycleStatus, workflowStatus, createdTime, lastUpdatedTime, responseCaching, cacheTimeout, destinationStatsEnabled, isDefaultVersion, transport, tags, labels, policies, visibility, visibleRoles, permission, userPermissionsForApi, visibleTenants, gatewayEnvironments, sequences, businessInformation, corsConfiguration, endpoint, operations);
+    return Objects.hash(id, name, description, context, version, provider, wsdlUri, lifeCycleStatus, workflowStatus, createdTime, apiPolicy, lastUpdatedTime, responseCaching, cacheTimeout, destinationStatsEnabled, isDefaultVersion, transport, tags, labels, policies, visibility, visibleRoles, permission, userPermissionsForApi, visibleTenants, gatewayEnvironments, sequences, businessInformation, corsConfiguration, endpoint, operations);
   }
 
   @Override
@@ -796,6 +818,7 @@ public class APIDTO   {
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
     sb.append("    workflowStatus: ").append(toIndentedString(workflowStatus)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
+    sb.append("    apiPolicy: ").append(toIndentedString(apiPolicy)).append("\n");
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
     sb.append("    responseCaching: ").append(toIndentedString(responseCaching)).append("\n");
     sb.append("    cacheTimeout: ").append(toIndentedString(cacheTimeout)).append("\n");

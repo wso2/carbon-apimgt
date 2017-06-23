@@ -2141,6 +2141,56 @@ public class PolicyDAOImpl implements PolicyDAO {
         }
     }
 
+    @Override
+    public Policy getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel policyLevel, String policyName)
+            throws APIMgtDAOException {
+        Policy policy = null;
+        final String apiPolicyQuery = "SELECT UUID,NAME FROM AM_API_POLICY WHERE NAME = ?";
+        final String applicationPolicyQuery = "SELECT UUID,NAME FROM AM_APPLICATION_POLICY WHERE NAME = ?";
+        final String subscriptionPolicyQuery = "SELECT UUID,NAME FROM AM_SUBSCRIPTION_POLICY WHERE NAME = ?";
+        try (Connection connection = DAOUtil.getConnection()) {
+            if (policyLevel.equals(APIMgtAdminService.PolicyLevel.api)) {
+                try (PreparedStatement statement = connection.prepareStatement(apiPolicyQuery)) {
+                    statement.setString(1, policyName);
+                    try (ResultSet resultSet = statement.executeQuery()) {
+                        if (resultSet.next()) {
+                            policy = new APIPolicy(resultSet.getString(APIMgtConstants
+                                    .ThrottlePolicyConstants.COLUMN_UUID), resultSet.getString(APIMgtConstants
+                                    .ThrottlePolicyConstants.COLUMN_NAME));
+                        }
+                    }
+                }
+            } else if (policyLevel.equals(APIMgtAdminService.PolicyLevel.application)) {
+                try (PreparedStatement statement = connection.prepareStatement(applicationPolicyQuery)) {
+                    statement.setString(1, policyName);
+                    try (ResultSet resultSet = statement.executeQuery()) {
+                        if (resultSet.next()) {
+                            policy = new ApplicationPolicy(resultSet.getString(APIMgtConstants
+                                    .ThrottlePolicyConstants.COLUMN_UUID), resultSet.getString(APIMgtConstants
+                                    .ThrottlePolicyConstants.COLUMN_NAME));
+                        }
+                    }
+                }
+            } else {
+                try (PreparedStatement statement = connection.prepareStatement(subscriptionPolicyQuery)) {
+                    statement.setString(1, policyName);
+                    try (ResultSet resultSet = statement.executeQuery()) {
+                        if (resultSet.next()) {
+                            policy = new SubscriptionPolicy(resultSet.getString(APIMgtConstants
+                                    .ThrottlePolicyConstants.COLUMN_UUID), resultSet.getString(APIMgtConstants
+                                    .ThrottlePolicyConstants.COLUMN_NAME));
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error while retrieving policies";
+            log.error(msg, e);
+            throw new APIMgtDAOException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return policy;
+    }
+
     /**
      * Validating context of the API.
      *

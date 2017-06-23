@@ -105,7 +105,7 @@ public class MappingUtil {
             UriTemplateDTO uriTemplateDTO = new UriTemplateDTO();
             uriTemplateDTO.setUriTemplate(v.getUriTemplate());
             uriTemplateDTO.setAuthType(v.getAuthType());
-            uriTemplateDTO.setPolicy(v.getPolicy());
+            uriTemplateDTO.setPolicy(v.getPolicy().getUuid());
             uriTemplateDTO.setHttpVerb(v.getHttpVerb());
             uriTemplateDTO.setScope("");
             uriTemplateDTOArrayList.add(uriTemplateDTO);
@@ -157,7 +157,7 @@ public class MappingUtil {
             ApplicationDTO applicationDTO = new ApplicationDTO();
             applicationDTO.setName(application.getName());
             applicationDTO.setApplicationId(application.getId());
-            applicationDTO.setThrottlingTier(application.getTier());
+            applicationDTO.setThrottlingTier(application.getPolicy().getUuid());
             applicationDTO.setSubscriber(application.getCreatedUser());
             applicationDTOList.add(applicationDTO);
         }
