@@ -60,6 +60,7 @@ paths:
 
   /application/applications_created_over_time:
     get:
+      x-scope: apim:api_publish
       summary: |
         Retrieve application created over time details
       description: |
