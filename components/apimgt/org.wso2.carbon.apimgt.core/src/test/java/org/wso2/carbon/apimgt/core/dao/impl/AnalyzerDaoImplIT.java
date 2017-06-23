@@ -29,9 +29,9 @@ public class AnalyzerDaoImplIT extends DAOIntegrationTestBase {
     @Test
     public void testGetApplicationCount() throws Exception {
 
-        String fromTimeStamp = (new Timestamp(System.currentTimeMillis() - 1000)).toString();
+        String fromTimeStamp = (new Timestamp(System.currentTimeMillis() - 10000)).toString();
         TestUtil.addCustomApplication("app1", "john");
-        String toTimeStamp = (new Timestamp(System.currentTimeMillis() + 1000)).toString();
+        String toTimeStamp = (new Timestamp(System.currentTimeMillis() + 10000)).toString();
         AnalyticsDAO analyticsDAO = DAOFactory.getAnalyticsDAO();
         List<ApplicationCount> applicationCountList = analyticsDAO
                 .getApplicationCount("john", null, fromTimeStamp, toTimeStamp);
