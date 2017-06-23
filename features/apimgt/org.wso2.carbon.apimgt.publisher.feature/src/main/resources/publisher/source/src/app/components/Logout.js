@@ -39,7 +39,8 @@ class Logout extends Component {
         logoutPromise.catch((error) => {
                 var message = "Error while logging out";
                 console.log(message);
-                window.history.back();
+                //TODO Fix to redirect to the previous page if login failed
+                //window.history.back();
 
                 /*noty({
                  text: message,

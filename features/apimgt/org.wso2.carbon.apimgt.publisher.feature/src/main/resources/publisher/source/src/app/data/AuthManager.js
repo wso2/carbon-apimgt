@@ -206,7 +206,8 @@ class AuthManager {
 
     logout() {
         var authzHeader = this.bearer + AuthManager.getCookie("WSO2_AM_TOKEN_1");
-        var url = this.contextPath + '/auth/apis/login/revoke';
+        //TODO Will have to change the logout end point url to contain the app context(i.e. publisher/store, etc.)
+        var url = this.host+ "/login/revoke";
         var headers = {
             'Accept': 'application/json',
             'Authorization': authzHeader
@@ -230,6 +231,10 @@ class AuthManager {
             'X-Alt-Referer': referrer
         };
         return axios.post(url, qs.stringify(params), {headers: headers});
+    }
+
+    delete_cookie(name) {
+        document.cookie = name + '=; Path=' + "/" + '; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
     }
 }
 
