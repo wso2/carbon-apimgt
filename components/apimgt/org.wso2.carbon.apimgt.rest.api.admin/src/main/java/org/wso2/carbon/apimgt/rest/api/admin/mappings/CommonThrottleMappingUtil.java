@@ -176,7 +176,7 @@ public class CommonThrottleMappingUtil {
      *
      * @param dto Throttle Condition DTO object
      * @return Derived Condition model object from DTO
-     * @throws UnsupportedThrottleConditionTypeException
+     * @throws UnsupportedThrottleConditionTypeException if the Throttle Condition type is not found
      */
     public static Condition fromDTOToCondition(ThrottleConditionDTO dto)
             throws UnsupportedThrottleConditionTypeException {
@@ -189,9 +189,10 @@ public class CommonThrottleMappingUtil {
         } else if (PolicyConstants.JWT_CLAIMS_CONDITION_TYPE.equals(dto.getType())) {
             return fromDTOToJWTClaimsCondition(dto);
         } else {
-            String msg = "Throttle Condition type " + dto.getClass().getName() + " is not supported";
+            String msg = "Throttle Condition type " + dto.getType() + " is not supported";
             log.error(msg);
-            throw new UnsupportedThrottleConditionTypeException(msg);
+            throw new UnsupportedThrottleConditionTypeException(msg,
+                    ExceptionCodes.UNSUPPORTED_THROTTLE_CONDITION_TYPE);
         }
     }
 
@@ -364,7 +365,8 @@ public class CommonThrottleMappingUtil {
      * @param dto IP Condition DTO object
      * @return IP Condition model object derived from DTO
      */
-    public static IPCondition fromDTOToIPCondition(ThrottleConditionDTO dto) {
+    public static IPCondition fromDTOToIPCondition(ThrottleConditionDTO dto)
+            throws UnsupportedThrottleConditionTypeException {
         String ipConditionType = mapIPConditionTypeFromDTOToModel(dto.getIpCondition().getIpConditionType());
         IPCondition ipCondition = new IPCondition(ipConditionType);
         ipCondition = updateFieldsFromDTOToCondition(dto, ipCondition);
@@ -380,7 +382,8 @@ public class CommonThrottleMappingUtil {
      * @param ipCondition IP Condition model object
      * @return DTO object derived from model object
      */
-    public static ThrottleConditionDTO fromIPConditionToDTO(IPCondition ipCondition) {
+    public static ThrottleConditionDTO fromIPConditionToDTO(IPCondition ipCondition)
+            throws UnsupportedThrottleConditionTypeException {
         String ipConditionType = mapIPConditionTypeFromModelToDTO(ipCondition.getType());
         ThrottleConditionDTO throttleConditionDTO = new ThrottleConditionDTO();
         throttleConditionDTO.setType(PolicyConstants.IP_CONDITION_TYPE);
@@ -583,32 +586,38 @@ public class CommonThrottleMappingUtil {
      *
      * @param throttleLimitType Throttle Limit DTO's Type
      * @return Mapped Quota Policy Type
+     * @throws UnsupportedThrottleLimitTypeException if the throttleLimitType is not supported
      */
-    private static String mapQuotaPolicyTypeFromDTOToModel(String throttleLimitType) {
+    private static String mapQuotaPolicyTypeFromDTOToModel(String throttleLimitType)
+            throws UnsupportedThrottleLimitTypeException {
         switch (throttleLimitType) {
         case PolicyConstants.BANDWIDTH_LIMIT_TYPE:
             return PolicyConstants.BANDWIDTH_TYPE;
         case PolicyConstants.REQUEST_COUNT_LIMIT_TYPE:
             return PolicyConstants.REQUEST_COUNT_TYPE;
         default:
-            return null;
+            throw new UnsupportedThrottleLimitTypeException("Throttle limit type " + throttleLimitType + " is not "
+                    + "supported", ExceptionCodes.UNSUPPORTED_THROTTLE_LIMIT_TYPE);
         }
     }
 
     /**
      * Maps IP Condition Type from IP Condition DTO into IP Condition model type
      *
-     * @param ipConditionTypeDto Type from IP Condition DTO
+     * @param ipConditionType Type from IP Condition DTO
      * @return Mapped IP Condition model type
+     * @throws UnsupportedThrottleConditionTypeException if the IP condition type is unsupported
      */
-    private static String mapIPConditionTypeFromDTOToModel(String ipConditionTypeDto) {
-        switch (ipConditionTypeDto) {
+    private static String mapIPConditionTypeFromDTOToModel(String ipConditionType)
+            throws UnsupportedThrottleConditionTypeException {
+        switch (ipConditionType) {
         case PolicyConstants.IP_RANGE_TYPE:
             return PolicyConstants.IP_RANGE_TYPE;
         case PolicyConstants.IP_SPECIFIC_TYPE:
             return PolicyConstants.IP_SPECIFIC_TYPE;
         default:
-            return null;
+            throw new UnsupportedThrottleConditionTypeException("IP Condition type: " + ipConditionType +
+                    " is not supported", ExceptionCodes.UNSUPPORTED_THROTTLE_CONDITION_TYPE);
         }
     }
 
@@ -617,15 +626,18 @@ public class CommonThrottleMappingUtil {
      *
      * @param ipConditionTypeInModel IP Condition model type
      * @return Mapped IP Condition DTO type
+     * @throws UnsupportedThrottleConditionTypeException if the IP condition type is unsupported
      */
-    private static String mapIPConditionTypeFromModelToDTO(String ipConditionTypeInModel) {
+    private static String mapIPConditionTypeFromModelToDTO(String ipConditionTypeInModel)
+            throws UnsupportedThrottleConditionTypeException {
         switch (ipConditionTypeInModel) {
         case PolicyConstants.IP_RANGE_TYPE:
             return PolicyConstants.IP_RANGE_TYPE;
         case PolicyConstants.IP_SPECIFIC_TYPE:
             return PolicyConstants.IP_SPECIFIC_TYPE;
         default:
-            return null;
+            throw new UnsupportedThrottleConditionTypeException("IP Condition type: " + ipConditionTypeInModel +
+                    " is not " + "supported");
         }
     }
 

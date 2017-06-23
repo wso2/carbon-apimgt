@@ -171,7 +171,9 @@ public enum ExceptionCodes implements ErrorHandler {
     //Throttle related codes
     THROTTLE_TEMPLATE_EXCEPTION(900969, "Policy Generating Error", 500, " Error while generate policy configuration"),
     ENDPOINT_CONFIG_NOT_FOUND(90070, "Endpoint Config Not found", 404, "Error while retrieving Endpoint " +
-            "Configuration");
+            "Configuration"),
+    UNSUPPORTED_THROTTLE_CONDITION_TYPE(900975, "Throttle Condition Error", 400, "Throttle Condition type is not "
+            + "supported");
 
     private final long errorCode;
     private final String errorMessage;
