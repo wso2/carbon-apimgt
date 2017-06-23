@@ -44,7 +44,6 @@ import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.TagDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
-import org.wso2.carbon.apimgt.core.exception.APICommentException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
@@ -527,7 +526,7 @@ public class APIStoreImplTestCase {
         Application application = new Application("TestApp", USER_ID);
         application.setId(UUID);
 
-        Mockito.when(apiDAO.getAPI(API_ID)).thenReturn(null);
+        Mockito.when(apiDAO.getAPI(API_ID)).thenThrow(new APIMgtDAOException("API does not exist"));
         Mockito.when(applicationDAO.getApplication(UUID)).thenReturn(application);
 
         SubscriptionResponse subscriptionResponse = apiStore.addApiSubscription(API_ID, UUID, TIER);
@@ -763,10 +762,10 @@ public class APIStoreImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIStore apiStore = getApiStoreImpl(apiDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
-        Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
+        Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
         Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
         apiStore.addComment(comment, api.getId());
-        Mockito.verify(apiDAO, Mockito.times(1)).getAPI(api.getId());
+        Mockito.verify(apiDAO, Mockito.times(1)).isAPIExists(api.getId());
         Mockito.verify(apiDAO, Mockito.times(1)).addComment(comment, api.getId());
     }
 
@@ -775,11 +774,11 @@ public class APIStoreImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIStore apiStore = getApiStoreImpl(apiDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
-        Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
+        Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
         Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
         Mockito.when(apiDAO.getCommentByUUID(comment.getUuid(), api.getId())).thenReturn(comment);
         apiStore.getCommentByUUID(comment.getUuid(), api.getId());
-        Mockito.verify(apiDAO, Mockito.times(1)).getAPI(api.getId());
+        Mockito.verify(apiDAO, Mockito.times(1)).isAPIExists(api.getId());
         Mockito.verify(apiDAO, Mockito.times(1)).getCommentByUUID(comment.getUuid(), api.getId());
     }
 
@@ -788,7 +787,7 @@ public class APIStoreImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIStore apiStore = getApiStoreImpl(apiDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
-        Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
+        Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
         List<Comment> commentList = new ArrayList<>();
         Comment comment1 = SampleTestObjectCreator.createDefaultComment(api.getId());
         Comment comment2 = SampleTestObjectCreator.createDefaultComment(api.getId());
@@ -798,7 +797,7 @@ public class APIStoreImplTestCase {
         List<Comment> commentListFromDB = apiStore.getCommentsForApi(api.getId());
         Assert.assertNotNull(commentListFromDB);
         Assert.assertEquals(commentList.size(), commentListFromDB.size());
-        Mockito.verify(apiDAO, Mockito.times(1)).getAPI(api.getId());
+        Mockito.verify(apiDAO, Mockito.times(1)).isAPIExists(api.getId());
         Mockito.verify(apiDAO, Mockito.times(1)).getCommentsForApi(api.getId());
     }
 
@@ -807,11 +806,11 @@ public class APIStoreImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIStore apiStore = getApiStoreImpl(apiDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
-        Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
+        Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
         Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
         Mockito.when(apiDAO.getCommentByUUID(comment.getUuid(), api.getId())).thenReturn(comment);
         apiStore.deleteComment(comment.getUuid(), api.getId(), "admin");
-        Mockito.verify(apiDAO, Mockito.times(1)).getAPI(api.getId());
+        Mockito.verify(apiDAO, Mockito.times(1)).isAPIExists(api.getId());
         Mockito.verify(apiDAO, Mockito.times(1)).deleteComment(comment.getUuid(), api.getId());
     }
 
@@ -820,11 +819,11 @@ public class APIStoreImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIStore apiStore = getApiStoreImpl(apiDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
-        Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
+        Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
         Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
         Mockito.when(apiDAO.getCommentByUUID(UUID, api.getId())).thenReturn(comment);
         apiStore.updateComment(comment, UUID, api.getId(), "admin");
-        Mockito.verify(apiDAO, Mockito.times(1)).getAPI(api.getId());
+        Mockito.verify(apiDAO, Mockito.times(1)).isAPIExists(api.getId());
         Mockito.verify(apiDAO, Mockito.times(1)).updateComment(comment, UUID, api.getId());
     }
 
@@ -833,11 +832,11 @@ public class APIStoreImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIStore apiStore = getApiStoreImpl(apiDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
-        Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
+        Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
         Rating rating = SampleTestObjectCreator.createDefaultRating(api.getId());
         Mockito.when(apiDAO.getRatingByUUID(api.getId(), rating.getUuid())).thenReturn(rating);
         apiStore.addRating(api.getId(), rating);
-        Mockito.verify(apiDAO, Mockito.times(1)).getAPI(api.getId());
+        Mockito.verify(apiDAO, Mockito.times(1)).isAPIExists(api.getId());
         Mockito.verify(apiDAO, Mockito.times(1)).addRating(api.getId(), rating);
     }
 
@@ -846,13 +845,13 @@ public class APIStoreImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIStore apiStore = getApiStoreImpl(apiDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
-        Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
+        Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
         Rating ratingFromDB = SampleTestObjectCreator.createDefaultRating(api.getId());
         Rating ratingFromPayload = SampleTestObjectCreator.createDefaultRating(api.getId());
         ratingFromPayload.setRating(3);
         Mockito.when(apiDAO.getRatingByUUID(api.getId(), ratingFromDB.getUuid())).thenReturn(ratingFromDB);
         apiStore.updateRating(api.getId(), ratingFromDB.getUuid(), ratingFromPayload);
-        Mockito.verify(apiDAO, Mockito.times(1)).getAPI(api.getId());
+        Mockito.verify(apiDAO, Mockito.times(1)).isAPIExists(api.getId());
         Mockito.verify(apiDAO, Mockito.times(1)).updateRating(api.getId(), ratingFromDB.getUuid(), ratingFromPayload);
     }
 
@@ -861,11 +860,11 @@ public class APIStoreImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIStore apiStore = getApiStoreImpl(apiDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
-        Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
+        Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
         Rating ratingFromDB = SampleTestObjectCreator.createDefaultRating(api.getId());
         Mockito.when(apiDAO.getRatingByUUID(api.getId(), ratingFromDB.getUuid())).thenReturn(ratingFromDB);
         apiStore.getRatingForApiFromUser(api.getId(), "john");
-        Mockito.verify(apiDAO, Mockito.times(1)).getAPI(api.getId());
+        Mockito.verify(apiDAO, Mockito.times(1)).isAPIExists(api.getId());
         Mockito.verify(apiDAO, Mockito.times(1)).getUserRatingForApiFromUser(api.getId(), "john");
     }
 
@@ -874,12 +873,12 @@ public class APIStoreImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIStore apiStore = getApiStoreImpl(apiDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
-        Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
+        Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
         String randomRatingUUID = java.util.UUID.randomUUID().toString();
         Mockito.when(apiDAO.getRatingByUUID(api.getId(), randomRatingUUID))
                 .thenReturn(SampleTestObjectCreator.createDefaultRating(api.getId()));
         apiStore.getRatingByUUID(api.getId(), randomRatingUUID);
-        Mockito.verify(apiDAO, Mockito.times(1)).getAPI(api.getId());
+        Mockito.verify(apiDAO, Mockito.times(1)).isAPIExists(api.getId());
         Mockito.verify(apiDAO, Mockito.times(1)).getRatingByUUID(api.getId(), randomRatingUUID);
     }
 
@@ -888,9 +887,9 @@ public class APIStoreImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIStore apiStore = getApiStoreImpl(apiDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
-        Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
+        Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
         apiStore.getAvgRating(api.getId());
-        Mockito.verify(apiDAO, Mockito.times(1)).getAPI(api.getId());
+        Mockito.verify(apiDAO, Mockito.times(1)).isAPIExists(api.getId());
         Mockito.verify(apiDAO, Mockito.times(1)).getAverageRating(api.getId());
     }
 
@@ -899,9 +898,9 @@ public class APIStoreImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIStore apiStore = getApiStoreImpl(apiDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
-        Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
+        Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
         apiStore.getRatingsListForApi(api.getId());
-        Mockito.verify(apiDAO, Mockito.times(1)).getAPI(api.getId());
+        Mockito.verify(apiDAO, Mockito.times(1)).isAPIExists(api.getId());
         Mockito.verify(apiDAO, Mockito.times(1)).getRatingsListForApi(api.getId());
     }
 
@@ -915,7 +914,7 @@ public class APIStoreImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIStore apiStore = getApiStoreImpl(apiDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
-        Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
+        Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
         Rating rating = SampleTestObjectCreator.createDefaultRating(api.getId());
         Mockito.when(apiDAO.getRatingByUUID(api.getId(), rating.getUuid())).thenReturn(rating);
         Mockito.doThrow(new APIMgtDAOException("Error occurred while adding rating for api "))
@@ -961,7 +960,7 @@ public class APIStoreImplTestCase {
     }
 
     @Test(description = "Exception in dao when deleting a specific comment",
-            expectedExceptions = APICommentException.class)
+            expectedExceptions = APIMgtResourceNotFoundException.class)
     public void testDeleteCommentDaoException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIStore apiStore = getApiStoreImpl(apiDAO);
@@ -975,7 +974,7 @@ public class APIStoreImplTestCase {
     }
 
     @Test(description = "check if user is comment moderator while delete comment",
-            expectedExceptions = APICommentException.class)
+            expectedExceptions = APIMgtResourceNotFoundException.class)
     public void testCommentModeratorWhileDeleteComment() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIStore apiStore = getApiStoreImpl(apiDAO);
@@ -1000,7 +999,7 @@ public class APIStoreImplTestCase {
     }
 
     @Test(description = "Exception in dao when updating a specific comment",
-            expectedExceptions = APICommentException.class)
+            expectedExceptions = APIMgtResourceNotFoundException.class)
     public void testUpdateCommentDaoException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIStore apiStore = getApiStoreImpl(apiDAO);

@@ -1223,11 +1223,12 @@ public class ApiDAOImpl implements ApiDAO {
                 String errorMessage =
                         "Error while retrieving comment for comment id: " + commentId + " and api id: " + apiId;
                 log.error(errorMessage, e);
-                throw new APIMgtDAOException(e);
+                throw new APIMgtDAOException(errorMessage, e);
             }
         } catch (SQLException e) {
-            log.error("Error while creating database connection/prepared-statement", e);
-            throw new APIMgtDAOException(e);
+            String errorMessage = "Error while creating database connection/prepared-statement";
+            log.error(errorMessage, e);
+            throw new APIMgtDAOException(errorMessage, e);
         }
         return null;
     }

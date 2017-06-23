@@ -162,74 +162,70 @@ public class APIStateChangeWorkflow extends Workflow {
         boolean deprecateOlderVersion = false;
         try {
             API api = apiDAO.getAPI(apiId);
-            if (api != null) {
-                API.APIBuilder apiBuilder = new API.APIBuilder(api);
-                apiBuilder.lastUpdatedTime(time);
-                apiBuilder.updatedBy(updatedBy);
-                LifecycleState currentState = apiLifecycleManager.getLifecycleDataForState(
-                        apiBuilder.getLifecycleInstanceId(), apiBuilder.getLifeCycleStatus());
-                apiBuilder.lifecycleState(currentState);
-                if (APIMgtConstants.APILCWorkflowStatus.PENDING.toString().equals(api.getWorkflowStatus())) {
-                    apiBuilder.workflowStatus(APIMgtConstants.APILCWorkflowStatus.APPROVED.toString());
-                    apiDAO.updateAPIWorkflowStatus(apiId, APIMgtConstants.APILCWorkflowStatus.APPROVED);
-                }
-                List<CheckItemBean> list = currentState.getCheckItemBeanList();
-                for (Iterator iterator = list.iterator(); iterator.hasNext(); ) {
-                    CheckItemBean checkItemBean = (CheckItemBean) iterator.next();
-                    if (APIMgtConstants.DEPRECATE_PREVIOUS_VERSIONS.equals(checkItemBean.getName())) {
-                        deprecateOlderVersion = checkItemBean.isValue();
-                    } else if (APIMgtConstants.REQUIRE_RE_SUBSCRIPTIONS.equals(checkItemBean.getName())) {
-                        requireReSubscriptions = checkItemBean.isValue();
-                    }
-                }
-                API originalAPI = apiBuilder.build();
 
-                apiLifecycleManager.executeLifecycleEvent(api.getLifeCycleStatus(), status,
-                        apiBuilder.getLifecycleInstanceId(), updatedBy, originalAPI);
-                if (deprecateOlderVersion) {
-                    if (StringUtils.isNotEmpty(api.getCopiedFromApiId())) {
-                        API oldAPI = apiDAO.getAPI(api.getCopiedFromApiId());
-                        if (oldAPI != null) {
-                            API.APIBuilder previousAPI = new API.APIBuilder(oldAPI);
-                            previousAPI.setLifecycleStateInfo(apiLifecycleManager.getLifecycleDataForState(
-                                    previousAPI.getLifecycleInstanceId(), previousAPI.getLifeCycleStatus())
-                            );
-                            if (APIUtils.validateTargetState(previousAPI.getLifecycleState(),
-                                    APIStatus.DEPRECATED.getStatus())) {
-                                apiLifecycleManager.executeLifecycleEvent(previousAPI.getLifeCycleStatus(),
-                                        APIStatus.DEPRECATED.getStatus(), previousAPI.getLifecycleInstanceId(),
-                                        updatedBy, previousAPI.build());
-                            }
-                        }
-                    }
-                }
-                if (!requireReSubscriptions) {
-                    if (StringUtils.isNotEmpty(api.getCopiedFromApiId())) {
-                        List<Subscription> subscriptions = apiSubscriptionDAO.getAPISubscriptionsByAPI(
-                                api.getCopiedFromApiId());
-                        List<Subscription> subscriptionList = new ArrayList<>();
-                        for (Subscription subscription : subscriptions) {
-                            if (api.getPolicies().contains(new SubscriptionPolicy(subscription.getPolicy()
-                                    .getPolicyName()))) {
-                                if (!APIMgtConstants.SubscriptionStatus.ON_HOLD.equals(subscription.getStatus())) {
-                                    subscriptionList.add(new Subscription(UUID.randomUUID().toString(),
-                                            subscription.getApplication(), subscription.getApi(),
-                                            subscription.getPolicy()));
-                                }
-                            }
-                            apiSubscriptionDAO.copySubscriptions(subscriptionList);
-                        }
-                    }
-                }
-                //publish API state change to gateway
-                apiGateway.changeAPIState(originalAPI, status);
-            } else {
-                throw new APIMgtResourceNotFoundException("Requested API " + apiId + " Not Available");
+            API.APIBuilder apiBuilder = new API.APIBuilder(api);
+            apiBuilder.lastUpdatedTime(time);
+            apiBuilder.updatedBy(updatedBy);
+            LifecycleState currentState = apiLifecycleManager.getLifecycleDataForState(
+                    apiBuilder.getLifecycleInstanceId(), apiBuilder.getLifeCycleStatus());
+            apiBuilder.lifecycleState(currentState);
+            if (APIMgtConstants.APILCWorkflowStatus.PENDING.toString().equals(api.getWorkflowStatus())) {
+                apiBuilder.workflowStatus(APIMgtConstants.APILCWorkflowStatus.APPROVED.toString());
+                apiDAO.updateAPIWorkflowStatus(apiId, APIMgtConstants.APILCWorkflowStatus.APPROVED);
             }
+            List<CheckItemBean> list = currentState.getCheckItemBeanList();
+            for (Iterator iterator = list.iterator(); iterator.hasNext(); ) {
+                CheckItemBean checkItemBean = (CheckItemBean) iterator.next();
+                if (APIMgtConstants.DEPRECATE_PREVIOUS_VERSIONS.equals(checkItemBean.getName())) {
+                    deprecateOlderVersion = checkItemBean.isValue();
+                } else if (APIMgtConstants.REQUIRE_RE_SUBSCRIPTIONS.equals(checkItemBean.getName())) {
+                    requireReSubscriptions = checkItemBean.isValue();
+                }
+            }
+            API originalAPI = apiBuilder.build();
+
+            apiLifecycleManager.executeLifecycleEvent(api.getLifeCycleStatus(), status,
+                    apiBuilder.getLifecycleInstanceId(), updatedBy, originalAPI);
+            if (deprecateOlderVersion) {
+                if (StringUtils.isNotEmpty(api.getCopiedFromApiId())) {
+                    API oldAPI = apiDAO.getAPI(api.getCopiedFromApiId());
+                    if (oldAPI != null) {
+                        API.APIBuilder previousAPI = new API.APIBuilder(oldAPI);
+                        previousAPI.setLifecycleStateInfo(apiLifecycleManager.getLifecycleDataForState(
+                                previousAPI.getLifecycleInstanceId(), previousAPI.getLifeCycleStatus())
+                        );
+                        if (APIUtils.validateTargetState(previousAPI.getLifecycleState(),
+                                APIStatus.DEPRECATED.getStatus())) {
+                            apiLifecycleManager.executeLifecycleEvent(previousAPI.getLifeCycleStatus(),
+                                    APIStatus.DEPRECATED.getStatus(), previousAPI.getLifecycleInstanceId(),
+                                    updatedBy, previousAPI.build());
+                        }
+                    }
+                }
+            }
+            if (!requireReSubscriptions) {
+                if (StringUtils.isNotEmpty(api.getCopiedFromApiId())) {
+                    List<Subscription> subscriptions = apiSubscriptionDAO.getAPISubscriptionsByAPI(
+                            api.getCopiedFromApiId());
+                    List<Subscription> subscriptionList = new ArrayList<>();
+                    for (Subscription subscription : subscriptions) {
+                        if (api.getPolicies().contains(subscription.getSubscriptionTier())) {
+                            if (!APIMgtConstants.SubscriptionStatus.ON_HOLD.equals(subscription.getStatus())) {
+                                subscriptionList.add(new Subscription(UUID.randomUUID().toString(),
+                                        subscription.getApplication(), subscription.getApi(),
+                                        subscription.getSubscriptionTier()));
+                            }
+                        }
+                        apiSubscriptionDAO.copySubscriptions(subscriptionList);
+                    }
+                }
+            }
+            //publish API state change to gateway
+            apiGateway.changeAPIState(originalAPI, status);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Couldn't change the status of api ID " + apiId;
             log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         } catch (LifecycleException e) {
             String errorMsg = "Couldn't change the status of api ID " + apiId;
             log.error(errorMsg, e);

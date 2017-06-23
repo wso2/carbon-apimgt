@@ -649,7 +649,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
-            if (!RestAPIPublisherUtil.getApiPublisher(username).checkIfAPIExists(apiId)) {
+            if (!RestAPIPublisherUtil.getApiPublisher(username).isAPIExists(apiId)) {
                 String errorMessage = "API not found : " + apiId;
                 APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
                         ExceptionCodes.API_NOT_FOUND);
@@ -755,7 +755,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
-            if (RestAPIPublisherUtil.getApiPublisher(username).checkIfAPIExists(apiId)) {
+            if (RestAPIPublisherUtil.getApiPublisher(username).isAPIExists(apiId)) {
                 String lifecycleInstanceId =
                         RestAPIPublisherUtil.getApiPublisher(username).getAPIbyUUID(apiId).getLifecycleInstanceId();
                 if (lifecycleInstanceId != null) {

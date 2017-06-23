@@ -122,15 +122,13 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     @Override
     public API getAPIbyUUID(String uuid) throws APIManagementException {
-        API api = null;
         try {
-            api = apiDAO.getAPI(uuid);
+            return apiDAO.getAPI(uuid);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while retrieving API with id " + uuid;
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         }
-        return api;
     }
 
     /**
@@ -174,16 +172,14 @@ public abstract class AbstractAPIManager implements APIManager {
      * {@inheritDoc}
      */
     @Override
-    public boolean checkIfAPIExists(String apiId) throws APIManagementException {
-        boolean status;
+    public boolean isAPIExists(String apiId) throws APIManagementException {
         try {
-            status = getApiDAO().getAPISummary(apiId) != null;
+            return getApiDAO().isAPIExists(apiId);
         } catch (APIMgtDAOException e) {
-            String errorMsg = "Couldn't get APISummary for " + apiId;
+            String errorMsg = "Error while checking if API " + apiId + " exists";
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         }
-        return status;
     }
 
     /**
@@ -254,7 +250,7 @@ public abstract class AbstractAPIManager implements APIManager {
         } catch (APIMgtDAOException e) {
             String errorMsg = "Couldn't retrieve swagger definition for apiId " + api;
             log.error(errorMsg + api, e);
-            throw new APIManagementException(errorMsg + api, e, e.getErrorHandler());
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         }
 
     }

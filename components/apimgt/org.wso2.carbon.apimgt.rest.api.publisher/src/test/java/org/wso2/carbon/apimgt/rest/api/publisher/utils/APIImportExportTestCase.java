@@ -478,7 +478,7 @@ public class APIImportExportTestCase {
         Assert.assertEquals(APIFileUtils.getDirectoryList(unzipPath).size() == 2, true,
                 "Exported API count is not equal to 2");
 
-        Mockito.when(apiPublisher.checkIfAPIExists(api2Id)).thenReturn(true);
+        Mockito.when(apiPublisher.isAPIExists(api2Id)).thenReturn(true);
     }
 
     private APIListDTO testApiImport(String importDir) throws APIManagementException, IOException {

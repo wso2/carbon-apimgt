@@ -207,7 +207,7 @@ public class APIManagerFactory {
     /**
      * Get API Store object for a particular user
      *
-     * @param username The username of user who's requesting the object
+     * @param username The username of user who's requesting the objecusernamet
      * @return APIStore object
      * @throws APIManagementException if error occurred while initializing API Store
      */
