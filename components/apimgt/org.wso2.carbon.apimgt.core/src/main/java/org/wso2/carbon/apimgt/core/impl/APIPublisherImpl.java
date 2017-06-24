@@ -217,116 +217,20 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         apiBuilder.lastUpdatedTime(localDateTime);
         apiBuilder.createdBy(getUsername());
         apiBuilder.updatedBy(getUsername());
-        Map<String, Endpoint> apiEndpointMap = apiBuilder.getEndpoint();
-        if (apiEndpointMap != null) {
-            for (Map.Entry<String, Endpoint> entry : apiEndpointMap.entrySet()) {
-                if (APIMgtConstants.API_SPECIFIC_ENDPOINT.equals(entry.getValue().getApplicableLevel())) {
-                    Endpoint.Builder endpointBuilder = new Endpoint.Builder(entry.getValue());
-                    if (StringUtils.isEmpty(endpointBuilder.getId())) {
-                        endpointBuilder.id(UUID.randomUUID().toString());
-                    }
-                    if (StringUtils.isEmpty(endpointBuilder.getApplicableLevel())) {
-                        endpointBuilder.applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT);
-                    }
-                    Endpoint endpoint = endpointBuilder.build();
-                    try {
-                        if (getApiDAO().getEndpointByName(endpoint.getName()) != null) {
-                            String msg = "Endpoint Already Exist By Name : " + endpoint.getName();
-                            throw new APIManagementException(msg, ExceptionCodes
-                                    .ENDPOINT_ALREADY_EXISTS);
-                        } else {
-                            apiEndpointMap.replace(entry.getKey(), endpointBuilder.build());
-                        }
-                    } catch (APIMgtDAOException e) {
-                        String msg = "Couldn't find Endpoint By Name : " + endpoint.getName();
-                        log.error(msg, e);
-                        throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
-                    }
-
-                } else {
-                    apiEndpointMap.replace(entry.getKey(), getEndpoint(entry.getValue().getId()));
-                }
-            }
-        }
+        validateApiEndpoints(apiBuilder);
         try {
             if (!isApiNameExist(apiBuilder.getName()) && !isContextExist(apiBuilder.getContext())) {
                 LifecycleState lifecycleState = getApiLifecycleManager().addLifecycle(APIMgtConstants.API_LIFECYCLE,
                         getUsername());
                 apiBuilder.associateLifecycle(lifecycleState);
 
-                Map<String, UriTemplate> uriTemplateMap = new HashMap();
-                if (apiBuilder.getUriTemplates().isEmpty()) {
-                    apiBuilder.uriTemplates(APIUtils.getDefaultUriTemplates());
-                    apiBuilder.apiDefinition(apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder));
-                } else {
-                    for (UriTemplate uriTemplate : apiBuilder.getUriTemplates().values()) {
-                        UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder
-                                (uriTemplate);
-                        if (StringUtils.isEmpty(uriTemplateBuilder.getTemplateId())) {
-                            uriTemplateBuilder.templateId(APIUtils.generateOperationIdFromPath(uriTemplate
-                                    .getUriTemplate(), uriTemplate.getHttpVerb()));
-                        }
-                        if (uriTemplate.getEndpoint() != null && !uriTemplate.getEndpoint().isEmpty()) {
-                            for (Map.Entry<String, Endpoint> entry : uriTemplate.getEndpoint().entrySet()) {
-                                if (APIMgtConstants.API_SPECIFIC_ENDPOINT.equals(entry.getValue().getApplicableLevel
-                                        ())) {
-                                    Endpoint.Builder endpointBuilder = new Endpoint.Builder(entry.getValue
-                                            ());
-                                    if (StringUtils.isEmpty(endpointBuilder.getId())) {
-                                        endpointBuilder.id(UUID.randomUUID().toString());
-                                    }
-                                    if (StringUtils.isEmpty(endpointBuilder.getApplicableLevel())) {
-                                        endpointBuilder.applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT);
-                                    }
-                                    Endpoint endpoint = endpointBuilder.build();
-                                    try {
-                                        if (getApiDAO().getEndpointByName(endpoint.getName()) != null) {
-                                            String msg = "Endpoint Already Exist By Name : " + endpoint.getName();
-                                            throw new APIManagementException(msg, ExceptionCodes
-                                                    .ENDPOINT_ALREADY_EXISTS);
-                                        } else {
-                                            uriTemplate.getEndpoint().replace(entry.getKey(), endpoint);
-                                        }
-                                    } catch (APIMgtDAOException e) {
-                                        String msg = "Couldn't find Endpoint By Name : " + endpoint.getName();
-                                        log.error(msg, e);
-                                        throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
-                                    }
-                                } else {
-                                    uriTemplateBuilder.getEndpoint().replace(entry.getKey(), getEndpoint(entry
-                                            .getValue().getId()));
-                                }
-                            }
-                        }
-                        uriTemplateMap.put(uriTemplateBuilder.getTemplateId(), uriTemplateBuilder.build());
-                    }
-                    apiBuilder.uriTemplates(uriTemplateMap);
-                }
+                createUriTemplateList(apiBuilder);
 
                 List<UriTemplate> list = new ArrayList<>(apiBuilder.getUriTemplates().values());
                 List<TemplateBuilderDTO> resourceList = new ArrayList<>();
 
-                if (apiBuilder.getApiPolicy() != null) {
-                    Policy apiPolicy = getPolicyByName(APIMgtAdminService.PolicyLevel.api, apiBuilder.getApiPolicy()
-                            .getPolicyName());
-                    if (apiPolicy == null) {
-                        throw new APIManagementException("Api Policy " + apiBuilder.getApiPolicy() + "Couldn't find",
-                                ExceptionCodes.POLICY_NOT_FOUND);
-                    }
-                    apiBuilder.apiPolicy(apiPolicy);
-                }
-                Set<Policy> subPolicies = new HashSet();
-                for (Policy subscriptionPolicy : apiBuilder.getPolicies()) {
-                    Policy policy = getPolicyByName(APIMgtAdminService.PolicyLevel.subscription,
-                            subscriptionPolicy.getPolicyName());
-                    if (policy == null) {
-                        throw new APIManagementException("Api Policy " + subscriptionPolicy.getPolicyName() +
-                                "Couldn't find",
-                                ExceptionCodes.POLICY_NOT_FOUND);
-                    }
-                    subPolicies.add(policy);
-                }
-                apiBuilder.policies(subPolicies);
+                validateApiPolicy(apiBuilder, "Api Policy " + apiBuilder.getApiPolicy() + "Couldn't find");
+                validateSubscriptionPolicies(apiBuilder);
                 for (UriTemplate uriTemplate : list) {
                     TemplateBuilderDTO dto = new TemplateBuilderDTO();
                     dto.setTemplateId(uriTemplate.getTemplateId());
@@ -429,6 +333,103 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         return apiBuilder.getId();
     }
 
+    private void validateApiEndpoints(API.APIBuilder apiBuilder) throws APIManagementException {
+        Map<String, Endpoint> apiEndpointMap = apiBuilder.getEndpoint();
+        if (apiEndpointMap != null) {
+            for (Map.Entry<String, Endpoint> entry : apiEndpointMap.entrySet()) {
+                if (APIMgtConstants.API_SPECIFIC_ENDPOINT.equals(entry.getValue().getApplicableLevel())) {
+                    Endpoint.Builder endpointBuilder = new Endpoint.Builder(entry.getValue());
+                    if (StringUtils.isEmpty(endpointBuilder.getId())) {
+                        endpointBuilder.id(UUID.randomUUID().toString());
+                    }
+                    if (StringUtils.isEmpty(endpointBuilder.getApplicableLevel())) {
+                        endpointBuilder.applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT);
+                    }
+                    Endpoint endpoint = endpointBuilder.build();
+                    try {
+                        if (getApiDAO().getEndpointByName(endpoint.getName()) != null) {
+                            String msg = "Endpoint Already Exist By Name : " + endpoint.getName();
+                            throw new APIManagementException(msg, ExceptionCodes
+                                    .ENDPOINT_ALREADY_EXISTS);
+                        } else {
+                            apiEndpointMap.replace(entry.getKey(), endpointBuilder.build());
+                        }
+                    } catch (APIMgtDAOException e) {
+                        String msg = "Couldn't find Endpoint By Name : " + endpoint.getName();
+                        log.error(msg, e);
+                        throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+                    }
+
+                } else {
+                    apiEndpointMap.replace(entry.getKey(), getEndpoint(entry.getValue().getId()));
+                }
+            }
+        }
+    }
+
+    private void validateApiPolicy(API.APIBuilder apiBuilder, String message) throws APIManagementException {
+        if (apiBuilder.getApiPolicy() != null) {
+            Policy apiPolicy = getPolicyByName(APIMgtAdminService.PolicyLevel.api, apiBuilder.getApiPolicy()
+                    .getPolicyName());
+            if (apiPolicy == null) {
+                throw new APIManagementException(message,
+                        ExceptionCodes.POLICY_NOT_FOUND);
+            }
+            apiBuilder.apiPolicy(apiPolicy);
+        }
+    }
+
+    private void createUriTemplateList(API.APIBuilder apiBuilder) throws APIManagementException {
+        Map<String, UriTemplate> uriTemplateMap = new HashMap();
+        if (apiBuilder.getUriTemplates().isEmpty()) {
+            apiBuilder.uriTemplates(APIUtils.getDefaultUriTemplates());
+            apiBuilder.apiDefinition(apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder));
+        } else {
+            for (UriTemplate uriTemplate : apiBuilder.getUriTemplates().values()) {
+                UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder
+                        (uriTemplate);
+                if (StringUtils.isEmpty(uriTemplateBuilder.getTemplateId())) {
+                    uriTemplateBuilder.templateId(APIUtils.generateOperationIdFromPath(uriTemplate
+                            .getUriTemplate(), uriTemplate.getHttpVerb()));
+                }
+                if (uriTemplate.getEndpoint() != null && !uriTemplate.getEndpoint().isEmpty()) {
+                    for (Map.Entry<String, Endpoint> entry : uriTemplate.getEndpoint().entrySet()) {
+                        if (APIMgtConstants.API_SPECIFIC_ENDPOINT.equals(entry.getValue().getApplicableLevel
+                                ())) {
+                            Endpoint.Builder endpointBuilder = new Endpoint.Builder(entry.getValue
+                                    ());
+                            if (StringUtils.isEmpty(endpointBuilder.getId())) {
+                                endpointBuilder.id(UUID.randomUUID().toString());
+                            }
+                            if (StringUtils.isEmpty(endpointBuilder.getApplicableLevel())) {
+                                endpointBuilder.applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT);
+                            }
+                            Endpoint endpoint = endpointBuilder.build();
+                            try {
+                                if (getApiDAO().getEndpointByName(endpoint.getName()) != null) {
+                                    String msg = "Endpoint Already Exist By Name : " + endpoint.getName();
+                                    throw new APIManagementException(msg, ExceptionCodes
+                                            .ENDPOINT_ALREADY_EXISTS);
+                                } else {
+                                    uriTemplate.getEndpoint().replace(entry.getKey(), endpoint);
+                                }
+                            } catch (APIMgtDAOException e) {
+                                String msg = "Couldn't find Endpoint By Name : " + endpoint.getName();
+                                log.error(msg, e);
+                                throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+                            }
+                        } else {
+                            uriTemplateBuilder.getEndpoint().replace(entry.getKey(), getEndpoint(entry
+                                    .getValue().getId()));
+                        }
+                    }
+                }
+                uriTemplateMap.put(uriTemplateBuilder.getTemplateId(), uriTemplateBuilder.build());
+            }
+            apiBuilder.uriTemplates(uriTemplateMap);
+        }
+    }
+
     /**
      * @param api API Object
      * @return If api definition is valid or not.
@@ -469,28 +470,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         roleNamePermissionList = getAPIPermissionArray(apiBuilder.getPermission());
                         apiBuilder.permissionMap(roleNamePermissionList);
                     }
-                    if (apiBuilder.getApiPolicy() != null) {
-                        Policy apiPolicy = getPolicyByName(APIMgtAdminService.PolicyLevel.api, apiBuilder
-                                .getApiPolicy().getPolicyName());
-                        if (apiPolicy == null) {
-                            throw new APIManagementException("Api Policy " + apiBuilder.getApiPolicy() + "Couldn't " +
-                                    "find",
-                                    ExceptionCodes.POLICY_NOT_FOUND);
-                        }
-                        apiBuilder.apiPolicy(apiPolicy);
-                    }
-                    Set<Policy> subPolicies = new HashSet();
-                    for (Policy subscriptionPolicy : apiBuilder.getPolicies()) {
-                        Policy policy = getPolicyByName(APIMgtAdminService.PolicyLevel.subscription,
-                                subscriptionPolicy.getPolicyName());
-                        if (policy == null) {
-                            throw new APIManagementException("Api Policy " + apiBuilder.getApiPolicy() + "Couldn't " +
-                                    "find",
-                                    ExceptionCodes.POLICY_NOT_FOUND);
-                        }
-                        subPolicies.add(policy);
-                    }
-                    apiBuilder.policies(subPolicies);
+                    validateApiEndpoints(apiBuilder);
+                    createUriTemplateList(apiBuilder);
+                    validateApiPolicy(apiBuilder, "Api Policy " + apiBuilder.getApiPolicy() + "Couldn't " +
+                            "find");
+                    validateSubscriptionPolicies(apiBuilder);
                     String updatedSwagger = apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder);
                     String gatewayConfig = getApiGatewayConfig(apiBuilder.getId());
                     GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
@@ -584,6 +568,21 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             log.error(message, e);
             throw new APIManagementException(message, ExceptionCodes.GATEWAY_EXCEPTION);
         }
+    }
+
+    private void validateSubscriptionPolicies(API.APIBuilder apiBuilder) throws APIManagementException {
+        Set<Policy> subPolicies = new HashSet();
+        for (Policy subscriptionPolicy : apiBuilder.getPolicies()) {
+            Policy policy = getPolicyByName(APIMgtAdminService.PolicyLevel.subscription,
+                    subscriptionPolicy.getPolicyName());
+            if (policy == null) {
+                throw new APIManagementException("Api Policy " + apiBuilder.getApiPolicy() + "Couldn't " +
+                        "find",
+                        ExceptionCodes.POLICY_NOT_FOUND);
+            }
+            subPolicies.add(policy);
+        }
+        apiBuilder.policies(subPolicies);
     }
 
     /**

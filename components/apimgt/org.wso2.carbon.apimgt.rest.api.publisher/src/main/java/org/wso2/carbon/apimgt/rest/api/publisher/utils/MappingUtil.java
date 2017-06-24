@@ -129,7 +129,9 @@ public class MappingUtil {
             apiOperationsDTO.setPolicy(uriTemplate.getPolicy().getPolicyName());
             apidto.addOperationsItem(apiOperationsDTO);
         }
-        apidto.setApiPolicy(api.getApiPolicy().getPolicyName());
+        if (api.getApiPolicy() != null) {
+            apidto.setApiPolicy(api.getApiPolicy().getPolicyName());
+        }
         apidto.setCreatedTime(api.getCreatedTime().toString());
         apidto.setLastUpdatedTime(api.getLastUpdatedTime().toString());
         return apidto;
