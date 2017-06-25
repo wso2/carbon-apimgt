@@ -309,8 +309,8 @@ public class DAOFactory {
     /**
      * To get the AnalyticsDao object. Depends on different vendors.
      *
-     * @return
-     * @throws APIMgtDAOException
+     * @return AnalyticsDAO object
+     * @throws APIMgtDAOException if error during getting analytics database connection
      */
     public static AnalyticsDAO getAnalyticsDAO() throws APIMgtDAOException {
         AnalyticsDAO analyticsDAO;
