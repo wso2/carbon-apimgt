@@ -210,9 +210,9 @@ public class ApplicationDAOImpl implements ApplicationDAO {
 
                 ps.setString(6, application.getGroupId());
                 ps.setString(7, application.getCreatedUser());
-                ps.setTimestamp(8, Timestamp.valueOf(application.getCreatedTime()));
+                ps.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now()));
                 ps.setString(9, application.getCreatedUser());
-                ps.setTimestamp(10, Timestamp.valueOf(application.getCreatedTime()));
+                ps.setTimestamp(10, Timestamp.valueOf(LocalDateTime.now()));
                 ps.executeUpdate();
                 addApplicationPermission(conn, application.getPermissionMap(), application.getId());
                 conn.commit();
@@ -316,7 +316,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 ps.setString(4, updatedApp.getStatus());
                 ps.setString(5, updatedApp.getGroupId());
                 ps.setString(6, updatedApp.getUpdatedUser());
-                ps.setTimestamp(7, Timestamp.valueOf(updatedApp.getUpdatedTime()));
+                ps.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
                 ps.setString(8, appID);
                 ps.executeUpdate();
                 updateApplicationPermission(conn, updatedApp.getPermissionMap(), updatedApp.getId());

@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
+import org.wso2.carbon.apimgt.core.dao.AnalyticsDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.FunctionDAO;
@@ -31,6 +32,7 @@ import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.TagDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -302,6 +304,54 @@ public class DAOFactory {
         setup();
 
         return functionDAO;
+    }
+
+    /**
+     * To get the AnalyticsDao object. Depends on different vendors.
+     *
+     * @return AnalyticsDAO object
+     * @throws APIMgtDAOException if error during getting analytics database connection
+     */
+    public static AnalyticsDAO getAnalyticsDAO() throws APIMgtDAOException {
+        AnalyticsDAO analyticsDAO;
+        boolean isAnalyticsEnabled = ServiceReferenceHolder.getInstance().getAPIMConfiguration().isAnalyticsEnabled();
+        if (isAnalyticsEnabled) {
+            try (Connection connection = DAOUtil.getAnalyticsConnection()) {
+                analyticsDAO = getAnalyticsDaoImplForVendor(connection);
+            } catch (SQLException e) {
+                throw new APIMgtDAOException(e);
+            }
+        } else {
+            // if analytics is not enabled create a normal AMDB data connection to check db driver
+            try (Connection connection = DAOUtil.getConnection()) {
+                analyticsDAO = getAnalyticsDaoImplForVendor(connection);
+            } catch (SQLException e) {
+                throw new APIMgtDAOException(e);
+            }
+        }
+        return analyticsDAO;
+    }
+
+    private static AnalyticsDAO getAnalyticsDaoImplForVendor(Connection connection)
+            throws SQLException, APIMgtDAOException {
+        AnalyticsDAO analyticsDAO = null;
+        String driverName = connection.getMetaData().getDriverName();
+        if (driverName.contains(MYSQL) || driverName.contains(H2)) {
+            analyticsDAO = new AnalyticsDAOImpl();
+        } else if (driverName.contains(DB2)) {
+
+        } else if (driverName.contains(MS_SQL) || driverName.contains(MICROSOFT)) {
+            analyticsDAO = new AnalyticsDAOImpl();
+
+        } else if (driverName.contains(POSTGRE)) {
+            analyticsDAO = new AnalyticsDAOImpl();
+
+        } else if (driverName.contains(ORACLE)) {
+            analyticsDAO = new AnalyticsDAOImpl();
+        } else {
+            throw new APIMgtDAOException("Unhandled DB Type detected");
+        }
+        return analyticsDAO;
     }
 
     private static void setup() throws APIMgtDAOException {

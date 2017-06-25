@@ -1,0 +1,185 @@
+swagger: '2.0'
+######################################################
+# Prolog
+######################################################
+info:
+  version: "v1.0"
+  title: "WSO2 API Manager - Analytics"
+  description: |
+    This document specifies a **RESTful API** for WSO2 **API Manager** - Analytics.
+    It is written with [swagger 2](http://swagger.io/).
+  contact:
+    name: "WSO2"
+    url: "http://wso2.com/products/api-manager/"
+    email: "architecture@wso2.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+######################################################
+# The fixed parts of the URLs of the API
+######################################################
+
+# The schemes supported by the API
+schemes:
+  - https
+  - http
+
+# The domain of the API.
+# This is configured by the customer during deployment.
+# The given host is just an example.
+host: apis.wso2.com
+
+# The base path of the API.
+# Will be prefixed to all paths.
+basePath: /api/am/analytics/v1.0
+
+# The following media types can be passed as input in message bodies of the API.
+# The actual media type must be specified in the Content-Type header field of the request.
+# The default is json, i.e. the Content-Type header is not needed to
+# be set, but supporting it serves extensibility.
+consumes:
+  - application/json
+
+# The following media types may be passed as output in message bodies of the API.
+# The media type(s) consumable by the requestor is specified in the Accept header field
+# of the corresponding request.
+# The actual media type returned will be specfied in the Content-Type header field
+# of the of the response.
+# The default of the Accept header is json, i.e. there is not needed to
+# set the value, but supporting it serves extensibility.
+produces:
+  - application/json
+
+
+paths:
+
+#-----------------------------------------------------
+#  Retrieve application created over time details
+#-----------------------------------------------------   
+
+  /application/applications_created_over_time:
+    get:
+      x-scope: apim:api_publish
+      summary: |
+        Retrieve application created over time details
+      description: |
+        Get application created over time details from summarized data.
+      parameters:
+        - $ref: '#/parameters/from'
+        - $ref: '#/parameters/to'
+        - $ref: '#/parameters/created_by'
+        - $ref: '#/parameters/subscribed_to'
+        - $ref: '#/parameters/api_filter'
+      responses:
+        200:
+          description: |
+            OK.
+            Requested applications created over time information is returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/ApplicationCountList'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+
+
+
+######################################################
+# Parameter definitions
+######################################################
+parameters:
+
+# Specified as part of the query string
+  from:
+    name: from
+    in: query
+    description: |
+      Defines the ending timestamp of the interval
+    required: true
+    type: string
+
+  to:
+    name: to
+    in: query
+    description: |
+      Defines the ending timestamp of the interval
+    required: true
+    type: string
+
+  created_by:
+    name: created_by
+    in: query
+    description: |
+     application creator name. In case of any creator, the value shold be equal to 'all'
+    required: true
+    type: string
+
+  subscribed_to:
+    name: subscribed_to
+    in: query
+    description: |
+      api name. In case of any api the value should be equal to 'all'
+    required: true
+    type: string
+
+  api_filter:
+    name: api_filter
+    in: query
+    description: |
+      api_filter could take two possible values. 'All' or 'My'. In case of 'My', only the current user's Apis will be filtered.
+    required: true
+    type: string
+
+######################################################
+# The resources used by some of the APIs above within the message body
+######################################################
+
+definitions:
+
+#-----------------------------------------------------
+# The ApplicationCount resource
+#-----------------------------------------------------
+  ApplicationCount:
+    title: Applications Created Over Time
+    properties:
+      time:
+        type: integer
+        format: int64
+        description: |
+          Timestamp
+      count:
+        type: integer
+        format: int64
+        description: |
+          Number of application registrations
+
+#-----------------------------------------------------
+# The ApplicationCountList resource
+#-----------------------------------------------------
+  ApplicationCountList:
+    title: ApplicationCount List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of applications.
+      next:
+        type: string
+        description: |
+          Link to the next subset of resources qualified.
+          Empty if no more resources are to be returned.
+      previous:
+        type: string
+        description: |
+          Link to the previous subset of resources qualified.
+          Empty if current subset is the first subset returned.
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/ApplicationCount'

@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.api.APIStore;
+import org.wso2.carbon.apimgt.core.api.Analyzer;
 import org.wso2.carbon.apimgt.core.configuration.APIMConfigurationService;
 import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
@@ -53,6 +54,7 @@ public class RestApiUtil {
     private static String publisherRestAPIDefinition;
     private static String storeRestAPIDefinition;
     private static String adminRestAPIDefinition;
+    private static String analyticsRestApiDefinition;
     private static final String HTTP = "http";
     private static final String HTTPS = "https";
     private static APIMConfigurations apimConfigurations = APIMConfigurationService.getInstance()
@@ -210,6 +212,17 @@ public class RestApiUtil {
      */
     public static APIStore getConsumer() throws APIManagementException {
         return APIManagerFactory.getInstance().getAPIConsumer();
+    }
+
+    /**
+     * Returns an Analyzer for a specific user.
+     *
+     * @param username
+     * @return {@code Analyzer}
+     * @throws APIManagementException if failed to get Analyzer
+     */
+    public static Analyzer getAnalyzer(String username) throws APIManagementException {
+        return APIManagerFactory.getInstance().getAnalyzer(username);
     }
 
     /**
@@ -446,6 +459,27 @@ public class RestApiUtil {
             }
         }
         return host;
+    }
+
+    /**
+     * This method return API swagger definition of Analytics REST API
+     *
+     * @return swagger definition as a String
+     * @throws APIMgtSecurityException if failed to get analytics api resource
+     */
+    public static String getAnalyticsRestAPIResource() throws APIMgtSecurityException {
+        if (analyticsRestApiDefinition == null) {
+            try {
+                analyticsRestApiDefinition = IOUtils
+                        .toString(RestApiUtil.class.getResourceAsStream(RestApiConstants.ANALYTICS_API_YAML), "UTF-8");
+            } catch (IOException e) {
+                String message = "Error while reading the swagger definition of Analytics Rest API";
+                log.error(message, e);
+                throw new APIMgtSecurityException(message, ExceptionCodes.API_NOT_FOUND);
+            }
+
+        }
+        return analyticsRestApiDefinition;
     }
 
     /**

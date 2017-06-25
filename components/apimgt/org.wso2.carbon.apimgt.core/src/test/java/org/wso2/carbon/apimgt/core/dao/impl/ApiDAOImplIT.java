@@ -1343,7 +1343,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         apiDAO.updateComment(comment2, comment1.getUuid(), api.getId());
         Comment commentFromDB = apiDAO.getCommentByUUID(comment1.getUuid(), api.getId());
         Assert.assertNotNull(commentFromDB);
-        Assert.assertEquals(newCommentText, commentFromDB.getCommentText());
+        Assert.assertEquals(commentFromDB.getCommentText(), newCommentText);
 
     }
 
