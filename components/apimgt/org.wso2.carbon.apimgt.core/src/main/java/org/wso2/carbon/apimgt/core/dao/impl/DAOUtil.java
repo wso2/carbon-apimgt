@@ -55,7 +55,6 @@ public class DAOUtil {
         if (DAOUtil.analyticsDataSource != null) {
             return;
         }
-
         DAOUtil.analyticsDataSource = analyticsDataSource;
     }
 
