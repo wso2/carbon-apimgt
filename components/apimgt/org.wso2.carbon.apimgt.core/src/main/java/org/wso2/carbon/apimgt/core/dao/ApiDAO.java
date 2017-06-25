@@ -509,6 +509,36 @@ public interface ApiDAO {
     void updateApiDefinition(String apiID, String swaggerDefinition, String updatedBy)
             throws APIMgtDAOException;
 
+
+    /**
+     * Updates the WSDL of an API
+     *
+     * @param apiId UUID of the API
+     * @param wsdlContent WSDL content as {@link String}
+     * @param updatedBy user who performs the action
+     * @throws APIMgtDAOException if error occurs while updating the WSDL from the data layer
+     */
+    void updateWSDLOfAPI(String apiId, String wsdlContent, String updatedBy) throws APIMgtDAOException;
+
+    /**
+     * Retrieves the WSDL of the API
+     *
+     * @param apiId UUID of the API
+     * @return WSDL as {@link String}
+     * @throws APIMgtDAOException if error occurs while accessing the WSDL from the data layer
+     */
+    String getWSDLOfAPI(String apiId) throws APIMgtDAOException;
+
+    /**
+     * Add a WSDL resource to an API
+     * 
+     * @param apiId UUID of API
+     * @param wsdlContent WSDL content as {@link String}
+     * @param createdBy the user who adds the WSDL
+     * @throws APIMgtDAOException
+     */
+    void addWSDLForAPI(String apiId, String wsdlContent, String createdBy) throws APIMgtDAOException;
+
     /**
      * Get gateway configuration of a given API
      *

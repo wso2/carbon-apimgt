@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
+import org.wso2.carbon.apimgt.core.api.WSDLProcessor;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
@@ -212,6 +213,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         if (StringUtils.isEmpty(apiBuilder.getId())) {
             apiBuilder.id(UUID.randomUUID().toString());
         }
+        String wsdlString = null;
         LocalDateTime localDateTime = LocalDateTime.now();
         apiBuilder.createdTime(localDateTime);
         apiBuilder.lastUpdatedTime(localDateTime);
@@ -229,6 +231,12 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 LifecycleState lifecycleState = getApiLifecycleManager().addLifecycle(APIMgtConstants.API_LIFECYCLE,
                         getUsername());
                 apiBuilder.associateLifecycle(lifecycleState);
+
+                if (!StringUtils.isBlank(apiBuilder.getWsdlUri())) {
+                    WSDLProcessor processor = WSDLProcessFactory.getInstance()
+                            .getWSDLProcessor(apiBuilder.getWsdlUri());
+                    wsdlString = processor.getWSDLString();
+                }
 
                 createUriTemplateList(apiBuilder, false);
 
@@ -300,6 +308,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
                 APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
                         "successfully.", log);
+
+                if (!StringUtils.isEmpty(wsdlString)) {
+                    addWSDLForAPI(apiBuilder.getId(), wsdlString);
+                }
+
                 // 'API_M Functions' related code
                 //Create a payload with event specific details
                 Map<String, String> eventPayload = new HashMap<>();
@@ -1430,6 +1443,37 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         }
     }
+
+    public void updateWSDLOfAPI(String apiId, String wsdlContent) throws APIMgtDAOException {
+        getApiDAO().updateWSDLOfAPI(apiId, wsdlContent, getUsername());
+    }
+
+    public String getWSDLOfAPI(String apiId) throws APIMgtDAOException {
+        return getApiDAO().getWSDLOfAPI(apiId);
+    }
+
+    public void addWSDLForAPI(String apiId, String wsdlContent) throws APIMgtDAOException {
+        getApiDAO().addWSDLForAPI(apiId, wsdlContent, getUsername());
+    }
+
+//    public String getWSDLOfAPIForLabel(String apiId, String labelName)
+//            throws APIMgtDAOException, LabelException, APINotFoundException {
+//        String rawWsdlContent = getApiDAO().getWSDLOfAPI(apiId);
+//        API api = getAPIbyUUID(apiId);
+//        if (api != null) {
+//            List<Label> labelList = getLabelDAO().getLabelsByName(Collections.singletonList(labelName));
+//            if (labelList.size() > 0) {
+//                Label label = labelList.get(0);
+//                String selectedEndpointUrl = label.getAccessUrls().get(0);
+//
+//            } else {
+//                throw new LabelException("No labels exists for " + labelName, ExceptionCodes.LABEL_NOT_FOUND);
+//            }
+//        } else {
+//            throw new APINotFoundException("API with UUID " + apiId + " not found.", ExceptionCodes.API_NOT_FOUND);
+//        }
+//    }
+
 
     /**
      * {@inheritDoc}

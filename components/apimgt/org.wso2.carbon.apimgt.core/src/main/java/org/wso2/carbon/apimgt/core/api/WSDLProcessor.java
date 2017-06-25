@@ -16,38 +16,22 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.core.models;
+package org.wso2.carbon.apimgt.core.api;
 
-import javax.wsdl.Definition;
-import java.util.HashMap;
-import java.util.Map;
+import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
+import org.wso2.carbon.apimgt.core.models.WSDLInfo;
 
-/**
- * 
- */
-public class WSDLInfo {
+import java.io.InputStream;
 
-    private String version;
-    private Map<String, String> endpoints;
+public interface WSDLProcessor {
 
-    public WSDLInfo() {
-        endpoints = new HashMap<>();
-    }
+    void init(byte[] wsdlContent) throws APIMgtWSDLException;
 
-    public String getVersion() {
-        return version;
-    }
+    boolean canProcess();
 
-    public void setVersion(String version) {
-        this.version = version;
-    }
+    WSDLInfo getWsdlInfo() throws APIMgtWSDLException;
 
-    public Map<String, String> getEndpoints() {
-        return endpoints;
-    }
+    void updateEndpoints(String[] endpointURLs) throws APIMgtWSDLException;
 
-    public void setEndpoints(Map<String, String> endpoints) {
-        this.endpoints = endpoints;
-    }
-
+    String getWSDLString() throws APIMgtWSDLException;
 }

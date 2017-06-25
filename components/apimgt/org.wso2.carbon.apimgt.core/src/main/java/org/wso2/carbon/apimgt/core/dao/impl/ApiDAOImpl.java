@@ -653,12 +653,13 @@ public class ApiDAOImpl implements ApiDAO {
             addVisibleRole(connection, apiPrimaryKey, api.getVisibleRoles());
         }
 
+        /*
         String wsdlUri = api.getWsdlUri();
-
         if (wsdlUri != null) {
             ApiResourceDAO.addTextResource(connection, apiPrimaryKey, UUID.randomUUID().toString(),
-                    ResourceCategory.WSDL_URI, MediaType.TEXT_PLAIN, wsdlUri, api.getCreatedBy());
-        }
+                    ResourceCategory.WSDL, MediaType.TEXT_PLAIN, wsdlUri, api.getCreatedBy());
+        }*/
+
         addTagsMapping(connection, apiPrimaryKey, api.getTags());
         addLabelMapping(connection, apiPrimaryKey, api.getLabels());
         addGatewayConfig(connection, apiPrimaryKey, api.getGatewayConfig(), api.getCreatedBy());
@@ -760,18 +761,19 @@ public class ApiDAOImpl implements ApiDAO {
                     addVisibleRole(connection, apiID, substituteAPI.getVisibleRoles());
                 }
 
+                /*
                 String wsdlUri = substituteAPI.getWsdlUri();
                 if (StringUtils.isBlank(wsdlUri)) {
-                    ApiResourceDAO.deleteUniqueResourceForCategory(connection, apiID, ResourceCategory.WSDL_URI);
+                    ApiResourceDAO.deleteUniqueResourceForCategory(connection, apiID, ResourceCategory.WSDL);
                 } else {
-                    if (!ApiResourceDAO.isResourceExistsForCategory(connection, apiID, ResourceCategory.WSDL_URI)) {
+                    if (!ApiResourceDAO.isResourceExistsForCategory(connection, apiID, ResourceCategory.WSDL)) {
                         ApiResourceDAO.addTextResource(connection, apiID, UUID.randomUUID().toString(),
-                                ResourceCategory.WSDL_URI, MediaType.TEXT_PLAIN, wsdlUri, substituteAPI.getCreatedBy());
+                                ResourceCategory.WSDL, MediaType.TEXT_PLAIN, wsdlUri, substituteAPI.getCreatedBy());
                     } else {
                         ApiResourceDAO.updateTextValueForCategory(connection, apiID,
-                                ResourceCategory.WSDL_URI, wsdlUri, substituteAPI.getUpdatedBy());
+                                ResourceCategory.WSDL, wsdlUri, substituteAPI.getUpdatedBy());
                     }
-                }
+                }*/
 
                 deleteAPIPermission(connection, apiID);
                 updateApiPermission(connection, substituteAPI.getPermissionMap(), apiID);
@@ -915,6 +917,50 @@ public class ApiDAOImpl implements ApiDAO {
         } catch (SQLException e) {
             throw new APIMgtDAOException("Data access error when updating API definition", e);
         }
+    }
+
+    public void addWSDLForAPI(String apiId, String wsdlContent, String createdBy) throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()) {
+            if (!StringUtils.isEmpty(wsdlContent)) {
+                ApiResourceDAO
+                        .addBinaryResource(connection, apiId, UUID.randomUUID().toString(), ResourceCategory.WSDL,
+                                MediaType.TEXT_XML,
+                                new ByteArrayInputStream(wsdlContent.getBytes(StandardCharsets.UTF_8)), createdBy);
+            } else {
+                log.warn("WSDL content to be added is empty for " + apiId);
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    public void updateWSDLOfAPI(String apiId, String wsdlContent, String updatedBy) throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()) {
+            if (!StringUtils.isEmpty(wsdlContent)) {
+                ApiResourceDAO
+                        .updateBinaryResourceForCategory(connection, apiId, ResourceCategory.WSDL,
+                                new ByteArrayInputStream(wsdlContent.getBytes(StandardCharsets.UTF_8)), updatedBy);
+            } else {
+                log.warn("WSDL content to be updated is empty for " + apiId);
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    public String getWSDLOfAPI(String apiId) throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()) {
+
+            InputStream gatewayConfig = ApiResourceDAO
+                    .getBinaryValueForCategory(connection, apiId, ResourceCategory.WSDL, ApiType.STANDARD);
+
+            if (gatewayConfig != null) {
+                return IOUtils.toString(gatewayConfig, StandardCharsets.UTF_8);
+            }
+        } catch (SQLException | IOException e) {
+            throw new APIMgtDAOException(e);
+        }
+        return null;
     }
 
     /**
@@ -1824,8 +1870,9 @@ public class ApiDAOImpl implements ApiDAO {
                         cacheTimeout(rs.getInt("CACHE_TIMEOUT")).
                         tags(getTags(connection, apiPrimaryKey)).
                         labels(getLabelNames(connection, apiPrimaryKey)).
-                        wsdlUri(ApiResourceDAO.getTextValueForCategory(connection, apiPrimaryKey, ResourceCategory
-                                .WSDL_URI)).
+                        wsdlUri(ApiResourceDAO.
+                                getTextValueForCategory(connection, apiPrimaryKey,
+                                        ResourceCategory.WSDL)).
                         transport(getTransports(connection, apiPrimaryKey)).
                         endpoint(getEndPointsForApi(connection, apiPrimaryKey)).
                         apiPermission(getPermissionsStringForApi(connection, apiPrimaryKey)).

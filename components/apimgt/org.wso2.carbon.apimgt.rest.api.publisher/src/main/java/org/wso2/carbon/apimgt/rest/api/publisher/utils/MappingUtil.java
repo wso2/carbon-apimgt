@@ -219,7 +219,8 @@ public class MappingUtil {
                 isResponseCachingEnabled(Boolean.valueOf(apidto.getResponseCaching())).
                 businessInformation(businessInformation).
                 uriTemplates(uriTemplateList).
-                corsConfiguration(corsConfiguration);
+                corsConfiguration(corsConfiguration).
+                wsdlUri(apidto.getWsdlUri());
         if (apidto.getIsDefaultVersion() != null) {
             apiBuilder.isDefaultVersion(apidto.getIsDefaultVersion());
         }

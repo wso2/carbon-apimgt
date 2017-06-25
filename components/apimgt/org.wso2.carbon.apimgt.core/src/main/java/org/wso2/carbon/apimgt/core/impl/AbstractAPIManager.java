@@ -115,17 +115,17 @@ public abstract class AbstractAPIManager implements APIManager {
      *
      * @param uuid UUID of the API's registry artifact
      * @return An API object related to the given artifact id or null
-     * @throws APIManagementException if failed get API from String
+     * @throws APIMgtDAOException if failed get API from String
      */
     @Override
-    public API getAPIbyUUID(String uuid) throws APIManagementException {
+    public API getAPIbyUUID(String uuid) throws APIMgtDAOException {
         API api = null;
         try {
             api = apiDAO.getAPI(uuid);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while retrieving API with id " + uuid;
             log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return api;
     }

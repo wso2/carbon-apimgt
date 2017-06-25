@@ -21,6 +21,7 @@
 package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
@@ -398,6 +399,33 @@ public interface APIPublisher extends APIManager {
      * @throws APIManagementException If failed to save swagger definition.
      */
     void saveSwagger20Definition(String apiId, String jsonText) throws APIManagementException;
+
+    /**
+     * Updates the WSDL of an API
+     *
+     * @param apiId UUID of the API
+     * @param wsdlContent WSDL content as {@link String}
+     * @throws APIMgtDAOException if error occurs while updating the WSDL from the data layer
+     */
+    void updateWSDLOfAPI(String apiId, String wsdlContent) throws APIMgtDAOException;
+
+    /**
+     * Returns the WSDL of a given API UUID as {@link String}
+     * 
+     * @param apiId API UUID
+     * @return WSDL of the API as {@link String}
+     * @throws APIMgtDAOException if error occurs while accessing the WSDL from the data layer
+     */
+    String getWSDLOfAPI(String apiId) throws APIMgtDAOException;
+
+    /**
+     * Add a WSDL resource to an API
+     *
+     * @param apiId UUID of API
+     * @param wsdlContent WSDL content as {@link String}
+     * @throws APIMgtDAOException
+     */
+    void addWSDLForAPI(String apiId, String wsdlContent) throws APIMgtDAOException;
 
     /**
      * Get list of policies of an particular tier level.

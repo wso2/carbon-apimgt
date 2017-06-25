@@ -352,6 +352,21 @@ public class ApiFileDAOImpl implements ApiDAO {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public void updateWSDLOfAPI(String apiId, String wsdlContent, String updatedBy) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getWSDLOfAPI(String apiId) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void addWSDLForAPI(String apiId, String wsdlContent, String createdBy) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * @see ApiDAO#getGatewayConfigOfAPI(String apiID)
      */
