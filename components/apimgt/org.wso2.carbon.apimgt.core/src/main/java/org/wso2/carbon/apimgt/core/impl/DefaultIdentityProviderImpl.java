@@ -71,21 +71,15 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
 
     @Override
     public String getIdOfUser(String userName) throws IdentityProviderException {
-        Response user = scimServiceStub.searchUsers(FILTER_PREFIX_USER + userName);
+        Response userResponse = scimServiceStub.searchUsers(FILTER_PREFIX_USER + userName);
         String userId;
-        if (user.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
-            String responseBody = user.body().toString();
+        if (userResponse.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
+            String responseBody = userResponse.body().toString();
             JsonParser parser = new JsonParser();
             JsonObject parsedResponseBody = (JsonObject) parser.parse(responseBody);
-            JsonArray userList = (JsonArray) parsedResponseBody.get("Resources");
-            if (userList.size() == 1) {
-                JsonObject scimUser = (JsonObject) userList.get(0);
-                userId = scimUser.get("id").getAsString();
-            } else {
-                String errorMessage = "Multiple users with " + userName + " exist.";
-                log.error(errorMessage);
-                throw new IdentityProviderException(errorMessage, ExceptionCodes.MULTIPLE_USERS_EXIST);
-            }
+            JsonArray user = (JsonArray) parsedResponseBody.get("Resources");
+            JsonObject scimUser = (JsonObject) user.get(0);
+            userId = scimUser.get("id").getAsString();
         } else {
             String errorMessage = "User " + userName + " does not exist in the system.";
             log.error(errorMessage);
@@ -136,21 +130,15 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
 
     @Override
     public String getRoleId(String roleName) throws IdentityProviderException {
-        Response role = scimServiceStub.searchGroups(FILTER_PREFIX_ROLE + roleName);
+        Response roleResponse = scimServiceStub.searchGroups(FILTER_PREFIX_ROLE + roleName);
         String roleId;
-        if (role.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
-            String responseBody = role.body().toString();
+        if (roleResponse.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
+            String responseBody = roleResponse.body().toString();
             JsonParser parser = new JsonParser();
             JsonObject parsedResponseBody = (JsonObject) parser.parse(responseBody);
-            JsonArray roleList = (JsonArray) parsedResponseBody.get("Resources");
-            if (roleList.size() == 1) {
-                JsonObject scimGroup = (JsonObject) roleList.get(0);
-                roleId = scimGroup.get("id").getAsString();
-            } else {
-                String errorMessage = "More than one role with role name " + roleName + " exist.";
-                log.error(errorMessage);
-                throw new IdentityProviderException(errorMessage, ExceptionCodes.MULTIPLE_ROLES_EXIST);
-            }
+            JsonArray role = (JsonArray) parsedResponseBody.get("Resources");
+            JsonObject scimGroup = (JsonObject) role.get(0);
+            roleId = scimGroup.get("id").getAsString();
         } else {
             String errorMessage = "Role with name " + roleName + " does not exist in the system.";
             log.error(errorMessage);

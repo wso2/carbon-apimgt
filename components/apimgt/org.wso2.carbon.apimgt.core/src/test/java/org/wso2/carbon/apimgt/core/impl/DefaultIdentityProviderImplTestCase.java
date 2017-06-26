@@ -81,25 +81,6 @@ public class DefaultIdentityProviderImplTestCase {
             Assert.assertTrue(ex instanceof IdentityProviderException);
             Assert.assertEquals(ex.getMessage(), "User " + invalidUserName + " does not exist in the system.");
         }
-
-        //Assuming there are multiple users returned
-        String responseBodyMultipleResults = "{\"totalResults\":2,\"schemas\":[\"urn:scim:schemas:core:1.0\"],"
-                + "\"Resources\":[{\"meta\":{\"created\":\"2017-06-02T14:05:08\",\"location\":"
-                + "\"https://localhost:9443/wso2/scim/Users/84c54947-513b-48df-8c49-7121932ffea8\",\"lastModified\":"
-                + "\"2017-06-02T14:05:08\"},\"id\":\"84c54947-513b-48df-8c49-7121932ffea8\",\"userName\":\"John\"},"
-                + "{\"meta\":{\"created\":\"2017-06-02T10:12:26\",\"location\":"
-                + "\"https://localhost:9443/wso2/scim/Users/cfbde56e-8422-498e-b6dc-85a6f1f8b058\",\"lastModified\":"
-                + "\"2017-06-02T10:12:26\"},\"id\":\"cfbde56e-8422-498e-b6dc-85a6f1f8b058\",\"userName\":\"John\"}]}";
-        Response createdResponseMultipleResults = Response.builder().status(200).headers(new HashMap<>())
-                .body(responseBodyMultipleResults.getBytes()).build();
-        Mockito.when(scimServiceStub.searchUsers(validUserSearchQuery)).thenReturn(createdResponseMultipleResults);
-
-        try {
-            idpImpl.getIdOfUser(validUserName);
-        } catch (Exception ex) {
-            Assert.assertTrue(ex instanceof IdentityProviderException);
-            Assert.assertEquals(ex.getMessage(), "Multiple users with " + validUserName + " exist.");
-        }
     }
 
     @Test
@@ -255,24 +236,6 @@ public class DefaultIdentityProviderImplTestCase {
             Assert.assertTrue(ex instanceof IdentityProviderException);
             Assert.assertEquals(ex.getMessage(),
                     "Role with name " + invalidRoleName + " does not exist in the system.");
-        }
-
-        //Assuming there are multiple roles returned
-        String responseBodyMultipleResults = "{\"totalResults\":2,\"schemas\":[\"urn:scim:schemas:core:1.0\"],"
-                + "\"Resources\":[{\"displayName\":\"PRIMARY/engineer\",\"meta\":{\"created\":\"2017-06-02T10:14:42\","
-                + "\"location\":\"https://localhost:9443/wso2/scim/Groups/ac093278-9343-466c-8a71-af47921a575b\","
-                + "\"lastModified\":\"2017-06-02T10:14:42\"},\"id\":\"ac093278-9343-466c-8a71-af47921a575b\"},"
-                + "{\"displayName\":\"PRIMARY/engineer\",\"meta\":{\"created\":\"2017-06-02T10:14:42\",\"location\":"
-                + "\"https://localhost:9443/wso2/scim/Groups/0ca93278-9343-466c-8a71-af47921a575b\",\"lastModified\":"
-                + "\"2017-06-02T10:14:42\"},\"id\":\"0ca93278-9343-466c-8a71-af47921a575b\"}]}";
-        Response createdResponseMultipleResults = Response.builder().status(200).headers(new HashMap<>())
-                .body(responseBodyMultipleResults.getBytes()).build();
-        Mockito.when(scimServiceStub.searchGroups(validRoleSearchQuery)).thenReturn(createdResponseMultipleResults);
-
-        try {
-            idpImpl.getRoleId(validRoleName);
-        } catch (IdentityProviderException ex) {
-            Assert.assertEquals(ex.getMessage(), "More than one role with role name " + validRoleName + " exist.");
         }
     }
 

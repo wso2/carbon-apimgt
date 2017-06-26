@@ -672,45 +672,48 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
         Map<String, Integer> permissionMap = api.getPermissionMap();
 
-        //TODO: Remove the check for admin after IS adds an ID to admin user
-        if (permissionMap != null && !permissionMap.isEmpty() && !"admin".equals(loggedInUserName)) {
-            String userId = getIdentityProvider().getIdOfUser(loggedInUserName);
-            List<String> loggedInUserRoles = getIdentityProvider().getRoleIdsOfUser(userId);
-            List<String> permissionRoleList = getRolesFromPermissionMap(permissionMap);
-            List<String> rolesOfUserWithAPIPermissions = null;
-            //To prevent a possible null pointer exception
-            if (loggedInUserRoles == null) {
-                loggedInUserRoles = new ArrayList<>();
-            }
-            //get the intersection - retainAll() transforms first set to the result of intersection
-            loggedInUserRoles.retainAll(permissionRoleList);
-            if (!loggedInUserRoles.isEmpty()) {
-                rolesOfUserWithAPIPermissions = loggedInUserRoles;
-            }
-            if (rolesOfUserWithAPIPermissions != null) {
-                //remove all elements from set
-                permissionArrayForUser.clear();
-                for (String role : rolesOfUserWithAPIPermissions) {
-                    Integer permission = permissionMap.get(role);
-                    if (permission == APIMgtConstants.Permission.READ_PERMISSION) {
-                        permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-                    } else if (permission == (APIMgtConstants.Permission.READ_PERMISSION
-                            + APIMgtConstants.Permission.UPDATE_PERMISSION)) {
-                        permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-                        permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
-                    } else if (permission == (APIMgtConstants.Permission.READ_PERMISSION
-                            + APIMgtConstants.Permission.DELETE_PERMISSION)) {
-                        permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-                        permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
-                    } else if (permission
-                          == APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.UPDATE_PERMISSION
-                            + APIMgtConstants.Permission.DELETE_PERMISSION) {
-                        permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-                        permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
-                        permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
+        try {
+            //TODO: Remove the check for admin after IS adds an ID to admin user
+            if (permissionMap != null && !permissionMap.isEmpty() && !"admin".equals(loggedInUserName)) {
+                String userId = getIdentityProvider().getIdOfUser(loggedInUserName);
+                List<String> loggedInUserRoles = getIdentityProvider().getRoleIdsOfUser(userId);
+                List<String> permissionRoleList = getRolesFromPermissionMap(permissionMap);
+                List<String> rolesOfUserWithAPIPermissions = null;
+                //To prevent a possible null pointer exception
+                if (loggedInUserRoles == null) {
+                    loggedInUserRoles = new ArrayList<>();
+                }
+                //get the intersection - retainAll() transforms first set to the result of intersection
+                loggedInUserRoles.retainAll(permissionRoleList);
+                if (!loggedInUserRoles.isEmpty()) {
+                    rolesOfUserWithAPIPermissions = loggedInUserRoles;
+                }
+                if (rolesOfUserWithAPIPermissions != null) {
+                    //remove all elements from set
+                    permissionArrayForUser.clear();
+                    for (String role : rolesOfUserWithAPIPermissions) {
+                        Integer permission = permissionMap.get(role);
+                        if (permission == APIMgtConstants.Permission.READ_PERMISSION) {
+                            permissionArrayForUser.add(APIMgtConstants.Permission.READ);
+                        } else if (permission == (APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.UPDATE_PERMISSION)) {
+                            permissionArrayForUser.add(APIMgtConstants.Permission.READ);
+                            permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
+                        } else if (permission == (APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.DELETE_PERMISSION)) {
+                            permissionArrayForUser.add(APIMgtConstants.Permission.READ);
+                            permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
+                        } else if (permission == APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.UPDATE_PERMISSION
+                                + APIMgtConstants.Permission.DELETE_PERMISSION) {
+                            permissionArrayForUser.add(APIMgtConstants.Permission.READ);
+                            permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
+                            permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
+                        }
                     }
                 }
             }
+        } catch (IdentityProviderException e) {
+            String errorMsg = "User " + loggedInUserName + " does not exist in the system.";
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.USER_DOES_NOT_EXIST);
         }
         List<String> finalAggregatedPermissionList = new ArrayList<>();
         finalAggregatedPermissionList.addAll(permissionArrayForUser);
