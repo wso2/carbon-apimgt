@@ -20,6 +20,10 @@ package org.wso2.carbon.apimgt.core.configuration.models;
 import org.wso2.carbon.kernel.annotations.Configuration;
 import org.wso2.carbon.kernel.annotations.Element;
 
+import java.util.ArrayList;
+import java.util.List;
+
+
 /**
  * Class to hold key manager configurations
  */
@@ -37,7 +41,6 @@ public class EnvironmentConfigurations {
 
     @Element(description = "Default environment IS Token endpoint URL")
     private String defaultEnvIsrevokeEndPoint = "";
-
 
     public String getDefaultEnvIsHost() {
         return defaultEnvIsHost;

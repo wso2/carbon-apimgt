@@ -259,7 +259,7 @@ public class DefaultKeyManagerImpl implements KeyManager {
                     ExceptionCodes.INVALID_TOKEN_REQUEST);
         }
 
-        //String environment = tokenRequest.getEnvironment();
+       // String environment = tokenRequest.getEnvironment();
         // Call the /revoke only if there's a token to be revoked.
 
         if (!StringUtils.isEmpty(tokenRequest.getTokenToRevoke())) {

@@ -78,7 +78,7 @@ public class APIMConfigurations {
     private int ratingMaxValue = 5;
 
     @Element(description = "Set of environments")
-    private EnvironmentConfigurations envs = new EnvironmentConfigurations();
+    private EnvironmentConfigurations environmentConfigs = new EnvironmentConfigurations();
 
     public String getHostname() {
         return hostname;
@@ -148,7 +148,7 @@ public class APIMConfigurations {
         return commentMaxLength;
     }
 
-    public EnvironmentConfigurations getEnvs() {
-        return envs;
+    public EnvironmentConfigurations getEnvironmentConfigs() {
+        return environmentConfigs;
     }
 }
