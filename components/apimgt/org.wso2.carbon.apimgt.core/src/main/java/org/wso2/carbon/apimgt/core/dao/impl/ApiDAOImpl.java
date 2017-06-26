@@ -2127,6 +2127,14 @@ public class ApiDAOImpl implements ApiDAO {
                 }
             }
         }
+//        else {
+//            try (PreparedStatement statement = connection.prepareStatement(query)) {
+//                    statement.setString(1, apiId);
+//                    statement.setString(2, APIMgtConstants.Permission.EVERYONE_GROUP);
+//                    statement.setInt(3, 7);
+//                    statement.execute();
+//            }
+//        }
     }
 
     /**

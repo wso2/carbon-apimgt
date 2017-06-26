@@ -660,22 +660,25 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * This method retrieves the set of overall permissions for a given api for the logged in user
      *
      * @param loggedInUserName - Logged in user
-     * @param api - The API whose permissions for the logged in user is retrieved
+     * @param api              - The API whose permissions for the logged in user is retrieved
      * @return The overall list of permissions for the given API for the logged in user
      */
     private List<String> getAPIPermissionsOfLoggedInUser(String loggedInUserName, API api)
             throws APIManagementException {
         Set<String> permissionArrayForUser = new HashSet();
-        //Setting default permissions for API
-        permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-        permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
-        permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
         Map<String, Integer> permissionMap = api.getPermissionMap();
+        String user = "tharika";
 
-        try {
-            //TODO: Remove the check for admin after IS adds an ID to admin user
-            if (permissionMap != null && !permissionMap.isEmpty() && !"admin".equals(loggedInUserName)) {
-                String userId = getIdentityProvider().getIdOfUser(loggedInUserName);
+        String createdUser = api.getCreatedBy();
+        //TODO: Remove the check for admin after IS adds an ID to admin user
+        if (user.equals(createdUser) || permissionMap == null || permissionMap.isEmpty() || "admin"
+                .equals(user)) {
+            permissionArrayForUser.add(APIMgtConstants.Permission.READ);
+            permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
+            permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
+        } else {
+            try {
+                String userId = getIdentityProvider().getIdOfUser(user);
                 List<String> loggedInUserRoles = getIdentityProvider().getRoleIdsOfUser(userId);
                 List<String> permissionRoleList = getRolesFromPermissionMap(permissionMap);
                 List<String> rolesOfUserWithAPIPermissions = null;
@@ -689,31 +692,33 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     rolesOfUserWithAPIPermissions = loggedInUserRoles;
                 }
                 if (rolesOfUserWithAPIPermissions != null) {
-                    //remove all elements from set
-                    permissionArrayForUser.clear();
+                    Integer aggregatePermissions = 0;
                     for (String role : rolesOfUserWithAPIPermissions) {
-                        Integer permission = permissionMap.get(role);
-                        if (permission == APIMgtConstants.Permission.READ_PERMISSION) {
-                            permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-                        } else if (permission == (APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.UPDATE_PERMISSION)) {
-                            permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-                            permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
-                        } else if (permission == (APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.DELETE_PERMISSION)) {
-                            permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-                            permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
-                        } else if (permission == APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.UPDATE_PERMISSION
-                                + APIMgtConstants.Permission.DELETE_PERMISSION) {
-                            permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-                            permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
-                            permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
-                        }
+                        aggregatePermissions |= permissionMap.get(role);
+                    }
+                    if (aggregatePermissions == APIMgtConstants.Permission.READ_PERMISSION) {
+                        permissionArrayForUser.add(APIMgtConstants.Permission.READ);
+                    } else if (aggregatePermissions == (APIMgtConstants.Permission.READ_PERMISSION
+                            + APIMgtConstants.Permission.UPDATE_PERMISSION)) {
+                        permissionArrayForUser.add(APIMgtConstants.Permission.READ);
+                        permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
+                    } else if (aggregatePermissions == (APIMgtConstants.Permission.READ_PERMISSION
+                            + APIMgtConstants.Permission.DELETE_PERMISSION)) {
+                        permissionArrayForUser.add(APIMgtConstants.Permission.READ);
+                        permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
+                    } else if (aggregatePermissions == APIMgtConstants.Permission.READ_PERMISSION
+                            + APIMgtConstants.Permission.UPDATE_PERMISSION
+                            + APIMgtConstants.Permission.DELETE_PERMISSION) {
+                        permissionArrayForUser.add(APIMgtConstants.Permission.READ);
+                        permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
+                        permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
                     }
                 }
+            } catch (IdentityProviderException e) {
+                String errorMsg = "User " + user + " does not exist in the system.";
+                log.error(errorMsg, e);
+                throw new APIManagementException(errorMsg, e, ExceptionCodes.USER_DOES_NOT_EXIST);
             }
-        } catch (IdentityProviderException e) {
-            String errorMsg = "User " + loggedInUserName + " does not exist in the system.";
-            log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.USER_DOES_NOT_EXIST);
         }
         List<String> finalAggregatedPermissionList = new ArrayList<>();
         finalAggregatedPermissionList.addAll(permissionArrayForUser);
