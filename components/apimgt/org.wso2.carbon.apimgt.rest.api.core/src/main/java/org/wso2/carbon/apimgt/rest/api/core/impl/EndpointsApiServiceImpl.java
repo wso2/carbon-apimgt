@@ -82,6 +82,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
             APIMgtAdminService adminService = RestApiUtil.getAPIMgtAdminService();
             List<String> endpointList = adminService.getAllEndpoints();
             endpointListDTO.setList(endpointList);
+            endpointListDTO.setCount(endpointList.size());
             return Response.ok().entity(endpointListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving APIs";

@@ -85,7 +85,48 @@ function getAPIs () (json) {
     }
     return apiList;
 }
+function getEndpoints () (json) {
 
+    string apiCoreURL;
+    message request = {};
+    message response = {};
+    json endpointList;
+    try {
+        http:ClientConnector client = create http:ClientConnector(getAPICoreURL());
+        string query = "?limit=-1";
+        response = http:ClientConnector.get (client, "/api/am/core/v1.0/endpoints" + query, request);
+        endpointList = messages:getJsonPayload(response);
+        return endpointList;
+    } catch (errors:Error e) {
+        system:println("Error occurred while retrieving gateway APIs from API Core. " + e.msg);
+        throw e;
+    }
+    return endpointList;
+}
+
+function loadGlobalEndpoints () {
+
+    json endpoints = getEndpoints();
+    int index = 0;
+    int count = (int)endpoints.count;
+    json endpointList = endpoints.list;
+
+    while (index < count) {
+
+        string endpoint = (string )endpointList[index];
+
+        //Retrieve API configuration
+        string endpointConfig;
+        int status;
+        status, endpointConfig = getEndpointConfig(endpoint);
+        if (status != Constants:NOT_FOUND) {
+            if (endpointConfig != "") {
+                deployFile(endpoint,endpointConfig);
+            }
+        }
+        index = index + 1;
+    }
+}
 
 function getAPIServiceConfig (string apiId) (int, string) {
     message request = {};
@@ -103,7 +144,22 @@ function getAPIServiceConfig (string apiId) (int, string) {
     }
     return status, apiConfig;
 }
-
+function getEndpointConfig (string endpointId) (int, string) {
+    message request = {};
+    message response = {};
+    string apiConfig;
+    int status;
+    try {
+        http:ClientConnector client = create http:ClientConnector(getAPICoreURL());
+        response = http:ClientConnector.get (client, "/api/am/core/v1.0/endpoints/" + endpointId + "/gateway-config", request);
+        apiConfig = messages:getStringPayload(response);
+        status = http:getStatusCode(response);
+    } catch (errors:Error e) {
+        system:println("Error occurred while retrieving service configuration for Endpoint : " + endpointId);
+        throw e;
+    }
+    return status, apiConfig;
+}
 function getAPICoreURL () (string) {
     string apiCoreURL;
 
@@ -121,9 +177,8 @@ function deployService (dto:APIDTO api, string config) {
     string serviceName = api.name+"_"+strings:replace(api.id,"-","_");
     deployment:deployService(fileName,serviceName,config,"org/wso2/carbon/apimgt/gateway");
     }
-function deployFile (dto:APIDTO api, string config) {
-    string fileName = api.id + ".bal";
-    string serviceName = api.name+"_"+strings:replace(api.id,"-","_");
+function deployFile (string id, string config) {
+    string fileName = id + ".bal";
     deployment:deploy(fileName, config, "org/wso2/carbon/apimgt/gateway");
 }
 function undeployService (dto:APIDTO api) {
