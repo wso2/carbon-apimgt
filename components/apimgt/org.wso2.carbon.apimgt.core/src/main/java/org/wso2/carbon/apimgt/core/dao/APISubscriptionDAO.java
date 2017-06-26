@@ -181,7 +181,7 @@ public interface APISubscriptionDAO {
      * @param uuid   UUID of new subscription
      * @param apiId  API ID
      * @param appId  Application ID
-     * @param policyId   subscription policyId
+     * @param policyId   Subscription tier's policy id
      * @param status {@code APIConstants.SubscriptionStatus} Subscription state
      * @throws APIMgtDAOException   If failed to add subscription.
      */

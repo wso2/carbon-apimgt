@@ -217,19 +217,20 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         apiBuilder.lastUpdatedTime(localDateTime);
         apiBuilder.createdBy(getUsername());
         apiBuilder.updatedBy(getUsername());
-        validateApiEndpoints(apiBuilder);
+        Map<String, Endpoint> apiEndpointMap = apiBuilder.getEndpoint();
+        validateEndpoints(apiEndpointMap, false);
         try {
             if (!isApiNameExist(apiBuilder.getName()) && !isContextExist(apiBuilder.getContext())) {
                 LifecycleState lifecycleState = getApiLifecycleManager().addLifecycle(APIMgtConstants.API_LIFECYCLE,
                         getUsername());
                 apiBuilder.associateLifecycle(lifecycleState);
 
-                createUriTemplateList(apiBuilder);
+                createUriTemplateList(apiBuilder, false);
 
                 List<UriTemplate> list = new ArrayList<>(apiBuilder.getUriTemplates().values());
                 List<TemplateBuilderDTO> resourceList = new ArrayList<>();
 
-                validateApiPolicy(apiBuilder, "Api Policy " + apiBuilder.getApiPolicy() + "Couldn't find");
+                validateApiPolicy(apiBuilder.getApiPolicy());
                 validateSubscriptionPolicies(apiBuilder);
                 for (UriTemplate uriTemplate : list) {
                     TemplateBuilderDTO dto = new TemplateBuilderDTO();
@@ -333,10 +334,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         return apiBuilder.getId();
     }
 
-    private void validateApiEndpoints(API.APIBuilder apiBuilder) throws APIManagementException {
-        Map<String, Endpoint> apiEndpointMap = apiBuilder.getEndpoint();
-        if (apiEndpointMap != null) {
-            for (Map.Entry<String, Endpoint> entry : apiEndpointMap.entrySet()) {
+    private void validateEndpoints(Map<String, Endpoint> endpointMap, boolean apiUpdate) throws
+            APIManagementException {
+        if (endpointMap != null) {
+            for (Map.Entry<String, Endpoint> entry : endpointMap.entrySet()) {
                 if (APIMgtConstants.API_SPECIFIC_ENDPOINT.equals(entry.getValue().getApplicableLevel())) {
                     Endpoint.Builder endpointBuilder = new Endpoint.Builder(entry.getValue());
                     if (StringUtils.isEmpty(endpointBuilder.getId())) {
@@ -347,12 +348,25 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     }
                     Endpoint endpoint = endpointBuilder.build();
                     try {
-                        if (getApiDAO().getEndpointByName(endpoint.getName()) != null) {
-                            String msg = "Endpoint Already Exist By Name : " + endpoint.getName();
-                            throw new APIManagementException(msg, ExceptionCodes
-                                    .ENDPOINT_ALREADY_EXISTS);
+                        Endpoint existingEndpoint = getApiDAO().getEndpoint(endpoint.getId());
+                        if (existingEndpoint == null) {
+                            if (getApiDAO().getEndpointByName(endpoint.getName()) != null) {
+                                String msg = "Endpoint Already Exist By Name : " + endpoint.getName();
+                                throw new APIManagementException(msg, ExceptionCodes
+                                        .ENDPOINT_ALREADY_EXISTS);
+                            } else {
+                                endpointMap.replace(entry.getKey(), endpointBuilder.build());
+                            }
                         } else {
-                            apiEndpointMap.replace(entry.getKey(), endpointBuilder.build());
+                            if (apiUpdate && !existingEndpoint.getName().equals(endpoint.getName())) {
+                                if (getApiDAO().getEndpointByName(endpoint.getName()) != null) {
+                                    String msg = "Endpoint Already Exist By Name : " + endpoint.getName();
+                                    throw new APIManagementException(msg, ExceptionCodes
+                                            .ENDPOINT_ALREADY_EXISTS);
+                                } else {
+                                    endpointMap.replace(entry.getKey(), endpointBuilder.build());
+                                }
+                            }
                         }
                     } catch (APIMgtDAOException e) {
                         String msg = "Couldn't find Endpoint By Name : " + endpoint.getName();
@@ -361,73 +375,38 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     }
 
                 } else {
-                    apiEndpointMap.replace(entry.getKey(), getEndpoint(entry.getValue().getId()));
+                    endpointMap.replace(entry.getKey(), getEndpoint(entry.getValue().getId()));
                 }
             }
         }
     }
 
-    private void validateApiPolicy(API.APIBuilder apiBuilder, String message) throws APIManagementException {
-        if (apiBuilder.getApiPolicy() != null) {
-            Policy apiPolicy = getPolicyByName(APIMgtAdminService.PolicyLevel.api, apiBuilder.getApiPolicy()
-                    .getPolicyName());
-            if (apiPolicy == null) {
-                throw new APIManagementException(message,
-                        ExceptionCodes.POLICY_NOT_FOUND);
-            }
-            apiBuilder.apiPolicy(apiPolicy);
+    private void validateApiPolicy(Policy policy) throws APIManagementException {
+        if (policy != null) {
+            Policy apiPolicy = getPolicyByName(APIMgtAdminService.PolicyLevel.api, policy.getPolicyName());
+            policy.setUuid(apiPolicy.getUuid());
         }
     }
 
-    private void createUriTemplateList(API.APIBuilder apiBuilder) throws APIManagementException {
+    private void createUriTemplateList(API.APIBuilder apiBuilder, boolean update) throws APIManagementException {
         Map<String, UriTemplate> uriTemplateMap = new HashMap();
         if (apiBuilder.getUriTemplates().isEmpty()) {
             apiBuilder.uriTemplates(APIUtils.getDefaultUriTemplates());
             apiBuilder.apiDefinition(apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder));
-        } else {
-            for (UriTemplate uriTemplate : apiBuilder.getUriTemplates().values()) {
-                UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder
-                        (uriTemplate);
-                if (StringUtils.isEmpty(uriTemplateBuilder.getTemplateId())) {
-                    uriTemplateBuilder.templateId(APIUtils.generateOperationIdFromPath(uriTemplate
-                            .getUriTemplate(), uriTemplate.getHttpVerb()));
-                }
-                if (uriTemplate.getEndpoint() != null && !uriTemplate.getEndpoint().isEmpty()) {
-                    for (Map.Entry<String, Endpoint> entry : uriTemplate.getEndpoint().entrySet()) {
-                        if (APIMgtConstants.API_SPECIFIC_ENDPOINT.equals(entry.getValue().getApplicableLevel
-                                ())) {
-                            Endpoint.Builder endpointBuilder = new Endpoint.Builder(entry.getValue
-                                    ());
-                            if (StringUtils.isEmpty(endpointBuilder.getId())) {
-                                endpointBuilder.id(UUID.randomUUID().toString());
-                            }
-                            if (StringUtils.isEmpty(endpointBuilder.getApplicableLevel())) {
-                                endpointBuilder.applicableLevel(APIMgtConstants.API_SPECIFIC_ENDPOINT);
-                            }
-                            Endpoint endpoint = endpointBuilder.build();
-                            try {
-                                if (getApiDAO().getEndpointByName(endpoint.getName()) != null) {
-                                    String msg = "Endpoint Already Exist By Name : " + endpoint.getName();
-                                    throw new APIManagementException(msg, ExceptionCodes
-                                            .ENDPOINT_ALREADY_EXISTS);
-                                } else {
-                                    uriTemplate.getEndpoint().replace(entry.getKey(), endpoint);
-                                }
-                            } catch (APIMgtDAOException e) {
-                                String msg = "Couldn't find Endpoint By Name : " + endpoint.getName();
-                                log.error(msg, e);
-                                throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
-                            }
-                        } else {
-                            uriTemplateBuilder.getEndpoint().replace(entry.getKey(), getEndpoint(entry
-                                    .getValue().getId()));
-                        }
-                    }
-                }
-                uriTemplateMap.put(uriTemplateBuilder.getTemplateId(), uriTemplateBuilder.build());
-            }
-            apiBuilder.uriTemplates(uriTemplateMap);
         }
+        for (UriTemplate uriTemplate : apiBuilder.getUriTemplates().values()) {
+            UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder
+                    (uriTemplate);
+            if (StringUtils.isEmpty(uriTemplateBuilder.getTemplateId())) {
+                uriTemplateBuilder.templateId(APIUtils.generateOperationIdFromPath(uriTemplate
+                        .getUriTemplate(), uriTemplate.getHttpVerb()));
+            }
+            Map<String, Endpoint> endpointMap = uriTemplateBuilder.getEndpoint();
+            validateEndpoints(endpointMap, update);
+            validateApiPolicy(uriTemplateBuilder.getPolicy());
+            uriTemplateMap.put(uriTemplateBuilder.getTemplateId(), uriTemplateBuilder.build());
+        }
+        apiBuilder.uriTemplates(uriTemplateMap);
     }
 
     /**
@@ -470,10 +449,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         roleNamePermissionList = getAPIPermissionArray(apiBuilder.getPermission());
                         apiBuilder.permissionMap(roleNamePermissionList);
                     }
-                    validateApiEndpoints(apiBuilder);
-                    createUriTemplateList(apiBuilder);
-                    validateApiPolicy(apiBuilder, "Api Policy " + apiBuilder.getApiPolicy() + "Couldn't " +
-                            "find");
+                    Map<String, Endpoint> apiEndpointMap = apiBuilder.getEndpoint();
+                    validateEndpoints(apiEndpointMap, true);
+                    createUriTemplateList(apiBuilder, true);
+                    validateApiPolicy(apiBuilder.getApiPolicy());
                     validateSubscriptionPolicies(apiBuilder);
                     String updatedSwagger = apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder);
                     String gatewayConfig = getApiGatewayConfig(apiBuilder.getId());

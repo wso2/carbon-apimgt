@@ -233,6 +233,7 @@ public class APIUtils {
         for (String httpVerb : APIMgtConstants.SUPPORTED_HTTP_VERBS.split(",")) {
             if (!HttpMethod.OPTIONS.toString().equals(httpVerb)) {
                 uriTemplateBuilder.httpVerb(httpVerb);
+                uriTemplateBuilder.policy(APIUtils.getDefaultAPIPolicy());
                 uriTemplateBuilder.templateId(APIUtils.generateOperationIdFromPath(uriTemplateBuilder.getUriTemplate
                         (), httpVerb));
                 uriTemplateMap.put(uriTemplateBuilder.getTemplateId(), uriTemplateBuilder.build());

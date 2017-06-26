@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.BlockConditionAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.BlockConditions;
@@ -2143,7 +2144,7 @@ public class PolicyDAOImpl implements PolicyDAO {
 
     @Override
     public Policy getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel policyLevel, String policyName)
-            throws APIMgtDAOException {
+            throws APIMgtDAOException, APIMgtResourceNotFoundException {
         Policy policy = null;
         final String apiPolicyQuery = "SELECT UUID,NAME FROM AM_API_POLICY WHERE NAME = ?";
         final String applicationPolicyQuery = "SELECT UUID,NAME FROM AM_APPLICATION_POLICY WHERE NAME = ?";
@@ -2187,6 +2188,10 @@ public class PolicyDAOImpl implements PolicyDAO {
             String msg = "Error while retrieving policies";
             log.error(msg, e);
             throw new APIMgtDAOException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        if (policy == null) {
+            throw new APIMgtResourceNotFoundException("Policy " + policyLevel + "Couldn't found " + policyName,
+                    ExceptionCodes.POLICY_NOT_FOUND);
         }
         return policy;
     }

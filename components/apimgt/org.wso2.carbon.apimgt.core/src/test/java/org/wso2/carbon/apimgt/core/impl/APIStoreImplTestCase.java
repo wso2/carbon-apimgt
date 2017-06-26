@@ -1446,12 +1446,8 @@ public class APIStoreImplTestCase {
     }
 
     private APIStore getApiStoreImpl(ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
-            apiSubscriptionDAO,
-
-                                     WorkflowDAO workflowDAO, APIGateway apiGateway, PolicyDAO policyDAO) {
+            apiSubscriptionDAO, WorkflowDAO workflowDAO, APIGateway apiGateway, PolicyDAO policyDAO) {
         return new APIStoreImpl(USER_NAME, null, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, null, null,
                 workflowDAO, null, apiGateway);
-
-
     }
 }

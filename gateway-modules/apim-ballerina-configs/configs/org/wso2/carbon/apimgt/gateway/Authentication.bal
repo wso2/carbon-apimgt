@@ -155,11 +155,6 @@ function validateSubscription (string apiContext, string version, dto:Introspect
 }
 function validateResource (string apiContext, string apiVersion, string uriTemplate, string verb) (dto:ResourceDto) {
     dto:ResourceDto resourceDto = holder:getFromResourceCache(apiContext, apiVersion, uriTemplate, verb);
-    if (resourceDto == null) {
-        //cachedKey doesn't exist in cache
-        gatewayUtil:retrieveResources(apiContext, apiVersion);
-        resourceDto = holder:getFromResourceCache(apiContext, apiVersion, uriTemplate, verb);
-    }
     return resourceDto;
 }
 function validateScopes (dto:ResourceDto resourceDto, dto:IntrospectDto introspectDto) (boolean){

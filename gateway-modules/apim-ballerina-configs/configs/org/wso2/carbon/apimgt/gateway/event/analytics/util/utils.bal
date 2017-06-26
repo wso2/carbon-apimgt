@@ -41,7 +41,7 @@ function getThrottleEventPayload (dto:ThrottleEventHolderDTO throttleEventHolder
 
     json dataArr = [throttleEventDTO.messageID, throttleEventDTO.appKey, throttleEventDTO.applicationTier,
                     throttleEventDTO.apiKey, throttleEventDTO.apiTier, throttleEventDTO.subscriptionKey,
-                    throttleEventDTO.policy, throttleEventDTO.resourceLevelThrottleKey,
+                    throttleEventDTO.subscriptionTier, throttleEventDTO.resourceLevelThrottleKey,
                     throttleEventDTO.resourceTier, throttleEventDTO.userId, throttleEventDTO.apiContext,
                     throttleEventDTO.apiVersion, throttleEventDTO.appTenant, throttleEventDTO.apiTenant,
                     throttleEventDTO.applicationId, throttleEventDTO.apiName, throttleEventDTO.properties];

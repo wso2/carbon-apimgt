@@ -53,6 +53,7 @@ service apimPublisherEventListner {
                     gatewayUtil:deployService(api, apiConfig);
                     //Update API cache
                     holder:putIntoAPICache(api);
+                    gatewayUtil:retrieveResources(api.context,api.version);
                 } else {
                     system:println("Invalid json received");
                 }

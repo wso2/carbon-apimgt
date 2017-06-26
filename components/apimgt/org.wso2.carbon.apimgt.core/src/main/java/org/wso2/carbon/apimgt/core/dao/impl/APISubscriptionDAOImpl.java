@@ -407,7 +407,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      * @param uuid     UUID of new subscription
      * @param apiId    API ID
      * @param appId    Application ID
-     * @param policyId Subscription tier
+     * @param policyId Subscription tier's policy id
      * @param status   {@link  org.wso2.carbon.apimgt.core.util.APIMgtConstants.SubscriptionStatus} Subscription state
      * @throws APIMgtDAOException If failed to add subscription.
      */

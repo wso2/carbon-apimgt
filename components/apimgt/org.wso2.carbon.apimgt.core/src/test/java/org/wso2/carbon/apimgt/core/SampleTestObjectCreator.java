@@ -79,6 +79,7 @@ import java.util.UUID;
 import static org.wso2.carbon.apimgt.core.dao.impl.PolicyDAOImpl.SECONDS_TIMUNIT;
 import static org.wso2.carbon.apimgt.core.dao.impl.PolicyDAOImpl.UNLIMITED_TIER;
 import static org.wso2.carbon.apimgt.core.models.policy.PolicyConstants.REQUEST_COUNT_TYPE;
+import static org.wso2.carbon.apimgt.core.util.APIMgtConstants.SANDBOX_ENDPOINT;
 
 public class SampleTestObjectCreator {
 
@@ -791,7 +792,11 @@ public class SampleTestObjectCreator {
     public static Map<String, Endpoint> getMockEndpointMap() {
         Map<String, Endpoint> endpointMap = new HashedMap();
         endpointMap.put(PRODUCTION_ENDPOINT,
-                new Endpoint.Builder().id(endpointId).applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).build());
+                new Endpoint.Builder().id(endpointId).applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).name
+                        ("production").build());
+        endpointMap.put(SANDBOX_ENDPOINT,
+                new Endpoint.Builder().id(UUID.randomUUID().toString()).name("sandbox").applicableLevel(APIMgtConstants
+                        .API_SPECIFIC_ENDPOINT).build());
         return endpointMap;
     }
 

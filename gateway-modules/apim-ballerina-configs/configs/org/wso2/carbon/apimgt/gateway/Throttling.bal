@@ -171,7 +171,7 @@ function setInvalidUser(message msg){
 
 
 function publishEvent(message m, string userId, string applicationId, string apiContext, string apiVersion,string apiTier,
-                      string applicationTier, string policy, string resourceLevelThrottleKey, string resourceTier,string ip) {
+                      string applicationTier, string subscriptionTier, string resourceLevelThrottleKey, string resourceTier,string ip) {
 
     string messageID = "messageID";
     string appKey = applicationId+ ":" + userId;
@@ -196,7 +196,7 @@ function publishEvent(message m, string userId, string applicationId, string api
     throttleEventDTO.apiKey = apiKey;
     throttleEventDTO.apiTier = apiTier;
     throttleEventDTO.subscriptionKey = subscriptionKey;
-    throttleEventDTO.policy = policy;
+    throttleEventDTO.subscriptionTier = subscriptionTier;
     throttleEventDTO.resourceLevelThrottleKey = resourceLevelThrottleKey;
     throttleEventDTO.resourceTier = resourceTier;
     throttleEventDTO.userId = userId;
