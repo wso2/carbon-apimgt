@@ -92,6 +92,10 @@ function getAnalyticsConf () (dto:AnalyticsInfoDTO){
     return gatewayConf.analyticsInfo;
 }
 
+function getThrottleConf () (dto:ThrottlingInfoDTO) {
+    return gatewayConf.throttlingInfo;
+}
+
 function putIntoApplicationCache (dto:ApplicationDto applicationDto) {
     caching:putCacheEntry(constants:APPLICATION_CACHE,applicationDto.applicationId,applicationDto);
 }
