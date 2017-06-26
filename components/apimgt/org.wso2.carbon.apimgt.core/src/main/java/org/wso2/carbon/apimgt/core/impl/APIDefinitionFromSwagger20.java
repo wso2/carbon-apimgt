@@ -212,6 +212,9 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         if (swagger.getVendorExtensions() != null) {
             String basePath = swagger.getBasePath();
             String nameSpace = getNamespaceFromBasePath(basePath);
+            if (nameSpace == null) {
+                return new HashMap<>();
+            }
             String securityHeaderScopes = null;
             //read security header from deployment.yaml
             if (localConfigMap.containsKey(nameSpace)) {

@@ -146,7 +146,10 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_SCOPE(900910, "Invalid Scope", 403, " You are not authorized to access the resource."),
     INVALID_AUTHORIZATION_HEADER(900911, "Invalid Authorization header", 401,
             " Please provide the Authorization : Bearer <> token to proceed."),
-
+    MALFORMED_AUTHORIZATION_HEADER_OAUTH(900912, "Malformed Authorization Header", 400,
+            "Please provide the Authorization : Bearer <> token to proceed."),
+    MALFORMED_AUTHORIZATION_HEADER_BASIC(900913, "Malformed Authorization Header", 400,
+            "Please provide the Authorization : Basic <> token to proceed."),
     OAUTH2_APP_CREATION_FAILED(900950, "Key Management Error", 500, "Error while creating the consumer application."),
     OAUTH2_APP_ALREADY_EXISTS(900951, "Key Management Error", 409, "OAuth2 application already created."),
     OAUTH2_APP_DELETION_FAILED(900952, "Key Management Error", 500, "Error while deleting the consumer application."),
@@ -168,7 +171,9 @@ public enum ExceptionCodes implements ErrorHandler {
     //Throttle related codes
     THROTTLE_TEMPLATE_EXCEPTION(900969, "Policy Generating Error", 500, " Error while generate policy configuration"),
     ENDPOINT_CONFIG_NOT_FOUND(90070, "Endpoint Config Not found", 404, "Error while retrieving Endpoint " +
-            "Configuration");
+            "Configuration"),
+    UNSUPPORTED_THROTTLE_CONDITION_TYPE(900975, "Throttle Condition Error", 400, "Throttle Condition type is not "
+            + "supported");
 
     private final long errorCode;
     private final String errorMessage;

@@ -95,7 +95,7 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
             }
         } else {
             throw new APIMgtSecurityException("Missing Authorization header in the request.`",
-                    ExceptionCodes.INVALID_AUTHORIZATION_HEADER);
+                    ExceptionCodes.MALFORMED_AUTHORIZATION_HEADER_OAUTH);
         }
 
         return isTokenValid;
@@ -293,8 +293,8 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
             }
         }
 
-        throw new APIMgtSecurityException("Invalid Authorization header: " +
-                authHeader, ExceptionCodes.INVALID_AUTHORIZATION_HEADER);
+        throw new APIMgtSecurityException("Invalid Authorization : Bearer header " +
+                authHeader, ExceptionCodes.MALFORMED_AUTHORIZATION_HEADER_OAUTH);
     }
 
     /**
