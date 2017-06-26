@@ -293,7 +293,7 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
             }
         }
 
-        throw new APIMgtSecurityException("Invalid Authorization : Bearer parameter " +
+        throw new APIMgtSecurityException("Invalid Authorization : Bearer header " +
                 authHeader, ExceptionCodes.MALFORMED_AUTHORIZATION_HEADER_OAUTH);
     }
 

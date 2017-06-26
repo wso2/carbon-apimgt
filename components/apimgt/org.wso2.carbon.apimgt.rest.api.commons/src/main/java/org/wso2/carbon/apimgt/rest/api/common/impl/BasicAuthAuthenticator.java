@@ -63,7 +63,7 @@ public class BasicAuthAuthenticator implements RESTAPIAuthenticator {
                     return true;
                 }
             } else {
-                throw new APIMgtSecurityException("Missing 'Authorization : Basic' parameter in the request.`",
+                throw new APIMgtSecurityException("Missing 'Authorization : Basic' header in the request.`",
                         ExceptionCodes.MALFORMED_AUTHORIZATION_HEADER_BASIC);
             }
 
