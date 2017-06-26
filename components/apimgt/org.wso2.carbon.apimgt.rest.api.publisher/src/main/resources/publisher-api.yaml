@@ -2823,7 +2823,7 @@ paths:
       x-scope: apim:workflow_approve
       summary: Update workflow status
       description: |
-        This operation can be used to approve or reject a workflow task. .
+        This operation can be used to approve or reject a workflow task.
       parameters:
        - $ref: '#/parameters/workflowReferenceId'
        - in: body
