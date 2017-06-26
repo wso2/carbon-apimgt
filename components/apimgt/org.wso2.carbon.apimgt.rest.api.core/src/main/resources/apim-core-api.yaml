@@ -865,6 +865,11 @@ definitions:
   EndpointList:
     title: Endpoint List
     properties:
+      count:
+        type: integer
+        description: |
+          Number of APIs returned.
+        example: 1
       list:
         type: array
         items:
