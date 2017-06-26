@@ -251,7 +251,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
                     .APPLICATION_CREATE);
             applicationEvent.setApplicationId(application.getId());
             applicationEvent.setName(application.getName());
-            applicationEvent.setThrottlingTier(application.getPolicyId());
+            applicationEvent.setThrottlingTier(application.getPolicy().getUuid());
             applicationEvent.setSubscriber(application.getCreatedUser());
             publishToStoreTopic(applicationEvent);
             if (log.isDebugEnabled()) {
@@ -269,7 +269,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
                     .APPLICATION_UPDATE);
             applicationEvent.setApplicationId(application.getId());
             applicationEvent.setName(application.getName());
-            applicationEvent.setThrottlingTier(application.getPolicyId());
+            applicationEvent.setThrottlingTier(application.getPolicy().getUuid());
             applicationEvent.setSubscriber(application.getCreatedUser());
             publishToStoreTopic(applicationEvent);
             if (log.isDebugEnabled()) {

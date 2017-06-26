@@ -40,6 +40,9 @@ public class APIPolicy extends Policy {
         super(name);
     }
 
+    public APIPolicy(String uuid, String policyName) {
+        super(uuid, policyName);
+    }
 
     public List<Pipeline> getPipelines() {
         return pipelines;

@@ -62,6 +62,7 @@ function loadAPIs () {
        // deployService(api, apiConfig);
         //Update API cache
         holder:putIntoAPICache(api);
+        retrieveResources(api.context, api.version);
         index = index + 1;
     }
 }
@@ -120,6 +121,11 @@ function deployService (dto:APIDTO api, string config) {
     string serviceName = api.name+"_"+strings:replace(api.id,"-","_");
     deployment:deployService(fileName,serviceName,config,"org/wso2/carbon/apimgt/gateway");
     }
+function deployFile (dto:APIDTO api, string config) {
+    string fileName = api.id + ".bal";
+    string serviceName = api.name+"_"+strings:replace(api.id,"-","_");
+    deployment:deploy(fileName, config, "org/wso2/carbon/apimgt/gateway");
+}
 function undeployService (dto:APIDTO api) {
     //TODO:To be implemented
 }

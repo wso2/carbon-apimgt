@@ -27,8 +27,6 @@ public class TemplateBuilderDTO {
     private String templateId;
     private String uriTemplate;
     private String httpVerb;
-    private String authType;
-    private String policy;
     private String produce;
     private String consume;
     private Endpoint productionEndpoint;
@@ -56,22 +54,6 @@ public class TemplateBuilderDTO {
 
     public void setHttpVerb(String httpVerb) {
         this.httpVerb = httpVerb;
-    }
-
-    public String getAuthType() {
-        return authType;
-    }
-
-    public void setAuthType(String authType) {
-        this.authType = authType;
-    }
-
-    public String getPolicy() {
-        return policy;
-    }
-
-    public void setPolicy(String policy) {
-        this.policy = policy;
     }
 
     public String getProduce() {

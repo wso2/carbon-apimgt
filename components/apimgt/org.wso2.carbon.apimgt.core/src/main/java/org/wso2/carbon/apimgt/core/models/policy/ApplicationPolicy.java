@@ -29,6 +29,10 @@ public class ApplicationPolicy extends Policy {
         super(name);
     }
 
+    public ApplicationPolicy(String uuid, String policyName) {
+        super(uuid, policyName);
+    }
+    
     public String getCustomAttributes() {
         return customAttributes;
     }
@@ -40,7 +44,7 @@ public class ApplicationPolicy extends Policy {
     @Override
     public String toString() {
         return "ApplicationPolicy [policyName=" + getPolicyName()
-                + ", applicationId =" + getUuid() + ", description=" + getDescription() + ", defaultQuotaPolicy="
+                + ", policyUUID =" + getUuid() + ", description=" + getDescription() + ", defaultQuotaPolicy="
                 + getDefaultQuotaPolicy() + "]";
     }
 }

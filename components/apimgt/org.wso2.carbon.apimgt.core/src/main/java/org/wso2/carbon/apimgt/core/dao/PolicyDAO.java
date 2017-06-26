@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.core.dao;
 
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.models.BlockConditions;
 import org.wso2.carbon.apimgt.core.models.PolicyValidationData;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
@@ -328,5 +329,16 @@ public interface PolicyDAO {
      * @throws APIMgtDAOException if policy deletion failed
      */
     void deleteCustomPolicy(String uuid) throws APIMgtDAOException;
+
+    /**
+     * Gets Policy by level and name
+     *
+     * @param policyLevel policy level
+     * @param policyName  Policy Name
+     * @return {@link Policy} instance
+     * @throws APIMgtDAOException If failed to get the Policies
+     */
+    Policy getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel policyLevel, String policyName)
+            throws APIMgtDAOException, APIMgtResourceNotFoundException;
 
 }

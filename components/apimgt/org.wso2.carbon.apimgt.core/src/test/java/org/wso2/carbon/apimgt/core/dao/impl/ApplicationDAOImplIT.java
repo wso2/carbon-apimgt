@@ -194,6 +194,7 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
             }
         }
     }
+
     @Test
     public void testGetAllApplicationsForValidation() throws Exception {
 
@@ -213,16 +214,12 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
             Assert.assertNotNull(application);
             if (application.getName().equals(app1.getName())) {
                 validateApp(application, app1, policyDAO);
-                validateAppTimestamps(application, app1);
             } else if (application.getName().equals(app2.getName())) {
                 validateApp(application, app2, policyDAO);
-                validateAppTimestamps(application, app2);
             } else if (application.getName().equals(app3.getName())) {
                 validateApp(application, app3, policyDAO);
-                validateAppTimestamps(application, app3);
             } else if (application.getName().equals(app4.getName())) {
                 validateApp(application, app4, policyDAO);
-                validateAppTimestamps(application, app4);
             } else {
                 Assert.fail("Invalid Application returned.");
             }
@@ -287,16 +284,16 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
             APIMgtDAOException, IllegalAccessException {
         Assert.assertEquals(appFromDB.getName(), expectedApp.getName(), TestUtil.printDiff(appFromDB.getName(),
                 expectedApp.getName()));
-        Assert.assertEquals(appFromDB.getDescription(), expectedApp.getDescription(), TestUtil.printDiff(appFromDB
-                .getDescription(), expectedApp.getDescription()));
         Assert.assertEquals(appFromDB.getStatus(), expectedApp.getStatus(), TestUtil.printDiff(appFromDB.getStatus(),
                 expectedApp.getStatus()));
         Assert.assertEquals(appFromDB.getCreatedUser(), expectedApp.getCreatedUser(), TestUtil.printDiff(appFromDB
                 .getCreatedUser(), expectedApp.getCreatedUser()));
         Assert.assertEquals(appFromDB.getId(), expectedApp.getId(), TestUtil.printDiff(appFromDB.getId(), expectedApp
                 .getId()));
-        Assert.assertEquals(policyDAO.getApplicationPolicyByUuid(appFromDB.getTier()).getPolicyName(), expectedApp
-                .getTier(), TestUtil.printDiff(policyDAO.getApplicationPolicyByUuid(appFromDB.getTier())
-                .getPolicyName(), expectedApp.getTier()));
+        Assert.assertEquals(policyDAO.getApplicationPolicyByUuid(appFromDB.getPolicy().getUuid()).getPolicyName(),
+                expectedApp
+                .getPolicy().getPolicyName(), TestUtil.printDiff(policyDAO.getApplicationPolicyByUuid(appFromDB
+                        .getPolicy().getUuid())
+                .getPolicyName(), expectedApp.getPolicy().getPolicyName()));
     }
 }
