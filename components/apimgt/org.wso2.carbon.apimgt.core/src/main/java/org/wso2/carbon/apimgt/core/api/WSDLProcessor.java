@@ -31,7 +31,11 @@ public interface WSDLProcessor {
 
     WSDLInfo getWsdlInfo() throws APIMgtWSDLException;
 
-    void updateEndpoints(String[] endpointURLs) throws APIMgtWSDLException;
+    String getWSDL() throws APIMgtWSDLException;
 
-    String getWSDLString() throws APIMgtWSDLException;
+    String getWSDL(String labelName) throws APIMgtWSDLException;
+
+    String getWSDLArchive() throws APIMgtWSDLException;
+
+    String getWSDLArchive(String labelName) throws APIMgtWSDLException;
 }

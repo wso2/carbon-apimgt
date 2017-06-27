@@ -1191,6 +1191,35 @@ public class ApisApiServiceImpl extends ApisApiService {
         }
     }
 
+    @Override
+    public Response apisApiIdWsdlGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince,
+            Request request) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+
+            String wsdl = apiPublisher.getWSDLOfAPI(apiId);
+            if (wsdl != null) {
+                return Response.ok(wsdl, MediaType.TEXT_PLAIN).build();  //TODO text/xml content type
+            } else {
+                return Response.noContent().build();
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving thumbnail of API : " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+    @Override
+    public Response apisApiIdWsdlPut(String apiId, String inlineContent, String contentType, String ifMatch,
+            String ifUnmodifiedSince, Request request) throws NotFoundException {
+        return null;
+    }
+
     /**
      * Change the lifecycle state of an API
      *

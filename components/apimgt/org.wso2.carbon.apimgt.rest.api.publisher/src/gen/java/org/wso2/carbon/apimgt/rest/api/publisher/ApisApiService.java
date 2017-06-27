@@ -130,6 +130,17 @@ public abstract class ApisApiService {
  ,String ifMatch
  ,String ifUnmodifiedSince
  , Request request) throws NotFoundException;
+    public abstract Response apisApiIdWsdlGet(String apiId
+ ,String accept
+ ,String ifNoneMatch
+ ,String ifModifiedSince
+ , Request request) throws NotFoundException;
+    public abstract Response apisApiIdWsdlPut(String apiId
+ ,String inlineContent
+ ,String contentType
+ ,String ifMatch
+ ,String ifUnmodifiedSince
+ , Request request) throws NotFoundException;
     public abstract Response apisChangeLifecyclePost(String action
  ,String apiId
  ,String lifecycleChecklist

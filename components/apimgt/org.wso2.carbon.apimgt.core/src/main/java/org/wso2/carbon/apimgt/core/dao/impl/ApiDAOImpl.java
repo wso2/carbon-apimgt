@@ -923,7 +923,7 @@ public class ApiDAOImpl implements ApiDAO {
         try (Connection connection = DAOUtil.getConnection()) {
             if (!StringUtils.isEmpty(wsdlContent)) {
                 ApiResourceDAO
-                        .addBinaryResource(connection, apiId, UUID.randomUUID().toString(), ResourceCategory.WSDL,
+                        .addBinaryResource(connection, apiId, UUID.randomUUID().toString(), ResourceCategory.WSDL_TEXT,
                                 MediaType.TEXT_XML,
                                 new ByteArrayInputStream(wsdlContent.getBytes(StandardCharsets.UTF_8)), createdBy);
             } else {
@@ -938,7 +938,7 @@ public class ApiDAOImpl implements ApiDAO {
         try (Connection connection = DAOUtil.getConnection()) {
             if (!StringUtils.isEmpty(wsdlContent)) {
                 ApiResourceDAO
-                        .updateBinaryResourceForCategory(connection, apiId, ResourceCategory.WSDL,
+                        .updateBinaryResourceForCategory(connection, apiId, ResourceCategory.WSDL_TEXT,
                                 new ByteArrayInputStream(wsdlContent.getBytes(StandardCharsets.UTF_8)), updatedBy);
             } else {
                 log.warn("WSDL content to be updated is empty for " + apiId);
@@ -952,7 +952,7 @@ public class ApiDAOImpl implements ApiDAO {
         try (Connection connection = DAOUtil.getConnection()) {
 
             InputStream gatewayConfig = ApiResourceDAO
-                    .getBinaryValueForCategory(connection, apiId, ResourceCategory.WSDL, ApiType.STANDARD);
+                    .getBinaryValueForCategory(connection, apiId, ResourceCategory.WSDL_TEXT, ApiType.STANDARD);
 
             if (gatewayConfig != null) {
                 return IOUtils.toString(gatewayConfig, StandardCharsets.UTF_8);
@@ -1872,7 +1872,7 @@ public class ApiDAOImpl implements ApiDAO {
                         labels(getLabelNames(connection, apiPrimaryKey)).
                         wsdlUri(ApiResourceDAO.
                                 getTextValueForCategory(connection, apiPrimaryKey,
-                                        ResourceCategory.WSDL)).
+                                        ResourceCategory.WSDL_TEXT)).
                         transport(getTransports(connection, apiPrimaryKey)).
                         endpoint(getEndPointsForApi(connection, apiPrimaryKey)).
                         apiPermission(getPermissionsStringForApi(connection, apiPrimaryKey)).

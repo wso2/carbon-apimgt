@@ -119,7 +119,7 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
         }
     }
 
-    public String getWSDLString() throws APIMgtWSDLException {
+    public String getWSDL() throws APIMgtWSDLException {
         WSDLWriter writer = getWsdlFactoryInstance().newWSDLWriter();
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try {
@@ -129,6 +129,28 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
                     ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
         }
         return byteArrayOutputStream.toString();
+    }
+
+    public String getWSDL(String labelName) throws APIMgtWSDLException {
+        WSDLWriter writer = getWsdlFactoryInstance().newWSDLWriter();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try {
+            writer.writeWSDL(wsdlDefinition, byteArrayOutputStream);
+        } catch (WSDLException e) {
+            throw new APIMgtWSDLException("Error while stringifying WSDL definition", e,
+                    ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
+        }
+        return byteArrayOutputStream.toString();
+    }
+
+    @Override
+    public String getWSDLArchive() throws APIMgtWSDLException {
+        return null;
+    }
+
+    @Override
+    public String getWSDLArchive(String labelName) throws APIMgtWSDLException {
+        return null;
     }
 
     /**
