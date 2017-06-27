@@ -53,7 +53,7 @@ service apimPublisherEventListner {
                     gatewayUtil:deployService(api, apiConfig);
                     //Update API cache
                     holder:putIntoAPICache(api);
-                    gatewayUtil:retrieveResources(api.context,api.version);
+                    gatewayUtil:retrieveResources(api.context, api.version);
                 } else {
                     system:println("Invalid json received");
                 }
@@ -78,7 +78,7 @@ service apimPublisherEventListner {
                             break;
                         }
                     }            //Update API service
-                    gatewayUtil:updateService(api, apiConfig);
+                    gatewayUtil:deployService(api, apiConfig);
                     //Update API cache
                     holder:removeFromAPICache(api);
                     holder:putIntoAPICache(api);
@@ -89,22 +89,7 @@ service apimPublisherEventListner {
             } else if (strings:equalsIgnoreCase(eventType, Constants:API_DELETE)) {
                 json apiSummary = event.apiSummary;
                 if (apiSummary != null) {
-
                     dto:APIDTO api = gatewayUtil:fromJSONToAPIDTO(apiSummary);
-                    //Retrieve API configuration
-                    string apiConfig;
-                    int status;
-                    status, apiConfig = gatewayUtil:getAPIServiceConfig(api.id);
-                    int maxRetries = 10;
-                    int i = 0;
-                    while (status == Constants:NOT_FOUND) {
-                        apimgtUtil:wait(10000);
-                        status, apiConfig = gatewayUtil:getAPIServiceConfig(api.id);
-                        i = i + 1;
-                        if (i > maxRetries) {
-                            break;
-                        }
-                    }
                     //Undeploy API service
                     gatewayUtil:undeployService(api);
                     //Remove from API cache
@@ -120,6 +105,31 @@ service apimPublisherEventListner {
                     dto:APIDTO api = gatewayUtil:fromJSONToAPIDTO(apiSummary);
                     holder:removeFromAPICache(api);
                     holder:putIntoAPICache(api);
+                } else {
+                    system:println("Invalid json received");
+                }
+            } else if (strings:equalsIgnoreCase(eventType, Constants:ENDPOINT_CREATE)) {
+                json endpoint = event.endpoint;
+                if (endpoint != null) {
+                    dto:EndpointDto endpointDto = gatewayUtil:fromJsonToEndpointDto(endpoint);
+                    holder:putIntoEndpointCache(endpointDto);
+                } else {
+                    system:println("Invalid json received");
+                }
+            } else if (strings:equalsIgnoreCase(eventType, Constants:ENDPOINT_UPDATE)) {
+                json endpoint = event.endpoint;
+                if (endpoint != null) {
+                    system:println(endpoint);
+                    dto:EndpointDto endpointDto = gatewayUtil:fromJsonToEndpointDto(endpoint);
+                    holder:updateEndpointCache(endpointDto);
+                } else {
+                    system:println("Invalid json received");
+                }
+            } else if (strings:equalsIgnoreCase(eventType, Constants:ENDPOINT_DELETE)) {
+                json endpoint = event.endpoint;
+                if (endpoint != null) {
+                    string endpointId = (string)endpoint.id;
+                    holder:removeFromEndpointCache(endpointId);
                 } else {
                     system:println("Invalid json received");
                 }

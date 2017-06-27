@@ -2,7 +2,8 @@ package org.wso2.carbon.apimgt.gateway.holders;
 import org.wso2.carbon.apimgt.gateway.dto as dto;
 import org.wso2.carbon.apimgt.gateway.constants;
 import org.wso2.carbon.apimgt.ballerina.caching;
-map apiCache = {};
+import ballerina.lang.system;
+map endpointCache = {};
 dto:GatewayConfDTO gatewayConf = {};
 dto:KeyManagerInfoDTO keyManagerConf = {};
 map applicationCache = {};
@@ -134,6 +135,7 @@ function initializeCache()(boolean ){
     caching:createCache(constants:USER_INFO_CACHE,"15");
     //cache for api
     caching:createCache(constants:API_CACHE,"15");
+    caching:createCache(constants:ENDPOINT_CACHE,"15");
 
     return true;
 }
@@ -162,4 +164,24 @@ function getFromPolicyCache (string id) (dto:PolicyDto) {
 }
 function removeFromPolicyCache (string id) {
     caching:removeCacheEntry(constants:POLICY_CACHE, id);
+}
+function putIntoEndpointCache (dto:EndpointDto endpointDto) {
+    caching:putCacheEntry(constants:ENDPOINT_CACHE,endpointDto.name,endpointDto);
+
+}
+function removeFromEndpointCache (string endpointId) {
+    caching:removeCacheEntry(constants:ENDPOINT_CACHE, endpointId);
+}
+function getFromEndpointCache (string endpointId) (dto:EndpointDto) {
+    any endpoint = caching:getCacheEntry(constants:ENDPOINT_CACHE,endpointId);
+    if(endpoint != null){
+        system:println("not null");
+        return (dto:EndpointDto)endpoint;
+    }else{
+        return null;
+    }
+}
+function updateEndpointCache(dto:EndpointDto endpointDto){
+    removeFromEndpointCache(endpointDto.name);
+    putIntoEndpointCache(endpointDto);
 }

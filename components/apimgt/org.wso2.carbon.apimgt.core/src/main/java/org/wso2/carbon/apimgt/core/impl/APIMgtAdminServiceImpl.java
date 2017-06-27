@@ -18,6 +18,7 @@ import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.BlockConditions;
+import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.PolicyValidationData;
 import org.wso2.carbon.apimgt.core.models.RegistrationSummary;
@@ -484,9 +485,9 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     }
 
     @Override
-    public List<String> getAllEndpoints() throws APIManagementException {
+    public List<Endpoint> getAllEndpoints() throws APIManagementException {
         try {
-            return apiDAO.getUUIDsOfGlobalEndpoints();
+            return apiDAO.getEndpoints();
         } catch (APIMgtDAOException ex) {
             String msg = "Error occurred while getting the Endpoint list";
             log.error(msg, ex);
