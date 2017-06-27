@@ -1193,11 +1193,12 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch,
-                            Request request) throws NotFoundException {
+            Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         APIListDTO apiListDTO = null;
         try {
-            apiListDTO = MappingUtil.toAPIListDTO(RestAPIPublisherUtil.getApiPublisher(username).searchAPIs(limit, offset, query));
+            apiListDTO = MappingUtil
+                    .toAPIListDTO(RestAPIPublisherUtil.getApiPublisher(username).searchAPIs(limit, offset, query));
             return Response.ok().entity(apiListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving APIs";

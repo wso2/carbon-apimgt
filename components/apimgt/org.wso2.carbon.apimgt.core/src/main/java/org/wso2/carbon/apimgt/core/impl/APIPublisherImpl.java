@@ -667,18 +667,17 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             throws APIManagementException {
         Set<String> permissionArrayForUser = new HashSet();
         Map<String, Integer> permissionMap = api.getPermissionMap();
-        String user = "tharika";
 
         String createdUser = api.getCreatedBy();
         //TODO: Remove the check for admin after IS adds an ID to admin user
-        if (user.equals(createdUser) || permissionMap == null || permissionMap.isEmpty() || "admin"
-                .equals(user)) {
+        if (loggedInUserName.equals(createdUser) || permissionMap == null || permissionMap.isEmpty() || "admin"
+                .equals(loggedInUserName)) {
             permissionArrayForUser.add(APIMgtConstants.Permission.READ);
             permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
             permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
         } else {
             try {
-                String userId = getIdentityProvider().getIdOfUser(user);
+                String userId = getIdentityProvider().getIdOfUser(loggedInUserName);
                 List<String> loggedInUserRoles = getIdentityProvider().getRoleIdsOfUser(userId);
                 List<String> permissionRoleList = getRolesFromPermissionMap(permissionMap);
                 List<String> rolesOfUserWithAPIPermissions = null;
@@ -706,8 +705,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                             + APIMgtConstants.Permission.DELETE_PERMISSION)) {
                         permissionArrayForUser.add(APIMgtConstants.Permission.READ);
                         permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
-                    } else if (aggregatePermissions == APIMgtConstants.Permission.READ_PERMISSION
-                            + APIMgtConstants.Permission.UPDATE_PERMISSION
+                    } else if (aggregatePermissions
+                            == APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.UPDATE_PERMISSION
                             + APIMgtConstants.Permission.DELETE_PERMISSION) {
                         permissionArrayForUser.add(APIMgtConstants.Permission.READ);
                         permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
@@ -715,7 +714,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     }
                 }
             } catch (IdentityProviderException e) {
-                String errorMsg = "User " + user + " does not exist in the system.";
+                String errorMsg = "User " + loggedInUserName + " does not exist in the system.";
                 log.error(errorMsg, e);
                 throw new APIManagementException(errorMsg, e, ExceptionCodes.USER_DOES_NOT_EXIST);
             }

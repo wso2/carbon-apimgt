@@ -1850,9 +1850,13 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     private List<API> constructAPISummaryList(Connection connection, PreparedStatement statement) throws SQLException {
+        //Set<String> roles, String user
         List<API> apiList = new ArrayList<>();
         try (ResultSet rs = statement.executeQuery()) {
             while (rs.next()) {
+                //String apiPrimaryKey = rs.getString("UUID");
+                //String createdUser = rs.getString("CREATED_BY");
+                //Map<String, Integer> permissionMap = getPermissionMapForApi(connection, apiPrimaryKey);
                 API apiSummary = new API.APIBuilder(rs.getString("PROVIDER"), rs.getString("NAME"),
                         rs.getString("VERSION")).
                         id(rs.getString("UUID")).
@@ -1861,6 +1865,13 @@ public class ApiDAOImpl implements ApiDAO {
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
                         lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
                         workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).build();
+//                if (permissionMap.isEmpty() || user.equals(createdUser)) {
+//                    apiList.add(apiSummary);
+//                } else {
+//                    for (String groupId : permissionMap.keySet()) {
+//
+//                    }
+//                }
                 apiList.add(apiSummary);
             }
         }
