@@ -494,6 +494,35 @@ paths:
               $ref: '#/definitions/Error'
 
 ######################################################
+# The "Blocking Condition Collection" resource API
+######################################################
+  /blacklist:
+
+#-----------------------------------------------------
+# Retrieve all Blocking conditions
+#-----------------------------------------------------
+    get:
+      summary: Get all blocking condtions
+      description: |
+        Get all blocking condtions
+      parameters:
+        - $ref: '#/parameters/Accept'
+      tags:
+        - Blacklist
+      responses:
+        200:
+          description: |
+            OK.
+            Blocking conditions returned
+          schema:
+            $ref: '#/definitions/BlockingConditionList'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+
+######################################################
 # Parameters - required by some of the APIs above
 ######################################################
 parameters:
@@ -1054,6 +1083,62 @@ definitions:
       password:
         type: string
         example: admin
+
+#-----------------------------------------------------
+# The Throttle Blocking Condition resource
+#-----------------------------------------------------
+  BlockingCondition:
+    title: Blocking Conditions
+    description: Blocking Conditions
+    required:
+      - conditionType
+      - conditionValue
+    properties:
+      conditionId:
+        type: string
+      conditionType:
+        type: string
+      conditionValue:
+        type: string
+      status:
+        type: boolean
+        deafult: true
+      ipCondition:
+        type: object
+        $ref: '#/definitions/IPCondition'
+
+#-----------------------------------------------------
+# The Throttle Blocking Condition List resource
+#-----------------------------------------------------
+  BlockingConditionList:
+    title: Blocking Conditions List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of Blocking Conditions returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/BlockingCondition'
+
+#-----------------------------------------------------
+# The Throttle IP Condition resource
+#-----------------------------------------------------
+  IPCondition:
+    title: IP based throttle condition
+    properties:
+      ipConditionType:
+        type: string
+        description: |
+          IPRange and IPSpecific are the supported values
+      specificIP:
+        type: string
+      startingIP:
+        type: string
+      endingIP:
+        type: string
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------

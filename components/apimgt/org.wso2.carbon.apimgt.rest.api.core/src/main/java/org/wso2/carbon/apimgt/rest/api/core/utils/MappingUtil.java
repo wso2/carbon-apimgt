@@ -25,17 +25,22 @@ package org.wso2.carbon.apimgt.rest.api.core.utils;
 
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.BlockConditions;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.PolicyValidationData;
 import org.wso2.carbon.apimgt.core.models.RegistrationSummary;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.core.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.AnalyticsInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.ApplicationDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.BlockingConditionDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.BlockingConditionListDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.CredentialsDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.IPConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.EndPointDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.JWTInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.KeyManagerInfoDTO;
@@ -97,12 +102,13 @@ public class MappingUtil {
 
     /**
      * Convert Uritemplate list to UriTemplateDTO list
+     *
      * @param resourcesOfApi list of uriTemplates
      * @return ResourcesListDTO
      */
-    public static List<UriTemplateDTO> convertToResourceListDto(List<UriTemplate> resourcesOfApi){
+    public static List<UriTemplateDTO> convertToResourceListDto(List<UriTemplate> resourcesOfApi) {
         List<UriTemplateDTO> uriTemplateDTOArrayList = new ArrayList<>();
-        resourcesOfApi.forEach((v)->{
+        resourcesOfApi.forEach((v) -> {
             UriTemplateDTO uriTemplateDTO = new UriTemplateDTO();
             uriTemplateDTO.setUriTemplate(v.getUriTemplate());
             uriTemplateDTO.setAuthType(v.getAuthType());
@@ -149,7 +155,8 @@ public class MappingUtil {
 
     /**
      * convert {@link ApplicationDTO} to {@link Application}
-     * @param applicationList  List of {@link Application}
+     *
+     * @param applicationList List of {@link Application}
      * @return ApplicationEvent list
      */
     public static List<ApplicationDTO> convertToApplicationDtoList(List<Application> applicationList) {
@@ -165,7 +172,7 @@ public class MappingUtil {
         return applicationDTOList;
     }
 
-/**
+    /**
      * Converts the Gateway registration summary into RegistrationSummaryDTO
      *
      * @param registrationSummary the registration summary required by gateway
@@ -252,12 +259,13 @@ public class MappingUtil {
 
     /**
      * Convert policy validation data list to policy dto list
+     *
      * @param allPolicies all policies
      * @return PolicyDTO list
      */
     public static List<PolicyDTO> convertToPolicyDtoList(Set<PolicyValidationData> allPolicies) {
         List<PolicyDTO> policyDTOList = new ArrayList<>();
-        allPolicies.forEach(v->{
+        allPolicies.forEach(v -> {
             PolicyDTO policyDTO = new PolicyDTO();
             policyDTO.setId(v.getId());
             policyDTO.setName(v.getName());
@@ -279,5 +287,68 @@ public class MappingUtil {
                 .getEndpointConfig()).id(endpoint.getId()).type(endpoint.getType()).name(endpoint.getName()).security
                 (endpoint.getSecurity())));
         return endPointDTOList;
+    }
+
+    /**
+     * Converts a List of Block Condition in to REST API LIST DTO Object.
+     *
+     * @param blockConditionList A List of Block Conditions
+     * @return REST API List DTO object derived from Block Condition list
+     */
+    public static BlockingConditionListDTO fromBlockConditionListToListDTO(List<BlockConditions> blockConditionList) {
+        BlockingConditionListDTO listDTO = new BlockingConditionListDTO();
+        List<BlockingConditionDTO> blockingConditionDTOList = new ArrayList<>();
+        if (blockConditionList != null) {
+            for (BlockConditions blockCondition : blockConditionList) {
+                BlockingConditionDTO dto = fromBlockingConditionToDTO(blockCondition);
+                blockingConditionDTOList.add(dto);
+            }
+        }
+        listDTO.setCount(blockingConditionDTOList.size());
+        listDTO.setList(blockingConditionDTOList);
+        return listDTO;
+    }
+
+    /**
+     * Converts a single Block Condition model object into REST API DTO object.
+     *
+     * @param blockCondition Block condition model object
+     * @return Block condition DTO object derived from block condition model object
+     */
+    public static BlockingConditionDTO fromBlockingConditionToDTO(BlockConditions blockCondition) {
+        if (blockCondition.getUuid() == null) {
+            return null;
+        }
+        BlockingConditionDTO dto = new BlockingConditionDTO();
+        dto.setConditionId(blockCondition.getUuid());
+        dto.setConditionType(blockCondition.getConditionType());
+        dto.setStatus(blockCondition.isEnabled());
+        if (blockCondition.getConditionType()
+                .equals(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITION_IP_RANGE)) {
+            dto.setIpCondition(fromBlockConditionToIpConditionDTO(blockCondition));
+        }
+        String conditionValue = blockCondition.getConditionValue();
+        if (APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_IP.equals(blockCondition.getConditionType())) {
+            int index = conditionValue.indexOf(":");
+            if (index > -1) {
+                // Removing Tenant Domain from IP
+                conditionValue = conditionValue.substring(index + 1, conditionValue.length());
+            }
+        }
+        dto.setConditionValue(conditionValue);
+        return dto;
+    }
+
+    /**
+     * Block condition IP range details to IPConditionDTO.
+     *
+     * @param blockConditions blockCondition to be converted into IPConditionDTO.
+     * @return IPConditionDTO Object
+     */
+    private static IPConditionDTO fromBlockConditionToIpConditionDTO(BlockConditions blockConditions) {
+        IPConditionDTO ipConditionDTO = new IPConditionDTO();
+        ipConditionDTO.setStartingIP(blockConditions.getStartingIP());
+        ipConditionDTO.setEndingIP(blockConditions.getEndingIP());
+        return ipConditionDTO;
     }
 }
