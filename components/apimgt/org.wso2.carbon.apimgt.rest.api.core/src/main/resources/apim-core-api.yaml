@@ -873,7 +873,40 @@ definitions:
       list:
         type: array
         items:
-          type: string
+          $ref: '#/definitions/EndPoint'
+
+#-----------------------------------------------------
+# The Environment Endpoint resource
+#-----------------------------------------------------
+  EndPoint :
+    title: Endpoints
+    properties:
+      id:
+        type: string
+        description: |
+          UUID of the Endpoint entry
+        example: 01234567-0123-0123-0123-012345678901
+      name:
+        type: string
+        description: |
+          name of the Endpoint entry
+        example: "Endpoint 1"
+      endpointConfig:
+        type: string
+        description: Endpoint Configuration
+        example: "{url: http://localhost:8280, timeout: 1000}"
+      security:
+        type: string
+        description: Endpoint Configuration
+        example: "{url: http://localhost:8280, timeout: 1000}"
+      maxTps:
+        type: integer
+        format: int64
+        description: Endpoint max tps
+        example: 1000
+      type:
+        type: string
+        example: "http"
 
 #-----------------------------------------------------
 # The API Info resource

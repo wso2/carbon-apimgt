@@ -25,6 +25,7 @@ package org.wso2.carbon.apimgt.rest.api.core.utils;
 
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.PolicyValidationData;
 import org.wso2.carbon.apimgt.core.models.RegistrationSummary;
@@ -35,11 +36,11 @@ import org.wso2.carbon.apimgt.rest.api.core.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.AnalyticsInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.CredentialsDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.EndPointDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.JWTInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.KeyManagerInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.PolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.core.dto.PolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.RegistrationSummaryDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.ThrottlingInfoDTO;
@@ -264,5 +265,19 @@ public class MappingUtil {
             policyDTOList.add(policyDTO);
         });
         return policyDTOList;
+    }
+
+    /**
+     * Converts {@link Endpoint} list to {@link EndPointDTO} list
+     *
+     * @param endpointList {@link Endpoint} list
+     * @return EndPointDTO list
+     */
+    public static List<EndPointDTO> toEndpointListDto(List<Endpoint> endpointList) {
+        List<EndPointDTO> endPointDTOList = new ArrayList<>();
+        endpointList.forEach(endpoint -> endPointDTOList.add(new EndPointDTO().endpointConfig(endpoint
+                .getEndpointConfig()).id(endpoint.getId()).type(endpoint.getType()).name(endpoint.getName()).security
+                (endpoint.getSecurity())));
+        return endPointDTOList;
     }
 }

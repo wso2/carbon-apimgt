@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.BlockConditions;
+import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.PolicyValidationData;
 import org.wso2.carbon.apimgt.core.models.RegistrationSummary;
@@ -334,7 +335,7 @@ public interface APIMgtAdminService {
      * @return list of UUID of Global Endpoints
      * @throws APIManagementException If failed to get Endpoints
      */
-    List<String> getAllEndpoints() throws APIManagementException;
+    List<Endpoint> getAllEndpoints() throws APIManagementException;
 
     /**
      * Return Gateway Configuration of Endpoint

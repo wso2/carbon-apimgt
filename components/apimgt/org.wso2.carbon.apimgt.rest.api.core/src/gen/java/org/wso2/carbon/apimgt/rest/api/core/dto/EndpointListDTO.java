@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.core.dto.EndPointDTO;
 import java.util.Objects;
 
 /**
@@ -17,7 +18,7 @@ public class EndpointListDTO   {
   private Integer count = null;
 
   @JsonProperty("list")
-  private List<String> list = new ArrayList<String>();
+  private List<EndPointDTO> list = new ArrayList<EndPointDTO>();
 
   public EndpointListDTO count(Integer count) {
     this.count = count;
@@ -37,12 +38,12 @@ public class EndpointListDTO   {
     this.count = count;
   }
 
-  public EndpointListDTO list(List<String> list) {
+  public EndpointListDTO list(List<EndPointDTO> list) {
     this.list = list;
     return this;
   }
 
-  public EndpointListDTO addListItem(String listItem) {
+  public EndpointListDTO addListItem(EndPointDTO listItem) {
     this.list.add(listItem);
     return this;
   }
@@ -52,11 +53,11 @@ public class EndpointListDTO   {
    * @return list
   **/
   @ApiModelProperty(value = "")
-  public List<String> getList() {
+  public List<EndPointDTO> getList() {
     return list;
   }
 
-  public void setList(List<String> list) {
+  public void setList(List<EndPointDTO> list) {
     this.list = list;
   }
 
