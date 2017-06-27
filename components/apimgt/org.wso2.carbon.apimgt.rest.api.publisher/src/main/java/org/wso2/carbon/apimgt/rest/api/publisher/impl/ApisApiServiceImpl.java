@@ -1205,7 +1205,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 return Response.noContent().build();
             }
         } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving thumbnail of API : " + apiId;
+            String errorMessage = "Error while retrieving WSDL of API : " + apiId;
             HashMap<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);

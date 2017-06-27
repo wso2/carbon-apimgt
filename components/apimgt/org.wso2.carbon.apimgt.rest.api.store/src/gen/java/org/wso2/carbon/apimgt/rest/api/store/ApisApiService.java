@@ -96,6 +96,12 @@ public abstract class ApisApiService {
  ,RatingDTO body
  ,String contentType
  , Request request) throws NotFoundException;
+    public abstract Response apisApiIdWsdlGet(String apiId
+ ,String labelName
+ ,String accept
+ ,String ifNoneMatch
+ ,String ifModifiedSince
+ , Request request) throws NotFoundException;
     public abstract Response apisGet(Integer limit
  ,Integer offset
  ,String query

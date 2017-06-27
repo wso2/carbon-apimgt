@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.LabelExtractor;
+import org.wso2.carbon.apimgt.core.api.WSDLProcessor;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
@@ -51,6 +52,8 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
+import org.wso2.carbon.apimgt.core.exception.APINotFoundException;
 import org.wso2.carbon.apimgt.core.exception.APIRatingException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
@@ -1229,6 +1232,30 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             log.error(msg, e);
             throw new APIManagementException(msg, ExceptionCodes.API_DEFINITION_MALFORMED);
         }
+    }
+
+    public String getWSDLOfAPI(String apiId, String labelName, boolean validateLabelInAPI)
+            throws APIMgtDAOException, APIMgtWSDLException, APINotFoundException, LabelException {
+        API api = getApiDAO().getAPI(apiId);
+        if (api == null) {
+            throw new APINotFoundException("API with id " + apiId + " not found.", ExceptionCodes.API_NOT_FOUND);
+        }
+
+        //If validateLabelInAPI is enabled, api.getLabels() should not be null and the labels should contain labelName
+        if (validateLabelInAPI && (api.getLabels() == null || !api.getLabels().contains(labelName))) {
+            throw new LabelException("API with id " + apiId + " does not contain label " + labelName,
+                    ExceptionCodes.LABEL_NOT_FOUND_IN_API);
+        }
+
+        String wsdl = getApiDAO().getWSDLOfAPI(apiId);
+        Label label = getLabelDAO().getLabelByName(labelName);
+
+        if (!StringUtils.isEmpty(wsdl)) {
+            WSDLProcessor processor = WSDLProcessFactory.getInstance()
+                    .getWSDLProcessor(wsdl.getBytes());
+            return processor.readWSDL(api, label);
+        }
+        return null;
     }
 
     /**

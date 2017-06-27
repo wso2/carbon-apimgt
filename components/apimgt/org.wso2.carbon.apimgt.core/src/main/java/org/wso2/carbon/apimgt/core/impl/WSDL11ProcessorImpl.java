@@ -27,6 +27,8 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.WSDLProcessor;
 import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.WSDLInfo;
 import org.xml.sax.InputSource;
 
@@ -106,20 +108,7 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
         return wsdlInfo;
     }
 
-    /**
-     * Read the wsdl and clean the actual service endpoint instead of that set
-     * the gateway endpoint.
-     *
-     * @throws APIMgtWSDLException
-     */
-    public void updateEndpoints(String[] endpointURLs) throws APIMgtWSDLException {
-        String selectedUrl = endpointURLs[0];
-        if (!StringUtils.isBlank(selectedUrl)) {
-            updateEndpointUrls(selectedUrl);
-        }
-    }
-
-    public String getWSDL() throws APIMgtWSDLException {
+    public String readWSDL() throws APIMgtWSDLException {
         WSDLWriter writer = getWsdlFactoryInstance().newWSDLWriter();
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try {
@@ -131,25 +120,21 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
         return byteArrayOutputStream.toString();
     }
 
-    public String getWSDL(String labelName) throws APIMgtWSDLException {
-        WSDLWriter writer = getWsdlFactoryInstance().newWSDLWriter();
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        try {
-            writer.writeWSDL(wsdlDefinition, byteArrayOutputStream);
-        } catch (WSDLException e) {
-            throw new APIMgtWSDLException("Error while stringifying WSDL definition", e,
-                    ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
+    public String readWSDL(API api, Label label) throws APIMgtWSDLException {
+        if (label!= null) {
+            updateEndpoints(label.getAccessUrls(), api);
+            return readWSDL();
         }
-        return byteArrayOutputStream.toString();
-    }
-
-    @Override
-    public String getWSDLArchive() throws APIMgtWSDLException {
         return null;
     }
 
     @Override
-    public String getWSDLArchive(String labelName) throws APIMgtWSDLException {
+    public String readWSDLArchive() throws APIMgtWSDLException {
+        return null;
+    }
+
+    @Override
+    public String readWSDLArchive(String labelName) throws APIMgtWSDLException {
         return null;
     }
 
@@ -238,6 +223,20 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
         } else {
             throw new APIMgtWSDLException("Unsupported WSDL Extensibility element",
                     ExceptionCodes.UNSUPPORTED_WSDL_EXTENSIBILITY_ELEMENT);
+        }
+    }
+
+    /**
+     * Read the wsdl and clean the actual service endpoint instead of that set
+     * the gateway endpoint.
+     *
+     * @throws APIMgtWSDLException
+     */
+    private void updateEndpoints(List<String> endpointURLs, API api) throws APIMgtWSDLException {
+        String context = api.getContext().startsWith("/") ? api.getContext() : "/" + api.getContext();
+        String selectedUrl = endpointURLs.get(0) + context;
+        if (!StringUtils.isBlank(selectedUrl)) {
+            updateEndpointUrls(selectedUrl);
         }
     }
 }

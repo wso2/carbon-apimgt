@@ -19,6 +19,8 @@
 package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
+import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.WSDLInfo;
 
 import java.io.InputStream;
@@ -31,11 +33,11 @@ public interface WSDLProcessor {
 
     WSDLInfo getWsdlInfo() throws APIMgtWSDLException;
 
-    String getWSDL() throws APIMgtWSDLException;
+    String readWSDL() throws APIMgtWSDLException;
 
-    String getWSDL(String labelName) throws APIMgtWSDLException;
+    String readWSDL(API api, Label label) throws APIMgtWSDLException;
 
-    String getWSDLArchive() throws APIMgtWSDLException;
+    String readWSDLArchive() throws APIMgtWSDLException;
 
-    String getWSDLArchive(String labelName) throws APIMgtWSDLException;
+    String readWSDLArchive(String labelName) throws APIMgtWSDLException;
 }

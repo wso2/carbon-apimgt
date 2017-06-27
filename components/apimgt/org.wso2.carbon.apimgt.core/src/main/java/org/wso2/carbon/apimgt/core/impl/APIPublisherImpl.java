@@ -235,7 +235,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 if (!StringUtils.isBlank(apiBuilder.getWsdlUri())) {
                     WSDLProcessor processor = WSDLProcessFactory.getInstance()
                             .getWSDLProcessor(apiBuilder.getWsdlUri());
-                    wsdlString = processor.getWSDL();
+                    wsdlString = processor.readWSDL();
                 }
 
                 createUriTemplateList(apiBuilder, false);

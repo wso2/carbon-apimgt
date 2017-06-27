@@ -2,28 +2,38 @@ package org.wso2.carbon.apimgt.rest.api.store.impl;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
+
 import org.apache.commons.lang3.StringUtils;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.core.exception.APIRatingException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.common.exception.MSF4JAPIMException;
+import org.wso2.carbon.apimgt.rest.api.common.exception.MSF4JAPIMExceptionMapper;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
@@ -662,6 +672,30 @@ public class ApisApiServiceImpl extends ApisApiService {
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorHandler);
             log.error(errorMessage, e);
             return Response.status(errorHandler.getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+    @Override
+    public Response apisApiIdWsdlGet(String apiId, String labelName, String accept, String ifNoneMatch,
+            String ifModifiedSince, Request request) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername();
+
+        try {
+            APIStore apiStore = RestApiUtil.getConsumer(username);
+            String wsdlString;
+            
+            if (StringUtils.isBlank(labelName)) {
+                wsdlString = apiStore.getWSDLOfAPI(apiId, "Default", false);
+            } else {
+                wsdlString = apiStore.getWSDLOfAPI(apiId, labelName, true);
+            }
+            return Response.ok(wsdlString, MediaType.TEXT_PLAIN).build();
+        } catch (APIManagementException e) {
+            Map<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error("Error while getting WSDL for API:" + apiId + " and label:" + labelName, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
     }
 

@@ -23,7 +23,10 @@ package org.wso2.carbon.apimgt.core.api;
 import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.exception.APICommentException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
+import org.wso2.carbon.apimgt.core.exception.APINotFoundException;
 import org.wso2.carbon.apimgt.core.exception.APIRatingException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -489,6 +492,19 @@ public interface APIStore extends APIManager {
      * @throws APIManagementException If failed to add the Composite API.
      */
     String addCompositeApiFromDefinition(String swaggerResourceUrl) throws APIManagementException;
+
+    /**
+     * Returns the WSDL of a given API UUID and gateway label name
+     * 
+     * @param apiId API Id
+     * @param labelName gateway label name
+     * @param validateLabelInAPI if true, the specified label must be present in the API
+     * @return WSDL of the API as {@link String}
+     * @throws APIMgtDAOException if error occurs while accessing the WSDL from the data layer
+     * @throws APIMgtWSDLException if error occurs while parsing/manipulating the wSDL
+     */
+    String getWSDLOfAPI(String apiId, String labelName, boolean validateLabelInAPI)
+            throws APIMgtDAOException, APIMgtWSDLException, APINotFoundException, LabelException;
 
     /**
      * Store user self signup
