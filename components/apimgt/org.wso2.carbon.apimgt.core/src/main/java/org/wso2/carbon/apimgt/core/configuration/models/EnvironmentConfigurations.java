@@ -25,7 +25,7 @@ import java.util.List;
 
 
 /**
- * Class to hold key manager configurations
+ * Class to hold environment configurations
  */
 @Configuration(description = "Key Management Configurations")
 public class EnvironmentConfigurations {
@@ -42,6 +42,10 @@ public class EnvironmentConfigurations {
     @Element(description = "Default environment IS Token endpoint URL")
     private String defaultEnvIsrevokeEndPoint = "";
 
+    @Element(description = "Default environment IS Token endpoint URL")
+    private List<EnvironmentConfigurations> environments = new ArrayList<EnvironmentConfigurations>();
+
+
     public String getDefaultEnvIsHost() {
         return defaultEnvIsHost;
     }
@@ -57,4 +61,9 @@ public class EnvironmentConfigurations {
     public String getDefaultEnvIsrevokeEndPoint() {
         return defaultEnvIsrevokeEndPoint;
     }
+
+    public List<EnvironmentConfigurations> getEnvironments() {
+        return environments;
+    }
+
 }
