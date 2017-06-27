@@ -77,6 +77,9 @@ public class APIMConfigurations {
     @Element(description = "rating upper limit")
     private int ratingMaxValue = 5;
 
+    @Element(description = "Set of environments")
+    private EnvironmentConfigurations environmentConfigs = new EnvironmentConfigurations();
+
     public String getHostname() {
         return hostname;
     }
@@ -143,5 +146,9 @@ public class APIMConfigurations {
 
     public int getCommentMaxLength() {
         return commentMaxLength;
+    }
+
+    public EnvironmentConfigurations getEnvironmentConfigs() {
+        return environmentConfigs;
     }
 }

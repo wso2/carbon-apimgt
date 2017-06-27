@@ -76,7 +76,8 @@ public class LoginTokenService {
      *
      */
     public String getTokens(AuthResponseBean authResponseBean, String appName, String userName, String password,
-            String grantType, String refreshToken, long validityPeriod) throws KeyManagementException {
+            String grantType, String refreshToken, long validityPeriod, String environment)
+            throws KeyManagementException {
         String scopes = "";
         try {
             String publisherRestAPI = RestApiUtil.getPublisherRestAPIResource();
@@ -113,7 +114,8 @@ public class LoginTokenService {
         Map<String, String> consumerKeySecretMap = getConsumerKeySecret(appName);
         AccessTokenRequest accessTokenRequest = AuthUtil
                 .createAccessTokenRequest(userName, password, grantType, refreshToken, null, validityPeriod, scopes,
-                        consumerKeySecretMap.get("CONSUMER_KEY"), consumerKeySecretMap.get("CONSUMER_SECRET"));
+                        consumerKeySecretMap.get("CONSUMER_KEY"),
+                        consumerKeySecretMap.get("CONSUMER_SECRET"), environment);
         AccessTokenInfo accessTokenInfo = APIManagerFactory.getInstance().getKeyManager()
                 .getNewAccessToken(accessTokenRequest);
         setAccessTokenData(authResponseBean, accessTokenInfo);
