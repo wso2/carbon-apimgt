@@ -28,7 +28,6 @@ describe('AuthManager',
                 it('Should return HTTP 200 status code if user authenticate',
                     function () {
                         let authenticator = new AuthManager();
-                        const agent = new https.Agent({rejectUnauthorized: false});
                         let promised_auth = authenticator.authenticateUser('admin', 'admin');
                         return promised_auth.then((response) => {
                             assert.equal(response.status, 200);
