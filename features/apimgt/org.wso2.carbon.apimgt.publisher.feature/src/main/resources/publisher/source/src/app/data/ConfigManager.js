@@ -17,11 +17,12 @@
  */
 
 import {Axios} from 'axios'
+import DefaultConfig from './DefaultConfigs.json'
 
 class ConfigManager {
 
     constructor() {
-        this.preBuildConfigs = {};
+        this.preBuildConfigs = DefaultConfig;
         this.runTimeConfigs = {};
         this.runTimeConfigLocation = ""; // URL to fetch runtime config JSON
     }
