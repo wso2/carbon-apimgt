@@ -94,7 +94,7 @@ public class DefaultKeyManagerImpl implements KeyManager {
         DCRClientInfo dcrClientInfo = new DCRClientInfo();
         dcrClientInfo.setClientName(applicationName);
         dcrClientInfo.setGrantTypes(oauthAppRequest.getGrantTypes());
-        dcrClientInfo.addCallbackUrl(oauthAppRequest.getCallbackURL());
+        dcrClientInfo.addCallbackUrl(oauthAppRequest.getCallBackURL());
         dcrClientInfo.setUserinfoSignedResponseAlg(ServiceReferenceHolder.getInstance().getAPIMConfiguration()
                 .getKeyManagerConfigs().getOidcUserinfoJWTSigningAlgo());
 
@@ -150,7 +150,7 @@ public class DefaultKeyManagerImpl implements KeyManager {
         dcrClientInfo.setClientName(applicationName);
         dcrClientInfo.setClientId(oAuthApplicationInfo.getClientId());
         dcrClientInfo.setClientSecret(oAuthApplicationInfo.getClientSecret());
-        dcrClientInfo.addCallbackUrl(oAuthApplicationInfo.getCallbackURL());
+        dcrClientInfo.addCallbackUrl(oAuthApplicationInfo.getCallBackURL());
         dcrClientInfo.setGrantTypes(oAuthApplicationInfo.getGrantTypes());
 
         Response response = dcrmServiceStub.updateApplication(dcrClientInfo, dcrClientInfo.getClientId());
@@ -442,7 +442,7 @@ public class DefaultKeyManagerImpl implements KeyManager {
         oAuthApplicationInfoResponse.setClientId(dcrClientInfoResponse.getClientId());
         oAuthApplicationInfoResponse.setClientSecret(dcrClientInfoResponse.getClientSecret());
         oAuthApplicationInfoResponse.setGrantTypes(dcrClientInfoResponse.getGrantTypes());
-        oAuthApplicationInfoResponse.setCallbackURL(dcrClientInfoResponse.getRedirectURIs().get(0));
+        oAuthApplicationInfoResponse.setCallBackURL(dcrClientInfoResponse.getRedirectURIs().get(0));
         return oAuthApplicationInfoResponse;
     }
 }

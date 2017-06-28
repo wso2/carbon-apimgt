@@ -163,23 +163,20 @@ public interface APIStore extends APIManager {
      *
      * @param applicationName APIM application name
      * @param ownerId          Application owner ID.
-     * @param groupId         Group id.
      * @return it will return Application.
      * @throws APIManagementException Failed to get application by name.
      */
-    Application getApplicationByName(String applicationName, String ownerId, String groupId)
-            throws APIManagementException;
+    Application getApplicationByName(String applicationName, String ownerId) throws APIManagementException;
 
     /**
      * Returns a list of applications for a given subscriber
      *
      * @param subscriber Subscriber
-     * @param groupId    the groupId to which the applications must belong.
      * @return Applications
      * @throws APIManagementException if failed to applications for given subscriber
      */
 
-    List<Application> getApplications(String subscriber, String groupId) throws APIManagementException;
+    List<Application> getApplications(String subscriber) throws APIManagementException;
 
     /**
      * Updates the details of the specified user application.

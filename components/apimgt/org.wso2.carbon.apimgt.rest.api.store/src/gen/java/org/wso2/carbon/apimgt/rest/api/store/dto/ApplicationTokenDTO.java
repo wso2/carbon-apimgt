@@ -5,8 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -17,7 +15,7 @@ public class ApplicationTokenDTO   {
   private String accessToken = null;
 
   @JsonProperty("tokenScopes")
-  private List<String> tokenScopes = new ArrayList<String>();
+  private String tokenScopes = null;
 
   @JsonProperty("validityTime")
   private Long validityTime = null;
@@ -40,13 +38,8 @@ public class ApplicationTokenDTO   {
     this.accessToken = accessToken;
   }
 
-  public ApplicationTokenDTO tokenScopes(List<String> tokenScopes) {
+  public ApplicationTokenDTO tokenScopes(String tokenScopes) {
     this.tokenScopes = tokenScopes;
-    return this;
-  }
-
-  public ApplicationTokenDTO addTokenScopesItem(String tokenScopesItem) {
-    this.tokenScopes.add(tokenScopesItem);
     return this;
   }
 
@@ -55,11 +48,11 @@ public class ApplicationTokenDTO   {
    * @return tokenScopes
   **/
   @ApiModelProperty(value = "Valid scopes for the access token")
-  public List<String> getTokenScopes() {
+  public String getTokenScopes() {
     return tokenScopes;
   }
 
-  public void setTokenScopes(List<String> tokenScopes) {
+  public void setTokenScopes(String tokenScopes) {
     this.tokenScopes = tokenScopes;
   }
 

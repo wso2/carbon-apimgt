@@ -178,14 +178,14 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
     @Override
-    public Application getApplicationByName(String applicationName, String ownerId, String groupId)
+    public Application getApplicationByName(String applicationName, String ownerId)
             throws APIManagementException {
         Application application = null;
         try {
             application = getApplicationDAO().getApplicationByName(applicationName, ownerId);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while fetching application for the given applicationName - "
-                    + applicationName + " with groupId - " + groupId;
+                    + applicationName;
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
@@ -194,13 +194,12 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
 
     @Override
-    public List<Application> getApplications(String subscriber, String groupId) throws APIManagementException {
+    public List<Application> getApplications(String subscriber) throws APIManagementException {
         List<Application> applicationList = null;
         try {
             applicationList = getApplicationDAO().getApplications(subscriber);
         } catch (APIMgtDAOException e) {
-            String errorMsg = "Error occurred while fetching applications for the given subscriber - " + subscriber
-                    + " with groupId - " + groupId;
+            String errorMsg = "Error occurred while fetching applications for the given subscriber - " + subscriber;
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
@@ -251,7 +250,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_POLICY_ID, application.getPolicyId());
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_DESCRIPTION,
                         application.getDescription());
-                workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_GROUPID, application.getGroupId());
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_PERMISSION,
                         application.getPermissionString());  
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_EXISTIN_APP_STATUS,
@@ -287,9 +285,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             log.debug("Generating application keys for application: " + applicationId);
         }
 
-        //todo: remove this temporary line when UI is fixed to send grant type list, which does not happen yet
-        grantTypes.add(KeyManagerConstants.CLIENT_CREDENTIALS_GRANT_TYPE);
-
         Application application = getApplicationByUuid(applicationId);
 
         OAuthAppRequest oauthAppRequest = new OAuthAppRequest(application.getName(), callbackUrl, tokenType,
@@ -303,7 +298,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         }
 
         try {
-            getApplicationDAO().addApplicationKeys(applicationId, oauthAppInfo);
+            getApplicationDAO().addApplicationKeys(applicationId, tokenType, oauthAppInfo);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while saving key data for application: " + application.getName();
             log.error(errorMsg, e);
@@ -347,7 +342,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         }
 
         try {
-            getApplicationDAO().addApplicationKeys(applicationId, oAuthApp);
+            getApplicationDAO().addApplicationKeys(applicationId, tokenType, oAuthApp);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while saving key data.";
             log.error(errorMsg, e);

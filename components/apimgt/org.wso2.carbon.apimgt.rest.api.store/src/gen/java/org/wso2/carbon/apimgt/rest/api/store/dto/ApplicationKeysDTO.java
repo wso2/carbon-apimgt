@@ -1,11 +1,11 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -22,6 +22,9 @@ public class ApplicationKeysDTO   {
 
   @JsonProperty("supportedGrantTypes")
   private List<String> supportedGrantTypes = new ArrayList<String>();
+
+  @JsonProperty("callbackUrl")
+  private String callbackUrl = null;
 
   /**
    * Key type
@@ -116,6 +119,24 @@ public class ApplicationKeysDTO   {
     this.supportedGrantTypes = supportedGrantTypes;
   }
 
+  public ApplicationKeysDTO callbackUrl(String callbackUrl) {
+    this.callbackUrl = callbackUrl;
+    return this;
+  }
+
+   /**
+   * Callback URL
+   * @return callbackUrl
+  **/
+  @ApiModelProperty(value = "Callback URL")
+  public String getCallbackUrl() {
+    return callbackUrl;
+  }
+
+  public void setCallbackUrl(String callbackUrl) {
+    this.callbackUrl = callbackUrl;
+  }
+
   public ApplicationKeysDTO keyType(KeyTypeEnum keyType) {
     this.keyType = keyType;
     return this;
@@ -147,12 +168,13 @@ public class ApplicationKeysDTO   {
     return Objects.equals(this.consumerKey, applicationKeys.consumerKey) &&
         Objects.equals(this.consumerSecret, applicationKeys.consumerSecret) &&
         Objects.equals(this.supportedGrantTypes, applicationKeys.supportedGrantTypes) &&
+        Objects.equals(this.callbackUrl, applicationKeys.callbackUrl) &&
         Objects.equals(this.keyType, applicationKeys.keyType);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(consumerKey, consumerSecret, supportedGrantTypes, keyType);
+    return Objects.hash(consumerKey, consumerSecret, supportedGrantTypes, callbackUrl, keyType);
   }
 
   @Override
@@ -163,6 +185,7 @@ public class ApplicationKeysDTO   {
     sb.append("    consumerKey: ").append(toIndentedString(consumerKey)).append("\n");
     sb.append("    consumerSecret: ").append(toIndentedString(consumerSecret)).append("\n");
     sb.append("    supportedGrantTypes: ").append(toIndentedString(supportedGrantTypes)).append("\n");
+    sb.append("    callbackUrl: ").append(toIndentedString(callbackUrl)).append("\n");
     sb.append("    keyType: ").append(toIndentedString(keyType)).append("\n");
     sb.append("}");
     return sb.toString();

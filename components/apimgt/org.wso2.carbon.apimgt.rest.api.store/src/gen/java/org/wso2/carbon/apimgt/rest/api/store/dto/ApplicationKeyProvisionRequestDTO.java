@@ -12,9 +12,6 @@ import java.util.Objects;
  * ApplicationKeyProvisionRequestDTO
  */
 public class ApplicationKeyProvisionRequestDTO   {
-  @JsonProperty("applicationId")
-  private String applicationId = null;
-
   @JsonProperty("consumerKey")
   private String consumerKey = null;
 
@@ -54,24 +51,6 @@ public class ApplicationKeyProvisionRequestDTO   {
 
   @JsonProperty("keyType")
   private KeyTypeEnum keyType = null;
-
-  public ApplicationKeyProvisionRequestDTO applicationId(String applicationId) {
-    this.applicationId = applicationId;
-    return this;
-  }
-
-   /**
-   * Application ID
-   * @return applicationId
-  **/
-  @ApiModelProperty(required = true, value = "Application ID")
-  public String getApplicationId() {
-    return applicationId;
-  }
-
-  public void setApplicationId(String applicationId) {
-    this.applicationId = applicationId;
-  }
 
   public ApplicationKeyProvisionRequestDTO consumerKey(String consumerKey) {
     this.consumerKey = consumerKey;
@@ -137,15 +116,14 @@ public class ApplicationKeyProvisionRequestDTO   {
       return false;
     }
     ApplicationKeyProvisionRequestDTO applicationKeyProvisionRequest = (ApplicationKeyProvisionRequestDTO) o;
-    return Objects.equals(this.applicationId, applicationKeyProvisionRequest.applicationId) &&
-        Objects.equals(this.consumerKey, applicationKeyProvisionRequest.consumerKey) &&
+    return Objects.equals(this.consumerKey, applicationKeyProvisionRequest.consumerKey) &&
         Objects.equals(this.consumerSecret, applicationKeyProvisionRequest.consumerSecret) &&
         Objects.equals(this.keyType, applicationKeyProvisionRequest.keyType);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, consumerKey, consumerSecret, keyType);
+    return Objects.hash(consumerKey, consumerSecret, keyType);
   }
 
   @Override
@@ -153,7 +131,6 @@ public class ApplicationKeyProvisionRequestDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApplicationKeyProvisionRequestDTO {\n");
     
-    sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
     sb.append("    consumerKey: ").append(toIndentedString(consumerKey)).append("\n");
     sb.append("    consumerSecret: ").append(toIndentedString(consumerSecret)).append("\n");
     sb.append("    keyType: ").append(toIndentedString(keyType)).append("\n");

@@ -15,44 +15,34 @@
 */
 package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.models.APIKey;
-import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
+import org.wso2.carbon.apimgt.core.models.ApplicationToken;
+import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeysDTO;
-
-import java.util.List;
-import java.util.Map;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationTokenDTO;
 
 public class ApplicationKeyMappingUtil {
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationKeyMappingUtil.class);
 
-    public static ApplicationKeysDTO fromApplicationKeysToDTO(APIKey apiKey) {
+    public static ApplicationKeysDTO fromApplicationKeysToDTO(OAuthApplicationInfo applicationKeys) {
         ApplicationKeysDTO applicationKeyDTO = new ApplicationKeysDTO();
-        applicationKeyDTO.setKeyType(ApplicationKeysDTO.KeyTypeEnum.valueOf(apiKey.getType()));
-        applicationKeyDTO.setConsumerKey(apiKey.getConsumerKey());
-        applicationKeyDTO.setConsumerSecret(apiKey.getConsumerSecret());
-        applicationKeyDTO.setSupportedGrantTypes(null); //this is not supported by impl yet
+        applicationKeyDTO.setKeyType(ApplicationKeysDTO.KeyTypeEnum.fromValue(applicationKeys.getKeyType()));
+        applicationKeyDTO.setConsumerKey(applicationKeys.getClientId());
+        applicationKeyDTO.setConsumerSecret(applicationKeys.getClientSecret());
+        applicationKeyDTO.setSupportedGrantTypes(applicationKeys.getGrantTypes());
         return applicationKeyDTO;
     }
 
-    public static ApplicationKeysDTO fromApplicationKeysToDTO(Map<String, Object> keyDetails,
-                                                              String applicationKeyType) {
-        ApplicationKeysDTO applicationKeyDTO = new ApplicationKeysDTO();
-        applicationKeyDTO.setConsumerKey((String) keyDetails.get(KeyManagerConstants.KeyDetails.CONSUMER_KEY));
-        applicationKeyDTO.setConsumerSecret((String) keyDetails.get(KeyManagerConstants.KeyDetails.CONSUMER_SECRET));
-        applicationKeyDTO.setSupportedGrantTypes(
-                ((List<String>) keyDetails.get(KeyManagerConstants.KeyDetails.SUPPORTED_GRANT_TYPES)));
-        String appDetailsString = (String) keyDetails.get(KeyManagerConstants.KeyDetails.APP_DETAILS);
-        if (appDetailsString != null) {
-            JsonObject appDetailsJsonObj = (JsonObject) new JsonParser().parse(appDetailsString);
-            if (appDetailsJsonObj != null) {
-                applicationKeyDTO.setKeyType(ApplicationKeysDTO.KeyTypeEnum.valueOf(applicationKeyType));
-            }
+    public static ApplicationTokenDTO fromApplicationTokenToDTO(ApplicationToken applicationToken){
+        if (applicationToken == null) {
+            return null;
         }
-        return applicationKeyDTO;
+        ApplicationTokenDTO applicationTokenDTO = new ApplicationTokenDTO();
+        applicationTokenDTO.setAccessToken(applicationToken.getAccessToken());
+        applicationTokenDTO.setTokenScopes(applicationToken.getScopes());
+        applicationTokenDTO.setValidityTime(applicationToken.getValidityPeriod());
+        return applicationTokenDTO;
     }
 }

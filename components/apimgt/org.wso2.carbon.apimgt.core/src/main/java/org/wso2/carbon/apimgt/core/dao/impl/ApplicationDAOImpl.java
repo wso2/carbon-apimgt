@@ -22,11 +22,10 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
-import org.wso2.carbon.apimgt.core.models.APIKey;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
-import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -38,6 +37,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 /**
  * Default implementation of the ApplicationDAO interface. Uses SQL syntax that is common to H2 and MySQL DBs.
  * Hence is considered as the default due to its re-usability.
@@ -45,7 +45,7 @@ import java.util.Map;
 public class ApplicationDAOImpl implements ApplicationDAO {
 
     private static final String GET_APPS_QUERY = "SELECT NAME, APPLICATION_POLICY_ID, DESCRIPTION, " +
-            "APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME, UUID " +
+            "APPLICATION_STATUS, CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME, UUID " +
             "FROM AM_APPLICATION";
     private static final String AM_APPLICATION_TABLE_NAME = "AM_APPLICATION";
 
@@ -94,6 +94,10 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             ps.setString(2, ownerId);
             try (ResultSet rs = ps.executeQuery()) {
                 application = this.createApplicationFromResultSet(rs);
+            }
+            if (application == null) {
+                throw new APIMgtDAOException("Application is not available in the system.",
+                        ExceptionCodes.APPLICATION_NOT_FOUND);
             }
         } catch (SQLException ex) {
             throw new APIMgtDAOException(ex);
@@ -191,9 +195,9 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     @Override
     public void addApplication(Application application) throws APIMgtDAOException {
         final String addAppQuery = "INSERT INTO AM_APPLICATION (UUID, NAME, APPLICATION_POLICY_ID, " +
-                "DESCRIPTION, APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_BY, " +
+                "DESCRIPTION, APPLICATION_STATUS, CREATED_BY, CREATED_TIME, UPDATED_BY, " +
                 "LAST_UPDATED_TIME) VALUES (?, ?, (SELECT UUID FROM AM_APPLICATION_POLICY " +
-                "WHERE NAME = ?),?,?,?,?,?,?,?)";
+                "WHERE NAME = ?),?,?,?,?,?,?)";
         try (Connection conn = DAOUtil.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement ps = conn.prepareStatement(addAppQuery)) {
@@ -208,11 +212,10 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                     ps.setString(5, APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
                 }
 
-                ps.setString(6, application.getGroupId());
-                ps.setString(7, application.getCreatedUser());
-                ps.setTimestamp(8, Timestamp.valueOf(application.getCreatedTime()));
-                ps.setString(9, application.getCreatedUser());
-                ps.setTimestamp(10, Timestamp.valueOf(application.getCreatedTime()));
+                ps.setString(6, application.getCreatedUser());
+                ps.setTimestamp(7, Timestamp.valueOf(application.getCreatedTime()));
+                ps.setString(8, application.getCreatedUser());
+                ps.setTimestamp(9, Timestamp.valueOf(application.getCreatedTime()));
                 ps.executeUpdate();
                 addApplicationPermission(conn, application.getPermissionMap(), application.getId());
                 conn.commit();
@@ -305,7 +308,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             throws APIMgtDAOException {
         final String updateAppQuery = "UPDATE AM_APPLICATION SET NAME=?, APPLICATION_POLICY_ID=" +
                 "(SELECT UUID FROM AM_APPLICATION_POLICY WHERE NAME=?), " +
-                "DESCRIPTION=?, APPLICATION_STATUS=?, GROUP_ID=?, UPDATED_BY=?, " +
+                "DESCRIPTION=?, APPLICATION_STATUS=?, UPDATED_BY=?, " +
                 "LAST_UPDATED_TIME=? WHERE UUID=?";
         try (Connection conn = DAOUtil.getConnection()) {
             conn.setAutoCommit(false);
@@ -314,10 +317,9 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 ps.setString(2, updatedApp.getTier());
                 ps.setString(3, updatedApp.getDescription());
                 ps.setString(4, updatedApp.getStatus());
-                ps.setString(5, updatedApp.getGroupId());
-                ps.setString(6, updatedApp.getUpdatedUser());
-                ps.setTimestamp(7, Timestamp.valueOf(updatedApp.getUpdatedTime()));
-                ps.setString(8, appID);
+                ps.setString(5, updatedApp.getUpdatedUser());
+                ps.setTimestamp(6, Timestamp.valueOf(updatedApp.getUpdatedTime()));
+                ps.setString(7, appID);
                 ps.executeUpdate();
                 updateApplicationPermission(conn, updatedApp.getPermissionMap(), updatedApp.getId());
                 conn.commit();
@@ -385,7 +387,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     }
 
     @Override
-    public void addApplicationKeys(String appId, OAuthApplicationInfo oAuthAppDetails)
+    public void addApplicationKeys(String appId, String keyType, OAuthApplicationInfo oAuthAppDetails)
             throws APIMgtDAOException {
         final String addApplicationKeysQuery = "INSERT INTO AM_APP_KEY_MAPPING (APPLICATION_ID, CLIENT_ID, KEY_TYPE) " +
                 "VALUES (?, ?, ?)";
@@ -394,7 +396,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             try (PreparedStatement ps = conn.prepareStatement(addApplicationKeysQuery)) {
                 ps.setString(1, appId);
                 ps.setString(2, oAuthAppDetails.getClientId());
-                ps.setString(3, oAuthAppDetails.getParameter(KeyManagerConstants.APP_KEY_TYPE).toString());
+                ps.setString(3, keyType);
                 ps.executeUpdate();
                 conn.commit();
             } catch (SQLException ex) {
@@ -436,10 +438,10 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             ps.setString(1, applicationId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    APIKey apiKey = new APIKey();
-                    apiKey.setConsumerKey(rs.getString("CLIENT_ID"));
-                    apiKey.setType(rs.getString("KEY_TYPE"));
-                    application.addKey(apiKey);
+                    OAuthApplicationInfo appKeys = new OAuthApplicationInfo();
+                    appKeys.setClientId(rs.getString("CLIENT_ID"));
+                    appKeys.setKeyType(rs.getString("KEY_TYPE"));
+                    application.addApplicationKeys(appKeys);
                 }
             }
         } catch (SQLException ex) {
@@ -463,7 +465,6 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             application = new Application(rs.getString("NAME"), createdUser);
             application.setId(rs.getString("UUID"));
             application.setDescription(rs.getString("DESCRIPTION"));
-            application.setGroupId(rs.getString("GROUP_ID"));
             application.setStatus(rs.getString("APPLICATION_STATUS"));
             application.setCreatedTime(rs.getTimestamp("CREATED_TIME").toLocalDateTime());
             application.setUpdatedUser(rs.getString("UPDATED_BY"));

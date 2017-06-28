@@ -52,11 +52,15 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
                         policy.getPolicyName()));
         Assert.assertNotNull(fingerprintBeforeUpdatingPolicy);
         APIPolicy updatedAPIPolicy = SampleTestObjectCreator.updateAPIPolicy(policy);
+        Thread.sleep(100L);
         policyDAO.updateApiPolicy(updatedAPIPolicy);
         String fingerprintAfterUpdatingPolicy = ETagUtils
                 .generateETag(policyDAO.getLastUpdatedTimeOfThrottlingPolicy(APIMgtAdminService.PolicyLevel.api,
                         updatedAPIPolicy.getPolicyName()));
         Assert.assertNotNull(fingerprintAfterUpdatingPolicy);
+        Assert.assertNotEquals(fingerprintBeforeUpdatingPolicy, fingerprintAfterUpdatingPolicy, "Policy "
+                + "fingerprint expected to be different before and after updating for policy: "
+                + policy.getPolicyName());
     }
 
     @Test
@@ -69,11 +73,15 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
                         policy.getPolicyName()));
         Assert.assertNotNull(fingerprintBeforeUpdatingPolicy);
         ApplicationPolicy updatedPolicy = SampleTestObjectCreator.updateApplicationPolicy(policy);
+        Thread.sleep(100L);
         policyDAO.updateApplicationPolicy(updatedPolicy);
         String fingerprintAfterUpdatingPolicy = ETagUtils
                 .generateETag(policyDAO.getLastUpdatedTimeOfThrottlingPolicy(APIMgtAdminService.PolicyLevel.application,
                         updatedPolicy.getPolicyName()));
         Assert.assertNotNull(fingerprintAfterUpdatingPolicy);
+        Assert.assertNotEquals(fingerprintBeforeUpdatingPolicy, fingerprintAfterUpdatingPolicy, "Policy "
+                + "fingerprint expected to be different before and after updating for policy: "
+                + policy.getPolicyName());
     }
 
     @Test
@@ -86,6 +94,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
                                 .subscription, policy.getPolicyName()));
         Assert.assertNotNull(fingerprintBeforeUpdatingPolicy);
         SubscriptionPolicy updatedPolicy = SampleTestObjectCreator.updateSubscriptionPolicy(policy);
+        Thread.sleep(100L);
         policyDAO.updateSubscriptionPolicy(updatedPolicy);
         String fingerprintAfterUpdatingPolicy = ETagUtils
                 .generateETag(policyDAO.getLastUpdatedTimeOfThrottlingPolicy(APIMgtAdminService.PolicyLevel

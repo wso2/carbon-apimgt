@@ -373,7 +373,6 @@ public class APIMgtConstants {
         public static final String ATTRIBUTE_APPLICATION_UPDATEDBY = "updatedUser";
         public static final String ATTRIBUTE_APPLICATION_TIER = "tier";
         public static final String ATTRIBUTE_APPLICATION_DESCRIPTION = "description";
-        public static final String ATTRIBUTE_APPLICATION_GROUPID = "groupId";
         public static final String ATTRIBUTE_APPLICATION_PERMISSION = "permission";
         public static final String ATTRIBUTE_APPLICATION_EXISTIN_APP_STATUS = "status";
         public static final String ATTRIBUTE_APPLICATION_POLICY_ID = "policyId";

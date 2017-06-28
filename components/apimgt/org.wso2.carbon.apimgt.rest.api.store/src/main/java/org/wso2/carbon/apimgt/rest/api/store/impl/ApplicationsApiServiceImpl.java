@@ -4,23 +4,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
-import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
-import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
-import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.core.models.APIKey;
-import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.ApplicationToken;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ApplicationStatus;
-import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -31,9 +25,12 @@ import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyProvisionRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeysDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationTokenGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.MiscMappingUtil;
 import org.wso2.msf4j.Request;
@@ -113,31 +110,8 @@ public class ApplicationsApiServiceImpl
                 return Response.notModified().build();
             }
 
-            Application application = apiConsumer.getApplication(applicationId, username, null);
+            Application application = apiConsumer.getApplication(applicationId, username);
             if (application != null) {
-                if (application.getKeys() != null) {
-                    //TODO : this logic needs to be wriiten properly ones the Identity server DCR endpoint is
-                    // available to get oauth app details by providing consumer
-                    KeyManager keyManager = APIManagerFactory.getInstance().getIdentityProvider();
-                    for (APIKey apiKey : application.getKeys()) {
-                        try {
-                            OAuthApplicationInfo oAuthApplicationInfo = keyManager
-                                    .retrieveApplication(apiKey.getConsumerKey());
-                            apiKey.setConsumerSecret(oAuthApplicationInfo.getClientSecret());
-                            AccessTokenInfo accessTokenInfo = keyManager.getNewAccessToken(
-                                    ApplicationUtils.createAccessTokenRequest(oAuthApplicationInfo));
-                            apiKey.setAccessToken(accessTokenInfo.getAccessToken());
-                            apiKey.setValidityPeriod(accessTokenInfo.getValidityPeriod());
-                            //TODO : When showing keys in the application view page , we need to get the access token
-                            // as well
-                        } catch (KeyManagementException e) {
-                            // This is exception is not thrown intentionally because key manager mock servie does not
-                            // have keys once the server is started. We need to re write this properly once the key
-                            // manager is available.
-                            log.error("Error while getting keys fo application : " + applicationId, e);
-                        }
-                    }
-                }
                 applicationDTO = ApplicationMappingUtil.fromApplicationToDTO(application);
                 return Response.ok().entity(applicationDTO).header(HttpHeaders.ETAG,
                         "\"" + existingFingerprint + "\"").build();
@@ -182,9 +156,10 @@ public class ApplicationsApiServiceImpl
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
-            OAuthApplicationInfo oAuthApp = apiConsumer.generateApplicationKeys(body.getApplicationId(),
+            OAuthApplicationInfo oAuthApp = apiConsumer.generateApplicationKeys(applicationId,
                     body.getKeyType().name(), body.getCallbackUrl(), body.getGrantTypesToBeSupported());
-            return Response.ok().entity(oAuthApp).build();
+            ApplicationKeysDTO appKeys = ApplicationKeyMappingUtil.fromApplicationKeysToDTO(oAuthApp);
+            return Response.ok().entity(appKeys).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while generating application keys for application: " + applicationId;
             Map<String, String> paramList = new HashMap<>();
@@ -216,9 +191,10 @@ public class ApplicationsApiServiceImpl
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
-            OAuthApplicationInfo oAuthApp = apiConsumer.provideApplicationKeys(body.getApplicationId(),
+            OAuthApplicationInfo oAuthApp = apiConsumer.provideApplicationKeys(applicationId,
                     body.getKeyType().name(), body.getConsumerKey(), body.getConsumerSecret());
-            return Response.ok().entity(oAuthApp).build();
+            ApplicationKeysDTO appKeys = ApplicationKeyMappingUtil.fromApplicationKeysToDTO(oAuthApp);
+            return Response.ok().entity(appKeys).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while provisioning application keys for application: "
                     + applicationId;
@@ -253,7 +229,8 @@ public class ApplicationsApiServiceImpl
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
             ApplicationToken token = apiConsumer.generateApplicationToken(body.getConsumerKey(),
                     body.getConsumerSecret(), body.getScopes(), body.getValidityPeriod(), body.getRevokeToken());
-            return Response.ok().entity(token).build();
+            ApplicationTokenDTO appToken = ApplicationKeyMappingUtil.fromApplicationTokenToDTO(token);
+            return Response.ok().entity(appToken).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while generating application tokens for application: "
                     + applicationId;
@@ -340,7 +317,7 @@ public class ApplicationsApiServiceImpl
             }
 
             //retrieves the updated application and send as the response
-            Application updatedApplication = apiConsumer.getApplication(applicationId, username, null);
+            Application updatedApplication = apiConsumer.getApplication(applicationId, username);
             updatedApplicationDTO = ApplicationMappingUtil.fromApplicationToDTO(updatedApplication);
             String newFingerprint = applicationsApplicationIdGetFingerprint(applicationId, null, null, null,
                     request);
@@ -394,7 +371,6 @@ public class ApplicationsApiServiceImpl
 
         ApplicationListDTO applicationListDTO = null;
         String username = RestApiUtil.getLoggedInUsername();
-        String groupId = RestApiUtil.getLoggedInUserGroupId();
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
@@ -402,9 +378,9 @@ public class ApplicationsApiServiceImpl
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
             List<Application> allMatchedApps = new ArrayList<>();
             if (StringUtils.isBlank(query)) {
-                allMatchedApps = apiConsumer.getApplications(username, groupId);
+                allMatchedApps = apiConsumer.getApplications(username);
             } else {
-                Application application = apiConsumer.getApplicationByName(username, query, groupId);
+                Application application = apiConsumer.getApplicationByName(username, query);
                 if (application != null) {
                     allMatchedApps = new ArrayList<>();
                     allMatchedApps.add(application);
@@ -414,7 +390,7 @@ public class ApplicationsApiServiceImpl
             //allMatchedApps are already sorted to application name
             applicationListDTO = ApplicationMappingUtil.fromApplicationsToDTO(allMatchedApps, limit, offset);
             ApplicationMappingUtil
-                    .setPaginationParams(applicationListDTO, groupId, limit, offset, allMatchedApps.size());
+                    .setPaginationParams(applicationListDTO, limit, offset, allMatchedApps.size());
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving applications";
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -444,11 +420,9 @@ public class ApplicationsApiServiceImpl
         try {
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
             Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
-            String groupId = RestApiUtil.getLoggedInUserGroupId();
-            application.setGroupId(groupId);
             ApplicationCreationResponse applicationResponse = apiConsumer.addApplication(application);
             String applicationUUID = applicationResponse.getApplicationUUID();
-            Application createdApplication = apiConsumer.getApplication(applicationUUID, username, groupId);
+            Application createdApplication = apiConsumer.getApplication(applicationUUID, username);
             createdApplicationDTO = ApplicationMappingUtil.fromApplicationToDTO(createdApplication);
 
             location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" +

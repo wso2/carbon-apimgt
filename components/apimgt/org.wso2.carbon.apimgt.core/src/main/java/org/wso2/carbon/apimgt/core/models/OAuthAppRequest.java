@@ -58,11 +58,11 @@ public final class OAuthAppRequest {
         this.clientName = clientName;
     }
 
-    public String getCallbackURL() {
+    public String getCallBackURL() {
         return callBackURL;
     }
 
-    public void setCallbackURL(String callBackURL) {
+    public void setCallBackURL(String callBackURL) {
         this.callBackURL = callBackURL;
     }
 

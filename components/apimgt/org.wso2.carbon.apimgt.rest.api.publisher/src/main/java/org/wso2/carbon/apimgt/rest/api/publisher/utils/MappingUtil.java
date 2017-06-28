@@ -333,7 +333,6 @@ public class MappingUtil {
         ApplicationDTO applicationDTO = new ApplicationDTO();
         applicationDTO.setApplicationId(application.getId());
         applicationDTO.setDescription(application.getDescription());
-        applicationDTO.setGroupId(application.getGroupId());
         applicationDTO.setName(application.getName());
         applicationDTO.setSubscriber(application.getCreatedUser());
         applicationDTO.setThrottlingTier(application.getTier());

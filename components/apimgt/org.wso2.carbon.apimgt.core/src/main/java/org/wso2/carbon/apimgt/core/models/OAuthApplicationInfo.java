@@ -30,12 +30,29 @@ import java.util.Objects;
  */
 public final class OAuthApplicationInfo {
 
+    private String keyType;
     private String clientId;
     private String clientName;
     private String callBackURL;
     private List<String> grantTypes;
     private String clientSecret;
     private Map<String, Object> parameters = new HashMap<>();
+
+    public String getKeyType() {
+        return keyType;
+    }
+
+    public void setKeyType(String keyType) {
+        this.keyType = keyType;
+    }
+
+    public String getCallBackURL() {
+        return callBackURL;
+    }
+
+    public void setCallBackURL(String callBackURL) {
+        this.callBackURL = callBackURL;
+    }
 
     public String getClientId() {
         return clientId;
@@ -55,14 +72,6 @@ public final class OAuthApplicationInfo {
 
     public void setClientName(String clientName) {
         this.clientName = clientName;
-    }
-
-    public void setCallbackURL(String callBackURL) {
-        this.callBackURL = callBackURL;
-    }
-
-    public String getCallbackURL() {
-        return callBackURL;
     }
 
     public void setGrantTypes(List<String> grantTypes) {

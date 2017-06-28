@@ -336,11 +336,10 @@ public abstract class AbstractAPIManager implements APIManager {
      * Returns the corresponding application given the uuid
      * @param uuid uuid of the Application
      * @param userId  Name of the User.
-     * @param groupId Id of the group.
      * @return it will return Application corresponds to the uuid provided.
      * @throws APIManagementException   If failed to retrieve application.
      */
-    public Application getApplication(String uuid, String userId, String groupId) throws APIManagementException {
+    public Application getApplication(String uuid, String userId) throws APIManagementException {
         Application application = null;
         try {
            application = getApplicationDAO().getApplication(uuid);

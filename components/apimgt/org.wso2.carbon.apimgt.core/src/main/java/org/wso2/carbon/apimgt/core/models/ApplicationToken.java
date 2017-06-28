@@ -50,4 +50,6 @@ public class ApplicationToken {
     public void setScopes(String scopes) {
         this.scopes = scopes;
     }
+
+
 }

@@ -67,7 +67,7 @@ public class DefaultKeyManagerImplTestCase {
         DCRClientInfo dcrClientInfo = new DCRClientInfo();
         dcrClientInfo.setClientName(oauthAppRequest.getClientName() + '_' + oauthAppRequest.getKeyType());
         dcrClientInfo.setGrantTypes(oauthAppRequest.getGrantTypes());
-        dcrClientInfo.addCallbackUrl(oauthAppRequest.getCallbackURL());
+        dcrClientInfo.addCallbackUrl(oauthAppRequest.getCallBackURL());
         dcrClientInfo.setUserinfoSignedResponseAlg(ServiceReferenceHolder.getInstance().getAPIMConfiguration()
                 .getKeyManagerConfigs().getOidcUserinfoJWTSigningAlgo());
 
@@ -75,7 +75,7 @@ public class DefaultKeyManagerImplTestCase {
         DCRClientInfo dcrClientInfoResponse = new DCRClientInfo();
         dcrClientInfoResponse.setClientName(oauthAppRequest.getClientName());
         dcrClientInfoResponse.setGrantTypes(oauthAppRequest.getGrantTypes());
-        dcrClientInfoResponse.addCallbackUrl(oauthAppRequest.getCallbackURL());
+        dcrClientInfoResponse.addCallbackUrl(oauthAppRequest.getCallBackURL());
         dcrClientInfoResponse.setUserinfoSignedResponseAlg(ServiceReferenceHolder.getInstance().getAPIMConfiguration()
                 .getKeyManagerConfigs().getOidcUserinfoJWTSigningAlgo());
         dcrClientInfoResponse.setClientId("xxx-xxx-xxx-xxx");
@@ -88,7 +88,7 @@ public class DefaultKeyManagerImplTestCase {
         OAuthApplicationInfo oAuthApplicationInfoResponse = new OAuthApplicationInfo();
         oAuthApplicationInfoResponse.setClientName(dcrClientInfoResponse.getClientName());
         oAuthApplicationInfoResponse.setGrantTypes(dcrClientInfoResponse.getGrantTypes());
-        oAuthApplicationInfoResponse.setCallbackURL(dcrClientInfoResponse.getRedirectURIs().get(0));
+        oAuthApplicationInfoResponse.setCallBackURL(dcrClientInfoResponse.getRedirectURIs().get(0));
         oAuthApplicationInfoResponse.setClientId(dcrClientInfoResponse.getClientId());
         oAuthApplicationInfoResponse.setClientSecret(dcrClientInfoResponse.getClientSecret());
 
@@ -150,7 +150,7 @@ public class DefaultKeyManagerImplTestCase {
         grantTypesList.add("password");
         grantTypesList.add("client-credentials");
         oAuthApplicationInfo.setGrantTypes(grantTypesList);
-        oAuthApplicationInfo.setCallbackURL("https://sample.callback/url");
+        oAuthApplicationInfo.setCallBackURL("https://sample.callback/url");
         oAuthApplicationInfo.setClientId(consumerKey);
         oAuthApplicationInfo.setClientSecret("yyy-yyy-yyy-yyy");
 
@@ -158,7 +158,7 @@ public class DefaultKeyManagerImplTestCase {
         DCRClientInfo dcrClientInfo = new DCRClientInfo();
         dcrClientInfo.setClientName(oAuthApplicationInfo.getClientName());
         dcrClientInfo.setGrantTypes(oAuthApplicationInfo.getGrantTypes());
-        dcrClientInfo.addCallbackUrl(oAuthApplicationInfo.getCallbackURL());
+        dcrClientInfo.addCallbackUrl(oAuthApplicationInfo.getCallBackURL());
         dcrClientInfo.setUserinfoSignedResponseAlg(ServiceReferenceHolder.getInstance().getAPIMConfiguration()
                 .getKeyManagerConfigs().getOidcUserinfoJWTSigningAlgo());
         dcrClientInfo.setClientId(oAuthApplicationInfo.getClientId());
@@ -168,7 +168,7 @@ public class DefaultKeyManagerImplTestCase {
         DCRClientInfo dcrClientInfoResponse = new DCRClientInfo();
         dcrClientInfoResponse.setClientName(oAuthApplicationInfo.getClientName());
         dcrClientInfoResponse.setGrantTypes(oAuthApplicationInfo.getGrantTypes());
-        dcrClientInfoResponse.addCallbackUrl(oAuthApplicationInfo.getCallbackURL());
+        dcrClientInfoResponse.addCallbackUrl(oAuthApplicationInfo.getCallBackURL());
         dcrClientInfoResponse.setClientId(consumerKey);
         dcrClientInfoResponse.setClientSecret("yyy-yyy-yyy-yyy");
         dcrClientInfoResponse.setClientIdIssuedAt("now");
@@ -179,7 +179,7 @@ public class DefaultKeyManagerImplTestCase {
         OAuthApplicationInfo oAuthApplicationInfoResponse = new OAuthApplicationInfo();
         oAuthApplicationInfoResponse.setClientName(dcrClientInfoResponse.getClientName());
         oAuthApplicationInfoResponse.setGrantTypes(dcrClientInfoResponse.getGrantTypes());
-        oAuthApplicationInfoResponse.setCallbackURL(dcrClientInfoResponse.getRedirectURIs().get(0));
+        oAuthApplicationInfoResponse.setCallBackURL(dcrClientInfoResponse.getRedirectURIs().get(0));
         oAuthApplicationInfoResponse.setClientId(dcrClientInfoResponse.getClientId());
         oAuthApplicationInfoResponse.setClientSecret(dcrClientInfoResponse.getClientSecret());
 
@@ -301,7 +301,7 @@ public class DefaultKeyManagerImplTestCase {
         OAuthApplicationInfo oAuthApplicationInfoResponse = new OAuthApplicationInfo();
         oAuthApplicationInfoResponse.setClientName(dcrClientInfoResponse.getClientName());
         oAuthApplicationInfoResponse.setGrantTypes(dcrClientInfoResponse.getGrantTypes());
-        oAuthApplicationInfoResponse.setCallbackURL(dcrClientInfoResponse.getRedirectURIs().get(0));
+        oAuthApplicationInfoResponse.setCallBackURL(dcrClientInfoResponse.getRedirectURIs().get(0));
         oAuthApplicationInfoResponse.setClientId(dcrClientInfoResponse.getClientId());
         oAuthApplicationInfoResponse.setClientSecret(dcrClientInfoResponse.getClientSecret());
 

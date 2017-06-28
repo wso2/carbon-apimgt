@@ -1452,7 +1452,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error while retrieving Policies for level: " + tierLevel;
             log.error(errorMsg);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIM_DAO_EXCEPTION);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -1464,7 +1464,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error while retrieving Policy for level: " + tierLevel + ", name: " + tierName;
             log.error(errorMsg);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIM_DAO_EXCEPTION);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 

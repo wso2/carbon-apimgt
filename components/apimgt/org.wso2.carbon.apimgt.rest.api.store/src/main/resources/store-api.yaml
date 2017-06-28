@@ -2519,14 +2519,6 @@ parameters:
       - STANDARD
       - COMPOSITE
 
-# Group Identifier of the application
-  groupId:
-    name: groupId
-    in: query
-    description: |
-      Application Group Id
-    required: false
-    type: string
 
 # Subscription Identifier
 # Specified as part of the path expression
@@ -2950,8 +2942,8 @@ definitions:
         type: string
       lifeCycleStatus:
         type: string
-      groupId:
-        type: string
+      token:
+        $ref: '#/definitions/ApplicationToken'
       keys:
         type: array
         items:
@@ -2974,8 +2966,6 @@ definitions:
       description:
         type: string
       lifeCycleStatus:
-        type: string
-      groupId:
         type: string
 
 #-----------------------------------------------------
@@ -3397,9 +3387,7 @@ definitions:
         type: string
         description: Access token
       tokenScopes:
-        type: array
-        items:
-          type: string
+        type: string
         description: Valid scopes for the access token
       validityTime:
         type: integer
@@ -3423,6 +3411,9 @@ definitions:
         items:
           type: string
         description: Supported grant types for the application
+      callbackUrl:
+        type: string
+        description: Callback URL
       keyType:
         description: Key type
         type: string
@@ -3436,26 +3427,22 @@ definitions:
   ApplicationKeyGenerateRequest :
     title: Application key generation request object
     required:
-      - applicationId
       - keyType
       - grantTypesToBeSupported
     properties:
-      applicationId:
-        type: string
-        description: Application ID
       keyType:
         type: string
         enum:
           - PRODUCTION
           - SANDBOX
-      callbackUrl:
-        type: string
-        description: Callback URL
       grantTypesToBeSupported:
         type: array
         items:
           type: string
         description: Grant types that should be supported by the application
+      callbackUrl:
+        type: string
+        description: Callback URL
 
 
 #-----------------------------------------------------
@@ -3464,14 +3451,10 @@ definitions:
   ApplicationKeyProvisionRequest :
     title: Application key provision request object
     required:
-      - applicationId
       - consumerKey
       - consumerSecret
       - keyType
     properties:
-      applicationId:
-        type: string
-        description: Application ID
       consumerKey:
         type: string
         description: Consumer key of the application

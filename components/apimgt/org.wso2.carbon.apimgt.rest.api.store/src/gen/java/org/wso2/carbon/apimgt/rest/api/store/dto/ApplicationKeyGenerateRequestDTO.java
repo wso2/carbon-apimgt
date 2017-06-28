@@ -1,11 +1,11 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -14,9 +14,6 @@ import java.util.Objects;
  * ApplicationKeyGenerateRequestDTO
  */
 public class ApplicationKeyGenerateRequestDTO   {
-  @JsonProperty("applicationId")
-  private String applicationId = null;
-
   /**
    * Gets or Sets keyType
    */
@@ -51,29 +48,11 @@ public class ApplicationKeyGenerateRequestDTO   {
   @JsonProperty("keyType")
   private KeyTypeEnum keyType = null;
 
-  @JsonProperty("callbackUrl")
-  private String callbackUrl = null;
-
   @JsonProperty("grantTypesToBeSupported")
   private List<String> grantTypesToBeSupported = new ArrayList<String>();
 
-  public ApplicationKeyGenerateRequestDTO applicationId(String applicationId) {
-    this.applicationId = applicationId;
-    return this;
-  }
-
-   /**
-   * Application ID
-   * @return applicationId
-  **/
-  @ApiModelProperty(required = true, value = "Application ID")
-  public String getApplicationId() {
-    return applicationId;
-  }
-
-  public void setApplicationId(String applicationId) {
-    this.applicationId = applicationId;
-  }
+  @JsonProperty("callbackUrl")
+  private String callbackUrl = null;
 
   public ApplicationKeyGenerateRequestDTO keyType(KeyTypeEnum keyType) {
     this.keyType = keyType;
@@ -91,24 +70,6 @@ public class ApplicationKeyGenerateRequestDTO   {
 
   public void setKeyType(KeyTypeEnum keyType) {
     this.keyType = keyType;
-  }
-
-  public ApplicationKeyGenerateRequestDTO callbackUrl(String callbackUrl) {
-    this.callbackUrl = callbackUrl;
-    return this;
-  }
-
-   /**
-   * Callback URL
-   * @return callbackUrl
-  **/
-  @ApiModelProperty(value = "Callback URL")
-  public String getCallbackUrl() {
-    return callbackUrl;
-  }
-
-  public void setCallbackUrl(String callbackUrl) {
-    this.callbackUrl = callbackUrl;
   }
 
   public ApplicationKeyGenerateRequestDTO grantTypesToBeSupported(List<String> grantTypesToBeSupported) {
@@ -134,6 +95,24 @@ public class ApplicationKeyGenerateRequestDTO   {
     this.grantTypesToBeSupported = grantTypesToBeSupported;
   }
 
+  public ApplicationKeyGenerateRequestDTO callbackUrl(String callbackUrl) {
+    this.callbackUrl = callbackUrl;
+    return this;
+  }
+
+   /**
+   * Callback URL
+   * @return callbackUrl
+  **/
+  @ApiModelProperty(value = "Callback URL")
+  public String getCallbackUrl() {
+    return callbackUrl;
+  }
+
+  public void setCallbackUrl(String callbackUrl) {
+    this.callbackUrl = callbackUrl;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -144,15 +123,14 @@ public class ApplicationKeyGenerateRequestDTO   {
       return false;
     }
     ApplicationKeyGenerateRequestDTO applicationKeyGenerateRequest = (ApplicationKeyGenerateRequestDTO) o;
-    return Objects.equals(this.applicationId, applicationKeyGenerateRequest.applicationId) &&
-        Objects.equals(this.keyType, applicationKeyGenerateRequest.keyType) &&
-        Objects.equals(this.callbackUrl, applicationKeyGenerateRequest.callbackUrl) &&
-        Objects.equals(this.grantTypesToBeSupported, applicationKeyGenerateRequest.grantTypesToBeSupported);
+    return Objects.equals(this.keyType, applicationKeyGenerateRequest.keyType) &&
+        Objects.equals(this.grantTypesToBeSupported, applicationKeyGenerateRequest.grantTypesToBeSupported) &&
+        Objects.equals(this.callbackUrl, applicationKeyGenerateRequest.callbackUrl);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, keyType, callbackUrl, grantTypesToBeSupported);
+    return Objects.hash(keyType, grantTypesToBeSupported, callbackUrl);
   }
 
   @Override
@@ -160,10 +138,9 @@ public class ApplicationKeyGenerateRequestDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApplicationKeyGenerateRequestDTO {\n");
     
-    sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
     sb.append("    keyType: ").append(toIndentedString(keyType)).append("\n");
-    sb.append("    callbackUrl: ").append(toIndentedString(callbackUrl)).append("\n");
     sb.append("    grantTypesToBeSupported: ").append(toIndentedString(grantTypesToBeSupported)).append("\n");
+    sb.append("    callbackUrl: ").append(toIndentedString(callbackUrl)).append("\n");
     sb.append("}");
     return sb.toString();
   }
