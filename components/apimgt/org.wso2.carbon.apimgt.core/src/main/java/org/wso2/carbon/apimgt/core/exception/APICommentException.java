@@ -20,11 +20,11 @@ package org.wso2.carbon.apimgt.core.exception;
  */
 public class APICommentException extends APIManagementException {
 
-    public APICommentException(String msg, Throwable e, ExceptionCodes code) {
+    public APICommentException(String msg, Throwable e, ErrorHandler code) {
         super(msg, e, code);
     }
 
-    public APICommentException(String msg, ExceptionCodes code) {
+    public APICommentException(String msg, ErrorHandler code) {
         super(msg, code);
     }
 }
