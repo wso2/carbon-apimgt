@@ -16,14 +16,22 @@
  * under the License.
  */
 
-import React from 'react'
+import React, {Component} from 'react'
+import Api from '../../../../data/SingleClient'
 
-const LifeCycle = (props) => {
-    return (
-        <h1>
-            Life cycle Page
-        </h1>
-    );
-};
+class LifeCycle extends Component {
+    constructor(props) {
+        super(props);
+        this.api = new Api();
+    }
+
+    render() {
+        return (
+            <h1>
+                Life cycle Page
+            </h1>
+        );
+    }
+}
 
 export default LifeCycle
