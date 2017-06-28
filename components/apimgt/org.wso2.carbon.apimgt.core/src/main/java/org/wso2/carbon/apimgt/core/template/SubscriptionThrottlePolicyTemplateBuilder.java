@@ -24,16 +24,19 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 
 import java.io.StringWriter;
 import java.util.Map;
+
 /**
  * Siddhi query builder for Subscription throttle policy.
  */
+
 public class SubscriptionThrottlePolicyTemplateBuilder extends ThrottlePolicyTemplateBuilder {
 
-    private static final Log log = LogFactory.getLog(ThrottlePolicyTemplateBuilder.class);
+    private static final Log log = LogFactory.getLog(SubscriptionThrottlePolicyTemplateBuilder.class);
     private static final String POLICY_VELOCITY_SUB = "throttle_policy_template_sub";
     private SubscriptionPolicy subscriptionPolicy;
 
@@ -50,37 +53,43 @@ public class SubscriptionThrottlePolicyTemplateBuilder extends ThrottlePolicyTem
      * @throws APITemplateException throws if generation failure occur
      */
     public String getThrottlePolicyForSubscriptionLevel(SubscriptionPolicy policy) throws APITemplateException {
-        StringWriter writer = new StringWriter();
 
         if (log.isDebugEnabled()) {
-            log.debug("Generating policy for subscriptionLevel :" + policy.toString());
+            log.debug("Generating Siddhi app for subscriptionLevel :" + policy.toString());
         }
-
+        //get velocity template for Subscription policy and generate the template
+        StringWriter writer = new StringWriter();
         VelocityEngine velocityengine = initVelocityEngine();
-        Template t = velocityengine.getTemplate(getTemplatePathForSubscription());
-
+        Template template = velocityengine.getTemplate(getTemplatePathForSubscription());
         VelocityContext context = new VelocityContext();
         setConstantContext(context);
-        context.put("policy", policy);
-        context.put("quotaPolicy", policy.getDefaultQuotaPolicy());
-        t.merge(context, writer);
+        //set values for velocity context
+        context.put(POLICY, policy);
+        context.put(QUOTA_POLICY, policy.getDefaultQuotaPolicy());
+        template.merge(context, writer);
         if (log.isDebugEnabled()) {
-            log.debug("Policy : " + writer.toString());
+            log.debug("Generated Siddhi app for policy : " + writer.toString());
         }
-
         return writer.toString();
     }
 
+    /**
+     * Get template path for subscription policy.
+     *
+     * @return Path as a string
+     */
     private String getTemplatePathForSubscription() {
-        return policyTemplateLocation + POLICY_VELOCITY_SUB + ".xml";
+        return policyTemplateLocation + POLICY_VELOCITY_SUB + XML_EXTENSION;
     }
 
-    @Override public Map<String, String> getThrottlePolicyTemplate() {
+    @Override public Map<String, String> getThrottlePolicyTemplate() throws APITemplateException {
         try {
-            templateMap.put("default", getThrottlePolicyForSubscriptionLevel(subscriptionPolicy));
+            templateMap
+                    .put(subscriptionPolicy.getPolicyName(), getThrottlePolicyForSubscriptionLevel(subscriptionPolicy));
         } catch (APITemplateException e) {
-            String errorMessage = "Error while creating template for application throttle policy.";
+            String errorMessage = "Error while creating template for subscription throttle policy.";
             log.error(errorMessage, e);
+            throw new APITemplateException(errorMessage, ExceptionCodes.THROTTLE_TEMPLATE_EXCEPTION);
         }
         return templateMap;
     }

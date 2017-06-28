@@ -32,9 +32,10 @@ import java.util.Map;
 /**
  * Siddhi query template builder for Custom throttle policy.
  */
+
 public class CustomThrottlePolicyTemplateBuilder extends ThrottlePolicyTemplateBuilder {
     private static final String POLICY_VELOCITY_GLOBAL = "throttle_policy_template_global";
-    private static final Log log = LogFactory.getLog(ThrottlePolicyTemplateBuilder.class);
+    private static final Log log = LogFactory.getLog(CustomThrottlePolicyTemplateBuilder.class);
     private CustomPolicy customPolicy;
 
     public CustomThrottlePolicyTemplateBuilder(CustomPolicy customPolicy) {
@@ -49,43 +50,43 @@ public class CustomThrottlePolicyTemplateBuilder extends ThrottlePolicyTemplateB
      * @return policy template as a string
      * @throws APITemplateException throws if any error occurred
      */
-    public String getThrottlePolicyForGlobalLevel(CustomPolicy policy) throws APITemplateException {
-        StringWriter writer = new StringWriter();
+    public String getThrottlePolicyTemplateForCustomPolicy(CustomPolicy policy) throws APITemplateException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Generating policy for globalLevel :" + policy.toString());
+            log.debug("Generating Siddhi app for custom policy :" + policy.toString());
         }
 
-        try {
-            VelocityEngine velocityengine = initVelocityEngine();
-
-            Template template = velocityengine.getTemplate(getTemplatePathForGlobal());
-
-            VelocityContext context = new VelocityContext();
-            setConstantContext(context);
-            context.put("policy", policy);
-            if (log.isDebugEnabled()) {
-                log.debug("Policy : " + writer.toString());
-            }
-            template.merge(context, writer);
-        } catch (Exception e) {
-            log.error("Velocity Error", e);
-            throw new APITemplateException("Velocity Error", ExceptionCodes.THROTTLE_TEMPLATE_EXCEPTION);
+        //get velocity template for custom throttle policy and generate the template
+        StringWriter writer = new StringWriter();
+        VelocityContext context = new VelocityContext();
+        VelocityEngine velocityengine = initVelocityEngine();
+        Template template = velocityengine.getTemplate(getTemplatePathForGlobal());
+        setConstantContext(context);
+        //set values for velocity context
+        context.put(POLICY, policy);
+        template.merge(context, writer);
+        if (log.isDebugEnabled()) {
+            log.debug("Generated Siddhi app for policy : " + writer.toString());
         }
-
         return writer.toString();
     }
 
+    /**
+     * Get the template path for Custom Policy
+     *
+     * @return Path as a string
+     */
     private String getTemplatePathForGlobal() {
-        return policyTemplateLocation + POLICY_VELOCITY_GLOBAL + ".xml";
+        return policyTemplateLocation + POLICY_VELOCITY_GLOBAL + XML_EXTENSION;
     }
 
-    @Override public Map<String, String> getThrottlePolicyTemplate() {
+    @Override public Map<String, String> getThrottlePolicyTemplate() throws APITemplateException {
         try {
-            templateMap.put("default", getThrottlePolicyForGlobalLevel(customPolicy));
+            templateMap.put(customPolicy.getPolicyName(), getThrottlePolicyTemplateForCustomPolicy(customPolicy));
         } catch (APITemplateException e) {
-            String errorMessage = "Error while creating template for advaced throttle policy.";
+            String errorMessage = "Error while creating template for Custom throttle policy.";
             log.error(errorMessage, e);
+            throw new APITemplateException(errorMessage, ExceptionCodes.THROTTLE_TEMPLATE_EXCEPTION);
         }
         return templateMap;
     }

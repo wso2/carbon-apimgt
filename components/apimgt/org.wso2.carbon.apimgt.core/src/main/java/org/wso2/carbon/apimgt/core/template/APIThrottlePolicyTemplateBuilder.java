@@ -25,13 +25,13 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Condition;
 import org.wso2.carbon.apimgt.core.models.policy.Pipeline;
 import org.wso2.carbon.apimgt.core.models.policy.PolicyConstants;
 
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -41,9 +41,10 @@ import java.util.Set;
 /**
  * Siddhi query builder for API throttle policy.
  */
+
 public class APIThrottlePolicyTemplateBuilder extends ThrottlePolicyTemplateBuilder {
 
-    private static final Log log = LogFactory.getLog(ThrottlePolicyTemplateBuilder.class);
+    private static final Log log = LogFactory.getLog(APIThrottlePolicyTemplateBuilder.class);
     private static final String POLICY_VELOCITY_RESOURCE = "throttle_policy_template_resource";
     private static final String POLICY_VELOCITY_RESOURCE_DEFAULT = "throttle_policy_template_resource_default";
     private APIPolicy apiPolicy;
@@ -61,41 +62,38 @@ public class APIThrottlePolicyTemplateBuilder extends ThrottlePolicyTemplateBuil
      * @return throttle policies for api level
      * @throws APITemplateException throws if generation failure occur
      */
-    public Map<String, String> getThrottlePolicyForAPILevel(APIPolicy policy) throws APITemplateException {
+    public Map<String, String> getThrottlePolicyTemplateForPipelines(APIPolicy policy) throws APITemplateException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Generating policy for apiLevel :" + policy.toString());
+            log.debug("Generating Siddhi App for apiLevel :" + policy.toString());
         }
+        //get velocity template for API policy pipeline and generate the template
         Map<String, String> policyArray = new HashMap<String, String>();
-        VelocityEngine velocityengine = initVelocityEngine();
-        Template template = velocityengine.getTemplate(getTemplatePathForAPI());
         StringWriter writer;
         VelocityContext context;
-
+        VelocityEngine velocityengine = initVelocityEngine();
+        Template template = velocityengine.getTemplate(getTemplatePathForAPI());
+        //Generate template for pipeline conditions if pipelines not null
         if (policy.getPipelines() != null) {
-
             for (Pipeline pipeline : policy.getPipelines()) {
+                //set values for velocity context
                 context = new VelocityContext();
                 setConstantContext(context);
-                context.put("pipelineItem", pipeline);
-                context.put("policy", policy);
-
-                context.put("quotaPolicy", pipeline.getQuotaPolicy());
-                context.put("pipeline", "condition_" + pipeline.getId());
-
+                context.put(PIPELINE_ITEM, pipeline);
+                context.put(POLICY, policy);
+                context.put(QUOTA_POLICY, pipeline.getQuotaPolicy());
+                context.put(PIPELINE,
+                        CONDITION + UNDERSCORE + pipeline.getId());
                 String conditionString = getPolicyCondition(pipeline.getConditions());
-                //                    conditionsSet.add(conditionString);
-
-                context.put("condition", " AND " + conditionString);
+                context.put(CONDITION, AND + conditionString);
                 writer = new StringWriter();
                 template.merge(context, writer);
                 if (log.isDebugEnabled()) {
-                    log.debug("Policy : " + writer.toString());
+                    log.debug("Generated Siddhi App : " + writer.toString());
                 }
-
                 String policyName =
-                        PolicyConstants.POLICY_LEVEL_RESOURCE + "_" + policy.getPolicyName() + "_condition_" + pipeline
-                                .getId();
+                        PolicyConstants.POLICY_LEVEL_RESOURCE + UNDERSCORE + policy.getPolicyName() + UNDERSCORE
+                                + CONDITION + UNDERSCORE + pipeline.getId();
                 policyArray.put(policyName, writer.toString());
             }
         }
@@ -112,20 +110,19 @@ public class APIThrottlePolicyTemplateBuilder extends ThrottlePolicyTemplateBuil
      * @return throttle policies for default api
      * @throws APITemplateException throws if generation failure occur
      */
-    public String getThrottlePolicyForAPILevelDefault(APIPolicy policy) throws APITemplateException {
+    public String getThrottlePolicyTemplateForAPILevelDefaultCondition(APIPolicy policy) throws APITemplateException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Generating policy for apiLevel :" + policy.toString());
+            log.debug("Generating Siddhi App for apiLevel :" + policy.toString());
         }
+        //get velocity template for API policy and generate the template
         Set<String> conditionsSet = new HashSet<String>();
-
+        List<Pipeline> pipelines = policy.getPipelines();
         VelocityEngine velocityengine = initVelocityEngine();
         Template template = velocityengine.getTemplate(getTemplatePathForAPIDefaultPolicy());
         StringWriter writer;
         VelocityContext context;
-
-        List<Pipeline> pipelines = policy.getPipelines();
-
+        //when APIPolicy contains pipelines, get template as a string
         if (pipelines != null) {
             for (Pipeline pipeline : pipelines) {
                 String conditionString = getPolicyConditionForDefault(pipeline.getConditions());
@@ -134,36 +131,44 @@ public class APIThrottlePolicyTemplateBuilder extends ThrottlePolicyTemplateBuil
                 }
             }
         }
-
-        // for default one
+        // for default API policy
         context = new VelocityContext();
         setConstantContext(context);
-        //default policy is defined as 'elseCondition'
-        context.put("pipeline", "elseCondition"); //// constant
-        context.put("pipelineItem", null);
-        context.put("policy", policy);
-
-        context.put("quotaPolicy", policy.getDefaultQuotaPolicy());
+        //default policy is defined as 'elseCondition' , set values for velocity context
+        context.put(PIPELINE, ELSE_CONDITION);
+        context.put(PIPELINE_ITEM, null);
+        context.put(POLICY, policy);
+        context.put(QUOTA_POLICY, policy.getDefaultQuotaPolicy());
         String conditionSetString = getConditionForDefault(conditionsSet);
         if (!StringUtils.isEmpty(conditionSetString)) {
-            context.put("condition", " AND " + conditionSetString);
+            context.put(CONDITION, AND + conditionSetString);
         } else {
-            context.put("condition", "");
+            context.put(CONDITION, null);
         }
         writer = new StringWriter();
         template.merge(context, writer);
         if (log.isDebugEnabled()) {
-            log.debug("Policy : " + writer.toString());
+            log.debug("Generated Siddhi App : " + writer.toString());
         }
         return writer.toString();
     }
 
+    /**
+     * Api policy template path for pipelines.
+     *
+     * @return path as a string
+     */
     private String getTemplatePathForAPI() {
-        return policyTemplateLocation + POLICY_VELOCITY_RESOURCE + ".xml";
+        return policyTemplateLocation + POLICY_VELOCITY_RESOURCE + XML_EXTENSION;
     }
 
+    /**
+     * Api policy template path for default condition.
+     *
+     * @return path as a string
+     */
     private String getTemplatePathForAPIDefaultPolicy() {
-        return policyTemplateLocation + POLICY_VELOCITY_RESOURCE_DEFAULT + ".xml";
+        return policyTemplateLocation + POLICY_VELOCITY_RESOURCE_DEFAULT + XML_EXTENSION;
     }
 
     /**
@@ -179,7 +184,7 @@ public class APIThrottlePolicyTemplateBuilder extends ThrottlePolicyTemplateBuil
             if (i == 0) {
                 conditionString = condition.getCondition();
             } else {
-                conditionString = conditionString + " AND " + condition.getCondition();
+                conditionString = conditionString + AND + condition.getCondition();
             }
             i++;
         }
@@ -200,7 +205,7 @@ public class APIThrottlePolicyTemplateBuilder extends ThrottlePolicyTemplateBuil
             if (i == 0) {
                 conditionString = conditionStringComplete;
             } else {
-                conditionString = conditionString + " AND " + conditionStringComplete;
+                conditionString = conditionString + AND + conditionStringComplete;
             }
             i++;
         }
@@ -222,42 +227,27 @@ public class APIThrottlePolicyTemplateBuilder extends ThrottlePolicyTemplateBuil
             if (i == 0) {
                 conditionString = conditionIsolated;
             } else {
-                conditionString = conditionString + " OR " + conditionIsolated;
+                conditionString = conditionString + OR + conditionIsolated;
             }
             i++;
         }
-
         if (!StringUtils.isEmpty(conditionString)) {
             conditionString = PolicyConstants.INVERT_CONDITION + "(" + conditionString + ")";
         }
-
         return conditionString;
     }
 
     @Override
-    public Map<String, String> getThrottlePolicyTemplate() {
+    public Map<String, String> getThrottlePolicyTemplate() throws APITemplateException {
         try {
-            templateMap = getThrottlePolicyForAPILevel(apiPolicy);
-            templateMap.put("default", getThrottlePolicyForAPILevelDefault(apiPolicy));
+            templateMap = getThrottlePolicyTemplateForPipelines(apiPolicy);
+            templateMap.put(apiPolicy.getPolicyName(), getThrottlePolicyTemplateForAPILevelDefaultCondition(apiPolicy));
         } catch (APITemplateException e) {
-            String errorMessage = "Error while creating template for advaced throttle policy.";
+            String errorMessage = "Error while creating template for advanced throttle policy.";
             log.error(errorMessage, e);
+            throw new APITemplateException(errorMessage, ExceptionCodes.THROTTLE_TEMPLATE_EXCEPTION);
         }
         return templateMap;
     }
 
-    public List<String> getAPIPolicyName() {
-        List<String> names = new ArrayList<>();
-        if (apiPolicy.getPipelines() != null) {
-            for (Pipeline pipeline : apiPolicy.getPipelines()) {
-                String policyName =
-                        PolicyConstants.POLICY_LEVEL_RESOURCE + "_" + apiPolicy.getPolicyName() + "_condition_"
-                                + pipeline.getId();
-                names.add(policyName);
-            }
-        }
-        String policyName = PolicyConstants.POLICY_LEVEL_RESOURCE + "_" + apiPolicy.getPolicyName() + "_default";
-        names.add(policyName);
-        return names;
-    }
 }

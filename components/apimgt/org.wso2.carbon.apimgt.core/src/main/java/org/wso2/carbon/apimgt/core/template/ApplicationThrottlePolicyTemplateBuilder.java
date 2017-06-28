@@ -24,16 +24,19 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 
 import java.io.StringWriter;
 import java.util.Map;
+
 /**
  * Siddhi query builder for application throttle policy.
  */
+
 public class ApplicationThrottlePolicyTemplateBuilder extends ThrottlePolicyTemplateBuilder {
 
-    private static final Log log = LogFactory.getLog(ThrottlePolicyTemplateBuilder.class);
+    private static final Log log = LogFactory.getLog(ApplicationThrottlePolicyTemplateBuilder.class);
     private static final String POLICY_VELOCITY_APP = "throttle_policy_template_app";
     private ApplicationPolicy applicationPolicy;
 
@@ -50,38 +53,43 @@ public class ApplicationThrottlePolicyTemplateBuilder extends ThrottlePolicyTemp
      * @throws APITemplateException throws if generation failure occur
      */
     public String getThrottlePolicyForAppLevel(ApplicationPolicy policy) throws APITemplateException {
-        StringWriter writer = new StringWriter();
 
         if (log.isDebugEnabled()) {
-            log.debug("Generating policy for appLevel :" + policy.toString());
+            log.debug("Generating Siddhi app for appLevel :" + policy.toString());
         }
-
+        //get velocity template for Application policy and generate the template
+        StringWriter writer = new StringWriter();
         VelocityEngine velocityengine = initVelocityEngine();
         Template template = velocityengine.getTemplate(getTemplatePathForApplication());
-
         VelocityContext context = new VelocityContext();
         setConstantContext(context);
-        context.put("policy", policy);
-        context.put("quotaPolicy", policy.getDefaultQuotaPolicy());
+        //set values for velocity context
+        context.put(POLICY, policy);
+        context.put(QUOTA_POLICY, policy.getDefaultQuotaPolicy());
         template.merge(context, writer);
         if (log.isDebugEnabled()) {
-            log.debug("Policy : " + writer.toString());
+            log.debug("Generated Siddhi app for policy : " + writer.toString());
         }
-
         return writer.toString();
     }
 
+    /**
+     * Get the template path for the application policy.
+     *
+     * @return Path as a string
+     */
     private String getTemplatePathForApplication() {
-        return policyTemplateLocation + POLICY_VELOCITY_APP + ".xml";
+        return policyTemplateLocation + POLICY_VELOCITY_APP + XML_EXTENSION;
     }
 
 
-    @Override public Map<String, String> getThrottlePolicyTemplate() {
+    @Override public Map<String, String> getThrottlePolicyTemplate() throws APITemplateException {
         try {
-            templateMap.put("default", getThrottlePolicyForAppLevel(applicationPolicy));
+            templateMap.put(applicationPolicy.getPolicyName(), getThrottlePolicyForAppLevel(applicationPolicy));
         } catch (APITemplateException e) {
-            String errorMessage = "Error while creating template for advaced throttle policy.";
+            String errorMessage = "Error while creating template for application throttle policy.";
             log.error(errorMessage, e);
+            throw new APITemplateException(errorMessage, ExceptionCodes.THROTTLE_TEMPLATE_EXCEPTION);
         }
         return templateMap;
     }

@@ -32,11 +32,32 @@ import java.util.Map;
 /**
  * Generate throttle policy using velocity template
  */
+
 abstract class ThrottlePolicyTemplateBuilder {
 
     protected String policyTemplateLocation =
             "resources" + File.separator + "template" + File.separator + "policy_templates" + File.separator;
     protected Map<String, String> templateMap = new HashMap<>();
+    public static final String PIPELINE_ITEM = "pipelineItem";
+    public static final String PIPELINE = "pipeline";
+    public static final String POLICY = "policy";
+    public static final String QUOTA_POLICY = "quotaPolicy";
+    public static final String CONDITION = "condition";
+    public static final String UNDERSCORE = "_";
+    public static final String AND = " AND ";
+    public static final String OR = " OR ";
+    public static final String ELSE_CONDITION = "elseCondition";
+    public static final String XML_EXTENSION = ".xml";
+    public static final String CLASS_PATH = "classpath";
+    public static final String CLASS_PATH_RESOURCE_LOADER = "classpath.resource.loader.class";
+    public static final String ACROSS_ALL = "ACROSS_ALL";
+    public static final String PER_USER = "PER_USER";
+    public static final String POLICY_LEVEL_API = "POLICY_LEVEL_API";
+    public static final String POLICY_LEVEL_APP = "POLICY_LEVEL_APP";
+    public static final String POLICY_LEVEL_SUB = "POLICY_LEVEL_SUB";
+    public static final String POLICY_LEVEL_CUSTOM = "POLICY_LEVEL_GLOBAL";
+    public static final String REQUEST_COUNT_TYPE = "REQUEST_COUNT_TYPE";
+    public static final String BANDWIDTH_TYPE = "BANDWIDTH_TYPE";
 
     /**
      * Set the location of the policy templates. If not set, default location is used
@@ -53,14 +74,14 @@ abstract class ThrottlePolicyTemplateBuilder {
      * @param context VelocityContext object to be set
      */
     protected static void setConstantContext(VelocityContext context) {
-        context.put("ACROSS_ALL", PolicyConstants.ACROSS_ALL);
-        context.put("PER_USER", PolicyConstants.PER_USER);
-        context.put("POLICY_LEVEL_API", PolicyConstants.POLICY_LEVEL_API);
-        context.put("POLICY_LEVEL_APP", PolicyConstants.POLICY_LEVEL_APP);
-        context.put("POLICY_LEVEL_SUB", PolicyConstants.POLICY_LEVEL_SUB);
-        context.put("POLICY_LEVEL_GLOBAL", PolicyConstants.POLICY_LEVEL_GLOBAL);
-        context.put("REQUEST_COUNT_TYPE", PolicyConstants.REQUEST_COUNT_TYPE);
-        context.put("BANDWIDTH_TYPE", PolicyConstants.BANDWIDTH_TYPE);
+        context.put(ACROSS_ALL, PolicyConstants.ACROSS_ALL);
+        context.put(PER_USER, PolicyConstants.PER_USER);
+        context.put(POLICY_LEVEL_API, PolicyConstants.POLICY_LEVEL_API);
+        context.put(POLICY_LEVEL_APP, PolicyConstants.POLICY_LEVEL_APP);
+        context.put(POLICY_LEVEL_SUB, PolicyConstants.POLICY_LEVEL_SUB);
+        context.put(POLICY_LEVEL_CUSTOM, PolicyConstants.POLICY_LEVEL_GLOBAL);
+        context.put(REQUEST_COUNT_TYPE, PolicyConstants.REQUEST_COUNT_TYPE);
+        context.put(BANDWIDTH_TYPE, PolicyConstants.BANDWIDTH_TYPE);
     }
 
     /**
@@ -70,8 +91,8 @@ abstract class ThrottlePolicyTemplateBuilder {
      */
     public VelocityEngine initVelocityEngine() {
         VelocityEngine velocityengine = new VelocityEngine();
-        velocityengine.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
-        velocityengine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
+        velocityengine.setProperty(RuntimeConstants.RESOURCE_LOADER, CLASS_PATH);
+        velocityengine.setProperty(CLASS_PATH_RESOURCE_LOADER, ClasspathResourceLoader.class.getName());
         velocityengine.setProperty(VelocityEngine.RUNTIME_LOG_LOGSYSTEM, new CommonsLogLogChute());
         velocityengine.init();
         return velocityengine;
@@ -81,6 +102,7 @@ abstract class ThrottlePolicyTemplateBuilder {
      * Return siddhi query template for policy level.
      *
      * @return Map with policy file(siddhi app name) and siddhi query
+     * @throws APITemplateException if throttle template generator fails
      */
-    public abstract Map<String, String> getThrottlePolicyTemplate();
+    public abstract Map<String, String> getThrottlePolicyTemplate() throws APITemplateException;
 }
