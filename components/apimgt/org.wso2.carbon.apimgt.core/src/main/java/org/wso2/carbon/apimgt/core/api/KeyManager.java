@@ -47,15 +47,14 @@ public interface KeyManager {
      */
     OAuthApplicationInfo createApplication(OAuthAppRequest oauthAppRequest) throws KeyManagementException;
 
-
     /**
      * Update an oAuth application
      *
-     * @param appInfoDTO accept an appinfoDTO object
+     * @param oAuthApplicationInfo Up-to-date information of OAuth Application
      * @return OAuthApplicationInfo this object will  contain all the properties of updated oAuth application
      * @throws KeyManagementException   Error while updating application.
      */
-    OAuthApplicationInfo updateApplication(OAuthAppRequest appInfoDTO) throws KeyManagementException;
+    OAuthApplicationInfo updateApplication(OAuthApplicationInfo oAuthApplicationInfo) throws KeyManagementException;
 
     /**
      * Delete auth application
@@ -110,17 +109,6 @@ public interface KeyManager {
      * @throws KeyManagementException if error occurred while revoking the access token
      */
     void revokeAccessToken(String accessToken, String clientId, String clientSecret) throws KeyManagementException;
-
-    /**
-     * This method will be used if you want to create a oAuth application in semi-manual mode
-     * where you must input minimum consumer key and consumer secret.
-     *
-     * @param appInfoRequest    Oauth app request object.
-     * @return OAuthApplicationInfo with oAuth application properties.
-     * @throws KeyManagementException   If fails to map oauth application.
-     */
-    OAuthApplicationInfo mapOAuthApplication(OAuthAppRequest appInfoRequest) throws KeyManagementException;
-
 
     /**
      * Load the key manager configuration

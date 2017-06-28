@@ -32,7 +32,6 @@ import java.util.Objects;
  */
 public final class Application {
     private String name;
-    private String groupId;
     private String uuid;
     private String policyId;
     private String description;
@@ -42,7 +41,8 @@ public final class Application {
     private LocalDateTime createdTime;
     private String updatedUser;
     private LocalDateTime updatedTime;
-    private List<APIKey> keys;
+    private List<OAuthApplicationInfo> applicationKeys;
+    private ApplicationToken applicationToken;
     private String permissionString;
     private HashMap permissionMap;
 
@@ -50,7 +50,7 @@ public final class Application {
     public Application(String name, String createdUser) {
         this.name = name;
         this.createdUser = createdUser;
-        keys = new ArrayList<>();
+        this.applicationKeys = new ArrayList<>();
     }
 
     public String getName() {
@@ -121,28 +121,44 @@ public final class Application {
         this.status = status;
     }
 
-    public String getGroupId() {
-        return groupId;
-    }
-
-    public void setGroupId(String groupId) {
-        this.groupId = groupId;
-    }
-
-    public List<APIKey> getKeys() {
-        return keys;
-    }
-
-    public void addKey(APIKey key) {
-        keys.add(key);
-    }
-
     public String getPolicyId() {
         return policyId;
     }
 
     public void setPolicyId(String policyId) {
         this.policyId = policyId;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public List<OAuthApplicationInfo> getApplicationKeys() {
+        return applicationKeys;
+    }
+
+    public void setApplicationKeys(List<OAuthApplicationInfo> applicationKeys) {
+        this.applicationKeys = applicationKeys;
+    }
+
+    public void addApplicationKeys(OAuthApplicationInfo oAuthApplicationInfo) {
+        applicationKeys.add(oAuthApplicationInfo);
+    }
+
+    public ApplicationToken getApplicationToken() {
+        return applicationToken;
+    }
+
+    public void setApplicationToken(ApplicationToken applicationToken) {
+        this.applicationToken = applicationToken;
     }
 
     @Override
@@ -155,7 +171,6 @@ public final class Application {
         }
         Application that = (Application) o;
         return Objects.equals(name, that.name) &&
-                Objects.equals(groupId, that.groupId) &&
                 Objects.equals(uuid, that.uuid) &&
                 Objects.equals(policyId, that.policyId) &&
                 Objects.equals(description, that.description) &&
@@ -167,7 +182,7 @@ public final class Application {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, groupId, uuid, policyId, description, tier, status, createdUser);
+        return Objects.hash(name, uuid, policyId, description, tier, status, createdUser);
     }
 
     public String getPermissionString() {
@@ -188,10 +203,10 @@ public final class Application {
 
     @Override
     public String toString() {
-        return "Application [name=" + name + ", groupId=" + groupId + ", uuid=" + uuid + ", policyId=" + policyId
+        return "Application [name=" + name + ", uuid=" + uuid + ", policyId=" + policyId
                 + ", description=" + description + ", tier=" + tier + ", status=" + status + ", createdUser="
                 + createdUser + ", createdTime=" + createdTime + ", updatedUser="
-                + updatedUser + ", updatedTime=" + updatedTime + ", keys=" + keys + ", permissionString="
-                + permissionString + ", permissionMap=" + permissionMap + "]";
-    }    
+                + updatedUser + ", updatedTime=" + updatedTime + ", numberOfKeys=" + applicationKeys.size()
+                + ", permissionString=" + permissionString + ", permissionMap=" + permissionMap + "]";
+    }
 }

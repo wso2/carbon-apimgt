@@ -51,7 +51,8 @@ public enum ExceptionCodes implements ErrorHandler {
     SUBSCRIPTION_STATE_INVALID(900318, "Invalid state change for subscription", 400, "Invalid state change for " +
             "subscription"),
     COMMENT_NOT_FOUND(900319, "Comment not found", 404, "Couldn't retrieve comment"),
-    APIM_DAO_EXCEPTION(900320, "Internal server error.", 500, " Error occurred while retrieving data"),
+    COMPOSITE_API_ALREADY_EXISTS(900320, "A Composite API already exists.", 409,
+            "A Composite API already exists for this application"),
     GATEWAY_LABELS_CANNOT_BE_NULL(900321, "Gateway labels cannot be null.", 400, "Gateway labels cannot be null"),
     STATUS_CANNOT_BE_NULL(900322, "Status cannot be null.", 400, " Status cannot be null"),
     NEED_COMMENT_MODERATOR_PERMISSION(900323, "Comment moderator permission needed", 403,
@@ -62,8 +63,6 @@ public enum ExceptionCodes implements ErrorHandler {
     COMMENT_LENGTH_EXCEEDED(900326, "Comment length exceeds max limit", 400, "Comment length exceeds allowed maximum "
             + "number of characters"),
     API_TYPE_INVALID(900327, "API Type specified is invalid.", 400, "API Type specified is invalid"),
-    COMPOSITE_API_ALREADY_EXISTS(900328, "A Composite API already exists.", 409,
-            "A Composite API already exists for this application"),
 
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),

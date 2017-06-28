@@ -3396,9 +3396,6 @@ definitions:
       description:
         type: string
         example: Sample calculator application
-      groupId:
-        type: string
-        example: ""
 
 #-----------------------------------------------------
 # The Document List resource
@@ -3624,13 +3621,13 @@ definitions:
         description: |
           Link to the next subset of resources qualified.
           Empty if no more resources are to be returned.
-        example: "/subscriptions?limit=1&offset=2&apiId=01234567-0123-0123-0123-012345678901&groupId="
+        example: "/subscriptions?limit=1&offset=2&apiId=01234567-0123-0123-0123-012345678901"
       previous:
         type: string
         description: |
           Link to the previous subset of resources qualified.
           Empty if current subset is the first subset returned.
-        example: "/subscriptions?limit=1&offset=0&apiId=01234567-0123-0123-0123-012345678901&groupId="
+        example: "/subscriptions?limit=1&offset=0&apiId=01234567-0123-0123-0123-012345678901"
       list:
         type: array
         items:

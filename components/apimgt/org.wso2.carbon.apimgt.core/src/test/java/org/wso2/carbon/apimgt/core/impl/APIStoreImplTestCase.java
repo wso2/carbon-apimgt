@@ -103,7 +103,6 @@ public class APIStoreImplTestCase {
     private static final String APP_NAME = "appname";
     private static final String USER_ID = "userid";
     private static final String API_ID = "apiid";
-    private static final String GROUP_ID = "groupdid";
     private static final String STATUS_CREATED = "CREATED";
     private static final String STATUS_PUBLISHED = "PUBLISHED";
     private static final String UUID = "7a2298c4-c905-403f-8fac-38c73301631f";
@@ -279,7 +278,7 @@ public class APIStoreImplTestCase {
         APIStore apiStore = getApiStoreImpl(applicationDAO);
         Application applicationFromDAO = new Application(APP_NAME, null);
         Mockito.when(applicationDAO.getApplicationByName(APP_NAME, USER_ID)).thenReturn(applicationFromDAO);
-        Application application = apiStore.getApplicationByName(APP_NAME, USER_ID, GROUP_ID);
+        Application application = apiStore.getApplicationByName(APP_NAME, USER_ID);
         Assert.assertNotNull(application);
         Mockito.verify(applicationDAO, Mockito.times(1)).getApplicationByName(APP_NAME, USER_ID);
     }
@@ -614,7 +613,7 @@ public class APIStoreImplTestCase {
     public void testGetApplications() throws APIManagementException {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
         APIStore apiStore = getApiStoreImpl(applicationDAO);
-        apiStore.getApplications(USER_ID, GROUP_ID);
+        apiStore.getApplications(USER_ID);
         Mockito.verify(applicationDAO, Mockito.times(1)).getApplications(USER_ID);
     }
 
@@ -1080,9 +1079,8 @@ public class APIStoreImplTestCase {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
         APIStore apiStore = getApiStoreImpl(applicationDAO);
         Mockito.when(applicationDAO.getApplicationByName(APP_NAME, USER_ID)).thenThrow(new APIMgtDAOException(
-                "Error occurred while fetching application for the given applicationName - " + APP_NAME
-                        + " with groupId - " + GROUP_ID));
-        apiStore.getApplicationByName(APP_NAME, USER_ID, GROUP_ID);
+                "Error occurred while fetching application for the given applicationName - " + APP_NAME));
+        apiStore.getApplicationByName(APP_NAME, USER_ID);
     }
 
     @Test(description = "Exception when retrieving applications", expectedExceptions = APIManagementException.class)
@@ -1090,9 +1088,8 @@ public class APIStoreImplTestCase {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
         APIStore apiStore = getApiStoreImpl(applicationDAO);
         Mockito.when(applicationDAO.getApplications(USER_ID)).thenThrow(new APIMgtDAOException(
-                "Error occurred while fetching applications for the given subscriber - " + USER_ID + " with groupId - "
-                        + GROUP_ID));
-        apiStore.getApplications(USER_ID, GROUP_ID);
+                "Error occurred while fetching applications for the given subscriber - " + USER_ID));
+        apiStore.getApplications(USER_ID);
     }
 
     @Test(description = "Exception when updating an application", expectedExceptions = APIManagementException.class)

@@ -31,7 +31,6 @@ import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
-import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -229,8 +228,7 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         OAuthApplicationInfo oAuthAppInfo = new OAuthApplicationInfo();
         oAuthAppInfo.setClientId(clientKey);
         oAuthAppInfo.setClientSecret(clintSecret);
-        oAuthAppInfo.addParameter(KeyManagerConstants.APP_KEY_TYPE, "Application");
-        applicationDAO.addApplicationKeys(appId, oAuthAppInfo);
+        applicationDAO.addApplicationKeys(appId, "Application", oAuthAppInfo);
     }
 
     @Test
