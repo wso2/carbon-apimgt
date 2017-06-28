@@ -32,6 +32,62 @@ class PublisherUtils {
         return auth.authenticateUser('admin', 'admin');
     }
 
+    /**
+     * Get JavaScript accessible cookies saved in browser, by giving the cooke name.
+     * @param {String} name : Name of the cookie which need to be retrived
+     * @returns {String|null} : If found a cookie with given name , return its value,Else null value is returned
+     */
+    static getCookie(name) {
+        let pairs = document.cookie.split(";");
+        let cookie = null;
+        for (let pair of pairs) {
+            pair = pair.split("=");
+            let cookie_name = pair[0].trim();
+            let value = encodeURIComponent(pair[1]);
+            if (cookie_name === name) {
+                cookie = value;
+                break;
+            }
+        }
+        return cookie;
+    }
+
+    /**
+     * Delete a browser cookie given its name
+     * @param {String} name : Name of the cookie which need to be deleted
+     */
+    static delete_cookie(name) {
+        document.cookie = name + '=; Path=' + "/" + '; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    }
+
+    /**
+     * Set a cookie with given name and value assigned to it. Cookies can be only set to the same origin,
+     * which the script is running
+     * @param {String} name : Name of the cookie which need to be set
+     * @param {String} value : Value of the cookie, expect it to be URLEncoded
+     * @param {number} validityPeriod :  (Optional) Validity period of the cookie in seconds
+     * @param {String} path : Path which needs to set the given cookie
+     */
+    static setCookie(name, value, validityPeriod, path = "/") {
+        let expires = "";
+        if (validityPeriod) {
+            const date = new Date();
+            date.setTime(date.getTime() + validityPeriod * 1000);
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + value + expires + "; path=" + path;
+    }
+
+    /**
+     * Given an object returns whether the object is empty or not
+     * @param {Object} object : Any JSON object
+     * @returns {boolean}
+     */
+    static isEmptyObject(object) {
+        return Object.keys(object).length === 0 && object.constructor === Object
+    }
+
+
 }
 
 export default PublisherUtils;

@@ -16,6 +16,7 @@
 "use strict";
 import SwaggerClient from 'swagger-client'
 import AuthClient from './AuthManager'
+import Utils from './utils'
 import SingleClient from './SingleClient'
 /**
  * Manage API access keys with corresponding keys,Not related to the keymanager used in backend
@@ -99,7 +100,7 @@ class API {
      * @constructor
      * @param {string} access_key - Access key for invoking the backend REST API call.
      */
-    constructor(access_key) {
+    constructor() {
         let args = {
             requestInterceptor: this._getRequestInterceptor(),
             responseInterceptor: this._getResponseInterceptor()
@@ -158,14 +159,14 @@ class API {
      */
     _requestMetaData(data = {}) {
         AuthClient.refreshTokenOnExpire();
-        let access_key_header = "Bearer " + AuthClient.getCookie("WSO2_AM_TOKEN_1");
+        let access_key_header = "Bearer " + AuthClient.getUser().getPartialToken();
         let request_meta = {
             clientAuthorizations: {
                 am_token1: new SwaggerClient.ApiKeyAuthorization("Authorization", access_key_header, "header")
             },
             requestContentType: data['Content-Type'] || "application/json"
         };
-        let am_token2 = AuthClient.getCookie('WSO2_AM_TOKEN_MSF4J'); // This cookie is meant to be send via browser, Hence this will be overridden by browser
+        let am_token2 = Utils.getCookie('WSO2_AM_TOKEN_MSF4J'); // This cookie is meant to be send via browser, Hence this will be overridden by browser
         if (am_token2) {
             request_meta.clientAuthorizations['am_token2'] = new SwaggerClient.ApiKeyAuthorization("Cookie", "WSO2_AM_TOKEN_MSF4J=" + am_token2, "header")
         }
