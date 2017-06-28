@@ -17,19 +17,18 @@
  */
 
 import React from 'react'
-import {Link} from "react-router-dom";
+import {Link, withRouter} from "react-router-dom";
 import AuthManager from '../../../data/AuthManager.js';
+import qs from 'qs'
 
 const Header = (props) => {
+    let params = qs.stringify({referrer: props.location.pathname});
     return (
         <header className="header header-default">
             <div className="container-fluid">
                 <div id="nav-icon1" className="menu-trigger navbar-left " data-toggle="sidebar"
                      data-target="#left-sidebar" data-container=".page-content-wrapper" data-container-divide="true"
                      aria-expanded="false" rel="sub-nav">
-                    <span />
-                    <span />
-                    <span />
                 </div>
                 <div className="pull-left brand">
                     <Link to="/">
@@ -44,13 +43,13 @@ const Header = (props) => {
                   <i className="fw fw-user fw-stack-1x fw-inverse"/>
                 </span>
                             <span className="hidden-xs add-margin-left-1x" id="logged-in-username">
-                                { AuthManager.getUserName()}
-                            <span className="caret"/></span>
+                                { AuthManager.getUser() ? AuthManager.getUser().name : ""}
+                                <span className="caret"/></span>
                         </a>
                         <ul className="dropdown-menu dropdown-menu-right slideInDown" role="menu">
                             <li><a href="#">Profile Settings</a></li>
                             <li>
-                                <Link to="/logout">Logout</Link>
+                                <Link to={{pathname: '/logout', search: params}}>Logout</Link>
                             </li>
                         </ul>
                     </li>
@@ -60,4 +59,7 @@ const Header = (props) => {
     );
 };
 
-export default Header
+// Using `withRouter` helper from React-Router-Dom to get the current user location to be used with logout action,
+// We pass the current path in referrer parameter to redirect back the user to where he/she was after login.
+// DOC: https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/withRouter.md
+export default withRouter(Header)
