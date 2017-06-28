@@ -15,9 +15,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+"use strict";
 
-import axios from 'axios';
-import qs from 'qs';
+import axios from 'axios'
+import qs from 'qs'
+import Configs from './ConfigManager'
+import Utils from './utils'
+import User from './User'
 
 class AuthManager {
     constructor() {
@@ -31,24 +35,23 @@ class AuthManager {
         this.contextPath = "/publisher";
     }
 
-
     static refreshTokenOnExpire() {
-        var timestampSkew = 100;
-        var currentTimestamp = Math.floor(Date.now() / 1000);
-        var tokenTimestamp = localStorage.getItem("expiresIn");
-        var rememberMe = (localStorage.getItem("rememberMe") == 'true');
+        let timestampSkew = 100;
+        let currentTimestamp = Math.floor(Date.now() / 1000);
+        let tokenTimestamp = localStorage.getItem("expiresIn");
+        let rememberMe = (localStorage.getItem("rememberMe") == 'true');
         if (rememberMe && (tokenTimestamp - currentTimestamp < timestampSkew)) {
-            var bearerToken = "Bearer " + AuthClient.getCookie("WSO2_AM_REFRESH_TOKEN_1");
-            var loginPromise = authManager.refresh(bearerToken);
+            let bearerToken = "Bearer " + Utils.getCookie("WSO2_AM_REFRESH_TOKEN_1");
+            let loginPromise = authManager.refresh(bearerToken);
             loginPromise.then(function (data, status, xhr) {
-                authManager.setAuthStatus(true);
-                var expiresIn = data.validityPeriod + Math.floor(Date.now() / 1000);
+                authManager.setUser(true);
+                let expiresIn = data.validityPeriod + Math.floor(Date.now() / 1000);
                 window.localStorage.setItem("expiresIn", expiresIn);
             });
             loginPromise.error(
                 function (error) {
-                    var error_data = JSON.parse(error.responseText);
-                    var message = "Error while refreshing token" + "<br/> You will be redirect to the login page ...";
+                    let error_data = JSON.parse(error.responseText);
+                    let message = "Error while refreshing token" + "<br/> You will be redirect to the login page ...";
                     noty({
                         text: message,
                         type: 'error',
@@ -104,73 +107,32 @@ class AuthManager {
     }
 
     /**
-     * Get JavaScript accessible cookies saved in browser, by giving the cooke name.
-     * @param {String} name : Name of the cookie which need to be retrived
-     * @returns {String|null} : If found a cookie with given name , return its value,Else null value is returned
-     */
-    static getCookie(name) {
-        let pairs = document.cookie.split(";");
-        let cookie = null;
-        for (let pair of pairs) {
-            pair = pair.split("=");
-            let cookie_name = pair[0].trim();
-            let value = encodeURIComponent(pair[1]);
-            if (cookie_name === name) {
-                cookie = value;
-                break;
-            }
-        }
-        return cookie;
-    }
-
-
-    /**
-     * Set a cookie with given name and value assigned to it. Cookies can be only set to the same origin,
-     * which the script is running
-     * @param {String} name : Name of the cookie which need to be set
-     * @param {String} value : Value of the cookie, expect it to be URLEncoded
-     * @param {String} days : (optional) validity period of the cookie
-     */
-    static setCookie(name, value, days) {
-        let expires = "";
-        if (days) {
-            const date = new Date();
-            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-            expires = "; expires=" + date.toUTCString();
-        }
-        document.cookie = name + "=" + value + expires + "; path=/";
-    }
-
-    /**
-     * TODO: Implement this method to return the user logged state by considering the cookies stored in the browser,
-     * This may give a partial indication of whether the user has logged in or not, The actual API call may get denied
+     * An user object is return in present of user logged in user info in browser local storage, at the same time checks for partialToken in the cookie as well.
+     * This may give a partial indication(passive check not actually check the token validity via an API) of whether the user has logged in or not, The actual API call may get denied
      * if the cookie stored access token is invalid/expired
      *
-     * @returns {boolean} Is any user has logged in or not
+     * @returns {User | null} Is any user has logged in or not
      */
-    static getAuthStatus() {
-        //this.isLogged = !(!$.cookie('token') && !$.cookie('user'));
-        return this.isLogged;
+    static getUser() {
+        const userData = localStorage.getItem("wso2_user");
+        const partialToken = Utils.getCookie("WSO2_AM_TOKEN_1");
+        if (!(userData && partialToken)) {
+            return null;
+        }
+        return User.fromJson(JSON.parse(userData));
     }
 
-    static setAuthStatus(status) {
-        this.isLogged = status;
-    }
-
-    static setUserName(username) {
-        this.username = username;
-    }
-
-    static getUserName() {
-        return this.username;
-    }
-
-    setUserScope(scope) {
-        this.userscope = scope;
-    }
-
-    getUserScope() {
-        return this.userscope;
+    /**
+     * Persist an user in browser local storage, Since only one use can be logged into the application at a time,
+     * This method will override any previously persist user data.
+     * @param {User} user : An instance of the {User} class
+     */
+    static setUser(user) {
+        if (!user instanceof User) {
+            throw "Invalid user object";
+        }
+        localStorage.setItem("wso2_user", JSON.stringify(user.toJson()));
+        /* TODO: IMHO it's better to get this key (`wso2_user`) from configs */
     }
 
     getTokenEndpoint() {
@@ -178,7 +140,8 @@ class AuthManager {
     }
 
     /**
-     * By given username and pa ssword Authenticate the user
+     * By given username and password Authenticate the user, Since this REST API has no swagger definition,
+     * Can't use swaggerjs to generate client.Hence using Axios to make AJAX calls
      * @param {String} username : Username of the user
      * @param {String} password : Plain text password
      * @returns {AxiosPromise} : Promise object with the login request made
@@ -198,33 +161,45 @@ class AuthManager {
         };
         let promised_response = axios.post(this.getTokenEndpoint(), qs.stringify(data), {headers: headers});
         promised_response.then(response => {
-            let WSO2_AM_TOKEN_1 = response.data.partialToken;
-            AuthManager.setCookie('WSO2_AM_TOKEN_1', WSO2_AM_TOKEN_1);
+            const validityPeriod = response.data.validityPeriod; // In seconds
+            const WSO2_AM_TOKEN_1 = response.data.partialToken;
+            const user = new User(response.data.authUser, response.data.idToken);
+            user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod);
+            user.scopes = response.data.scopes.split(" ");
+            AuthManager.setUser(user);
         });
         return promised_response;
     }
 
+    /**
+     * Revoke the issued OAuth access token for currently logged in user and clear both cookie and localstorage data.
+     */
     logout() {
-        var authzHeader = this.bearer + AuthManager.getCookie("WSO2_AM_TOKEN_1");
+        let authHeader = this.bearer + AuthManager.getUser().getPartialToken();
         //TODO Will have to change the logout end point url to contain the app context(i.e. publisher/store, etc.)
-        var url = this.host+ "/login/revoke";
-        var headers = {
+        let url = this.host + "/login/revoke";
+        let headers = {
             'Accept': 'application/json',
-            'Authorization': authzHeader
+            'Authorization': authHeader
         };
-        return axios.post(url, null, {headers: headers});
+        const promisedLogout = axios.post(url, null, {headers: headers});
+        return promisedLogout.then(response => {
+            Utils.delete_cookie("WSO2_AM_TOKEN_1");
+            localStorage.removeItem("wso2_user");
+        });
     }
 
     refresh(authzHeader) {
-        var params = {
+        let params = {
             grant_type: 'refresh_token',
             validity_period: '3600',
             scopes: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage' +
             ' apim:subscription_view apim:subscription_block apim:subscribe'
         };
-        var referrer = (document.referrer.indexOf("https") !== -1) ? document.referrer : null;
-        var url = this.contextPath + '/auth/apis/login/token';
-        var headers = {
+        let referrer = (document.referrer.indexOf("https") !== -1) ? document.referrer : null;
+        let url = this.contextPath + '/auth/apis/login/token';
+        /* TODO: Fetch this from configs ~tmkb*/
+        let headers = {
             'Authorization': authzHeader,
             'Accept': 'application/json',
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -233,9 +208,6 @@ class AuthManager {
         return axios.post(url, qs.stringify(params), {headers: headers});
     }
 
-    delete_cookie(name) {
-        document.cookie = name + '=; Path=' + "/" + '; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-    }
 }
 
 export default AuthManager;
