@@ -24,6 +24,6 @@ const LifeCycle = (props) => {
             Life cycle Page
         </h1>
     );
-}
+};
 
 export default LifeCycle
