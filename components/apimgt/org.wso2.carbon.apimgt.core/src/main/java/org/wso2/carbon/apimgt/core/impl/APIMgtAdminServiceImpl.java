@@ -199,7 +199,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
             policyDAO.deletePolicy(policyLevel, policyName);
 
         } catch (APIMgtDAOException e) {
-            String errorMessage = "Couldn't update application policy with name: " + policyName + ", level: " +
+            String errorMessage = "Couldn't delete policy with name: " + policyName + ", level: " +
                     policyLevel;
             log.error(errorMessage, e);
             throw new APIManagementException(errorMessage, e, e.getErrorHandler());
@@ -212,7 +212,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
             policyDAO.deletePolicyByUuid(policyLevel, uuid);
 
         } catch (APIMgtDAOException e) {
-            String errorMessage = "Couldn't update application policy with id: " + uuid + ", level: " + policyLevel;
+            String errorMessage = "Couldn't delete policy with id: " + uuid + ", level: " + policyLevel;
             log.error(errorMessage, e);
             throw new APIManagementException(errorMessage, e, e.getErrorHandler());
         }

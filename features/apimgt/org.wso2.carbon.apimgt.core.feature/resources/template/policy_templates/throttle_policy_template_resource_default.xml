@@ -10,8 +10,8 @@ resourceKey##
 resource_${policy.getPolicyName()}_default##
 #end
 
-@Plan:name('#getRule($policy)')
-@Plan:description('ExecutionPlan for #getRule($policy)')
+@App:name('#getRule($policy)')
+@App:description('ExecutionPlan for #getRule($policy)')
 
 @source(type='inMemory', topic='apim', @map(type='passThrough'))
 define stream RequestStream (messageID string, appKey string, appTier string, subscriptionKey string, apiKey string, apiTier string, subscriptionTier string, resourceKey string, resourceTier string, userId string,  apiContext string, apiVersion string, appTenant string, apiTenant string, appId string, apiName string, propertiesMap string);
