@@ -62,7 +62,6 @@ import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.APILCWorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
-import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExtensionsConfigBuilder;
 import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
 import org.wso2.carbon.kernel.configprovider.ConfigProvider;
@@ -470,12 +469,12 @@ public class APIPublisherImplTestCase {
         API api1 = SampleTestObjectCreator.createDefaultAPI().build();
         List<API> apimResultsFromDAO = new ArrayList<>();
         apimResultsFromDAO.add(api1);
-        Mockito.when(apiDAO.searchAPIs(APIUtils.getAllRolesOfUser(USER), USER, QUERY_STRING, 1, 2)).
+        Mockito.when(apiDAO.searchAPIs(new HashSet<>(), USER, QUERY_STRING, 1, 2)).
                 thenReturn(apimResultsFromDAO);
         List<API> apis = apiPublisher.searchAPIs(2, 1, QUERY_STRING);
         Assert.assertNotNull(apis);
-        Mockito.verify(apiDAO, Mockito.atLeastOnce()).searchAPIs(APIUtils.getAllRolesOfUser(USER),
-                USER, QUERY_STRING, 1, 2);
+        Mockito.verify(apiDAO, Mockito.atLeastOnce())
+                .searchAPIsWithPermissions(new HashSet<>(), USER, QUERY_STRING, 1, 2);
     }
 
     @Test(description = "Search APIs with null query string")
@@ -483,17 +482,17 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
         List<API> apimResultsFromDAO = new ArrayList<>();
-        Mockito.when(apiDAO.searchAPIs(new HashSet<>(), USER, null, 1, 2)).
+        Mockito.when(apiDAO.searchAPIsWithPermissions(new HashSet<>(), USER, null, 1, 2)).
                 thenReturn(apimResultsFromDAO);
         apiPublisher.searchAPIs(2, 1, null);
-        Mockito.verify(apiDAO, Mockito.times(1)).getAPIs();
+        Mockito.verify(apiDAO, Mockito.times(1)).getAPIs(new HashSet<>(), USER);
     }
 
     @Test(description = "Exception when searching APIs", expectedExceptions = APIManagementException.class)
     public void testSearchAPIsException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
-        Mockito.when(apiDAO.searchAPIs(APIUtils.getAllRolesOfUser(USER), USER, QUERY_STRING, 1, 2))
+        Mockito.when(apiDAO.searchAPIsWithPermissions(new HashSet<>(), USER, QUERY_STRING, 1, 2))
                 .thenThrow(new APIMgtDAOException("Error occurred while Searching the API with query pizza"));
         apiPublisher.searchAPIs(2, 1, QUERY_STRING);
     }

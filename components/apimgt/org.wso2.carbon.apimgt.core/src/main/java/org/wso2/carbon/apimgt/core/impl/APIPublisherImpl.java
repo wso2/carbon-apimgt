@@ -667,7 +667,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             throws APIManagementException {
         Set<String> permissionArrayForUser = new HashSet();
         Map<String, Integer> permissionMap = api.getPermissionMap();
-
         String createdUser = api.getCreatedBy();
         //TODO: Remove the check for admin after IS adds an ID to admin user
         if (loggedInUserName.equals(createdUser) || permissionMap == null || permissionMap.isEmpty() || "admin"
@@ -1231,14 +1230,18 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public List<API> searchAPIs(Integer limit, Integer offset, String query) throws APIManagementException {
 
         List<API> apiResults;
+        String user = getUsername();
+        Set<String> roles = new HashSet<>();
+        if (!"admin".equals(user)) {
+            String userId = getIdentityProvider().getIdOfUser(user);
+            roles = new HashSet<>(getIdentityProvider().getRoleIdsOfUser(userId));
+        }
         try {
             //TODO: Need to validate users roles against results returned
             if (query != null && !query.isEmpty()) {
-                String user = getUsername();
-                Set<String> roles = APIUtils.getAllRolesOfUser(user);
-                apiResults = getApiDAO().searchAPIs(roles, user, query, offset, limit);
+                apiResults = getApiDAO().searchAPIsWithPermissions(roles, user, query, offset, limit);
             } else {
-                apiResults = getApiDAO().getAPIs();
+                apiResults = getApiDAO().getAPIs(roles, user);
             }
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while Searching the API with query " + query;

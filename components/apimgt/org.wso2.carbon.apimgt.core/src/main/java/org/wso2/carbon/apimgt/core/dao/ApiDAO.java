@@ -138,6 +138,17 @@ public interface ApiDAO {
     List<API> getAPIs() throws APIMgtDAOException;
 
     /**
+     * Retrieves summary data of all available APIs considering the permission restrictions.
+     *
+     * @param roles - roleId list of the user
+     * @param user - user name of the user
+     * @return {@code List<API>} matching results
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     *
+     */
+    List<API> getAPIs(Set<String> roles, String user) throws APIMgtDAOException;
+
+    /**
      * Retrieves summary data of all available APIs with life cycle status that matches the status list provided
      *
      * @param statuses A list of matching life cycle statuses
@@ -172,6 +183,22 @@ public interface ApiDAO {
      *
      */
     List<API> searchAPIs(Set<String> roles, String user, String searchString, int offset, int limit)
+            throws APIMgtDAOException;
+
+    /**
+     * Retrieves summary of paginated data of all available APIs that match the given search criteria. This will use
+     * the full text search for API table considering the API permissions of the current user
+     *
+     * @param roles     List of the roles of the user.
+     * @param user      Current user.
+     * @param searchString The search string provided
+     * @param offset  The starting point of the formatApiSearch results.
+     * @param limit   Number of formatApiSearch results that will be returned.
+     * @return {@code List<API>} matching results
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     *
+     */
+    List<API> searchAPIsWithPermissions(Set<String> roles, String user, String searchString, int offset, int limit)
             throws APIMgtDAOException;
 
     /**
