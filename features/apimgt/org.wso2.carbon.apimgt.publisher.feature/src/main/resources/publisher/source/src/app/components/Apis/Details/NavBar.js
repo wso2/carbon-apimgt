@@ -36,7 +36,8 @@ export default class NavBar extends Component {
             OVERVIEW: "overview",
             LIFECYCLE: "lifecycle",
             ENDPOINTS: "endpoints",
-            RESOURCES: "resources"
+            RESOURCES: "resources",
+            PERMISSION: "permission"
         }
     }
 
@@ -82,9 +83,11 @@ export default class NavBar extends Component {
                                                                   aria-controls="documents-tab" data-toggle="tab"><i
                                 className="fw fw-document"/>&nbsp; Documents</a>
                             </li>
-                            <li id="tab-6" role="presentation"><a href="#actrl-tab" role="tab" aria-controls="actrl-tab"
-                                                                  data-toggle="tab"><i
-                                className="fw fw-contract"/>&nbsp; Access Control</a>
+                            <li className={this.isActive(NavBar.CONST.PERMISSION)}>
+                                <Link onClick={this.setActive}
+                                      to={"/apis/" + this.props.match.params.api_uuid + "/permission"}>
+                                    <i className="fw fw-resource"/>&nbsp;Permission
+                                </Link>
                             </li>
                             <li id="tab-7" role="presentation"><a href="#mediation-tab" role="tab"
                                                                   aria-controls="mediation-tab" data-toggle="tab"><i
