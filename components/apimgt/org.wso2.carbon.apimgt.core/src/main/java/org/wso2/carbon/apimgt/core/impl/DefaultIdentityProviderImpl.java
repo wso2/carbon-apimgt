@@ -60,6 +60,8 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
     private static final String RESOURCES = "Resources";
     private static final String ID = "id";
     private static final String EMPTY_STRING = "";
+    private static final String USERNAME = "userName";
+    private static final String GROUPNAME = "displayName";
 
     DefaultIdentityProviderImpl() throws APIManagementException {
         this(SCIMServiceStubFactory.getSCIMServiceStub(), DCRMServiceStubFactory.getDCRMServiceStub(),
@@ -83,6 +85,11 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
             JsonArray user = (JsonArray) parsedResponseBody.get(RESOURCES);
             JsonObject scimUser = (JsonObject) user.get(0);
             userId = scimUser.get(ID).getAsString();
+            String message = "Id " + userId + " of user " + scimUser.get(USERNAME).getAsString()
+                    + " is successfully retrieved from SCIM API";
+            if (log.isDebugEnabled()) {
+                log.debug(message);
+            }
         } else {
             String errorMessage = "User " + userName + " does not exist in the system.";
             log.error(errorMessage);
@@ -99,6 +106,11 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
             List<SCIMUser.SCIMUserGroups> roles = scimUser.getGroups();
             if (roles != null) {
                 roles.forEach(role -> roleNames.add(role.getDisplay()));
+                String message = "Role names of user " + scimUser.getName() + " are successfully retrieved as " + StringUtils
+                        .join(roleNames, ", ") + ".";
+                if (log.isDebugEnabled()) {
+                    log.debug(message);
+                }
             }
         } else {
             String errorMessage = "User id " + userId + " does not exist in the system.";
@@ -122,6 +134,11 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
             List<SCIMUser.SCIMUserGroups> roles = scimUser.getGroups();
             if (roles != null) {
                 roles.forEach(role -> roleIds.add(role.getValue()));
+                String message = "Role Ids of user " + scimUser.getName() + " are successfully retrieved as " + StringUtils
+                        .join(roleIds, ", ") + ".";
+                if (log.isDebugEnabled()) {
+                    log.debug(message);
+                }
             }
         } else {
             String errorMessage = "User id " + userId + " does not exist in the system.";
@@ -142,6 +159,11 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
             JsonArray role = (JsonArray) parsedResponseBody.get(RESOURCES);
             JsonObject scimGroup = (JsonObject) role.get(0);
             roleId = scimGroup.get(ID).getAsString();
+            String message = "Id " + roleId + " of role " + scimGroup.get(GROUPNAME).getAsString()
+                    + " is successfully retrieved from SCIM API";
+            if (log.isDebugEnabled()) {
+                log.debug(message);
+            }
         } else {
             String errorMessage = "Role with name " + roleName + " does not exist in the system.";
             log.error(errorMessage);
@@ -157,6 +179,10 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
             String displayName;
             if (scimGroup != null) {
                 displayName = scimGroup.getDisplayName();
+                String message = "Display name of role with Id " + roleId + " is successfully retrieved as " + displayName;
+                if (log.isDebugEnabled()) {
+                    log.debug(message);
+                }
             } else {
                 String errorMessage = "Role with role Id " + roleId + " does not exist in the system.";
                 log.error(errorMessage);
@@ -191,6 +217,11 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
                 }
             }
             throw new IdentityProviderException(errorMessage.toString(), ExceptionCodes.USER_CREATION_FAILED);
+        } else {
+            String message = "User  " + user.getUsername() + " is successfully created";
+            if (log.isDebugEnabled()) {
+                log.debug(message);
+            }
         }
     }
 
