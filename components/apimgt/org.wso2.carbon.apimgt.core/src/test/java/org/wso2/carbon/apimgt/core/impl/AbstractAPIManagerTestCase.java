@@ -76,7 +76,7 @@ public class AbstractAPIManagerTestCase {
         AbstractAPIManager apiStore = getAPIStoreImpl(applicationDAO);
         Application applicationFromDAO = new Application(APP_NAME, USER_NAME);
         when(applicationDAO.getApplication(UUID)).thenReturn(applicationFromDAO);
-        Application application = apiStore.getApplication(UUID, USER_NAME, null);
+        Application application = apiStore.getApplication(UUID, USER_NAME);
         Assert.assertNotNull(application);
         verify(applicationDAO, times(1)).getApplication(UUID);
     }
@@ -241,11 +241,11 @@ public class AbstractAPIManagerTestCase {
         AbstractAPIManager apiStore = getAPIStoreImpl(applicationDAO);
         doThrow(new APIMgtDAOException("Error occurred while retrieving application")).when(applicationDAO)
                 .getApplication(UUID);
-        apiStore.getApplication(UUID, USER_NAME, null);
+        apiStore.getApplication(UUID, USER_NAME);
     }
 
     @Test(description = "Exception when retrieving documentation summary given the id",
-            expectedExceptions = APIMgtDAOException.class)
+            expectedExceptions = APIManagementException.class)
     public void testGetDocumentationSummaryException() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
         AbstractAPIManager apiStore = getAPIStoreImpl(apiDAO);

@@ -447,7 +447,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         } catch (APIMgtDAOException e) {
             String msg = "Error occurred while getting the API list in given states";
             log.error(msg, e);
-            throw new APIManagementException(msg, ExceptionCodes.APIM_DAO_EXCEPTION);
+            throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return apiList;
     }
@@ -466,7 +466,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         } catch (APIMgtDAOException e) {
             String msg = "Error occurred while getting the API list in given gateway labels";
             log.error(msg, e);
-            throw new APIManagementException(msg, ExceptionCodes.APIM_DAO_EXCEPTION);
+            throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return apiList;
     }
@@ -483,7 +483,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         } catch (APIMgtDAOException ex) {
             String msg = "Error occurred while getting the Application list";
             log.error(msg, ex);
-            throw new APIManagementException(msg, ExceptionCodes.APIM_DAO_EXCEPTION);
+            throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -494,7 +494,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         } catch (APIMgtDAOException ex) {
             String msg = "Error occurred while getting the Endpoint list";
             log.error(msg, ex);
-            throw new APIManagementException(msg, ExceptionCodes.APIM_DAO_EXCEPTION);
+            throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 
@@ -505,7 +505,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         } catch (APIMgtDAOException ex) {
             String msg = "Error occurred while getting the Endpoint Configuration";
             log.error(msg, ex);
-            throw new APIManagementException(msg, ExceptionCodes.APIM_DAO_EXCEPTION);
+            throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
 
     }
@@ -517,7 +517,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         } catch (APIMgtDAOException ex) {
             String msg = "Error occurred while retrieving policies";
             log.error(msg, ex);
-            throw new APIManagementException(msg, ExceptionCodes.APIM_DAO_EXCEPTION);
+            throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
 

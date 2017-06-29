@@ -65,6 +65,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     /**
+     *Retrieve a list of APIs with given gateway labels and status
      *
      * @param labels Gateway labels
      * @param status Lifecycle status
