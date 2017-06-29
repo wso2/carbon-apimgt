@@ -83,7 +83,7 @@ public class ApiDAOImpl implements ApiDAO {
     private final ApiDAOVendorSpecificStatements sqlStatements;
 
     private static final String API_SUMMARY_SELECT = "SELECT UUID, PROVIDER, NAME, CONTEXT, VERSION, DESCRIPTION, " +
-            "CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS, CREATED_BY FROM AM_API";
+            "CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS FROM AM_API";
 
     private static final String API_SELECT = "SELECT UUID, PROVIDER, NAME, CONTEXT, VERSION, IS_DEFAULT_VERSION, " +
             "DESCRIPTION, VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, TECHNICAL_OWNER, TECHNICAL_EMAIL, " +
@@ -257,22 +257,6 @@ public class ApiDAOImpl implements ApiDAO {
 
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<API> getAPIs(Set<String> roles, String user) throws APIMgtDAOException {
-        final String query = API_SUMMARY_SELECT + " WHERE API_TYPE_ID = " +
-                "(SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)";
-
-        try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, ApiType.STANDARD.toString());
-
-            return constructAPISummaryListWithPermissions(connection, statement, roles, user);
-        } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
-        }
-    }
-
-    @Override
-    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     public List<CompositeAPI> getCompositeAPIs(Set<String> roles, String user, int offset, int limit)
             throws APIMgtDAOException {
 
@@ -394,25 +378,6 @@ public class ApiDAOImpl implements ApiDAO {
                     ApiType.STANDARD, offset, limit);
 
             return constructAPISummaryList(connection, statement);
-        } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
-        }
-    }
-
-    /**
-     * @see ApiDAO#searchAPIs(Set, String, String, int, int)
-     */
-    @Override
-    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<API> searchAPIsWithPermissions(Set<String> roles, String user, String searchString,
-            int offset, int limit) throws APIMgtDAOException {
-        final String query = sqlStatements.getApiSearchQuery(roles.size());
-        try (Connection connection = DAOUtil.getConnection();
-                PreparedStatement statement = connection.prepareStatement(query)) {
-            sqlStatements.setApiSearchStatement(statement, roles, user, searchString,
-                    ApiType.STANDARD, offset, limit);
-
-            return constructAPISummaryListWithPermissions(connection, statement, roles, user);
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
         }
@@ -1897,48 +1862,6 @@ public class ApiDAOImpl implements ApiDAO {
                         lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
                         workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).build();
                 apiList.add(apiSummary);
-            }
-        }
-
-        return apiList;
-    }
-
-    private List<API> constructAPISummaryListWithPermissions(Connection connection, PreparedStatement statement,
-            Set<String> roles, String user) throws SQLException {
-        List<API> apiList = new ArrayList<>();
-        Set<String> rolesOfUser = new HashSet<>(roles);
-        try (ResultSet rs = statement.executeQuery()) {
-            while (rs.next()) {
-                String apiPrimaryKey = rs.getString("UUID");
-                String createdUser = rs.getString("CREATED_BY");
-                Map<String, Integer> permissionMap = getPermissionMapForApi(connection, apiPrimaryKey);
-                API apiSummary = new API.APIBuilder(rs.getString("PROVIDER"), rs.getString("NAME"),
-                        rs.getString("VERSION")).
-                        id(rs.getString("UUID")).
-                        context(rs.getString("CONTEXT")).
-                        description(rs.getString("DESCRIPTION")).
-                        lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
-                        lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
-                        workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).build();
-                //TODO: Remove the check for admin after IS adds an ID to admin user
-                if (permissionMap.isEmpty() || createdUser.equals(user) || "admin".equals(user)) {
-                    apiList.add(apiSummary);
-                } else {
-                    //From the following operation, rolesOfUser variable will be replaced with the intersection of
-                    //the roles.
-                    rolesOfUser.retainAll(permissionMap.keySet());
-                    Integer aggregatePermissions = 0;
-                    if (!rolesOfUser.isEmpty()) {
-                        for (String role : rolesOfUser) {
-                            aggregatePermissions |= permissionMap.get(role);
-                        }
-                    }
-                    if (aggregatePermissions >= 4) {
-                        apiList.add(apiSummary);
-                    }
-                    //Assigning back the roles of user
-                    rolesOfUser = new HashSet<>(roles);
-                }
             }
         }
 
