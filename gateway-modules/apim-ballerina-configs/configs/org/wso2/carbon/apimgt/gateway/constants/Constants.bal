@@ -18,7 +18,10 @@ const string APPLICATION_DELETE = "APPLICATION_DELETE";
 const string POLICY_CREATE = "POLICY_CREATE";
 const string POLICY_UPDATE = "POLICY_UPDATE";
 const string POLICY_DELETE = "POLICY_DELETE";
-
+const string BLOCKING_CONDITION_IP_RANGE = "IP_RANGE";
+const string BLOCK_CONDITION_ADD = "BLOCK_CONDITION_ADD";
+const string BLOCK_CONDITION_UPDATE = "BLOCK_CONDITION_UPDATE";
+const string BLOCK_CONDITION_DELETE = "BLOCK_CONDITION_DELETE";
 const string EVENT_TYPE = "eventType";
 const string INTROSPECT_CONTEXT = "/oauth2/introspect";
 const string USER_INFO_CONTEXT = "/oauth2/userinfo";
@@ -33,6 +36,8 @@ const string APPLICATION_CACHE = "APPLICATION_CACHE";
 const string RESOURCE_CACHE = "RESOURCE_CACHE";
 const string POLICY_CACHE = "POLICY_CACHE";
 const string API_CACHE = "API_CACHE";
+const string BLOCK_CONDITION_MAP = "BLOCK_CONDITION_MAP";
+const string BLOCK_CONDITION_IP_RANGE_MAP = "BLOCK_CONDITION_IP_RANGE_MAP";
 
 const string THROTTLE_KEY = "throttleKey";
 const string POLICY_TEMPLATE_KEY = "keyTemplateValue";
