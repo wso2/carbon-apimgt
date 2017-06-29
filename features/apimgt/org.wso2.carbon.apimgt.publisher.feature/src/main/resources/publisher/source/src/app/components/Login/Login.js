@@ -19,7 +19,9 @@
 import React, {Component} from 'react'
 import './login.css'
 import {Switch, Redirect} from 'react-router-dom'
-import AuthManager from '../../data/AuthManager';
+import AuthManager from '../../data/AuthManager'
+import qs from 'qs'
+import Utils from '../../data/utils'
 
 class Login extends Component {
 
@@ -27,39 +29,31 @@ class Login extends Component {
         super(props);
         this.authManager = new AuthManager();
         this.state = {
-            isLogin: false
+            isLogin: false,
+            referrer: "/",
+        };
+        this.doLogin = this.doLogin.bind(this);
+    }
+
+    componentDidMount() {
+        let queryString = this.props.location.search;
+        queryString = queryString.replace(/^\?/, '');
+        /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
+        let params = qs.parse(queryString);
+        if (params.referrer) {
+            this.setState({referrer: params.referrer});
         }
     }
 
-    doLogin() {
-        var username = document.getElementById('username').value;
-        var password = document.getElementById('password').value;
-        var loginPromise = this.authManager.authenticateUser(username, password);
-        loginPromise.then((data) => {
-            AuthManager.setAuthStatus(true);
-            AuthManager.setUserName(data.data.authUser);
-            this.authManager.setUserScope(data.data.scopes);
-            var expiresIn = data.validityPeriod + Math.floor(Date.now() / 1000);
-            window.localStorage.setItem("expiresIn", expiresIn);
-            window.localStorage.setItem("user", data.authUser);
-            window.localStorage.setItem("rememberMe", document.getElementById("rememberMe").checked);
-            window.localStorage.setItem("userScopes", data.scopes);
-            this.setState({isLogin: AuthManager.getAuthStatus()});
-        });
-        loginPromise.catch(function (error) {
-                var error_data = JSON.parse(error.responseText);
-                var message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message;
-                noty({
-                    text: message,
-                    type: 'error',
-                    dismissQueue: true,
-                    modal: true,
-                    progressBar: true,
-                    timeout: 5000,
-                    layout: 'top',
-                    theme: 'relax',
-                    maxVisible: 10,
-                });
+    doLogin(e) {
+        e.preventDefault();
+        let username = document.getElementById('username').value;
+        let password = document.getElementById('password').value;
+        let loginPromise = this.authManager.authenticateUser(username, password);
+        loginPromise.then((response) => {
+            this.setState({isLogin: AuthManager.getUser()});
+        }).catch((error) => {
+                console.log(error);
             }
         );
     };
@@ -68,12 +62,6 @@ class Login extends Component {
         if (!this.state.isLogin) { // If not logged in, go to login page
             return (
                 <div>
-                    <meta charSet="utf-8"/>
-                    <meta httpEquiv="X-UA-Compatible" content="IE=edge"/>
-                    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-                    <link rel="shortcut icon"
-                          href="/publisher/public/components/root/base/images/favicon.png"
-                          type="image/png"/>
                     <title>Login | API Publisher</title>
                     <header className="header header-default">
                         <div className="container-fluid">
@@ -128,12 +116,7 @@ class Login extends Component {
                                                     <form className="form-horizontal"
                                                           method="post"
                                                           id="loginForm"
-                                                          onKeyDown={ (e) => {
-                                                              if (e.keyCode == '13') {
-                                                                  this.doLogin();
-                                                              }
-                                                          }
-                                                          }
+                                                          onSubmit={this.doLogin}
                                                     >
                                                         <h3>Sign in to your account</h3>
                                                         <div className="form-group">
@@ -176,23 +159,19 @@ class Login extends Component {
                                                         <div className="form-group">
                                                             <div
                                                                 className="col-xs-12 col-sm-12 col-md-5 col-lg-5">
-                                                                <button type="button"
-                                                                        id="loginButton"
-                                                                        className="btn btn-default btn-primary add-margin-right-2x"
-                                                                        onClick={this.doLogin.bind(this)}>
-                                                                    Sign In
-                                                                </button>
+                                                                <input type="submit"
+                                                                       className="btn btn-default btn-primary add-margin-right-2x"
+                                                                       value="Sign In"/>
                                                             </div>
                                                         </div>
-                                                        <a href
-                                                           className="add-margin-bottom-5x remove-margin-lg remove-margin-md">Forgot
-                                                                                                                              Password</a>
+                                                        <a
+                                                            className="add-margin-bottom-5x remove-margin-lg remove-margin-md">Forgot
+                                                            Password</a>
                                                         <p className="hidden-xs hidden-sm">Don't
-                                                                                           have
-                                                                                           an
-                                                                                           account?
-                                                            <a
-                                                                href>Register Now</a></p>
+                                                            have
+                                                            an
+                                                            account?
+                                                            <a>Register Now</a></p>
                                                     </form>
                                                 </div>
                                                 <p className="visible-xs visible-sm add-margin-2x text-center">
@@ -220,7 +199,7 @@ class Login extends Component {
         } else // If logged in, redirect to /apis page
             return (
                 <Switch>
-                    <Redirect from={'/login'} to={"/apis"}/>
+                    <Redirect to={this.state.referrer}/>
                 </Switch>
             );
     }

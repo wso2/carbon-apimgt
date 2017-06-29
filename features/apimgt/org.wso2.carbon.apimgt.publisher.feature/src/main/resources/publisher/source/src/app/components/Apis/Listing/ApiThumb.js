@@ -26,23 +26,25 @@ class ApiThumb extends React.Component {
 
     render() {
         let details_link = "/apis/" + this.props.api.id;
-        if( this.props.listType === "grid"){
-            return <div className={this.getGridUI()} key={this.props.api.id}>
-                <div className="thumbnail">
-                    <div className="caption">
-                        <h4 className="group inner list-group-item-heading">
-                            {this.props.api.name}</h4>
-                        <p className="group inner list-group-item-text">
-                            {this.props.api.description}</p>
-                        <p className="group inner list-group-item-text">
-                            {this.props.api.version}</p>
-                        <p className="lead">
-                            {this.props.api.context}</p>
-                        <Link to={details_link} className="btn btn-default">More details </Link>
+        if (this.props.listType === "grid") {
+            return (
+                <div className={this.getGridUI()} key={this.props.api.id}>
+                    <div className="thumbnail">
+                        <div className="caption">
+                            <h4 className="group inner list-group-item-heading">
+                                {this.props.api.name}</h4>
+                            <p className="group inner list-group-item-text">
+                                {this.props.api.description}</p>
+                            <p className="group inner list-group-item-text">
+                                {this.props.api.version}</p>
+                            <p className="lead">
+                                {this.props.api.context}</p>
+                            <Link to={details_link} className="btn btn-default">More details </Link>
 
+                        </div>
                     </div>
                 </div>
-            </div>
+            );
         } else {
             return <tr key={this.props.api.id}>
                 <td>
@@ -59,11 +61,11 @@ class ApiThumb extends React.Component {
                     <small>{this.props.api.context}</small>
                 </td>
                 <td className="apis-status">
-                    <ApiProgress resources="true" tiers="false" />
+                    <ApiProgress resources="true" tiers="false"/>
                 </td>
                 <td className="apis-actions">
-                    <a href="#" className="btn btn-white"><i className="fw fw-edit"></i> Edit </a>
-                    <a href="#" className="btn btn-white"><i className="fw fw-delete"></i> Delete </a>
+                    <a href="#" className="btn btn-white"><i className="fw fw-edit"/> Edit </a>
+                    <a href="#" className="btn btn-white"><i className="fw fw-delete"/> Delete </a>
                 </td>
             </tr>
         }

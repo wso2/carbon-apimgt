@@ -16,22 +16,14 @@
  * under the License.
  */
 
-import {Axios} from 'axios'
-import DefaultConfig from './DefaultConfigs.json'
+import React, {Component} from 'react'
 
-class ConfigManager {
+export default class LifeCyclePolicies extends Component {
+    render() {
+        return (
+            <div>
 
-    constructor() {
-        this.preBuildConfigs = DefaultConfig;
-        this.runTimeConfigs = {};
-        this.runTimeConfigLocation = ""; // URL to fetch runtime config JSON
-    }
-
-    checkRunTimeConfigs() {
-
-    }
-
-    getConfigs() {
-
+            </div>
+        );
     }
 }

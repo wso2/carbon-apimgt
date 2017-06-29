@@ -16,22 +16,22 @@
  * under the License.
  */
 
-import {Axios} from 'axios'
-import DefaultConfig from './DefaultConfigs.json'
+import React, {Component} from 'react'
+import Api from '../../../../data/SingleClient'
 
-class ConfigManager {
-
-    constructor() {
-        this.preBuildConfigs = DefaultConfig;
-        this.runTimeConfigs = {};
-        this.runTimeConfigLocation = ""; // URL to fetch runtime config JSON
+class LifeCycle extends Component {
+    constructor(props) {
+        super(props);
+        this.api = new Api();
     }
 
-    checkRunTimeConfigs() {
-
-    }
-
-    getConfigs() {
-
+    render() {
+        return (
+            <h1>
+                Life cycle Page
+            </h1>
+        );
     }
 }
+
+export default LifeCycle

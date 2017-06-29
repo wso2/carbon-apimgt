@@ -23,12 +23,14 @@ import qs from 'qs'
 
 import AuthManager from '../../../data/AuthManager.js'
 import ResourceNotFound from "../Errors/ResourceNotFound";
-
+/**
+ * DEPRECATED: This authorization check is done in App -> Protected component, hence deprecating use of this
+ */
 class AuthCheck extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {isLogged: AuthManager.getAuthStatus()};
+        this.state = {isLogged: AuthManager.getUser()};
         if (props.response) {
             let status = props.response.status;
             this.state['isAuthorize'] = status !== 401;

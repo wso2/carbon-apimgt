@@ -16,14 +16,14 @@
  * under the License.
  */
 
-import React from 'react'
+import React, {Component} from 'react'
 
-const LifeCycle = (props) => {
-    return (
-        <h1>
-            Life cycle Page
-        </h1>
-    );
+export default class LifeCycleHistory extends Component {
+    render() {
+        return (
+            <div>
+
+            </div>
+        );
+    }
 }
-
-export default LifeCycle

@@ -21,7 +21,7 @@ import {Route, Switch, Redirect} from 'react-router-dom'
 
 import Overview from './Overview'
 import NavBar from './NavBar'
-import LifeCycle from './LifeCycle'
+import LifeCycle from './LifeCycle/LifeCycle'
 import {PageNotFound} from '../../Base/Errors/index'
 import Loading from '../../Base/Loading/Loading'
 import Resources from './Resources'
@@ -49,7 +49,6 @@ export default class Details extends Component {
             error => {
                 if (process.env.NODE_ENV !== "production")
                     console.log(error);
-                this.bindApi(error);
             }
         );
     }
@@ -62,20 +61,18 @@ export default class Details extends Component {
         let redirect_url = "/apis/" + this.props.match.params.api_uuid + "/overview";
         if (this.state.response) {
             return (
-                <AuthCheck response={this.state.response} {...this.props}>
-                    <div className="tab-content">
+                <div className="tab-content">
                     <NavBar {...this.props}/>
-                        <Switch>
-                            <Redirect exact from="/apis/:api_uuid"
-                                      to={redirect_url}/>
-                            <Route path="/apis/:api_uuid/overview"
-                                   render={ props => <Overview api={this.state.response.obj} {...props} /> }/>
-                            <Route path="/apis/:api_uuid/lifecycle" component={LifeCycle}/>
-                            <Route path="/apis/:api_uuid/resources" component={Resources}/>
-                            <Route component={PageNotFound}/>
-                        </Switch>
-                    </div>
-                </AuthCheck>
+                    <Switch>
+                        <Redirect exact from="/apis/:api_uuid"
+                                  to={redirect_url}/>
+                        <Route path="/apis/:api_uuid/overview"
+                               render={ props => <Overview api={this.state.response.obj} {...props} /> }/>
+                        <Route path="/apis/:api_uuid/lifecycle" component={LifeCycle}/>
+                        <Route path="/apis/:api_uuid/resources" component={Resources}/>
+                        <Route component={PageNotFound}/>
+                    </Switch>
+                </div>
             );
         } else {
             return (

@@ -19,50 +19,42 @@
 import React, {Component} from 'react'
 import AuthManager from '../data/AuthManager'
 import {Redirect} from 'react-router-dom';
+import qs from 'qs'
 
 class Logout extends Component {
     constructor(props) {
         super(props);
         this.authManager = new AuthManager();
         this.state = {
-            redirectTo: null
-        }
-        this.doLogout();
+            logoutSuccess: false,
+            logoutFail: null,
+            referrer: "/login"
+        };
     }
 
-    doLogout() {
-        var logoutPromise = this.authManager.logout();
-        logoutPromise.then(() => {
-            this.authManager.delete_cookie("WSO2_AM_TOKEN_1");
-            this.setState({redirectTo: '/login'});
-        });
-        logoutPromise.catch((error) => {
-                var message = "Error while logging out";
+    componentDidMount() {
+        const promisedLogout = this.authManager.logout();
+        promisedLogout.then(() => {
+            let newState = {logoutSuccess: true};
+            let queryString = this.props.location.search;
+            queryString = queryString.replace(/^\?/, '');
+            /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
+            let params = qs.parse(queryString);
+            if (params.referrer) {
+                newState['referrer'] = params.referrer;
+            }
+            this.setState(newState);
+
+        }).catch((error) => {
+                let message = "Error while logging out";
                 console.log(message);
-                //TODO Fix to redirect to the previous page if login failed
-                //window.history.back();
-
-                /*noty({
-                 text: message,
-                 type: 'error',
-                 dismissQueue: true,
-                 modal: true,
-                 progressBar: true,
-                 timeout: 5000,
-                 layout: 'top',
-                 theme: 'relax',
-                 maxVisible: 10
-                 });*/
-
+                this.setState({logoutFail: error});
             }
         );
-    };
+    }
 
     render() {
-        return (
-            (this.state.redirectTo) ? <Redirect to={{pathname: this.state.redirectTo}}/> :
-                (<div></div> )
-        )
+        return this.state.logoutSuccess && <Redirect to={this.state.referrer}/>;
     }
 }
 
