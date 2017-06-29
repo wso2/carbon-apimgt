@@ -25,6 +25,7 @@ import LifeCycle from './LifeCycle/LifeCycle'
 import {PageNotFound} from '../../Base/Errors/index'
 import Loading from '../../Base/Loading/Loading'
 import Resources from './Resources'
+import Permission from './Permission'
 
 import Api from '../../../data/api'
 import AuthCheck from "../../Base/Auth/AuthCheck";
@@ -70,6 +71,7 @@ export default class Details extends Component {
                                render={ props => <Overview api={this.state.response.obj} {...props} /> }/>
                         <Route path="/apis/:api_uuid/lifecycle" component={LifeCycle}/>
                         <Route path="/apis/:api_uuid/resources" component={Resources}/>
+                        <Route path="/apis/:api_uuid/permission" render={ props => <Permission api={this.state.response.obj} {...props} /> }/>/>
                         <Route component={PageNotFound}/>
                     </Switch>
                 </div>
