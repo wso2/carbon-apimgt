@@ -57,6 +57,9 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
     private static final String FILTER_PREFIX_USER = "userName Eq ";
     private static final String FILTER_PREFIX_ROLE = "displayName Eq ";
     private static final String HOME_EMAIL = "home";
+    private static final String RESOURCES = "Resources";
+    private static final String ID = "id";
+    private static final String EMPTY_STRING = "";
 
     DefaultIdentityProviderImpl() throws APIManagementException {
         this(SCIMServiceStubFactory.getSCIMServiceStub(), DCRMServiceStubFactory.getDCRMServiceStub(),
@@ -77,9 +80,9 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
             String responseBody = userResponse.body().toString();
             JsonParser parser = new JsonParser();
             JsonObject parsedResponseBody = (JsonObject) parser.parse(responseBody);
-            JsonArray user = (JsonArray) parsedResponseBody.get("Resources");
+            JsonArray user = (JsonArray) parsedResponseBody.get(RESOURCES);
             JsonObject scimUser = (JsonObject) user.get(0);
-            userId = scimUser.get("id").getAsString();
+            userId = scimUser.get(ID).getAsString();
         } else {
             String errorMessage = "User " + userName + " does not exist in the system.";
             log.error(errorMessage);
@@ -136,9 +139,9 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
             String responseBody = roleResponse.body().toString();
             JsonParser parser = new JsonParser();
             JsonObject parsedResponseBody = (JsonObject) parser.parse(responseBody);
-            JsonArray role = (JsonArray) parsedResponseBody.get("Resources");
+            JsonArray role = (JsonArray) parsedResponseBody.get(RESOURCES);
             JsonObject scimGroup = (JsonObject) role.get(0);
-            roleId = scimGroup.get("id").getAsString();
+            roleId = scimGroup.get(ID).getAsString();
         } else {
             String errorMessage = "Role with name " + roleName + " does not exist in the system.";
             log.error(errorMessage);
@@ -192,7 +195,7 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
     }
 
     private String getErrorMessage(Response response) {
-        StringBuilder errorMessage = new StringBuilder("");
+        StringBuilder errorMessage = new StringBuilder(EMPTY_STRING);
         if (response != null && response.body() != null) {
             try {
                 String errorDescription = new Gson().fromJson(response.body().toString(), JsonElement.class)
