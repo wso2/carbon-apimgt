@@ -305,6 +305,10 @@ public class APIGatewayPublisherImpl implements APIGateway {
             policyEvent.setName(policyValidationData.getName());
             policyEvent.setStopOnQuotaReach(policyValidationData.isStopOnQuotaReach());
             publishToThrottleTopic(policyEvent);
+            if (log.isDebugEnabled()) {
+                log.debug("Policy : " + policyValidationData.getName() + " add event has been successfully published " +
+                        "to broker");
+            }
         }
     }
 
@@ -316,6 +320,11 @@ public class APIGatewayPublisherImpl implements APIGateway {
             policyEvent.setName(policyValidationData.getName());
             policyEvent.setStopOnQuotaReach(policyValidationData.isStopOnQuotaReach());
             publishToThrottleTopic(policyEvent);
+            if (log.isDebugEnabled()) {
+                log.debug("Policy : " + policyValidationData.getName() + " update event has been successfully " +
+                        "published " +
+                        "to broker");
+            }
         }
     }
 
@@ -327,6 +336,11 @@ public class APIGatewayPublisherImpl implements APIGateway {
             policyEvent.setName(policyValidationData.getName());
             policyEvent.setStopOnQuotaReach(policyValidationData.isStopOnQuotaReach());
             publishToThrottleTopic(policyEvent);
+            if (log.isDebugEnabled()) {
+                log.debug("Policy : " + policyValidationData.getName() + " delete event has been successfully " +
+                        "published " +
+                        "to broker");
+            }
         }
     }
 
@@ -349,6 +363,10 @@ public class APIGatewayPublisherImpl implements APIGateway {
                 blockEvent.setEndingIP(APIUtils.ipToLong(blockConditions.getEndingIP()));
             }
             publishToThrottleTopic(blockEvent);
+            if (log.isDebugEnabled()) {
+                log.debug("BlockCondition : " + blockConditions.getUuid() + " add event has been successfully " +
+                        "published " + "to broker");
+            }
         }
     }
 
@@ -371,6 +389,10 @@ public class APIGatewayPublisherImpl implements APIGateway {
                 blockEvent.setEndingIP(APIUtils.ipToLong(blockConditions.getEndingIP()));
             }
             publishToThrottleTopic(blockEvent);
+            if (log.isDebugEnabled()) {
+                log.debug("BlockCondition : " + blockConditions.getUuid() + " update event has been successfully " +
+                        "published " + "to broker");
+            }
         }
     }
 
@@ -393,6 +415,10 @@ public class APIGatewayPublisherImpl implements APIGateway {
                 blockEvent.setEndingIP(APIUtils.ipToLong(blockConditions.getEndingIP()));
             }
             publishToThrottleTopic(blockEvent);
+            if (log.isDebugEnabled()) {
+                log.debug("BlockCondition : " + blockConditions.getUuid() + " delete event has been successfully " +
+                        "published " + "to broker");
+            }
         }
     }
 
