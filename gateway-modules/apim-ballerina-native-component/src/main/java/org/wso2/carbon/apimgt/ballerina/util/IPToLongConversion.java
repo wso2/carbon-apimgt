@@ -19,7 +19,7 @@ package org.wso2.carbon.apimgt.ballerina.util;
 
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.model.types.TypeEnum;
-import org.ballerinalang.model.values.BMessage;
+import org.ballerinalang.model.values.BInteger;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.natives.AbstractNativeFunction;
 import org.ballerinalang.natives.annotations.Argument;
@@ -29,38 +29,30 @@ import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.ReturnType;
 
 /**
- * Ballerina function to set a message property.
+ * Ballerina function to convert ip into Long value
  * <br>
- * org.wso2.carbon.apimgt.ballerina.util:getProperty
+ * org.wso2.carbon.apimgt.ballerina.util:convertIpToLong
  */
 @BallerinaFunction(
         packageName = "org.wso2.carbon.apimgt.ballerina.util",
-        functionName = "getProperty",
-        args = {@Argument(name = "msg", type = TypeEnum.MESSAGE),
-                @Argument(name = "propertyName", type = TypeEnum.STRING)},
-        returnType = {@ReturnType(type = TypeEnum.ANY)},
+        functionName = "convertIpToLong",
+        args = {@Argument(name = "value", type = TypeEnum.STRING)},
+        returnType = {@ReturnType(type = TypeEnum.INT)},
         isPublic = true
 )
 @BallerinaAnnotation(annotationName = "Description", attributes = {@Attribute(name = "value",
-        value = "Retrieve a message property")})
-@BallerinaAnnotation(annotationName = "Param", attributes = {@Attribute(name = "msg",
-        value = "The current message object")})
-@BallerinaAnnotation(annotationName = "Param", attributes = {@Attribute(name = "propertyName",
-        value = "The name of the property")})
-@BallerinaAnnotation(annotationName = "Return", attributes = {@Attribute(name = "string",
-        value = "The property value")})
-public class GetProperty extends AbstractNativeFunction {
+        value = "Convert ip into long value")})
+@BallerinaAnnotation(annotationName = "Param", attributes = {@Attribute(name = "value",
+        value = "String value of ip")})
+@BallerinaAnnotation(annotationName = "Return", attributes = {@Attribute(name = "int",
+        value = "long value of ip")})
+public class IPToLongConversion extends AbstractNativeFunction {
 
     @Override
     public BValue[] execute(Context context) {
-        BMessage msg = (BMessage) getRefArgument(context, 0);
-        String propertyName = getStringArgument(context, 0);
-
-        BValue propertyValue = (BValue) msg.getProperty(propertyName);
-
-        if (propertyValue == null) {
-            return VOID_RETURN;
-        }
-        return getBValues(propertyValue);
+        String value = getStringArgument(context, 0);
+        long longValue = Util.ipToLong(value);
+        return getBValues(new BInteger(longValue));
     }
+
 }

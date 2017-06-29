@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.core.models.RegistrationSummary;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.rest.api.core.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.AnalyticsInfoDTO;
@@ -40,7 +41,6 @@ import org.wso2.carbon.apimgt.rest.api.core.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.BlockingConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.BlockingConditionListDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.CredentialsDTO;
-import org.wso2.carbon.apimgt.rest.api.core.dto.IPConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.EndPointDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.JWTInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.KeyManagerInfoDTO;
@@ -56,6 +56,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Utility class for convert apimgt Core objects into rest api model
+ */
 public class MappingUtil {
 
     /**
@@ -320,35 +323,20 @@ public class MappingUtil {
             return null;
         }
         BlockingConditionDTO dto = new BlockingConditionDTO();
-        dto.setConditionId(blockCondition.getUuid());
+        dto.setUuid(blockCondition.getUuid());
         dto.setConditionType(blockCondition.getConditionType());
-        dto.setStatus(blockCondition.isEnabled());
-        if (blockCondition.getConditionType()
-                .equals(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITION_IP_RANGE)) {
-            dto.setIpCondition(fromBlockConditionToIpConditionDTO(blockCondition));
+        dto.setEnabled(blockCondition.isEnabled());
+        if (blockCondition.getConditionType().equals(APIMgtConstants.ThrottlePolicyConstants
+                .BLOCKING_CONDITION_IP_RANGE)) {
+            dto.setStartingIP(APIUtils.ipToLong(blockCondition.getStartingIP()));
+            dto.setEndingIP(APIUtils.ipToLong(blockCondition.getEndingIP()));
         }
         String conditionValue = blockCondition.getConditionValue();
         if (APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_IP.equals(blockCondition.getConditionType())) {
-            int index = conditionValue.indexOf(":");
-            if (index > -1) {
-                // Removing Tenant Domain from IP
-                conditionValue = conditionValue.substring(index + 1, conditionValue.length());
-            }
+            dto.setFixedIp(APIUtils.ipToLong(conditionValue));
         }
         dto.setConditionValue(conditionValue);
         return dto;
     }
 
-    /**
-     * Block condition IP range details to IPConditionDTO.
-     *
-     * @param blockConditions blockCondition to be converted into IPConditionDTO.
-     * @return IPConditionDTO Object
-     */
-    private static IPConditionDTO fromBlockConditionToIpConditionDTO(BlockConditions blockConditions) {
-        IPConditionDTO ipConditionDTO = new IPConditionDTO();
-        ipConditionDTO.setStartingIP(blockConditions.getStartingIP());
-        ipConditionDTO.setEndingIP(blockConditions.getEndingIP());
-        return ipConditionDTO;
-    }
 }

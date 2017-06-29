@@ -1094,19 +1094,24 @@ definitions:
       - conditionType
       - conditionValue
     properties:
-      conditionId:
+      uuid:
         type: string
       conditionType:
         type: string
       conditionValue:
         type: string
-      status:
+      enabled:
         type: boolean
         deafult: true
-      ipCondition:
-        type: object
-        $ref: '#/definitions/IPCondition'
-
+      fixedIp:
+        type: integer
+        format: int64
+      startingIP:
+        type: integer
+        format: int64
+      endingIP:
+        type: integer
+        format: int64
 #-----------------------------------------------------
 # The Throttle Blocking Condition List resource
 #-----------------------------------------------------
@@ -1123,22 +1128,6 @@ definitions:
         items:
           $ref: '#/definitions/BlockingCondition'
 
-#-----------------------------------------------------
-# The Throttle IP Condition resource
-#-----------------------------------------------------
-  IPCondition:
-    title: IP based throttle condition
-    properties:
-      ipConditionType:
-        type: string
-        description: |
-          IPRange and IPSpecific are the supported values
-      specificIP:
-        type: string
-      startingIP:
-        type: string
-      endingIP:
-        type: string
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------

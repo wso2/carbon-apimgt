@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.core.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIGateway;
@@ -425,7 +426,8 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
     }
 
-    @Override public List<API> getAPIsByStatus(List<String> gatewayLabels, String status)
+    @Override
+    public List<API> getAPIsByStatus(List<String> gatewayLabels, String status)
             throws APIManagementException {
         List<API> apiList;
         try {
@@ -450,7 +452,8 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         return apiList;
     }
 
-    @Override public List<API> getAPIsByGatewayLabel(List<String> gatewayLabels) throws APIManagementException {
+    @Override
+    public List<API> getAPIsByGatewayLabel(List<String> gatewayLabels) throws APIManagementException {
         List<API> apiList;
         try {
             if (gatewayLabels != null) {
@@ -521,7 +524,12 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public String addBlockCondition(BlockConditions blockConditions) throws APIManagementException {
         try {
-            return policyDAO.addBlockConditions(blockConditions);
+            if (StringUtils.isEmpty(blockConditions.getUuid())) {
+                blockConditions.setUuid(UUID.randomUUID().toString());
+            }
+            policyDAO.addBlockConditions(blockConditions);
+            apiGateway.addBlockCondition(blockConditions);
+            return blockConditions.getUuid();
         } catch (APIMgtDAOException e) {
             String errorMessage =
                     "Couldn't add block condition with condition type: " + blockConditions.getConditionType()
@@ -534,7 +542,13 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public boolean updateBlockConditionStateByUUID(String uuid, Boolean state) throws APIManagementException {
         try {
-            return policyDAO.updateBlockConditionStateByUUID(uuid, state);
+            if (policyDAO.updateBlockConditionStateByUUID(uuid, state)) {
+                BlockConditions blockConditions = getBlockConditionByUUID(uuid);
+                apiGateway.updateBlockCondition(blockConditions);
+                return true;
+            } else {
+                return false;
+            }
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't update block condition with UUID: " + uuid + ", state: " + state;
             log.error(errorMessage, e);
@@ -545,7 +559,13 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public boolean deleteBlockConditionByUuid(String uuid) throws APIManagementException {
         try {
-            return policyDAO.deleteBlockConditionByUuid(uuid);
+            BlockConditions blockConditions = getBlockConditionByUUID(uuid);
+            if (policyDAO.deleteBlockConditionByUuid(uuid)) {
+                apiGateway.deleteBlockCondition(blockConditions);
+                return true;
+            } else {
+                return false;
+            }
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't delete block condition with UUID: " + uuid;
             log.error(errorMessage, e);

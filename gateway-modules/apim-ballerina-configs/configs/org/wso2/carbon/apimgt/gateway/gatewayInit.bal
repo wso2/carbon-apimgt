@@ -23,6 +23,7 @@ function initGateway () (boolean) {
         //Retrieve APIs from API Core and deploy
         gatewayUtil:loadAPIs();
         gatewayUtil:loadGlobalEndpoints();
+        gatewayUtil:loadBlockConditions();
     } catch (errors:Error e) {
         system:println("Error while initilazing API gateway. " + e.msg);
     }

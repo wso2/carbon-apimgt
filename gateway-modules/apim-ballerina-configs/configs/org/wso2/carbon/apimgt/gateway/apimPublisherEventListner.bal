@@ -4,7 +4,6 @@ import ballerina.lang.messages;
 import ballerina.net.jms;
 import ballerina.net.http;
 import ballerina.lang.system;
-import ballerina.lang.errors;
 import ballerina.lang.strings;
 import org.wso2.carbon.apimgt.gateway.constants as Constants;
 import org.wso2.carbon.apimgt.gateway.utils as gatewayUtil;
@@ -26,7 +25,6 @@ service apimPublisherEventListner {
 
     @http:GET {}
     resource onMessage (message m) {
-        try {
             json event = messages:getJsonPayload(m);
             string eventType = (string)event[Constants:EVENT_TYPE];
 
@@ -119,7 +117,6 @@ service apimPublisherEventListner {
             } else if (strings:equalsIgnoreCase(eventType, Constants:ENDPOINT_UPDATE)) {
                 json endpoint = event.endpoint;
                 if (endpoint != null) {
-                    system:println(endpoint);
                     dto:EndpointDto endpointDto = gatewayUtil:fromJsonToEndpointDto(endpoint);
                     holder:updateEndpointCache(endpointDto);
                 } else {
@@ -137,10 +134,7 @@ service apimPublisherEventListner {
                 system:println("Invalid event received");
             }
 
-        } catch (errors:Error e) {
-            system:println(e.msg);
-            system:println("[Error] : Error occurred while processing gateway event ");
-        }
+
     }
 
 }

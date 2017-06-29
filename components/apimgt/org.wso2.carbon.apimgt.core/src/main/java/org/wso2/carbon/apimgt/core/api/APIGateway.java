@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.core.api;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.BlockConditions;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.PolicyValidationData;
@@ -179,4 +180,24 @@ public interface APIGateway {
      */
     void deletePolicy(PolicyValidationData policyValidationData) throws GatewayException;
 
+    /**
+     * Publish Block condition Add event to Gateway
+     * @param blockConditions block condition data
+     * @throws GatewayException If there is a failure in notifying add block condition to gateway
+     */
+    void addBlockCondition(BlockConditions blockConditions) throws GatewayException;
+
+    /**
+     * Publish Block condition Update event to Gateway
+     * @param blockConditions block condition data
+     * @throws GatewayException If there is a failure in notifying update block condition to gateway
+     */
+    void updateBlockCondition(BlockConditions blockConditions) throws GatewayException;
+
+    /**
+     * Publish Block condition Delete event to Gateway
+     * @param blockConditions block condition data
+     * @throws GatewayException If there is a failure in notifying update block condition to gateway
+     */
+    void deleteBlockCondition(BlockConditions blockConditions) throws GatewayException;
 }

@@ -52,13 +52,6 @@ service ThrottleJmsService {
                  // expiryTimeStamp - When the throttling time window will expires
                  
                 handleThrottleUpdateMessage(event);
-            } else if ("" != util:getJsonString(event, Constants:BLOCKING_CONDITION_KEY)) {
-                
-                 // This message contains blocking condition data
-                 // blockingCondition - Blocking condition type
-                 // conditionValue - blocking condition value
-                 // state - State whether blocking condition is enabled or not
-                handleBlockingMessage(event);
             } else if ("" != util:getJsonString(event, Constants:POLICY_TEMPLATE_KEY)) {
                 
                  // This message contains key template data
@@ -89,42 +82,6 @@ function handleThrottleUpdateMessage(json event){
     }
 }
 
-
-function handleBlockingMessage(json event) {
-
-    system:println("Received Key -  blockingCondition : " + (string )event[Constants:BLOCKING_CONDITION_KEY] + " , " +
-              "conditionValue :" + util:getJsonString(event, Constants:BLOCKING_CONDITION_VALUE));
-    
-    string condition = util:getJsonString(event, Constants:BLOCKING_CONDITION_KEY);
-    string conditionValue = util:getJsonString(event, Constants:BLOCKING_CONDITION_VALUE);
-    string conditionState = util:getJsonString(event, Constants:BLOCKING_CONDITION_STATE);
-
-    if (Constants:BLOCKING_CONDITIONS_APPLICATION == condition) {
-        if (Constants:TRUE == conditionState) {
-            throttle:addApplicationBlockingCondition(conditionValue, conditionValue);
-        } else {
-            throttle:removeApplicationBlockingCondition(conditionValue);
-        }
-    } else if (Constants:BLOCKING_CONDITIONS_API == condition) {
-        if (Constants:TRUE == conditionState) {
-            throttle:addAPIBlockingCondition(conditionValue, conditionValue);
-        } else {
-            throttle:removeAPIBlockingCondition(conditionValue);
-        }
-    } else if (Constants:BLOCKING_CONDITIONS_USER == condition) {
-        if (Constants:TRUE == conditionState) {
-            throttle:addUserBlockingCondition(conditionValue, conditionValue);
-        } else {
-            throttle:removeUserBlockingCondition(conditionValue);
-        }
-    } else if (Constants:BLOCKING_CONDITIONS_IP == condition) {
-        if (Constants:TRUE == conditionState) {
-            throttle:addIpBlockingCondition(conditionValue, conditionValue);
-        } else {
-            throttle:removeIpBlockingCondition(conditionValue);
-        }
-    }
-}
 
 function handleKeyTemplateMessage(json event) {
     
