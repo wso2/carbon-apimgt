@@ -580,14 +580,6 @@ public class ApiFileDAOImpl implements ApiDAO {
         return apiList;
     }
 
-    /**
-     * @see ApiDAO#getAPIs(Set, String)
-     */
-    @Override
-    public List<API> getAPIs(Set<String> roles, String user) throws APIMgtDAOException {
-        throw new UnsupportedOperationException();
-    }
-
     @Override
     public List<CompositeAPI> getCompositeAPIs(Set<String> roles, String user, int offset, int limit) {
         throw new UnsupportedOperationException();
@@ -616,15 +608,6 @@ public class ApiFileDAOImpl implements ApiDAO {
     @Override
     public List<API> searchAPIs(Set<String> roles, String user, String searchString,
                                 int offset, int limit) throws APIMgtDAOException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @see ApiDAO#searchAPIsWithPermissions(Set, String, String, int, int)
-     */
-    @Override
-    public List<API> searchAPIsWithPermissions(Set<String> roles, String user, String searchString,
-            int offset, int limit) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
