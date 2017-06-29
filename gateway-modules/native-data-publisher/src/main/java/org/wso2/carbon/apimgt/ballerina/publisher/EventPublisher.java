@@ -48,5 +48,10 @@ public interface EventPublisher {
             throws DataEndpointAuthenticationException, DataEndpointAgentConfigurationException, TransportException,
             DataEndpointException, DataEndpointConfigurationException;
 
+    /**
+     * publish events synchronously
+     *
+     * @param aEvent event payload
+     */
     void publish(Event aEvent);
 }
