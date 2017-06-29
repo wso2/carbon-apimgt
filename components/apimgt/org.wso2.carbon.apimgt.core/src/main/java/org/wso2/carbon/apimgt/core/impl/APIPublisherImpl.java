@@ -465,6 +465,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         try {
             API originalAPI = getAPIbyUUID(apiBuilder.getId());
             if (originalAPI != null) {
+                //Checks whether the logged in user has the "UPDATE" permission for the API
+                verifyUserPermissionsToUpdateAPI(getUsername(), originalAPI);
                 apiBuilder.createdTime(originalAPI.getCreatedTime());
                 //workflow status is an internal property and shouldn't be allowed to update externally
                 apiBuilder.workflowStatus(originalAPI.getWorkflowStatus());
@@ -591,6 +593,40 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             subPolicies.add(policy);
         }
         apiBuilder.policies(subPolicies);
+    }
+
+    /**
+     * This method checks whether the currently logged in user has the "UPDATE" permission for the API
+     * @param user - currently logged in user
+     * @param api - the api to be updated
+     * @throws APIManagementException - If the user does not have "UPDATE" permission for the API
+     */
+    private void verifyUserPermissionsToUpdateAPI(String user, API api) throws APIManagementException {
+        List<String> userPermissions = api.getUserSpecificApiPermissions();
+        if (!userPermissions.contains(APIMgtConstants.Permission.UPDATE)) {
+            String message = "The user " + user + " does not have permission to update the api " + api.getName();
+            if (log.isDebugEnabled()) {
+                log.debug(message);
+            }
+            throw new APIManagementException(message, ExceptionCodes.NO_UPDATE_PERMISSIONS);
+        }
+    }
+
+    /**
+     * This method checks whether the currently logged in user has the "DELETE" permission for the API
+     * @param user - currently logged in user
+     * @param api - the api to be deleted
+     * @throws APIManagementException - If the user does not have "DELETE" permission for the API
+     */
+    private void verifyUserPermissionsToDeleteAPI(String user, API api) throws APIManagementException {
+        List<String> userPermissions = getAPIPermissionsOfLoggedInUser(user, api);
+        if (!userPermissions.contains(APIMgtConstants.Permission.DELETE)) {
+            String message = "The user " + user + " does not have permission to delete the api " + api.getName();
+            if (log.isDebugEnabled()) {
+                log.debug(message);
+            }
+            throw new APIManagementException(message, ExceptionCodes.NO_DELETE_PERMISSIONS);
+        }
     }
 
     /**
@@ -1171,6 +1207,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             if (getAPISubscriptionCountByAPI(identifier) == 0) {
                 API api = getApiDAO().getAPI(identifier);
                 if (api != null) {
+                    //Checks whether the user has required permissions to delete the API
+                    verifyUserPermissionsToDeleteAPI(getUsername(), api);
                     String apiWfStatus = api.getWorkflowStatus();
                     API.APIBuilder apiBuilder = new API.APIBuilder(api);
 

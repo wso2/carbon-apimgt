@@ -473,8 +473,7 @@ public class APIPublisherImplTestCase {
                 thenReturn(apimResultsFromDAO);
         List<API> apis = apiPublisher.searchAPIs(2, 1, QUERY_STRING);
         Assert.assertNotNull(apis);
-        Mockito.verify(apiDAO, Mockito.atLeastOnce())
-                .searchAPIsWithPermissions(new HashSet<>(), USER, QUERY_STRING, 1, 2);
+        Mockito.verify(apiDAO, Mockito.atLeastOnce()).searchAPIs(new HashSet<>(), USER, QUERY_STRING, 1, 2);
     }
 
     @Test(description = "Search APIs with null query string")
@@ -482,17 +481,16 @@ public class APIPublisherImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
         List<API> apimResultsFromDAO = new ArrayList<>();
-        Mockito.when(apiDAO.searchAPIsWithPermissions(new HashSet<>(), USER, null, 1, 2)).
-                thenReturn(apimResultsFromDAO);
+        Mockito.when(apiDAO.searchAPIs(new HashSet<>(), USER, null, 1, 2)).thenReturn(apimResultsFromDAO);
         apiPublisher.searchAPIs(2, 1, null);
-        Mockito.verify(apiDAO, Mockito.times(1)).getAPIs(new HashSet<>(), USER);
+        Mockito.verify(apiDAO, Mockito.times(1)).getAPIs();
     }
 
     @Test(description = "Exception when searching APIs", expectedExceptions = APIManagementException.class)
     public void testSearchAPIsException() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
-        Mockito.when(apiDAO.searchAPIsWithPermissions(new HashSet<>(), USER, QUERY_STRING, 1, 2))
+        Mockito.when(apiDAO.searchAPIs(new HashSet<>(), USER, QUERY_STRING, 1, 2))
                 .thenThrow(new APIMgtDAOException("Error occurred while Searching the API with query pizza"));
         apiPublisher.searchAPIs(2, 1, QUERY_STRING);
     }
@@ -2603,6 +2601,13 @@ public class APIPublisherImplTestCase {
                                                          apiGatewayPublisher) {
         return new APIPublisherImpl(USER, null, apiDAO, null, apiSubscriptionDAO, null, apiLifecycleManager, null, null,
                 null, new GatewaySourceGeneratorImpl(), apiGatewayPublisher);
+    }
+
+    private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider, ApiDAO apiDAO,
+            APISubscriptionDAO apiSubscriptionDAO, APILifecycleManager apiLifecycleManager,
+            APIGatewayPublisherImpl apiGatewayPublisher) {
+        return new APIPublisherImpl(USER, identityProvider, apiDAO, null, apiSubscriptionDAO, null, apiLifecycleManager,
+                null, null, null, new GatewaySourceGeneratorImpl(), apiGatewayPublisher);
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APISubscriptionDAO apiSubscriptionDAO,
