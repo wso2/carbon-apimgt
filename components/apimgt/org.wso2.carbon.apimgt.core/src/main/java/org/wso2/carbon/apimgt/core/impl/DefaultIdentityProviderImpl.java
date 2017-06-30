@@ -69,7 +69,7 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
     }
 
     DefaultIdentityProviderImpl(SCIMServiceStub scimServiceStub, DCRMServiceStub dcrmServiceStub,
-                                OAuth2ServiceStubs oAuth2ServiceStubs) throws APIManagementException {
+            OAuth2ServiceStubs oAuth2ServiceStubs) throws APIManagementException {
         super(dcrmServiceStub, oAuth2ServiceStubs);
         this.scimServiceStub = scimServiceStub;
     }
@@ -106,8 +106,9 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
             List<SCIMUser.SCIMUserGroups> roles = scimUser.getGroups();
             if (roles != null) {
                 roles.forEach(role -> roleNames.add(role.getDisplay()));
-                String message = "Role names of user " + scimUser.getName() + " are successfully retrieved as " + StringUtils
-                        .join(roleNames, ", ") + ".";
+                String message =
+                        "Role names of user " + scimUser.getName() + " are successfully retrieved as " + StringUtils
+                                .join(roleNames, ", ") + ".";
                 if (log.isDebugEnabled()) {
                     log.debug(message);
                 }
@@ -134,8 +135,9 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
             List<SCIMUser.SCIMUserGroups> roles = scimUser.getGroups();
             if (roles != null) {
                 roles.forEach(role -> roleIds.add(role.getValue()));
-                String message = "Role Ids of user " + scimUser.getName() + " are successfully retrieved as " + StringUtils
-                        .join(roleIds, ", ") + ".";
+                String message =
+                        "Role Ids of user " + scimUser.getName() + " are successfully retrieved as " + StringUtils
+                                .join(roleIds, ", ") + ".";
                 if (log.isDebugEnabled()) {
                     log.debug(message);
                 }
@@ -179,7 +181,8 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
             String displayName;
             if (scimGroup != null) {
                 displayName = scimGroup.getDisplayName();
-                String message = "Display name of role with Id " + roleId + " is successfully retrieved as " + displayName;
+                String message =
+                        "Display name of role with Id " + roleId + " is successfully retrieved as " + displayName;
                 if (log.isDebugEnabled()) {
                     log.debug(message);
                 }
@@ -230,8 +233,8 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
         if (response != null && response.body() != null) {
             try {
                 String errorDescription = new Gson().fromJson(response.body().toString(), JsonElement.class)
-                        .getAsJsonObject().get("Errors").getAsJsonArray().get(0).getAsJsonObject()
-                        .get("description").getAsString();
+                        .getAsJsonObject().get("Errors").getAsJsonArray().get(0).getAsJsonObject().get("description")
+                        .getAsString();
                 errorMessage.append(errorDescription);
             } catch (Exception ex) {
                 log.error("Error occurred while parsing error response", ex);
