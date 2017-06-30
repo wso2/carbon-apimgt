@@ -947,4 +947,105 @@ public class SampleTestObjectCreator {
         return customPolicy;
     }
 
+    public static String createDefaultSiddhiAppforAppPolicy() {
+        ApplicationPolicy policy = createDefaultApplicationPolicy();
+        RequestCountLimit limit = (RequestCountLimit) createDefaultApplicationPolicy().getDefaultQuotaPolicy()
+                .getLimit();
+        String siddhiApp =
+                "@App:name('application_" + policy.getPolicyName() + "')\n" + "@App:description('ExecutionPlan for app_"
+                        + policy.getPolicyName() + "')\n" +
+
+                        "@source(type='inMemory', topic='apim', @map(type='passThrough'))\n"
+                        + "define stream RequestStream (messageID string, appKey string, appTier string, "
+                        + "subscriptionKey string,"
+                        + " apiKey string, apiTier string, subscriptionTier string, resourceKey string,"
+                        + " resourceTier string,"
+                        + " userId string,  apiContext string, apiVersion string, appTenant string, apiTenant string,"
+                        + " appId " + "string, apiName string, propertiesMap string);\n" +
+
+                        "@sink(type='jms', @map(type='text'),\n"
+                        + "factory.initial='org.apache.activemq.jndi.ActiveMQInitialContextFactory',"
+                        + " provider.url='tcp://localhost:61616', destination='TEST.FOO', connection.factory."
+                        + "type='topic',\n" + "connection.factory.jndi.name='TopicConnectionFactory')\n"
+                        + "define stream GlobalThrottleStream (throttleKey string, isThrottled bool"
+                        + ", expiryTimeStamp long);\n" +
+
+                        "FROM RequestStream\n" + "SELECT messageID, (appTier == '" + policy.getPolicyName()
+                        + "') AS isEligible, appKey AS throttleKey, " + "propertiesMap\n"
+                        + "INSERT INTO EligibilityStream;\n" +
+
+                        "FROM EligibilityStream[isEligible==true]#throttler:timeBatch(" + policy.getDefaultQuotaPolicy()
+                        .getLimit().getUnitTime() + " " + policy.getDefaultQuotaPolicy().getLimit().getTimeUnit()
+                        + ", 0)\n" + "select throttleKey, (count(messageID) >= " + limit.getRequestCount() + ")"
+                        + " as isThrottled, expiryTimeStamp group by throttleKey\n"
+                        + "INSERT ALL EVENTS into ResultStream;\n" +
+
+                        "from ResultStream#throttler:emitOnStateChange(throttleKey, isThrottled)\n" + "select *\n"
+                        + "insert into GlobalThrottleStream;\n";
+        return siddhiApp;
+    }
+
+    public static String createDefaultSiddhiAppforSubscriptionPolicy() {
+        SubscriptionPolicy policy = createDefaultSubscriptionPolicy();
+        RequestCountLimit limit = (RequestCountLimit) policy.getDefaultQuotaPolicy()
+                .getLimit();
+        String siddhiApp = "@App:name('subscription_" + policy.getPolicyName() + "')\n"
+                + "\n@App:description('ExecutionPlan for subscription_" + policy.getPolicyName() + "')\n" +
+
+                "\n@source(type='inMemory', topic='apim', @map(type='passThrough'))\n"
+                + "define stream RequestStream (messageID string, appKey string, appTier string,"
+                + " subscriptionKey string,"
+                + " apiKey string, apiTier string, subscriptionTier string, resourceKey string, resourceTier string,"
+                + " userId string,  apiContext string, apiVersion string, appTenant string, apiTenant string, "
+                + "appId string, apiName string, propertiesMap string);\n" +
+
+                "\n@sink(type='jms', @map(type='text'),\n"
+                + "factory.initial='org.apache.activemq.jndi.ActiveMQInitialContextFactory',"
+                + " provider.url='tcp://localhost:61616', destination='TEST.FOO', connection.factory."
+                + "type='topic',\n" + "connection.factory.jndi.name='TopicConnectionFactory')\n"
+                + "define stream GlobalThrottleStream (throttleKey string, isThrottled bool"
+                + ", expiryTimeStamp long);\n" +
+
+                "\nFROM RequestStream\n" + "SELECT messageID, (subscriptionTier == '" + policy.getPolicyName()
+                + "')" + " AS isEligible, subscriptionKey AS throttleKey, propertiesMap\n"
+                + "INSERT INTO EligibilityStream;\n" + "\nFROM EligibilityStream[isEligible==true]#throttler:timeBatch("
+                + policy.getDefaultQuotaPolicy().getLimit().getUnitTime() + " " + policy.getDefaultQuotaPolicy()
+                .getLimit().getTimeUnit() + ", 0)\n" + "select throttleKey, (count(messageID) >= " + limit
+                .getRequestCount() + ")" + " as isThrottled, expiryTimeStamp group by throttleKey\n"
+                + "INSERT ALL EVENTS into ResultStream;\n" +
+
+                "\nfrom ResultStream#throttler:emitOnStateChange(throttleKey, isThrottled)" + " select * "
+                + "insert into GlobalThrottleStream;";
+        return siddhiApp;
+    }
+
+    public static String createDefaultCustomPolicySiddhiApp() {
+        CustomPolicy policy = createDefaultCustomPolicy();
+        String siddhiApp =
+                "@App:name('custom_" + policy.getPolicyName() + "')" + "\n@App:description('ExecutionPlan for custom_"
+                        + policy.getPolicyName() + "')\n" +
+
+                        "\n@source(type='inMemory', topic='apim', @map(type='passThrough'))\n"
+                        + "define stream RequestStream (messageID string, appKey string, appTier string, "
+                        + "subscriptionKey string, apiKey string, apiTier string, subscriptionTier string,"
+                        + " resourceKey string, resourceTier string, userId string,  apiContext string, "
+                        + "apiVersion string, appTenant string, apiTenant string, appId string, apiName string, "
+                        + "propertiesMap string);\n" +
+
+                        "\n@sink(type='jms', @map(type='text'),\n"
+                        + "factory.initial='org.apache.activemq.jndi.ActiveMQInitialContextFactory',"
+                        + " provider.url='tcp://localhost:61616', destination='TEST.FOO',"
+                        + " connection.factory.type='topic',\n"
+                        + "connection.factory.jndi.name='TopicConnectionFactory')\n"
+                        + "define stream GlobalThrottleStream (throttleKey string, isThrottled bool, "
+                        + "expiryTimeStamp long);\n"
+                        +
+
+                        "\n" + policy.getSiddhiQuery() + "\n" +
+
+                        "\nfrom ResultStream#throttler:emitOnStateChange(throttleKey, isThrottled)" + "\nselect *\n"
+                        + "insert into GlobalThrottleStream;";
+
+        return siddhiApp;
+    }
 }
