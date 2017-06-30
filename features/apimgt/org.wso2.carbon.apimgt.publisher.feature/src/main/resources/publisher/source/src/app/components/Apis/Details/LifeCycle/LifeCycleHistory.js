@@ -22,7 +22,41 @@ export default class LifeCycleHistory extends Component {
     render() {
         return (
             <div>
-
+                <div className="page-header">
+                    <h4 className="lead">Lifecycle History</h4>
+                </div>
+                ##each @params.lcHistory
+                ##if this.previousState
+                ##else
+                ##if
+                ##each
+                <table className="lifeCycleTable" id="lifeCycleTable">
+                    <thead>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td><i className="glyphicon glyphicon-info-sign" title="date"/> <b><span
+                            className="dateFull">##this.updatedTime</span></b>
+                        </td>
+                        <td>&nbsp;&nbsp;&nbsp; <i className="glyphicon glyphicon-user"
+                                                  title="user"/>&nbsp;<a
+                            href="/publisher/apis?query=provider:##this.user" title="user">##this.user</a>
+                            changed the API status from ##this.previousState
+                            to ##i18n this.postState
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><i className="glyphicon glyphicon-info-sign" title="date"/> <b><span
+                            className="dateFull">##this.updatedTime</span></b>
+                        </td>
+                        <td>&nbsp;&nbsp;&nbsp; <i className="glyphicon glyphicon-user"
+                                                  title="user"/>&nbsp;<a
+                            href="/publisher/apis?query=provider:##this.user" title="user">##this.user</a>
+                            created the API.
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
         );
     }
