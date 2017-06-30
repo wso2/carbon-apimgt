@@ -23,140 +23,114 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
 
 
-class ApiCreateEndpoint extends React.Component {
+import { Form, Icon, Input, Button, message, Radio } from 'antd';
+const FormItem = Form.Item;
+const RadioButton = Radio.Button;
+const RadioGroup = Radio.Group;
+
+class EndpointForm extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            apiName: '',
-            apiContext: '',
-            apiVersion: ''
-        };
-        this.handleFormSubmit = this.handleFormSubmit.bind(this);
-        this.handleClearForm = this.handleClearForm.bind(this);
-        this.handleApiNameChange = this.handleApiNameChange.bind(this);
-        this.handleApiContextChange = this.handleApiContextChange.bind(this);
-        this.handleApiVersionChange = this.handleApiVersionChange.bind(this);
-    }
-
-    handleApiNameChange(e) {
-        this.setState({ apiName: e.target.value }, () => console.log('name:', this.state.apiName));
-    }
-    handleApiContextChange(e) {
-        this.setState({ apiContext: e.target.value }, () => console.log('name:', this.state.apiContext));
-    }
-    handleApiVersionChange(e) {
-        this.setState({ apiVersion: e.target.value }, () => console.log('name:', this.state.apiVersion));
-    }
-
-    handleClearForm(e) {
-        e.preventDefault();
-        this.setState({
-            apiName: '',
-            apiContext: '',
-            apiVersion: ''
-
-        });
-    }
-    componentDidMount(){
     }
     createAPICallback = (response) => {
-        let that = this;
-        const opts = {
-            position: toast.POSITION.TOP_CENTER,
-            onClose: () => {
-                let uuid = JSON.parse(response.data).id;
-                let redirect_url = "/apis/" + uuid + "/overview";
-                that.props.history.push(redirect_url);
-            }
-        };
-
-        toast.success("Api Created Successfully. Now you can add resources, define endpoints etc..",opts);
-    }
-
-    handleFormSubmit(e) {
+        let uuid = JSON.parse(response.data).id;
+        let redirect_url = "/apis/" + uuid + "/overview";
+        this.props.history.push(redirect_url);
+        message.success("Api Created Successfully. Now you can add resources, define endpoints etc..",opts);
+    };
+    /**
+     * Do create API from either swagger URL or swagger file upload.In case of URL pre fetch the swagger file and make a blob
+     * and the send it over REST API.
+     * @param e {Event}
+     */
+    handleSubmit = (e) => {
         e.preventDefault();
+        this.props.form.validateFields((err, values) => {
+            if (!err) {
+                console.log('Received values of form: ', values);
+                let api_data = {
+                    name: values.apiName,
+                    context: values.apiContext,
+                    version: values.apiVersion
+                };
+                let new_api = new API('');
+                let promised_create = new_api.create(api_data);
+                promised_create
+                    .then(this.createAPICallback)
+                    .catch(
+                        function (error_response) {
+                            let error_data = JSON.parse(error_response.data);
+                            let messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
 
-        let api_data = {
-            name: this.state.apiName,
-            context: this.state.apiContext,
-            version: this.state.apiVersion
-            //endpoint: this.constructEndpointsForApi()
-        };
-        let new_api = new API('');
-        let promised_create = new_api.create(api_data);
-        promised_create
-            .then(this.createAPICallback)
-            .catch(
-                function (error_response) {
-                    let error_data = JSON.parse(error_response.data);
-                    let message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+                            message.error(messageTxt);
+                        });
 
-                    alert(message);
-                });
+                console.log('Send this in a POST request:', api_data);
 
-        console.log('Send this in a POST request:', api_data);
-        this.handleClearForm(e);
-    }
-    render() {
-        return (
-            <div>
-                <div className="ch-info-wrap tmp-form-style">
-                    <div className="ch-info flex-stay-200">
-                        <div className="ch-info-front ch-img-3">
-                            <i className="fw fw-rest-api fw-4x"></i>
-                            <span>Design New REST API</span>
-                        </div>
-                        <div className="ch-info-back">
-                            <p className="unselectable">Design and prototype a new REST API</p>
-                        </div>
-                    </div>
-                    <div id="rest-form-container" className="form-container flex-1">
+            } else {
 
-                        <form onSubmit={this.handleFormSubmit} className="bs-component text-left">
-                            <SingleInput
-                                inputType={'text'}
-                                title={'Api name'}
-                                name={'apiName'}
-                                controlFunc={this.handleApiNameChange}
-                                content={this.state.apiName}
-                                helpText="Display name to be shown in the API Store."
-                                placeholder={'Type api name here'} />
-                            <SingleInput
-                                inputType={'text'}
-                                title={'Api Context'}
-                                name={'apiContext'}
-                                controlFunc={this.handleApiContextChange}
-                                content={this.state.apiContext}
-                                helpText="URI context path of the API (case sensitive)."
-                                placeholder={'Type api context here'} />
-
-                            <SingleInput
-                                inputType={'text'}
-                                title={'Api Version'}
-                                name={'apiVersion'}
-                                controlFunc={this.handleApiVersionChange}
-                                content={this.state.apiVersion}
-                                helpText=""
-                                placeholder={'Type api version here'} />
+            }
+        });
+    };
 
 
 
-                            <div className="form-group">
-                                <div>
-                                    <button id="btn-close-step1" type="button" className="btn btn-default" onClick={() => this.props.history.push("/api/create")}>Cancel<div className="ripple-container"></div></button>
-                                    <button type="submit" className="btn btn-info btn-raised" >Continue</button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                <span className="ink animate"></span>
-                </div>
+    render(){
+        const { getFieldDecorator } = this.props.form;
 
 
+        return(
+            <Form onSubmit={this.handleSubmit} className="login-form">
+                <FormItem  label="Name"
+                           labelCol={{ span: 4 }}
+                           wrapperCol={{ span: 8 }}>
+                    {getFieldDecorator('apiName', {
+                        rules: [{ required: false, message: 'Please input Api Name' }],
+                    })(
+                        <Input name="apiName" prefix={<Icon type="user" style={{ fontSize: 13 }} />} placeholder="Api Name" />
+                    )}
+                </FormItem>
+                <FormItem  label="Version"
+                           labelCol={{ span: 4 }}
+                           wrapperCol={{ span: 8 }}>
+                    {getFieldDecorator('apiVersion', {
+                        rules: [{ required: false, message: 'Please input Api Version' }],
+                    })(
+                        <Input name="apiVersion" prefix={<Icon type="user" style={{ fontSize: 13 }} />} placeholder="Api Version" />
+                    )}
+                </FormItem>
+                <FormItem  label="Context"
+                           labelCol={{ span: 4 }}
+                           wrapperCol={{ span: 8 }}>
+                    {getFieldDecorator('apiContext', {
+                        rules: [{ required: false, message: 'Please input Api Context' }],
+                    })(
+                        <Input name="apiContext" prefix={<Icon type="user" style={{ fontSize: 13 }} />} placeholder="Api Context" />
+                    )}
+                </FormItem>
+                <FormItem >
 
-            </div>
+                    <Button type="primary" htmlType="submit">
+                        Create
+                    </Button>
+                    <Button type="default" htmlType="button" onClick={() => this.props.history.push("/api/create/home")}>
+                        Cancel
+                    </Button>
+                </FormItem>
+            </Form>
         );
     }
 }
+
+const EndpointFormGenerated = Form.create()(EndpointForm);
+
+class ApiCreateEndpoint extends React.Component {
+    constructor(props) {
+        super(props);
+
+    }
+    render = () => {return  <EndpointFormGenerated history={this.props.history} /> }
+}
+
 
 export default ApiCreateEndpoint;

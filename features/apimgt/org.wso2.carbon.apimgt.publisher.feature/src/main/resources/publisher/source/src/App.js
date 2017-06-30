@@ -25,6 +25,7 @@ import ApiCreate from './app/components/Apis/Create/ApiCreate'
 import AuthManager from './app/data/AuthManager'
 import qs from 'qs'
 
+import 'antd/dist/antd.css';
 import './App.css'
 
 /**

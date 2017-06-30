@@ -23,15 +23,55 @@ import ApiThumb from './ApiThumb'
 import '../Apis.css'
 import API from '../../../data/api.js'
 import Loading from '../../Base/Loading/Loading'
-import ListingHeader from "./ListingHeader";
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
-import {Link} from 'react-router-dom'
-import ApiProgress from './ApiProgress';
+import { Link } from 'react-router-dom'
+import { Table, Icon, Menu, Dropdown, Button, Row } from 'antd';
 
+const columns = [{
+    title: 'Name',
+    dataIndex: 'name',
+    key: 'name',
+    render: (text,record) => <Link to={"/apis/"+record.id}>{text}</Link>,
+}, {
+    title: 'Context',
+    dataIndex: 'context',
+    key: 'context',
+}, {
+    title: 'Version',
+    dataIndex: 'version',
+    key: 'version',
+}, {
+    title: 'Action',
+    key: 'action',
+    render: (text, record) => (
+        <span>
+      <a href="#">Action 一 {record.name}</a>
+      <span className="ant-divider" />
+      <a href="#">Delete</a>
+      <span className="ant-divider" />
+      <a href="#" className="ant-dropdown-link">
+        More actions <Icon type="down" />
+      </a>
+    </span>
+    ),
+}];
+
+const menu = (
+    <Menu>
+        <Menu.Item>
+            <Link to="/api/create/swagger">Create new API with Swagger</Link>
+        </Menu.Item>
+        <Menu.Item>
+            <Link to="/api/create/rest">Create new API</Link>
+        </Menu.Item>
+    </Menu>
+);
+const ButtonGroup = Button.Group;
 class Listing extends React.Component {
     constructor(props) {
         super(props);
         this.state = {listType: 'grid', apis: null};
+
     }
 
     componentDidMount() {
@@ -40,12 +80,15 @@ class Listing extends React.Component {
         promised_apis.then((response) => {
             this.setState({apis: response.obj})
         }).catch(error => {
-            if (process.env.NODE_ENV !== "production") {
+            if (process.env.NODE_ENV !== "production")
                 console.log(error);
-            }
             let status = error.status;
             if (status === 404) {
                 this.setState({notFound: true});
+            } else if (status === 401) {
+                this.setState({isAuthorize: false});
+                let params = qs.stringify({reference: this.props.location.pathname});
+                this.props.history.push({pathname: "/login", search: params});
             }
         });
     }
@@ -64,71 +107,31 @@ class Listing extends React.Component {
         }
         return (
             <div className="container-fluid">
-                <div className="ibox">
-                    <div className="ibox-title">
-                        <h5>All APIs visible to this account</h5>
-                        <h2 className="pull-left">All APIs</h2>
-                        <Link className="pull-right btn btn-primary" to="/api/create">Create new API</Link>
-                    </div>
-                    <div className="clearfix"/>
-                    <nav className="navbar navbar-default" role="navigation">
-                        {/* Collect the nav links, forms, and other content for toggling */}
-                        <div className="collapse navbar-collapse">
-                            <ul className="nav navbar-nav">
-                                <li>
-                                    <button type="button" className="btn">
-                                        <i className="fw fw-delete"/>
-                                    </button>
-                                </li>
-                                <li>
-                                    <button type="button" className="btn">
-                                        <i className="fw fw-refresh"/>
-                                    </button>
-                                </li>
-                            </ul>
-                            <div className="col-sm-6">
-                                <form className="navbar-form" role="search">
-                                    <div className="input-group">
-                                        <input type="text" placeholder="Search" className="input-sm form-control"/>
-                                        <div className="input-group-btn">
-                                            <button className="btn btn-default" type="submit"><i
-                                                className="glyphicon glyphicon-search"/></button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                            <ul className="nav navbar-nav navbar-right">
-                                <li>
-                                    <button type="button"
-                                            className={this.isActive('grid')}
-                                            onClick={() => this.setListType('grid')}><i className="fw fw-grid"/>
-                                    </button>
-                                </li>
-                                <li>
-                                    <button type="button"
-                                            className={this.isActive('list')}
-                                            onClick={() => this.setListType('list')}><i className="fw fw-list"/>
-                                    </button>
-                                </li>
-                            </ul>
-                        </div>
-                        {/* /.navbar-collapse */}
-                    </nav>
-
-                    <div className="ibox-content">
-                        <div className="apis-list">
-                            <table className="table table-hover">
-                                <tbody>
-                                {this.state.apis ?
-                                    this.state.apis.list.map((api, i) => {
-                                        return <ApiThumb key={api.id} listType={this.state.listType} api={api}/>
-                                    }) : <Loading/>
-                                }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                <div className="api-add-links">
+                    <Dropdown overlay={menu} placement="topCenter">
+                        <Button shape="circle" icon="plus" />
+                    </Dropdown>
                 </div>
+                <h2 className="api-heading">
+                    All APIs
+                    <span>All APIs visible to this account</span>
+                </h2>
+                <ButtonGroup className="api-type-selector">
+                    <Button type="primary" icon="bars" onClick={() => this.setListType('list')}  />
+                    <Button type="primary" icon="appstore" onClick={() => this.setListType('grid')} />
+                </ButtonGroup>
+                <div style={{clear:"both"}}></div>
+                    {
+                        this.state.apis ?
+                            this.state.listType === "list" ?
+                            <Table columns={columns} dataSource={this.state.apis.list} />
+                                :  <Row gutter={16}>
+                                {this.state.apis.list.map((api, i) => {
+                                    return <ApiThumb listType={this.state.listType} api={api}/>
+                                })}
+                                </Row>
+                            : <Loading/>
+                    }
             </div>
         );
     }
