@@ -25,6 +25,7 @@ import { Layout, Breadcrumb } from 'antd';
 const { Header, Content, Footer } = Layout;
 import { Form, Icon, Input, Button, Checkbox, message } from 'antd';
 import { Card } from 'antd';
+import { Row, Col } from 'antd';
 const FormItem = Form.Item;
 
 
@@ -36,6 +37,7 @@ class NormalLoginForm extends Component {
         this.state = {
             isLogin: false,
             referrer: "/",
+            userNameEmpty:true
         };
     }
 
@@ -67,10 +69,17 @@ class NormalLoginForm extends Component {
             }
         });
     }
+    emitEmpty = () => {
+        this.setState({
+            userNameEmpty: true
+        });
+    };
 
 
     render() {
         const { getFieldDecorator } = this.props.form;
+        const makeEmptySuffix = this.state.userNameEmpty ? <Icon type="close-circle" onClick={this.emitEmpty} /> : '';
+
         if (!this.state.isLogin) { // If not logged in, go to login page
             return (
                 <Form onSubmit={this.handleSubmit} className="login-form">
@@ -78,7 +87,7 @@ class NormalLoginForm extends Component {
                         {getFieldDecorator('userName', {
                             rules: [{ required: true, message: 'Please input your username!' }],
                         })(
-                            <Input prefix={<Icon type="user" style={{ fontSize: 13 }} />} placeholder="Username" />
+                            <Input prefix={<Icon type="user" style={{ fontSize: 13 }} />} placeholder="Username" suffix={makeEmptySuffix}/>
                         )}
                     </FormItem>
                     <FormItem>
@@ -89,19 +98,15 @@ class NormalLoginForm extends Component {
                         )}
                     </FormItem>
                     <FormItem>
-                        <Button type="primary" htmlType="submit" className="login-form-button">
-                            Log in
-                        </Button> Or <a href="">register now!</a>
-                        <br />
                         {getFieldDecorator('remember', {
                             valuePropName: 'checked',
                             initialValue: true,
                         })(
                             <Checkbox>Remember me</Checkbox>
                         )}
-                        <a className="login-form-forgot" href="">Forgot password</a>
-
-
+                        <Button type="primary" htmlType="submit" className="login-form-button">
+                            Log in
+                        </Button>
                     </FormItem>
                 </Form>
             );
@@ -124,36 +129,30 @@ class Login extends Component {
 
     }
     render() {
-        return (
-            <Layout className="layout" style={{height:"100vh"}}>
-                <Header>
-                    <div className="brand-wrapper"> <img
-                        className="brand"
-                        src="/publisher/public/images/logo.svg"
-                        alt="wso2-logo"/> <span>API Publisher</span>
-                    </div>
-
-                </Header>
-                <Content style={{ padding: '0 50px' }}>
-                    <Breadcrumb style={{ margin: '12px 0' }}>
-                        <Breadcrumb.Item>Home</Breadcrumb.Item>
-                        <Breadcrumb.Item>Login</Breadcrumb.Item>
-                    </Breadcrumb>
-                    <div>
-                        <Card title="Login to API Publisher" style={{ width: 300 }}>
-                            <WrappedNormalLoginForm />
-                        </Card>
-
-
-                    </div>
-                </Content>
-                <Footer style={{ textAlign: 'left' }}>
-                    WSO2 | © 2016
-                    <a href="http://wso2.com/" target="_blank"><i
-                        className="icon fw fw-wso2"/> Inc</a>.
-                </Footer>
-            </Layout>
-        )
+            return (
+                    <Layout className="layout" style={{height:"100vh"}}>
+                        <Content>
+                            <Row type="flex" justify="center" align="middle">
+                                <Col>
+                                    <div className="login-card-wrapper">
+                                    <Card>
+                                        <div className="login-card">
+                                            <img className="brand" src="/publisher/public/images/logo.svg" alt="wso2-logo"/>
+                                            <p>API Publisher</p>
+                                        </div>
+                                        <WrappedNormalLoginForm />
+                                    </Card >
+                                    </div>
+                                </Col>
+                            </Row>
+                        </Content>
+                        <Footer style={{ textAlign:"left" }}>
+                            WSO2 | © 2017
+                            <a href="http://wso2.com/" target="_blank"><i
+                                className="icon fw fw-wso2"/> Inc</a>.
+                        </Footer>
+                    </Layout>
+            )
 
     }
 }
