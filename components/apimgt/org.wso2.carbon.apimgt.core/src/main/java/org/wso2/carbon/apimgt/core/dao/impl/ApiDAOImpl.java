@@ -2207,8 +2207,8 @@ public class ApiDAOImpl implements ApiDAO {
         final String query = "SELECT operationMapping.OPERATION_ID AS OPERATION_ID,operationMapping.API_ID AS API_ID," +
                 "operationMapping.HTTP_METHOD AS HTTP_METHOD,operationMapping.URL_PATTERN AS URL_PATTERN," +
                 "operationMapping.AUTH_SCHEME AS AUTH_SCHEME,apiPolicy.NAME AS POLICY_NAME FROM " +
-                "AM_API_OPERATION_MAPPING AS operationMapping,AM_API_POLICY AS apiPolicy WHERE operationMapping" +
-                ".API_POLICY_ID =apiPolicy.UUID AND API_ID = ?";
+                "AM_API_OPERATION_MAPPING operationMapping,AM_API_POLICY apiPolicy WHERE operationMapping" +
+                ".API_POLICY_ID =apiPolicy.UUID AND operationMapping.API_ID = ?";
         Map<String, UriTemplate> uriTemplateSet = new HashMap();
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, apiId);
@@ -2263,7 +2263,7 @@ public class ApiDAOImpl implements ApiDAO {
 
     private Policy getApiPolicyByAPIId(Connection connection, String apiId) throws SQLException {
         final String query = "SELECT amapipolicy.NAME AS POLICY_NAME FROM AM_API_POLICY_MAPPING apimpolicymapping," +
-                "AM_API_POLICY AS amapipolicy WHERE apimpolicymapping.API_POLICY_ID=amapipolicy.UUID " +
+                "AM_API_POLICY amapipolicy WHERE apimpolicymapping.API_POLICY_ID=amapipolicy.UUID " +
                 "AND apimpolicymapping.API_ID = ?";
         Policy apiPolicy = null;
         try (PreparedStatement statement = connection.prepareStatement(query)) {
