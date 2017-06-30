@@ -48,17 +48,11 @@ public class ApplicationKeyGenerateRequestDTO   {
   @JsonProperty("keyType")
   private KeyTypeEnum keyType = null;
 
-  @JsonProperty("validityTime")
-  private String validityTime = null;
-
-  @JsonProperty("callbackUrl")
-  private String callbackUrl = null;
-
   @JsonProperty("grantTypesToBeSupported")
   private List<String> grantTypesToBeSupported = new ArrayList<String>();
 
-  @JsonProperty("scopes")
-  private List<String> scopes = new ArrayList<String>();
+  @JsonProperty("callbackUrl")
+  private String callbackUrl = null;
 
   public ApplicationKeyGenerateRequestDTO keyType(KeyTypeEnum keyType) {
     this.keyType = keyType;
@@ -76,42 +70,6 @@ public class ApplicationKeyGenerateRequestDTO   {
 
   public void setKeyType(KeyTypeEnum keyType) {
     this.keyType = keyType;
-  }
-
-  public ApplicationKeyGenerateRequestDTO validityTime(String validityTime) {
-    this.validityTime = validityTime;
-    return this;
-  }
-
-   /**
-   * Get validityTime
-   * @return validityTime
-  **/
-  @ApiModelProperty(required = true, value = "")
-  public String getValidityTime() {
-    return validityTime;
-  }
-
-  public void setValidityTime(String validityTime) {
-    this.validityTime = validityTime;
-  }
-
-  public ApplicationKeyGenerateRequestDTO callbackUrl(String callbackUrl) {
-    this.callbackUrl = callbackUrl;
-    return this;
-  }
-
-   /**
-   * Callback URL
-   * @return callbackUrl
-  **/
-  @ApiModelProperty(value = "Callback URL")
-  public String getCallbackUrl() {
-    return callbackUrl;
-  }
-
-  public void setCallbackUrl(String callbackUrl) {
-    this.callbackUrl = callbackUrl;
   }
 
   public ApplicationKeyGenerateRequestDTO grantTypesToBeSupported(List<String> grantTypesToBeSupported) {
@@ -137,27 +95,22 @@ public class ApplicationKeyGenerateRequestDTO   {
     this.grantTypesToBeSupported = grantTypesToBeSupported;
   }
 
-  public ApplicationKeyGenerateRequestDTO scopes(List<String> scopes) {
-    this.scopes = scopes;
-    return this;
-  }
-
-  public ApplicationKeyGenerateRequestDTO addScopesItem(String scopesItem) {
-    this.scopes.add(scopesItem);
+  public ApplicationKeyGenerateRequestDTO callbackUrl(String callbackUrl) {
+    this.callbackUrl = callbackUrl;
     return this;
   }
 
    /**
-   * Allowed scopes for the access token
-   * @return scopes
+   * Callback URL
+   * @return callbackUrl
   **/
-  @ApiModelProperty(value = "Allowed scopes for the access token")
-  public List<String> getScopes() {
-    return scopes;
+  @ApiModelProperty(value = "Callback URL")
+  public String getCallbackUrl() {
+    return callbackUrl;
   }
 
-  public void setScopes(List<String> scopes) {
-    this.scopes = scopes;
+  public void setCallbackUrl(String callbackUrl) {
+    this.callbackUrl = callbackUrl;
   }
 
 
@@ -171,15 +124,13 @@ public class ApplicationKeyGenerateRequestDTO   {
     }
     ApplicationKeyGenerateRequestDTO applicationKeyGenerateRequest = (ApplicationKeyGenerateRequestDTO) o;
     return Objects.equals(this.keyType, applicationKeyGenerateRequest.keyType) &&
-        Objects.equals(this.validityTime, applicationKeyGenerateRequest.validityTime) &&
-        Objects.equals(this.callbackUrl, applicationKeyGenerateRequest.callbackUrl) &&
         Objects.equals(this.grantTypesToBeSupported, applicationKeyGenerateRequest.grantTypesToBeSupported) &&
-        Objects.equals(this.scopes, applicationKeyGenerateRequest.scopes);
+        Objects.equals(this.callbackUrl, applicationKeyGenerateRequest.callbackUrl);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyType, validityTime, callbackUrl, grantTypesToBeSupported, scopes);
+    return Objects.hash(keyType, grantTypesToBeSupported, callbackUrl);
   }
 
   @Override
@@ -188,10 +139,8 @@ public class ApplicationKeyGenerateRequestDTO   {
     sb.append("class ApplicationKeyGenerateRequestDTO {\n");
     
     sb.append("    keyType: ").append(toIndentedString(keyType)).append("\n");
-    sb.append("    validityTime: ").append(toIndentedString(validityTime)).append("\n");
-    sb.append("    callbackUrl: ").append(toIndentedString(callbackUrl)).append("\n");
     sb.append("    grantTypesToBeSupported: ").append(toIndentedString(grantTypesToBeSupported)).append("\n");
-    sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
+    sb.append("    callbackUrl: ").append(toIndentedString(callbackUrl)).append("\n");
     sb.append("}");
     return sb.toString();
   }

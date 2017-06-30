@@ -123,8 +123,6 @@ public class SampleTestObjectCreator {
     private static final String ALLOWED_HEADER_AUTHORIZATION = "Authorization";
     private static final String ALLOWED_HEADER_CUSTOM = "X-Custom";
     private static final String API_CREATOR = "Adam Doe";
-    private static final String GROUP_1 = "groupx";
-    private static final String GROUP_2 = "groupx2";
     private static final String SAMPLE_DOC_NAME = "CalculatorDoc";
     private static final String TEST_APP_1 = "TestApp";
     private static final String TEST_APP_2 = "TestApp2";
@@ -498,7 +496,6 @@ public class SampleTestObjectCreator {
         Application application = new Application(TEST_APP_1, ADMIN);
         application.setId(UUID.randomUUID().toString());
         application.setDescription("This is a test application");
-        application.setGroupId(GROUP_1);
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
         application.setPolicy(fiftyPerMinApplicationPolicy);
         application.setCreatedTime(LocalDateTime.now());
@@ -512,7 +509,6 @@ public class SampleTestObjectCreator {
         Application application = new Application(TEST_APP_2, ADMIN);
         application.setId(UUID.randomUUID().toString());
         application.setDescription("This is test application 2");
-        application.setGroupId(GROUP_2);
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_APPROVED);
         application.setPolicy(twentyPerMinApplicationPolicy);
         application.setUpdatedUser("admin2");
@@ -524,7 +520,6 @@ public class SampleTestObjectCreator {
         Application application = new Application(applicationName, owner);
         application.setId(UUID.randomUUID().toString());
         application.setDescription("This is a test application");
-        application.setGroupId(GROUP_1);
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
         application.setPolicy(fiftyPerMinApplicationPolicy);
         application.setCreatedTime(LocalDateTime.now());
@@ -540,7 +535,6 @@ public class SampleTestObjectCreator {
         Application application = new Application(TEST_APP_1, ADMIN);
         application.setId(UUID.randomUUID().toString());
         application.setDescription("This is a test application");
-        application.setGroupId(GROUP_1);
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
         application.setPolicy(fiftyPerMinApplicationPolicy);
         application.setPermissionMap(permissionMap);

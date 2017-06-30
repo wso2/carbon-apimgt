@@ -1,29 +1,27 @@
 package org.wso2.carbon.apimgt.rest.api.store;
 
-import org.wso2.carbon.apimgt.rest.api.store.*;
-import org.wso2.carbon.apimgt.rest.api.store.dto.*;
-
-import org.wso2.msf4j.formparam.FormDataParam;
-import org.wso2.msf4j.formparam.FileInfo;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyProvisionRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationTokenGenerateRequestDTO;
 import org.wso2.msf4j.Request;
 
-import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
-
-import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
-
-import java.io.InputStream;
-
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 public abstract class ApplicationsApiService {
     public abstract Response applicationsApplicationIdDelete(String applicationId
+ ,String ifMatch
+ ,String ifUnmodifiedSince
+ , Request request) throws NotFoundException;
+    public abstract Response applicationsApplicationIdGenerateKeysPost(String applicationId
+ ,ApplicationKeyGenerateRequestDTO body
+ ,String contentType
+ ,String ifMatch
+ ,String ifUnmodifiedSince
+ , Request request) throws NotFoundException;
+    public abstract Response applicationsApplicationIdGenerateTokenPost(String applicationId
+ ,ApplicationTokenGenerateRequestDTO body
+ ,String contentType
  ,String ifMatch
  ,String ifUnmodifiedSince
  , Request request) throws NotFoundException;
@@ -32,14 +30,14 @@ public abstract class ApplicationsApiService {
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
-    public abstract Response applicationsApplicationIdPut(String applicationId
- ,ApplicationDTO body
+    public abstract Response applicationsApplicationIdProvideKeysPost(String applicationId
+ ,ApplicationKeyProvisionRequestDTO body
  ,String contentType
  ,String ifMatch
  ,String ifUnmodifiedSince
  , Request request) throws NotFoundException;
-    public abstract Response applicationsGenerateKeysPost(String applicationId
- ,ApplicationKeyGenerateRequestDTO body
+    public abstract Response applicationsApplicationIdPut(String applicationId
+ ,ApplicationDTO body
  ,String contentType
  ,String ifMatch
  ,String ifUnmodifiedSince

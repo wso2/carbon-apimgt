@@ -34,7 +34,6 @@ import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.Scope;
-import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 
@@ -134,11 +133,8 @@ public class LoginTokenService {
             List<String> grantTypes = new ArrayList<>();
             grantTypes.add(KeyManagerConstants.PASSWORD_GRANT_TYPE);
             grantTypes.add(KeyManagerConstants.REFRESH_GRANT_TYPE);
-            OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(appName,
-                    "http://temporary.callback/url", grantTypes);
-
-            oauthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.VALIDITY_PERIOD, 3600);
-            oauthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.APP_KEY_TYPE, "application");
+            OAuthAppRequest oauthAppRequest = new OAuthAppRequest(appName, "http://temporary.callback/url",
+                    "Application", grantTypes);
             OAuthApplicationInfo oAuthApplicationInfo;
             oAuthApplicationInfo = APIManagerFactory.getInstance().getKeyManager().createApplication(oauthAppRequest);
 

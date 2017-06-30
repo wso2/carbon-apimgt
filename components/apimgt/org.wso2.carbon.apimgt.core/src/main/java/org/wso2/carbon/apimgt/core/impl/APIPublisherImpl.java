@@ -142,7 +142,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (APIMgtDAOException e) {
             String errorMsg = "Unable to fetch subscriptions APIs of provider " + providerName;
             log.error(errorMsg, e);
-            throw new APIMgtDAOException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         }
     }
 
@@ -317,7 +317,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while creating the API - " + apiBuilder.getName();
             log.error(errorMsg);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         } catch (LifecycleException | ParseException e) {
             String errorMsg = "Error occurred while Associating the API - " + apiBuilder.getName();
             log.error(errorMsg);
@@ -537,7 +537,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while updating the API - " + apiBuilder.getName();
             log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         } catch (ParseException e) {
             String errorMsg = "Error occurred while parsing the permission json from swagger - " + apiBuilder.getName();
             log.error(errorMsg, e);
@@ -696,7 +696,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (APIMgtDAOException e) {
             String errorMsg = "Couldn't change the status of api ID " + apiId;
             log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         } catch (LifecycleException e) {
             String errorMsg = "Couldn't change the status of api ID " + apiId;
             log.error(errorMsg, e);
@@ -791,7 +791,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (APIMgtDAOException e) {
             String errorMsg = "Couldn't create new API version from " + apiId;
             log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         } catch (LifecycleException e) {
             String errorMsg = "Couldn't Associate  new API Lifecycle from " + apiId;
             log.error(errorMsg, e);
@@ -842,7 +842,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (APIMgtDAOException e) {
             String errorMsg = "Unable to add documentation";
             log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         } catch (ParseException e) {
             String errorMsg = "Unable to add documentation due to json parse error";
             log.error(errorMsg, e);
@@ -866,7 +866,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (APIMgtDAOException e) {
             String errorMsg = "Unable to add documentation with file";
             log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         }
     }
 
@@ -883,7 +883,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (APIMgtDAOException e) {
             String errorMsg = "Unable to add documentation with file";
             log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         }
     }
 
@@ -962,7 +962,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (APIMgtDAOException e) {
             String errorMsg = "Unable to update the documentation";
             log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         } catch (ParseException e) {
             String errorMsg = "Unable to update the documentation due to json parse error";
             log.error(errorMsg, e);
@@ -1006,7 +1006,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (APIMgtDAOException e) {
             String errorMsg = "Couldn't find APISummary Resource for ID " + apiId;
             log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         } catch (LifecycleException e) {
             String errorMsg = "Couldn't find APILifecycle History for ID " + apiId;
             log.error(errorMsg, e);
@@ -1064,7 +1064,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while deleting the API with id " + identifier;
             log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         } catch (LifecycleException e) {
             String errorMsg = "Error occurred while Disassociating the API with Lifecycle id " + identifier;
             log.error(errorMsg, e);
@@ -1099,7 +1099,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while Searching the API with query " + query;
             log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         }
         return apiResults;
     }
@@ -1166,7 +1166,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (APIMgtDAOException e) {
             String errorMsg = "Couldn't retrieve API Summary for " + apiId;
             log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         } catch (LifecycleException e) {
             String errorMsg = "Couldn't retrieve API Lifecycle for " + apiId;
             log.error(errorMsg, e);
@@ -1212,7 +1212,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (APIMgtDAOException e) {
             String msg = "Failed to get all Endpoints";
             log.error(msg, e);
-            throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(msg, e, e.getErrorHandler());
         }
 
     }
@@ -1231,7 +1231,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (APIMgtDAOException e) {
             String msg = "Failed to get Endpoint : " + endpointId;
             log.error(msg, e);
-            throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(msg, e, e.getErrorHandler());
         }
     }
 
@@ -1242,7 +1242,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (APIMgtDAOException e) {
             String msg = "Failed to get Endpoint : " + endpointName;
             log.error(msg, e);
-            throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(msg, e, e.getErrorHandler());
         }
     }
 
@@ -1282,7 +1282,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (APIMgtDAOException e) {
             String msg = "Failed to add Endpoint : " + endpoint.getName();
             log.error(msg, e);
-            throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(msg, e, e.getErrorHandler());
         }
         //update endpoint config in gateway
         return endpoint1.getId();
@@ -1305,7 +1305,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (APIMgtDAOException e) {
             String msg = "Failed to update Endpoint : " + endpoint.getName();
             log.error(msg, e);
-            throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(msg, e, e.getErrorHandler());
         }
         //update endpoint config in gateway
     }
@@ -1328,7 +1328,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             } catch (APIMgtDAOException e) {
                 String msg = "Failed to delete Endpoint : " + endpointId;
                 log.error(msg, e);
-                throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+                throw new APIManagementException(msg, e, e.getErrorHandler());
             }
             gateway.deleteEndpoint(endpoint);
 
@@ -1422,7 +1422,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (APIMgtDAOException e) {
             String errorMsg = "Couldn't update the Swagger Definition";
             log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         }
     }
 
@@ -1442,7 +1442,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (APIMgtDAOException e) {
             log.error("Couldn't update configuration for apiId " + apiId, e);
             throw new APIManagementException("Couldn't update configuration for apiId " + apiId,
-                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
+                    e.getErrorHandler());
         } catch (APITemplateException e) {
             log.error("Error generating swagger from gateway config " + apiId, e);
             throw new APIManagementException("Error generating swagger from gateway config " + apiId,
@@ -1461,7 +1461,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (APIMgtDAOException e) {
             log.error("Couldn't retrieve swagger definition for apiId " + apiId, e);
             throw new APIManagementException("Couldn't retrieve gateway configuration for apiId " + apiId,
-                    ExceptionCodes.APIMGT_DAO_EXCEPTION);
+                    e.getErrorHandler());
         }
     }
 
@@ -1480,7 +1480,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error while retrieving Policies for level: " + tierLevel;
             log.error(errorMsg);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIM_DAO_EXCEPTION);
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         }
     }
 
@@ -1492,7 +1492,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error while retrieving Policy for level: " + tierLevel + ", name: " + tierName;
             log.error(errorMsg);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIM_DAO_EXCEPTION);
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         }
     }
 
@@ -1534,7 +1534,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             String errorMsg =
                     "Error occurred while retrieving the last update time of the endpoint with id " + endpointId;
             log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         }
 
         return lastUpdatedTime;
@@ -1612,7 +1612,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 } catch (APIMgtDAOException e) {
                     String msg = "Error occurred while changing api lifecycle workflow status";
                     log.error(msg, e);
-                    throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+                    throw new APIManagementException(msg, e.getErrorHandler());
                 }
             } else {
                 String msg = "API does not have a pending lifecycle state change.";
@@ -1652,7 +1652,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             return getApiDAO().isEndpointExist(name);
         } catch (APIMgtDAOException e) {
             String msg = "Couldn't find existence of endpoint :" + name;
-            throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(msg, e.getErrorHandler());
         }
     }
 }

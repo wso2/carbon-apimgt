@@ -144,11 +144,10 @@ public interface APIManager {
      *
      * @param uuid uuid of the Application
      * @param userId  Name of the User.
-     * @param groupId Id of the group.
      * @return it will return Application corresponds to the uuid provided.
      * @throws APIManagementException   If failed to get application.
      */
-    Application getApplication(String uuid, String userId, String groupId) throws APIManagementException;
+    Application getApplication(String uuid, String userId) throws APIManagementException;
 
     /**
      * Retrieves the last updated time of the subscription
