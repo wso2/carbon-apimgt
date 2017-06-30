@@ -1,18 +1,49 @@
-.sidebar-nav {
-    z-index: 0;
-    padding-top: 124px;
-    left:0;
+#components-layout-demo-side .logo {
+    height: 32px;
+    background: #fff;
+    border-radius: 6px;
+    margin: 16px;
 }
-header.header{
-  z-index: 2;
+
+#components-layout-demo-side .ant-layout-sider-collapsed .anticon {
+    font-size: 16px;
+    margin-left: 8px;
 }
-.breadcrumb-wrapper{
-  z-index: 2;
-  position: relative;
+
+#components-layout-demo-side .ant-layout-sider-collapsed .nav-text {
+    display: none;
 }
-.content-section{
-  margin-left: 350px;
+
+#components-layout-demo-side .ant-layout-sider-collapsed .ant-menu-submenu-vertical > .ant-menu-submenu-title:after {
+    display: none;
 }
-div.toastify{
-    z-index: 1001;
+.brand{
+    width:70px;
+    padding-right:10px;
+}
+.brand-wrapper{
+    padding-top:10px;
+    font-size: 18px;
+    color:#fff;
+    text-indent:10px;
+}
+.brand-wrapper span{
+    display: inline-block;
+    margin-top: -8px;
+    position: absolute;
+}
+#components-form-demo-normal-login .login-form {
+    max-width: 300px;
+}
+#components-form-demo-normal-login .login-form-forgot {
+    float: right;
+}
+#components-form-demo-normal-login .login-form-button {
+    width: 100%;
+}
+div.ant-layout-sider{
+    background: #fff;
+}
+span.ant-layout-sider-zero-width-trigger{
+    top:0;
 }
