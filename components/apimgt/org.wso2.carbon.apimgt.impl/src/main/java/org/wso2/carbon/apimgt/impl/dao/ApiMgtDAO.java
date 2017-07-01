@@ -8960,7 +8960,7 @@ public class ApiMgtDAO {
         ResultSet resultSet = null;
         PreparedStatement policyStatement = null;
         String addQuery = SQLConstants.ThrottleSQLConstants.INSERT_API_POLICY_SQL;
-        int policyId = policy.getPolicyId();
+        int policyId;
 
         try {
             String dbProductName = conn.getMetaData().getDatabaseProductName();
@@ -8978,11 +8978,11 @@ public class ApiMgtDAO {
                    Therefore policyId should be policy parameter's policyId when it is provided.
                  */
                     policyId = resultSet.getInt(1);
-            }
-            List<Pipeline> pipelines = policy.getPipelines();
-            if (pipelines != null) {
-                for (Pipeline pipeline : pipelines) { // add each pipeline data to AM_CONDITION_GROUP table
-                    addPipeline(pipeline, policyId, conn);
+                List<Pipeline> pipelines = policy.getPipelines();
+                if (pipelines != null) {
+                    for (Pipeline pipeline : pipelines) { // add each pipeline data to AM_CONDITION_GROUP table
+                        addPipeline(pipeline, policyId, conn);
+                    }
                 }
             }
         } finally {
@@ -9014,19 +9014,20 @@ public class ApiMgtDAO {
             setCommonParametersForPolicy(policyStatement, policy);
             policyStatement.setString(12, policy.getUserLevel());
                 // Assume policy is deployed if update request is recieved
-                policyStatement.setBoolean(10, true);
-                policyStatement.setInt(13, policyId);
+            policyStatement.setBoolean(10, true);
+            policyStatement.setInt(13, policyId);
             policyStatement.executeUpdate();
             resultSet = policyStatement.getGeneratedKeys(); // Get the inserted POLICY_ID (auto incremented value)
 
             if (driverName.contains("MS SQL")||driverName.contains("Microsoft")) {
                 st.executeUpdate("SET IDENTITY_INSERT AM_API_THROTTLE_POLICY OFF");
             }
-
-            List<Pipeline> pipelines = policy.getPipelines();
-            if (pipelines != null) {
-                for (Pipeline pipeline : pipelines) { // add each pipeline data to AM_CONDITION_GROUP table
-                    addPipeline(pipeline, policyId, conn);
+            if (resultSet.next()) {
+                List<Pipeline> pipelines = policy.getPipelines();
+                if (pipelines != null) {
+                    for (Pipeline pipeline : pipelines) { // add each pipeline data to AM_CONDITION_GROUP table
+                        addPipeline(pipeline, policyId, conn);
+                    }
                 }
             }
         } finally {
