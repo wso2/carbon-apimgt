@@ -21,6 +21,7 @@
 package org.wso2.carbon.apimgt.core.models;
 
 
+import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,9 +34,8 @@ import java.util.Objects;
 public final class Application {
     private String name;
     private String uuid;
-    private String policyId;
     private String description;
-    private String tier;
+    private Policy policy;
     private String status;
     private String createdUser;
     private LocalDateTime createdTime;
@@ -105,12 +105,12 @@ public final class Application {
         this.description = description;
     }
 
-    public String getTier() {
-        return tier;
+    public Policy getPolicy() {
+        return policy;
     }
 
-    public void setTier(String tier) {
-        this.tier = tier;
+    public void setPolicy(Policy policy) {
+        this.policy = policy;
     }
 
     public String getStatus() {
@@ -119,14 +119,6 @@ public final class Application {
 
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public String getPolicyId() {
-        return policyId;
-    }
-
-    public void setPolicyId(String policyId) {
-        this.policyId = policyId;
     }
 
     public void setName(String name) {
@@ -172,9 +164,7 @@ public final class Application {
         Application that = (Application) o;
         return Objects.equals(name, that.name) &&
                 Objects.equals(uuid, that.uuid) &&
-                Objects.equals(policyId, that.policyId) &&
                 Objects.equals(description, that.description) &&
-                Objects.equals(tier, that.tier) &&
                 Objects.equals(status, that.status) &&
                 Objects.equals(permissionString, that.permissionString) &&
                 Objects.equals(createdUser, that.createdUser);
@@ -182,7 +172,7 @@ public final class Application {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, uuid, policyId, description, tier, status, createdUser);
+        return Objects.hash(name, uuid, description,  status, createdUser);
     }
 
     public String getPermissionString() {
@@ -203,8 +193,8 @@ public final class Application {
 
     @Override
     public String toString() {
-        return "Application [name=" + name + ", uuid=" + uuid + ", policyId=" + policyId
-                + ", description=" + description + ", tier=" + tier + ", status=" + status + ", createdUser="
+        return "Application [name=" + name + ", uuid=" + uuid + ", policyId=" +
+                ", description=" + description + ", status=" + status + ", createdUser="
                 + createdUser + ", createdTime=" + createdTime + ", updatedUser="
                 + updatedUser + ", updatedTime=" + updatedTime + ", numberOfKeys=" + applicationKeys.size()
                 + ", permissionString=" + permissionString + ", permissionMap=" + permissionMap + "]";

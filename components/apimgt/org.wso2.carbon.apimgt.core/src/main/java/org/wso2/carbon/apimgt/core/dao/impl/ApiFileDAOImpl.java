@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.FileApi;
 import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIFileUtils;
@@ -65,9 +66,10 @@ public class ApiFileDAOImpl implements ApiDAO {
     @Override
     public void addAPI(API api) throws APIMgtDAOException {
         //Save API definition
-        String apiExportDirectory = APIFileUtils.getAPIBaseDirectory(storagePath, api);
+        FileApi fileApi = new FileApi(api);
+        String apiExportDirectory = APIFileUtils.getAPIBaseDirectory(storagePath, fileApi);
         APIFileUtils.createDirectory(apiExportDirectory);
-        APIFileUtils.exportApiDefinitionToFileSystem(api, apiExportDirectory);
+        APIFileUtils.exportApiDefinitionToFileSystem(fileApi, apiExportDirectory);
 
         //Export gateway config to file system
         APIFileUtils.exportGatewayConfigToFileSystem(api.getGatewayConfig(), api, apiExportDirectory);
@@ -124,7 +126,7 @@ public class ApiFileDAOImpl implements ApiDAO {
             log.error(errorMsg);
             throw new APIMgtDAOException(errorMsg, ExceptionCodes.API_NOT_FOUND);
         }
-        APIFileUtils.deleteDirectory(APIFileUtils.getAPIBaseDirectory(storagePath, api));
+        APIFileUtils.deleteDirectory(APIFileUtils.getAPIBaseDirectory(storagePath, new FileApi(api)));
     }
 
     /**
@@ -168,7 +170,8 @@ public class ApiFileDAOImpl implements ApiDAO {
             log.error(errorMsg);
             throw new APIMgtDAOException(errorMsg, ExceptionCodes.API_NOT_FOUND);
         }
-        String thumbnailPath = APIFileUtils.getAPIBaseDirectory(storagePath, api) + File.separator + APIMgtConstants
+        String thumbnailPath = APIFileUtils.getAPIBaseDirectory(storagePath, new FileApi(api)) + File.separator +
+                APIMgtConstants
                 .APIFileUtilConstants.THUMBNAIL_FILE_NAME;
         return APIFileUtils.getThumbnailImage(thumbnailPath);
     }
@@ -181,7 +184,8 @@ public class ApiFileDAOImpl implements ApiDAO {
             throws APIMgtDAOException {
         API api = getAPI(apiID);
         if (api != null) {
-            APIFileUtils.exportThumbnailToFileSystem(image, APIFileUtils.getAPIBaseDirectory(storagePath, api));
+            APIFileUtils.exportThumbnailToFileSystem(image, APIFileUtils.getAPIBaseDirectory(storagePath, new FileApi
+                    (api)));
         }
     }
 
@@ -248,7 +252,7 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public void addDocumentFileContent(String resourceID, InputStream content, String dataType,
-            String updatedBy) throws APIMgtDAOException {
+                                       String updatedBy) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
@@ -458,18 +462,18 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
-     *
      * @see ApiDAO#getAPIsByStatus(List, String)
      */
-    @Override public List<API> getAPIsByStatus(List<String> gatewayLabels, String status) throws APIMgtDAOException {
+    @Override
+    public List<API> getAPIsByStatus(List<String> gatewayLabels, String status) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     *
      * @see ApiDAO#getAPIsByGatewayLabel(List)
      */
-    @Override public List<API> getAPIsByGatewayLabel(List<String> gatewayLabels) throws APIMgtDAOException {
+    @Override
+    public List<API> getAPIsByGatewayLabel(List<String> gatewayLabels) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
@@ -569,7 +573,7 @@ public class ApiFileDAOImpl implements ApiDAO {
                         !dir.isHidden());
         if (files != null) {
             for (File file : files) {
-                apiList.add((API) fetchObject(file, API.class, filenameFilter));
+                apiList.add((API) fetchObject(file, FileApi.class, filenameFilter));
             }
         }
         apiList.removeIf(Objects::isNull);
@@ -618,7 +622,7 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public List<API> attributeSearchAPIs(Set<String> roles, String user, Map<String, String> attributeMap, int offset,
-            int limit) throws APIMgtDAOException {
+                                         int limit) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
@@ -627,7 +631,7 @@ public class ApiFileDAOImpl implements ApiDAO {
      */
     @Override
     public List<API> searchAPIsByAttributeInStore(List<String> roles, Map<String, String> attributeMap, int offset,
-            int limit) throws APIMgtDAOException {
+                                                  int limit) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
@@ -656,7 +660,7 @@ public class ApiFileDAOImpl implements ApiDAO {
                 .APIFileUtilConstants.JSON_EXTENSION;
         String apiFilePath = APIFileUtils.findInFileSystem(new File(storagePath), apiFileName);
         if (apiFilePath != null) {
-            return (API) constructObjectSummaryFromFile(apiFilePath, API.class);
+            return new API.APIBuilder((FileApi) constructObjectSummaryFromFile(apiFilePath, FileApi.class)).build();
         }
         return null;
     }
@@ -670,7 +674,7 @@ public class ApiFileDAOImpl implements ApiDAO {
                 .APIFileUtilConstants.JSON_EXTENSION;
         String apiFilePath = APIFileUtils.findInFileSystem(new File(storagePath), apiFileName);
         if (apiFilePath != null) {
-            return (API) constructObjectSummaryFromFile(apiFilePath, API.class);
+            return new API.APIBuilder((FileApi) constructObjectSummaryFromFile(apiFilePath, FileApi.class)).build();
         }
         return null;
     }

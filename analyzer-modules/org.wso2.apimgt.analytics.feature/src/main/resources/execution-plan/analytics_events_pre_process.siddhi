@@ -1,6 +1,6 @@
-@Plan:name('analytics_events_pre_process')
+@App:name('analytics_events_pre_process')
 
-@source(type='inMemory', topic='symbol', @map(type='passThrough'))
+@source(type='wso2event', @map(type='wso2event'))
 Define stream ResponseStream (
 api STRING,
 context STRING,
@@ -32,15 +32,15 @@ response_size  INT,
 protocol  STRING,
 response_code  INT,
 destination  STRING,
-response_time  LONG,
-service_time  LONG,
-backend_time  LONG,
-backend_latency  LONG,
-security_latency  LONG,
-throttling_latency  LONG,
-request_mediation_latency  LONG,
-respons_mediation_latency  LONG,
-other_latency  LONG
+response_time  INT,
+service_time  INT,
+backend_time  INT,
+backend_latency  INT,
+security_latency  INT,
+throttling_latency  INT,
+request_mediation_latency  INT,
+respons_mediation_latency  INT,
+other_latency  INT
 );
 
 @sink(type='inMemory', topic='apim.analytics.request', @map(type='passThrough'))

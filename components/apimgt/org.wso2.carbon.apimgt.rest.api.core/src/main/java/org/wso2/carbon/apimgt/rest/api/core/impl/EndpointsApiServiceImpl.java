@@ -24,12 +24,14 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.core.EndpointsApiService;
 import org.wso2.carbon.apimgt.rest.api.core.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.core.dto.EndpointListDTO;
+import org.wso2.carbon.apimgt.rest.api.core.utils.MappingUtil;
 import org.wso2.msf4j.Request;
 
 import java.util.HashMap;
@@ -80,8 +82,9 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
         EndpointListDTO endpointListDTO = new EndpointListDTO();
         try {
             APIMgtAdminService adminService = RestApiUtil.getAPIMgtAdminService();
-            List<String> endpointList = adminService.getAllEndpoints();
-            endpointListDTO.setList(endpointList);
+            List<Endpoint> endpointList = adminService.getAllEndpoints();
+            endpointListDTO.setList(MappingUtil.toEndpointListDto(endpointList));
+            endpointListDTO.setCount(endpointList.size());
             return Response.ok().entity(endpointListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving APIs";

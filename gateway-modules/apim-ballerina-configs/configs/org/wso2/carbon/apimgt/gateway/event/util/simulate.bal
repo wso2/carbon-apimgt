@@ -34,7 +34,7 @@ function simulate (message m) {
     //messages:setProperty(m, "response_size", 123);
     //messages:setProperty(m, "protocol", "http");
     //messages:setProperty(m, "response_code", 200);
-    //messages:setProperty(m, "destination", "wso2gw");
+    messages:setProperty(m, "destination", "destination");
     //messages:setProperty(m, "response_time", "123456");
     //messages:setProperty(m, "service_time", "123456");
     //messages:setProperty(m, "backend_time", "123456");

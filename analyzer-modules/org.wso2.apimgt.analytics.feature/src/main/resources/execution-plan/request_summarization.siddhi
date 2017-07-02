@@ -1,4 +1,4 @@
-@Plan:name('request summarization')
+@App:name('request_summarization')
 
 @Store(type="rdbms", jdbc.url="jdbc:h2:./database/AM_STAT_DB;DB_CLOSE_ON_EXIT=FALSE;LOCK_TIMEOUT=60000;AUTO_SERVER=TRUE",
 username="wso2carbon",

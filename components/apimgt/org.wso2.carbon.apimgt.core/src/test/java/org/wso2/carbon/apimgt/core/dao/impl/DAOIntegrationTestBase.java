@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
+import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
+import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 
 import java.io.File;
 import java.io.IOException;
@@ -123,6 +125,8 @@ public class DAOIntegrationTestBase {
         try (Connection connection = DAOUtil.getConnection()) {
             DBScriptRunnerUtil.executeSQLScript(sqlFilePath, connection);
         }
+        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        SampleTestObjectCreator.createDefaultPolicy(policyDAO);
     }
 
     @AfterClass

@@ -30,6 +30,10 @@ public class CustomPolicy extends Policy {
         super(name);
     }
 
+    public CustomPolicy(String uuid, String policyName) {
+        super(uuid, policyName);
+    }
+
     public String getSiddhiQuery() {
         return siddhiQuery;
     }

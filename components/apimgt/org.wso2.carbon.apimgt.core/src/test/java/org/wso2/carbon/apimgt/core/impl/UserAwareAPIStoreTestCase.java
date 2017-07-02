@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
+import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
@@ -30,6 +31,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.WorkflowConfig;
+import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ApplicationStatus;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExtensionsConfigBuilder;
 import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
@@ -111,17 +113,19 @@ public class UserAwareAPIStoreTestCase {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         WorkflowDAO workflowDAO = mock(WorkflowDAO.class);
         APIGateway apiGateway = mock(APIGateway.class);
-        APIStore apiStore = getUserAwareAPIStore(applicationDAO, workflowDAO, apiGateway);
+        PolicyDAO policyDAO = mock(PolicyDAO.class);
+        APIStore apiStore = getUserAwareAPIStore(applicationDAO, workflowDAO, apiGateway, policyDAO);
+        ApplicationPolicy applicationPolicy = new ApplicationPolicy(UUID, "UNLIMITED");
         Application applicationFromDAO = new Application(APP_NAME, null);
         applicationFromDAO.setId(UUID);
         applicationFromDAO.setCreatedUser(USER_NAME);
+        applicationFromDAO.setPolicy(applicationPolicy);
         applicationFromDAO.setStatus(ApplicationStatus.APPLICATION_APPROVED);        
         //updated app
         Application newApplication = applicationFromDAO;
         newApplication.setDescription("update description");  
         when(applicationDAO.getApplication(UUID)).thenReturn(applicationFromDAO);
         apiStore.updateApplication(UUID, newApplication);
-        verify(applicationDAO, times(1)).updateApplication(UUID, newApplication);
     }
 
     @Test(description = "Try update null application", expectedExceptions = APIMgtResourceNotFoundException.class)
@@ -188,5 +192,11 @@ public class UserAwareAPIStoreTestCase {
     private UserAwareAPIStore getUserAwareAPIStore(ApplicationDAO applicationDAO) {
         return new UserAwareAPIStore(USER_NAME, null, null, applicationDAO, null, null, null, null,
                 null, null, null);
+    }
+
+    private APIStore getUserAwareAPIStore(ApplicationDAO applicationDAO, WorkflowDAO workflowDAO, APIGateway apiGateway,
+                                          PolicyDAO policyDAO) {
+        return new UserAwareAPIStore(USER_NAME, null, null, applicationDAO, null, policyDAO, null, null,
+                workflowDAO, null, apiGateway);
     }
 }

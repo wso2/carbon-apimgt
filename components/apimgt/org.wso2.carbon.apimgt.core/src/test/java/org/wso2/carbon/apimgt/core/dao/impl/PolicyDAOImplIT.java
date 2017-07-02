@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
+import org.wso2.carbon.apimgt.core.TestUtil;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
@@ -100,9 +101,8 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
                 .generateETag(policyDAO.getLastUpdatedTimeOfThrottlingPolicy(APIMgtAdminService.PolicyLevel
                         .subscription, updatedPolicy.getPolicyName()));
         Assert.assertNotNull(fingerprintAfterUpdatingPolicy);
-        Assert.assertNotEquals(fingerprintBeforeUpdatingPolicy, fingerprintAfterUpdatingPolicy, "Policy "
-                + "fingerprint expected to be different before and after updating for policy: "
-                + policy.getPolicyName());
+        Assert.assertNotEquals(fingerprintBeforeUpdatingPolicy, fingerprintAfterUpdatingPolicy, TestUtil.printDiff
+                (fingerprintBeforeUpdatingPolicy, fingerprintAfterUpdatingPolicy));
     }
 
     @Test (description = "Add, Get and Delete an API policy")

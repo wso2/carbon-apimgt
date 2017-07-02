@@ -181,11 +181,11 @@ public interface APISubscriptionDAO {
      * @param uuid   UUID of new subscription
      * @param apiId  API ID
      * @param appId  Application ID
-     * @param tier   subscription tier
+     * @param policyId   Subscription tier's policy id
      * @param status {@code APIConstants.SubscriptionStatus} Subscription state
      * @throws APIMgtDAOException   If failed to add subscription.
      */
-    void addAPISubscription(String uuid, String apiId, String appId, String tier, APIMgtConstants.SubscriptionStatus
+    void addAPISubscription(String uuid, String apiId, String appId, String policyId, APIMgtConstants.SubscriptionStatus
             status) throws APIMgtDAOException;
 
     /**

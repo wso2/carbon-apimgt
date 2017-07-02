@@ -445,6 +445,83 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  /policies:
+
+  #-----------------------------------------------------
+  # Retrieve all policies
+  #-----------------------------------------------------
+      get:
+        x-wso2-curl: "curl -k https://localhost:9292/api/am/core/v1/policies"
+        x-wso2-request: |
+          GET https://localhost:9292/api/am/core/v1/policies
+        x-wso2-response: "HTTP/1.1 200 OK\nContent-Type:application/json"
+        summary: |
+          Return the list of policies
+        description: |
+          Return the list of policies
+        parameters:
+          - $ref : '#/parameters/Accept'
+        tags:
+          - Policies
+        responses:
+          200:
+            description: |
+              OK.
+              The list of Policies.
+            schema:
+              $ref: '#/definitions/PolicyList'
+            headers:
+              Content-Type:
+                description: The content type of the body.
+                type: string
+          400:
+            description: |
+              Bad Request.
+              Invalid request or validation error
+            schema:
+              $ref: '#/definitions/Error'
+          404:
+            description: |
+              Not Found.
+              The resource to be updated does not exist.
+            schema:
+              $ref: '#/definitions/Error'
+          406:
+            description: |
+              Not Acceptable.
+              The requested media type is not supported
+            schema:
+              $ref: '#/definitions/Error'
+
+######################################################
+# The "Blocking Condition Collection" resource API
+######################################################
+  /blacklist:
+
+#-----------------------------------------------------
+# Retrieve all Blocking conditions
+#-----------------------------------------------------
+    get:
+      summary: Get all blocking condtions
+      description: |
+        Get all blocking condtions
+      parameters:
+        - $ref: '#/parameters/Accept'
+      tags:
+        - Blacklist
+      responses:
+        200:
+          description: |
+            OK.
+            Blocking conditions returned
+          schema:
+            $ref: '#/definitions/BlockingConditionList'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
@@ -596,6 +673,10 @@ definitions:
         type: string
         description: |
           UUID of Application
+      status:
+        type: string
+        description: |
+          Subscription Status
 
 #-----------------------------------------------------
 # API Summary Info resource
@@ -792,15 +873,69 @@ definitions:
           $ref: '#/definitions/APIInfo'
 
 #-----------------------------------------------------
+# The POLICY List resource
+#-----------------------------------------------------
+  PolicyList:
+    title: Policy List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of Polcies returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/Policy'
+
+#-----------------------------------------------------
 # The Endpoint List resource
 #-----------------------------------------------------
   EndpointList:
     title: Endpoint List
     properties:
+      count:
+        type: integer
+        description: |
+          Number of APIs returned.
+        example: 1
       list:
         type: array
         items:
-          type: string
+          $ref: '#/definitions/EndPoint'
+
+#-----------------------------------------------------
+# The Environment Endpoint resource
+#-----------------------------------------------------
+  EndPoint :
+    title: Endpoints
+    properties:
+      id:
+        type: string
+        description: |
+          UUID of the Endpoint entry
+        example: 01234567-0123-0123-0123-012345678901
+      name:
+        type: string
+        description: |
+          name of the Endpoint entry
+        example: "Endpoint 1"
+      endpointConfig:
+        type: string
+        description: Endpoint Configuration
+        example: "{url: http://localhost:8280, timeout: 1000}"
+      security:
+        type: string
+        description: Endpoint Configuration
+        example: "{url: http://localhost:8280, timeout: 1000}"
+      maxTps:
+        type: integer
+        format: int64
+        description: Endpoint max tps
+        example: 1000
+      type:
+        type: string
+        example: "http"
 
 #-----------------------------------------------------
 # The API Info resource
@@ -823,6 +958,22 @@ definitions:
       lifeCycleStatus:
         type: string
         example: 'CREATED'
+
+#-----------------------------------------------------
+# The Policy resource
+#-----------------------------------------------------
+  Policy:
+    title: API Info object with basic Policy details.
+    properties:
+      id:
+        type: string
+        example: 01234567-0123-0123-0123-012345678901
+      name:
+        type: string
+        example: CalculatorAPI
+      stopOnQuotaReach:
+        type: boolean
+        example: false
 
 #-----------------------------------------------------
 # The Application resource
@@ -932,6 +1083,51 @@ definitions:
       password:
         type: string
         example: admin
+
+#-----------------------------------------------------
+# The Throttle Blocking Condition resource
+#-----------------------------------------------------
+  BlockingCondition:
+    title: Blocking Conditions
+    description: Blocking Conditions
+    required:
+      - conditionType
+      - conditionValue
+    properties:
+      uuid:
+        type: string
+      conditionType:
+        type: string
+      conditionValue:
+        type: string
+      enabled:
+        type: boolean
+        deafult: true
+      fixedIp:
+        type: integer
+        format: int64
+      startingIP:
+        type: integer
+        format: int64
+      endingIP:
+        type: integer
+        format: int64
+#-----------------------------------------------------
+# The Throttle Blocking Condition List resource
+#-----------------------------------------------------
+  BlockingConditionList:
+    title: Blocking Conditions List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of Blocking Conditions returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/BlockingCondition'
+
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------

@@ -2823,7 +2823,7 @@ paths:
       x-scope: apim:workflow_approve
       summary: Update workflow status
       description: |
-        This operation can be used to approve or reject a workflow task. .
+        This operation can be used to approve or reject a workflow task.
       parameters:
        - $ref: '#/parameters/workflowReferenceId'
        - in: body
@@ -3216,6 +3216,9 @@ definitions:
       createdTime:
         type: string
         example: 2017-02-20T13:57:16.229
+      apiPolicy:
+        type: string
+        example: UNLIMITED
       lastUpdatedTime:
         type: string
         example: 2017-02-20T13:57:16.229
@@ -3642,7 +3645,7 @@ definitions:
       - subscriptionId
       - applicationInfo
       - apiInfo
-      - subscriptionTier
+      - policy
       - status
     properties:
       subscriptionId:
@@ -3651,10 +3654,10 @@ definitions:
       applicationInfo:
         type: Application
         $ref: '#/definitions/Application'
-      subscriptionTier:
+      policy:
         type: string
         example: Unlimited
-      subscriptionStatus:
+      status:
         type: string
         enum:
           - BLOCKED

@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
+import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 
@@ -79,8 +80,7 @@ public class ApplicationUpdateWorkflow extends Workflow {
         String permission = getAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_PERMISSION);
 
         Application application = new Application(name, updatedUser);
-        application.setTier(tier);
-        application.setPolicyId(policyId);
+        application.setPolicy(new ApplicationPolicy(policyId, tier));
         application.setDescription(description);
         application.setId(applicationId);
         application.setUpdatedTime(LocalDateTime.now());

@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
+import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
 
@@ -94,9 +95,8 @@ public class APIUtils {
         return null;
     }
 
-    public static String getDefaultAPIPolicy() {
-        // TODO: 11/25/16 need to implement logic
-        return "Unlimited";
+    public static Policy getDefaultAPIPolicy() {
+        return new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY);
     }
 
     /**
@@ -233,6 +233,7 @@ public class APIUtils {
         for (String httpVerb : APIMgtConstants.SUPPORTED_HTTP_VERBS.split(",")) {
             if (!HttpMethod.OPTIONS.toString().equals(httpVerb)) {
                 uriTemplateBuilder.httpVerb(httpVerb);
+                uriTemplateBuilder.policy(APIUtils.getDefaultAPIPolicy());
                 uriTemplateBuilder.templateId(APIUtils.generateOperationIdFromPath(uriTemplateBuilder.getUriTemplate
                         (), httpVerb));
                 uriTemplateMap.put(uriTemplateBuilder.getTemplateId(), uriTemplateBuilder.build());
@@ -493,5 +494,25 @@ public class APIUtils {
 
             throw new APIManagementException(msg, ExceptionCodes.COULD_NOT_UPDATE_API);
         }
+    }
+
+    /**
+     * Utility for Ip to Long convrsion
+     * @param ip ip value
+     * @return return long value of Ip
+     */
+    public static long ipToLong(String ip) {
+        long ipAddressinLong = 0;
+        if (ip != null) {
+            //convert ipaddress into a long
+            String[] ipAddressArray = ip.split("\\.");    //split by "." and add to an array
+
+            for (int i = 0; i < ipAddressArray.length; i++) {
+                int power = 3 - i;
+                long ipAddress = Long.parseLong(ipAddressArray[i]);   //parse to long
+                ipAddressinLong += ipAddress * Math.pow(256, power);
+            }
+        }
+        return ipAddressinLong;
     }
 }

@@ -21,8 +21,10 @@ package org.wso2.carbon.apimgt.core.api;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.BlockConditions;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.PolicyValidationData;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 
 import java.util.List;
@@ -155,4 +157,47 @@ public interface APIGateway {
      */
     void deleteApplication(String applicationId) throws GatewayException;
 
+    /**
+     * Publish policy add event to Gateway
+     *
+     * @param policyValidationData policy Data
+     * @throws GatewayException If there is a failure in notifying add policy to gateway
+     */
+    void addPolicy(PolicyValidationData policyValidationData) throws GatewayException;
+
+    /**
+     *Publish policy update event to gateway
+     *
+     * @param policyValidationData policy Data
+     * @throws GatewayException If there is a failure in notifying update policy to gateway
+     */
+    void updatePolicy(PolicyValidationData policyValidationData) throws GatewayException;
+    /**
+     *Publish policy delete event to gateway
+     *
+     * @param policyValidationData policy Data
+     * @throws GatewayException If there is a failure in notifying delete policy to gateway
+     */
+    void deletePolicy(PolicyValidationData policyValidationData) throws GatewayException;
+
+    /**
+     * Publish Block condition Add event to Gateway
+     * @param blockConditions block condition data
+     * @throws GatewayException If there is a failure in notifying add block condition to gateway
+     */
+    void addBlockCondition(BlockConditions blockConditions) throws GatewayException;
+
+    /**
+     * Publish Block condition Update event to Gateway
+     * @param blockConditions block condition data
+     * @throws GatewayException If there is a failure in notifying update block condition to gateway
+     */
+    void updateBlockCondition(BlockConditions blockConditions) throws GatewayException;
+
+    /**
+     * Publish Block condition Delete event to Gateway
+     * @param blockConditions block condition data
+     * @throws GatewayException If there is a failure in notifying update block condition to gateway
+     */
+    void deleteBlockCondition(BlockConditions blockConditions) throws GatewayException;
 }

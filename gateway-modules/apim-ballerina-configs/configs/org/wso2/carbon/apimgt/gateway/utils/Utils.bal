@@ -6,6 +6,7 @@ import ballerina.lang.system;
 import ballerina.net.http;
 import org.wso2.carbon.apimgt.gateway.dto as dto;
 import org.wso2.carbon.apimgt.gateway.holders as holders;
+import org.wso2.carbon.apimgt.gateway.constants;
 
 function constructAccessTokenNotFoundPayload (message response) {
     json payload = {"code":900902, "message":"accessToken invalid"};
@@ -19,7 +20,17 @@ function constructSubscriptionNotFound (message response) {
     json payload = {"code":900903, "message":"subscription not found"};
     messages:setJsonPayload(response, payload);
 }
-
+function constructSubscriptionBlocked (message response, string context, string version) {
+    json payload = {
+                       "fault":{
+                                   "code":900907,
+                                   "message":"The requested API is temporarily blocked",
+                                   "description":"Access failure for API: " + context + ", version: " + version + " status: (900907) - The requested API is temporarily blocked"
+                               }
+                   };
+    http:setStatusCode(response, 401);
+    messages:setJsonPayload(response, payload);
+}
 function constructAPIIsInMaintenance (message response) {
     messages:setHeader(response, "Content-Type", "application/json");
     http:setStatusCode(response, 503);
@@ -27,7 +38,7 @@ function constructAPIIsInMaintenance (message response) {
     messages:setJsonPayload(response, payload);
 }
 
-function fromJsonToIntrospectDto (json introspectResponse) (dto:IntrospectDto){
+function fromJsonToIntrospectDto (json introspectResponse) (dto:IntrospectDto) {
     dto:IntrospectDto introspectDto = {};
     introspectDto.active = (boolean)introspectResponse.active;
     if (introspectDto.active) {
@@ -35,7 +46,7 @@ function fromJsonToIntrospectDto (json introspectResponse) (dto:IntrospectDto){
             introspectDto.exp = (int)introspectResponse.exp;
         } else {
             // https://github.com/ballerinalang/ballerina/issues/2396
-            introspectDto.exp = - 1;
+            introspectDto.exp = -1;
         }
         if (introspectResponse.username != null) {
             introspectDto.username = (string)introspectResponse.username;
@@ -55,7 +66,7 @@ function fromJsonToIntrospectDto (json introspectResponse) (dto:IntrospectDto){
     }
     return introspectDto;
 }
-function fromJsonToSubscriptionDto (json subscriptionResponse) (dto:SubscriptionDto){
+function fromJsonToSubscriptionDto (json subscriptionResponse) (dto:SubscriptionDto) {
     dto:SubscriptionDto subscriptionDto = {};
     subscriptionDto.apiName = (string)subscriptionResponse.apiName;
     subscriptionDto.apiContext = (string)subscriptionResponse.apiContext;
@@ -65,9 +76,10 @@ function fromJsonToSubscriptionDto (json subscriptionResponse) (dto:Subscription
     subscriptionDto.subscriptionPolicy = (string)subscriptionResponse.subscriptionPolicy;
     subscriptionDto.keyEnvType = (string)subscriptionResponse.keyEnvType;
     subscriptionDto.applicationId = (string)subscriptionResponse.applicationId;
+    subscriptionDto.status = (string)subscriptionResponse.status;
     return subscriptionDto;
 }
-function fromJsonToResourceDto (json resourceResponse) (dto:ResourceDto){
+function fromJsonToResourceDto (json resourceResponse) (dto:ResourceDto) {
     dto:ResourceDto resourceDto = {};
     resourceDto.uriTemplate = (string)resourceResponse.uriTemplate;
     resourceDto.httpVerb = (string)resourceResponse.httpVerb;
@@ -76,12 +88,12 @@ function fromJsonToResourceDto (json resourceResponse) (dto:ResourceDto){
     resourceDto.policy = (string)resourceResponse.policy;
     return resourceDto;
 }
-function retrieveSubscriptions () (boolean){
+function retrieveSubscriptions () (boolean) {
     string query = "/api/am/core/v1.0/subscriptions?limit=-1";
     message request = {};
     http:ClientConnector apiInfoConnector = create http:ClientConnector(getAPICoreURL());
     messages:setHeader(request, "Content-Type", "application/json");
-    message response = http:ClientConnector.get (apiInfoConnector, query, request);
+    message response = http:ClientConnector.get(apiInfoConnector, query, request);
     json subscriptions = messages:getJsonPayload(response);
     putIntoSubscriptionCache(subscriptions.list);
     return true;
@@ -117,7 +129,7 @@ function retrieveResources (string apiContext, string apiVersion) {
     message request = {};
     http:ClientConnector apiInfoConnector = create http:ClientConnector(getAPICoreURL());
     messages:setHeader(request, "Content-Type", "application/json");
-    message response = http:ClientConnector.get (apiInfoConnector, query, request);
+    message response = http:ClientConnector.get(apiInfoConnector, query, request);
     json resources = messages:getJsonPayload(response);
     int length = jsons:getInt(resources, "$.list.length()");
     int i = 0;
@@ -132,7 +144,7 @@ function retrieveApplications () (boolean) {
     message request = {};
     http:ClientConnector apiInfoConnector = create http:ClientConnector(getAPICoreURL());
     messages:setHeader(request, "Content-Type", "application/json");
-    message response = http:ClientConnector.get (apiInfoConnector, query, request);
+    message response = http:ClientConnector.get(apiInfoConnector, query, request);
     json applications = messages:getJsonPayload(response);
     int length = jsons:getInt(applications, "$.list.length()");
     int i = 0;
@@ -140,6 +152,24 @@ function retrieveApplications () (boolean) {
         while (i < length) {
             json application = applications.list[i];
             putIntoApplicationCache(application);
+            i = i + 1;
+        }
+    }
+    return true;
+}
+function retrievePolicies () (boolean) {
+    string query = "/api/am/core/v1.0/policies";
+    message request = {};
+    http:ClientConnector apiInfoConnector = create http:ClientConnector(getAPICoreURL());
+    messages:setHeader(request, "Content-Type", "application/json");
+    message response = http:ClientConnector.get(apiInfoConnector, query, request);
+    json policies = messages:getJsonPayload(response);
+    int length = (int)policies.count;
+    int i = 0;
+    if (length > 0) {
+        while (i < length) {
+            json policy = policies.list[i];
+            putIntoPolicyCache(policy);
             i = i + 1;
         }
     }
@@ -154,12 +184,18 @@ function putIntoApplicationCache (json application) {
     applicationDto.applicationPolicy = (string)application.throttlingTier;
     holders:putIntoApplicationCache(applicationDto);
 }
-
+function putIntoPolicyCache (json policy) {
+    dto:PolicyDto policyDto = {};
+    policyDto.id = (string)policy.id;
+    policyDto.name = (string)policy.name;
+    policyDto.stopOnQuotaReach = (boolean)policy.stopOnQuotaReach;
+    holders:putIntoPolicyCache(policyDto);
+}
 function removeFromApplicationCache (json application) {
     string applicationId = (string)application.applicationId;
     holders:removeApplicationFromCache(applicationId);
 }
-function fromJsonToGatewayConfDTO (json conf) (dto:GatewayConfDTO){
+function fromJsonToGatewayConfDTO (json conf) (dto:GatewayConfDTO) {
     dto:GatewayConfDTO gatewayConf = {};
 
     //Extract key manager information and populate KeyManageInfoDTO to be cached
@@ -180,42 +216,42 @@ function fromJsonToGatewayConfDTO (json conf) (dto:GatewayConfDTO){
     //Extract JWT information and populate JWTInfoDTO to be cached
     json jwTInfo = conf.jwTInfo;
     dto:JWTInfoDTO jwtInfoDTO = {};
-    jwtInfoDTO.enableJWTGeneration = jsons:getBoolean(jwTInfo, "enableJWTGeneration");
-    jwtInfoDTO.jwtHeader = jsons:getString(jwTInfo, "jwtHeader");
+    jwtInfoDTO.enableJWTGeneration = (boolean)jwTInfo.enableJWTGeneration;
+    jwtInfoDTO.jwtHeader = (string)jwTInfo.jwtHeader;
     gatewayConf.jwtInfo = jwtInfoDTO;
 
     //Extract Analytics Server information and populate AnalyticsInfoDTO to be cached
     json analyticsInfo = conf.analyticsInfo;
     dto:AnalyticsInfoDTO analyticsInfoDTO = {};
-    analyticsInfoDTO.serverURL = jsons:getString(analyticsInfo, "serverURL");
+    analyticsInfoDTO.serverURL = (string)analyticsInfo.serverURL;
     dto:CredentialsDTO analyticsServerCredentialsDTO = {};
     json analyticsServerCredentials = analyticsInfo.credentials;
-    analyticsServerCredentialsDTO.username = jsons:getString(analyticsServerCredentials, "username");
-    analyticsServerCredentialsDTO.password = jsons:getString(analyticsServerCredentials, "password");
+    analyticsServerCredentialsDTO.username = (string)analyticsServerCredentials.username;
+    analyticsServerCredentialsDTO.password = (string)analyticsServerCredentials.password;
     analyticsInfoDTO.credentials = analyticsServerCredentialsDTO;
     gatewayConf.analyticsInfo = analyticsInfoDTO;
 
     //Extract Throttling Server information and populate ThrottlingInfoDTO to be cached
     json throttlingInfo = conf.throttlingInfo;
     dto:ThrottlingInfoDTO throttlingInfoDTO = {};
-    throttlingInfoDTO.serverURL = jsons:getString(throttlingInfo, "serverURL");
+    throttlingInfoDTO.serverURL = (string)throttlingInfo.serverURL;
     json throttlingServerCredentials = throttlingInfo.credentials;
     dto:CredentialsDTO throttlingServerCredentialsDTO = {};
-    throttlingServerCredentialsDTO.username = jsons:getString(throttlingServerCredentials, "username");
-    throttlingServerCredentialsDTO.password = jsons:getString(throttlingServerCredentials, "password");
+    throttlingServerCredentialsDTO.username = (string)throttlingServerCredentials.username;
+    throttlingServerCredentialsDTO.password = (string)throttlingServerCredentials.password;
     throttlingInfoDTO.credentials = throttlingServerCredentialsDTO;
     gatewayConf.throttlingInfo = throttlingInfoDTO;
 
     return gatewayConf;
 }
 
-function fromJSONToAPIDTO (json api) (dto:APIDTO){
+function fromJSONToAPIDTO (json api) (dto:APIDTO) {
     dto:APIDTO APIDTO = {};
-    APIDTO.id = jsons:getString(api, "id");
-    APIDTO.name = jsons:getString(api, "name");
-    APIDTO.version = jsons:getString(api, "version");
-    APIDTO.context = jsons:getString(api, "context");
-    APIDTO.lifeCycleStatus = jsons:getString(api, "lifeCycleStatus");
+    APIDTO.id = (string)api.id;
+    APIDTO.name = (string)api.name;
+    APIDTO.version = (string)api.version;
+    APIDTO.context = (string)api.context;
+    APIDTO.lifeCycleStatus = (string)api.lifeCycleStatus;
     return APIDTO;
 
 }
@@ -233,7 +269,7 @@ function getSystemProperty (string prop) (string) {
     return pathValue;
 }
 
-function getStringProperty (message msg, string propertyKey) (string){
+function getStringProperty (message msg, string propertyKey) (string) {
     string value = "";
     try {
         value = messages:getProperty(msg, propertyKey);
@@ -246,12 +282,32 @@ function getStringProperty (message msg, string propertyKey) (string){
     return value;
 }
 
-function getJsonString (json jsonObject, string jsonPath) (string){
+function getJsonString (json jsonObject, string jsonPath) (string) {
     string value = "";
     try {
-        value = jsons:getString(jsonObject, jsonPath);
+        value = (string)jsonObject.jsonPath;
     } catch (errors:Error e) {
         return "";
     }
     return value;
+}
+function fromJsonToBlockConditionDto (json event) (dto:BlockConditionDto) {
+    string key = "";
+    dto:BlockConditionDto blockConditionDto = {};
+    blockConditionDto.enabled = (boolean)event.enabled;
+    blockConditionDto.conditionType = (string)event.conditionType;
+    key = key + blockConditionDto.conditionType;
+    blockConditionDto.uuid = (string)event.uuid;
+    if (blockConditionDto.conditionType == constants:BLOCKING_CONDITION_IP_RANGE) {
+        blockConditionDto.startingIP = (int)event.startingIP;
+        blockConditionDto.endingIP = (int)event.endingIP;
+        key = key + " : " + blockConditionDto.startingIP + " : " + blockConditionDto.endingIP;
+    } else if (blockConditionDto.conditionType == constants:BLOCKING_CONDITIONS_IP) {
+        blockConditionDto.fixedIp = (int)event.fixedIp;
+        key = key + " : " + blockConditionDto.fixedIp;
+    } else {
+        blockConditionDto.conditionValue = (string)event.conditionValue;
+    }
+    blockConditionDto.key = key;
+    return blockConditionDto;
 }

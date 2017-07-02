@@ -220,15 +220,17 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 application.setUpdatedUser(getUsername());
                 application.setUpdatedTime(LocalDateTime.now());
 
-                String appTierName = application.getTier();
-                if (appTierName != null && !appTierName.equals(existingApplication.getTier())) {
-                    Policy policy = getPolicyDAO().getApplicationPolicy(appTierName);
+                Policy appTier = application.getPolicy();
+                if (appTier != null && !appTier.getPolicyName().equals(existingApplication.getPolicy().getPolicyName
+                        ())) {
+                    Policy policy = getPolicyDAO().getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel
+                            .application, appTier.getPolicyName());
                     if (policy == null) {
-                        String message = "Specified tier " + appTierName + " is invalid";
+                        String message = "Specified tier " + appTier + " is invalid";
                         log.error(message);
                         throw new APIManagementException(message, ExceptionCodes.TIER_NAME_INVALID);
                     }
-                    application.setPolicyId(policy.getUuid());
+                    application.setPolicy(policy);
                 }
                 workflow.setExistingApplication(existingApplication);
                 workflow.setUpdatedApplication(application);
@@ -236,22 +238,24 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 workflow.setWorkflowReference(application.getId());
                 workflow.setExternalWorkflowReference(UUID.randomUUID().toString());
                 workflow.setCreatedTime(LocalDateTime.now());
-                
+
                 String workflowDescription = "Update application from : " + existingApplication.toString()
                         + " to : " + application.toString();
                 workflow.setWorkflowDescription(workflowDescription);
-                
+
                 //setting attributes for internal use. These are set to use from outside the executor's method
                 //these will be saved in the AM_WORKFLOW table so these can be retrieved later for external wf approval
                 //scenarios. this won't get stored for simple wfs
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_NAME, application.getName());
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_UPDATEDBY, application.getUpdatedUser());
-                workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_TIER, application.getTier());
-                workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_POLICY_ID, application.getPolicyId());
+                workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_TIER, application.getPolicy()
+                        .getPolicyName());
+                workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_POLICY_ID, application.getPolicy()
+                        .getUuid());
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_DESCRIPTION,
                         application.getDescription());
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_PERMISSION,
-                        application.getPermissionString());  
+                        application.getPermissionString());
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_EXISTIN_APP_STATUS,
                         existingApplication.getStatus());
 
@@ -263,7 +267,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 } else {
                     getApplicationDAO().updateApplicationState(uuid, ApplicationStatus.APPLICATION_ONHOLD);
                     addWorkflowEntries(workflow);
-                }             
+                }
                 return response;
             } else {
                 String errorMsg = "Applicaiton does not exist - " + uuid;
@@ -422,7 +426,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
     @Override
     public List<Subscription> getAPISubscriptionsByApplication(Application application, ApiType apiType)
-                                                                                        throws APIManagementException {
+            throws APIManagementException {
         List<Subscription> subscriptionsList;
         try {
             subscriptionsList = getApiSubscriptionDAO().getAPISubscriptionsByApplication(application.getId(), apiType);
@@ -457,15 +461,22 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 log.error(errorMsg);
                 throw new APIManagementException(errorMsg, ExceptionCodes.APPLICATION_NOT_FOUND);
             }
-            getApiSubscriptionDAO().addAPISubscription(subscriptionId, apiId, applicationId, tier,
+            Policy policy = getPolicyDAO().getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel
+                    .subscription, tier);
+            if (policy == null) {
+                String errorMsg = "Cannot find an subscription policy for given policy name - " + tier;
+                log.error(errorMsg);
+                throw new APIManagementException(errorMsg, ExceptionCodes.POLICY_NOT_FOUND);
+            }
+            getApiSubscriptionDAO().addAPISubscription(subscriptionId, apiId, applicationId, policy.getUuid(),
                     APIMgtConstants.SubscriptionStatus.ON_HOLD);
 
             WorkflowExecutor addSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance()
                     .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
             //Instead of quering the db, we create same subscription object
-            Subscription subscription = new Subscription(subscriptionId, application, api, tier);
+            Subscription subscription = new Subscription(subscriptionId, application, api, policy);
             subscription.setStatus(APIMgtConstants.SubscriptionStatus.ON_HOLD);
-            
+
             SubscriptionCreationWorkflow workflow = new SubscriptionCreationWorkflow(getApiSubscriptionDAO(),
                     getWorkflowDAO(), getApiGateway());
 
@@ -479,12 +490,12 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             String workflowDescription = "Subscription creation workflow for the subscription to api "
                     + subscription.getApi().getName() + ":" + subscription.getApi().getVersion() + ":"
                     + subscription.getApi().getProvider() + " using application "
-                    + subscription.getApplication().getName() + " with tier " + subscription.getSubscriptionTier()
+                    + subscription.getApplication().getName() + " with tier " + subscription.getPolicy()
                     + " by " + getUsername();
             workflow.setWorkflowDescription(workflowDescription);
 
             WorkflowResponse response = addSubscriptionWFExecutor.execute(workflow);
-            workflow.setStatus(response.getWorkflowStatus());            
+            workflow.setStatus(response.getWorkflowStatus());
 
             if (WorkflowStatus.CREATED != response.getWorkflowStatus()) {
                 completeWorkflow(addSubscriptionWFExecutor, workflow);
@@ -543,7 +554,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 String workflowDescription = "Subscription deletion workflow for the subscription to api "
                         + subscription.getApi().getName() + ":" + subscription.getApi().getVersion() + ":"
                         + subscription.getApi().getProvider() + " using application "
-                        + subscription.getApplication().getName() + " with tier " + subscription.getSubscriptionTier()
+                        + subscription.getApplication().getName() + " with tier " + subscription.getPolicy()
                         + " by " + getUsername();
                 workflow.setWorkflowDescription(workflowDescription);
                 
@@ -1008,8 +1019,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             dto.setTemplateId(uriTemplate.getTemplateId());
             dto.setUriTemplate(uriTemplate.getUriTemplate());
             dto.setHttpVerb(uriTemplate.getHttpVerb());
-            dto.setAuthType(uriTemplate.getAuthType());
-            dto.setPolicy(uriTemplate.getPolicy());
             resourceList.add(dto);
         }
         GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
@@ -1017,7 +1026,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
         gatewaySourceGenerator.setApiConfigContext(apiConfigContext);
         String gatewayConfig = gatewaySourceGenerator.getCompositeAPIConfigStringFromTemplate(resourceList,
-                                                                                              endpointDTOs);
+                endpointDTOs);
         if (log.isDebugEnabled()) {
             log.debug("API " + apiBuilder.getName() + "gateway config: " + gatewayConfig);
         }
@@ -1449,20 +1458,20 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 throw new APIMgtResourceAlreadyExistsException(message, ExceptionCodes.APPLICATION_ALREADY_EXISTS);
             }
             // Tier validation
-            String tierName = application.getTier();
-            if (tierName == null) {
+            Policy tier = application.getPolicy();
+            if (tier == null) {
                 String message = "Tier name cannot be null - " + application.getName();
                 log.error(message);
                 throw new APIManagementException(message, ExceptionCodes.TIER_CANNOT_BE_NULL);
             } else {
-                Policy policy = getPolicyDAO().getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application,
-                        tierName);
+                Policy policy = getPolicyDAO().getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel
+                        .application, tier.getPolicyName());
                 if (policy == null) {
-                    String message = "Specified tier " + tierName + " is invalid";
+                    String message = "Specified tier " + tier.getPolicyName() + " is invalid";
                     log.error(message);
                     throw new APIManagementException(message, ExceptionCodes.TIER_CANNOT_BE_NULL);
                 }
-                application.setPolicyId(policy.getUuid());
+                application.setPolicy(policy);
             }
             // Generate UUID for application
             String generatedUuid = UUID.randomUUID().toString();
@@ -1489,9 +1498,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             workflow.setWorkflowReference(application.getId());
             workflow.setExternalWorkflowReference(UUID.randomUUID().toString());
             workflow.setCreatedTime(LocalDateTime.now());
-            
+
             String workflowDescription = "Application creation workflow for " + application.getName() + " with tier "
-                    + tierName + " by " + getUsername();
+                    + tier.getPolicyName() + " by " + getUsername();
             workflow.setWorkflowDescription(workflowDescription);
             WorkflowResponse response = appCreationWFExecutor.execute(workflow);
             workflow.setStatus(response.getWorkflowStatus());

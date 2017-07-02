@@ -55,9 +55,9 @@ function isrequestThrottled( message msg) (boolean){
     string applicationId = keyValidationDto.applicationId;
 
     if (authorizedUser == ""){
-        http:setStatusCode( msg, constants:HTTP_UNAUTHORIZED);
-        messages:setProperty(msg, constants:THROTTLED_ERROR_CODE, constants:BLOCKED_ERROR_CODE);
-        messages:setProperty(msg, constants:THROTTLED_OUT_REASON, constants:THROTTLE_OUT_REASON_REQUEST_BLOCKED);
+        http:setStatusCode( msg, HTTP_UNAUTHORIZED);
+        messages:setProperty(msg, THROTTLED_ERROR_CODE, BLOCKED_ERROR_CODE);
+        messages:setProperty(msg, THROTTLED_OUT_REASON, THROTTLE_OUT_REASON_REQUEST_BLOCKED);
         setThrottledResponse(msg);
         return true;
     }
@@ -71,9 +71,9 @@ function isrequestThrottled( message msg) (boolean){
     boolean isBlocked = throttle:isRequestBlocked(apiLevelThrottleKey,subscriptionLevelThrottleKey,authorizedUser,ipLevelBlockingKey);
 
     if (isBlocked) {
-        http:setStatusCode( msg, constants:HTTP_FORBIDDEN);
-        messages:setProperty(msg, constants:THROTTLED_ERROR_CODE, constants:BLOCKED_ERROR_CODE);
-        messages:setProperty(msg, constants:THROTTLED_OUT_REASON, constants:THROTTLE_OUT_REASON_REQUEST_BLOCKED);
+        http:setStatusCode( msg, HTTP_FORBIDDEN);
+        messages:setProperty(msg, THROTTLED_ERROR_CODE, BLOCKED_ERROR_CODE);
+        messages:setProperty(msg, THROTTLED_OUT_REASON, THROTTLE_OUT_REASON_REQUEST_BLOCKED);
         setThrottledResponse(msg);
         return true;
     }
@@ -104,17 +104,17 @@ function isrequestThrottled( message msg) (boolean){
 
         // todo check for conditions
         // resource level + API level condition checking
-        if (throttle:isThrottled(resourceLevelThrottleKey)) {
+        if (throttle:isThrottled(resourceLevelThrottleKey, msg)) {
 
             if(apiLevelThrottlingTriggered){
-                messages:setProperty(msg, constants:THROTTLED_ERROR_CODE, constants:API_THROTTLE_OUT_ERROR_CODE);
-                messages:setProperty(msg, constants:THROTTLED_OUT_REASON, constants:THROTTLE_OUT_REASON_API_LIMIT_EXCEEDED);
+                messages:setProperty(msg, THROTTLED_ERROR_CODE, API_THROTTLE_OUT_ERROR_CODE);
+                messages:setProperty(msg, THROTTLED_OUT_REASON, THROTTLE_OUT_REASON_API_LIMIT_EXCEEDED);
             }else{
-                messages:setProperty(msg, constants:THROTTLED_ERROR_CODE, constants:RESOURCE_THROTTLE_OUT_ERROR_CODE);
-                messages:setProperty(msg, constants:THROTTLED_OUT_REASON, constants:THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED);
+                messages:setProperty(msg, THROTTLED_ERROR_CODE, RESOURCE_THROTTLE_OUT_ERROR_CODE);
+                messages:setProperty(msg, THROTTLED_OUT_REASON, THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED);
             }
 
-            http:setStatusCode( msg, constants:HTTP_TOO_MANY_REQUESTS);
+            http:setStatusCode( msg, HTTP_TOO_MANY_REQUESTS);
             setThrottledResponse(msg);
 
             return true;
@@ -122,15 +122,15 @@ function isrequestThrottled( message msg) (boolean){
     }
 
     // Subscription Level throttling
-    isSubscriptionLevelThrottled = throttle:isThrottled(subscriptionLevelThrottleKey);
+    isSubscriptionLevelThrottled = throttle:isThrottled(subscriptionLevelThrottleKey, msg);
     string stopOnQuotaReach = gatewayUtil:getStringProperty(msg, constants:STOP_ON_QUOTA_REACH);
 
     if(isSubscriptionLevelThrottled){
 
         if(stopOnQuotaReach == "true"){
-            http:setStatusCode( msg, constants:HTTP_TOO_MANY_REQUESTS );
-            messages:setProperty(msg, constants:THROTTLED_ERROR_CODE, constants:SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE);
-            messages:setProperty(msg, constants:THROTTLED_OUT_REASON, constants:THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED);
+            http:setStatusCode( msg, HTTP_TOO_MANY_REQUESTS );
+            messages:setProperty(msg, THROTTLED_ERROR_CODE, SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE);
+            messages:setProperty(msg, THROTTLED_OUT_REASON, THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED);
             setThrottledResponse(msg);
             return true;
         }
@@ -143,12 +143,12 @@ function isrequestThrottled( message msg) (boolean){
 
     // Application Level Throttling
     applicationLevelThrottleKey = applicationId + ":" + authorizedUser;
-    isApplicationLevelThrottled = throttle:isThrottled(applicationLevelThrottleKey);
+    isApplicationLevelThrottled = throttle:isThrottled(applicationLevelThrottleKey, msg);
 
     if(isApplicationLevelThrottled){
-        http:setStatusCode( msg, constants:HTTP_TOO_MANY_REQUESTS );
-        messages:setProperty(msg, constants:THROTTLED_ERROR_CODE, constants:APPLICATION_THROTTLE_OUT_ERROR_CODE);
-        messages:setProperty(msg, constants:THROTTLED_OUT_REASON, constants:THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED);
+        http:setStatusCode( msg, HTTP_TOO_MANY_REQUESTS );
+        messages:setProperty(msg, THROTTLED_ERROR_CODE, APPLICATION_THROTTLE_OUT_ERROR_CODE);
+        messages:setProperty(msg, THROTTLED_OUT_REASON, THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED);
         setThrottledResponse(msg);
         return true;
     }
@@ -163,13 +163,6 @@ function isrequestThrottled( message msg) (boolean){
     }
 
     return false;
-}
-
-function setThrottledResponse(message msg){
-    json jsonPayload = {};
-    jsonPayload.Error_Code =(string)messages:getProperty(msg, constants:THROTTLED_ERROR_CODE);
-    jsonPayload.Error_Message = (string)messages:getProperty(msg, constants:THROTTLED_OUT_REASON);
-    messages:setJsonPayload(msg, jsonPayload);
 }
 
 function setInvalidUser(message msg){

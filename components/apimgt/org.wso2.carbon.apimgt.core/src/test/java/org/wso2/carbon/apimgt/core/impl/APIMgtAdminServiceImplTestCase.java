@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.core.impl;
 import org.mockito.Mockito;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
+import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
@@ -97,7 +98,8 @@ public class APIMgtAdminServiceImplTestCase {
     @Test(description = "Add policy")
     public void testAddPolicy() throws APIManagementException {
         PolicyDAO policyDAO = mock(PolicyDAO.class);
-        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforPolicyDAO(policyDAO);
+        APIGateway apiGateway = mock(APIGateway.class);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforPolicyDAO(policyDAO, apiGateway);
         APIPolicy policy = mock(APIPolicy.class);
         adminService.addApiPolicy(policy);
         verify(policyDAO, times(1)).addApiPolicy(
@@ -185,20 +187,22 @@ public class APIMgtAdminServiceImplTestCase {
     }
 
     private APIMgtAdminServiceImpl newAPIMgtAdminServiceImplforApiDAO(ApiDAO apiDAO) {
-        return new APIMgtAdminServiceImpl(null, null, apiDAO, null, null);
+        return new APIMgtAdminServiceImpl(null, null, apiDAO, null, null, null);
     }
 
     private APIMgtAdminServiceImpl newAPIMgtAdminServiceImplforPolicyDAO(PolicyDAO policyDAO) {
-        return new APIMgtAdminServiceImpl(null, policyDAO, null, null, null);
+        return new APIMgtAdminServiceImpl(null, policyDAO, null, null, null, null);
     }
 
     private APIMgtAdminServiceImpl newAPIMgtAdminServiceImplforAPISubscriptionDAO(APISubscriptionDAO
                                                                                           apiSubscriptionDAO) {
-        return new APIMgtAdminServiceImpl(apiSubscriptionDAO, null, null, null, null);
+        return new APIMgtAdminServiceImpl(apiSubscriptionDAO, null, null, null, null, null);
     }
 
     private APIMgtAdminServiceImpl newAPIMgtAdminServiceImplforLabelDAO(LabelDAO labelDAO) {
-        return new APIMgtAdminServiceImpl(null, null, null, labelDAO, null);
+        return new APIMgtAdminServiceImpl(null, null, null, labelDAO, null, null);
     }
-
+    private APIMgtAdminServiceImpl newAPIMgtAdminServiceImplforPolicyDAO(PolicyDAO policyDAO, APIGateway apiGateway) {
+        return new APIMgtAdminServiceImpl(null, policyDAO, null, null, null, apiGateway);
+    }
 }

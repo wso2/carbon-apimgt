@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.sql.Connection;
@@ -44,9 +45,16 @@ import java.util.Map;
  */
 public class ApplicationDAOImpl implements ApplicationDAO {
 
-    private static final String GET_APPS_QUERY = "SELECT NAME, APPLICATION_POLICY_ID, DESCRIPTION, " +
-            "APPLICATION_STATUS, CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME, UUID " +
-            "FROM AM_APPLICATION";
+    private static final String GET_APPS_QUERY = "SELECT NAME, APPLICATION_POLICY_ID, " +
+            "APPLICATION_STATUS,CREATED_BY,UUID" +
+            " FROM AM_APPLICATION";
+    private static final String GET_APPS_WITH_POLICY_QUERY = "SELECT APPLICATION.NAME AS NAME, APPLICATION_POLICY" +
+            ".NAME AS APPLICATION_POLICY_NAME, APPLICATION.DESCRIPTION AS DESCRIPTION," +
+            "APPLICATION.APPLICATION_STATUS AS APPLICATION_STATUS,APPLICATION.CREATED_BY AS " +
+            "CREATED_BY,APPLICATION.CREATED_TIME AS CREATED_TIME , APPLICATION.UPDATED_BY AS UPDATED_BY, APPLICATION" +
+            ".LAST_UPDATED_TIME AS LAST_UPDATED_TIME, APPLICATION.UUID AS UUID FROM AM_APPLICATION APPLICATION," +
+            "AM_APPLICATION_POLICY APPLICATION_POLICY " +
+            "WHERE APPLICATION.APPLICATION_POLICY_ID = APPLICATION_POLICY.UUID ";
     private static final String AM_APPLICATION_TABLE_NAME = "AM_APPLICATION";
 
     ApplicationDAOImpl() {
@@ -61,7 +69,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      */
     @Override
     public Application getApplication(String appId) throws APIMgtDAOException {
-        final String completeGetAppQuery = GET_APPS_QUERY + " WHERE UUID = ?";
+        final String completeGetAppQuery = GET_APPS_WITH_POLICY_QUERY + " AND APPLICATION.UUID = ?";
         Application application;
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(completeGetAppQuery)) {
@@ -86,7 +94,8 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      */
     @Override
     public Application getApplicationByName(String appName, String ownerId) throws APIMgtDAOException {
-        final String completeGetAppQuery = GET_APPS_QUERY + " WHERE NAME = ? AND CREATED_BY = ?";
+        final String completeGetAppQuery = GET_APPS_WITH_POLICY_QUERY + "AND APPLICATION.NAME = ? AND APPLICATION" +
+                ".CREATED_BY = ?";
         Application application;
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(completeGetAppQuery)) {
@@ -114,7 +123,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      */
     @Override
     public List<Application> getApplications(String ownerId) throws APIMgtDAOException {
-        final String completeGetAppsQuery = GET_APPS_QUERY + " WHERE CREATED_BY = ?";
+        final String completeGetAppsQuery = GET_APPS_WITH_POLICY_QUERY + " AND APPLICATION.CREATED_BY = ?";
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(completeGetAppsQuery)) {
             ps.setString(1, ownerId);
@@ -196,14 +205,13 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     public void addApplication(Application application) throws APIMgtDAOException {
         final String addAppQuery = "INSERT INTO AM_APPLICATION (UUID, NAME, APPLICATION_POLICY_ID, " +
                 "DESCRIPTION, APPLICATION_STATUS, CREATED_BY, CREATED_TIME, UPDATED_BY, " +
-                "LAST_UPDATED_TIME) VALUES (?, ?, (SELECT UUID FROM AM_APPLICATION_POLICY " +
-                "WHERE NAME = ?),?,?,?,?,?,?)";
+                "LAST_UPDATED_TIME) VALUES (?, ?,?,?,?,?,?,?,?)";
         try (Connection conn = DAOUtil.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement ps = conn.prepareStatement(addAppQuery)) {
                 ps.setString(1, application.getId());
                 ps.setString(2, application.getName());
-                ps.setString(3, application.getTier());
+                ps.setString(3, application.getPolicy().getUuid());
                 ps.setString(4, application.getDescription());
 
                 if (APIMgtConstants.DEFAULT_APPLICATION_NAME.equals(application.getName())) {
@@ -307,14 +315,12 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     public void updateApplication(String appID, Application updatedApp)
             throws APIMgtDAOException {
         final String updateAppQuery = "UPDATE AM_APPLICATION SET NAME=?, APPLICATION_POLICY_ID=" +
-                "(SELECT UUID FROM AM_APPLICATION_POLICY WHERE NAME=?), " +
-                "DESCRIPTION=?, APPLICATION_STATUS=?, UPDATED_BY=?, " +
-                "LAST_UPDATED_TIME=? WHERE UUID=?";
+                "?, DESCRIPTION=?, APPLICATION_STATUS=?, UPDATED_BY=?, LAST_UPDATED_TIME=? WHERE UUID=?";
         try (Connection conn = DAOUtil.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement ps = conn.prepareStatement(updateAppQuery)) {
                 ps.setString(1, updatedApp.getName());
-                ps.setString(2, updatedApp.getTier());
+                ps.setString(2, updatedApp.getPolicy().getUuid());
                 ps.setString(3, updatedApp.getDescription());
                 ps.setString(4, updatedApp.getStatus());
                 ps.setString(5, updatedApp.getUpdatedUser());
@@ -420,14 +426,24 @@ public class ApplicationDAOImpl implements ApplicationDAO {
 
     @Override
     public List<Application> getAllApplications() throws APIMgtDAOException {
+        List<Application> applicationList = new ArrayList<>();
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(GET_APPS_QUERY)) {
             try (ResultSet rs = ps.executeQuery()) {
-                return this.createApplicationsFromResultSet(rs);
+                while (rs.next()) {
+                        String createdUser = rs.getString("CREATED_BY");
+                        Application application = new Application(rs.getString("NAME"), createdUser);
+                        application.setId(rs.getString("UUID"));
+                        application.setStatus(rs.getString("APPLICATION_STATUS"));
+                        application.setPolicy(new ApplicationPolicy(rs.getString("APPLICATION_POLICY_ID"), ""));
+                        applicationList.add(application);
+
+                }
             }
         } catch (SQLException ex) {
             throw new APIMgtDAOException(ex);
         }
+        return applicationList;
     }
 
     private void setApplicationKeys(Connection conn, Application application, String applicationId)
@@ -469,8 +485,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             application.setCreatedTime(rs.getTimestamp("CREATED_TIME").toLocalDateTime());
             application.setUpdatedUser(rs.getString("UPDATED_BY"));
             application.setUpdatedTime(rs.getTimestamp("LAST_UPDATED_TIME").toLocalDateTime());
-            application.setTier(DAOFactory.getPolicyDAO().
-                    getApplicationPolicyByUuid(rs.getString("APPLICATION_POLICY_ID")).getPolicyName());
+            application.setPolicy(new ApplicationPolicy(rs.getString("APPLICATION_POLICY_NAME")));
         }
         return application;
     }
