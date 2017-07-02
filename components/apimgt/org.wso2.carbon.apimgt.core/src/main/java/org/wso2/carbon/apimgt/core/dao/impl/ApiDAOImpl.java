@@ -1001,7 +1001,7 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    public String getWSDLOfAPI(String apiId) throws APIMgtDAOException {
+    public String getAPIWSDL(String apiId) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
 
             InputStream gatewayConfig = ApiResourceDAO
@@ -1014,6 +1014,16 @@ public class ApiDAOImpl implements ApiDAO {
             throw new APIMgtDAOException(e);
         }
         return null;
+    }
+
+    @Override
+    public InputStream getAPIWSDLArchive(String apiId) throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()) {
+            return ApiResourceDAO.getBinaryValueForCategory(connection, apiId, ResourceCategory.WSDL_ZIP,
+                    ApiType.STANDARD);
+        } catch (SQLException | IOException e) {
+            throw new APIMgtDAOException(e);
+        }
     }
 
     public void removeWSDLOfAPI(String apiId) throws APIMgtDAOException {

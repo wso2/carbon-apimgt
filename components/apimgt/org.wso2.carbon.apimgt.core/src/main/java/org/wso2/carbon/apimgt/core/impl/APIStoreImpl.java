@@ -1247,7 +1247,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                     ExceptionCodes.LABEL_NOT_FOUND_IN_API);
         }
 
-        String wsdl = getApiDAO().getWSDLOfAPI(apiId);
+        String wsdl = getApiDAO().getAPIWSDL(apiId);
         Label label = getLabelDAO().getLabelByName(labelName);
 
         if (!StringUtils.isEmpty(wsdl)) {

@@ -527,7 +527,9 @@ public interface ApiDAO {
      * @return WSDL as {@link String}
      * @throws APIMgtDAOException if error occurs while accessing the WSDL from the data layer
      */
-    String getWSDLOfAPI(String apiId) throws APIMgtDAOException;
+    String getAPIWSDL(String apiId) throws APIMgtDAOException;
+
+    InputStream getAPIWSDLArchive(String apiId) throws APIMgtDAOException;
 
     /**
      * Remove WSDL text resource of a particular API

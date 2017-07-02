@@ -84,7 +84,6 @@ import org.wso2.carbon.lcm.core.impl.LifecycleEventManager;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
 import org.wso2.carbon.lcm.sql.beans.LifecycleHistoryBean;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -1448,17 +1447,23 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
     }
 
-    public String getWSDLOfAPI(String apiId) throws APIMgtDAOException {
-        return getApiDAO().getWSDLOfAPI(apiId);
+    public String getAPIWSDL(String apiId) throws APIMgtDAOException {
+        return getApiDAO().getAPIWSDL(apiId);
+    }
+
+    @Override
+    public InputStream getAPIWSDLArchive(String apiId) throws APIMgtDAOException {
+        return getApiDAO().getAPIWSDLArchive(apiId);
     }
 
     public String addAPIFromWSDLArchive(API.APIBuilder apiBuilder, InputStream inputStream)
             throws APIManagementException, IOException {
-        String path = System.getProperty("java.io.tmpdir") + File.separator + "WSDL-archives" + File.separator + UUID
-                .randomUUID().toString();
-        String archivePath = path + File.separator + "wsdl-archive.zip";
-        String extractedLocation = APIFileUtils
-                .extractUploadedArchive(inputStream, "extracted", archivePath, path);
+        String path = System.getProperty(APIMgtConstants.JAVA_IO_TMPDIR) 
+                + File.separator + APIMgtConstants.WSDLConstants.WSDL_ARCHIVES_FOLDERNAME 
+                + File.separator + UUID.randomUUID().toString();
+        String archivePath = path + File.separator + APIMgtConstants.WSDLConstants.WSDL_ARCHIVE_FILENAME;
+        String extractedLocation = APIFileUtils.extractUploadedArchive(inputStream,
+                APIMgtConstants.WSDLConstants.EXTRACTED_WSDL_ARCHIVE_FOLDERNAME, archivePath, path);
         WSDLProcessor processor = WSDLProcessFactory.getInstance()
                 .getWSDLProcessor(extractedLocation, apiBuilder.getWsdlUri());
         if (!processor.canProcess()) {

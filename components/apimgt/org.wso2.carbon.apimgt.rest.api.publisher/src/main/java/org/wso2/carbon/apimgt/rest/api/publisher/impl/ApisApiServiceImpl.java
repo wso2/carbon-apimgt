@@ -1198,12 +1198,24 @@ public class ApisApiServiceImpl extends ApisApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-
-            String wsdl = apiPublisher.getWSDLOfAPI(apiId);
-            if (wsdl != null) {
-                return Response.ok(wsdl, MediaType.TEXT_PLAIN).build();  //TODO text/xml content type
+            InputStream wsdlStream = null;
+            String wsdlText = apiPublisher.getAPIWSDL(apiId);
+            if (wsdlText != null) {
+                return Response.ok(wsdlText, MediaType.TEXT_PLAIN).build();  //TODO text/xml content type
             } else {
-                return Response.noContent().build();
+                wsdlStream = apiPublisher.getAPIWSDLArchive(apiId);
+                if (wsdlStream != null) {
+                    API api = apiPublisher.getAPIbyUUID(apiId);
+                    String wsdlFileName =
+                            api.getProvider() + "-" + api.getName() + "-" + api.getVersion() + "-wsdl-archive.zip";
+
+                    return Response.ok(wsdlStream)
+                            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE)
+                            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + wsdlFileName + "\"")
+                            .build();
+                } else {
+                    return Response.noContent().build();
+                }
             }
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving WSDL of API : " + apiId;

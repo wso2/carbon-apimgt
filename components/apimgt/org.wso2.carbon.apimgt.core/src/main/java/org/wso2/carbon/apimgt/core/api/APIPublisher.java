@@ -409,7 +409,9 @@ public interface APIPublisher extends APIManager {
      * @return WSDL of the API as {@link String}
      * @throws APIMgtDAOException if error occurs while accessing the WSDL from the data layer
      */
-    String getWSDLOfAPI(String apiId) throws APIMgtDAOException;
+    String getAPIWSDL(String apiId) throws APIMgtDAOException;
+
+    InputStream getAPIWSDLArchive(String apiId) throws APIMgtDAOException;
     
     String addAPIFromWSDLArchive(API.APIBuilder apiBuilder, InputStream inputStream)
             throws APIManagementException, IOException;

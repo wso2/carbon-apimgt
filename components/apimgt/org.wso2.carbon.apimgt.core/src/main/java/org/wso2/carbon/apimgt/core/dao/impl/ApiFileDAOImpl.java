@@ -358,7 +358,12 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     @Override
-    public String getWSDLOfAPI(String apiId) throws APIMgtDAOException {
+    public String getAPIWSDL(String apiId) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public InputStream getAPIWSDLArchive(String apiId) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 
