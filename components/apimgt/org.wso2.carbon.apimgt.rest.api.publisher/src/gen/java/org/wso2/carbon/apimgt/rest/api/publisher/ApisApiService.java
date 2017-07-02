@@ -161,8 +161,10 @@ public abstract class ApisApiService {
  ,String ifNoneMatch
  , Request request) throws NotFoundException;
     public abstract Response apisImportDefinitionPost(String contentType
+ ,String type
  ,InputStream fileInputStream, FileInfo fileDetail
  ,String url
+ ,String additionalProperties
  ,String ifMatch
  ,String ifUnmodifiedSince
  , Request request) throws NotFoundException;

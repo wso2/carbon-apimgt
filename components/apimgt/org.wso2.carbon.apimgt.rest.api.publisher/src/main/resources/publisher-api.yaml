@@ -633,8 +633,6 @@ paths:
       x-wso2-request: |
         GET https://127.0.0.1:9292/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/wsdl
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      produces:
-        - text/xml
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 329\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"x-wso2-security\": {\"apim\": {\"x-wso2-scopes\": []}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}"
       summary: Get swagger definition
       description: |
@@ -1403,20 +1401,40 @@ paths:
       summary: Import API Definition
       description: |
          This operation can be used to create api from api definition.
+        
+         API definition can be either Swagger or a WSDL
+         
+         WSDL can be speficied as a single file or a ZIP archive with WSDLs and reference XSDs etc.
+         When the type is WSDL, it is a **must** to specify additionalProperties with API's name, version, context and endpoints. See the example for additionalProperties.
       parameters:
-         - in: formData
-           name: file
-           description: Document to upload
-           type: file
-           required: false
-         - in: formData
-           name: url
-           description: Swagger definition from url
-           type: string
-           required: false
-         - $ref: '#/parameters/Content-Type'
-         - $ref: '#/parameters/If-Match'
-         - $ref: '#/parameters/If-Unmodified-Since'
+        - in: formData
+          name: type
+          description: Definition type to upload
+          type: string
+          required: false
+          enum:
+          - SWAGGER
+          - WSDL
+          default: SWAGGER
+        - in: formData
+          name: file
+          description: Definition to upload as a file
+          type: file
+          required: false
+        - in: formData
+          name: url
+          description: Definition url
+          type: string
+          required: false
+        - in: formData
+          name: additionalProperties
+          description: Additional attributes specified as a stringified JSON with API's schema
+          example: "{\r\n   \"name\":\"api1\",\r\n   \"context\":\"/api1\",\r\n   \"version\":\"1.0.0\",\r\n   \"labels\":[\r\n      \"Default\"\r\n   ],\r\n   \"endpoint\":[\r\n      {\r\n         \"inline\":{\r\n            \"name\":\"api1 -- 1.0.0 -- PRODUCTION -- Endpoint\",\r\n            \"type\":\"http\",\r\n            \"endpointSecurity\":{\r\n               \"enabled\":false\r\n            },\r\n            \"endpointConfig\":\"{\\\"serviceUrl\\\":\\\"http://www.webservicex.net/stockquote.asmx\\\"}\"\r\n         },\r\n         \"type\":\"production\"\r\n      }\r\n   ]\r\n}"
+          type: string
+          required: false
+        - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
       tags:
         - API (Collection)
       responses:

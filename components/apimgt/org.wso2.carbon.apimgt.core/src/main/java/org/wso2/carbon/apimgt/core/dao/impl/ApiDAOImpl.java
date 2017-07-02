@@ -919,16 +919,69 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    public void addWSDLForAPI(String apiId, String wsdlContent, String createdBy) throws APIMgtDAOException {
+    public void addOrUpdateWSDL(String apiId, byte[] wsdlContent, String updatedBy) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
-            if (!StringUtils.isEmpty(wsdlContent)) {
-                ApiResourceDAO
-                        .addBinaryResource(connection, apiId, UUID.randomUUID().toString(), ResourceCategory.WSDL_TEXT,
-                                MediaType.TEXT_XML,
-                                new ByteArrayInputStream(wsdlContent.getBytes(StandardCharsets.UTF_8)), createdBy);
-            } else {
-                log.warn("WSDL content to be added is empty for " + apiId);
+            try {
+                connection.setAutoCommit(false);
+                if (!ApiResourceDAO.isResourceExistsForCategory(connection, apiId,
+                        ResourceCategory.WSDL_TEXT)) {
+                    if (ApiResourceDAO.isResourceExistsForCategory(connection, apiId,
+                            ResourceCategory.WSDL_ZIP)) {
+                        removeWSDLArchiveOfAPI(apiId);
+                    }
+                    ApiResourceDAO.addBinaryResource(connection, apiId, UUID.randomUUID().toString(),
+                            ResourceCategory.WSDL_TEXT, MediaType.TEXT_XML,
+                            new ByteArrayInputStream(wsdlContent), updatedBy);
+                } else {
+                    ApiResourceDAO.updateBinaryResourceForCategory(connection, apiId,
+                            ResourceCategory.WSDL_TEXT, new ByteArrayInputStream(wsdlContent), updatedBy);
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new APIMgtDAOException(e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    public void addOrUpdateWSDLArchive(String apiID, InputStream inputStream, String updatedBy)
+            throws APIMgtDAOException {
+        if (inputStream != null) {
+            try (Connection connection = DAOUtil.getConnection()) {
+                try {
+                    connection.setAutoCommit(false);
+                    if (!ApiResourceDAO.isResourceExistsForCategory(connection, apiID,
+                            ResourceCategory.WSDL_ZIP)) {
+                        if (ApiResourceDAO.isResourceExistsForCategory(connection, apiID,
+                                ResourceCategory.WSDL_TEXT)) {
+                            removeWSDLOfAPI(apiID);
+                        }
+                        ApiResourceDAO.addBinaryResource(connection, apiID, UUID.randomUUID().toString(),
+                                ResourceCategory.WSDL_ZIP, MediaType.APPLICATION_OCTET_STREAM, inputStream, updatedBy);
+                    } else {
+                        ApiResourceDAO.updateBinaryResourceForCategory(connection, apiID,
+                                ResourceCategory.WSDL_ZIP, inputStream, updatedBy);
+                    }
+                    connection.commit();
+                } catch (SQLException e) {
+                    connection.rollback();
+                    throw new APIMgtDAOException(e);
+                } finally {
+                    connection.setAutoCommit(DAOUtil.isAutoCommit());
+                }
+            } catch (SQLException e) {
+                throw new APIMgtDAOException(e);
+            }
+        }
+    }
+
+    public void removeWSDLArchiveOfAPI(String apiId) throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()) {
+            ApiResourceDAO.deleteUniqueResourceForCategory(connection, apiId, ResourceCategory.WSDL_ZIP);
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
         }
@@ -961,6 +1014,14 @@ public class ApiDAOImpl implements ApiDAO {
             throw new APIMgtDAOException(e);
         }
         return null;
+    }
+
+    public void removeWSDLOfAPI(String apiId) throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()) {
+            ApiResourceDAO.deleteUniqueResourceForCategory(connection, apiId, ResourceCategory.WSDL_TEXT);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
     }
 
     /**

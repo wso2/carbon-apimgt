@@ -29,11 +29,13 @@ public interface WSDLProcessor {
 
     void init(byte[] wsdlContent) throws APIMgtWSDLException;
 
+    void init(String path, String rootWSDLRelativePath) throws APIMgtWSDLException;
+
     boolean canProcess();
 
     WSDLInfo getWsdlInfo() throws APIMgtWSDLException;
 
-    String readWSDL() throws APIMgtWSDLException;
+    byte[] readWSDL() throws APIMgtWSDLException;
 
     String readWSDL(API api, Label label) throws APIMgtWSDLException;
 

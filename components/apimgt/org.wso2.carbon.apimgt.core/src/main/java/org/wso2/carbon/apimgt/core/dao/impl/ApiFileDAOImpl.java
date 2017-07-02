@@ -363,7 +363,23 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     @Override
-    public void addWSDLForAPI(String apiId, String wsdlContent, String createdBy) throws APIMgtDAOException {
+    public void removeWSDLOfAPI(String apiId) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override public void addOrUpdateWSDL(String apiId, byte[] wsdlContent, String createdBy)
+            throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void addOrUpdateWSDLArchive(String apiID, InputStream inputStream, String updatedBy)
+            throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void removeWSDLArchiveOfAPI(String apiId) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 

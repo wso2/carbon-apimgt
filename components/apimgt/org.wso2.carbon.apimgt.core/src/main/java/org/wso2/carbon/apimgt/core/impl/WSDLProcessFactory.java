@@ -18,11 +18,15 @@
 
 package org.wso2.carbon.apimgt.core.impl;
 
+import org.apache.commons.io.IOUtils;
 import org.wso2.carbon.apimgt.core.api.WSDLProcessor;
 import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.util.APIMWSDLUtils;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,7 +51,18 @@ public class WSDLProcessFactory {
         byte[] wsdlContent = APIMWSDLUtils.getWSDL(wsdlUrl);
         return getWSDLProcessor(wsdlContent);
     }
-    
+
+    public WSDLProcessor getWSDLProcessor(InputStream inputStream) throws APIMgtWSDLException {
+        byte[] wsdlContent;
+        try {
+            wsdlContent = IOUtils.toByteArray(inputStream);
+            return getWSDLProcessor(wsdlContent);
+        } catch (IOException e) {
+            throw new APIMgtWSDLException("Cannot convert WSDL to byte array.", e,
+                    ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
+        }
+    }
+
     public WSDLProcessor getWSDLProcessor(byte[] wsdlContent) throws APIMgtWSDLException {
         for (String clazz : wsdlProcessorClasses) {
             WSDLProcessor processor;
@@ -65,6 +80,44 @@ public class WSDLProcessFactory {
 
         //no processors found if this line reaches
         throw new APIMgtWSDLException("No WSDL processor found to process WSDL content",
+                ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
+    }
+
+    public WSDLProcessor getWSDLProcessor(String path, String rootWSDLFileName) throws APIMgtWSDLException {
+        for (String clazz : wsdlProcessorClasses) {
+            WSDLProcessor processor;
+            try {
+                processor = (WSDLProcessor) Class.forName(clazz).newInstance();
+
+                if (rootWSDLFileName == null) {
+                    rootWSDLFileName = getFirstWSDLFileName(path);
+                }
+                processor.init(path, rootWSDLFileName);
+                if (processor.canProcess()) {
+                    return processor;
+                }
+            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+                throw new APIMgtWSDLException("Error while instantiating " + clazz, e,
+                        ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
+            }
+        }
+
+        //no processors found if this line reaches
+        throw new APIMgtWSDLException("No WSDL processor found to process WSDL content",
+                ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
+    }
+
+    private String getFirstWSDLFileName(String path) throws APIMgtWSDLException {
+        File folder = new File(path);
+        File[] files = folder.listFiles();
+        if (files != null) {
+            for (File f : files) {
+                if (f.getName().endsWith(".wsdl")) {
+                    return f.getName();
+                }
+            }
+        }
+        throw new APIMgtWSDLException("Could not find a valid WSDL file in the archive.",
                 ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
     }
 }

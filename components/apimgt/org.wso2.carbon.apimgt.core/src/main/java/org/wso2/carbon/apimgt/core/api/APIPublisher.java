@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
@@ -35,6 +36,7 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
 import org.wso2.carbon.lcm.sql.beans.LifecycleHistoryBean;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.List;
@@ -401,15 +403,6 @@ public interface APIPublisher extends APIManager {
     void saveSwagger20Definition(String apiId, String jsonText) throws APIManagementException;
 
     /**
-     * Updates the WSDL of an API
-     *
-     * @param apiId UUID of the API
-     * @param wsdlContent WSDL content as {@link String}
-     * @throws APIMgtDAOException if error occurs while updating the WSDL from the data layer
-     */
-    void updateWSDLOfAPI(String apiId, String wsdlContent) throws APIMgtDAOException;
-
-    /**
      * Returns the WSDL of a given API UUID as {@link String}
      * 
      * @param apiId API UUID
@@ -417,15 +410,15 @@ public interface APIPublisher extends APIManager {
      * @throws APIMgtDAOException if error occurs while accessing the WSDL from the data layer
      */
     String getWSDLOfAPI(String apiId) throws APIMgtDAOException;
+    
+    String addAPIFromWSDLArchive(API.APIBuilder apiBuilder, InputStream inputStream)
+            throws APIManagementException, IOException;
 
-    /**
-     * Add a WSDL resource to an API
-     *
-     * @param apiId UUID of API
-     * @param wsdlContent WSDL content as {@link String}
-     * @throws APIMgtDAOException
-     */
-    void addWSDLForAPI(String apiId, String wsdlContent) throws APIMgtDAOException;
+    String addAPIFromWSDLFile(API.APIBuilder apiBuilder, InputStream inputStream) throws APIManagementException,
+            IOException;
+
+    String addAPIFromWSDLURL(API.APIBuilder apiBuilder, String wsdlUrl) throws APIManagementException,
+            IOException;
 
     /**
      * Get list of policies of an particular tier level.

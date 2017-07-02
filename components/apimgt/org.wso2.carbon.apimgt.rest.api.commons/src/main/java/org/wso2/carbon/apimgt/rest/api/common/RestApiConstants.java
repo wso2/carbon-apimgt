@@ -111,6 +111,9 @@ public class RestApiConstants {
     public static final String THROTTLING_CUSTOM_ATTRIBUTE_NAME = "name";
     public static final String THROTTLING_CUSTOM_ATTRIBUTE_VALUE = "value";
 
+    public static final String IMPORT_DEFINITION_TYPE_SWAGGER = "SWAGGER";
+    public static final String IMPORT_DEFINITION_TYPE_WSDL = "WSDL";
+
     /**
      * Type of UUF apps in system
      */

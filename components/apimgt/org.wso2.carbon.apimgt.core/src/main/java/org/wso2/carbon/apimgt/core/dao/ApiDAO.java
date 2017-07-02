@@ -530,14 +530,41 @@ public interface ApiDAO {
     String getWSDLOfAPI(String apiId) throws APIMgtDAOException;
 
     /**
+     * Remove WSDL text resource of a particular API
+     * 
+     * @param apiId UUID of API
+     * @throws APIMgtDAOException if error occurs while deleting the WSDL from the data layer
+     */
+    void removeWSDLOfAPI(String apiId) throws APIMgtDAOException;
+
+    /**
      * Add a WSDL resource to an API
      * 
      * @param apiId UUID of API
-     * @param wsdlContent WSDL content as {@link String}
+     * @param wsdlContent WSDL content as byte array
      * @param createdBy the user who adds the WSDL
      * @throws APIMgtDAOException
      */
-    void addWSDLForAPI(String apiId, String wsdlContent, String createdBy) throws APIMgtDAOException;
+    void addOrUpdateWSDL(String apiId, byte[] wsdlContent, String createdBy) throws APIMgtDAOException;
+
+    /**
+     * Add WSDL archive if not exist. If Text WSDL exists, it will be removed from the DB.
+     * If a WSDL archive already exists, it will be updated with the new content. 
+     * 
+     * @param apiID api uuid
+     * @param inputStream WSDL archive input stream
+     * @param updatedBy user who performs the action
+     * @throws APIMgtDAOException when updating the WSDL failed in DB level
+     */
+    void addOrUpdateWSDLArchive(String apiID, InputStream inputStream, String updatedBy) throws APIMgtDAOException;
+
+    /**
+     * Remove WSDL archive of an API
+     * 
+     * @param apiId UUID of API
+     * @throws APIMgtDAOException if error occurs while deleting the WSDL archive from the data layer
+     */
+    void removeWSDLArchiveOfAPI(String apiId) throws APIMgtDAOException;
 
     /**
      * Get gateway configuration of a given API

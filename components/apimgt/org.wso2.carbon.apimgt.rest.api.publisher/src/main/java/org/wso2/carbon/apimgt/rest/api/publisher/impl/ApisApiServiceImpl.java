@@ -1,6 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -1426,46 +1427,104 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     /**
-     * Import an API from from a swagger definition
-     *
-     * @param fileInputStream   file content stream
-     * @param fileDetail        meta infomation about the file
-     * @param url               swagger url
-     * @param contentType       Content-Type header value
-     * @param ifMatch           If-Match header value
+     * Import an API from a Swagger or WSDL
+     * 
+     * @param contentType Content-Type header value
+     * @param type definition type. If not specified, default will be SWAGGER
+     * @param fileInputStream file content stream, can be either archive or a single text file
+     * @param fileDetail file details
+     * @param url URL of the definition
+     * @param additionalProperties Additional attributes specified as a stringified JSON with API's schema
+     * @param ifMatch If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @param request           msf4j request object
+     * @param request msf4j request object
      * @return Imported API
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response apisImportDefinitionPost(String contentType, InputStream fileInputStream, FileInfo fileDetail,
-                                             String url,
-                                             String ifMatch, String ifUnmodifiedSince, Request request)
-            throws NotFoundException {
+    public Response apisImportDefinitionPost(String contentType, String type, InputStream fileInputStream,
+            FileInfo fileDetail, String url, String additionalProperties, String ifMatch, String ifUnmodifiedSince,
+            Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
+            if (StringUtils.isBlank(type)) {
+                type = RestApiConstants.IMPORT_DEFINITION_TYPE_SWAGGER;
+            }
+
+            if (!RestApiConstants.IMPORT_DEFINITION_TYPE_SWAGGER.equals(type)
+                    && !RestApiConstants.IMPORT_DEFINITION_TYPE_WSDL.equals(type)) {
+                String errorMessage =
+                        "Unsupported definition type. Only " + RestApiConstants.IMPORT_DEFINITION_TYPE_SWAGGER + " or "
+                                + RestApiConstants.IMPORT_DEFINITION_TYPE_WSDL + " is allowed";
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(ExceptionCodes.UNSUPPORTED_API_DEFINITION_TYPE);
+                log.error(errorMessage);
+                return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+            }
+
+            if (url == null && fileInputStream == null){
+                String msg = "Either 'file' or 'url' should be specified";
+                log.error(msg);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900700L, msg);
+                return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+            }
 
             if (fileInputStream != null && url != null) {
                 String msg = "Only one of 'file' and 'url' should be specified";
                 log.error(msg);
-                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900700L, msg);
                 return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+            }
+
+            API.APIBuilder apiBuilder = null;
+            APIDTO additionalPropertiesAPI = null;
+            if (!StringUtils.isBlank(additionalProperties)) {
+                ObjectMapper mapper = new ObjectMapper();
+                additionalPropertiesAPI = mapper.readValue(additionalProperties, APIDTO.class);
+                apiBuilder = MappingUtil.toAPI(additionalPropertiesAPI);
             }
 
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String uuid = "";
-            if (fileInputStream != null) {
-                uuid = apiPublisher.addApiFromDefinition(fileInputStream);
-            } else if (url != null) {
-                URL swaggerUrl = new URL(url);
-                HttpURLConnection urlConn = (HttpURLConnection) swaggerUrl.openConnection();
-                uuid = apiPublisher.addApiFromDefinition(urlConn);
-            } else {
-                String msg = "Either 'file' or 'inlineContent' should be specified";
-                log.error(msg);
-                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
-                return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+
+            if (RestApiConstants.IMPORT_DEFINITION_TYPE_SWAGGER.equals(type)) {
+                if (fileInputStream != null) {
+                    uuid = apiPublisher.addApiFromDefinition(fileInputStream);
+                } else {
+                    URL swaggerUrl = new URL(url);
+                    HttpURLConnection urlConn = (HttpURLConnection) swaggerUrl.openConnection();
+                    uuid = apiPublisher.addApiFromDefinition(urlConn);
+                }
+            } else if (RestApiConstants.IMPORT_DEFINITION_TYPE_WSDL.equals(type)) {
+
+                //In this case, additionalPropertiesAPI must not be null since we need attributes like name, 
+                // context, version when creating an API from WSDL 
+                if (additionalPropertiesAPI != null) {
+                    if (fileInputStream != null) {
+                        if (fileDetail.getFileName() == null) {
+                            String msg = "File name cannot be null.";
+                            log.error(msg);
+                            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900700L, msg);
+                            return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+                        }
+                        if (fileDetail.getFileName().endsWith(".zip")) {
+                            uuid = apiPublisher.addAPIFromWSDLArchive(apiBuilder, fileInputStream);
+                        } else if (fileDetail.getFileName().endsWith(".wsdl")) {
+                            uuid = apiPublisher.addAPIFromWSDLFile(apiBuilder, fileInputStream);
+                        } else {
+                            String msg = "Unsupported file extension type: " + fileDetail.getFileName();
+                            log.error(msg);
+                            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900700L, msg);
+                            return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+                        }
+                    } else {
+                        uuid = apiPublisher.addAPIFromWSDLURL(apiBuilder, url);
+                    }
+                } else {
+                    String msg = "'additionalProperties' should be specified when creating an API from WSDL";
+                    log.error(msg);
+                    ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900700L, msg);
+                    return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+                }
             }
             API returnAPI = apiPublisher.getAPIbyUUID(uuid);
             return Response.status(Response.Status.CREATED).entity(MappingUtil.toAPIDto(returnAPI)).build();

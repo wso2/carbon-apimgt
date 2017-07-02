@@ -42,6 +42,7 @@ import javax.wsdl.xml.WSDLReader;
 import javax.wsdl.xml.WSDLWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -108,22 +109,20 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
         return wsdlInfo;
     }
 
-    public String readWSDL() throws APIMgtWSDLException {
-        WSDLWriter writer = getWsdlFactoryInstance().newWSDLWriter();
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        try {
-            writer.writeWSDL(wsdlDefinition, byteArrayOutputStream);
-        } catch (WSDLException e) {
-            throw new APIMgtWSDLException("Error while stringifying WSDL definition", e,
-                    ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
-        }
-        return byteArrayOutputStream.toString();
+    public byte[] readWSDLBytes() throws APIMgtWSDLException {
+        ByteArrayOutputStream byteArrayOutputStream = getWSDLByteArrayOutputStream();
+        return byteArrayOutputStream.toByteArray();
+    }
+
+    public byte[] readWSDL() throws APIMgtWSDLException {
+        ByteArrayOutputStream byteArrayOutputStream = getWSDLByteArrayOutputStream();
+        return byteArrayOutputStream.toByteArray();
     }
 
     public String readWSDL(API api, Label label) throws APIMgtWSDLException {
         if (label!= null) {
             updateEndpoints(label.getAccessUrls(), api);
-            return readWSDL();
+            return new String(readWSDL());
         }
         return null;
     }
@@ -136,6 +135,29 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
     @Override
     public String readWSDLArchive(String labelName) throws APIMgtWSDLException {
         return null;
+    }
+
+    @Override
+    public void init(String path, String rootWSDLRelativePath) throws APIMgtWSDLException {
+        WSDLReader wsdlReader = getWsdlFactoryInstance().newWSDLReader();
+
+        // switch off the verbose mode
+        wsdlReader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
+        wsdlReader.setFeature(JAVAX_WSDL_IMPORT_DOCUMENTS, false);
+        try {
+            
+            if (path != null && !path.endsWith(File.separator)) {
+                path += File.separator;
+            }
+            path += rootWSDLRelativePath;
+            wsdlDefinition = wsdlReader.readWSDL(null, path);
+        } catch (WSDLException e) {
+            //This implementation class cannot process the WSDL.
+            log.debug("Cannot process the WSDL by " + this.getClass().getName(), e);
+            canProcess = false;
+            return;
+        }
+        canProcess = true;
     }
 
     /**
@@ -238,5 +260,17 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
         if (!StringUtils.isBlank(selectedUrl)) {
             updateEndpointUrls(selectedUrl);
         }
+    }
+
+    private ByteArrayOutputStream getWSDLByteArrayOutputStream() throws APIMgtWSDLException {
+        WSDLWriter writer = getWsdlFactoryInstance().newWSDLWriter();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try {
+            writer.writeWSDL(wsdlDefinition, byteArrayOutputStream);
+        } catch (WSDLException e) {
+            throw new APIMgtWSDLException("Error while stringifying WSDL definition", e,
+                    ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
+        }
+        return byteArrayOutputStream;
     }
 }

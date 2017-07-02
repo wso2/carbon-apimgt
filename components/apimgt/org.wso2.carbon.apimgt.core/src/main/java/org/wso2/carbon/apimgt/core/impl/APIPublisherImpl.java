@@ -48,6 +48,7 @@ import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
@@ -71,6 +72,7 @@ import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.template.APIConfigContext;
 import org.wso2.carbon.apimgt.core.template.APITemplateException;
 import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
+import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.APILCWorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
@@ -82,6 +84,9 @@ import org.wso2.carbon.lcm.core.impl.LifecycleEventManager;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
 import org.wso2.carbon.lcm.sql.beans.LifecycleHistoryBean;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -213,7 +218,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         if (StringUtils.isEmpty(apiBuilder.getId())) {
             apiBuilder.id(UUID.randomUUID().toString());
         }
-        String wsdlString = null;
+        byte[] wsdlContentBytes = null;
         LocalDateTime localDateTime = LocalDateTime.now();
         apiBuilder.createdTime(localDateTime);
         apiBuilder.lastUpdatedTime(localDateTime);
@@ -232,11 +237,12 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         getUsername());
                 apiBuilder.associateLifecycle(lifecycleState);
 
+                /*
                 if (!StringUtils.isBlank(apiBuilder.getWsdlUri())) {
                     WSDLProcessor processor = WSDLProcessFactory.getInstance()
                             .getWSDLProcessor(apiBuilder.getWsdlUri());
-                    wsdlString = processor.readWSDL();
-                }
+                    wsdlContentBytes = processor.readWSDL();
+                }*/
 
                 createUriTemplateList(apiBuilder, false);
 
@@ -309,9 +315,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
                         "successfully.", log);
 
-                if (!StringUtils.isEmpty(wsdlString)) {
-                    addWSDLForAPI(apiBuilder.getId(), wsdlString);
-                }
+                //addOrUpdateWSDL(apiBuilder.getId(), wsdlContentBytes);
 
                 // 'API_M Functions' related code
                 //Create a payload with event specific details
@@ -1444,35 +1448,74 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
     }
 
-    public void updateWSDLOfAPI(String apiId, String wsdlContent) throws APIMgtDAOException {
-        getApiDAO().updateWSDLOfAPI(apiId, wsdlContent, getUsername());
-    }
-
     public String getWSDLOfAPI(String apiId) throws APIMgtDAOException {
         return getApiDAO().getWSDLOfAPI(apiId);
     }
 
-    public void addWSDLForAPI(String apiId, String wsdlContent) throws APIMgtDAOException {
-        getApiDAO().addWSDLForAPI(apiId, wsdlContent, getUsername());
+    public String addAPIFromWSDLArchive(API.APIBuilder apiBuilder, InputStream inputStream)
+            throws APIManagementException, IOException {
+        String path = System.getProperty("java.io.tmpdir") + File.separator + "WSDL-archives" + File.separator + UUID
+                .randomUUID().toString();
+        String archivePath = path + File.separator + "wsdl-archive.zip";
+        String extractedLocation = APIFileUtils
+                .extractUploadedArchive(inputStream, "extracted", archivePath, path);
+        WSDLProcessor processor = WSDLProcessFactory.getInstance()
+                .getWSDLProcessor(extractedLocation, apiBuilder.getWsdlUri());
+        if (!processor.canProcess()) {
+            throw new APIMgtWSDLException("Unable to process WSDL by the processor " + processor.getClass().getName(),
+                    ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
+        }
+
+        if (apiBuilder.getEndpoint() == null || apiBuilder.getEndpoint().entrySet().isEmpty()) {
+            //TODO: getUniqueEndpoints from processor, get first one and assign as API's endpoints for both PROD/SAND
+        }
+        String uuid = addAPI(apiBuilder);
+        try (InputStream fileInputStream = new FileInputStream(archivePath)) {
+            getApiDAO().addOrUpdateWSDLArchive(uuid, fileInputStream, getUsername());
+        }
+        return uuid;
     }
 
-//    public String getWSDLOfAPIForLabel(String apiId, String labelName)
-//            throws APIMgtDAOException, LabelException, APINotFoundException {
-//        String rawWsdlContent = getApiDAO().getWSDLOfAPI(apiId);
-//        API api = getAPIbyUUID(apiId);
-//        if (api != null) {
-//            List<Label> labelList = getLabelDAO().getLabelsByName(Collections.singletonList(labelName));
-//            if (labelList.size() > 0) {
-//                Label label = labelList.get(0);
-//                String selectedEndpointUrl = label.getAccessUrls().get(0);
-//
-//            } else {
-//                throw new LabelException("No labels exists for " + labelName, ExceptionCodes.LABEL_NOT_FOUND);
-//            }
-//        } else {
-//            throw new APINotFoundException("API with UUID " + apiId + " not found.", ExceptionCodes.API_NOT_FOUND);
-//        }
-//    }
+    public String addAPIFromWSDLFile(API.APIBuilder apiBuilder, InputStream inputStream) throws APIManagementException,
+            IOException {
+
+        byte[] wsdlContent = IOUtils.toByteArray(inputStream);
+        WSDLProcessor processor = WSDLProcessFactory.getInstance().getWSDLProcessor(wsdlContent);
+        if (!processor.canProcess()) {
+            throw new APIMgtWSDLException("Unable to process WSDL by the processor " + processor.getClass().getName(),
+                    ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
+        }
+        
+        if (apiBuilder.getEndpoint() == null || apiBuilder.getEndpoint().entrySet().isEmpty()) {
+            //TODO: getUniqueEndpoints from processor, get first one and assign as API's endpoints for both PROD/SAND
+        }
+        String uuid = addAPI(apiBuilder);
+        addOrUpdateWSDL(uuid, wsdlContent);
+        return uuid;
+    }
+
+    public String addAPIFromWSDLURL(API.APIBuilder apiBuilder, String wsdlUrl) throws APIManagementException,
+            IOException {
+        WSDLProcessor processor = WSDLProcessFactory.getInstance().getWSDLProcessor(wsdlUrl);
+        if (!processor.canProcess()) {
+            throw new APIMgtWSDLException("Unable to process WSDL by the processor " + processor.getClass().getName(),
+                    ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
+        }
+
+        if (apiBuilder.getEndpoint() == null || apiBuilder.getEndpoint().entrySet().isEmpty()) {
+            //TODO: getUniqueEndpoints from processor, get first one and assign as API's endpoints for both PROD/SAND
+        }
+
+        String uuid = addAPI(apiBuilder);
+        byte[] wsdlContentBytes = processor.readWSDL();
+        addOrUpdateWSDL(uuid, wsdlContentBytes);
+        return uuid;
+    }
+
+
+    public void addOrUpdateWSDL(String apiId, byte[] wsdlContent) throws APIMgtDAOException {
+        getApiDAO().addOrUpdateWSDL(apiId, wsdlContent, getUsername());
+    }
 
 
     /**
