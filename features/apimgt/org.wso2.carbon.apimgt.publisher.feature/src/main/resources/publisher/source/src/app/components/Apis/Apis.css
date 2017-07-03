@@ -50,3 +50,18 @@ h2 span{
 .api-heading{
     float: left;
 }
+.custom-card.ant-card{
+    margin-right:10px;
+    min-height:200px;
+    height:200px;
+    margin-bottom:10px;
+    background:#efefef;
+}
+.custom-card.ant-card .ant-card-head{
+    background: #dfdfdf;
+}
+.card-footer{
+    position: absolute;
+    bottom: 0;
+    padding: 10px 0;
+}
