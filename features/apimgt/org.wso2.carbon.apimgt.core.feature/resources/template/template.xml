@@ -2,6 +2,10 @@ package $package;
 import ballerina.net.http;
 import ballerina.lang.messages;
 import org.wso2.carbon.apimgt.gateway.constants;
+import org.wso2.carbon.apimgt.gateway.handler;
+import ballerina.lang.errors;
+import ballerina.lang.system;
+import org.wso2.carbon.apimgt.gateway.event.analytics.fault;
 
 @http:BasePath{value:"$apiContext"}
 service $serviceName {
@@ -62,6 +66,10 @@ service $serviceName {
 		boolean isThrottled = isrequestThrottled(m);
 		if(!isThrottled){
 		string endpointType = messages:getProperty(m,constants:KEY_TYPE);
+
+handler:mediateIn(m);
+handler:mediateEndpointRequest(m);
+	try{
 		if (endpointType == "PRODUCTION") {
 		#if($productionEndpoint.applicableLevel == "API")
 		response = http:ClientConnector.execute(${apiResource.templateId}ProductionEndpoint, "$apiResource.httpVerb.toLowerCase()", "", m);
@@ -74,8 +82,18 @@ service $serviceName {
 		#else
 		response = execute_endpoint("${sandboxEndpoint.name}","$apiResource.httpVerb.toLowerCase()", "", m);
 		#end
-
 		}
+	} catch (errors:Error e) {
+			system:println(e.msg);
+			fault:mediate(m, e);
+			response = {};
+		    messages:setStringPayload(response, "Internal error occured");
+			http:setStatusCode (response, 500);
+		    reply response;
+	}
+	handler:mediateEndpointResponse(response);
+	handler:mediateOut(m, response);
+
 		}
 		}
 		reply response;

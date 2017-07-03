@@ -187,7 +187,6 @@ function publishEvent(message m, string userId, string applicationId, string api
     dto:ThrottleEventDTO throttleEventDTO = {};
 
     throttleEventHolderDTO.streamName = "PreRequestStream";
-    throttleEventHolderDTO.executionPlanName = "requestPreProcessorExecutionPlan";
     throttleEventHolderDTO.timestamp = system:currentTimeMillis();
 
     throttleEventDTO.messageID = messageID;
