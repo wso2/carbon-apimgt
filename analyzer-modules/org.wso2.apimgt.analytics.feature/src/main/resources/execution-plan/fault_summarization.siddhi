@@ -1,0 +1,103 @@
+@App:name('fault_summarization')
+
+@source(type='inMemory', topic='apim.analytics.fault', @map(type='passThrough'))
+Define stream FaultStream (
+api STRING,
+context STRING,
+version STRING,
+publisher STRING,
+subscription_policy STRING,
+uri_template STRING,
+method STRING,
+consumer_key STRING,
+application_name STRING,
+application_id STRING,
+application_owner STRING,
+user_id STRING,
+subscriber STRING,
+fault_count INT,
+fault_event_time LONG,
+gateway_domain STRING,
+gateway_ip STRING,
+fault_reason STRING,
+host_name STRING
+);
+
+@Store(type="rdbms", jdbc.url="jdbc:h2:./database/AM_STAT_DB;DB_CLOSE_ON_EXIT=FALSE;LOCK_TIMEOUT=60000;AUTO_SERVER=TRUE",
+username="wso2carbon",
+password="wso2carbon",field.length="api:254", pool.properties="driverClassName:org.h2.Driver" )
+@PrimaryKey("api, version, publisher, context, consumer_key, application_name, user_id, uri_template, method, year,month, day, hour, minute")
+define table api_fault_summary (api string, version string, publisher string, context string, consumer_key string,
+application_name string, user_id string, uri_template string, method string, fault_count long, time long, year int ,
+month int, day int, hour int, minute int);
+
+-- per second fault
+from FaultStream#window.externalTimeBatch(fault_event_time, 1 sec, 0, 10 sec, true)
+select fault_event_time as startTime, api, version, publisher, context, consumer_key, application_name, user_id,
+uri_template, method, max(fault_event_time) as faultTime, count() as total_fault_count
+group by api, version, publisher, context, consumer_key, application_name, user_id, uri_template, method
+insert into perSecondFaultTemp;
+
+from perSecondFaultTemp
+select (startTime - (startTime % 1000)) as startTime,
+convert((startTime - (startTime % 1000)), 'string') as facetStartTime,
+time:extract(startTime, 'year') as year,
+time:extract(startTime, 'month') as month,
+time:extract(startTime, 'day') as day,
+time:extract(startTime, 'hour') as hour,
+time:extract(startTime, 'minute') as minute,
+time:extract(startTime, 'second') as second,
+api, version, publisher, context, consumer_key, application_name, user_id, uri_template, method,
+faultTime, total_fault_count
+insert into perSecondFault;
+
+
+-- per minute fault
+from perSecondFault
+select startTime,
+str:concat(facetStartTime, '_', api, '_', version, '_', publisher, '_', context, '_', consumer_key, '_',
+    uri_template, '_', method, '_', user_id) as uniqueId,
+year, month, day, hour, minute, second, consumer_key, context, api, version, uri_template, method,
+faultTime, user_id, publisher, total_fault_count, application_name
+insert into perSecondFaultWithUniqueId;
+
+/*from perSecondFaultWithUniqueId#window.uniqueExternalTimeBatch(uniqueId, startTime, 60 sec, 59999 millisec, 10 sec, true)*/
+from perSecondFaultWithUniqueId#window.externalTimeBatch(startTime, 60 sec, 59999 millisec, 10 sec, true)
+select startTime, consumer_key, context, api, version, uri_template, method,
+max(faultTime) as faultTime, user_id, publisher, sum(total_fault_count) as total_fault_count,
+application_name
+group by consumer_key, context, api, version, user_id, publisher, uri_template, method
+insert into perMinuteFaultTemp;
+
+
+from perMinuteFaultTemp select
+api, context, version, publisher, uri_template, method, consumer_key, application_name,
+user_id, total_fault_count, faultTime as fault_time,
+time:extract(startTime, 'year') as year,
+time:extract(startTime, 'month') as month,
+time:extract(startTime, 'day') as day,
+time:extract(startTime, 'hour') as hour,
+time:extract(startTime, 'minute') as minute
+insert into perMinuteFault;
+
+@info(name = 'query1')
+from perMinuteFault
+select api, version, publisher, context, consumer_key, application_name, user_id , uri_template, method,
+total_fault_count as fault_count, fault_time as time,
+year, month, day, hour, minute
+update or insert into api_fault_summary
+on api_fault_summary.api == api
+and api_fault_summary.version == version
+and api_fault_summary.publisher == publisher
+and api_fault_summary.context == context
+and api_fault_summary.consumer_key == consumer_key
+and api_fault_summary.application_name == application_name
+and api_fault_summary.user_id == user_id
+and api_fault_summary.uri_template == uri_template
+and api_fault_summary.method == method
+and api_fault_summary.year == year
+and api_fault_summary.month == month
+and api_fault_summary.day == day
+and api_fault_summary.hour == hour
+and api_fault_summary.minute == minute
+;
