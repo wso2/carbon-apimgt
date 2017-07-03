@@ -29,8 +29,6 @@ function mediate (message m, message res) {
     int backend_latency = current_time - backend_start_time;
 
     dto:EventHolderDTO eventHolderDTO = {};
-    eventHolderDTO.streamName = "ResponseStream";
-    eventHolderDTO.executionPlanName = "analytics_events_pre_process";
     eventHolderDTO.timestamp = system:currentTimeMillis();
 
     dto:RequestEventDTO requestEventDTO = {};
