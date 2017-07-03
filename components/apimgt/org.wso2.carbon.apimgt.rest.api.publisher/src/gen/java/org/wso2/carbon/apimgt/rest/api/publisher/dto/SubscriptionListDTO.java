@@ -53,7 +53,7 @@ public class SubscriptionListDTO   {
    * Link to the next subset of resources qualified. Empty if no more resources are to be returned. 
    * @return next
   **/
-  @ApiModelProperty(example = "/subscriptions?limit&#x3D;1&amp;offset&#x3D;2&amp;apiId&#x3D;01234567-0123-0123-0123-012345678901&amp;groupId&#x3D;", value = "Link to the next subset of resources qualified. Empty if no more resources are to be returned. ")
+  @ApiModelProperty(example = "/subscriptions?limit&#x3D;1&amp;offset&#x3D;2&amp;apiId&#x3D;01234567-0123-0123-0123-012345678901", value = "Link to the next subset of resources qualified. Empty if no more resources are to be returned. ")
   public String getNext() {
     return next;
   }
@@ -71,7 +71,7 @@ public class SubscriptionListDTO   {
    * Link to the previous subset of resources qualified. Empty if current subset is the first subset returned. 
    * @return previous
   **/
-  @ApiModelProperty(example = "/subscriptions?limit&#x3D;1&amp;offset&#x3D;0&amp;apiId&#x3D;01234567-0123-0123-0123-012345678901&amp;groupId&#x3D;", value = "Link to the previous subset of resources qualified. Empty if current subset is the first subset returned. ")
+  @ApiModelProperty(example = "/subscriptions?limit&#x3D;1&amp;offset&#x3D;0&amp;apiId&#x3D;01234567-0123-0123-0123-012345678901", value = "Link to the previous subset of resources qualified. Empty if current subset is the first subset returned. ")
   public String getPrevious() {
     return previous;
   }

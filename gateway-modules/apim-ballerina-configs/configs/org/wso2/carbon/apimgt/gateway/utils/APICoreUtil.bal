@@ -104,11 +104,27 @@ function getEndpoints () (json) {
     }
     return endpointList;
 }
+function getBlockConditions () (json) {
 
+    string apiCoreURL;
+    message request = {};
+    message response = {};
+    json blockConditionList;
+    try {
+        http:ClientConnector client = create http:ClientConnector(getAPICoreURL());
+        string query = "?limit=-1";
+        response = http:ClientConnector.get(client, "/api/am/core/v1.0/blacklist" + query, request);
+        blockConditionList = messages:getJsonPayload(response);
+        return blockConditionList;
+    } catch (errors:Error e) {
+        system:println("Error occurred while retrieving gateway APIs from API Core. " + e.msg);
+        throw e;
+    }
+    return blockConditionList;
+}
 function loadGlobalEndpoints () {
 
     json endpoints = getEndpoints();
-    system:println(endpoints);
     int index = 0;
     int count = (int)endpoints.count;
     json endpointList = endpoints.list;
@@ -117,6 +133,20 @@ function loadGlobalEndpoints () {
 
         dto:EndpointDto endpoint = fromJsonToEndpointDto(endpointList[index]);
         holder:putIntoEndpointCache(endpoint);
+        index = index+1;
+    }
+}
+function loadBlockConditions () {
+
+    json blockConditions = getBlockConditions();
+    int index = 0;
+    int count = (int)blockConditions.count;
+    json blockConditionList = blockConditions.list;
+
+    while (index < count) {
+
+        dto:BlockConditionDto condition = fromJsonToBlockConditionDto(blockConditionList[index]);
+        holder:addBlockConditions(condition);
         index = index+1;
     }
 }

@@ -360,7 +360,8 @@ public interface APIMgtAdminService {
     enum PolicyLevel {
         api,
         application,
-        subscription
+        subscription,
+        custom
     }
 
     /**

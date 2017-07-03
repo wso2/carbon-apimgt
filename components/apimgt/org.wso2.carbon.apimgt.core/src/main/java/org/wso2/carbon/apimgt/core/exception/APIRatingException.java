@@ -20,10 +20,10 @@ package org.wso2.carbon.apimgt.core.exception;
  */
 public class APIRatingException extends APIManagementException {
 
-    public APIRatingException(String msg, Throwable e, ExceptionCodes code) {
+    public APIRatingException(String msg, Throwable e, ErrorHandler code) {
         super(msg, e, code);
     }
-    public APIRatingException(String msg, ExceptionCodes code) {
+    public APIRatingException(String msg, ErrorHandler code) {
         super(msg, code);
     }
 

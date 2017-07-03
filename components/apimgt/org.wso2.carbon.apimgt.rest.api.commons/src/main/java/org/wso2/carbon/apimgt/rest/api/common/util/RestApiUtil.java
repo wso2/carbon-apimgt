@@ -70,35 +70,6 @@ public class RestApiUtil {
     }
 
     /**
-     * Returns the current logged in consumer's group id
-     *
-     * @return group id of the current logged in user.
-     */
-    @SuppressWarnings("unchecked")
-    public static String getLoggedInUserGroupId() {
-        //        String username = RestApiUtil.getLoggedInUsername();
-        //        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-        //        JSONObject loginInfoJsonObj = new JSONObject();
-        //        try {
-        //            APIStore apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-        //            loginInfoJsonObj.put("user", username);
-        //            if (tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-        //                loginInfoJsonObj.put("isSuperTenant", true);
-        //            } else {
-        //                loginInfoJsonObj.put("isSuperTenant", false);
-        //            }
-        //            String loginInfoString = loginInfoJsonObj.toJSONString();
-        //            return apiConsumer.getGroupIds(loginInfoString);
-        //        } catch (APIManagementException e) {
-        //            String errorMsg = "Unable to get groupIds of user " + username;
-        //            handleInternalServerError(errorMsg, e, log);
-        return "";
-        //       }
-    }
-
-
-
-    /**
      * Logs the error, builds a BadRequestException with specified details and throws it
      *
      * @param msg error message
@@ -265,15 +236,12 @@ public class RestApiUtil {
      *
      * @param offset  starting index
      * @param limit   max number of objects returned
-     * @param groupId groupId of the Application
      * @return constructed paginated url
      */
-    public static String getApplicationPaginatedURL(Integer offset, Integer limit, String groupId) {
-        groupId = groupId == null ? "" : groupId;
+    public static String getApplicationPaginatedURL(Integer offset, Integer limit) {
         String paginatedURL = RestApiConstants.APPLICATIONS_GET_PAGINATION_URL;
         paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
         paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
-        paginatedURL = paginatedURL.replace(RestApiConstants.GROUPID_PARAM, groupId);
         return paginatedURL;
     }
 

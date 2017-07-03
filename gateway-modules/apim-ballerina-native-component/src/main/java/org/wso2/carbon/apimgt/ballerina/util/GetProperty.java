@@ -31,7 +31,7 @@ import org.ballerinalang.natives.annotations.ReturnType;
 /**
  * Ballerina function to set a message property.
  * <br>
- * ballerina.model.messages:getProperty
+ * org.wso2.carbon.apimgt.ballerina.util:getProperty
  */
 @BallerinaFunction(
         packageName = "org.wso2.carbon.apimgt.ballerina.util",

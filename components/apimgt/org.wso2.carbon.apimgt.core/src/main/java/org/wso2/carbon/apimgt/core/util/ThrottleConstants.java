@@ -92,8 +92,6 @@ public final class ThrottleConstants {
     public static final String BILLING_PLAN_FREE = "FREE";
 
     //    need to be used with siddhi M4 onward
-    //    public static final String DAS_REST_API_PATH_ARTIFACT_DEPLOY = "/siddhi-apps";
-    public static final String DAS_REST_API_PATH_ARTIFACT_DEPLOY = "/siddhi/artifact/deploy";
-    public static final String DAS_REST_API_PATH_ARTIFACT_LIST = "/siddhi/artifact/list";
+    public static final String DAS_REST_API_PATH_ARTIFACT_DEPLOY = "/siddhi-apps/";
 
 }

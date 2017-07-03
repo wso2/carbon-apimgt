@@ -350,10 +350,11 @@ public class MappingUtil {
         ApplicationDTO applicationDTO = new ApplicationDTO();
         applicationDTO.setApplicationId(application.getId());
         applicationDTO.setDescription(application.getDescription());
-        applicationDTO.setGroupId(application.getGroupId());
         applicationDTO.setName(application.getName());
         applicationDTO.setSubscriber(application.getCreatedUser());
-        applicationDTO.setThrottlingTier(application.getPolicy().getPolicyName());
+        if (application.getPolicy() != null) {
+            applicationDTO.setThrottlingTier(application.getPolicy().getPolicyName());
+        }
         return applicationDTO;
     }
 

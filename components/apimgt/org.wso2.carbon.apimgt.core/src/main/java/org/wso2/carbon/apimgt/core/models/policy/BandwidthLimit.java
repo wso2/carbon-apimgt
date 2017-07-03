@@ -55,4 +55,18 @@ public class BandwidthLimit extends Limit {
         return "BandwidthLimit [dataAmount=" + dataAmount + ", dataUnit=" + dataUnit + ", toString()="
                 + super.toString() + "]";
     }
+
+    /**
+     * To get the data amount in single standard unit.
+     *
+     * @return
+     */
+    public long getStandardDataAmount() {
+        if (PolicyConstants.MB.equalsIgnoreCase(dataUnit)) {
+            return (long) dataAmount * 1024 * 1024;
+        } else if (PolicyConstants.KB.equalsIgnoreCase(dataUnit)) {
+            return (long) dataAmount * 1024;
+        }
+        return dataAmount;
+    }
 }

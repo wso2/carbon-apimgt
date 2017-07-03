@@ -77,25 +77,31 @@ public class LogInServiceTest {
         wireMockRule.start();
 
         // Mock service for key manager DCR endpoint
-        wireMockRule.stubFor(post(urlEqualTo("/identity/connect/register/")).withBasicAuth("admin", "admin")
-                .withRequestBody(equalToJson("{\"client_name\":\"login_application\"}", true, true)).willReturn(
-                        aResponse().withStatus(201).withHeader("Content-Type", "application/json").withBody(
-                                "{\"client_name\":\"publisher_application\","
-                                        + "\"client_id\":\"09261007-fd34-45c7-b950-c08f194773e7\","
-                                        + "\"client_secret\":\"9e38b1a4-08a1-44db-a52d-fc7c751bd742\","
-                                        + "\"redirect_uris\":[\"\"],\"grant_types\":[\"password\","
-                                        + "\"refresh_token\"]}")));
+        wireMockRule.stubFor(post(urlEqualTo("/identity/connect/register/"))
+                .withBasicAuth("admin", "admin")
+                .withRequestBody(equalToJson("{\"client_name\":\"login_Application\"," +
+                        "\"redirect_uris\":[\"http://temporary.callback/url\"],\"grant_types\":[\"password\"," +
+                        "\"refresh_token\"],\"userinfo_signed_response_alg\":\"SHA256withRSA\"}", true, true))
+                .willReturn(aResponse()
+                        .withStatus(201)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{\"client_name\":\"publisher_application\","
+                                + "\"client_id\":\"09261007-fd34-45c7-b950-c08f194773e7\","
+                                + "\"client_secret\":\"9e38b1a4-08a1-44db-a52d-fc7c751bd742\","
+                                + "\"redirect_uris\":[\"\"],\"grant_types\":[\"password\","
+                                + "\"refresh_token\"]}")));
 
         // Mock service for key manager token endpoint
         wireMockRule.stubFor(post(urlEqualTo("/oauth2/token/"))
-                .willReturn(
-                        aResponse().withStatus(200).withHeader("Content-Type", "application/x-www-form-urlencoded")
-                                .withBody("{\"access_token\":\"8d4f62ea-edc5-419d-a898-a517f9d3d6f9\","
-                                        + "\"refresh_token\":\"ec3cc1f4-6432-4bbb-9f9e-03c6dbd0da47\","
-                                        + "\"expires_in\":3600,\"scopes\":[\"apim:api_view\",\"apim:api_create\","
-                                        + "\"apim:api_publish\",\"apim:tier_view\",\"apim:tier_manage\","
-                                        + "\"apim:subscription_view\",\"apim:subscription_block\",\"apim:subscribe\","
-                                        + "\"apim:workflow_approve\"],\"expiresTimestamp\":1490615736702}")));
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/x-www-form-urlencoded")
+                        .withBody("{\"access_token\":\"8d4f62ea-edc5-419d-a898-a517f9d3d6f9\","
+                                + "\"refresh_token\":\"ec3cc1f4-6432-4bbb-9f9e-03c6dbd0da47\","
+                                + "\"expires_in\":3600,\"scopes\":[\"apim:api_view\",\"apim:api_create\","
+                                + "\"apim:api_publish\",\"apim:tier_view\",\"apim:tier_manage\","
+                                + "\"apim:subscription_view\",\"apim:subscription_block\",\"apim:subscribe\","
+                                + "\"apim:workflow_approve\"],\"expiresTimestamp\":1490615736702}")));
 
         // Mock service for key manager revoke endpoint
         wireMockRule.stubFor(post(urlEqualTo("/oauth2/revoke/")).willReturn(aResponse().withStatus(200)));

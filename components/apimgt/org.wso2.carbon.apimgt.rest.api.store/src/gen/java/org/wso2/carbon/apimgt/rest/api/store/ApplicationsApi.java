@@ -4,9 +4,12 @@ package org.wso2.carbon.apimgt.rest.api.store;
 import io.swagger.annotations.ApiParam;
 
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyProvisionRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeysDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationTokenDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationTokenGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.factories.ApplicationsApiServiceFactory;
@@ -67,6 +70,50 @@ public class ApplicationsApi implements Microservice  {
     throws NotFoundException {
         return delegate.applicationsApplicationIdDelete(applicationId,ifMatch,ifUnmodifiedSince, request);
     }
+    @POST
+    @Path("/{applicationId}/generate-keys")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Generate keys (Consumer key/secret) for application ", response = ApplicationKeysDTO.class, tags={ "Generate Keys", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Keys are generated. ", response = ApplicationKeysDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ApplicationKeysDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ApplicationKeysDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ApplicationKeysDTO.class) })
+    public Response applicationsApplicationIdGenerateKeysPost(@ApiParam(value = "**Application Identifier** consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId
+,@ApiParam(value = "Application key generation request object " ,required=true) ApplicationKeyGenerateRequestDTO body
+,@ApiParam(value = "Media type of the entity in the body. Default is JSON. " ,required=true, defaultValue="JSON")@HeaderParam("Content-Type") String contentType
+,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
+,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
+, @Context Request request)
+    throws NotFoundException {
+        return delegate.applicationsApplicationIdGenerateKeysPost(applicationId,body,contentType,ifMatch,ifUnmodifiedSince, request);
+    }
+    @POST
+    @Path("/{applicationId}/generate-token")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Generate an access token for application by client_credentials grant type ", response = ApplicationTokenDTO.class, tags={ "Generate Application Tokens", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Token is generated. ", response = ApplicationTokenDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ApplicationTokenDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ApplicationTokenDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ApplicationTokenDTO.class) })
+    public Response applicationsApplicationIdGenerateTokenPost(@ApiParam(value = "**Application Identifier** consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId
+,@ApiParam(value = "Application token generation request object " ,required=true) ApplicationTokenGenerateRequestDTO body
+,@ApiParam(value = "Media type of the entity in the body. Default is JSON. " ,required=true, defaultValue="JSON")@HeaderParam("Content-Type") String contentType
+,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
+,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
+, @Context Request request)
+    throws NotFoundException {
+        return delegate.applicationsApplicationIdGenerateTokenPost(applicationId,body,contentType,ifMatch,ifUnmodifiedSince, request);
+    }
     @GET
     @Path("/{applicationId}")
     @Consumes({ "application/json" })
@@ -87,6 +134,28 @@ public class ApplicationsApi implements Microservice  {
 , @Context Request request)
     throws NotFoundException {
         return delegate.applicationsApplicationIdGet(applicationId,accept,ifNoneMatch,ifModifiedSince, request);
+    }
+    @POST
+    @Path("/{applicationId}/provide-keys")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Provide keys (Consumer key/secret) to application ", response = ApplicationKeysDTO.class, tags={ "Provision Keys", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Keys are provisioned. ", response = ApplicationKeysDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ApplicationKeysDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ApplicationKeysDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ApplicationKeysDTO.class) })
+    public Response applicationsApplicationIdProvideKeysPost(@ApiParam(value = "**Application Identifier** consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId
+,@ApiParam(value = "Application key provision request object " ,required=true) ApplicationKeyProvisionRequestDTO body
+,@ApiParam(value = "Media type of the entity in the body. Default is JSON. " ,required=true, defaultValue="JSON")@HeaderParam("Content-Type") String contentType
+,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
+,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
+, @Context Request request)
+    throws NotFoundException {
+        return delegate.applicationsApplicationIdProvideKeysPost(applicationId,body,contentType,ifMatch,ifUnmodifiedSince, request);
     }
     @PUT
     @Path("/{applicationId}")
@@ -109,28 +178,6 @@ public class ApplicationsApi implements Microservice  {
 , @Context Request request)
     throws NotFoundException {
         return delegate.applicationsApplicationIdPut(applicationId,body,contentType,ifMatch,ifUnmodifiedSince, request);
-    }
-    @POST
-    @Path("/generate-keys")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Generate keys for application ", response = ApplicationKeyDTO.class, tags={ "Generate Keys", })
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Keys are generated. ", response = ApplicationKeyDTO.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ApplicationKeyDTO.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ApplicationKeyDTO.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ApplicationKeyDTO.class) })
-    public Response applicationsGenerateKeysPost(@ApiParam(value = "**Application Identifier** consisting of the UUID of the Application. ",required=true) @QueryParam("applicationId") String applicationId
-,@ApiParam(value = "Application object the keys of which are to be generated " ,required=true) ApplicationKeyGenerateRequestDTO body
-,@ApiParam(value = "Media type of the entity in the body. Default is JSON. " ,required=true, defaultValue="JSON")@HeaderParam("Content-Type") String contentType
-,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
-,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
-, @Context Request request)
-    throws NotFoundException {
-        return delegate.applicationsGenerateKeysPost(applicationId,body,contentType,ifMatch,ifUnmodifiedSince, request);
     }
     @GET
     
