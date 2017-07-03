@@ -2372,15 +2372,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 + " created";
                 log.debug(logMessage);
             }
-        } catch (Exception e) {
-        	 try {
-                 registry.rollbackTransaction();
-             } catch (RegistryException re) {
-                 // Throwing an error here would mask the original exception
-                 log.error("Error while rolling back the transaction for API: " +
-                                 api.getId().getApiName(), re);
-             }
-             handleException("Error while performing registry transaction operation", e);
+        } catch (RegistryException e) {
+            try {
+                registry.rollbackTransaction();
+            } catch (RegistryException re) {
+                // Throwing an error here would mask the original exception
+                log.error("Error while rolling back the transaction for API: " + api.getId().getApiName(), re);
+            }
+            handleException("Error while performing registry transaction operation", e);
+        } catch (APIManagementException e) {
+            handleException("Error while creating API", e);
         } finally {
             try {
                 if (!transactionCommitted) {

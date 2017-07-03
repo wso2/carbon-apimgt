@@ -23,8 +23,9 @@
                 for(var t=0;t < transports.length;t++){
                 %>
                 <div  class="well well-sm add-margin-bottom-1x"><%=encode.forHtml(transports[t]) %>://<%=domainValue%><%= contextWithoutTenant %>
-                    <%if (api.isDefaultVersion){%>
-                        <br/><%= encode.forHtml(transports[t]) %><%= contextWithoutTenant %>
+                    <%if (api.isDefaultVersion){
+                        var contextWithoutTenantANDVersion = contextWithoutTenant.replace(api.version, "");%>
++                       <br/><%= encode.forHtml(transports[t]) %>://<%=domainValue%><%= contextWithoutTenantANDVersion %>
                     <%}%>
                 </div>
                 <%
