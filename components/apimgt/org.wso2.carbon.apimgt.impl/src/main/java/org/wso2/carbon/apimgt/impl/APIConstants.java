@@ -363,6 +363,9 @@ public final class APIConstants {
     public static final String LC_CHECK_ITEM_VALUE = "value:";
     public static final String LC_CHECK_ITEM_ORDER = "order:";
 
+    public static final String SUPER_TENANT_DOMAIN = "carbon.super";
+    public static final String TENANT_PREFIX = "/t/";
+
     public static class TokenStatus {
         public static final String ACTIVE = "ACTIVE";
         public static final String BLOCKED = "BLOCKED";

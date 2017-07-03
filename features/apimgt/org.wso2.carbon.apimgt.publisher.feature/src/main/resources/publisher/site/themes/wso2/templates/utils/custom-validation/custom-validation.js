@@ -31,6 +31,10 @@ $(document).ready(function() {
         return this.optional(element) || apiNameExist != "true";
     }, i18n.t('Duplicate API name.'));
 
+    $.validator.addMethod('validContext', function (value, element) {
+        return value != "/";
+    }, i18n.t('Only / is not allowed as context.'));
+
     $.validator.addMethod('selected', function(value, element) {
         return value!="";
     }, i18n.t('Select a value for the tier.'));
