@@ -11,8 +11,8 @@ function loginRedirect(){
             var client_id = data.client_id;
             var callback_URL = data.callback_URL;
             var scopes = data.scopes;
-            var ssoEnabled = data.ssoEnabled;
-            if(ssoEnabled) {
+            var isSSOEnabled = data.isSSOEnabled;
+            if(isSSOEnabled) {
                 // Call SSO Login (When grantType = "authorization_code")
                 // TODO: Add URL to config
                 window.location = "https://localhost:9443/oauth2/authorize?response_type=code&client_id="+client_id+"&redirect_uri="+callback_URL+"&scope="+scopes;
@@ -30,6 +30,8 @@ function loginRedirect(){
 }
 
 var token = getCookie("WSO2_AM_TOKEN_1");
+var user = getCookie("LOGGED_IN_USER");
+window.localStorage.setItem("user", user);
 var request_path = window.location.pathname.split('/');
 if (!(request_path.includes('editor') || request_path.includes('auth') )&& !token) {
     loginRedirect();

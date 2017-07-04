@@ -20,14 +20,13 @@ package org.wso2.carbon.apimgt.authenticator;
 import com.google.gson.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.authenticator.configuration.models.APIMStoreConfigurations;
 import org.wso2.carbon.apimgt.authenticator.constants.AuthenticatorConstants;
 import org.wso2.carbon.apimgt.authenticator.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.authenticator.utils.AuthUtil;
 import org.wso2.carbon.apimgt.authenticator.utils.bean.AuthResponseBean;
 import org.wso2.carbon.apimgt.core.api.APIDefinition;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
-import org.wso2.carbon.apimgt.core.configuration.APIMConfigurationService;
-import org.wso2.carbon.apimgt.core.configuration.models.IdentityProviderConfigurations;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
@@ -176,7 +175,7 @@ public class AuthenticatorAPI implements Microservice {
      */
     @GET
     @Path("/dcr")
-    @Produces(MediaType.TEXT_HTML)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response redirect(@Context Request request) {
         String appContext = AuthUtil.getAppContext(request);
         List<String> grantTypes = new ArrayList<>();
@@ -206,13 +205,13 @@ public class AuthenticatorAPI implements Microservice {
                 oAuthData.addProperty("callback_URL" , oAuthApplicationCallBackURL);
                 oAuthData.addProperty("scopes" , storeScopes);
                 oAuthData.addProperty("client_secret" , oAuthApplicationClientSecret);
-                IdentityProviderConfigurations idpConfigs = APIMConfigurationService.getInstance()
-                        .getApimConfigurations().getIdentityProviderConfigs();
-                oAuthData.addProperty("ssoEnabled" , idpConfigs.getSsoEnabled());
-                return Response.ok().entity(oAuthData).build();
+                APIMStoreConfigurations storeConfigs = new APIMStoreConfigurations();
+                oAuthData.addProperty("isSSOEnabled" , storeConfigs.getIsSSOEnabled());
+                return Response.status(Response.Status.OK).entity(oAuthData).build();
             } else {
                 log.warn("No information available in OAuth application.");
-                return Response.status(500).entity("Error while creating the OAuth application!").build();
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .entity("Error while creating the OAuth application!").build();
             }
         } catch (APIManagementException e) {
             ErrorDTO errorDTO = AuthUtil.getErrorDTO(e.getErrorHandler(), null);
@@ -227,11 +226,12 @@ public class AuthenticatorAPI implements Microservice {
      */
     @GET
     @Path("/callback")
-    @Produces(MediaType.TEXT_HTML)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response callback(@Context Request request) {
         String appContext = AuthUtil.getAppContext(request);
         String appName = appContext.substring(1);
         String restAPIContext;
+        APIMStoreConfigurations storeConfigs = new APIMStoreConfigurations();
         if (appContext.contains("editor")) {
             restAPIContext = AuthenticatorConstants.REST_CONTEXT + "/publisher";
         } else {
@@ -239,7 +239,6 @@ public class AuthenticatorAPI implements Microservice {
         }
         String grantType = "authorization_code";
         String callbackURI = "https://localhost:9292/store/auth/apis/login/callback";
-        String userName = "admin";
         Long validityPeriod = 3600L;
         // Get the Authorization Code
         String requestURL = (String) request.getProperty("REQUEST_URL");
@@ -270,7 +269,6 @@ public class AuthenticatorAPI implements Microservice {
             accessTokenRequest.setCallbackURI(callbackURI);
             AccessTokenInfo accessTokenInfo = APIManagerFactory.getInstance().getKeyManager()
                     .getNewAccessToken(accessTokenRequest);
-            authResponseBean.setAuthUser(userName);
             loginTokenService.setAccessTokenData(authResponseBean, accessTokenInfo);
             String accessToken = accessTokenInfo.getAccessToken();
             String refreshToken = accessTokenInfo.getRefreshToken();
@@ -287,17 +285,20 @@ public class AuthenticatorAPI implements Microservice {
             NewCookie restAPIContextCookie = AuthUtil
                     .cookieBuilder(APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J, part2, restAPIContext, true, true,
                             "");
+            String authUser = authResponseBean.getAuthUser();
+            NewCookie authUserCookie = AuthUtil
+                    .cookieBuilder(AuthenticatorConstants.AUTH_USER, authUser, appContext, true, false, "");
             // Redirect to the store/apis page (redirect URL)
-            URI targetURIForRedirection = new URI("https://localhost:9292/store/apis");
+            URI targetURIForRedirection = new URI(storeConfigs.getApimBaseUrl() + appName + "/apis");
             return Response.status(Response.Status.FOUND)
                     .header(HttpHeaders.LOCATION, targetURIForRedirection).entity(authResponseBean)
-                    .cookie(cookieWithAppContext, httpOnlyCookieWithAppContext, restAPIContextCookie).build();
+                    .cookie(cookieWithAppContext, httpOnlyCookieWithAppContext, restAPIContextCookie, authUserCookie)
+                    .build();
         } catch (APIManagementException e) {
             ErrorDTO errorDTO = AuthUtil.getErrorDTO(e.getErrorHandler(), null);
             log.error(e.getMessage(), e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         } catch (URISyntaxException e) {
-            // Handle exception properly
             log.error(e.getMessage(), e);
             return Response.status(e.getIndex()).build();
         }
@@ -318,13 +319,10 @@ public class AuthenticatorAPI implements Microservice {
             oAuthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.VALIDITY_PERIOD, validityPeriod);
             oAuthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.APP_KEY_TYPE, "application");
             oAuthApplicationInfo = keyManager.createApplication(oAuthAppRequest);
-            // Authorization Code grant type (with CallBackURL) has set manually in the SP,
-            // Do it using code when creating the application
-            // Check whether the exception handling is correct
         } catch (KeyManagementException e) {
             String errorMsg = "Error while creating the keys for OAuth application : " + clientName;
             log.error(errorMsg, e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
-            throw new APIManagementException(errorMsg, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
+            throw new APIManagementException(errorMsg, e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
         }
         return oAuthApplicationInfo;
     }
