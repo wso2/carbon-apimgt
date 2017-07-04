@@ -27,25 +27,20 @@ const { Header } = Layout;
 const ComposeHeader = (props) => {
     let params = qs.stringify({referrer: props.location.pathname});
     return (
-        <div>
-            <Header style={{ background: '#fff', padding: 0 }} >
-                <div className="brand-wrapper" style={{float:"left", width:"200px"}}> <img
-                    className="brand"
-                    src="/publisher/public/images/logo.svg"
-                    alt="wso2-logo"/> <span>API Publisher</span>
+        <div className="custom-layout-header">
+            <Header style={{ padding: '0 20px' , background: '#fff', lineHeight: '0', height: "0"}}>
+                <div className="logo">
+                    <Link to="/apis">
+                        <img className="brand" src="/publisher/public/images/logo.svg" alt="wso2-logo"/>
+                        <span>API Publisher</span>
+                    </Link>
                 </div>
                 <Menu
                     mode="horizontal"
-                    theme="dark"
+                    theme="light"
+                    defaultSelectedKeys={['2']}
+                    style={{background: '#f1f1f1', height: '100%' }}
                 >
-
-                    <Menu.Item key="apis">
-                        <Link to="/apis" style={{lineHeight:'46px'}}><Icon type="mail" />Apis</Link>
-                    </Menu.Item>
-                    <Menu.Item key="app">
-                        <Icon type="appstore" />Subscriptions
-                    </Menu.Item>
-
                     <SubMenu className="logoutLink"  title={<span><Icon type="user" />{ AuthManager.getUser() ? AuthManager.getUser().name : ""}</span>}>
                         <Menu.Item key="setting:1"><Link to={{pathname: '/logout', search: params}}>Logout</Link></Menu.Item>
                         <Menu.Item key="setting:2">Profile</Menu.Item>
