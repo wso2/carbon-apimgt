@@ -37,7 +37,6 @@ import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.Scope;
-import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 import org.wso2.carbon.apimgt.rest.api.common.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -313,7 +312,8 @@ public class AuthenticatorAPI implements Microservice {
         KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();
         OAuthApplicationInfo oAuthApplicationInfo;
         try {
-            OAuthAppRequest oAuthAppRequest = new OAuthAppRequest(clientName, "https://localhost:9292/store/auth/apis/login/callback", "PRODUCTION",
+            OAuthAppRequest oAuthAppRequest = new OAuthAppRequest(clientName,
+                    "https://localhost:9292/store/auth/apis/login/callback", "PRODUCTION",
                     grantTypes);
             oAuthAppRequest.addParameter(KeyManagerConstants.VALIDITY_PERIOD, validityPeriod);
             oAuthAppRequest.addParameter(KeyManagerConstants.APP_KEY_TYPE, "application");
