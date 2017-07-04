@@ -187,3 +187,27 @@ body {
 .checkbox-font {
     font-weight: 300;
 }
+.login-card-wrapper{
+    position:absolute;
+    top:50%;;
+    width:300px;
+    margin:-200px 0 0 -150px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
+}
+.login-card{
+    text-align: center;
+    padding: 0px 20px 20px 20px;
+    max-width: 300px;
+}
+.login-card .brand{
+    padding:0px;
+}
+.login-card p{
+    font-size: 16px;
+}
+.login-form .login-form-forgot {
+    float: right;
+}
+.login-form .login-form-button {
+    width: 100%;
+}
