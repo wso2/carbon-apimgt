@@ -67,15 +67,17 @@ class PublisherUtils {
      * @param {String} value : Value of the cookie, expect it to be URLEncoded
      * @param {number} validityPeriod :  (Optional) Validity period of the cookie in seconds
      * @param {String} path : Path which needs to set the given cookie
+     * @param {boolean} secured : secured parameter is set
      */
-    static setCookie(name, value, validityPeriod, path = "/") {
+    static setCookie(name, value, validityPeriod, path = "/", secured = true) {
         let expires = "";
+        const securedDirective = secured ? "; Secure" : "";
         if (validityPeriod) {
             const date = new Date();
             date.setTime(date.getTime() + validityPeriod * 1000);
             expires = "; expires=" + date.toUTCString();
         }
-        document.cookie = name + "=" + value + expires + "; path=" + path;
+        document.cookie = name + "=" + value + expires + "; path=" + path + securedDirective;
     }
 
     /**
