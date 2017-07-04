@@ -33,7 +33,7 @@ public interface WorkflowExecutor {
      * @return WorkflowResponse
      * @throws WorkflowException - Thrown when the workflow execution was not fully performed.
      */
-    WorkflowResponse execute(Workflow workflow) throws WorkflowException;
+    public abstract WorkflowResponse execute(Workflow workflow) throws WorkflowException;
 
     /**
      * Implements the workflow completion logic.
@@ -42,7 +42,7 @@ public interface WorkflowExecutor {
      * @return WorkflowResponse
      * @throws WorkflowException - Thrown when the workflow completion was not fully performed.
      */
-    WorkflowResponse complete(Workflow workflow) throws WorkflowException;
+    public abstract WorkflowResponse complete(Workflow workflow) throws WorkflowException;
 
     /**
      * Clean up pending task with workflowExtRef from workflow server
@@ -50,5 +50,5 @@ public interface WorkflowExecutor {
      * @param workflowExtRef workflow external reference to match with workflow server process
      * @throws WorkflowException  - Thrown when the workflow cleanup pending tasks was not fully performed.
      */
-    void cleanUpPendingTask(String workflowExtRef) throws WorkflowException;
+    public abstract void cleanUpPendingTask(String workflowExtRef) throws WorkflowException;
 }

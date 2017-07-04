@@ -182,7 +182,7 @@ public class AuthenticatorAPI implements Microservice {
         grantTypes.add("password");
         grantTypes.add("authorization_code");
         grantTypes.add("refresh_token");
-        Long validityPeriod = 3600L;
+        String validityPeriod = "3600";
         OAuthApplicationInfo oAuthApplicationInfo;
         try {
             String storeRestAPI = RestApiUtil.getStoreRestAPIResource();
@@ -197,7 +197,7 @@ public class AuthenticatorAPI implements Microservice {
             oAuthApplicationInfo = createDCRApplication(appContext.substring(1), grantTypes, validityPeriod);
             if (oAuthApplicationInfo != null) {
                 String oAuthApplicationClientId = oAuthApplicationInfo.getClientId();
-                String oAuthApplicationCallBackURL = oAuthApplicationInfo.getCallbackUrl();
+                String oAuthApplicationCallBackURL = oAuthApplicationInfo.getCallBackURL();
                 String oAuthApplicationClientSecret = oAuthApplicationInfo.getClientSecret();
 
                 JsonObject oAuthData = new JsonObject();
@@ -308,16 +308,15 @@ public class AuthenticatorAPI implements Microservice {
      * This method creates a DCR application.
      * @return OAUthApplicationInfo - An object with DCR Application information
      */
-    private OAuthApplicationInfo createDCRApplication(String clientName, List<String> grantTypes, Long validityPeriod)
+    private OAuthApplicationInfo createDCRApplication(String clientName, List<String> grantTypes, String validityPeriod)
             throws APIManagementException {
         KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();
-        OAuthAppRequest oAuthAppRequest = null;
         OAuthApplicationInfo oAuthApplicationInfo;
         try {
-            oAuthAppRequest = ApplicationUtils.createOauthAppRequest(
-                    clientName, "https://localhost:9292/store/auth/apis/login/callback", grantTypes);
-            oAuthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.VALIDITY_PERIOD, validityPeriod);
-            oAuthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.APP_KEY_TYPE, "application");
+            OAuthAppRequest oAuthAppRequest = new OAuthAppRequest(clientName, "https://localhost:9292/store/auth/apis/login/callback", "PRODUCTION",
+                    grantTypes);
+            oAuthAppRequest.addParameter(KeyManagerConstants.VALIDITY_PERIOD, validityPeriod);
+            oAuthAppRequest.addParameter(KeyManagerConstants.APP_KEY_TYPE, "application");
             oAuthApplicationInfo = keyManager.createApplication(oAuthAppRequest);
         } catch (KeyManagementException e) {
             String errorMsg = "Error while creating the keys for OAuth application : " + clientName;
