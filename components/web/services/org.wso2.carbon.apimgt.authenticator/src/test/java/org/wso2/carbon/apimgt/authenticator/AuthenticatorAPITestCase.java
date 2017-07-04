@@ -57,7 +57,7 @@ public class AuthenticatorAPITestCase {
         oAuthApplicationInfo.setClientName("store");
         oAuthApplicationInfo.setClientId("n69QigpPbFTzCr9VoSPv_l2BI6oa");
         oAuthApplicationInfo.setClientSecret("oBvJZen3FanevdlCVEqQvCRnW04a");
-        oAuthApplicationInfo.setCallbackUrl("https://localhost:9292/store/auth/apis/login/callback");
+        oAuthApplicationInfo.setCallBackURL("https://localhost:9292/store/auth/apis/login/callback");
 
         OAuthAppRequest oAuthAppRequest = new OAuthAppRequest();
         oAuthAppRequest.setOAuthApplicationInfo(oAuthApplicationInfo);
