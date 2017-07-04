@@ -35,7 +35,7 @@ export default class Details extends Component {
         super(props);
         this.api_uuid = props.match.params.api_uuid;
         this.state = {
-            response: null,
+            api_response: null,
         }
     }
 
@@ -48,30 +48,30 @@ export default class Details extends Component {
             }
         ).catch(
             error => {
-                if (process.env.NODE_ENV !== "production")
-                    console.log(error);
+                //if (process.env.NODE_ENV !== "production")
+                  //  console.log(error);
             }
         );
+        this.props.setLeftMenu(this.props);
     }
 
     bindApi(api_response) {
-        this.setState({response: api_response});
+        this.setState({api_response: api_response});
     }
 
     render() {
         let redirect_url = "/apis/" + this.props.match.params.api_uuid + "/overview";
-        if (this.state.response) {
+        if (this.state.api_response) {
             return (
                 <div className="tab-content">
-                    <NavBar {...this.props}/>
                     <Switch>
                         <Redirect exact from="/apis/:api_uuid"
                                   to={redirect_url}/>
                         <Route path="/apis/:api_uuid/overview"
-                               render={ props => <Overview api={this.state.response.obj} {...props} /> }/>
-                        <Route path="/apis/:api_uuid/lifecycle" component={LifeCycle}/>
-                        <Route path="/apis/:api_uuid/resources" component={Resources}/>
-                        <Route path="/apis/:api_uuid/permission" render={ props => <Permission api={this.state.response.obj} {...props} /> }/>/>
+                               render={ props => <Overview api={this.state.api_response.obj} {...this.props} /> }/>
+                        <Route path="/apis/:api_uuid/lifecycle" render={ props => <LifeCycle api={this.state.api_response.obj} {...this.props} /> } />
+                        <Route path="/apis/:api_uuid/resources" render={ props => <Resources api={this.state.api_response.obj} {...this.props} /> } />
+                        <Route path="/apis/:api_uuid/permission" render={ props => <Permission api={this.state.api_response.obj} {...props} /> }/>/>
                         <Route component={PageNotFound}/>
                     </Switch>
                 </div>

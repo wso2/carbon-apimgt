@@ -28,7 +28,7 @@
 .api-add-links{
     position: fixed;
     bottom: 10px;
-    right: 10px;
+    right: 40px;
 }
 .api-add-links button{
     background: #ff0000;
@@ -64,4 +64,7 @@ h2 span{
     position: absolute;
     bottom: 0;
     padding: 10px 0;
+}
+.ant-menu-item > a{
+    line-height: 20px;
 }

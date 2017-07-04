@@ -91,6 +91,7 @@ class Listing extends React.Component {
                 this.props.history.push({pathname: "/login", search: params});
             }
         });
+        this.props.setLeftMenu(null);
     }
 
     setListType = (value) => {
@@ -108,7 +109,7 @@ class Listing extends React.Component {
         return (
             <div className="container-fluid">
                 <div className="api-add-links">
-                    <Dropdown overlay={menu} placement="topCenter">
+                    <Dropdown overlay={menu} placement="topRight">
                         <Button shape="circle" icon="plus" />
                     </Dropdown>
                 </div>

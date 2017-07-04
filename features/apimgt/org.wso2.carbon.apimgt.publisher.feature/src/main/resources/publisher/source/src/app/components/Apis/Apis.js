@@ -25,16 +25,26 @@ import {PageNotFound} from '../Base/Errors/index'
 import 'react-toastify/dist/ReactToastify.min.css';
 
 
-const Apis = (props) => {
-    return (
-        <div>
-            <Switch>
-                <Route exact path={"/apis"} component={Listing}/>
-                <Route path={"/apis/:api_uuid/"} component={Details}/>
-                <Route component={PageNotFound}/>
-            </Switch>
-        </div>
-    );
+class Apis extends React.Component {
+    constructor(props){
+        super(props);
+        props.setLeftMenu(null);
+    }
+    render(){
+        return (
+            <div>
+                <Switch>
+                    <Route exact path={"/apis"} render={props => (<Listing {...props}
+                                                                           setLeftMenu={this.props.setLeftMenu}
+                                                                           leftMenu={this.props.leftMenu} />)} />
+                    <Route path={"/apis/:api_uuid/"} render={ props => (<Details {...props}
+                                                                             setLeftMenu={this.props.setLeftMenu}
+                                                                             leftMenu={this.props.leftMenu} />)} />
+                    <Route component={PageNotFound}/>
+                </Switch>
+            </div>
+        );
+    }
 }
 
 export default Apis;
