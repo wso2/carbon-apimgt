@@ -1284,7 +1284,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             if (query != null && !query.isEmpty()) {
                 apiResults = getApiDAO().searchAPIs(roles, user, query, offset, limit);
             } else {
-                apiResults = getApiDAO().getAPIs();
+                apiResults = getApiDAO().getAPIs(roles, user);
             }
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while Searching the API with query " + query;

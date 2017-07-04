@@ -290,7 +290,7 @@ public class SampleTestObjectCreator {
         permissionMap.put(DEVELOPER_ROLE_ID, 6);
         permissionMap.put(ADMIN_ROLE_ID, 7);
 
-        API.APIBuilder apiBuilder = new API.APIBuilder("Adam", "restaurantAPI", "0.9").
+        API.APIBuilder apiBuilder = new API.APIBuilder(ADMIN, "restaurantAPI", "0.9").
                 id(UUID.randomUUID().toString()).
                 context("weather").
                 description("Get Food & Beverage Info").

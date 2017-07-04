@@ -82,8 +82,8 @@ public class ApiDAOImpl implements ApiDAO {
 
     private final ApiDAOVendorSpecificStatements sqlStatements;
 
-    private static final String API_SUMMARY_SELECT = "SELECT UUID, PROVIDER, NAME, CONTEXT, VERSION, DESCRIPTION, " +
-            "CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS FROM AM_API";
+    private static final String API_SUMMARY_SELECT = "SELECT DISTINCT UUID, PROVIDER, NAME, CONTEXT, VERSION, " +
+            "DESCRIPTION, CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS FROM AM_API";
 
     private static final String API_SELECT = "SELECT UUID, PROVIDER, NAME, CONTEXT, VERSION, IS_DEFAULT_VERSION, " +
             "DESCRIPTION, VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, TECHNICAL_OWNER, TECHNICAL_EMAIL, " +
@@ -241,18 +241,40 @@ public class ApiDAOImpl implements ApiDAO {
 
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<API> getAPIs() throws APIMgtDAOException {
-        final String query = API_SUMMARY_SELECT + " WHERE API_TYPE_ID = " +
-                "(SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)";
-
+    public List<API> getAPIs(Set<String> roles, String user) throws APIMgtDAOException {
+        int roleCount = roles.size();
+        final String query;
+        if (roleCount > 0) {
+            query = API_SUMMARY_SELECT + " LEFT JOIN AM_API_GROUP_PERMISSION PERMISSION ON UUID = API_ID WHERE" +
+                    " API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
+                    " AND (((`GROUP_ID` IN (" + DAOUtil.getParameterString(roles.size()) + "))" +
+                    " AND PERMISSION.PERMISSION >= 4) OR (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))";
+        } else {
+            query = API_SUMMARY_SELECT + " LEFT JOIN AM_API_GROUP_PERMISSION PERMISSION ON UUID = API_ID WHERE" +
+                    " API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
+                    " AND ((PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))";
+        }
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, ApiType.STANDARD.toString());
 
+            int index = 1;
+            if (roleCount > 0) {
+                for (String role : roles) {
+                    statement.setString(++index, role);
+                }
+            }
+            statement.setString(++index, user);
             return constructAPISummaryList(connection, statement);
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
         }
+    }
+
+    @Override
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
+    public List<API> getAPIs() throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
     }
 
     @Override

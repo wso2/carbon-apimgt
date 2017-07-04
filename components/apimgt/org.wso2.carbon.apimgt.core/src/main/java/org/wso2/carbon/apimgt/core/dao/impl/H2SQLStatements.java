@@ -41,7 +41,7 @@ public class H2SQLStatements implements ApiDAOVendorSpecificStatements {
 
     private static final Logger log = LoggerFactory.getLogger(H2SQLStatements.class);
     private static final String API_SUMMARY_SELECT =
-            "SELECT API.UUID, API.PROVIDER, API.NAME, API.CONTEXT, API.VERSION, API.DESCRIPTION,"
+            "SELECT DISTINCT API.UUID, API.PROVIDER, API.NAME, API.CONTEXT, API.VERSION, API.DESCRIPTION,"
                     + "API.CURRENT_LC_STATUS, API.LIFECYCLE_INSTANCE_ID, API.LC_WORKFLOW_STATUS, API.API_TYPE_ID "
                     + "FROM AM_API API LEFT JOIN AM_API_GROUP_PERMISSION PERMISSION ON UUID = API_ID";
     private static final String API_SUMMARY_SELECT_STORE = "SELECT UUID, PROVIDER, NAME, CONTEXT, " +
@@ -70,7 +70,8 @@ public class H2SQLStatements implements ApiDAOVendorSpecificStatements {
         return API_SUMMARY_SELECT +
                 " LEFT JOIN FTL_SEARCH_DATA (?, 0, 0) FT ON API.UUID=FT.KEYS[0]" +
                 " WHERE API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
-                " AND ((`GROUP_ID` IN (" + DAOUtil.getParameterString(roleCount) + ")) OR (PROVIDER = ?))" +
+                " AND (((`GROUP_ID` IN (" + DAOUtil.getParameterString(roleCount) + "))" +
+                " AND PERMISSION.PERMISSION >= 4) OR (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" +
                 " AND FT.TABLE='AM_API'" +
                 " GROUP BY UUID ORDER BY NAME OFFSET ? LIMIT ?";
     }
@@ -118,10 +119,10 @@ public class H2SQLStatements implements ApiDAOVendorSpecificStatements {
             }
         }
 
-        return API_SUMMARY_SELECT +
-                " WHERE " + searchQuery.toString() +
+        return API_SUMMARY_SELECT + " WHERE " + searchQuery.toString() +
                 " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
-                " AND ((GROUP_ID IN (" + DAOUtil.getParameterString(roleCount) + ")) OR  (PROVIDER = ?))" +
+                " AND (((GROUP_ID IN (" + DAOUtil.getParameterString(roleCount) +
+                ")) AND PERMISSION.PERMISSION >= 4) OR (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" +
                 " GROUP BY UUID ORDER BY NAME OFFSET ? LIMIT ?";
     }
 

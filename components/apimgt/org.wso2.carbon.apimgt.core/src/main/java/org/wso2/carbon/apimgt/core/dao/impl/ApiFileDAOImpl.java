@@ -580,6 +580,14 @@ public class ApiFileDAOImpl implements ApiDAO {
         return apiList;
     }
 
+    /**
+     * @see ApiDAO#getAPIs(Set, String)
+     */
+    @Override
+    public List<API> getAPIs(Set<String> roles, String user) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public List<CompositeAPI> getCompositeAPIs(Set<String> roles, String user, int offset, int limit) {
         throw new UnsupportedOperationException();

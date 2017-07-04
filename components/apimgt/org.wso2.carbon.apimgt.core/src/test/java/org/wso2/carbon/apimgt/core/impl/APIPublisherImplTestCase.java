@@ -62,6 +62,7 @@ import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.APILCWorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExtensionsConfigBuilder;
 import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
 import org.wso2.carbon.kernel.configprovider.ConfigProvider;
@@ -469,11 +470,11 @@ public class APIPublisherImplTestCase {
         API api1 = SampleTestObjectCreator.createDefaultAPI().build();
         List<API> apimResultsFromDAO = new ArrayList<>();
         apimResultsFromDAO.add(api1);
-        Mockito.when(apiDAO.searchAPIs(new HashSet<>(), USER, QUERY_STRING, 1, 2)).
+        Mockito.when(apiDAO.searchAPIs(new HashSet<>(), USER, api1.getName(), 1, 2)).
                 thenReturn(apimResultsFromDAO);
-        List<API> apis = apiPublisher.searchAPIs(2, 1, QUERY_STRING);
+        List<API> apis = apiPublisher.searchAPIs(2, 1, api1.getName());
         Assert.assertNotNull(apis);
-        Mockito.verify(apiDAO, Mockito.atLeastOnce()).searchAPIs(new HashSet<>(), USER, QUERY_STRING, 1, 2);
+        Mockito.verify(apiDAO, Mockito.atLeastOnce()).searchAPIs(new HashSet<>(), USER, api1.getName(), 1, 2);
     }
 
     @Test(description = "Search APIs with null query string")
@@ -483,7 +484,7 @@ public class APIPublisherImplTestCase {
         List<API> apimResultsFromDAO = new ArrayList<>();
         Mockito.when(apiDAO.searchAPIs(new HashSet<>(), USER, null, 1, 2)).thenReturn(apimResultsFromDAO);
         apiPublisher.searchAPIs(2, 1, null);
-        Mockito.verify(apiDAO, Mockito.times(1)).getAPIs();
+        Mockito.verify(apiDAO, Mockito.times(1)).getAPIs(new HashSet<String>(), USER);
     }
 
     @Test(description = "Exception when searching APIs", expectedExceptions = APIManagementException.class)

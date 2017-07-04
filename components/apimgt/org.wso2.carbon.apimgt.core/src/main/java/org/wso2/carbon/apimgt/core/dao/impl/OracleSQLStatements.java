@@ -77,7 +77,8 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
                     API_SUMMARY_SELECT +
                     " WHERE (CONTAINS(INDEXER, ?, 1) > 0)" +
                     " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
-                    " AND ((GROUP_ID IN (" + DAOUtil.getParameterString(roleCount) + ")) OR (PROVIDER = ?))" +
+                    " AND (((GROUP_ID IN (" + DAOUtil.getParameterString(roleCount) + "))" +
+                    " AND PERMISSION.PERMISSION >= 4) OR (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" +
                     " ORDER BY NAME " +
                     ") A WHERE rownum <= ?) where rnum >= ?";
         } else {
@@ -85,7 +86,7 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
                     API_SUMMARY_SELECT +
                     " WHERE (CONTAINS(INDEXER, ?, 1) > 0)" +
                     " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
-                    " AND PROVIDER = ?" +
+                    " AND ((PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" +
                     " ORDER BY NAME " +
                     ") A WHERE rownum <= ?) where rnum >= ?";
         }
@@ -136,20 +137,15 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
         }
 
         if (roleCount > 0) {
-            return "SELECT * FROM (" +
-                    API_SUMMARY_SELECT +
-                    " WHERE " + searchQuery.toString() +
+            return "SELECT * FROM (" + API_SUMMARY_SELECT + " WHERE " + searchQuery.toString() +
                     " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
-                    " AND ((GROUP_ID IN (" + DAOUtil.getParameterString(roleCount) + ")) OR  (PROVIDER = ?))" +
-                    " ORDER BY NAME" +
-                    ")  A WHERE rownum <= ?) where rnum >= ?";
+                    " AND (((GROUP_ID IN (" + DAOUtil.getParameterString(roleCount) +
+                    ")) AND PERMISSION.PERMISSION >= 4) OR (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" +
+                    " ORDER BY NAME" + ")  A WHERE rownum <= ?) where rnum >= ?";
         } else {
-            return "SELECT * FROM (" +
-                    API_SUMMARY_SELECT +
-                    " WHERE " + searchQuery.toString() +
+            return "SELECT * FROM (" + API_SUMMARY_SELECT + " WHERE " + searchQuery.toString() +
                     " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
-                    " AND PROVIDER = ?" +
-                    " ORDER BY NAME" +
+                    " AND ((PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" + " ORDER BY NAME" +
                     ")  A WHERE rownum <= ?) where rnum >= ?";
         }
     }
