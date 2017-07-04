@@ -1229,9 +1229,36 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     @Override
-    public Response apisApiIdWsdlPut(String apiId, String inlineContent, String contentType, String ifMatch,
-            String ifUnmodifiedSince, Request request) throws NotFoundException {
-        return null;
+    public Response apisApiIdWsdlPut(String apiId, InputStream fileInputStream, FileInfo fileDetail,
+            String contentType, String ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            if (fileDetail.getFileName().endsWith(".zip")) {
+                apiPublisher.updateAPIWSDLArchive(apiId, fileInputStream);
+                return Response.ok().build();
+            } else if (fileDetail.getFileName().endsWith(".wsdl")) {
+                String updatedWSDL = apiPublisher.updateAPIWSDL(apiId, fileInputStream);
+                return Response.ok(updatedWSDL, MediaType.TEXT_PLAIN).build();
+            } else {
+                String msg = "Unsupported file extension type: " + fileDetail.getFileName();
+                log.error(msg);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900700L, msg);
+                return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while updating WSDL of API : " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        } catch (IOException e) {
+            String errorMessage = "Error while updating WSDL of API : " + apiId;
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
+        }
     }
 
     /**

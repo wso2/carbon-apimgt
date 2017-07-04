@@ -706,9 +706,9 @@ paths:
       parameters:
         - $ref: '#/parameters/apiId'
         - in: formData
-          name: inlineContent
-          description: WSDL definition of the API
-          type: string
+          name: file
+          description: WSDL file or archive to upload
+          type: file
           required: true
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'

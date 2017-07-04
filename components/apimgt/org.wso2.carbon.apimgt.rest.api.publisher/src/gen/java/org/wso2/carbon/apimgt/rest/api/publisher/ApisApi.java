@@ -501,13 +501,15 @@ public class ApisApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = void.class) })
     public Response apisApiIdWsdlPut(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
-,@ApiParam(value = "WSDL definition of the API", required=true)@FormDataParam("inlineContent")  String inlineContent
+,
+            @FormDataParam("file") InputStream fileInputStream,
+            @FormDataParam("file") FileInfo fileDetail
 ,@ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
 , @Context Request request)
     throws NotFoundException {
-        return delegate.apisApiIdWsdlPut(apiId,inlineContent,contentType,ifMatch,ifUnmodifiedSince, request);
+        return delegate.apisApiIdWsdlPut(apiId,fileInputStream, fileDetail,contentType,ifMatch,ifUnmodifiedSince, request);
     }
     @POST
     @Path("/change-lifecycle")

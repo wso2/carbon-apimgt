@@ -3,7 +3,6 @@ package org.wso2.carbon.apimgt.rest.api.store.impl;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -13,7 +12,6 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -693,7 +691,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 
                 //wsdlArchiveInfo will not be null all the time so no need null check
                 FileInputStream inputStream = new FileInputStream(
-                        new File(wsdlArchiveInfo.getFullAbsoluteFilePath()));
+                        new File(wsdlArchiveInfo.getAbsoluteFilePath()));
                 return Response.ok(inputStream)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE)
                         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\""
@@ -731,6 +729,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 try {
                     APIFileUtils.deleteDirectory(wsdlArchiveInfo.getLocation());
                 } catch (APIMgtDAOException e) {
+                    //This is not a blocker. Give a warning and continue
                     log.warn("Error occured while deleting processed WSDL artifacts folder : " + wsdlArchiveInfo
                             .getLocation());
                 }

@@ -422,6 +422,11 @@ public interface APIPublisher extends APIManager {
     String addAPIFromWSDLURL(API.APIBuilder apiBuilder, String wsdlUrl) throws APIManagementException,
             IOException;
 
+    String updateAPIWSDL(String apiId, InputStream inputStream)
+            throws APIMgtDAOException, IOException, APIMgtWSDLException;
+
+    void updateAPIWSDLArchive(String apiId, InputStream inputStream)
+            throws APIMgtDAOException, IOException, APIMgtWSDLException;
     /**
      * Get list of policies of an particular tier level.
      *

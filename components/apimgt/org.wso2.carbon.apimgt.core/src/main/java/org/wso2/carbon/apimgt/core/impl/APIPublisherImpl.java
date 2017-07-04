@@ -67,6 +67,7 @@ import org.wso2.carbon.apimgt.core.models.Provider;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
+import org.wso2.carbon.apimgt.core.models.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.template.APIConfigContext;
@@ -1458,31 +1459,27 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     public String addAPIFromWSDLArchive(API.APIBuilder apiBuilder, InputStream inputStream)
             throws APIManagementException, IOException {
-        String path = System.getProperty(APIMgtConstants.JAVA_IO_TMPDIR) 
-                + File.separator + APIMgtConstants.WSDLConstants.WSDL_ARCHIVES_FOLDERNAME 
-                + File.separator + UUID.randomUUID().toString();
-        String archivePath = path + File.separator + APIMgtConstants.WSDLConstants.WSDL_ARCHIVE_FILENAME;
-        String extractedLocation = APIFileUtils.extractUploadedArchive(inputStream,
-                APIMgtConstants.WSDLConstants.EXTRACTED_WSDL_ARCHIVE_FOLDERNAME, archivePath, path);
-        WSDLProcessor processor = WSDLProcessFactory.getInstance().getWSDLProcessorForPath(extractedLocation);
-        if (!processor.canProcess()) {
-            throw new APIMgtWSDLException("Unable to process WSDL by the processor " + processor.getClass().getName(),
-                    ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
-        }
+        WSDLArchiveInfo archiveInfo = extractAndValidateWSDLArchive(inputStream);
 
         if (apiBuilder.getEndpoint() == null || apiBuilder.getEndpoint().entrySet().isEmpty()) {
             //TODO: getUniqueEndpoints from processor, get first one and assign as API's endpoints for both PROD/SAND
         }
         String uuid = addAPI(apiBuilder);
-        try (InputStream fileInputStream = new FileInputStream(archivePath)) {
+        try (InputStream fileInputStream = new FileInputStream(archiveInfo.getAbsoluteFilePath())) {
             getApiDAO().addOrUpdateWSDLArchive(uuid, fileInputStream, getUsername());
+            return uuid;
+        } finally {
+            try {
+                APIFileUtils.deleteDirectory(archiveInfo.getLocation());
+            } catch (APIMgtDAOException e) {
+                //This is not a blocker. Give a warning and continue
+                log.warn("Error occured while deleting processed WSDL artifacts folder : " + archiveInfo.getLocation());
+            }
         }
-        return uuid;
     }
 
     public String addAPIFromWSDLFile(API.APIBuilder apiBuilder, InputStream inputStream) throws APIManagementException,
             IOException {
-
         byte[] wsdlContent = IOUtils.toByteArray(inputStream);
         WSDLProcessor processor = WSDLProcessFactory.getInstance().getWSDLProcessor(wsdlContent);
         if (!processor.canProcess()) {
@@ -1494,7 +1491,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             //TODO: getUniqueEndpoints from processor, get first one and assign as API's endpoints for both PROD/SAND
         }
         String uuid = addAPI(apiBuilder);
-        addOrUpdateWSDL(uuid, wsdlContent);
+        getApiDAO().addOrUpdateWSDL(uuid, wsdlContent, getUsername());
         return uuid;
     }
 
@@ -1512,15 +1509,37 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
         String uuid = addAPI(apiBuilder);
         byte[] wsdlContentBytes = processor.getWSDL();
-        addOrUpdateWSDL(uuid, wsdlContentBytes);
+        getApiDAO().addOrUpdateWSDL(uuid, wsdlContentBytes, getUsername());
         return uuid;
     }
 
+    public String updateAPIWSDL(String apiId, InputStream inputStream)
+            throws APIMgtDAOException, IOException, APIMgtWSDLException {
+        byte[] wsdlContent = IOUtils.toByteArray(inputStream);
+        WSDLProcessor processor = WSDLProcessFactory.getInstance().getWSDLProcessor(wsdlContent);
+        if (!processor.canProcess()) {
+            throw new APIMgtWSDLException("Unable to process WSDL by the processor " + processor.getClass().getName(),
+                    ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
+        }
 
-    public void addOrUpdateWSDL(String apiId, byte[] wsdlContent) throws APIMgtDAOException {
         getApiDAO().addOrUpdateWSDL(apiId, wsdlContent, getUsername());
+        return new String(wsdlContent);
     }
 
+    public void updateAPIWSDLArchive(String apiId, InputStream inputStream)
+            throws APIMgtDAOException, IOException, APIMgtWSDLException {
+        WSDLArchiveInfo archiveInfo = extractAndValidateWSDLArchive(inputStream);
+        try (InputStream fileInputStream = new FileInputStream(archiveInfo.getAbsoluteFilePath())) {
+            getApiDAO().addOrUpdateWSDLArchive(apiId, fileInputStream, getUsername());
+        } finally {
+            try {
+                APIFileUtils.deleteDirectory(archiveInfo.getLocation());
+            } catch (APIMgtDAOException e) {
+                //This is not a blocker. Give a warning and continue
+                log.warn("Error occured while deleting processed WSDL artifacts folder : " + archiveInfo.getLocation());
+            }
+        }
+    }
 
     /**
      * {@inheritDoc}
@@ -1722,6 +1741,16 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
     }
 
+    @Override
+    public boolean isEndpointExist(String name) throws APIManagementException {
+        try {
+            return getApiDAO().isEndpointExist(name);
+        } catch (APIMgtDAOException e) {
+            String msg = "Couldn't find existence of endpoint :" + name;
+            throw new APIManagementException(msg, e.getErrorHandler());
+        }
+    }
+
     private void cleanupPendingTaskForAPIStateChange(String apiId) throws APIManagementException {
         String workflowExtRef = getWorkflowDAO().getExternalWorkflowReferenceForPendingTask(apiId,
                 WorkflowConstants.WF_TYPE_AM_API_STATE);
@@ -1739,16 +1768,20 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isEndpointExist(String name) throws APIManagementException {
-        try {
-            return getApiDAO().isEndpointExist(name);
-        } catch (APIMgtDAOException e) {
-            String msg = "Couldn't find existence of endpoint :" + name;
-            throw new APIManagementException(msg, e.getErrorHandler());
+    private WSDLArchiveInfo extractAndValidateWSDLArchive(InputStream inputStream)
+            throws APIMgtDAOException, APIMgtWSDLException {
+
+        String path = System.getProperty(APIMgtConstants.JAVA_IO_TMPDIR)
+                + File.separator + APIMgtConstants.WSDLConstants.WSDL_ARCHIVES_FOLDERNAME
+                + File.separator + UUID.randomUUID().toString();
+        String archivePath = path + File.separator + APIMgtConstants.WSDLConstants.WSDL_ARCHIVE_FILENAME;
+        String extractedLocation = APIFileUtils.extractUploadedArchive(inputStream,
+                APIMgtConstants.WSDLConstants.EXTRACTED_WSDL_ARCHIVE_FOLDERNAME, archivePath, path);
+        WSDLProcessor processor = WSDLProcessFactory.getInstance().getWSDLProcessorForPath(extractedLocation);
+        if (!processor.canProcess()) {
+            throw new APIMgtWSDLException("Unable to process WSDL by the processor " + processor.getClass().getName(),
+                    ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
         }
+        return new WSDLArchiveInfo(path, APIMgtConstants.WSDLConstants.WSDL_ARCHIVE_FILENAME);
     }
 }

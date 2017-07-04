@@ -136,7 +136,7 @@ public abstract class ApisApiService {
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdWsdlPut(String apiId
- ,String inlineContent
+ ,InputStream fileInputStream, FileInfo fileDetail
  ,String contentType
  ,String ifMatch
  ,String ifUnmodifiedSince

@@ -72,17 +72,6 @@ public class WSDLProcessFactory {
                 ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
     }
 
-    public WSDLProcessor getWSDLProcessor(InputStream inputStream) throws APIMgtWSDLException {
-        byte[] wsdlContent;
-        try {
-            wsdlContent = IOUtils.toByteArray(inputStream);
-            return getWSDLProcessor(wsdlContent);
-        } catch (IOException e) {
-            throw new APIMgtWSDLException("Cannot convert WSDL to byte array.", e,
-                    ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
-        }
-    }
-
     public WSDLProcessor getWSDLProcessor(byte[] wsdlContent) throws APIMgtWSDLException {
         for (String clazz : wsdlProcessorClasses) {
             WSDLProcessor processor;
