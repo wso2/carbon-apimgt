@@ -189,7 +189,7 @@ public class APIMWSDLUtils {
         // switch off the verbose mode
         wsdlReader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
         wsdlReader.setFeature("javax.wsdl.importDocuments", false);
-        Definition wsdlDefinition = wsdlReader.readWSDL(null, new InputSource(new ByteArrayInputStream(wsdl)));
+        Definition wsdlDefinition = wsdlReader.getWSDL(null, new InputSource(new ByteArrayInputStream(wsdl)));
         
         
         if (!isWSDL2Document(wsdlUrl)) {

@@ -288,4 +288,5 @@ public interface APIManager {
      */
     Label getLabelByName(String labelName) throws APIManagementException;
 
+    boolean isWSDLArchiveExists (String apiId) throws APIManagementException;
 }

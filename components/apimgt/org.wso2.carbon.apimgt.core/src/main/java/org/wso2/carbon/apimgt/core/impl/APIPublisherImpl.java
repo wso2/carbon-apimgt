@@ -240,7 +240,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 if (!StringUtils.isBlank(apiBuilder.getWsdlUri())) {
                     WSDLProcessor processor = WSDLProcessFactory.getInstance()
                             .getWSDLProcessor(apiBuilder.getWsdlUri());
-                    wsdlContentBytes = processor.readWSDL();
+                    wsdlContentBytes = processor.getWSDL();
                 }*/
 
                 createUriTemplateList(apiBuilder, false);
@@ -1448,12 +1448,12 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     public String getAPIWSDL(String apiId) throws APIMgtDAOException {
-        return getApiDAO().getAPIWSDL(apiId);
+        return getApiDAO().getWSDL(apiId);
     }
 
     @Override
     public InputStream getAPIWSDLArchive(String apiId) throws APIMgtDAOException {
-        return getApiDAO().getAPIWSDLArchive(apiId);
+        return getApiDAO().getWSDLArchive(apiId);
     }
 
     public String addAPIFromWSDLArchive(API.APIBuilder apiBuilder, InputStream inputStream)
@@ -1464,8 +1464,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         String archivePath = path + File.separator + APIMgtConstants.WSDLConstants.WSDL_ARCHIVE_FILENAME;
         String extractedLocation = APIFileUtils.extractUploadedArchive(inputStream,
                 APIMgtConstants.WSDLConstants.EXTRACTED_WSDL_ARCHIVE_FOLDERNAME, archivePath, path);
-        WSDLProcessor processor = WSDLProcessFactory.getInstance()
-                .getWSDLProcessor(extractedLocation, apiBuilder.getWsdlUri());
+        WSDLProcessor processor = WSDLProcessFactory.getInstance().getWSDLProcessorForPath(extractedLocation);
         if (!processor.canProcess()) {
             throw new APIMgtWSDLException("Unable to process WSDL by the processor " + processor.getClass().getName(),
                     ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
@@ -1512,7 +1511,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
 
         String uuid = addAPI(apiBuilder);
-        byte[] wsdlContentBytes = processor.readWSDL();
+        byte[] wsdlContentBytes = processor.getWSDL();
         addOrUpdateWSDL(uuid, wsdlContentBytes);
         return uuid;
     }

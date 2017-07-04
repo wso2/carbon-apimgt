@@ -489,4 +489,12 @@ public class APIMgtConstants {
         public static final String STORE = "store";
         public static final String ADMIN = "admin";
     }
+
+    /**
+     * Label related constants
+     */
+    public static class LabelConstants {
+        public static final String DEFAULT = "Default";
+    }
+    
 }

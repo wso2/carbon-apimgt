@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.WSDLInfo;
+import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 import org.xml.sax.InputSource;
 
 import javax.wsdl.Definition;
@@ -43,11 +44,11 @@ import javax.wsdl.xml.WSDLWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.InputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 public class WSDL11ProcessorImpl implements WSDLProcessor {
@@ -60,8 +61,15 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
     private static WSDLFactory wsdlFactoryInstance;
     private boolean canProcess;
     protected WSDLInfo wsdlInfo;
+    
+    //Fields required for processing a single wsdl
     protected Definition wsdlDefinition;
     protected byte[] wsdlContentBytes;
+    
+    //Fields required for processing WSDL archive
+    protected Map<String, Definition> pathToDefinitionMap;
+    protected String wsdlArchiveExtractedPath;
+
 
     private static WSDLFactory getWsdlFactoryInstance() throws APIMgtWSDLException {
         if (wsdlFactoryInstance == null) {
@@ -93,6 +101,32 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
         canProcess = true;
     }
 
+    @Override
+    public void initPath(String path) throws APIMgtWSDLException {
+        pathToDefinitionMap = new HashMap<>();
+        wsdlArchiveExtractedPath = path;
+        WSDLReader wsdlReader = getWsdlFactoryInstance().newWSDLReader();
+        
+        // switch off the verbose mode
+        wsdlReader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
+        wsdlReader.setFeature(JAVAX_WSDL_IMPORT_DOCUMENTS, false);
+        try {
+            File folderToImport = new File(path);
+            File[] foundWSDLFiles = APIFileUtils.searchFilesWithMatchingExtension(folderToImport, "wsdl");
+            for (File file : foundWSDLFiles) {
+                String absWSDLPath = file.getAbsolutePath();
+                Definition definition = wsdlReader.readWSDL(null, absWSDLPath);
+                pathToDefinitionMap.put(file.getAbsolutePath(), definition);
+            }
+        } catch (WSDLException e) {
+            //This implementation class cannot process the WSDL.
+            log.debug("Cannot process the WSDL by " + this.getClass().getName(), e);
+            canProcess = false;
+            return;
+        }
+        canProcess = true;
+    }
+
     public boolean canProcess() {
         return canProcess;
     }
@@ -109,55 +143,37 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
         return wsdlInfo;
     }
 
-    public byte[] readWSDLBytes() throws APIMgtWSDLException {
-        ByteArrayOutputStream byteArrayOutputStream = getWSDLByteArrayOutputStream();
+    public byte[] getWSDL() throws APIMgtWSDLException {
+        ByteArrayOutputStream byteArrayOutputStream = getWSDLByteArrayOutputStream(wsdlDefinition);
         return byteArrayOutputStream.toByteArray();
     }
 
-    public byte[] readWSDL() throws APIMgtWSDLException {
-        ByteArrayOutputStream byteArrayOutputStream = getWSDLByteArrayOutputStream();
-        return byteArrayOutputStream.toByteArray();
-    }
-
-    public String readWSDL(API api, Label label) throws APIMgtWSDLException {
+    public byte[] getUpdatedWSDL(API api, Label label) throws APIMgtWSDLException {
         if (label!= null) {
-            updateEndpoints(label.getAccessUrls(), api);
-            return new String(readWSDL());
+            updateEndpoints(label.getAccessUrls(), api, wsdlDefinition);
+            return getWSDL();
         }
         return null;
     }
 
     @Override
-    public String readWSDLArchive() throws APIMgtWSDLException {
-        return null;
-    }
-
-    @Override
-    public String readWSDLArchive(String labelName) throws APIMgtWSDLException {
-        return null;
-    }
-
-    @Override
-    public void init(String path, String rootWSDLRelativePath) throws APIMgtWSDLException {
-        WSDLReader wsdlReader = getWsdlFactoryInstance().newWSDLReader();
-
-        // switch off the verbose mode
-        wsdlReader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
-        wsdlReader.setFeature(JAVAX_WSDL_IMPORT_DOCUMENTS, false);
-        try {
-            
-            if (path != null && !path.endsWith(File.separator)) {
-                path += File.separator;
+    public String getUpdatedWSDLPath(API api, Label label) throws APIMgtWSDLException {
+        if (label != null) {
+            for (String path : pathToDefinitionMap.keySet()) {
+                Definition definition = pathToDefinitionMap.get(path);
+                updateEndpoints(label.getAccessUrls(), api, definition);
+                try (FileOutputStream wsdlFileOutputStream = new FileOutputStream(new File(path))) {
+                    WSDLWriter writer = getWsdlFactoryInstance().newWSDLWriter();
+                    writer.writeWSDL(definition, wsdlFileOutputStream);
+                } catch (IOException | WSDLException e) {
+                    throw new APIMgtWSDLException(
+                            "Failed to create WSDL archive for API:" + api.getName() + ":" + api.getVersion()
+                                    + " for label " + label.getName(),
+                            ExceptionCodes.ERROR_WHILE_CREATING_WSDL_ARCHIVE);
+                }
             }
-            path += rootWSDLRelativePath;
-            wsdlDefinition = wsdlReader.readWSDL(null, path);
-        } catch (WSDLException e) {
-            //This implementation class cannot process the WSDL.
-            log.debug("Cannot process the WSDL by " + this.getClass().getName(), e);
-            canProcess = false;
-            return;
         }
-        canProcess = true;
+        return wsdlArchiveExtractedPath;
     }
 
     /**
@@ -209,8 +225,8 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
      *
      * @throws APIMgtWSDLException
      */
-    private void updateEndpointUrls(String selectedEndpoint) throws APIMgtWSDLException {
-        Map serviceMap = wsdlDefinition.getAllServices();
+    private void updateEndpointUrls(String selectedEndpoint, Definition definition) throws APIMgtWSDLException {
+        Map serviceMap = definition.getAllServices();
         for (Object service : serviceMap.entrySet()) {
             Map.Entry svcEntry = (Map.Entry) service;
             Service svc = (Service) svcEntry.getValue();
@@ -254,19 +270,19 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
      *
      * @throws APIMgtWSDLException
      */
-    private void updateEndpoints(List<String> endpointURLs, API api) throws APIMgtWSDLException {
+    private void updateEndpoints(List<String> endpointURLs, API api, Definition definition) throws APIMgtWSDLException {
         String context = api.getContext().startsWith("/") ? api.getContext() : "/" + api.getContext();
         String selectedUrl = endpointURLs.get(0) + context;
         if (!StringUtils.isBlank(selectedUrl)) {
-            updateEndpointUrls(selectedUrl);
+            updateEndpointUrls(selectedUrl, definition);
         }
     }
 
-    private ByteArrayOutputStream getWSDLByteArrayOutputStream() throws APIMgtWSDLException {
+    private ByteArrayOutputStream getWSDLByteArrayOutputStream(Definition definition) throws APIMgtWSDLException {
         WSDLWriter writer = getWsdlFactoryInstance().newWSDLWriter();
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try {
-            writer.writeWSDL(wsdlDefinition, byteArrayOutputStream);
+            writer.writeWSDL(definition, byteArrayOutputStream);
         } catch (WSDLException e) {
             throw new APIMgtWSDLException("Error while stringifying WSDL definition", e,
                     ExceptionCodes.INTERNAL_WSDL_EXCEPTION);

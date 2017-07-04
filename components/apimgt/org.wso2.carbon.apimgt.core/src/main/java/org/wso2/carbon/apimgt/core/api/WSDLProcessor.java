@@ -23,23 +23,19 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.WSDLInfo;
 
-import java.io.InputStream;
-
 public interface WSDLProcessor {
 
     void init(byte[] wsdlContent) throws APIMgtWSDLException;
 
-    void init(String path, String rootWSDLRelativePath) throws APIMgtWSDLException;
+    byte[] getWSDL() throws APIMgtWSDLException;
 
+    byte[] getUpdatedWSDL(API api, Label label) throws APIMgtWSDLException;
+    
+    void initPath(String path) throws APIMgtWSDLException;
+
+    String getUpdatedWSDLPath(API api, Label label) throws APIMgtWSDLException;
+    
     boolean canProcess();
 
     WSDLInfo getWsdlInfo() throws APIMgtWSDLException;
-
-    byte[] readWSDL() throws APIMgtWSDLException;
-
-    String readWSDL(API api, Label label) throws APIMgtWSDLException;
-
-    String readWSDLArchive() throws APIMgtWSDLException;
-
-    String readWSDLArchive(String labelName) throws APIMgtWSDLException;
 }

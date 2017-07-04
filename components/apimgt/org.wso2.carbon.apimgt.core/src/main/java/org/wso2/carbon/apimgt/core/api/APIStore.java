@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
 import org.wso2.carbon.apimgt.core.models.Tag;
 import org.wso2.carbon.apimgt.core.models.User;
+import org.wso2.carbon.apimgt.core.models.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationResponse;
 
@@ -503,7 +504,10 @@ public interface APIStore extends APIManager {
      * @throws APIMgtDAOException if error occurs while accessing the WSDL from the data layer
      * @throws APIMgtWSDLException if error occurs while parsing/manipulating the wSDL
      */
-    String getWSDLOfAPI(String apiId, String labelName, boolean validateLabelInAPI)
+    String getAPIWSDL(String apiId, String labelName, boolean validateLabelInAPI)
+            throws APIMgtDAOException, APIMgtWSDLException, APINotFoundException, LabelException;
+
+    WSDLArchiveInfo getAPIWSDLArchive(String apiId, String labelName, boolean validateLabelInAPI)
             throws APIMgtDAOException, APIMgtWSDLException, APINotFoundException, LabelException;
 
     /**
