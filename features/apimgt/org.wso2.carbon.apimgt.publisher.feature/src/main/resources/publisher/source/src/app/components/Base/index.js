@@ -21,6 +21,7 @@ import React, {Component} from 'react'
 import  NavBar  from './Navigation/NavBar';
 import { Layout, Breadcrumb, Icon, Menu } from 'antd';
 import ComposeHeader from './Header/ComposeHeader'
+import Footer from './Footer/Footer'
 const { Content, Sider } = Layout;
 
 
@@ -44,34 +45,25 @@ class Base extends Component {
         return (
 
             <Layout style={{height:"100vh"}} >
-                {this.props.leftMenu ?
-                    <Sider
-                        collapsible
-                        collapsed={this.state.collapsed}
-                        onCollapse={this.onCollapse}
-                    >
-                        <NavBar leftMenu={this.props.leftMenu} />
-                    </Sider>
+                <ComposeHeader />
+                <Content style={{ padding: '0 20px' , background: '#fff'}}>
+                    <Layout style={{ padding: '0', background: '#fff' }}>
+                        {this.props.leftMenu ?
+                            <Sider
+                                collapsed={this.state.collapsed}
+                                onCollapse={this.onCollapse}
+                                width={200} style={{ padding: '20px 0' ,background: '#fff' }}
+                            >
+                                <NavBar leftMenu={this.props.leftMenu} />
+                            </Sider>
 
-                    : <div />}
-                <Layout>
-                    <ComposeHeader />
-                    <Content>
-                        <Breadcrumb style={{ margin: '10px 16px' }}>
-                            <Breadcrumb.Item href="">
-                                <Icon type="home" />
-                            </Breadcrumb.Item>
-                            <Breadcrumb.Item href="">
-                                <Icon type="user" />
-                                <span>Apis</span>
-                            </Breadcrumb.Item>
-                        </Breadcrumb>
-                        <div style={{ padding: 24, minHeight: 360 , background: "#fff"}}>
+                            : <div />}
+                        <Content style={{ padding: '20px 0', minHeight: 280 }}>
                             {this.props.children}
-                        </div>
-                    </Content>
-
-                </Layout>
+                        </Content>
+                    </Layout>
+                </Content>
+                <Footer />
             </Layout>
 
         );
