@@ -39,15 +39,7 @@ class NormalLoginForm extends Component {
         };
     }
 
-    componentDidMount() {
-        let queryString = this.props.location.search;
-        queryString = queryString.replace(/^\?/, '');
-        /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
-        let params = qs.parse(queryString);
-        if (params.referrer) {
-            this.setState({referrer: params.referrer});
-        }
-    }
+
     handleSubmit = (e) => {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {

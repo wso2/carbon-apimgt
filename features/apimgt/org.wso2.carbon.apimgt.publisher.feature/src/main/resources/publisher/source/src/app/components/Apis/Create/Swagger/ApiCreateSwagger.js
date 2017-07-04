@@ -35,7 +35,6 @@ class SwaggerForm extends React.Component {
         this.state = {uploadMethod:'file',file:{}}
     }
     createAPICallback = (response) => {
-        console.info(response);
         let uuid = JSON.parse(response.data).id;
         let redirect_url = "/apis/" + uuid + "/overview";
         this.props.history.push(redirect_url);
