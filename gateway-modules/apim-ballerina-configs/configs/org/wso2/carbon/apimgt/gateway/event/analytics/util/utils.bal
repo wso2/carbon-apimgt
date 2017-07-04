@@ -46,8 +46,8 @@ function getThrottleEventPayload (dto:ThrottleEventHolderDTO throttleEventHolder
                     throttleEventDTO.apiKey, throttleEventDTO.apiTier, throttleEventDTO.subscriptionKey,
                     throttleEventDTO.subscriptionTier, throttleEventDTO.resourceLevelThrottleKey,
                     throttleEventDTO.resourceTier, throttleEventDTO.userId, throttleEventDTO.apiContext,
-                    throttleEventDTO.apiVersion, throttleEventDTO.appTenant, throttleEventDTO.apiTenant,
-                    throttleEventDTO.applicationId, throttleEventDTO.apiName, throttleEventDTO.properties];
+                    throttleEventDTO.apiVersion, throttleEventDTO.applicationId, throttleEventDTO.apiName,
+                        throttleEventDTO.properties];
 
     event.metaData = metaData;
     event.correlationData = correlationData;
