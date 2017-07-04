@@ -47,12 +47,11 @@ public class ApplicationThrottlePolicyTemplateBuilder extends ThrottlePolicyTemp
     /**
      * Generate application level policy.
      *
-     * @param policy policy with level 'app'. Multiple pipelines are not allowed. Can define more than one condition
-     *               as set of conditions. all these conditions should be passed as a single pipeline
      * @return throttle policies for app level
      * @throws APITemplateException throws if generation failure occur
      */
-    public String getThrottlePolicyForAppLevel(ApplicationPolicy policy) throws APITemplateException {
+    public String getThrottlePolicyForAppLevel() throws APITemplateException {
+        ApplicationPolicy policy = applicationPolicy;
 
         if (log.isDebugEnabled()) {
             log.debug("Generating Siddhi app for appLevel :" + policy.toString());
@@ -85,7 +84,7 @@ public class ApplicationThrottlePolicyTemplateBuilder extends ThrottlePolicyTemp
 
     @Override public Map<String, String> getThrottlePolicyTemplate() throws APITemplateException {
         try {
-            templateMap.put(applicationPolicy.getPolicyName(), getThrottlePolicyForAppLevel(applicationPolicy));
+            templateMap.put(applicationPolicy.getPolicyName(), getThrottlePolicyForAppLevel());
         } catch (APITemplateException e) {
             String errorMessage = "Error while creating template for application throttle policy.";
             log.error(errorMessage, e);

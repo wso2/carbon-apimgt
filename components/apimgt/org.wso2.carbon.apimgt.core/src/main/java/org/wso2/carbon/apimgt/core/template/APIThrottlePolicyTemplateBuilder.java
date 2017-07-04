@@ -56,14 +56,11 @@ public class APIThrottlePolicyTemplateBuilder extends ThrottlePolicyTemplateBuil
     /**
      * Generate policy for api level throttling
      *
-     * @param policy Policy with level 'api'. isAcrossAllUsers() method in policy is used to identify the level in
-     *               the api level. Policy can have multiple pipelines and a default condition which will be used as
-     *               else condition
      * @return throttle policies for api level
      * @throws APITemplateException throws if generation failure occur
      */
-    public Map<String, String> getThrottlePolicyTemplateForPipelines(APIPolicy policy) throws APITemplateException {
-
+    public Map<String, String> getThrottlePolicyTemplateForPipelines() throws APITemplateException {
+        APIPolicy policy = apiPolicy;
         if (log.isDebugEnabled()) {
             log.debug("Generating Siddhi App for apiLevel :" + policy.toString());
         }
@@ -104,14 +101,11 @@ public class APIThrottlePolicyTemplateBuilder extends ThrottlePolicyTemplateBuil
     /**
      * Generate default policy for api level throttling
      *
-     * @param policy Policy with level 'api'. isAcrossAllUsers() method in policy is used to identify the level in
-     *               the api level. Policy can have multiple pipelines and a default condition which will be used as
-     *               else condition
      * @return throttle policies for default api
      * @throws APITemplateException throws if generation failure occur
      */
-    public String getThrottlePolicyTemplateForAPILevelDefaultCondition(APIPolicy policy) throws APITemplateException {
-
+    public String getThrottlePolicyTemplateForAPILevelDefaultCondition() throws APITemplateException {
+        APIPolicy policy = apiPolicy;
         if (log.isDebugEnabled()) {
             log.debug("Generating Siddhi App for apiLevel :" + policy.toString());
         }
@@ -240,8 +234,8 @@ public class APIThrottlePolicyTemplateBuilder extends ThrottlePolicyTemplateBuil
     @Override
     public Map<String, String> getThrottlePolicyTemplate() throws APITemplateException {
         try {
-            templateMap = getThrottlePolicyTemplateForPipelines(apiPolicy);
-            templateMap.put(apiPolicy.getPolicyName(), getThrottlePolicyTemplateForAPILevelDefaultCondition(apiPolicy));
+            templateMap = getThrottlePolicyTemplateForPipelines();
+            templateMap.put(apiPolicy.getPolicyName(), getThrottlePolicyTemplateForAPILevelDefaultCondition());
         } catch (APITemplateException e) {
             String errorMessage = "Error while creating template for advanced throttle policy.";
             log.error(errorMessage, e);
