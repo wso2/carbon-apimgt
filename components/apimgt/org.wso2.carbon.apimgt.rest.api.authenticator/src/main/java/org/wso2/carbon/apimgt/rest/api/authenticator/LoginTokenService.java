@@ -48,7 +48,6 @@ import java.util.Map;
 
 /**
  * This method authenticate the user.
- *
  */
 public class LoginTokenService {
 
@@ -56,7 +55,6 @@ public class LoginTokenService {
 
     /**
      * This method authenticate the user.
-     *
      */
     public AuthResponseBean setAccessTokenData(AuthResponseBean responseBean, AccessTokenInfo accessTokenInfo)
             throws KeyManagementException {
@@ -73,10 +71,9 @@ public class LoginTokenService {
 
     /**
      * This method authenticate the user.
-     *
      */
     public String getTokens(AuthResponseBean authResponseBean, String appName, String userName, String password,
-            String grantType, String refreshToken, long validityPeriod) throws KeyManagementException {
+                            String grantType, String refreshToken, long validityPeriod) throws KeyManagementException {
         String scopes = "";
         try {
             String publisherRestAPI = RestApiUtil.getPublisherRestAPIResource();
@@ -134,11 +131,8 @@ public class LoginTokenService {
             List<String> grantTypes = new ArrayList<>();
             grantTypes.add(KeyManagerConstants.PASSWORD_GRANT_TYPE);
             grantTypes.add(KeyManagerConstants.REFRESH_GRANT_TYPE);
-            OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(appName,
-                    "http://temporary.callback/url", grantTypes);
-
-            oauthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.VALIDITY_PERIOD, 3600);
-            oauthAppRequest.getOAuthApplicationInfo().addParameter(KeyManagerConstants.APP_KEY_TYPE, "application");
+            OAuthAppRequest oauthAppRequest = new OAuthAppRequest(appName, "http://temporary.callback/url",
+                    "Application", grantTypes);
             OAuthApplicationInfo oAuthApplicationInfo;
             oAuthApplicationInfo = APIManagerFactory.getInstance().getKeyManager().createApplication(oauthAppRequest);
 
