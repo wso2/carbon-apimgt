@@ -17,8 +17,10 @@
  */
 
 import React, {Component} from 'react'
-import CheckItem from "./CheckItem";
 import TransitionStateButton from "./TransitionStateButton";
+import {Radio, Checkbox, message, Alert} from 'antd'
+const ButtonGroup = Radio.Group;
+const CheckboxGroup = Checkbox.Group;
 
 import API from '../../../../data/api'
 
@@ -36,15 +38,17 @@ export default class LifeCycleUpdate extends Component {
     updateLifeCycleState(event) {
         event.preventDefault();
         let promisedUpdate;
-        const newState = event.target.dataset.lcstate; // TODO: check compatibility with IE10 if not work use : event.target.attributes.getNamedItem('data-lcState').value; ~tmkb
+        const newState = event.target.value;
         const apiUUID = this.props.api.id;
         if (this.state.checkedItems !== '') {
             promisedUpdate = this.api.updateLcState(apiUUID, newState, this.state.checkedItems);
         } else {
             promisedUpdate = this.api.updateLcState(apiUUID, newState);
         }
-        promisedUpdate.then( response => {
+        promisedUpdate.then(response => { /*TODO: Handle IO erros ~tmkb*/
             this.props.handleUpdate(true);
+            message.info("Lifecycle state updated successfully");
+            /*TODO: add i18n ~tmkb*/
         })
     }
 
@@ -53,66 +57,51 @@ export default class LifeCycleUpdate extends Component {
     }
 
     render() {
-        let is_workflow_pending = this.props.api.workflowStatus.toLowerCase() === "pending";
+        const {lcState, api} = this.props;
+        const is_workflow_pending = api.workflowStatus.toLowerCase() === "pending";
+        const checkList = lcState.checkItemBeanList.map(item => ({label: item.name, value: item.value}));
         return (
-            <form className="form-horizontal lifecycle-state">
-                <div className="well remove-padding-top remove-padding-bottom">
-                    <div className="form-group">
-                        <label className="control-label col-xs-12 col-sm-4 col-md-3 col-lg-2 text-center-xs"
-                               name="state">
-                            <h4>Current State : </h4>
-                        </label>
-                        <div className="controls col-xs-12 col-sm-8 col-md-9 col-lg-10 text-center-xs">
-                            {
-                                is_workflow_pending ?
-                                    (
-                                        <h4>
-                                            <p className="form-control-static" name="stateValue">
-                                                <strong>Pending lifecycle state change</strong>
-                                            </p>
-                                        </h4>
-                                    ) :
-                                    (
-                                        <h4>
-                                            <p className="form-control-static" name="stateValue">
-                                                <strong>{this.props.api.lifeCycleStatus}</strong>
-                                            </p>
-                                        </h4>
-                                    )
-                            }
-                        </div>
-                    </div>
-                </div>
+            <div>
                 {
-                    !is_workflow_pending &&
-                    this.props.lcState.checkItemBeanList.map(
-                        item => {
-                            return <CheckItem key={item.name} item={item} handleCheckItem={this.handleCheckItem}/>
-                        }
-                    )
+                    is_workflow_pending ?
+                        (
+                            <Alert
+                                message="Warning"
+                                description="Pending lifecycle state change."
+                                type="warning"
+                                showIcon
+                            />
+                        ) :
+                        (
+                            <Alert
+                                message={api.lifeCycleStatus}
+                                description="Current Life Cycle State"
+                                type="info"
+                                showIcon
+                            />
+                        )
                 }
-                <div className="form-actions">
-                    <div className="btn-group btn-group-justified" style={{display: 'block'}}
-                         role="group" aria-label="btn">
-                        {
-                            is_workflow_pending ?
-                                (
-                                    <div className="btn-group" role="group">
-                                        <input type="button" className="btn btn-primary wf-cleanup-btn"
-                                               defaultValue="Delete pending lifecycle state change request"/>
-                                    </div>
-                                ) :
-                                (
-                                    this.props.lcState.availableTransitionBeanList.map(
-                                        transition_state => <TransitionStateButton
-                                            updateLifeCycleState={this.updateLifeCycleState}
-                                            key={transition_state.event} state={transition_state}/>
-                                    )
-                                )
-                        }
-                    </div>
-                </div>
-            </form>
+                {
+                    !is_workflow_pending && <CheckboxGroup options={checkList} onChange={this.handleCheckItem}/>
+                }
+                <ButtonGroup onChange={this.updateLifeCycleState}>
+                    {
+                        is_workflow_pending ?
+                            (
+                                <div className="btn-group" role="group">
+                                    <input type="button" className="btn btn-primary wf-cleanup-btn"
+                                           defaultValue="Delete pending lifecycle state change request"/>
+                                </div>
+                            ) :
+                            (
+                                lcState.availableTransitionBeanList.map(
+                                    transition_state => lcState.state !== transition_state.targetState &&
+                                    <TransitionStateButton key={transition_state.event} state={transition_state}/>
+                                ) /* Skip when transitions available for current state , this occurs in states where have allowed re-publishing in prototype and published sates*/
+                            )
+                    }
+                </ButtonGroup>
+            </div>
         );
     }
 }

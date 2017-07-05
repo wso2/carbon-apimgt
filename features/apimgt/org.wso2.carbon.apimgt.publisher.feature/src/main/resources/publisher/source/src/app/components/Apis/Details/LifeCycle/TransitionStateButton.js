@@ -1,11 +1,10 @@
 import React from 'react'
+import {Radio} from 'antd'
+const Button = Radio.Button;
 
 const TransitionStateButton = (props) => {
     return (
-        <div className="btn-group" role="group">
-            <input type="button" style={{color: 'black'}} className="btn btn-primary lc-state-btn" data-lcstate={props.state.targetState}
-                   defaultValue={props.state.event} onClick={props.updateLifeCycleState}/>
-        </div>
+        <Button value={props.state.targetState}>{props.state.event}</Button>
     );
 };
 
