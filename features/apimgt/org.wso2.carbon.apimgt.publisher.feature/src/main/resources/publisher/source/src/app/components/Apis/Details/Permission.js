@@ -20,44 +20,15 @@ import React from 'react'
 import {Row, Col} from 'antd';
 
 
-var createReactClass = require('create-react-class');
-
-var Component = createReactClass({
-
-    render() {
-        return <Child />;
-    }
-});
-
-
-
 class Permission extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             api: props.api
         }
-        console.log(this.state.api.permission);
     }
 
     render() {
-
-        var test = createReactClass({
-
-            render() {
-                return <Child />;
-            }
-        });
-
-        var Child = () => {
-            return (
-                <div>
-                    <button>+dfsdfsdfsd</button>
-                </div>
-            );
-        };
-
-
 
         return (
             <div>
@@ -79,7 +50,7 @@ class Permission extends React.Component {
                                             <div className="gutter-box">Update</div>
                                         </Col>
                                         <Col className="gutter-row" span={6}>
-                                            <div className="gutter-box"><Child/></div>
+                                            <div className="gutter-box">Delete</div>
                                         </Col>
                                     </Row>
                                 </div>
