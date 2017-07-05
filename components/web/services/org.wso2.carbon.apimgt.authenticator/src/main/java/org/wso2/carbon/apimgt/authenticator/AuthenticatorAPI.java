@@ -232,7 +232,7 @@ public class AuthenticatorAPI implements Microservice {
         String restAPIContext;
         APIMStoreConfigurations storeConfigs = new APIMStoreConfigurations();
         if (appContext.contains("editor")) {
-            restAPIContext = AuthenticatorConstants.REST_CONTEXT + "/store";
+            restAPIContext = AuthenticatorConstants.REST_CONTEXT + "/publisher";
         } else {
             restAPIContext = AuthenticatorConstants.REST_CONTEXT + appContext;
         }
