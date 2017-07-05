@@ -6,6 +6,7 @@ import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.core.models.HttpResponse;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.CustomPolicy;
@@ -27,6 +28,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
@@ -89,8 +92,8 @@ public class ExportApiServiceImpl extends ExportApiService {
             String zippedFilePath = createArchiveFromPolicies(exportedPoliciesDirName, archiveDir, archiveName);
             APIFileUtils.deleteDirectory(exportedPoliciesDirName);
             File exportedApiArchiveFile = new File(zippedFilePath);
-            Response.ResponseBuilder responseBuilder = Response.status(Response.Status.OK);
-            responseBuilder
+            Response.ResponseBuilder responseBuilder = Response.status(Response.Status.OK).entity(exportedApiArchiveFile);
+            responseBuilder.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM)
                     .header("Content-Disposition", "attachment; filename=\"" + exportedApiArchiveFile.getName() + "\"");
             Response response = responseBuilder.build();
             return response;
