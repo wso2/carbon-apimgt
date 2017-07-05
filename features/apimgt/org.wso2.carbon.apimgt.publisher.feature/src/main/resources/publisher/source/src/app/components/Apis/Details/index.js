@@ -28,7 +28,7 @@ import Resources from './Resources'
 import Permission from './Permission'
 
 import Api from '../../../data/api'
-import AuthCheck from "../../Base/Auth/AuthCheck";
+import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 
 export default class Details extends Component {
     constructor(props) {
@@ -36,6 +36,7 @@ export default class Details extends Component {
         this.api_uuid = props.match.params.api_uuid;
         this.state = {
             api_response: null,
+            notFound: false
         }
     }
 
@@ -48,11 +49,22 @@ export default class Details extends Component {
             }
         ).catch(
             error => {
-                //if (process.env.NODE_ENV !== "production")
-                  //  console.log(error);
+                if (process.env.NODE_ENV !== "production") {
+                    console.log(error);
+                }
+                let status = error.status;
+                if (status === 404) {
+                    this.setState({notFound: true});
+                }
             }
         );
-        this.props.setLeftMenu(this.props);
+        this.props.setLeftMenu(true);
+    }
+
+    componentWillUnmount() {
+        /* Hide the left side nav bar when detail page is unmount ,
+        since the left nav bar is currently only associated with details page*/
+        this.props.setLeftMenu(false);
     }
 
     bindApi(api_response) {
@@ -60,7 +72,10 @@ export default class Details extends Component {
     }
 
     render() {
-        let redirect_url = "/apis/" + this.props.match.params.api_uuid + "/overview";
+        let redirect_url = "/apis/" + this.props.match.params.api_uuid + "/" + NavBar.CONST.OVERVIEW;
+        if (this.state.notFound) {
+            return <ResourceNotFound/>
+        }
         if (this.state.api_response) {
             return (
                 <div className="tab-content">
@@ -69,9 +84,12 @@ export default class Details extends Component {
                                   to={redirect_url}/>
                         <Route path="/apis/:api_uuid/overview"
                                render={ props => <Overview api={this.state.api_response.obj} {...this.props} /> }/>
-                        <Route path="/apis/:api_uuid/lifecycle" render={ props => <LifeCycle api={this.state.api_response.obj} {...this.props} /> } />
-                        <Route path="/apis/:api_uuid/resources" render={ props => <Resources api={this.state.api_response.obj} {...this.props} /> } />
-                        <Route path="/apis/:api_uuid/permission" render={ props => <Permission api={this.state.api_response.obj} {...props} /> }/>/>
+                        <Route path="/apis/:api_uuid/lifecycle"
+                               render={ props => <LifeCycle api={this.state.api_response.obj} {...this.props} /> }/>
+                        <Route path="/apis/:api_uuid/resources"
+                               render={ props => <Resources api={this.state.api_response.obj} {...this.props} /> }/>
+                        <Route path="/apis/:api_uuid/permission"
+                               render={ props => <Permission api={this.state.api_response.obj} {...props} /> }/>/>
                         <Route component={PageNotFound}/>
                     </Switch>
                 </div>

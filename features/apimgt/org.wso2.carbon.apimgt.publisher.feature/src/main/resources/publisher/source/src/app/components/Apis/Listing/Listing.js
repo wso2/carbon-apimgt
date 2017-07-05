@@ -24,19 +24,20 @@ import '../Apis.css'
 import API from '../../../data/api.js'
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
-import { Link } from 'react-router-dom'
-import { Table, Icon, Menu, Dropdown, Button, Row } from 'antd';
+import {Link} from 'react-router-dom'
+import {Table, Icon, Menu, Dropdown, Button, Row} from 'antd';
 
 const columns = [{
     title: 'Name',
     dataIndex: 'name',
     key: 'name',
-    render: (text,record) => <Link to={"/apis/"+record.id}>{text}</Link>,
+    render: (text, record) => <Link to={"/apis/" + record.id}>{text}</Link>,
 }, {
     title: 'Context',
     dataIndex: 'context',
     key: 'context',
 }, {
+
     title: 'Version',
     dataIndex: 'version',
     key: 'version',
@@ -46,11 +47,11 @@ const columns = [{
     render: (text, record) => (
         <span>
       <a href="#">Action 一 {record.name}</a>
-      <span className="ant-divider" />
+      <span className="ant-divider"/>
       <a href="#">Delete</a>
-      <span className="ant-divider" />
+      <span className="ant-divider"/>
       <a href="#" className="ant-dropdown-link">
-        More actions <Icon type="down" />
+        More actions <Icon type="down"/>
       </a>
     </span>
     ),
@@ -71,7 +72,6 @@ class Listing extends React.Component {
     constructor(props) {
         super(props);
         this.state = {listType: 'grid', apis: null};
-
     }
 
     componentDidMount() {
@@ -91,7 +91,6 @@ class Listing extends React.Component {
                 this.props.history.push({pathname: "/login", search: params});
             }
         });
-        this.props.setLeftMenu(null);
     }
 
     setListType = (value) => {
@@ -110,7 +109,7 @@ class Listing extends React.Component {
             <div className="container-fluid">
                 <div className="api-add-links">
                     <Dropdown overlay={menu} placement="topRight">
-                        <Button shape="circle" icon="plus" />
+                        <Button shape="circle" icon="plus"/>
                     </Dropdown>
                 </div>
                 <h2 className="api-heading">
@@ -118,21 +117,21 @@ class Listing extends React.Component {
                     <span>All APIs visible to this account</span>
                 </h2>
                 <ButtonGroup className="api-type-selector">
-                    <Button type="primary" icon="bars" onClick={() => this.setListType('list')}  />
-                    <Button type="primary" icon="appstore" onClick={() => this.setListType('grid')} />
+                    <Button type="primary" icon="bars" onClick={() => this.setListType('list')}/>
+                    <Button type="primary" icon="appstore" onClick={() => this.setListType('grid')}/>
                 </ButtonGroup>
-                <div style={{clear:"both"}}></div>
-                    {
-                        this.state.apis ?
-                            this.state.listType === "list" ?
-                            <Table columns={columns} dataSource={this.state.apis.list} />
-                                :  <Row gutter={16}>
-                                {this.state.apis.list.map((api, i) => {
-                                    return <ApiThumb listType={this.state.listType} api={api}/>
-                                })}
-                                </Row>
-                            : <Loading/>
-                    }
+                <div style={{clear: "both"}}></div>
+                {
+                    this.state.apis ?
+                        this.state.listType === "list" ?
+                            <Table columns={columns} dataSource={this.state.apis.list}/>
+                            : <Row gutter={16}>
+                            {this.state.apis.list.map((api, i) => {
+                                return <ApiThumb key={api.id} listType={this.state.listType} api={api}/>
+                            })}
+                        </Row>
+                        : <Loading/>
+                }
             </div>
         );
     }

@@ -17,20 +17,55 @@
  */
 
 import React, {Component} from 'react'
-import Api from '../../../../data/SingleClient'
+import Api from '../../../../data/api'
+import LifeCycleUpdate from './LifeCycleUpdate'
+import Loading from "../../../Base/Loading/Loading";
+import LifeCycleHistory from "./LifeCycleHistory";
 
 class LifeCycle extends Component {
     constructor(props) {
         super(props);
         this.api = new Api();
+        this.state = {};
+        this.api_uuid = props.match.params.api_uuid;
+        this.updateData = this.updateData.bind(this);
+    }
+
+    componentWillMount() {
+        this.updateData();
+    }
+
+    updateData() {
+        let promised_api = this.api.get(this.api_uuid);
+        let promised_tiers = this.api.policies('api');
+        let promised_lcState = this.api.getLcState(this.api_uuid);
+        let promised_lcHistory = this.api.getLcHistory(this.api_uuid);
+        let promised_labels = this.api.labels();
+        Promise.all([promised_api, promised_tiers, promised_lcState, promised_lcHistory, promised_labels])
+            .then(response => {
+                let [api, tiers, lcState, lcHistory, labels] = response.map(data => data.obj);
+                this.setState({api: api, tiers: tiers, lcState: lcState, lcHistory: lcHistory, labels: labels});
+            });
     }
 
     render() {
-        return (
-            <h1>
-                Life cycle Page
-            </h1>
-        );
+        if (this.state.api) {
+            return (
+                <div>
+                    <div className="row">
+                        <div id="lifecycle-content " className="tab-content col-md-6 col-sm-6">
+                            <div className="page-header">
+                                <h4 className="lead">Change Lifecycle</h4>
+                            </div>
+                            <LifeCycleUpdate handleUpdate={this.updateData} lcState={this.state.lcState} api={this.state.api}/>
+                            <LifeCycleHistory/>
+                        </div>
+                    </div>
+                </div>
+            );
+        } else {
+            return <Loading/>
+        }
     }
 }
 

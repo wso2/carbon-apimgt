@@ -17,19 +17,11 @@
  */
 
 import React, {Component} from 'react'
-import {Link} from 'react-router-dom'
+import {Link, withRouter} from 'react-router-dom'
+import {Tabs} from 'antd'
+const TabPane = Tabs.TabPane;
 
-export default class NavBar extends Component {
-    constructor(props) {
-        super(props);
-        const path_sections = props.location.pathname.split('/');
-        let details_action = path_sections[path_sections.indexOf("apis") + 2];
-        let active_tab = (Object.values(NavBar.CONST).includes(details_action)) ? details_action : NavBar.CONST.OVERVIEW;
-        this.state = {
-            activeTab: active_tab
-        };
-        this.setActive = this.setActive.bind(this);
-    }
+class NavBar extends Component {
 
     static get CONST() {
         return {
@@ -37,76 +29,38 @@ export default class NavBar extends Component {
             LIFECYCLE: "lifecycle",
             ENDPOINTS: "endpoints",
             RESOURCES: "resources",
-            PERMISSION: "permission"
+            PERMISSION: "permission",
+            DOCUMENTS: "documents",
+            MEDIATION: "mediation",
+            SCRIPTING: "scripting",
+            SUBSCRIPTIONS: "subscriptions"
         }
     }
 
-    isActive(tab) {
-        return this.state.activeTab === tab ? "active" : "";
-    }
-
-    setActive(event) {
-        this.setState({activeTab: event.target.name});
-    }
-
     render() {
+        /* TODO: This could have been done easily with match object containing api_uuid value , But
+         Due to a bug (https://github.com/ReactTraining/react-router/issues/4649) in the latest version(4.1.1),
+         it's not working as expected, Hence doing this hack, revert to following with react-router upgrade
+         const api_uuid = this.props.match.params.api_uuid; ~tmkb */
+        const pathSegments = this.props.location.pathname.split('/');
+        // This assume that last segment and segment before it contains detail page action and API UUID
+        const [active_tab, api_uuid] = pathSegments.reverse();
         return (
-            <div>
-                <div className="tabs-holder" style={{background: 'floralwhite'}}>
-                    <div className="button-bar">
-                        <ul className="nav nav-pills tab-effect">
-                            <li className={this.isActive(NavBar.CONST.OVERVIEW)}>
-                                <Link name={NavBar.CONST.OVERVIEW} onClick={this.setActive}
-                                      to={"/apis/" + this.props.match.params.api_uuid + "/overview"}>
-                                    <i className="fw fw-view"/>&nbsp;Overview
-                                </Link>
-                            </li>
-                            <li className={this.isActive(NavBar.CONST.LIFECYCLE)}>
-                                <Link name={NavBar.CONST.LIFECYCLE} onClick={this.setActive}
-                                      to={"/apis/" + this.props.match.params.api_uuid + "/lifecycle"}>
-                                    <i className="fw fw-lifecycle"/>&nbsp;Life-Cycle
-                                </Link>
-                            </li>
-                            <li className={this.isActive(NavBar.CONST.ENDPOINTS)}>
-                                <Link name={NavBar.CONST.ENDPOINTS} onClick={this.setActive}
-                                      to={"/apis/" + this.props.match.params.api_uuid + "/endpoints"}>
-                                    <i className="fw fw-endpoint"/>&nbsp; Endpoints
-                                </Link>
-                            </li>
-                            <li className={this.isActive(NavBar.CONST.RESOURCES)}>
-                                <Link onClick={this.setActive}
-                                      to={"/apis/" + this.props.match.params.api_uuid + "/resources"}>
-                                    <i className="fw fw-resource"/>&nbsp;Resources
-                                </Link>
-                            </li>
-                            <li id="tab-5" role="presentation"><a href="#documents-tab" role="tab"
-                                                                  aria-controls="documents-tab" data-toggle="tab"><i
-                                className="fw fw-document"/>&nbsp; Documents</a>
-                            </li>
-                            <li className={this.isActive(NavBar.CONST.PERMISSION)}>
-                                <Link onClick={this.setActive}
-                                      to={"/apis/" + this.props.match.params.api_uuid + "/permission"}>
-                                    <i className="fw fw-resource"/>&nbsp;Permission
-                                </Link>
-                            </li>
-                            <li id="tab-7" role="presentation"><a href="#mediation-tab" role="tab"
-                                                                  aria-controls="mediation-tab" data-toggle="tab"><i
-                                className="fw fw-sequence"/>&nbsp;
-                                Mediation</a>
-                            </li>
-                            <li id="tab-8" role="presentation"><a href="#scripting-tab" role="tab"
-                                                                  aria-controls="scripting-tab" data-toggle="tab"><i
-                                className="fw fw-prototype"/>&nbsp; Scripting</a>
-                            </li>
-                            <li id="tab-9" role="presentation"><a href="#subscriptions-tab" role="tab"
-                                                                  aria-controls="subscriptions-tab" data-toggle="tab"><i
-                                className="fw fw-subscribe"/>&nbsp; Subscriptions</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-            </div>
-        );
+            <Tabs defaultActiveKey={active_tab} tabPosition={'left'} style={{height: '100vh'}}>
+                {Object.entries(NavBar.CONST).map(
+                    ([key, val]) => {
+                        return (
+                            <TabPane
+                                tab={ <Link name={val} to={"/apis/" + api_uuid + "/" + val}>{val}</Link> } key={val}/>
+                        );
+                    }
+                )}
+            </Tabs>
+        )
     }
 }
+
+// Using `withRouter` helper from React-Router-Dom to get the current user location to be used with logout action,
+// To identify which tab user is currently viewing we need to know their location information
+// DOC: https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/withRouter.md
+export default withRouter(NavBar)

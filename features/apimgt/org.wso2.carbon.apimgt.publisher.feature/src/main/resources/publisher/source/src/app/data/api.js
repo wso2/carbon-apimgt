@@ -159,7 +159,7 @@ class API {
      */
     _requestMetaData(data = {}) {
         AuthClient.refreshTokenOnExpire();
-        let access_key_header = "Bearer " + AuthClient.getUser().getPartialToken();
+        let access_key_header = "Bearer " + AuthClient.getUser().getPartialToken(); // Anti-CSRF token
         let request_meta = {
             clientAuthorizations: {
                 am_token1: new SwaggerClient.ApiKeyAuthorization("Authorization", access_key_header, "header")

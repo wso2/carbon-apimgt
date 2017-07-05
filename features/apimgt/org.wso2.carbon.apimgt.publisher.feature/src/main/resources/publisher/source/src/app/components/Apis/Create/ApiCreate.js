@@ -23,10 +23,6 @@ import './ApiCreate.css'
 
 
 class ApiCreate extends Component {
-    constructor(props){
-        super(props);
-        props.setLeftMenu(null);
-    }
     render() {
         return (
                 <div>

@@ -26,20 +26,13 @@ import 'react-toastify/dist/ReactToastify.min.css';
 
 
 class Apis extends React.Component {
-    constructor(props){
-        super(props);
-        props.setLeftMenu(null);
-    }
-    render(){
+    render() {
         return (
             <div>
                 <Switch>
-                    <Route exact path={"/apis"} render={props => (<Listing {...props}
-                                                                           setLeftMenu={this.props.setLeftMenu}
-                                                                           leftMenu={this.props.leftMenu} />)} />
-                    <Route path={"/apis/:api_uuid/"} render={ props => (<Details {...props}
-                                                                             setLeftMenu={this.props.setLeftMenu}
-                                                                             leftMenu={this.props.leftMenu} />)} />
+                    <Route exact path={"/apis"} component={Listing}/>
+                    <Route path={"/apis/:api_uuid/"} render={ props => (
+                        <Details {...props} setLeftMenu={this.props.setLeftMenu}/>)}/>
                     <Route component={PageNotFound}/>
                 </Switch>
             </div>
