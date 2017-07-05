@@ -17,27 +17,11 @@
  */
 
 import React, {Component} from 'react'
-import {Link} from 'react-router-dom'
+import {Link, withRouter} from 'react-router-dom'
 import {Tabs} from 'antd'
 const TabPane = Tabs.TabPane;
 
-export default class NavBar extends Component {
-    constructor(props) {
-        super(props);
-        let location = this.props.leftMenu.location;
-        let path_sections, active_tab = "overview", details_action;
-        if (this.props.leftMenu.location) {
-            path_sections = location.pathname.split('/');
-            details_action = path_sections[path_sections.indexOf("apis") + 2];
-            active_tab = (Object.values(NavBar.CONST).includes(details_action)) ? details_action : NavBar.CONST.OVERVIEW;
-        }
-        this.state = {
-            activeTab: active_tab
-        };
-        this.setActive = this.setActive.bind(this);
-
-    }
-
+class NavBar extends Component {
 
     static get CONST() {
         return {
@@ -53,29 +37,30 @@ export default class NavBar extends Component {
         }
     }
 
-    setActive(event) {
-        this.setState({activeTab: event.target.name});
-    }
-
     render() {
-        let api_uuid = '';
-        if (this.props.leftMenu.match) {
-            api_uuid = this.props.leftMenu.match.params.api_uuid;
-        }
+        /* TODO: This could have been done easily with match object containing api_uuid value , But
+         Due to a bug (https://github.com/ReactTraining/react-router/issues/4649) in the latest version(4.1.1),
+         it's not working as expected, Hence doing this hack, revert to following with react-router upgrade
+         const api_uuid = this.props.match.params.api_uuid; ~tmkb */
+        const pathSegments = this.props.location.pathname.split('/');
+        // This assume that last segment and segment before it contains detail page action and API UUID
+        const [active_tab, api_uuid] = pathSegments.reverse();
         return (
-            <Tabs defaultActiveKey={NavBar.CONST.OVERVIEW} tabPosition={'left'} style={{height: '100vh'}}>
+            <Tabs defaultActiveKey={active_tab} tabPosition={'left'} style={{height: '100vh'}}>
                 {Object.entries(NavBar.CONST).map(
                     ([key, val]) => {
                         return (
-                                <TabPane tab={
-                                    <Link name={val} onClick={this.setActive} to={"/apis/" + api_uuid + "/" + val}>
-                                        {val}
-                                    </Link>
-                                } key={val}/>
-                            );
+                            <TabPane
+                                tab={ <Link name={val} to={"/apis/" + api_uuid + "/" + val}>{val}</Link> } key={val}/>
+                        );
                     }
                 )}
             </Tabs>
         )
     }
 }
+
+// Using `withRouter` helper from React-Router-Dom to get the current user location to be used with logout action,
+// To identify which tab user is currently viewing we need to know their location information
+// DOC: https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/withRouter.md
+export default withRouter(NavBar)
