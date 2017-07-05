@@ -17,6 +17,26 @@
  */
 
 import React, {Component} from 'react'
+import { Link } from 'react-router-dom'
+import { Col, Row, Card, Form, Select, Dropdown, Tag, Menu , Button, Badge } from 'antd';
+
+const FormItem = Form.Item;
+const Option = Select.Option;
+
+const menu = (
+    <Menu>
+        <Menu.Item>
+            <Link to="">Edit</Link>
+        </Menu.Item>
+        <Menu.Item>
+            <Link to="">Create New Version</Link>
+        </Menu.Item>
+        <Menu.Item>
+            <Link to="">View Swagger</Link>
+        </Menu.Item>
+    </Menu>
+);
+
 class ActivityItem extends Component {
     constructor(props){
         super(props);
@@ -52,143 +72,73 @@ class Overview extends Component {
     }
 
     render() {
+
+        const formItemLayout = {
+            labelCol: { span: 6 },
+            wrapperCol: { span: 18 }
+        };
         return (
             <div>
-                <div className="wrapper wrapper-content">
-                    <h2>{this.state.api.name} <span className="pull-right btn-block view-in-store btn btn-block">View in Store <i className="fw fw-store"></i></span></h2>
+                <Row type="flex" justify="center">
+                    <Col span={4}>
 
-                    <div className="row animated fadeInRight">
-                        <div className="col-md-4">
-                            <div className="api-box float-e-margins">
-                                    <span className="label label-primary">{this.state.api.lifeCycleStatus}</span>
-                                    <div className="api-box-content no-padding border-left-right">
-                                        <div className="square-element setbgcolor"
-                                             style={{background: 'rgb(92, 107, 192)'}}>
-                                            <div className="api-name-icon text-uppercase"
-                                                 style={{fontSize: '900%', color: 'white', textAlign: 'center'}}>A
-                                            </div>
-                                            <div style={{display: 'none'}}>
-                                                <a className="api-name" title="exsample_4">{this.state.api.name}</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="api-box-content profile-content">
-
-                                        <p>
-                                            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitat.
-                                        </p>
-                                        <div className="row m-t-lg">
-                                            <div className="col-md-4">
-                                                <span className="bar" style={{display: 'none'}}>5,3,9,6,5,9,7,3,5,2</span><svg className="peity" height={16} width={32}><rect fill="#1ab394" x={0} y="7.111111111111111" width="2.3" height="8.88888888888889" /><rect fill="#d7d7d7" x="3.3" y="10.666666666666668" width="2.3" height="5.333333333333333" /><rect fill="#1ab394" x="6.6" y={0} width="2.3" height={16} /><rect fill="#d7d7d7" x="9.899999999999999" y="5.333333333333334" width="2.3" height="10.666666666666666" /><rect fill="#1ab394" x="13.2" y="7.111111111111111" width="2.3" height="8.88888888888889" /><rect fill="#d7d7d7" x="16.5" y={0} width="2.3" height={16} /><rect fill="#1ab394" x="19.799999999999997" y="3.555555555555557" width="2.3" height="12.444444444444443" /><rect fill="#d7d7d7" x="23.099999999999998" y="10.666666666666668" width="2.3" height="5.333333333333333" /><rect fill="#1ab394" x="26.4" y="7.111111111111111" width="2.3" height="8.88888888888889" /><rect fill="#d7d7d7" x="29.7" y="12.444444444444445" width="2.3" height="3.5555555555555554" /></svg>
-                                                <h5><strong>169</strong> <br />Requests</h5>
-                                            </div>
-                                            <div className="col-md-4">
-                                                <span className="bar" style={{display: 'none'}}>5,3,2,-1,-3,-2,2,3,5,2</span><svg className="peity" height={16} width={32}><rect fill="#1ab394" x={0} y={0} width="2.3" height={10} /><rect fill="#d7d7d7" x="3.3" y={4} width="2.3" height={6} /><rect fill="#1ab394" x="6.6" y={6} width="2.3" height={4} /><rect fill="#d7d7d7" x="9.899999999999999" y={10} width="2.3" height={2} /><rect fill="#1ab394" x="13.2" y={10} width="2.3" height={6} /><rect fill="#d7d7d7" x="16.5" y={10} width="2.3" height={4} /><rect fill="#1ab394" x="19.799999999999997" y={6} width="2.3" height={4} /><rect fill="#d7d7d7" x="23.099999999999998" y={4} width="2.3" height={6} /><rect fill="#1ab394" x="26.4" y={0} width="2.3" height={10} /><rect fill="#d7d7d7" x="29.7" y={6} width="2.3" height={4} /></svg>
-                                                <h5><strong>10</strong> <br />Fault Requests</h5>
-                                            </div>
-                                            <div className="col-md-4">
-                                                <span className="line" style={{display: 'none'}}>5,3,9,6,5,9,7,3,5,2</span><svg className="peity" height={16} width={32}><polygon fill="#1ab394" points="0 15 0 7.166666666666666 3.5555555555555554 10.5 7.111111111111111 0.5 10.666666666666666 5.5 14.222222222222221 7.166666666666666 17.77777777777778 0.5 21.333333333333332 3.833333333333332 24.888888888888886 10.5 28.444444444444443 7.166666666666666 32 12.166666666666666 32 15" /><polyline fill="transparent" points="0 7.166666666666666 3.5555555555555554 10.5 7.111111111111111 0.5 10.666666666666666 5.5 14.222222222222221 7.166666666666666 17.77777777777778 0.5 21.333333333333332 3.833333333333332 24.888888888888886 10.5 28.444444444444443 7.166666666666666 32 12.166666666666666" stroke="#169c81" strokeWidth={1} strokeLinecap="square" /></svg>
-                                                <h5><strong>28</strong> <br />Subscriptions</h5>
-                                            </div>
-
-                                        </div>
-                                        <div className="row m-t-lg">
-                                            <div className="col-md-4">
-                                                <h5><strong>Context</strong> <br />{this.state.api.context}</h5>
-                                            </div>
-                                            <div className="col-md-4">
-                                                <h5><strong>Version</strong> <br />{this.state.api.version}</h5>
-                                            </div>
-                                            <div className="col-md-4">
-                                                <h5><strong>Status</strong> <br />{this.state.api.lifeCycleStatus}</h5>
-                                            </div>
-
-                                        </div>
-                                        <div className="user-button">
-                                            <div className="row">
-                                                <div className="col-md-6">
-                                                    <button type="button" className="btn btn-primary btn-sm btn-block"><i className="fa fa-envelope" /> Delete</button>
-                                                </div>
-                                                <div className="col-md-6">
-                                                    <button type="button" className="btn btn-default btn-sm btn-block"><i className="fa fa-coffee" /> New Version</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                        <Card bodyStyle={{ padding: 10 }}>
+                            <div className="custom-image">
+                                <img alt="API thumb" width="100%" src="http://placekitten.com/g/200/200" />
                             </div>
-                        </div>
-                        <div className="col-md-8">
-                            <table className="table table-bordered api-detail-table">
-                                <tbody>
-                                <tr>
-                                    <td>Visibility</td>
-                                    <td id="inUrl">
-                                        {this.state.api.visibility}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Context</td>
-                                    <td id="inUrl">{this.state.api.name}</td>
-                                </tr>
-                                <tr>
-                                    <td>Date Last Updated</td>
-                                    <td id="inUpdated" className="dateFull">{this.state.api.createdTime}</td>
-                                </tr>
-                                <tr>
-                                    <td>Tier Availability</td>
-                                    <td id="tierAvb">Unlimited</td>
-                                </tr>
-                                <tr>
-                                    <td>Default API Version</td>
-                                    <td id="defaultAPIVersion">
-                                        false
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Published Environments</td>
-                                    <td>
-                                        <b>N/A</b>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Labels</td>
-                                    <td id="labelValues"><b>N/A</b></td>
-                                </tr>
-                                </tbody>
-                            </table>
-                            <div className="api-box-white float-e-margins">
-
-                                <div className="api-box-content">
-                                    <div>
-                                        <div className="feed-activity-list">
-                                            <h3>Activities</h3>
-                                            <ActivityItem when="1m ago"
-                                                          time="Today 4:21 pm - 12.06.2014"
-                                                          user="Sandra Momot"
-                                                          tier="Unlimited"
-                                            />
-                                            <ActivityItem when="12m ago"
-                                                          time="Today 4:01 pm - 12.06.2014"
-                                                          user="Monica Smith"
-                                                          tier="Unlimited"
-                                            /><
-                                            ActivityItem when="23m ago"
-                                                          time="Today 3:55 pm - 12.06.2014"
-                                                          user="Sandra Momot"
-                                                          tier="Unlimited"
-                                            />
-                                            <ActivityItem when="45m ago"
-                                                          time="Today 4:21 pm - 12.06.2014"
-                                                          user="Sandra Momot"
-                                                          tier="Unlimited"
-                                            />
-                                        </div>
-                                        <button className="btn btn-default btn-block m"><i className="fa fa-arrow-down" /> Show More</button>
-                                    </div>
-                                </div>
+                            <div className="custom-card">
+                                <Badge status="processing" text={this.state.api.lifeCycleStatus} />
+                                <p>11 Apps</p>
+                                <a href="#components-anchor-store" title="Store" >View in store</a>
                             </div>
-                        </div>
-                    </div>
+                        </Card>
+                    </Col>
+                    <Col span={15} offset={1}>
+                        <Form layout="vertical">
+                            <FormItem {...formItemLayout} label="API Name">
+                                <span className="ant-form-text">{this.state.api.name}</span>
+                            </FormItem>
+                            <FormItem {...formItemLayout} label="Version">
+                                <span className="ant-form-text">{this.state.api.version}</span>
+                            </FormItem>
+                            <FormItem {...formItemLayout} label="Context">
+                                <span className="ant-form-text">{this.state.api.context}</span>
+                            </FormItem>
+                            <FormItem {...formItemLayout} label="Last Updated">
+                                <span className="ant-form-text">{this.state.api.createdTime}</span>
+                            </FormItem>
+                            <FormItem {...formItemLayout} label="Business Plans">
+                                <span className="ant-form-text">{"Gold, Silver, Free"}</span>
+                            </FormItem>
+                            <FormItem {...formItemLayout} label="Tags">
+                                <span className="ant-form-text">
+                                    <Tag><a href="#somelink">Social</a></Tag>
+                                    <Tag><a href="#somelink">Facebook</a></Tag>
+                                </span>
+                            </FormItem>
+                            <FormItem {...formItemLayout} label="Labels">
+                                <span className="ant-form-text">
+                                      <Tag color="pink">pink</Tag>
+                                      <Tag color="red">red</Tag>
+                                      <Tag color="orange">orange</Tag>
+                                      <Tag color="green">green</Tag>
+                                </span>
+                            </FormItem>
+                            <FormItem {...formItemLayout} label="Business Owner">
+                                <span className="ant-form-text">{"WSO2"}</span>
+                                <a className="ant-form-text" href="#email">{"(bizdev@wso2.com)"}</a>
+                            </FormItem>
+                            <FormItem {...formItemLayout} label="Tech Owner">
+                                <span className="ant-form-text">{"WSO2 Support"}</span>
+                                <a className="ant-form-text" href="#email">{"(support@wso2.com)"}</a>
+                            </FormItem>
+                        </Form>
+                    </Col>
+                </Row>
+                <div className="api-add-links">
+                    <Dropdown overlay={menu} placement="topCenter">
+                        <Button shape="circle" icon="edit"/>
+                    </Dropdown>
                 </div>
             </div>
         );

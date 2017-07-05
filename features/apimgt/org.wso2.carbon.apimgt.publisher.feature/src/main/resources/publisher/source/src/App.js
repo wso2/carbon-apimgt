@@ -32,17 +32,27 @@ import './App.css'
  * Render protected application paths
  */
 class Protected extends Component {
+    constructor(props){
+        super(props);
+        this.state = {leftMenu:[]};
+        this.setLeftMenu = this.setLeftMenu.bind(this);
+    }
+    setLeftMenu(leftMenu) {
+        this.setState({
+            leftMenu: leftMenu
+        });
+    }
 
     render() {
         // Note: AuthManager.getUser() method is a passive check, which simply check the user availability in browser storage,
         // Not actively check validity of access token from backend
         if (AuthManager.getUser()) {
             return (
-                <Base>
+                <Base setLeftMenu={this.setLeftMenu} leftMenu={this.state.leftMenu}>
                     <Switch>
                         <Route exact path={"/"} component={ApiCreate}/>
-                        <Route path={"/apis"} component={Apis}/>
-                        <Route path={"/api/create"} component={ApiCreate}/>
+                        <Route path={"/apis"} render={ props => (<Apis setLeftMenu={this.setLeftMenu}  />)}  />
+                        <Route path={"/api/create"} render={props => <ApiCreate setLeftMenu={this.setLeftMenu} /> } />
                         <Route component={PageNotFound}/>
                     </Switch>
                 </Base>
