@@ -4,12 +4,12 @@
 function loginRedirect(){
     $.ajax({
         type: "GET",
-        url: "https://localhost:9292/store/auth/apis/login/dcr",
+        url: "https://localhost:9292/store/auth/apis/login/login",
         dataType: "json",
         success:function(data){
             console.log(this.data);
             var client_id = data.client_id;
-            var callback_URL = data.callback_URL;
+            var callback_URL = data.callback_url;
             var scopes = data.scopes;
             var isSSOEnabled = data.isSSOEnabled;
             if(isSSOEnabled) {

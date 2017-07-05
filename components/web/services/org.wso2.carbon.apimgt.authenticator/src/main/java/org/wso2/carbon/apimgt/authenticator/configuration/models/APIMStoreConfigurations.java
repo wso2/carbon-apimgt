@@ -29,13 +29,21 @@ public class APIMStoreConfigurations {
     @Element(description = "APIM Base URL")
     private String apimBaseUrl = "https://localhost:9292/";
     @Element(description = "SSO Enabled or not")
-    private Boolean isSSOEnabled = true;
-
-    public Boolean getIsSSOEnabled() {
-        return isSSOEnabled;
-    }
+    private boolean ssoEnabled = true;
 
     public String getApimBaseUrl() {
         return apimBaseUrl;
+    }
+
+    public void setApimBaseUrl(String apimBaseUrl) {
+        this.apimBaseUrl = apimBaseUrl;
+    }
+
+    public boolean isSsoEnabled() {
+        return ssoEnabled;
+    }
+
+    public void setSsoEnabled(boolean ssoEnabled) {
+        this.ssoEnabled = ssoEnabled;
     }
 }

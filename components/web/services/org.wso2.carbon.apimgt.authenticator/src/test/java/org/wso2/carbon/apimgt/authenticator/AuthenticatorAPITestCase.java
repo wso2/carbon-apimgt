@@ -21,8 +21,6 @@ package org.wso2.carbon.apimgt.authenticator;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.testng.annotations.Test;
-import org.wso2.carbon.apimgt.core.api.KeyManager;
-import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.messaging.CarbonMessage;
 import org.wso2.msf4j.Request;
@@ -43,8 +41,8 @@ public class AuthenticatorAPITestCase {
         CarbonMessage carbonMessage = Mockito.mock(CarbonMessage.class);
         Request requestObj = new Request(carbonMessage);
         PowerMockito.whenNew(Request.class).withArguments(carbonMessage).thenReturn(requestObj);
-        Mockito.when(requestObj.getProperty("REQUEST_URL")).thenReturn("/store/auth/apis/login/dcr");
-        KeyManager keyManager = Mockito.mock(KeyManager.class);
+        Mockito.when(requestObj.getProperty("REQUEST_URL")).thenReturn("/store/auth/apis/login/login");
+        //KeyManager keyManager = Mockito.mock(KeyManager.class);
         //AuthenticatorAPI authenticatorAPI = new AuthenticatorAPI(keyManager);
         // Happy Path - 200
         //// Mocked response object from DCR api
@@ -58,10 +56,8 @@ public class AuthenticatorAPITestCase {
         oAuthApplicationInfo.setClientId("n69QigpPbFTzCr9VoSPv_l2BI6oa");
         oAuthApplicationInfo.setClientSecret("oBvJZen3FanevdlCVEqQvCRnW04a");
         oAuthApplicationInfo.setCallBackURL("https://localhost:9292/store/auth/apis/login/callback");
-
-        OAuthAppRequest oAuthAppRequest = new OAuthAppRequest();
-        oAuthAppRequest.setOAuthApplicationInfo(oAuthApplicationInfo);
-        Mockito.when(keyManager.createApplication(oAuthAppRequest)).thenReturn(oAuthApplicationInfo);
+        //OAuthAppRequest oAuthAppRequest = Mockito.mock(OAuthAppRequest.class);
+        //Mockito.when(keyManager.createApplication(oAuthAppRequest)).thenReturn(oAuthApplicationInfo);
         //// Redirect to IS Login
         //Response responseObj = authenticatorAPI.redirect(requestObj);
         //Assert.assertEquals(responseObj.getStatus(), 200);
