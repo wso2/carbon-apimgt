@@ -17,40 +17,42 @@
  */
 
 import React from 'react'
+import {Row, Col} from 'antd';
 
-class Permission extends React.Component{
-    constructor(props){
+
+class Permission extends React.Component {
+    constructor(props) {
         super(props);
         this.state = {
             api: props.api
         }
-        console.log(this.state);
     }
-    render(){
+
+    render() {
+
         return (
             <div>
                 <div>
                     <div className="wrapper wrapper-content">
                         <h2> API Name : {this.state.api.name} </h2>
+
                         <div className="divTable">
                             <div className="divTableBody">
-                                <div className="divTableRow">
-                                    <div className="divTableCell">Group Name</div>
-                                    <div className="divTableCell">Read</div>
-                                    <div className="divTableCell">Update</div>
-                                    <div className="divTableCell">Delete</div>
-                                </div>
-                                <div className="divTableRow">
-                                    <div className="divTableCell">&nbsp;</div>
-                                    <div className="divTableCell">&nbsp;</div>
-                                    <div className="divTableCell">&nbsp;</div>
-                                    <div className="divTableCell">&nbsp;</div>
-                                </div>
-                                <div className="divTableRow">
-                                    <div className="divTableCell">&nbsp;</div>
-                                    <div className="divTableCell">&nbsp;</div>
-                                    <div className="divTableCell">&nbsp;</div>
-                                    <div className="divTableCell">&nbsp;</div>
+                                <div className="gutter-example">
+                                    <Row gutter={16}>
+                                        <Col className="gutter-row" span={6}>
+                                            <div className="gutter-box">Group Name</div>
+                                        </Col>
+                                        <Col className="gutter-row" span={6}>
+                                            <div className="gutter-box">Read</div>
+                                        </Col>
+                                        <Col className="gutter-row" span={6}>
+                                            <div className="gutter-box">Update</div>
+                                        </Col>
+                                        <Col className="gutter-row" span={6}>
+                                            <div className="gutter-box">Delete</div>
+                                        </Col>
+                                    </Row>
                                 </div>
 
                             </div>
@@ -59,6 +61,8 @@ class Permission extends React.Component{
                 </div>
 
             </div>
+
+
         )
     }
 }
