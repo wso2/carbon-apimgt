@@ -18,18 +18,26 @@
 
 import React, {Component} from 'react'
 import {Link} from 'react-router-dom'
+import {Tabs} from 'antd'
+const TabPane = Tabs.TabPane;
 
 export default class NavBar extends Component {
     constructor(props) {
         super(props);
-        const path_sections = props.location.pathname.split('/');
-        let details_action = path_sections[path_sections.indexOf("apis") + 2];
-        let active_tab = (Object.values(NavBar.CONST).includes(details_action)) ? details_action : NavBar.CONST.OVERVIEW;
+        let location = this.props.leftMenu.location;
+        let path_sections, active_tab = "overview", details_action;
+        if (this.props.leftMenu.location) {
+            path_sections = location.pathname.split('/');
+            details_action = path_sections[path_sections.indexOf("apis") + 2];
+            active_tab = (Object.values(NavBar.CONST).includes(details_action)) ? details_action : NavBar.CONST.OVERVIEW;
+        }
         this.state = {
             activeTab: active_tab
         };
         this.setActive = this.setActive.bind(this);
+
     }
+
 
     static get CONST() {
         return {
@@ -37,12 +45,12 @@ export default class NavBar extends Component {
             LIFECYCLE: "lifecycle",
             ENDPOINTS: "endpoints",
             RESOURCES: "resources",
-            PERMISSION: "permission"
+            PERMISSION: "permission",
+            DOCUMENTS: "documents",
+            MEDIATION: "mediation",
+            SCRIPTING: "scripting",
+            SUBSCRIPTIONS: "subscriptions"
         }
-    }
-
-    isActive(tab) {
-        return this.state.activeTab === tab ? "active" : "";
     }
 
     setActive(event) {
@@ -50,63 +58,24 @@ export default class NavBar extends Component {
     }
 
     render() {
+        let api_uuid = '';
+        if (this.props.leftMenu.match) {
+            api_uuid = this.props.leftMenu.match.params.api_uuid;
+        }
         return (
-            <div>
-                <div className="tabs-holder" style={{background: 'floralwhite'}}>
-                    <div className="button-bar">
-                        <ul className="nav nav-pills tab-effect">
-                            <li className={this.isActive(NavBar.CONST.OVERVIEW)}>
-                                <Link name={NavBar.CONST.OVERVIEW} onClick={this.setActive}
-                                      to={"/apis/" + this.props.match.params.api_uuid + "/overview"}>
-                                    <i className="fw fw-view"/>&nbsp;Overview
-                                </Link>
-                            </li>
-                            <li className={this.isActive(NavBar.CONST.LIFECYCLE)}>
-                                <Link name={NavBar.CONST.LIFECYCLE} onClick={this.setActive}
-                                      to={"/apis/" + this.props.match.params.api_uuid + "/lifecycle"}>
-                                    <i className="fw fw-lifecycle"/>&nbsp;Life-Cycle
-                                </Link>
-                            </li>
-                            <li className={this.isActive(NavBar.CONST.ENDPOINTS)}>
-                                <Link name={NavBar.CONST.ENDPOINTS} onClick={this.setActive}
-                                      to={"/apis/" + this.props.match.params.api_uuid + "/endpoints"}>
-                                    <i className="fw fw-endpoint"/>&nbsp; Endpoints
-                                </Link>
-                            </li>
-                            <li className={this.isActive(NavBar.CONST.RESOURCES)}>
-                                <Link onClick={this.setActive}
-                                      to={"/apis/" + this.props.match.params.api_uuid + "/resources"}>
-                                    <i className="fw fw-resource"/>&nbsp;Resources
-                                </Link>
-                            </li>
-                            <li id="tab-5" role="presentation"><a href="#documents-tab" role="tab"
-                                                                  aria-controls="documents-tab" data-toggle="tab"><i
-                                className="fw fw-document"/>&nbsp; Documents</a>
-                            </li>
-                            <li className={this.isActive(NavBar.CONST.PERMISSION)}>
-                                <Link onClick={this.setActive}
-                                      to={"/apis/" + this.props.match.params.api_uuid + "/permission"}>
-                                    <i className="fw fw-resource"/>&nbsp;Permission
-                                </Link>
-                            </li>
-                            <li id="tab-7" role="presentation"><a href="#mediation-tab" role="tab"
-                                                                  aria-controls="mediation-tab" data-toggle="tab"><i
-                                className="fw fw-sequence"/>&nbsp;
-                                Mediation</a>
-                            </li>
-                            <li id="tab-8" role="presentation"><a href="#scripting-tab" role="tab"
-                                                                  aria-controls="scripting-tab" data-toggle="tab"><i
-                                className="fw fw-prototype"/>&nbsp; Scripting</a>
-                            </li>
-                            <li id="tab-9" role="presentation"><a href="#subscriptions-tab" role="tab"
-                                                                  aria-controls="subscriptions-tab" data-toggle="tab"><i
-                                className="fw fw-subscribe"/>&nbsp; Subscriptions</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-            </div>
-        );
+            <Tabs defaultActiveKey={NavBar.CONST.OVERVIEW} tabPosition={'left'} style={{height: '100vh'}}>
+                {Object.entries(NavBar.CONST).map(
+                    ([key, val]) => {
+                        return (
+                                <TabPane tab={
+                                    <Link name={val} onClick={this.setActive} to={"/apis/" + api_uuid + "/" + val}>
+                                        {val}
+                                    </Link>
+                                } key={val}/>
+                            );
+                    }
+                )}
+            </Tabs>
+        )
     }
 }
