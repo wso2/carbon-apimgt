@@ -1,0 +1,59 @@
+
+.custom-layout-header .ant-layout-sider-collapsed .anticon {
+    font-size: 16px;
+    margin-left: 8px;
+}
+
+.custom-layout-header .ant-layout-sider-collapsed .nav-text {
+    display: none;
+}
+
+.custom-layout-header .ant-layout-sider-collapsed .ant-menu-submenu-vertical > .ant-menu-submenu-title:after {
+    display: none;
+}
+.footer{
+    padding: 20px;
+    width: 100%;
+}
+.ant-menu-horizontal > .ant-menu-submenu.logoutLink{
+    float: right;
+}
+.brand{
+    width:50px;
+    padding-right:10px;
+}
+.brand-wrapper{
+    padding-top:10px;
+    font-size: 18px;
+    color:#fff;
+    text-indent:10px;
+    float:left;
+    width: 200px;
+    line-height: 46px;
+}
+.brand-wrapper span{
+    display: inline-block;
+    margin-top: -8px;
+    position: absolute;
+    color:#efefef;
+    text-indent: 0;
+}
+#components-form-demo-normal-login .login-form {
+    max-width: 300px;
+}
+#components-form-demo-normal-login .login-form-forgot {
+    float: right;
+}
+#components-form-demo-normal-login .login-form-button {
+    width: 100%;
+}
+div.ant-layout-sider{
+    background: #fff;
+}
+span.ant-layout-sider-zero-width-trigger{
+    top:0;
+}
+.custom-layout-header .logo {
+    padding: 16px 28px 16px 0;
+    float: left;
+}
