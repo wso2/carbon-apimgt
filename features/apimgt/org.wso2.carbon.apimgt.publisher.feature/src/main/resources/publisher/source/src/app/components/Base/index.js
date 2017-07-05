@@ -18,22 +18,22 @@
 
 import React, {Component} from 'react'
 
-import  NavBar  from './Navigation/NavBar';
-import { Layout, Breadcrumb, Icon, Menu } from 'antd';
+import  NavBar  from '../Apis/Details/NavBar';
+import {Layout, Breadcrumb, Icon, Menu} from 'antd';
 import ComposeHeader from './Header/ComposeHeader'
 import Footer from './Footer/Footer'
-const { Content, Sider } = Layout;
-
+const {Content, Sider} = Layout;
 
 
 class Base extends Component {
-    constructor(props){
+    constructor(props) {
         super(props);
         this.state = {
             collapsed: false,
             mode: 'inline'
         }
     }
+
     onCollapse = (collapsed) => {
         console.log(collapsed);
         this.setState({
@@ -41,31 +41,27 @@ class Base extends Component {
             mode: collapsed ? 'vertical' : 'inline',
         });
     }
+
     render() {
         return (
-
-            <Layout style={{height:"100vh"}} >
+            <Layout style={{height: "100vh"}}>
                 <ComposeHeader />
-                <Content style={{ padding: '0 20px' , background: '#fff'}}>
-                    <Layout style={{ padding: '0', background: '#fff' }}>
-                        {this.props.leftMenu ?
+                <Content style={{padding: '0 20px', background: '#fff'}}>
+                    <Layout style={{padding: '0', background: '#fff'}}>
+                        {this.props.showLeftMenu ?
                             <Sider
                                 collapsed={this.state.collapsed}
                                 onCollapse={this.onCollapse}
-                                width={200} style={{ padding: '20px 0' ,background: '#fff' }}
-                            >
-                                <NavBar leftMenu={this.props.leftMenu} />
-                            </Sider>
-
-                            : <div />}
-                        <Content style={{ padding: '20px 0', minHeight: 280 }}>
+                                width={200} style={{padding: '20px 0', background: '#fff'}}>
+                                <NavBar/>
+                            </Sider> : <div/>}
+                        <Content style={{padding: '20px 0', minHeight: 280}}>
                             {this.props.children}
                         </Content>
                     </Layout>
                 </Content>
                 <Footer />
             </Layout>
-
         );
     }
 }

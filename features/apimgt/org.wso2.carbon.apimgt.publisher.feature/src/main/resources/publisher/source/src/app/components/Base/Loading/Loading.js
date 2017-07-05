@@ -18,24 +18,22 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
-import { Spin, Row, Col } from 'antd'
+import {Spin, Row, Col} from 'antd'
 
 const LoadingAnimation = (props) => {
     return (
         <Row type="flex" justify="center" align="middle">
-            <Col span={24} style={{textAlign:"center"}}>
-                <Spin spinning="true" size="large" >
-
-                </Spin>
+            <Col span={24} style={{textAlign: "center"}}>
+                <Spin spinning={true} size="large"/>
             </Col>
         </Row>
     );
 };
 
 LoadingAnimation.propTypes = {
-  message: PropTypes.string
+    message: PropTypes.string
 };
 LoadingAnimation.defaultProps = {
-  message: "Loading . . ."
+    message: "Loading . . ."
 };
 export default LoadingAnimation

@@ -25,7 +25,7 @@ const ResourceNotFound = (props) => {
                 <h4><i className="icon fw fw-error"/>404 Resource Not Found!</h4>
                 <p>
                     Can't find the resource you are looking for
-                    <span style={{color: 'green'}}> {props.response.statusText} </span>
+                    <span style={{color: 'green'}}> {props.response ? props.response.statusText : ""} </span>
                 </p>
             </div>
 

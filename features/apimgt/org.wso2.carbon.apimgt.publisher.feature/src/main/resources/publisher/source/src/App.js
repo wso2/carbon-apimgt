@@ -32,14 +32,19 @@ import './App.css'
  * Render protected application paths
  */
 class Protected extends Component {
-    constructor(props){
+    constructor(props) {
         super(props);
-        this.state = {leftMenu:[]};
+        this.state = {showLeftMenu: false};
         this.setLeftMenu = this.setLeftMenu.bind(this);
     }
-    setLeftMenu(leftMenu) {
+
+    /**
+     * Change the visibility state of left side navigation menu bar
+     * @param {boolean} status : Whether or not to show or hide left side navigation menu
+     */
+    setLeftMenu(status) {
         this.setState({
-            leftMenu: leftMenu
+            showLeftMenu: status
         });
     }
 
@@ -48,11 +53,11 @@ class Protected extends Component {
         // Not actively check validity of access token from backend
         if (AuthManager.getUser()) {
             return (
-                <Base setLeftMenu={this.setLeftMenu} leftMenu={this.state.leftMenu}>
+                <Base showLeftMenu={this.state.showLeftMenu}>
                     <Switch>
-                        <Route exact path={"/"} component={ApiCreate}/>
-                        <Route path={"/apis"} render={ props => (<Apis setLeftMenu={this.setLeftMenu}  />)}  />
-                        <Route path={"/api/create"} render={props => <ApiCreate setLeftMenu={this.setLeftMenu} /> } />
+                        <Route exact path={"/"} component={ApiCreate}/>{/* TODO: redirects to apis listing or render apis listing here ~tmkb*/}
+                        <Route path={"/apis"} render={ props => (<Apis setLeftMenu={this.setLeftMenu}/>)}/>
+                        <Route path={"/api/create"} component={ApiCreate}/>
                         <Route component={PageNotFound}/>
                     </Switch>
                 </Base>
