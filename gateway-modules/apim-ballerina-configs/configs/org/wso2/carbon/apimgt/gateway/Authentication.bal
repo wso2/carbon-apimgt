@@ -84,6 +84,20 @@ function authenticate (message m) (boolean, message) {
                         // validating subscription
                         subscriptionDto = validateSubscription(apiContext, version, introspectDto);
                         if (subscriptionDto != null) {
+                            if (subscriptionDto.status == constants:SUBSCRIPTION_STATUS_BLOCKED) {
+                                gatewayUtil:constructSubscriptionBlocked(response,apiDto.context,apiDto.version);
+                                return false,response;
+                            }else if (subscriptionDto.status == constants:SUBSCRIPTION_STATUS_PROD_ONLY_BLOCKED){
+                                if(subscriptionDto.keyEnvType == constants:ENV_TYPE_PRODUCTION){
+                                    gatewayUtil:constructSubscriptionBlocked(response,apiDto.context,apiDto.version);
+                                    return false,response;
+                                }
+                            }else if (subscriptionDto.status == constants:SUBSCRIPTION_STATUS_SANDBOX_ONLY_BLOCKED){
+                                if(subscriptionDto.keyEnvType == constants:ENV_TYPE_SANDBOX){
+                                    gatewayUtil:constructSubscriptionBlocked(response,apiDto.context,apiDto.version);
+                                    return false,response;
+                                }
+                            }
                             if (validateScopes(resourceDto, introspectDto)) {
                                 dto:KeyValidationDto keyValidationInfo = constructKeyValidationDto(authToken, introspectDto, subscriptionDto, resourceDto);
                                 util:setProperty(m, "KEY_VALIDATION_INFO", keyValidationInfo);
@@ -141,11 +155,6 @@ function validateSubscription (string apiContext, string version, dto:Introspect
 }
 function validateResource (string apiContext, string apiVersion, string uriTemplate, string verb) (dto:ResourceDto) {
     dto:ResourceDto resourceDto = holder:getFromResourceCache(apiContext, apiVersion, uriTemplate, verb);
-    if (resourceDto == null) {
-        //cachedKey doesn't exist in cache
-        gatewayUtil:retrieveResources(apiContext, apiVersion);
-        resourceDto = holder:getFromResourceCache(apiContext, apiVersion, uriTemplate, verb);
-    }
     return resourceDto;
 }
 function validateScopes (dto:ResourceDto resourceDto, dto:IntrospectDto introspectDto) (boolean){
@@ -165,10 +174,15 @@ function constructKeyValidationDto (string token, dto:IntrospectDto introspectDt
     dto:KeyValidationDto keyValidationInfoDTO = {};
     dto:ApplicationDto applicationDto = holder:getFromApplicationCache(subscriptionDto.applicationId);
     keyValidationInfoDTO.username = introspectDto.username;
-    keyValidationInfoDTO.applicationPolicy = applicationDto.applicationPolicy;
-    keyValidationInfoDTO.subscriptionPolicy = subscriptionDto.subscriptionPolicy;
+    dto:PolicyDto applicationPolicy = holder:getFromPolicyCache(applicationDto.applicationPolicy);
+    keyValidationInfoDTO.applicationPolicy = applicationPolicy.name;
+    dto:PolicyDto subscriptionPolicy = holder:getFromPolicyCache(subscriptionDto.subscriptionPolicy);
+    keyValidationInfoDTO.subscriptionPolicy = subscriptionPolicy.name;
+    keyValidationInfoDTO.stopOnQuotaReach = subscriptionPolicy.stopOnQuotaReach;
+    dto:PolicyDto apiLevelPolicy = holder:getFromPolicyCache(subscriptionDto.apiLevelPolicy);
     keyValidationInfoDTO.apiLevelPolicy = subscriptionDto.apiLevelPolicy;
-    keyValidationInfoDTO.resourceLevelPolicy = resourceDto.policy;
+    dto:PolicyDto resourceLevelPolicy = holder:getFromPolicyCache(resourceDto.policy);
+    keyValidationInfoDTO.resourceLevelPolicy = resourceLevelPolicy.name;
     keyValidationInfoDTO.verb = resourceDto.httpVerb;
     keyValidationInfoDTO.apiName = subscriptionDto.apiName;
     keyValidationInfoDTO.apiProvider = subscriptionDto.apiProvider;

@@ -23,6 +23,8 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.TestUtil;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
+import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
@@ -194,6 +196,37 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
+    public void testGetAllApplicationsForValidation() throws Exception {
+
+        //add 4 apps
+        String username = "admin";
+        Application app1 = TestUtil.addCustomApplication("App1", username);
+        Application app2 = TestUtil.addCustomApplication("App2", username);
+        Application app3 = TestUtil.addCustomApplication("App3", username);
+        Application app4 = TestUtil.addCustomApplication("App4", username);
+        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
+        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        //get added apps
+        List<Application> appsFromDB = applicationDAO.getAllApplications();
+        Assert.assertNotNull(appsFromDB);
+        Assert.assertEquals(appsFromDB.size(), 4);
+        for (Application application : appsFromDB) {
+            Assert.assertNotNull(application);
+            if (application.getName().equals(app1.getName())) {
+                validateApp(application, app1, policyDAO);
+            } else if (application.getName().equals(app2.getName())) {
+                validateApp(application, app2, policyDAO);
+            } else if (application.getName().equals(app3.getName())) {
+                validateApp(application, app3, policyDAO);
+            } else if (application.getName().equals(app4.getName())) {
+                validateApp(application, app4, policyDAO);
+            } else {
+                Assert.fail("Invalid Application returned.");
+            }
+        }
+    }
+
+    @Test
     public void testFingerprintAfterUpdatingApplication() throws Exception {
         ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
 
@@ -247,4 +280,20 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
                 "Application updated time is not the same!");
     }
 
+    private void validateApp(Application appFromDB, Application expectedApp, PolicyDAO policyDAO) throws
+            APIMgtDAOException, IllegalAccessException {
+        Assert.assertEquals(appFromDB.getName(), expectedApp.getName(), TestUtil.printDiff(appFromDB.getName(),
+                expectedApp.getName()));
+        Assert.assertEquals(appFromDB.getStatus(), expectedApp.getStatus(), TestUtil.printDiff(appFromDB.getStatus(),
+                expectedApp.getStatus()));
+        Assert.assertEquals(appFromDB.getCreatedUser(), expectedApp.getCreatedUser(), TestUtil.printDiff(appFromDB
+                .getCreatedUser(), expectedApp.getCreatedUser()));
+        Assert.assertEquals(appFromDB.getId(), expectedApp.getId(), TestUtil.printDiff(appFromDB.getId(), expectedApp
+                .getId()));
+        Assert.assertEquals(policyDAO.getApplicationPolicyByUuid(appFromDB.getPolicy().getUuid()).getPolicyName(),
+                expectedApp
+                .getPolicy().getPolicyName(), TestUtil.printDiff(policyDAO.getApplicationPolicyByUuid(appFromDB
+                        .getPolicy().getUuid())
+                .getPolicyName(), expectedApp.getPolicy().getPolicyName()));
+    }
 }

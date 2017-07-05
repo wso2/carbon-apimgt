@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>carbon-apimgt</artifactId>
-        <version>7.0.29-SNAPSHOT</version>
+        <version>7.0.34-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -35,6 +35,7 @@
     <modules>
         <module>apim-ballerina-configs</module>
         <module>apim-ballerina-native-component</module>
+        <module>native-data-publisher</module>
     </modules>
 
 </project>

@@ -6,7 +6,7 @@
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -23,7 +23,7 @@ import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.Parameter;
 import org.wso2.siddhi.annotation.util.DataType;
-import org.wso2.siddhi.core.config.ExecutionPlanContext;
+import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
@@ -35,7 +35,7 @@ import org.wso2.siddhi.core.query.processor.stream.StreamProcessor;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
-import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
+import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -128,18 +128,18 @@ public class EmitOnStateChange extends StreamProcessor {
 
     @Override
     protected List<Attribute> init(AbstractDefinition abstractDefinition, ExpressionExecutor[] expressionExecutors,
-            ConfigReader configReader, ExecutionPlanContext executionPlanContext) {
+            ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
         if (attributeExpressionExecutors.length != 2) {
-            throw new ExecutionPlanValidationException("Invalid no of arguments passed to throttler:emitOnStateChange"
+            throw new SiddhiAppValidationException("Invalid no of arguments passed to throttler:emitOnStateChange"
                     + "(key,isThrottled), required 2, but found " + attributeExpressionExecutors.length);
         }
         if (attributeExpressionExecutors[0].getReturnType() != Attribute.Type.STRING) {
-            throw new ExecutionPlanValidationException("Invalid parameter type found for the argument of "
+            throw new SiddhiAppValidationException("Invalid parameter type found for the argument of "
                     + "throttler:emitOnStateChange(key,isThrottled), " + "required " + Attribute.Type.STRING + ", "
                     + "but found " + attributeExpressionExecutors[0].getReturnType());
         }
         if (attributeExpressionExecutors[1].getReturnType() != Attribute.Type.BOOL) {
-            throw new ExecutionPlanValidationException("Invalid parameter type found for the argument of "
+            throw new SiddhiAppValidationException("Invalid parameter type found for the argument of "
                     + "throttler:emitOnStateChange(key,isThrottled), " + "required " + Attribute.Type.BOOL
                     + ", but found " + attributeExpressionExecutors[1].getReturnType());
         }

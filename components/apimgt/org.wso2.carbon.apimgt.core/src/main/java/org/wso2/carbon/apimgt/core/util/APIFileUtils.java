@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.FileApi;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -228,11 +229,11 @@ public class APIFileUtils {
     /**
      * write the given API definition to file system
      *
-     * @param api            {@link API} object to be exported
+     * @param api            {@link FileApi} object to be exported
      * @param exportLocation file system location to write the API definition
      * @throws APIMgtDAOException if an error occurs while writing the API definition
      */
-    public static void exportApiDefinitionToFileSystem(API api, String exportLocation) throws APIMgtDAOException {
+    public static void exportApiDefinitionToFileSystem(FileApi api, String exportLocation) throws APIMgtDAOException {
         String apiFileLocation = exportLocation + File.separator + APIMgtConstants.APIFileUtilConstants
                 .API_DEFINITION_FILE_PREFIX + api.getId() + APIMgtConstants.APIFileUtilConstants.JSON_EXTENSION;
         APIFileUtils.writeObjectAsJsonToFile(api, apiFileLocation);
@@ -454,7 +455,7 @@ public class APIFileUtils {
      * @param api      api to get details
      * @return Directory path of the api
      */
-    public static String getAPIBaseDirectory(String basePath, API api) {
+    public static String getAPIBaseDirectory(String basePath, FileApi api) {
         return basePath + File.separator + api.getProvider() + "-" + api.getName() + "-" + api.getVersion();
     }
 

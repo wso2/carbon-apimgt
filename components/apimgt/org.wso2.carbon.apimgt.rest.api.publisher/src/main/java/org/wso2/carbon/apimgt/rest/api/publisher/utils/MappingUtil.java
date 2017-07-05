@@ -36,6 +36,9 @@ import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
+import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.Policy;
+import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
@@ -63,8 +66,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Utility class for mapping rest api Models to Core
+ */
 public class MappingUtil {
 
     /**
@@ -93,7 +100,9 @@ public class MappingUtil {
         apidto.setLabels(new ArrayList<>(api.getLabels()));
         apidto.setTransport(new ArrayList<>(api.getTransport()));
         apidto.setUserPermissionsForApi(api.getUserSpecificApiPermissions());
-        api.getPolicies().forEach(apidto::addPoliciesItem);
+        for (Policy policy : api.getPolicies()) {
+            apidto.addPoliciesItem(policy.getPolicyName());
+        }
         BusinessInformation businessInformation = api.getBusinessInformation();
         API_businessInformationDTO apiBusinessInformationDTO = new API_businessInformationDTO();
         apiBusinessInformationDTO.setBusinessOwner(businessInformation.getBusinessOwner());
@@ -117,8 +126,11 @@ public class MappingUtil {
             apiOperationsDTO.setAuthType(uriTemplate.getAuthType());
             apiOperationsDTO.setEndpoint(fromEndpointToList(uriTemplate.getEndpoint()));
             apiOperationsDTO.setHttpVerb(uriTemplate.getHttpVerb());
-            apiOperationsDTO.setPolicy(uriTemplate.getPolicy());
+            apiOperationsDTO.setPolicy(uriTemplate.getPolicy().getPolicyName());
             apidto.addOperationsItem(apiOperationsDTO);
+        }
+        if (api.getApiPolicy() != null) {
+            apidto.setApiPolicy(api.getApiPolicy().getPolicyName());
         }
         apidto.setCreatedTime(api.getCreatedTime().toString());
         apidto.setLastUpdatedTime(api.getLastUpdatedTime().toString());
@@ -174,7 +186,7 @@ public class MappingUtil {
             uriTemplateBuilder.uriTemplate(operationsDTO.getUritemplate());
             uriTemplateBuilder.authType(operationsDTO.getAuthType());
             uriTemplateBuilder.httpVerb(operationsDTO.getHttpVerb());
-            uriTemplateBuilder.policy(operationsDTO.getPolicy());
+            uriTemplateBuilder.policy(new APIPolicy(operationsDTO.getPolicy()));
             if (operationsDTO.getEndpoint() != null && !operationsDTO.getEndpoint().isEmpty()) {
                 uriTemplateBuilder.endpoint(fromEndpointListToMap(operationsDTO.getEndpoint()));
             }
@@ -186,6 +198,8 @@ public class MappingUtil {
             }
             uriTemplateList.put(uriTemplateBuilder.getTemplateId(), uriTemplateBuilder.build());
         }
+        Set<Policy> subscriptionPolicies = new HashSet<>();
+        apidto.getPolicies().forEach(v-> subscriptionPolicies.add(new SubscriptionPolicy(v)));
         API.APIBuilder apiBuilder = new API.APIBuilder(apidto.getProvider(), apidto.getName(), apidto.getVersion()).
                 id(apidto.getId()).
                 context(apidto.getContext()).
@@ -193,13 +207,12 @@ public class MappingUtil {
                 lifeCycleStatus(apidto.getLifeCycleStatus()).
                 endpoint(fromEndpointListToMap(apidto.getEndpoint())).
                 visibleRoles(new HashSet<>(apidto.getVisibleRoles())).
-                policies(new HashSet<>(apidto.getPolicies())).
+                policies(subscriptionPolicies).
                 permission(apidto.getPermission()).
                 tags(new HashSet<>(apidto.getTags())).
                 labels(new HashSet<>(apidto.getLabels())).
                 transport(new HashSet<>(apidto.getTransport())).
                 isResponseCachingEnabled(Boolean.valueOf(apidto.getResponseCaching())).
-                policies(new HashSet<>(apidto.getPolicies())).
                 businessInformation(businessInformation).
                 uriTemplates(uriTemplateList).
                 corsConfiguration(corsConfiguration);
@@ -211,6 +224,10 @@ public class MappingUtil {
         }
         if (apidto.getCacheTimeout() != null) {
             apiBuilder.cacheTimeout(apidto.getCacheTimeout());
+        }
+        if (apidto.getApiPolicy() != null) {
+            Policy policy = new APIPolicy(apidto.getApiPolicy());
+            apiBuilder.apiPolicy(policy);
         }
         return apiBuilder;
     }
@@ -333,10 +350,11 @@ public class MappingUtil {
         ApplicationDTO applicationDTO = new ApplicationDTO();
         applicationDTO.setApplicationId(application.getId());
         applicationDTO.setDescription(application.getDescription());
-        applicationDTO.setGroupId(application.getGroupId());
         applicationDTO.setName(application.getName());
         applicationDTO.setSubscriber(application.getCreatedUser());
-        applicationDTO.setThrottlingTier(application.getTier());
+        if (application.getPolicy() != null) {
+            applicationDTO.setThrottlingTier(application.getPolicy().getPolicyName());
+        }
         return applicationDTO;
     }
 
@@ -369,7 +387,7 @@ public class MappingUtil {
         subscriptionDTO.setSubscriptionStatus(
                 SubscriptionDTO.SubscriptionStatusEnum.fromValue(subscription.getStatus().toString()));
         subscriptionDTO.setApplicationInfo(toApplicationDto(subscription.getApplication()));
-        subscriptionDTO.setSubscriptionTier(subscription.getSubscriptionTier());
+        subscriptionDTO.setSubscriptionTier(subscription.getPolicy().getPolicyName());
         return subscriptionDTO;
     }
 
@@ -387,7 +405,7 @@ public class MappingUtil {
         endPointDTO.setEndpointConfig(endpoint.getEndpointConfig());
         EndPoint_endpointSecurityDTO endpointSecurityDTO = mapper.readValue(endpoint.getSecurity(),
                 EndPoint_endpointSecurityDTO.class);
-        if(endpointSecurityDTO.getEnabled()){
+        if (endpointSecurityDTO.getEnabled()) {
             endpointSecurityDTO.setPassword("");
         }
         endPointDTO.setEndpointSecurity(endpointSecurityDTO);

@@ -57,7 +57,7 @@ public class APIMConfigurations {
     private IdentityProviderConfigurations identityProviderConfigs = new IdentityProviderConfigurations();
 
     @Element(description = "Broker Configurations")
-    private BrokerConfigurations brokerConfiguration = new BrokerConfigurations();
+    private BrokerConfigurations brokerConfigurations = new BrokerConfigurations();
 
     @Element(description = "JWT Configurations")
     private JWTConfigurations jwtConfigurations = new JWTConfigurations();
@@ -117,8 +117,8 @@ public class APIMConfigurations {
         return identityProviderConfigs;
     }
 
-    public BrokerConfigurations getBrokerConfiguration() {
-        return brokerConfiguration;
+    public BrokerConfigurations getBrokerConfigurations() {
+        return brokerConfigurations;
     }
 
     public JWTConfigurations getJwtConfigurations() {

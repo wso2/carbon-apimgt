@@ -2823,7 +2823,7 @@ paths:
       x-scope: apim:workflow_approve
       summary: Update workflow status
       description: |
-        This operation can be used to approve or reject a workflow task. .
+        This operation can be used to approve or reject a workflow task.
       parameters:
        - $ref: '#/parameters/workflowReferenceId'
        - in: body
@@ -3216,6 +3216,9 @@ definitions:
       createdTime:
         type: string
         example: 2017-02-20T13:57:16.229
+      apiPolicy:
+        type: string
+        example: UNLIMITED
       lastUpdatedTime:
         type: string
         example: 2017-02-20T13:57:16.229
@@ -3396,9 +3399,6 @@ definitions:
       description:
         type: string
         example: Sample calculator application
-      groupId:
-        type: string
-        example: ""
 
 #-----------------------------------------------------
 # The Document List resource
@@ -3624,13 +3624,13 @@ definitions:
         description: |
           Link to the next subset of resources qualified.
           Empty if no more resources are to be returned.
-        example: "/subscriptions?limit=1&offset=2&apiId=01234567-0123-0123-0123-012345678901&groupId="
+        example: "/subscriptions?limit=1&offset=2&apiId=01234567-0123-0123-0123-012345678901"
       previous:
         type: string
         description: |
           Link to the previous subset of resources qualified.
           Empty if current subset is the first subset returned.
-        example: "/subscriptions?limit=1&offset=0&apiId=01234567-0123-0123-0123-012345678901&groupId="
+        example: "/subscriptions?limit=1&offset=0&apiId=01234567-0123-0123-0123-012345678901"
       list:
         type: array
         items:
@@ -3645,7 +3645,7 @@ definitions:
       - subscriptionId
       - applicationInfo
       - apiInfo
-      - subscriptionTier
+      - policy
       - status
     properties:
       subscriptionId:
@@ -3654,10 +3654,10 @@ definitions:
       applicationInfo:
         type: Application
         $ref: '#/definitions/Application'
-      subscriptionTier:
+      policy:
         type: string
         example: Unlimited
-      subscriptionStatus:
+      status:
         type: string
         enum:
           - BLOCKED

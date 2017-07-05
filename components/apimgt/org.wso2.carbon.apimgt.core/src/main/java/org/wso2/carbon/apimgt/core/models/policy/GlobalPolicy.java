@@ -29,6 +29,10 @@ public class GlobalPolicy extends Policy {
         super(name);
     }
 
+    public GlobalPolicy(String uuid, String policyName) {
+        super(uuid, policyName);
+    }
+
     public String getSiddhiQuery() {
         return siddhiQuery;
     }

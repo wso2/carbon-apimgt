@@ -42,7 +42,7 @@ public class SubscriptionMappingUtil {
         }
 
         //identifying the proper start and end indexes
-        int size =subscriptions.size();
+        int size = subscriptions.size();
         int start = offset < size && offset >= 0 ? offset : Integer.MAX_VALUE;
         int end = offset + limit - 1 <= size - 1 ? offset + limit -1 : size - 1;
 
@@ -71,8 +71,9 @@ public class SubscriptionMappingUtil {
         if (subscription.getApplication() != null) {
             subscriptionDTO.setApplicationId(subscription.getApplication().getId());
         }
-        subscriptionDTO.setPolicy(subscription.getSubscriptionTier());
-        subscriptionDTO.setLifeCycleStatus(SubscriptionDTO.LifeCycleStatusEnum.valueOf(subscription.getStatus().toString()));
+        subscriptionDTO.setPolicy(subscription.getPolicy().getPolicyName());
+        subscriptionDTO.setLifeCycleStatus(SubscriptionDTO.LifeCycleStatusEnum.valueOf(subscription.getStatus()
+                .toString()));
         return subscriptionDTO;
     }
 }

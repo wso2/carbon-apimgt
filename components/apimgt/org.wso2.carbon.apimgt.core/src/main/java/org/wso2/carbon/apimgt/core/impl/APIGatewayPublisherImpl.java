@@ -27,15 +27,20 @@ import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.BlockConditions;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.PolicyValidationData;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.events.APIEvent;
 import org.wso2.carbon.apimgt.core.models.events.ApplicationEvent;
+import org.wso2.carbon.apimgt.core.models.events.BlockEvent;
 import org.wso2.carbon.apimgt.core.models.events.EndpointEvent;
 import org.wso2.carbon.apimgt.core.models.events.GatewayEvent;
+import org.wso2.carbon.apimgt.core.models.events.PolicyEvent;
 import org.wso2.carbon.apimgt.core.models.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.BrokerUtil;
 
 import java.util.List;
@@ -48,11 +53,13 @@ public class APIGatewayPublisherImpl implements APIGateway {
     private APIMConfigurations config;
     private String publisherTopic;
     private String storeTopic;
+    private String throttleTopic;
 
     public APIGatewayPublisherImpl() {
         config = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
-        publisherTopic = config.getBrokerConfiguration().getPublisherTopic();
-        storeTopic = config.getBrokerConfiguration().getStoreTopic();
+        publisherTopic = config.getBrokerConfigurations().getPublisherTopic();
+        storeTopic = config.getBrokerConfigurations().getStoreTopic();
+        throttleTopic = config.getBrokerConfigurations().getThrottleTopic();
     }
 
     @Override
@@ -216,6 +223,20 @@ public class APIGatewayPublisherImpl implements APIGateway {
         }
     }
 
+    /**
+     * Publish event to throttle topic
+     *
+     * @param gatewayDTO gateway data transfer object
+     * @throws GatewayException If there is a failure to publish to gateway
+     */
+    private void publishToThrottleTopic(GatewayEvent gatewayDTO) throws GatewayException {
+        BrokerUtil.publishToTopic(throttleTopic, gatewayDTO);
+        if (log.isDebugEnabled()) {
+            log.debug("Gateway event : " + gatewayDTO.getEventType() + " has been published to store topic : " +
+                    storeTopic);
+        }
+    }
+
     @Override
     public void changeAPIState(API api, String status) throws GatewayException {
         //create the message to be sent to the gateway. This contains the basic details of the API and target
@@ -234,7 +255,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
                     .APPLICATION_CREATE);
             applicationEvent.setApplicationId(application.getId());
             applicationEvent.setName(application.getName());
-            applicationEvent.setThrottlingTier(application.getPolicyId());
+            applicationEvent.setThrottlingTier(application.getPolicy().getUuid());
             applicationEvent.setSubscriber(application.getCreatedUser());
             publishToStoreTopic(applicationEvent);
             if (log.isDebugEnabled()) {
@@ -252,7 +273,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
                     .APPLICATION_UPDATE);
             applicationEvent.setApplicationId(application.getId());
             applicationEvent.setName(application.getName());
-            applicationEvent.setThrottlingTier(application.getPolicyId());
+            applicationEvent.setThrottlingTier(application.getPolicy().getUuid());
             applicationEvent.setSubscriber(application.getCreatedUser());
             publishToStoreTopic(applicationEvent);
             if (log.isDebugEnabled()) {
@@ -272,6 +293,131 @@ public class APIGatewayPublisherImpl implements APIGateway {
             if (log.isDebugEnabled()) {
                 log.debug("Application : " + applicationId + " deleted event has been successfully published " +
                         "to broker");
+            }
+        }
+    }
+
+    @Override
+    public void addPolicy(PolicyValidationData policyValidationData) throws GatewayException {
+        if (policyValidationData != null) {
+            PolicyEvent policyEvent = new PolicyEvent(APIMgtConstants.GatewayEventTypes.POLICY_CREATE);
+            policyEvent.setId(policyValidationData.getId());
+            policyEvent.setName(policyValidationData.getName());
+            policyEvent.setStopOnQuotaReach(policyValidationData.isStopOnQuotaReach());
+            publishToThrottleTopic(policyEvent);
+            if (log.isDebugEnabled()) {
+                log.debug("Policy : " + policyValidationData.getName() + " add event has been successfully published " +
+                        "to broker");
+            }
+        }
+    }
+
+    @Override
+    public void updatePolicy(PolicyValidationData policyValidationData) throws GatewayException {
+        if (policyValidationData != null) {
+            PolicyEvent policyEvent = new PolicyEvent(APIMgtConstants.GatewayEventTypes.POLICY_UPDATE);
+            policyEvent.setId(policyValidationData.getId());
+            policyEvent.setName(policyValidationData.getName());
+            policyEvent.setStopOnQuotaReach(policyValidationData.isStopOnQuotaReach());
+            publishToThrottleTopic(policyEvent);
+            if (log.isDebugEnabled()) {
+                log.debug("Policy : " + policyValidationData.getName() + " update event has been successfully " +
+                        "published " +
+                        "to broker");
+            }
+        }
+    }
+
+    @Override
+    public void deletePolicy(PolicyValidationData policyValidationData) throws GatewayException {
+        if (policyValidationData != null) {
+            PolicyEvent policyEvent = new PolicyEvent(APIMgtConstants.GatewayEventTypes.POLICY_DELETE);
+            policyEvent.setId(policyValidationData.getId());
+            policyEvent.setName(policyValidationData.getName());
+            policyEvent.setStopOnQuotaReach(policyValidationData.isStopOnQuotaReach());
+            publishToThrottleTopic(policyEvent);
+            if (log.isDebugEnabled()) {
+                log.debug("Policy : " + policyValidationData.getName() + " delete event has been successfully " +
+                        "published " +
+                        "to broker");
+            }
+        }
+    }
+
+    @Override
+    public void addBlockCondition(BlockConditions blockConditions) throws GatewayException {
+        if (blockConditions != null) {
+            BlockEvent blockEvent = new BlockEvent(APIMgtConstants.GatewayEventTypes.BLOCK_CONDITION_ADD);
+            blockEvent.setConditionId(blockConditions.getConditionId());
+            blockEvent.setUuid(blockConditions.getUuid());
+            blockEvent.setConditionType(blockConditions.getConditionType());
+            blockEvent.setEnabled(blockConditions.isEnabled());
+            blockEvent.setConditionValue(blockConditions.getConditionValue());
+            if (APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_IP.equals(blockConditions
+                    .getConditionType())) {
+                blockEvent.setFixedIp(APIUtils.ipToLong(blockConditions.getConditionValue()));
+            }
+            if (APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITION_IP_RANGE.equals(blockConditions
+                    .getConditionType())) {
+                blockEvent.setStartingIP(APIUtils.ipToLong(blockConditions.getStartingIP()));
+                blockEvent.setEndingIP(APIUtils.ipToLong(blockConditions.getEndingIP()));
+            }
+            publishToThrottleTopic(blockEvent);
+            if (log.isDebugEnabled()) {
+                log.debug("BlockCondition : " + blockConditions.getUuid() + " add event has been successfully " +
+                        "published " + "to broker");
+            }
+        }
+    }
+
+    @Override
+    public void updateBlockCondition(BlockConditions blockConditions) throws GatewayException {
+        if (blockConditions != null) {
+            BlockEvent blockEvent = new BlockEvent(APIMgtConstants.GatewayEventTypes.BLOCK_CONDITION_ADD);
+            blockEvent.setConditionId(blockConditions.getConditionId());
+            blockEvent.setUuid(blockConditions.getUuid());
+            blockEvent.setConditionType(blockConditions.getConditionType());
+            blockEvent.setEnabled(blockConditions.isEnabled());
+            blockEvent.setConditionValue(blockConditions.getConditionValue());
+            if (APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_IP.equals(blockConditions
+                    .getConditionType())) {
+                blockEvent.setFixedIp(APIUtils.ipToLong(blockConditions.getConditionValue()));
+            }
+            if (APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITION_IP_RANGE.equals(blockConditions
+                    .getConditionType())) {
+                blockEvent.setStartingIP(APIUtils.ipToLong(blockConditions.getStartingIP()));
+                blockEvent.setEndingIP(APIUtils.ipToLong(blockConditions.getEndingIP()));
+            }
+            publishToThrottleTopic(blockEvent);
+            if (log.isDebugEnabled()) {
+                log.debug("BlockCondition : " + blockConditions.getUuid() + " update event has been successfully " +
+                        "published " + "to broker");
+            }
+        }
+    }
+
+    @Override
+    public void deleteBlockCondition(BlockConditions blockConditions) throws GatewayException {
+        if (blockConditions != null) {
+            BlockEvent blockEvent = new BlockEvent(APIMgtConstants.GatewayEventTypes.BLOCK_CONDITION_ADD);
+            blockEvent.setConditionId(blockConditions.getConditionId());
+            blockEvent.setUuid(blockConditions.getUuid());
+            blockEvent.setConditionType(blockConditions.getConditionType());
+            blockEvent.setEnabled(blockConditions.isEnabled());
+            blockEvent.setConditionValue(blockConditions.getConditionValue());
+            if (APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_IP.equals(blockConditions
+                    .getConditionType())) {
+                blockEvent.setFixedIp(APIUtils.ipToLong(blockConditions.getConditionValue()));
+            }
+            if (APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITION_IP_RANGE.equals(blockConditions
+                    .getConditionType())) {
+                blockEvent.setStartingIP(APIUtils.ipToLong(blockConditions.getStartingIP()));
+                blockEvent.setEndingIP(APIUtils.ipToLong(blockConditions.getEndingIP()));
+            }
+            publishToThrottleTopic(blockEvent);
+            if (log.isDebugEnabled()) {
+                log.debug("BlockCondition : " + blockConditions.getUuid() + " delete event has been successfully " +
+                        "published " + "to broker");
             }
         }
     }

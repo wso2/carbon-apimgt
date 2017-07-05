@@ -45,7 +45,7 @@ public class BrokerImpl implements Broker {
     private static final Logger log = LoggerFactory.getLogger(BrokerUtil.class);
 
     public BrokerImpl() {
-        config = ServiceReferenceHolder.getInstance().getAPIMConfiguration().getBrokerConfiguration();
+        config = ServiceReferenceHolder.getInstance().getAPIMConfiguration().getBrokerConfigurations();
         JMSConnectionConfiguration jmsConnectionConfiguration = config.getJmsConnectionConfiguration();
         Class<?> clientClass = null;
         Constructor<?> construct = null;

@@ -11,6 +11,8 @@ service gatewayInitService {
     boolean isReady = initGateway();
     boolean subscriptionsInitialized = gatewayUtil:retrieveSubscriptions();
     boolean applicationsInitialized = gatewayUtil:retrieveApplications();
+    boolean policiesInitialized = gatewayUtil:retrievePolicies();
+
 }
 
 function initGateway () (boolean) {
@@ -20,6 +22,8 @@ function initGateway () (boolean) {
         gatewayUtil:registerGateway();
         //Retrieve APIs from API Core and deploy
         gatewayUtil:loadAPIs();
+        gatewayUtil:loadGlobalEndpoints();
+        gatewayUtil:loadBlockConditions();
     } catch (errors:Error e) {
         system:println("Error while initilazing API gateway. " + e.msg);
     }

@@ -19,7 +19,7 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import feign.Response;
 import feign.gson.GsonDecoder;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
@@ -42,7 +42,6 @@ import org.wso2.carbon.apimgt.core.models.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
-import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 
 import java.io.IOException;
@@ -82,22 +81,20 @@ public class DefaultKeyManagerImpl implements KeyManager {
 
     @Override
     public OAuthApplicationInfo createApplication(OAuthAppRequest oauthAppRequest) throws KeyManagementException {
-        OAuthApplicationInfo oAuthApplicationInfo = oauthAppRequest.getOAuthApplicationInfo();
-
         if (log.isDebugEnabled()) {
-            log.debug("Creating OAuth2 application: " + oAuthApplicationInfo.toString());
+            log.debug("Creating OAuth2 application: " + oauthAppRequest.toString());
         }
 
-        String applicationName = oAuthApplicationInfo.getClientName();
-        String keyType = (String) oAuthApplicationInfo.getParameter(KeyManagerConstants.APP_KEY_TYPE);
+        String applicationName = oauthAppRequest.getClientName();
+        String keyType = oauthAppRequest.getKeyType();
         if (keyType != null) {  //Derive oauth2 app name based on key type and user input for app name
             applicationName = applicationName + '_' + keyType;
         }
 
         DCRClientInfo dcrClientInfo = new DCRClientInfo();
         dcrClientInfo.setClientName(applicationName);
-        dcrClientInfo.setGrantTypes(oAuthApplicationInfo.getGrantTypes());
-        dcrClientInfo.addCallbackUrl(oAuthApplicationInfo.getCallbackUrl());
+        dcrClientInfo.setGrantTypes(oauthAppRequest.getGrantTypes());
+        dcrClientInfo.addCallbackUrl(oauthAppRequest.getCallBackURL());
         dcrClientInfo.setUserinfoSignedResponseAlg(ServiceReferenceHolder.getInstance().getAPIMConfiguration()
                 .getKeyManagerConfigs().getOidcUserinfoJWTSigningAlgo());
 
@@ -110,7 +107,7 @@ public class DefaultKeyManagerImpl implements KeyManager {
             try {
                 OAuthApplicationInfo oAuthApplicationInfoResponse = getOAuthApplicationInfo(response);
                 //setting original parameter list
-                oAuthApplicationInfoResponse.setParameters(oAuthApplicationInfo.getParameters());
+                oAuthApplicationInfoResponse.setParameters(oauthAppRequest.getParameters());
                 if (log.isDebugEnabled()) {
                     log.debug("OAuth2 application created: " + oAuthApplicationInfoResponse.toString());
                 }
@@ -137,9 +134,8 @@ public class DefaultKeyManagerImpl implements KeyManager {
     }
 
     @Override
-    public OAuthApplicationInfo updateApplication(OAuthAppRequest oauthAppRequest) throws KeyManagementException {
-        OAuthApplicationInfo oAuthApplicationInfo = oauthAppRequest.getOAuthApplicationInfo();
-
+    public OAuthApplicationInfo updateApplication(OAuthApplicationInfo oAuthApplicationInfo)
+            throws KeyManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Updating OAuth2 application with : " + oAuthApplicationInfo.toString());
         }
@@ -147,14 +143,14 @@ public class DefaultKeyManagerImpl implements KeyManager {
         String applicationName = oAuthApplicationInfo.getClientName();
         String keyType = (String) oAuthApplicationInfo.getParameter(KeyManagerConstants.APP_KEY_TYPE);
         if (keyType != null) {  //Derive oauth2 app name based on key type and user input for app name
-            applicationName = applicationName + "_" + keyType;
+            applicationName = applicationName + '_' + keyType;
         }
 
         DCRClientInfo dcrClientInfo = new DCRClientInfo();
         dcrClientInfo.setClientName(applicationName);
         dcrClientInfo.setClientId(oAuthApplicationInfo.getClientId());
         dcrClientInfo.setClientSecret(oAuthApplicationInfo.getClientSecret());
-        dcrClientInfo.addCallbackUrl(oAuthApplicationInfo.getCallbackUrl());
+        dcrClientInfo.addCallbackUrl(oAuthApplicationInfo.getCallBackURL());
         dcrClientInfo.setGrantTypes(oAuthApplicationInfo.getGrantTypes());
 
         Response response = dcrmServiceStub.updateApplication(dcrClientInfo, dcrClientInfo.getClientId());
@@ -224,7 +220,7 @@ public class DefaultKeyManagerImpl implements KeyManager {
         }
 
         if (StringUtils.isEmpty(consumerKey)) {
-            throw new KeyManagementException("Consumer Key is null or empty",
+            throw new KeyManagementException("Unable to retrieve OAuth Application. Consumer Key is null or empty",
                     ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
         }
 
@@ -243,16 +239,6 @@ public class DefaultKeyManagerImpl implements KeyManager {
             } catch (IOException e) {
                 throw new KeyManagementException("Error occurred while parsing the DCR application retrieval " +
                         "response message.", e, ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
-            }
-        } else if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_400_BAD_REQUEST) {  //400 - Known Error
-            try {
-                DCRError error = (DCRError) new GsonDecoder().decode(response, DCRError.class);
-                throw new KeyManagementException("Error occurred while retrieving DCR application. Error: " +
-                        error.getError() + ". Error Description: " + error.getErrorDescription() + ". Status Code: " +
-                        response.status(), ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
-            } catch (IOException e) {
-                throw new KeyManagementException("Error occurred while parsing the DCR error message.", e,
-                        ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
             }
         } else {  //Unknown Error
             throw new KeyManagementException("Error occurred while retrieving DCR application. Error: " +
@@ -341,48 +327,48 @@ public class DefaultKeyManagerImpl implements KeyManager {
     @Override
     public AccessTokenInfo getTokenMetaData(String accessToken) throws KeyManagementException {
         log.debug("Token introspection request is being sent.");
+        Response response;
         try {
-            Response response = oAuth2ServiceStubs.getIntrospectionServiceStub().introspectToken(accessToken);
-            if (response == null) {
-                throw new KeyManagementException("Error occurred while introspecting access token. " +
-                        "Response is null", ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
-            }
-            if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
-                log.debug("Token introspection is successful");
-
-                try {
-                    OAuth2IntrospectionResponse introspectResponse = (OAuth2IntrospectionResponse) new GsonDecoder()
-                            .decode(response, OAuth2IntrospectionResponse.class);
-                    AccessTokenInfo tokenInfo = new AccessTokenInfo();
-                    boolean active = introspectResponse.isActive();
-                    if (active) {
-                        tokenInfo.setTokenValid(true);
-                        tokenInfo.setAccessToken(accessToken);
-                        tokenInfo.setScopes(introspectResponse.getScope());
-                        tokenInfo.setConsumerKey(introspectResponse.getClientId());
-                        tokenInfo.setEndUserName(introspectResponse.getUsername());
-                        tokenInfo.setIssuedTime(introspectResponse.getIat());
-                        tokenInfo.setExpiryTime(introspectResponse.getExp());
-
-                        long validityPeriod = introspectResponse.getExp() - introspectResponse.getIat();
-                        tokenInfo.setValidityPeriod(validityPeriod);
-                    } else {
-                        tokenInfo.setTokenValid(false);
-                        log.error("Invalid or expired access token received.");
-                        tokenInfo.setErrorCode(KeyManagerConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
-                    }
-                    return tokenInfo;
-                } catch (IOException e) {
-                    throw new KeyManagementException("Error occurred while parsing token introspection response", e,
-                            ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
-                }
-            } else {
-                throw new KeyManagementException("Token introspection request failed. HTTP error code: "
-                        + response.status() + " Error Response Body: " + response.body().toString(),
-                        ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
-            }
+            response = oAuth2ServiceStubs.getIntrospectionServiceStub().introspectToken(accessToken);
         } catch (APIManagementException e) {
             throw new KeyManagementException("Error occurred while introspecting access token.", e,
+                    ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
+        }
+        if (response == null) {
+            throw new KeyManagementException("Error occurred while introspecting access token. " +
+                    "Response is null", ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
+        }
+        if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
+            log.debug("Token introspection is successful");
+            try {
+                OAuth2IntrospectionResponse introspectResponse = (OAuth2IntrospectionResponse) new GsonDecoder()
+                        .decode(response, OAuth2IntrospectionResponse.class);
+                AccessTokenInfo tokenInfo = new AccessTokenInfo();
+                boolean active = introspectResponse.isActive();
+                if (active) {
+                    tokenInfo.setTokenValid(true);
+                    tokenInfo.setAccessToken(accessToken);
+                    tokenInfo.setScopes(introspectResponse.getScope());
+                    tokenInfo.setConsumerKey(introspectResponse.getClientId());
+                    tokenInfo.setEndUserName(introspectResponse.getUsername());
+                    tokenInfo.setIssuedTime(introspectResponse.getIat());
+                    tokenInfo.setExpiryTime(introspectResponse.getExp());
+
+                    long validityPeriod = introspectResponse.getExp() - introspectResponse.getIat();
+                    tokenInfo.setValidityPeriod(validityPeriod);
+                } else {
+                    tokenInfo.setTokenValid(false);
+                    log.error("Invalid or expired access token received.");
+                    tokenInfo.setErrorCode(KeyManagerConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
+                }
+                return tokenInfo;
+            } catch (IOException e) {
+                throw new KeyManagementException("Error occurred while parsing token introspection response", e,
+                        ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
+            }
+        } else {
+            throw new KeyManagementException("Token introspection request failed. HTTP error code: "
+                    + response.status() + " Error Response Body: " + response.body().toString(),
                     ExceptionCodes.TOKEN_INTROSPECTION_FAILED);
         }
     }
@@ -391,24 +377,25 @@ public class DefaultKeyManagerImpl implements KeyManager {
     public void revokeAccessToken(String accessToken, String clientId, String clientSecret)
             throws KeyManagementException {
         log.debug("Revoking access token");
+        Response response;
         try {
-            Response response = oAuth2ServiceStubs.getRevokeServiceStub().revokeAccessToken(accessToken, clientId,
+            response = oAuth2ServiceStubs.getRevokeServiceStub().revokeAccessToken(accessToken, clientId,
                     clientSecret);
-            if (response == null) {
-                throw new KeyManagementException("Error occurred while revoking current access token. " +
-                        "Response is null", ExceptionCodes.ACCESS_TOKEN_REVOKE_FAILED);
-            }
-            if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Successfully revoked access token: " + accessToken);
-                }
-            } else {
-                throw new KeyManagementException("Token revocation failed. HTTP error code: " + response.status()
-                        + " Error Response Body: " + response.body().toString(),
-                        ExceptionCodes.ACCESS_TOKEN_REVOKE_FAILED);
-            }
         } catch (APIManagementException e) {
             throw new KeyManagementException("Error occurred while revoking current access token", e,
+                    ExceptionCodes.ACCESS_TOKEN_REVOKE_FAILED);
+        }
+        if (response == null) {
+            throw new KeyManagementException("Error occurred while revoking current access token. " +
+                    "Response is null", ExceptionCodes.ACCESS_TOKEN_REVOKE_FAILED);
+        }
+        if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully revoked access token: " + accessToken);
+            }
+        } else {
+            throw new KeyManagementException("Token revocation failed. HTTP error code: " + response.status()
+                    + " Error Response Body: " + response.body().toString(),
                     ExceptionCodes.ACCESS_TOKEN_REVOKE_FAILED);
         }
     }
@@ -416,46 +403,6 @@ public class DefaultKeyManagerImpl implements KeyManager {
     @Override
     public KeyManagerConfiguration getKeyManagerConfiguration() throws KeyManagementException {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public OAuthApplicationInfo mapOAuthApplication(OAuthAppRequest appInfoRequest)
-            throws KeyManagementException {
-        //initiate OAuthApplicationInfo
-        OAuthApplicationInfo oAuthApplicationInfo = appInfoRequest.getOAuthApplicationInfo();
-        //String consumerKey = oAuthApplicationInfo.getClientId();
-        String tokenScope = (String) oAuthApplicationInfo.getParameter(KeyManagerConstants.OAUTH_CLIENT_TOKEN_SCOPE);
-        String tokenScopes[] = new String[1];
-        tokenScopes[0] = tokenScope;
-        String clientSecret = (String) oAuthApplicationInfo.getParameter(KeyManagerConstants.OAUTH_CLIENT_ID);
-        oAuthApplicationInfo.setClientSecret(clientSecret);
-        //for the first time we set default time period. TO-DO Add the validity period config value
-        oAuthApplicationInfo.addParameter(KeyManagerConstants.VALIDITY_PERIOD,
-                System.getProperty(KeyManagerConstants.VALIDITY_PERIOD, "3600"));
-
-        //check whether given consumer key and secret match or not. If it does not match throw an exception.
-        try {
-            /*  TO-DO -ADD logIC TO RETIRVE OAUTH2 APP
-
-               */
-        } catch (Exception e) {
-            String msg = "Some thing went wrong while getting OAuth application for given consumer key "
-                    + oAuthApplicationInfo.getClientId();
-            log.error(msg, e);
-            throw new KeyManagementException(msg, e, ExceptionCodes.OAUTH2_APP_MAP_FAILED);
-        } finally {
-
-        }
-        /* TO-DO
-        if (info != null && info.getClientId() == null) {
-            return null;
-        } */
-
-        oAuthApplicationInfo.addParameter(KeyManagerConstants.OAUTH_CLIENT_TOKEN_SCOPE, tokenScopes);
-        APIUtils.logDebug("Creating semi-manual application for consumer id  :  " + oAuthApplicationInfo.getClientId(),
-                log);
-
-        return oAuthApplicationInfo;
     }
 
     @Override
@@ -495,7 +442,7 @@ public class DefaultKeyManagerImpl implements KeyManager {
         oAuthApplicationInfoResponse.setClientId(dcrClientInfoResponse.getClientId());
         oAuthApplicationInfoResponse.setClientSecret(dcrClientInfoResponse.getClientSecret());
         oAuthApplicationInfoResponse.setGrantTypes(dcrClientInfoResponse.getGrantTypes());
-        oAuthApplicationInfoResponse.setCallbackUrl(dcrClientInfoResponse.getRedirectURIs().get(0));
+        oAuthApplicationInfoResponse.setCallBackURL(dcrClientInfoResponse.getRedirectURIs().get(0));
         return oAuthApplicationInfoResponse;
     }
 }

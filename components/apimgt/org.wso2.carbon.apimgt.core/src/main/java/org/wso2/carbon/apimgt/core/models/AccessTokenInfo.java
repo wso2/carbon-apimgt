@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.core.models;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Details about an Access Token.
@@ -182,5 +183,36 @@ public class AccessTokenInfo {
 
     public void addParameter(String paramName, Object paramValue) {
         parameters.put(paramName, paramValue);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AccessTokenInfo)) {
+            return false;
+        }
+        AccessTokenInfo that = (AccessTokenInfo) o;
+        return isTokenValid == that.isTokenValid &&
+                isApplicationToken == that.isApplicationToken &&
+                issuedTime == that.issuedTime &&
+                expiryTime == that.expiryTime &&
+                validityPeriod == that.validityPeriod &&
+                Objects.equals(consumerKey, that.consumerKey) &&
+                Objects.equals(consumerSecret, that.consumerSecret) &&
+                Objects.equals(scopes, that.scopes) &&
+                Objects.equals(tokenState, that.tokenState) &&
+                Objects.equals(accessToken, that.accessToken) &&
+                Objects.equals(refreshToken, that.refreshToken) &&
+                Objects.equals(idToken, that.idToken) &&
+                Objects.equals(errorCode, that.errorCode) &&
+                Objects.equals(endUserName, that.endUserName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(isTokenValid, isApplicationToken, consumerKey, consumerSecret, scopes, tokenState,
+                accessToken, refreshToken, idToken, issuedTime, expiryTime, validityPeriod, endUserName);
     }
 }
