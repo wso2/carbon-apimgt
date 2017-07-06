@@ -46,7 +46,7 @@ class NavBar extends Component {
         // This assume that last segment and segment before it contains detail page action and API UUID
         const [active_tab, api_uuid] = pathSegments.reverse();
         return (
-            <Tabs defaultActiveKey={active_tab} tabPosition={'left'} style={{height: '100vh'}}>
+            <Tabs defaultActiveKey={active_tab} tabPosition={'left'}>
                 {Object.entries(NavBar.CONST).map(
                     ([key, val]) => {
                         return (

@@ -26,9 +26,9 @@ const { Header } = Layout;
 
 const ComposeHeader = (props) => {
     let params = qs.stringify({referrer: props.location.pathname});
+
     return (
-        <div className="custom-layout-header">
-            <Header style={{ padding: '0 20px' , background: '#fff', lineHeight: '0', height: "0"}}>
+            <Header className='custom-header'>
                 <div className="logo">
                     <Link to="/apis">
                         <img className="brand" src="/publisher/public/images/logo.svg" alt="wso2-logo"/>
@@ -37,19 +37,17 @@ const ComposeHeader = (props) => {
                 </div>
                 <Menu
                     mode="horizontal"
-                    theme="light"
                     defaultSelectedKeys={['2']}
-                    style={{background: '#f1f1f1', height: '100%' }}
+                    className='custom-menu'
+                    theme="light"
                 >
-                    <SubMenu className="logoutLink"  title={<span><Icon type="user" />{ AuthManager.getUser() ? AuthManager.getUser().name : ""}</span>}>
-                        <Menu.Item key="setting:1"><Link to={{pathname: '/logout', search: params}}>Logout</Link></Menu.Item>
-                        <Menu.Item key="setting:2">Profile</Menu.Item>
-                    </SubMenu>
-
+                        <SubMenu title={<span><Icon type="user" />{ AuthManager.getUser() ? AuthManager.getUser().name : ""}</span>}>
+                            <Menu.Item key="setting:1"><Link to={{pathname: '/logout', search: params}}>Logout</Link></Menu.Item>
+                            <Menu.Item key="setting:2">Profile</Menu.Item>
+                        </SubMenu>
                 </Menu>
 
             </Header>
-        </div>
 
     );
 };
