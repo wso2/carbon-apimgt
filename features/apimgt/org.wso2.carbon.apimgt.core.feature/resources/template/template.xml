@@ -1,14 +1,11 @@
 package $package;
 import ballerina.net.http;
 import ballerina.lang.messages;
-import org.wso2.carbon.apimgt.gateway.constants;
-import org.wso2.carbon.apimgt.gateway.handler;
 import ballerina.lang.errors;
 import ballerina.lang.system;
-import org.wso2.carbon.apimgt.gateway.event.analytics.fault;
 
-@http:BasePath{value:"$apiContext"}
-service $serviceName {
+@http:config {basePath:"$apiContext"}
+service<http> $serviceName {
 #foreach( $endpointEntry in $apiEndpoint.entrySet() )
 	#if($endpointEntry.key == "production")
 		#if($endpointEntry.value.applicableLevel == "API")
@@ -25,6 +22,7 @@ service $serviceName {
 		#end
 	#end
 #end
+	string KEY_TYPE = "KEY_TYPE";
 #foreach($apiResource in $apiResources)
 		#set( $productionEndpoint = $apiEndpoint.get("production"))
 		#set( $sandboxEndpoint = $apiEndpoint.get("sandbox"))
@@ -60,15 +58,8 @@ service $serviceName {
 		#end
 		#end
         message response;
-        boolean status;
-        status,response = authenticate(m);
-        if(status){
-		boolean isThrottled = isrequestThrottled(m);
-		if(!isThrottled){
-		string endpointType = messages:getProperty(m,constants:KEY_TYPE);
+		string endpointType = messages:getProperty(m,KEY_TYPE);
 
-handler:mediateIn(m);
-handler:mediateEndpointRequest(m);
 	try{
 		if (endpointType == "PRODUCTION") {
 		#if($productionEndpoint.applicableLevel == "API")
@@ -85,17 +76,13 @@ handler:mediateEndpointRequest(m);
 		}
 	} catch (errors:Error e) {
 			system:println(e.msg);
-			fault:mediate(m, e);
+			//fault:mediate(m, e);
 			response = {};
-		    messages:setStringPayload(response, "Internal error occured");
+		    messages:setStringPayload(response, "Internal error occurred");
 			http:setStatusCode (response, 500);
 		    reply response;
 	}
-	handler:mediateEndpointResponse(response);
-	handler:mediateOut(m, response);
 
-		}
-		}
 		reply response;
 }
 #end

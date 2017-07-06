@@ -44,7 +44,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Native function org.wso2.carbon.apimgt.ballerina.deployment.ServiceDeploy.{@link ServiceDeploy}
+ * Native function org.wso2.carbon.apimgt.ballerina.deployment.ServiceDeploy.{@link DeployService}
  * This function will create ballerina file in the FS.
  *
  * @since 0.10-SNAPSHOT
@@ -71,9 +71,9 @@ import java.nio.file.Paths;
         value = "ballerina package")})
 @BallerinaAnnotation(annotationName = "Return", attributes = {@Attribute(name = "string",
         value = "status of the deployment")})
-public class ServiceDeploy extends AbstractNativeFunction {
+public class DeployService extends AbstractNativeFunction {
 
-    private static final Logger log = LoggerFactory.getLogger(ServiceDeploy.class);
+    private static final Logger log = LoggerFactory.getLogger(DeployService.class);
     private static Path programDirPath = Paths.get(System.getProperty("user.dir"));
 
     @Override
@@ -94,7 +94,7 @@ public class ServiceDeploy extends AbstractNativeFunction {
 
             // This is required to invoke package/service init functions;
             Context bContext = new Context(programFile);
-            bContext.initFunction = true;
+//            bContext.initFunction = true;
             PackageInfo packageInfo = programFile.getPackageInfo(packageName.replace("/", "."));
 
             // Invoke package init function
