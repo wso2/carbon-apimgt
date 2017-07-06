@@ -37,9 +37,9 @@ class ApiThumb extends React.Component {
                         <p>{this.props.api.version}</p>
                         <p>{this.props.api.context}</p>
                         <p className="description">{this.props.api.description}</p>
-                        <div style={{float:'right'}}>
+                        <div style={{textAlign:'center'}}>
                             <ButtonGroup>
-                                <Button type="primary" icon="edit">More...<Link to={details_link}></Link></Button>
+                                <Link to={details_link}><Button type="primary" icon="edit">More...</Button></Link>
                                 <Button type="default" icon="delete" />
                             </ButtonGroup>
                         </div>
