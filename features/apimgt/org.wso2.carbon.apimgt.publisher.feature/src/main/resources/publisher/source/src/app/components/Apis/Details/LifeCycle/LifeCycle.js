@@ -21,6 +21,7 @@ import Api from '../../../../data/api'
 import LifeCycleUpdate from './LifeCycleUpdate'
 import Loading from "../../../Base/Loading/Loading";
 import LifeCycleHistory from "./LifeCycleHistory";
+import {Card, Col, Row} from 'antd';
 
 class LifeCycle extends Component {
     constructor(props) {
@@ -51,16 +52,21 @@ class LifeCycle extends Component {
     render() {
         if (this.state.api) {
             return (
-                <div>
-                    <div className="row">
-                        <div id="lifecycle-content " className="tab-content col-md-6 col-sm-6">
-                            <div className="page-header">
-                                <h4 className="lead">Change Lifecycle</h4>
-                            </div>
-                            <LifeCycleUpdate handleUpdate={this.updateData} lcState={this.state.lcState} api={this.state.api}/>
-                            <LifeCycleHistory/>
-                        </div>
-                    </div>
+                <div style={{background: '#ECECEC', height: '100vh', padding: '30px'}}>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Card title="Change Lifecycle" bordered={false} style={{margin: '5px'}}>
+                                <LifeCycleUpdate handleUpdate={this.updateData} lcState={this.state.lcState}
+                                                 api={this.state.api}/>
+                            </Card>
+                        </Col>
+                    </Row>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Card title="History" bordered={false} style={{margin: '5px'}}><LifeCycleHistory
+                                lcHistory={this.state.lcHistory}/></Card>
+                        </Col>
+                    </Row>
                 </div>
             );
         } else {
