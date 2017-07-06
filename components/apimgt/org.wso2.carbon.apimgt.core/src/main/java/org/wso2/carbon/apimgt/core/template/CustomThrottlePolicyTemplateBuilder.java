@@ -49,9 +49,9 @@ public class CustomThrottlePolicyTemplateBuilder extends ThrottlePolicyTemplateB
      * @throws APITemplateException throws if any error occurred
      */
     public String getThrottlePolicyTemplateForCustomPolicy() throws APITemplateException {
-        CustomPolicy policy = customPolicy;
+
         if (log.isDebugEnabled()) {
-            log.debug("Generating Siddhi app for custom policy :" + policy.toString());
+            log.debug("Generating Siddhi app for custom policy :" + customPolicy.toString());
         }
 
         //get velocity template for custom throttle policy and generate the template
@@ -61,7 +61,7 @@ public class CustomThrottlePolicyTemplateBuilder extends ThrottlePolicyTemplateB
         Template template = velocityengine.getTemplate(getTemplatePathForGlobal());
         setConstantContext(context);
         //set values for velocity context
-        context.put(POLICY, policy);
+        context.put(POLICY, customPolicy);
         template.merge(context, writer);
         if (log.isDebugEnabled()) {
             log.debug("Generated Siddhi app for policy : " + writer.toString());

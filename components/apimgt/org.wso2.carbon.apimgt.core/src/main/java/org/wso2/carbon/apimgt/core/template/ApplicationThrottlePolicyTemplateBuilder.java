@@ -51,10 +51,9 @@ public class ApplicationThrottlePolicyTemplateBuilder extends ThrottlePolicyTemp
      * @throws APITemplateException throws if generation failure occur
      */
     public String getThrottlePolicyForAppLevel() throws APITemplateException {
-        ApplicationPolicy policy = applicationPolicy;
 
         if (log.isDebugEnabled()) {
-            log.debug("Generating Siddhi app for appLevel :" + policy.toString());
+            log.debug("Generating Siddhi app for appLevel :" + applicationPolicy.toString());
         }
         //get velocity template for Application policy and generate the template
         StringWriter writer = new StringWriter();
@@ -63,8 +62,8 @@ public class ApplicationThrottlePolicyTemplateBuilder extends ThrottlePolicyTemp
         VelocityContext context = new VelocityContext();
         setConstantContext(context);
         //set values for velocity context
-        context.put(POLICY, policy);
-        context.put(QUOTA_POLICY, policy.getDefaultQuotaPolicy());
+        context.put(POLICY, applicationPolicy);
+        context.put(QUOTA_POLICY, applicationPolicy.getDefaultQuotaPolicy());
         template.merge(context, writer);
         if (log.isDebugEnabled()) {
             log.debug("Generated Siddhi app for policy : " + writer.toString());

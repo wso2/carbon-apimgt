@@ -52,9 +52,9 @@ public class SubscriptionThrottlePolicyTemplateBuilder extends ThrottlePolicyTem
      * @throws APITemplateException throws if generation failure occur
      */
     public String getThrottlePolicyForSubscriptionLevel() throws APITemplateException {
-        SubscriptionPolicy policy = subscriptionPolicy;
+
         if (log.isDebugEnabled()) {
-            log.debug("Generating Siddhi app for subscriptionLevel :" + policy.toString());
+            log.debug("Generating Siddhi app for subscriptionLevel :" + subscriptionPolicy.toString());
         }
         //get velocity template for Subscription policy and generate the template
         StringWriter writer = new StringWriter();
@@ -63,8 +63,8 @@ public class SubscriptionThrottlePolicyTemplateBuilder extends ThrottlePolicyTem
         VelocityContext context = new VelocityContext();
         setConstantContext(context);
         //set values for velocity context
-        context.put(POLICY, policy);
-        context.put(QUOTA_POLICY, policy.getDefaultQuotaPolicy());
+        context.put(POLICY, subscriptionPolicy);
+        context.put(QUOTA_POLICY, subscriptionPolicy.getDefaultQuotaPolicy());
         template.merge(context, writer);
         if (log.isDebugEnabled()) {
             log.debug("Generated Siddhi app for policy : " + writer.toString());
