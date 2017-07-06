@@ -63,9 +63,9 @@ class SwaggerForm extends React.Component {
                                 let error_data = JSON.parse(error_response.data);
                                 let messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
                                 message.error(messageTxt);
+                                console.debug(error_response);
                             });
                 } else if (input_type === "file") {
-                    debugger;
                     let swagger = this.state.file.originFileObj;
                     let new_api = new API('');
                     new_api.create(swagger)
