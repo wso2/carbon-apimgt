@@ -24,9 +24,9 @@ export default class LifeCycleHistory extends Component {
         return (
             <Timeline>
                 {this.props.lcHistory.map(item =>
-                    <Timeline.Item
-                        color="green">{"LC has changed from " + item.postState + " to " + item.previousState +
-                    " on " + item.updatedTime + " by " + item.user}</Timeline.Item>)}
+                    <Timeline.Item>
+                        {"LC has changed from " + item.postState + " to " + item.previousState
+                        + " on " + item.updatedTime + " by " + item.user}</Timeline.Item>)}
             </Timeline>
         );
     }
