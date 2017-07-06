@@ -6,6 +6,7 @@ import ballerina.lang.messages;
 import ballerina.lang.system;
 import ballerina.net.http;
 import org.wso2.carbon.apimgt.gateway.dto;
+import ballerina.lang.errors;
 
 function mediate (message m, message res) {
     dto:AnalyticsInfoDTO analyticsConf = holder:getAnalyticsConf();
@@ -13,15 +14,26 @@ function mediate (message m, message res) {
         system:println("Analytics is Disabled");
         return;
     }
-    int request_start_time = (int)messages:getProperty(m, "am.request_start_time");
-    int request_end_time = (int)messages:getProperty(m, "am.request_end_time");
-    int backend_start_time = (int)messages:getProperty(m, "am.backend_start_time");
-    int backend_end_time = (int)messages:getProperty(res, "am.backend_end_time");
-    int security_latency = (int)messages:getProperty(m, "am.security_latency");
-    int throttling_latency = (int)messages:getProperty(m, "am.throttling_latency");
-    int request_mediation_latency = (int)messages:getProperty(m, "am.request_mediation_latency");
-    int response_mediation_latency = (int)messages:getProperty(m, "am.response_mediation_latency");
-    int other_latency = (int)messages:getProperty(m, "am.other_latency");
+    errors:TypeCastError err;
+    int request_start_time;
+    int request_end_time;
+    int backend_start_time;
+    int backend_end_time;
+    int security_latency;
+    int throttling_latency;
+    int request_mediation_latency;
+    int response_mediation_latency;
+    int other_latency;
+
+    request_start_time, _ = <int> messages:getProperty(m, "am.request_start_time");
+    request_end_time , _ = <int>messages:getProperty(m, "am.request_end_time");
+    backend_start_time , _ = <int>messages:getProperty(m, "am.backend_start_time");
+    backend_end_time , _ = <int>messages:getProperty(res, "am.backend_end_time");
+    security_latency , _ = <int>messages:getProperty(m, "am.security_latency");
+    throttling_latency , _ = <int>messages:getProperty(m, "am.throttling_latency");
+    request_mediation_latency , _ = <int>messages:getProperty(m, "am.request_mediation_latency");
+    response_mediation_latency , _ = <int>messages:getProperty(m, "am.response_mediation_latency");
+    other_latency , _ = <int>messages:getProperty(m, "am.other_latency");
     int current_time = system:currentTimeMillis();
     int response_time = request_end_time - request_start_time;
     int backend_time = backend_end_time - backend_start_time;
@@ -29,8 +41,6 @@ function mediate (message m, message res) {
     int backend_latency = current_time - backend_start_time;
 
     dto:EventHolderDTO eventHolderDTO = {};
-    eventHolderDTO.streamName = "ResponseStream";
-    eventHolderDTO.executionPlanName = "analytics_events_pre_process";
     eventHolderDTO.timestamp = system:currentTimeMillis();
 
     dto:RequestEventDTO requestEventDTO = {};

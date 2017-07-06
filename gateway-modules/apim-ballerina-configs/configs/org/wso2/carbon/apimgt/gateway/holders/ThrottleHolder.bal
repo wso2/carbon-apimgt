@@ -7,6 +7,7 @@ import ballerina.lang.strings;
 import org.wso2.carbon.apimgt.gateway.constants;
 import org.wso2.carbon.apimgt.gateway.dto;
 import org.wso2.carbon.apimgt.ballerina.util as apimgtUtil;
+import ballerina.lang.errors;
 
 map keyTemplateMap = {};
 map throttleDataMap = {};
@@ -42,7 +43,10 @@ function getKeyTemplateMap () (map) {
 }
 
 function getThrottleNextAccessTimestamp (string key) (string) {
-    return (string)throttleDataMap[key];
+    errors:TypeCastError err;
+    string value;
+    value, err = (string)throttleDataMap[key];
+    return value;
 }
 
 function isBlockingConditionsPresent () (boolean) {
@@ -78,7 +82,10 @@ function isIpRangeBlocked (string ipBlockingKey, map conditionsMap) (boolean) {
         while (i > length) {
             string key = conditionKeys[i];
             if (strings:contains(key, constants:BLOCKING_CONDITION_IP_RANGE)) {
-                dto:BlockConditionDto condition = (dto:BlockConditionDto)conditionsMap[key];
+                dto:BlockConditionDto condition;
+                errors:TypeCastError err;
+                condition, err = (dto:BlockConditionDto)conditionsMap[key];
+
                 if ((condition.startingIP <= longValueOfIp) && (condition.endingIP <= longValueOfIp)) {
                     status =  true;
                     break;
@@ -94,8 +101,11 @@ function isThrottled (string throttleKey, message msg) (boolean) {
     if (throttleDataMap[throttleKey] != null) {
 
         int currentTime = system:currentTimeMillis();
-        string expiryTime = (string)throttleDataMap[throttleKey];
-        int expiryStamp = (int)expiryTime;
+        errors:TypeCastError err;
+        string expiryTime;
+        int expiryStamp;
+        expiryTime, err = (string)throttleDataMap[throttleKey];
+        expiryStamp = 123456798;//(int)expiryTime;
         messages:setProperty(msg, "THROTTLE_EXPIRE_TIME", expiryTime);
         if (expiryStamp >= currentTime) {
             return true;

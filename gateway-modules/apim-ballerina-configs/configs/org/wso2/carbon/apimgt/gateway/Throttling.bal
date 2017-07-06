@@ -12,7 +12,25 @@ import org.wso2.carbon.apimgt.gateway.event.publisher;
 import org.wso2.carbon.apimgt.gateway.dto;
 import org.wso2.carbon.apimgt.ballerina.util;
 
-function isrequestThrottled( message msg) (boolean){
+errors:TypeCastError err;
+
+function main(string[] args) {
+    system:println("Hello, World!");
+}
+
+function requestInterceptor (message m) (boolean, message) {
+    system:println("invoking throttle interceptor");
+    boolean isThrottled = isRequestThrottled(m);
+    system:println("isRequestThrottled " + isThrottled);
+    return isThrottled, m;
+}
+
+function responseInterceptor (message m) (boolean, message) {
+    system:println("response");
+    return true, m;
+}
+
+function isRequestThrottled( message msg) (boolean){
     // will return true if the request is throttled
 
     //Throttle Keys
@@ -42,7 +60,8 @@ function isrequestThrottled( message msg) (boolean){
     string apiLevelBlockingKey = "";
     string userLevelBlockingKey = "";
 
-    dto:KeyValidationDto keyValidationDto = (dto:KeyValidationDto)util:getProperty(msg, "KEY_VALIDATION_INFO");
+    dto:KeyValidationDto keyValidationDto;
+    keyValidationDto, err = (dto:KeyValidationDto)util:getProperty(msg, "KEY_VALIDATION_INFO");
 
     authorizedUser = keyValidationDto.username;
     //Throttle Policies
@@ -187,7 +206,6 @@ function publishEvent(message m, string userId, string applicationId, string api
     dto:ThrottleEventDTO throttleEventDTO = {};
 
     throttleEventHolderDTO.streamName = "PreRequestStream";
-    throttleEventHolderDTO.executionPlanName = "requestPreProcessorExecutionPlan";
     throttleEventHolderDTO.timestamp = system:currentTimeMillis();
 
     throttleEventDTO.messageID = messageID;
