@@ -38,6 +38,7 @@ public class WSDLProcessFactory {
     private WSDLProcessFactory() {
         wsdlProcessorClasses = new ArrayList<>();
         wsdlProcessorClasses.add("org.wso2.carbon.apimgt.core.impl.WSDL11ProcessorImpl");
+        wsdlProcessorClasses.add("org.wso2.carbon.apimgt.core.impl.WSDL20ProcessorImpl");
     }
 
     public static WSDLProcessFactory getInstance() {
@@ -57,8 +58,8 @@ public class WSDLProcessFactory {
             WSDLProcessor processor;
             try {
                 processor = (WSDLProcessor) Class.forName(clazz).newInstance();
-                processor.initPath(wsdlPath);
-                if (processor.canProcess()) {
+                boolean canProcess = processor.initPath(wsdlPath);
+                if (canProcess) {
                     return processor;
                 }
             } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
@@ -77,8 +78,8 @@ public class WSDLProcessFactory {
             WSDLProcessor processor;
             try {
                 processor = (WSDLProcessor) Class.forName(clazz).newInstance();
-                processor.init(wsdlContent);
-                if (processor.canProcess()) {
+                boolean canProcess = processor.init(wsdlContent);
+                if (canProcess) {
                     return processor;
                 }
             } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {

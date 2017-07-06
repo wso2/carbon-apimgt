@@ -25,13 +25,13 @@ import org.wso2.carbon.apimgt.core.models.WSDLInfo;
 
 public interface WSDLProcessor {
 
-    void init(byte[] wsdlContent) throws APIMgtWSDLException;
+    boolean init(byte[] wsdlContent) throws APIMgtWSDLException;
 
     byte[] getWSDL() throws APIMgtWSDLException;
 
     byte[] getUpdatedWSDL(API api, Label label) throws APIMgtWSDLException;
     
-    void initPath(String path) throws APIMgtWSDLException;
+    boolean initPath(String path) throws APIMgtWSDLException;
 
     String getUpdatedWSDLPath(API api, Label label) throws APIMgtWSDLException;
     

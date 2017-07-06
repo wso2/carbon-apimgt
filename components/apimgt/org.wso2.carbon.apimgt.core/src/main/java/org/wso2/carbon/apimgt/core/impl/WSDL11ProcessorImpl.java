@@ -46,6 +46,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -59,7 +61,7 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
     private static final String WSDL_VERSION_11 = "1.1";
 
     private static WSDLFactory wsdlFactoryInstance;
-    private boolean canProcess;
+    private boolean canProcess = false;
     protected WSDLInfo wsdlInfo;
     
     //Fields required for processing a single wsdl
@@ -83,7 +85,7 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
         return wsdlFactoryInstance;
     }
 
-    public void init(byte[] wsdlContent) throws APIMgtWSDLException {
+    public boolean init(byte[] wsdlContent) throws APIMgtWSDLException {
         WSDLReader wsdlReader = getWsdlFactoryInstance().newWSDLReader();
 
         // switch off the verbose mode
@@ -91,18 +93,18 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
         wsdlReader.setFeature(JAVAX_WSDL_IMPORT_DOCUMENTS, false);
         try {
             wsdlDefinition = wsdlReader.readWSDL(null, new InputSource(new ByteArrayInputStream(wsdlContent)));
+            wsdlContentBytes = wsdlContent;
+            canProcess = true;
         } catch (WSDLException e) {
             //This implementation class cannot process the WSDL.
             log.debug("Cannot process the WSDL by " + this.getClass().getName(), e);
             canProcess = false;
-            return;
         }
-        wsdlContentBytes = wsdlContent;
-        canProcess = true;
+        return canProcess;
     }
 
     @Override
-    public void initPath(String path) throws APIMgtWSDLException {
+    public boolean initPath(String path) throws APIMgtWSDLException {
         pathToDefinitionMap = new HashMap<>();
         wsdlArchiveExtractedPath = path;
         WSDLReader wsdlReader = getWsdlFactoryInstance().newWSDLReader();
@@ -122,9 +124,9 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
             //This implementation class cannot process the WSDL.
             log.debug("Cannot process the WSDL by " + this.getClass().getName(), e);
             canProcess = false;
-            return;
         }
         canProcess = true;
+        return true;
     }
 
     public boolean canProcess() {
@@ -272,7 +274,13 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
      */
     private void updateEndpoints(List<String> endpointURLs, API api, Definition definition) throws APIMgtWSDLException {
         String context = api.getContext().startsWith("/") ? api.getContext() : "/" + api.getContext();
-        String selectedUrl = endpointURLs.get(0) + context;
+        String selectedUrl;
+        try {
+            selectedUrl = getSelectedEndpoint(endpointURLs) + context;
+        } catch (MalformedURLException e) {
+            throw new APIMgtWSDLException("Error while selecting endpoints for WSDL", e,
+                    ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
+        }
         if (!StringUtils.isBlank(selectedUrl)) {
             updateEndpointUrls(selectedUrl, definition);
         }
@@ -288,5 +296,19 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
                     ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
         }
         return byteArrayOutputStream;
+    }
+
+    private String getSelectedEndpoint(List<String> endpoints) throws MalformedURLException {
+        if (endpoints.size() > 0) {
+            for (String ep : endpoints) {
+                URL url = new URL(ep);
+                if ("https".equalsIgnoreCase(url.getProtocol())) {
+                    return ep;
+                }
+            }
+        } else {
+            return endpoints.get(0);
+        }
+        return null;
     }
 }
