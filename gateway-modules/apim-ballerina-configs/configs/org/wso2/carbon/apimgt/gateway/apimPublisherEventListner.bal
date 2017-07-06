@@ -2,8 +2,8 @@ package org.wso2.carbon.apimgt.gateway;
 
 import ballerina.lang.messages;
 import ballerina.net.jms;
-import ballerina.net.http;
 import ballerina.lang.system;
+import ballerina.lang.errors;
 import ballerina.lang.strings;
 import org.wso2.carbon.apimgt.gateway.constants as Constants;
 import org.wso2.carbon.apimgt.gateway.utils as gatewayUtil;
@@ -11,23 +11,22 @@ import org.wso2.carbon.apimgt.gateway.dto as dto;
 import org.wso2.carbon.apimgt.gateway.holders as holder;
 import org.wso2.carbon.apimgt.ballerina.util as apimgtUtil;
 
-@jms:JMSSource {
-    factoryInitial:"org.apache.activemq.jndi.ActiveMQInitialContextFactory",
-    providerUrl:"tcp://localhost:61616"}
-@jms:ConnectionProperty {key:"connectionFactoryType", value:"topic"}
-@jms:ConnectionProperty {key:"destination", value:"PublisherTopic"}
-@jms:ConnectionProperty {key:"connectionFactoryJNDIName", value:"TopicConnectionFactory"}
-@jms:ConnectionProperty {key:"subscriptionDurable", value:"true"}
-@jms:ConnectionProperty {key:"durableSubscriberClientID", value:"apimPublisherEventListner"}
-@jms:ConnectionProperty {key:"durableSubscriberName", value:"apimPublisherEventListner"}
-@jms:ConnectionProperty {key:"sessionAcknowledgement", value:"AUTO_ACKNOWLEDGE"}
-service apimPublisherEventListner {
+@jms:config {
+    initialContextFactory:"org.apache.activemq.jndi.ActiveMQInitialContextFactory",
+    providerUrl:"tcp://localhost:61616",
+    connectionFactoryType:"topic",
+    connectionFactoryName:"TopicConnectionFactory",
+    destination:"PublisherTopic",
+    acknowledgmentMode:"AUTO_ACKNOWLEDGE"
+}
+service<jms> apimPublisherEventListner {
 
-    @http:GET {}
     resource onMessage (message m) {
             json event = messages:getJsonPayload(m);
-            string eventType = (string)event[Constants:EVENT_TYPE];
-
+            errors:TypeCastError err;
+            string eventType;
+            eventType, err = (string)event[Constants:EVENT_TYPE];
+            system:println("eventType " + eventType);
             if (strings:equalsIgnoreCase(eventType, Constants:API_CREATE)) {
                 json apiSummary = event.apiSummary;
                 if (apiSummary != null) {
@@ -125,7 +124,8 @@ service apimPublisherEventListner {
             } else if (strings:equalsIgnoreCase(eventType, Constants:ENDPOINT_DELETE)) {
                 json endpoint = event.endpoint;
                 if (endpoint != null) {
-                    string endpointId = (string)endpoint.id;
+                    string endpointId;
+                    endpointId, err = (string)endpoint.id;
                     holder:removeFromEndpointCache(endpointId);
                 } else {
                     system:println("Invalid json received");

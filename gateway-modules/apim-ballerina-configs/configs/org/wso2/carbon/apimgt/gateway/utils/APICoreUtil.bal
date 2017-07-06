@@ -38,7 +38,9 @@ function loadAPIs () {
 
     json apis = getAPIs();
     int index = 0;
-    int count = (int)apis.count;
+    errors:TypeCastError err;
+    int count;
+    count, err = (int)apis.count;
     json apiList = apis.list;
 
     while (index < count) {
@@ -126,7 +128,9 @@ function loadGlobalEndpoints () {
 
     json endpoints = getEndpoints();
     int index = 0;
-    int count = (int)endpoints.count;
+    errors:TypeCastError err;
+    int count;
+    count, err = (int)endpoints.count;
     json endpointList = endpoints.list;
 
     while (index < count) {
@@ -140,7 +144,9 @@ function loadBlockConditions () {
 
     json blockConditions = getBlockConditions();
     int index = 0;
-    int count = (int)blockConditions.count;
+    errors:TypeCastError err;
+    int count;
+    count, err = (int)blockConditions.count;
     json blockConditionList = blockConditions.list;
 
     while (index < count) {
@@ -185,15 +191,23 @@ function getEndpointConfig (string endpointId) (int, string) {
 }
 function fromJsonToEndpointDto (json endpointConfig) (dto:EndpointDto) {
     dto:EndpointDto endpointDto = {};
-    json config = util:parse((string )endpointConfig["endpointConfig"]);
-    endpointDto.clientConnector = create http:ClientConnector((string )config["serviceUrl"]);
-    endpointDto.name = (string)endpointConfig.name;
-    json security = util:parse((string )endpointConfig["security"]);
-    endpointDto.securityEnable = (boolean )security.enabled;
+    errors:TypeCastError err;
+    string endpointConfigValue;
+    string securityConfigValue;
+    string serviceUrlValue;
+    endpointConfigValue, err = (string )endpointConfig["endpointConfig"];
+    json config = util:parse(endpointConfigValue);
+
+    serviceUrlValue, err = (string )config["serviceUrl"];
+    endpointDto.clientConnector = create http:ClientConnector(serviceUrlValue);
+    endpointDto.name, err = (string)endpointConfig.name;
+    securityConfigValue, err = (string )endpointConfig["security"];
+    json security = util:parse(securityConfigValue);
+    endpointDto.securityEnable, err = (boolean )security.enabled;
     if (endpointDto.securityEnable) {
         dto:Endpoint_Security endpointSecurity = {};
-        endpointSecurity.username = (string)security.username;
-        endpointSecurity.password = (string)security.password;
+        endpointSecurity.username, err = (string)security.username;
+        endpointSecurity.password, err = (string)security.password;
         endpointDto.security = endpointSecurity;
     }
     return endpointDto;
