@@ -16,18 +16,18 @@
  * under the License.
  */
 
-import React, {Component} from 'react'
+import React from 'react'
 import {Timeline} from 'antd';
 
-export default class LifeCycleHistory extends Component {
-    render() {
-        return (
-            <Timeline>
-                {this.props.lcHistory.map(item =>
-                    <Timeline.Item>
-                        {"LC has changed from " + item.postState + " to " + item.previousState
-                        + " on " + item.updatedTime + " by " + item.user}</Timeline.Item>)}
-            </Timeline>
-        );
-    }
-}
+const LifeCycleHistory = props => {
+    return (
+        <Timeline>
+            {props.lcHistory.map(entry =>
+                <Timeline.Item key={entry.updatedTime}>
+                    {"LC has changed from " + entry.postState + " to " + entry.previousState
+                    + " on " + entry.updatedTime + " by " + entry.user}</Timeline.Item>)}
+        </Timeline>
+    );
+};
+
+export default LifeCycleHistory

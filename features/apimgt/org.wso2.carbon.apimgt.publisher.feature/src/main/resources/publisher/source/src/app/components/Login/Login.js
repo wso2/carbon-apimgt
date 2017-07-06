@@ -67,7 +67,7 @@ class NormalLoginForm extends Component {
         });
     };
 
-
+    /* TODO: re-impliment referrer handling ~tmkb*/
     render() {
         const { getFieldDecorator } = this.props.form;
         const makeEmptySuffix = this.state.userNameEmpty ? <Icon type="close-circle" onClick={this.emitEmpty} /> : '';
@@ -105,7 +105,7 @@ class NormalLoginForm extends Component {
         } else {// If logged in, redirect to /apis page
             return (
                 <Switch>
-                    <Redirect from={'/login'} to={"/apis"}/>
+                    <Redirect to={"/apis"}/>
                 </Switch>
             );
         }
