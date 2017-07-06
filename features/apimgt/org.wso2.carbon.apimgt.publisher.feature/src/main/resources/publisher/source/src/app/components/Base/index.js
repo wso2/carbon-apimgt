@@ -46,7 +46,7 @@ class Base extends Component {
 
     render() {
         return (
-            <Layout style={{height: "100vh"}}>
+            <Layout>
                 <ComposeHeader/>
                 <Content style={{padding: '20px 20px 0 20px'}}>
                     <Layout style={{padding: '0'}}>

@@ -125,7 +125,7 @@ class Listing extends React.Component {
                     this.state.apis ?
                         this.state.listType === "list" ?
                             <Table columns={columns} dataSource={this.state.apis.list}/>
-                            : <Row type="flex" justify="start" gutter={8}>
+                            : <Row type="flex" justify="start">
                             {this.state.apis.list.map((api, i) => {
                                 return <ApiThumb key={api.id} listType={this.state.listType} api={api}/>
                             })}
