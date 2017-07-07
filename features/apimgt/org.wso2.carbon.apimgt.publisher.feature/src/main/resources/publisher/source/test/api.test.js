@@ -21,7 +21,7 @@ import {before, describe, it} from "mocha"
 import {assert} from 'chai'
 import TestUtils from './utils.js'
 
-TestUtils.setupMockEnviroment();
+TestUtils.setupMockEnvironment();
 
 describe('Api',
     function () {
