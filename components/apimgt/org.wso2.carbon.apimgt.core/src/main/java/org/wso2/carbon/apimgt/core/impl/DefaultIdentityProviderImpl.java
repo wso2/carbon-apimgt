@@ -23,8 +23,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import feign.FeignException;
 import feign.Response;
+import feign.gson.GsonDecoder;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
 import org.wso2.carbon.apimgt.core.models.User;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,6 +79,12 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
     public String getIdOfUser(String userName) throws IdentityProviderException {
         Response userResponse = scimServiceStub.searchUsers(FILTER_PREFIX_USER + userName);
         String userId;
+        if (userResponse == null) {
+            String errorMessage =
+                    "Error occurred while retrieving Id of user " + userName + ". Error : Response is null.";
+            log.error(errorMessage);
+            throw new IdentityProviderException(errorMessage, ExceptionCodes.RESOURCE_RETRIEVAL_FAILED);
+        }
         if (userResponse.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
             String responseBody = userResponse.body().toString();
             JsonParser parser = new JsonParser();
@@ -86,14 +93,16 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
             JsonObject scimUser = (JsonObject) user.get(0);
             userId = scimUser.get(ID).getAsString();
             String message = "Id " + userId + " of user " + scimUser.get(USERNAME).getAsString()
-                    + " is successfully retrieved from SCIM API";
+                    + " is successfully retrieved from SCIM endpoint.";
             if (log.isDebugEnabled()) {
                 log.debug(message);
             }
         } else {
-            String errorMessage = "User " + userName + " does not exist in the system.";
+            String errorMessage =
+                    "Error occurred while retrieving Id of user " + userName + ". Error : " + getErrorMessage(
+                            userResponse);
             log.error(errorMessage);
-            throw new IdentityProviderException(errorMessage, ExceptionCodes.USER_DOES_NOT_EXIST);
+            throw new IdentityProviderException(errorMessage, ExceptionCodes.RESOURCE_RETRIEVAL_FAILED);
         }
         return userId;
     }
@@ -101,22 +110,48 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
     @Override
     public List<String> getRoleNamesOfUser(String userId) throws IdentityProviderException {
         List<String> roleNames = new ArrayList<>();
-        SCIMUser scimUser = scimServiceStub.getUser(userId);
-        if (scimUser != null) {
-            List<SCIMUser.SCIMUserGroups> roles = scimUser.getGroups();
-            if (roles != null) {
-                roles.forEach(role -> roleNames.add(role.getDisplay()));
-                String message =
-                        "Role names of user " + scimUser.getName() + " are successfully retrieved as " + StringUtils
-                                .join(roleNames, ", ") + ".";
-                if (log.isDebugEnabled()) {
-                    log.debug(message);
-                }
-            }
-        } else {
-            String errorMessage = "User id " + userId + " does not exist in the system.";
+        Response response = scimServiceStub.getUser(userId);
+        if (response == null) {
+            String errorMessage =
+                    "Error occurred while retrieving user with Id " + userId + ". Error : Response is null.";
             log.error(errorMessage);
-            throw new IdentityProviderException(errorMessage, ExceptionCodes.USER_DOES_NOT_EXIST);
+            throw new IdentityProviderException(errorMessage, ExceptionCodes.RESOURCE_RETRIEVAL_FAILED);
+        }
+        try {
+            if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
+                SCIMUser scimUser = (SCIMUser) new GsonDecoder().decode(response, SCIMUser.class);
+                if (scimUser != null) {
+                    List<SCIMUser.SCIMUserGroups> roles = scimUser.getGroups();
+                    if (roles != null) {
+                        roles.forEach(role -> roleNames.add(role.getDisplay()));
+                        String message =
+                                "Role names of user " + scimUser.getName() + " are successfully retrieved as " +
+                                        StringUtils.join(roleNames, ", ") + ".";
+                        if (log.isDebugEnabled()) {
+                            log.debug(message);
+                        }
+                    }
+                } else {
+                    String errorMessage =
+                            "Error occurred while retrieving user with user Id " + userId + " from SCIM endpoint. "
+                                    + "Response body is null or empty.";
+                    log.error(errorMessage);
+                    throw new IdentityProviderException(
+                            "Error occurred while retrieving user with user Id " + userId + " from SCIM endpoint. "
+                                    + "Response body is null or empty.", ExceptionCodes.RESOURCE_RETRIEVAL_FAILED);
+                }
+            } else {
+                String errorMessage =
+                        "Error occurred while retrieving role names of user with Id " + userId + ". Error : " +
+                                getErrorMessage(response);
+                log.error(errorMessage);
+                throw new IdentityProviderException(errorMessage, ExceptionCodes.RESOURCE_RETRIEVAL_FAILED);
+            }
+        } catch (IOException e) {
+            String errorMessage = "Error occurred while parsing response from SCIM endpoint.";
+            log.error(errorMessage);
+            throw new IdentityProviderException("Error occurred while parsing response from SCIM endpoint for ", e,
+                    ExceptionCodes.RESOURCE_RETRIEVAL_FAILED);
         }
         return roleNames;
     }
@@ -130,22 +165,47 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
     @Override
     public List<String> getRoleIdsOfUser(String userId) throws IdentityProviderException {
         List<String> roleIds = new ArrayList<>();
-        SCIMUser scimUser = scimServiceStub.getUser(userId);
-        if (scimUser != null) {
-            List<SCIMUser.SCIMUserGroups> roles = scimUser.getGroups();
-            if (roles != null) {
-                roles.forEach(role -> roleIds.add(role.getValue()));
-                String message =
-                        "Role Ids of user " + scimUser.getName() + " are successfully retrieved as " + StringUtils
-                                .join(roleIds, ", ") + ".";
-                if (log.isDebugEnabled()) {
-                    log.debug(message);
-                }
-            }
-        } else {
-            String errorMessage = "User id " + userId + " does not exist in the system.";
+        Response response = scimServiceStub.getUser(userId);
+        if (response == null) {
+            String errorMessage =
+                    "Error occurred while retrieving user with Id " + userId + ". Error : Response is null.";
             log.error(errorMessage);
-            throw new IdentityProviderException(errorMessage, ExceptionCodes.USER_DOES_NOT_EXIST);
+            throw new IdentityProviderException(errorMessage, ExceptionCodes.RESOURCE_RETRIEVAL_FAILED);
+        }
+        try {
+            if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
+                SCIMUser scimUser = (SCIMUser) new GsonDecoder().decode(response, SCIMUser.class);
+                if (scimUser != null) {
+                    List<SCIMUser.SCIMUserGroups> roles = scimUser.getGroups();
+                    if (roles != null) {
+                        roles.forEach(role -> roleIds.add(role.getValue()));
+                        String message = "Role Ids of user " + scimUser.getName() + " are successfully retrieved as " +
+                                StringUtils.join(roleIds, ", ") + ".";
+                        if (log.isDebugEnabled()) {
+                            log.debug(message);
+                        }
+                    }
+                } else {
+                    String errorMessage =
+                            "Error occurred while retrieving user with user Id " + userId + " from SCIM endpoint. "
+                                    + "Response body is null or empty.";
+                    log.error(errorMessage);
+                    throw new IdentityProviderException(
+                            "Error occurred while retrieving user with user Id " + userId + " from SCIM endpoint. "
+                                    + "Response body is null or empty.", ExceptionCodes.RESOURCE_RETRIEVAL_FAILED);
+                }
+            } else {
+                String errorMessage =
+                        "Error occurred while retrieving role Ids of user with Id " + userId + ". Error : " +
+                                getErrorMessage(response);
+                log.error(errorMessage);
+                throw new IdentityProviderException(errorMessage, ExceptionCodes.RESOURCE_RETRIEVAL_FAILED);
+            }
+        } catch (IOException e) {
+            String errorMessage = "Error occurred while parsing response from SCIM endpoint.";
+            log.error(errorMessage);
+            throw new IdentityProviderException("Error occurred while parsing response from SCIM endpoint for ", e,
+                    ExceptionCodes.RESOURCE_RETRIEVAL_FAILED);
         }
         return roleIds;
     }
@@ -154,6 +214,12 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
     public String getRoleId(String roleName) throws IdentityProviderException {
         Response roleResponse = scimServiceStub.searchGroups(FILTER_PREFIX_ROLE + roleName);
         String roleId;
+        if (roleResponse == null) {
+            String errorMessage =
+                    "Error occurred while retrieving Id of role " + roleName + ". Error : Response is null.";
+            log.error(errorMessage);
+            throw new IdentityProviderException(errorMessage, ExceptionCodes.RESOURCE_RETRIEVAL_FAILED);
+        }
         if (roleResponse.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
             String responseBody = roleResponse.body().toString();
             JsonParser parser = new JsonParser();
@@ -162,41 +228,62 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
             JsonObject scimGroup = (JsonObject) role.get(0);
             roleId = scimGroup.get(ID).getAsString();
             String message = "Id " + roleId + " of role " + scimGroup.get(GROUPNAME).getAsString()
-                    + " is successfully retrieved from SCIM API";
+                    + " is successfully retrieved from SCIM endpoint.";
             if (log.isDebugEnabled()) {
                 log.debug(message);
             }
         } else {
-            String errorMessage = "Role with name " + roleName + " does not exist in the system.";
+            String errorMessage =
+                    "Error occurred while retrieving Id of role " + roleName + ". Error : " + getErrorMessage(
+                            roleResponse);
             log.error(errorMessage);
-            throw new IdentityProviderException(errorMessage, ExceptionCodes.ROLE_DOES_NOT_EXIST);
+            throw new IdentityProviderException(errorMessage, ExceptionCodes.RESOURCE_RETRIEVAL_FAILED);
         }
         return roleId;
     }
 
     @Override
     public String getRoleName(String roleId) throws IdentityProviderException {
+        Response response = scimServiceStub.getGroup(roleId);
+        if (response == null) {
+            String errorMessage =
+                    "Error occurred while retrieving name of role with Id " + roleId + ". Error : Response is null.";
+            log.error(errorMessage);
+            throw new IdentityProviderException(errorMessage, ExceptionCodes.RESOURCE_RETRIEVAL_FAILED);
+        }
+        String displayName;
         try {
-            SCIMGroup scimGroup = scimServiceStub.getGroup(roleId);
-            String displayName;
-            if (scimGroup != null) {
-                displayName = scimGroup.getDisplayName();
-                String message =
-                        "Display name of role with Id " + roleId + " is successfully retrieved as " + displayName;
-                if (log.isDebugEnabled()) {
-                    log.debug(message);
+            if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
+                SCIMGroup scimGroup = (SCIMGroup) new GsonDecoder().decode(response, SCIMGroup.class);
+                if (scimGroup != null) {
+                    displayName = scimGroup.getDisplayName();
+                    String message =
+                            "Display name of role with Id " + roleId + " is successfully retrieved as " + displayName;
+                    if (log.isDebugEnabled()) {
+                        log.debug(message);
+                    }
+                } else {
+                    String errorMessage =
+                            "Error occurred while retrieving role name with role Id " + roleId + " from SCIM endpoint. "
+                                    + "Response body is null or empty.";
+                    log.error(errorMessage);
+                    throw new IdentityProviderException(
+                            "Error occurred while retrieving role name with role Id " + roleId + " from SCIM endpoint. "
+                                    + "Response body is null or empty.", ExceptionCodes.RESOURCE_RETRIEVAL_FAILED);
                 }
             } else {
-                String errorMessage = "Role with role Id " + roleId + " does not exist in the system.";
+                String errorMessage = "Error occurred while retrieving name of role with Id " + roleId + ". Error : "
+                        + getErrorMessage(response);
                 log.error(errorMessage);
-                throw new IdentityProviderException(errorMessage, ExceptionCodes.ROLE_DOES_NOT_EXIST);
+                throw new IdentityProviderException(errorMessage, ExceptionCodes.RESOURCE_RETRIEVAL_FAILED);
             }
-            return displayName;
-        } catch (FeignException e) {
-            String errorMessage = "Role with role Id " + roleId + " does not exist in the system.";
-            log.error(errorMessage, e);
-            throw new IdentityProviderException(errorMessage, e, ExceptionCodes.ROLE_DOES_NOT_EXIST);
+        } catch (IOException e) {
+            String errorMessage = "Error occurred while parsing response from SCIM endpoint.";
+            log.error(errorMessage);
+            throw new IdentityProviderException("Error occurred while parsing response from SCIM endpoint for ", e,
+                    ExceptionCodes.RESOURCE_RETRIEVAL_FAILED);
         }
+        return displayName;
     }
 
     @Override

@@ -749,9 +749,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     }
                 }
             } catch (IdentityProviderException e) {
-                String errorMsg = "User " + loggedInUserName + " does not exist in the system.";
+                String errorMsg = "Error occurred while calling SCIM endpoint to retrieve user " + loggedInUserName +
+                        "'s information";
                 log.error(errorMsg, e);
-                throw new APIManagementException(errorMsg, e, ExceptionCodes.USER_DOES_NOT_EXIST);
+                throw new APIManagementException(errorMsg, e, e.getErrorHandler());
             }
         }
         List<String> finalAggregatedPermissionList = new ArrayList<>();
@@ -804,7 +805,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 updatedPermissionArray.add(updatedPermissionJsonObj);
             } catch (IdentityProviderException e) {
                 //lets the execution continue after logging the exception
-                String errorMessage = "Role with ID " + groupId + " no longer exists in the system";
+                String errorMessage = "Error occurred while calling SCIM endpoint to retrieve role name of role " +
+                        "with Id " + groupId;
                 log.warn(errorMessage, e);
             }
         }
@@ -1275,23 +1277,27 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         List<API> apiResults;
         String user = getUsername();
         Set<String> roles = new HashSet<>();
-        if (!"admin".equals(user)) {
-            String userId = getIdentityProvider().getIdOfUser(user);
-            roles = new HashSet<>(getIdentityProvider().getRoleIdsOfUser(userId));
-        }
         try {
             //TODO: Need to validate users roles against results returned
+            if (!"admin".equals(user)) {
+                String userId = getIdentityProvider().getIdOfUser(user);
+                roles = new HashSet<>(getIdentityProvider().getRoleIdsOfUser(userId));
+            }
             if (query != null && !query.isEmpty()) {
                 apiResults = getApiDAO().searchAPIs(roles, user, query, offset, limit);
             } else {
                 apiResults = getApiDAO().getAPIs(roles, user);
             }
+            return apiResults;
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while Searching the API with query " + query;
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, e.getErrorHandler());
+        } catch (IdentityProviderException e) {
+            String errorMsg = "Error occurred while calling SCIM endpoint to retrieve user " + user + "'s information";
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         }
-        return apiResults;
     }
 
     /**
