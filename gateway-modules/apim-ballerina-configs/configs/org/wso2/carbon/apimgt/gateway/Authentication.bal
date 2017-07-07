@@ -24,7 +24,7 @@ function requestInterceptor (message m) (boolean, message) {
     return authenticated, res;
 }
 
-function responseInterceptor1 (message m) (boolean, message) {
+function responseInterceptor (message m) (boolean, message) {
     system:println("invoking response auth interceptor");
     return true, m;
 }
