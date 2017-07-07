@@ -48,11 +48,21 @@ class EndpointForm extends React.Component {
         this.props.form.validateFields((err, values) => {
             if (!err) {
                 console.log('Received values of form: ', values);
+                let endpoint = {
+                    inline: {
+                        endpointConfig: JSON.stringify({serviceUrl: values.apiEndpoint}),
+                        endpointSecurity: {enabled: false},
+                        type: "http"
+                    }
+                };
                 let api_data = {
                     name: values.apiName,
                     context: values.apiContext,
                     version: values.apiVersion
                 };
+                if (values.apiEndpoint) {
+                    api_data['endpoint'] =  [endpoint];
+                }
                 let new_api = new API('');
                 let promised_create = new_api.create(api_data);
                 promised_create
@@ -68,7 +78,7 @@ class EndpointForm extends React.Component {
                 console.log('Send this in a POST request:', api_data);
 
             } else {
-
+                message.error("Error creating API");
             }
         });
     };
@@ -108,6 +118,15 @@ class EndpointForm extends React.Component {
                         <Input name="apiContext" prefix={<Icon type="user" style={{ fontSize: 13 }} />} placeholder="Api Context" />
                     )}
                 </FormItem>
+                <FormItem  label="Endpoint"
+                           labelCol={{ span: 4 }}
+                           wrapperCol={{ span: 8 }}>
+                    {getFieldDecorator('apiEndpoint', {
+                        rules: [{ required: false, message: 'Please input Api endpoint' }],
+                    })(
+                        <Input name="apiEndpoint" prefix={<Icon type="user" style={{ fontSize: 13 }} />} placeholder="Api Endpoint" />
+                    )}
+                </FormItem>
                 <FormItem >
 
                     <Button type="primary" htmlType="submit">
@@ -125,10 +144,6 @@ class EndpointForm extends React.Component {
 const EndpointFormGenerated = Form.create()(EndpointForm);
 
 class ApiCreateEndpoint extends React.Component {
-    constructor(props) {
-        super(props);
-
-    }
     render = () => {return  <EndpointFormGenerated history={this.props.history} /> }
 }
 
