@@ -17,12 +17,15 @@
  */
 
 import AuthManager from '../../src/app/data/AuthManager.js'
-import {describe, it} from "mocha";
-import {assert} from 'chai';
-import https from 'https';
+import {describe, it, before} from "mocha"
+import {assert} from 'chai'
+import TestUtils from "../utils";
 
 describe('AuthManager',
     function () {
+        before(function () {
+            TestUtils.setupMockEnvironment();
+        });
         describe('#authenticateUser()',
             function () {
                 it('Should return HTTP 200 status code if user authenticate',

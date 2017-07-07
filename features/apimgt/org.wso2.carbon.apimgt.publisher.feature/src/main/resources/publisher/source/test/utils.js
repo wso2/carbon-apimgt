@@ -16,15 +16,18 @@
  * under the License.
  */
 
-import AuthManager from "../src/app/data/AuthManager.js";
+import AuthManager from "../src/app/data/AuthManager.js"
+import Os from 'os'
+
 class TestUtils {
-    static setupMockEnviroment() {
+    static setupMockEnvironment() {
+        const hostname = Os.hostname(); //for IP address Object.entries(os.networkInterfaces())[0][1][0].address
         global.window = {
             location: {
                 hash: "",
-                host: "localhost:9292",
-                hostname: "localhost",
-                origin: "https://localhost:9292",
+                host: hostname + ":9292",
+                hostname: hostname,
+                origin: "https://" + hostname + ":9292",
                 pathname: "/",
                 port: "9292",
                 protocol: "https:"

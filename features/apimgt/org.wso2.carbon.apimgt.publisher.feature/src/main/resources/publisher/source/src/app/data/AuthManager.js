@@ -26,7 +26,7 @@ import User from './User'
 class AuthManager {
     constructor() {
         /* TODO: Move this to configuration ~tmkb*/
-        this.host = "https://localhost:9292";
+        this.host = window.location.protocol + "//" + window.location.host;
         this.token = "/login/token/publisher";
         this.isLogged = false;
         this.username = null;
@@ -39,7 +39,7 @@ class AuthManager {
         let timestampSkew = 100;
         let currentTimestamp = Math.floor(Date.now() / 1000);
         let tokenTimestamp = localStorage.getItem("expiresIn");
-        let rememberMe = (localStorage.getItem("rememberMe") == 'true');
+        let rememberMe = (localStorage.getItem("rememberMe") === 'true');
         if (rememberMe && (tokenTimestamp - currentTimestamp < timestampSkew)) {
             let bearerToken = "Bearer " + Utils.getCookie("WSO2_AM_REFRESH_TOKEN_1");
             let loginPromise = authManager.refresh(bearerToken);

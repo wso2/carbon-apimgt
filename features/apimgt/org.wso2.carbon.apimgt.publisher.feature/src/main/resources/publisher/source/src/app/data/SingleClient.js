@@ -41,7 +41,7 @@ class SingleClient {
         }));
         this._client.then(
             (swagger) => {
-                swagger.setHost("localhost:9292");
+                swagger.setHost(window.location.host);
                 /* TODO: Set hostname according to the APIM environment selected by user*/
                 swagger.setSchemes(["https"]);
             }
@@ -66,7 +66,7 @@ class SingleClient {
 
     _getSwaggerURL() {
         /* TODO: Read this from configuration ~tmkb*/
-        return "https://localhost:9292/api/am/publisher/v1.0/apis/swagger.json";
+        return window.location.protocol + "//" + window.location.host + "/api/am/publisher/v1.0/apis/swagger.json";
     }
 }
 

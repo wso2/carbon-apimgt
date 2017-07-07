@@ -21,11 +21,11 @@ import './login.css'
 import {Switch, Redirect} from 'react-router-dom'
 import AuthManager from '../../data/AuthManager'
 import qs from 'qs'
-import { Layout, Breadcrumb } from 'antd';
-const { Header, Content, Footer } = Layout;
-import { Form, Icon, Input, Button, Checkbox, message } from 'antd';
-import { Card } from 'antd';
-import { Row, Col } from 'antd';
+import {Layout, Breadcrumb} from 'antd';
+const {Header, Content, Footer} = Layout;
+import {Form, Icon, Input, Button, Checkbox, message} from 'antd';
+import {Card} from 'antd';
+import {Row, Col} from 'antd';
 const FormItem = Form.Item;
 
 
@@ -37,7 +37,7 @@ class NormalLoginForm extends Component {
         this.state = {
             isLogin: false,
             referrer: "/",
-            userNameEmpty:true
+            userNameEmpty: true
         };
     }
 
@@ -57,36 +57,48 @@ class NormalLoginForm extends Component {
                         console.log(error);
                     }
                 );
-            } else{
+            } else {
             }
         });
     }
+
+    componentDidMount() {
+        let queryString = this.props.location.search;
+        queryString = queryString.replace(/^\?/, '');
+        /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
+        let params = qs.parse(queryString);
+        if (params.referrer) {
+            this.setState({referrer: params.referrer});
+        }
+    }
+
     emitEmpty = () => {
         this.setState({
             userNameEmpty: true
         });
     };
 
-    /* TODO: re-impliment referrer handling ~tmkb*/
     render() {
-        const { getFieldDecorator } = this.props.form;
-        const makeEmptySuffix = this.state.userNameEmpty ? <Icon type="close-circle" onClick={this.emitEmpty} /> : '';
+        const {getFieldDecorator} = this.props.form;
+        const makeEmptySuffix = this.state.userNameEmpty ? <Icon type="close-circle" onClick={this.emitEmpty}/> : '';
 
         if (!this.state.isLogin) { // If not logged in, go to login page
             return (
                 <Form onSubmit={this.handleSubmit} className="login-form">
                     <FormItem>
                         {getFieldDecorator('userName', {
-                            rules: [{ required: true, message: 'Please input your username!' }],
+                            rules: [{required: true, message: 'Please input your username!'}],
                         })(
-                            <Input prefix={<Icon type="user" style={{ fontSize: 13 }} />} placeholder="Username" suffix={makeEmptySuffix}/>
+                            <Input prefix={<Icon type="user" style={{fontSize: 13}}/>} placeholder="Username"
+                                   suffix={makeEmptySuffix}/>
                         )}
                     </FormItem>
                     <FormItem>
                         {getFieldDecorator('password', {
-                            rules: [{ required: true, message: 'Please input your Password!' }],
+                            rules: [{required: true, message: 'Please input your Password!'}],
                         })(
-                            <Input prefix={<Icon type="lock" style={{ fontSize: 13 }} />} type="password" placeholder="Password" />
+                            <Input prefix={<Icon type="lock" style={{fontSize: 13}}/>} type="password"
+                                   placeholder="Password"/>
                         )}
                     </FormItem>
                     <FormItem>
@@ -105,7 +117,7 @@ class NormalLoginForm extends Component {
         } else {// If logged in, redirect to /apis page
             return (
                 <Switch>
-                    <Redirect to={"/apis"}/>
+                    <Redirect to={this.state.referrer}/>
                 </Switch>
             );
         }
@@ -116,35 +128,31 @@ const WrappedNormalLoginForm = Form.create()(NormalLoginForm);
 
 class Login extends Component {
 
-    constructor(props) {
-        super(props);
-
-    }
     render() {
-            return (
-                    <Layout className="layout" style={{height:"100vh"}}>
-                        <Content>
-                            <Row type="flex" justify="center" align="middle">
-                                <Col>
-                                    <div className="login-card-wrapper">
-                                    <Card>
-                                        <div className="login-card">
-                                            <img className="brand" src="/publisher/public/images/logo.svg" alt="wso2-logo"/>
-                                            <p>API Publisher</p>
-                                        </div>
-                                        <WrappedNormalLoginForm />
-                                    </Card >
+        return (
+            <Layout className="layout" style={{height: "100vh"}}>
+                <Content>
+                    <Row type="flex" justify="center" align="middle">
+                        <Col>
+                            <div className="login-card-wrapper">
+                                <Card>
+                                    <div className="login-card">
+                                        <img className="brand" src="/publisher/public/images/logo.svg" alt="wso2-logo"/>
+                                        <p>API Publisher</p>
                                     </div>
-                                </Col>
-                            </Row>
-                        </Content>
-                        <Footer style={{ textAlign:"left" }}>
-                            WSO2 | © 2017
-                            <a href="http://wso2.com/" target="_blank"><i
-                                className="icon fw fw-wso2"/> Inc</a>.
-                        </Footer>
-                    </Layout>
-            )
+                                    <WrappedNormalLoginForm location={this.props.location}/>
+                                </Card >
+                            </div>
+                        </Col>
+                    </Row>
+                </Content>
+                <Footer style={{textAlign: "left"}}>
+                    WSO2 | © 2017
+                    <a href="http://wso2.com/" target="_blank"><i
+                        className="icon fw fw-wso2"/> Inc</a>.
+                </Footer>
+            </Layout>
+        )
 
     }
 }
