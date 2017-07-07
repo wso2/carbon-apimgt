@@ -25,7 +25,7 @@ import API from '../../../data/api.js'
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import {Link} from 'react-router-dom'
-import {Table, Icon, Menu, Dropdown, Button, Row} from 'antd';
+import {Table, Icon, Menu, Dropdown, Button, Row, Col} from 'antd';
 
 const columns = [{
     title: 'Name',
@@ -122,7 +122,11 @@ class Listing extends React.Component {
                 {
                     this.state.apis ?
                         this.state.listType === "list" ?
-                            <Table columns={columns} dataSource={this.state.apis.list}/>
+                            <Row type="flex" justify="start">
+                                <Col span={24}>
+                                    <Table columns={columns} dataSource={this.state.apis.list} bordered style={{margin:'10px'}}/>
+                                </Col>
+                            </Row>
                             : <Row type="flex" justify="start">
                             {this.state.apis.list.map((api, i) => {
                                 return <ApiThumb key={api.id} listType={this.state.listType} api={api}/>
