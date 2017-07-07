@@ -44,6 +44,9 @@ public class PolicyExportManagerTest {
 
     @BeforeClass
     void init() {
+        File dir = new File(exportRootDirectory);
+        dir.mkdir();
+        dir.deleteOnExit();
         File temp = Files.createTempDir();
         temp.deleteOnExit();
         System.setProperty("gwHome", temp.getAbsolutePath());

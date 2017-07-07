@@ -47,6 +47,7 @@ public class APIThrottlePolicyTemplateBuilder extends ThrottlePolicyTemplateBuil
     private static final Log log = LogFactory.getLog(APIThrottlePolicyTemplateBuilder.class);
     private static final String POLICY_VELOCITY_RESOURCE = "throttle_policy_template_resource";
     private static final String POLICY_VELOCITY_RESOURCE_DEFAULT = "throttle_policy_template_resource_default";
+    private static final String EMPTY_STRING = "";
     private APIPolicy apiPolicy;
 
     public APIThrottlePolicyTemplateBuilder(APIPolicy apiPolicy) {
@@ -137,7 +138,7 @@ public class APIThrottlePolicyTemplateBuilder extends ThrottlePolicyTemplateBuil
         if (!StringUtils.isEmpty(conditionSetString)) {
             context.put(CONDITION, AND + conditionSetString);
         } else {
-            context.put(CONDITION, null);
+            context.put(CONDITION, EMPTY_STRING);
         }
         writer = new StringWriter();
         template.merge(context, writer);

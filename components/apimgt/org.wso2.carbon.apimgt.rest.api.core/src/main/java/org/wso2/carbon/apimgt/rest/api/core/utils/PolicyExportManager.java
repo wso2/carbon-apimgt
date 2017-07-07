@@ -54,6 +54,7 @@ public class PolicyExportManager {
     private static final String CUSTOM = "custom_";
     private static final String ZIP = ".zip";
     private static final String EXPORT_POLICIES = "ExportPolicies";
+    private static final String SIDDHI_EXTENSION = ".siddhi";
     private APIMgtAdminService apiMgtAdminService;
 
     public PolicyExportManager(APIMgtAdminService adminService) {
@@ -70,26 +71,25 @@ public class PolicyExportManager {
             List<SubscriptionPolicy> subscriptionPolicies = apiMgtAdminService.getSubscriptionPolicies();
             List<CustomPolicy> customPolicies = apiMgtAdminService.getCustomRules();
             //write all execution Plans/Siddhi Apps to exportPoliciesDirName directory
-            String rootFolder = exportedPoliciesDirName;
-            exportedPoliciesDirName = exportedPoliciesDirName + File.separator + EXPORT_POLICIES;
-            APIFileUtils.createDirectory(exportedPoliciesDirName);
+            String dirLocation = exportedPoliciesDirName + File.separator + EXPORT_POLICIES;
+            APIFileUtils.createDirectory(dirLocation);
             if (!apiPolicies.isEmpty()) {
                 for (Map<String, String> map : getApiPolicySiddhiApps(apiPolicies)) {
-                    prepareFile(exportedPoliciesDirName, map);
+                    prepareFile(dirLocation, map);
                 }
             }
             if (!applicationPolicies.isEmpty()) {
-                prepareFile(exportedPoliciesDirName, getAppPolicySiddhiApps(applicationPolicies));
+                prepareFile(dirLocation, getAppPolicySiddhiApps(applicationPolicies));
             }
             if (!subscriptionPolicies.isEmpty()) {
-                prepareFile(exportedPoliciesDirName, getSubscriptionPolicySiddhiApps(subscriptionPolicies));
+                prepareFile(dirLocation, getSubscriptionPolicySiddhiApps(subscriptionPolicies));
             }
             if (!customPolicies.isEmpty()) {
-                prepareFile(exportedPoliciesDirName, getCustomPolicySiddhiApps(customPolicies));
+                prepareFile(dirLocation, getCustomPolicySiddhiApps(customPolicies));
             }
             //create archive and get the archive location
-            String zippedFilePath = createArchiveFromPolicies(rootFolder, archiveDir, archiveName);
-            APIFileUtils.deleteDirectory(rootFolder);
+            String zippedFilePath = createArchiveFromPolicies(exportedPoliciesDirName, archiveDir, archiveName);
+            APIFileUtils.deleteDirectory(exportedPoliciesDirName);
             return zippedFilePath;
         } catch (APIManagementException e) {
             String errorMessage = "Error while exporting policies";
@@ -108,11 +108,17 @@ public class PolicyExportManager {
      * @throws APIMgtDAOException if creating archive failed
      */
     private String createArchiveFromPolicies(String sourceDir, String archiveDir, String archiveName)
-            throws APIMgtDAOException {
+            throws APIManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Creating archive for execution plans.");
         }
-        APIFileUtils.archiveDirectory(sourceDir, archiveDir, archiveName);
+        try {
+            APIFileUtils.archiveDirectory(sourceDir, archiveDir, archiveName);
+        } catch (APIMgtDAOException e) {
+            String errorMessage = "Error occurred creating archive :" + archiveName + " at " + archiveDir;
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e);
+        }
         String archivePath = archiveDir + File.separator + archiveName + ZIP;
         log.info("Created archive for execution plans: " + archivePath);
         return archivePath;
@@ -124,19 +130,16 @@ public class PolicyExportManager {
      * @param exportDir location contains the files
      * @param policies  Map of execution plan names and execution plans
      */
-    private void prepareFile(String exportDir, Map<String, String> policies) {
+    private void prepareFile(String exportDir, Map<String, String> policies) throws APIMgtDAOException {
         if (log.isDebugEnabled()) {
             log.debug("Writing files for execution plans.");
         }
-        policies.forEach((name, siddhiApp) -> {
-            try {
-                APIFileUtils.createFile(exportDir + File.separator + name);
-                APIFileUtils.writeToFile(exportDir + File.separator + name, siddhiApp);
-            } catch (APIMgtDAOException e) {
-                String errorMsg = "Error while preparing the file with policy name: " + name;
-                log.error(errorMsg, e);
-            }
-        });
+
+        for (Map.Entry<String, String> entry : policies.entrySet())
+        {
+            APIFileUtils.createFile(exportDir + File.separator + entry.getKey() + SIDDHI_EXTENSION);
+            APIFileUtils.writeToFile(exportDir + File.separator + entry.getKey() + SIDDHI_EXTENSION, entry.getValue());
+        }
     }
 
     /**

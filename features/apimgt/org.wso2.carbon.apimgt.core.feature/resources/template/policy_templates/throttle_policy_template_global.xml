@@ -1,5 +1,5 @@
         @App:name('custom_${policy.getPolicyName()}')
-        @App:description('ExecutionPlan for global_${policy.getPolicyName()}')
+        @App:description('ExecutionPlan for custom_${policy.getPolicyName()}')
 
         @source(type='inMemory', topic='apim', @map(type='passThrough'))
         define stream RequestStream (messageID string, appKey string, appTier string, subscriptionKey string, apiKey string, apiTier string, policy string, resourceKey string, resourceTier string, userId string,  apiContext string, apiVersion string, appTenant string, apiTenant string, appId string, apiName string, propertiesMap string);
