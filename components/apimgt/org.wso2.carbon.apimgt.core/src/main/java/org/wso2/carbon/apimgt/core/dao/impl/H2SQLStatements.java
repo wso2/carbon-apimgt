@@ -67,13 +67,18 @@ public class H2SQLStatements implements ApiDAOVendorSpecificStatements {
      */
     @Override
     public String getApiSearchQuery(int roleCount) {
-        return API_SUMMARY_SELECT +
-                " LEFT JOIN FTL_SEARCH_DATA (?, 0, 0) FT ON API.UUID=FT.KEYS[0]" +
-                " WHERE API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
-                " AND (((`GROUP_ID` IN (" + DAOUtil.getParameterString(roleCount) + "))" +
-                " AND PERMISSION.PERMISSION >= 4) OR (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" +
-                " AND FT.TABLE='AM_API'" +
-                " GROUP BY UUID ORDER BY NAME OFFSET ? LIMIT ?";
+        if (roleCount > 0) {
+            return API_SUMMARY_SELECT + " LEFT JOIN FTL_SEARCH_DATA (?, 0, 0) FT ON API.UUID=FT.KEYS[0]"
+                    + " WHERE API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)"
+                    + " AND (((`GROUP_ID` IN (" + DAOUtil.getParameterString(roleCount) + "))"
+                    + " AND PERMISSION.PERMISSION >= 4) OR (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))"
+                    + " AND FT.TABLE='AM_API' GROUP BY UUID ORDER BY NAME OFFSET ? LIMIT ?";
+        } else {
+            return API_SUMMARY_SELECT + " LEFT JOIN FTL_SEARCH_DATA (?, 0, 0) FT ON API.UUID=FT.KEYS[0]"
+                    + " WHERE API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)"
+                    + " AND ((PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL)) AND FT.TABLE='AM_API'"
+                    + " GROUP BY UUID ORDER BY NAME OFFSET ? LIMIT ?";
+        }
     }
 
     /**
@@ -119,11 +124,18 @@ public class H2SQLStatements implements ApiDAOVendorSpecificStatements {
             }
         }
 
-        return API_SUMMARY_SELECT + " WHERE " + searchQuery.toString() +
-                " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
-                " AND (((GROUP_ID IN (" + DAOUtil.getParameterString(roleCount) +
-                ")) AND PERMISSION.PERMISSION >= 4) OR (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" +
-                " GROUP BY UUID ORDER BY NAME OFFSET ? LIMIT ?";
+        if (roleCount > 0) {
+            return API_SUMMARY_SELECT + " WHERE " + searchQuery.toString()
+                    + " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)"
+                    + " AND (((GROUP_ID IN (" + DAOUtil.getParameterString(roleCount)
+                    + ")) AND PERMISSION.PERMISSION >= 4) OR (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))"
+                    + " GROUP BY UUID ORDER BY NAME OFFSET ? LIMIT ?";
+        } else {
+            return API_SUMMARY_SELECT + " WHERE " + searchQuery.toString()
+                    + " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)"
+                    + " AND ((PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL)) GROUP BY UUID ORDER BY NAME"
+                    + " OFFSET ? LIMIT ?";
+        }
     }
 
     /**
