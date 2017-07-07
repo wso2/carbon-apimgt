@@ -26,9 +26,11 @@ import {PageNotFound} from '../../Base/Errors/index'
 import Loading from '../../Base/Loading/Loading'
 import Resources from './Resources'
 import Permission from './Permission'
+import Endpoint from './LifeCycle/Endpoint'
 
 import Api from '../../../data/api'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
+
 
 export default class Details extends Component {
     constructor(props) {
@@ -88,6 +90,8 @@ export default class Details extends Component {
                                render={ props => <LifeCycle api={this.state.api_response.obj} {...this.props} /> }/>
                         <Route path="/apis/:api_uuid/resources"
                                render={ props => <Resources api={this.state.api_response.obj} {...this.props} /> }/>
+                        <Route path="/apis/:api_uuid/endpoints"
+                               render={ props => <Endpoint api={this.state.api_response.obj} {...this.props} /> }/>
                         <Route path="/apis/:api_uuid/permission"
                                render={ props => <Permission api={this.state.api_response.obj} {...props} /> }/>/>
                         <Route component={PageNotFound}/>
