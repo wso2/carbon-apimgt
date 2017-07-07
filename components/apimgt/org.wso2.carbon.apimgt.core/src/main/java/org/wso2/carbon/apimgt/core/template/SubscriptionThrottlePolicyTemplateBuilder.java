@@ -38,6 +38,7 @@ public class SubscriptionThrottlePolicyTemplateBuilder extends ThrottlePolicyTem
 
     private static final Log log = LogFactory.getLog(SubscriptionThrottlePolicyTemplateBuilder.class);
     private static final String POLICY_VELOCITY_SUB = "throttle_policy_template_sub";
+    private static final String SUBSCRIPTION = "subscription_";
     private SubscriptionPolicy subscriptionPolicy;
 
     public SubscriptionThrottlePolicyTemplateBuilder(SubscriptionPolicy subscriptionPolicy) {
@@ -47,15 +48,13 @@ public class SubscriptionThrottlePolicyTemplateBuilder extends ThrottlePolicyTem
     /**
      * Generate policy for subscription level.
      *
-     * @param policy policy with level 'sub'. Multiple pipelines are not allowed. Can define more than one condition
-     *               as set of conditions. all these conditions should be passed as a single pipeline
      * @return throttle policies for subscription level
      * @throws APITemplateException throws if generation failure occur
      */
-    public String getThrottlePolicyForSubscriptionLevel(SubscriptionPolicy policy) throws APITemplateException {
+    public String getThrottlePolicyForSubscriptionLevel() throws APITemplateException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Generating Siddhi app for subscriptionLevel :" + policy.toString());
+            log.debug("Generating Siddhi app for subscriptionLevel :" + subscriptionPolicy.toString());
         }
         //get velocity template for Subscription policy and generate the template
         StringWriter writer = new StringWriter();
@@ -64,8 +63,8 @@ public class SubscriptionThrottlePolicyTemplateBuilder extends ThrottlePolicyTem
         VelocityContext context = new VelocityContext();
         setConstantContext(context);
         //set values for velocity context
-        context.put(POLICY, policy);
-        context.put(QUOTA_POLICY, policy.getDefaultQuotaPolicy());
+        context.put(POLICY, subscriptionPolicy);
+        context.put(QUOTA_POLICY, subscriptionPolicy.getDefaultQuotaPolicy());
         template.merge(context, writer);
         if (log.isDebugEnabled()) {
             log.debug("Generated Siddhi app for policy : " + writer.toString());
@@ -84,8 +83,7 @@ public class SubscriptionThrottlePolicyTemplateBuilder extends ThrottlePolicyTem
 
     @Override public Map<String, String> getThrottlePolicyTemplate() throws APITemplateException {
         try {
-            templateMap
-                    .put(subscriptionPolicy.getPolicyName(), getThrottlePolicyForSubscriptionLevel(subscriptionPolicy));
+            templateMap.put(SUBSCRIPTION + subscriptionPolicy.getPolicyName(), getThrottlePolicyForSubscriptionLevel());
         } catch (APITemplateException e) {
             String errorMessage = "Error while creating template for subscription throttle policy.";
             log.error(errorMessage, e);
