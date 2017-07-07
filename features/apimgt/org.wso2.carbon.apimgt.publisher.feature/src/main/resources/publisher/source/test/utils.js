@@ -39,6 +39,10 @@ class TestUtils {
 
             set cookie(value) {
                 this.value_ += value + '; ';
+            },
+
+            clearCookies() {
+                this.value_ = ''
             }
         };
     }
