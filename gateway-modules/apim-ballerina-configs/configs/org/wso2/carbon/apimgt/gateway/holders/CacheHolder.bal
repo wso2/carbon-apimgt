@@ -99,12 +99,20 @@ function getFromAPICache (string key) (dto:APIDTO) {
 }
 function setGatewayConf (dto:GatewayConfDTO conf) {
     gatewayConf = conf;
+    apimgtMaps:putMapEntry("sampleConfig", gatewayConf);
     keyManagerConf = conf.keyManagerInfo;
 }
 function getGatewayConf () (dto:GatewayConfDTO) {
+    any dto = apimgtMaps:getMapEntry("sampleConfig");
+    errors:TypeCastError err;
+    if(dto!=null){
+        gatewayConf, err = (dto:GatewayConfDTO)dto;
+        keyManagerConf = gatewayConf.keyManagerInfo;
+    }
     return gatewayConf;
 }
 function getKeyManagerConf () (dto:KeyManagerInfoDTO) {
+    getGatewayConf();
     return keyManagerConf;
 }
 function getAnalyticsConf () (dto:AnalyticsInfoDTO) {

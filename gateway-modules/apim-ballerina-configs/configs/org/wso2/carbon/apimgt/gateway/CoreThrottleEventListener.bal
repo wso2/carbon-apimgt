@@ -13,9 +13,9 @@ import org.wso2.carbon.apimgt.gateway.dto;
 @jms:config {
     initialContextFactory:"org.apache.activemq.jndi.ActiveMQInitialContextFactory",
     providerUrl:"tcp://localhost:61616",
-    connectionFactoryType:"ThrottleTopic",
+    connectionFactoryType:"topic",
     connectionFactoryName:"TopicConnectionFactory",
-    destination:"StoreTopic"
+    destination:"ThrottleTopic"
 }
 
 service<jms> ThrottleCoreJmsService {

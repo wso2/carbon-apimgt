@@ -25,7 +25,7 @@ function requestInterceptor (message m) (boolean, message) {
 }
 
 function responseInterceptor (message m) (boolean, message) {
-    system:println("response");
+    system:println("invoking response auth interceptor");
     return true, m;
 }
 
@@ -62,6 +62,7 @@ function authenticate (message m) (boolean, message) {
                     //extract key
                     string authToken = messages:getHeader(m, constants:AUTHORIZATION);
                     authToken = strings:replace(authToken, constants:BEARER, "");
+
                     if (strings:length(authToken) == 0) {
                         // token incorrect
                         gatewayUtil:constructAccessTokenNotFoundPayload(response);
