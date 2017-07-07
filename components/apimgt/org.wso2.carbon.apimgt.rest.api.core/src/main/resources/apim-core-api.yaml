@@ -388,6 +388,57 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+######################################################
+# Export Throttle Policies
+######################################################
+  /export/policies/throttle:
+
+    get:
+      produces:
+        - application/zip
+      x-wso2-curl: curl -k https://localhost:9292/api/am/core/v1.0/export/policies/throttle > exported-policies.zip
+      x-wso2-request: |
+        GET https://localhost:9292/api/am/core/v1.0/export/policies/throttle
+      x-wso2-response: "HTTP/1.1 200 OK\n  Connection: keep-alive\n  Content-Disposition: attachment; filename=\"exported-policies.zip\"\n  Transfer-Encoding: chunked\n  Content-Type: application/zip"
+
+      summary: Export Siddhi apps generated from throttle policies
+      description: |
+        This operation can be used to export Siddhi apps available in DB
+      parameters:
+        - $ref: '#/parameters/Accept'
+      tags:
+        - Export Configuration
+      responses:
+        200:
+          description: |
+            OK.
+            Export Policies returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            type: file
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Requested Policies does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
 #-----------------------------------------------------
 #  Retrieve API list
 #-----------------------------------------------------

@@ -45,15 +45,13 @@ public class CustomThrottlePolicyTemplateBuilder extends ThrottlePolicyTemplateB
     /**
      * Generate policy for global level.
      *
-     * @param policy policy with level 'global'. Multiple pipelines are not allowed. Can define more than one condition
-     *               as set of conditions. all these conditions should be passed as a single pipeline
      * @return policy template as a string
      * @throws APITemplateException throws if any error occurred
      */
-    public String getThrottlePolicyTemplateForCustomPolicy(CustomPolicy policy) throws APITemplateException {
+    public String getThrottlePolicyTemplateForCustomPolicy() throws APITemplateException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Generating Siddhi app for custom policy :" + policy.toString());
+            log.debug("Generating Siddhi app for custom policy :" + customPolicy.toString());
         }
 
         //get velocity template for custom throttle policy and generate the template
@@ -63,7 +61,7 @@ public class CustomThrottlePolicyTemplateBuilder extends ThrottlePolicyTemplateB
         Template template = velocityengine.getTemplate(getTemplatePathForGlobal());
         setConstantContext(context);
         //set values for velocity context
-        context.put(POLICY, policy);
+        context.put(POLICY, customPolicy);
         template.merge(context, writer);
         if (log.isDebugEnabled()) {
             log.debug("Generated Siddhi app for policy : " + writer.toString());
@@ -82,7 +80,7 @@ public class CustomThrottlePolicyTemplateBuilder extends ThrottlePolicyTemplateB
 
     @Override public Map<String, String> getThrottlePolicyTemplate() throws APITemplateException {
         try {
-            templateMap.put(customPolicy.getPolicyName(), getThrottlePolicyTemplateForCustomPolicy(customPolicy));
+            templateMap.put(customPolicy.getPolicyName(), getThrottlePolicyTemplateForCustomPolicy());
         } catch (APITemplateException e) {
             String errorMessage = "Error while creating template for Custom throttle policy.";
             log.error(errorMessage, e);

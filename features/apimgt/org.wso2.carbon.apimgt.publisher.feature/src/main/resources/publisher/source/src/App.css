@@ -1,0 +1,80 @@
+
+.custom-layout-header .ant-layout-sider-collapsed .anticon {
+    font-size: 16px;
+    margin-left: 8px;
+}
+
+.custom-layout-header .ant-layout-sider-collapsed .nav-text {
+    display: none;
+}
+
+.custom-layout-header .ant-layout-sider-collapsed .ant-menu-submenu-vertical > .ant-menu-submenu-title:after {
+    display: none;
+}
+.footer{
+    padding: 20px;
+    width: 100%;
+}
+.ant-menu-horizontal > .ant-menu-submenu.logoutLink{
+    float: right;
+}
+.brand{
+    width:70px;
+    padding-right:10px;
+}
+.brand-wrapper{
+    padding-top:10px;
+    font-size: 18px;
+    color:#fff;
+    text-indent:10px;
+    float:left;
+    width: 200px;
+    line-height: 46px;
+}
+.brand-wrapper span{
+    display: inline-block;
+    margin-top: -8px;
+    position: absolute;
+    color:#efefef;
+    text-indent: 0;
+}
+#components-form-demo-normal-login .login-form {
+    max-width: 300px;
+}
+#components-form-demo-normal-login .login-form-forgot {
+    float: right;
+}
+#components-form-demo-normal-login .login-form-button {
+    width: 100%;
+}
+div.ant-layout-sider{
+    background: none;
+}
+span.ant-layout-sider-zero-width-trigger{
+    top:0;
+}
+
+.logo a{
+    float: left;
+    display: flex;
+    align-items: center;
+}
+.logo a span{
+    font-size: 16px;
+}
+
+.custom-menu{
+    border-bottom: none;
+    line-height: 44px;
+    background: none;
+}
+.custom-menu > .ant-menu-item, .custom-menu > .ant-menu-submenu{
+    float: right;
+}
+.custom-header{
+    background: #fff;
+    padding: 0 20px;
+    height: 45px;
+    line-height: 45px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.2);
+}

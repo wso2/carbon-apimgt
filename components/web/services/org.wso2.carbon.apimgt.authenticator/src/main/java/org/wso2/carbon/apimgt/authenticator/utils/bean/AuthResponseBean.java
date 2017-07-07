@@ -31,6 +31,7 @@ public class AuthResponseBean {
     private String createdDate;
     private String authUser;
     private String idToken;
+    private String partialToken;
 
     public boolean isTokenValid() {
         return isTokenValid;
@@ -86,5 +87,13 @@ public class AuthResponseBean {
 
     public void setIdToken(String idToken) {
         this.idToken = idToken;
+    }
+
+    public String getPartialToken() {
+        return partialToken;
+    }
+
+    public void setPartialToken(String partialToken) {
+        this.partialToken = partialToken;
     }
 }

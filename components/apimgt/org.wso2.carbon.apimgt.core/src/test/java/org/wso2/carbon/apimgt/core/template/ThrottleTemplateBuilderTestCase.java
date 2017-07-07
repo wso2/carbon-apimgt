@@ -49,7 +49,7 @@ public class ThrottleTemplateBuilderTestCase {
     public void testSiddiQueryForApp() throws APITemplateException {
         ApplicationPolicy policy = SampleTestObjectCreator.createDefaultApplicationPolicy();
         ApplicationThrottlePolicyTemplateBuilder templateBuilder = new ApplicationThrottlePolicyTemplateBuilder(policy);
-        String siddhiQuery = templateBuilder.getThrottlePolicyForAppLevel(policy);
+        String siddhiQuery = templateBuilder.getThrottlePolicyForAppLevel();
         String sampleQuery = SampleTestObjectCreator.createDefaultSiddhiAppforAppPolicy();
         Assert.assertEquals(siddhiQuery, sampleQuery);
     }
@@ -59,7 +59,7 @@ public class ThrottleTemplateBuilderTestCase {
         SubscriptionPolicy policy = SampleTestObjectCreator.createDefaultSubscriptionPolicy();
         SubscriptionThrottlePolicyTemplateBuilder templateBuilder = new SubscriptionThrottlePolicyTemplateBuilder(
                 policy);
-        String siddhiQuery = templateBuilder.getThrottlePolicyForSubscriptionLevel(policy);
+        String siddhiQuery = templateBuilder.getThrottlePolicyForSubscriptionLevel();
         String sampleQuery = SampleTestObjectCreator.createDefaultSiddhiAppforSubscriptionPolicy();
         Assert.assertEquals(siddhiQuery, sampleQuery);
     }
@@ -69,7 +69,7 @@ public class ThrottleTemplateBuilderTestCase {
         CustomPolicy policy = SampleTestObjectCreator.createDefaultCustomPolicy();
         CustomThrottlePolicyTemplateBuilder templateBuilder = new CustomThrottlePolicyTemplateBuilder(
                 policy);
-        String siddhiQuery = templateBuilder.getThrottlePolicyTemplateForCustomPolicy(policy);
+        String siddhiQuery = templateBuilder.getThrottlePolicyTemplateForCustomPolicy();
         String sampleQuery = SampleTestObjectCreator.createDefaultCustomPolicySiddhiApp();
         Assert.assertEquals(siddhiQuery, sampleQuery);
     }

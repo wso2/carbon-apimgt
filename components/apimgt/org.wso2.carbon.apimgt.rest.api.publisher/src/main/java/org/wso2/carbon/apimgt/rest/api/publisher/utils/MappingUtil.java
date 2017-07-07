@@ -387,7 +387,7 @@ public class MappingUtil {
         subscriptionDTO.setSubscriptionStatus(
                 SubscriptionDTO.SubscriptionStatusEnum.fromValue(subscription.getStatus().toString()));
         subscriptionDTO.setApplicationInfo(toApplicationDto(subscription.getApplication()));
-        subscriptionDTO.setSubscriptionTier(subscription.getPolicy().getPolicyName());
+        subscriptionDTO.setPolicy(subscription.getPolicy().getPolicyName());
         return subscriptionDTO;
     }
 
