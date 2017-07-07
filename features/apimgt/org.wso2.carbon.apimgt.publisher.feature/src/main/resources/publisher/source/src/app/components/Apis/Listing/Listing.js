@@ -25,7 +25,7 @@ import API from '../../../data/api.js'
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import {Link} from 'react-router-dom'
-import {Table, Icon, Menu, Dropdown, Button, Row} from 'antd';
+import {Table, Icon, Menu, Dropdown, Button, Row, Col} from 'antd';
 
 const columns = [{
     title: 'Name',
@@ -44,17 +44,7 @@ const columns = [{
 }, {
     title: 'Action',
     key: 'action',
-    render: (text, record) => (
-        <span>
-      <a href="#">Action 一 {record.name}</a>
-      <span className="ant-divider"/>
-      <a href="#">Delete</a>
-      <span className="ant-divider"/>
-      <a href="#" className="ant-dropdown-link">
-        More actions <Icon type="down"/>
-      </a>
-    </span>
-    ),
+    render: (text, record) => <Link to=""><Icon type="delete"/> Delete</Link>,
 }];
 
 const menu = (
@@ -106,25 +96,27 @@ class Listing extends React.Component {
             return <ResourceNotFound/>
         }
         return (
-            <div className="container-fluid">
+            <div>
                 <div className="api-add-links">
                     <Dropdown overlay={menu} placement="topRight">
                         <Button shape="circle" icon="plus"/>
                     </Dropdown>
                 </div>
-                <h2 className="api-heading">
-                    All APIs
-                    <span>All APIs visible to this account</span>
-                </h2>
-                <ButtonGroup className="api-type-selector">
-                    <Button type="default" icon="bars" onClick={() => this.setListType('list')}/>
-                    <Button type="default" icon="appstore" onClick={() => this.setListType('grid')}/>
-                </ButtonGroup>
-                <div style={{clear: "both"}}></div>
+                <div className="flex-container">
+                    <h2>All APIs</h2>
+                    <ButtonGroup className="api-type-selector">
+                        <Button type="default" icon="bars" onClick={() => this.setListType('list')}/>
+                        <Button type="default" icon="appstore" onClick={() => this.setListType('grid')}/>
+                    </ButtonGroup>
+                </div>
                 {
                     this.state.apis ?
                         this.state.listType === "list" ?
-                            <Table columns={columns} dataSource={this.state.apis.list}/>
+                            <Row type="flex" justify="start">
+                                <Col span={24}>
+                                    <Table columns={columns} dataSource={this.state.apis.list} bordered style={{margin:'10px'}}/>
+                                </Col>
+                            </Row>
                             : <Row type="flex" justify="start">
                             {this.state.apis.list.map((api, i) => {
                                 return <ApiThumb key={api.id} listType={this.state.listType} api={api}/>
