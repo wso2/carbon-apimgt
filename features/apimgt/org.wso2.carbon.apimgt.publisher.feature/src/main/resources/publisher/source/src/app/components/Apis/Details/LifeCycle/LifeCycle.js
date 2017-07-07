@@ -19,9 +19,10 @@
 import React, {Component} from 'react'
 import Api from '../../../../data/api'
 import LifeCycleUpdate from './LifeCycleUpdate'
-import Loading from "../../../Base/Loading/Loading";
-import LifeCycleHistory from "./LifeCycleHistory";
-import {Card, Col, Row} from 'antd';
+import Loading from "../../../Base/Loading/Loading"
+import LifeCycleHistory from "./LifeCycleHistory"
+import Policies from "./Policies"
+import {Card, Col, Row} from 'antd'
 
 class LifeCycle extends Component {
     constructor(props) {
@@ -45,7 +46,7 @@ class LifeCycle extends Component {
         Promise.all([promised_api, promised_tiers, promised_lcState, promised_lcHistory, promised_labels])
             .then(response => {
                 let [api, tiers, lcState, lcHistory, labels] = response.map(data => data.obj);
-                this.setState({api: api, tiers: tiers, lcState: lcState, lcHistory: lcHistory, labels: labels});
+                this.setState({api: api, policies: tiers, lcState: lcState, lcHistory: lcHistory, labels: labels});
             });
     }
 
@@ -58,6 +59,11 @@ class LifeCycle extends Component {
                             <Card title="Change Lifecycle" bordered={false} style={{margin: '5px'}}>
                                 <LifeCycleUpdate handleUpdate={this.updateData} lcState={this.state.lcState}
                                                  api={this.state.api}/>
+                            </Card>
+                        </Col>
+                        <Col span={12}>
+                            <Card title="Change policy" bordered={false} style={{margin: '5px'}}>
+                                <Policies policies={this.state.policies} api={this.state.api} />
                             </Card>
                         </Col>
                     </Row>

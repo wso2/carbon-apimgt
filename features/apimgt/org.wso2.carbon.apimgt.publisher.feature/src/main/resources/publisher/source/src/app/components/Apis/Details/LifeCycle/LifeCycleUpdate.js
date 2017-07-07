@@ -15,6 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+'use strict';
 
 import React, {Component} from 'react'
 import TransitionStateButton from "./TransitionStateButton";
@@ -31,7 +32,7 @@ export default class LifeCycleUpdate extends Component {
         this.handleCheckItem = this.handleCheckItem.bind(this);
         this.api = new API();
         this.state = {
-            checkedItems: ''
+            checkedItems: []
         }
     }
 
@@ -40,8 +41,9 @@ export default class LifeCycleUpdate extends Component {
         let promisedUpdate;
         const newState = event.target.value;
         const apiUUID = this.props.api.id;
-        if (this.state.checkedItems !== '') {
-            promisedUpdate = this.api.updateLcState(apiUUID, newState, this.state.checkedItems);
+        const lifecycleChecklist = this.state.checkedItems.map(item => (item + ":true"));
+        if (this.state.checkedItems.length > 0) {
+            promisedUpdate = this.api.updateLcState(apiUUID, newState, lifecycleChecklist);
         } else {
             promisedUpdate = this.api.updateLcState(apiUUID, newState);
         }
@@ -52,14 +54,19 @@ export default class LifeCycleUpdate extends Component {
         })
     }
 
-    handleCheckItem(event) {
-        event.preventDefault();
+    handleCheckItem(checkedItems) {
+        this.setState({checkedItems: checkedItems});
     }
 
     render() {
         const {lcState, api} = this.props;
         const is_workflow_pending = api.workflowStatus.toLowerCase() === "pending";
-        const checkList = lcState.checkItemBeanList.map(item => ({label: item.name, value: item.value}));
+        const checkList = [];
+        const checkedItems = [];
+        for (let item of lcState.checkItemBeanList) {
+            checkList.push({label: item.name, value: item.name});
+            item.value && checkedItems.push(item.name);
+        }
         return (
             <div>
                 {
@@ -82,9 +89,10 @@ export default class LifeCycleUpdate extends Component {
                         )
                 }
                 {
-                    !is_workflow_pending && <CheckboxGroup options={checkList} onChange={this.handleCheckItem}/>
+                    !is_workflow_pending &&
+                    <CheckboxGroup options={checkList} defaultValue={checkedItems} onChange={this.handleCheckItem}/>
                 }
-                <ButtonGroup onChange={this.updateLifeCycleState}>
+                <ButtonGroup style={{margin: "5px"}} onChange={this.updateLifeCycleState}>
                     {
                         is_workflow_pending ?
                             (

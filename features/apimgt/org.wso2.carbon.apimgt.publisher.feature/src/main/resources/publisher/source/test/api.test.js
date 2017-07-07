@@ -27,6 +27,7 @@ describe('Api',
     function () {
         before(function (done) {
             TestUtils.userLogin().then((response) => {
+                document.clearCookies();
                 for (let cookie of response.headers["set-cookie"]) {
                     document.cookie = cookie.split(';')[0];
                 }
