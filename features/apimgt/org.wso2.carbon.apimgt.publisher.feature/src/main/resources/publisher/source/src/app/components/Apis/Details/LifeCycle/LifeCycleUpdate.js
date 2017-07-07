@@ -92,7 +92,7 @@ export default class LifeCycleUpdate extends Component {
                     !is_workflow_pending &&
                     <CheckboxGroup options={checkList} defaultValue={checkedItems} onChange={this.handleCheckItem}/>
                 }
-                <ButtonGroup onChange={this.updateLifeCycleState}>
+                <ButtonGroup style={{margin: "5px"}} onChange={this.updateLifeCycleState}>
                     {
                         is_workflow_pending ?
                             (

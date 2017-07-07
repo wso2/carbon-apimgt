@@ -18,47 +18,60 @@
 'use strict';
 
 import React, {Component} from 'react'
+import API from '../../../../data/api'
 
-import {Select} from 'antd';
+import {Select, Button, message} from 'antd';
 const Option = Select.Option;
 
 export default class Policies extends Component {
     constructor() {
         super();
+        this.state = {loading: false, selectedPolicies: []};
         this.handleChange = this.handleChange.bind(this);
+        this.changeTiers = this.changeTiers.bind(this);
+        this.api = new API();
     }
 
-    handleChange(event) {
-        debugger;
+    handleChange(data) {
+        this.setState({selectedPolicies: data});
+    }
+
+    changeTiers(event) {
+        this.setState({loading: true});
+        const api_uuid = this.props.api.id;
+        let promisedApi = this.api.get(api_uuid);
+        promisedApi.then(response => {
+            let api_data = JSON.parse(response.data);
+            api_data.policies = this.state.selectedPolicies;
+            let promised_update = this.api.update(api_data);
+            promised_update.then(response => {
+                this.setState({loading: false});
+                message.info("Lifecycle state updated successfully");
+            })
+        });
     }
 
     render() {
-        const policies = [], currentPolicies = [];
-        for (let policy of this.props.policies) {
-            policies.push(<Option key={policy.policyName}>{policy.displayName}</Option>);
-            policy.isDeployed && currentPolicies.push(policy.name);
-        }
-        /*const children = [];
-         for (let i = 10; i < 36; i++) {
-         children.push(<Option key={i.toString(36) + i}>{i.toString(36) + i}</Option>);
-         }*/
-        let props = {
+        const currentPolicies = this.props.api.policies;
+        const policies = this.props.policies.map(
+            policy => <Option key={policy.policyName}>{policy.displayName}</Option>);
+        const props = {
             mode: "multiple",
             style: {width: '100%'},
             placeholder: "Please select",
-            onChange: this.handleChange
+            onChange: this.handleChange,
+            defaultValue: currentPolicies
         };
         return (
-            <div className="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+
+            <div>
                 <Select {...props}>
                     {policies}
                 </Select>
-                <button id="update-tiers-button" type="button" data-resource-path="/apis/{apiId}"
-                        data-resource-method="put" className="btn btn-primary">Update
-                </button>
+                <Button style={{margin: "5px"}} type="primary" loading={this.state.loading}
+                        onClick={this.changeTiers}>Update</Button>
             </div>
 
-        )
-            ;
+        );
     }
 }

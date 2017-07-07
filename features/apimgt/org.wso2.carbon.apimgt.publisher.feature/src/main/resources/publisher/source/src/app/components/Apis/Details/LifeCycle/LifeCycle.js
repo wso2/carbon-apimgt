@@ -19,10 +19,10 @@
 import React, {Component} from 'react'
 import Api from '../../../../data/api'
 import LifeCycleUpdate from './LifeCycleUpdate'
-import Loading from "../../../Base/Loading/Loading";
-import LifeCycleHistory from "./LifeCycleHistory";
-import Policies from "./Policies";
-import {Card, Col, Row} from 'antd';
+import Loading from "../../../Base/Loading/Loading"
+import LifeCycleHistory from "./LifeCycleHistory"
+import Policies from "./Policies"
+import {Card, Col, Row} from 'antd'
 
 class LifeCycle extends Component {
     constructor(props) {
@@ -63,7 +63,7 @@ class LifeCycle extends Component {
                         </Col>
                         <Col span={12}>
                             <Card title="Change policy" bordered={false} style={{margin: '5px'}}>
-                                <Policies policies={this.state.policies}/>
+                                <Policies policies={this.state.policies} api={this.state.api} />
                             </Card>
                         </Col>
                     </Row>
