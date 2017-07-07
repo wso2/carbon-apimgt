@@ -47,15 +47,13 @@ public class ApplicationThrottlePolicyTemplateBuilder extends ThrottlePolicyTemp
     /**
      * Generate application level policy.
      *
-     * @param policy policy with level 'app'. Multiple pipelines are not allowed. Can define more than one condition
-     *               as set of conditions. all these conditions should be passed as a single pipeline
      * @return throttle policies for app level
      * @throws APITemplateException throws if generation failure occur
      */
-    public String getThrottlePolicyForAppLevel(ApplicationPolicy policy) throws APITemplateException {
+    public String getThrottlePolicyForAppLevel() throws APITemplateException {
 
         if (log.isDebugEnabled()) {
-            log.debug("Generating Siddhi app for appLevel :" + policy.toString());
+            log.debug("Generating Siddhi app for appLevel :" + applicationPolicy.toString());
         }
         //get velocity template for Application policy and generate the template
         StringWriter writer = new StringWriter();
@@ -64,8 +62,8 @@ public class ApplicationThrottlePolicyTemplateBuilder extends ThrottlePolicyTemp
         VelocityContext context = new VelocityContext();
         setConstantContext(context);
         //set values for velocity context
-        context.put(POLICY, policy);
-        context.put(QUOTA_POLICY, policy.getDefaultQuotaPolicy());
+        context.put(POLICY, applicationPolicy);
+        context.put(QUOTA_POLICY, applicationPolicy.getDefaultQuotaPolicy());
         template.merge(context, writer);
         if (log.isDebugEnabled()) {
             log.debug("Generated Siddhi app for policy : " + writer.toString());
@@ -85,7 +83,7 @@ public class ApplicationThrottlePolicyTemplateBuilder extends ThrottlePolicyTemp
 
     @Override public Map<String, String> getThrottlePolicyTemplate() throws APITemplateException {
         try {
-            templateMap.put(applicationPolicy.getPolicyName(), getThrottlePolicyForAppLevel(applicationPolicy));
+            templateMap.put(applicationPolicy.getPolicyName(), getThrottlePolicyForAppLevel());
         } catch (APITemplateException e) {
             String errorMessage = "Error while creating template for application throttle policy.";
             log.error(errorMessage, e);
