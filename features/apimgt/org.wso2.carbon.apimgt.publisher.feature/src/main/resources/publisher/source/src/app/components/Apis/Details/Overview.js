@@ -77,14 +77,16 @@ class Overview extends Component {
             labelCol: { span: 6 },
             wrapperCol: { span: 18 }
         };
+
         return (
+
             <div>
                 <Row type="flex" justify="center">
                     <Col span={4}>
 
                         <Card bodyStyle={{ padding: 10 }}>
                             <div className="custom-image">
-                                <img alt="API thumb" width="100%" src="http://placekitten.com/g/200/200" />
+                                <img alt="API thumb" width="100%" src="/publisher/public/images/api/api-default.png" />
                             </div>
                             <div className="custom-card">
                                 <Badge status="processing" text={this.state.api.lifeCycleStatus} />

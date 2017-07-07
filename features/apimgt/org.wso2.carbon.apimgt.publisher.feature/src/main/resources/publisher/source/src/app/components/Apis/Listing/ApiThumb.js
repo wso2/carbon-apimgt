@@ -19,6 +19,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { Card, Col,Button } from 'antd';
+const ButtonGroup = Button.Group;
 
 class ApiThumb extends React.Component {
 
@@ -26,16 +27,22 @@ class ApiThumb extends React.Component {
         let details_link = "/apis/" + this.props.api.id;
 
         return(
-            <Col span={6}>
-                <Card title={this.props.api.name} bordered={false} className="custom-card" >
-                    <p className="group inner list-group-item-text">
-                        {this.props.api.description}</p>
-                    <p className="group inner list-group-item-text">
-                        {this.props.api.version}</p>
-                    <p className="lead">
-                        {this.props.api.context}</p>
-                    <div className="card-footer">
-                    <Link to={details_link} className="btn btn-default"><Button>More details </Button></Link>
+            <Col xs={12} sm={8} md={6} lg={4} xl={3}>
+                <Card className="custom-card" bodyStyle={{ padding: 0 }}>
+                    <div className="custom-image">
+                        <img alt="example" width="100%" src="/publisher/public/images/api/api-default.png" />
+                    </div>
+                    <div className="custom-card">
+                        <h3>{this.props.api.name}</h3>
+                        <p>{this.props.api.version}</p>
+                        <p>{this.props.api.context}</p>
+                        <p className="description">{this.props.api.description}</p>
+                        <div style={{textAlign:'center'}}>
+                            <ButtonGroup>
+                                <Link to={details_link}><Button type="primary" icon="edit">More...</Button></Link>
+                                <Button type="default" icon="delete" />
+                            </ButtonGroup>
+                        </div>
                     </div>
                 </Card>
             </Col>

@@ -29,12 +29,15 @@
     position: fixed;
     bottom: 50px;
     right: 20px;
+    z-index: 99999;
 }
 .api-add-links button{
     background: #ff0000;
     color: #fff;
     width: 48px;
     height: 48px;
+    border: none;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.2);
 }
 .api-add-links button i{
     font-size: 21px;
@@ -53,21 +56,33 @@ h2 span{
 .api-heading{
     float: left;
 }
-.custom-card.ant-card{
-    margin-right:10px;
-    min-height:200px;
-    height:200px;
-    margin-bottom:10px;
-    background:#efefef;
+.ant-menu-item > a{
+    line-height: 20px;
 }
-.custom-card.ant-card .ant-card-head{
-    background: #dfdfdf;
+
+/*card*/
+.custom-card.ant-card{
+    margin:10px;
 }
 .card-footer{
     position: absolute;
     bottom: 0;
     padding: 10px 0;
 }
-.ant-menu-item > a{
-    line-height: 20px;
+.custom-card .custom-image img {
+    display: block;
+}
+.custom-card .description {
+    height: 40px;
+    min-height: 40px;
+    white-space: pre-wrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 6px;
+}
+.custom-card {
+    padding: 4px;
+}
+.custom-card p {
+    color: #999;
 }

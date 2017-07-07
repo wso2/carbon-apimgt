@@ -117,15 +117,15 @@ class Listing extends React.Component {
                     <span>All APIs visible to this account</span>
                 </h2>
                 <ButtonGroup className="api-type-selector">
-                    <Button type="primary" icon="bars" onClick={() => this.setListType('list')}/>
-                    <Button type="primary" icon="appstore" onClick={() => this.setListType('grid')}/>
+                    <Button type="default" icon="bars" onClick={() => this.setListType('list')}/>
+                    <Button type="default" icon="appstore" onClick={() => this.setListType('grid')}/>
                 </ButtonGroup>
                 <div style={{clear: "both"}}></div>
                 {
                     this.state.apis ?
                         this.state.listType === "list" ?
                             <Table columns={columns} dataSource={this.state.apis.list}/>
-                            : <Row gutter={16}>
+                            : <Row type="flex" justify="start">
                             {this.state.apis.list.map((api, i) => {
                                 return <ApiThumb key={api.id} listType={this.state.listType} api={api}/>
                             })}

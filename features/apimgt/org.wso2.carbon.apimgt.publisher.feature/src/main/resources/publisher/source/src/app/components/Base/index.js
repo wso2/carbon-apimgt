@@ -42,20 +42,22 @@ class Base extends Component {
         });
     }
 
+
+
     render() {
         return (
-            <Layout style={{height: "100vh"}}>
-                <ComposeHeader />
-                <Content style={{padding: '0 20px', background: '#fff'}}>
-                    <Layout style={{padding: '0', background: '#fff'}}>
+            <Layout>
+                <ComposeHeader/>
+                <Content style={{padding: '20px 20px 0 20px'}}>
+                    <Layout style={{padding: '0'}}>
                         {this.props.showLeftMenu ?
                             <Sider
                                 collapsed={this.state.collapsed}
                                 onCollapse={this.onCollapse}
-                                width={200} style={{padding: '20px 0', background: '#fff'}}>
+                                width={200} style={{padding: '20px 0'}}>
                                 <NavBar/>
                             </Sider> : <div/>}
-                        <Content style={{padding: '20px 0', minHeight: 280}}>
+                        <Content style={{padding: '20px 0'}}>
                             {this.props.children}
                         </Content>
                     </Layout>
