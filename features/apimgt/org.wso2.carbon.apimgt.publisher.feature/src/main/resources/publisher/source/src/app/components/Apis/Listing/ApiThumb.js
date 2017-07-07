@@ -18,7 +18,7 @@
 
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { Card, Col,Button } from 'antd';
+import { Card, Col,Button, Icon } from 'antd';
 const ButtonGroup = Button.Group;
 
 class ApiThumb extends React.Component {
@@ -27,7 +27,7 @@ class ApiThumb extends React.Component {
         let details_link = "/apis/" + this.props.api.id;
 
         return(
-            <Col xs={12} sm={8} md={6} lg={4} xl={3}>
+            <Col xs={24} sm={12} md={8} lg={6} xl={4}>
                 <Card className="custom-card" bodyStyle={{ padding: 0 }}>
                     <div className="custom-image">
                         <img alt="example" width="100%" src="/publisher/public/images/api/api-default.png" />
@@ -37,11 +37,9 @@ class ApiThumb extends React.Component {
                         <p>{this.props.api.version}</p>
                         <p>{this.props.api.context}</p>
                         <p className="description">{this.props.api.description}</p>
-                        <div style={{textAlign:'center'}}>
-                            <ButtonGroup>
-                                <Link to={details_link}><Button type="primary" icon="edit">More...</Button></Link>
-                                <Button type="default" icon="delete" />
-                            </ButtonGroup>
+                        <div className="api-action-container">
+                                <Link to={details_link}>More... <Icon type="edit"/></Link>
+                                <Button type="default" shape="circle" icon="delete" />
                         </div>
                     </div>
                 </Card>

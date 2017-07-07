@@ -106,21 +106,19 @@ class Listing extends React.Component {
             return <ResourceNotFound/>
         }
         return (
-            <div className="container-fluid">
+            <div>
                 <div className="api-add-links">
                     <Dropdown overlay={menu} placement="topRight">
                         <Button shape="circle" icon="plus"/>
                     </Dropdown>
                 </div>
-                <h2 className="api-heading">
-                    All APIs
-                    <span>All APIs visible to this account</span>
-                </h2>
-                <ButtonGroup className="api-type-selector">
-                    <Button type="default" icon="bars" onClick={() => this.setListType('list')}/>
-                    <Button type="default" icon="appstore" onClick={() => this.setListType('grid')}/>
-                </ButtonGroup>
-                <div style={{clear: "both"}}></div>
+                <div className="flex-container">
+                    <h2>All APIs</h2>
+                    <ButtonGroup className="api-type-selector">
+                        <Button type="default" icon="bars" onClick={() => this.setListType('list')}/>
+                        <Button type="default" icon="appstore" onClick={() => this.setListType('grid')}/>
+                    </ButtonGroup>
+                </div>
                 {
                     this.state.apis ?
                         this.state.listType === "list" ?
