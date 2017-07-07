@@ -78,7 +78,6 @@ class NormalLoginForm extends Component {
         });
     };
 
-    /* TODO: re-impliment referrer handling ~tmkb*/
     render() {
         const {getFieldDecorator} = this.props.form;
         const makeEmptySuffix = this.state.userNameEmpty ? <Icon type="close-circle" onClick={this.emitEmpty}/> : '';
