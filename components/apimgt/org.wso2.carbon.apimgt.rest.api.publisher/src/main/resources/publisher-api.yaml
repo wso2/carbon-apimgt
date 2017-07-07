@@ -3657,7 +3657,7 @@ definitions:
       policy:
         type: string
         example: Unlimited
-      status:
+      subscriptionStatus:
         type: string
         enum:
           - BLOCKED
