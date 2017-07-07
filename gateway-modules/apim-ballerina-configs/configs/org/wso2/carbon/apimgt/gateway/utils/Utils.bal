@@ -288,11 +288,13 @@ function getStringProperty (message msg, string propertyKey) (string) {
 
 function getJsonString (json jsonObject, string jsonPath) (string) {
     string value = "";
-    try {
-        value, err = (string)jsonObject.jsonPath;
-    } catch (errors:Error e) {
-        return "";
-    }
+
+    system:println(jsonObject);
+    system:println(jsonPath);
+    system:println(jsonObject.jsonPath);
+    system:println(291);
+    value, err = (string)jsonObject.jsonPath;
+    system:println(293);
     return value;
 }
 function fromJsonToBlockConditionDto (json event) (dto:BlockConditionDto) {

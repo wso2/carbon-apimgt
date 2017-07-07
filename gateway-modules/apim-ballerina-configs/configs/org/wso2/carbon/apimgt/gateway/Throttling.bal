@@ -22,11 +22,11 @@ function requestInterceptor (message m) (boolean, message) {
     system:println("invoking throttle interceptor");
     boolean isThrottled = isRequestThrottled(m);
     system:println("isRequestThrottled " + isThrottled);
-    return isThrottled, m;
+    return !isThrottled, m;
 }
 
 function responseInterceptor (message m) (boolean, message) {
-    system:println("response");
+    system:println("invoking response throttle interceptor");
     return true, m;
 }
 
