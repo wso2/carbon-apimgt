@@ -46,6 +46,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
@@ -543,10 +544,8 @@ public class APIFileUtils {
         return directoryNames;
     }
 
-    public static File[] searchFilesWithMatchingExtension(File folder, String extension) {
-        return folder.listFiles((dir, filename) -> {
-            return filename.endsWith("." + extension);
-        });
+    public static Collection<File> searchFilesWithMatchingExtension(File folder, String extension) {
+        return FileUtils.listFiles(folder, new String[] {extension}, true);
     }
 
     /**

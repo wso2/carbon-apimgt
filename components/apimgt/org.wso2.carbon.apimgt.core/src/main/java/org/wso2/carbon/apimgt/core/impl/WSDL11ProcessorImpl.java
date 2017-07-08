@@ -48,6 +48,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -62,7 +63,6 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
 
     private static WSDLFactory wsdlFactoryInstance;
     private boolean canProcess = false;
-    protected WSDLInfo wsdlInfo;
     
     //Fields required for processing a single wsdl
     protected Definition wsdlDefinition;
@@ -108,25 +108,27 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
         pathToDefinitionMap = new HashMap<>();
         wsdlArchiveExtractedPath = path;
         WSDLReader wsdlReader = getWsdlFactoryInstance().newWSDLReader();
-        
+
         // switch off the verbose mode
         wsdlReader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
         wsdlReader.setFeature(JAVAX_WSDL_IMPORT_DOCUMENTS, false);
         try {
             File folderToImport = new File(path);
-            File[] foundWSDLFiles = APIFileUtils.searchFilesWithMatchingExtension(folderToImport, "wsdl");
+            Collection<File> foundWSDLFiles = APIFileUtils.searchFilesWithMatchingExtension(folderToImport, "wsdl");
             for (File file : foundWSDLFiles) {
                 String absWSDLPath = file.getAbsolutePath();
                 Definition definition = wsdlReader.readWSDL(null, absWSDLPath);
-                pathToDefinitionMap.put(file.getAbsolutePath(), definition);
+                pathToDefinitionMap.put(absWSDLPath, definition);
+            }
+            if (foundWSDLFiles.size() > 0) {
+                canProcess = true;
             }
         } catch (WSDLException e) {
             //This implementation class cannot process the WSDL.
             log.debug("Cannot process the WSDL by " + this.getClass().getName(), e);
             canProcess = false;
         }
-        canProcess = true;
-        return true;
+        return canProcess;
     }
 
     public boolean canProcess() {
@@ -134,14 +136,10 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
     }
 
     public WSDLInfo getWsdlInfo() throws APIMgtWSDLException {
-        if (wsdlInfo != null) {
-            return wsdlInfo;
-        } else {
-            Map<String, String> endpointsMap = getEndpoints();
-            wsdlInfo = new WSDLInfo();
-            wsdlInfo.setEndpoints(endpointsMap);
-            wsdlInfo.setVersion(WSDL_VERSION_11);
-        }
+        Map<String, String> endpointsMap = getEndpoints();
+        WSDLInfo wsdlInfo = new WSDLInfo();
+        wsdlInfo.setEndpoints(endpointsMap);
+        wsdlInfo.setVersion(WSDL_VERSION_11);
         return wsdlInfo;
     }
 
@@ -197,9 +195,22 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
                     ExceptionCodes.UNSUPPORTED_WSDL_EXTENSIBILITY_ELEMENT);
         }
     }
-    
+
     private Map<String, String> getEndpoints() throws APIMgtWSDLException {
-        Map serviceMap = wsdlDefinition.getAllServices();
+        if (wsdlDefinition != null) {
+            return getEndpoints(wsdlDefinition);
+        } else {
+            Map<String, String> allEndpointsOfAllWSDLs = new HashMap<>();
+            for (Definition definition : pathToDefinitionMap.values()) {
+                Map<String, String> wsdlEndpoints = getEndpoints(definition);
+                allEndpointsOfAllWSDLs.putAll(wsdlEndpoints);
+            }
+            return allEndpointsOfAllWSDLs;
+        }
+    }
+
+    private Map<String, String> getEndpoints(Definition definition) throws APIMgtWSDLException {
+        Map serviceMap = definition.getAllServices();
         Iterator serviceItr = serviceMap.entrySet().iterator();
         Map<String, String> serviceEndpointMap = new HashMap<>();
         while (serviceItr.hasNext()) {
@@ -218,6 +229,7 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
         }
         return serviceEndpointMap;
     }
+    
     
     /**
      * Clear the actual service Endpoint and use Gateway Endpoint instead of the
