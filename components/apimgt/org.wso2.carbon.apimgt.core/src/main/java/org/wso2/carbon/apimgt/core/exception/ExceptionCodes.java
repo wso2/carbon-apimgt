@@ -128,7 +128,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "null"),
     LABEL_EXCEPTION(900651, "Label Error", 500, "Error occurred while retrieving label information"),
     LABEL_NOT_FOUND(900652, "Label Not Found", 404, "Label with specified name cannot be found."),
-    LABEL_NOT_FOUND_IN_API(900653, "Label Not Found In API", 404, "Label with specified name cannot be found in the API."),
+    LABEL_NOT_FOUND_IN_API(900653, "Label Not Found In API", 404, "Label with specified name" 
+            + " cannot be found in the API."),
 
     //WSDL related codes
     INVALID_WSDL_URL_EXCEPTION(900675, "Invalid WSDL", 400, "Invalid WSDL URL"),

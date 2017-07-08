@@ -23,6 +23,9 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.WSDLInfo;
 
+/**
+ * Interface class that contains the common operations for WSDL 1.1 and 2.0
+ */
 public interface WSDLProcessor {
 
     boolean init(byte[] wsdlContent) throws APIMgtWSDLException;

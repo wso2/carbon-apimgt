@@ -33,14 +33,6 @@ import org.wso2.carbon.apimgt.core.models.WSDLInfo;
 import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 import org.xml.sax.InputSource;
 
-import javax.wsdl.Definition;
-import javax.wsdl.Port;
-import javax.wsdl.Service;
-import javax.wsdl.WSDLException;
-import javax.wsdl.extensions.ExtensibilityElement;
-import javax.wsdl.factory.WSDLFactory;
-import javax.wsdl.xml.WSDLReader;
-import javax.wsdl.xml.WSDLWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -53,20 +45,30 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import javax.wsdl.Definition;
+import javax.wsdl.Port;
+import javax.wsdl.Service;
+import javax.wsdl.WSDLException;
+import javax.wsdl.factory.WSDLFactory;
+import javax.wsdl.xml.WSDLReader;
+import javax.wsdl.xml.WSDLWriter;
 
+/**
+ * This class handles WSDL 1.1 related operations
+ */
 public class WSDL11ProcessorImpl implements WSDLProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(WSDL11ProcessorImpl.class);
     private static final String JAVAX_WSDL_VERBOSE_MODE = "javax.wsdl.verbose";
     private static final String JAVAX_WSDL_IMPORT_DOCUMENTS = "javax.wsdl.importDocuments";
     private static final String WSDL_VERSION_11 = "1.1";
-    
+
     private static volatile WSDLFactory wsdlFactoryInstance;
     private boolean canProcess = false;
-    
+
     //Fields required for processing a single wsdl
     protected Definition wsdlDefinition;
-    
+
     //Fields required for processing WSDL archive
     protected Map<String, Definition> pathToDefinitionMap;
     protected String wsdlArchiveExtractedPath;
@@ -150,7 +152,7 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
     }
 
     public byte[] getUpdatedWSDL(API api, Label label) throws APIMgtWSDLException {
-        if (label!= null) {
+        if (label != null) {
             updateEndpoints(label.getAccessUrls(), api, wsdlDefinition);
             return getWSDL();
         }
@@ -180,7 +182,7 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
     /**
      * Get the addressURl from the Extensibility element
      *
-     * @param exElement - {@link ExtensibilityElement}
+     * @param exElement ExtensibilityElement
      * @return {@link String}
      * @throws APIMgtWSDLException
      */
@@ -230,8 +232,7 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
         }
         return serviceEndpointMap;
     }
-    
-    
+
     /**
      * Clear the actual service Endpoint and use Gateway Endpoint instead of the
      * actual Endpoint.
@@ -261,7 +262,7 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
     /**
      * Get the addressURl from the Extensibility element
      *
-     * @param exElement - {@link ExtensibilityElement}
+     * @param exElement - ExtensibilityElement
      * @throws APIMgtWSDLException
      */
     private void setAddressUrl(Object exElement, String endpointWithApiContext)

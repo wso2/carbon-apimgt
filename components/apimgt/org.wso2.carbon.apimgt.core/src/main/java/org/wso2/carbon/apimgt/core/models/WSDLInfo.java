@@ -18,12 +18,11 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
-import javax.wsdl.Definition;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 
+ *
  */
 public class WSDLInfo {
 

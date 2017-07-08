@@ -41,10 +41,6 @@ import org.wso2.carbon.apimgt.core.models.WSDLInfo;
 import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 import org.xml.sax.SAXException;
 
-import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -57,7 +53,14 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
+/**
+ * This class handles WSDL 2.0 related operations
+ */
 public class WSDL20ProcessorImpl implements WSDLProcessor {
 
     //Fields required for processing a single wsdl
@@ -119,7 +122,7 @@ public class WSDL20ProcessorImpl implements WSDLProcessor {
 
     @Override
     public byte[] getUpdatedWSDL(API api, Label label) throws APIMgtWSDLException {
-        if (label!= null) {
+        if (label != null) {
             updateEndpoints(label.getAccessUrls(), api, wsdlDescription);
             return getWSDL();
         }
@@ -142,7 +145,7 @@ public class WSDL20ProcessorImpl implements WSDLProcessor {
             if (foundWSDLFiles.size() > 0) {
                 canProcess = true;
             }
-        } catch (WSDLException  e) {
+        } catch (WSDLException e) {
             //This implementation class cannot process the WSDL.
             log.debug("Cannot process the WSDL by " + this.getClass().getName(), e);
             canProcess = false;
@@ -184,7 +187,7 @@ public class WSDL20ProcessorImpl implements WSDLProcessor {
         return wsdlInfo;
     }
 
-    private void setAddressUrl(EndpointElement endpoint,URI uri) {
+    private void setAddressUrl(EndpointElement endpoint, URI uri) {
         endpoint.setAddress(uri);
     }
 
@@ -240,12 +243,12 @@ public class WSDL20ProcessorImpl implements WSDLProcessor {
     }
 
     private Map<String, String> getEndpoints() throws APIMgtWSDLException {
-        if(wsdlDescription != null) {
+        if (wsdlDescription != null) {
             return getEndpoints(wsdlDescription);
         } else {
             Map<String, String> allEndpointsOfAllWSDLs = new HashMap<>();
-            for (Description description: pathToDescriptionMap.values()) {
-                Map <String, String> wsdlEndpoints = getEndpoints(description);
+            for (Description description : pathToDescriptionMap.values()) {
+                Map<String, String> wsdlEndpoints = getEndpoints(description);
                 allEndpointsOfAllWSDLs.putAll(wsdlEndpoints);
             }
             return allEndpointsOfAllWSDLs;
@@ -257,7 +260,7 @@ public class WSDL20ProcessorImpl implements WSDLProcessor {
         Map<String, String> serviceEndpointMap = new HashMap<>();
         for (Service service : services) {
             Endpoint[] endpoints = service.getEndpoints();
-            for (Endpoint endpoint: endpoints) {
+            for (Endpoint endpoint : endpoints) {
                 serviceEndpointMap.put(endpoint.getName().toString(), endpoint.getAddress().toString());
             }
         }

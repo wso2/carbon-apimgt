@@ -18,18 +18,17 @@
 
 package org.wso2.carbon.apimgt.core.impl;
 
-import org.apache.commons.io.IOUtils;
 import org.wso2.carbon.apimgt.core.api.WSDLProcessor;
 import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.util.APIMWSDLUtils;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This factory class provides WSDL 1.1 or 2.0 processor instances based on the WSDL content
+ */
 public class WSDLProcessFactory {
 
     private List<String> wsdlProcessorClasses;

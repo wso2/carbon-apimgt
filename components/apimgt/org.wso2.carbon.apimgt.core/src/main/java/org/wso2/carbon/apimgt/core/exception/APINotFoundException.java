@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.apimgt.core.exception;
 
+/**
+ * This is the custom exception class to be thrown when the user tries to access a non-existing API
+ */
 public class APINotFoundException extends APIManagementException {
     public APINotFoundException(String msg, Throwable e, ExceptionCodes code) {
         super(msg, e, code);

@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.apimgt.core.exception;
 
+/**
+ * This is the custom exception class to be thrown when an issue encountered in WSDL related operations 
+ */
 public class APIMgtWSDLException extends APIManagementException {
     public APIMgtWSDLException(String msg, Throwable e, ExceptionCodes code) {
         super(msg, e, code);
