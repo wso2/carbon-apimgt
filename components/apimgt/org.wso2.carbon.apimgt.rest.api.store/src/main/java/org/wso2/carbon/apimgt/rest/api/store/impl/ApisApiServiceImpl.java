@@ -690,9 +690,8 @@ public class ApisApiServiceImpl extends ApisApiService {
                 }
                 
                 //wsdlArchiveInfo will not be null all the time so no need null check
-                FileInputStream inputStream = new FileInputStream(
-                        new File(wsdlArchiveInfo.getAbsoluteFilePath()));
-                return Response.ok(inputStream)
+                File archive = new File(wsdlArchiveInfo.getAbsoluteFilePath());
+                return Response.ok(archive)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE)
                         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\""
                                 + wsdlArchiveInfo.getFileName() + "\"")
@@ -717,14 +716,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error("Error while getting WSDL for API:" + apiId + " and label:" + labelName, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-        } catch (FileNotFoundException e) {
-            Map<String, String> paramList = new HashMap<String, String>();
-            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(ExceptionCodes.INTERNAL_WSDL_EXCEPTION, paramList);
-            log.error("Error while getting WSDL for API:" + apiId + " and label:" + labelName, e);
-            return Response.status(ExceptionCodes.INTERNAL_WSDL_EXCEPTION.getHttpStatusCode()).entity(errorDTO)
-                    .build();
         } finally {
+            //Commented below since MSFJ fails to reply when the files are already deleted. Need to fix this properly
+            /*
             if (wsdlArchiveInfo != null) {
                 try {
                     APIFileUtils.deleteDirectory(wsdlArchiveInfo.getLocation());
@@ -733,7 +727,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                     log.warn("Error occured while deleting processed WSDL artifacts folder : " + wsdlArchiveInfo
                             .getLocation());
                 }
-            }
+            }*/
         }
     }
 

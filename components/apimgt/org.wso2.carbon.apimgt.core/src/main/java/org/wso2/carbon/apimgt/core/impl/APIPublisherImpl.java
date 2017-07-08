@@ -91,6 +91,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
+import java.nio.charset.Charset;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -237,13 +238,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         getUsername());
                 apiBuilder.associateLifecycle(lifecycleState);
 
-                /*
-                if (!StringUtils.isBlank(apiBuilder.getWsdlUri())) {
-                    WSDLProcessor processor = WSDLProcessFactory.getInstance()
-                            .getWSDLProcessor(apiBuilder.getWsdlUri());
-                    wsdlContentBytes = processor.getWSDL();
-                }*/
-
                 createUriTemplateList(apiBuilder, false);
 
                 List<UriTemplate> list = new ArrayList<>(apiBuilder.getUriTemplates().values());
@@ -314,8 +308,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
                 APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
                         "successfully.", log);
-
-                //addOrUpdateWSDL(apiBuilder.getId(), wsdlContentBytes);
 
                 // 'API_M Functions' related code
                 //Create a payload with event specific details
@@ -1461,9 +1453,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             throws APIManagementException, IOException {
         WSDLArchiveInfo archiveInfo = extractAndValidateWSDLArchive(inputStream);
 
-        if (apiBuilder.getEndpoint() == null || apiBuilder.getEndpoint().entrySet().isEmpty()) {
-            //TODO: getUniqueEndpoints from processor, get first one and assign as API's endpoints for both PROD/SAND
-        }
         String uuid = addAPI(apiBuilder);
         try (InputStream fileInputStream = new FileInputStream(archiveInfo.getAbsoluteFilePath())) {
             getApiDAO().addOrUpdateWSDLArchive(uuid, fileInputStream, getUsername());
@@ -1486,10 +1475,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             throw new APIMgtWSDLException("Unable to process WSDL by the processor " + processor.getClass().getName(),
                     ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
         }
-        
-        if (apiBuilder.getEndpoint() == null || apiBuilder.getEndpoint().entrySet().isEmpty()) {
-            //TODO: getUniqueEndpoints from processor, get first one and assign as API's endpoints for both PROD/SAND
-        }
+
         String uuid = addAPI(apiBuilder);
         getApiDAO().addOrUpdateWSDL(uuid, wsdlContent, getUsername());
         return uuid;
@@ -1501,10 +1487,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         if (!processor.canProcess()) {
             throw new APIMgtWSDLException("Unable to process WSDL by the processor " + processor.getClass().getName(),
                     ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
-        }
-
-        if (apiBuilder.getEndpoint() == null || apiBuilder.getEndpoint().entrySet().isEmpty()) {
-            //TODO: getUniqueEndpoints from processor, get first one and assign as API's endpoints for both PROD/SAND
         }
 
         String uuid = addAPI(apiBuilder);
@@ -1523,7 +1505,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
 
         getApiDAO().addOrUpdateWSDL(apiId, wsdlContent, getUsername());
-        return new String(wsdlContent);
+        return new String(wsdlContent, APIMgtConstants.ENCODING_UTF_8);
     }
 
     public void updateAPIWSDLArchive(String apiId, InputStream inputStream)

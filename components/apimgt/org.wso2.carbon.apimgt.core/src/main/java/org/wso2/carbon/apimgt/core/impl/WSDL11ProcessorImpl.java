@@ -60,23 +60,25 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
     private static final String JAVAX_WSDL_VERBOSE_MODE = "javax.wsdl.verbose";
     private static final String JAVAX_WSDL_IMPORT_DOCUMENTS = "javax.wsdl.importDocuments";
     private static final String WSDL_VERSION_11 = "1.1";
-
-    private static WSDLFactory wsdlFactoryInstance;
+    
+    private static volatile WSDLFactory wsdlFactoryInstance;
     private boolean canProcess = false;
     
     //Fields required for processing a single wsdl
     protected Definition wsdlDefinition;
-    protected byte[] wsdlContentBytes;
     
     //Fields required for processing WSDL archive
     protected Map<String, Definition> pathToDefinitionMap;
     protected String wsdlArchiveExtractedPath;
 
-
     private static WSDLFactory getWsdlFactoryInstance() throws APIMgtWSDLException {
         if (wsdlFactoryInstance == null) {
             try {
-                wsdlFactoryInstance = WSDLFactory.newInstance();
+                synchronized (WSDL11ProcessorImpl.class) {
+                    if (wsdlFactoryInstance == null) {
+                        wsdlFactoryInstance = WSDLFactory.newInstance();
+                    }
+                }
             } catch (WSDLException e) {
                 throw new APIMgtWSDLException("Error while instantiating WSDL 1.1 factory", e,
                         ExceptionCodes.ERROR_WHILE_INITIALIZING_WSDL_FACTORY);
@@ -93,7 +95,6 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
         wsdlReader.setFeature(JAVAX_WSDL_IMPORT_DOCUMENTS, false);
         try {
             wsdlDefinition = wsdlReader.readWSDL(null, new InputSource(new ByteArrayInputStream(wsdlContent)));
-            wsdlContentBytes = wsdlContent;
             canProcess = true;
         } catch (WSDLException e) {
             //This implementation class cannot process the WSDL.
@@ -153,16 +154,16 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
             updateEndpoints(label.getAccessUrls(), api, wsdlDefinition);
             return getWSDL();
         }
-        return null;
+        return new byte[0];
     }
 
     @Override
     public String getUpdatedWSDLPath(API api, Label label) throws APIMgtWSDLException {
         if (label != null) {
-            for (String path : pathToDefinitionMap.keySet()) {
-                Definition definition = pathToDefinitionMap.get(path);
+            for (Map.Entry<String, Definition> entry : pathToDefinitionMap.entrySet()) {
+                Definition definition = entry.getValue();
                 updateEndpoints(label.getAccessUrls(), api, definition);
-                try (FileOutputStream wsdlFileOutputStream = new FileOutputStream(new File(path))) {
+                try (FileOutputStream wsdlFileOutputStream = new FileOutputStream(new File(entry.getKey()))) {
                     WSDLWriter writer = getWsdlFactoryInstance().newWSDLWriter();
                     writer.writeWSDL(definition, wsdlFileOutputStream);
                 } catch (IOException | WSDLException e) {

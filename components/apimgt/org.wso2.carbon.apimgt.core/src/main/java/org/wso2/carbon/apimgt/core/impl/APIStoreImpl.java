@@ -1254,9 +1254,15 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         Label label = getLabelDAO().getLabelByName(labelName);
 
         if (!StringUtils.isEmpty(wsdl)) {
-            WSDLProcessor processor = WSDLProcessFactory.getInstance()
-                    .getWSDLProcessor(wsdl.getBytes());
-            return new String(processor.getUpdatedWSDL(api, label));
+            WSDLProcessor processor = null;
+            try {
+                processor = WSDLProcessFactory.getInstance()
+                        .getWSDLProcessor(wsdl.getBytes(APIMgtConstants.ENCODING_UTF_8));
+                return new String(processor.getUpdatedWSDL(api, label), APIMgtConstants.ENCODING_UTF_8);
+            } catch (UnsupportedEncodingException e) {
+                throw new APIMgtWSDLException("WSDL content is not in utf-8 encoding", e,
+                        ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
+            }
         }
         return null;
     }

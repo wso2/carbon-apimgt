@@ -62,17 +62,20 @@ public class WSDL20ProcessorImpl implements WSDLProcessor {
 
     //Fields required for processing a single wsdl
     protected Description wsdlDescription;
-    protected byte[] wsdlContentBytes;
     protected boolean canProcess;
-    protected static WSDLFactory wsdlFactoryInstance;
     protected Map<String, Description> pathToDescriptionMap;
     protected String wsdlArchiveExtractedPath;
+    private static volatile WSDLFactory wsdlFactoryInstance;
     private static final Logger log = LoggerFactory.getLogger(WSDL20ProcessorImpl.class);
     private static final String WSDL_VERSION_20 = "2.0";
 
     private static WSDLFactory getWsdlFactoryInstance() throws WSDLException {
-        if (null == wsdlFactoryInstance) {
-            wsdlFactoryInstance = WSDLFactory.newInstance();
+        if (wsdlFactoryInstance == null) {
+            synchronized (WSDL20ProcessorImpl.class) {
+                if (wsdlFactoryInstance == null) {
+                    wsdlFactoryInstance = WSDLFactory.newInstance();
+                }
+            }
         }
         return wsdlFactoryInstance;
     }
@@ -91,7 +94,6 @@ public class WSDL20ProcessorImpl implements WSDLProcessor {
             WSDLSource wsdlSource = reader.createWSDLSource();
             wsdlSource.setSource(domElement);
             wsdlDescription = reader.readWSDL(wsdlSource);
-            wsdlContentBytes = wsdlContent;
             canProcess = true;
         } catch (WSDLException | ParserConfigurationException | SAXException | IOException e) {
             //This implementation class cannot process the WSDL.
@@ -121,7 +123,7 @@ public class WSDL20ProcessorImpl implements WSDLProcessor {
             updateEndpoints(label.getAccessUrls(), api, wsdlDescription);
             return getWSDL();
         }
-        return null;
+        return new byte[0];
     }
 
     @Override
@@ -151,10 +153,10 @@ public class WSDL20ProcessorImpl implements WSDLProcessor {
     @Override
     public String getUpdatedWSDLPath(API api, Label label) throws APIMgtWSDLException {
         if (label != null) {
-            for (String path : pathToDescriptionMap.keySet()) {
-                Description description = pathToDescriptionMap.get(path);
+            for (Map.Entry<String, Description> entry : pathToDescriptionMap.entrySet()) {
+                Description description = entry.getValue();
                 updateEndpoints(label.getAccessUrls(), api, description);
-                try (FileOutputStream wsdlFileOutputStream = new FileOutputStream(new File(path))) {
+                try (FileOutputStream wsdlFileOutputStream = new FileOutputStream(new File(entry.getKey()))) {
                     WSDLWriter writer = getWsdlFactoryInstance().newWSDLWriter();
                     writer.writeWSDL(description.toElement(), wsdlFileOutputStream);
                 } catch (IOException | WSDLException e) {

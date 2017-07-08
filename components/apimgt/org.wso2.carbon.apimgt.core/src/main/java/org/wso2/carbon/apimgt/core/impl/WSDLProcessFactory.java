@@ -33,7 +33,7 @@ import java.util.List;
 public class WSDLProcessFactory {
 
     private List<String> wsdlProcessorClasses;
-    private static WSDLProcessFactory instance;
+    private static volatile WSDLProcessFactory instance;
 
     private WSDLProcessFactory() {
         wsdlProcessorClasses = new ArrayList<>();
@@ -43,7 +43,11 @@ public class WSDLProcessFactory {
 
     public static WSDLProcessFactory getInstance() {
         if (instance == null) {
-            instance = new WSDLProcessFactory();
+            synchronized (WSDLProcessFactory.class) {
+                if (instance == null) {
+                    instance = new WSDLProcessFactory();
+                }
+            }
         }
         return instance;
     }
