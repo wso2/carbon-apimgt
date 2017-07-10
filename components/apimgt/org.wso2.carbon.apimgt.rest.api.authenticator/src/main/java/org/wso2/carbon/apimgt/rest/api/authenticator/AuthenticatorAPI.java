@@ -20,18 +20,23 @@ package org.wso2.carbon.apimgt.rest.api.authenticator;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.APIMConfigurationService;
+import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.models.APIMConfigurations;
 import org.wso2.carbon.apimgt.rest.api.authenticator.constants.AuthenticatorConstants;
 import org.wso2.carbon.apimgt.rest.api.authenticator.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.authenticator.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.authenticator.utils.AuthUtil;
 import org.wso2.carbon.apimgt.rest.api.authenticator.utils.bean.AuthResponseBean;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.rest.api.authenticator.utils.bean.EnvironmentConfigBean;
 import org.wso2.carbon.apimgt.rest.api.common.APIConstants;
 import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.formparam.FormDataParam;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -99,13 +104,16 @@ public class AuthenticatorAPI implements Microservice {
 
             // The access token is stored as two cookies in client side. One is a normal cookie and other is a http
             // only cookie. Hence we need to split the access token
+            APIMConfigurations environmentConfigurations = APIMConfigurationService.getInstance().getApimConfigurations();
             String part1 = accessToken.substring(0, accessToken.length() / 2);
             String part2 = accessToken.substring(accessToken.length() / 2);
             NewCookie cookieWithAppContext = AuthUtil
-                    .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_1, part1, appContext, true, false, "");
+                    .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_1 + "_" + environmentConfigurations.getEnvironmentName(),
+                            part1, appContext, true, false, "");
             authResponseBean.setPartialToken(part1);
             NewCookie httpOnlyCookieWithAppContext = AuthUtil
-                    .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_2, part2, appContext, true, true, "");
+                    .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_2 + "_" + environmentConfigurations.getEnvironmentName(),
+                            part2, appContext, true, true, "");
             NewCookie restAPIContextCookie = AuthUtil
                     .cookieBuilder(APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J, part2, restAPIContext, true, true,
                             "");
@@ -197,6 +205,19 @@ public class AuthenticatorAPI implements Microservice {
         errorDTO.setMessage(ExceptionCodes.INVALID_AUTHORIZATION_HEADER.getErrorMessage());
         return Response.status(Response.Status.UNAUTHORIZED).entity(errorDTO).build();
 
+    }
+
+    @GET
+    @Produces (MediaType.APPLICATION_JSON)
+    @Path ("/infoenv")
+    public Response configInfo () {
+
+        APIMConfigurations environmentConfigurations = APIMConfigurationService.getInstance().getApimConfigurations();
+        EnvironmentConfigBean environmentConfigBean = new EnvironmentConfigBean();
+
+        environmentConfigBean.setEnvironments(environmentConfigurations.getEnvironments());
+
+        return Response.ok(environmentConfigBean, MediaType.APPLICATION_JSON).build();
     }
 
 }
