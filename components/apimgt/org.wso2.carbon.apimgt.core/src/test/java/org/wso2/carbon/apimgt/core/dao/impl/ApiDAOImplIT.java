@@ -898,9 +898,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         testAddGetEndpoint();
         apiDAO.addAPI(api);
 
-        HashMap permissionMap = new HashMap();
-        permissionMap.put(APIMgtConstants.Permission.UPDATE, APIMgtConstants.Permission.UPDATE_PERMISSION);
-        builder = SampleTestObjectCreator.createAlternativeAPI().permissionMap(permissionMap);
+        builder = SampleTestObjectCreator.createAlternativeAPI();
         API substituteAPI = builder.build();
 
         apiDAO.updateAPI(api.getId(), substituteAPI);
@@ -1503,9 +1501,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API api = builder.build();
         testAddGetEndpoint();
         apiDAO.addAPI(api);
-        Map permissionMap = new HashMap();
-        permissionMap.put(APIMgtConstants.Permission.UPDATE, APIMgtConstants.Permission.UPDATE_PERMISSION);
-        builder = SampleTestObjectCreator.createAlternativeAPI().permissionMap(permissionMap).wsdlUri(null);
+        builder = SampleTestObjectCreator.createAlternativeAPI().wsdlUri(null);
         API substituteAPI = builder.build();
         apiDAO.updateAPI(api.getId(), substituteAPI);
         API apiFromDB = apiDAO.getAPI(api.getId());
