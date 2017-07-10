@@ -403,7 +403,7 @@ public interface APIPublisher extends APIManager {
     void saveSwagger20Definition(String apiId, String jsonText) throws APIManagementException;
 
     /**
-     * Returns the WSDL of a given API UUID as {@link String}
+     * Returns the WSDL of a given API UUID as {@link String}.
      * 
      * @param apiId API UUID
      * @return WSDL of the API as {@link String}
@@ -411,22 +411,71 @@ public interface APIPublisher extends APIManager {
      */
     String getAPIWSDL(String apiId) throws APIMgtDAOException;
 
+    /**
+     * Returns an stream from the ZIP wsdl archive of a particular API stored in DB.
+     * 
+     * @param apiId UUID of API
+     * @return an stream from the ZIP wsdl archive of a particular API stored in DB
+     * @throws APIMgtDAOException
+     */
     InputStream getAPIWSDLArchive(String apiId) throws APIMgtDAOException;
-    
+
+    /**
+     * Creates an API using a WSDL archive stream.
+     * 
+     * @param apiBuilder {@code APIBuilder} instance
+     * @param inputStream WSDL archive stream
+     * @return UUID of the created API
+     * @throws APIManagementException If fails to add the API
+     */
     String addAPIFromWSDLArchive(API.APIBuilder apiBuilder, InputStream inputStream)
-            throws APIManagementException, IOException;
+            throws APIManagementException;
 
-    String addAPIFromWSDLFile(API.APIBuilder apiBuilder, InputStream inputStream) throws APIManagementException,
-            IOException;
+    /**
+     * Creates an API using a WSDL file.
+     *
+     * @param apiBuilder {@code APIBuilder} instance
+     * @param inputStream WSDL archive stream
+     * @return UUID of the created API
+     * @throws APIManagementException If fails to add the API
+     */
+    String addAPIFromWSDLFile(API.APIBuilder apiBuilder, InputStream inputStream) throws APIManagementException;
 
+    /**
+     * Creates an API using a WSDL URL.
+     *
+     * @param apiBuilder {@code APIBuilder} instance
+     * @param wsdlUrl WSDL URL
+     * @return UUID of the created API
+     * @throws APIManagementException If fails to add the API
+     * @throws IOException Error occurs while accessing the URL
+     */
     String addAPIFromWSDLURL(API.APIBuilder apiBuilder, String wsdlUrl) throws APIManagementException,
             IOException;
 
+    /**
+     * Updates a WSDL (single file) of an API.
+     * 
+     * @param apiId UUID of API
+     * @param inputStream WSDL file stream
+     * @return updated WSDL content
+     * @throws APIMgtDAOException If data layer error occurs while updating the WSDL
+     * @throws APIMgtWSDLException If WSDL content error occurs while updating the WSDL
+     */
     String updateAPIWSDL(String apiId, InputStream inputStream)
-            throws APIMgtDAOException, IOException, APIMgtWSDLException;
+            throws APIMgtDAOException, APIMgtWSDLException;
 
+    /**
+     * Updates a WSDL archive of an API.
+     *
+     * @param apiId UUID of API
+     * @param inputStream WSDL file stream
+     * @throws APIMgtDAOException If data layer error occurs while updating the WSDL
+     * @throws APIMgtWSDLException If WSDL content error occurs while updating the WSDL
+     */
     void updateAPIWSDLArchive(String apiId, InputStream inputStream)
-            throws APIMgtDAOException, IOException, APIMgtWSDLException;
+            throws APIMgtDAOException, APIMgtWSDLException;
+
     /**
      * Get list of policies of an particular tier level.
      *

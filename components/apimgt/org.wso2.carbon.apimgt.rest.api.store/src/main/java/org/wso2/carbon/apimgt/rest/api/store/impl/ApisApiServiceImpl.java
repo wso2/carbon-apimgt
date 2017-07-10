@@ -672,6 +672,19 @@ public class ApisApiServiceImpl extends ApisApiService {
         }
     }
 
+    /**
+     * Retrieves the WSDL of the particular API. If the WSDL is added as a single file/URL, the text content of the WSDL
+     * will be retrived. If the WSDL is added as an archive, the binary content of the archive will be retrieved.
+     * 
+     * @param apiId UUID of API
+     * @param labelName Name of the label
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param request msf4j request
+     * @return WSDL archive/file content
+     * @throws NotFoundException
+     */
     @Override
     public Response apisApiIdWsdlGet(String apiId, String labelName, String accept, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {

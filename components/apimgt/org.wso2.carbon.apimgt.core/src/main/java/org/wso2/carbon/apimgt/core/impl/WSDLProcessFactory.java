@@ -40,6 +40,11 @@ public class WSDLProcessFactory {
         wsdlProcessorClasses.add("org.wso2.carbon.apimgt.core.impl.WSDL20ProcessorImpl");
     }
 
+    /**
+     * Returns a {@link WSDLProcessFactory} instance
+     * 
+     * @return a {@link WSDLProcessFactory} instance
+     */
     public static WSDLProcessFactory getInstance() {
         if (instance == null) {
             synchronized (WSDLProcessFactory.class) {
@@ -51,11 +56,25 @@ public class WSDLProcessFactory {
         return instance;
     }
 
+    /**
+     * Returns the appropriate WSDL 1.1 or 2.0 processor based on the content of the provided {@code wsdlUrl}.
+     * 
+     * @param wsdlUrl URL of the WSDL
+     * @return WSDL 1.1 or 2.0 processor for the provided content
+     * @throws APIMgtWSDLException If an error occurs while determining the processor
+     */
     public WSDLProcessor getWSDLProcessor(String wsdlUrl) throws APIMgtWSDLException {
         byte[] wsdlContent = APIMWSDLUtils.getWSDL(wsdlUrl);
         return getWSDLProcessor(wsdlContent);
     }
 
+    /**
+     * Returns the appropriate WSDL 1.1 or 2.0 processor based on the file path {@code wsdlPath}.
+     *
+     * @param wsdlPath File path containing WSDL files and dependant files
+     * @return WSDL 1.1 or 2.0 processor for the provided content
+     * @throws APIMgtWSDLException If an error occurs while determining the processor
+     */
     public WSDLProcessor getWSDLProcessorForPath(String wsdlPath) throws APIMgtWSDLException {
         for (String clazz : wsdlProcessorClasses) {
             WSDLProcessor processor;
@@ -76,6 +95,13 @@ public class WSDLProcessFactory {
                 ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
     }
 
+    /**
+     * Returns the appropriate WSDL 1.1 or 2.0 processor based on the content {@code wsdlContent}.
+     *
+     * @param wsdlContent Content of the WSDL
+     * @return WSDL 1.1 or 2.0 processor for the provided content
+     * @throws APIMgtWSDLException If an error occurs while determining the processor
+     */
     public WSDLProcessor getWSDLProcessor(byte[] wsdlContent) throws APIMgtWSDLException {
         for (String clazz : wsdlProcessorClasses) {
             WSDLProcessor processor;

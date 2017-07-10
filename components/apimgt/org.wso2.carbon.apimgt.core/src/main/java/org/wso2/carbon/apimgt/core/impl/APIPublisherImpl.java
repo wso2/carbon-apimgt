@@ -113,9 +113,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     private Map<String, EventObserver> eventObservers = new HashMap<>();
 
     public APIPublisherImpl(String username, IdentityProvider idp, ApiDAO apiDAO, ApplicationDAO applicationDAO,
-                            APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager
-                                    apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO, TagDAO tagDAO,
-                            GatewaySourceGenerator gatewaySourceGenerator, APIGateway apiGatewayPublisher) {
+            APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, APILifecycleManager
+            apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO, TagDAO tagDAO,
+            GatewaySourceGenerator gatewaySourceGenerator, APIGateway apiGatewayPublisher) {
         super(username, idp, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, apiLifecycleManager, labelDAO,
                 workflowDAO, tagDAO, gatewaySourceGenerator, apiGatewayPublisher);
     }
@@ -751,7 +751,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
     }
 
-
     /**
      * Create a new version of the <code>api</code>, with version <code>newVersion</code>
      *
@@ -812,7 +811,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
         return newVersionedId;
     }
-
 
     /**
      * Attach Documentation (without content) to an API
@@ -1158,7 +1156,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
     }
 
-
     /**
      * This method returns the lifecycle data for an API including current state,next states.
      *
@@ -1439,6 +1436,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
     }
 
+    @Override
     public String getAPIWSDL(String apiId) throws APIMgtDAOException {
         return getApiDAO().getWSDL(apiId);
     }
@@ -1448,14 +1446,18 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         return getApiDAO().getWSDLArchive(apiId);
     }
 
+    @Override
     public String addAPIFromWSDLArchive(API.APIBuilder apiBuilder, InputStream inputStream)
-            throws APIManagementException, IOException {
+            throws APIManagementException {
         WSDLArchiveInfo archiveInfo = extractAndValidateWSDLArchive(inputStream);
 
         String uuid = addAPI(apiBuilder);
         try (InputStream fileInputStream = new FileInputStream(archiveInfo.getAbsoluteFilePath())) {
             getApiDAO().addOrUpdateWSDLArchive(uuid, fileInputStream, getUsername());
             return uuid;
+        } catch (IOException e) {
+            throw new APIMgtWSDLException("Unable to process WSDL archive at " + archiveInfo.getAbsoluteFilePath(), e,
+                    ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
         } finally {
             try {
                 APIFileUtils.deleteDirectory(archiveInfo.getLocation());
@@ -1466,9 +1468,15 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
     }
 
-    public String addAPIFromWSDLFile(API.APIBuilder apiBuilder, InputStream inputStream) throws APIManagementException,
-            IOException {
-        byte[] wsdlContent = IOUtils.toByteArray(inputStream);
+    @Override
+    public String addAPIFromWSDLFile(API.APIBuilder apiBuilder, InputStream inputStream) throws APIManagementException {
+        byte[] wsdlContent;
+        try {
+            wsdlContent = IOUtils.toByteArray(inputStream);
+        } catch (IOException e) {
+            throw new APIMgtWSDLException("Error while converting input stream to byte array", e,
+                    ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
+        }
         WSDLProcessor processor = WSDLProcessFactory.getInstance().getWSDLProcessor(wsdlContent);
         if (!processor.canProcess()) {
             throw new APIMgtWSDLException("Unable to process WSDL by the processor " + processor.getClass().getName(),
@@ -1480,8 +1488,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         return uuid;
     }
 
-    public String addAPIFromWSDLURL(API.APIBuilder apiBuilder, String wsdlUrl) throws APIManagementException,
-            IOException {
+    @Override
+    public String addAPIFromWSDLURL(API.APIBuilder apiBuilder, String wsdlUrl) throws APIManagementException {
         WSDLProcessor processor = WSDLProcessFactory.getInstance().getWSDLProcessor(wsdlUrl);
         if (!processor.canProcess()) {
             throw new APIMgtWSDLException("Unable to process WSDL by the processor " + processor.getClass().getName(),
@@ -1494,24 +1502,36 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         return uuid;
     }
 
+    @Override
     public String updateAPIWSDL(String apiId, InputStream inputStream)
-            throws APIMgtDAOException, IOException, APIMgtWSDLException {
-        byte[] wsdlContent = IOUtils.toByteArray(inputStream);
-        WSDLProcessor processor = WSDLProcessFactory.getInstance().getWSDLProcessor(wsdlContent);
-        if (!processor.canProcess()) {
-            throw new APIMgtWSDLException("Unable to process WSDL by the processor " + processor.getClass().getName(),
-                    ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
-        }
+            throws APIMgtDAOException, APIMgtWSDLException {
+        byte[] wsdlContent;
+        try {
+            wsdlContent = IOUtils.toByteArray(inputStream);
+            WSDLProcessor processor = WSDLProcessFactory.getInstance().getWSDLProcessor(wsdlContent);
+            if (!processor.canProcess()) {
+                throw new APIMgtWSDLException(
+                        "Unable to process WSDL by the processor " + processor.getClass().getName(),
+                        ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
+            }
 
-        getApiDAO().addOrUpdateWSDL(apiId, wsdlContent, getUsername());
-        return new String(wsdlContent, APIMgtConstants.ENCODING_UTF_8);
+            getApiDAO().addOrUpdateWSDL(apiId, wsdlContent, getUsername());
+            return new String(wsdlContent, APIMgtConstants.ENCODING_UTF_8);
+        } catch (IOException e) {
+            throw new APIMgtWSDLException("Error while updating WSDL of API " + apiId, e,
+                    ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
+        }
     }
 
+    @Override
     public void updateAPIWSDLArchive(String apiId, InputStream inputStream)
-            throws APIMgtDAOException, IOException, APIMgtWSDLException {
+            throws APIMgtDAOException, APIMgtWSDLException {
         WSDLArchiveInfo archiveInfo = extractAndValidateWSDLArchive(inputStream);
         try (InputStream fileInputStream = new FileInputStream(archiveInfo.getAbsoluteFilePath())) {
             getApiDAO().addOrUpdateWSDLArchive(apiId, fileInputStream, getUsername());
+        } catch (IOException e) {
+            throw new APIMgtWSDLException("Unable to process WSDL archive at " + archiveInfo.getAbsoluteFilePath(), e,
+                    ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
         } finally {
             try {
                 APIFileUtils.deleteDirectory(archiveInfo.getLocation());
@@ -1660,7 +1680,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public void notifyObservers(Event event, String username, ZonedDateTime eventTime,
-                                Map<String, String> metaData) {
+            Map<String, String> metaData) {
 
         Set<Map.Entry<String, EventObserver>> eventObserverEntrySet = eventObservers.entrySet();
         eventObserverEntrySet.forEach(eventObserverEntry -> eventObserverEntry.getValue().captureEvent(event,
@@ -1749,6 +1769,14 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
     }
 
+    /**
+     * Extract the WSDL archive and validate
+     *
+     * @param inputStream WSDL archive input stream
+     * @return {@link WSDLArchiveInfo} object with WSDL information
+     * @throws APIMgtDAOException  If an error occurred from DAO layer
+     * @throws APIMgtWSDLException If an error occurred while processing WSDL files
+     */
     private WSDLArchiveInfo extractAndValidateWSDLArchive(InputStream inputStream)
             throws APIMgtDAOException, APIMgtWSDLException {
 

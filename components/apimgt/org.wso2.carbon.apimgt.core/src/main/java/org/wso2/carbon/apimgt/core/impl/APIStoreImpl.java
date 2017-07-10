@@ -1237,6 +1237,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         }
     }
 
+    @Override
     public String getAPIWSDL(String apiId, String labelName, boolean validateLabelInAPI)
             throws APIMgtDAOException, APIMgtWSDLException, APINotFoundException, LabelException {
         API api = getApiDAO().getAPI(apiId);
@@ -1267,6 +1268,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         return null;
     }
 
+    @Override
     public WSDLArchiveInfo getAPIWSDLArchive(String apiId, String labelName, boolean validateLabelInAPI)
             throws APIMgtDAOException, APIMgtWSDLException, APINotFoundException, LabelException {
         API api = getApiDAO().getAPI(apiId);

@@ -1192,6 +1192,18 @@ public class ApisApiServiceImpl extends ApisApiService {
         }
     }
 
+    /**
+     * Retrieves the WSDL of the particular API. If the WSDL is added as a single file/URL, the text content of the WSDL
+     * will be retrived. If the WSDL is added as an archive, the binary content of the archive will be retrieved.
+     *
+     * @param apiId UUID of API
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param request msf4j request
+     * @return WSDL archive/file content
+     * @throws NotFoundException
+     */
     @Override
     public Response apisApiIdWsdlGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince,
             Request request) throws NotFoundException {
@@ -1228,6 +1240,20 @@ public class ApisApiServiceImpl extends ApisApiService {
         }
     }
 
+    /**
+     * Updates the WSDL of an existing API. File can be uploaded as a single WSDL (.wsdl) or a zipped WSDL 
+     * archive (.zip). 
+     * 
+     * @param apiId UUID of API
+     * @param fileInputStream file content stream
+     * @param fileDetail file details
+     * @param contentType Content-Type header value
+     * @param ifMatch If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param request msf4j request
+     * @return 200 OK if upadating was successful.
+     * @throws NotFoundException
+     */
     @Override
     public Response apisApiIdWsdlPut(String apiId, InputStream fileInputStream, FileInfo fileDetail,
             String contentType, String ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
@@ -1253,11 +1279,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-        } catch (IOException e) {
-            String errorMessage = "Error while updating WSDL of API : " + apiId;
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
-            log.error(errorMessage, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
         }
     }
 
