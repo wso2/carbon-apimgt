@@ -30,11 +30,16 @@ import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.models.APIMAppConfigurations;
+import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.APIMConfigurationService;
+import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.models.APIMConfigurations;
 import org.wso2.carbon.apimgt.rest.api.authenticator.constants.AuthenticatorConstants;
 import org.wso2.carbon.apimgt.rest.api.authenticator.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.authenticator.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.authenticator.utils.AuthUtil;
 import org.wso2.carbon.apimgt.rest.api.authenticator.utils.bean.AuthResponseBean;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.rest.api.authenticator.utils.bean.EnvironmentConfigBean;
 import org.wso2.carbon.apimgt.rest.api.common.APIConstants;
 import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
@@ -44,13 +49,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
-import javax.ws.rs.Consumes;
+import javax.ws.rs.*;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
@@ -60,6 +62,7 @@ import javax.ws.rs.core.Response;
  * This class provides access token during login from store app.
  *
  */
+
 @Component(
         name = "org.wso2.carbon.apimgt.rest.api.authenticator.AuthenticatorAPI",
         service = Microservice.class,
@@ -78,7 +81,7 @@ public class AuthenticatorAPI implements Microservice {
     @Path ("/token/{appName}")
     @Produces (MediaType.APPLICATION_JSON)
     @Consumes ({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.MULTIPART_FORM_DATA })
-    public Response authenticate(@Context Request request, @PathParam("appName") String appName,
+    public Response authenticate(@Context Request request, @PathParam ("appName") String appName,
             @FormDataParam ("username") String userName, @FormDataParam ("password") String password,
             @FormDataParam ("grant_type") String grantType, @FormDataParam ("validity_period") String validityPeriod,
             @FormDataParam ("remember_me") boolean isRememberMe, @FormDataParam ("scopes") String scopesList) {
@@ -115,13 +118,16 @@ public class AuthenticatorAPI implements Microservice {
 
             // The access token is stored as two cookies in client side. One is a normal cookie and other is a http
             // only cookie. Hence we need to split the access token
+            APIMConfigurations environmentConfigurations = APIMConfigurationService.getInstance().getApimConfigurations();
             String part1 = accessToken.substring(0, accessToken.length() / 2);
             String part2 = accessToken.substring(accessToken.length() / 2);
             NewCookie cookieWithAppContext = AuthUtil
-                    .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_1, part1, appContext, true, false, "");
+                    .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_1 + "_" + environmentConfigurations.getEnvironmentName(),
+                            part1, appContext, true, false, "");
             authResponseBean.setPartialToken(part1);
             NewCookie httpOnlyCookieWithAppContext = AuthUtil
-                    .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_2, part2, appContext, true, true, "");
+                    .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_2 + "_" + environmentConfigurations.getEnvironmentName(),
+                            part2, appContext, true, true, "");
             NewCookie restAPIContextCookie = AuthUtil
                     .cookieBuilder(APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J, part2, restAPIContext, true, true,
                             "");
@@ -162,7 +168,9 @@ public class AuthenticatorAPI implements Microservice {
                                                 "").build();
             }
         } catch (APIManagementException e) {
+
             ErrorDTO errorDTO = AuthUtil.getErrorDTO(e.getErrorHandler(), null);
+
             log.error(e.getMessage(), e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
@@ -330,4 +338,17 @@ public class AuthenticatorAPI implements Microservice {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
+    @GET
+    @Produces (MediaType.APPLICATION_JSON)
+    @Path ("/infoenv")
+    public Response configInfo () {
+
+        APIMConfigurations environmentConfigurations = APIMConfigurationService.getInstance().getApimConfigurations();
+        EnvironmentConfigBean environmentConfigBean = new EnvironmentConfigBean();
+
+        environmentConfigBean.setEnvironments(environmentConfigurations.getEnvironments());
+
+        return Response.ok(environmentConfigBean, MediaType.APPLICATION_JSON).build();
+    }
+
 }
