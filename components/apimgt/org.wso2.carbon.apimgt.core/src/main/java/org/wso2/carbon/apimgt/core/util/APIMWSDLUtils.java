@@ -24,17 +24,25 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.List;
 
 /**
- * This class is used to read the WSDL file using WSDL4J library.
+ * This class contains utility functions which are required for WSDL file processing.
  */
-
 public class APIMWSDLUtils {
-    private static final int CONNECTION_TIMEOUT = 10000;
-    private static final int READ_TIMEOUT = 10000;
+    private static final int CONNECTION_TIMEOUT = 30000;
+    private static final int READ_TIMEOUT = 30000;
 
+    /**
+     * Retrieves the WSDL located in the provided URI ({@code wsdlUrl}
+     *
+     * @param wsdlUrl URL of the WSDL file
+     * @return Content bytes of the WSDL file
+     * @throws APIMgtWSDLException If an error occurred while retrieving the WSDL file
+     */
     public static byte[] getWSDL(String wsdlUrl) throws APIMgtWSDLException {
         ByteArrayOutputStream outputStream = null;
         InputStream inputStream = null;
@@ -62,4 +70,27 @@ public class APIMWSDLUtils {
             }
         }
     }
+
+    /**
+     * Prioritizes the first https endpoint. If https endpoints are not available returns the first endpoint in the
+     * {@code endpoints}
+     *
+     * @param endpoints Endpoint list
+     * @return First https endpoint in {@code endpoint} or first available endpoint
+     * @throws MalformedURLException If a URL in {@code endpoints} is invalid
+     */
+    public static String getSelectedEndpoint(List<String> endpoints) throws MalformedURLException {
+        if (endpoints.size() > 0) {
+            for (String ep : endpoints) {
+                URL url = new URL(ep);
+                if ("https".equalsIgnoreCase(url.getProtocol())) {
+                    return ep;
+                }
+            }
+        } else {
+            return endpoints.get(0);
+        }
+        return null;
+    }
+
 }

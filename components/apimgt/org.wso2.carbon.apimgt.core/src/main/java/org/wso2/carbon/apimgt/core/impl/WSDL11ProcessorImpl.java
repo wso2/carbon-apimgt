@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.WSDLInfo;
 import org.wso2.carbon.apimgt.core.util.APIFileUtils;
+import org.wso2.carbon.apimgt.core.util.APIMWSDLUtils;
 import org.xml.sax.InputSource;
 
 import java.io.ByteArrayInputStream;
@@ -39,7 +40,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -54,7 +54,7 @@ import javax.wsdl.xml.WSDLReader;
 import javax.wsdl.xml.WSDLWriter;
 
 /**
- * This class handles WSDL 1.1 related operations
+ * This class handles WSDL 1.1 related operations and it is implemented using WSDL4J.
  */
 public class WSDL11ProcessorImpl implements WSDLProcessor {
 
@@ -89,6 +89,11 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
         return wsdlFactoryInstance;
     }
 
+    /**
+     * {@inheritDoc}
+     * Will return true if the provided WSDL is of 1.1 and can be successfully parsed by WSDL4J.
+     */
+    @Override
     public boolean init(byte[] wsdlContent) throws APIMgtWSDLException {
         WSDLReader wsdlReader = getWsdlFactoryInstance().newWSDLReader();
 
@@ -106,6 +111,11 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
         return canProcess;
     }
 
+    /**
+     * {@inheritDoc}
+     * Will return true if all the provided WSDL files in the initialized path is of 1.1 and can be successfully 
+     * parsed by WSDL4J.
+     */
     @Override
     public boolean initPath(String path) throws APIMgtWSDLException {
         pathToDefinitionMap = new HashMap<>();
@@ -134,10 +144,12 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
         return canProcess;
     }
 
+    @Override
     public boolean canProcess() {
         return canProcess;
     }
 
+    @Override
     public WSDLInfo getWsdlInfo() throws APIMgtWSDLException {
         Map<String, String> endpointsMap = getEndpoints();
         WSDLInfo wsdlInfo = new WSDLInfo();
@@ -146,11 +158,25 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
         return wsdlInfo;
     }
 
+    /**
+     * {@inheritDoc}
+     * @return WSDL 1.1 content bytes
+     */
+    @Override
     public byte[] getWSDL() throws APIMgtWSDLException {
         ByteArrayOutputStream byteArrayOutputStream = getWSDLByteArrayOutputStream(wsdlDefinition);
         return byteArrayOutputStream.toByteArray();
     }
 
+    /**
+     * Updates the WSDL's endpoints based on the provided API (context) and Label (host).
+     *
+     * @param api Provided API object
+     * @param label Provided label object
+     * @return Updated WSDL 1.1 content bytes
+     * @throws APIMgtWSDLException Error while updating the WSDL
+     */
+    @Override
     public byte[] getUpdatedWSDL(API api, Label label) throws APIMgtWSDLException {
         if (label != null) {
             updateEndpoints(label.getAccessUrls(), api, wsdlDefinition);
@@ -159,6 +185,14 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
         return new byte[0];
     }
 
+    /**
+     * Updates the endpoints of all the WSDL files in the path based on the provided API (context) and Label (host).
+     *
+     * @param api Provided API object
+     * @param label Provided label object
+     * @return Updated WSDL file path
+     * @throws APIMgtWSDLException Error while updating WSDL files
+     */
     @Override
     public String getUpdatedWSDLPath(API api, Label label) throws APIMgtWSDLException {
         if (label != null) {
@@ -180,7 +214,7 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
     }
 
     /**
-     * Get the addressURl from the Extensibility element
+     * Get the addressURl from the Extensibility element.
      *
      * @param exElement ExtensibilityElement
      * @return {@link String}
@@ -199,6 +233,12 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
         }
     }
 
+    /**
+     * Get endpoints defined in WSDL file(s).
+     * 
+     * @return a Map of endpoint names and their URIs.
+     * @throws APIMgtWSDLException if error occurs while reading endpoints
+     */
     private Map<String, String> getEndpoints() throws APIMgtWSDLException {
         if (wsdlDefinition != null) {
             return getEndpoints(wsdlDefinition);
@@ -212,6 +252,13 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
         }
     }
 
+    /**
+     * Get endpoints defined in the provided WSDL definition.
+     *
+     * @param definition WSDL Definition
+     * @return a Map of endpoint names and their URIs.
+     * @throws APIMgtWSDLException if error occurs while reading endpoints
+     */
     private Map<String, String> getEndpoints(Definition definition) throws APIMgtWSDLException {
         Map serviceMap = definition.getAllServices();
         Iterator serviceItr = serviceMap.entrySet().iterator();
@@ -234,14 +281,14 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
     }
 
     /**
-     * Clear the actual service Endpoint and use Gateway Endpoint instead of the
-     * actual Endpoint.
-     * <p/>
-     * get the first api label --> get access urls
-     *
-     * @throws APIMgtWSDLException
+     * Clear the actual service endpoints in {@code definition} and use {@code selectedEndpoint} instead of 
+     * actual endpoints.
+     * 
+     * @param selectedEndpoint Endpoint which will replace the WSDL endpoints
+     * @param definition WSDL Definition
+     * @throws APIMgtWSDLException If an error occurred while updating endpoints
      */
-    private void updateEndpointUrls(String selectedEndpoint, Definition definition) throws APIMgtWSDLException {
+    private void updateEndpoints(String selectedEndpoint, Definition definition) throws APIMgtWSDLException {
         Map serviceMap = definition.getAllServices();
         for (Object service : serviceMap.entrySet()) {
             Map.Entry svcEntry = (Map.Entry) service;
@@ -260,10 +307,11 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
     }
 
     /**
-     * Get the addressURl from the Extensibility element
+     * Get the addressURl from the Extensibility element.
      *
      * @param exElement - ExtensibilityElement
-     * @throws APIMgtWSDLException
+     * @param endpointWithApiContext Endpoint (gateway host + api context) which will replace the WSDL endpoints
+     * @throws APIMgtWSDLException If an error occurred while updating endpoints
      */
     private void setAddressUrl(Object exElement, String endpointWithApiContext)
             throws APIMgtWSDLException {
@@ -281,25 +329,34 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
     }
 
     /**
-     * Read the wsdl and clean the actual service endpoint instead of that set
-     * the gateway endpoint.
+     * Updates the endpoints of the {@code definition} based on the provided {@code endpointURLs} and {@code api}.
      *
-     * @throws APIMgtWSDLException
+     * @param endpointURLs Endpoint URIs
+     * @param api Provided API object
+     * @param definition WSDL Definition
+     * @throws APIMgtWSDLException If an error occurred while updating endpoints
      */
     private void updateEndpoints(List<String> endpointURLs, API api, Definition definition) throws APIMgtWSDLException {
         String context = api.getContext().startsWith("/") ? api.getContext() : "/" + api.getContext();
         String selectedUrl;
         try {
-            selectedUrl = getSelectedEndpoint(endpointURLs) + context;
+            selectedUrl = APIMWSDLUtils.getSelectedEndpoint(endpointURLs) + context;
         } catch (MalformedURLException e) {
             throw new APIMgtWSDLException("Error while selecting endpoints for WSDL", e,
                     ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
         }
         if (!StringUtils.isBlank(selectedUrl)) {
-            updateEndpointUrls(selectedUrl, definition);
+            updateEndpoints(selectedUrl, definition);
         }
     }
 
+    /**
+     * Retrieves a {@link ByteArrayOutputStream} for provided {@link Definition}.
+     * 
+     * @param definition WSDL Definition
+     * @return A {@link ByteArrayOutputStream} for provided {@link Definition}
+     * @throws APIMgtWSDLException If an error occurs while creating {@link ByteArrayOutputStream}
+     */
     private ByteArrayOutputStream getWSDLByteArrayOutputStream(Definition definition) throws APIMgtWSDLException {
         WSDLWriter writer = getWsdlFactoryInstance().newWSDLWriter();
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -310,19 +367,5 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
                     ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
         }
         return byteArrayOutputStream;
-    }
-
-    private String getSelectedEndpoint(List<String> endpoints) throws MalformedURLException {
-        if (endpoints.size() > 0) {
-            for (String ep : endpoints) {
-                URL url = new URL(ep);
-                if ("https".equalsIgnoreCase(url.getProtocol())) {
-                    return ep;
-                }
-            }
-        } else {
-            return endpoints.get(0);
-        }
-        return null;
     }
 }

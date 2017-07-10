@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.WSDLInfo;
 import org.wso2.carbon.apimgt.core.util.APIFileUtils;
+import org.wso2.carbon.apimgt.core.util.APIMWSDLUtils;
 import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
@@ -48,7 +49,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -59,15 +59,19 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 /**
- * This class handles WSDL 2.0 related operations
+ * This class handles WSDL 2.0 related operations. This is implemented using apache woden.
  */
 public class WSDL20ProcessorImpl implements WSDLProcessor {
 
     //Fields required for processing a single wsdl
     protected Description wsdlDescription;
-    protected boolean canProcess;
+
+    //Fields required for processing a file path with multiple WSDLs (WSDL archive)
     protected Map<String, Description> pathToDescriptionMap;
     protected String wsdlArchiveExtractedPath;
+
+    //Common fields
+    protected boolean canProcess;
     private static volatile WSDLFactory wsdlFactoryInstance;
     private static final Logger log = LoggerFactory.getLogger(WSDL20ProcessorImpl.class);
     private static final String WSDL_VERSION_20 = "2.0";
@@ -83,6 +87,10 @@ public class WSDL20ProcessorImpl implements WSDLProcessor {
         return wsdlFactoryInstance;
     }
 
+    /**
+     * {@inheritDoc}
+     * Will return true if the provided WSDL is of 2.0 and can be successfully parsed by woden library.
+     */
     @Override
     public boolean init(byte[] wsdlContent) throws APIMgtWSDLException {
         try {
@@ -106,6 +114,10 @@ public class WSDL20ProcessorImpl implements WSDLProcessor {
         return canProcess;
     }
 
+    /**
+     * {@inheritDoc}
+     * @return WSDL 2.0 content bytes
+     */
     @Override
     public byte[] getWSDL() throws APIMgtWSDLException {
         WSDLWriter writer;
@@ -120,6 +132,14 @@ public class WSDL20ProcessorImpl implements WSDLProcessor {
         }
     }
 
+    /**
+     * Updates the WSDL's endpoints based on the provided API (context) and Label (host).
+     *
+     * @param api Provided API object
+     * @param label Provided label object
+     * @return Updated WSDL 2.0 content bytes
+     * @throws APIMgtWSDLException Error while updating the WSDL
+     */
     @Override
     public byte[] getUpdatedWSDL(API api, Label label) throws APIMgtWSDLException {
         if (label != null) {
@@ -129,6 +149,11 @@ public class WSDL20ProcessorImpl implements WSDLProcessor {
         return new byte[0];
     }
 
+    /**
+     * {@inheritDoc}
+     * Will return true if all the provided WSDL files in the initialized path is of 2.0 and can be successfully 
+     * parsed by woden.
+     */
     @Override
     public boolean initPath(String path) throws APIMgtWSDLException {
         pathToDescriptionMap = new HashMap<>();
@@ -153,6 +178,14 @@ public class WSDL20ProcessorImpl implements WSDLProcessor {
         return canProcess;
     }
 
+    /**
+     * Updates the endpoints of all the WSDL files in the path based on the provided API (context) and Label (host).
+     *
+     * @param api Provided API object
+     * @param label Provided label object
+     * @return Updated WSDL file path
+     * @throws APIMgtWSDLException Error while updating WSDL files
+     */
     @Override
     public String getUpdatedWSDLPath(API api, Label label) throws APIMgtWSDLException {
         if (label != null) {
@@ -187,39 +220,45 @@ public class WSDL20ProcessorImpl implements WSDLProcessor {
         return wsdlInfo;
     }
 
-    private void setAddressUrl(EndpointElement endpoint, URI uri) {
-        endpoint.setAddress(uri);
-    }
-
     /**
-     * Read the wsdl and clean the actual service endpoint instead of that set
-     * the gateway endpoint.
+     * Updates the endpoints of the {@code description} based on the provided {@code endpointURLs} and {@code api}.
      *
-     * @throws APIMgtWSDLException
+     * @param endpointURLs Endpoint URIs
+     * @param api Provided API object
+     * @param description WSDL 2.0 description
+     * @throws APIMgtWSDLException If an error occurred while updating endpoints
      */
     private void updateEndpoints(List<String> endpointURLs, API api, Description description)
             throws APIMgtWSDLException {
         String context = api.getContext().startsWith("/") ? api.getContext() : "/" + api.getContext();
         String selectedUrl;
         try {
-            selectedUrl = getSelectedEndpoint(endpointURLs) + context;
+            selectedUrl = APIMWSDLUtils.getSelectedEndpoint(endpointURLs) + context;
         } catch (MalformedURLException e) {
             throw new APIMgtWSDLException("Error while selecting endpoints for WSDL", e,
                     ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
         }
         if (!StringUtils.isBlank(selectedUrl)) {
-            updateEndpointUrls(selectedUrl, description);
+            updateEndpoints(selectedUrl, description);
         }
     }
 
-    private void updateEndpointUrls(String selectedEndpoint, Description description) throws APIMgtWSDLException {
+    /**
+     * Clear the actual service endpoints in {@code description} and use {@code selectedEndpoint} instead of 
+     * actual endpoints.
+     *
+     * @param selectedEndpoint Endpoint which will replace the WSDL endpoints
+     * @param description WSDL 2.0 description
+     * @throws APIMgtWSDLException If an error occurred while updating endpoints
+     */
+    private void updateEndpoints(String selectedEndpoint, Description description) throws APIMgtWSDLException {
         Service[] serviceMap = description.getServices();
         try {
             for (Service svc : serviceMap) {
                 Endpoint[] portMap = svc.getEndpoints();
                 for (Endpoint endpoint : portMap) {
                     EndpointElement element = endpoint.toElement();
-                    setAddressUrl(element, new URI(selectedEndpoint));
+                    element.setAddress(new URI(selectedEndpoint));
                 }
             }
         } catch (Exception e) {
@@ -227,21 +266,13 @@ public class WSDL20ProcessorImpl implements WSDLProcessor {
             log.error(errorMsg, e);
         }
     }
-
-    private String getSelectedEndpoint(List<String> endpoints) throws MalformedURLException {
-        if (endpoints.size() > 0) {
-            for (String ep : endpoints) {
-                URL url = new URL(ep);
-                if ("https".equalsIgnoreCase(url.getProtocol())) {
-                    return ep;
-                }
-            }
-        } else {
-            return endpoints.get(0);
-        }
-        return null;
-    }
-
+    
+    /**
+     * Get endpoints defined in WSDL file(s).
+     *
+     * @return a Map of endpoint names and their URIs.
+     * @throws APIMgtWSDLException if error occurs while reading endpoints
+     */
     private Map<String, String> getEndpoints() throws APIMgtWSDLException {
         if (wsdlDescription != null) {
             return getEndpoints(wsdlDescription);
@@ -255,6 +286,13 @@ public class WSDL20ProcessorImpl implements WSDLProcessor {
         }
     }
 
+    /**
+     * Get endpoints defined in the provided WSDL description.
+     *
+     * @param description WSDL 2.0 description
+     * @return a Map of endpoint names and their URIs.
+     * @throws APIMgtWSDLException if error occurs while reading endpoints
+     */
     private Map<String, String> getEndpoints(Description description) throws APIMgtWSDLException {
         Service[] services = description.getServices();
         Map<String, String> serviceEndpointMap = new HashMap<>();
