@@ -2,7 +2,6 @@ package org.wso2.carbon.apimgt.gateway.holders;
 
 import ballerina.lang.maps;
 import ballerina.lang.system;
-import ballerina.lang.messages;
 import ballerina.lang.strings;
 import org.wso2.carbon.apimgt.gateway.constants;
 import org.wso2.carbon.apimgt.gateway.dto;
