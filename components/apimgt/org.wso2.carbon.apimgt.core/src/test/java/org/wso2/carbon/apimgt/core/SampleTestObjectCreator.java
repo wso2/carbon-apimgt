@@ -138,8 +138,8 @@ public class SampleTestObjectCreator {
     private static final String SAMPLE_IP_1 = "12.32.45.3";
     private static final String SAMPLE_IP_2 = "24.34.1.45";
     private static final String SAMPLE_CUSTOM_RULE = "Sample Custom Rule";
-    private static final String ADMIN_ROLE_ID = "cfbde56e-4352-498e-b6dc-85a6f1f8b058";
-    private static final String DEVELOPER_ROLE_ID = "cfdce56e-8434-498e-b6dc-85a6f2d8f035";
+    public static final String ADMIN_ROLE_ID = "cfbde56e-4352-498e-b6dc-85a6f1f8b058";
+    public static final String DEVELOPER_ROLE_ID = "cfdce56e-8434-498e-b6dc-85a6f2d8f035";
     public static  APIPolicy unlimitedApiPolicy = new APIPolicy(UUID.randomUUID().toString(), UNLIMITED_TIER);
     public static  APIPolicy goldApiPolicy = new APIPolicy(UUID.randomUUID().toString(), GOLD_TIER);
     public static  APIPolicy silverApiPolicy = new APIPolicy(UUID.randomUUID().toString(), SILVER_TIER);

@@ -63,6 +63,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     private static final String CUSTOMER_ROLE = "customer";
     private static final String EMPLOYEE_ROLE = "employee";
     private static final String MANAGER_ROLE = "manager";
+    private static final String ADMIN_ROLE_ID = "";
 
     @Test
     public void testGetAPIsByStatusStore() throws Exception {
@@ -509,6 +510,38 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         apiDAO.addAPI(api2);
 
         apiList = apiDAO.getAPIs(new HashSet<>(), ADMIN);
+
+        List<API> expectedAPIs = new ArrayList<>();
+        expectedAPIs.add(SampleTestObjectCreator.copyAPISummary(api1));
+        expectedAPIs.add(SampleTestObjectCreator.copyAPISummary(api2));
+
+        Assert.assertTrue(apiList.size() == 2);
+
+        Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, expectedAPIs, new APIComparator()),
+                TestUtil.printDiff(apiList, expectedAPIs));
+    }
+
+    @Test
+    public void testGetAPIsWithUserRoles() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+
+        Set<String> rolesOfUser = new HashSet<>();
+        rolesOfUser.add(SampleTestObjectCreator.ADMIN_ROLE_ID);
+
+        List<API> apiList = apiDAO.getAPIs(rolesOfUser, ADMIN);
+        Assert.assertTrue(apiList.isEmpty());
+
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
+        API api1 = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api1);
+
+        builder = SampleTestObjectCreator.createAlternativeAPI();
+        API api2 = builder.build();
+
+        apiDAO.addAPI(api2);
+
+        apiList = apiDAO.getAPIs(rolesOfUser, ADMIN);
 
         List<API> expectedAPIs = new ArrayList<>();
         expectedAPIs.add(SampleTestObjectCreator.copyAPISummary(api1));
