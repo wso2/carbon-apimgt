@@ -165,7 +165,6 @@
                     </execution>
                 </executions>
             </plugin>
-
             <plugin>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.extensions.configuration.maven.plugin</artifactId>
@@ -182,7 +181,38 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.wso2.carbon.apimgt</groupId>
+                                    <artifactId>org.wso2.carbon.apimgt.rest.api.authenticator</artifactId>
+                                    <version>7.0.34-SNAPSHOT</version>
+                                    <type>bundle</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/docs</outputDirectory>
+                                    <includes>config-docs/**</includes>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>${project.build.directory}/docs/</directory>
+            </resource>
+        </resources>
     </build>
 
     <properties>
@@ -194,6 +224,7 @@
             org.slf4j.*;version="${slf4j.logging.package.import.version.range}",
             org.wso2.carbon.apimgt.rest.api.common.*;version="${carbon.apimgt.version}",
             org.wso2.carbon.apimgt.core.*; version="${carbon.apimgt.import.pkg.version}",
+            org.wso2.carbon.kernel.*;version="${carbon.kernel.package.import.version.range}",
             org.apache.commons.lang3.*; version="${apache.commons.lang3.import.version.range}",
             javax.ws.rs.*; version="${javax.ws.rs.import.version.range}",
             com.google.gson.*; version="${google.code.gson.import.version.range}",

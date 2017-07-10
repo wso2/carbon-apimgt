@@ -30,10 +30,14 @@ import org.wso2.carbon.kernel.configprovider.ConfigProvider;
  * Class used to activate store/publisher application configuration loading.
  */
 @Component(
+        //TODO: From Ravindu's Code
+        //name = "org.wso2.carbon.apimgt.authenticator",
         name = "org.wso2.carbon.apimgt.rest.api.authenticator",
         immediate = true
 )
 public class ConfigurationActivator {
+    //TODO: From Ravindu's code
+    //private static final Logger log = LoggerFactory.getLogger(ServiceReferenceHolder.class);
     private static final Logger log = LoggerFactory.getLogger(ConfigurationActivator.class);
 
     /**

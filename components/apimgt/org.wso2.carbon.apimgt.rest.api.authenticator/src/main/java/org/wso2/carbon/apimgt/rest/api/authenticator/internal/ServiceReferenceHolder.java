@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.rest.api.authenticator.internal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.models.APIMAppConfigurations;
+import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.models.APIMConfigurations;
 import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
 import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 
@@ -34,6 +35,8 @@ public class ServiceReferenceHolder {
     private static ServiceReferenceHolder instance = new ServiceReferenceHolder();
     private ConfigProvider configProvider;
     private APIMAppConfigurations config = null;
+    //TODO from Ravindu Code and Renamed config to config_env
+    private APIMConfigurations config_env = null;
 
     private ServiceReferenceHolder() {
 
@@ -65,6 +68,26 @@ public class ServiceReferenceHolder {
 
         return config;
     }
+
+    public APIMConfigurations getAPIMConfiguration() {
+        try {
+            if (configProvider != null) {
+                config_env = configProvider.getConfigurationObject(APIMConfigurations.class);
+            } else {
+                log.error("Configuration provider is null");
+            }
+        } catch (CarbonConfigurationException e) {
+            log.error("error getting config : org.wso2.carbon.apimgt.core.internal.APIMConfiguration", e);
+        }
+
+        if (config_env == null) {
+            config_env = new APIMConfigurations();
+            log.info("Setting default configurations...");
+        }
+
+        return config_env;
+    }
+
     /**
      * This method is to get configuration map of a given namespace
      *
