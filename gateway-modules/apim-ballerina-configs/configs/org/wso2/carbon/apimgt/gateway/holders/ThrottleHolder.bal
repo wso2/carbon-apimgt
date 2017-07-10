@@ -110,19 +110,20 @@ function isThrottled (string throttleKey, message msg) (boolean) {
     throttleDataMap = getMapFromHolder("throttleDataMap");
     if (throttleDataMap[throttleKey] != null) {
 
-        int currentTime = system:currentTimeMillis();
-        errors:TypeCastError err;
-        string expiryTime;
-        int expiryStamp;
-        expiryTime, err = (string)throttleDataMap[throttleKey];
-        expiryStamp = 123456798;//(int)expiryTime;
-        messages:setProperty(msg, "THROTTLE_EXPIRE_TIME", expiryTime);
-        if (expiryStamp >= currentTime) {
-            return true;
-        } else {
-            maps:remove(throttleDataMap, throttleKey);
-            return false;
-        }
+        //int currentTime = system:currentTimeMillis();
+        //errors:TypeCastError err;
+        //string expiryTime;
+        //int expiryStamp;
+        //expiryTime, err = (string)throttleDataMap[throttleKey];
+        //expiryStamp = 123456798;//(int)expiryTime;
+        //messages:setProperty(msg, "THROTTLE_EXPIRE_TIME", expiryTime);
+        //if (expiryStamp >= currentTime) {
+        //    return true;
+        //} else {
+        //    maps:remove(throttleDataMap, throttleKey);
+        //    return false;
+        //}
+        return true;
     }
 
     return false;
