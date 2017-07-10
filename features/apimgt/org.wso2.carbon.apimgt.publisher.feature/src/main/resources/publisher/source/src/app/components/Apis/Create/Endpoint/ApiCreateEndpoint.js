@@ -23,7 +23,8 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
 
 
-import { Form, Icon, Input, Button, message, Radio } from 'antd';
+import { Form, Icon, Input, Button, message, Radio, Collapse, Row, Col} from 'antd'
+const Panel = Collapse.Panel;
 const FormItem = Form.Item;
 const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
@@ -87,8 +88,6 @@ class EndpointForm extends React.Component {
 
     render(){
         const { getFieldDecorator } = this.props.form;
-
-
         return(
             <Form onSubmit={this.handleSubmit} className="login-form">
                 <FormItem  label="Name"
@@ -118,15 +117,25 @@ class EndpointForm extends React.Component {
                         <Input name="apiContext" prefix={<Icon type="user" style={{ fontSize: 13 }} />} placeholder="Api Context" />
                     )}
                 </FormItem>
-                <FormItem  label="Endpoint"
-                           labelCol={{ span: 4 }}
-                           wrapperCol={{ span: 8 }}>
-                    {getFieldDecorator('apiEndpoint', {
-                        rules: [{ required: false, message: 'Please input Api endpoint' }],
-                    })(
-                        <Input name="apiEndpoint" prefix={<Icon type="user" style={{ fontSize: 13 }} />} placeholder="Api Endpoint" />
-                    )}
-                </FormItem>
+                <Row>
+                    <Col offset={4} span={8}>
+                        <Collapse bordered={false}>
+                            <Panel header="More options" key="1">
+                                <FormItem  label="Endpoint"
+                                           labelCol={{ span: 6 }}
+                                           wrapperCol={{ span: 16 }}>
+                                    {getFieldDecorator('apiEndpoint', {
+                                        rules: [{ required: false, message: 'Please input Api endpoint' }],
+                                    })(
+                                        <Input name="apiEndpoint" prefix={<Icon type="user" style={{ fontSize: 13 }} />} placeholder="Api Endpoint" />
+                                    )}
+                                </FormItem>
+                            </Panel>
+                        </Collapse>
+                    </Col>
+                </Row>
+
+
                 <FormItem >
 
                     <Button type="primary" htmlType="submit">

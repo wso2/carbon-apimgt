@@ -15,13 +15,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+'use strict';
 
 import React, {Component} from 'react'
-import Base from './Base/index'
-import Landing from './Landing/Landing'
-import Apis from './Apis/Apis'
-import Login from './Login/Login'
-import Logout from './Logout'
-import Endpoints from './Endpoints'
 
-export {Base, Landing, Apis, Login, Logout, Endpoints}
+const Endpoints = (props) => {
+
+    return (
+        <div>
+            <h2>
+                Global Endpoints Page
+            </h2>
+        </div>
+    );
+};
+
+export default Endpoints
