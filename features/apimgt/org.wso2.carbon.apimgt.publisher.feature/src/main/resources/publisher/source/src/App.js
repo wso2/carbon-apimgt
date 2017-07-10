@@ -58,8 +58,8 @@ class Protected extends Component {
             return (
                 <Base showLeftMenu={this.state.showLeftMenu}>
                     <Switch>
-                        <Route exact path={"/"}
-                               component={ApiCreate}/>{/* TODO: redirects to apis listing or render apis listing here ~tmkb*/}
+
+                        <Redirect exact from="/" to="/apis"/>
                         <Route path={"/apis"} render={ props => (<Apis setLeftMenu={this.setLeftMenu}/>)}/>
                         <Route path={"/endpoints"} component={Endpoints}/>
                         <Route path={"/api/create"} component={ApiCreate}/>
