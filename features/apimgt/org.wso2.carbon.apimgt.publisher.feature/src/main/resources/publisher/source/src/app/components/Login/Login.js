@@ -37,13 +37,15 @@ class NormalLoginForm extends Component {
         this.state = {
             isLogin: false,
             referrer: "/",
-            userNameEmpty: true
+            userNameEmpty: true,
+            loading: false
         };
     }
 
 
     handleSubmit = (e) => {
         e.preventDefault();
+        this.setState({loading: true});
         this.props.form.validateFields((err, values) => {
             if (!err) {
                 console.log('Received values of form: ', values);
@@ -51,10 +53,11 @@ class NormalLoginForm extends Component {
                 let password = values.password;
                 let loginPromise = this.authManager.authenticateUser(username, password);
                 loginPromise.then((response) => {
-                    this.setState({isLogin: AuthManager.getUser()});
+                    this.setState({isLogin: AuthManager.getUser(), loading: false});
                 }).catch((error) => {
                         message.error("error");
                         console.log(error);
+                        this.setState({loading: false});
                     }
                 );
             } else {
@@ -108,7 +111,8 @@ class NormalLoginForm extends Component {
                         })(
                             <Checkbox>Remember me</Checkbox>
                         )}
-                        <Button type="primary" htmlType="submit" className="login-form-button">
+                        <Button loading={this.state.loading} type="primary" htmlType="submit"
+                                className="login-form-button">
                             Log in
                         </Button>
                     </FormItem>
