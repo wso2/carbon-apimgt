@@ -33,7 +33,7 @@ public final class SubscriptionValidationData {
     private String subscriptionPolicy;
     private String keyEnvType;
     private String applicationId;
-    private String subscriptionStatus;
+    private String status;
 
     public SubscriptionValidationData(String apiContext, String apiVersion, String consumerKey) {
         this.apiContext = apiContext;
@@ -93,11 +93,11 @@ public final class SubscriptionValidationData {
         this.applicationId = applicationId;
     }
 
-    public String getSubscriptionStatus() {
-        return subscriptionStatus;
+    public String getStatus() {
+        return status;
     }
 
-    public void setSubscriptionStatus(String subscriptionStatus) {
-        this.subscriptionStatus = subscriptionStatus;
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

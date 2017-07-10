@@ -1,15 +1,14 @@
 package org.wso2.carbon.apimgt.gateway.event.analytics.response;
 
 import org.wso2.carbon.apimgt.gateway.event.publisher;
-import org.wso2.carbon.apimgt.gateway.holders;
+import org.wso2.carbon.apimgt.gateway.event.holder;
 import ballerina.lang.messages;
 import ballerina.lang.system;
 import ballerina.net.http;
 import org.wso2.carbon.apimgt.gateway.dto;
 
 function mediate (message m, message res) {
-    dto:AnalyticsInfoDTO analyticsConf = holders:getAnalyticsConf();
-    system:println(analyticsConf);
+    dto:AnalyticsInfoDTO analyticsConf = holder:getAnalyticsConf();
     if (!analyticsConf.enabled) {
         system:println("Analytics is Disabled");
         return;
@@ -17,7 +16,7 @@ function mediate (message m, message res) {
     int request_start_time = (int)messages:getProperty(m, "am.request_start_time");
     int request_end_time = (int)messages:getProperty(m, "am.request_end_time");
     int backend_start_time = (int)messages:getProperty(m, "am.backend_start_time");
-    int backend_end_time = (int)messages:getProperty(m, "am.backend_end_time");
+    int backend_end_time = (int)messages:getProperty(res, "am.backend_end_time");
     int security_latency = (int)messages:getProperty(m, "am.security_latency");
     int throttling_latency = (int)messages:getProperty(m, "am.throttling_latency");
     int request_mediation_latency = (int)messages:getProperty(m, "am.request_mediation_latency");

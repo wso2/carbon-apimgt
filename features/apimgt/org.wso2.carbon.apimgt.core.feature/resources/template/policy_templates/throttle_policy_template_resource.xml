@@ -9,11 +9,11 @@ str:concat(resourceKey,'_${pipeline}')##
 resource_${policy.getPolicyName()}_${pipeline}##
 #end
 
-@Plan:name('#getRule($policy)')
-@Plan:description('ExecutionPlan for #getRule($policy)')
+@App:name('#getRule($policy)')
+@App:description('ExecutionPlan for #getRule($policy)')
 
 @source(type='inMemory', topic='apim', @map(type='passThrough'))
-define stream RequestStream (messageID string, appKey string, appTier string, subscriptionKey string, apiKey string, apiTier string, subscriptionTier string, resourceKey string, resourceTier string, userId string,  apiContext string, apiVersion string, appTenant string, apiTenant string, appId string, apiName string, propertiesMap string);
+define stream RequestStream (messageID string, appKey string, appTier string, subscriptionKey string, apiKey string, apiTier string, policy string, resourceKey string, resourceTier string, userId string,  apiContext string, apiVersion string, appTenant string, apiTenant string, appId string, apiName string, propertiesMap string);
 
 @sink(type='jms', @map(type='text'),
 factory.initial='org.apache.activemq.jndi.ActiveMQInitialContextFactory', provider.url='tcp://localhost:61616', destination='TEST.FOO', connection.factory.type='topic',

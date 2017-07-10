@@ -496,20 +496,35 @@ var generateKeys = function () {
 
     var id = document.getElementById("appid").value;
     setAuthHeader(client);
-    client["Generate Keys"].post_applications_generate_keys(
+    client["Generate Keys"].post_applications_applicationId_generate_keys(
         {
             "applicationId": id,
             "Content-Type": "application/json",
             "body": {
-                "validityTime": 3600,
                 "keyType": keyType,
-                "accessAllowDomains": ["ALL"],
                 "callbackUrl": document.getElementById("callbackUrl").value,
-                "scopes": []
-                //TODO should be able to send supported grant types
+                "grantTypesToBeSupported": ["client_credentials", "password"]
+                //TODO should be able to send supported grant types taken from UI
             }
-        }, function (data) {
-            renderGeneratedKeys(data, keyType);
+        }, function (keys) {
+            if(keys.status == 200){
+                var jsonData = JSON.parse(keys.data)
+                client["Generate Application Tokens"].post_applications_applicationId_generate_token(
+                    {
+                        "applicationId": id,
+                        "Content-Type": "application/json",
+                        "body": {
+                            "consumerKey": jsonData.consumerKey,
+                            "consumerSecret": jsonData.consumerSecret,
+                            "validityPeriod": document.getElementById("validitytime").value,
+                            "scopes": "",
+                            "revokeToken": null
+                        }
+                    }, function (tokens) {
+                        renderGeneratedKeys(keys, tokens, keyType);
+                    }
+                );
+            }
         }
     );
 };
@@ -529,11 +544,11 @@ var updateClick = function () {
     });
 };
 
-var renderGeneratedKeys = function (data, keyType) {
+var renderGeneratedKeys = function (keys, tokens, keyType) {
     var compiledHtml, context;
 
     for (var j = 0; j < Object.keys(grantTypes).length; j++) {
-        if ((data.obj.callbackUrl == undefined || data.obj.callbackUrl == "" ) &&
+        if ((keys.obj.callbackUrl == undefined || keys.obj.callbackUrl == "" ) &&
             (grantTypes[j].key == "authorization_code" || grantTypes[j].key == "implicit")) {
             grantTypes[j].selected = false;
             grantTypes[j].disabled = true;
@@ -542,27 +557,28 @@ var renderGeneratedKeys = function (data, keyType) {
             grantTypes[j].disabled = false;
         }
     }
-    var jsonData = JSON.parse(data.data);
+
+    var jsonKeyData = JSON.parse(keys.data);
+    var jsonTokenData = JSON.parse(tokens.data);
     context = {
         "keyType": keyType,
-        "callbackUrl": document.getElementById("callbackUrl").value,
+        "callbackUrl": jsonKeyData.callbackUrl,
         "grantTypes": grantTypes,
-        "keyState": data.obj.keyState,
         "show_keys": false,
-        "Key": jsonData.token.accessToken,
-        "ConsumerKey": jsonData.consumerKey,
-        "ConsumerSecret": jsonData.consumerSecret,
+        "Key": jsonTokenData.accessToken,
+        "ConsumerKey": jsonKeyData.consumerKey,
+        "ConsumerSecret": jsonKeyData.consumerSecret,
         "username": "Username",
         "password": "Password",
-        "basickey": window.btoa(jsonData.consumerKey + ":" + jsonData.consumerSecret),
-        "ValidityTime": jsonData.token.validityTime,
-        "Scopes": "",
-        "tokenScopes": jsonData.token.tokenScopes,
+        "basickey": window.btoa(jsonKeyData.consumerKey + ":" + jsonKeyData.consumerSecret),
+        "ValidityTime": jsonTokenData.validityTime,
+        "tokenScopes": jsonTokenData.tokenScopes,
         "provide_keys_form": false,
         "provide_keys": false,
         "gatewayurlendpoint": "(gatewayurl)/token"
 
     };
+
     UUFClient.renderFragment("org.wso2.carbon.apimgt.web.store.feature.application-keys", context, {
         onSuccess: function (renderedData) {
             if (context.keyType.toLowerCase() == "production") {

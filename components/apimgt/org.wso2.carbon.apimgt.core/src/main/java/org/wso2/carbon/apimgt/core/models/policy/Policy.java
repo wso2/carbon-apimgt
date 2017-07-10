@@ -24,7 +24,7 @@ import java.sql.SQLException;
 /**
  * Contains the common model attributes for policy
  */
-public abstract class Policy {
+public abstract class Policy  {
     private String uuid;
     private String policyName;
     private String displayName;
@@ -35,6 +35,11 @@ public abstract class Policy {
     public Policy(String name) {
         this.policyName = name;
         this.isDeployed = false;
+    }
+
+    public Policy(String uuid, String policyName) {
+        this.uuid = uuid;
+        this.policyName = policyName;
     }
 
     public String getDescription() {

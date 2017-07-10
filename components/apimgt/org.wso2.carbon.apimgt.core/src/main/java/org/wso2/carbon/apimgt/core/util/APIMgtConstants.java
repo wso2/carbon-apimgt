@@ -373,7 +373,6 @@ public class APIMgtConstants {
         public static final String ATTRIBUTE_APPLICATION_UPDATEDBY = "updatedUser";
         public static final String ATTRIBUTE_APPLICATION_TIER = "tier";
         public static final String ATTRIBUTE_APPLICATION_DESCRIPTION = "description";
-        public static final String ATTRIBUTE_APPLICATION_GROUPID = "groupId";
         public static final String ATTRIBUTE_APPLICATION_PERMISSION = "permission";
         public static final String ATTRIBUTE_APPLICATION_EXISTIN_APP_STATUS = "status";
         public static final String ATTRIBUTE_APPLICATION_POLICY_ID = "policyId";
@@ -404,6 +403,13 @@ public class APIMgtConstants {
         public static final String APPLICATION_CREATE = "APPLICATION_CREATE";
         public static final String APPLICATION_UPDATE = "APPLICATION_UPDATE";
         public static final String APPLICATION_DELETE = "APPLICATION_DELETE";
+        public static final String POLICY_CREATE = "POLICY_CREATE";
+        public static final String POLICY_UPDATE = "POLICY_UPDATE";
+        public static final String POLICY_DELETE = "POLICY_DELETE";
+        public static final String BLOCK_CONDITION_ADD = "BLOCK_CONDITION_ADD";
+        public static final String BLOCK_CONDITION_UPDATE = "BLOCK_CONDITION_UPDATE";
+        public static final String BLOCK_CONDITION_DELETE = "BLOCK_CONDITION_DELETE";
+
     }
 
     /**

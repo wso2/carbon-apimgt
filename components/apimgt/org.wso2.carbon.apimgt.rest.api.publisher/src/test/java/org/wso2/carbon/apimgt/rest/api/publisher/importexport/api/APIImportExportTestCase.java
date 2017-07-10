@@ -38,6 +38,9 @@ import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.Policy;
+import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
@@ -503,9 +506,9 @@ public class APIImportExportTestCase {
         transport.add("http");
 
 
-        Set<String> policies = new HashSet<>();
-        policies.add("Silver");
-        policies.add("Bronze");
+        Set<Policy> policies = new HashSet<>();
+        policies.add(new SubscriptionPolicy("Silver"));
+        policies.add(new SubscriptionPolicy("Bronze"));
 
         Set<String> tags = new HashSet<>();
         tags.add("food");
@@ -534,7 +537,7 @@ public class APIImportExportTestCase {
                 isResponseCachingEnabled(true).
                 cacheTimeout(120).
                 isDefaultVersion(true).
-                apiPolicy("Gold").
+                apiPolicy(new APIPolicy("Gold")).
                 transport(transport).
                 tags(tags).
                 policies(policies).

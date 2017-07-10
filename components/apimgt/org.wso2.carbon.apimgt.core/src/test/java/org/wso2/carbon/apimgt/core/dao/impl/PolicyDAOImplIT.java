@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
+import org.wso2.carbon.apimgt.core.TestUtil;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
@@ -52,11 +53,15 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
                         policy.getPolicyName()));
         Assert.assertNotNull(fingerprintBeforeUpdatingPolicy);
         APIPolicy updatedAPIPolicy = SampleTestObjectCreator.updateAPIPolicy(policy);
+        Thread.sleep(100L);
         policyDAO.updateApiPolicy(updatedAPIPolicy);
         String fingerprintAfterUpdatingPolicy = ETagUtils
                 .generateETag(policyDAO.getLastUpdatedTimeOfThrottlingPolicy(APIMgtAdminService.PolicyLevel.api,
                         updatedAPIPolicy.getPolicyName()));
         Assert.assertNotNull(fingerprintAfterUpdatingPolicy);
+        Assert.assertNotEquals(fingerprintBeforeUpdatingPolicy, fingerprintAfterUpdatingPolicy, "Policy "
+                + "fingerprint expected to be different before and after updating for policy: "
+                + policy.getPolicyName());
     }
 
     @Test
@@ -69,11 +74,15 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
                         policy.getPolicyName()));
         Assert.assertNotNull(fingerprintBeforeUpdatingPolicy);
         ApplicationPolicy updatedPolicy = SampleTestObjectCreator.updateApplicationPolicy(policy);
+        Thread.sleep(100L);
         policyDAO.updateApplicationPolicy(updatedPolicy);
         String fingerprintAfterUpdatingPolicy = ETagUtils
                 .generateETag(policyDAO.getLastUpdatedTimeOfThrottlingPolicy(APIMgtAdminService.PolicyLevel.application,
                         updatedPolicy.getPolicyName()));
         Assert.assertNotNull(fingerprintAfterUpdatingPolicy);
+        Assert.assertNotEquals(fingerprintBeforeUpdatingPolicy, fingerprintAfterUpdatingPolicy, "Policy "
+                + "fingerprint expected to be different before and after updating for policy: "
+                + policy.getPolicyName());
     }
 
     @Test
@@ -86,14 +95,14 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
                                 .subscription, policy.getPolicyName()));
         Assert.assertNotNull(fingerprintBeforeUpdatingPolicy);
         SubscriptionPolicy updatedPolicy = SampleTestObjectCreator.updateSubscriptionPolicy(policy);
+        Thread.sleep(100L);
         policyDAO.updateSubscriptionPolicy(updatedPolicy);
         String fingerprintAfterUpdatingPolicy = ETagUtils
                 .generateETag(policyDAO.getLastUpdatedTimeOfThrottlingPolicy(APIMgtAdminService.PolicyLevel
                         .subscription, updatedPolicy.getPolicyName()));
         Assert.assertNotNull(fingerprintAfterUpdatingPolicy);
-        Assert.assertNotEquals(fingerprintBeforeUpdatingPolicy, fingerprintAfterUpdatingPolicy, "Policy "
-                + "fingerprint expected to be different before and after updating for policy: "
-                + policy.getPolicyName());
+        Assert.assertNotEquals(fingerprintBeforeUpdatingPolicy, fingerprintAfterUpdatingPolicy, TestUtil.printDiff
+                (fingerprintBeforeUpdatingPolicy, fingerprintAfterUpdatingPolicy));
     }
 
     @Test (description = "Add, Get and Delete an API policy")

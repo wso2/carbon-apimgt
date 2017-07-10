@@ -71,6 +71,14 @@ x-wso2-security:
         roles: admin
         name: apim:bl_manage
         key: apim:bl_manage
+      - description: ""
+        roles: admin
+        name: apim:label_view
+        key: apim:label_view
+      - description: ""
+        roles: admin
+        name: apim:label_manage
+        key: apim:label_manage
 
 ######################################################
 # The "API Collection" resource APIs
@@ -180,7 +188,7 @@ paths:
 ######################################################
 # The "Individual Application Throttle Policy" resource API
 ######################################################
-  '/policies/throttling/application/{policyId}':
+  '/policies/throttling/application/{id}':
 
 #-----------------------------------------------------
 # Retrieve a certain Application level Policy
@@ -191,7 +199,7 @@ paths:
       description: |
         Retrieve an Application Policy providing the policy name.
       parameters:
-        - $ref: '#/parameters/policyId'
+        - $ref: '#/parameters/id'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -244,7 +252,7 @@ paths:
       description: |
         Delete an Application level throttle policy
       parameters:
-        - $ref: '#/parameters/policyId'
+        - $ref: '#/parameters/id'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
@@ -276,7 +284,7 @@ paths:
       description: |
         Update an Application level throttle policy
       parameters:
-        - $ref: '#/parameters/policyId'
+        - $ref: '#/parameters/id'
         - in: body
           name: body
           description: |
@@ -441,7 +449,7 @@ paths:
 ######################################################
 # The "Individual Subscription Throttle Policy" resource API
 ######################################################
-  '/policies/throttling/subscription/{policyId}':
+  '/policies/throttling/subscription/{id}':
 
 #-----------------------------------------------------
 # Retrieve a certain Subscription Policy
@@ -452,7 +460,7 @@ paths:
       description: |
         Retrieve a Subscription Policy providing the policy name.
       parameters:
-        - $ref: '#/parameters/policyId'
+        - $ref: '#/parameters/id'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -505,7 +513,7 @@ paths:
       description: |
         Delete a Subscription level throttle policy
       parameters:
-        - $ref: '#/parameters/policyId'
+        - $ref: '#/parameters/id'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
@@ -537,7 +545,7 @@ paths:
       description: |
         Update a Subscription level throttle policy
       parameters:
-        - $ref: '#/parameters/policyId'
+        - $ref: '#/parameters/id'
         - in: body
           name: body
           description: |
@@ -702,7 +710,7 @@ paths:
 ######################################################
 # The "Individual Advanced Throttle Policy" resource API
 ######################################################
-  '/policies/throttling/advanced/{policyId}':
+  '/policies/throttling/advanced/{id}':
 
 #-----------------------------------------------------
 # Retrieve a certain Advanced Throttling Policy
@@ -713,7 +721,7 @@ paths:
       description: |
         Retrieve a Advanced Policy providing the policy name.
       parameters:
-        - $ref: '#/parameters/policyId'
+        - $ref: '#/parameters/id'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -766,7 +774,7 @@ paths:
       description: |
         Delete an Advanced level throttle policy
       parameters:
-        - $ref: '#/parameters/policyId'
+        - $ref: '#/parameters/id'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
@@ -798,7 +806,7 @@ paths:
       description: |
         Update an Advanced level throttle policy
       parameters:
-        - $ref: '#/parameters/policyId'
+        - $ref: '#/parameters/id'
         - in: body
           name: body
           description: |
@@ -1379,6 +1387,266 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+######################################################
+# The "Label collection" resource API
+######################################################
+  '/labels/':
+
+#-----------------------------------------------------
+# Retrieve all labels
+#-----------------------------------------------------
+    get:
+      x-scope: apim:label_view
+      summary: Get all registered Labels
+      description: |
+        Get all registered Labels
+      parameters:
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
+      tags:
+        - Label Collection
+      responses:
+        200:
+          description: |
+            OK.
+            Labels returned
+          schema:
+            $ref: '#/definitions/LabelList'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests.
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional reuquests.
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported.
+          schema:
+            $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# Add a Label
+#-----------------------------------------------------
+    post:
+      x-scope: apim:label_manage
+      summary: Add a Label
+      description: |
+        Add a new gateway/store Label
+      parameters:
+        - in: body
+          name: body
+          description: |
+            Label object that should to be added
+          required: true
+          schema:
+            $ref: '#/definitions/Label'
+        - $ref: '#/parameters/Content-Type'
+      tags:
+        - Label Collection
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created object as entity in the body.
+            Location header contains URL of newly created entity.
+          schema:
+            $ref: '#/definitions/Label'
+          headers:
+            Location:
+              description: |
+                Location of the newly created resource.
+              type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional request'
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        415:
+          description: |
+            Unsupported media type.
+            The entity of the request was in a not supported format.
+
+######################################################
+# The "Individual Label" resource API
+######################################################
+  '/labels/{labelId}':
+
+#-----------------------------------------------------
+# Retrieve a Label
+#-----------------------------------------------------
+    get:
+      x-scope: apim:label_view
+      summary: Retrieve a Label
+      description: |
+        Retrieve a Label for labelId
+      parameters:
+        - $ref: '#/parameters/labelId'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
+      tags:
+        - Label
+      responses:
+        200:
+          description: |
+            OK.
+            Label returned
+          schema:
+            $ref: '#/definitions/Label'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests.
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional reuquests.
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+        404:
+          description: |
+            Not Found.
+            Requested Label does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported.
+          schema:
+            $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# Delete a Label
+#-----------------------------------------------------
+    delete:
+      x-scope: apim:label_manage
+      summary: Delete a Label
+      description: |
+        Delete a Label by label Id
+      parameters:
+        - $ref: '#/parameters/labelId'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
+      tags:
+        - Label
+      responses:
+        200:
+          description: |
+            OK.
+            Label successfully deleted.
+        404:
+          description: |
+            Not Found.
+            Label to be deleted does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# Update a Label
+#-----------------------------------------------------
+    put:
+      x-scope: apim:label_manage
+      summary: Update a Label
+      description: |
+        Update a Label by label Id
+      parameters:
+        - $ref: '#/parameters/labelId'
+        - in: body
+          name: body
+          description: |
+            Label object with updated information
+          required: true
+          schema:
+            $ref: '#/definitions/Label'
+        - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
+      tags:
+        - Label
+      responses:
+        200:
+          description: |
+            OK.
+            Label updated.
+          schema:
+            $ref: '#/definitions/Label'
+          headers:
+            Location:
+              description: |
+                The URL of the updated resource.
+              type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional request.
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional reuquests.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
 
 ######################################################
 # Parameters - required by some of the APIs above
@@ -1387,8 +1655,8 @@ parameters:
 
 # Throttle Policy Id
 # Specified as part of the path expression
-  policyId:
-    name: policyId
+  id:
+    name: id
     in: path
     description: |
       Thorttle policy UUID
@@ -1412,6 +1680,16 @@ parameters:
     in: path
     description: |
       Blocking condition identifier
+    type: string
+    required: true
+
+# Label Id
+# Specified as part of the path expression
+  labelId:
+    name: labelId
+    in: path
+    description: |
+      Label identifier
     type: string
     required: true
 
@@ -1549,13 +1827,13 @@ definitions:
 # The Throttle Policy resource
 #-----------------------------------------------------
   ThrottlePolicy :
-    discriminator: policyId
+    discriminator: id
     title: Generic Throttle Policy
     required:
       - policyName
       - type
     properties:
-      policyId:
+      id:
         type: string
       policyName:
         type: string
@@ -1944,6 +2222,44 @@ definitions:
         type: string
       value:
         type: string
+
+#-----------------------------------------------------
+# The Label resource
+#-----------------------------------------------------
+  Label:
+    title: Label
+    required:
+      - name
+      - type
+    properties:
+      name:
+        type: string
+        example: "Public"
+      description:
+        type: string
+        example: "Label to use for public APIs"
+      type:
+        type: string
+        example: "GATEWAY"
+      accessUrl:
+        type: string
+        example: "https://gateway.wso2.com"
+
+#-----------------------------------------------------
+# The Label List resource
+#-----------------------------------------------------
+  LabelList:
+    title: Label List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of Labels returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/Label'
 
 #-----------------------------------------------------
 # END-OF-FILE

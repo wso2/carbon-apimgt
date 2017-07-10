@@ -6,7 +6,7 @@
  * in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -22,7 +22,7 @@ import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.Parameter;
 import org.wso2.siddhi.annotation.util.DataType;
-import org.wso2.siddhi.core.config.ExecutionPlanContext;
+import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEvent;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.state.StateEvent;
@@ -45,7 +45,7 @@ import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.parser.OperatorParser;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
-import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
+import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.wso2.siddhi.query.api.expression.Expression;
 
 import java.util.ArrayList;
@@ -54,7 +54,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Stream processor for Throttling
+ * Stream processor for Throttling.
  *
  */
 @Extension(name = "timeBatch", namespace = "throttler", description =
@@ -76,7 +76,7 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
     private long timeInMilliSeconds;
     private ComplexEventChunk<StreamEvent> expiredEventChunk = new ComplexEventChunk<StreamEvent>(true);
     private Scheduler scheduler;
-    private ExecutionPlanContext executionPlanContext;
+    private SiddhiAppContext siddhiAppContext;
     private long expireEventTime = -1;
     private long startTime = -1;
 
@@ -96,8 +96,8 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
 
     @Override
     protected List<Attribute> init(AbstractDefinition abstractDefinition, ExpressionExecutor[] expressionExecutors,
-            ConfigReader configReader, ExecutionPlanContext executionPlanContext) {
-        this.executionPlanContext = executionPlanContext;
+            ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
+        this.siddhiAppContext = siddhiAppContext;
 
         if (attributeExpressionExecutors.length == 1) {
             if (attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor) {
@@ -109,13 +109,13 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
                     timeInMilliSeconds = (Long) ((ConstantExpressionExecutor) attributeExpressionExecutors[0])
                             .getValue();
                 } else {
-                    throw new ExecutionPlanValidationException(
+                    throw new SiddhiAppValidationException(
                             "Throttle batch window's 1st parameter attribute should be "
                                     + "either int or long, but found " + attributeExpressionExecutors[0]
                                     .getReturnType());
                 }
             } else {
-                throw new ExecutionPlanValidationException("Throttle batch window 1st parameter needs to be constant "
+                throw new SiddhiAppValidationException("Throttle batch window 1st parameter needs to be constant "
                         + "parameter attribute but found a dynamic attribute " + attributeExpressionExecutors[0]
                         .getClass().getCanonicalName());
             }
@@ -129,13 +129,13 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
                     timeInMilliSeconds = (Long) ((ConstantExpressionExecutor) attributeExpressionExecutors[0])
                             .getValue();
                 } else {
-                    throw new ExecutionPlanValidationException(
+                    throw new SiddhiAppValidationException(
                             "Throttle batch window's 1st parameter attribute should be "
                                     + "either int or long, but found " + attributeExpressionExecutors[0]
                                     .getReturnType());
                 }
             } else {
-                throw new ExecutionPlanValidationException("Throttle batch window 1st parameter needs to be constant "
+                throw new SiddhiAppValidationException("Throttle batch window 1st parameter needs to be constant "
                         + "attribute but found a dynamic attribute " + attributeExpressionExecutors[0].getClass()
                         .getCanonicalName());
             }
@@ -147,12 +147,12 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
                 startTime = Long.parseLong(
                         String.valueOf(((ConstantExpressionExecutor) attributeExpressionExecutors[1]).getValue()));
             } else {
-                throw new ExecutionPlanValidationException(
+                throw new SiddhiAppValidationException(
                         "Throttle batch window 2nd parameter needs to be a Long " + "or Int type but found a "
                                 + attributeExpressionExecutors[2].getReturnType());
             }
         } else {
-            throw new ExecutionPlanValidationException("Throttle batch window should only have one/two parameter "
+            throw new SiddhiAppValidationException("Throttle batch window should only have one/two parameter "
                     + "(<int|long|time> windowTime (and <int|long> startTime), but found "
                     + attributeExpressionExecutors.length + " input attributes");
         }
@@ -168,11 +168,11 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
 
         synchronized (this) {
             if (expireEventTime == -1) {
-                long currentTime = executionPlanContext.getTimestampGenerator().currentTime();
+                long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
                 if (startTime != -1) {
                     expireEventTime = addTimeShift(currentTime);
                 } else {
-                    expireEventTime = executionPlanContext.getTimestampGenerator().currentTime() + timeInMilliSeconds;
+                    expireEventTime = siddhiAppContext.getTimestampGenerator().currentTime() + timeInMilliSeconds;
                 }
                 if (scheduler != null) {
                     scheduler.notifyAt(expireEventTime);
@@ -180,7 +180,7 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
                     log.error("scheduler is not initiated");
                 }
             }
-            long currentTime = executionPlanContext.getTimestampGenerator().currentTime();
+            long currentTime = siddhiAppContext.getTimestampGenerator().currentTime();
             boolean sendEvents;
             if (currentTime >= expireEventTime) {
                 expireEventTime += timeInMilliSeconds;
@@ -259,10 +259,10 @@ public class ThrottleStreamProcessor extends StreamProcessor implements Scheduli
 
     @Override
     public CompiledCondition compileCondition(Expression expression, MatchingMetaInfoHolder matchingMetaInfoHolder,
-            ExecutionPlanContext executionPlanContext, List<VariableExpressionExecutor> list, Map<String, Table> map,
+            SiddhiAppContext siddhiAppContext, List<VariableExpressionExecutor> list, Map<String, Table> map,
             String s) {
         return OperatorParser
-                .constructOperator(this.expiredEventChunk, expression, matchingMetaInfoHolder, executionPlanContext,
+                .constructOperator(this.expiredEventChunk, expression, matchingMetaInfoHolder, siddhiAppContext,
                         list, map, this.queryName);
     }
 }
