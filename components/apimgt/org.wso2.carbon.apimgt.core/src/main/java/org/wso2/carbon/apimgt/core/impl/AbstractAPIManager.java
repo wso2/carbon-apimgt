@@ -256,14 +256,9 @@ public abstract class AbstractAPIManager implements APIManager {
 
     }
 
-    public boolean isWSDLArchiveExists(String apiId) throws APIManagementException {
-        try {
-            return getApiDAO().isWSDLArchiveExists(apiId);
-        } catch (APIMgtDAOException e) {
-            String errorMsg = "Error while checking if WSDL archive exists for API " + apiId;
-            log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
-        }
+    @Override
+    public boolean isWSDLArchiveExists(String apiId) throws APIMgtDAOException {
+        return getApiDAO().isWSDLArchiveExists(apiId);
     }
 
     /**
