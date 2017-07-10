@@ -17,100 +17,101 @@
  */
 
 import React, {Component} from 'react'
-import { Link } from 'react-router-dom'
-import { Col, Row, Card, Form, Select, Dropdown, Tag, Menu , Button, Badge } from 'antd';
+import {Link} from 'react-router-dom'
+import {Col, Row, Card, Form, Select, Dropdown, Tag, Menu, Button, Badge} from 'antd';
 
 const FormItem = Form.Item;
-const Option = Select.Option;
+import Loading from '../../Base/Loading/Loading'
+import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
+import Api from '../../../data/api'
 
-const menu = (
-    <Menu>
-        <Menu.Item>
-            <Link to="">Edit</Link>
-        </Menu.Item>
-        <Menu.Item>
-            <Link to="">Create New Version</Link>
-        </Menu.Item>
-        <Menu.Item>
-            <Link to="">View Swagger</Link>
-        </Menu.Item>
-    </Menu>
-);
-
-class ActivityItem extends Component {
-    constructor(props){
-        super(props);
-    }
-    render(){
-        return <div className="feed-element">
-            <a href="#" className="pull-left">
-                <i className="fw fw-user"></i>
-            </a>
-            <div className="media-body ">
-                <small className="pull-right text-navy">{this.props.when}</small>
-                <strong>{this.props.user}</strong> subscribed with <strong>{this.props.tier}</strong> tier. <br />
-                <small className="text-muted">{this.props.time}</small>
-            </div>
-        </div>
-    }
-}
 class Overview extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            api: props.api
-        }
+            api: null,
+            notFound: false
+        };
+        this.api_uuid = this.props.match.params.api_uuid;
     }
 
-    componentWillReceiveProps(nextProps) {
-        this.setState(
-            {
-                api: nextProps.api
+    componentDidMount() {
+        const api = new Api();
+        let promised_api = api.get(this.api_uuid);
+        promised_api.then(
+            response => {
+                this.setState({api: response.obj});
+            }
+        ).catch(
+            error => {
+                if (process.env.NODE_ENV !== "production") {
+                    console.log(error);
+                }
+                let status = error.status;
+                if (status === 404) {
+                    this.setState({notFound: true});
+                }
             }
         );
-
     }
 
     render() {
-
+        const menu = (
+            <Menu>
+                <Menu.Item>
+                    <Link to="">Edit</Link>
+                </Menu.Item>
+                <Menu.Item>
+                    <Link to="">Create New Version</Link>
+                </Menu.Item>
+                <Menu.Item>
+                    <Link to="">View Swagger</Link>
+                </Menu.Item>
+            </Menu>
+        );
         const formItemLayout = {
-            labelCol: { span: 6 },
-            wrapperCol: { span: 18 }
+            labelCol: {span: 6},
+            wrapperCol: {span: 18}
         };
-
+        const api = this.state.api;
+        if (this.state.notFound) {
+            return <ResourceNotFound/>
+        }
+        if (!this.state.api) {
+            return <Loading/>
+        }
         return (
-
             <div>
                 <Row type="flex" justify="center">
                     <Col span={4}>
 
-                        <Card bodyStyle={{ padding: 10 }}>
+                        <Card bodyStyle={{padding: 10}}>
                             <div className="custom-image">
-                                <img alt="API thumb" width="100%" src="/publisher/public/images/api/api-default.png" />
+                                <img alt="API thumb" width="100%" src="/publisher/public/images/api/api-default.png"/>
                             </div>
                             <div className="custom-card">
-                                <Badge status="processing" text={this.state.api.lifeCycleStatus} />
+                                <Badge status="processing" text={api.lifeCycleStatus}/>
                                 <p>11 Apps</p>
-                                <a href="#components-anchor-store" title="Store" >View in store</a>
+                                <a href={"/store/apis/" + this.api_uuid} target="_blank" title="Store">View in store</a>
                             </div>
                         </Card>
                     </Col>
                     <Col span={15} offset={1}>
                         <Form layout="vertical">
                             <FormItem {...formItemLayout} label="API Name">
-                                <span className="ant-form-text">{this.state.api.name}</span>
+                                <span className="ant-form-text">{api.name}</span>
                             </FormItem>
                             <FormItem {...formItemLayout} label="Version">
-                                <span className="ant-form-text">{this.state.api.version}</span>
+                                <span className="ant-form-text">{api.version}</span>
                             </FormItem>
                             <FormItem {...formItemLayout} label="Context">
-                                <span className="ant-form-text">{this.state.api.context}</span>
+                                <span className="ant-form-text">{api.context}</span>
                             </FormItem>
                             <FormItem {...formItemLayout} label="Last Updated">
-                                <span className="ant-form-text">{this.state.api.createdTime}</span>
+                                <span className="ant-form-text">{api.createdTime}</span>
                             </FormItem>
                             <FormItem {...formItemLayout} label="Business Plans">
-                                <span className="ant-form-text">{"Gold, Silver, Free"}</span>
+                                <span className="ant-form-text">{api.policies.map(policy => policy + ", ")}</span>
                             </FormItem>
                             <FormItem {...formItemLayout} label="Tags">
                                 <span className="ant-form-text">
