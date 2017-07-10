@@ -19,8 +19,8 @@
 import React, {Component} from 'react'
 
 import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom'
-import {Apis, Base, Login, Logout} from './app/components/index'
-import {PageNotFound} from './app/components/Base/Errors/index'
+import {Apis, Base, Login, Logout, Endpoints} from './app/components'
+import {PageNotFound} from './app/components/Base/Errors'
 import ApiCreate from './app/components/Apis/Create/ApiCreate'
 import AuthManager from './app/data/AuthManager'
 import qs from 'qs'
@@ -57,6 +57,7 @@ class Protected extends Component {
                     <Switch>
                         <Route exact path={"/"} component={ApiCreate}/>{/* TODO: redirects to apis listing or render apis listing here ~tmkb*/}
                         <Route path={"/apis"} render={ props => (<Apis setLeftMenu={this.setLeftMenu}/>)}/>
+                        <Route path={"/endpoints"} component={Endpoints}/>
                         <Route path={"/api/create"} component={ApiCreate}/>
                         <Route component={PageNotFound}/>
                     </Switch>
