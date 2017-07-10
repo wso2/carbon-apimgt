@@ -11,39 +11,37 @@ import org.wso2.carbon.kernel.annotations.Element;
 public class EnvironmentConfigurations {
 
     @Element(description = "Default environment IS Host name")
-    private String envIsHost = "localhost";
+    private String defaultEnvIsHost = "localhost";
 
     @Element(description = "Default environment IS port")
-    private int envIsPort = 0;
+    private int defaultEnvIsPort = 0;
 
     @Element(description = "Default environment IS Token endpoint URL")
-    private String envIsEndPoint = "https://localhost:9443/oauth2/token";
+    private String defaultEnvIsEndPoint = "https://localhost:9443/oauth2/token";
 
     @Element(description = "Default environment IS Token endpoint URL")
-    private String envIsrevokeEndPoint = "";
+    private String defaultEnvIsrevokeEndPoint = "";
 
     @Element(description = "Default environment IS Token endpoint URL")
-    private String env = "development";
+    private String defaultEnv = "development";
 
-    public String getEnvIsHost() {
-        return envIsHost;
+    public String getDefaultEnvIsHost() {
+        return defaultEnvIsHost;
     }
 
-    public int getEnvIsPort() {
-        return envIsPort;
+    public int getDefaultEnvIsPort() {
+        return defaultEnvIsPort;
     }
 
-    public String getEnvIsEndPoint() {
-        return envIsEndPoint;
+    public String getDefaultEnvIsEndPoint() {
+        return defaultEnvIsEndPoint;
     }
 
-    public String getEnvIsrevokeEndPoint() {
-        return envIsrevokeEndPoint;
+    public String getDefaultEnvIsrevokeEndPoint() {
+        return defaultEnvIsrevokeEndPoint;
     }
 
-    public String getEnv() {
-        return env;
+    public String getDefaultEnv() {
+        return defaultEnv;
     }
-
-
 }

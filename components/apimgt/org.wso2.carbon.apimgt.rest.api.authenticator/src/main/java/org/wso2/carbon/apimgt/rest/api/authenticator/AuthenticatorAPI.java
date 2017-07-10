@@ -55,6 +55,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
@@ -100,7 +101,7 @@ public class AuthenticatorAPI implements Microservice {
     @Path ("/token/{appName}")
     @Produces (MediaType.APPLICATION_JSON)
     @Consumes ({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.MULTIPART_FORM_DATA })
-    public Response authenticate(@Context Request request, @PathParam("appName") String appName,
+    public Response authenticate(@Context Request request, @PathParam ("appName") String appName,
             @FormDataParam ("username") String userName, @FormDataParam ("password") String password,
             @FormDataParam ("grant_type") String grantType, @FormDataParam ("validity_period") String validityPeriod,
             @FormDataParam ("remember_me") boolean isRememberMe, @FormDataParam ("scopes") String scopesList) {
