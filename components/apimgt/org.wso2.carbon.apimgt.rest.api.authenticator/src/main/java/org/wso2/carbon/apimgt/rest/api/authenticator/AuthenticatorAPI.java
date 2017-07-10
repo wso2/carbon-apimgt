@@ -58,6 +58,7 @@ import javax.ws.rs.core.Response;
  * This class provides access token during login from store app.
  *
  */
+
 @Component(
         name = "org.wso2.carbon.apimgt.rest.api.authenticator.AuthenticatorAPI",
         service = Microservice.class,
@@ -113,13 +114,16 @@ public class AuthenticatorAPI implements Microservice {
 
             // The access token is stored as two cookies in client side. One is a normal cookie and other is a http
             // only cookie. Hence we need to split the access token
+            APIMConfigurations environmentConfigurations = APIMConfigurationService.getInstance().getApimConfigurations();
             String part1 = accessToken.substring(0, accessToken.length() / 2);
             String part2 = accessToken.substring(accessToken.length() / 2);
             NewCookie cookieWithAppContext = AuthUtil
-                    .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_1, part1, appContext, true, false, "");
+                    .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_1 + "_" + environmentConfigurations.getEnvironmentName(),
+                            part1, appContext, true, false, "");
             authResponseBean.setPartialToken(part1);
             NewCookie httpOnlyCookieWithAppContext = AuthUtil
-                    .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_2, part2, appContext, true, true, "");
+                    .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_2 + "_" + environmentConfigurations.getEnvironmentName(),
+                            part2, appContext, true, true, "");
             NewCookie restAPIContextCookie = AuthUtil
                     .cookieBuilder(APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J, part2, restAPIContext, true, true,
                             "");
@@ -160,7 +164,9 @@ public class AuthenticatorAPI implements Microservice {
                                                 "").build();
             }
         } catch (APIManagementException e) {
+
             ErrorDTO errorDTO = AuthUtil.getErrorDTO(e.getErrorHandler(), null);
+
             log.error(e.getMessage(), e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
@@ -310,4 +316,17 @@ public class AuthenticatorAPI implements Microservice {
             return Response.status(e.getIndex()).build();
         }
     }
+    @GET
+    @Produces (MediaType.APPLICATION_JSON)
+    @Path ("/infoenv")
+    public Response configInfo () {
+
+        APIMConfigurations environmentConfigurations = APIMConfigurationService.getInstance().getApimConfigurations();
+        EnvironmentConfigBean environmentConfigBean = new EnvironmentConfigBean();
+
+        environmentConfigBean.setEnvironments(environmentConfigurations.getEnvironments());
+
+        return Response.ok(environmentConfigBean, MediaType.APPLICATION_JSON).build();
+    }
+
 }
