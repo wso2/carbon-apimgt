@@ -142,11 +142,10 @@ function isRequestThrottled( message msg) (boolean){
 
     // Subscription Level throttling
     isSubscriptionLevelThrottled = throttle:isThrottled(subscriptionLevelThrottleKey, msg);
-    string stopOnQuotaReach = gatewayUtil:getStringProperty(msg, constants:STOP_ON_QUOTA_REACH);
+    boolean stopOnQuotaReach = keyValidationDto.stopOnQuotaReach;
 
     if(isSubscriptionLevelThrottled){
-
-        if(stopOnQuotaReach == "true"){
+        if(stopOnQuotaReach){
             http:setStatusCode( msg, HTTP_TOO_MANY_REQUESTS );
             messages:setProperty(msg, THROTTLED_ERROR_CODE, SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE);
             messages:setProperty(msg, THROTTLED_OUT_REASON, THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED);
