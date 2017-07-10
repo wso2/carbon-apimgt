@@ -7,6 +7,7 @@ import ballerina.lang.strings;
 import org.wso2.carbon.apimgt.gateway.constants;
 import org.wso2.carbon.apimgt.gateway.dto;
 import org.wso2.carbon.apimgt.ballerina.util as apimgtUtil;
+import org.wso2.carbon.apimgt.ballerina.maps as mapHolder;
 import ballerina.lang.errors;
 
 map keyTemplateMap = {};
@@ -16,21 +17,28 @@ boolean isBlockingConditionsPresent = false;
 boolean isKeyTemplatesPresent = false;
 
 function addThrottleData (string key, string value) {
+    throttleDataMap = getMapFromHolder("throttleDataMap");
     throttleDataMap[key] = value;
+    mapHolder:putMapEntry("throttleDataMap", throttleDataMap);
 }
 
 function removeThrottleData (string key) {
+    throttleDataMap = getMapFromHolder("throttleDataMap");
     maps:remove(throttleDataMap, key);
+    mapHolder:putMapEntry("throttleDataMap", throttleDataMap);
 }
 
 function addKeyTemplate (string key, string value) {
+    keyTemplateMap = getMapFromHolder("keyTemplateMap");
     keyTemplateMap[key] = value;
+    mapHolder:putMapEntry("keyTemplateMap", keyTemplateMap);
     isKeyTemplatesPresent = true;
 }
 
-
 function removeKeyTemplate (string key) {
+    keyTemplateMap = getMapFromHolder("keyTemplateMap");
     maps:remove(keyTemplateMap, key);
+    mapHolder:putMapEntry("keyTemplateMap", keyTemplateMap);
     if (maps:length(keyTemplateMap) > 0) {
         isKeyTemplatesPresent = true;
     } else {
@@ -39,12 +47,14 @@ function removeKeyTemplate (string key) {
 }
 
 function getKeyTemplateMap () (map) {
+    keyTemplateMap = getMapFromHolder("keyTemplateMap");
     return keyTemplateMap;
 }
 
 function getThrottleNextAccessTimestamp (string key) (string) {
     errors:TypeCastError err;
     string value;
+    throttleDataMap = getMapFromHolder("throttleDataMap");
     value, err = (string)throttleDataMap[key];
     return value;
 }
@@ -97,7 +107,7 @@ function isIpRangeBlocked (string ipBlockingKey, map conditionsMap) (boolean) {
 }
 
 function isThrottled (string throttleKey, message msg) (boolean) {
-
+    throttleDataMap = getMapFromHolder("throttleDataMap");
     if (throttleDataMap[throttleKey] != null) {
 
         int currentTime = system:currentTimeMillis();
@@ -116,4 +126,22 @@ function isThrottled (string throttleKey, message msg) (boolean) {
     }
 
     return false;
+}
+
+function getMapFromHolder(string mapName)(map){
+    any object = mapHolder:getMapEntry(mapName);
+    var retrivedMap, castErr = (map)object;
+    if(castErr != null) {
+        system:println("Error while casting throttle maps: " + castErr.msg);
+        retrivedMap = {};
+    }
+    return retrivedMap;
+}
+
+function addThrottleMaps()(boolean){
+    map throttleMap = {};
+    map keyTemplateMap = {};
+    mapHolder:putMapEntry("throttleDataMap", throttleMap);
+    mapHolder:putMapEntry("keyTemplateMap", keyTemplateMap);
+    return true;
 }
