@@ -65,6 +65,7 @@ import javax.ws.rs.core.Response;
  * This class provides access token during login from store app.
  *
  */
+
 @Component(
         name = "org.wso2.carbon.apimgt.rest.api.authenticator.AuthenticatorAPI",
         service = Microservice.class,
@@ -170,7 +171,9 @@ public class AuthenticatorAPI implements Microservice {
                                                 "").build();
             }
         } catch (APIManagementException e) {
+
             ErrorDTO errorDTO = AuthUtil.getErrorDTO(e.getErrorHandler(), null);
+
             log.error(e.getMessage(), e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
