@@ -217,6 +217,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         apiBuilder.lastUpdatedTime(localDateTime);
         apiBuilder.createdBy(getUsername());
         apiBuilder.updatedBy(getUsername());
+        if (apiBuilder.getLabels().isEmpty()) {
+            apiBuilder.getLabels().add(APIMgtConstants.DEFAULT_LABEL_NAME);
+        }
         Map<String, Endpoint> apiEndpointMap = apiBuilder.getEndpoint();
         validateEndpoints(apiEndpointMap, false);
         try {
