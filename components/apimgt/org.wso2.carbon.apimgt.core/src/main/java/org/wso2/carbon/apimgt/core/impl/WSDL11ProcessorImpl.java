@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.WSDLInfo;
+import org.wso2.carbon.apimgt.core.models.WSDLOperation;
 import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 import org.wso2.carbon.apimgt.core.util.APIMWSDLUtils;
 import org.xml.sax.InputSource;
@@ -42,13 +43,19 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import javax.wsdl.Binding;
+import javax.wsdl.BindingOperation;
 import javax.wsdl.Definition;
 import javax.wsdl.Port;
 import javax.wsdl.Service;
 import javax.wsdl.WSDLException;
+import javax.wsdl.extensions.http.HTTPBinding;
+import javax.wsdl.extensions.http.HTTPOperation;
 import javax.wsdl.factory.WSDLFactory;
 import javax.wsdl.xml.WSDLReader;
 import javax.wsdl.xml.WSDLWriter;
@@ -151,10 +158,12 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
 
     @Override
     public WSDLInfo getWsdlInfo() throws APIMgtWSDLException {
-        Map<String, String> endpointsMap = getEndpoints();
         WSDLInfo wsdlInfo = new WSDLInfo();
+        Map<String, String> endpointsMap = getEndpoints();
+        Set <WSDLOperation> operations = getOperations();
         wsdlInfo.setEndpoints(endpointsMap);
         wsdlInfo.setVersion(WSDL_VERSION_11);
+        wsdlInfo.setOperations(operations);
         return wsdlInfo;
     }
 
@@ -367,5 +376,73 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
                     ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
         }
         return byteArrayOutputStream;
+    }
+
+    /**
+     * Retrieves all the operations defined in WSDL(s).
+     * 
+     * @return a set of {@link WSDLOperation} defined in WSDL(s)
+     */
+    private Set<WSDLOperation> getOperations() {
+        if (wsdlDefinition != null) {
+            return getOperations(wsdlDefinition);
+        } else {
+            Set<WSDLOperation> allOperations = new HashSet<>();
+            for (Definition definition : pathToDefinitionMap.values()) {
+                Set<WSDLOperation> operations = getOperations(definition);
+                allOperations.addAll(operations);
+            }
+            return allOperations;
+        }
+    }
+
+    /**
+     * Retrieves all the operations defined in the provided WSDL definition.
+     * 
+     * @param definition WSDL Definition
+     * @return a set of {@link WSDLOperation} defined in the provided WSDL definition
+     */
+    private Set<WSDLOperation> getOperations (Definition definition) {
+        Set<WSDLOperation> allOperations = new HashSet<>();
+        for (Object bindingObj : definition.getAllBindings().values()) {
+            if (bindingObj instanceof Binding) {
+                Binding binding = (Binding) bindingObj;
+                Set<WSDLOperation> operations = getOperations(binding);
+                allOperations.addAll(operations);
+            }
+        }
+        return allOperations;
+    }
+
+    /**
+     * Retrieves all the operations defined in the provided Binding.
+     * 
+     * @param binding WSDL binding
+     * @return a set of {@link WSDLOperation} defined in the provided Binding
+     */
+    private Set<WSDLOperation> getOperations(Binding binding) {
+        Set<WSDLOperation> allBindingOperations = new HashSet<>();
+        if (binding.getExtensibilityElements() != null && binding.getExtensibilityElements().size() > 0) {
+            if (binding.getExtensibilityElements().get(0) instanceof HTTPBinding) {
+                HTTPBinding httpBinding = (HTTPBinding)binding.getExtensibilityElements().get(0);
+                String verb = httpBinding.getVerb();
+                for (Object opObj : binding.getBindingOperations()) {
+                    if (opObj instanceof BindingOperation) {
+                        BindingOperation bindingOperation = (BindingOperation) opObj;
+                        for (Object boExtElement : bindingOperation.getExtensibilityElements()) {
+                            if (boExtElement instanceof HTTPOperation) {
+                                HTTPOperation httpOperation = (HTTPOperation) boExtElement;
+                                if (!StringUtils.isBlank(httpOperation.getLocationURI())) {
+                                    WSDLOperation wsdlOperation = new WSDLOperation(verb,
+                                            httpOperation.getLocationURI());
+                                    allBindingOperations.add(wsdlOperation);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return allBindingOperations;
     }
 }

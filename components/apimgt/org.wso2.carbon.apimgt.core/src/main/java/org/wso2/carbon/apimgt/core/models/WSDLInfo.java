@@ -20,14 +20,16 @@ package org.wso2.carbon.apimgt.core.models;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
- *
+ * Information extracted from WSDL 
  */
 public class WSDLInfo {
 
     private String version;
     private Map<String, String> endpoints;
+    private Set<WSDLOperation> operations;
 
     public WSDLInfo() {
         endpoints = new HashMap<>();
@@ -49,4 +51,11 @@ public class WSDLInfo {
         this.endpoints = endpoints;
     }
 
+    public Set<WSDLOperation> getOperations() {
+        return operations;
+    }
+
+    public void setOperations(Set<WSDLOperation> operations) {
+        this.operations = operations;
+    }
 }

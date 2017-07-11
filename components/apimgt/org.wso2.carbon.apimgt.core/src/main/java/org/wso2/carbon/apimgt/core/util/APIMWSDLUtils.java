@@ -17,9 +17,12 @@
  */
 package org.wso2.carbon.apimgt.core.util;
 
+import io.swagger.models.HttpMethod;
 import org.apache.commons.io.IOUtils;
 import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.models.UriTemplate;
+import org.wso2.carbon.apimgt.core.models.WSDLOperation;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -27,7 +30,10 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This class contains utility functions which are required for WSDL file processing.
@@ -93,4 +99,35 @@ public class APIMWSDLUtils {
         return null;
     }
 
+    /**
+     * Generates URI templates to be assigned to an API from a set of operations extracted from WSDL.
+     * This will always include "POST /" resource
+     *
+     * @param operations a Set of {@link WSDLOperation} objects
+     * @return Map of URI Templates
+     */
+    public static Map<String, UriTemplate> getUriTemplatesForWSDLOperations(Set<WSDLOperation> operations) {
+        Map<String, UriTemplate> uriTemplateMap = new HashMap<>();
+
+        //add default "POST /" operation
+        UriTemplate.UriTemplateBuilder builderForPOSTRootCtx = new UriTemplate.UriTemplateBuilder();
+        builderForPOSTRootCtx.uriTemplate("/");
+        builderForPOSTRootCtx.httpVerb("POST");
+        builderForPOSTRootCtx.policy(APIUtils.getDefaultAPIPolicy());
+        builderForPOSTRootCtx.templateId(APIUtils.generateOperationIdFromPath("/", "POST"));
+        uriTemplateMap.put(builderForPOSTRootCtx.getTemplateId(), builderForPOSTRootCtx.build());
+
+        //add URI templates for operations
+        if (operations != null && operations.size() > 0) {
+            for (WSDLOperation operation : operations) {
+                UriTemplate.UriTemplateBuilder builder = new UriTemplate.UriTemplateBuilder();
+                builder.uriTemplate(operation.getURI().startsWith("/") ? operation.getURI() : "/" + operation.getURI());
+                builder.httpVerb(operation.getVerb());
+                builder.policy(APIUtils.getDefaultAPIPolicy());
+                builder.templateId(APIUtils.generateOperationIdFromPath(builder.getUriTemplate(), operation.getVerb()));
+                uriTemplateMap.put(builder.getTemplateId(), builder.build());
+            }
+        }
+        return uriTemplateMap;
+    }
 }

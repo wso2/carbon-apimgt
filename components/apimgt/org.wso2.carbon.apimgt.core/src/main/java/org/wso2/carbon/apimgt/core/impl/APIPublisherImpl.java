@@ -74,6 +74,7 @@ import org.wso2.carbon.apimgt.core.template.APIConfigContext;
 import org.wso2.carbon.apimgt.core.template.APITemplateException;
 import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
 import org.wso2.carbon.apimgt.core.util.APIFileUtils;
+import org.wso2.carbon.apimgt.core.util.APIMWSDLUtils;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.APILCWorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
@@ -218,7 +219,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         if (StringUtils.isEmpty(apiBuilder.getId())) {
             apiBuilder.id(UUID.randomUUID().toString());
         }
-        byte[] wsdlContentBytes = null;
+
         LocalDateTime localDateTime = LocalDateTime.now();
         apiBuilder.createdTime(localDateTime);
         apiBuilder.lastUpdatedTime(localDateTime);
@@ -1450,7 +1451,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public String addAPIFromWSDLArchive(API.APIBuilder apiBuilder, InputStream inputStream)
             throws APIManagementException {
         WSDLArchiveInfo archiveInfo = extractAndValidateWSDLArchive(inputStream);
-
+        apiBuilder.uriTemplates(
+                APIMWSDLUtils.getUriTemplatesForWSDLOperations(archiveInfo.getWsdlInfo().getOperations()));
         String uuid = addAPI(apiBuilder);
         try (InputStream fileInputStream = new FileInputStream(archiveInfo.getAbsoluteFilePath())) {
             getApiDAO().addOrUpdateWSDLArchive(uuid, fileInputStream, getUsername());
@@ -1791,6 +1793,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             throw new APIMgtWSDLException("Unable to process WSDL by the processor " + processor.getClass().getName(),
                     ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
         }
-        return new WSDLArchiveInfo(path, APIMgtConstants.WSDLConstants.WSDL_ARCHIVE_FILENAME);
+        WSDLArchiveInfo archiveInfo = new WSDLArchiveInfo(path, APIMgtConstants.WSDLConstants.WSDL_ARCHIVE_FILENAME);
+        archiveInfo.setWsdlInfo(processor.getWsdlInfo());
+        return archiveInfo;
     }
 }
