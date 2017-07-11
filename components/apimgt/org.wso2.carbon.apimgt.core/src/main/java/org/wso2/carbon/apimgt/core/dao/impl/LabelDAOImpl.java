@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.Label;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -406,8 +407,8 @@ public class LabelDAOImpl implements LabelDAO {
             List<String> accessUrls = new ArrayList<>();
             Label.Builder labelBuilder = new Label.Builder();
             labelBuilder.id(UUID.randomUUID().toString());
-            labelBuilder.name("Default");
-            accessUrls.add("https://localhost:9092");
+            labelBuilder.name(APIMgtConstants.DEFAULT_LABEL_NAME);
+            accessUrls.add(APIMgtConstants.DEFAULT_LABEL_ACCESS_URL);
             labelBuilder.accessUrls(accessUrls);
             addLabel(labelBuilder.build());
         }
