@@ -15,26 +15,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+'use strict';
 
-import React from 'react'
-import {Route, Switch} from 'react-router-dom'
+import React, {Component} from 'react'
 
-import Listing from './Listing/Listing'
-import Details from './Details/index'
-import {PageNotFound} from '../Base/Errors'
+export default class EndpointDetails extends Component {
 
-
-class Apis extends React.Component {
     render() {
         return (
-            <Switch>
-                <Route exact path={"/apis"} component={Listing}/>
-                <Route path={"/apis/:api_uuid/"} render={ props => (
-                    <Details {...props} setLeftMenu={this.props.setLeftMenu}/>)}/>
-                <Route component={PageNotFound}/>
-            </Switch>
+            <div>
+                <h4>
+                    Endpoint details page!
+                </h4>
+            </div>
         );
     }
 }
-
-export default Apis;
