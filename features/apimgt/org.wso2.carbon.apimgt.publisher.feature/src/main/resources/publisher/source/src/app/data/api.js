@@ -538,6 +538,21 @@ class API {
     }
 
     /**
+     * Delete an Endpoint given its identifier
+     * @param id {String} UUID of the Endpoint which want to delete
+     * @returns {promise}
+     */
+    deleteEndpoint(id) {
+        var promised_delete = this.client.then(
+            (client) => {
+                return client["Endpoint (individual)"].delete_endpoints_endpointId(
+                    {endpointId: id,'Content-Type': 'application/json'}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+            }
+        );
+        return promised_delete;
+    }
+
+    /**
      * Get All Global Endpoints.
      * @returns {Promise} Promised all list of endpoint
      */

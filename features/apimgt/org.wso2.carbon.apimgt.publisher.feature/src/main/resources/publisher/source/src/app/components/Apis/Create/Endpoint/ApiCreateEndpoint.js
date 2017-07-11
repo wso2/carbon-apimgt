@@ -50,21 +50,30 @@ class EndpointForm extends React.Component {
         this.props.form.validateFields((err, values) => {
             if (!err) {
                 console.log('Received values of form: ', values);
-                let endpoint = {
+                let endpoints = [{
+                    type: "production",
                     inline: {
-                        name: values.apiName + values.apiVersion.replace(/\./g, "_"), // TODO: It's better to add this name property from the REST api itself, making sure no name conflicts with other inline endpoint definitions ~tmkb
+                        name: "production_" + values.apiName + values.apiVersion.replace(/\./g, "_"), // TODO: It's better to add this name property from the REST api itself, making sure no name conflicts with other inline endpoint definitions ~tmkb
                         endpointConfig: JSON.stringify({serviceUrl: values.apiEndpoint}),
                         endpointSecurity: {enabled: false},
                         type: "http"
                     }
-                };
+                }, {
+                    type: "sandbox",
+                    inline: {
+                        name: "sandbox_" + values.apiName + values.apiVersion.replace(/\./g, "_"), // TODO: It's better to add this name property from the REST api itself, making sure no name conflicts with other inline endpoint definitions ~tmkb
+                        endpointConfig: JSON.stringify({serviceUrl: values.apiEndpoint}),
+                        endpointSecurity: {enabled: false},
+                        type: "http"
+                    }
+                }];
                 let api_data = {
                     name: values.apiName,
                     context: values.apiContext,
                     version: values.apiVersion
                 };
                 if (values.apiEndpoint) {
-                    api_data['endpoint'] = [endpoint];
+                    api_data['endpoint'] = endpoints;
                 }
                 let new_api = new API('');
                 let promised_create = new_api.create(api_data);

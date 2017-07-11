@@ -68,10 +68,6 @@ class Listing extends React.Component {
         this.setState({listType: value});
     }
 
-    isActive = (value) => {
-        return 'btn ' + ((value === this.state.listType) ? 'active' : 'default');
-    }
-
     handleApiDelete(api_uuid, name) {
         const hideMessage = message.loading("Deleting the API ...",0);
         const api = new API();
@@ -119,7 +115,7 @@ class Listing extends React.Component {
         }, {
             title: 'Action',
             key: 'action',
-            render: (text, record) => {
+            render: text => {
                 return (
                     <Popconfirm title="Confirm delete?" onConfirm={() => this.handleApiDelete(text.id, text.name)}>
                         <Button type="danger" icon="delete">Delete</Button>
