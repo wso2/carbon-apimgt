@@ -727,7 +727,7 @@ var getThemeFile = function (path) {
             var BigInteger = Packages.java.math.BigInteger;
             var token = new BigInteger(130, random).toString(32);
 
-            var cookie= {'name':'csrftoken','value': token , 'path':"/", "secure": true};
+            var cookie = {'name': 'csrftoken', 'value': token, 'path': "/", "secure": true, "maxAge": -1};
             session.put('csrfuser',user);
             response.addCookie(cookie);
         }     
