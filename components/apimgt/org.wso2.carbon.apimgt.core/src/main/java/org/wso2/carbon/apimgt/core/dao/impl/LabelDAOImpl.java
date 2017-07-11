@@ -420,14 +420,11 @@ public class LabelDAOImpl implements LabelDAO {
      */
     private static boolean isLabelsExists() throws APIMgtDAOException {
         final String query = "SELECT 1 FROM AM_LABELS";
-        try {
-            try (Connection connection = DAOUtil.getConnection();
-                    PreparedStatement statement = connection.prepareStatement(query)) {
-                try (ResultSet rs = statement.executeQuery()) {
-                    if (rs.next()) {
-                        return true;
-                    }
-                }
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(query);
+                ResultSet rs = statement.executeQuery()) {
+            if (rs.next()) {
+                return true;
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -435,5 +432,3 @@ public class LabelDAOImpl implements LabelDAO {
         return false;
     }
 }
-
-
