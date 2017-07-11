@@ -45,9 +45,10 @@ const ComposeHeader = (props) => {
             >
                 <SubMenu
                     title={<span><Icon type="down"/>{ AuthManager.getUser() ? AuthManager.getUser().name : ""}</span>}>
-                    <Menu.Item key="setting:1"><Link
-                        to={{pathname: '/logout', search: params}}><Icon type="logout"/>Logout</Link></Menu.Item>
                     <Menu.Item key="setting:2"><Icon type="user"/>Profile</Menu.Item>
+                    <Menu.Item key="setting:1">
+                        <Link to={{pathname: '/logout', search: params}}><Icon type="logout"/>Logout</Link>
+                    </Menu.Item>
                 </SubMenu>
                 <SubMenu title={<Icon type="appstore-o" style={{fontSize: 20}}/>}>
                     <Menu.Item key="endpoints">
