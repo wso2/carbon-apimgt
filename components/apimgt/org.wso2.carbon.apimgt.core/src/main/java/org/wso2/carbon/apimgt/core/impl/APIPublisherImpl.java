@@ -780,12 +780,12 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     /**
-     * This method replaces the groupId field's value of the api permisisons string to the role name before sending to
+     * This method replaces the groupId field's value of the api permissions string to the role name before sending to
      * frontend
      *
      * @param permissionString - permissions string containing role ids in the groupId field
      * @return the permission string replacing the groupId field's value to role name
-     * @throws ParseException - if there is an erro rparsing the permission json
+     * @throws ParseException - if there is an error parsing the permission json
      * @throws APIManagementException - if there is an error getting the IdentityProvider instance
      */
     private String replaceGroupIdWithName(String permissionString) throws ParseException, APIManagementException {
