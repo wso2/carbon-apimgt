@@ -120,8 +120,6 @@ public class LabelDAOImpl implements LabelDAO {
                 insertAccessUrlMappings(label.getId(), label.getAccessUrls());
             }
         } catch (SQLException e) {
-            String message = "Error while adding label data";
-            log.error(message, e);
             throw new APIMgtDAOException(e);
         }
     }
