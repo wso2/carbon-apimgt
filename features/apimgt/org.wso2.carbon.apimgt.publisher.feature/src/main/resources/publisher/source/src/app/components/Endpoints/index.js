@@ -18,16 +18,71 @@
 'use strict';
 
 import React, {Component} from 'react'
+import {Link} from 'react-router-dom'
+import {Table} from 'antd';
 
-const Endpoints = (props) => {
+import API from '../../data/api'
 
-    return (
-        <div>
-            <h2>
-                Global Endpoints Page
-            </h2>
-        </div>
-    );
-};
+export default class Endpoints extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            endpoints: null,
+            selectedRowKeys: []
+        };
+        this.onSelectChange = this.onSelectChange.bind(this);
+    }
 
-export default Endpoints
+    componentDidMount() {
+        const api = new API();
+        const promised_endpoints = api.getEndpoints();
+        /* TODO: Handle catch case , auth errors and ect ~tmkb*/
+        promised_endpoints.then(
+            response => {
+                this.setState({endpoints: response.obj.list});
+            }
+        );
+    }
+
+    onSelectChange(selectedRowKeys) {
+        this.setState({selectedRowKeys: selectedRowKeys});
+    }
+
+    render() {
+        const {selectedRowKeys, endpoints} = this.state;
+        const columns = [{
+            title: 'Name',
+            dataIndex: 'name',
+            key: 'age',
+            sorter: (a, b) => a.name.length - b.name.length,
+            render: (text, record) => <Link to={"/endpoints/" + record.id}>{text}</Link>
+            // sortOrder: sortedInfo.columnKey === 'age' && sortedInfo.order,
+        }, {
+            title: 'Type',
+            dataIndex: 'type'
+        }, {
+            title: 'Service URL',
+            dataIndex: 'endpointConfig',
+            render: (text, record, index) => JSON.parse(text).serviceUrl
+        }, {
+            title: 'Max TPS',
+            dataIndex: 'maxTps',
+            sorter: (a, b) => a.maxTps - b.maxTps,
+        }];
+        const rowSelection = {
+            selectedRowKeys,
+            onChange: this.onSelectChange,
+        };
+        return (
+            <div>
+                <div>
+                    <h4>Global Endpoints</h4>
+                    <Table rowSelection={rowSelection} loading={endpoints === null} columns={columns}
+                           dataSource={endpoints}
+                           rowKey="id"
+                           size="middle"/>
+                </div>
+            </div>
+        );
+    }
+}
