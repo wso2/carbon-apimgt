@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.model.AccessTokenDO;
@@ -144,6 +145,11 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
         AuthenticatedUser user = new AuthenticatedUser();
         user.setUserName(apiKeyValidationInfoDTO.getEndUserName());
+
+        if ("FEDERATED".equalsIgnoreCase(IdentityUtil.extractDomainFromName(user.getUserName()))) {
+            user.setFederatedUser(true);
+        }
+
         AccessTokenDO accessTokenDO = new AccessTokenDO(apiKeyValidationInfoDTO.getConsumerKey(), user, scopes, null,
                 null, apiKeyValidationInfoDTO.getValidityPeriod(), apiKeyValidationInfoDTO.getValidityPeriod(),
                 apiKeyValidationInfoDTO.getType());

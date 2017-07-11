@@ -27,6 +27,13 @@ public final class ResourceConstants {
     public static final String RESOURCE_PATH = "resource";
     public static final String RESOURCE_VERB = "httpVerb";
     public static final String KEY_DOMAIN = "clientDomain";
+    public static final String CHECK_ROLES_FROM_SAML_ASSERTION = "checkRolesFromSamlAssertion";
+    public static final String SAML2_ASSERTION = "SAML2Assertion";
+    public static final String SAML2_SSO_AUTHENTICATOR_NAME = "SAML2SSOAuthenticator";
+    public static final String ROLE_CLAIM_ATTRIBUTE = "RoleClaimAttribute";
+    public static final String ATTRIBUTE_VALUE_SEPARATOR = "AttributeValueSeparator";
+    public static final String ROLE_ATTRIBUTE_NAME = "http://wso2.org/claims/role";
+    public static final String ATTRIBUTE_VALUE_SEPERATER = ",";
 
     public static final String RESOURCE_PARAMS = "keymgt_resource_params";
     public static final String INTROSPECTURI = "http://localhost:8080/openid-connect-server-webapp/introspect";

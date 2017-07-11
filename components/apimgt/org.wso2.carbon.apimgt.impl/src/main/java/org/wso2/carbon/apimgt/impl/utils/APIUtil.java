@@ -166,18 +166,6 @@ import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
 
-import javax.cache.Cache;
-import javax.cache.CacheConfiguration;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
-import javax.xml.XMLConstants;
-import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -212,6 +200,18 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
+import javax.cache.Cache;
+import javax.cache.CacheConfiguration;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
+import javax.xml.XMLConstants;
+import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 
 /**
  * This class contains the utility methods used by the implementations of APIManager, APIProvider
@@ -224,6 +224,8 @@ public final class APIUtil {
     private static final Log audit = CarbonConstants.AUDIT_LOG;
 
     private static boolean isContextCacheInitialized = false;
+
+    public static final String DISABLE_ROLE_VALIDATION_AT_SCOPE_CREATION = "disableRoleValidationAtScopeCreation";
 
     private static final int ENTITY_EXPANSION_LIMIT = 0;
 
@@ -3775,6 +3777,13 @@ public final class APIUtil {
         if (roleName == null || StringUtils.isEmpty(roleName.trim())) {
             return true;
         }
+
+        //disable role validation if "disableRoleValidationAtScopeCreation" system property is set
+        String disableRoleValidation = System.getProperty(DISABLE_ROLE_VALIDATION_AT_SCOPE_CREATION);
+        if (Boolean.parseBoolean(disableRoleValidation)) {
+            return true;
+        }
+
         org.wso2.carbon.user.api.UserStoreManager userStoreManager;
         try {
             RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
