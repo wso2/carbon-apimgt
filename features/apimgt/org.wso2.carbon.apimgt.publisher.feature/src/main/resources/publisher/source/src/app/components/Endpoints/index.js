@@ -17,72 +17,23 @@
  */
 'use strict';
 
-import React, {Component} from 'react'
-import {Link} from 'react-router-dom'
-import {Table} from 'antd';
+import React from 'react'
+import {Switch, Route} from 'react-router-dom'
 
-import API from '../../data/api'
+import EndpointsListing from './Listing'
+import EndpointDetails from './Details'
+import EndpointCreate from './Create'
+import {PageNotFound} from '../Base/Errors'
 
-export default class Endpoints extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            endpoints: null,
-            selectedRowKeys: []
-        };
-        this.onSelectChange = this.onSelectChange.bind(this);
-    }
+const Endpoints = () => {
+    return (
+        <Switch>
+            <Route exact path="/endpoints" component={EndpointsListing}/>
+            <Route path="/endpoints/create" component={EndpointCreate}/>
+            <Route path={"/endpoints/:endpoint_uuid/"} component={EndpointDetails}/>
+            <Route component={PageNotFound}/>
+        </Switch>
+    );
+};
 
-    componentDidMount() {
-        const api = new API();
-        const promised_endpoints = api.getEndpoints();
-        /* TODO: Handle catch case , auth errors and ect ~tmkb*/
-        promised_endpoints.then(
-            response => {
-                this.setState({endpoints: response.obj.list});
-            }
-        );
-    }
-
-    onSelectChange(selectedRowKeys) {
-        this.setState({selectedRowKeys: selectedRowKeys});
-    }
-
-    render() {
-        const {selectedRowKeys, endpoints} = this.state;
-        const columns = [{
-            title: 'Name',
-            dataIndex: 'name',
-            key: 'age',
-            sorter: (a, b) => a.name.length - b.name.length,
-            render: (text, record) => <Link to={"/endpoints/" + record.id}>{text}</Link>
-            // sortOrder: sortedInfo.columnKey === 'age' && sortedInfo.order,
-        }, {
-            title: 'Type',
-            dataIndex: 'type'
-        }, {
-            title: 'Service URL',
-            dataIndex: 'endpointConfig',
-            render: (text, record, index) => JSON.parse(text).serviceUrl
-        }, {
-            title: 'Max TPS',
-            dataIndex: 'maxTps',
-            sorter: (a, b) => a.maxTps - b.maxTps,
-        }];
-        const rowSelection = {
-            selectedRowKeys,
-            onChange: this.onSelectChange,
-        };
-        return (
-            <div>
-                <div>
-                    <h4>Global Endpoints</h4>
-                    <Table rowSelection={rowSelection} loading={endpoints === null} columns={columns}
-                           dataSource={endpoints}
-                           rowKey="id"
-                           size="middle"/>
-                </div>
-            </div>
-        );
-    }
-}
+export default Endpoints

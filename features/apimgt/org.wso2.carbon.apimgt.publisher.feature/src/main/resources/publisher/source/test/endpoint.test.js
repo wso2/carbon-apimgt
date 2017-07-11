@@ -57,7 +57,7 @@ describe("Endpoint", function () {
         });
     });
     describe("#update()", function () {
-        it("Should update existing endpoint resource", function () {
+        it.skip("Should update existing endpoint resource", function () {
             const api = new API();
             const c_time = Date.now();
             const endpointDefinition = api.getEndpoints();
@@ -75,7 +75,13 @@ describe("Endpoint", function () {
             const endpointDefinition = api.getEndpoints();
             return endpointDefinition.then(
                 response => {
-                    console.log(response);
+                    const endpoint = response.obj.list.pop(); // Poping the endpoint created in #create() case
+                    const promisedDelete = api.deleteEndpoint(endpoint.id);
+                    return promisedDelete.then(
+                        response => {
+                            assert.equal(response.status, 200, "Can't delete API!")
+                        }
+                    );
                 }
             );
         });

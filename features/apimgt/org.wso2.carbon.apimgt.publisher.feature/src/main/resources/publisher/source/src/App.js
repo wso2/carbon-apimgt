@@ -58,7 +58,6 @@ class Protected extends Component {
             return (
                 <Base showLeftMenu={this.state.showLeftMenu}>
                     <Switch>
-
                         <Redirect exact from="/" to="/apis"/>
                         <Route path={"/apis"} render={ props => (<Apis setLeftMenu={this.setLeftMenu}/>)}/>
                         <Route path={"/endpoints"} component={Endpoints}/>
