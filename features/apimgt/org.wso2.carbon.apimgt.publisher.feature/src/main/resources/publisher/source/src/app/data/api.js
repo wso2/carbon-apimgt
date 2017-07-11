@@ -538,6 +538,19 @@ class API {
     }
 
     /**
+     * Get All Global Endpoints.
+     * @returns {Promise} Promised all list of endpoint
+     */
+    getEndpoints() {
+        return this.client.then(
+            (client) => {
+                return client["Endpoint (Collection)"].get_endpoints(
+                    {}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+            }
+        );
+    }
+
+    /**
      * Get endpoint object by its UUID.
      * @param id {String} UUID of the endpoint
      * @returns {Promise.<TResult>}
