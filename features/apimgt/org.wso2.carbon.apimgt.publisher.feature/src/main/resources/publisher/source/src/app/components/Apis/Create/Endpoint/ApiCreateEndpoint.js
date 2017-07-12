@@ -50,30 +50,25 @@ class EndpointForm extends React.Component {
         this.props.form.validateFields((err, values) => {
             if (!err) {
                 console.log('Received values of form: ', values);
-                let endpoints = [{
+                let production = {
                     type: "production",
                     inline: {
-                        name: "production_" + values.apiName + values.apiVersion.replace(/\./g, "_"), // TODO: It's better to add this name property from the REST api itself, making sure no name conflicts with other inline endpoint definitions ~tmkb
+                        name: values.apiName + values.apiVersion.replace(/\./g, "_"), // TODO: It's better to add this name property from the REST api itself, making sure no name conflicts with other inline endpoint definitions ~tmkb
                         endpointConfig: JSON.stringify({serviceUrl: values.apiEndpoint}),
                         endpointSecurity: {enabled: false},
                         type: "http"
                     }
-                }, {
-                    type: "sandbox",
-                    inline: {
-                        name: "sandbox_" + values.apiName + values.apiVersion.replace(/\./g, "_"), // TODO: It's better to add this name property from the REST api itself, making sure no name conflicts with other inline endpoint definitions ~tmkb
-                        endpointConfig: JSON.stringify({serviceUrl: values.apiEndpoint}),
-                        endpointSecurity: {enabled: false},
-                        type: "http"
-                    }
-                }];
+                };
                 let api_data = {
                     name: values.apiName,
                     context: values.apiContext,
                     version: values.apiVersion
                 };
                 if (values.apiEndpoint) {
-                    api_data['endpoint'] = endpoints;
+                    let sandbox = JSON.parse(JSON.stringify(production)); // deep coping the object
+                    sandbox.type = "sandbox";
+                    sandbox.inline.name += "_sandbox";
+                    api_data['endpoint'] = [production, sandbox];
                 }
                 let new_api = new API('');
                 let promised_create = new_api.create(api_data);
