@@ -16,11 +16,46 @@
  * under the License.
  */
 
-import React from 'react'
-import {Row, Col} from 'antd';
+import React, {Component} from 'react'
+import {Link} from 'react-router-dom'
+import {Col, Row, Card, Form, Select, Dropdown, Tag, Menu, Button, Badge} from 'antd';
 
+const FormItem = Form.Item;
+const Option = Select.Option;
 
-class Permission extends React.Component {
+const menu = (
+    <Menu>
+        <Menu.Item>
+            <Link to="">Edit</Link>
+        </Menu.Item>
+        <Menu.Item>
+            <Link to="">Create New Version</Link>
+        </Menu.Item>
+        <Menu.Item>
+            <Link to="">View Swagger</Link>
+        </Menu.Item>
+    </Menu>
+);
+
+class ActivityItem extends Component {
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+        return <div className="feed-element">
+            <a href="#" className="pull-left">
+                <i className="fw fw-user"></i>
+            </a>
+            <div className="media-body ">
+                <small className="pull-right text-navy">{this.props.when}</small>
+                <strong>{this.props.user}</strong> subscribed with <strong>{this.props.tier}</strong> tier. <br />
+                <small className="text-muted">{this.props.time}</small>
+            </div>
+        </div>
+    }
+}
+class Permission extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -28,42 +63,94 @@ class Permission extends React.Component {
         }
     }
 
+    componentWillReceiveProps(nextProps) {
+        this.setState(
+            {
+                api: nextProps.api
+            }
+        );
+
+    }
+
     render() {
 
+        const formItemLayout = {
+            labelCol: {span: 6},
+            wrapperCol: {span: 18}
+        };
+
         return (
+
             <div>
-                <div>
-                    <div className="wrapper wrapper-content">
-                        <h2> API Name : {this.state.api.name} </h2>
+                <Row type="flex" justify="center">
+                    <Col span={4}>
 
-                        <div className="divTable">
-                            <div className="divTableBody">
-                                <div className="gutter-example">
-                                    <Row gutter={16}>
-                                        <Col className="gutter-row" span={6}>
-                                            <div className="gutter-box">Group Name</div>
-                                        </Col>
-                                        <Col className="gutter-row" span={6}>
-                                            <div className="gutter-box">Read</div>
-                                        </Col>
-                                        <Col className="gutter-row" span={6}>
-                                            <div className="gutter-box">Update</div>
-                                        </Col>
-                                        <Col className="gutter-row" span={6}>
-                                            <div className="gutter-box">Delete</div>
-                                        </Col>
-                                    </Row>
-                                </div>
-
+                        <Card bodyStyle={{padding: 10}}>
+                            <div className="custom-image">
+                                <img alt="API thumb" width="100%" src="/publisher/public/images/api/api-default.png"/>
                             </div>
-                        </div>
-                    </div>
+                            <div className="custom-card">
+                                <Badge status="processing" text={this.state.api.lifeCycleStatus}/>
+                                <p>11 Apps</p>
+                                <a href="#components-anchor-store" title="Store">View in store</a>
+                            </div>
+                        </Card>
+                    </Col>
+                    <Col span={15} offset={1}>
+                        <Form layout="vertical">
+                            <FormItem {...formItemLayout} label="Visibility">
+                                <span className="ant-form-text">
+                                        <Select labelInValue defaultValue={{ key: 'Public' }}>
+                                            <Option value="Public">Public</Option>
+                                            <Option value="RestrictedByRoles">Restricted By Roles</Option>
+                                            <Option value="Visibletomydomain">Visible To My Domain</Option>
+                                        </Select>
+                                </span>
+                            </FormItem>
+                            <FormItem {...formItemLayout} label="Version">
+                                <span className="ant-form-text">{this.state.api.version}</span>
+                            </FormItem>
+                            <FormItem {...formItemLayout} label="Context">
+                                <span className="ant-form-text">{this.state.api.context}</span>
+                            </FormItem>
+                            <FormItem {...formItemLayout} label="Last Updated">
+                                <span className="ant-form-text">{this.state.api.createdTime}</span>
+                            </FormItem>
+                            <FormItem {...formItemLayout} label="Business Plans">
+                                <span className="ant-form-text">{"Gold, Silver, Free"}</span>
+                            </FormItem>
+                            <FormItem {...formItemLayout} label="Tags">
+                                <span className="ant-form-text">
+                                    <Tag><a href="#somelink">Social</a></Tag>
+                                    <Tag><a href="#somelink">Facebook</a></Tag>
+                                </span>
+                            </FormItem>
+                            <FormItem {...formItemLayout} label="Labels">
+                                <span className="ant-form-text">
+                                      <Tag color="pink">pink</Tag>
+                                      <Tag color="red">red</Tag>
+                                      <Tag color="orange">orange</Tag>
+                                      <Tag color="green">green</Tag>
+                                </span>
+                            </FormItem>
+                            <FormItem {...formItemLayout} label="Business Owner">
+                                <span className="ant-form-text">{"WSO2"}</span>
+                                <a className="ant-form-text" href="#email">{"(bizdev@wso2.com)"}</a>
+                            </FormItem>
+                            <FormItem {...formItemLayout} label="Tech Owner">
+                                <span className="ant-form-text">{"WSO2 Support"}</span>
+                                <a className="ant-form-text" href="#email">{"(support@wso2.com)"}</a>
+                            </FormItem>
+                        </Form>
+                    </Col>
+                </Row>
+                <div className="api-add-links">
+                    <Dropdown overlay={menu} placement="topCenter">
+                        <Button shape="circle" icon="edit"/>
+                    </Dropdown>
                 </div>
-
             </div>
-
-
-        )
+        );
     }
 }
 
