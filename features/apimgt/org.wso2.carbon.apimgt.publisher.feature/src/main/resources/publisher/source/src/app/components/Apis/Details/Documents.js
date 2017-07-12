@@ -18,7 +18,7 @@
 
 import React, {Component} from 'react'
 import API from '../../../data/api.js'
-import {Button, Row, Col, Form, Input, Table, message} from 'antd';
+import {Button, Row, Col, Form, Input, Table, message, Popconfirm} from 'antd';
 
 const FormItem = Form.Item;
 
@@ -27,10 +27,10 @@ const FormItem = Form.Item;
 
  # Component hierarchy
  -Documents
-    -DocumentsTable
-    -NewDocDiv
-        -NewDocInfoDiv
-        -NewDocSourceDiv
+ -DocumentsTable
+ -NewDocDiv
+ -NewDocInfoDiv
+ -NewDocSourceDiv
  */
 class Documents extends Component {
     constructor(props) {
@@ -39,24 +39,37 @@ class Documents extends Component {
         this.api_id = this.props.match.params.api_uuid;
         this.state = {
             newDocName: "",
+            documentId: "",
             newDocSourceType: "INLINE",
             newDocURL: "",
             newDocFilePath: null,
             addingNewDoc: false,
             newDocSummary: "",
             newDocFile: null,
-            documentsList: null
+            documentsList: null,
+            updatingDoc: false
         };
         this.addNewDocBtnListner = this.addNewDocBtnListner.bind(this);
         this.handleNewDocInputChange = this.handleNewDocInputChange.bind(this);
         this.submitAddNewDocListner = this.submitAddNewDocListner.bind(this);
         this.cancelAddNewDocListner = this.cancelAddNewDocListner.bind(this);
         this.resetNewDocDetails = this.resetNewDocDetails.bind(this);
+        this.deleteDocHandler = this.deleteDocHandler.bind(this);
+        this.addNewDocBtnListner = this.addNewDocBtnListner.bind(this);
+        this.editAPIDocumentListener = this.editAPIDocumentListener.bind(this);
+        this.submitUpdateDocumentListener = this.submitUpdateDocumentListener.bind(this);
     }
 
     componentDidMount() {
+        this.getDocumentsList();
+    }
+
+    getDocumentsList() {
         let docs = this.client.getDocuments(this.api_id);
-        docs.catch(error => {
+        docs.catch(error_response => {
+            let error_data = JSON.parse(error_response.data);
+            let messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+            console.error(messageTxt);
             message.error("Error in fetching documents list of the API");
         }).then(response => {
             this.setState({documentsList: response.obj.list});
@@ -102,9 +115,13 @@ class Documents extends Component {
                 var file = this.state.newDocFile;
                 var promised_add_file = this.client.addFileToDocument(this.api_id, docId, file);
                 promised_add_file.catch(function (error) {
+                    let error_data = JSON.parse(error_response.data);
+                    let messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+                    console.error(messageTxt);
                     message.error("Failed adding file to the newly added document");
                 });
             }
+            api_documents_data.documentId = docId;
             var updatedDocList = this.state.documentsList;
             updatedDocList.push(api_documents_data);
             this.setState({
@@ -131,7 +148,7 @@ class Documents extends Component {
         this.resetNewDocDetails();
     }
 
-    resetNewDocDetails(){
+    resetNewDocDetails() {
         this.setState({
             newDocName: "",
             newDocSourceType: "INLINE",
@@ -143,28 +160,109 @@ class Documents extends Component {
         });
     }
 
+    deleteDocHandler(documentID) {
+        let promised_delete = this.client.deleteDocument(this.api_id, documentID);
+        promised_delete.then(
+            (response) => {
+                if (!response) {
+                    return;
+                }
+                this.getDocumentsList();
+            }
+        );
+    }
+
+    editAPIDocumentListener(document) {
+        this.setState({
+            documentId: document.documentId,
+            newDocName: document.name,
+            newDocSourceType: document.sourceType,
+            newDocURL: document.sourceUrl,
+            newDocFilePath: document.fileName,
+            addingNewDoc: false,
+            newDocSummary: document.summary,
+            updatingDoc: true
+        });
+    }
+
+    submitUpdateDocumentListener() {
+        if (
+            (this.state.newDocSourceType == null) || (this.state.newDocName == "") ||
+            (this.state.newDocSourceType == "URL" && this.state.newDocURL == "") ||
+            (this.state.newDocSourceType == "FILE" && this.state.newDocFile == null)
+        ) {
+            message.error("Enter the required details before adding the document");
+            return;
+        }
+
+        var api_documents_data = {
+            documentId: this.state.documentId,
+            name: this.state.newDocName,
+            type: "HOWTO",
+            summary: this.state.newDocSummary,
+            sourceType: this.state.newDocSourceType,
+            sourceUrl: this.state.newDocURL,
+            inlineContent: "string",
+            permission: '[{"groupId" : "1000", "permission" : ["READ","UPDATE"]},{"groupId" : "1001", "permission" : ["READ","UPDATE"]}]',
+            visibility: "API_LEVEL"
+        }
+        var promised_update = this.client.updateDocument(this.api_id, api_documents_data.documentId, api_documents_data);
+        promised_update.catch(function (error_response) {
+            let error_data = JSON.parse(error_response.data);
+            let messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+            console.error(messageTxt);
+            message.error(messageTxt);
+        }).then((response) => {
+            var dt_data = response.obj;
+            var docId = dt_data.documentId;
+
+            if (dt_data.sourceType == "FILE") {
+                var promised_add_file = this.client.addFileToDocument(this.api_id, docId, this.state.newDocFile);
+                promised_add_file.catch(() => {
+                    var error_data = JSON.parse(error_response.data);
+                    var messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+                    console.error(messageTxt);
+                    message.error("Failed updating document file")
+                });
+            }
+            this.resetNewDocDetails();
+            this.setState({updatingDoc: false});
+            this.getDocumentsList();
+            message.success("Document updated successfully");
+        });
+    }
+
     render() {
         return (
             <div>
                 <Button style={{marginBottom: 30}} onClick={this.addNewDocBtnListner}
                         type="primary">Add New Document</Button>
                 <div>
-                    {this.state.addingNewDoc &&
+                    {(this.state.addingNewDoc || this.state.updatingDoc) &&
                     <NewDocDiv
                         newDocName={this.state.newDocName}
-                        onNewDocInfoChange={this.handleNewDocInputChange}
-                        selectedSourceType={this.state.newDocSourceType}
+                        newDocSummary={this.state.newDocSummary}
+                        newDocURL={this.state.newDocURL}
                         newDocFilePath={this.state.newDocFilePath}
+                        selectedSourceType={this.state.newDocSourceType}
+                        newDocFile={this.state.newDocFile}
+                        onNewDocInfoChange={this.handleNewDocInputChange}
                         onSubmitAddNewDoc={this.submitAddNewDocListner}
                         onCancelAddNewDoc={this.cancelAddNewDocListner}
+                        onSubmitUpdateDoc={this.submitUpdateDocumentListener}
+                        updatingDoc={this.state.updatingDoc}
                     />}
                 </div>
                 <hr color="#f2f2f2"/>
                 {
                     (this.state.documentsList && (this.state.documentsList.length > 0) ) ? (
                         <DocumentsTable apiId={this.api_id} client={this.client}
-                                    documentsList={this.state.documentsList}/> ) :
-                        (<div style={{paddingTop:20}}><p>No documents added into the API</p></div>)
+                                        documentsList={this.state.documentsList}
+                                        deleteDocHandler={this.deleteDocHandler}
+                                        onEditAPIDocument={this.editAPIDocumentListener}
+
+                        /> ) :
+                        (<div style={{paddingTop: 20}}><p>No documents added into the API</p></div>)
                 }
             </div>
         );
@@ -186,19 +284,24 @@ class DocumentsTable extends Component {
             title: 'Actions',
             dataIndex: 'actions',
             key: 'actions',
-            render: () => <div>
-                <a href="#">Edit | </a>
+            render: (text1, record) => (<div>
+                <a href="#" onClick={() => this.props.onEditAPIDocument(record)}>Edit | </a>
                 <a href="#">View | </a>
-                <a href="#">Delete</a>
-            </div>
+                <Popconfirm title="Are you sure you want to delete this document?"
+                            onConfirm={() => this.props.deleteDocHandler(record.documentId)}
+                            okText="Yes" cancelText="No">
+                    <a href="#">Delete</a>
+                </Popconfirm>
+            </div>)
         }
         ];
     }
 
     render() {
+
         return (
-            <div style={{ paddingTop: 20 }}>
-                <h3 style={{ paddingBottom: 15 }}>Current Documents</h3>
+            <div style={{paddingTop: 20}}>
+                <h3 style={{paddingBottom: 15}}>Current Documents</h3>
                 <Table dataSource={ this.props.documentsList } columns={this.columns}/>
             </div>
         );
@@ -208,7 +311,7 @@ class DocumentsTable extends Component {
 class NewDocDiv extends Component {
     constructor(props) {
         super(props);
-        this.state = {sourceURL: "", summary: "", sourceFile: ""};
+        //this.state = {sourceURL: "", summary: "", sourceFile: ""};
     }
 
     render() {
@@ -218,13 +321,23 @@ class NewDocDiv extends Component {
                     <Row type="flex" gutter={80} style={{paddingTop: 10}}>
                         <Col span={6}>
                             <NewDocInfoDiv
-                                onNewDocInfoChange={this.props.onNewDocInfoChange}/>
+                                onNewDocInfoChange={this.props.onNewDocInfoChange}
+                                newDocName={this.props.newDocName}
+                                newDocSummary={this.props.newDocSummary}
+                                newDocURL={this.props.newDocURL}
+                                newDocFilePath={this.props.newDocFilePath}
+                                selectedSourceType={this.props.newDocSourceType}
+                                updatingDoc={this.props.updatingDoc}
+                            />
                         </Col>
                         <Col span={6}>
                             <NewDocSourceDiv
                                 onNewDocInfoChange={this.props.onNewDocInfoChange}
                                 selectedSourceType={this.props.selectedSourceType}
                                 newDocFilePath={this.props.newDocFilePath}
+                                newDocFile={this.props.newDocFile}
+                                newDocURL={this.props.newDocURL}
+                                updatingDoc={this.props.updatingDoc}
                             />
                         </Col>
                     </Row>
@@ -232,8 +345,15 @@ class NewDocDiv extends Component {
                 <div name="action-buttons" style={{paddingBottom: 20}}>
                     <Row gutter={1}>
                         <Col span={1}>
-                            <Button type="default" size="small"
-                                    onClick={this.props.onSubmitAddNewDoc}>Add</Button>
+                            {
+                                this.props.updatingDoc ? (
+                                    <Button type="default" size="small"
+                                            onClick={this.props.onSubmitUpdateDoc}>Update</Button>
+                                ) : (
+                                    <Button type="default" size="small"
+                                            onClick={this.props.onSubmitAddNewDoc}>Add</Button>
+                                )
+                            }
                         </Col>
                         <Col span={1}>
                             <Button type="default" size="small"
@@ -265,7 +385,12 @@ class NewDocInfoDiv extends Component {
                         <h4>Name*</h4>
                     </Col>
                     <Col span={30}>
-                        <Input type="text" name="newDocName" onChange={this.handleInputChange}/>
+                        {this.props.addingNewDoc ? (
+                            <Input type="text" name="newDocName" onChange={this.handleInputChange}/>
+                        ) :
+                            (<Input type="text" name="newDocName" value={this.props.newDocName}
+                                    readonly/>)
+                        }
                     </Col>
                 </Row>
                 <Row gutter={45} type="flex" style={{paddingBottom: 20, paddingLeft: 10}}
@@ -274,8 +399,13 @@ class NewDocInfoDiv extends Component {
                         <h4>Summary</h4>
                     </Col>
                     <Col span={30}>
-                        <Input type="textarea" cols={20} rows={4} name="newDocSummary"
-                               onChange={this.handleInputChange}></Input>
+                        {this.props.addingNewDoc ? (
+                            <Input type="textarea" cols={20} rows={4} name="newDocSummary"
+                                   onChange={this.handleInputChange}></Input>
+                        ) : ( <Input type="textarea" cols={20} rows={4} name="newDocSummary"
+                                     onChange={this.handleInputChange}
+                                     value={this.props.newDocSummary}></Input>)
+                        }
                     </Col>
                 </Row>
             </div>
@@ -300,7 +430,8 @@ class NewDocSourceDiv extends Component {
                 <Form layout="vertical" style={{paddingTop: 5}}>
                     <FormItem style={{margin: 0}}>
                         <label>
-                            <input type="radio" name="newDocSourceType" value="INLINE" checked={this.props.selectedSourceType == 'INLINE'}
+                            <input type="radio" name="newDocSourceType" value="INLINE"
+                                   checked={this.props.selectedSourceType == 'INLINE'}
                                    onClick={this.handleInputChange}/>
                             Inline
                         </label>
@@ -308,16 +439,19 @@ class NewDocSourceDiv extends Component {
                     <FormItem style={{margin: 0}}>
                         <label>
                             <input type="radio" name="newDocSourceType" value="URL"
+                                   checked={this.props.selectedSourceType == 'URL'}
                                    onClick={this.handleInputChange}/>
                             URL
                         </label>
                         {this.props.selectedSourceType == "URL" &&
-                        <Input type="text" name="newDocURL" onChange={this.handleInputChange}/>
+                        <Input type="text" name="newDocURL" onChange={this.handleInputChange}
+                               value={this.props.newDocURL}/>
                         }
                     </FormItem>
                     <FormItem style={{margin: 0}}>
                         <label>
                             <input type="radio" name="newDocSourceType" value="FILE"
+                                   checked={this.props.selectedSourceType == 'FILE'}
                                    onClick={this.handleInputChange}/>
                             File
                         </label>
