@@ -1,5 +1,6 @@
-		@App:name('sub_Bronze')
+		@App:name('subscription_Silver')
 
+		@App:description('ExecutionPlan for subscription_Silver')
 
 		@source(type='inMemory', topic='apim', @map(type='passThrough'))
 		define stream RequestStream (messageID string, appKey string, appTier string, subscriptionKey string, apiKey string, apiTier string, subscriptionTier string, resourceKey string, resourceTier string, userId string,  apiContext string, apiVersion string, apiName string, propertiesMap string);
@@ -10,11 +11,11 @@ connection.factory.jndi.name='TopicConnectionFactory')
 		define stream GlobalThrottleStream (throttleKey string, isThrottled bool, expiryTimeStamp long);
 
 		FROM RequestStream
-		SELECT messageID, (subscriptionTier == 'Bronze') AS isEligible, subscriptionKey AS throttleKey, propertiesMap
+		SELECT messageID, (subscriptionTier == 'Silver') AS isEligible, subscriptionKey AS throttleKey, propertiesMap
 		INSERT INTO EligibilityStream;
 
 				FROM EligibilityStream[isEligible==true]#throttler:timeBatch(1 min, 0)
-				select throttleKey, (count(messageID) >= 1000) as isThrottled, expiryTimeStamp group by throttleKey
+				select throttleKey, (count(messageID) >= 2000) as isThrottled, expiryTimeStamp group by throttleKey
 				INSERT ALL EVENTS into ResultStream;
 		
 		from ResultStream#throttler:emitOnStateChange(throttleKey, isThrottled) select * insert into GlobalThrottleStream;

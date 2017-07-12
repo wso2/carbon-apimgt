@@ -1,4 +1,5 @@
-        @App:name('app_20PerMin')
+        @App:name('application_20PerMin')
+        @App:description('ExecutionPlan for application_20PerMin')
 
         @source(type='inMemory', topic='apim', @map(type='passThrough'))
         define stream RequestStream (messageID string, appKey string, appTier string, subscriptionKey string, apiKey string, apiTier string, subscriptionTier string, resourceKey string, resourceTier string, userId string,  apiContext string, apiVersion string, apiName string, propertiesMap string);
