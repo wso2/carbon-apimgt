@@ -95,6 +95,8 @@ import static org.wso2.carbon.apimgt.core.dao.impl.PolicyDAOImpl.SILVER_TIER;
 
 public class APIPublisherImplTestCase {
     private static final String USER = "admin";
+    private static final String ALTERNATIVE_USER = "alternativeUser";
+    private static final String USER_ID = "d54de56r-4151-448e-5423-85b4f1f8b069";
     private static final String TIER = "Gold";
     private static final String API_ID = "apiId";
     private static final String DOC_ID = "docId";
@@ -414,18 +416,54 @@ public class APIPublisherImplTestCase {
         Mockito.verify(apiDAO, Mockito.times(1)).getAPI(uuid);
     }
 
+    @Test(description = "Delete API when the logged in user has no delete permission for the API")
+    public void testDeleteApiWhenUserHasNoDeletePermission()
+            throws APIManagementException, LifecycleException, SQLException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
+        APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
+        API api = builder.build();
+        String uuid = api.getId();
+        Mockito.when(apiSubscriptionDAO.getSubscriptionCountByAPI(uuid)).thenReturn(0L);
+        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
+        APIGateway gateway = Mockito.mock(APIGateway.class);
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(ALTERNATIVE_USER, identityProvider, apiDAO,
+                apiSubscriptionDAO, apiLifecycleManager, gateway);
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+        Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.DEVELOPER_ROLE_ID))
+                .thenReturn(DEVELOPER_ROLE);
+        Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.ADMIN_ROLE_ID)).thenReturn(ADMIN_ROLE);
+        try {
+            apiPublisher.deleteAPI(uuid);
+        } catch (APIManagementException ex) {
+            Assert.assertEquals(ex.getMessage(),
+                    "The user " + ALTERNATIVE_USER + " does not have permission to delete the api " + api.getName());
+        }
+    }
+
     @Test(description = "Delete API with zero Subscriptions")
     public void testDeleteApiWithZeroSubscriptions() throws APIManagementException, LifecycleException, SQLException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        List<String> roleIdsOfUser = new ArrayList<>();
+        roleIdsOfUser.add(ADMIN_ROLE_ID);
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
-        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI();
+        API api = apiBuilder.build();
         String uuid = api.getId();
         String lifecycleId = api.getLifecycleInstanceId();
         Mockito.when(apiSubscriptionDAO.getSubscriptionCountByAPI(uuid)).thenReturn(0L);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiSubscriptionDAO, apiLifecycleManager, gateway);
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(ALTERNATIVE_USER, identityProvider, apiDAO,
+                apiSubscriptionDAO, apiLifecycleManager, gateway);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+        Mockito.when(identityProvider.getIdOfUser(ALTERNATIVE_USER)).thenReturn(USER_ID);
+        Mockito.when(identityProvider.getRoleIdsOfUser(USER_ID)).thenReturn(roleIdsOfUser);
+        Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.DEVELOPER_ROLE_ID))
+                .thenReturn(DEVELOPER_ROLE);
+        Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.ADMIN_ROLE_ID)).thenReturn(ADMIN_ROLE);
         apiPublisher.deleteAPI(uuid);
         Mockito.verify(apiDAO, Mockito.times(1)).getAPI(uuid);
         Mockito.verify(apiLifecycleManager, Mockito.times(1)).removeLifecycle(lifecycleId);
@@ -445,15 +483,18 @@ public class APIPublisherImplTestCase {
         String lifecycleId = api.getLifecycleInstanceId();
         Mockito.when(apiSubscriptionDAO.getSubscriptionCountByAPI(uuid)).thenReturn(0L);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
-
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiSubscriptionDAO, apiLifecycleManager,
-                workflowDAO, gateway);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiSubscriptionDAO,
+                apiLifecycleManager, workflowDAO, gateway);
         String externalRef = UUID.randomUUID().toString();
         Mockito.when(
                 workflowDAO.getExternalWorkflowReferenceForPendingTask(uuid, WorkflowConstants.WF_TYPE_AM_API_STATE))
                 .thenReturn(externalRef);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+        Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.DEVELOPER_ROLE_ID))
+                .thenReturn(DEVELOPER_ROLE);
+        Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.ADMIN_ROLE_ID)).thenReturn(ADMIN_ROLE);
         apiPublisher.deleteAPI(uuid);
         Mockito.verify(apiDAO, Mockito.times(1)).getAPI(uuid);
         Mockito.verify(apiLifecycleManager, Mockito.times(1)).removeLifecycle(lifecycleId);
@@ -482,12 +523,17 @@ public class APIPublisherImplTestCase {
             throws APIManagementException, LifecycleException, SQLException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
         Mockito.when(apiSubscriptionDAO.getSubscriptionCountByAPI(uuid)).thenReturn(0L);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiSubscriptionDAO, apiLifecycleManager);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiSubscriptionDAO,
+                apiLifecycleManager);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+        Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.DEVELOPER_ROLE_ID))
+                .thenReturn(DEVELOPER_ROLE);
+        Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.ADMIN_ROLE_ID)).thenReturn(ADMIN_ROLE);
         Mockito.doThrow(new APIMgtDAOException("Error occurred while deleting the API with id" + uuid)).when(apiDAO)
                 .deleteAPI(uuid);
         apiPublisher.deleteAPI(uuid);
@@ -496,15 +542,21 @@ public class APIPublisherImplTestCase {
     @Test(description = "Search APIs")
     public void testSearchAPIs() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        List<String> roleIdsOfUser = new ArrayList<>();
+        roleIdsOfUser.add(ADMIN_ROLE_ID);
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(ALTERNATIVE_USER, identityProvider, apiDAO);
         API api1 = SampleTestObjectCreator.createDefaultAPI().build();
         List<API> apimResultsFromDAO = new ArrayList<>();
         apimResultsFromDAO.add(api1);
-        Mockito.when(apiDAO.searchAPIs(new HashSet<>(), USER, api1.getName(), 1, 2)).
+        Mockito.when(apiDAO.searchAPIs(new HashSet<>(roleIdsOfUser), ALTERNATIVE_USER, api1.getName(), 1, 2)).
                 thenReturn(apimResultsFromDAO);
+        Mockito.when(identityProvider.getIdOfUser(ALTERNATIVE_USER)).thenReturn(USER_ID);
+        Mockito.when(identityProvider.getRoleIdsOfUser(USER_ID)).thenReturn(roleIdsOfUser);
         List<API> apis = apiPublisher.searchAPIs(2, 1, api1.getName());
         Assert.assertNotNull(apis);
-        Mockito.verify(apiDAO, Mockito.atLeastOnce()).searchAPIs(new HashSet<>(), USER, api1.getName(), 1, 2);
+        Mockito.verify(apiDAO, Mockito.atLeastOnce())
+                .searchAPIs(new HashSet<>(roleIdsOfUser), ALTERNATIVE_USER, api1.getName(), 1, 2);
     }
 
     @Test(description = "Search APIs with null query string")
@@ -552,13 +604,18 @@ public class APIPublisherImplTestCase {
             throws APIManagementException, LifecycleException, SQLException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
         String lifecycleId = api.getLifecycleInstanceId();
         Mockito.when(apiSubscriptionDAO.getSubscriptionCountByAPI(uuid)).thenReturn(0L);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiSubscriptionDAO, apiLifecycleManager);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiSubscriptionDAO,
+                apiLifecycleManager);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+        Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.DEVELOPER_ROLE_ID))
+                .thenReturn(DEVELOPER_ROLE);
+        Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.ADMIN_ROLE_ID)).thenReturn(ADMIN_ROLE);
         Mockito.doThrow(new LifecycleException("Error occurred while Disassociating the API with Lifecycle id " + uuid))
                 .when(apiLifecycleManager).removeLifecycle(lifecycleId);
         apiPublisher.deleteAPI(uuid);
@@ -2678,10 +2735,21 @@ public class APIPublisherImplTestCase {
                 new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
+    private APIPublisherImpl getApiPublisherImpl(String user, IdentityProvider identityProvider, ApiDAO apiDAO) {
+        return new APIPublisherImpl(user, identityProvider, apiDAO, null, null, null, null, null, null, null,
+                new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
+    }
+
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APISubscriptionDAO apiSubscriptionDAO,
             APILifecycleManager apiLifecycleManager) {
         return new APIPublisherImpl(USER, null, apiDAO, null, apiSubscriptionDAO, null, apiLifecycleManager, null, null,
                 null, new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
+    }
+
+    private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider, ApiDAO apiDAO,
+            APISubscriptionDAO apiSubscriptionDAO, APILifecycleManager apiLifecycleManager) {
+        return new APIPublisherImpl(USER, identityProvider, apiDAO, null, apiSubscriptionDAO, null, apiLifecycleManager,
+                null, null, null, new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APISubscriptionDAO apiSubscriptionDAO,
@@ -2690,10 +2758,31 @@ public class APIPublisherImplTestCase {
                 null, new GatewaySourceGeneratorImpl(), apiGatewayPublisher);
     }
 
+    private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider, ApiDAO apiDAO,
+            APISubscriptionDAO apiSubscriptionDAO, APILifecycleManager apiLifecycleManager,
+            APIGateway apiGatewayPublisher) {
+        return new APIPublisherImpl(USER, identityProvider, apiDAO, null, apiSubscriptionDAO, null, apiLifecycleManager,
+                null, null, null, new GatewaySourceGeneratorImpl(), apiGatewayPublisher);
+    }
+
+    private APIPublisherImpl getApiPublisherImpl(String user, IdentityProvider identityProvider, ApiDAO apiDAO,
+            APISubscriptionDAO apiSubscriptionDAO, APILifecycleManager apiLifecycleManager,
+            APIGateway apiGatewayPublisher) {
+        return new APIPublisherImpl(user, identityProvider, apiDAO, null, apiSubscriptionDAO, null, apiLifecycleManager,
+                null, null, null, new GatewaySourceGeneratorImpl(), apiGatewayPublisher);
+    }
+
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APISubscriptionDAO apiSubscriptionDAO,
             APILifecycleManager apiLifecycleManager, WorkflowDAO workfloDAO, APIGateway apiGatewayPublisher) {
         return new APIPublisherImpl(USER, null, apiDAO, null, apiSubscriptionDAO, null, apiLifecycleManager, null,
                 workfloDAO, null, new GatewaySourceGeneratorImpl(), apiGatewayPublisher);
+    }
+
+    private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider, ApiDAO apiDAO,
+            APISubscriptionDAO apiSubscriptionDAO, APILifecycleManager apiLifecycleManager, WorkflowDAO workfloDAO,
+            APIGateway apiGatewayPublisher) {
+        return new APIPublisherImpl(USER, identityProvider, apiDAO, null, apiSubscriptionDAO, null, apiLifecycleManager,
+                null, workfloDAO, null, new GatewaySourceGeneratorImpl(), apiGatewayPublisher);
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APISubscriptionDAO apiSubscriptionDAO) {

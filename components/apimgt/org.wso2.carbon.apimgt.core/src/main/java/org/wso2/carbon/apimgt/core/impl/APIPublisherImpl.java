@@ -619,7 +619,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * @throws APIManagementException - If the user does not have "DELETE" permission for the API
      */
     private void verifyUserPermissionsToDeleteAPI(String user, API api) throws APIManagementException {
-        List<String> userPermissions = getAPIPermissionsOfLoggedInUser(user, api);
+        List<String> userPermissions = api.getUserSpecificApiPermissions();
         if (!userPermissions.contains(APIMgtConstants.Permission.DELETE)) {
             String message = "The user " + user + " does not have permission to delete the api " + api.getName();
             if (log.isDebugEnabled()) {
@@ -703,9 +703,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             throws APIManagementException {
         Set<String> permissionArrayForUser = new HashSet();
         Map<String, Integer> permissionMap = api.getPermissionMap();
-        String createdUser = api.getCreatedBy();
+        String provider = api.getProvider();
         //TODO: Remove the check for admin after IS adds an ID to admin user
-        if (loggedInUserName.equals(createdUser) || permissionMap == null || permissionMap.isEmpty() || "admin"
+        if (loggedInUserName.equals(provider) || permissionMap == null || permissionMap.isEmpty() || "admin"
                 .equals(loggedInUserName)) {
             permissionArrayForUser.add(APIMgtConstants.Permission.READ);
             permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
@@ -1212,7 +1212,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         APIGateway gateway = getApiGateway();
         try {
             if (getAPISubscriptionCountByAPI(identifier) == 0) {
-                API api = getApiDAO().getAPI(identifier);
+                API api = getAPIbyUUID(identifier);
                 if (api != null) {
                     //Checks whether the user has required permissions to delete the API
                     verifyUserPermissionsToDeleteAPI(getUsername(), api);
