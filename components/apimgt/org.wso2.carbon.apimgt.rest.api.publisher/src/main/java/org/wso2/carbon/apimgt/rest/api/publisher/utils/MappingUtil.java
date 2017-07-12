@@ -208,7 +208,7 @@ public class MappingUtil {
                 endpoint(fromEndpointListToMap(apidto.getEndpoint())).
                 visibleRoles(new HashSet<>(apidto.getVisibleRoles())).
                 policies(subscriptionPolicies).
-                permission(apidto.getPermission()).
+                apiPermission(apidto.getPermission()).
                 tags(new HashSet<>(apidto.getTags())).
                 labels(new HashSet<>(apidto.getLabels())).
                 transport(new HashSet<>(apidto.getTransport())).

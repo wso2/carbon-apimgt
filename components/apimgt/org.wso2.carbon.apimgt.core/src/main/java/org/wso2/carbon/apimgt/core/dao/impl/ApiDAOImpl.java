@@ -2728,7 +2728,7 @@ public class ApiDAOImpl implements ApiDAO {
      * @return permission string
      * @throws SQLException - if error occurred while getting permissionMap of API from DB
      */
-    private StringBuilder getPermissionsStringForApi(Connection connection, String apiId) throws SQLException {
+    private String getPermissionsStringForApi(Connection connection, String apiId) throws SQLException {
         JSONArray permissionArray = new JSONArray();
         Map<String, Integer> permissionMap = getPermissionMapForApi(connection, apiId);
         for (Map.Entry<String, Integer> entry : permissionMap.entrySet()) {
@@ -2756,9 +2756,9 @@ public class ApiDAOImpl implements ApiDAO {
             permissionArray.add(jsonObject);
         }
         if (!permissionArray.isEmpty()) {
-            return new StringBuilder(permissionArray.toString());
+            return permissionArray.toString();
         } else {
-            return new StringBuilder("");
+            return "";
         }
     }
 

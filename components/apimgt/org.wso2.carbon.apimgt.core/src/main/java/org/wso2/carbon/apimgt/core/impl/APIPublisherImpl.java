@@ -290,9 +290,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 if (StringUtils.isEmpty(apiBuilder.getApiDefinition())) {
                     apiBuilder.apiDefinition(apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder));
                 }
-                if (!StringUtils.isEmpty(apiBuilder.getPermission())) {
+                if (!StringUtils.isEmpty(apiBuilder.getApiPermission())) {
                     Map<String, Integer> roleNamePermissionList;
-                    roleNamePermissionList = getAPIPermissionArray(apiBuilder.getPermission());
+                    roleNamePermissionList = getAPIPermissionArray(apiBuilder.getApiPermission());
                     apiBuilder.permissionMap(roleNamePermissionList);
 
                 }
@@ -474,10 +474,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         (apiBuilder.getVersion())) && (originalAPI.getProvider().equals(apiBuilder.getProvider())) &&
                         originalAPI.getLifeCycleStatus().equalsIgnoreCase(apiBuilder.getLifeCycleStatus())) {
 
-                    if (!StringUtils.isEmpty(apiBuilder.getPermission())) {
-                        apiBuilder.setPermission(replaceGroupNamesWithId(apiBuilder.getPermission()));
+                    if (!StringUtils.isEmpty(apiBuilder.getApiPermission())) {
+                        apiBuilder.apiPermission(replaceGroupNamesWithId(apiBuilder.getApiPermission()));
                         Map<String, Integer> roleNamePermissionList;
-                        roleNamePermissionList = getAPIPermissionArray(apiBuilder.getPermission());
+                        roleNamePermissionList = getAPIPermissionArray(apiBuilder.getApiPermission());
                         apiBuilder.permissionMap(roleNamePermissionList);
                     }
                     Map<String, Endpoint> apiEndpointMap = apiBuilder.getEndpoint();

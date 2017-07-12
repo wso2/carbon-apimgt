@@ -757,7 +757,7 @@ public class APIPublisherImplTestCase {
         APIGateway gateway = Mockito.mock(APIGateway.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager, gateway);
-        API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI().permission("data");
+        API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI().apiPermission("data");
         String uuid = api.getId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.DEVELOPER_ROLE_ID))
@@ -1125,7 +1125,7 @@ public class APIPublisherImplTestCase {
         String permissionString = "[{\"groupId\" : \"developer\", \"permission\" : [\"READ\",\"UPDATE\"]},"
                 + "{\"groupId\" : \"invalid_role\", \"permission\" : [\"READ\",\"UPDATE\",\"DELETE\"]}]";
         String errorMessage = "There are invalid roles in the permission string";
-        API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI().permission(permissionString);
+        API.APIBuilder api = SampleTestObjectCreator.createDefaultAPI().apiPermission(permissionString);
         String uuid = api.getId();
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
@@ -2381,7 +2381,8 @@ public class APIPublisherImplTestCase {
         Map<String, Endpoint> endpointMap = SampleTestObjectCreator.getMockEndpointMap();
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().id(UUID.randomUUID().toString())
                 .endpoint(endpointMap);
-        apiBuilder.permission("");
+        apiBuilder.apiPermission("");
+        apiBuilder.permissionMap(null);
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
         Mockito.when(apiDAO.getAPI(apiBuilder.getId())).thenReturn(apiBuilder.build());
@@ -2431,7 +2432,7 @@ public class APIPublisherImplTestCase {
         endpointMap.put(APIMgtConstants.SANDBOX_ENDPOINT, endpoint2);
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().id(UUID.randomUUID().toString())
                 .endpoint(endpointMap);
-        apiBuilder.apiPermission(new StringBuilder(""));
+        apiBuilder.apiPermission("");
         apiBuilder.permissionMap(null);
         apiBuilder.policies(Collections.emptySet());
         apiBuilder.apiPolicy(null);
@@ -2474,7 +2475,7 @@ public class APIPublisherImplTestCase {
         endpointMap.put(APIMgtConstants.SANDBOX_ENDPOINT, endpoint2);
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().id(UUID.randomUUID().toString())
                 .endpoint(endpointMap);
-        apiBuilder.apiPermission(new StringBuilder(""));
+        apiBuilder.apiPermission("");
         apiBuilder.permissionMap(null);
         apiBuilder.policies(Collections.emptySet());
         apiBuilder.apiPolicy(null);
@@ -2511,7 +2512,7 @@ public class APIPublisherImplTestCase {
         endpointMap.put(APIMgtConstants.SANDBOX_ENDPOINT, endpoint2);
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().id(UUID.randomUUID().toString())
                 .endpoint(endpointMap);
-        apiBuilder.apiPermission(new StringBuilder(""));
+        apiBuilder.apiPermission("");
         apiBuilder.permissionMap(null);
         apiBuilder.policies(Collections.emptySet());
         apiBuilder.apiPolicy(null);
@@ -2552,7 +2553,7 @@ public class APIPublisherImplTestCase {
         endpointMap.put(APIMgtConstants.SANDBOX_ENDPOINT, endpoint2);
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().id(UUID.randomUUID().toString())
                 .endpoint(endpointMap);
-        apiBuilder.apiPermission(new StringBuilder(""));
+        apiBuilder.apiPermission("");
         apiBuilder.permissionMap(null);
         apiBuilder.policies(Collections.emptySet());
         apiBuilder.apiPolicy(null);
@@ -2590,7 +2591,7 @@ public class APIPublisherImplTestCase {
         endpointMap.put(APIMgtConstants.SANDBOX_ENDPOINT, endpoint2);
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().id(UUID.randomUUID().toString())
                 .endpoint(endpointMap);
-        apiBuilder.apiPermission(new StringBuilder(""));
+        apiBuilder.apiPermission("");
         apiBuilder.permissionMap(null);
         apiBuilder.policies(Collections.emptySet());
         apiBuilder.apiPolicy(null);
@@ -2633,7 +2634,7 @@ public class APIPublisherImplTestCase {
                 .replace(s, new UriTemplate.UriTemplateBuilder(uriTemplate).endpoint(endpointMap).build()));
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().id(UUID.randomUUID().toString())
                 .endpoint(Collections.emptyMap()).uriTemplates(uriTemplateMap);
-        apiBuilder.apiPermission(new StringBuilder(""));
+        apiBuilder.apiPermission("");
         apiBuilder.permissionMap(null);
         apiBuilder.policies(Collections.emptySet());
         apiBuilder.apiPolicy(null);
@@ -2689,13 +2690,6 @@ public class APIPublisherImplTestCase {
                 null, new GatewaySourceGeneratorImpl(), apiGatewayPublisher);
     }
 
-    private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider, ApiDAO apiDAO,
-            APISubscriptionDAO apiSubscriptionDAO, APILifecycleManager apiLifecycleManager,
-            APIGatewayPublisherImpl apiGatewayPublisher) {
-        return new APIPublisherImpl(USER, identityProvider, apiDAO, null, apiSubscriptionDAO, null, apiLifecycleManager,
-                null, null, null, new GatewaySourceGeneratorImpl(), apiGatewayPublisher);
-    }
-
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APISubscriptionDAO apiSubscriptionDAO,
             APILifecycleManager apiLifecycleManager, WorkflowDAO workfloDAO, APIGateway apiGatewayPublisher) {
         return new APIPublisherImpl(USER, null, apiDAO, null, apiSubscriptionDAO, null, apiLifecycleManager, null,
@@ -2705,12 +2699,6 @@ public class APIPublisherImplTestCase {
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APISubscriptionDAO apiSubscriptionDAO) {
         return new APIPublisherImpl(USER, null, apiDAO, null, apiSubscriptionDAO, null, null, null, null, null,
                 new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
-    }
-
-    private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, ApplicationDAO applicationDAO,
-            APISubscriptionDAO apiSubscriptionDAO, APILifecycleManager apiLifecycleManager) {
-        return new APIPublisherImpl(USER, null, apiDAO, applicationDAO, apiSubscriptionDAO, null, apiLifecycleManager,
-                null, null, null, new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(LabelDAO labelDAO) {
@@ -2744,13 +2732,6 @@ public class APIPublisherImplTestCase {
             GatewaySourceGenerator gatewaySourceGenerator, APIGateway apiGatewayPublisher) {
         return new APIPublisherImpl(USER, identityProvider, apiDAO, null, null, null, null, null, null, null,
                 gatewaySourceGenerator, apiGatewayPublisher);
-    }
-
-    private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, ApplicationDAO applicationDAO,
-            APISubscriptionDAO apiSubscriptionDAO, APILifecycleManager apiLifecycleManager,
-            GatewaySourceGenerator gatewaySourceGenerator) {
-        return new APIPublisherImpl(USER, null, apiDAO, applicationDAO, apiSubscriptionDAO, null, apiLifecycleManager,
-                null, null, null, gatewaySourceGenerator, new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(String user, IdentityProvider identityProvider, ApiDAO apiDAO,
