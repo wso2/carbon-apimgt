@@ -19,11 +19,11 @@ import React from 'react';
 import SingleInput from '../FormComponents/SingleInput';
 import {Redirect} from 'react-router-dom'
 import API from '../../../../data/api.js'
-import { toast } from 'react-toastify';
+import {toast} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
 
 
-import { Form, Icon, Input, Button, message, Radio, Collapse, Row, Col} from 'antd'
+import {Form, Icon, Input, Button, message, Radio, Collapse, Row, Col} from 'antd'
 const Panel = Collapse.Panel;
 const FormItem = Form.Item;
 const RadioButton = Radio.Button;
@@ -33,11 +33,12 @@ class EndpointForm extends React.Component {
     constructor(props) {
         super(props);
     }
+
     createAPICallback = (response) => {
         let uuid = JSON.parse(response.data).id;
         let redirect_url = "/apis/" + uuid + "/overview";
         this.props.history.push(redirect_url);
-        message.success("Api Created Successfully. Now you can add resources, define endpoints etc..",opts);
+        message.success("Api Created Successfully. Now you can add resources, define endpoints etc..", opts);
     };
     /**
      * Do create API from either swagger URL or swagger file upload.In case of URL pre fetch the swagger file and make a blob
@@ -49,8 +50,10 @@ class EndpointForm extends React.Component {
         this.props.form.validateFields((err, values) => {
             if (!err) {
                 console.log('Received values of form: ', values);
-                let endpoint = {
+                let production = {
+                    type: "production",
                     inline: {
+                        name: values.apiName + values.apiVersion.replace(/\./g, "_"), // TODO: It's better to add this name property from the REST api itself, making sure no name conflicts with other inline endpoint definitions ~tmkb
                         endpointConfig: JSON.stringify({serviceUrl: values.apiEndpoint}),
                         endpointSecurity: {enabled: false},
                         type: "http"
@@ -62,7 +65,10 @@ class EndpointForm extends React.Component {
                     version: values.apiVersion
                 };
                 if (values.apiEndpoint) {
-                    api_data['endpoint'] =  [endpoint];
+                    let sandbox = JSON.parse(JSON.stringify(production)); // deep coping the object
+                    sandbox.type = "sandbox";
+                    sandbox.inline.name += "_sandbox";
+                    api_data['endpoint'] = [production, sandbox];
                 }
                 let new_api = new API('');
                 let promised_create = new_api.create(api_data);
@@ -85,49 +91,52 @@ class EndpointForm extends React.Component {
     };
 
 
-
-    render(){
-        const { getFieldDecorator } = this.props.form;
-        return(
+    render() {
+        const {getFieldDecorator} = this.props.form;
+        return (
             <Form onSubmit={this.handleSubmit} className="login-form">
-                <FormItem  label="Name"
-                           labelCol={{ span: 4 }}
-                           wrapperCol={{ span: 8 }}>
+                <FormItem label="Name"
+                          labelCol={{span: 4}}
+                          wrapperCol={{span: 8}}>
                     {getFieldDecorator('apiName', {
-                        rules: [{ required: false, message: 'Please input Api Name' }],
+                        rules: [{required: false, message: 'Please input Api Name'}],
                     })(
-                        <Input name="apiName" prefix={<Icon type="user" style={{ fontSize: 13 }} />} placeholder="Api Name" />
+                        <Input name="apiName" prefix={<Icon type="user" style={{fontSize: 13}}/>}
+                               placeholder="Api Name"/>
                     )}
                 </FormItem>
-                <FormItem  label="Version"
-                           labelCol={{ span: 4 }}
-                           wrapperCol={{ span: 8 }}>
+                <FormItem label="Version"
+                          labelCol={{span: 4}}
+                          wrapperCol={{span: 8}}>
                     {getFieldDecorator('apiVersion', {
-                        rules: [{ required: false, message: 'Please input Api Version' }],
+                        rules: [{required: false, message: 'Please input Api Version'}],
                     })(
-                        <Input name="apiVersion" prefix={<Icon type="user" style={{ fontSize: 13 }} />} placeholder="Api Version" />
+                        <Input name="apiVersion" prefix={<Icon type="user" style={{fontSize: 13}}/>}
+                               placeholder="Api Version"/>
                     )}
                 </FormItem>
-                <FormItem  label="Context"
-                           labelCol={{ span: 4 }}
-                           wrapperCol={{ span: 8 }}>
+                <FormItem label="Context"
+                          labelCol={{span: 4}}
+                          wrapperCol={{span: 8}}>
                     {getFieldDecorator('apiContext', {
-                        rules: [{ required: false, message: 'Please input Api Context' }],
+                        rules: [{required: false, message: 'Please input Api Context'}],
                     })(
-                        <Input name="apiContext" prefix={<Icon type="user" style={{ fontSize: 13 }} />} placeholder="Api Context" />
+                        <Input name="apiContext" prefix={<Icon type="user" style={{fontSize: 13}}/>}
+                               placeholder="Api Context"/>
                     )}
                 </FormItem>
                 <Row>
                     <Col offset={4} span={8}>
                         <Collapse bordered={false}>
                             <Panel header="More options" key="1">
-                                <FormItem  label="Endpoint"
-                                           labelCol={{ span: 6 }}
-                                           wrapperCol={{ span: 16 }}>
+                                <FormItem label="Endpoint"
+                                          labelCol={{span: 6}}
+                                          wrapperCol={{span: 16}}>
                                     {getFieldDecorator('apiEndpoint', {
-                                        rules: [{ required: false, message: 'Please input Api endpoint' }],
+                                        rules: [{required: false, message: 'Please input Api endpoint'}],
                                     })(
-                                        <Input name="apiEndpoint" prefix={<Icon type="user" style={{ fontSize: 13 }} />} placeholder="Api Endpoint" />
+                                        <Input name="apiEndpoint" prefix={<Icon type="user" style={{fontSize: 13}}/>}
+                                               placeholder="Api Endpoint"/>
                                     )}
                                 </FormItem>
                             </Panel>
@@ -141,7 +150,8 @@ class EndpointForm extends React.Component {
                     <Button type="primary" htmlType="submit">
                         Create
                     </Button>
-                    <Button type="default" htmlType="button" onClick={() => this.props.history.push("/api/create/home")}>
+                    <Button type="default" htmlType="button"
+                            onClick={() => this.props.history.push("/api/create/home")}>
                         Cancel
                     </Button>
                 </FormItem>
@@ -153,7 +163,9 @@ class EndpointForm extends React.Component {
 const EndpointFormGenerated = Form.create()(EndpointForm);
 
 class ApiCreateEndpoint extends React.Component {
-    render = () => {return  <EndpointFormGenerated history={this.props.history} /> }
+    render = () => {
+        return <EndpointFormGenerated history={this.props.history}/>
+    }
 }
 
 

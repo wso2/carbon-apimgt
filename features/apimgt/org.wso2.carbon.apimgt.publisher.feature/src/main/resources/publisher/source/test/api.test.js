@@ -25,7 +25,7 @@ TestUtils.setupMockEnvironment();
 
 describe('Api',
     function () {
-        before(function (done) {
+        before("Make any REST API calls ,Login a user and get access token", function (done) {
             TestUtils.userLogin().then((response) => {
                 document.clearCookies();
                 for (let cookie of response.headers["set-cookie"]) {
@@ -64,6 +64,7 @@ describe('Api',
                             "context": "/testing_" + c_time,
                             "version": "1.0.0",
                             "endpoint": [{
+                                type: "production",
                                 inline: {
                                     endpointConfig: JSON.stringify({serviceUrl: 'http://test.wso2.org/api/endpoint'}),
                                     endpointSecurity: {enabled: false},

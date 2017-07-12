@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.Label;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -17,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Provides access to Labels which maybe shared across multiple entities
@@ -98,13 +100,38 @@ public class LabelDAOImpl implements LabelDAO {
     }
 
     /**
+     * Adds a single label
+     * 
+     * @param label label
+     * @throws APIMgtDAOException If error occurs while adding a label
+     */
+    private static void addLabel(Label label) throws APIMgtDAOException {
+        final String query = "INSERT INTO AM_LABELS (LABEL_ID, NAME) VALUES (?,?)";
+
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            statement.setString(1, label.getId());
+            statement.setString(2, label.getName());
+            statement.executeUpdate();
+
+            connection.commit();
+            if (!label.getAccessUrls().isEmpty()) {
+                insertAccessUrlMappings(label.getId(), label.getAccessUrls());
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    /**
      * Add access url mappings
      *
      * @param labelId    Id of the label
      * @param accessUrls List of access urls
      * @throws APIMgtDAOException if error occurs while adding access url mappings
      */
-    private void insertAccessUrlMappings(String labelId, List<String> accessUrls) throws APIMgtDAOException {
+    private static void insertAccessUrlMappings(String labelId, List<String> accessUrls) throws APIMgtDAOException {
 
         if (!accessUrls.isEmpty()) {
 
@@ -140,7 +167,7 @@ public class LabelDAOImpl implements LabelDAO {
      * @return List of access urls of the label
      * @throws APIMgtDAOException if error occurs while retrieving access urls
      */
-    private List<String> getLabelAccessUrls(String labelId) throws APIMgtDAOException {
+    private static List<String> getLabelAccessUrls(String labelId) throws APIMgtDAOException {
 
         final String query = "SELECT ACCESS_URL FROM AM_LABEL_ACCESS_URL_MAPPING WHERE LABEL_ID = ?";
         List<String> accessUrls = new ArrayList<>();
@@ -367,6 +394,41 @@ public class LabelDAOImpl implements LabelDAO {
 
     }
 
+    /**
+     * Add default labels.
+     * 
+     * @throws APIMgtDAOException If an error occurred while adding labels.
+     */
+    static void initDefaultLabels() throws APIMgtDAOException {
+        if (!isLabelsExists()) {
+            //Todo : default labels need to be configurable
+            List<String> accessUrls = new ArrayList<>();
+            Label.Builder labelBuilder = new Label.Builder();
+            labelBuilder.id(UUID.randomUUID().toString());
+            labelBuilder.name(APIMgtConstants.DEFAULT_LABEL_NAME);
+            accessUrls.add(APIMgtConstants.DEFAULT_LABEL_ACCESS_URL);
+            labelBuilder.accessUrls(accessUrls);
+            addLabel(labelBuilder.build());
+        }
+    }
+
+    /**
+     * Checks if any labels added to DB and already available
+     *
+     * @return true if there are any labels available in the system
+     * @throws APIMgtDAOException If an error occurs while checking labels existence
+     */
+    private static boolean isLabelsExists() throws APIMgtDAOException {
+        final String query = "SELECT 1 FROM AM_LABELS";
+        try (Connection connection = DAOUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(query);
+                ResultSet rs = statement.executeQuery()) {
+            if (rs.next()) {
+                return true;
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+        return false;
+    }
 }
-
-
