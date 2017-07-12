@@ -18,14 +18,12 @@
 */
 package org.wso2.carbon.apimgt.core.models;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDateTime;
 
 /**
- * Bean Class for API summery to be loaded at server startup
+ * The summary of the API
  */
-public class APISummary implements Serializable {
+public class APISummary {
 
     private static final long serialVersionUID = 1L;
 
@@ -35,18 +33,24 @@ public class APISummary implements Serializable {
 
     private String context;
 
-    private String version;    //todo remove if version is appended in context
+    private String version;
 
-    private List<UriTemplate> uriTemplates = new ArrayList<UriTemplate>();
+    private String lifeCycleStatus;
 
-    private String lifeCycleState;
+    private LocalDateTime createdTime;
 
-    public APISummary(String id) {
-        this.id = id;
+    private LocalDateTime lastUpdatedTime;
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
     }
 
     public String getId() {
         return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -65,77 +69,35 @@ public class APISummary implements Serializable {
         this.context = context;
     }
 
-    public String getLifeCycleState() {
-        return lifeCycleState;
-    }
-
-    public void setLifeCycleState(String lifeCycleState) {
-        this.lifeCycleState = lifeCycleState;
-    }
-
-    public List<UriTemplate> getUriTemplates() {
-        return uriTemplates;
-    }
-
-    public void setUriTemplates(List<UriTemplate> uriTemplates) {
-        this.uriTemplates = uriTemplates;
+    public String getVersion() {
+        return version;
     }
 
     public void setVersion(String version) {
         this.version = version;
     }
 
-    public String getContextWithVersion() {
-        return context + version;
-    }
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof APISummary)) {
-            return false;
-        }
-
-        APISummary apiInfo = (APISummary) o;
-
-        if (context != null ? !context.equals(apiInfo.context) : apiInfo.context != null) {
-            return false;
-        }
-        if (!id.equals(apiInfo.id)) {
-            return false;
-        }
-        if (name != null ? !name.equals(apiInfo.name) : apiInfo.name != null) {
-            return false;
-        }
-        if (uriTemplates != null ? !uriTemplates.equals(apiInfo.uriTemplates) : apiInfo.uriTemplates != null) {
-            return false;
-        }
-        if (lifeCycleState != null ? !lifeCycleState.equals(apiInfo.lifeCycleState) : apiInfo.lifeCycleState != null) {
-            return false;
-        }
-
-        return true;
+    public String getLifeCycleStatus() {
+        return lifeCycleStatus;
     }
 
-    @Override
-    public int hashCode() {
-        int result = id.hashCode();
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (context != null ? context.hashCode() : 0);
-        result = 31 * result + (uriTemplates != null ? uriTemplates.hashCode() : 0);
-        result = 31 * result + (lifeCycleState != null ? lifeCycleState.hashCode() : 0);
-        return result;
+    public void setLifeCycleStatus(String lifeCycleStatus) {
+        this.lifeCycleStatus = lifeCycleStatus;
     }
 
-    @Override
-    public String toString() {
-        return "APIInfo{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", context='" + context + '\'' +
-                ", lifeCycleState='" + lifeCycleState + '\'' +
-                uriTemplates.toString() +
-                '}';
+    public LocalDateTime getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(LocalDateTime createdTime) {
+        this.createdTime = createdTime;
+    }
+
+    public LocalDateTime getLastUpdatedTime() {
+        return lastUpdatedTime;
+    }
+
+    public void setLastUpdatedTime(LocalDateTime lastUpdatedTime) {
+        this.lastUpdatedTime = lastUpdatedTime;
     }
 }

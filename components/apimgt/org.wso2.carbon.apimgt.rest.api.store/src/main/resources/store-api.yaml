@@ -1739,7 +1739,7 @@ paths:
 ######################################################
 # The "Generate Keys" Processing Function resource API
 ######################################################
-  '/applications/generate-keys':
+  '/applications/{applicationId}/generate-keys':
 
 #-----------------------------------------------------
 # Generate keys for an application
@@ -1747,13 +1747,13 @@ paths:
     post:
       x-scope: apim:subscribe
       description: |
-        Generate keys for application
+        Generate keys (Consumer key/secret) for application
       parameters:
-        - $ref: '#/parameters/applicationId-Q'
+        - $ref: '#/parameters/applicationId'
         - in: body
           name: body
           description: |
-            Application object the keys of which are to be generated
+            Application key generation request object
           required: true
           schema:
             $ref: '#/definitions/ApplicationKeyGenerateRequest'
@@ -1769,7 +1769,7 @@ paths:
             OK.
             Keys are generated.
           schema:
-            $ref: '#/definitions/ApplicationKey'
+            $ref: '#/definitions/ApplicationKeys'
           headers:
             Content-Type:
               description: |
@@ -1803,6 +1803,144 @@ paths:
             The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
+
+######################################################
+# The "Provide Keys" Processing Function resource API
+######################################################
+  '/applications/{applicationId}/provide-keys':
+
+#-----------------------------------------------------
+# Provide keys for an application
+#-----------------------------------------------------
+    post:
+      x-scope: apim:subscribe
+      description: |
+        Provide keys (Consumer key/secret) to application
+      parameters:
+        - $ref: '#/parameters/applicationId'
+        - in: body
+          name: body
+          description: |
+            Application key provision request object
+          required: true
+          schema:
+            $ref: '#/definitions/ApplicationKeyProvisionRequest'
+        - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
+      tags:
+        - Application (individual)
+        - Provision Keys
+      responses:
+        200:
+          description: |
+            OK.
+            Keys are provisioned.
+          schema:
+            $ref: '#/definitions/ApplicationKeys'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional request.
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional reuquests.‚
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+
+######################################################
+# The "Generate Tokens" Processing Function resource API
+######################################################
+  '/applications/{applicationId}/generate-token':
+
+#-----------------------------------------------------
+# Generate tokens for an application
+#-----------------------------------------------------
+    post:
+      x-scope: apim:subscribe
+      description: |
+        Generate an access token for application by client_credentials grant type
+      parameters:
+        - $ref: '#/parameters/applicationId'
+        - in: body
+          name: body
+          description: |
+            Application token generation request object
+          required: true
+          schema:
+            $ref: '#/definitions/ApplicationTokenGenerateRequest'
+        - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
+      tags:
+        - Application (individual)
+        - Generate Application Tokens
+      responses:
+        200:
+          description: |
+            OK.
+            Token is generated.
+          schema:
+            $ref: '#/definitions/ApplicationToken'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional request.
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional reuquests.‚
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
 
 ######################################################
 # The "Subscription Collection" resource APIs
@@ -2381,14 +2519,6 @@ parameters:
       - STANDARD
       - COMPOSITE
 
-# Group Identifier of the application
-  groupId:
-    name: groupId
-    in: query
-    description: |
-      Application Group Id
-    required: false
-    type: string
 
 # Subscription Identifier
 # Specified as part of the path expression
@@ -2812,12 +2942,12 @@ definitions:
         type: string
       lifeCycleStatus:
         type: string
-      groupId:
-        type: string
+      token:
+        $ref: '#/definitions/ApplicationToken'
       keys:
         type: array
         items:
-          $ref: '#/definitions/ApplicationKey'
+          $ref: '#/definitions/ApplicationKeys'
 
 #-----------------------------------------------------
 # The Application Info resource
@@ -2836,8 +2966,6 @@ definitions:
       description:
         type: string
       lifeCycleStatus:
-        type: string
-      groupId:
         type: string
 
 #-----------------------------------------------------
@@ -3250,18 +3378,16 @@ definitions:
           Description about individual errors occurred
 
 #-----------------------------------------------------
-# The Token resource
+# The Application Token resource
 #-----------------------------------------------------
-  Token :
-    title: Token details for invoking APIs
+  ApplicationToken :
+    title: Application token details to invoke APIs
     properties:
       accessToken:
         type: string
         description: Access token
       tokenScopes:
-        type: array
-        items:
-          type: string
+        type: string
         description: Valid scopes for the access token
       validityTime:
         type: integer
@@ -3271,7 +3397,7 @@ definitions:
 #-----------------------------------------------------
 # The Application Key resource
 #-----------------------------------------------------
-  ApplicationKey :
+  ApplicationKeys :
     title: Application key details
     properties:
       consumerKey:
@@ -3285,17 +3411,15 @@ definitions:
         items:
           type: string
         description: Supported grant types for the application
-      keyState:
+      callbackUrl:
         type: string
-        description: State of the key generation of the application
+        description: Callback URL
       keyType:
         description: Key type
         type: string
         enum:
           - PRODUCTION
           - SANDBOX
-      token:
-        $ref: '#/definitions/Token'
 
 #-----------------------------------------------------
 # The Application Key Generation Request schema
@@ -3304,7 +3428,6 @@ definitions:
     title: Application key generation request object
     required:
       - keyType
-      - validityTime
       - grantTypesToBeSupported
     properties:
       keyType:
@@ -3312,21 +3435,63 @@ definitions:
         enum:
           - PRODUCTION
           - SANDBOX
-      validityTime:
-        type: string
-      callbackUrl:
-        type: string
-        description: Callback URL
       grantTypesToBeSupported:
         type: array
         items:
           type: string
         description: Grant types that should be supported by the application
+      callbackUrl:
+        type: string
+        description: Callback URL
+
+
+#-----------------------------------------------------
+# The Application Key Provision Request schema
+#-----------------------------------------------------
+  ApplicationKeyProvisionRequest :
+    title: Application key provision request object
+    required:
+      - consumerKey
+      - consumerSecret
+      - keyType
+    properties:
+      consumerKey:
+        type: string
+        description: Consumer key of the application
+      consumerSecret:
+        type: string
+        description: Consumer secret of the application
+      keyType:
+        type: string
+        enum:
+          - PRODUCTION
+          - SANDBOX
+
+
+#-----------------------------------------------------
+# The Application Token Generation Request schema
+#-----------------------------------------------------
+  ApplicationTokenGenerateRequest :
+    title: Application access token generation request object
+    required:
+      - consumerKey
+      - consumerSecret
+    properties:
+      consumerKey:
+        type: string
+        description: Consumer key of the application
+      consumerSecret:
+        type: string
+        description: Consumer secret of the application
+      validityPeriod:
+        type: integer
+        description: Token validity period
       scopes:
-        type: array
-        items:
-          type: string
-        description: Allowed scopes for the access token
+        type: string
+        description: Allowed scopes (space seperated) for the access token
+      revokeToken:
+        type: string
+        description: Token to be revoked, if any.
 
 #-----------------------------------------------------
 # The Label resource

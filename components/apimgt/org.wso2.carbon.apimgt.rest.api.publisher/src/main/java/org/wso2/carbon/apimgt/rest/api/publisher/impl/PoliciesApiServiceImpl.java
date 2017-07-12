@@ -6,7 +6,9 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
@@ -41,7 +43,8 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         log.info("Received Policy GET request for tierLevel " + tierLevel);
 
         try {
-            List<Policy> policies = RestAPIPublisherUtil.getApiPublisher(username).getAllPoliciesByLevel(tierLevel);
+            List<Policy> policies = RestAPIPublisherUtil.getApiPublisher(username).getAllPoliciesByLevel
+                    (RestApiUtil.mapRestApiPolicyLevelToPolicyLevelEnum(tierLevel));
             return Response.ok().entity(policies).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while retrieving Policies";
@@ -76,7 +79,8 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         }
 
         try {
-            Policy policy = RestAPIPublisherUtil.getApiPublisher(username).getPolicyByName(tierLevel, tierName);
+            Policy policy = RestAPIPublisherUtil.getApiPublisher(username).getPolicyByName
+                    (RestApiUtil.mapRestApiPolicyLevelToPolicyLevelEnum(tierLevel), tierName);
             return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(policy).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while retrieving Policy";
@@ -102,7 +106,8 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username)
-                    .getLastUpdatedTimeOfThrottlingPolicy(tierLevel, tierName);
+                    .getLastUpdatedTimeOfThrottlingPolicy(RestApiUtil.mapRestApiPolicyLevelToPolicyLevelEnum
+                            (tierLevel), tierName);
             return ETagUtils.generateETag(lastUpdatedTime);
         } catch (APIManagementException e) {
             //gives a warning and let it continue the execution

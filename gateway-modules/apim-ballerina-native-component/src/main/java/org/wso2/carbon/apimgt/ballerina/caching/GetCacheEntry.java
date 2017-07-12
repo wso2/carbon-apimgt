@@ -31,7 +31,6 @@ import org.ballerinalang.natives.annotations.ReturnType;
 import javax.cache.Cache;
 
 
-
 /**
  * Native function ballerina.utils:base64decode.
  * This function will be used to get cache entry by providing cacheName and cacheKey
@@ -48,23 +47,27 @@ import javax.cache.Cache;
         isPublic = true
 )
 @BallerinaAnnotation(annotationName = "Description", attributes = {@Attribute(name = "value",
-        value = "Get cache entry by providing cacheName and cacheKey") })
+        value = "Get cache entry by providing cacheName and cacheKey")})
 @BallerinaAnnotation(annotationName = "Param", attributes = {@Attribute(name = "cacheName",
-        value = "Cache Manager name") })
+        value = "Cache Manager name")})
 @BallerinaAnnotation(annotationName = "Param", attributes = {@Attribute(name = "cacheKey",
-        value = "String cache key") })
+        value = "String cache key")})
 @BallerinaAnnotation(annotationName = "Return", attributes = {@Attribute(name = "cacheEntry",
-        value = "Cache entry object") })
+        value = "Cache entry object")})
 
 public class GetCacheEntry extends AbstractNativeFunction {
     @Override
     public BValue[] execute(Context context) {
-        String cacheName = getArgument(context, 0).stringValue();
-        String cacheKey = getArgument(context, 1).stringValue();
+        String cacheName = getStringArgument(context, 0);
+        String cacheKey = getStringArgument(context, 1);
         Cache cache = (CacheManagerHolder.getInstance().getCacheManager().getCache(cacheName));
-        BValue cacheEntry = (BValue) cache.get(cacheKey);
-        //TODO build ballerina any type value based on the cache entry and return it.
-        return getBValues(cacheEntry);
+        Object cacheEntry = cache.get(cacheKey);
+        if (cacheEntry != null) {
+
+            return getBValues((BValue) cacheEntry);
+        } else {
+            return getBValues();
+        }
     }
 }
 

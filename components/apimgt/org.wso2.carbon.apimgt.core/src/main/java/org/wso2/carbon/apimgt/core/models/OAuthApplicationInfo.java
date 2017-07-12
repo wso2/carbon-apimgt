@@ -23,12 +23,14 @@ import org.json.simple.JSONObject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Captures common attributes used in an OAuth Application.
  */
 public final class OAuthApplicationInfo {
 
+    private String keyType;
     private String clientId;
     private String clientName;
     private String callBackURL;
@@ -36,20 +38,26 @@ public final class OAuthApplicationInfo {
     private String clientSecret;
     private Map<String, Object> parameters = new HashMap<>();
 
-    /**
-     * get client Id (consumer id)
-     *
-     * @return clientId
-     */
+    public String getKeyType() {
+        return keyType;
+    }
+
+    public void setKeyType(String keyType) {
+        this.keyType = keyType;
+    }
+
+    public String getCallBackURL() {
+        return callBackURL;
+    }
+
+    public void setCallBackURL(String callBackURL) {
+        this.callBackURL = callBackURL;
+    }
+
     public String getClientId() {
         return clientId;
     }
 
-    /**
-     * set client Id
-     *
-     * @param clientId  Key of the client.
-     */
     public void setClientId(String clientId) {
         this.clientId = clientId;
     }
@@ -62,29 +70,10 @@ public final class OAuthApplicationInfo {
         this.clientSecret = clientSecret;
     }
 
-    /**
-     * Set client Name of OAuthApplication.
-     *
-     * @param clientName    Name of the application.
-     */
     public void setClientName(String clientName) {
         this.clientName = clientName;
     }
 
-    /**
-     * Set callback URL of OAuthapplication.
-     *
-     * @param callBackURL   call back uris of the application.
-     */
-    public void setCallbackUrl(String callBackURL) {
-        this.callBackURL = callBackURL;
-    }
-
-    /**
-     * Set grant types of OAuth Application.
-     *
-     * @param grantTypes grant types
-     */
     public void setGrantTypes(List<String> grantTypes) {
         this.grantTypes = grantTypes;
     }
@@ -104,10 +93,6 @@ public final class OAuthApplicationInfo {
 
     public String getClientName() {
         return clientName;
-    }
-
-    public String getCallbackUrl() {
-        return callBackURL;
     }
 
     public List<String> getGrantTypes() {
@@ -139,5 +124,26 @@ public final class OAuthApplicationInfo {
                 ", parameters=" + parameters.toString() +
                 ", grantTypes=" + grantTypes +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof OAuthApplicationInfo)) {
+            return false;
+        }
+        OAuthApplicationInfo that = (OAuthApplicationInfo) o;
+        return Objects.equals(clientId, that.clientId) &&
+                Objects.equals(clientName, that.clientName) &&
+                Objects.equals(callBackURL, that.callBackURL) &&
+                Objects.equals(grantTypes, that.grantTypes) &&
+                Objects.equals(clientSecret, that.clientSecret);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(clientId, clientName, callBackURL, grantTypes, clientSecret);
     }
 }

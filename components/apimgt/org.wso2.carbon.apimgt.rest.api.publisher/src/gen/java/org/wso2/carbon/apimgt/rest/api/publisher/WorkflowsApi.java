@@ -15,6 +15,7 @@ import org.wso2.msf4j.formparam.FormDataParam;
 import org.osgi.service.component.annotations.Component;
 
 import java.io.InputStream;
+import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -38,6 +39,7 @@ import javax.ws.rs.core.Response;
 @Path("/api/am/publisher/v1.[\\d]+/workflows")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
+@ApplicationPath("/workflows")
 @io.swagger.annotations.Api(description = "the workflows API")
 public class WorkflowsApi implements Microservice  {
    private final WorkflowsApiService delegate = WorkflowsApiServiceFactory.getWorkflowsApi();
@@ -46,7 +48,7 @@ public class WorkflowsApi implements Microservice  {
     @Path("/{workflowReferenceId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Update workflow status", notes = "This operation can be used to approve or reject a workflow task. . ", response = WorkflowResponseDTO.class, tags={ "Workflows (Individual)", })
+    @io.swagger.annotations.ApiOperation(value = "Update workflow status", notes = "This operation can be used to approve or reject a workflow task. ", response = WorkflowResponseDTO.class, tags={ "Workflows (Individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Workflow request information is returned. ", response = WorkflowResponseDTO.class),
         

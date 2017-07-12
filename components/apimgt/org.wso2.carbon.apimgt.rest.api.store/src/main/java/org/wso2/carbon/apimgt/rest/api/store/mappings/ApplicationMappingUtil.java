@@ -16,13 +16,14 @@
 package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
 
-import org.wso2.carbon.apimgt.core.models.APIKey;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
+import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeysDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
 
 import java.util.ArrayList;
@@ -57,21 +58,21 @@ public class ApplicationMappingUtil {
         return applicationListDTO;
     }
 
-    public static ApplicationDTO fromApplicationtoDTO (Application application) {
+    public static ApplicationDTO fromApplicationToDTO(Application application) {
         ApplicationDTO applicationDTO = new ApplicationDTO();
         applicationDTO.setApplicationId(application.getId());
-        applicationDTO.setThrottlingTier(application.getTier());
+        applicationDTO.setThrottlingTier(application.getPolicy().getPolicyName());
         applicationDTO.setDescription(application.getDescription());
         applicationDTO.setName(application.getName());
         applicationDTO.setLifeCycleStatus(application.getStatus());
         applicationDTO.setPermission(application.getPermissionString());
-        applicationDTO.setGroupId(application.getGroupId());
         applicationDTO.setSubscriber(application.getCreatedUser());
-        List<ApplicationKeyDTO> applicationKeyDTOs = new ArrayList<>();
-        for(APIKey apiKey : application.getKeys()) {
-            ApplicationKeyDTO applicationKeyDTO = ApplicationKeyMappingUtil.fromApplicationKeyToDTO(apiKey);
-            applicationKeyDTOs.add(applicationKeyDTO);
+        List<ApplicationKeysDTO> applicationKeyDTOs = new ArrayList<>();
+        for(OAuthApplicationInfo applicationKeys : application.getApplicationKeys()) {
+            ApplicationKeysDTO applicationKeysDTO = ApplicationKeyMappingUtil.fromApplicationKeysToDTO(applicationKeys);
+            applicationKeyDTOs.add(applicationKeysDTO);
         }
+        applicationDTO.setToken(ApplicationKeyMappingUtil.fromApplicationTokenToDTO(application.getApplicationToken()));
         applicationDTO.setKeys(applicationKeyDTOs);
         return applicationDTO;
     }
@@ -79,12 +80,11 @@ public class ApplicationMappingUtil {
     /** Sets pagination urls for a ApplicationListDTO object given pagination parameters and url parameters
      *
      * @param applicationListDTO a SubscriptionListDTO object
-     * @param groupId group id of the applications to be returned
      * @param limit max number of objects returned
      * @param offset starting index
      * @param size max offset
      */
-    public static void setPaginationParams(ApplicationListDTO applicationListDTO, String groupId, int limit, int offset,
+    public static void setPaginationParams(ApplicationListDTO applicationListDTO, int limit, int offset,
                                            int size) {
 
         Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
@@ -95,13 +95,13 @@ public class ApplicationMappingUtil {
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
             paginatedPrevious = RestApiUtil
                     .getApplicationPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
-                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), groupId);
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT));
         }
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
             paginatedNext = RestApiUtil
                     .getApplicationPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
-                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), groupId);
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT));
         }
         applicationListDTO.setNext(paginatedNext);
         applicationListDTO.setPrevious(paginatedPrevious);
@@ -110,11 +110,10 @@ public class ApplicationMappingUtil {
     public static ApplicationInfoDTO fromApplicationToInfoDTO (Application application) {
         ApplicationInfoDTO applicationInfoDTO = new ApplicationInfoDTO();
         applicationInfoDTO.setApplicationId(application.getId());
-        applicationInfoDTO.setThrottlingTier(application.getTier());
+        applicationInfoDTO.setThrottlingTier(application.getPolicy().getPolicyName());
         applicationInfoDTO.setDescription(application.getDescription());
         applicationInfoDTO.setLifeCycleStatus(application.getStatus());
         applicationInfoDTO.setName(application.getName());
-        applicationInfoDTO.setGroupId(application.getGroupId());
         applicationInfoDTO.setSubscriber(application.getCreatedUser());
         return applicationInfoDTO;
     }
@@ -122,7 +121,7 @@ public class ApplicationMappingUtil {
     public static Application fromDTOtoApplication (ApplicationDTO applicationDTO, String createdUser) {
         //subscriber field of the body is not honored
         Application application = new Application(applicationDTO.getName(), createdUser);
-        application.setTier(applicationDTO.getThrottlingTier());
+        application.setPolicy(new ApplicationPolicy(applicationDTO.getThrottlingTier()));
         application.setDescription(applicationDTO.getDescription());
         application.setId(applicationDTO.getApplicationId());
         application.setPermissionString(applicationDTO.getPermission());

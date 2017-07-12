@@ -12,4 +12,6 @@ struct SubscriptionDto {
     string keyEnvType;
     string applicationId;
     string applicationTier;
+    string status;
+    string apiLevelPolicy = "Unlimited";
 }

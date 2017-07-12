@@ -29,3 +29,9 @@ lcm/features/org.wso2.carbon.apimgt.lifecycle.manager.feature/resources/database
 components/apimgt/org.wso2.carbon.apimgt.rest.api.commons/src/main/resources/publisher-api.yaml
 components/apimgt/org.wso2.carbon.apimgt.rest.api.commons/src/main/resources/store-api.yaml
 components/apimgt/org.wso2.carbon.apimgt.rest.api.commons/src/main/resources/admin-api.yaml
+#################
+## NPM
+#################
+node_modules/
+dist
+npm-debug.log

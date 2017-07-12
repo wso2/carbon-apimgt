@@ -170,6 +170,13 @@ public class SCIMUser {
         private String type;
         private boolean primary;
 
+        /**
+         * Constructor
+         *
+         * @param value   Emails address
+         * @param type    Type of email (eg. home, work)
+         * @param primary Is primary email
+         */
         public SCIMUserEmails(String value, String type, boolean primary) {
             this.value = value;
             this.type = type;
@@ -177,7 +184,6 @@ public class SCIMUser {
         }
 
         public String getValue() {
-
             return this.value;
         }
 
@@ -210,6 +216,12 @@ public class SCIMUser {
         private String value;
         private String display;
 
+        /**
+         * Constructor
+         *
+         * @param value    Id of the group
+         * @param display   Name of the group
+         */
         public SCIMUserGroups(String value, String display) {
             this.value = value;
             this.display = display;

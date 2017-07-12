@@ -3,16 +3,14 @@ package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.ThrottleConditionDTO;
 import java.util.Objects;
 
 /**
  * JWTClaimsConditionDTO
  */
-public class JWTClaimsConditionDTO extends ThrottleConditionDTO  {
+public class JWTClaimsConditionDTO   {
   @JsonProperty("claimUrl")
   private String claimUrl = null;
 
@@ -28,7 +26,7 @@ public class JWTClaimsConditionDTO extends ThrottleConditionDTO  {
    * Get claimUrl
    * @return claimUrl
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   public String getClaimUrl() {
     return claimUrl;
   }
@@ -46,7 +44,7 @@ public class JWTClaimsConditionDTO extends ThrottleConditionDTO  {
    * Get attribute
    * @return attribute
   **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   public String getAttribute() {
     return attribute;
   }
@@ -66,20 +64,19 @@ public class JWTClaimsConditionDTO extends ThrottleConditionDTO  {
     }
     JWTClaimsConditionDTO jwTClaimsCondition = (JWTClaimsConditionDTO) o;
     return Objects.equals(this.claimUrl, jwTClaimsCondition.claimUrl) &&
-        Objects.equals(this.attribute, jwTClaimsCondition.attribute) &&
-        super.equals(o);
+        Objects.equals(this.attribute, jwTClaimsCondition.attribute);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(claimUrl, attribute, super.hashCode());
+    return Objects.hash(claimUrl, attribute);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class JWTClaimsConditionDTO {\n");
-    sb.append("    ").append(toIndentedString(super.toString())).append("\n");
+    
     sb.append("    claimUrl: ").append(toIndentedString(claimUrl)).append("\n");
     sb.append("    attribute: ").append(toIndentedString(attribute)).append("\n");
     sb.append("}");

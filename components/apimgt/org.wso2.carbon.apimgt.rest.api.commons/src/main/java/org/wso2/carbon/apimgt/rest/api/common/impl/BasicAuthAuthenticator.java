@@ -63,13 +63,13 @@ public class BasicAuthAuthenticator implements RESTAPIAuthenticator {
                     return true;
                 }
             } else {
-                throw new APIMgtSecurityException("Missing Authorization header in the request.`",
-                        ExceptionCodes.INVALID_AUTHORIZATION_HEADER);
+                throw new APIMgtSecurityException("Missing 'Authorization : Basic' header in the request.`",
+                        ExceptionCodes.MALFORMED_AUTHORIZATION_HEADER_BASIC);
             }
 
         } else {
             throw new APIMgtSecurityException("Missing Authorization header in the request.`",
-                    ExceptionCodes.INVALID_AUTHORIZATION_HEADER);
+                    ExceptionCodes.MALFORMED_AUTHORIZATION_HEADER_BASIC);
 
         }
         return false;

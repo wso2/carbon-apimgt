@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationResult;
+import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.SubscriptionStatus;
 
@@ -57,7 +58,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      *
      * @param subscriptionId The UUID that uniquely identifies a Subscription
      * @return valid {@link Subscription} object or null
-     * @throws APIMgtDAOException   If failed to get subscription.
+     * @throws APIMgtDAOException If failed to get subscription.
      */
     @Override
     public Subscription getAPISubscription(String subscriptionId) throws APIMgtDAOException {
@@ -65,7 +66,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 "SUBS.APPLICATION_ID AS APP_ID, SUBS.SUB_STATUS AS SUB_STATUS, API.PROVIDER AS API_PROVIDER, " +
                 "API.NAME AS API_NAME, API.CONTEXT AS API_CONTEXT, API.VERSION AS API_VERSION, APP.NAME AS APP_NAME, " +
                 "APP.APPLICATION_STATUS AS APP_STATUS, " +
-                "APP.CREATED_BY AS APP_OWNER, POLICY.NAME AS SUBS_POLICY " +
+                "APP.CREATED_BY AS APP_OWNER, POLICY.NAME AS SUBS_POLICY, POLICY.UUID AS SUBS_POLICY_ID " +
                 "FROM AM_SUBSCRIPTION SUBS, AM_API API, AM_APPLICATION APP, AM_SUBSCRIPTION_POLICY POLICY " +
                 "WHERE SUBS.UUID = ? AND SUBS.API_ID = API.UUID AND SUBS.APPLICATION_ID = APP.UUID AND " +
                 "SUBS.TIER_ID = POLICY.UUID";
@@ -86,7 +87,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      *
      * @param apiId The UUID of API
      * @return A list of {@link Subscription} objects
-     * @throws APIMgtDAOException   If failed to get subscriptions.
+     * @throws APIMgtDAOException If failed to get subscriptions.
      */
     @Override
     public List<Subscription> getAPISubscriptionsByAPI(String apiId) throws APIMgtDAOException {
@@ -117,7 +118,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      *
      * @param applicationId The UUID of Application
      * @return A list of {@link Subscription} objects
-     * @throws APIMgtDAOException   If failed to get subscriptions.
+     * @throws APIMgtDAOException If failed to get subscriptions.
      */
     @Override
     public List<Subscription> getAPISubscriptionsByApplication(String applicationId) throws APIMgtDAOException {
@@ -142,7 +143,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
 
     @Override
     public List<Subscription> getAPISubscriptionsByApplication(String applicationId, ApiType apiType)
-                                                                                            throws APIMgtDAOException {
+            throws APIMgtDAOException {
         final String getSubscriptionsByAppSql = "SELECT SUBS.UUID AS SUBS_UUID, SUBS.TIER_ID AS SUBS_TIER, " +
                 "SUBS.API_ID AS API_ID, SUBS.APPLICATION_ID AS APP_ID, SUBS.SUB_STATUS AS SUB_STATUS, " +
                 "SUBS.SUB_TYPE AS SUB_TYPE, API.PROVIDER AS API_PROVIDER, API.NAME AS API_NAME, " +
@@ -169,7 +170,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      *
      * @param applicationId The UUID of Application
      * @return A list of {@link Subscription} objects which has pendig status
-     * @throws APIMgtDAOException   If failed to get subscriptions.
+     * @throws APIMgtDAOException If failed to get subscriptions.
      */
     @Override
     public List<Subscription> getPendingAPISubscriptionsByApplication(String applicationId) throws APIMgtDAOException {
@@ -193,28 +194,24 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
             throw new APIMgtDAOException(e);
         }
     }
+
     /**
      * Retrieve all API Subscriptions for validation
      *
      * @param limit Subscription Limit
      * @return A list of {@link SubscriptionValidationData} objects
-     * @throws APIMgtDAOException   If failed to get subscriptions.
+     * @throws APIMgtDAOException If failed to get subscriptions.
      */
     @Override
     public List<SubscriptionValidationData> getAPISubscriptionsOfAPIForValidation(int limit) throws APIMgtDAOException {
         if (limit == 0) {
             return new ArrayList<>();
         }
-        final String getSubscriptionsSql = "SELECT SUBS.API_ID AS API_ID, SUBS.APPLICATION_ID AS APP_ID, " +
-                "SUBS.SUB_STATUS AS SUB_STATUS, API.PROVIDER AS API_PROVIDER, API.NAME AS API_NAME, " +
-                "API.CONTEXT AS API_CONTEXT, API.VERSION AS API_VERSION, APP.NAME AS APP_NAME,APPLICATION_POLICY.NAME" +
-                " AS " +
-                "APP_POLICY, APP.CREATED_BY AS APP_OWNER, POLICY.NAME AS SUBS_POLICY , KEY_MAP.CLIENT_ID AS " +
-                "CLIENT_ID,KEY_MAP.KEY_TYPE AS KEY_ENV_TYPE FROM AM_SUBSCRIPTION SUBS, AM_API API, AM_APPLICATION " +
-                "APP, AM_SUBSCRIPTION_POLICY POLICY,AM_APPLICATION_POLICY APPLICATION_POLICY,AM_APP_KEY_MAPPING " +
-                "KEY_MAP " +
-                "WHERE SUBS.API_ID = API.UUID AND SUBS.APPLICATION_ID = APP.UUID AND SUBS.TIER_ID = POLICY.UUID AND " +
-                "KEY_MAP.APPLICATION_ID = SUBS.APPLICATION_ID AND APP.APPLICATION_POLICY_ID = APPLICATION_POLICY.UUID";
+        final String getSubscriptionsSql = "SELECT SUBS.API_ID AS API_ID,SUBS.APPLICATION_ID AS APP_ID,SUBS" +
+                ".SUB_STATUS AS SUB_STATUS, API.PROVIDER AS API_PROVIDER, API.NAME AS API_NAME,API.CONTEXT AS " +
+                "API_CONTEXT, API.VERSION AS API_VERSION,SUBS.TIER_ID AS SUBS_POLICY , KEY_MAP.CLIENT_ID AS " +
+                "CLIENT_ID,KEY_MAP.KEY_TYPE AS KEY_ENV_TYPE FROM AM_SUBSCRIPTION SUBS, AM_API API,AM_APP_KEY_MAPPING " +
+                "KEY_MAP WHERE SUBS.API_ID = API.UUID AND KEY_MAP.APPLICATION_ID = SUBS.APPLICATION_ID";
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(getSubscriptionsSql)) {
             try (ResultSet rs = ps.executeQuery()) {
@@ -229,30 +226,85 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
     /**
      * Retrieve the list of subscriptions of an API for validation
      *
-     * @param apiContext    Context of the API
-     * @param apiVersion    Version of the API.
+     * @param apiContext Context of the API
+     * @param apiVersion Version of the API.
      * @return A list of {@link SubscriptionValidationData} objects
-     * @throws APIMgtDAOException   If failed to get subscriptions.
+     * @throws APIMgtDAOException If failed to get subscriptions.
      */
     @Override
     public List<SubscriptionValidationData> getAPISubscriptionsOfAPIForValidation(String apiContext, String apiVersion)
             throws APIMgtDAOException {
-        final String getSubscriptionsByAPISql = "SELECT SUBS.API_ID AS API_ID, SUBS.APPLICATION_ID AS APP_ID, " +
-                "SUBS.SUB_STATUS AS SUB_STATUS, API.PROVIDER AS API_PROVIDER, API.NAME AS API_NAME, " +
-                "API.CONTEXT AS API_CONTEXT, API.VERSION AS API_VERSION, APP.NAME AS APP_NAME,APPLICATION_POLICY.NAME" +
-                " AS " +
-                "APP_POLICY,APP.CREATED_BY AS APP_OWNER, POLICY.NAME AS SUBS_POLICY , KEY_MAP.CLIENT_ID AS CLIENT_ID," +
-                "KEY_MAP.KEY_TYPE AS KEY_ENV_TYPE " +
-                "FROM AM_SUBSCRIPTION SUBS, AM_API API, AM_APPLICATION APP, AM_SUBSCRIPTION_POLICY POLICY, " +
-                "AM_APP_KEY_MAPPING KEY_MAP ,AM_APPLICATION_POLICY APPLICATION_POLICY " +
-                "WHERE SUBS.API_ID = API.UUID AND SUBS.APPLICATION_ID = APP.UUID AND SUBS.TIER_ID = POLICY.UUID AND " +
-                "KEY_MAP.APPLICATION_ID = SUBS.APPLICATION_ID AND APP.APPLICATION_POLICY_ID = APPLICATION_POLICY.UUID" +
-                " " +
-                "AND API.CONTEXT = ? AND API.VERSION = ?";
+        final String getSubscriptionsByAPISql = "SELECT SUBS.API_ID AS API_ID, SUBS.APPLICATION_ID AS APP_ID,SUBS" +
+                ".SUB_STATUS AS SUB_STATUS, API.PROVIDER AS API_PROVIDER, API.NAME AS API_NAME, API.CONTEXT AS " +
+                "API_CONTEXT, API.VERSION AS API_VERSION, SUBS.TIER_ID AS SUBS_POLICY , KEY_MAP.CLIENT_ID AS " +
+                "CLIENT_ID,KEY_MAP.KEY_TYPE AS KEY_ENV_TYPE FROM AM_SUBSCRIPTION SUBS, AM_API API,AM_APP_KEY_MAPPING " +
+                "KEY_MAP WHERE SUBS.API_ID = API.UUID AND KEY_MAP.APPLICATION_ID = SUBS.APPLICATION_ID AND API" +
+                ".CONTEXT = ? AND API.VERSION = ?";
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(getSubscriptionsByAPISql)) {
             ps.setString(1, apiContext);
             ps.setString(2, apiVersion);
+            try (ResultSet rs = ps.executeQuery()) {
+                return createSubscriptionValidationDataFromResultSet(rs);
+            }
+        } catch (SQLException e) {
+            log.error("Error while executing sql query", e);
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    /**
+     * Retrieve the list of subscriptions of an API for validation
+     *
+     * @param apiContext    Context of the API
+     * @param apiVersion    Version of the API.
+     * @param applicationId UUID of the application
+     * @return A list of {@link SubscriptionValidationData} objects
+     * @throws APIMgtDAOException If failed to get subscriptions.
+     */
+    @Override
+    public List<SubscriptionValidationData> getAPISubscriptionsOfAPIForValidation(String apiContext, String
+            apiVersion, String applicationId) throws APIMgtDAOException {
+        final String getSubscriptionsByAPISql = "SELECT SUBS.API_ID AS API_ID, SUBS.APPLICATION_ID AS APP_ID,SUBS" +
+                ".SUB_STATUS AS SUB_STATUS, API.PROVIDER AS API_PROVIDER, API.NAME AS API_NAME, API.CONTEXT AS " +
+                "API_CONTEXT, API.VERSION AS API_VERSION, SUBS.TIER_ID AS SUBS_POLICY , KEY_MAP.CLIENT_ID AS " +
+                "CLIENT_ID,KEY_MAP.KEY_TYPE AS KEY_ENV_TYPE FROM AM_SUBSCRIPTION SUBS, AM_API API,AM_APP_KEY_MAPPING " +
+                "KEY_MAP WHERE SUBS.API_ID = API.UUID AND KEY_MAP.APPLICATION_ID = SUBS.APPLICATION_ID AND API" +
+                ".CONTEXT = ? AND API.VERSION = ? AND SUBS.APPLICATION_ID = ?";
+        try (Connection conn = DAOUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(getSubscriptionsByAPISql)) {
+            ps.setString(1, apiContext);
+            ps.setString(2, apiVersion);
+            ps.setString(3, applicationId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return createSubscriptionValidationDataFromResultSet(rs);
+            }
+        } catch (SQLException e) {
+            log.error("Error while executing sql query", e);
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    /**
+     * Retrieve the list of subscriptions with a given application and key type for validation
+     *
+     * @param applicationId UUID of the application
+     * @param keyType       Application key type
+     * @return A list of {@link SubscriptionValidationData} objects
+     * @throws APIMgtDAOException If failed to get subscriptions.
+     */
+    public List<SubscriptionValidationData> getAPISubscriptionsOfAppForValidation(String applicationId, String keyType)
+            throws APIMgtDAOException {
+        final String getSubscriptionsByAPISql = "SELECT SUBS.API_ID AS API_ID, SUBS.APPLICATION_ID AS APP_ID,SUBS" +
+                ".SUB_STATUS AS SUB_STATUS, API.PROVIDER AS API_PROVIDER, API.NAME AS API_NAME, API.CONTEXT AS " +
+                "API_CONTEXT, API.VERSION AS API_VERSION, SUBS.TIER_ID AS SUBS_POLICY , KEY_MAP.CLIENT_ID AS " +
+                "CLIENT_ID,KEY_MAP.KEY_TYPE AS KEY_ENV_TYPE FROM AM_SUBSCRIPTION SUBS, AM_API API,AM_APP_KEY_MAPPING " +
+                "KEY_MAP WHERE SUBS.API_ID = API.UUID AND KEY_MAP.APPLICATION_ID = SUBS.APPLICATION_ID AND SUBS" +
+                ".APPLICATION_ID = ? AND KEY_MAP.KEY_TYPE = ?";
+        try (Connection conn = DAOUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(getSubscriptionsByAPISql)) {
+            ps.setString(1, applicationId);
+            ps.setString(2, keyType);
             try (ResultSet rs = ps.executeQuery()) {
                 return createSubscriptionValidationDataFromResultSet(rs);
             }
@@ -270,7 +322,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      * @param limit    The maximum number of results to be returned after the offset
      * @param username The username to filter results by
      * @return {@link APISubscriptionResults} matching results
-     * @throws APIMgtDAOException   If failed to get subscriptions.
+     * @throws APIMgtDAOException If failed to get subscriptions.
      */
     @Override
     public List<Subscription> getAPISubscriptionsForUser(int offset, int limit, String username)
@@ -305,7 +357,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      * @param limit   The maximum number of results to be returned after the offset
      * @param groupID The Group ID to filter results by
      * @return {@link APISubscriptionResults} matching results
-     * @throws APIMgtDAOException   If failed to get subscriptions.
+     * @throws APIMgtDAOException If failed to get subscriptions.
      */
     @Override
     public APISubscriptionResults getAPISubscriptionsForGroup(int offset, int limit, String groupID)
@@ -323,7 +375,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      * @param limit           The maximum number of results to be returned after the offset
      * @param username        The username to filter results by
      * @return {@link APISubscriptionResults} matching results
-     * @throws APIMgtDAOException   If failed to get subscriptions.
+     * @throws APIMgtDAOException If failed to get subscriptions.
      */
     @Override
     public APISubscriptionResults searchApplicationsForUser(String searchAttribute, String searchString, int offset,
@@ -341,7 +393,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      * @param limit           The maximum number of results to be returned after the offset
      * @param groupID         The Group ID to filter results by
      * @return {@link APISubscriptionResults} matching results
-     * @throws APIMgtDAOException   If failed to get subscriptions.
+     * @throws APIMgtDAOException If failed to get subscriptions.
      */
     @Override
     public APISubscriptionResults searchApplicationsForGroup(String searchAttribute, String searchString, int offset,
@@ -352,20 +404,20 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
     /**
      * Create a new Subscription
      *
-     * @param uuid   UUID of new subscription
-     * @param apiId  API ID
-     * @param appId  Application ID
-     * @param tier   Subscription tier
-     * @param status {@link  org.wso2.carbon.apimgt.core.util.APIMgtConstants.SubscriptionStatus} Subscription state
-     * @throws APIMgtDAOException   If failed to add subscription.
+     * @param uuid     UUID of new subscription
+     * @param apiId    API ID
+     * @param appId    Application ID
+     * @param policyId Subscription tier's policy id
+     * @param status   {@link  org.wso2.carbon.apimgt.core.util.APIMgtConstants.SubscriptionStatus} Subscription state
+     * @throws APIMgtDAOException If failed to add subscription.
      */
     @Override
-    public void addAPISubscription(String uuid, String apiId, String appId, String tier, APIMgtConstants
+    public void addAPISubscription(String uuid, String apiId, String appId, String policyId, APIMgtConstants
             .SubscriptionStatus status) throws APIMgtDAOException {
         try (Connection conn = DAOUtil.getConnection()) {
             conn.setAutoCommit(false);
             try {
-                createSubscription(apiId, appId, uuid, tier, status, conn);
+                createSubscription(apiId, appId, uuid, policyId, status, conn);
                 conn.commit();
             } catch (SQLException ex) {
                 conn.rollback();
@@ -383,7 +435,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      * Remove an existing API Subscription
      *
      * @param subscriptionId The UUID of the API Subscription that needs to be deleted
-     * @throws APIMgtDAOException   If failed to delete subscription.
+     * @throws APIMgtDAOException If failed to delete subscription.
      */
     @Override
     public void deleteAPISubscription(String subscriptionId) throws APIMgtDAOException {
@@ -412,7 +464,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      *
      * @param apiId UUID of the API
      * @return Subscription Count
-     * @throws APIMgtDAOException   If failed to get subscription count.
+     * @throws APIMgtDAOException If failed to get subscription count.
      */
     @Override
     public long getSubscriptionCountByAPI(String apiId) throws APIMgtDAOException {
@@ -436,7 +488,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      * Copy existing subscriptions on one of the API versions into latest version
      *
      * @param subscriptionList uuid of newly created version
-     * @throws APIMgtDAOException   If failed to get copy subscriptions.
+     * @throws APIMgtDAOException If failed to get copy subscriptions.
      */
     @Override
     public void copySubscriptions(List<Subscription> subscriptionList) throws APIMgtDAOException {
@@ -445,7 +497,8 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
             try {
                 for (Subscription subscription : subscriptionList) {
                     createSubscription(subscription.getApi().getId(), subscription.getApplication().getId(),
-                            subscription.getId(), subscription.getSubscriptionTier(), subscription.getStatus(), conn);
+                            subscription.getId(), subscription.getPolicy().getPolicyName(), subscription.getStatus(),
+                            conn);
                 }
                 conn.commit();
             } catch (SQLException ex) {
@@ -465,7 +518,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      *
      * @param subId     ID of the Subscription
      * @param subStatus New Subscription Status
-     * @throws APIMgtDAOException   If failed to update subscriptions.
+     * @throws APIMgtDAOException If failed to update subscriptions.
      */
     @Override
     public void updateSubscriptionStatus(String subId, APIMgtConstants.SubscriptionStatus subStatus)
@@ -505,7 +558,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      *
      * @param subId  ID of the Subscription
      * @param policy New Subscription Policy
-     * @throws APIMgtDAOException   If failed to update subscriptions.
+     * @throws APIMgtDAOException If failed to update subscriptions.
      */
     @Override
     public void updateSubscriptionPolicy(String subId, String policy) throws APIMgtDAOException {
@@ -533,11 +586,11 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
     /**
      * Validates a subscription
      *
-     * @param apiContext  Context of the API
-     * @param apiVersion  Version of the API
-     * @param clientId    Client id of the application
+     * @param apiContext Context of the API
+     * @param apiVersion Version of the API
+     * @param clientId   Client id of the application
      * @return Subscription Validation Information
-     * @throws APIMgtDAOException   If failed to get subscription validation results.
+     * @throws APIMgtDAOException If failed to get subscription validation results.
      */
     public SubscriptionValidationResult validateSubscription(String apiContext, String apiVersion, String clientId)
             throws APIMgtDAOException {
@@ -590,11 +643,9 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 subValidationData.setSubscriptionPolicy(rs.getString("SUBS_POLICY"));
                 subValidationData.setApiName(rs.getString("API_NAME"));
                 subValidationData.setApiProvider(rs.getString("API_PROVIDER"));
-                subValidationData.setApplicationName(rs.getString("APP_NAME"));
-                subValidationData.setApplicationOwner(rs.getString("APP_OWNER"));
                 subValidationData.setKeyEnvType(rs.getString("KEY_ENV_TYPE"));
                 subValidationData.setApplicationId(rs.getString("APP_ID"));
-                subValidationData.setApplicationTier(rs.getString("APP_POLICY"));
+                subValidationData.setStatus(rs.getString("SUB_STATUS"));
                 subscriptionList.add(subValidationData);
             }
         } catch (SQLException e) {
@@ -622,6 +673,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
             if (rs.next()) {
                 String subscriptionId = rs.getString("SUBS_UUID");
                 String subscriptionTier = rs.getString("SUBS_POLICY");
+                String subscriptionPolicyId = rs.getString("SUBS_POLICY_ID");
 
                 API.APIBuilder apiBuilder = new API.APIBuilder(rs.getString("API_PROVIDER"),
                         rs.getString("API_NAME"), rs.getString("API_VERSION"));
@@ -633,7 +685,8 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 app.setId(rs.getString("APP_ID"));
                 app.setStatus(rs.getString("APP_STATUS"));
 
-                subscription = new Subscription(subscriptionId, app, api, subscriptionTier);
+                subscription = new Subscription(subscriptionId, app, api, new SubscriptionPolicy(subscriptionPolicyId,
+                        subscriptionTier));
                 subscription.setStatus(APIMgtConstants.SubscriptionStatus.valueOf(rs.getString("SUB_STATUS")));
             }
         } catch (SQLException e) {
@@ -657,7 +710,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 apiBuilder.context(rs.getString("API_CONTEXT"));
                 API api = apiBuilder.build();
 
-                subscription = new Subscription(subscriptionId, null, api, subscriptionTier);
+                subscription = new Subscription(subscriptionId, null, api, new SubscriptionPolicy(subscriptionTier));
                 subscription.setStatus(APIMgtConstants.SubscriptionStatus.valueOf(rs.getString("SUB_STATUS")));
                 subscriptionList.add(subscription);
             }
@@ -680,7 +733,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 app.setId(rs.getString("APP_ID"));
                 app.setStatus(rs.getString("APP_STATUS"));
 
-                subscription = new Subscription(subscriptionId, app, null, subscriptionTier);
+                subscription = new Subscription(subscriptionId, app, null, new SubscriptionPolicy(subscriptionTier));
                 subscription.setStatus(APIMgtConstants.SubscriptionStatus.valueOf(rs.getString("SUB_STATUS")));
                 subscriptionList.add(subscription);
             }
@@ -691,7 +744,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
         return subscriptionList;
     }
 
-    void createSubscription(String apiId, String appId, String uuid, String tier, APIMgtConstants
+    void createSubscription(String apiId, String appId, String uuid, String policyId, APIMgtConstants
             .SubscriptionStatus status, Connection conn) throws APIMgtDAOException, SQLException {
         //check for existing subscriptions
         final String checkExistingSubscriptionSql = " SELECT UUID FROM AM_SUBSCRIPTION WHERE API_ID = ? " +
@@ -713,12 +766,12 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
 
         //add new subscription
         final String addSubscriptionSql = "INSERT INTO AM_SUBSCRIPTION (UUID, TIER_ID, API_ID, APPLICATION_ID," +
-                "SUB_STATUS, CREATED_TIME) VALUES (?,(SELECT UUID FROM AM_SUBSCRIPTION_POLICY WHERE NAME = ?),?,?,?,?)";
+                "SUB_STATUS, CREATED_TIME) VALUES (?,?,?,?,?,?)";
 
         try (PreparedStatement ps = conn.prepareStatement(addSubscriptionSql)) {
             conn.setAutoCommit(false);
             ps.setString(1, uuid);
-            ps.setString(2, tier);
+            ps.setString(2, policyId);
             ps.setString(3, apiId);
             ps.setString(4, appId);
             ps.setString(5, status != null ? status.toString() : APIMgtConstants.SubscriptionStatus.ACTIVE.toString());

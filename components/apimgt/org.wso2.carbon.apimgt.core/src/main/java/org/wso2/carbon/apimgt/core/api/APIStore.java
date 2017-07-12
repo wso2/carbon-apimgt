@@ -28,9 +28,11 @@ import org.wso2.carbon.apimgt.core.exception.APIRatingException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.ApplicationToken;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.Label;
+import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
@@ -41,7 +43,6 @@ import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationResponse;
 
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This interface used to write Store specific methods.
@@ -162,23 +163,20 @@ public interface APIStore extends APIManager {
      *
      * @param applicationName APIM application name
      * @param ownerId          Application owner ID.
-     * @param groupId         Group id.
      * @return it will return Application.
      * @throws APIManagementException Failed to get application by name.
      */
-    Application getApplicationByName(String applicationName, String ownerId, String groupId)
-            throws APIManagementException;
+    Application getApplicationByName(String applicationName, String ownerId) throws APIManagementException;
 
     /**
      * Returns a list of applications for a given subscriber
      *
      * @param subscriber Subscriber
-     * @param groupId    the groupId to which the applications must belong.
      * @return Applications
      * @throws APIManagementException if failed to applications for given subscriber
      */
 
-    List<Application> getApplications(String subscriber, String groupId) throws APIManagementException;
+    List<Application> getApplications(String subscriber) throws APIManagementException;
 
     /**
      * Updates the details of the specified user application.
@@ -192,20 +190,43 @@ public interface APIStore extends APIManager {
     /**
      * Generates oAuth keys for an application.
      *
-     * @param applicationName Name of the Application.
      * @param applicationId   Id of the Application.
      * @param tokenType       Token type (PRODUCTION | SANDBOX)
      * @param callbackUrl     Callback URL
      * @param grantTypes      List of grant types to be supported by the application
-     * @param validityTime    Validity time period.
-     * @param groupingId      APIM application id.
-     * @param tokenScopes      Scopes for the requested tokens.
-     * @return                {@code Map<String, Object>}  Map of generated keys.
-     * @throws APIManagementException if failed to applications for given subscriber
+     * @return {@link OAuthApplicationInfo}  Generated OAuth client information
+     * @throws APIManagementException If oauth application creation was failed
      */
-    Map<String, Object> generateApplicationKeys(String applicationName, String applicationId,
-            String tokenType, String callbackUrl, List<String> grantTypes, String validityTime,
-            String tokenScopes, String groupingId) throws APIManagementException;
+    OAuthApplicationInfo generateApplicationKeys(String applicationId, String tokenType,
+                                                 String callbackUrl, List<String> grantTypes)
+            throws APIManagementException;
+
+    /**
+     * Provision out-of-band OAuth clients (Semi-manual client registration)
+     *
+     * @param applicationId Application ID
+     * @param tokenType     Token type (PRODUCTION | SANDBOX)
+     * @param clientId      Client ID of the OAuth application
+     * @param clientSecret  Client secret of the OAuth application
+     * @return {@link OAuthApplicationInfo}  Existing OAuth client information
+     * @throws APIManagementException If oauth application mapping was failed
+     */
+    OAuthApplicationInfo provideApplicationKeys(String applicationId, String tokenType, String clientId,
+                                                String clientSecret) throws APIManagementException;
+
+    /**
+     * Generate an application access token (and revoke current token, if any)
+     *
+     * @param clientId         Consumer Key
+     * @param clientSecret     Consumer Secret
+     * @param scopes           Scope of the token
+     * @param validityPeriod   Token validity period
+     * @param tokenToBeRevoked Current access token which needs to be revoked
+     * @return {@link ApplicationToken} object which contains access token, scopes and validity period
+     * @throws APIManagementException if error occurred while generating access token
+     */
+    ApplicationToken generateApplicationToken(String clientId, String clientSecret, String scopes, long validityPeriod,
+                                              String tokenToBeRevoked) throws APIManagementException;
 
     /**
      * Retrieve an application given the uuid.
@@ -272,7 +293,7 @@ public interface APIStore extends APIManager {
      * @return  List of policies for the given tier level.
      * @throws APIManagementException   If failed to get policies.
      */
-    List<Policy> getPolicies(String tierLevel) throws APIManagementException;
+    List<Policy> getPolicies(APIMgtAdminService.PolicyLevel tierLevel) throws APIManagementException;
 
     /**
      * Retrieve all policies of given tier level.
@@ -281,7 +302,7 @@ public interface APIStore extends APIManager {
      * @return  Policy object.
      * @throws APIManagementException   If failed to get the policy.
      */
-    Policy getPolicy(String tierLevel, String tierName) throws APIManagementException;
+    Policy getPolicy(APIMgtAdminService.PolicyLevel tierLevel, String tierName) throws APIManagementException;
 
     /**
      * Retrieve Label information based on the label name

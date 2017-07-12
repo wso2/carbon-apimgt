@@ -24,10 +24,11 @@
 package org.wso2.carbon.apimgt.core.models;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
@@ -35,14 +36,13 @@ import java.util.Objects;
 /**
  * This Class contains the model of Uri Templates
  */
-public final class UriTemplate implements Serializable {
+public final class UriTemplate {
 
-    private static final long serialVersionUID = 1L;
     private final String templateId;
     private final String uriTemplate;
     private final String httpVerb;
     private final String authType;
-    private final String policy;
+    private final Policy policy;
     private final Map<String, Endpoint> endpoint;
 
     private UriTemplate(UriTemplateBuilder uriTemplateBuilder) {
@@ -66,7 +66,7 @@ public final class UriTemplate implements Serializable {
         return authType;
     }
 
-    public String getPolicy() {
+    public Policy getPolicy() {
         return policy;
     }
 
@@ -92,14 +92,14 @@ public final class UriTemplate implements Serializable {
         return Objects.equals(uriTemplate, that.uriTemplate) &&
                 Objects.equals(httpVerb, that.httpVerb) &&
                 Objects.equals(authType, that.authType) &&
-                Objects.equals(policy, that.policy) &&
+                Objects.equals(policy.getPolicyName(), that.policy.getPolicyName()) &&
                 Objects.equals(templateId, that.templateId) &&
                 Objects.equals(endpoint, that.endpoint);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uriTemplate, httpVerb, authType, policy, endpoint);
+        return Objects.hash(uriTemplate, httpVerb, authType, policy.getPolicyName(), endpoint);
     }
 
     @Override
@@ -119,7 +119,7 @@ public final class UriTemplate implements Serializable {
         private String uriTemplate;
         private String httpVerb;
         private String authType = APIMgtConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
-        private String policy = APIUtils.getDefaultAPIPolicy();
+        private Policy policy = APIUtils.getDefaultAPIPolicy();
         private Map<String, Endpoint> endpoint = Collections.emptyMap();
         public String templateId;
 
@@ -134,6 +134,7 @@ public final class UriTemplate implements Serializable {
             this.policy = copy.policy;
             this.templateId = copy.templateId;
         }
+
         public static UriTemplateBuilder getInstance() {
             return new UriTemplateBuilder();
         }
@@ -152,12 +153,13 @@ public final class UriTemplate implements Serializable {
             this.authType = authType;
             return this;
         }
+
         public UriTemplateBuilder templateId(String templateId) {
             this.templateId = templateId;
             return this;
         }
 
-        public UriTemplateBuilder policy(String policy) {
+        public UriTemplateBuilder policy(Policy policy) {
             this.policy = policy;
             return this;
         }
@@ -179,7 +181,7 @@ public final class UriTemplate implements Serializable {
             return authType;
         }
 
-        public String getPolicy() {
+        public Policy getPolicy() {
             return policy;
         }
 
@@ -193,6 +195,14 @@ public final class UriTemplate implements Serializable {
 
         public UriTemplate build() {
             return new UriTemplate(this);
+        }
+
+        public UriTemplateBuilder(FileApi.FileUriTemplate fileUriTemplate) {
+            this.templateId = fileUriTemplate.getTemplateId();
+            this.uriTemplate = fileUriTemplate.getUriTemplate();
+            this.authType = fileUriTemplate.getAuthType();
+            this.httpVerb = fileUriTemplate.getHttpVerb();
+            this.policy = new APIPolicy(fileUriTemplate.getPolicy());
         }
     }
 }

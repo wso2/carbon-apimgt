@@ -63,6 +63,9 @@ public class APIMgtConstants {
     public static final String RESOURCE_SPECIFIC_ENDPOINT = "RESOURCE";
     public static final String PRODUCTION_ENDPOINT = "production";
 
+    public static final String DEFAULT_LABEL_NAME = "Default";
+    public static final String DEFAULT_LABEL_ACCESS_URL = "https://localhost:9092";
+
     //workflow executor default executors
     public static final String WF_DEFAULT_APPCREATION_EXEC =
             "org.wso2.carbon.apimgt.core.workflow.ApplicationCreationSimpleWorkflowExecutor";
@@ -102,8 +105,15 @@ public class APIMgtConstants {
     public static final String URL_PATTERN_COLUMN = "URL_PATTERN";
 
     public static final String SANDBOX_ENDPOINT = "sandbox";
+    public static final String GATEWAY_CONFIG = "GATEWAY_CONFIG";
     public static final String HTTP = "http";
     public static final String HTTPS = "https";
+
+    public static final String HTTP_METHOD = "HTTP_METHOD";
+
+    public static final String NAMESPACE_STORE_API = "wso2.carbon.apimgt.store.rest.api";
+    public static final String NAMESPACE_PUBLISHER_API = "wso2.carbon.apimgt.publisher.rest.api";
+    public static final String NAMESPACE_ADMIN_API = "wso2.carbon.apimgt.admin.rest.api";
 
     /**
      * Application statuses.
@@ -259,6 +269,15 @@ public class APIMgtConstants {
         public static final String API_LEVEL = "api";
         public static final String APPLICATION_LEVEL = "application";
         public static final String SUBSCRIPTION_LEVEL = "subscription";
+        public static final String COLUMN_CONDITION_GROUP_ID = "CONDITION_GROUP_ID";
+        public static final String BLOCKING_CONDITION_STATE = "state";
+        public static final String BLOCKING_CONDITION_KEY = "blockingCondition";
+        public static final String BLOCKING_CONDITION_VALUE = "conditionValue";
+        public static final String BLOCKING_CONDITIONS_APPLICATION = "APPLICATION";
+        public static final String BLOCKING_CONDITIONS_API = "API";
+        public static final String BLOCKING_CONDITIONS_USER = "USER";
+        public static final String BLOCKING_CONDITIONS_IP = "IP";
+        public static final String BLOCKING_CONDITION_IP_RANGE = "IP_RANGE";
     }
 
     /**
@@ -324,6 +343,8 @@ public class APIMgtConstants {
         public static final String POST = "POST";
         public static final String PUT = "PUT";
         public static final String DELETE = "DELETE";
+        public static final String HEAD = "HEAD";
+        public static final String OPTIONS = "OPTIONS";
         public static final String CONTENT_TYPE = "Content-Type";
         public static final String ACCEPT = "Accept";
         public static final String USERNAME = "username";
@@ -355,9 +376,9 @@ public class APIMgtConstants {
         public static final String ATTRIBUTE_APPLICATION_UPDATEDBY = "updatedUser";
         public static final String ATTRIBUTE_APPLICATION_TIER = "tier";
         public static final String ATTRIBUTE_APPLICATION_DESCRIPTION = "description";
-        public static final String ATTRIBUTE_APPLICATION_GROUPID = "groupId";
         public static final String ATTRIBUTE_APPLICATION_PERMISSION = "permission";
         public static final String ATTRIBUTE_APPLICATION_EXISTIN_APP_STATUS = "status";
+        public static final String ATTRIBUTE_APPLICATION_POLICY_ID = "policyId";
 
     }
 
@@ -381,6 +402,17 @@ public class APIMgtConstants {
         public static final String ENDPOINT_DELETE = "ENDPOINT_DELETE";
         public static final String SUBSCRIPTION_CREATE = "SUBSCRIPTION_CREATE";
         public static final String SUBSCRIPTION_DELETE = "SUBSCRIPTION_DELETE";
+        public static final String SUBSCRIPTION_STATUS_CHANGE = "SUBSCRIPTION_STATUS_CHANGE";
+        public static final String APPLICATION_CREATE = "APPLICATION_CREATE";
+        public static final String APPLICATION_UPDATE = "APPLICATION_UPDATE";
+        public static final String APPLICATION_DELETE = "APPLICATION_DELETE";
+        public static final String POLICY_CREATE = "POLICY_CREATE";
+        public static final String POLICY_UPDATE = "POLICY_UPDATE";
+        public static final String POLICY_DELETE = "POLICY_DELETE";
+        public static final String BLOCK_CONDITION_ADD = "BLOCK_CONDITION_ADD";
+        public static final String BLOCK_CONDITION_UPDATE = "BLOCK_CONDITION_UPDATE";
+        public static final String BLOCK_CONDITION_DELETE = "BLOCK_CONDITION_DELETE";
+
     }
 
     /**
@@ -435,5 +467,14 @@ public class APIMgtConstants {
         public static final int SC_504_GATEWAY_TIMEOUT = 504;
         public static final int SC_505_HTTP_VERSION_NOT_SUPPORTED = 505;
         public static final int SC_507_INSUFFICIENT_STORAGE = 507;
+    }
+
+    /**
+     * Type of UUF apps in system
+     */
+    public static class APPType {
+        public static final String PUBLISHER = "publisher";
+        public static final String STORE = "store";
+        public static final String ADMIN = "admin";
     }
 }

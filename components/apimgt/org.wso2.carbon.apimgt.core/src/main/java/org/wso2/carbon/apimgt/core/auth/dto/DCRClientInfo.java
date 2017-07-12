@@ -22,6 +22,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Model for DCR Client (OAuth2 Application)
@@ -177,5 +178,35 @@ public final class DCRClientInfo {
             redirectURIs = new ArrayList<>();
         }
         redirectURIs.add(callback);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof DCRClientInfo)) {
+            return false;
+        }
+        DCRClientInfo that = (DCRClientInfo) o;
+        return Objects.equals(clientId, that.clientId) &&
+                Objects.equals(registrationClientUri, that.registrationClientUri) &&
+                Objects.equals(registrationAccessToken, that.registrationAccessToken) &&
+                Objects.equals(clientIdIssuedAt, that.clientIdIssuedAt) &&
+                Objects.equals(clientSecret, that.clientSecret) &&
+                Objects.equals(clientSecretExpiresAt, that.clientSecretExpiresAt) &&
+                Objects.equals(clientName, that.clientName) &&
+                Objects.equals(redirectURIs, that.redirectURIs) &&
+                Objects.equals(grantTypes, that.grantTypes) &&
+                Objects.equals(tokenEndpointAuthMethod, that.tokenEndpointAuthMethod) &&
+                Objects.equals(logoUri, that.logoUri) &&
+                Objects.equals(jwksUri, that.jwksUri);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(clientId, registrationClientUri, registrationAccessToken, clientIdIssuedAt, clientSecret,
+                clientSecretExpiresAt, clientName, redirectURIs, grantTypes, tokenEndpointAuthMethod, logoUri,
+                jwksUri, userinfoSignedResponseAlg);
     }
 }

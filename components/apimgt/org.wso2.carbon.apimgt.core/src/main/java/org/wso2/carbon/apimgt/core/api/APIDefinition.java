@@ -22,6 +22,8 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIResource;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.Scope;
+import org.wso2.msf4j.Request;
+import org.wso2.msf4j.ServiceMethodInfo;
 
 import java.util.List;
 import java.util.Map;
@@ -51,6 +53,16 @@ public interface APIDefinition {
      * @throws APIManagementException   If error occurs while parsing swagger resources.
      */
     Map<String, Scope> getScopes(String resourceConfigsJSON) throws APIManagementException;
+
+    /**
+     * This method extracts the scope from the API definition matching to a resource path
+     *
+     * @param resourceConfigsJSON resource json
+     * @return request   HttpRequest being processed.
+     * @throws APIManagementException   If error occurs while parsing swagger resources.
+     */
+    String getScopeOfResourcePath(String resourceConfigsJSON, Request request, ServiceMethodInfo serviceMethodInfo)
+            throws APIManagementException;
 
     /**
      * generate the swagger from uri templates.

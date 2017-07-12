@@ -34,8 +34,10 @@ import org.wso2.carbon.apimgt.core.api.Broker;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOUtil;
 import org.wso2.carbon.apimgt.core.dao.impl.DataSource;
 import org.wso2.carbon.apimgt.core.dao.impl.DataSourceImpl;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.impl.BrokerImpl;
 import org.wso2.carbon.apimgt.core.util.BrokerUtil;
+import org.wso2.carbon.apimgt.core.util.ThrottlerUtil;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExtensionsConfigBuilder;
 import org.wso2.carbon.datasource.core.api.DataSourceService;
 import org.wso2.carbon.kernel.configprovider.ConfigProvider;
@@ -69,6 +71,16 @@ public class BundleActivator {
         } catch (NamingException e) {
             log.error("Error occurred while jndi lookup", e);
         }
+
+        // deploying default policies
+        try {
+            ThrottlerUtil.addDefaultAdvancedThrottlePolicies();
+            if (log.isDebugEnabled()) {
+                log.debug("Checked default throttle policies successfully");
+            }
+        } catch (APIManagementException e) {
+            log.error("Error occurred while deploying default policies", e);
+        }
     }
 
     @Reference (
@@ -93,7 +105,6 @@ public class BundleActivator {
         this.jndiContextManager = jndiContextManager;
 
     }
-
 
     protected void onJNDIUnregister(JNDIContextManager jndiContextManager) {
         this.jndiContextManager = null;

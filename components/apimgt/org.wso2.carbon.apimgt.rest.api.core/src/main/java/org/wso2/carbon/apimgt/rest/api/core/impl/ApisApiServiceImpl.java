@@ -65,6 +65,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     /**
+     * Retrieve a list of APIs with given gateway labels and status.
      *
      * @param labels Gateway labels
      * @param status Lifecycle status
@@ -72,7 +73,8 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return 200 OK if the opration was successful
      * @throws NotFoundException If failed to retrieve APIs
      */
-    @Override public Response apisGet(String labels, String status, Request request) throws NotFoundException {
+    @Override
+    public Response apisGet(String labels, String status, Request request) throws NotFoundException {
         APIListDTO apiListDTO;
         try {
             APIMgtAdminService adminService = RestApiUtil.getAPIMgtAdminService();

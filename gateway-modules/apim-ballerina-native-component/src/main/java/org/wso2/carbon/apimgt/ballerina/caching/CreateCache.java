@@ -65,8 +65,8 @@ import javax.cache.expiry.Duration;
 public class CreateCache extends AbstractNativeFunction {
     @Override
     public BValue[] execute(Context context) {
-        String cacheName = getArgument(context, 0).stringValue();
-        String cacheTimeoutString = getArgument(context, 1).stringValue();
+        String cacheName = getStringArgument(context, 0);
+        String cacheTimeoutString = getStringArgument(context, 1);
         //Default cache timeout is 15 minutes
         int cacheTimeout = 15;
         if (cacheTimeoutString != null && cacheTimeoutString.length() > 0) {

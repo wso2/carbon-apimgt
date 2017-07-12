@@ -3,11 +3,12 @@ package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.HeaderConditionDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.IPConditionDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.JWTClaimsConditionDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.QueryParameterConditionDTO;
 import java.util.Objects;
 
 /**
@@ -15,48 +16,97 @@ import java.util.Objects;
  */
 @ApiModel(description = "Throttling Conditions")
 public class ThrottleConditionDTO   {
-  /**
-   * Gets or Sets type
-   */
-  public enum TypeEnum {
-    HEADERCONDITION("HeaderCondition"),
-    
-    IPCONDITION("IPCondition"),
-    
-    JWTCLAIMSCONDITION("JWTClaimsCondition"),
-    
-    QUERYPARAMETERCONDITION("QueryParameterCondition");
+  @JsonProperty("headerCondition")
+  private HeaderConditionDTO headerCondition = null;
 
-    private String value;
+  @JsonProperty("ipCondition")
+  private IPConditionDTO ipCondition = null;
 
-    TypeEnum(String value) {
-      this.value = value;
-    }
+  @JsonProperty("jwtClaimsCondition")
+  private JWTClaimsConditionDTO jwtClaimsCondition = null;
 
-    @Override
-    @JsonValue
-    public String toString() {
-      return String.valueOf(value);
-    }
-
-    @JsonCreator
-    public static TypeEnum fromValue(String text) {
-      for (TypeEnum b : TypeEnum.values()) {
-        if (String.valueOf(b.value).equals(text)) {
-          return b;
-        }
-      }
-      return null;
-    }
-  }
+  @JsonProperty("queryParameterCondition")
+  private QueryParameterConditionDTO queryParameterCondition = null;
 
   @JsonProperty("type")
-  private TypeEnum type = null;
+  private String type = null;
 
   @JsonProperty("invertCondition")
   private Boolean invertCondition = false;
 
-  public ThrottleConditionDTO type(TypeEnum type) {
+  public ThrottleConditionDTO headerCondition(HeaderConditionDTO headerCondition) {
+    this.headerCondition = headerCondition;
+    return this;
+  }
+
+   /**
+   * Get headerCondition
+   * @return headerCondition
+  **/
+  @ApiModelProperty(value = "")
+  public HeaderConditionDTO getHeaderCondition() {
+    return headerCondition;
+  }
+
+  public void setHeaderCondition(HeaderConditionDTO headerCondition) {
+    this.headerCondition = headerCondition;
+  }
+
+  public ThrottleConditionDTO ipCondition(IPConditionDTO ipCondition) {
+    this.ipCondition = ipCondition;
+    return this;
+  }
+
+   /**
+   * Get ipCondition
+   * @return ipCondition
+  **/
+  @ApiModelProperty(value = "")
+  public IPConditionDTO getIpCondition() {
+    return ipCondition;
+  }
+
+  public void setIpCondition(IPConditionDTO ipCondition) {
+    this.ipCondition = ipCondition;
+  }
+
+  public ThrottleConditionDTO jwtClaimsCondition(JWTClaimsConditionDTO jwtClaimsCondition) {
+    this.jwtClaimsCondition = jwtClaimsCondition;
+    return this;
+  }
+
+   /**
+   * Get jwtClaimsCondition
+   * @return jwtClaimsCondition
+  **/
+  @ApiModelProperty(value = "")
+  public JWTClaimsConditionDTO getJwtClaimsCondition() {
+    return jwtClaimsCondition;
+  }
+
+  public void setJwtClaimsCondition(JWTClaimsConditionDTO jwtClaimsCondition) {
+    this.jwtClaimsCondition = jwtClaimsCondition;
+  }
+
+  public ThrottleConditionDTO queryParameterCondition(QueryParameterConditionDTO queryParameterCondition) {
+    this.queryParameterCondition = queryParameterCondition;
+    return this;
+  }
+
+   /**
+   * Get queryParameterCondition
+   * @return queryParameterCondition
+  **/
+  @ApiModelProperty(value = "")
+  public QueryParameterConditionDTO getQueryParameterCondition() {
+    return queryParameterCondition;
+  }
+
+  public void setQueryParameterCondition(QueryParameterConditionDTO queryParameterCondition) {
+    this.queryParameterCondition = queryParameterCondition;
+  }
+
+  public ThrottleConditionDTO type(String type) {
     this.type = type;
     return this;
   }
@@ -66,11 +116,11 @@ public class ThrottleConditionDTO   {
    * @return type
   **/
   @ApiModelProperty(required = true, value = "")
-  public TypeEnum getType() {
+  public String getType() {
     return type;
   }
 
-  public void setType(TypeEnum type) {
+  public void setType(String type) {
     this.type = type;
   }
 
@@ -102,13 +152,17 @@ public class ThrottleConditionDTO   {
       return false;
     }
     ThrottleConditionDTO throttleCondition = (ThrottleConditionDTO) o;
-    return Objects.equals(this.type, throttleCondition.type) &&
+    return Objects.equals(this.headerCondition, throttleCondition.headerCondition) &&
+        Objects.equals(this.ipCondition, throttleCondition.ipCondition) &&
+        Objects.equals(this.jwtClaimsCondition, throttleCondition.jwtClaimsCondition) &&
+        Objects.equals(this.queryParameterCondition, throttleCondition.queryParameterCondition) &&
+        Objects.equals(this.type, throttleCondition.type) &&
         Objects.equals(this.invertCondition, throttleCondition.invertCondition);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(type, invertCondition);
+    return Objects.hash(headerCondition, ipCondition, jwtClaimsCondition, queryParameterCondition, type, invertCondition);
   }
 
   @Override
@@ -116,6 +170,10 @@ public class ThrottleConditionDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class ThrottleConditionDTO {\n");
     
+    sb.append("    headerCondition: ").append(toIndentedString(headerCondition)).append("\n");
+    sb.append("    ipCondition: ").append(toIndentedString(ipCondition)).append("\n");
+    sb.append("    jwtClaimsCondition: ").append(toIndentedString(jwtClaimsCondition)).append("\n");
+    sb.append("    queryParameterCondition: ").append(toIndentedString(queryParameterCondition)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    invertCondition: ").append(toIndentedString(invertCondition)).append("\n");
     sb.append("}");

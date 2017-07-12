@@ -24,8 +24,6 @@ import org.ballerinalang.model.values.BString;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.natives.AbstractNativeFunction;
 import org.ballerinalang.natives.annotations.Argument;
-import org.ballerinalang.natives.annotations.Attribute;
-import org.ballerinalang.natives.annotations.BallerinaAnnotation;
 import org.ballerinalang.natives.annotations.BallerinaFunction;
 import org.ballerinalang.natives.annotations.ReturnType;
 
@@ -45,23 +43,13 @@ import org.ballerinalang.natives.annotations.ReturnType;
         returnType = {@ReturnType(type = TypeEnum.STRING)},
         isPublic = true
 )
-@BallerinaAnnotation(annotationName = "Description", attributes = {@Attribute(name = "value",
-        value = "Put cache entry by providing cacheName, cacheKey and cache entry") })
-@BallerinaAnnotation(annotationName = "Param", attributes = {@Attribute(name = "cacheName",
-        value = "Cache Manager name") })
-@BallerinaAnnotation(annotationName = "Param", attributes = {@Attribute(name = "cacheKey",
-        value = "String cache key") })
-@BallerinaAnnotation(annotationName = "Param", attributes = {@Attribute(name = "cacheEntry",
-        value = "Cache entry to be push to cache") })
-@BallerinaAnnotation(annotationName = "Return", attributes = {@Attribute(name = "string",
-        value = "Cache Manager reference") })
 
 public class PutCacheEntry extends AbstractNativeFunction {
     @Override
     public BValue[] execute(Context context) {
-        String cacheName = getArgument(context, 0).stringValue();
-        String cacheKey = getArgument(context, 1).stringValue();
-        BValue cacheEntry = getArgument(context, 2);
+        String cacheName = getStringArgument(context, 0);
+        String cacheKey = getStringArgument(context, 1);
+        BValue cacheEntry = getRefArgument(context, 0);
         //TODO If cache is not created then need to send proper message or create and put entry.
         CacheManagerHolder.getInstance().getCacheManager().getCache(cacheName).put(cacheKey, cacheEntry);
         return getBValues(new BString(cacheName));

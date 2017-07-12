@@ -147,10 +147,12 @@ public interface ApplicationDAO {
      * Add application key related information
      *
      * @param appId     UUID of the application
+     * @param keyType     Key Type (Production | Sandbox | Application)
      * @param oAuthAppDetails   Oauth application detail object.
      * @throws APIMgtDAOException   If failed to add application keys.
      */
-    void addApplicationKeys(String appId, OAuthApplicationInfo oAuthAppDetails) throws APIMgtDAOException;
+    void addApplicationKeys(String appId, String keyType, OAuthApplicationInfo oAuthAppDetails)
+            throws APIMgtDAOException;
     
     /**
      * Update the state of an existing Application
@@ -170,4 +172,13 @@ public interface ApplicationDAO {
      * @throws APIMgtDAOException if DB level exception occurred
      */
     String getLastUpdatedTimeOfApplication(String applicationId) throws APIMgtDAOException;
+
+    /**
+     * Retrieves all Applications
+     *
+     * @return List of Applications
+     * @throws APIMgtDAOException if DB level exception occurred
+     */
+    List<Application> getAllApplications() throws APIMgtDAOException;
+
 }

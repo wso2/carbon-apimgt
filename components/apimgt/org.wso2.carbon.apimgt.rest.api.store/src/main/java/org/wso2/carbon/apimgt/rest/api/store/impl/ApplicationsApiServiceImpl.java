@@ -4,33 +4,31 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
-import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
-import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
-import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.core.models.APIKey;
-import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationResponse;
+import org.wso2.carbon.apimgt.core.models.ApplicationToken;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ApplicationStatus;
-import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
+import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyProvisionRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeysDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationTokenDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationTokenGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationMappingUtil;
@@ -112,33 +110,9 @@ public class ApplicationsApiServiceImpl
                 return Response.notModified().build();
             }
 
-            Application application = apiConsumer.getApplication(applicationId, username, null);
+            Application application = apiConsumer.getApplication(applicationId, username);
             if (application != null) {
-                if (application.getKeys() != null) {
-                    //TODO : this logic needs to be wriiten properly ones the Identity server DCR endpoint is
-                    // available to get oauth app details by providing consumer
-                    KeyManager keyManager = APIManagerFactory.getInstance().getIdentityProvider();
-                    for (APIKey apiKey : application.getKeys()) {
-                        try {
-                            OAuthApplicationInfo oAuthApplicationInfo = keyManager
-                                    .retrieveApplication(apiKey.getConsumerKey());
-                            apiKey.setConsumerSecret(oAuthApplicationInfo.getClientSecret());
-                            AccessTokenInfo accessTokenInfo = keyManager.getNewAccessToken(
-                                    ApplicationUtils.createAccessTokenRequest(oAuthApplicationInfo));
-                            apiKey.setAccessToken(accessTokenInfo.getAccessToken());
-                            apiKey.setValidityPeriod(accessTokenInfo.getValidityPeriod());
-                            //TODO : When showing keys in the application view page , we need to get the access token
-                            // as well
-                        } catch (KeyManagementException e) {
-                            // This is exception is not thrown intentionally because key manager mock servie does not
-                            // have keys once the server is started. We need to re write this properly once the key
-                            // manager is available.
-                            log.error("Error while getting keys fo application : " + applicationId, e);
-                        }
-                    }
-
-                }
-                applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
+                applicationDTO = ApplicationMappingUtil.fromApplicationToDTO(application);
                 return Response.ok().entity(applicationDTO).header(HttpHeaders.ETAG,
                         "\"" + existingFingerprint + "\"").build();
             } else {
@@ -154,6 +128,113 @@ public class ApplicationsApiServiceImpl
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving application: " + applicationId;
             HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+    /**
+     * Generate application keys
+     *
+     * @param applicationId   Application ID
+     * @param body            Application information which are required to generate keys
+     * @param contentType     Content-Type header value
+     * @param ifMatch         If-Match header value
+     * @param ifUnmodifiedSince If-UnModified-Since header value
+     * @param request         msf4j request object
+     * @return Generated application key detials
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
+    @Override
+    public Response applicationsApplicationIdGenerateKeysPost(String applicationId,
+                                                              ApplicationKeyGenerateRequestDTO body,
+                                                              String contentType, String ifMatch,
+                                                              String ifUnmodifiedSince, Request request)
+            throws NotFoundException {
+        try {
+            String username = RestApiUtil.getLoggedInUsername();
+            APIStore apiConsumer = RestApiUtil.getConsumer(username);
+            OAuthApplicationInfo oAuthApp = apiConsumer.generateApplicationKeys(applicationId,
+                    body.getKeyType().name(), body.getCallbackUrl(), body.getGrantTypesToBeSupported());
+            ApplicationKeysDTO appKeys = ApplicationKeyMappingUtil.fromApplicationKeysToDTO(oAuthApp);
+            return Response.ok().entity(appKeys).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error occurred while generating application keys for application: " + applicationId;
+            Map<String, String> paramList = new HashMap<>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+    /**
+     * Provide application keys
+     *
+     * @param applicationId   Application ID
+     * @param body            Application and key information
+     * @param contentType     Content-Type header value
+     * @param ifMatch         If-Match header value
+     * @param ifUnmodifiedSince If-UnModified-Since header value
+     * @param request         msf4j request object
+     * @return Generated application key detials
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
+    @Override
+    public Response applicationsApplicationIdProvideKeysPost(String applicationId,
+                                                             ApplicationKeyProvisionRequestDTO body,
+                                                             String contentType, String ifMatch,
+                                                             String ifUnmodifiedSince, Request request)
+            throws NotFoundException {
+        try {
+            String username = RestApiUtil.getLoggedInUsername();
+            APIStore apiConsumer = RestApiUtil.getConsumer(username);
+            OAuthApplicationInfo oAuthApp = apiConsumer.provideApplicationKeys(applicationId,
+                    body.getKeyType().name(), body.getConsumerKey(), body.getConsumerSecret());
+            ApplicationKeysDTO appKeys = ApplicationKeyMappingUtil.fromApplicationKeysToDTO(oAuthApp);
+            return Response.ok().entity(appKeys).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error occurred while provisioning application keys for application: "
+                    + applicationId;
+            Map<String, String> paramList = new HashMap<>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+    /**
+     * Generate an application token
+     *
+     * @param applicationId   Application ID
+     * @param body            Application information which are required to generate tokens
+     * @param contentType     Content-Type header value
+     * @param ifMatch         If-Match header value
+     * @param ifUnmodifiedSince If-UnModified-Since header value
+     * @param request         msf4j request object
+     * @return Generated application key detials
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
+    @Override
+    public Response applicationsApplicationIdGenerateTokenPost(String applicationId,
+                                                               ApplicationTokenGenerateRequestDTO body,
+                                                               String contentType, String ifMatch,
+                                                               String ifUnmodifiedSince, Request request)
+            throws NotFoundException {
+        try {
+            String username = RestApiUtil.getLoggedInUsername();
+            APIStore apiConsumer = RestApiUtil.getConsumer(username);
+            ApplicationToken token = apiConsumer.generateApplicationToken(body.getConsumerKey(),
+                    body.getConsumerSecret(), body.getScopes(), body.getValidityPeriod(), body.getRevokeToken());
+            ApplicationTokenDTO appToken = ApplicationKeyMappingUtil.fromApplicationTokenToDTO(token);
+            return Response.ok().entity(appToken).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error occurred while generating application tokens for application: "
+                    + applicationId;
+            Map<String, String> paramList = new HashMap<>();
             paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
@@ -222,7 +303,7 @@ public class ApplicationsApiServiceImpl
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
                 log.error(errorMessage, e);
                 return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-                
+
             }
             WorkflowResponse updateResponse = apiConsumer.updateApplication(applicationId, application);
             if (WorkflowStatus.REJECTED == updateResponse.getWorkflowStatus()) {
@@ -236,22 +317,22 @@ public class ApplicationsApiServiceImpl
             }
 
             //retrieves the updated application and send as the response
-            Application updatedApplication = apiConsumer.getApplication(applicationId, username, null);
-            updatedApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(updatedApplication);
+            Application updatedApplication = apiConsumer.getApplication(applicationId, username);
+            updatedApplicationDTO = ApplicationMappingUtil.fromApplicationToDTO(updatedApplication);
             String newFingerprint = applicationsApplicationIdGetFingerprint(applicationId, null, null, null,
                     request);
-            
-            
-            //if workflow is in pending state or if the executor sends any httpworklfowresponse (workflow state can 
-            //be in either pending or approved state) send back the workflow response 
+
+
+            //if workflow is in pending state or if the executor sends any httpworklfowresponse (workflow state can
+            //be in either pending or approved state) send back the workflow response
             if (ApplicationStatus.APPLICATION_ONHOLD.equals(updatedApplication.getStatus())) {
-                
+
                 WorkflowResponseDTO workflowResponse = MiscMappingUtil
                         .fromWorkflowResponseToDTO(updateResponse);
                 URI location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" + applicationId);
                 return Response.status(Response.Status.ACCEPTED).header(RestApiConstants.LOCATION_HEADER, location)
                         .entity(workflowResponse).build();
-            }    
+            }
             return Response.ok().entity(updatedApplicationDTO).header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"")
                     .build();
         } catch (APIManagementException e) {
@@ -273,67 +354,6 @@ public class ApplicationsApiServiceImpl
     }
 
     /**
-     * Generates keys for the application
-     *
-     * @param applicationId     application Id
-     * @param body              Key generation request details
-     * @param contentType       Content-Type header
-     * @param ifMatch           If-Match header value
-     * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @param request           msf4j request object
-     * @return Generated application key details
-     * @throws NotFoundException When the particular resource does not exist in the system
-     */
-    @Override
-    public Response applicationsGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO body,
-                                                 String contentType, String ifMatch, String ifUnmodifiedSince,
-                                                 Request request) throws NotFoundException {
-        ApplicationKeyDTO applicationKeyDTO = null;
-        String username = RestApiUtil.getLoggedInUsername();
-        try {
-            APIStore apiConsumer = RestApiUtil.getConsumer(username);
-            Application application = apiConsumer.getApplication(applicationId, username, null);
-            if (application != null && !ApplicationStatus.APPLICATION_APPROVED.equals(application.getStatus())) {
-                String errorMessage = "Application " + applicationId + " is not active/available";
-                ExceptionCodes exceptionCode = ExceptionCodes.APPLICATION_INACTIVE;
-                APIManagementException e = new APIManagementException(errorMessage, exceptionCode);
-                HashMap<String, String> paramList = new HashMap<String, String>();
-                paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
-                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
-                log.error(errorMessage, e);
-                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-                
-            }
-            if (application != null) {
-                String tokenScopes = StringUtils.join(body.getScopes(), " ");
-                Map<String, Object> keyDetails = apiConsumer
-                        .generateApplicationKeys(application.getName(), applicationId, body.getKeyType().toString(),
-                                body.getCallbackUrl(), body.getGrantTypesToBeSupported(), body.getValidityTime(),
-                                tokenScopes, application.getGroupId());
-                applicationKeyDTO = ApplicationKeyMappingUtil
-                        .fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
-            } else {
-                String errorMessage = "Application not found for key geneation: " + applicationId;
-                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
-                        ExceptionCodes.APPLICATION_NOT_FOUND);
-                Map<String, String> paramList = new HashMap<>();
-                paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
-                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
-                log.error(errorMessage, e);
-                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-            }
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while generating keys for application";
-            HashMap<String, String> paramList = new HashMap<String, String>();
-            paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
-            log.error(errorMessage, e);
-            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-        }
-        return Response.ok().entity(applicationKeyDTO).build();
-    }
-
-    /**
      * Retrieves all applications that qualifies for the search query
      *
      * @param query       Search query
@@ -351,7 +371,6 @@ public class ApplicationsApiServiceImpl
 
         ApplicationListDTO applicationListDTO = null;
         String username = RestApiUtil.getLoggedInUsername();
-        String groupId = RestApiUtil.getLoggedInUserGroupId();
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
@@ -359,9 +378,9 @@ public class ApplicationsApiServiceImpl
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
             List<Application> allMatchedApps = new ArrayList<>();
             if (StringUtils.isBlank(query)) {
-                allMatchedApps = apiConsumer.getApplications(username, groupId);
+                allMatchedApps = apiConsumer.getApplications(username);
             } else {
-                Application application = apiConsumer.getApplicationByName(username, query, groupId);
+                Application application = apiConsumer.getApplicationByName(username, query);
                 if (application != null) {
                     allMatchedApps = new ArrayList<>();
                     allMatchedApps.add(application);
@@ -371,7 +390,7 @@ public class ApplicationsApiServiceImpl
             //allMatchedApps are already sorted to application name
             applicationListDTO = ApplicationMappingUtil.fromApplicationsToDTO(allMatchedApps, limit, offset);
             ApplicationMappingUtil
-                    .setPaginationParams(applicationListDTO, groupId, limit, offset, allMatchedApps.size());
+                    .setPaginationParams(applicationListDTO, limit, offset, allMatchedApps.size());
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving applications";
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -401,25 +420,23 @@ public class ApplicationsApiServiceImpl
         try {
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
             Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
-            String groupId = RestApiUtil.getLoggedInUserGroupId();
-            application.setGroupId(groupId);
             ApplicationCreationResponse applicationResponse = apiConsumer.addApplication(application);
             String applicationUUID = applicationResponse.getApplicationUUID();
-            Application createdApplication = apiConsumer.getApplication(applicationUUID, username, groupId);
-            createdApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(createdApplication);
-           
+            Application createdApplication = apiConsumer.getApplication(applicationUUID, username);
+            createdApplicationDTO = ApplicationMappingUtil.fromApplicationToDTO(createdApplication);
+
             location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" +
                     createdApplicationDTO.getApplicationId());
 
-            //if workflow is in pending state or if the executor sends any httpworklfowresponse (workflow state can 
-            //be in either pending or approved state) send back the workflow response 
+            //if workflow is in pending state or if the executor sends any httpworklfowresponse (workflow state can
+            //be in either pending or approved state) send back the workflow response
             if (ApplicationStatus.APPLICATION_ONHOLD.equals(createdApplication.getStatus())) {
-                
+
                 WorkflowResponseDTO workflowResponse = MiscMappingUtil
                         .fromWorkflowResponseToDTO(applicationResponse.getWorkflowResponse());
                 return Response.status(Response.Status.ACCEPTED).header(RestApiConstants.LOCATION_HEADER, location)
                         .entity(workflowResponse).build();
-            }    
+            }
 
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new application : " + body.getName();
