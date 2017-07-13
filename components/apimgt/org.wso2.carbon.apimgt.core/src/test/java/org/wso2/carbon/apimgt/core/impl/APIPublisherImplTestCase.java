@@ -1279,7 +1279,6 @@ public class APIPublisherImplTestCase {
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiLifecycleManager, apiDAO, workflowDAO, gateway);
         API api = null;
         String uuid = UUID.randomUUID().toString();
-        ;
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
         apiPublisher.removePendingLifecycleWorkflowTaskForAPI(uuid);
 
