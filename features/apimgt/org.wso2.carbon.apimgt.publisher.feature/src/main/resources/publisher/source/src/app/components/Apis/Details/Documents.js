@@ -58,6 +58,7 @@ class Documents extends Component {
         this.addNewDocBtnListner = this.addNewDocBtnListner.bind(this);
         this.editAPIDocumentListener = this.editAPIDocumentListener.bind(this);
         this.submitUpdateDocumentListener = this.submitUpdateDocumentListener.bind(this);
+        this.viewDocContentHandler = this.viewDocContentHandler.bind(this);
     }
 
     componentDidMount() {
@@ -92,7 +93,7 @@ class Documents extends Component {
             return;
         }
 
-        var api_documents_data = {
+        const api_documents_data = {
             documentId: "",
             name: this.state.newDocName,
             type: "HOWTO",
@@ -103,26 +104,26 @@ class Documents extends Component {
             permission: '[{"groupId" : "1000", "permission" : ["READ","UPDATE"]},{"groupId" : "1001", "permission" : ["READ","UPDATE"]}]',
             visibility: "API_LEVEL"
         }
-        var promised_add = this.client.addDocument(this.api_id, api_documents_data);
+        const promised_add = this.client.addDocument(this.api_id, api_documents_data);
         promised_add.catch(function (error) {
-            var error_data = JSON.parse(error_response.data);
-            var messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+            const error_data = JSON.parse(error_response.data);
+            const messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
             message.error(messageTxt);
         }).then((done) => {
-            var dt_data = done.obj;
-            var docId = dt_data.documentId;
+            const dt_data = done.obj;
+            const docId = dt_data.documentId;
             if (api_documents_data.sourceType == "FILE") {
-                var file = this.state.newDocFile;
-                var promised_add_file = this.client.addFileToDocument(this.api_id, docId, file);
+                const file = this.state.newDocFile;
+                const promised_add_file = this.client.addFileToDocument(this.api_id, docId, file);
                 promised_add_file.catch(function (error) {
-                    let error_data = JSON.parse(error_response.data);
-                    let messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+                    const error_data = JSON.parse(error_response.data);
+                    const messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
                     console.error(messageTxt);
                     message.error("Failed adding file to the newly added document");
                 });
             }
             api_documents_data.documentId = docId;
-            var updatedDocList = this.state.documentsList;
+            const updatedDocList = this.state.documentsList;
             updatedDocList.push(api_documents_data);
             this.setState({
                 documentsList: updatedDocList,
@@ -157,6 +158,7 @@ class Documents extends Component {
             addingNewDoc: false,
             newDocSummary: "",
             newDocFile: null,
+            updatingDoc: false
         });
     }
 
@@ -188,14 +190,13 @@ class Documents extends Component {
     submitUpdateDocumentListener() {
         if (
             (this.state.newDocSourceType == null) || (this.state.newDocName == "") ||
-            (this.state.newDocSourceType == "URL" && this.state.newDocURL == "") ||
-            (this.state.newDocSourceType == "FILE" && this.state.newDocFile == null)
+            (this.state.newDocSourceType == "URL" && this.state.newDocURL == "")
         ) {
             message.error("Enter the required details before adding the document");
             return;
         }
 
-        var api_documents_data = {
+        const api_documents_data = {
             documentId: this.state.documentId,
             name: this.state.newDocName,
             type: "HOWTO",
@@ -206,30 +207,88 @@ class Documents extends Component {
             permission: '[{"groupId" : "1000", "permission" : ["READ","UPDATE"]},{"groupId" : "1001", "permission" : ["READ","UPDATE"]}]',
             visibility: "API_LEVEL"
         }
-        var promised_update = this.client.updateDocument(this.api_id, api_documents_data.documentId, api_documents_data);
+        const promised_update = this.client.updateDocument(this.api_id, api_documents_data.documentId, api_documents_data);
         promised_update.catch(function (error_response) {
             let error_data = JSON.parse(error_response.data);
             let messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
             console.error(messageTxt);
             message.error(messageTxt);
         }).then((response) => {
-            var dt_data = response.obj;
-            var docId = dt_data.documentId;
+            const dt_data = response.obj;
+            const docId = dt_data.documentId;
 
             if (dt_data.sourceType == "FILE") {
-                var promised_add_file = this.client.addFileToDocument(this.api_id, docId, this.state.newDocFile);
-                promised_add_file.catch(() => {
-                    var error_data = JSON.parse(error_response.data);
-                    var messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
-                    console.error(messageTxt);
-                    message.error("Failed updating document file")
-                });
+                if(dt_data.newDocFile != null) {
+                    const promised_add_file = this.client.addFileToDocument(this.api_id, docId, this.state.newDocFile);
+                    promised_add_file.catch(() => {
+                        const error_data = JSON.parse(error_response.data);
+                        const messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+                        console.error(messageTxt);
+                        message.error("Failed updating document file")
+                    });
+                }
             }
             this.resetNewDocDetails();
-            this.setState({updatingDoc: false});
             this.getDocumentsList();
             message.success("Document updated successfully");
         });
+    }
+
+    viewDocContentHandler(document) {
+        if (document.sourceType == "URL") {
+            window.open(document.sourceUrl, '_blank');
+        } else if (document.sourceType == "INLINE") {
+            //TODO Open In line doc editor
+            //href = contextPath + "/apis/" + this.api_id + "/documents/" + document.documentId + "/docInlineEditor";
+        } else if (document.sourceType == "FILE") {
+            let promised_get_content = this.client.getFileForDocument(this.api_id, document.documentId);
+            promised_get_content.catch((error_response)=>{
+                let error_data = JSON.parse(error_response.data);
+                let messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+                console.error(messageTxt);
+            }).then((done)=>{
+                this.downloadFile(done);
+            })
+        }
+    }
+
+    downloadFile(response) {
+        let fileName = "";
+        const contentDisposition = response.headers["content-disposition"];
+
+        if (contentDisposition && contentDisposition.indexOf('attachment') !== -1) {
+            const fileNameReg = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+            const matches = fileNameReg.exec(contentDisposition);
+            if (matches != null && matches[1]) fileName = matches[1].replace(/['"]/g, '');
+        }
+        const contentType = response.headers["content-type"];
+        const blob = new Blob([response.data], {
+            type: contentType
+        });
+        if (typeof window.navigator.msSaveBlob !== 'undefined') {
+            window.navigator.msSaveBlob(blob, fileName);
+        } else {
+            const URL = window.URL || window.webkitURL;
+            const downloadUrl = URL.createObjectURL(blob);
+
+            if (fileName) {
+                const aTag = document.createElement("a");
+                if (typeof aTag.download === 'undefined') {
+                    window.location = downloadUrl;
+                } else {
+                    aTag.href = downloadUrl;
+                    aTag.download = fileName;
+                    document.body.appendChild(aTag);
+                    aTag.click();
+                }
+            } else {
+                window.location = downloadUrl;
+            }
+
+            setTimeout(function() {
+                URL.revokeObjectURL(downloadUrl);
+            }, 100);
+        }
     }
 
     render() {
@@ -251,6 +310,7 @@ class Documents extends Component {
                         onCancelAddNewDoc={this.cancelAddNewDocListner}
                         onSubmitUpdateDoc={this.submitUpdateDocumentListener}
                         updatingDoc={this.state.updatingDoc}
+                        addingNewDoc={this.state.addingNewDoc}
                     />}
                 </div>
                 <hr color="#f2f2f2"/>
@@ -260,7 +320,7 @@ class Documents extends Component {
                                         documentsList={this.state.documentsList}
                                         deleteDocHandler={this.deleteDocHandler}
                                         onEditAPIDocument={this.editAPIDocumentListener}
-
+                                        viewDocContentHandler={this.viewDocContentHandler}
                         /> ) :
                         (<div style={{paddingTop: 20}}><p>No documents added into the API</p></div>)
                 }
@@ -286,7 +346,7 @@ class DocumentsTable extends Component {
             key: 'actions',
             render: (text1, record) => (<div>
                 <a href="#" onClick={() => this.props.onEditAPIDocument(record)}>Edit | </a>
-                <a href="#">View | </a>
+                <a href="#" onClick={() => this.props.viewDocContentHandler(record)}>View | </a>
                 <Popconfirm title="Are you sure you want to delete this document?"
                             onConfirm={() => this.props.deleteDocHandler(record.documentId)}
                             okText="Yes" cancelText="No">
@@ -311,7 +371,6 @@ class DocumentsTable extends Component {
 class NewDocDiv extends Component {
     constructor(props) {
         super(props);
-        //this.state = {sourceURL: "", summary: "", sourceFile: ""};
     }
 
     render() {
@@ -328,6 +387,7 @@ class NewDocDiv extends Component {
                                 newDocFilePath={this.props.newDocFilePath}
                                 selectedSourceType={this.props.newDocSourceType}
                                 updatingDoc={this.props.updatingDoc}
+                                addingNewDoc={this.props.addingNewDoc}
                             />
                         </Col>
                         <Col span={6}>
@@ -386,10 +446,11 @@ class NewDocInfoDiv extends Component {
                     </Col>
                     <Col span={30}>
                         {this.props.addingNewDoc ? (
-                            <Input type="text" name="newDocName" onChange={this.handleInputChange}/>
-                        ) :
-                            (<Input type="text" name="newDocName" value={this.props.newDocName}
-                                    readonly/>)
+                                <Input type="text" name="newDocName" onChange={this.handleInputChange}/>
+                            ) : (
+                                <Input type="text" name="newDocName" value={this.props.newDocName}
+                                       readonly/>
+                            )
                         }
                     </Col>
                 </Row>
@@ -444,7 +505,7 @@ class NewDocSourceDiv extends Component {
                             URL
                         </label>
                         {this.props.selectedSourceType == "URL" &&
-                        <Input type="text" name="newDocURL" onChange={this.handleInputChange}
+                        <Input type="text" name="newDocURL" placeholder="eg: http://wso2.com/api-management" onChange={this.handleInputChange}
                                value={this.props.newDocURL}/>
                         }
                     </FormItem>
@@ -472,11 +533,4 @@ class NewDocSourceDiv extends Component {
     }
 }
 
-class ActionsCellDiv extends Component {
-    render() {
-        return (
-            <div></div>
-        );
-    }
-}
 export default Documents;
