@@ -63,6 +63,9 @@ public class APIMgtConstants {
     public static final String RESOURCE_SPECIFIC_ENDPOINT = "RESOURCE";
     public static final String PRODUCTION_ENDPOINT = "production";
 
+    public static final String DEFAULT_LABEL_NAME = "Default";
+    public static final String DEFAULT_LABEL_ACCESS_URL = "https://localhost:9092";
+
     //workflow executor default executors
     public static final String WF_DEFAULT_APPCREATION_EXEC =
             "org.wso2.carbon.apimgt.core.workflow.ApplicationCreationSimpleWorkflowExecutor";

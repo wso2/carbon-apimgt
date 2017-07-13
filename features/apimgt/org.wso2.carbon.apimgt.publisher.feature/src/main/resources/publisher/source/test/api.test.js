@@ -25,7 +25,7 @@ TestUtils.setupMockEnvironment();
 
 describe('Api',
     function () {
-        before(function (done) {
+        before("Make any REST API calls ,Login a user and get access token", function (done) {
             TestUtils.userLogin().then((response) => {
                 document.clearCookies();
                 for (let cookie of response.headers["set-cookie"]) {
@@ -43,11 +43,40 @@ describe('Api',
                         let data = {
                             "name": "test_api_" + c_time,
                             "context": "/testing_" + c_time,
-                            "version": "1.0.0",
-                            "endpoint": []
+                            "version": "1.0.0"
                         };
                         let promised_create = api.create(data);
                         return promised_create.then((response) => {
+                            assert.equal(response.status, 201, 'API creation failed!');
+                        });
+                    }
+                );
+            }
+        );
+        describe('#createWithInlineEndpoint()',
+            function () {
+                it('Should return HTTP 201 status code with newly created API UUID',
+                    function () {
+                        let api = new Api();
+                        let c_time = Date.now();
+                        let data = {
+                            "name": "test_api_" + c_time,
+                            "context": "/testing_" + c_time,
+                            "version": "1.0.0",
+                            "endpoint": [{
+                                type: "production",
+                                inline: {
+                                    endpointConfig: JSON.stringify({serviceUrl: 'http://test.wso2.org/api/endpoint'}),
+                                    endpointSecurity: {enabled: false},
+                                    type: "http",
+                                    name: "testing_endpoint" + c_time,
+                                    maxTps: 1000
+                                }
+                            }]
+                        };
+                        let promised_create = api.create(data);
+                        return promised_create.then((response) => {
+                            assert.isAtLeast(response.obj.endpoint.length, 1, 'No endpoint configurations were found');
                             assert.equal(response.status, 201, 'API creation failed!');
                         });
                     }
