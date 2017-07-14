@@ -8,16 +8,16 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
 
 /**
- * WSDLValidationResponse_wsdlInfo_endpointsDTO
+ * APIDefinitionValidationResponse_wsdlInfo_endpointsDTO
  */
-public class WSDLValidationResponse_wsdlInfo_endpointsDTO   {
+public class APIDefinitionValidationResponse_wsdlInfo_endpointsDTO   {
   @JsonProperty("name")
   private String name = null;
 
   @JsonProperty("location")
   private String location = null;
 
-  public WSDLValidationResponse_wsdlInfo_endpointsDTO name(String name) {
+  public APIDefinitionValidationResponse_wsdlInfo_endpointsDTO name(String name) {
     this.name = name;
     return this;
   }
@@ -35,7 +35,7 @@ public class WSDLValidationResponse_wsdlInfo_endpointsDTO   {
     this.name = name;
   }
 
-  public WSDLValidationResponse_wsdlInfo_endpointsDTO location(String location) {
+  public APIDefinitionValidationResponse_wsdlInfo_endpointsDTO location(String location) {
     this.location = location;
     return this;
   }
@@ -62,9 +62,9 @@ public class WSDLValidationResponse_wsdlInfo_endpointsDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    WSDLValidationResponse_wsdlInfo_endpointsDTO wsDLValidationResponseWsdlInfoEndpoints = (WSDLValidationResponse_wsdlInfo_endpointsDTO) o;
-    return Objects.equals(this.name, wsDLValidationResponseWsdlInfoEndpoints.name) &&
-        Objects.equals(this.location, wsDLValidationResponseWsdlInfoEndpoints.location);
+    APIDefinitionValidationResponse_wsdlInfo_endpointsDTO apIDefinitionValidationResponseWsdlInfoEndpoints = (APIDefinitionValidationResponse_wsdlInfo_endpointsDTO) o;
+    return Objects.equals(this.name, apIDefinitionValidationResponseWsdlInfoEndpoints.name) &&
+        Objects.equals(this.location, apIDefinitionValidationResponseWsdlInfoEndpoints.location);
   }
 
   @Override
@@ -75,7 +75,7 @@ public class WSDLValidationResponse_wsdlInfo_endpointsDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class WSDLValidationResponse_wsdlInfo_endpointsDTO {\n");
+    sb.append("class APIDefinitionValidationResponse_wsdlInfo_endpointsDTO {\n");
     
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    location: ").append(toIndentedString(location)).append("\n");

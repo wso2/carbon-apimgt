@@ -43,6 +43,9 @@ import org.wso2.carbon.apimgt.core.models.WSDLInfo;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponse_wsdlInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponse_wsdlInfo_endpointsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_businessInformationDTO;
@@ -58,9 +61,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.WSDLValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.WSDLValidationResponse_wsdlInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.WSDLValidationResponse_wsdlInfo_endpointsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowResponseDTO.WorkflowStatusEnum;
 
@@ -474,6 +474,7 @@ public class MappingUtil {
         }
         return labelDTOs;
     }
+
     /**
      * Map WorkflowResponse to WorkflowResponseDTO
      * @param response WorkflowResponse object
@@ -486,17 +487,23 @@ public class MappingUtil {
         return responseDTO;
     }
 
-    public static WSDLValidationResponseDTO toWSDLValidationResponseDTO(WSDLInfo info) {
-        WSDLValidationResponseDTO wsdlValidationResponseDTO = new WSDLValidationResponseDTO();
+    /**
+     * Map WSDLInfo to APIDefinitionValidationResponseDTO
+     * 
+     * @param info WSDLInfo object
+     * @return {@link APIDefinitionValidationResponseDTO} based on provided {@link WSDLInfo} object
+     */
+    public static APIDefinitionValidationResponseDTO toWSDLValidationResponseDTO(WSDLInfo info) {
+        APIDefinitionValidationResponseDTO wsdlValidationResponseDTO = new APIDefinitionValidationResponseDTO();
         wsdlValidationResponseDTO.setIsValid(info.getVersion() != null);
 
-        WSDLValidationResponse_wsdlInfoDTO infoDTO = new WSDLValidationResponse_wsdlInfoDTO();
+        APIDefinitionValidationResponse_wsdlInfoDTO infoDTO = new APIDefinitionValidationResponse_wsdlInfoDTO();
         infoDTO.setVersion(info.getVersion());
-        WSDLValidationResponse_wsdlInfo_endpointsDTO endpointsDTO;
+        APIDefinitionValidationResponse_wsdlInfo_endpointsDTO endpointsDTO;
 
         if (info.getEndpoints() != null) {
             for (String endpointName : info.getEndpoints().keySet()) {
-                endpointsDTO = new WSDLValidationResponse_wsdlInfo_endpointsDTO();
+                endpointsDTO = new APIDefinitionValidationResponse_wsdlInfo_endpointsDTO();
                 endpointsDTO.setName(endpointName);
                 endpointsDTO.setLocation(info.getEndpoints().get(endpointName));
                 infoDTO.addEndpointsItem(endpointsDTO);
@@ -505,5 +512,4 @@ public class MappingUtil {
         wsdlValidationResponseDTO.setWsdlInfo(infoDTO);
         return wsdlValidationResponseDTO;
     }
-    
 }

@@ -1429,7 +1429,6 @@ paths:
         - in: formData
           name: additionalProperties
           description: Additional attributes specified as a stringified JSON with API's schema
-          example: "{\r\n   \"name\":\"api1\",\r\n   \"context\":\"/api1\",\r\n   \"version\":\"1.0.0\",\r\n   \"labels\":[\r\n      \"Default\"\r\n   ],\r\n   \"endpoint\":[\r\n      {\r\n         \"inline\":{\r\n            \"name\":\"api1 -- 1.0.0 -- PRODUCTION -- Endpoint\",\r\n            \"type\":\"http\",\r\n            \"endpointSecurity\":{\r\n               \"enabled\":false\r\n            },\r\n            \"endpointConfig\":\"{\\\"serviceUrl\\\":\\\"http://www.webservicex.net/stockquote.asmx\\\"}\"\r\n         },\r\n         \"type\":\"production\"\r\n      }\r\n   ]\r\n}"
           type: string
           required: false
         - $ref: '#/parameters/Content-Type'
@@ -1470,6 +1469,54 @@ paths:
             The entity of the request was in a not supported format.
           schema:
             $ref: '#/definitions/Error'
+
+######################################################
+# The "Validate API Definition" utility API
+######################################################
+
+  /apis/validate-definition:
+#-------------------------------------------------------------------
+# Resume the workflow by approving or rejecting the workflow request
+#-------------------------------------------------------------------
+    post:
+      x-scope: apim:api_create
+      summary: Validate API definition and retrieve a summary
+      consumes:
+        - multipart/form-data
+      description: |
+        This operation can be used to validate a swagger or WSDL definition and retrieve a summary.
+      parameters:
+        - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/definitionType'
+        - $ref: '#/parameters/definitionFile'
+        - $ref: '#/parameters/definitionUrl'
+      tags:
+        - API (Collection)
+      responses:
+        200:
+          description: |
+            OK.
+            API definition validation information is returned
+          schema:
+            $ref: '#/definitions/APIDefinitionValidationResponse'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Workflow for the given reference in not found.
+          schema:
+            $ref: '#/definitions/Error'
+
 ######################################################
 # The "Document Collection" resource APIs
 ######################################################
@@ -3025,52 +3072,6 @@ paths:
             $ref: '#/definitions/Error'
 
 ######################################################
-# The "WSDLs" resource API
-######################################################
-  /wsdls/validate:
-#-------------------------------------------------------------------
-# Resume the workflow by approving or rejecting the workflow request
-#-------------------------------------------------------------------
-    post:
-      x-scope: apim:api_create
-      summary: Validate a WSDL and retrieve a summary
-      description: |
-        This operation can be used to validate a WSDL and retrieve a summary
-      parameters:
-        - name : wsdlUrl
-          in: query
-          description: |
-            URL of the WSDL
-          type: string
-      tags:
-        - WSDLs (Individual)
-      responses:
-        200:
-          description: |
-            OK.
-            WSDL validation information is returned
-          schema:
-            $ref: '#/definitions/WSDLValidationResponse'
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-        400:
-          description: |
-            Bad Request.
-            Invalid request or validation error.
-          schema:
-            $ref: '#/definitions/Error'
-        404:
-          description: |
-            Not Found.
-            Workflow for the given reference in not found.
-          schema:
-            $ref: '#/definitions/Error'
-
-
-######################################################
 # Parameters - required by some of the APIs above
 ######################################################
 parameters:
@@ -3302,6 +3303,36 @@ parameters:
       Workflow reference id
     required: true
     type: string
+
+# API definition type
+  definitionType:
+    in: formData
+    name: type
+    description: Definition type to upload
+    type: string
+    required: true
+    enum:
+    - SWAGGER
+    - WSDL
+    default: SWAGGER
+
+# API definition specified as a file
+# Specified as a multipart form-data parameter
+  definitionFile:  
+    in: formData
+    name: file
+    description: Definition to upload as a file
+    type: file
+    required: false
+
+# API definition URL
+# Specified as a multipart form-data parameter
+  definitionUrl:  
+    in: formData
+    name: url
+    description: Definition url
+    type: string
+    required: false
 
 ######################################################
 # The resources used by some of the APIs above within the message body
@@ -4276,18 +4307,26 @@ definitions:
         type: string
         
 #-----------------------------------------------------
-# The workflow executor's response resource
+# The api definition validation response
 #-----------------------------------------------------        
-  WSDLValidationResponse:
-    title: WSDL validation Response
+  APIDefinitionValidationResponse:
+    title: API definition validation Response
     required:
       - isValid
     properties:
       isValid:
         description: |
-          This attribute declares whether this WSDL is valid or not.
+          This attribute declares whether this definition is valid or not.
         type: boolean
         example: true
+      definitionType:
+        description: |
+          This attribute declares whether this definition is a swagger or WSDL
+        type: string
+        enum:
+        - SWAGGER
+        - WSDL
+        example: WSDL
       wsdlInfo:
         description:
           Summary of the WSDL including the basic information

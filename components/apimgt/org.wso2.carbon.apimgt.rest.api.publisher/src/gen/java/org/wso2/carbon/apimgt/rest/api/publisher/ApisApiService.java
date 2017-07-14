@@ -8,6 +8,7 @@ import org.wso2.msf4j.formparam.FileInfo;
 import org.wso2.msf4j.Request;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
@@ -170,5 +171,10 @@ public abstract class ApisApiService {
  , Request request) throws NotFoundException;
     public abstract Response apisPost(APIDTO body
  ,String contentType
+ , Request request) throws NotFoundException;
+    public abstract Response apisValidateDefinitionPost(String contentType
+ ,String type
+ ,InputStream fileInputStream, FileInfo fileDetail
+ ,String url
  , Request request) throws NotFoundException;
 }

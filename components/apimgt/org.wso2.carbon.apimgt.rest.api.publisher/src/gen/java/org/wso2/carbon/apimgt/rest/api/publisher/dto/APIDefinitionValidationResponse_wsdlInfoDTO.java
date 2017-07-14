@@ -7,21 +7,21 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.WSDLValidationResponse_wsdlInfo_endpointsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponse_wsdlInfo_endpointsDTO;
 import java.util.Objects;
 
 /**
  * Summary of the WSDL including the basic information
  */
 @ApiModel(description = "Summary of the WSDL including the basic information")
-public class WSDLValidationResponse_wsdlInfoDTO   {
+public class APIDefinitionValidationResponse_wsdlInfoDTO   {
   @JsonProperty("version")
   private String version = null;
 
   @JsonProperty("endpoints")
-  private List<WSDLValidationResponse_wsdlInfo_endpointsDTO> endpoints = new ArrayList<WSDLValidationResponse_wsdlInfo_endpointsDTO>();
+  private List<APIDefinitionValidationResponse_wsdlInfo_endpointsDTO> endpoints = new ArrayList<APIDefinitionValidationResponse_wsdlInfo_endpointsDTO>();
 
-  public WSDLValidationResponse_wsdlInfoDTO version(String version) {
+  public APIDefinitionValidationResponse_wsdlInfoDTO version(String version) {
     this.version = version;
     return this;
   }
@@ -39,12 +39,12 @@ public class WSDLValidationResponse_wsdlInfoDTO   {
     this.version = version;
   }
 
-  public WSDLValidationResponse_wsdlInfoDTO endpoints(List<WSDLValidationResponse_wsdlInfo_endpointsDTO> endpoints) {
+  public APIDefinitionValidationResponse_wsdlInfoDTO endpoints(List<APIDefinitionValidationResponse_wsdlInfo_endpointsDTO> endpoints) {
     this.endpoints = endpoints;
     return this;
   }
 
-  public WSDLValidationResponse_wsdlInfoDTO addEndpointsItem(WSDLValidationResponse_wsdlInfo_endpointsDTO endpointsItem) {
+  public APIDefinitionValidationResponse_wsdlInfoDTO addEndpointsItem(APIDefinitionValidationResponse_wsdlInfo_endpointsDTO endpointsItem) {
     this.endpoints.add(endpointsItem);
     return this;
   }
@@ -54,11 +54,11 @@ public class WSDLValidationResponse_wsdlInfoDTO   {
    * @return endpoints
   **/
   @ApiModelProperty(value = "A list of endpoints the service exposes ")
-  public List<WSDLValidationResponse_wsdlInfo_endpointsDTO> getEndpoints() {
+  public List<APIDefinitionValidationResponse_wsdlInfo_endpointsDTO> getEndpoints() {
     return endpoints;
   }
 
-  public void setEndpoints(List<WSDLValidationResponse_wsdlInfo_endpointsDTO> endpoints) {
+  public void setEndpoints(List<APIDefinitionValidationResponse_wsdlInfo_endpointsDTO> endpoints) {
     this.endpoints = endpoints;
   }
 
@@ -71,9 +71,9 @@ public class WSDLValidationResponse_wsdlInfoDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    WSDLValidationResponse_wsdlInfoDTO wsDLValidationResponseWsdlInfo = (WSDLValidationResponse_wsdlInfoDTO) o;
-    return Objects.equals(this.version, wsDLValidationResponseWsdlInfo.version) &&
-        Objects.equals(this.endpoints, wsDLValidationResponseWsdlInfo.endpoints);
+    APIDefinitionValidationResponse_wsdlInfoDTO apIDefinitionValidationResponseWsdlInfo = (APIDefinitionValidationResponse_wsdlInfoDTO) o;
+    return Objects.equals(this.version, apIDefinitionValidationResponseWsdlInfo.version) &&
+        Objects.equals(this.endpoints, apIDefinitionValidationResponseWsdlInfo.endpoints);
   }
 
   @Override
@@ -84,7 +84,7 @@ public class WSDLValidationResponse_wsdlInfoDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class WSDLValidationResponse_wsdlInfoDTO {\n");
+    sb.append("class APIDefinitionValidationResponse_wsdlInfoDTO {\n");
     
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    endpoints: ").append(toIndentedString(endpoints)).append("\n");

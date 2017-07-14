@@ -1528,16 +1528,24 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public void updateAPIWSDLArchive(String apiId, InputStream inputStream)
             throws APIMgtDAOException, APIMgtWSDLException {
-        WSDLArchiveInfo archiveInfo = extractAndValidateWSDLArchive(inputStream);
-        try (InputStream fileInputStream = new FileInputStream(archiveInfo.getAbsoluteFilePath())) {
+        WSDLArchiveInfo archiveInfo = null;
+        InputStream fileInputStream = null;
+        try  {
+            archiveInfo = extractAndValidateWSDLArchive(inputStream);
+            fileInputStream = new FileInputStream(archiveInfo.getAbsoluteFilePath());
             getApiDAO().addOrUpdateWSDLArchive(apiId, fileInputStream, getUsername());
         } catch (IOException e) {
             throw new APIMgtWSDLException("Unable to process WSDL archive at " + archiveInfo.getAbsoluteFilePath(), e,
                     ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
         } finally {
             try {
-                APIFileUtils.deleteDirectory(archiveInfo.getLocation());
-            } catch (APIMgtDAOException e) {
+                if (fileInputStream != null) {
+                    fileInputStream.close();
+                }
+                if (archiveInfo != null) {
+                    APIFileUtils.deleteDirectory(archiveInfo.getLocation());
+                }
+            } catch (APIMgtDAOException | IOException e) {
                 //This is not a blocker. Give a warning and continue
                 log.warn("Error occured while deleting processed WSDL artifacts folder : " + archiveInfo.getLocation());
             }
@@ -1754,32 +1762,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
     }
 
-    private void cleanupPendingTaskForAPIStateChange(String apiId) throws APIManagementException {
-        String workflowExtRef = getWorkflowDAO().getExternalWorkflowReferenceForPendingTask(apiId,
-                WorkflowConstants.WF_TYPE_AM_API_STATE);
-        if (workflowExtRef != null) {
-            WorkflowExecutor executor = WorkflowExecutorFactory.getInstance()
-                    .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
-            try {
-                executor.cleanUpPendingTask(workflowExtRef);
-            } catch (WorkflowException e) {
-                String warn = "Failed to clean pending api state change task for " + apiId;
-                // failed cleanup processes are ignored to prevent failing the deletion process
-                log.warn(warn, e.getLocalizedMessage());
-            }
-            getWorkflowDAO().deleteWorkflowEntryforExternalReference(workflowExtRef);
-        }
-    }
-
-    /**
-     * Extract the WSDL archive and validate
-     *
-     * @param inputStream WSDL archive input stream
-     * @return {@link WSDLArchiveInfo} object with WSDL information
-     * @throws APIMgtDAOException  If an error occurred from DAO layer
-     * @throws APIMgtWSDLException If an error occurred while processing WSDL files
-     */
-    private WSDLArchiveInfo extractAndValidateWSDLArchive(InputStream inputStream)
+    @Override
+    public WSDLArchiveInfo extractAndValidateWSDLArchive(InputStream inputStream)
             throws APIMgtDAOException, APIMgtWSDLException {
 
         String path = System.getProperty(APIMgtConstants.JAVA_IO_TMPDIR)
@@ -1797,4 +1781,22 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         archiveInfo.setWsdlInfo(processor.getWsdlInfo());
         return archiveInfo;
     }
+
+    private void cleanupPendingTaskForAPIStateChange(String apiId) throws APIManagementException {
+        String workflowExtRef = getWorkflowDAO().getExternalWorkflowReferenceForPendingTask(apiId,
+                WorkflowConstants.WF_TYPE_AM_API_STATE);
+        if (workflowExtRef != null) {
+            WorkflowExecutor executor = WorkflowExecutorFactory.getInstance()
+                    .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
+            try {
+                executor.cleanUpPendingTask(workflowExtRef);
+            } catch (WorkflowException e) {
+                String warn = "Failed to clean pending api state change task for " + apiId;
+                // failed cleanup processes are ignored to prevent failing the deletion process
+                log.warn(warn, e.getLocalizedMessage());
+            }
+            getWorkflowDAO().deleteWorkflowEntryforExternalReference(workflowExtRef);
+        }
+    }
+
 }

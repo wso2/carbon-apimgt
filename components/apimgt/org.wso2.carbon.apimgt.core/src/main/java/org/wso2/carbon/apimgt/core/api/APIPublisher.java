@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
 import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.models.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
@@ -536,4 +537,15 @@ public interface APIPublisher extends APIManager {
      * @throws APIManagementException if API Manager core level exception occurred
      */
     boolean isEndpointExist(String name) throws APIManagementException;
+
+    /**
+     * Extract the WSDL archive and validate
+     *
+     * @param inputStream WSDL archive input stream
+     * @return {@link WSDLArchiveInfo} object with WSDL information
+     * @throws APIMgtDAOException  If an error occurred from DAO layer
+     * @throws APIMgtWSDLException If an error occurred while processing WSDL files
+     */
+    WSDLArchiveInfo extractAndValidateWSDLArchive(InputStream inputStream)
+            throws APIMgtDAOException, APIMgtWSDLException;
 }
