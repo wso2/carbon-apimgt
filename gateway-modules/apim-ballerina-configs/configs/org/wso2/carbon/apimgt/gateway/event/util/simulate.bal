@@ -16,7 +16,7 @@ function simulate (message m) {
     //messages:setProperty(m, "event_time", 13454564556);
     messages:setProperty(m, "gateway_domain", "gw.wso2.com");
     messages:setProperty(m, "gateway_ip", "127.0.0.1");
-    messages:setProperty(m, "is_throttled", 0);
+    messages:setProperty(m, "is_throttled", "false");
     messages:setProperty(m, "throttled_reason", "SUBSCRIPTION");
     messages:setProperty(m, "throttled_policy", "LARGE");
     messages:setProperty(m, "client_ip", "127.0.0.1");
@@ -26,11 +26,11 @@ function simulate (message m) {
 
     messages:setProperty(m, "application_name", "sampleApp");
     messages:setProperty(m, "application_owner", "admin");
-    messages:setProperty(m, "request_count", 1);
-    messages:setProperty(m, "response_count", 1);
+    messages:setProperty(m, "request_count", "1");
+    messages:setProperty(m, "response_count", "1");
     messages:setProperty(m, "host_name", "wso2gw");
 
-    messages:setProperty(m, "cache_hit", 0);
+    messages:setProperty(m, "cache_hit", "0");
     //messages:setProperty(m, "response_size", 123);
     //messages:setProperty(m, "protocol", "http");
     //messages:setProperty(m, "response_code", 200);
