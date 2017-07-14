@@ -45,6 +45,7 @@ class DocumentsTable extends Component {
             </div>)
         }
         ];
+        //TODO: Add permission/valid scope checks for document Edit/Delete actions
     }
 
     render() {

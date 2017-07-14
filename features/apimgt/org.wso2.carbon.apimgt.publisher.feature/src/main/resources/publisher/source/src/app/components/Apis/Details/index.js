@@ -27,7 +27,6 @@ import {PageNotFound} from '../../Base/Errors/index'
 import Resources from './Resources'
 import Permission from './Permission'
 import Endpoints from './Endpoints'
-import Documents from './Documents'
 
 export default class Details extends Component {
     componentDidMount() {
