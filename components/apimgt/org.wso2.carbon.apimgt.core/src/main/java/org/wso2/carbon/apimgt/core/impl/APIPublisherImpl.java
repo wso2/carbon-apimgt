@@ -654,6 +654,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     totalPermissionValue += APIMgtConstants.Permission.UPDATE_PERMISSION;
                 } else if (APIMgtConstants.Permission.DELETE.equals(aSubJsonArray.toString().trim())) {
                     totalPermissionValue += APIMgtConstants.Permission.DELETE_PERMISSION;
+                } else if (APIMgtConstants.Permission.MANAGE_SUBSCRIPTION.equals(aSubJsonArray.toString().trim())) {
+                    totalPermissionValue += APIMgtConstants.Permission.MANAGE_SUBSCRIPTION_PERMISSION;
                 }
             }
             rolePermissionList.put(groupId, totalPermissionValue);
@@ -701,7 +703,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     private List<String> getAPIPermissionsOfLoggedInUser(String loggedInUserName, API api)
             throws APIManagementException {
-        Set<String> permissionArrayForUser = new HashSet();
+        Set<String> permissionArrayForUser = new HashSet<>();
         Map<String, Integer> permissionMap = api.getPermissionMap();
         String provider = api.getProvider();
         //TODO: Remove the check for admin after IS adds an ID to admin user
@@ -710,6 +712,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             permissionArrayForUser.add(APIMgtConstants.Permission.READ);
             permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
             permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
+            permissionArrayForUser.add(APIMgtConstants.Permission.MANAGE_SUBSCRIPTION);
         } else {
             try {
                 String userId = getIdentityProvider().getIdOfUser(loggedInUserName);
@@ -727,30 +730,16 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 }
                 if (rolesOfUserWithAPIPermissions != null) {
                     Integer aggregatePermissions = 0;
+                    //Calculating aggregate permissions using Bitwise OR operation
                     for (String role : rolesOfUserWithAPIPermissions) {
                         aggregatePermissions |= permissionMap.get(role);
                     }
-                    if (aggregatePermissions == APIMgtConstants.Permission.READ_PERMISSION) {
-                        permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-                    } else if (aggregatePermissions == (APIMgtConstants.Permission.READ_PERMISSION
-                            + APIMgtConstants.Permission.UPDATE_PERMISSION)) {
-                        permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-                        permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
-                    } else if (aggregatePermissions == (APIMgtConstants.Permission.READ_PERMISSION
-                            + APIMgtConstants.Permission.DELETE_PERMISSION)) {
-                        permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-                        permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
-                    } else if (aggregatePermissions
-                            == APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.UPDATE_PERMISSION
-                            + APIMgtConstants.Permission.DELETE_PERMISSION) {
-                        permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-                        permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
-                        permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
-                    }
+                    permissionArrayForUser = new HashSet<>(
+                            APIUtils.constructApiPermissionsListForValue(aggregatePermissions));
                 }
             } catch (IdentityProviderException e) {
-                String errorMsg = "Error occurred while calling SCIM endpoint to retrieve user " + loggedInUserName +
-                        "'s information";
+                String errorMsg = "Error occurred while calling SCIM endpoint to retrieve user " + loggedInUserName
+                        + "'s information";
                 log.error(errorMsg, e);
                 throw new APIManagementException(errorMsg, e, e.getErrorHandler());
             }

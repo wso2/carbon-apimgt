@@ -310,7 +310,8 @@ public class APIMgtConstants {
      * Permission related constants
      */
     public static class Permission {
-        public static final int SUBSCRIBE_PERMISSION = 8;
+        public static final int MANAGE_SUBSCRIPTION_PERMISSION = 8; //Publisher side API permission
+        public static final int SUBSCRIBE_PERMISSION = 8; //Store side permission
         public static final int READ_PERMISSION = 4;
         public static final int UPDATE_PERMISSION = 2;
         public static final int DELETE_PERMISSION = 1;
@@ -321,7 +322,17 @@ public class APIMgtConstants {
         public static final String UPDATE = "UPDATE";
         public static final String DELETE = "DELETE";
         public static final String SUBSCRIPTION = "SUBSCRIPTION";
-
+        public static final String MANAGE_SUBSCRIPTION = "MANAGE_SUBSCRIPTION";
+        public static final int READ_UPDATE_PERMISSION = READ_PERMISSION + UPDATE_PERMISSION;
+        public static final int READ_DELETE_PERMISSION = READ_PERMISSION + DELETE_PERMISSION;
+        public static final int READ_UPDATE_DELETE_PERMISSION = READ_PERMISSION + UPDATE_PERMISSION + DELETE_PERMISSION;
+        public static final int READ_UPDATE_DELETE_MANAGESUB_PERMISSION = READ_PERMISSION + UPDATE_PERMISSION +
+                DELETE_PERMISSION + MANAGE_SUBSCRIPTION_PERMISSION;
+        public static final int READ_UPDATE_MANAGESUB_PERMISSION = READ_PERMISSION + UPDATE_PERMISSION +
+                MANAGE_SUBSCRIPTION_PERMISSION;
+        public static final int READ_DELETE_MANAGESUB_PERMISSION = READ_PERMISSION + DELETE_PERMISSION +
+                MANAGE_SUBSCRIPTION_PERMISSION;
+        public static final int READ_MANAGESUB_PERMISSION = READ_PERMISSION + MANAGE_SUBSCRIPTION_PERMISSION;
     }
 
     /**

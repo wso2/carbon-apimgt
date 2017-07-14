@@ -39,6 +39,7 @@ import org.wso2.carbon.lcm.core.impl.LifecycleState;
 
 import java.time.Duration;
 import java.time.temporal.Temporal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -267,6 +268,40 @@ public class APIUtils {
                 availableTransitionBean.getTargetState().equals(nextState));
     }
 
+    public static List<String> constructApiPermissionsListForValue(Integer permissionValue) {
+        List<String> array = new ArrayList<String>();
+        if (permissionValue == APIMgtConstants.Permission.READ_PERMISSION) {
+            array.add(APIMgtConstants.Permission.READ);
+        } else if (permissionValue == (APIMgtConstants.Permission.READ_UPDATE_PERMISSION)) {
+            array.add(APIMgtConstants.Permission.READ);
+            array.add(APIMgtConstants.Permission.UPDATE);
+        } else if (permissionValue == (APIMgtConstants.Permission.READ_DELETE_PERMISSION)) {
+            array.add(APIMgtConstants.Permission.READ);
+            array.add(APIMgtConstants.Permission.DELETE);
+        } else if (permissionValue == (APIMgtConstants.Permission.READ_UPDATE_DELETE_PERMISSION)) {
+            array.add(APIMgtConstants.Permission.READ);
+            array.add(APIMgtConstants.Permission.UPDATE);
+            array.add(APIMgtConstants.Permission.DELETE);
+        } else if (permissionValue == APIMgtConstants.Permission.READ_UPDATE_DELETE_MANAGESUB_PERMISSION) {
+            array.add(APIMgtConstants.Permission.READ);
+            array.add(APIMgtConstants.Permission.UPDATE);
+            array.add(APIMgtConstants.Permission.DELETE);
+            array.add(APIMgtConstants.Permission.MANAGE_SUBSCRIPTION);
+        } else if (permissionValue == APIMgtConstants.Permission.READ_UPDATE_MANAGESUB_PERMISSION) {
+            array.add(APIMgtConstants.Permission.READ);
+            array.add(APIMgtConstants.Permission.UPDATE);
+            array.add(APIMgtConstants.Permission.MANAGE_SUBSCRIPTION);
+        } else if (permissionValue == APIMgtConstants.Permission.READ_DELETE_MANAGESUB_PERMISSION) {
+            array.add(APIMgtConstants.Permission.READ);
+            array.add(APIMgtConstants.Permission.DELETE);
+            array.add(APIMgtConstants.Permission.MANAGE_SUBSCRIPTION);
+        } else if (permissionValue == APIMgtConstants.Permission.READ_MANAGESUB_PERMISSION) {
+            array.add(APIMgtConstants.Permission.READ);
+            array.add(APIMgtConstants.Permission.MANAGE_SUBSCRIPTION);
+        }
+        return array;
+    }
+
     /**
      * This method returns all available roles
      *
@@ -348,7 +383,8 @@ public class APIUtils {
     }
 
     /**
-     * This method will return map with role names and its permission values.
+     * This method will return map with role names and its permission values. This is not for an API. This is for other
+     * resources of an API.
      *
      * @param permissionJsonString Permission json object a string
      * @return Map of permission values.

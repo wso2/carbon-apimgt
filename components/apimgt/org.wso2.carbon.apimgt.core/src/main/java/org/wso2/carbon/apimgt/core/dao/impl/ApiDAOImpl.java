@@ -48,6 +48,7 @@ import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.APILCWorkflowStatus;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -2137,11 +2138,15 @@ public class ApiDAOImpl implements ApiDAO {
                     for (Map.Entry<String, Integer> entry : map.entrySet()) {
                         statement.setString(1, apiId);
                         statement.setString(2, entry.getKey());
-                        //if permission value is UPDATE or DELETE we by default give them read permission also.
-                        if (entry.getValue() < APIMgtConstants.Permission.READ_PERMISSION && entry.getValue() != 0) {
-                            statement.setInt(3, entry.getValue() + APIMgtConstants.Permission.READ_PERMISSION);
+                        Integer permissionValue = entry.getValue();
+                        //if permission value is UPDATE, DELETE or MANAGE_SUBSCRIPTION_PERMISSION we by default give
+                        // them read permission also.
+                        if (permissionValue != 0 && ((permissionValue < APIMgtConstants.Permission.READ_PERMISSION) || (
+                                permissionValue >= APIMgtConstants.Permission.MANAGE_SUBSCRIPTION_PERMISSION
+                                        && permissionValue < APIMgtConstants.Permission.READ_MANAGESUB_PERMISSION))) {
+                            statement.setInt(3, permissionValue + APIMgtConstants.Permission.READ_PERMISSION);
                         } else {
-                            statement.setInt(3, entry.getValue());
+                            statement.setInt(3, permissionValue);
                         }
                         statement.addBatch();
                     }
@@ -2168,11 +2173,15 @@ public class ApiDAOImpl implements ApiDAO {
                     for (Map.Entry<String, Integer> entry : map.entrySet()) {
                         statement.setString(1, apiId);
                         statement.setString(2, entry.getKey());
-                        //if permission value is UPDATE or DELETE we by default give them read permission also.
-                        if (entry.getValue() < APIMgtConstants.Permission.READ_PERMISSION && entry.getValue() != 0) {
-                            statement.setInt(3, entry.getValue() + APIMgtConstants.Permission.READ_PERMISSION);
+                        Integer permissionValue = entry.getValue();
+                        //if permission value is UPDATE, DELETE or MANAGE_SUBSCRIPTION_PERMISSION we by default give
+                        // them read permission also.
+                        if (permissionValue != 0 && ((permissionValue < APIMgtConstants.Permission.READ_PERMISSION) || (
+                                permissionValue >= APIMgtConstants.Permission.MANAGE_SUBSCRIPTION_PERMISSION
+                                        && permissionValue < APIMgtConstants.Permission.READ_MANAGESUB_PERMISSION))) {
+                            statement.setInt(3, permissionValue + APIMgtConstants.Permission.READ_PERMISSION);
                         } else {
-                            statement.setInt(3, entry.getValue());
+                            statement.setInt(3, permissionValue);
                         }
                         statement.addBatch();
                     }
@@ -2734,25 +2743,8 @@ public class ApiDAOImpl implements ApiDAO {
         for (Map.Entry<String, Integer> entry : permissionMap.entrySet()) {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put(APIMgtConstants.Permission.GROUP_ID, entry.getKey());
-            ArrayList<String> array = new ArrayList<String>();
-            Integer permissionValue = entry.getValue();
-            if (permissionValue == APIMgtConstants.Permission.READ_PERMISSION) {
-                array.add(APIMgtConstants.Permission.READ);
-            } else if (permissionValue == (APIMgtConstants.Permission.READ_PERMISSION
-                    + APIMgtConstants.Permission.UPDATE_PERMISSION)) {
-                array.add(APIMgtConstants.Permission.READ);
-                array.add(APIMgtConstants.Permission.UPDATE);
-            } else if (permissionValue == (APIMgtConstants.Permission.READ_PERMISSION
-                    + APIMgtConstants.Permission.DELETE_PERMISSION)) {
-                array.add(APIMgtConstants.Permission.READ);
-                array.add(APIMgtConstants.Permission.DELETE);
-            } else if (permissionValue == (APIMgtConstants.Permission.READ_PERMISSION
-                    + APIMgtConstants.Permission.UPDATE_PERMISSION + APIMgtConstants.Permission.DELETE_PERMISSION)) {
-                array.add(APIMgtConstants.Permission.READ);
-                array.add(APIMgtConstants.Permission.UPDATE);
-                array.add(APIMgtConstants.Permission.DELETE);
-            }
-            jsonObject.put(APIMgtConstants.Permission.PERMISSION, array);
+            jsonObject.put(APIMgtConstants.Permission.PERMISSION,
+                    APIUtils.constructApiPermissionsListForValue(entry.getValue()));
             permissionArray.add(jsonObject);
         }
         if (!permissionArray.isEmpty()) {
