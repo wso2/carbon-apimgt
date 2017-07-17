@@ -9,25 +9,23 @@ import ballerina.lang.strings;
 import org.wso2.carbon.apimgt.gateway.constants as Constants;
 import org.wso2.carbon.apimgt.gateway.utils as gatewayUtil;
 
+@jms:config {
+    initialContextFactory:"org.apache.activemq.jndi.ActiveMQInitialContextFactory",
+    providerUrl:"tcp://localhost:61616",
+    connectionFactoryType:"topic",
+    connectionFactoryName:"TopicConnectionFactory",
+    destination:"StoreTopic"
+}
 
-@jms:JMSSource {
-    factoryInitial:"org.apache.activemq.jndi.ActiveMQInitialContextFactory",
-    providerUrl:"tcp://localhost:61616"}
-@jms:ConnectionProperty {key:"connectionFactoryType", value:"topic"}
-@jms:ConnectionProperty {key:"destination", value:"StoreTopic"}
-@jms:ConnectionProperty {key:"connectionFactoryJNDIName", value:"TopicConnectionFactory"}
-@jms:ConnectionProperty {key:"subscriptionDurable", value:"true"}
-@jms:ConnectionProperty {key:"durableSubscriberClientID", value:"apimStoreEventListner"}
-@jms:ConnectionProperty {key:"durableSubscriberName", value:"apimStoreEventListner"}
-@jms:ConnectionProperty {key:"sessionAcknowledgement", value:"AUTO_ACKNOWLEDGE"}
-service apimStoreEventListner {
+service<jms> apimStoreEventListner {
 
     @http:GET {}
     resource onMessage (message m) {
         try {
-
+            errors:TypeCastError err;
             json event = messages:getJsonPayload(m);
-            string eventType = (string)event[Constants:EVENT_TYPE];
+            string eventType;
+            eventType, err = (string)event[Constants:EVENT_TYPE];
             if (strings:equalsIgnoreCase(eventType, Constants:SUBSCRIPTION_CREATE)) {
                 json subscriptionsList = event.subscriptionsList;
                 gatewayUtil:putIntoSubscriptionCache(subscriptionsList);

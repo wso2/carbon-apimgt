@@ -12,7 +12,25 @@ import org.wso2.carbon.apimgt.gateway.event.publisher;
 import org.wso2.carbon.apimgt.gateway.dto;
 import org.wso2.carbon.apimgt.ballerina.util;
 
-function isrequestThrottled( message msg) (boolean){
+errors:TypeCastError err;
+
+function main(string[] args) {
+    system:println("Hello, World!");
+}
+
+function requestInterceptor (message m) (boolean, message) {
+    system:println("invoking throttle interceptor");
+    boolean isThrottled = isRequestThrottled(m);
+    system:println("isRequestThrottled " + isThrottled);
+    return !isThrottled, m;
+}
+
+function responseInterceptor (message m) (boolean, message) {
+    system:println("invoking response throttle interceptor");
+    return true, m;
+}
+
+function isRequestThrottled( message msg) (boolean){
     // will return true if the request is throttled
 
     //Throttle Keys
@@ -42,7 +60,8 @@ function isrequestThrottled( message msg) (boolean){
     string apiLevelBlockingKey = "";
     string userLevelBlockingKey = "";
 
-    dto:KeyValidationDto keyValidationDto = (dto:KeyValidationDto)util:getProperty(msg, "KEY_VALIDATION_INFO");
+    dto:KeyValidationDto keyValidationDto;
+    keyValidationDto, err = (dto:KeyValidationDto)util:getProperty(msg, "KEY_VALIDATION_INFO");
 
     authorizedUser = keyValidationDto.username;
     //Throttle Policies
@@ -123,11 +142,10 @@ function isrequestThrottled( message msg) (boolean){
 
     // Subscription Level throttling
     isSubscriptionLevelThrottled = throttle:isThrottled(subscriptionLevelThrottleKey, msg);
-    string stopOnQuotaReach = gatewayUtil:getStringProperty(msg, constants:STOP_ON_QUOTA_REACH);
+    boolean stopOnQuotaReach = keyValidationDto.stopOnQuotaReach;
 
     if(isSubscriptionLevelThrottled){
-
-        if(stopOnQuotaReach == "true"){
+        if(stopOnQuotaReach){
             http:setStatusCode( msg, HTTP_TOO_MANY_REQUESTS );
             messages:setProperty(msg, THROTTLED_ERROR_CODE, SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE);
             messages:setProperty(msg, THROTTLED_OUT_REASON, THROTTLE_OUT_REASON_SUBSCRIPTION_LIMIT_EXCEEDED);
@@ -187,7 +205,6 @@ function publishEvent(message m, string userId, string applicationId, string api
     dto:ThrottleEventDTO throttleEventDTO = {};
 
     throttleEventHolderDTO.streamName = "PreRequestStream";
-    throttleEventHolderDTO.executionPlanName = "requestPreProcessorExecutionPlan";
     throttleEventHolderDTO.timestamp = system:currentTimeMillis();
 
     throttleEventDTO.messageID = messageID;

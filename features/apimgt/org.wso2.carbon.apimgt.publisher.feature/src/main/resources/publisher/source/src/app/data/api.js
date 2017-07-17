@@ -663,7 +663,7 @@ class API {
                 let payload = {
                     apiId: api_id,
                     body: body,
-                    documentId: $('#docId').val(),
+                    documentId: docId,
                     "Content-Type": "application/json"
                 };
                 return client["Document (Individual)"].put_apis_apiId_documents_documentId(
