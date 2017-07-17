@@ -46,10 +46,14 @@ class Base extends Component {
 
     render() {
         return (
-            <Layout>
-                <ComposeHeader/>
-                <Content style={{padding: '20px 20px 0 20px'}}>
-                    <Layout style={{padding: '0'}}>
+            <Layout style={{height:'100vh'}}>
+                <ComposeHeader />
+                <Content>
+                    <div className="custom-page-heading">
+                        <h1 className="api-heading">APIs</h1>
+                        <span>subheading</span>
+                    </div>
+                    <Layout className="custom-content-wrapper">
                         {this.props.showLeftMenu ?
                             <Sider
                                 collapsed={this.state.collapsed}
@@ -57,7 +61,7 @@ class Base extends Component {
                                 width={200} style={{padding: '20px 0'}}>
                                 <NavBar/>
                             </Sider> : <div/>}
-                        <Content style={{padding: '20px 0'}}>
+                        <Content >
                             {this.props.children}
                         </Content>
                     </Layout>

@@ -15,13 +15,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+'use strict';
 
-import React, {Component} from 'react'
-import Base from './Base/index'
-import Landing from './Landing/Landing'
-import Apis from './Apis/Apis'
-import Login from './Login/Login'
-import Logout from './Logout'
-import Endpoints from './Endpoints'
+import React from 'react'
+import {Switch, Route} from 'react-router-dom'
 
-export {Base, Landing, Apis, Login, Logout, Endpoints}
+import EndpointsListing from './Listing'
+import EndpointDetails from './Details'
+import EndpointCreate from './Create'
+import {PageNotFound} from '../Base/Errors'
+
+const Endpoints = () => {
+    return (
+        <Switch>
+            <Route exact path="/endpoints" component={EndpointsListing}/>
+            <Route path="/endpoints/create" component={EndpointCreate}/>
+            <Route path={"/endpoints/:endpoint_uuid/"} component={EndpointDetails}/>
+            <Route component={PageNotFound}/>
+        </Switch>
+    );
+};
+
+export default Endpoints

@@ -63,9 +63,9 @@ export default class User {
      * @param {String} newToken : Part of the access token which needs when accessing REST API
      * @param {Number} validityPeriod : Validity period of the cookie in seconds
      */
-    setPartialToken(newToken, validityPeriod) {
+    setPartialToken(newToken, validityPeriod, path) {
         Utils.delete_cookie('WSO2_AM_TOKEN_1');
-        Utils.setCookie('WSO2_AM_TOKEN_1', newToken, validityPeriod);
+        Utils.setCookie('WSO2_AM_TOKEN_1', newToken, validityPeriod, path);
     }
     /**
      *

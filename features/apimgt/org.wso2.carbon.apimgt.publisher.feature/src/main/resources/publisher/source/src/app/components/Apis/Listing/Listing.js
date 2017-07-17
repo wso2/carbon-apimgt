@@ -25,37 +25,7 @@ import API from '../../../data/api.js'
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import {Link} from 'react-router-dom'
-import {Table, Icon, Menu, Dropdown, Button, Row} from 'antd';
-
-const columns = [{
-    title: 'Name',
-    dataIndex: 'name',
-    key: 'name',
-    render: (text, record) => <Link to={"/apis/" + record.id}>{text}</Link>,
-}, {
-    title: 'Context',
-    dataIndex: 'context',
-    key: 'context',
-}, {
-
-    title: 'Version',
-    dataIndex: 'version',
-    key: 'version',
-}, {
-    title: 'Action',
-    key: 'action',
-    render: (text, record) => (
-        <span>
-      <a href="#">Action 一 {record.name}</a>
-      <span className="ant-divider"/>
-      <a href="#">Delete</a>
-      <span className="ant-divider"/>
-      <a href="#" className="ant-dropdown-link">
-        More actions <Icon type="down"/>
-      </a>
-    </span>
-    ),
-}];
+import {Table, Popconfirm, Menu, Dropdown, Button, Row, Col, message} from 'antd';
 
 const menu = (
     <Menu>
@@ -72,13 +42,14 @@ class Listing extends React.Component {
     constructor(props) {
         super(props);
         this.state = {listType: 'grid', apis: null};
+        this.handleApiDelete = this.handleApiDelete.bind(this);
     }
 
     componentDidMount() {
         let api = new API();
         let promised_apis = api.getAll();
         promised_apis.then((response) => {
-            this.setState({apis: response.obj})
+            this.setState({apis: response.obj});
         }).catch(error => {
             if (process.env.NODE_ENV !== "production")
                 console.log(error);
@@ -97,34 +68,83 @@ class Listing extends React.Component {
         this.setState({listType: value});
     }
 
-    isActive = (value) => {
-        return 'btn ' + ((value === this.state.listType) ? 'active' : 'default');
+    handleApiDelete(api_uuid, name) {
+        const hideMessage = message.loading("Deleting the API ...",0);
+        const api = new API();
+        let promised_delete = api.deleteAPI(api_uuid);
+        promised_delete.then(
+            response => {
+                if (response.status !== 200) {
+                    console.log(response);
+                    message.error("Something went wrong while deleting the " + name + " API!");
+                    hideMessage();
+                    return;
+                }
+                message.success(name + " API deleted successfully!");
+                let api = this.state.apis;
+                for (let apiIndex in api.list) {
+                    if (api.list.hasOwnProperty(apiIndex) && api.list[apiIndex].id === api_uuid) {
+                        api.list.splice(apiIndex, 1);
+                        break;
+                    }
+                }
+                this.setState({active: false, apis: api});
+                hideMessage();
+            }
+        );
     }
 
     render() {
         if (this.state.notFound) {
             return <ResourceNotFound/>
         }
+        const columns = [{
+            title: 'Name',
+            dataIndex: 'name',
+            key: 'name',
+            render: (text, record) => <Link to={"/apis/" + record.id}>{text}</Link>,
+        }, {
+            title: 'Context',
+            dataIndex: 'context',
+            key: 'context',
+        }, {
+
+            title: 'Version',
+            dataIndex: 'version',
+            key: 'version',
+        }, {
+            title: 'Action',
+            key: 'action',
+            render: text => {
+                return (
+                    <Popconfirm title="Confirm delete?" onConfirm={() => this.handleApiDelete(text.id, text.name)}>
+                        <Button type="danger" icon="delete">Delete</Button>
+                    </Popconfirm>)
+            },
+        }];
         return (
-            <div className="container-fluid">
+            <div>
                 <div className="api-add-links">
                     <Dropdown overlay={menu} placement="topRight">
                         <Button shape="circle" icon="plus"/>
                     </Dropdown>
                 </div>
-                <h2 className="api-heading">
-                    All APIs
-                    <span>All APIs visible to this account</span>
-                </h2>
-                <ButtonGroup className="api-type-selector">
-                    <Button type="default" icon="bars" onClick={() => this.setListType('list')}/>
-                    <Button type="default" icon="appstore" onClick={() => this.setListType('grid')}/>
-                </ButtonGroup>
-                <div style={{clear: "both"}}></div>
+                <div className="flex-container">
+                    <h2>All APIs</h2>
+                    <ButtonGroup className="api-type-selector">
+                        <Button type="default" icon="bars" onClick={() => this.setListType('list')}/>
+                        <Button type="default" icon="appstore" onClick={() => this.setListType('grid')}/>
+                    </ButtonGroup>
+                </div>
                 {
                     this.state.apis ?
                         this.state.listType === "list" ?
-                            <Table columns={columns} dataSource={this.state.apis.list}/>
+                            <Row type="flex" justify="start">
+                                <Col span={24}>
+                                    <Table columns={columns} dataSource={this.state.apis.list} bordered
+                                           style={{margin: '10px'}}/>
+                                </Col>
+                            </Row>
                             : <Row type="flex" justify="start">
                             {this.state.apis.list.map((api, i) => {
                                 return <ApiThumb key={api.id} listType={this.state.listType} api={api}/>
