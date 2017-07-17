@@ -38,24 +38,47 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.PolicyDeploymentFailureException;
 import org.wso2.carbon.apimgt.api.UnsupportedPolicyTypeException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
-import org.wso2.carbon.apimgt.api.PolicyDeploymentFailureException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.api.model.policy.*;
-import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
-import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
-import org.wso2.carbon.apimgt.impl.notification.NotificationExecutor;
-import org.wso2.carbon.apimgt.impl.notification.NotifierConstants;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
+import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
+import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.Provider;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.Usage;
+import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.Condition;
+import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
+import org.wso2.carbon.apimgt.impl.notification.NotificationExecutor;
+import org.wso2.carbon.apimgt.impl.notification.NotifierConstants;
 import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
@@ -63,7 +86,6 @@ import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
-import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -109,11 +131,6 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.cache.Cache;
-import javax.cache.Caching;
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
-
 import java.io.File;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -135,6 +152,10 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.cache.Cache;
+import javax.cache.Caching;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
 
 /**
  * This class provides the core API provider functionality. It is implemented in a very
@@ -3176,7 +3197,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	public List<String> getCustomInSequences(APIIdentifier apiIdentifier) throws APIManagementException {
 
 		List<String> sequenceList = new ArrayList<String>();
+		boolean isTenantFlowStarted = false;
 		try {
+			String tenantDomain = null;
+			if (apiIdentifier.getProviderName().contains("-AT-")) {
+				String provider = apiIdentifier.getProviderName().replace("-AT-", "@");
+				tenantDomain = MultitenantUtils.getTenantDomain(provider);
+			}
+			PrivilegedCarbonContext.startTenantFlow();
+			isTenantFlowStarted = true;
+			if (!StringUtils.isEmpty(tenantDomain)) {
+				PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+			} else {
+				PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain
+						(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+			}
 			UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceSystemRegistry(tenantId);
 			if (registry.resourceExists(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION)) {
 	            org.wso2.carbon.registry.api.Collection inSeqCollection =
@@ -3205,10 +3240,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                 }
             }
-
-
 		} catch (Exception e) {
 			handleException("Issue is in getting custom InSequences from the Registry", e);
+		} finally {
+			if (isTenantFlowStarted) {
+				PrivilegedCarbonContext.endTenantFlow();
+			}
 		}
 		return sequenceList;
 	}
@@ -3222,7 +3259,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	public List<String> getCustomOutSequences(APIIdentifier apiIdentifier) throws APIManagementException {
 
 		List<String> sequenceList = new ArrayList<String>();
+		boolean isTenantFlowStarted = false;
 		try {
+			String tenantDomain = null;
+			if (apiIdentifier.getProviderName().contains("-AT-")) {
+				String provider = apiIdentifier.getProviderName().replace("-AT-", "@");
+				tenantDomain = MultitenantUtils.getTenantDomain(provider);
+			}
+			PrivilegedCarbonContext.startTenantFlow();
+			isTenantFlowStarted = true;
+			if (!StringUtils.isEmpty(tenantDomain)) {
+				PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+			} else {
+				PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain
+						(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+			}
 			UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
 			                                              .getGovernanceSystemRegistry(tenantId);
 			if (registry.resourceExists(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION)) {
@@ -3255,6 +3306,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 		} catch (Exception e) {
 			handleException("Issue is in getting custom OutSequences from the Registry", e);
+		} finally {
+			if (isTenantFlowStarted) {
+				PrivilegedCarbonContext.endTenantFlow();
+			}
 		}
 		return sequenceList;
 	}
@@ -3388,7 +3443,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public List<String> getCustomFaultSequences(APIIdentifier apiIdentifier) throws APIManagementException {
 
         List<String> sequenceList = new ArrayList<String>();
+        boolean isTenantFlowStarted = false;
         try {
+            String tenantDomain = null;
+            if (apiIdentifier.getProviderName().contains("-AT-")) {
+                String provider = apiIdentifier.getProviderName().replace("-AT-", "@");
+                tenantDomain = MultitenantUtils.getTenantDomain(provider);
+            }
+            PrivilegedCarbonContext.startTenantFlow();
+            isTenantFlowStarted = true;
+            if (!StringUtils.isEmpty(tenantDomain)) {
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            } else {
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain
+                        (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            }
             UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getGovernanceSystemRegistry(tenantId);
             if (registry.resourceExists(APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION)) {
@@ -3434,6 +3503,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new APIManagementException(e.getMessage(), e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
         return sequenceList;
     }
@@ -3447,7 +3520,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     public List<String> getCustomApiInSequences(APIIdentifier apiIdentifier)  throws APIManagementException {
         List<String> sequenceList = new ArrayList<String>();
+        boolean isTenantFlowStarted = false;
         try {
+            String tenantDomain = null;
+            if (apiIdentifier.getProviderName().contains("-AT-")) {
+                String provider = apiIdentifier.getProviderName().replace("-AT-", "@");
+                tenantDomain = MultitenantUtils.getTenantDomain(provider);
+            }
+            PrivilegedCarbonContext.startTenantFlow();
+            isTenantFlowStarted = true;
+            if (!StringUtils.isEmpty(tenantDomain)) {
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            } else {
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain
+                        (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            }
             UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getGovernanceSystemRegistry(tenantId);
             String customOutSeqFileLocation = APIUtil.getSequencePath(apiIdentifier,
@@ -3476,6 +3563,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new APIManagementException(e.getMessage(), e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
         return sequenceList;
     }
@@ -3489,7 +3580,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     public List<String> getCustomApiOutSequences(APIIdentifier apiIdentifier)  throws APIManagementException {
         List<String> sequenceList = new ArrayList<String>();
+        boolean isTenantFlowStarted = false;
         try {
+            String tenantDomain = null;
+            if (apiIdentifier.getProviderName().contains("-AT-")) {
+                String provider = apiIdentifier.getProviderName().replace("-AT-", "@");
+                tenantDomain = MultitenantUtils.getTenantDomain(provider);
+            }
+            PrivilegedCarbonContext.startTenantFlow();
+            isTenantFlowStarted = true;
+            if (!StringUtils.isEmpty(tenantDomain)) {
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            } else {
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain
+                        (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            }
             UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getGovernanceSystemRegistry(tenantId);
             String customOutSeqFileLocation = APIUtil.getSequencePath(apiIdentifier,
@@ -3518,6 +3623,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new APIManagementException(e.getMessage(), e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
         return sequenceList;
     }
@@ -3530,7 +3639,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     public List<String> getCustomApiFaultSequences(APIIdentifier apiIdentifier)  throws APIManagementException {
         List<String> sequenceList = new ArrayList<String>();
+        boolean isTenantFlowStarted = false;
         try {
+            String tenantDomain = null;
+            if (apiIdentifier.getProviderName().contains("-AT-")) {
+                String provider = apiIdentifier.getProviderName().replace("-AT-", "@");
+                tenantDomain = MultitenantUtils.getTenantDomain(provider);
+            }
+            PrivilegedCarbonContext.startTenantFlow();
+            isTenantFlowStarted = true;
+            if (!StringUtils.isEmpty(tenantDomain)) {
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            } else {
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain
+                        (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            }
             UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getGovernanceSystemRegistry(tenantId);
             String customOutSeqFileLocation = APIUtil.getSequencePath(apiIdentifier,
@@ -3559,6 +3682,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new APIManagementException(e.getMessage(), e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
         return sequenceList;
     }

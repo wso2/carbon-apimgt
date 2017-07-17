@@ -289,6 +289,7 @@
                 var cleaned = [];
                 for(var i=0; i< endpoints.length; i++){
                     if(endpoints[i].url != undefined & endpoints[i].url !=""){
+                        endpoints[i].url = endpoints[i].url.trim();
                         cleaned.push(endpoints[i]);
                     }
                 }

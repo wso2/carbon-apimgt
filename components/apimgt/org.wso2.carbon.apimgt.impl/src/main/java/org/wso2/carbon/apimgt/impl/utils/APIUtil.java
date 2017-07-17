@@ -1497,7 +1497,6 @@ public final class APIUtil {
     public static String getGatewayendpoint(String transports) {
 
         String gatewayURLs;
-        String gatewayURL = null;
 
         Map<String, Environment> gatewayEnvironments = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService()
@@ -1505,19 +1504,32 @@ public final class APIUtil {
                 .getApiGatewayEnvironments();
         if (gatewayEnvironments.size() > 1) {
             for (Environment environment : gatewayEnvironments.values()) {
+                if (APIConstants.GATEWAY_ENV_TYPE_HYBRID.equals(environment.getType())) {
+                    gatewayURLs = environment.getApiGatewayEndpoint(); // This might have http,https
+                    // pick correct endpoint
+                    return APIUtil.extractHTTPSEndpoint(gatewayURLs, transports);
+                }
+            }
+            for (Environment environment : gatewayEnvironments.values()) {
                 if (APIConstants.GATEWAY_ENV_TYPE_PRODUCTION.equals(environment.getType())) {
                     gatewayURLs = environment.getApiGatewayEndpoint(); // This might have http,https
-                    // endpoints
-                    gatewayURL = APIUtil.extractHTTPSEndpoint(gatewayURLs, transports);
-                    break;
+                    // pick correct endpoint
+                    return APIUtil.extractHTTPSEndpoint(gatewayURLs, transports);
+                }
+            }
+            for (Environment environment : gatewayEnvironments.values()) {
+                if (APIConstants.GATEWAY_ENV_TYPE_SANDBOX.equals(environment.getType())) {
+                    gatewayURLs = environment.getApiGatewayEndpoint(); // This might have http,https
+                    // pick correct endpoint
+                    return APIUtil.extractHTTPSEndpoint(gatewayURLs, transports);
                 }
             }
         } else {
             gatewayURLs = ((Environment) gatewayEnvironments.values().toArray()[0]).getApiGatewayEndpoint();
-            gatewayURL = extractHTTPSEndpoint(gatewayURLs, transports);
+            return extractHTTPSEndpoint(gatewayURLs, transports);
         }
 
-        return gatewayURL;
+        return null;
     }
 
     /**
