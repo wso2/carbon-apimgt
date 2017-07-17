@@ -3,12 +3,14 @@ import {Input, Col, Row, Select} from 'antd'
 const Option = Select.Option;
 
 export default class GenericEndpointInputs extends Component {
+
     constructor(props) {
         super(props);
         this.state = {};
         this.handleTextInputs = this.handleTextInputs.bind(this);
         this.handleEndpointType = this.handleEndpointType.bind(this);
         this.handleSecurityType = this.handleSecurityType.bind(this);
+        this.endpoint_url = props.endpoint_url;
     }
 
     handleTextInputs(e) {
@@ -41,6 +43,7 @@ export default class GenericEndpointInputs extends Component {
                     <Col span={6} offset={2}>Endpoint URL </Col>
                     <Col span={10}>
                         <Input
+                            defaultValue={this.endpoint_url}
                             name="url"
                             onChange={this.handleTextInputs}
                             placeholder="https://sample.wso2.org/api/endpoint"/>
