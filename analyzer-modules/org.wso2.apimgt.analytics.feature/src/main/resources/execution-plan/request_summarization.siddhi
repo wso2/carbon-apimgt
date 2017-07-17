@@ -1,12 +1,32 @@
 @App:name('request_summarization')
 
-@Store(type="rdbms", jdbc.url="jdbc:h2:./database/AM_STAT_DB;DB_CLOSE_ON_EXIT=FALSE;LOCK_TIMEOUT=60000;AUTO_SERVER=TRUE",
-username="wso2carbon",
-password="wso2carbon",field.length="api:254", pool.properties="driverClassName:org.h2.Driver" )
-@PrimaryKey("api, version, publisher, context, consumer_key, application_name, user_id, uri_template, method, year, month, day, hour, minute")
-define table api_request_summary (api string, version string, publisher string, context string, consumer_key string, application_name string, user_id string, uri_template string, method string, request_count long, time long, year int ,month int, day int, hour int, minute int);
-
 @source(type='inMemory', topic='apim.analytics.request', @map(type='passThrough'))
+Define stream RequestStream (
+api STRING,
+context STRING,
+version STRING,
+publisher STRING,
+subscription_policy STRING,
+uri_template STRING,
+method STRING,
+consumer_key STRING,
+application_name STRING,
+application_id STRING,
+application_owner STRING,
+user_id STRING,
+subscriber STRING,
+request_count INT,
+request_event_time LONG,
+gateway_domain STRING,
+gateway_ip STRING,
+is_throttled BOOL,
+throttled_reason STRING,
+throttled_policy STRING,
+client_ip STRING,
+user_agent STRING,
+host_name STRING
+);
+
 Define stream perMinuteRequests (
 api STRING, context STRING, version STRING, publisher STRING,
 uri_template STRING,
@@ -18,6 +38,64 @@ total_request_count LONG,
 request_time LONG,
 year INT, month INT, day INT, hour INT, minute INT
 );
+
+@Store(type="rdbms", jdbc.url="jdbc:h2:./database/AM_STAT_DB;DB_CLOSE_ON_EXIT=FALSE;LOCK_TIMEOUT=60000;AUTO_SERVER=TRUE",
+username="wso2carbon",
+password="wso2carbon",field.length="api:254", pool.properties="driverClassName:org.h2.Driver" )
+@PrimaryKey("api, version, publisher, context, consumer_key, application_name, user_id, uri_template, method, year,month, day, hour, minute")
+define table api_request_summary (api string, version string, publisher string, context string, consumer_key string,
+application_name string, user_id string, uri_template string, method string, request_count long, time long, year int ,
+month int, day int, hour int, minute int);
+
+
+-- per second request
+from RequestStream#window.externalTimeBatch(request_event_time, 1 sec, 0, 10 sec, true)
+select request_event_time as startTime, api, version, publisher, context, consumer_key, application_name, user_id,
+uri_template, method, max(request_event_time) as requestTime, count() as total_request_count
+group by api, version, publisher, context, consumer_key, application_name, user_id, uri_template, method
+insert into perSecondRequestsTemp;
+
+from perSecondRequestsTemp
+select (startTime - (startTime % 1000)) as startTime,
+convert((startTime - (startTime % 1000)), 'string') as facetStartTime,
+time:extract(startTime, 'year') as year,
+time:extract(startTime, 'month') as month,
+time:extract(startTime, 'day') as day,
+time:extract(startTime, 'hour') as hour,
+time:extract(startTime, 'minute') as minute,
+time:extract(startTime, 'second') as second,
+api, version, publisher, context, consumer_key, application_name, user_id, uri_template, method,
+requestTime, total_request_count
+insert into perSecondRequests;
+
+
+-- per minute request
+from perSecondRequests
+select startTime,
+str:concat(facetStartTime, '_', api, '_', version, '_', publisher, '_', context, '_', consumer_key, '_',
+    uri_template, '_', method, '_', user_id) as uniqueId,
+year, month, day, hour, minute, second, consumer_key, context, api, version, uri_template, method,
+requestTime, user_id, publisher, total_request_count, application_name
+insert into perSecondRequestsWithUniqueId;
+
+/*from perSecondRequestsWithUniqueId#window.uniqueExternalTimeBatch(uniqueId, startTime, 60 sec, 59999 millisec, 10 sec, true)*/
+from perSecondRequestsWithUniqueId#window.externalTimeBatch(startTime, 60 sec, 59999 millisec, 10 sec, true)
+select startTime, consumer_key, context, api, version, uri_template, method,
+max(requestTime) as requestTime, user_id, publisher, sum(total_request_count) as total_request_count,
+application_name
+group by consumer_key, context, api, version, user_id, publisher, uri_template, method
+insert into perMinuteRequestsTemp;
+
+
+from perMinuteRequestsTemp select
+api, context, version, publisher, uri_template, method, consumer_key, application_name,
+user_id, total_request_count, requestTime as request_time,
+time:extract(startTime, 'year') as year,
+time:extract(startTime, 'month') as month,
+time:extract(startTime, 'day') as day,
+time:extract(startTime, 'hour') as hour,
+time:extract(startTime, 'minute') as minute
+insert into perMinuteRequests;
 
 @info(name = 'query1')
 from perMinuteRequests

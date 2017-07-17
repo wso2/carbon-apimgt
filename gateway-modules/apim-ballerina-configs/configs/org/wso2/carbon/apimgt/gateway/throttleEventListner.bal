@@ -10,22 +10,21 @@ import org.wso2.carbon.apimgt.gateway.constants as Constants;
 import org.wso2.carbon.apimgt.gateway.holders as throttle;
 import org.wso2.carbon.apimgt.gateway.utils as util;
 
-
-@jms:JMSSource {
-factoryInitial : "org.apache.activemq.jndi.ActiveMQInitialContextFactory",
-providerUrl : "tcp://localhost:61616"}
-@jms:ConnectionProperty{key:"connectionFactoryType", value:"topic"}
-@jms:ConnectionProperty{key:"destination", value:"TEST.FOO"}
-@jms:ConnectionProperty{key:"connectionFactoryJNDIName", value:"TopicConnectionFactory"}
-@jms:ConnectionProperty{key:"sessionAcknowledgement", value:"AUTO_ACKNOWLEDGE"}
-service ThrottleJmsService {
+@jms:config {
+    initialContextFactory:"org.apache.activemq.jndi.ActiveMQInitialContextFactory",
+    providerUrl:"tcp://localhost:61616",
+    connectionFactoryType:"topic",
+    connectionFactoryName:"TopicConnectionFactory",
+    destination:"TEST.FOO"
+}
+service<jms> ThrottleJmsService {
 
     @http:GET {}
     resource onMessage (message m) {
         try {
             
             system:println("OnMessage fired ............");
-
+            errors:TypeCastError err;
             json event = {};
             
             string receivedMessage = messages:getStringPayload(m);
@@ -42,15 +41,17 @@ service ThrottleJmsService {
                 event = messages:getJsonPayload(m);
             }
 
-            system:println("Throttling Message received : " + (string)event);
-            
-            if ("" != util:getJsonString(event, Constants:THROTTLE_KEY)) {
+            string eventMsg;
+            eventMsg, err = (string)event;
+            system:println("Throttling Message received : " + eventMsg);
+            string keyy;
+            keyy, err= (string)event.throttleKey;
+            if ("" != keyy) {
                
                  // This message contains throttle data in map which contains Keys
                  // throttleKey - Key of particular throttling level
                  // isThrottled - Whether message has throttled or not
                  // expiryTimeStamp - When the throttling time window will expires
-                 
                 handleThrottleUpdateMessage(event);
             } else if ("" != util:getJsonString(event, Constants:POLICY_TEMPLATE_KEY)) {
                 
@@ -68,11 +69,13 @@ service ThrottleJmsService {
 }
 
 function handleThrottleUpdateMessage(json event){
-
-    string throttleKey = util:getJsonString(event, Constants:THROTTLE_KEY);
-    string throttleState = util:getJsonString(event, Constants:IS_THROTTLED);
-    string timeStamp = util:getJsonString(event, Constants:EXPIRY_TIMESTAMP);
-
+    errors:TypeCastError err;
+    string throttleKey;
+    throttleKey, err = (string)event.throttleKey;
+    string throttleState;
+    throttleState, err = (string)event.isThrottled;
+    string timeStamp;
+    timeStamp, err = (string)event.expiryTimeStamp;
     system:println("Received Key -  throttleKey : " + throttleKey + " , " + "isThrottled :" + throttleState + " , expiryTime : " + timeStamp);
     
     if (throttleState == Constants:TRUE) {
@@ -84,8 +87,11 @@ function handleThrottleUpdateMessage(json event){
 
 
 function handleKeyTemplateMessage(json event) {
-    
-    system:println("Received Key -  KeyTemplate : " + (string )event[Constants:KEY_TEMPLATE_KEY]);
+
+    string eventMsg;
+    errors:TypeCastError err;
+    eventMsg, err = (string )event[Constants:KEY_TEMPLATE_KEY];
+    system:println("Received Key -  KeyTemplate : " + eventMsg);
     
     string keyTemplateValue = util:getJsonString(event, Constants:KEY_TEMPLATE_KEY);
     string keyTemplateState = util:getJsonString(event, Constants:KEY_TEMPLATE_KEY_STATE);
