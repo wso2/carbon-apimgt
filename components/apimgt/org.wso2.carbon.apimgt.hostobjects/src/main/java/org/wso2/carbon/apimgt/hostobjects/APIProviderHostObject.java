@@ -51,13 +51,33 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.mozilla.javascript.*;
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.Function;
+import org.mozilla.javascript.NativeArray;
+import org.mozilla.javascript.NativeObject;
+import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
@@ -92,16 +112,29 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.cache.Caching;
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLSession;
-import javax.xml.namespace.QName;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.cache.Caching;
+import javax.xml.namespace.QName;
 
 @SuppressWarnings("unused")
 public class APIProviderHostObject extends ScriptableObject {
@@ -673,19 +706,38 @@ public class APIProviderHostObject extends ScriptableObject {
 
     }
     
-    private static String uploadSequenceFile(APIProvider apiProvider, FileHostObject seqFile, String filePath) 
+    private static String uploadSequenceFile(APIProvider apiProvider, FileHostObject seqFile, String filePath,
+                                             APIIdentifier apiIdentifier)
                                                         throws APIManagementException, ScriptException {
         ResourceFile inSeq = new ResourceFile(seqFile.getInputStream(), seqFile.getJavaScriptFile().getContentType());
         String seqFileName;
+        boolean isTenantFlowStarted = false;
         try {
+            PrivilegedCarbonContext.startTenantFlow();
+            isTenantFlowStarted = true;
+            String tenantDomain = null;
+            if (apiIdentifier.getProviderName().contains("-AT-")) {
+                String provider = apiIdentifier.getProviderName().replace("-AT-", "@");
+                tenantDomain = MultitenantUtils.getTenantDomain(provider);
+            }
+            if (!StringUtils.isEmpty(tenantDomain)) {
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            } else {
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain
+                        (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+            }
             OMElement seqElment = APIUtil.buildOMElement(seqFile.getInputStream());
-            seqFileName = seqElment.getAttributeValue(new QName("name"));            
+            seqFileName = seqElment.getAttributeValue(new QName("name"));
+            apiProvider.addResourceFile(filePath + seqFileName, inSeq);
         } catch (Exception e) {
             String errorMsg = "An Error has occurred while reading custom sequence file";
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
-        apiProvider.addResourceFile(filePath + seqFileName, inSeq);
         return seqFileName;
     }
     
@@ -726,7 +778,7 @@ public class APIProviderHostObject extends ScriptableObject {
         if (apiData.get("seqFile", apiData) != null)  {
             FileHostObject seqFile = (FileHostObject) apiData.get("seqFile", apiData);
             String inSeqPath = APIUtil.getSequencePath(apiId, sequenceType);
-            inSeqFileName = uploadSequenceFile(apiProvider, seqFile, inSeqPath);
+            inSeqFileName = uploadSequenceFile(apiProvider, seqFile, inSeqPath, apiId);
         }
         return inSeqFileName;
         

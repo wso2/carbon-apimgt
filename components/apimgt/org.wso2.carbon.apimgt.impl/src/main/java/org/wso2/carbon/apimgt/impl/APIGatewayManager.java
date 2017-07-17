@@ -16,16 +16,10 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
@@ -44,6 +38,12 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
 
 public class APIGatewayManager {
 
@@ -693,57 +693,65 @@ public class APIGatewayManager {
 
         String faultSequenceName = api.getFaultSequence();
         String faultSeqExt = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
+        boolean isTenantFlowStarted = false;
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            isTenantFlowStarted = true;
+            if (!StringUtils.isEmpty(tenantDomain)) {
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            } else {
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain
+                        (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+                tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+            }
 
-        //If a fault sequence has be defined.
-        if (APIUtil.isSequenceDefined(faultSequenceName)) {
-            try {
-                PrivilegedCarbonContext.startTenantFlow();
-                if (tenantDomain != null && !"".equals(tenantDomain)) {
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                } else {
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain
-                            (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-                }
+            APIGatewayAdminClient client;
+
+            client = new APIGatewayAdminClient(api.getId(), environment);
+            //If a fault sequence has be defined.
+            if (APIUtil.isSequenceDefined(faultSequenceName)) {
                 int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-
-                APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
-
                 //If the sequence already exists
-                if (client.isExistingSequence(faultSequenceName, tenantDomain)) {
+                if (client.isExistingSequence(faultSeqExt, tenantDomain)) {
                     //Delete the sequence. We need to redeploy afterwards since the sequence may have been updated.
-                    client.deleteSequence(faultSequenceName, tenantDomain);
+                    client.deleteSequence(faultSeqExt, tenantDomain);
                 }
                 //Get the fault sequence xml
-                OMElement faultSequence = APIUtil.getCustomSequence(faultSequenceName, tenantId, 
-                                                            APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT, api.getId());
+                OMElement faultSequence = APIUtil.getCustomSequence(faultSequenceName, tenantId,
+                        APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT, api.getId());
 
                 if (faultSequence != null) {
-                    if (APIUtil.isPerAPISequence(faultSequenceName, tenantId, api.getId(), 
-                                                 APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT)) {
-                        if (faultSequence.getAttribute(new QName("name")) != null)    {
+                    if (APIUtil.isPerAPISequence(faultSequenceName, tenantId, api.getId(),
+                            APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT)) {
+                        if (faultSequence.getAttribute(new QName("name")) != null) {
                             faultSequence.getAttribute(new QName("name")).setAttributeValue(faultSeqExt);
                         }
                     } else {
                         //If the previous sequence was a per API fault sequence delete it
-                        if (client.isExistingSequence(faultSeqExt, tenantDomain)) {
-                            client.deleteSequence(faultSeqExt, tenantDomain);
+                        if (client.isExistingSequence(faultSequenceName, tenantDomain)) {
+                            client.deleteSequence(faultSequenceName, tenantDomain);
                         }
                     }
 
                     //Deploy the fault sequence
                     client.addSequence(faultSequence, tenantDomain);
                 }
-            } catch (Exception e) {
-                String msg = "Error in updating the fault sequence at the Gateway";
-                log.error(msg, e);
-                throw new APIManagementException(msg, e);
-            } finally {
+            } else {
+                if (client.isExistingSequence(faultSeqExt, tenantDomain)) {
+                    client.deleteSequence(faultSeqExt, tenantDomain);
+                }
+            }
+        } catch (AxisFault e) {
+            String msg = "Error while updating the fault sequence at the Gateway";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        } finally {
+            if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
     }
 
-       
     /**
      * Store the secured endpoint username password to registry
      * @param api
