@@ -34,7 +34,15 @@ public class PolicyDeployerConfiguration {
         return serverURL;
     }
 
+    public void setServerURL(String serverURL) {
+        this.serverURL = serverURL;
+    }
+
     public CredentialConfigurations getPolicyDeployerCredentials() {
         return policyDeployerCredentials;
+    }
+
+    public void setPolicyDeployerCredentials(CredentialConfigurations policyDeployerCredentials) {
+        this.policyDeployerCredentials = policyDeployerCredentials;
     }
 }
