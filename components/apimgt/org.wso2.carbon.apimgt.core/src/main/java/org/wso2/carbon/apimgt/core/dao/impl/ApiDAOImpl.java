@@ -274,12 +274,6 @@ public class ApiDAOImpl implements ApiDAO {
 
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<API> getAPIs() throws APIMgtDAOException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     public List<CompositeAPI> getCompositeAPIs(Set<String> roles, String user, int offset, int limit)
             throws APIMgtDAOException {
 

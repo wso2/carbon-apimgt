@@ -129,16 +129,6 @@ public interface ApiDAO {
     String getLastUpdatedTimeOfGatewayConfig(String apiId) throws APIMgtDAOException;
 
     /**
-     * Retrieves summary data of all available APIs. This method is used to retrieve APIs in the Editor without
-     * considering the permissions model
-     *
-     * @return {@code List<API>} matching results
-     * @throws APIMgtDAOException if error occurs while accessing data layer
-     *
-     */
-    List<API> getAPIs() throws APIMgtDAOException;
-
-    /**
      * Retrieves summary data of all available APIs.
      *
      * @param roles The set of roles of the current user
