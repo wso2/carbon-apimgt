@@ -247,19 +247,17 @@ public class ApiDAOImpl implements ApiDAO {
         final String query;
         if (roleCount > 0) {
             query = API_SUMMARY_SELECT + " LEFT JOIN AM_API_GROUP_PERMISSION PERMISSION ON UUID = API_ID WHERE" +
-                    " API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
+                    " API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = STANDARD)" +
                     " AND (((PERMISSION.GROUP_ID IN (" + DAOUtil.getParameterString(roles.size()) + "))" +
                     " AND PERMISSION.PERMISSION >= 4) OR (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))";
         } else {
             query = API_SUMMARY_SELECT + " LEFT JOIN AM_API_GROUP_PERMISSION PERMISSION ON UUID = API_ID WHERE" +
-                    " API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
+                    " API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = STANDARD)" +
                     " AND ((PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))";
         }
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, ApiType.STANDARD.toString());
-
-            int index = 1;
+            int index = 0;
             if (roleCount > 0) {
                 for (String role : roles) {
                     statement.setString(++index, role);
