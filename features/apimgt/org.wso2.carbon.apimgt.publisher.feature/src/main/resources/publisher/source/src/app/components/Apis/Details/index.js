@@ -22,11 +22,11 @@ import {Route, Switch, Redirect} from 'react-router-dom'
 import Overview from './Overview'
 import NavBar from './NavBar'
 import LifeCycle from './LifeCycle/LifeCycle'
+import Documents from './Documents/Documents'
 import {PageNotFound} from '../../Base/Errors/index'
 import Resources from './Resources'
 import Permission from './Permission'
 import Endpoints from './Endpoints'
-import Documents from './Documents'
 
 export default class Details extends Component {
     componentDidMount() {
