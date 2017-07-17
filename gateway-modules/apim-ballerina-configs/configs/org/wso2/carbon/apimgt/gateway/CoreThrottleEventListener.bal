@@ -10,28 +10,34 @@ import org.wso2.carbon.apimgt.gateway.utils as gatewayUtils;
 import org.wso2.carbon.apimgt.gateway.holders;
 import org.wso2.carbon.apimgt.gateway.dto;
 
+@jms:config {
+    initialContextFactory:"org.apache.activemq.jndi.ActiveMQInitialContextFactory",
+    providerUrl:"tcp://localhost:61616",
+    connectionFactoryType:"topic",
+    connectionFactoryName:"TopicConnectionFactory",
+    destination:"ThrottleTopic"
+}
 
-@jms:JMSSource {
-    factoryInitial:"org.apache.activemq.jndi.ActiveMQInitialContextFactory",
-    providerUrl:"tcp://localhost:61616"}
-@jms:ConnectionProperty {key:"connectionFactoryType", value:"topic"}
-@jms:ConnectionProperty {key:"destination", value:"ThrottleTopic"}
-@jms:ConnectionProperty {key:"connectionFactoryJNDIName", value:"TopicConnectionFactory"}
-@jms:ConnectionProperty {key:"sessionAcknowledgement", value:"AUTO_ACKNOWLEDGE"}
-service ThrottleCoreJmsService {
+service<jms> ThrottleCoreJmsService {
 
     @http:GET {}
     resource onMessage (message m) {
         json event = messages:getJsonPayload(m);
-        string eventType = (string)event[Constants:EVENT_TYPE];
+        errors:TypeCastError err;
+        string eventType;
+        eventType, err = (string)event[Constants:EVENT_TYPE];
         try {
             if(eventType == Constants:POLICY_CREATE){
                 gatewayUtils:putIntoPolicyCache(event);
             }else if(eventType == Constants:POLICY_UPDATE){
-                holders:removeFromPolicyCache((string )event.id);
+                string eventId;
+                eventId, err = (string )event.id;
+                holders:removeFromPolicyCache(eventId);
                 gatewayUtils:putIntoPolicyCache(event);
             }else if(eventType == Constants:POLICY_DELETE){
-                holders:removeFromPolicyCache((string )event.id);
+                string eventId;
+                eventId, err = (string )event.id;
+                holders:removeFromPolicyCache(eventId);
              }else if(eventType == Constants:BLOCK_CONDITION_ADD){
                 dto:BlockConditionDto condition = gatewayUtils:fromJsonToBlockConditionDto(event);
                 holders:addBlockConditions(condition);

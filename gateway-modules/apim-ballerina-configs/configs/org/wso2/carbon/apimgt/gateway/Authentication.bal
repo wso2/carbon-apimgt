@@ -11,6 +11,24 @@ import org.wso2.carbon.apimgt.gateway.holders as holder;
 import org.wso2.carbon.apimgt.gateway.constants;
 import org.wso2.carbon.apimgt.ballerina.util;
 
+function main(string[] args) {
+    system:println("Hello, World!");
+}
+
+function requestInterceptor (message m) (boolean, message) {
+    system:println("invoking auth interceptor");
+    message res;
+    boolean authenticated;
+    authenticated, res = authenticate(m);
+    system:println("auth authenticated " + authenticated);
+    return authenticated, res;
+}
+
+function responseInterceptor (message m) (boolean, message) {
+    system:println("invoking response auth interceptor");
+    return true, m;
+}
+
 function authenticate (message m) (boolean, message) {
     message response = {};
     message request = {};
@@ -44,6 +62,7 @@ function authenticate (message m) (boolean, message) {
                     //extract key
                     string authToken = messages:getHeader(m, constants:AUTHORIZATION);
                     authToken = strings:replace(authToken, constants:BEARER, "");
+
                     if (strings:length(authToken) == 0) {
                         // token incorrect
                         gatewayUtil:constructAccessTokenNotFoundPayload(response);

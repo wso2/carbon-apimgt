@@ -4,10 +4,11 @@ import ballerina.lang.system;
 import ballerina.lang.errors;
 import org.wso2.carbon.apimgt.gateway.utils as gatewayUtil;
 import org.wso2.carbon.apimgt.gateway.holders as holder;
+import ballerina.net.http;
 
-
-service gatewayInitService {
+service<http> gatewayInitService {
     boolean isCacheInitialized = holder:initializeCache();
+    boolean isMapsAdded = holder:addThrottleMaps();
     boolean isReady = initGateway();
     boolean subscriptionsInitialized = gatewayUtil:retrieveSubscriptions();
     boolean applicationsInitialized = gatewayUtil:retrieveApplications();
