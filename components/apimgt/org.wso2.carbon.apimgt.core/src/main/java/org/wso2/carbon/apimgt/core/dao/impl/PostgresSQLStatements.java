@@ -75,7 +75,8 @@ public class PostgresSQLStatements implements ApiDAOVendorSpecificStatements {
                     " WHERE textsearchable_index_col @@ to_tsquery(replace(?, ' ', '+'))" +
                     " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
                     " AND (((GROUP_ID IN (" + DAOUtil.getParameterString(roleCount) + "))" +
-                    " AND PERMISSION.PERMISSION >= 4) OR (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" +
+                    " AND PERMISSION.PERMISSION >= " + APIMgtConstants.Permission.READ_PERMISSION +
+                    ") OR (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" +
                     " GROUP BY UUID ORDER BY NAME  OFFSET ? LIMIT ?";
         } else {
             return API_SUMMARY_SELECT +
@@ -132,7 +133,8 @@ public class PostgresSQLStatements implements ApiDAOVendorSpecificStatements {
             return API_SUMMARY_SELECT + " WHERE " + searchQuery.toString() +
                     " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
                     " AND (((GROUP_ID IN (" + DAOUtil.getParameterString(roleCount) +
-                    ")) AND PERMISSION.PERMISSION >= 4) OR  (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" +
+                    ")) AND PERMISSION.PERMISSION >= " + APIMgtConstants.Permission.READ_PERMISSION +
+                    ") OR  (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" +
                     " GROUP BY UUID ORDER BY NAME  OFFSET ? LIMIT ?";
         } else {
             return API_SUMMARY_SELECT + " WHERE " + searchQuery.toString() +

@@ -78,7 +78,8 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
                     " WHERE (CONTAINS(INDEXER, ?, 1) > 0)" +
                     " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
                     " AND (((GROUP_ID IN (" + DAOUtil.getParameterString(roleCount) + "))" +
-                    " AND PERMISSION.PERMISSION >= 4) OR (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" +
+                    " AND PERMISSION.PERMISSION >= " + APIMgtConstants.Permission.READ_PERMISSION +
+                    ") OR (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" +
                     " ORDER BY NAME " +
                     ") A WHERE rownum <= ?) where rnum >= ?";
         } else {
@@ -140,7 +141,8 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
             return "SELECT * FROM (" + API_SUMMARY_SELECT + " WHERE " + searchQuery.toString() +
                     " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
                     " AND (((GROUP_ID IN (" + DAOUtil.getParameterString(roleCount) +
-                    ")) AND PERMISSION.PERMISSION >= 4) OR (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" +
+                    ")) AND PERMISSION.PERMISSION >= " + APIMgtConstants.Permission.READ_PERMISSION +
+                    ") OR (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" +
                     " ORDER BY NAME" + ")  A WHERE rownum <= ?) where rnum >= ?";
         } else {
             return "SELECT * FROM (" + API_SUMMARY_SELECT + " WHERE " + searchQuery.toString() +

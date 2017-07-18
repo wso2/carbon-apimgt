@@ -2132,10 +2132,10 @@ public class ApiDAOImpl implements ApiDAO {
                         statement.setString(2, entry.getKey());
                         Integer permissionValue = entry.getValue();
                         //if permission value is UPDATE, DELETE or MANAGE_SUBSCRIPTION_PERMISSION we by default give
-                        // them read permission also.
-                        if (permissionValue != 0 && ((permissionValue < APIMgtConstants.Permission.READ_PERMISSION) || (
-                                permissionValue >= APIMgtConstants.Permission.MANAGE_SUBSCRIPTION_PERMISSION
-                                        && permissionValue < APIMgtConstants.Permission.READ_MANAGESUB_PERMISSION))) {
+                        // them read permission also. Have used the bitwise AND operation to check whether the
+                        // permission value passed by the user contains the read permission.
+                        if (permissionValue > APIMgtConstants.Permission.READ_PERMISSION
+                                && (permissionValue & APIMgtConstants.Permission.READ_PERMISSION) == 0) {
                             statement.setInt(3, permissionValue + APIMgtConstants.Permission.READ_PERMISSION);
                         } else {
                             statement.setInt(3, permissionValue);
@@ -2167,10 +2167,10 @@ public class ApiDAOImpl implements ApiDAO {
                         statement.setString(2, entry.getKey());
                         Integer permissionValue = entry.getValue();
                         //if permission value is UPDATE, DELETE or MANAGE_SUBSCRIPTION_PERMISSION we by default give
-                        // them read permission also.
-                        if (permissionValue != 0 && ((permissionValue < APIMgtConstants.Permission.READ_PERMISSION) || (
-                                permissionValue >= APIMgtConstants.Permission.MANAGE_SUBSCRIPTION_PERMISSION
-                                        && permissionValue < APIMgtConstants.Permission.READ_MANAGESUB_PERMISSION))) {
+                        // them read permission also. Have used the bitwise AND operation to check whether the
+                        // permission value passed by the user contains the read permission.
+                        if (permissionValue > APIMgtConstants.Permission.READ_PERMISSION
+                                && (permissionValue & APIMgtConstants.Permission.READ_PERMISSION) == 0) {
                             statement.setInt(3, permissionValue + APIMgtConstants.Permission.READ_PERMISSION);
                         } else {
                             statement.setInt(3, permissionValue);

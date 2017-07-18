@@ -72,7 +72,8 @@ public class MysqlSQLStatements implements ApiDAOVendorSpecificStatements {
                     "`TECHNICAL_OWNER`, `BUSINESS_OWNER`) AGAINST (? IN BOOLEAN MODE)" +
                     " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
                     " AND (((`GROUP_ID` IN (" + DAOUtil.getParameterString(roleCount) + "))" +
-                    " AND PERMISSION.PERMISSION >= 4) OR (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" +
+                    " AND PERMISSION.PERMISSION >= " + APIMgtConstants.Permission.READ_PERMISSION +
+                    ") OR (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" +
                     " GROUP BY UUID ORDER BY NAME LIMIT ?, ?";
         } else {
             return API_SUMMARY_SELECT +
@@ -129,7 +130,8 @@ public class MysqlSQLStatements implements ApiDAOVendorSpecificStatements {
             return API_SUMMARY_SELECT + " WHERE " + searchQuery.toString() +
                     " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
                     " AND (((GROUP_ID IN (" + DAOUtil.getParameterString(roleCount) +
-                    ")) AND PERMISSION.PERMISSION >= 4) OR (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" +
+                    ")) AND PERMISSION.PERMISSION >= " + APIMgtConstants.Permission.READ_PERMISSION +
+                    ") OR (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" +
                     " GROUP BY UUID ORDER BY NAME LIMIT ?, ?";
         } else {
             return API_SUMMARY_SELECT + " WHERE " + searchQuery.toString() +

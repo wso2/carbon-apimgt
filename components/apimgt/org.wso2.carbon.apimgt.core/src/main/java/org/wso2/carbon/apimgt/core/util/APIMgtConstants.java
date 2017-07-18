@@ -312,9 +312,9 @@ public class APIMgtConstants {
     public static class Permission {
         public static final int MANAGE_SUBSCRIPTION_PERMISSION = 8; //Publisher side API permission
         public static final int SUBSCRIBE_PERMISSION = 8; //Store side permission
-        public static final int READ_PERMISSION = 4;
+        public static final int READ_PERMISSION = 1;
         public static final int UPDATE_PERMISSION = 2;
-        public static final int DELETE_PERMISSION = 1;
+        public static final int DELETE_PERMISSION = 4;
         public static final String EVERYONE_GROUP = "EVERYONE";
         public static final String GROUP_ID = "groupId";
         public static final String PERMISSION = "permission";
