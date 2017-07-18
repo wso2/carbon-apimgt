@@ -268,35 +268,24 @@ public class APIUtils {
                 availableTransitionBean.getTargetState().equals(nextState));
     }
 
+    /**
+     * This method is used to construct the aggregate permission list from the aggregate permission integer value
+     *
+     * @param permissionValue - The aggregate permission value for the logged in user
+     * @return The array containing the aggregate permissions for the logged in user
+     */
     public static List<String> constructApiPermissionsListForValue(Integer permissionValue) {
         List<String> array = new ArrayList<String>();
-        if (permissionValue == APIMgtConstants.Permission.READ_PERMISSION) {
+        if ((permissionValue & APIMgtConstants.Permission.READ_PERMISSION) != 0) {
             array.add(APIMgtConstants.Permission.READ);
-        } else if (permissionValue == (APIMgtConstants.Permission.READ_UPDATE_PERMISSION)) {
-            array.add(APIMgtConstants.Permission.READ);
+        }
+        if ((permissionValue & APIMgtConstants.Permission.UPDATE_PERMISSION) != 0) {
             array.add(APIMgtConstants.Permission.UPDATE);
-        } else if (permissionValue == (APIMgtConstants.Permission.READ_DELETE_PERMISSION)) {
-            array.add(APIMgtConstants.Permission.READ);
+        }
+        if ((permissionValue & APIMgtConstants.Permission.DELETE_PERMISSION) != 0) {
             array.add(APIMgtConstants.Permission.DELETE);
-        } else if (permissionValue == (APIMgtConstants.Permission.READ_UPDATE_DELETE_PERMISSION)) {
-            array.add(APIMgtConstants.Permission.READ);
-            array.add(APIMgtConstants.Permission.UPDATE);
-            array.add(APIMgtConstants.Permission.DELETE);
-        } else if (permissionValue == APIMgtConstants.Permission.READ_UPDATE_DELETE_MANAGESUB_PERMISSION) {
-            array.add(APIMgtConstants.Permission.READ);
-            array.add(APIMgtConstants.Permission.UPDATE);
-            array.add(APIMgtConstants.Permission.DELETE);
-            array.add(APIMgtConstants.Permission.MANAGE_SUBSCRIPTION);
-        } else if (permissionValue == APIMgtConstants.Permission.READ_UPDATE_MANAGESUB_PERMISSION) {
-            array.add(APIMgtConstants.Permission.READ);
-            array.add(APIMgtConstants.Permission.UPDATE);
-            array.add(APIMgtConstants.Permission.MANAGE_SUBSCRIPTION);
-        } else if (permissionValue == APIMgtConstants.Permission.READ_DELETE_MANAGESUB_PERMISSION) {
-            array.add(APIMgtConstants.Permission.READ);
-            array.add(APIMgtConstants.Permission.DELETE);
-            array.add(APIMgtConstants.Permission.MANAGE_SUBSCRIPTION);
-        } else if (permissionValue == APIMgtConstants.Permission.READ_MANAGESUB_PERMISSION) {
-            array.add(APIMgtConstants.Permission.READ);
+        }
+        if ((permissionValue & APIMgtConstants.Permission.MANAGE_SUBSCRIPTION_PERMISSION) != 0) {
             array.add(APIMgtConstants.Permission.MANAGE_SUBSCRIPTION);
         }
         return array;
