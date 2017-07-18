@@ -32,6 +32,14 @@ var log = new Log();
         });
     }            
     else if (action == "changePassword" && request.getMethod() == 'POST') {
+        if (!user) {
+            obj = {
+                error: true,
+                message: msg.error.loginRequired(action)
+            };
+            print(obj);
+            return;
+        }
         username = request.getParameter("username");
         currentPassword = request.getParameter("currentPassword");
 		newPassword = request.getParameter("newPassword");
