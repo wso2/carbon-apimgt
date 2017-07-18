@@ -746,9 +746,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
         List<String> finalAggregatedPermissionList = new ArrayList<>();
         finalAggregatedPermissionList.addAll(permissionArrayForUser);
-        String message = "Aggregate permissions of user " + loggedInUserName + " for the API " + api.getName() + " are "
-                + StringUtils.join(finalAggregatedPermissionList, ", ") + ".";
         if (log.isDebugEnabled()) {
+            String message = "Aggregate permissions of user " + loggedInUserName + " for the API " + api.getName() +
+                    " are " + StringUtils.join(finalAggregatedPermissionList, ", ") + ".";
             log.debug(message);
         }
         return finalAggregatedPermissionList;
