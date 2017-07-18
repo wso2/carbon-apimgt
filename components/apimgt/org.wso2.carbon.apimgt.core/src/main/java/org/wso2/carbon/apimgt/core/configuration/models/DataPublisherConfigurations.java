@@ -34,7 +34,15 @@ public class DataPublisherConfigurations {
         return receiverURL;
     }
 
+    public void setReceiverURL(String receiverURL) {
+        this.receiverURL = receiverURL;
+    }
+
     public CredentialConfigurations getDataPublisherCredentials() {
         return dataPublisherCredentials;
+    }
+
+    public void setDataPublisherCredentials(CredentialConfigurations dataPublisherCredentials) {
+        this.dataPublisherCredentials = dataPublisherCredentials;
     }
 }
