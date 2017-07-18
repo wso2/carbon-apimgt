@@ -20,34 +20,50 @@ import React from 'react'
 import {Link, withRouter} from "react-router-dom";
 import AuthManager from '../../../data/AuthManager.js';
 import qs from 'qs'
-import { Layout, Menu, Icon} from 'antd';
+import {Layout, Menu, Icon} from 'antd';
 const SubMenu = Menu.SubMenu;
-const { Header } = Layout;
+const MenuItemGroup = Menu.ItemGroup;
+const {Header} = Layout;
 
 const ComposeHeader = (props) => {
     let params = qs.stringify({referrer: props.location.pathname});
 
     return (
-            <Header className='custom-header'>
-                <div className="logo">
-                    <Link to="/apis">
-                        <img className="brand" src="/publisher/public/images/logo.svg" alt="wso2-logo"/>
-                        <span>API Publisher</span>
-                    </Link>
-                </div>
-                <Menu
-                    mode="horizontal"
-                    defaultSelectedKeys={['2']}
-                    className='custom-menu'
-                    theme="light"
-                >
-                        <SubMenu title={<span><Icon type="user" />{ AuthManager.getUser() ? AuthManager.getUser().name : ""}</span>}>
-                            <Menu.Item key="setting:1"><Link to={{pathname: '/logout', search: params}}>Logout</Link></Menu.Item>
-                            <Menu.Item key="setting:2">Profile</Menu.Item>
-                        </SubMenu>
-                </Menu>
+        <Header className='custom-header'>
+            <div className="logo">
+                <Link to="/apis">
+                    <img className="brand" src="/publisher/public/images/logo.svg" alt="wso2-logo"/>
+                    <span>API Publisher</span>
+                </Link>
+            </div>
 
-            </Header>
+            <Menu
+                mode="horizontal"
+                defaultSelectedKeys={['2']}
+                className='custom-menu'
+                theme="light"
+            >
+                <SubMenu
+                    title={<span><Icon type="down"/>{ AuthManager.getUser() ? AuthManager.getUser().name : ""}</span>}>
+                    <Menu.Item key="setting:2"><Icon type="user"/>Profile</Menu.Item>
+                    <Menu.Item key="setting:1">
+                        <Link to={{pathname: '/logout', search: params}}><Icon type="logout"/>Logout</Link>
+                    </Menu.Item>
+                </SubMenu>
+                <SubMenu title={<Icon type="appstore-o" style={{fontSize: 20}}/>}>
+                    <Menu.Item key="endpoints">
+                        <Link to={{pathname: '/endpoints'}}>
+                            <Icon type="rocket" style={{fontSize: 20}}/> Endpoints
+                        </Link>
+                    </Menu.Item>
+                    <Menu.Item key="settings">
+                        <Link to={{pathname: '/apis'}}>
+                            <Icon type="fork" style={{fontSize: 20}}/> Apis
+                        </Link>
+                    </Menu.Item>
+                </SubMenu>
+            </Menu>
+        </Header>
 
     );
 };

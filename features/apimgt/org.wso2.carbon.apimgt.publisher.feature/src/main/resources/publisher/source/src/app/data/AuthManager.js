@@ -164,7 +164,7 @@ class AuthManager {
             const validityPeriod = response.data.validityPeriod; // In seconds
             const WSO2_AM_TOKEN_1 = response.data.partialToken;
             const user = new User(response.data.authUser, response.data.idToken);
-            user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod);
+            user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, "/publisher");
             user.scopes = response.data.scopes.split(" ");
             AuthManager.setUser(user);
         });

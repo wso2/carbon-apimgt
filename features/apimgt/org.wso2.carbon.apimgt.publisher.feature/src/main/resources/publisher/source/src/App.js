@@ -19,13 +19,14 @@
 import React, {Component} from 'react'
 
 import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom'
-import {Apis, Base, Login, Logout} from './app/components/index'
-import {PageNotFound} from './app/components/Base/Errors/index'
+import {Apis, Base, Login, Logout, Endpoints} from './app/components'
+import {PageNotFound} from './app/components/Base/Errors'
 import ApiCreate from './app/components/Apis/Create/ApiCreate'
 import AuthManager from './app/data/AuthManager'
 import qs from 'qs'
 
-import 'antd/dist/antd.css';
+import 'antd/dist/antd.css'
+import {message} from 'antd'
 import './App.css'
 
 /**
@@ -36,6 +37,8 @@ class Protected extends Component {
         super(props);
         this.state = {showLeftMenu: false};
         this.setLeftMenu = this.setLeftMenu.bind(this);
+        message.config({top: '48px'}); // .custom-header height + some offset
+        /* TODO: need to fix the header to avoid conflicting with messages ~tmkb*/
     }
 
     /**
@@ -55,8 +58,9 @@ class Protected extends Component {
             return (
                 <Base showLeftMenu={this.state.showLeftMenu}>
                     <Switch>
-                        <Route exact path={"/"} component={ApiCreate}/>{/* TODO: redirects to apis listing or render apis listing here ~tmkb*/}
+                        <Redirect exact from="/" to="/apis"/>
                         <Route path={"/apis"} render={ props => (<Apis setLeftMenu={this.setLeftMenu}/>)}/>
+                        <Route path={"/endpoints"} component={Endpoints}/>
                         <Route path={"/api/create"} component={ApiCreate}/>
                         <Route component={PageNotFound}/>
                     </Switch>

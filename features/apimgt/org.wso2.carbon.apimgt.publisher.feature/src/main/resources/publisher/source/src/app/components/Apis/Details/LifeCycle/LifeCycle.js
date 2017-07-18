@@ -53,7 +53,7 @@ class LifeCycle extends Component {
     render() {
         if (this.state.api) {
             return (
-                <div style={{background: '#ECECEC', height: '100vh', padding: '30px'}}>
+                <div style={{padding: '30px'}}>
                     <Row gutter={16}>
                         <Col span={12}>
                             <Card title="Change Lifecycle" bordered={false} style={{margin: '5px'}}>

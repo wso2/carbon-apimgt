@@ -25,7 +25,7 @@ TestUtils.setupMockEnvironment();
 
 describe('Api',
     function () {
-        before(function (done) {
+        before("Make any REST API calls ,Login a user and get access token", function (done) {
             TestUtils.userLogin().then((response) => {
                 document.clearCookies();
                 for (let cookie of response.headers["set-cookie"]) {
@@ -43,11 +43,40 @@ describe('Api',
                         let data = {
                             "name": "test_api_" + c_time,
                             "context": "/testing_" + c_time,
-                            "version": "1.0.0",
-                            "endpoint": []
+                            "version": "1.0.0"
                         };
                         let promised_create = api.create(data);
                         return promised_create.then((response) => {
+                            assert.equal(response.status, 201, 'API creation failed!');
+                        });
+                    }
+                );
+            }
+        );
+        describe('#createWithInlineEndpoint()',
+            function () {
+                it('Should return HTTP 201 status code with newly created API UUID',
+                    function () {
+                        let api = new Api();
+                        let c_time = Date.now();
+                        let data = {
+                            "name": "test_api_" + c_time,
+                            "context": "/testing_" + c_time,
+                            "version": "1.0.0",
+                            "endpoint": [{
+                                type: "production",
+                                inline: {
+                                    endpointConfig: JSON.stringify({serviceUrl: 'http://test.wso2.org/api/endpoint'}),
+                                    endpointSecurity: {enabled: false},
+                                    type: "http",
+                                    name: "testing_endpoint" + c_time,
+                                    maxTps: 1000
+                                }
+                            }]
+                        };
+                        let promised_create = api.create(data);
+                        return promised_create.then((response) => {
+                            assert.isAtLeast(response.obj.endpoint.length, 1, 'No endpoint configurations were found');
                             assert.equal(response.status, 201, 'API creation failed!');
                         });
                     }
@@ -96,6 +125,49 @@ describe('Api',
                                 });
                             });
                         });
+                    });
+            });
+
+        describe('#update',
+            function () {
+                it('Should update an API with inline endpoints',
+                    function () {
+                        let api = new Api();
+                        let c_time = Date.now();
+                        let data = {
+                            "name": "test_api_update" + c_time,
+                            "context": "/testing_update" + c_time,
+                            "version": "1.0.0",
+                            "endpoint": []
+                        };
+                        let promised_create = api.create(data);
+                        return promised_create.then((response) => {
+                            assert.equal(response.status, 201, 'API creation failed');
+                            let new_api_uuid = response.obj.id;
+                            let get_api = api.get(new_api_uuid);
+                            return get_api.then((response) => {
+                                assert.equal(response.obj.id, new_api_uuid, 'API get operation failed');
+                                let endpoint_created_time = Date.now();
+                                let endpointData = [{
+                                    inline: {
+                                        endpointConfig: JSON.stringify({serviceUrl: 'http://test.wso2.org/api/endpoint'}),
+                                        endpointSecurity: {enabled: false},
+                                        type: "http",
+                                        name: "testing_endpoint" + endpoint_created_time,
+                                        maxTps: 1000
+                                    }
+                                }];
+                                let update_data = response.obj;
+                                // Update the payload by setting the endpoint
+                                update_data.endpoint = endpointData;
+                                let promised_api_update = api.update(update_data);
+                                return promised_api_update.then(response => {
+                                    assert.equal("testing_endpoint" + endpoint_created_time, response.obj.endpoint[0].inline.name, 'API update has failed');
+                                });
+                            });
+
+                        });
+
                     });
             });
     }

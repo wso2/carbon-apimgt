@@ -8,6 +8,7 @@ import ballerina.net.http;
 
 service<http> gatewayInitService {
     boolean isCacheInitialized = holder:initializeCache();
+    boolean isMapsAdded = holder:addThrottleMaps();
     boolean isReady = initGateway();
     boolean subscriptionsInitialized = gatewayUtil:retrieveSubscriptions();
     boolean applicationsInitialized = gatewayUtil:retrieveApplications();
