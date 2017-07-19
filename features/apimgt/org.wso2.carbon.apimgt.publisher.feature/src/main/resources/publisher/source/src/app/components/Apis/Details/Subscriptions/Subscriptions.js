@@ -28,7 +28,6 @@ class Subscriptions extends Component {
     }
 
     updateProductionSubscription(event)    {
-        debugger;
         const currentState = event.target.dataset.currentState;
         const subscriptionId = event.target.dataset.sample;
         const api = new API();
