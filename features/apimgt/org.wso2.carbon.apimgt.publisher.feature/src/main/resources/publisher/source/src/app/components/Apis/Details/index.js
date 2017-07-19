@@ -27,6 +27,7 @@ import {PageNotFound} from '../../Base/Errors/index'
 import Resources from './Resources'
 import Permission from './Permission'
 import Endpoints from './Endpoints'
+import Subscriptions from './Subscriptions/Subscriptions'
 
 export default class Details extends Component {
     componentDidMount() {
@@ -51,6 +52,7 @@ export default class Details extends Component {
                     <Route path="/apis/:api_uuid/permission" component={Permission}/>
                     <Route path="/apis/:api_uuid/documents" component={Documents}/>
                     <Route path="/apis/:api_uuid/endpoints" component={Endpoints}/>
+                    <Route path="/apis/:api_uuid/subscriptions" component={Subscriptions}/>
                     <Route component={PageNotFound}/>
                 </Switch>
             </div>
