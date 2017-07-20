@@ -4,18 +4,18 @@
 function loginRedirect(){
     $.ajax({
         type: "GET",
-        url: "https://localhost:9292/store/auth/apis/login/login",
+        url: window.location.origin + "/login/login/" + app_name,
         dataType: "json",
         success:function(data){
             console.log(this.data);
             var client_id = data.client_id;
             var callback_URL = data.callback_url;
             var scopes = data.scopes;
-            var isSSOEnabled = data.isSSOEnabled;
-            if(isSSOEnabled) {
+            var is_sso_enabled = data.is_sso_enabled;
+            if(is_sso_enabled) {
                 // Call SSO Login (When grantType = "authorization_code")
                 // TODO: Add URL to config
-                window.location = "https://localhost:9443/oauth2/authorize?response_type=code&client_id="+client_id+"&redirect_uri="+callback_URL+"&scope="+scopes;
+                window.location = "https://"+ window.location.hostname +":9443/oauth2/authorize?response_type=code&client_id="+client_id+"&redirect_uri="+callback_URL+"&scope="+scopes;
                 alert('Redirected to IS Login Page!');
             }
             else {
@@ -33,6 +33,7 @@ var token = getCookie("WSO2_AM_TOKEN_1");
 var user = getCookie("LOGGED_IN_USER");
 window.localStorage.setItem("user", user);
 var request_path = window.location.pathname.split('/');
+var app_name = request_path[1];
 if (!(request_path.includes('editor') || request_path.includes('auth') )&& !token) {
     loginRedirect();
 }
