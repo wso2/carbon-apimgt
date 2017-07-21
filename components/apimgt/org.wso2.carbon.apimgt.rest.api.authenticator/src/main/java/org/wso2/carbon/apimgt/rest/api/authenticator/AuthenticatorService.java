@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.models.APIMStoreConfigurations;
+import org.wso2.carbon.apimgt.rest.api.authenticator.constants.AuthenticatorConstants;
 import org.wso2.carbon.apimgt.rest.api.authenticator.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.authenticator.utils.AuthUtil;
 import org.wso2.carbon.apimgt.rest.api.authenticator.utils.bean.AuthResponseBean;
@@ -72,7 +73,7 @@ public class AuthenticatorService {
      * @return oAuthData - A JsonObject with DCR application details, scopes, and SSO is enabled or not
      * @throws APIManagementException When creating DCR application fails
      */
-    public JsonObject getDCRApplicationDetails(String appName)
+    public JsonObject getAuthenticationConfigurations(String appName)
             throws APIManagementException {
         JsonObject oAuthData = new JsonObject();
         List<String> grantTypes = new ArrayList<>();
@@ -84,7 +85,7 @@ public class AuthenticatorService {
         // Get scopes of the application
         String scopes = getApplicationScopes(appName);
         if (log.isDebugEnabled()) {
-            log.debug("Set scopes for " + appName + "application using swagger definition.");
+            log.debug("Set scopes for " + appName + " application using swagger definition.");
         }
         OAuthApplicationInfo oAuthApplicationInfo;
         try {
@@ -132,12 +133,12 @@ public class AuthenticatorService {
         // Get scopes of the application
         String scopes = getApplicationScopes(appName);
         if (log.isDebugEnabled()) {
-            log.debug("Set scopes for " + appName + "application using swagger definition.");
+            log.debug("Set scopes for " + appName + " application using swagger definition.");
         }
         // TODO: Get Consumer Key & Secret without creating a new app, from the IS side
         Map<String, String> consumerKeySecretMap = getConsumerKeySecret(appName);
         if (log.isDebugEnabled()) {
-            log.debug("Received consumer key & secret for " + appName + "application.");
+            log.debug("Received consumer key & secret for " + appName + " application.");
         }
         try {
             if (grantType.equals(KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE)) {
@@ -248,11 +249,11 @@ public class AuthenticatorService {
     private String getApplicationScopes(String appName) throws APIManagementException {
         String scopes = "";
         String applicationRestAPI = null;
-        if (appName.equals("store")) {
+        if (appName.equals(AuthenticatorConstants.STORE_APPLICATION)) {
             applicationRestAPI = RestApiUtil.getStoreRestAPIResource();
-        } else if (appName.equals("publisher")) {
+        } else if (appName.equals(AuthenticatorConstants.PUBLISHER_APPLICATION)) {
             applicationRestAPI = RestApiUtil.getPublisherRestAPIResource();
-        } else if (appName.equals("admin")) {
+        } else if (appName.equals(AuthenticatorConstants.ADMIN_APPLICATION)) {
             applicationRestAPI = RestApiUtil.getAdminRestAPIResource();
         }
         try {
