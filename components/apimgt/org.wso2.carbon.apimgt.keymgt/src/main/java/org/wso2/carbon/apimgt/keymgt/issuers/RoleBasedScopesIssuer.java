@@ -34,7 +34,6 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -131,8 +130,7 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
                     Assertion assertion = (Assertion) tokReqMsgCtx.getProperty(ResourceConstants.SAML2_ASSERTION);
                     userRoles = APIKeyMgtUtil.getRolesFromAssertion(assertion);
                 } else {
-                    userRoles = userStoreManager.getRoleListOfUser(MultitenantUtils.
-                            getTenantAwareUsername(endUsernameWithDomain));
+                    userRoles = userStoreManager.getRoleListOfUser(endUsernameWithDomain);
                 }
 
             } catch (UserStoreException e) {
