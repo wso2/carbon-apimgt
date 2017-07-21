@@ -48,6 +48,7 @@ import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.APILCWorkflowStatus;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -82,8 +83,8 @@ public class ApiDAOImpl implements ApiDAO {
 
     private final ApiDAOVendorSpecificStatements sqlStatements;
 
-    private static final String API_SUMMARY_SELECT = "SELECT UUID, PROVIDER, NAME, CONTEXT, VERSION, DESCRIPTION, " +
-            "CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS FROM AM_API";
+    private static final String API_SUMMARY_SELECT = "SELECT DISTINCT UUID, PROVIDER, NAME, CONTEXT, VERSION, " +
+            "DESCRIPTION, CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS FROM AM_API";
 
     private static final String API_SELECT = "SELECT UUID, PROVIDER, NAME, CONTEXT, VERSION, IS_DEFAULT_VERSION, " +
             "DESCRIPTION, VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, TECHNICAL_OWNER, TECHNICAL_EMAIL, " +
@@ -241,14 +242,28 @@ public class ApiDAOImpl implements ApiDAO {
 
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<API> getAPIs() throws APIMgtDAOException {
-        final String query = API_SUMMARY_SELECT + " WHERE API_TYPE_ID = " +
-                "(SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)";
-
+    public List<API> getAPIs(Set<String> roles, String user) throws APIMgtDAOException {
+        int roleCount = roles.size();
+        final String query;
+        if (roleCount > 0) {
+            query = API_SUMMARY_SELECT + " LEFT JOIN AM_API_GROUP_PERMISSION PERMISSION ON UUID = API_ID WHERE" +
+                    " API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = '" + ApiType.STANDARD.toString()
+                    + "') AND (((PERMISSION.GROUP_ID IN (" + DAOUtil.getParameterString(roles.size()) + "))" +
+                    " AND PERMISSION.PERMISSION >= 4) OR (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))";
+        } else {
+            query = API_SUMMARY_SELECT + " LEFT JOIN AM_API_GROUP_PERMISSION PERMISSION ON UUID = API_ID WHERE" +
+                    " API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = '" + ApiType.STANDARD.toString()
+                    + "') AND ((PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))";
+        }
         try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, ApiType.STANDARD.toString());
-
+                PreparedStatement statement = connection.prepareStatement(query)) {
+            int index = 0;
+            if (roleCount > 0) {
+                for (String role : roles) {
+                    statement.setString(++index, role);
+                }
+            }
+            statement.setString(++index, user);
             return constructAPISummaryList(connection, statement);
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -1853,17 +1868,14 @@ public class ApiDAOImpl implements ApiDAO {
         List<API> apiList = new ArrayList<>();
         try (ResultSet rs = statement.executeQuery()) {
             while (rs.next()) {
-                String apiPrimaryKey = rs.getString("UUID");
                 API apiSummary = new API.APIBuilder(rs.getString("PROVIDER"), rs.getString("NAME"),
                         rs.getString("VERSION")).
-                        id(apiPrimaryKey).
+                        id(rs.getString("UUID")).
                         context(rs.getString("CONTEXT")).
                         description(rs.getString("DESCRIPTION")).
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
                         lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
-                        workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).
-                        permissionMap(getPermissionMapForApi(connection, apiPrimaryKey)).build();
-
+                        workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).build();
                 apiList.add(apiSummary);
             }
         }
@@ -2118,11 +2130,15 @@ public class ApiDAOImpl implements ApiDAO {
                     for (Map.Entry<String, Integer> entry : map.entrySet()) {
                         statement.setString(1, apiId);
                         statement.setString(2, entry.getKey());
-                        //if permission value is UPDATE or DELETE we by default give them read permission also.
-                        if (entry.getValue() < APIMgtConstants.Permission.READ_PERMISSION && entry.getValue() != 0) {
-                            statement.setInt(3, entry.getValue() + APIMgtConstants.Permission.READ_PERMISSION);
+                        Integer permissionValue = entry.getValue();
+                        //if permission value is UPDATE, DELETE or MANAGE_SUBSCRIPTION_PERMISSION we by default give
+                        // them read permission also. Have used the bitwise AND operation to check whether the
+                        // permission value passed by the user contains the read permission.
+                        if (permissionValue > APIMgtConstants.Permission.READ_PERMISSION
+                                && (permissionValue & APIMgtConstants.Permission.READ_PERMISSION) == 0) {
+                            statement.setInt(3, permissionValue + APIMgtConstants.Permission.READ_PERMISSION);
                         } else {
-                            statement.setInt(3, entry.getValue());
+                            statement.setInt(3, permissionValue);
                         }
                         statement.addBatch();
                     }
@@ -2149,11 +2165,15 @@ public class ApiDAOImpl implements ApiDAO {
                     for (Map.Entry<String, Integer> entry : map.entrySet()) {
                         statement.setString(1, apiId);
                         statement.setString(2, entry.getKey());
-                        //if permission value is UPDATE or DELETE we by default give them read permission also.
-                        if (entry.getValue() < APIMgtConstants.Permission.READ_PERMISSION && entry.getValue() != 0) {
-                            statement.setInt(3, entry.getValue() + APIMgtConstants.Permission.READ_PERMISSION);
+                        Integer permissionValue = entry.getValue();
+                        //if permission value is UPDATE, DELETE or MANAGE_SUBSCRIPTION_PERMISSION we by default give
+                        // them read permission also. Have used the bitwise AND operation to check whether the
+                        // permission value passed by the user contains the read permission.
+                        if (permissionValue > APIMgtConstants.Permission.READ_PERMISSION
+                                && (permissionValue & APIMgtConstants.Permission.READ_PERMISSION) == 0) {
+                            statement.setInt(3, permissionValue + APIMgtConstants.Permission.READ_PERMISSION);
                         } else {
-                            statement.setInt(3, entry.getValue());
+                            statement.setInt(3, permissionValue);
                         }
                         statement.addBatch();
                     }
@@ -2709,37 +2729,20 @@ public class ApiDAOImpl implements ApiDAO {
      * @return permission string
      * @throws SQLException - if error occurred while getting permissionMap of API from DB
      */
-    private StringBuilder getPermissionsStringForApi(Connection connection, String apiId) throws SQLException {
+    private String getPermissionsStringForApi(Connection connection, String apiId) throws SQLException {
         JSONArray permissionArray = new JSONArray();
         Map<String, Integer> permissionMap = getPermissionMapForApi(connection, apiId);
         for (Map.Entry<String, Integer> entry : permissionMap.entrySet()) {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put(APIMgtConstants.Permission.GROUP_ID, entry.getKey());
-            ArrayList<String> array = new ArrayList<String>();
-            Integer permissionValue = entry.getValue();
-            if (permissionValue == APIMgtConstants.Permission.READ_PERMISSION) {
-                array.add(APIMgtConstants.Permission.READ);
-            } else if (permissionValue == (APIMgtConstants.Permission.READ_PERMISSION
-                    + APIMgtConstants.Permission.UPDATE_PERMISSION)) {
-                array.add(APIMgtConstants.Permission.READ);
-                array.add(APIMgtConstants.Permission.UPDATE);
-            } else if (permissionValue == (APIMgtConstants.Permission.READ_PERMISSION
-                    + APIMgtConstants.Permission.DELETE_PERMISSION)) {
-                array.add(APIMgtConstants.Permission.READ);
-                array.add(APIMgtConstants.Permission.DELETE);
-            } else if (permissionValue == (APIMgtConstants.Permission.READ_PERMISSION
-                    + APIMgtConstants.Permission.UPDATE_PERMISSION + APIMgtConstants.Permission.DELETE_PERMISSION)) {
-                array.add(APIMgtConstants.Permission.READ);
-                array.add(APIMgtConstants.Permission.UPDATE);
-                array.add(APIMgtConstants.Permission.DELETE);
-            }
-            jsonObject.put(APIMgtConstants.Permission.PERMISSION, array);
+            jsonObject.put(APIMgtConstants.Permission.PERMISSION,
+                    APIUtils.constructApiPermissionsListForValue(entry.getValue()));
             permissionArray.add(jsonObject);
         }
         if (!permissionArray.isEmpty()) {
-            return new StringBuilder(permissionArray.toString());
+            return permissionArray.toString();
         } else {
-            return new StringBuilder("");
+            return "";
         }
     }
 
