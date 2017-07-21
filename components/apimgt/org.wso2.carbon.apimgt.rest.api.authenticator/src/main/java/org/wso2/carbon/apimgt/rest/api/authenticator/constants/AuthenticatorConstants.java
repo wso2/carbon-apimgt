@@ -40,4 +40,9 @@ public class AuthenticatorConstants {
     public static final String COOKIE_EXPIRE_TIME = "Expires=Thu, 01-Jan-1970 00:00:01 GMT";
     public static final String REST_CONTEXT = "/api/am";
     public static final String AUTH_USER = "LOGGED_IN_USER";
+    public static final String STORE_APPLICATION = "store";
+    public static final String PUBLISHER_APPLICATION = "publisher";
+    public static final String ADMIN_APPLICATION = "admin";
+    public static final String EDITOR_APPLICATION = "editor";
+
 }

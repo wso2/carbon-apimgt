@@ -31,7 +31,7 @@ import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
  */
 public class AuthenticatorServiceTestCase {
     @Test(description = "Provide DCR application information to the SSO-IS login")
-    public void testGetDCRApplicationDetails() throws Exception {
+    public void testGetAuthenticationConfigurations() throws Exception {
         // Happy Path - 200
         //// Mocked response object from DCR api
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
@@ -50,13 +50,13 @@ public class AuthenticatorServiceTestCase {
         KeyManager keyManager = Mockito.mock(KeyManager.class);
         AuthenticatorService authenticatorService = new AuthenticatorService(keyManager);
         Mockito.when(keyManager.createApplication(Mockito.any())).thenReturn(oAuthApplicationInfo);
-        JsonObject responseOAuthDataObj = authenticatorService.getDCRApplicationDetails("store");
+        JsonObject responseOAuthDataObj = authenticatorService.getAuthenticationConfigurations("store");
         Assert.assertEquals(responseOAuthDataObj, oAuthData);
 
         // Error Path - 500 - When OAuthApllicationInfo is null
         JsonObject emptyOAuthDataObj = new JsonObject();
         Mockito.when(keyManager.createApplication(Mockito.any())).thenReturn(null);
-        JsonObject responseEmptyOAuthDataObj = authenticatorService.getDCRApplicationDetails("store");
+        JsonObject responseEmptyOAuthDataObj = authenticatorService.getAuthenticationConfigurations("store");
         Assert.assertEquals(responseEmptyOAuthDataObj, emptyOAuthDataObj);
     }
 

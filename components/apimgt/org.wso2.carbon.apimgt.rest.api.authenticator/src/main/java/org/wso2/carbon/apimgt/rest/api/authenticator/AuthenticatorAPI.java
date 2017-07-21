@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.rest.api.authenticator;
 
 import com.google.gson.JsonObject;
+import org.apache.commons.lang3.StringUtils;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,8 +85,10 @@ public class AuthenticatorAPI implements Microservice {
             AuthResponseBean authResponseBean = new AuthResponseBean();
             String appContext = AuthUtil.getAppContext(request);
             String restAPIContext;
-            if (appContext.contains("editor") || request.getUri().contains("publisher")) {
-                restAPIContext = AuthenticatorConstants.REST_CONTEXT + "/publisher";
+            if (appContext.contains(AuthenticatorConstants.EDITOR_APPLICATION) ||
+                    request.getUri().contains(AuthenticatorConstants.PUBLISHER_APPLICATION)) {
+                restAPIContext = AuthenticatorConstants.REST_CONTEXT + "/" +
+                        AuthenticatorConstants.PUBLISHER_APPLICATION;
             } else {
                 restAPIContext = AuthenticatorConstants.REST_CONTEXT + appContext;
             }
@@ -168,8 +171,8 @@ public class AuthenticatorAPI implements Microservice {
     public Response logout(@Context Request request) {
         String appContext = AuthUtil.getAppContext(request);
         String restAPIContext;
-        if (appContext.contains("editor")) {
-            restAPIContext = AuthenticatorConstants.REST_CONTEXT + "/publisher";
+        if (appContext.contains(AuthenticatorConstants.EDITOR_APPLICATION)) {
+            restAPIContext = AuthenticatorConstants.REST_CONTEXT + "/" + AuthenticatorConstants.PUBLISHER_APPLICATION;
         } else {
             restAPIContext = AuthenticatorConstants.REST_CONTEXT + appContext;
         }
@@ -222,7 +225,7 @@ public class AuthenticatorAPI implements Microservice {
         try {
             KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();
             AuthenticatorService authenticatorService = new AuthenticatorService(keyManager);
-            JsonObject oAuthData = authenticatorService.getDCRApplicationDetails(appName);
+            JsonObject oAuthData = authenticatorService.getAuthenticationConfigurations(appName);
             if (oAuthData.size() == 0) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                         .entity("Error while creating the OAuth application!").build();
@@ -249,8 +252,9 @@ public class AuthenticatorAPI implements Microservice {
         String appContext = AuthUtil.getAppContext(request).split("\\?")[0];
         String appName = appContext.substring(1);
         String restAPIContext;
-        if (appContext.contains("editor") || request.getUri().contains("publisher")) {
-            restAPIContext = AuthenticatorConstants.REST_CONTEXT + "/publisher";
+        if (appContext.contains(AuthenticatorConstants.EDITOR_APPLICATION) ||
+                request.getUri().contains(AuthenticatorConstants.PUBLISHER_APPLICATION)) {
+            restAPIContext = AuthenticatorConstants.REST_CONTEXT + "/" + AuthenticatorConstants.PUBLISHER_APPLICATION;
         } else {
             restAPIContext = AuthenticatorConstants.REST_CONTEXT + appContext;
         }
@@ -264,14 +268,14 @@ public class AuthenticatorAPI implements Microservice {
             AuthenticatorService authenticatorService = new AuthenticatorService(keyManager);
             AccessTokenInfo accessTokenInfo = authenticatorService.getTokens(appName, requestURL, grantType,
                     null, null, null, 0);
-            if (accessTokenInfo.toString().equals("")) {
+            if (StringUtils.isEmpty(accessTokenInfo.toString())) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                         .entity("Access token generation failed!").build();
             } else {
                 authenticatorService.setAccessTokenData(authResponseBean, accessTokenInfo);
                 String accessToken = accessTokenInfo.getAccessToken();
                 if (log.isDebugEnabled()) {
-                    log.debug("Received access token for " + appName + "application.");
+                    log.debug("Received access token for " + appName + " application.");
                 }
                 // Set Access Token cookies
                 String part1 = accessToken.substring(0, accessToken.length() / 2);
@@ -289,7 +293,7 @@ public class AuthenticatorAPI implements Microservice {
                 NewCookie authUserCookie = AuthUtil
                         .cookieBuilder(AuthenticatorConstants.AUTH_USER, authUser, appContext, true, false, "");
                 if (log.isDebugEnabled()) {
-                    log.debug("Set cookies for " + appName + "application.");
+                    log.debug("Set cookies for " + appName + " application.");
                 }
                 // Redirect to the store/apis page (redirect URL)
                 URI targetURIForRedirection = new URI(storeConfigs.getApimBaseUrl() + appName);
