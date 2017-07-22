@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.keymgt.service;
 
-import org.apache.oltu.oauth2.common.OAuth;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.util.URL;
 import org.apache.commons.logging.Log;
@@ -31,9 +30,16 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.apache.oltu.oauth2.common.OAuth;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.handlers.security.stub.types.APIKeyMapping;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -53,6 +59,7 @@ import org.wso2.carbon.identity.application.common.model.InboundAuthenticationCo
 import org.wso2.carbon.identity.application.common.model.InboundAuthenticationRequestConfig;
 import org.wso2.carbon.identity.application.common.model.Property;
 import org.wso2.carbon.identity.application.common.model.ServiceProvider;
+import org.wso2.carbon.identity.application.common.util.IdentityApplicationConstants;
 import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.oauth.OAuthAdminService;
@@ -469,14 +476,20 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
                 return;
             }
 
-            log.debug("Removing Service Provider with name : " + spAppName);
-            appMgtService.deleteApplication(spAppName, tenantDomain, tenantAwareUsername);
-
+            // Skip deleting the default app or role. Only delete records from IDN_OAUTH_CONSUMER_APPS
+            if (IdentityApplicationConstants.DEFAULT_SP_CONFIG.equals(spAppName)) {
+                log.debug("Avoided removing the default app : " + spAppName);
+                log.debug("However, OAuth details for the default app will be removed.");
+                OAuthAdminService oAuthAdminService = new OAuthAdminService();
+                oAuthAdminService.removeOAuthApplicationData(consumerKey);
+            } else {
+                log.debug("Removing Service Provider with name : " + spAppName);
+                appMgtService.deleteApplication(spAppName, tenantDomain, tenantAwareUsername);
+            }
             if (OAuthServerConfiguration.getInstance().isCacheEnabled()) {
                 OAuthCache oAuthCache = OAuthCache.getInstance();
                 oAuthCache.clearCacheEntry(new OAuthCacheKey(consumerKey));
             }
-
         } catch (IdentityApplicationManagementException e) {
             APIUtil.handleException("Error occurred while deleting ServiceProvider", e);
         } catch (Exception e) {
