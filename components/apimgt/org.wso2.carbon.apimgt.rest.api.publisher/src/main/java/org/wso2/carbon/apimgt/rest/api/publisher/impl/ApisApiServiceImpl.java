@@ -2,20 +2,14 @@ package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.commons.lang3.StringUtils;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
-import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
-import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
@@ -51,12 +45,9 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.StringTokenizer;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
@@ -541,6 +532,10 @@ public class ApisApiServiceImpl extends ApisApiService {
             String docid = apiProvider.addDocumentationInfo(apiId, documentation);
             documentation = apiProvider.getDocumentationSummary(docid);
             DocumentDTO newDocumentDTO = MappingUtil.toDocumentDTO(documentation);
+            //Add initial inline content as empty String, if the Document type is INLINE
+            if (body.getSourceType() == DocumentDTO.SourceTypeEnum.INLINE) {
+                apiProvider.addDocumentationContent(docid, "");
+            }
             return Response.status(Response.Status.CREATED).entity(newDocumentDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while create  document for api " + apiId;

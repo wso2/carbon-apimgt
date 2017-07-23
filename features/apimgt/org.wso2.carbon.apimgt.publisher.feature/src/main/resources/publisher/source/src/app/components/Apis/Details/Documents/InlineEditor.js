@@ -46,8 +46,6 @@ class InlineEditor extends Component {
             });
             var reader = new FileReader();
             reader.onload =  (value) => {
-                console.log(reader.result);
-                console.log(value.target.result);
                 this.setState({
                     editorHtml: value.target.result
                 });
