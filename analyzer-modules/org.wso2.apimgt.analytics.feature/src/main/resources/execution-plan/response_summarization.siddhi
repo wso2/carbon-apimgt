@@ -1,20 +1,97 @@
 @App:name('response_summarization')
 
-@Store(type="rdbms", jdbc.url="jdbc:h2:./database/AM_STAT_DB;DB_CLOSE_ON_EXIT=FALSE;LOCK_TIMEOUT=60000;AUTO_SERVER=TRUE",
-username="wso2carbon",
-password="wso2carbon",field.length="api:254", pool.properties="driverClassName:org.h2.Driver" )
-@PrimaryKey("api, version, publisher, context, consumer_key, application_name, user_id, uri_template, method,response_code, destination, year, month, day, hour, minute")
-define table api_response_summary (api string, version string, publisher string, context string, consumer_key string,
-application_name string, user_id string, uri_template string, method string, response_code int, destination string,
-response_count long, time long, year int ,month int, day int, hour int, minute int);
-
 @source(type='inMemory', topic='apim.analytics.response', @map(type='passThrough'))
+Define stream ResponseStream (
+api STRING,
+context STRING,
+version STRING,
+publisher STRING,
+subscription_policy STRING,
+uri_template STRING,
+method STRING,
+consumer_key STRING,
+application_name STRING,
+application_id STRING,
+application_owner STRING,
+user_id STRING,
+subscriber STRING,
+response_count INT,
+response_event_time LONG,
+gateway_domain STRING,
+gateway_ip STRING,
+client_ip STRING,
+user_agent STRING,
+host_name STRING,
+cache_hit  BOOL,
+response_size  INT,
+protocol  STRING,
+response_code  INT,
+destination  STRING
+);
+
 Define stream perMinuteResponses (
 api STRING, context STRING, version STRING, publisher STRING,
 uri_template STRING, method STRING, consumer_key STRING, application_name STRING, user_id STRING,
 response_code INT, destination STRING, total_response_count LONG, response_time LONG,
 year INT, month INT, day INT, hour INT, minute INT
 );
+
+@Store(type="rdbms", jdbc.url="jdbc:h2:./database/AM_STAT_DB;DB_CLOSE_ON_EXIT=FALSE;LOCK_TIMEOUT=60000;AUTO_SERVER=TRUE",
+username="wso2carbon",
+password="wso2carbon",field.length="api:254", pool.properties="driverClassName:org.h2.Driver" )
+@PrimaryKey("api, version, publisher, context, consumer_key, application_name, user_id, uri_template, method, response_code, destination, year, month, day, hour, minute")
+define table api_response_summary (api string, version string, publisher string, context string, consumer_key string,
+application_name string, user_id string, uri_template string, method string, response_code int, destination string,
+response_count long, time long, year int ,month int, day int, hour int, minute int);
+
+
+-- per second response
+from ResponseStream#window.externalTimeBatch(response_event_time, 1 sec, 0, 10 sec, true)
+select response_event_time as startTime, api, version, publisher, context, consumer_key, application_name, user_id,
+uri_template, method, max(response_event_time) as responseTime, count() as total_response_count,
+response_code, destination
+group by api, version, publisher, context, consumer_key, application_name, user_id, uri_template, method,
+response_code, destination
+insert into perSecondResponseTemp;
+
+from perSecondResponseTemp
+select (startTime - (startTime % 1000)) as startTime,
+convert((startTime - (startTime % 1000)), 'string') as facetStartTime,
+time:extract(startTime, 'year') as year,
+time:extract(startTime, 'month') as month,
+time:extract(startTime, 'day') as day,
+time:extract(startTime, 'hour') as hour,
+time:extract(startTime, 'minute') as minute,
+time:extract(startTime, 'second') as second,
+api, version, publisher, context, consumer_key, application_name, user_id, uri_template, method,
+responseTime, total_response_count, response_code, destination
+insert into perSecondResponse;
+
+from perSecondResponse
+select startTime, str:concat(facetStartTime, '_', api, '_', version, '_', publisher, '_', context, '_', consumer_key,
+    '_', uri_template, '_', method, '_', user_id, '_', response_code, '_', destination) as uniqueId,
+year, month, day, hour, minute, second, consumer_key, context, api, version, uri_template, method,
+responseTime, user_id, publisher, total_response_count, application_name, response_code, destination
+insert into perSecondResponsesWithUniqueId;
+
+/*from perSecondResponsesWithUniqueId#window.uniqueExternalTimeBatch(uniqueId, startTime, 60 sec, 59999 millisec, 10 sec, true)*/
+from perSecondResponsesWithUniqueId#window.externalTimeBatch(startTime, 60 sec, 59999 millisec, 10 sec, true)
+select startTime, consumer_key, context, api, version, uri_template, method,
+max(responseTime) as responseTime, user_id, publisher, sum(total_response_count) as total_response_count,
+application_name, response_code, destination
+group by consumer_key, context, api, version, user_id, publisher, uri_template, method, response_code, destination
+insert into perMinuteResponsesTemp;
+
+
+from perMinuteResponsesTemp select
+api, context, version, publisher, uri_template, method, consumer_key, application_name,
+user_id, response_code, destination, total_response_count, responseTime as response_time,
+time:extract(startTime, 'year') as year,
+time:extract(startTime, 'month') as month,
+time:extract(startTime, 'day') as day,
+time:extract(startTime, 'hour') as hour,
+time:extract(startTime, 'minute') as minute
+insert into perMinuteResponses;
 
 @info(name = 'query1')
 from perMinuteResponses

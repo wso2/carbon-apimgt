@@ -208,7 +208,7 @@ public class MappingUtil {
                 endpoint(fromEndpointListToMap(apidto.getEndpoint())).
                 visibleRoles(new HashSet<>(apidto.getVisibleRoles())).
                 policies(subscriptionPolicies).
-                permission(apidto.getPermission()).
+                apiPermission(apidto.getPermission()).
                 tags(new HashSet<>(apidto.getTags())).
                 labels(new HashSet<>(apidto.getLabels())).
                 transport(new HashSet<>(apidto.getTransport())).
@@ -265,7 +265,6 @@ public class MappingUtil {
             apiInfo.setLifeCycleStatus(apiSummary.getLifeCycleStatus());
             apiInfo.setVersion(apiSummary.getVersion());
             apiInfo.setWorkflowStatus(apiSummary.getWorkflowStatus());
-            apiInfo.setUserPermissionsForApi(apiSummary.getUserSpecificApiPermissions());
             apiInfoList.add(apiInfo);
         }
         return apiInfoList;

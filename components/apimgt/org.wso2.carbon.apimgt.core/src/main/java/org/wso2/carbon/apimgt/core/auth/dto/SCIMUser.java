@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.core.auth.dto;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -26,12 +28,19 @@ import java.util.Objects;
  */
 public class SCIMUser {
 
+    @SerializedName("schemas")
     private List<String> schemas;
+    @SerializedName("userName")
     private String userName;
+    @SerializedName("password")
     private String password;  //note: this can't be a char[] because then feign reads is as a multi-valued attribute
+    @SerializedName("id")
     private String id;
+    @SerializedName("name")
     private SCIMName name;
+    @SerializedName("emails")
     private List<SCIMUserEmails> emails;
+    @SerializedName("groups")
     private List<SCIMUserGroups> groups;
 
     public List<String> getSchemas() {

@@ -34,16 +34,27 @@ public class AnalyticsConfigurations {
     @Element(description = "DAS server credentials")
     private CredentialConfigurations dasServerCredentials = new CredentialConfigurations();
 
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
     public String getDasServerURL() {
         return dasServerURL;
     }
 
-    public boolean isEnabled() {
-        return enabled;
+    public void setDasServerURL(String dasServerURL) {
+        this.dasServerURL = dasServerURL;
     }
 
     public CredentialConfigurations getDasServerCredentials() {
         return dasServerCredentials;
     }
 
+    public void setDasServerCredentials(CredentialConfigurations dasServerCredentials) {
+        this.dasServerCredentials = dasServerCredentials;
+    }
 }

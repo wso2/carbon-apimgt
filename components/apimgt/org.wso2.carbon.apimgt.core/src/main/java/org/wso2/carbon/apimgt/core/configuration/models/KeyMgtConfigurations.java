@@ -50,35 +50,71 @@ public class KeyMgtConfigurations {
         return keyManagerImplClass;
     }
 
+    public void setKeyManagerImplClass(String keyManagerImplClass) {
+        this.keyManagerImplClass = keyManagerImplClass;
+    }
+
     public String getDcrEndpoint() {
         return dcrEndpoint;
+    }
+
+    public void setDcrEndpoint(String dcrEndpoint) {
+        this.dcrEndpoint = dcrEndpoint;
     }
 
     public String getTokenEndpoint() {
         return tokenEndpoint;
     }
 
+    public void setTokenEndpoint(String tokenEndpoint) {
+        this.tokenEndpoint = tokenEndpoint;
+    }
+
     public String getRevokeEndpoint() {
         return revokeEndpoint;
+    }
+
+    public void setRevokeEndpoint(String revokeEndpoint) {
+        this.revokeEndpoint = revokeEndpoint;
     }
 
     public String getIntrospectEndpoint() {
         return introspectEndpoint;
     }
 
-    public long getDefaultTokenValidityPeriod() {
-        return defaultTokenValidityPeriod;
+    public void setIntrospectEndpoint(String introspectEndpoint) {
+        this.introspectEndpoint = introspectEndpoint;
     }
 
     public CredentialConfigurations getKeyManagerCredentials() {
         return keyManagerCredentials;
     }
 
+    public void setKeyManagerCredentials(CredentialConfigurations keyManagerCredentials) {
+        this.keyManagerCredentials = keyManagerCredentials;
+    }
+
     public String getKeyManagerCertAlias() {
         return keyManagerCertAlias;
     }
 
+    public void setKeyManagerCertAlias(String keyManagerCertAlias) {
+        this.keyManagerCertAlias = keyManagerCertAlias;
+    }
+
+    public long getDefaultTokenValidityPeriod() {
+        return defaultTokenValidityPeriod;
+    }
+
+    public void setDefaultTokenValidityPeriod(long defaultTokenValidityPeriod) {
+        this.defaultTokenValidityPeriod = defaultTokenValidityPeriod;
+    }
+
     public String getOidcUserinfoJWTSigningAlgo() {
         return oidcUserinfoJWTSigningAlgo;
+    }
+
+    public void setOidcUserinfoJWTSigningAlgo(String oidcUserinfoJWTSigningAlgo) {
+        this.oidcUserinfoJWTSigningAlgo = oidcUserinfoJWTSigningAlgo;
     }
 }

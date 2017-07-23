@@ -40,15 +40,31 @@ public class IdentityProviderConfigurations {
         return identityProviderImplClass;
     }
 
+    public void setIdentityProviderImplClass(String identityProviderImplClass) {
+        this.identityProviderImplClass = identityProviderImplClass;
+    }
+
     public String getIdentityProviderBaseUrl() {
         return identityProviderBaseUrl;
+    }
+
+    public void setIdentityProviderBaseUrl(String identityProviderBaseUrl) {
+        this.identityProviderBaseUrl = identityProviderBaseUrl;
     }
 
     public CredentialConfigurations getIdentityProviderCredentials() {
         return identityProviderCredentials;
     }
 
+    public void setIdentityProviderCredentials(CredentialConfigurations identityProviderCredentials) {
+        this.identityProviderCredentials = identityProviderCredentials;
+    }
+
     public String getIdpCertAlias() {
         return idpCertAlias;
+    }
+
+    public void setIdpCertAlias(String idpCertAlias) {
+        this.idpCertAlias = idpCertAlias;
     }
 }

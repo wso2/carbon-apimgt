@@ -28,7 +28,7 @@ function getThrottlingPublisher () (publisher:EventConnector) {
     if (initThrottle != false) {
         return throttlePublisher;
     } else {
-        system:println("Initiating new event publisher for throttleing");
+        system:println("Initiating new event publisher for throttling");
         map config = getThrottleConfigMap();
         publisher:EventConnector pub = getPublisherInstance(config);
         initThrottle = true;
