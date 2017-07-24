@@ -71,6 +71,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         //test for exception
         try {
             policyDAO.updateApiPolicy(updatedAPIPolicy);
+            Assert.fail("Exception expected, but not thrown.");
         } catch (APIMgtDAOException ex) {
             Assert.assertEquals(ex.getMessage(),
                     "Policy uuid is not found, unable to update policy: " + updatedAPIPolicy.getPolicyName());
@@ -100,11 +101,11 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         updatedPolicy.setUuid(null);
         try {
             policyDAO.updateApplicationPolicy(updatedPolicy);
+            Assert.fail("Exception expected, but not thrown.");
         } catch (APIMgtDAOException ex) {
             Assert.assertEquals(ex.getMessage(),
                     "Policy uuid is not found, unable to update policy: " + updatedPolicy.getPolicyName());
         }
-
     }
 
     @Test
@@ -129,6 +130,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         updatedPolicy.setUuid(null);
         try {
             policyDAO.updateSubscriptionPolicy(updatedPolicy);
+            Assert.fail("Exception expected, but not thrown.");
         } catch (APIMgtDAOException ex) {
             Assert.assertEquals(ex.getMessage(),
                     "Policy uuid is not found, unable to update policy: " + updatedPolicy.getPolicyName());
