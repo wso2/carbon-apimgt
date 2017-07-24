@@ -535,6 +535,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             //Add initial inline content as empty String, if the Document type is INLINE
             if (body.getSourceType() == DocumentDTO.SourceTypeEnum.INLINE) {
                 apiProvider.addDocumentationContent(docid, "");
+                if (log.isDebugEnabled()) {
+                    log.debug("The updated source type of the document " + body.getName() + " is: " + body.getSourceType());
+                }
             }
             return Response.status(Response.Status.CREATED).entity(newDocumentDTO).build();
         } catch (APIManagementException e) {
