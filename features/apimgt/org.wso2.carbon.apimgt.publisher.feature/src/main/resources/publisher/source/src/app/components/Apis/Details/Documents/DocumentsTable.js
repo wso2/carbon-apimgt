@@ -18,10 +18,18 @@
 
 import React, {Component} from 'react'
 import {Table, Popconfirm} from 'antd';
+import InlineEditor from "./InlineEditor";
 
 class DocumentsTable extends Component {
     constructor(props) {
         super(props);
+        this.viewDocContentHandler=this.viewDocContentHandler.bind(this);
+        this.handleCloseModal = this.handleCloseModal.bind(this);
+        this.state = {
+            showInlineEditor: false,
+            documentId: null,
+            selectedDocName: null
+        }
         this.columns = [{
             title: 'Name',
             dataIndex: 'name',
@@ -36,7 +44,7 @@ class DocumentsTable extends Component {
             key: 'actions',
             render: (text1, record) => (<div>
                 <a href="#" onClick={() => this.props.onEditAPIDocument(record)}>Edit | </a>
-                <a href="#" onClick={() => this.props.viewDocContentHandler(record)}>View | </a>
+                <a href="#" onClick={() => this.viewDocContentHandler(record)}>View | </a>
                 <Popconfirm title="Are you sure you want to delete this document?"
                             onConfirm={() => this.props.deleteDocHandler(record.documentId)}
                             okText="Yes" cancelText="No">
@@ -48,12 +56,51 @@ class DocumentsTable extends Component {
         //TODO: Add permission/valid scope checks for document Edit/Delete actions
     }
 
-    render() {
+    /*
+     On click listener for 'View' link on each document related row in the documents table.
+     1- If the document type is 'URL' open it in new tab
+     2- If the document type is 'INLINE' open the content with an inline editor
+     3- If the document type is 'FILE' download the file
+     */
+    viewDocContentHandler(document) {
+        if (document.sourceType == "URL") {
+            window.open(document.sourceUrl, '_blank');
+        } else if (document.sourceType == "INLINE") {
+                this.setState({
+                    documentId:document.documentId,
+                    showInlineEditor:true,
+                    selectedDocName:document.name
+                });
+        } else if (document.sourceType == "FILE") {
+            let promised_get_content = this.props.client.getFileForDocument(this.props.apiId, document.documentId);
+            promised_get_content.then((done) => {
+                this.props.downloadFile(done);
+            }).catch((error_response) => {
+                let error_data = JSON.parse(error_response.data);
+                let messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+                console.error(messageTxt);
+            });
+        }
+    }
 
+    handleCloseModal () {
+        this.setState({ showInlineEditor: false });
+    }
+
+    render() {
         return (
             <div style={{paddingTop: 20}}>
                 <h3 style={{paddingBottom: 15}}>Current Documents</h3>
                 <Table dataSource={ this.props.documentsList } columns={this.columns}/>
+                {this.state.showInlineEditor &&
+                <InlineEditor showInlineEditor={this.state.showInlineEditor}
+                              handleCloseModal={this.handleCloseModal}
+                              apiId={this.props.apiId}
+                              documentId={this.state.documentId}
+                              documentName={this.state.selectedDocName}
+                              client={this.props.client}
+                />
+                }
             </div>
         );
     }

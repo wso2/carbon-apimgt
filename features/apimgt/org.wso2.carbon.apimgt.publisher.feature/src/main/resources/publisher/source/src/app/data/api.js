@@ -613,6 +613,9 @@ class API {
         return promised_addDocument;
     }
 
+    /*
+     Add a File resource to a document
+     */
     addFileToDocument(api_id, docId, fileToDocument) {
         var promised_addFileToDocument = this.client.then(
             (client) => {
@@ -630,6 +633,25 @@ class API {
         return promised_addFileToDocument;
     }
 
+    /*
+      Add inline content to a INLINE type document
+     */
+    addInlineContentToDocument(api_id, doc_id, inline_content) {
+        var promised_addInlineContentToDocument = this.client.then(
+            (client) => {
+                let payload = {
+                    apiId: api_id,
+                    documentId: doc_id,
+                    inlineContent: inline_content,
+                    "Content-Type": "application/json"
+                };
+                return client["Document (Individual)"].post_apis_apiId_documents_documentId_content(
+                    payload, this._requestMetaData({"Content-Type": "multipart/form-data"}));
+            }
+        ).catch(AuthClient.unauthorizedErrorHandler);
+        return promised_addInlineContentToDocument;
+    }
+
     getFileForDocument(api_id, docId) {
         var promised_getDocContent = this.client.then(
             (client) => {
@@ -638,11 +660,22 @@ class API {
                     payload, this._requestMetaData({"Content-Type": "multipart/form-data"}));
             }
         ).catch(AuthClient.unauthorizedErrorHandler);
-
         return promised_getDocContent;
-
     }
 
+    /*
+      Get the inline content of a given document
+     */
+    getInlineContentOfDocument(api_id, docId) {
+        var promised_getDocContent = this.client.then(
+            (client) => {
+                let payload = {apiId: api_id, documentId: docId, "Accept": "text/plain"};
+                return client["Document (Individual)"].get_apis_apiId_documents_documentId_content(
+                    payload, this._requestMetaData());
+            }
+        ).catch(AuthClient.unauthorizedErrorHandler);
+        return promised_getDocContent;
+    }
 
     getDocuments(api_id, callback) {
         var promise_get_all = this.client.then(
