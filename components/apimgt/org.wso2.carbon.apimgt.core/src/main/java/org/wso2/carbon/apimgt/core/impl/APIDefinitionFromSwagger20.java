@@ -30,6 +30,8 @@ import io.swagger.models.Operation;
 import io.swagger.models.Path;
 import io.swagger.models.Response;
 import io.swagger.models.Swagger;
+import io.swagger.models.auth.OAuth2Definition;
+import io.swagger.models.auth.SecuritySchemeDefinition;
 import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.FormParameter;
 import io.swagger.models.parameters.Parameter;
@@ -207,6 +209,20 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         return apiResources;
     }
 
+    @Override public Map<String, String> getScope(String resourceConfigJSON) throws APIManagementException {
+        SwaggerParser swaggerParser = new SwaggerParser();
+        Swagger swagger = swaggerParser.parse(resourceConfigJSON);
+        String basePath = swagger.getBasePath();
+        String nameSpace = getNamespaceFromBasePath(basePath);
+        if (nameSpace == null) {
+            return new HashMap<>();
+        }
+        Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
+        Map.Entry<String, SecuritySchemeDefinition> entry = securityDefinitions.entrySet().iterator().next();
+        OAuth2Definition securityDefinition = (OAuth2Definition) entry.getValue();
+        return securityDefinition.getScopes();
+    }
+
     @Override
     public Map<String, Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {
 
@@ -248,8 +264,8 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
                 log.debug("vendor extensions are not found in provided swagger json. resourceConfigsJSON = "
                         + resourceConfigsJSON);
             }
+            return new HashMap<>();
         }
-        return new HashMap<>();
     }
 
     /*

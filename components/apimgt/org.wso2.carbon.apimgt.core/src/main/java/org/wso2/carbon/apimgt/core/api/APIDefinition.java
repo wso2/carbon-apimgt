@@ -55,6 +55,16 @@ public interface APIDefinition {
     Map<String, Scope> getScopes(String resourceConfigsJSON) throws APIManagementException;
 
     /**
+     * Get Scopes Extracts from the API definition
+     *
+     * @param resourceConfigJSON
+     * @return
+     * @throws APIManagementException
+     */
+    //todo: keep only single getScopes method after .yamls in same format
+    Map<String, String> getScope(String resourceConfigJSON) throws APIManagementException;
+
+    /**
      * This method extracts the scope from the API definition matching to a resource path
      *
      * @param resourceConfigsJSON resource json
