@@ -237,6 +237,40 @@ class API {
     }
 
     /**
+     * Create an API from WSDL with the given parameters and call the callback method given optional.
+     * @param {Object} api_data - API data which need to fill the placeholder values in the @get_template
+     * @param {function} callback - An optional callback method
+     * @returns {Promise} Promise after creating and optionally calling the callback method.
+     */
+    importWSDL (api_data, callback = null) {
+        let payload;
+        let promise_create;
+        payload = {
+            type: "WSDL",
+            additionalProperties: api_data.additionalProperties,
+            'Content-Type': "multipart/form-data",
+            importOptions: api_data.importOptions
+        };
+        if (api_data.url) {
+            payload.url = api_data.url;
+        } else {
+            payload.file = api_data.file;
+        }
+        promise_create = this.client.then(
+            (client) => {
+                return client["API (Collection)"].post_apis_import_definition(payload,
+                    this._requestMetaData({'Content-Type': "multipart/form-data"}))
+                    .catch(AuthClient.unauthorizedErrorHandler);
+            }
+        );
+        if (callback) {
+            return promise_create.then(callback);
+        } else {
+            return promise_create;
+        }
+    }
+
+    /**
      * Get list of all the available APIs, If the call back is given (TODO: need to ask for fallback sequence as well tmkb)
      * It will be invoked upon receiving the response from REST service.Else will return a promise.
      * @param callback {function} A callback function to invoke after receiving successful response.
@@ -714,6 +748,31 @@ class API {
         return promise_labels;
     }
 
+    validateWSDLUrl(wsdlUrl) {
+        let promised_validationResponse = this.client.then((client) => {
+            return client["API (Collection)"]
+                .post_apis_validate_definition({
+                    "type": "WSDL",
+                    "url": wsdlUrl,
+                    "Content-Type": "multipart/form-data"}, 
+                    this._requestMetaData({"Content-Type": "multipart/form-data"}))
+                .catch(AuthClient.unauthorizedErrorHandler);
+        });
+        return promised_validationResponse;
+    }
+
+    validateWSDLFile(file) {
+        let promised_validationResponse = this.client.then((client) => {
+            return client["API (Collection)"]
+                .post_apis_validate_definition({
+                        "type": "WSDL",
+                        "file": file,
+                        "Content-Type": "multipart/form-data"},
+                    this._requestMetaData({"Content-Type": "multipart/form-data"}))
+                .catch(AuthClient.unauthorizedErrorHandler);
+        });
+        return promised_validationResponse;
+    }
 }
 
 export default API
