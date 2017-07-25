@@ -18,140 +18,303 @@
 
 import React, {Component} from 'react'
 import {Link} from 'react-router-dom'
-import {Col, Row, Card, Form, Select, Dropdown, Tag, Menu, Button, Badge} from 'antd';
+import {
+    Col,
+    Row,
+    Card,
+    Radio,
+    InputNumber,
+    Switch,
+    Button,
+    message,
+    Form,
+    Select,
+    Dropdown,
+    Tag,
+    Menu,
+    Badge
+} from 'antd';
 
 const FormItem = Form.Item;
+import Api from '../../../data/api'
+import Loading from '../../Base/Loading/Loading'
+import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
+import {Input} from 'antd';
+import {Checkbox} from 'antd';
+import {Table, Icon} from 'antd';
+
+const RadioButton = Radio.Button;
+const RadioGroup = Radio.Group;
 const Option = Select.Option;
 
-const menu = (
-    <Menu>
-        <Menu.Item>
-            <Link to="">Edit</Link>
-        </Menu.Item>
-        <Menu.Item>
-            <Link to="">Create New Version</Link>
-        </Menu.Item>
-        <Menu.Item>
-            <Link to="">View Swagger</Link>
-        </Menu.Item>
-    </Menu>
-);
 
-class ActivityItem extends Component {
-    constructor(props) {
-        super(props);
-    }
-
-    render() {
-        return <div className="feed-element">
-            <a href="#" className="pull-left">
-                <i className="fw fw-user"></i>
-            </a>
-            <div className="media-body ">
-                <small className="pull-right text-navy">{this.props.when}</small>
-                <strong>{this.props.user}</strong> subscribed with <strong>{this.props.tier}</strong> tier. <br />
-                <small className="text-muted">{this.props.time}</small>
-            </div>
-        </div>
-    }
-}
 class Permission extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            api: props.api
-        }
+            api: null,
+            notFound: false
+        };
+        this.api_uuid = this.props.match.params.api_uuid;
+        this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleInputs = this.handleInputs.bind(this);
+        this.handleSwitch = this.handleSwitch.bind(this);
+        this.handleMaxTPS = this.handleMaxTPS.bind(this);
     }
 
-    componentWillReceiveProps(nextProps) {
-        this.setState(
-            {
-                api: nextProps.api
+    componentDidMount() {
+        const api = new Api();
+        let promised_api = api.get(this.api_uuid);
+        promised_api.then(
+            response => {
+                this.setState({api: response.obj});
+            }
+        ).catch(
+            error => {
+                if (process.env.NODE_ENV !== "production") {
+                    console.log(error);
+                }
+                let status = error.status;
+                if (status === 404) {
+                    this.setState({notFound: true});
+                }
             }
         );
+    }
 
+    handleSwitch(secured) {
+        this.setState({secured: secured})
+    }
+
+    handleInputs(e) {
+        this.setState({[e.target.name]: e.target.value});
+    }
+
+    handleMaxTPS(maxTPS) {
+        this.setState({maxTPS: maxTPS});
+    }
+
+
+    handleSubmit = (e) => {
+        debugger;
     }
 
     render() {
-
+        const {getFieldDecorator} = this.props.form;
         const formItemLayout = {
             labelCol: {span: 6},
             wrapperCol: {span: 18}
         };
 
+        const columns = [{
+            title: 'Role',
+            dataIndex: 'name',
+            key: 'name',
+            render: text => <a href="#">{text}</a>,
+        }, {
+            title: 'Read',
+            dataIndex: 'age',
+            key: 'age',
+        }, {
+            title: 'Write',
+            dataIndex: 'address',
+            key: 'address',
+        }, {
+            title: 'Update',
+            dataIndex: 'update',
+            key: 'update',
+        }
+            , {
+                title: 'Action',
+                key: 'action',
+                render: (text, record) => (
+                    <span>
+                    <a href="#">Delete</a>
+                </span>
+                ),
+            }];
+
+        const columnsOfScopeTable = [{
+            title: 'Scopes',
+            dataIndex: 'name',
+            key: 'name',
+            render: text => <a href="#">{text}</a>,
+        }, {
+            title: '',
+            key: 'delete',
+            render: (text, record) => (
+                <span>
+                    <a href="#">Delete</a>
+                </span>
+            ),
+        }];
+
+        const dataOfScopes = [{
+            key: '1',
+            name: 'John Brown',
+
+        }, {
+            key: '2',
+            name: 'Jim Green',
+
+        }];
+
+        const data = [{
+            key: '1',
+            name: 'Engineering',
+            age: 'Yes',
+            address: 'New York No. 1 Lake Park',
+            update: 'update'
+        }, {
+            key: '2',
+            name: 'Sales',
+            age: 42,
+            address: 'New York No. 1 Lake Park',
+            update: 'update'
+        }, {
+            key: '3',
+            name: 'QA',
+            age: 32,
+            address: 'New York No. 1 Lake Park',
+            update: 'update'
+        }];
+
+
+        const api = this.state.api;
+        if (this.state.notFound) {
+            return <ResourceNotFound/>
+        }
+        if (!this.state.api) {
+            return <Loading/>
+        }
+
+
         return (
 
             <div>
-                <Row type="flex" justify="center">
+                <Row type="flex" justify="left">
                     <Col span={4}>
-
-                        <Card bodyStyle={{padding: 10}}>
+                        <Card bodyStyle={{padding: 5}}>
                             <div className="custom-image">
                                 <img alt="API thumb" width="100%" src="/publisher/public/images/api/api-default.png"/>
                             </div>
                             <div className="custom-card">
-                                <Badge status="processing" text={this.state.api.lifeCycleStatus}/>
+                                <Badge status="processing" text={api.lifeCycleStatus}/>
                                 <p>11 Apps</p>
-                                <a href="#components-anchor-store" title="Store">View in store</a>
+                                <a href={"/store/apis/" + this.api_uuid} target="_blank" title="Store">View in store</a>
                             </div>
                         </Card>
                     </Col>
-                    <Col span={15} offset={1}>
-                        <Form layout="vertical">
-                            <FormItem {...formItemLayout} label="Visibility">
-                                <span className="ant-form-text">
-                                        <Select labelInValue defaultValue={{ key: 'Public' }}>
+                    <Col span={19} offset={1}>
+                        <form onSubmit={this.handleSubmit}>
+                            <Card bodyStyle={{padding: 5}}>
+                                <Row style={{marginBottom: "10px"}} type="flex" justify="left">
+                                    <Col span={8}>Visibility</Col>
+                                    <Col span={16}>
+                                        <Select>
+                                            <Option value="RestrictedByRoles">RestrictedByRoles</Option>
                                             <Option value="Public">Public</Option>
-                                            <Option value="RestrictedByRoles">Restricted By Roles</Option>
-                                            <Option value="Visibletomydomain">Visible To My Domain</Option>
                                         </Select>
-                                </span>
-                            </FormItem>
-                            <FormItem {...formItemLayout} label="Version">
-                                <span className="ant-form-text">{this.state.api.version}</span>
-                            </FormItem>
-                            <FormItem {...formItemLayout} label="Context">
-                                <span className="ant-form-text">{this.state.api.context}</span>
-                            </FormItem>
-                            <FormItem {...formItemLayout} label="Last Updated">
-                                <span className="ant-form-text">{this.state.api.createdTime}</span>
-                            </FormItem>
-                            <FormItem {...formItemLayout} label="Business Plans">
-                                <span className="ant-form-text">{"Gold, Silver, Free"}</span>
-                            </FormItem>
-                            <FormItem {...formItemLayout} label="Tags">
-                                <span className="ant-form-text">
-                                    <Tag><a href="#somelink">Social</a></Tag>
-                                    <Tag><a href="#somelink">Facebook</a></Tag>
-                                </span>
-                            </FormItem>
-                            <FormItem {...formItemLayout} label="Labels">
-                                <span className="ant-form-text">
-                                      <Tag color="pink">pink</Tag>
-                                      <Tag color="red">red</Tag>
-                                      <Tag color="orange">orange</Tag>
-                                      <Tag color="green">green</Tag>
-                                </span>
-                            </FormItem>
-                            <FormItem {...formItemLayout} label="Business Owner">
-                                <span className="ant-form-text">{"WSO2"}</span>
-                                <a className="ant-form-text" href="#email">{"(bizdev@wso2.com)"}</a>
-                            </FormItem>
-                            <FormItem {...formItemLayout} label="Tech Owner">
-                                <span className="ant-form-text">{"WSO2 Support"}</span>
-                                <a className="ant-form-text" href="#email">{"(support@wso2.com)"}</a>
-                            </FormItem>
-                        </Form>
+                                    </Col>
+                                </Row>
+
+                                <Row style={{marginBottom: "10px"}} type="flex" justify="left">
+                                    <Col span={8}>Roels</Col>
+                                    <Col span={16}>
+                                        <Input name="roles" placeholder="Sales-group,Engineering"/>
+                                    </Col>
+                                </Row>
+                            </Card>
+
+                            <Card bodyStyle={{padding: 5}}>
+                                <Row style={{marginBottom: "10px"}} type="flex" justify="center">
+                                    <Col span={8}>API Permission</Col>
+                                    <Col span={16}>
+                                        <Row>
+                                            <Col span={7} style={{margin: "10px"}}>
+                                                <Input name="role" placeholder="role"/>
+                                            </Col>
+                                            <Col span={3} style={{margin: "10px"}}>
+                                                <Checkbox name="read"> Read </Checkbox>
+                                            </Col>
+                                            <Col span={3} style={{margin: "10px"}}>
+                                                <Checkbox name="update"> Update </Checkbox>
+                                            </Col>
+                                            <Col span={3} style={{margin: "10px"}}>
+                                                <Checkbox name="delete"> Delete </Checkbox>
+                                            </Col>
+                                        </Row>
+                                    </Col>
+
+                                </Row>
+                                <Row style={{marginBottom: "10px"}} type="flex" justify="center">
+                                    <Col span={8}></Col>
+                                    <Col span={16}>
+                                        <Table columns={columns} dataSource={data}/>
+                                    </Col>
+                                </Row>
+                            </Card>
+                            <Card bodyStyle={{padding: 5}}>
+                                <Row style={{marginBottom: "10px"}} type="flex" justify="center">
+                                    <Col span={8}>API Scopes</Col>
+                                    <Col span={16}>
+                                        <Row>
+                                            <Col span={8} style={{margin: "10px"}}>
+                                                <Input name="scopeKey" placeholder="scopeKey"/>
+                                            </Col>
+                                            <Col span={8} style={{margin: "10px"}}>
+                                                <Input name="scopeName" placeholder="scopeName"/>
+                                            </Col>
+                                        </Row>
+                                        <Row>
+                                            <Col span={16} style={{margin: "10px"}}>
+                                                <Input name="roles" placeholder="roles"/>
+                                            </Col>
+                                        </Row>
+                                        <Row>
+                                            <Col span={16} style={{margin: "10px"}}>
+                                                <Input name="descriptions" placeholder="descriptions"/>
+                                            </Col>
+                                        </Row>
+                                        <Row>
+                                            <Col span={16} style={{margin: "10px"}}>
+                                                <Table columns={columnsOfScopeTable} dataSource={dataOfScopes}/>
+                                            </Col>
+                                        </Row>
+                                    </Col>
+                                </Row>
+                            </Card>
+
+                            <Button loading={this.state.creating} type="primary"
+                                    onClick={this.handleSubmit}>Create</Button>
+                        </form>
                     </Col>
                 </Row>
-                <div className="api-add-links">
-                    <Dropdown overlay={menu} placement="topCenter">
-                        <Button shape="circle" icon="edit"/>
-                    </Dropdown>
-                </div>
             </div>
+
+
         );
     }
 }
 
-export default Permission
+const PermissionFormGenerated = Form.create()(Permission);
+
+class PermissionFormWrapper extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            api: null,
+            notFound: false
+        };
+        // this.api_uuid = this.props.match.params.api_uuid;
+    }
+
+
+    render = () => {
+        const {match} = this.props;
+        return <PermissionFormGenerated match={match} history={this.props.history}/>
+    }
+}
+
+export default PermissionFormWrapper
