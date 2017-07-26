@@ -230,7 +230,6 @@ public class ApisApiServiceImpl extends ApisApiService {
                 log.error(msg);
                 return Response.status(Response.Status.NOT_FOUND).entity(errorDTO).build();
             }
-            DocumentInfo.Builder docBuilder = new DocumentInfo.Builder(documentation);
             //add content depending on the availability of either input stream or inline content
             if (fileInputStream != null) {
                 if (!documentation.getSourceType().equals(DocumentInfo.SourceType.FILE)) {
@@ -240,28 +239,26 @@ public class ApisApiServiceImpl extends ApisApiService {
                     log.error(msg);
                     return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
                 }
-                docBuilder = docBuilder.fileName(fileDetail.getFileName());
                 apiProvider.uploadDocumentationFile(documentId, fileInputStream, fileDetail.getContentType());
             } else if (inlineContent != null) {
                 if (!documentation.getSourceType().equals(DocumentInfo.SourceType.INLINE)) {
                     String msg = "Source type of document " + documentId + " is not INLINE";
                     log.error(msg);
-                    ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
+                    ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900976L, msg);
+                    return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
                 }
                 apiProvider.addDocumentationContent(documentId, inlineContent);
             } else {
                 String msg = "Either 'file' or 'inlineContent' should be specified";
                 log.error(msg);
-                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900976L, msg);
+                return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
             }
-            apiProvider.updateDocumentation(apiId, docBuilder.build());
-            //retrieving the updated doc and the URI
-            DocumentInfo updatedDoc = apiProvider.getDocumentationSummary(documentId);
             String newFingerprint = apisApiIdDocumentsDocumentIdContentGetFingerprint(apiId, documentId, null,
                     null, null, request);
-            DocumentDTO documentDTO = MappingUtil.toDocumentDTO(updatedDoc);
             return Response.status(Response.Status.CREATED)
-                    .header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"").entity(documentDTO).build();
+                    .header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"")
+                    .build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding content to document" + documentId;
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -415,7 +412,6 @@ public class ApisApiServiceImpl extends ApisApiService {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
             }
 
-            //DocumentInfo documentInfo = MappingUtil.toDocumentInfo(body);
             DocumentInfo documentInfoOld = apiPublisher.getDocumentationSummary(documentId);
             //validation checks for existence of the document
             if (documentInfoOld == null) {
