@@ -24,33 +24,52 @@ package org.wso2.carbon.apimgt.rest.api.core.utils;
 
 
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.BlockConditions;
+import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
+import org.wso2.carbon.apimgt.core.models.PolicyValidationData;
+import org.wso2.carbon.apimgt.core.models.RegistrationSummary;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
-import org.wso2.carbon.apimgt.rest.api.core.dto.LabelDTO;
-import org.wso2.carbon.apimgt.rest.api.core.dto.ResourcesListDTO;
-import org.wso2.carbon.apimgt.rest.api.core.dto.SubscriptionDTO;
-import org.wso2.carbon.apimgt.rest.api.core.dto.SubscriptionListDTO;
-import org.wso2.carbon.apimgt.rest.api.core.dto.UriTemplateDTO;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.rest.api.core.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.AnalyticsInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.ApplicationDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.BlockingConditionDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.BlockingConditionListDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.CredentialsDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.EndPointDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.JWTInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.KeyManagerInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.LabelDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.PolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.RegistrationSummaryDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.SubscriptionDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.ThrottlingInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.UriTemplateDTO;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Utility class for convert apimgt Core objects into rest api model
+ */
 public class MappingUtil {
 
     /**
-     * This method converts List of SubscriptionValidationData into SubscriptionListDTO object.
+     * This method converts List of SubscriptionValidationData into SubscriptionDTO list.
      *
      * @param subscriptionValidationData List of Subscription Validation Data
-     * @return subscriptionListDTO
+     * @return SubscriptionDTO list
      */
-    public static SubscriptionListDTO convertToSubscriptionListDto(
+    public static List<SubscriptionDTO> convertToSubscriptionListDto(
             List<SubscriptionValidationData> subscriptionValidationData) {
-        SubscriptionListDTO subscriptionListDTO = new SubscriptionListDTO();
+        List<SubscriptionDTO> subscriptionDTOList = new ArrayList<>();
         for (SubscriptionValidationData subscriptionData : subscriptionValidationData) {
             SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
             subscriptionDTO.setApiName(subscriptionData.getApiName());
@@ -59,12 +78,12 @@ public class MappingUtil {
             subscriptionDTO.setApiProvider(subscriptionData.getApiProvider());
             subscriptionDTO.setConsumerKey(subscriptionData.getConsumerKey());
             subscriptionDTO.setSubscriptionPolicy(subscriptionData.getSubscriptionPolicy());
-            subscriptionDTO.setApplicationName(subscriptionData.getApplicationName());
-            subscriptionDTO.setApplicationOwner(subscriptionData.getApplicationOwner());
             subscriptionDTO.setKeyEnvType(subscriptionData.getKeyEnvType());
-            subscriptionListDTO.addListItem(subscriptionDTO);
+            subscriptionDTO.setApplicationId(subscriptionData.getApplicationId());
+            subscriptionDTO.setStatus(subscriptionData.getStatus());
+            subscriptionDTOList.add(subscriptionDTO);
         }
-        return subscriptionListDTO;
+        return subscriptionDTOList;
     }
 
     /**
@@ -85,24 +104,23 @@ public class MappingUtil {
     }
 
     /**
-     * Convert Uritemplate list to ResourceListDto
+     * Convert Uritemplate list to UriTemplateDTO list
+     *
      * @param resourcesOfApi list of uriTemplates
      * @return ResourcesListDTO
      */
-    public static ResourcesListDTO convertToResourceListDto(List<UriTemplate> resourcesOfApi){
-        ResourcesListDTO resourcesListDTO = new ResourcesListDTO();
+    public static List<UriTemplateDTO> convertToResourceListDto(List<UriTemplate> resourcesOfApi) {
         List<UriTemplateDTO> uriTemplateDTOArrayList = new ArrayList<>();
-        resourcesOfApi.forEach((v)->{
+        resourcesOfApi.forEach((v) -> {
             UriTemplateDTO uriTemplateDTO = new UriTemplateDTO();
             uriTemplateDTO.setUriTemplate(v.getUriTemplate());
             uriTemplateDTO.setAuthType(v.getAuthType());
-            uriTemplateDTO.setPolicy(v.getPolicy());
+            uriTemplateDTO.setPolicy(v.getPolicy().getUuid());
             uriTemplateDTO.setHttpVerb(v.getHttpVerb());
-            uriTemplateDTO.setScopes(Collections.emptyList());
+            uriTemplateDTO.setScope("");
             uriTemplateDTOArrayList.add(uriTemplateDTO);
         });
-        resourcesListDTO.setList(uriTemplateDTOArrayList);
-        return resourcesListDTO;
+        return uriTemplateDTOArrayList;
     }
 
     /**
@@ -137,4 +155,188 @@ public class MappingUtil {
         }
         return apiInfoList;
     }
+
+    /**
+     * convert {@link ApplicationDTO} to {@link Application}
+     *
+     * @param applicationList List of {@link Application}
+     * @return ApplicationEvent list
+     */
+    public static List<ApplicationDTO> convertToApplicationDtoList(List<Application> applicationList) {
+        List<ApplicationDTO> applicationDTOList = new ArrayList<>();
+        for (Application application : applicationList) {
+            ApplicationDTO applicationDTO = new ApplicationDTO();
+            applicationDTO.setName(application.getName());
+            applicationDTO.setApplicationId(application.getId());
+            applicationDTO.setThrottlingTier(application.getPolicy().getUuid());
+            applicationDTO.setSubscriber(application.getCreatedUser());
+            applicationDTOList.add(applicationDTO);
+        }
+        return applicationDTOList;
+    }
+
+    /**
+     * Converts the Gateway registration summary into RegistrationSummaryDTO
+     *
+     * @param registrationSummary the registration summary required by gateway
+     * @return RegistrationSummaryDTO
+     */
+    public static RegistrationSummaryDTO toRegistrationSummaryDTO(RegistrationSummary registrationSummary) {
+        RegistrationSummaryDTO registrationSummaryDTO = new RegistrationSummaryDTO();
+        registrationSummaryDTO.setKeyManagerInfo(toKeyManagerInfoDTO(registrationSummary));
+        registrationSummaryDTO.setAnalyticsInfo(toAnalyticsDTO(registrationSummary));
+        registrationSummaryDTO.setJwTInfo(toJWTInfoDTO(registrationSummary));
+        registrationSummaryDTO.setThrottlingInfo(toThrottlingInfoDTO(registrationSummary));
+        return registrationSummaryDTO;
+    }
+
+    /**
+     * Converts RegistrationSummary key manager information into KeyManagerInfoDTO
+     *
+     * @param registrationSummary the registration summary required by gateway
+     * @return KeyManagerInfoDTO
+     */
+    private static KeyManagerInfoDTO toKeyManagerInfoDTO(RegistrationSummary registrationSummary) {
+
+        KeyManagerInfoDTO keyManagerInfoDTO = new KeyManagerInfoDTO();
+        keyManagerInfoDTO.setDcrEndpoint(registrationSummary.getKeyManagerInfo().getDcrEndpoint());
+        keyManagerInfoDTO.setIntrospectEndpoint(registrationSummary.getKeyManagerInfo().getIntrospectEndpoint());
+        keyManagerInfoDTO.setRevokeEndpoint(registrationSummary.getKeyManagerInfo().getRevokeEndpoint());
+        keyManagerInfoDTO.setTokenEndpoint(registrationSummary.getKeyManagerInfo().getTokenEndpoint());
+        CredentialsDTO keyManagerCredentials = new CredentialsDTO();
+        keyManagerCredentials.setUsername(registrationSummary.getKeyManagerInfo().getCredentials().getUsername());
+        keyManagerCredentials.setPassword(registrationSummary.getKeyManagerInfo().getCredentials().getPassword());
+        keyManagerInfoDTO.setCredentials(keyManagerCredentials);
+        return keyManagerInfoDTO;
+    }
+
+    /**
+     * Converts RegistrationSummary analytics information into AnalyticsInfoDTO
+     *
+     * @param registrationSummary the registration summary required by gateway
+     * @return AnalyticsInfoDTO
+     */
+    private static AnalyticsInfoDTO toAnalyticsDTO(RegistrationSummary registrationSummary) {
+        AnalyticsInfoDTO analyticsInfoDTO = new AnalyticsInfoDTO();
+        analyticsInfoDTO.serverURL(registrationSummary.getAnalyticsInfo().getDasServerURL());
+        analyticsInfoDTO.setEnabled(registrationSummary.getAnalyticsInfo().isEnabled());
+        CredentialsDTO analyticsServerCredentials = new CredentialsDTO();
+        analyticsServerCredentials.setUsername(registrationSummary.getAnalyticsInfo().getDasServerCredentials()
+                .getUsername());
+        analyticsServerCredentials.setPassword(registrationSummary.getAnalyticsInfo().getDasServerCredentials()
+                .getPassword());
+        analyticsInfoDTO.setCredentials(analyticsServerCredentials);
+        return analyticsInfoDTO;
+    }
+
+    /**
+     * Converts RegistrationSummary JWT information into JWTInfoDTO
+     *
+     * @param registrationSummary the registration summary required by gateway
+     * @return JWTInfoDTO
+     */
+    private static JWTInfoDTO toJWTInfoDTO(RegistrationSummary registrationSummary) {
+        JWTInfoDTO jwtInfoDTO = new JWTInfoDTO();
+        jwtInfoDTO.enableJWTGeneration(registrationSummary.getJwtInfo().isEnableJWTGeneration());
+        jwtInfoDTO.jwtHeader(registrationSummary.getJwtInfo().getJwtHeader());
+        return jwtInfoDTO;
+    }
+
+    /**
+     * Converts RegistrationSummary Throttling information into ThrottlingInfoDTO
+     *
+     * @param registrationSummary the registration summary required by gateway
+     * @return ThrottlingInfoDTO
+     */
+    private static ThrottlingInfoDTO toThrottlingInfoDTO(RegistrationSummary registrationSummary) {
+        ThrottlingInfoDTO throttlingInfoDTO = new ThrottlingInfoDTO();
+        throttlingInfoDTO.serverURL(registrationSummary.getThrottlingInfo().getDataPublisher().getReceiverURL());
+        CredentialsDTO throttlingServerCredentials = new CredentialsDTO();
+        throttlingServerCredentials.setUsername(registrationSummary.getThrottlingInfo().getDataPublisher()
+                .getCredentials().getUsername());
+        throttlingServerCredentials.setPassword(registrationSummary.getThrottlingInfo().getDataPublisher()
+                .getCredentials().getPassword());
+        throttlingInfoDTO.setCredentials(throttlingServerCredentials);
+        return throttlingInfoDTO;
+    }
+
+    /**
+     * Convert policy validation data list to policy dto list
+     *
+     * @param allPolicies all policies
+     * @return PolicyDTO list
+     */
+    public static List<PolicyDTO> convertToPolicyDtoList(Set<PolicyValidationData> allPolicies) {
+        List<PolicyDTO> policyDTOList = new ArrayList<>();
+        allPolicies.forEach(v -> {
+            PolicyDTO policyDTO = new PolicyDTO();
+            policyDTO.setId(v.getId());
+            policyDTO.setName(v.getName());
+            policyDTO.setStopOnQuotaReach(v.isStopOnQuotaReach());
+            policyDTOList.add(policyDTO);
+        });
+        return policyDTOList;
+    }
+
+    /**
+     * Converts {@link Endpoint} list to {@link EndPointDTO} list
+     *
+     * @param endpointList {@link Endpoint} list
+     * @return EndPointDTO list
+     */
+    public static List<EndPointDTO> toEndpointListDto(List<Endpoint> endpointList) {
+        List<EndPointDTO> endPointDTOList = new ArrayList<>();
+        endpointList.forEach(endpoint -> endPointDTOList.add(new EndPointDTO().endpointConfig(endpoint
+                .getEndpointConfig()).id(endpoint.getId()).type(endpoint.getType()).name(endpoint.getName()).security
+                (endpoint.getSecurity())));
+        return endPointDTOList;
+    }
+
+    /**
+     * Converts a List of Block Condition in to REST API LIST DTO Object.
+     *
+     * @param blockConditionList A List of Block Conditions
+     * @return REST API List DTO object derived from Block Condition list
+     */
+    public static BlockingConditionListDTO fromBlockConditionListToListDTO(List<BlockConditions> blockConditionList) {
+        BlockingConditionListDTO listDTO = new BlockingConditionListDTO();
+        List<BlockingConditionDTO> blockingConditionDTOList = new ArrayList<>();
+        if (blockConditionList != null) {
+            for (BlockConditions blockCondition : blockConditionList) {
+                BlockingConditionDTO dto = fromBlockingConditionToDTO(blockCondition);
+                blockingConditionDTOList.add(dto);
+            }
+        }
+        listDTO.setCount(blockingConditionDTOList.size());
+        listDTO.setList(blockingConditionDTOList);
+        return listDTO;
+    }
+
+    /**
+     * Converts a single Block Condition model object into REST API DTO object.
+     *
+     * @param blockCondition Block condition model object
+     * @return Block condition DTO object derived from block condition model object
+     */
+    public static BlockingConditionDTO fromBlockingConditionToDTO(BlockConditions blockCondition) {
+        if (blockCondition.getUuid() == null) {
+            return null;
+        }
+        BlockingConditionDTO dto = new BlockingConditionDTO();
+        dto.setUuid(blockCondition.getUuid());
+        dto.setConditionType(blockCondition.getConditionType());
+        dto.setEnabled(blockCondition.isEnabled());
+        if (blockCondition.getConditionType().equals(APIMgtConstants.ThrottlePolicyConstants
+                .BLOCKING_CONDITION_IP_RANGE)) {
+            dto.setStartingIP(APIUtils.ipToLong(blockCondition.getStartingIP()));
+            dto.setEndingIP(APIUtils.ipToLong(blockCondition.getEndingIP()));
+        }
+        String conditionValue = blockCondition.getConditionValue();
+        if (APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_IP.equals(blockCondition.getConditionType())) {
+            dto.setFixedIp(APIUtils.ipToLong(conditionValue));
+        }
+        dto.setConditionValue(conditionValue);
+        return dto;
+    }
+
 }

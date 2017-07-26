@@ -82,6 +82,7 @@ public class ApiFileDAOImplIT {
         Assert.assertNotNull(apiFromDB);
         Assert.assertTrue(api.equals(apiFromDB), TestUtil.printDiff(api, apiFromDB));
     }
+
     @Test
     public void testAddGetAPIWithApiLevelEndpoint() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();

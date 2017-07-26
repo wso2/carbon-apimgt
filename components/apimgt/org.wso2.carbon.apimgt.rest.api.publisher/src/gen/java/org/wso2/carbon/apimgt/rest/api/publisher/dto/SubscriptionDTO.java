@@ -19,8 +19,8 @@ public class SubscriptionDTO   {
   @JsonProperty("applicationInfo")
   private ApplicationDTO applicationInfo = null;
 
-  @JsonProperty("subscriptionTier")
-  private String subscriptionTier = null;
+  @JsonProperty("policy")
+  private String policy = null;
 
   /**
    * Gets or Sets subscriptionStatus
@@ -100,22 +100,22 @@ public class SubscriptionDTO   {
     this.applicationInfo = applicationInfo;
   }
 
-  public SubscriptionDTO subscriptionTier(String subscriptionTier) {
-    this.subscriptionTier = subscriptionTier;
+  public SubscriptionDTO policy(String policy) {
+    this.policy = policy;
     return this;
   }
 
    /**
-   * Get subscriptionTier
-   * @return subscriptionTier
+   * Get policy
+   * @return policy
   **/
   @ApiModelProperty(example = "Unlimited", required = true, value = "")
-  public String getSubscriptionTier() {
-    return subscriptionTier;
+  public String getPolicy() {
+    return policy;
   }
 
-  public void setSubscriptionTier(String subscriptionTier) {
-    this.subscriptionTier = subscriptionTier;
+  public void setPolicy(String policy) {
+    this.policy = policy;
   }
 
   public SubscriptionDTO subscriptionStatus(SubscriptionStatusEnum subscriptionStatus) {
@@ -148,13 +148,13 @@ public class SubscriptionDTO   {
     SubscriptionDTO subscription = (SubscriptionDTO) o;
     return Objects.equals(this.subscriptionId, subscription.subscriptionId) &&
         Objects.equals(this.applicationInfo, subscription.applicationInfo) &&
-        Objects.equals(this.subscriptionTier, subscription.subscriptionTier) &&
+        Objects.equals(this.policy, subscription.policy) &&
         Objects.equals(this.subscriptionStatus, subscription.subscriptionStatus);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(subscriptionId, applicationInfo, subscriptionTier, subscriptionStatus);
+    return Objects.hash(subscriptionId, applicationInfo, policy, subscriptionStatus);
   }
 
   @Override
@@ -164,7 +164,7 @@ public class SubscriptionDTO   {
     
     sb.append("    subscriptionId: ").append(toIndentedString(subscriptionId)).append("\n");
     sb.append("    applicationInfo: ").append(toIndentedString(applicationInfo)).append("\n");
-    sb.append("    subscriptionTier: ").append(toIndentedString(subscriptionTier)).append("\n");
+    sb.append("    policy: ").append(toIndentedString(policy)).append("\n");
     sb.append("    subscriptionStatus: ").append(toIndentedString(subscriptionStatus)).append("\n");
     sb.append("}");
     return sb.toString();

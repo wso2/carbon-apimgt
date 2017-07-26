@@ -28,8 +28,8 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.TestUtil;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
-import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
+import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
+import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIComparator;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
@@ -58,6 +59,8 @@ import java.util.UUID;
 
 public class ApiDAOImplIT extends DAOIntegrationTestBase {
     private static final String ADMIN = "admin";
+    private static final String ALTERNATIVE_USER = "alternativeUser";
+    private static final String ALTERNATIVE_USER_ROLE_ID = "cfbde56e-4352-498e-4545-85a6f1f8b058";
     private static final String CREATOR = "creator";
     private static final String CUSTOMER_ROLE = "customer";
     private static final String EMPLOYEE_ROLE = "employee";
@@ -79,12 +82,12 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         //Asserting results for different search queries
         //Role based API retrieval for a user with "admin" role
         userRoles.add(ADMIN);
-        apiResults = apiDAO.getAPIsByStatus(userRoles, statuses, ApiType.STANDARD);
+        apiResults = apiDAO.getAPIsByStatus(userRoles, statuses);
         List<String> resultAPINameList = new ArrayList<>();
         for (API api : apiResults) {
             resultAPINameList.add(api.getName());
         }
-        expectedAPINames = new String[]{"PublicAPI", "AdminManagerAPI"};
+        expectedAPINames = new String[] {"PublicAPI", "AdminManagerAPI"};
         Assert.assertTrue(resultAPINameList.containsAll(Arrays.asList(expectedAPINames)) &&
                 Arrays.asList(expectedAPINames).containsAll(resultAPINameList));
         userRoles.clear();
@@ -93,11 +96,11 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         //Role based API retrieval for a user with "manager" role
         userRoles.add(MANAGER_ROLE);
-        apiResults = apiDAO.getAPIsByStatus(userRoles, statuses, ApiType.STANDARD);
+        apiResults = apiDAO.getAPIsByStatus(userRoles, statuses);
         for (API api : apiResults) {
             resultAPINameList.add(api.getName());
         }
-        expectedAPINames = new String[]{"PublicAPI", "ManagerOnlyAPI", "AdminManagerAPI",
+        expectedAPINames = new String[] {"PublicAPI", "ManagerOnlyAPI", "AdminManagerAPI",
                 "NonAdminAPI"};
         Assert.assertTrue(resultAPINameList.containsAll(Arrays.asList(expectedAPINames)) &&
                 Arrays.asList(expectedAPINames).containsAll(resultAPINameList));
@@ -109,12 +112,12 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         userRoles.add(MANAGER_ROLE);
         userRoles.add(EMPLOYEE_ROLE);
         userRoles.add(CUSTOMER_ROLE);
-        apiResults = apiDAO.getAPIsByStatus(userRoles, statuses, ApiType.STANDARD);
+        apiResults = apiDAO.getAPIsByStatus(userRoles, statuses);
 
         for (API api : apiResults) {
             resultAPINameList.add(api.getName());
         }
-        expectedAPINames = new String[]{"PublicAPI", "ManagerOnlyAPI", "AdminManagerAPI",
+        expectedAPINames = new String[] {"PublicAPI", "ManagerOnlyAPI", "AdminManagerAPI",
                 "EmployeeAPI", "NonAdminAPI"};
         Assert.assertTrue(resultAPINameList.containsAll(Arrays.asList(expectedAPINames)) &&
                 Arrays.asList(expectedAPINames).containsAll(resultAPINameList));
@@ -122,10 +125,6 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         apiResults.clear();
         resultAPINameList.clear();
 
-        //cleanup added APIs
-        for (String apiID : apiIDList) {
-            apiDAO.deleteAPI(apiID);
-        }
     }
 
     @Test
@@ -141,7 +140,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         //Attribute search for "provider", for "admin" role
         userRoles.add(ADMIN);
         attributeMap.put("provider", "a");
-        expectedAPINames = new String[]{"PublicAPI", "AdminManagerAPI"};
+        expectedAPINames = new String[] {"PublicAPI", "AdminManagerAPI"};
         Assert.assertTrue(compareResults(userRoles, attributeMap, expectedAPINames));
         userRoles.clear();
         attributeMap.clear();
@@ -149,7 +148,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         //Attribute search for "version", for "manager" role
         userRoles.add(MANAGER_ROLE);
         attributeMap.put("version", "2.3");
-        expectedAPINames = new String[]{"PublicAPI", "ManagerOnlyAPI"};
+        expectedAPINames = new String[] {"PublicAPI", "ManagerOnlyAPI"};
         Assert.assertTrue(compareResults(userRoles, attributeMap, expectedAPINames));
         userRoles.clear();
         attributeMap.clear();
@@ -159,7 +158,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         userRoles.add(EMPLOYEE_ROLE);
         userRoles.add(CUSTOMER_ROLE);
         attributeMap.put("context", "Man");
-        expectedAPINames = new String[]{"ManagerOnlyAPI", "AdminManagerAPI"};
+        expectedAPINames = new String[] {"ManagerOnlyAPI", "AdminManagerAPI"};
         Assert.assertTrue(compareResults(userRoles, attributeMap, expectedAPINames));
         userRoles.clear();
         attributeMap.clear();
@@ -167,7 +166,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         //Attribute search for "description", for "admin" role
         userRoles.add(ADMIN);
         attributeMap.put("description", "Admin and manager");
-        expectedAPINames = new String[]{"AdminManagerAPI"};
+        expectedAPINames = new String[] {"AdminManagerAPI"};
         Assert.assertTrue(compareResults(userRoles, attributeMap, expectedAPINames));
         userRoles.clear();
         attributeMap.clear();
@@ -177,7 +176,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         userRoles.add(EMPLOYEE_ROLE);
         userRoles.add(CUSTOMER_ROLE);
         attributeMap.put("tags", "E");
-        expectedAPINames = new String[]{"ManagerOnlyAPI", "NonAdminAPI"};
+        expectedAPINames = new String[] {"ManagerOnlyAPI", "NonAdminAPI"};
         Assert.assertTrue(compareResults(userRoles, attributeMap, expectedAPINames));
         userRoles.clear();
         attributeMap.clear();
@@ -187,7 +186,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         userRoles.add(EMPLOYEE_ROLE);
         userRoles.add(CUSTOMER_ROLE);
         attributeMap.put("subcontext", "C");
-        expectedAPINames = new String[]{"AdminManagerAPI", "EmployeeAPI", "NonAdminAPI"};
+        expectedAPINames = new String[] {"AdminManagerAPI", "EmployeeAPI", "NonAdminAPI"};
         Assert.assertTrue(compareResults(userRoles, attributeMap, expectedAPINames));
         userRoles.clear();
         attributeMap.clear();
@@ -201,6 +200,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     /**
      * This method creates few APIs and returns the ID list of those APIs
+     *
      * @return the ID list of added APIs
      * @throws APIMgtDAOException if it fails to creates APIs
      */
@@ -215,19 +215,19 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         //Construct an API which has public visibility
         apiTags.add("Car");
         apiTags.add("Van");
-        uriTemplateMap = getUriTemplateMap(new String[]{"/toyota", "/nissan"});
+        uriTemplateMap = getUriTemplateMap(new String[] {"/toyota", "/nissan"});
         addAPIWithGivenData("PublicAPI", "1.2.3", "PublicContext", "Paul", API.Visibility.PUBLIC,
                 null, APIStatus.CREATED.getStatus(), "This is a public API, visible to all.",
                 apiTags, uriTemplateMap, APIStatus.PUBLISHED.getStatus());
         visibleRoles.clear();
         apiTags.clear();
         uriTemplateMap.clear();
-        apiIDList.add(apiDAO.getAPIs(ApiType.STANDARD).get(0).getId());
+        apiIDList.add(apiDAO.getAPIs(new HashSet<String>(), "Paul").get(0).getId());
 
         //Construct an API which is visible to manager role only
         apiTags.add("Pizza");
         apiTags.add("Cake");
-        uriTemplateMap = getUriTemplateMap(new String[]{"/pizzahut", "/dominos"});
+        uriTemplateMap = getUriTemplateMap(new String[] {"/pizzahut", "/dominos"});
         visibleRoles.add(MANAGER_ROLE);
         addAPIWithGivenData("ManagerOnlyAPI", "2.3.4", "managerContext", "Mark",
                 API.Visibility.RESTRICTED, visibleRoles, APIStatus.CREATED.getStatus(),
@@ -236,11 +236,11 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         visibleRoles.clear();
         apiTags.clear();
         uriTemplateMap.clear();
-        apiIDList.add(apiDAO.getAPIs(ApiType.STANDARD).get(1).getId());
+        apiIDList.add(apiDAO.getAPIs(new HashSet<String>(), "Mark").get(0).getId());
 
         //Construct an API which is visible to admin and manager roles
         apiTags.add("Java");
-        uriTemplateMap = getUriTemplateMap(new String[]{"/desktop", "/laptop", "nikoncam"});
+        uriTemplateMap = getUriTemplateMap(new String[] {"/desktop", "/laptop", "nikoncam"});
         visibleRoles.add(ADMIN);
         visibleRoles.add(MANAGER_ROLE);
         addAPIWithGivenData("AdminManagerAPI", "3.4.5", "adminManager", "Alex",
@@ -250,12 +250,12 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         visibleRoles.clear();
         apiTags.clear();
         uriTemplateMap.clear();
-        apiIDList.add(apiDAO.getAPIs(ApiType.STANDARD).get(2).getId());
+        apiIDList.add(apiDAO.getAPIs(new HashSet<String>(), "Alex").get(0).getId());
 
         //Construct an API in created state, this should not be shown in store
         apiTags.add("Movie");
         apiTags.add("TV");
-        uriTemplateMap = getUriTemplateMap(new String[]{"/cnn", "/bbc"});
+        uriTemplateMap = getUriTemplateMap(new String[] {"/cnn", "/bbc"});
         addAPIWithGivenData("CreatedStateAPI", "4.5.6", "createdContext", "Colin",
                 API.Visibility.PUBLIC, null, APIStatus.CREATED.getStatus(),
                 "This API is in created state. Should not be shown in store.", apiTags,
@@ -263,12 +263,12 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         visibleRoles.clear();
         apiTags.clear();
         uriTemplateMap.clear();
-        apiIDList.add(apiDAO.getAPIs(ApiType.STANDARD).get(3).getId());
+        apiIDList.add(apiDAO.getAPIs(new HashSet<String>(), "Colin").get(0).getId());
 
         //Construct an API which is visible to employee role only
         apiTags.add("Salary");
         apiTags.add("Bonus");
-        uriTemplateMap = getUriTemplateMap(new String[]{"/cash", "/cheque"});
+        uriTemplateMap = getUriTemplateMap(new String[] {"/cash", "/cheque"});
         visibleRoles.add(EMPLOYEE_ROLE);
         addAPIWithGivenData("EmployeeAPI", "5.6.7", "employeeCtx", "Emma",
                 API.Visibility.RESTRICTED, visibleRoles, APIStatus.CREATED.getStatus(),
@@ -276,12 +276,12 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         visibleRoles.clear();
         apiTags.clear();
         uriTemplateMap.clear();
-        apiIDList.add(apiDAO.getAPIs(ApiType.STANDARD).get(4).getId());
+        apiIDList.add(apiDAO.getAPIs(new HashSet<String>(), "Emma").get(0).getId());
 
         //Construct an API which is visible to all roles, except admin role
         apiTags.add("Science");
         apiTags.add("Technology");
-        uriTemplateMap = getUriTemplateMap(new String[]{"/velocity", "/distance"});
+        uriTemplateMap = getUriTemplateMap(new String[] {"/velocity", "/distance"});
         visibleRoles.add(EMPLOYEE_ROLE);
         visibleRoles.add(MANAGER_ROLE);
         visibleRoles.add(CUSTOMER_ROLE);
@@ -292,13 +292,14 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         visibleRoles.clear();
         apiTags.clear();
         uriTemplateMap.clear();
-        apiIDList.add(apiDAO.getAPIs(ApiType.STANDARD).get(5).getId());
+        apiIDList.add(apiDAO.getAPIs(new HashSet<String>(), "Nancy").get(0).getId());
 
         return apiIDList;
     }
 
     /**
      * This method creates a map containing the resources to be added to the API
+     *
      * @param resourceArray resources to be added to HTTP verbs in the API
      * @return a map containing the resources to be added
      */
@@ -311,7 +312,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
             String randomIdString = UUID.randomUUID().toString();
             uriTemplateBuilder.endpoint(Collections.emptyMap()).
                     templateId(randomIdString).uriTemplate(resource).
-                    authType(APIMgtConstants.AUTH_APPLICATION_LEVEL_TOKEN).policy("Unlimited").
+                    authType(APIMgtConstants.AUTH_APPLICATION_LEVEL_TOKEN).policy(APIUtils.getDefaultAPIPolicy()).
                     httpVerb(APIMgtConstants.FunctionsConstants.GET);
             uriTemplateMap.put(randomIdString, uriTemplateBuilder.build());
         }
@@ -320,8 +321,9 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     /**
      * Compare the results of attribute search in store
-     * @param userRoles List of the roles of the user.
-     * @param attributeMap Map containing the attributes to be searched
+     *
+     * @param userRoles        List of the roles of the user.
+     * @param attributeMap     Map containing the attributes to be searched
      * @param expectedAPINames List of expected APIs.
      * @return true if returned API list has all expected APIs, false otherwise
      * @throws APIMgtDAOException if error occurs while accessing data layer
@@ -330,7 +332,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
                                    String[] expectedAPINames) throws APIMgtDAOException {
 
         ApiDAO apiDAO = DAOFactory.getApiDAO();
-        List<API> apiList = apiDAO.attributeSearchAPIsStore(userRoles, attributeMap, 10, 0);
+        List<API> apiList = apiDAO.searchAPIsByAttributeInStore(userRoles, attributeMap, 10, 0);
         List<String> resultAPINameList = new ArrayList<>();
         for (API api : apiList) {
             resultAPINameList.add(api.getName());
@@ -343,17 +345,18 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     /**
      * This method adds an API with given information
-     * @param apiName API name
-     * @param apiVersion API version
-     * @param apiContext API context
-     * @param apiProvider API provider
-     * @param apiVisibility API visibility
-     * @param visibleRoles roles that are eligible to consume the API
+     *
+     * @param apiName                API name
+     * @param apiVersion             API version
+     * @param apiContext             API context
+     * @param apiProvider            API provider
+     * @param apiVisibility          API visibility
+     * @param visibleRoles           roles that are eligible to consume the API
      * @param initialLifecycleStatus initial lifecycle status
-     * @param description API description
-     * @param tags tag list for the API
-     * @param uriTemplates URI templates, i.e - resources
-     * @param finalLifecycleStatus final lifecycle status
+     * @param description            API description
+     * @param tags                   tag list for the API
+     * @param uriTemplates           URI templates, i.e - resources
+     * @param finalLifecycleStatus   final lifecycle status
      * @throws APIMgtDAOException if it fails to add the API
      */
     private void addAPIWithGivenData(String apiName, String apiVersion, String apiContext,
@@ -366,6 +369,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API.APIBuilder builder;
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         builder = SampleTestObjectCreator.createCustomAPI(apiName, apiVersion, apiContext);
+        builder.provider(apiProvider);
         builder.createdBy(apiProvider);
         builder.visibility(apiVisibility);
         //visible roles should be added for restricted APIs
@@ -382,6 +386,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         apiDAO.addAPI(api);
         apiDAO.changeLifeCycleStatus(api.getId(), finalLifecycleStatus);
     }
+
     private static final Logger log = LoggerFactory.getLogger(ApiDAOImplIT.class);
 
     @Test
@@ -420,7 +425,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API apiFromDB = apiDAO.getAPI(api.getId());
 
         Assert.assertNull(apiDAO.getAPI(duplicateAPI.getId()));
-        Assert.assertEquals(apiDAO.getAPIs(ApiType.STANDARD).size(), 1);
+        Assert.assertEquals(apiDAO.getAPIs(new HashSet<String>(), api.getProvider()).size(), 1);
         Assert.assertEquals(apiFromDB, api, TestUtil.printDiff(apiFromDB, api));
     }
 
@@ -442,7 +447,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         Assert.assertEquals(duplicateApiFromDB.getName(), api.getName());
         Assert.assertEquals(duplicateApiFromDB.getVersion(), api.getVersion());
-        Assert.assertEquals(apiDAO.getAPIs(ApiType.STANDARD).size(), 2);
+        Assert.assertEquals(apiDAO.getAPIs(new HashSet<String>(), api.getProvider()).size(), 1);
         Assert.assertEquals(apiFromDB, api, TestUtil.printDiff(apiFromDB, api));
         Assert.assertEquals(duplicateApiFromDB, duplicateAPI, TestUtil.printDiff(duplicateApiFromDB, duplicateAPI));
     }
@@ -468,7 +473,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API apiFromDB = apiDAO.getAPI(api.getId());
 
         Assert.assertNull(apiDAO.getAPI(duplicateAPI.getId()));
-        Assert.assertEquals(apiDAO.getAPIs(ApiType.STANDARD).size(), 1);
+        Assert.assertEquals(apiDAO.getAPIs(new HashSet<String>(), api.getProvider()).size(), 1);
         Assert.assertEquals(apiFromDB, api, TestUtil.printDiff(apiFromDB, api));
     }
 
@@ -488,11 +493,11 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertEquals(apiFromDB, expectedAPI);
     }
 
-    @Test
+    @Test (description = "Tests getting the APIs when the user has no roles assigned")
     public void testGetAPIs() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
 
-        List<API> apiList = apiDAO.getAPIs(ApiType.STANDARD);
+        List<API> apiList = apiDAO.getAPIs(new HashSet<>(), ADMIN);
         Assert.assertTrue(apiList.isEmpty());
 
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
@@ -505,7 +510,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         apiDAO.addAPI(api2);
 
-        apiList = apiDAO.getAPIs(ApiType.STANDARD);
+        apiList = apiDAO.getAPIs(new HashSet<>(), ADMIN);
 
         List<API> expectedAPIs = new ArrayList<>();
         expectedAPIs.add(SampleTestObjectCreator.copyAPISummary(api1));
@@ -517,38 +522,27 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
                 TestUtil.printDiff(apiList, expectedAPIs));
     }
 
-    @Test
-    public void testGetStandardAPIsForProvider() throws Exception {
+    @Test (description = "Tests getting the APIs when the user has roles assigned")
+    public void testGetAPIsWithUserRoles() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
-        String provider1 = "Watson";
-        String provider2 = "Holmes";
 
-        List<API> apiList = apiDAO.getAPIsForProvider(provider1, ApiType.STANDARD);
-        Assert.assertTrue(apiList.isEmpty());
-        apiList = apiDAO.getAPIsForProvider(provider2, ApiType.STANDARD);
+        Set<String> rolesOfUser = new HashSet<>();
+        rolesOfUser.add(SampleTestObjectCreator.ADMIN_ROLE_ID);
+
+        List<API> apiList = apiDAO.getAPIs(rolesOfUser, ADMIN);
         Assert.assertTrue(apiList.isEmpty());
 
-        // Add APIs belonging to provider1
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
-        builder.provider(provider1);
         API api1 = builder.build();
         testAddGetEndpoint();
         apiDAO.addAPI(api1);
 
         builder = SampleTestObjectCreator.createAlternativeAPI();
-        builder.provider(provider1);
         API api2 = builder.build();
 
         apiDAO.addAPI(api2);
 
-        // Add APIs belonging to provider2
-        builder = SampleTestObjectCreator.createUniqueAPI();
-        API api3 = builder.provider(provider2).build();
-
-        apiDAO.addAPI(api3);
-
-        // Get APIs belonging to provider1
-        apiList = apiDAO.getAPIsForProvider(provider1, ApiType.STANDARD);
+        apiList = apiDAO.getAPIs(rolesOfUser, ADMIN);
 
         List<API> expectedAPIs = new ArrayList<>();
         expectedAPIs.add(SampleTestObjectCreator.copyAPISummary(api1));
@@ -558,16 +552,120 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, expectedAPIs, new APIComparator()),
                 TestUtil.printDiff(apiList, expectedAPIs));
+    }
 
-        // Get APIs belonging to provider2
-        apiList = apiDAO.getAPIsForProvider(provider2, ApiType.STANDARD);
+    @Test (description = "Tests getting the APIs when the user is the provider of the API")
+    public void testGetAPIsWhenUserIsProvider() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
 
-        API expectedAPI = SampleTestObjectCreator.copyAPISummary(api3);
+        Set<String> rolesOfUser = new HashSet<>();
+        //The ID here is the group ID of the provider of the API. This ID is not assigned permissions for the API
+        rolesOfUser.add(ALTERNATIVE_USER_ROLE_ID);
 
+        //But this user is the provider of the API
+        List<API> apiList = apiDAO.getAPIs(rolesOfUser, ADMIN);
+        Assert.assertTrue(apiList.isEmpty());
+
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
+        API api1 = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api1);
+
+        apiList = apiDAO.getAPIs(rolesOfUser, ADMIN);
+
+        List<API> expectedAPIs = new ArrayList<>();
+        expectedAPIs.add(SampleTestObjectCreator.copyAPISummary(api1));
+
+        //The provider will have all permissions for the API by default
         Assert.assertTrue(apiList.size() == 1);
 
-        Assert.assertEquals(apiList.get(0), expectedAPI);
+        Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, expectedAPIs, new APIComparator()),
+                TestUtil.printDiff(apiList, expectedAPIs));
     }
+
+    @Test (description = "Tests getting the APIs when the API has no permissions assigned")
+    public void testGetAPIsWhenAPIHasNoPermissionsAssigned() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+
+        Set<String> rolesOfUser = new HashSet<>();
+        //The ID here is the group ID of the provider of the API. This ID is not assigned permissions for the API
+        rolesOfUser.add(ALTERNATIVE_USER_ROLE_ID);
+
+        //But this user is not the provider of the API
+        List<API> apiList = apiDAO.getAPIs(rolesOfUser, ALTERNATIVE_USER);
+        Assert.assertTrue(apiList.isEmpty());
+
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI().permissionMap(null);
+        API api1 = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api1);
+
+        apiList = apiDAO.getAPIs(rolesOfUser, ALTERNATIVE_USER);
+
+        List<API> expectedAPIs = new ArrayList<>();
+        expectedAPIs.add(SampleTestObjectCreator.copyAPISummary(api1));
+
+        //Since the API has no permissions assigned specifically, it is visible to every one
+        Assert.assertTrue(apiList.size() == 1);
+
+        Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, expectedAPIs, new APIComparator()),
+                TestUtil.printDiff(apiList, expectedAPIs));
+    }
+
+    @Test (description = "Tests getting the APIs when the user roles are contained in the API permission list")
+    public void testGetAPIsWhenUserRolesInAPIPermissions() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+
+        Set<String> rolesOfUser = new HashSet<>();
+        rolesOfUser.add(SampleTestObjectCreator.DEVELOPER_ROLE_ID);
+
+        //This user is not the provider of the API
+        List<API> apiList = apiDAO.getAPIs(rolesOfUser, ALTERNATIVE_USER);
+        Assert.assertTrue(apiList.isEmpty());
+
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
+        API api1 = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api1);
+
+        apiList = apiDAO.getAPIs(rolesOfUser, ALTERNATIVE_USER);
+
+        List<API> expectedAPIs = new ArrayList<>();
+        expectedAPIs.add(SampleTestObjectCreator.copyAPISummary(api1));
+
+        //Since the API has the role ID of the user with READ permissions, it is visible to this user
+        Assert.assertTrue(apiList.size() == 1);
+
+        Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, expectedAPIs, new APIComparator()),
+                TestUtil.printDiff(apiList, expectedAPIs));
+    }
+
+    @Test (description = "Tests getting the APIs when the user roles are contained in the API permission list "
+            + "but without READ permissions")
+    public void testGetAPIsWhenUserRolesInAPIPermissionsWithoutREAD() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+
+        Set<String> rolesOfUser = new HashSet<>();
+        rolesOfUser.add(SampleTestObjectCreator.DEVELOPER_ROLE_ID);
+
+        //This user is not the provider of the API
+        List<API> apiList = apiDAO.getAPIs(rolesOfUser, ALTERNATIVE_USER);
+        Assert.assertTrue(apiList.isEmpty());
+
+        Map map = new HashMap();
+        map.put(SampleTestObjectCreator.DEVELOPER_ROLE_ID, 0);
+
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI().permissionMap(map);
+        API api1 = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api1);
+
+        apiList = apiDAO.getAPIs(rolesOfUser, ALTERNATIVE_USER);
+
+        //Since the API has the role ID of the user but without READ permissions, it is not visible to this user
+        Assert.assertTrue(apiList.size() == 0);
+    }
+
 
     @Test
     public void testGetAPIsByStatus() throws Exception {
@@ -576,12 +674,12 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         // Define statuses used in test
         final String publishedStatus = "PUBLISHED";
         final String createdStatus = "CREATED";
-        final String blockedStatus = "BLOCKED";
+        final String maintenanceStatus = "MAINTENANCE";
 
         // Define number of APIs to be created for a given status
         final int numberOfPublished = 4;
         final int numberOfCreated = 2;
-        final int numberOfBlocked = 1;
+        final int numberOfInMaintenance = 1;
 
         // Add APIs
         List<API> publishedAPIsSummary = new ArrayList<>();
@@ -599,10 +697,10 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
             apiDAO.addAPI(api);
         }
 
-        List<API> blockedAPIsSummary = new ArrayList<>();
-        for (int i = 0; i < numberOfBlocked; ++i) {
-            API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(blockedStatus).build();
-            blockedAPIsSummary.add(SampleTestObjectCreator.getSummaryFromAPI(api));
+        List<API> maintenanceAPIsSummary = new ArrayList<>();
+        for (int i = 0; i < numberOfInMaintenance; ++i) {
+            API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(maintenanceStatus).build();
+            maintenanceAPIsSummary.add(SampleTestObjectCreator.getSummaryFromAPI(api));
             apiDAO.addAPI(api);
         }
 
@@ -610,25 +708,25 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         List<String> singleStatus = new ArrayList<>();
         singleStatus.add(publishedStatus);
 
-        List<API> apiList = apiDAO.getAPIsByStatus(singleStatus, ApiType.STANDARD);
+        List<API> apiList = apiDAO.getAPIsByStatus(singleStatus);
 
         Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, publishedAPIsSummary, new APIComparator()));
 
         // Filter APIs by two statuses
         List<String> twoStatuses = new ArrayList<>();
         twoStatuses.add(publishedStatus);
-        twoStatuses.add(blockedStatus);
+        twoStatuses.add(maintenanceStatus);
 
-        apiList = apiDAO.getAPIsByStatus(twoStatuses, ApiType.STANDARD);
+        apiList = apiDAO.getAPIsByStatus(twoStatuses);
 
-        Assert.assertEquals(apiList.size(), publishedAPIsSummary.size() + blockedAPIsSummary.size());
+        Assert.assertEquals(apiList.size(), publishedAPIsSummary.size() + maintenanceAPIsSummary.size());
 
         for (API api : publishedAPIsSummary) {
             Assert.assertTrue(apiList.contains(api));
             apiList.remove(api);
         }
 
-        for (API api : blockedAPIsSummary) {
+        for (API api : maintenanceAPIsSummary) {
             Assert.assertTrue(apiList.contains(api));
             apiList.remove(api);
         }
@@ -639,11 +737,11 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         List<String> multipleStatuses = new ArrayList<>();
         multipleStatuses.add(publishedStatus);
         multipleStatuses.add(createdStatus);
-        multipleStatuses.add(blockedStatus);
+        multipleStatuses.add(maintenanceStatus);
 
-        apiList = apiDAO.getAPIsByStatus(multipleStatuses, ApiType.STANDARD);
+        apiList = apiDAO.getAPIsByStatus(multipleStatuses);
 
-        Assert.assertEquals(apiList.size(), publishedAPIsSummary.size() + blockedAPIsSummary.size()
+        Assert.assertEquals(apiList.size(), publishedAPIsSummary.size() + maintenanceAPIsSummary.size()
                 + createdAPIsSummary.size());
 
         for (API api : publishedAPIsSummary) {
@@ -651,7 +749,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
             apiList.remove(api);
         }
 
-        for (API api : blockedAPIsSummary) {
+        for (API api : maintenanceAPIsSummary) {
             Assert.assertTrue(apiList.contains(api));
             apiList.remove(api);
         }
@@ -715,33 +813,32 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         commonStringResult.add(apis.get(upperCaseString));
 
         // Search by common mixed case
-        List<API> apiList = apiDAO.searchAPIs(new HashSet<>(), provider, commonMixedCaseSearchString, ApiType
-                .STANDARD, 0, 10);
+        List<API> apiList = apiDAO.searchAPIs(new HashSet<>(), provider, commonMixedCaseSearchString, 0, 10);
         Assert.assertEquals(apiList.size(), 3);
         Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, commonStringResult, new APIComparator()),
                 TestUtil.printListDiff(apiList, commonStringResult));
 
         // Search by common lower case
-        apiList = apiDAO.searchAPIs(new HashSet<>(), provider, commonLowerCaseSearchString, ApiType.STANDARD, 0, 10);
+        apiList = apiDAO.searchAPIs(new HashSet<>(), provider, commonLowerCaseSearchString, 0, 10);
         Assert.assertEquals(apiList.size(), 3);
         Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, commonStringResult, new APIComparator()),
                 TestUtil.printListDiff(apiList, commonStringResult));
 
         // Search by common upper case
-        apiList = apiDAO.searchAPIs(new HashSet<>(), provider, commonUpperCaseSearchString, ApiType.STANDARD, 0, 10);
+        apiList = apiDAO.searchAPIs(new HashSet<>(), provider, commonUpperCaseSearchString, 0, 10);
         Assert.assertEquals(apiList.size(), 3);
         Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, commonStringResult, new APIComparator()),
                 TestUtil.printListDiff(apiList, commonStringResult));
 
         // Search by symbol
-        apiList = apiDAO.searchAPIs(new HashSet<>(), provider, symbolSearchString, ApiType.STANDARD, 0, 10);
+        apiList = apiDAO.searchAPIs(new HashSet<>(), provider, symbolSearchString, 0, 10);
         Assert.assertEquals(apiList.size(), 1);
         API actualAPI = apiList.get(0);
         API expectedAPI = apis.get(charSymbolNumString);
         Assert.assertEquals(actualAPI, expectedAPI, TestUtil.printDiff(actualAPI, expectedAPI));
 
         // Search by number
-        apiList = apiDAO.searchAPIs(new HashSet<>(), provider, numberSearchString, ApiType.STANDARD, 0, 10);
+        apiList = apiDAO.searchAPIs(new HashSet<>(), provider, numberSearchString, 0, 10);
         Assert.assertEquals(apiList.size(), 1);
         actualAPI = apiList.get(0);
         expectedAPI = apis.get(charSymbolNumString);
@@ -755,8 +852,8 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API api = SampleTestObjectCreator.createUniqueAPI().build();
         apiDAO.addAPI(api);
 
-        Assert.assertTrue(apiDAO.isAPINameExists(api.getName(), api.getProvider(), ApiType.STANDARD));
-        Assert.assertFalse(apiDAO.isAPINameExists("Not-Exists", api.getProvider(), ApiType.STANDARD));
+        Assert.assertTrue(apiDAO.isAPINameExists(api.getName(), api.getProvider()));
+        Assert.assertFalse(apiDAO.isAPINameExists("Not-Exists", api.getProvider()));
 
         final String upperCaseName = "CAPITAL";
 
@@ -764,13 +861,13 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         api = SampleTestObjectCreator.createUniqueAPI().name(upperCaseName).build();
         apiDAO.addAPI(api);
         // Check with upper case format
-        Assert.assertTrue(apiDAO.isAPINameExists(upperCaseName, api.getProvider(), ApiType.STANDARD));
+        Assert.assertTrue(apiDAO.isAPINameExists(upperCaseName, api.getProvider()));
         // Check with lower case format
-        Assert.assertTrue(apiDAO.isAPINameExists(upperCaseName.toLowerCase(Locale.ENGLISH), api.getProvider(),
-                                                    ApiType.STANDARD));
+        Assert.assertTrue(apiDAO.isAPINameExists(upperCaseName.toLowerCase(Locale.ENGLISH), api.getProvider()
+        ));
         // Check with mixed case format
         Assert.assertTrue(apiDAO.isAPINameExists(upperCaseName.substring(0, 3) +
-                upperCaseName.substring(3).toLowerCase(Locale.ENGLISH), api.getProvider(), ApiType.STANDARD));
+                upperCaseName.substring(3).toLowerCase(Locale.ENGLISH), api.getProvider()));
 
         final String lowerCaseName = "simple";
 
@@ -778,13 +875,13 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         api = SampleTestObjectCreator.createUniqueAPI().name(lowerCaseName).build();
         apiDAO.addAPI(api);
         // Check with lower case format
-        Assert.assertTrue(apiDAO.isAPINameExists(lowerCaseName, api.getProvider(), ApiType.STANDARD));
+        Assert.assertTrue(apiDAO.isAPINameExists(lowerCaseName, api.getProvider()));
         // Check with upper case format
-        Assert.assertTrue(apiDAO.isAPINameExists(lowerCaseName.toUpperCase(Locale.ENGLISH), api.getProvider(),
-                                                    ApiType.STANDARD));
+        Assert.assertTrue(apiDAO.isAPINameExists(lowerCaseName.toUpperCase(Locale.ENGLISH), api.getProvider()
+        ));
         // Check with mixed case format
         Assert.assertTrue(apiDAO.isAPINameExists(lowerCaseName.substring(0, 3) +
-                lowerCaseName.substring(3).toUpperCase(Locale.ENGLISH), api.getProvider(), ApiType.STANDARD));
+                lowerCaseName.substring(3).toUpperCase(Locale.ENGLISH), api.getProvider()));
 
         // Create same API for different providers and check for existence
         final String sameName = "same";
@@ -795,9 +892,9 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API api2 = SampleTestObjectCreator.createUniqueAPI().name(sameName).build();
         apiDAO.addAPI(api2);
 
-        Assert.assertTrue(apiDAO.isAPINameExists(sameName, api1.getProvider(), ApiType.STANDARD));
-        Assert.assertTrue(apiDAO.isAPINameExists(sameName, api2.getProvider(), ApiType.STANDARD));
-        Assert.assertFalse(apiDAO.isAPINameExists(sameName, "no_such_provider", ApiType.STANDARD));
+        Assert.assertTrue(apiDAO.isAPINameExists(sameName, api1.getProvider()));
+        Assert.assertTrue(apiDAO.isAPINameExists(sameName, api2.getProvider()));
+        Assert.assertFalse(apiDAO.isAPINameExists(sameName, "no_such_provider"));
     }
 
     @Test
@@ -815,7 +912,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         testAddGetEndpoint();
         API api = SampleTestObjectCreator.createUniqueAPI().build();
         apiDAO.addAPI(api);
-        Assert.assertNotNull(apiDAO.getSwaggerDefinition(api.getId()));
+        Assert.assertNotNull(apiDAO.getApiSwaggerDefinition(api.getId()));
     }
 
     @Test
@@ -825,7 +922,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         String configString = SampleTestObjectCreator.createSampleGatewayConfig();
         API api = SampleTestObjectCreator.createUniqueAPI().gatewayConfig(configString).build();
         apiDAO.addAPI(api);
-        Assert.assertNotNull(apiDAO.getGatewayConfig(api.getId()));
+        Assert.assertNotNull(apiDAO.getGatewayConfigOfAPI(api.getId()));
     }
 
     @Test(description = "Changing the Lifecycle status of a given API")
@@ -910,20 +1007,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Set<String> roles = new HashSet<>();
         Map<String, String> attributeMap = new HashMap<>();
         attributeMap.put("name", api.getName());
-        List<API> apiList = apiDAO.attributeSearchAPIs(roles, api.getProvider(), attributeMap, ApiType.STANDARD, 0, 2);
-        Assert.assertTrue(apiList.size() > 0);
-    }
-
-    @Test(description = "Search APIs by status")
-    public void testSearchAPIsByStatus() throws Exception {
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
-        testAddGetEndpoint();
-        API api = SampleTestObjectCreator.createDefaultAPI().build();
-        apiDAO.addAPI(api);
-        List<String> statuses = new ArrayList<>();
-        statuses.add(api.getLifeCycleStatus());
-        String searchString = api.getName();
-        List<API> apiList = apiDAO.searchAPIsByStatus(searchString, statuses, ApiType.STANDARD);
+        List<API> apiList = apiDAO.attributeSearchAPIs(roles, api.getProvider(), attributeMap, 0, 2);
         Assert.assertTrue(apiList.size() > 0);
     }
 
@@ -960,9 +1044,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         testAddGetEndpoint();
         apiDAO.addAPI(api);
 
-        HashMap permissionMap = new HashMap();
-        permissionMap.put(APIMgtConstants.Permission.UPDATE, APIMgtConstants.Permission.UPDATE_PERMISSION);
-        builder = SampleTestObjectCreator.createAlternativeAPI().permissionMap(permissionMap);
+        builder = SampleTestObjectCreator.createAlternativeAPI();
         API substituteAPI = builder.build();
 
         apiDAO.updateAPI(api.getId(), substituteAPI);
@@ -1010,7 +1092,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Thread.sleep(1);
 
         String swagger = SampleTestObjectCreator.createAlternativeSwaggerDefinition();
-        apiDAO.updateSwaggerDefinition(api.getId(), swagger, ADMIN);
+        apiDAO.updateApiDefinition(api.getId(), swagger, ADMIN);
         String fingerprintAfterUpdate = ETagUtils
                 .generateETag(apiDAO.getLastUpdatedTimeOfSwaggerDefinition(api.getId()));
         Assert.assertNotNull(fingerprintAfterUpdate);
@@ -1367,6 +1449,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNotNull(retrievedGlobal);
         Assert.assertEquals(endpointToInsert, retrievedGlobal);
     }
+
     @Test
     public void testAddGetComment() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
@@ -1416,6 +1499,57 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
     }
 
+    @Test
+    public void testAddGetRating() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
+                .apiDefinition(SampleTestObjectCreator.apiDefinition);
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+        Rating rating = SampleTestObjectCreator.createDefaultRating(api.getId());
+        apiDAO.addRating(api.getId(), rating);
+        Rating ratingFromDB = apiDAO.getRatingByUUID(api.getId(), rating.getUuid());
+        Assert.assertNotNull(ratingFromDB);
+    }
+
+    @Test
+    public void testUpdateRating() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
+                .apiDefinition(SampleTestObjectCreator.apiDefinition);
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+        Rating rating1 = SampleTestObjectCreator.createDefaultRating(api.getId());
+        apiDAO.addRating(api.getId(), rating1);
+        Rating rating2 = SampleTestObjectCreator.createDefaultRating(api.getId());
+        rating2.setRating(4);
+        apiDAO.updateRating(api.getId(), rating1.getUuid(), rating2);
+        Rating ratingFromDB = apiDAO.getRatingByUUID(api.getId(), rating1.getUuid());
+        Assert.assertNotNull(ratingFromDB);
+        Assert.assertEquals(4, ratingFromDB.getRating());
+    }
+
+    @Test
+    public void testAddGetAllRatings() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
+                .apiDefinition(SampleTestObjectCreator.apiDefinition);
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+        Rating rating1 = SampleTestObjectCreator.createDefaultRating(api.getId());
+        apiDAO.addRating(api.getId(), rating1);
+        Rating rating2 = SampleTestObjectCreator.createDefaultRating(api.getId());
+        rating2.setRating(3);
+        rating2.setUsername("andrew");
+        apiDAO.addRating(api.getId(), rating2);
+        List<Rating> ratingsListFromDB = apiDAO.getRatingsListForApi(api.getId());
+        Assert.assertNotNull(ratingsListFromDB);
+        Assert.assertEquals(2, ratingsListFromDB.size());
+    }
+
     @Test(expectedExceptions = APIMgtDAOException.class)
     public void testGetAPIByStatus() throws Exception {
 
@@ -1423,14 +1557,14 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         // Define statuses used in test
         final String publishedStatus = "PUBLISHED";
         final String createdStatus = "CREATED";
-        final String blockedStatus = "BLOCKED";
+        final String maintenanceStatus = "MAINTENANCE";
         // Define number of APIs to be created for a given status by role
         final int numberOfPublishedAdmin = 4;
         final int numberOfCreatedAdmin = 2;
-        final int numberOfBlockedAdmin = 1;
+        final int numberOfMaintenanceAdmin = 1;
         final int numberOfPublishedCreator = 5;
         final int numberOfCreatedCreator = 3;
-        final int numberOfBlockedCreator = 1;
+        final int numberOfMaintenanceCreator = 1;
 
         Set<String> singleRole = new HashSet<>();
         singleRole.add(ADMIN);
@@ -1450,21 +1584,21 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
             createdAPIsSummaryAdmin.add(SampleTestObjectCreator.getSummaryFromAPI(api));
             apiDAO.addAPI(api);
         }
-        List<API> blockedAPIsSummaryAdmin = new ArrayList<>();
-        for (int i = 0; i < numberOfBlockedAdmin; ++i) {
-            API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(blockedStatus).
+        List<API> maintenanceAPIsSummaryAdmin = new ArrayList<>();
+        for (int i = 0; i < numberOfMaintenanceAdmin; ++i) {
+            API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(maintenanceStatus).
                     visibleRoles(singleRole).build();
-            blockedAPIsSummaryAdmin.add(SampleTestObjectCreator.getSummaryFromAPI(api));
+            maintenanceAPIsSummaryAdmin.add(SampleTestObjectCreator.getSummaryFromAPI(api));
             apiDAO.addAPI(api);
         }
         // Filter APIs by single status
         List<String> singleStatus = new ArrayList<>();
         singleStatus.add(publishedStatus);
-        List<API> apiList = apiDAO.getAPIsByStatus(singleRole, singleStatus, ApiType.STANDARD);
+        List<API> apiList = apiDAO.getAPIsByStatus(singleRole, singleStatus);
         Assert.assertTrue(APIUtils.isListsEqualIgnoreOrder(apiList, publishedAPIsSummaryAdmin, new APIComparator()));
         List<String> twoStatus = new ArrayList<>();
         twoStatus.add(createdStatus);
-        twoStatus.add(blockedStatus);
+        twoStatus.add(maintenanceStatus);
         Set<String> twoRoles = new HashSet<>();
         twoRoles.add(ADMIN);
         twoRoles.add(CREATOR);
@@ -1484,20 +1618,21 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
             createdAPIsSummaryTwoRoles.add(SampleTestObjectCreator.getSummaryFromAPI(api));
             apiDAO.addAPI(api);
         }
-        List<API> blockedAPIsSummaryTwoRoles = new ArrayList<>();
-        for (int i = 0; i < numberOfBlockedCreator; ++i) {
-            API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(blockedStatus).
+        List<API> maintenanceAPIsSummaryTwoRoles = new ArrayList<>();
+        for (int i = 0; i < numberOfMaintenanceCreator; ++i) {
+            API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(maintenanceStatus).
                     visibleRoles(twoRoles).build();
-            blockedAPIsSummaryTwoRoles.add(SampleTestObjectCreator.getSummaryFromAPI(api));
+            maintenanceAPIsSummaryTwoRoles.add(SampleTestObjectCreator.getSummaryFromAPI(api));
             apiDAO.addAPI(api);
         }
-        apiList = apiDAO.getAPIsByStatus(twoRoles, twoStatus, ApiType.STANDARD);
-        Assert.assertEquals(apiList.size(), publishedAPIsSummaryTwoRoles.size() + blockedAPIsSummaryTwoRoles.size());
+        apiList = apiDAO.getAPIsByStatus(twoRoles, twoStatus);
+        Assert.assertEquals(apiList.size(),
+                publishedAPIsSummaryTwoRoles.size() + maintenanceAPIsSummaryTwoRoles.size());
         for (API api : publishedAPIsSummaryTwoRoles) {
             Assert.assertTrue(apiList.contains(api));
             apiList.remove(api);
         }
-        for (API api : blockedAPIsSummaryTwoRoles) {
+        for (API api : maintenanceAPIsSummaryTwoRoles) {
             Assert.assertTrue(apiList.contains(api));
             apiList.remove(api);
         }
@@ -1512,9 +1647,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API api = builder.build();
         testAddGetEndpoint();
         apiDAO.addAPI(api);
-        Map permissionMap = new HashMap();
-        permissionMap.put(APIMgtConstants.Permission.UPDATE, APIMgtConstants.Permission.UPDATE_PERMISSION);
-        builder = SampleTestObjectCreator.createAlternativeAPI().permissionMap(permissionMap).wsdlUri(null);
+        builder = SampleTestObjectCreator.createAlternativeAPI().wsdlUri(null);
         API substituteAPI = builder.build();
         apiDAO.updateAPI(api.getId(), substituteAPI);
         API apiFromDB = apiDAO.getAPI(api.getId());
@@ -1522,5 +1655,32 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNotNull(apiFromDB);
         Assert.assertEquals(apiFromDB, expectedAPI, TestUtil.printDiff(apiFromDB, expectedAPI));
 
+    }
+
+    @Test
+    public void testGetResourcesOfApi() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
+        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+        List<UriTemplate> uriTemplateList = apiDAO.getResourcesOfApi(api.getContext(), api.getVersion());
+        for (Map.Entry<String, UriTemplate> entry : api.getUriTemplates().entrySet()) {
+            UriTemplate uriTemplate = entry.getValue();
+            for (UriTemplate v : uriTemplateList) {
+                if (v.getTemplateId().equals(uriTemplate.getTemplateId())) {
+                    Assert.assertEquals(uriTemplate.getAuthType(), v.getAuthType(), TestUtil.printDiff(uriTemplate
+                            .getAuthType(), v.getAuthType()));
+                    Assert.assertEquals(uriTemplate.getHttpVerb(), v.getHttpVerb(), TestUtil.printDiff(uriTemplate
+                            .getHttpVerb(), v.getHttpVerb()));
+                    Assert.assertEquals(uriTemplate.getUriTemplate(), v.getUriTemplate(), TestUtil.printDiff
+                            (uriTemplate.getUriTemplate(), v.getUriTemplate()));
+                    Assert.assertEquals(uriTemplate.getPolicy().getPolicyName(), policyDAO.getApiPolicyByUuid(v
+                            .getPolicy().getUuid()).getPolicyName(), TestUtil.printDiff(uriTemplate.getPolicy()
+                            .getPolicyName(), policyDAO.getApiPolicyByUuid(v.getPolicy().getUuid()).getPolicyName()));
+                }
+            }
+        }
     }
 }

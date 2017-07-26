@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
-import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 
 /**
@@ -30,34 +29,6 @@ public class ApplicationUtils {
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationUtils.class);
 
-    /**
-     * This method will parse json String and set properties in  OAuthApplicationInfo object.
-     * Further it will initiate new OauthAppRequest  object and set applicationInfo object as its own property.
-     * @param clientName client Name.
-     * @param callbackURL This is the call back URL of the application
-     * @param tokenScope The token scope
-     * @param clientId The ID of the client
-     * @return appRequest object of OauthAppRequest.
-     * @throws APIManagementException
-     */
-    public static OAuthAppRequest createOauthAppRequest(String clientName, String clientId, String callbackURL,
-            String tokenScope) throws APIManagementException {
-
-        //String[] tokenScopeList = new String[]{tokenScope};
-        //initiate OauthAppRequest object.
-        OAuthAppRequest appRequest = new OAuthAppRequest();
-        OAuthApplicationInfo authApplicationInfo = new OAuthApplicationInfo();
-        authApplicationInfo.setClientName(clientName);
-        authApplicationInfo.setCallbackUrl(callbackURL);
-        //authApplicationInfo.addParameter(KeyManagerConstants.OAUTH_CLIENT_TOKEN_SCOPE, tokenScopeList);
-        authApplicationInfo.setClientId(clientId);
-        authApplicationInfo.setAppOwner(clientId);
-
-        //set applicationInfo object
-        appRequest.setOAuthApplicationInfo(authApplicationInfo);
-        return appRequest;
-    }
-
     public static AccessTokenRequest createAccessTokenRequest(OAuthApplicationInfo oAuthApplication)
             throws APIManagementException {
 
@@ -66,14 +37,16 @@ public class ApplicationUtils {
             tokenRequest.setClientId(oAuthApplication.getClientId());
             tokenRequest.setClientSecret(oAuthApplication.getClientSecret());
         } else {
-            throw new KeyManagementException("Consumer key or Consumer Secret missing.");
+            throw new KeyManagementException("Consumer key or Consumer Secret is missing.");
         }
 
-//        if (oAuthApplication.getParameter("tokenScope") != null) {
-//            String[] tokenScopes = (String[]) oAuthApplication.getParameter("tokenScope");
-//            tokenRequest.setScopes(tokenScopes);
-//            oAuthApplication.addParameter("tokenScope", Arrays.toString(tokenScopes));
-//        }
+        if (oAuthApplication.getParameter(KeyManagerConstants.TOKEN_SCOPES) != null) {
+            String tokenScopes = (String) oAuthApplication.getParameter(KeyManagerConstants.TOKEN_SCOPES);
+            tokenRequest.setScopes(tokenScopes);
+            oAuthApplication.addParameter(KeyManagerConstants.OAUTH_CLIENT_TOKEN_SCOPE, tokenScopes);
+        }
+
+        tokenRequest.setGrantType(KeyManagerConstants.CLIENT_CREDENTIALS_GRANT_TYPE);
 
         if (oAuthApplication.getParameter(KeyManagerConstants.VALIDITY_PERIOD) != null) {
             tokenRequest.setValidityPeriod(Long.parseLong((String) oAuthApplication.getParameter(KeyManagerConstants

@@ -191,64 +191,94 @@ function createAPIFromSwagger(input_type) {
  * @param response
  */
 function createAPIUsingEndpoint() {
-    var api_data = {
-        name: $("#new-api-name").val(),
-        context: $('#new-api-context').val(),
-        version: $('#new-api-version').val(),
-        endpoint: constructEndpointsForApi()
-    };
-    var new_api = new API('');
-    var promised_create = new_api.create(api_data);
-    promised_create
-        .then(createAPICallback)
-        .catch(
-            function (error_response) {
-                var error_data = JSON.parse(error_response.data);
-                var message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
-                noty({
-                    text: message,
-                    type: 'error',
-                    dismissQueue: true,
-                    modal: true,
-                    closeWith: ['click', 'backdrop'],
-                    progressBar: true,
-                    timeout: 5000,
-                    layout: 'top',
-                    theme: 'relax',
-                    maxVisible: 10
+    var endpoints = constructEndpointsForApi();
+    if (endpoints != false) {
+        var api_data = {
+            name: $("#new-api-name").val(),
+            context: $('#new-api-context').val(),
+            version: $('#new-api-version').val(),
+            endpoint: endpoints
+        };
+        var new_api = new API('');
+        var promised_create = new_api.create(api_data);
+        promised_create
+            .then(createAPICallback)
+            .catch(
+                function (error_response) {
+                    var error_data = JSON.parse(error_response.data);
+                    var message = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+                    noty({
+                        text: message,
+                        type: 'error',
+                        dismissQueue: true,
+                        modal: true,
+                        closeWith: ['click', 'backdrop'],
+                        progressBar: true,
+                        timeout: 5000,
+                        layout: 'top',
+                        theme: 'relax',
+                        maxVisible: 10
+                    });
+                    $('[data-toggle="loading"]').loading('hide');
+                    console.debug(error_response);
                 });
-                $('[data-toggle="loading"]').loading('hide');
-                console.debug(error_response);
-            });
+    }
+    else {
+        noty({
+            text: "Need at least one end point",
+            type: 'error',
+            dismissQueue: true,
+            modal: true,
+            closeWith: ['click', 'backdrop'],
+            progressBar: true,
+            timeout: 5000,
+            layout: 'top',
+            theme: 'relax',
+            maxVisible: 10
+        });
+        $('[data-toggle="loading"]').loading('hide');
+    }
 }
-function constructEndpointsForApi(){
- var endpoint = [];
+function constructEndpointsForApi() {
+    var endpoint = [];
 
-     var productionLevel = $('input[name=endpoint-select-production]:checked').val();
-     var sandBoxLevel = $('input[name=endpoint-select-sandbox]:checked').val();
-     if(productionLevel =="global"){
-     var endpointId = $('#global-endpoint-production option:selected').val();
+    var productionLevel = $('input[name=endpoint-select-production]:checked').val();
+    var sandBoxLevel = $('input[name=endpoint-select-sandbox]:checked').val();
+    var productionEndpoint, sandboxEndpoint;
+    if (productionLevel == "global") {
+        var endpointId = $('#global-endpoint-production option:selected').val();
         endpoint.push({
             'key': endpointId,
             'type': 'production'
         });
-     }else{
-         endpoint.push({
-             'inline': constructEndpoint('production'),
-             'type': 'production'
-         });
-     }
-     if(sandBoxLevel =="global"){
-          var endpointId = $('#global-endpoint-sandbox option:selected').val();
-             endpoint.push({
-                 'key': endpointId,
-                 'type': 'sandbox'
-             });
-          }else{
-              endpoint.push({
-                  'inline': constructEndpoint('sandbox'),
-                  'type': 'sandbox'
-              });
-          }
-     return endpoint;
+    } else {
+        productionEndpoint = constructEndpoint('production');
+        if (productionEndpoint != false) {
+            endpoint.push({
+                'inline': productionEndpoint,
+                'type': 'production'
+            });
+        }
+    }
+    if (sandBoxLevel == "global") {
+        var endpointId = $('#global-endpoint-sandbox option:selected').val();
+        endpoint.push({
+            'key': endpointId,
+            'type': 'sandbox'
+        });
+    } else {
+        sandboxEndpoint = constructEndpoint('sandbox');
+        if (sandboxEndpoint != false) {
+            endpoint.push({
+                'inline': sandboxEndpoint,
+                'type': 'sandbox'
+            });
+        }
+    }
+    if (productionEndpoint == false && sandboxEndpoint == false) {
+        return false;
+    }
+    else {
+        return endpoint;
+    }
 }

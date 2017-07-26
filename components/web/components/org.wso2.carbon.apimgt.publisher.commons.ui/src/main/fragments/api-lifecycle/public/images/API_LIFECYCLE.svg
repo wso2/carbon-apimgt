@@ -118,9 +118,9 @@
         <g transform="translate(37.5547,0)"/></g>
     </g>
     <g class="cell cell-state " transform="translate(129.4898681640625,62.33333206176758)">
-      <rect class="border" rx="5" ry="5" height="26" width="75.3125" y="-13" x="-37.65625" id="Blocked"/>
+      <rect class="border" rx="5" ry="5" height="26" width="110" y="-13" x="-55.65625" id="Maintenance"/>
       <g class="cell-header" transform="translate(0,-8)">
-        <text y="12" x="0">Blocked</text>
+        <text y="12" x="0">Maintenance</text>
         <g transform="translate(-32.65625,0)"/>
         <g transform="translate(32.65625,0)"/></g>
     </g>
@@ -200,12 +200,12 @@
     </g>
     <g class="transition">
       <path class="transitionMask" d="M-152.19638333333336,-13.666666666666671L-108.07825000000003,-13.666666666666671L-108.07825000000003,62.33333333333334L-46.36715000000004,62.33333333333334L-1.1483500000000504,62.33333333333334L91.83361666666656,62.33333333333334"/>
-      <path class="transitionLine" style="marker-end: url(#_force_id_1-arrow)" id="_force_id_1-transition/_transition/Published/Blocked/1" d="M-152.19638333333336,-13.666666666666671L-108.07825000000003,-13.666666666666671L-108.07825000000003,62.33333333333334L-46.36715000000004,62.33333333333334L-1.1483500000000504,62.33333333333334L91.83361666666656,62.33333333333334"/>
+      <path class="transitionLine" style="marker-end: url(#_force_id_1-arrow)" id="_force_id_1-transition/_transition/Published/Maintenance/1" d="M-152.19638333333336,-13.666666666666671L-108.07825000000003,-13.666666666666671L-108.07825000000003,62.33333333333334L-46.36715000000004,62.33333333333334L-1.1483500000000504,62.33333333333334L91.83361666666656,62.33333333333334"/>
       <g class="transition-label" transform="translate(-23.757749557495117,55.83333206176758)">
         <g class="transition-label-offset" transform="translate(0,-12.5)">
           <rect x="-22.6094" width="45.2188" height="25"/>
           <text y="16">
-            <tspan>Block</tspan>
+            <tspan>Move to Maintenance</tspan>
           </text>
           <g transform="translate(0,21)"/></g>
       </g>
@@ -260,7 +260,7 @@
     </g>
     <g class="transition">
       <path class="transitionMask" d="M167.14611666666656,58L241.23484999999994,58L312.96925,58L381.4225499999999,58"/>
-      <path class="transitionLine" style="marker-end: url(#_force_id_1-arrow)" id="_force_id_1-transition/_transition/Blocked/Deprecated/1" d="M167.14611666666656,58L241.23484999999994,58L312.96925,58L381.4225499999999,58"/>
+      <path class="transitionLine" style="marker-end: url(#_force_id_1-arrow)" id="_force_id_1-transition/_transition/Maintenance/Deprecated/1" d="M167.14611666666656,58L241.23484999999994,58L312.96925,58L381.4225499999999,58"/>
       <g class="transition-label" transform="translate(277.10205078125,51)">
         <g class="transition-label-offset" transform="translate(0,-13)">
           <rect x="-35.8672" width="71.7344" height="26"/>
@@ -272,7 +272,7 @@
     </g>
     <g class="transition">
       <path class="transitionMask" d="M167.14611666666656,66.66666666666669L182.78154999999992,66.66666666666669L182.78154999999992,103L202.78154999999992,103L280.89094999999986,103L361.4225499999999,103L361.4225499999999,135L-296.71925,135L-296.71925,-5.866666666666674L-237.30578333333335,-5.866666666666674"/>
-      <path class="transitionLine" style="marker-end: url(#_force_id_1-arrow)" id="_force_id_1-transition/_transition/Blocked/Published/1" d="M167.14611666666656,66.66666666666669L182.78154999999992,66.66666666666669L182.78154999999992,103L202.78154999999992,103L280.89094999999986,103L361.4225499999999,103L361.4225499999999,135L-296.71925,135L-296.71925,-5.866666666666674L-237.30578333333335,-5.866666666666674"/>
+      <path class="transitionLine" style="marker-end: url(#_force_id_1-arrow)" id="_force_id_1-transition/_transition/Maintenance/Published/1" d="M167.14611666666656,66.66666666666669L182.78154999999992,66.66666666666669L182.78154999999992,103L202.78154999999992,103L280.89094999999986,103L361.4225499999999,103L361.4225499999999,135L-296.71925,135L-296.71925,-5.866666666666674L-237.30578333333335,-5.866666666666674"/>
       <g class="transition-label" transform="translate(241.83624267578125,96.5)">
         <g class="transition-label-offset" transform="translate(0,-12.5)">
           <rect x="-39.0547" width="78.1094" height="25"/>

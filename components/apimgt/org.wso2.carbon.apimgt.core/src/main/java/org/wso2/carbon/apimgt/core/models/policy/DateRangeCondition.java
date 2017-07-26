@@ -27,7 +27,7 @@ public class DateRangeCondition extends Condition {
     private String endingDate;
 
     public DateRangeCondition() {
-        setType(PolicyConstants.DATE_RANGE_TYPE);
+        setType(PolicyConstants.DATE_RANGE_CONDITION_TYPE);
         this.queryAttributeName = PolicyConstants.START_QUERY + PolicyConstants.DATE_QUERY + PolicyConstants.END_QUERY;
         // "cast(map:get(properties,’"+value+"’),’string’)";
     }

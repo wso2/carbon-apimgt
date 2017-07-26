@@ -373,13 +373,40 @@ public interface APIPublisher extends APIManager {
     String addApiFromDefinition(HttpURLConnection httpURLConnection) throws APIManagementException;
 
     /**
+     * This method updates gateway config in the database
+     *
+     * @param apiId        id of the String
+     * @param configString text to be saved in the registry
+     * @throws APIManagementException If failed to update gateway config.
+     */
+    void updateApiGatewayConfig(String apiId, String configString) throws APIManagementException;
+
+    /**
+     * This method retrieve gateway config in the database
+     *
+     * @param apiId id of the String
+     * @return API gateway config as a string
+     * @throws APIManagementException If failed to get gateway config of the API.
+     */
+    String getApiGatewayConfig(String apiId) throws APIManagementException;
+
+    /**
+     * This method updates Swagger 2.0 resource in the DB
+     *
+     * @param apiId    id of the String
+     * @param jsonText json text to be saved in the registry
+     * @throws APIManagementException If failed to save swagger definition.
+     */
+    void saveSwagger20Definition(String apiId, String jsonText) throws APIManagementException;
+
+    /**
      * Get list of policies of an particular tier level.
      *
      * @param tierLevel Tier level.
      * @return List of policy objects.
      * @throws APIManagementException If failed to retrieve policies..
      */
-    List<Policy> getAllPoliciesByLevel(String tierLevel) throws APIManagementException;
+    List<Policy> getAllPoliciesByLevel(APIMgtAdminService.PolicyLevel tierLevel) throws APIManagementException;
 
     /**
      * Get the policy when name is provided.
@@ -389,7 +416,7 @@ public interface APIPublisher extends APIManager {
      * @return List of policy objects.
      * @throws APIManagementException If failed to retrieve policies..
      */
-    Policy getPolicyByName(String tierLevel, String tierName) throws APIManagementException;
+    Policy getPolicyByName(APIMgtAdminService.PolicyLevel tierLevel, String tierName) throws APIManagementException;
 
     /**
      * Get LifeCycle State Chanage History of API

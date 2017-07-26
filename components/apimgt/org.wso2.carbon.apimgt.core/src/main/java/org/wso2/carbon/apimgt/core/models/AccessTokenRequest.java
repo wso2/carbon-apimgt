@@ -27,13 +27,14 @@ public class AccessTokenRequest {
     private String clientId;
     private String clientSecret;
     private String grantType;
-    private String[] scopes = null;
+    private String scopes;
     private String callbackURI;
     private String resourceOwnerUsername;
     private String resourceOwnerPassword;
     private String refreshToken;
     private long validityPeriod;
     private String tokenToRevoke;
+    private String authorizationCode;
 
     // This map can be used to store additional properties not captured by above list of fields.
     private HashMap<String, Object> requestParameters = new HashMap<String, Object>();
@@ -71,16 +72,12 @@ public class AccessTokenRequest {
         this.grantType = grantType;
     }
 
-    public String[] getScopes() {
-        if (scopes != null) {
-            return scopes.clone();
-        } else {
-            return new String[0];
-        }
+    public String getScopes() {
+        return scopes;
     }
 
-    public void setScopes(String[] scope) {
-        this.scopes = scope.clone();
+    public void setScopes(String scopes) {
+        this.scopes = scopes;
     }
 
     public String getCallbackURI() {
@@ -131,6 +128,12 @@ public class AccessTokenRequest {
         return requestParameters.get(key);
     }
 
+    public String getAuthorizationCode() {
+        return authorizationCode;
+    }
 
+    public void setAuthorizationCode(String authorizationCode) {
+        this.authorizationCode = authorizationCode;
+    }
 }
 

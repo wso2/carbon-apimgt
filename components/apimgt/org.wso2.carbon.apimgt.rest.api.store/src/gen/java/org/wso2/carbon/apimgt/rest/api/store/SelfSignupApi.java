@@ -2,17 +2,32 @@ package org.wso2.carbon.apimgt.rest.api.store;
 
 
 import io.swagger.annotations.ApiParam;
-import org.osgi.service.component.annotations.Component;
+
+import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.UserDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.factories.SelfSignupApiServiceFactory;
+
 import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
+import org.wso2.msf4j.formparam.FileInfo;
+import org.wso2.msf4j.formparam.FormDataParam;
+import org.osgi.service.component.annotations.Component;
 
+import java.io.InputStream;
+import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.HEAD;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
@@ -24,6 +39,7 @@ import javax.ws.rs.core.Response;
 @Path("/api/am/store/v1.[\\d]+/self-signup")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
+@ApplicationPath("/self-signup")
 @io.swagger.annotations.Api(description = "the self-signup API")
 public class SelfSignupApi implements Microservice  {
    private final SelfSignupApiService delegate = SelfSignupApiServiceFactory.getSelfSignupApi();

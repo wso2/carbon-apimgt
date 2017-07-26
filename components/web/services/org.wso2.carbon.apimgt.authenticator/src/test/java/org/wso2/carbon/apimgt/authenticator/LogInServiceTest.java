@@ -77,28 +77,34 @@ public class LogInServiceTest {
         wireMockRule.start();
 
         // Mock service for key manager DCR endpoint
-        wireMockRule.stubFor(post(urlEqualTo("/identity/connect/register")).withBasicAuth("admin", "admin")
-                .withRequestBody(equalToJson("{\"client_name\":\"oauth_application\"}", true, true)).willReturn(
-                        aResponse().withStatus(201).withHeader("Content-Type", "application/json").withBody(
-                                "{\"client_name\":\"publisher_application\","
-                                        + "\"client_id\":\"09261007-fd34-45c7-b950-c08f194773e7\","
-                                        + "\"client_secret\":\"9e38b1a4-08a1-44db-a52d-fc7c751bd742\","
-                                        + "\"redirect_uris\":[\"\"],\"grant_types\":[\"password\","
-                                        + "\"refresh_token\"]}")));
+        wireMockRule.stubFor(post(urlEqualTo("/identity/connect/register/"))
+                .withBasicAuth("admin", "admin")
+                .withRequestBody(equalToJson("{\"client_name\":\"login_Application\"," +
+                        "\"redirect_uris\":[\"http://temporary.callback/url\"],\"grant_types\":[\"password\"," +
+                        "\"refresh_token\"],\"userinfo_signed_response_alg\":\"SHA256withRSA\"}", true, true))
+                .willReturn(aResponse()
+                        .withStatus(201)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{\"client_name\":\"publisher_application\","
+                                + "\"client_id\":\"09261007-fd34-45c7-b950-c08f194773e7\","
+                                + "\"client_secret\":\"9e38b1a4-08a1-44db-a52d-fc7c751bd742\","
+                                + "\"redirect_uris\":[\"\"],\"grant_types\":[\"password\","
+                                + "\"refresh_token\"]}")));
 
         // Mock service for key manager token endpoint
-        wireMockRule.stubFor(post(urlEqualTo("/oauth2/token"))
-                .willReturn(
-                        aResponse().withStatus(200).withHeader("Content-Type", "application/x-www-form-urlencoded")
-                                .withBody("{\"access_token\":\"8d4f62ea-edc5-419d-a898-a517f9d3d6f9\","
-                                        + "\"refresh_token\":\"ec3cc1f4-6432-4bbb-9f9e-03c6dbd0da47\","
-                                        + "\"expires_in\":3600,\"scopes\":[\"apim:api_view\",\"apim:api_create\","
-                                        + "\"apim:api_publish\",\"apim:tier_view\",\"apim:tier_manage\","
-                                        + "\"apim:subscription_view\",\"apim:subscription_block\",\"apim:subscribe\","
-                                        + "\"apim:workflow_approve\"],\"expiresTimestamp\":1490615736702}")));
+        wireMockRule.stubFor(post(urlEqualTo("/oauth2/token/"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/x-www-form-urlencoded")
+                        .withBody("{\"access_token\":\"8d4f62ea-edc5-419d-a898-a517f9d3d6f9\","
+                                + "\"refresh_token\":\"ec3cc1f4-6432-4bbb-9f9e-03c6dbd0da47\","
+                                + "\"expires_in\":3600,\"scopes\":[\"apim:api_view\",\"apim:api_create\","
+                                + "\"apim:api_publish\",\"apim:tier_view\",\"apim:tier_manage\","
+                                + "\"apim:subscription_view\",\"apim:subscription_block\",\"apim:subscribe\","
+                                + "\"apim:workflow_approve\"],\"expiresTimestamp\":1490615736702}")));
 
         // Mock service for key manager revoke endpoint
-        wireMockRule.stubFor(post(urlEqualTo("/oauth2/revoke")).willReturn(aResponse().withStatus(200)));
+        wireMockRule.stubFor(post(urlEqualTo("/oauth2/revoke/")).willReturn(aResponse().withStatus(200)));
 
         baseURI = URI.create(String.format("http://%s:%d", HOSTNAME, PORT));
         microservicesRunner = new MicroservicesRunner(PORT);
@@ -131,7 +137,7 @@ public class LogInServiceTest {
 
     @Test
     public void testLogin() throws IOException {
-        HttpURLConnection urlConn = request("/oauth/token", HttpMethod.POST, true);
+        HttpURLConnection urlConn = request("/login/token", HttpMethod.POST, true);
         String postParams = "username=admin&password=admin&grant_type=password"
                 + "&validity_period=3600&scopes=apim:api_view";
         urlConn.getOutputStream().write((postParams).getBytes(Charsets.UTF_8));
@@ -147,7 +153,7 @@ public class LogInServiceTest {
 
     @Test
     public void testLogOut() throws IOException {
-        HttpURLConnection urlConn = request("/oauth/revoke", HttpMethod.POST, true);
+        HttpURLConnection urlConn = request("/login/revoke", HttpMethod.POST, true);
         urlConn.setRequestProperty("Authorization", "Bearer 1234");
         urlConn.setRequestProperty("Cookie", "WSO2_AM_TOKEN_2=2345");
         assertEquals(200, urlConn.getResponseCode());
@@ -157,7 +163,7 @@ public class LogInServiceTest {
 
     @Test
     public void testRefresh() throws IOException {
-        HttpURLConnection urlConn = request("/oauth/token", HttpMethod.POST, true);
+        HttpURLConnection urlConn = request("/login/token", HttpMethod.POST, true);
         String postParams = "grant_type=refresh_token&validity_period=3600&scopes=apim:api_view";
         urlConn.setRequestProperty("Authorization", "Bearer 1234");
         urlConn.setRequestProperty("Cookie", "WSO2_AM_REFRESH_TOKEN_2=2345");

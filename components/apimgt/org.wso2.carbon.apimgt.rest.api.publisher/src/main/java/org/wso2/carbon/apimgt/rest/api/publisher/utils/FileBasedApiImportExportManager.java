@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.core.models.APIDetails;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.FileApi;
 import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
@@ -88,15 +89,15 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
 
         for (APIDetails apiDetails : apiDetailSet) {
             // derive the folder structure
-            String apiExportDirectory = APIFileUtils.getAPIBaseDirectory(apiArtifactsBaseDirectoryPath, apiDetails
-                    .getApi());
+            String apiExportDirectory = APIFileUtils.getAPIBaseDirectory(apiArtifactsBaseDirectoryPath, new FileApi
+                    (apiDetails.getApi()));
             API exportAPI = apiDetails.getApi();
             try {
                 // create per-api export directory
                 APIFileUtils.createDirectory(apiExportDirectory);
 
                 //export API definition
-                APIFileUtils.exportApiDefinitionToFileSystem(exportAPI, apiExportDirectory);
+                APIFileUtils.exportApiDefinitionToFileSystem(new FileApi(exportAPI), apiExportDirectory);
 
                 //export swagger definition
                 APIFileUtils.exportSwaggerDefinitionToFileSystem(apiDetails.getSwaggerDefinition(), exportAPI,
@@ -404,7 +405,7 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
         // convert to bean
         Gson gson = new GsonBuilder().create();
         try {
-            return gson.fromJson(apiDefinitionString, API.class);
+            return new API.APIBuilder(gson.fromJson(apiDefinitionString, FileApi.class)).build();
         } catch (Exception e) {
             String errorMsg =
                     "Error in building APIDTO from api definition read from file at: " + apiDefinitionFilePath;

@@ -29,9 +29,6 @@ public class ApplicationInfoDTO   {
   @JsonProperty("lifeCycleStatus")
   private String lifeCycleStatus = null;
 
-  @JsonProperty("groupId")
-  private String groupId = null;
-
   public ApplicationInfoDTO applicationId(String applicationId) {
     this.applicationId = applicationId;
     return this;
@@ -140,24 +137,6 @@ public class ApplicationInfoDTO   {
     this.lifeCycleStatus = lifeCycleStatus;
   }
 
-  public ApplicationInfoDTO groupId(String groupId) {
-    this.groupId = groupId;
-    return this;
-  }
-
-   /**
-   * Get groupId
-   * @return groupId
-  **/
-  @ApiModelProperty(value = "")
-  public String getGroupId() {
-    return groupId;
-  }
-
-  public void setGroupId(String groupId) {
-    this.groupId = groupId;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -173,13 +152,12 @@ public class ApplicationInfoDTO   {
         Objects.equals(this.subscriber, applicationInfo.subscriber) &&
         Objects.equals(this.throttlingTier, applicationInfo.throttlingTier) &&
         Objects.equals(this.description, applicationInfo.description) &&
-        Objects.equals(this.lifeCycleStatus, applicationInfo.lifeCycleStatus) &&
-        Objects.equals(this.groupId, applicationInfo.groupId);
+        Objects.equals(this.lifeCycleStatus, applicationInfo.lifeCycleStatus);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, name, subscriber, throttlingTier, description, lifeCycleStatus, groupId);
+    return Objects.hash(applicationId, name, subscriber, throttlingTier, description, lifeCycleStatus);
   }
 
   @Override
@@ -193,7 +171,6 @@ public class ApplicationInfoDTO   {
     sb.append("    throttlingTier: ").append(toIndentedString(throttlingTier)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
-    sb.append("    groupId: ").append(toIndentedString(groupId)).append("\n");
     sb.append("}");
     return sb.toString();
   }

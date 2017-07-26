@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>7.0.22-SNAPSHOT</version>
+        <version>7.0.37-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -181,7 +181,7 @@
                                     <path refid="maven.compile.classpath" />
                                 </path>
                                 <echo message="########### Creating Carbon APIM Database ##############" />
-                                <sql driver="org.h2.Driver" url="jdbc:h2:${basedir}/resources/database/AM_DB;create=true" userid="wso2carbon" password="wso2carbon" autocommit="true" onerror="continue">
+                                <sql driver="org.h2.Driver" url="jdbc:h2:${basedir}/resources/database/AM_DB;create=true;MV_STORE=TRUE" userid="wso2carbon" password="wso2carbon" autocommit="true" onerror="continue">
 
                                     <classpath>
                                         <path refid="h2.classpath" />
@@ -293,7 +293,7 @@
                                 </bundle>
                                 <bundle>
                                     <symbolicName>nimbus-jose-jwt</symbolicName>
-                                    <version>2.26.1.wso2v2</version>
+                                    <version>${nimbusds.version}</version>
                                 </bundle>
                                 <bundle>
                                     <symbolicName>com.fasterxml.jackson.jaxrs.jackson-jaxrs-base</symbolicName>

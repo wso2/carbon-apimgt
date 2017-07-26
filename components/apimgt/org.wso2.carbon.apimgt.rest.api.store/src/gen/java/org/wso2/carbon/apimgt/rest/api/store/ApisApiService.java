@@ -76,19 +76,25 @@ public abstract class ApisApiService {
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
-    public abstract Response apisApiIdRatingGet(String apiId
+    public abstract Response apisApiIdRatingsGet(String apiId
  ,Integer limit
  ,Integer offset
  ,String accept
  , Request request) throws NotFoundException;
-    public abstract Response apisApiIdRatingPost(String apiId
- ,RatingDTO body
- ,String contentType
+    public abstract Response apisApiIdRatingsRatingIdGet(String apiId
+ ,String ratingId
+ ,String accept
+ ,String ifNoneMatch
+ ,String ifModifiedSince
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdSwaggerGet(String apiId
  ,String accept
  ,String ifNoneMatch
  ,String ifModifiedSince
+ , Request request) throws NotFoundException;
+    public abstract Response apisApiIdUserRatingPut(String apiId
+ ,RatingDTO body
+ ,String contentType
  , Request request) throws NotFoundException;
     public abstract Response apisGet(Integer limit
  ,Integer offset

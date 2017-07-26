@@ -22,7 +22,6 @@ import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
-import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
@@ -77,7 +76,7 @@ public class AbstractAPIManagerTestCase {
         AbstractAPIManager apiStore = getAPIStoreImpl(applicationDAO);
         Application applicationFromDAO = new Application(APP_NAME, USER_NAME);
         when(applicationDAO.getApplication(UUID)).thenReturn(applicationFromDAO);
-        Application application = apiStore.getApplication(UUID, USER_NAME, null);
+        Application application = apiStore.getApplication(UUID, USER_NAME);
         Assert.assertNotNull(application);
         verify(applicationDAO, times(1)).getApplication(UUID);
     }
@@ -135,9 +134,9 @@ public class AbstractAPIManagerTestCase {
         ApiDAO apiDAO = mock(ApiDAO.class);
         AbstractAPIManager apiPublisher = getApiPublisherImpl(apiDAO);
         String swaggerDefinition = SampleTestObjectCreator.apiDefinition;
-        when(apiDAO.getSwaggerDefinition(UUID)).thenReturn(swaggerDefinition);
-        apiPublisher.getSwagger20Definition(UUID);
-        verify(apiDAO, times(1)).getSwaggerDefinition(UUID);
+        when(apiDAO.getApiSwaggerDefinition(UUID)).thenReturn(swaggerDefinition);
+        apiPublisher.getApiSwaggerDefinition(UUID);
+        verify(apiDAO, times(1)).getApiSwaggerDefinition(UUID);
     }
 
     @Test(description = "Get subscription by UUID")
@@ -242,11 +241,11 @@ public class AbstractAPIManagerTestCase {
         AbstractAPIManager apiStore = getAPIStoreImpl(applicationDAO);
         doThrow(new APIMgtDAOException("Error occurred while retrieving application")).when(applicationDAO)
                 .getApplication(UUID);
-        apiStore.getApplication(UUID, USER_NAME, null);
+        apiStore.getApplication(UUID, USER_NAME);
     }
 
     @Test(description = "Exception when retrieving documentation summary given the id",
-            expectedExceptions = APIMgtDAOException.class)
+            expectedExceptions = APIManagementException.class)
     public void testGetDocumentationSummaryException() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
         AbstractAPIManager apiStore = getAPIStoreImpl(apiDAO);
@@ -311,7 +310,7 @@ public class AbstractAPIManagerTestCase {
     public void testIsApiNameExistException() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
         AbstractAPIManager apiPublisher = getApiPublisherImpl(apiDAO);
-        when(apiDAO.isAPINameExists(API_NAME, USER_NAME, ApiType.STANDARD))
+        when(apiDAO.isAPINameExists(API_NAME, USER_NAME))
                 .thenThrow(new APIMgtDAOException("Couldn't check API Name " + API_NAME + " Exists."));
         apiPublisher.isApiNameExist(API_NAME);
     }
@@ -321,10 +320,10 @@ public class AbstractAPIManagerTestCase {
     public void testGetSwagger20DefinitionException() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
         AbstractAPIManager apiPublisher = getApiPublisherImpl(apiDAO);
-        when(apiDAO.getSwaggerDefinition(UUID))
+        when(apiDAO.getApiSwaggerDefinition(UUID))
                 .thenThrow(new APIMgtDAOException("Couldn't retrieve swagger definition for apiId " + UUID));
-        apiPublisher.getSwagger20Definition(UUID);
-        verify(apiDAO, times(0)).getSwaggerDefinition(UUID);
+        apiPublisher.getApiSwaggerDefinition(UUID);
+        verify(apiDAO, times(0)).getApiSwaggerDefinition(UUID);
     }
 
     @Test(description = "Exception when getting subscription by UUID",

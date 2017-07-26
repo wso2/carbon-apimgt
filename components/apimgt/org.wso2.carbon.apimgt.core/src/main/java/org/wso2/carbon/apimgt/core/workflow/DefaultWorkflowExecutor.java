@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
-import org.wso2.carbon.apimgt.core.models.Workflow;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 
 /**
@@ -33,12 +32,9 @@ public class DefaultWorkflowExecutor implements WorkflowExecutor {
     private static final Log log = LogFactory.getLog(DefaultWorkflowExecutor.class);
 
     /**
-     * Execute the workflow executor
-     *
-     * @param workFlow
-     * @throws WorkflowException
+     * {@inheritDoc}
      */
-
+    @Override
     public WorkflowResponse execute(Workflow workFlow) throws WorkflowException {
         if (log.isDebugEnabled()) {
             log.debug("Executing execute() in Workflow for " + workFlow.getWorkflowType());

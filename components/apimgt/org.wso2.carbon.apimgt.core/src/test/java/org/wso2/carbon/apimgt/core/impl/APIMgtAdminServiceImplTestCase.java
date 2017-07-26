@@ -23,16 +23,17 @@ package org.wso2.carbon.apimgt.core.impl;
 import org.mockito.Mockito;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
+import org.wso2.carbon.apimgt.core.api.APIGateway;
+import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
-import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
-import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
+import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 
 import java.util.ArrayList;
@@ -76,9 +77,10 @@ public class APIMgtAdminServiceImplTestCase {
         PolicyDAO policyDAO = mock(PolicyDAO.class);
         APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforPolicyDAO(policyDAO);
         Policy policy = mock(Policy.class);
-        when(policyDAO.getPolicy(POLICY_LEVEL, POLICY_NAME)).thenReturn(policy);
-        adminService.getPolicy(POLICY_LEVEL, POLICY_NAME);
-        verify(policyDAO, times(1)).getPolicy(POLICY_LEVEL, POLICY_NAME);
+        when(policyDAO.getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, POLICY_NAME))
+                .thenReturn(policy);
+        adminService.getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, POLICY_NAME);
+        verify(policyDAO, times(1)).getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, POLICY_NAME);
     }
 
     @Test(description = "Get all policies by level")
@@ -88,28 +90,20 @@ public class APIMgtAdminServiceImplTestCase {
         Policy policy = mock(Policy.class);
         List<Policy> policyList = new ArrayList<>();
         policyList.add(policy);
-        when(policyDAO.getPolicies(POLICY_LEVEL)).thenReturn(policyList);
-        adminService.getAllPoliciesByLevel(POLICY_LEVEL);
-        verify(policyDAO, times(1)).getPolicies(POLICY_LEVEL);
+        when(policyDAO.getPoliciesByLevel(APIMgtAdminService.PolicyLevel.application)).thenReturn(policyList);
+        adminService.getPoliciesByLevel(APIMgtAdminService.PolicyLevel.application);
+        verify(policyDAO, times(1)).getPoliciesByLevel(APIMgtAdminService.PolicyLevel.application);
     }
 
     @Test(description = "Add policy")
     public void testAddPolicy() throws APIManagementException {
         PolicyDAO policyDAO = mock(PolicyDAO.class);
-        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforPolicyDAO(policyDAO);
-        Policy policy = mock(Policy.class);
-        adminService.addPolicy(POLICY_LEVEL, policy);
-        verify(policyDAO, times(1)).addPolicy(POLICY_LEVEL, policy);
-    }
-
-    @Test(description = "Get API Info")
-    public void testGetAPIInfo() throws APIManagementException {
-        ApiDAO apiDAO = mock(ApiDAO.class);
-        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforApiDAO(apiDAO);
-        List<API> apiList = SampleTestObjectCreator.createMockAPIList();
-        when(apiDAO.getAPIs(ApiType.STANDARD)).thenReturn(apiList);
-        adminService.getAPIInfo();
-        verify(apiDAO, times(1)).getAPIs(ApiType.STANDARD);
+        APIGateway apiGateway = mock(APIGateway.class);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforPolicyDAO(policyDAO, apiGateway);
+        APIPolicy policy = mock(APIPolicy.class);
+        adminService.addApiPolicy(policy);
+        verify(policyDAO, times(1)).addApiPolicy(
+                policy);
     }
 
     @Test(description = "Delete a label")
@@ -193,20 +187,22 @@ public class APIMgtAdminServiceImplTestCase {
     }
 
     private APIMgtAdminServiceImpl newAPIMgtAdminServiceImplforApiDAO(ApiDAO apiDAO) {
-        return new APIMgtAdminServiceImpl(null, null, apiDAO, null);
+        return new APIMgtAdminServiceImpl(null, null, apiDAO, null, null, null);
     }
 
     private APIMgtAdminServiceImpl newAPIMgtAdminServiceImplforPolicyDAO(PolicyDAO policyDAO) {
-        return new APIMgtAdminServiceImpl(null, policyDAO, null, null);
+        return new APIMgtAdminServiceImpl(null, policyDAO, null, null, null, null);
     }
 
     private APIMgtAdminServiceImpl newAPIMgtAdminServiceImplforAPISubscriptionDAO(APISubscriptionDAO
                                                                                           apiSubscriptionDAO) {
-        return new APIMgtAdminServiceImpl(apiSubscriptionDAO, null, null, null);
+        return new APIMgtAdminServiceImpl(apiSubscriptionDAO, null, null, null, null, null);
     }
 
     private APIMgtAdminServiceImpl newAPIMgtAdminServiceImplforLabelDAO(LabelDAO labelDAO) {
-        return new APIMgtAdminServiceImpl(null, null, null, labelDAO);
+        return new APIMgtAdminServiceImpl(null, null, null, labelDAO, null, null);
     }
-
+    private APIMgtAdminServiceImpl newAPIMgtAdminServiceImplforPolicyDAO(PolicyDAO policyDAO, APIGateway apiGateway) {
+        return new APIMgtAdminServiceImpl(null, policyDAO, null, null, null, apiGateway);
+    }
 }

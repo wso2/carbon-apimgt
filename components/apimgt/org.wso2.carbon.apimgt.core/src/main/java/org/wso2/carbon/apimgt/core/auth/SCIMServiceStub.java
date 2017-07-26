@@ -25,7 +25,7 @@ import feign.Response;
 import org.wso2.carbon.apimgt.core.auth.dto.SCIMUser;
 
 /**
- * This is the stub class from SCIM service
+ * This is the stub class for SCIM service
  */
 public interface SCIMServiceStub {
 
@@ -34,11 +34,16 @@ public interface SCIMServiceStub {
     Response addUser(SCIMUser scimUser);
 
     @RequestLine("GET /Users/{id}")
-    SCIMUser getUser(@Param("id") String id);
+    Response getUser(@Param("id") String id);
 
     @RequestLine("GET /Groups?filter={query}")
     Response searchGroups(@Param("query") String query);
 
+    @RequestLine("GET /Groups/{id}")
+    Response getGroup(@Param("id") String id);
+
+    @RequestLine("GET /Users?filter={query}")
+    Response searchUsers(@Param("query") String query);
 }
 
 

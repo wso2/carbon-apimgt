@@ -49,6 +49,9 @@ public class APIDTO   {
   @JsonProperty("createdTime")
   private String createdTime = null;
 
+  @JsonProperty("apiPolicy")
+  private String apiPolicy = null;
+
   @JsonProperty("lastUpdatedTime")
   private String lastUpdatedTime = null;
 
@@ -119,6 +122,9 @@ public class APIDTO   {
 
   @JsonProperty("permission")
   private String permission = null;
+
+  @JsonProperty("userPermissionsForApi")
+  private List<String> userPermissionsForApi = new ArrayList<String>();
 
   @JsonProperty("visibleTenants")
   private List<String> visibleTenants = new ArrayList<String>();
@@ -319,6 +325,24 @@ public class APIDTO   {
 
   public void setCreatedTime(String createdTime) {
     this.createdTime = createdTime;
+  }
+
+  public APIDTO apiPolicy(String apiPolicy) {
+    this.apiPolicy = apiPolicy;
+    return this;
+  }
+
+   /**
+   * Get apiPolicy
+   * @return apiPolicy
+  **/
+  @ApiModelProperty(example = "UNLIMITED", value = "")
+  public String getApiPolicy() {
+    return apiPolicy;
+  }
+
+  public void setApiPolicy(String apiPolicy) {
+    this.apiPolicy = apiPolicy;
   }
 
   public APIDTO lastUpdatedTime(String lastUpdatedTime) {
@@ -562,6 +586,29 @@ public class APIDTO   {
     this.permission = permission;
   }
 
+  public APIDTO userPermissionsForApi(List<String> userPermissionsForApi) {
+    this.userPermissionsForApi = userPermissionsForApi;
+    return this;
+  }
+
+  public APIDTO addUserPermissionsForApiItem(String userPermissionsForApiItem) {
+    this.userPermissionsForApi.add(userPermissionsForApiItem);
+    return this;
+  }
+
+   /**
+   * LoggedIn user permissions for the API 
+   * @return userPermissionsForApi
+  **/
+  @ApiModelProperty(example = "[&quot;READ&quot;,&quot;UPDATE&quot;]", value = "LoggedIn user permissions for the API ")
+  public List<String> getUserPermissionsForApi() {
+    return userPermissionsForApi;
+  }
+
+  public void setUserPermissionsForApi(List<String> userPermissionsForApi) {
+    this.userPermissionsForApi = userPermissionsForApi;
+  }
+
   public APIDTO visibleTenants(List<String> visibleTenants) {
     this.visibleTenants = visibleTenants;
     return this;
@@ -728,6 +775,7 @@ public class APIDTO   {
         Objects.equals(this.lifeCycleStatus, API.lifeCycleStatus) &&
         Objects.equals(this.workflowStatus, API.workflowStatus) &&
         Objects.equals(this.createdTime, API.createdTime) &&
+        Objects.equals(this.apiPolicy, API.apiPolicy) &&
         Objects.equals(this.lastUpdatedTime, API.lastUpdatedTime) &&
         Objects.equals(this.responseCaching, API.responseCaching) &&
         Objects.equals(this.cacheTimeout, API.cacheTimeout) &&
@@ -740,6 +788,7 @@ public class APIDTO   {
         Objects.equals(this.visibility, API.visibility) &&
         Objects.equals(this.visibleRoles, API.visibleRoles) &&
         Objects.equals(this.permission, API.permission) &&
+        Objects.equals(this.userPermissionsForApi, API.userPermissionsForApi) &&
         Objects.equals(this.visibleTenants, API.visibleTenants) &&
         Objects.equals(this.gatewayEnvironments, API.gatewayEnvironments) &&
         Objects.equals(this.sequences, API.sequences) &&
@@ -751,7 +800,7 @@ public class APIDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, wsdlUri, lifeCycleStatus, workflowStatus, createdTime, lastUpdatedTime, responseCaching, cacheTimeout, destinationStatsEnabled, isDefaultVersion, transport, tags, labels, policies, visibility, visibleRoles, permission, visibleTenants, gatewayEnvironments, sequences, businessInformation, corsConfiguration, endpoint, operations);
+    return Objects.hash(id, name, description, context, version, provider, wsdlUri, lifeCycleStatus, workflowStatus, createdTime, apiPolicy, lastUpdatedTime, responseCaching, cacheTimeout, destinationStatsEnabled, isDefaultVersion, transport, tags, labels, policies, visibility, visibleRoles, permission, userPermissionsForApi, visibleTenants, gatewayEnvironments, sequences, businessInformation, corsConfiguration, endpoint, operations);
   }
 
   @Override
@@ -769,6 +818,7 @@ public class APIDTO   {
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
     sb.append("    workflowStatus: ").append(toIndentedString(workflowStatus)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
+    sb.append("    apiPolicy: ").append(toIndentedString(apiPolicy)).append("\n");
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
     sb.append("    responseCaching: ").append(toIndentedString(responseCaching)).append("\n");
     sb.append("    cacheTimeout: ").append(toIndentedString(cacheTimeout)).append("\n");
@@ -781,6 +831,7 @@ public class APIDTO   {
     sb.append("    visibility: ").append(toIndentedString(visibility)).append("\n");
     sb.append("    visibleRoles: ").append(toIndentedString(visibleRoles)).append("\n");
     sb.append("    permission: ").append(toIndentedString(permission)).append("\n");
+    sb.append("    userPermissionsForApi: ").append(toIndentedString(userPermissionsForApi)).append("\n");
     sb.append("    visibleTenants: ").append(toIndentedString(visibleTenants)).append("\n");
     sb.append("    gatewayEnvironments: ").append(toIndentedString(gatewayEnvironments)).append("\n");
     sb.append("    sequences: ").append(toIndentedString(sequences)).append("\n");

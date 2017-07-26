@@ -23,12 +23,10 @@ package org.wso2.carbon.apimgt.core.workflow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
+import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
-import org.wso2.carbon.apimgt.core.models.APIStateChangeWorkflow;
-import org.wso2.carbon.apimgt.core.models.ApplicationCreationWorkflow;
-import org.wso2.carbon.apimgt.core.models.ApplicationUpdateWorkflow;
-import org.wso2.carbon.apimgt.core.models.SubscriptionWorkflow;
-import org.wso2.carbon.apimgt.core.models.Workflow;
+import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 
 /**
@@ -39,8 +37,8 @@ public class WorkflowExecutorFactory {
     private static final Logger log = LoggerFactory.getLogger(WorkflowExecutorFactory.class);
 
     private static final WorkflowExecutorFactory instance = new WorkflowExecutorFactory();
-    
-    private  WorkflowConfigHolder holder = null;
+
+    private WorkflowConfigHolder holder = null;
 
     private WorkflowExecutorFactory() {
     }
@@ -61,7 +59,7 @@ public class WorkflowExecutorFactory {
             return holder.getWorkflowExecutor(workflowExecutorType);
         } catch (WorkflowException e) {
             handleException("Error while creating WorkFlowDTO for " + workflowExecutorType, e);
-        } 
+        }
         return null;
     }
 
@@ -69,22 +67,34 @@ public class WorkflowExecutorFactory {
      * Create a DTO object related to a given workflow type.
      *
      * @param workflowType Type of the workflow.
+     * @return WorkFlow instance
      */
-    public Workflow createWorkflow(String workflowType) {
+    public Workflow createWorkflow(String workflowType) throws APIMgtDAOException {
         Workflow workflow = null;
-        if (WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION.equals(workflowType)
-                || WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION.equals(workflowType)) {
-            workflow = new ApplicationCreationWorkflow();
+        if (WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION.equals(workflowType)) {
+            workflow = new ApplicationCreationWorkflow(DAOFactory.getApplicationDAO(), DAOFactory.getWorkflowDAO(),
+                    APIManagerFactory.getInstance().getApiGateway());
             workflow.setWorkflowType(workflowType);
-        } else if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION.equals(workflowType)
-                || WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION.equals(workflowType)) {
-            workflow = new SubscriptionWorkflow();
+        } else if (WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION.equals(workflowType)) {
+            workflow = new ApplicationDeletionWorkflow(DAOFactory.getApplicationDAO(), DAOFactory.getWorkflowDAO(),
+                    APIManagerFactory.getInstance().getApiGateway());
+            workflow.setWorkflowType(workflowType);
+        } else if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION.equals(workflowType)) {
+            workflow = new SubscriptionCreationWorkflow(DAOFactory.getAPISubscriptionDAO(), DAOFactory.getWorkflowDAO(),
+                    APIManagerFactory.getInstance().getApiGateway());
+            workflow.setWorkflowType(workflowType);
+        } else if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION.equals(workflowType)) {
+            workflow = new SubscriptionDeletionWorkflow(DAOFactory.getAPISubscriptionDAO(), DAOFactory.getWorkflowDAO(),
+                    APIManagerFactory.getInstance().getApiGateway());
             workflow.setWorkflowType(workflowType);
         } else if (WorkflowConstants.WF_TYPE_AM_API_STATE.equals(workflowType)) {
-            workflow = new APIStateChangeWorkflow();
+            workflow = new APIStateChangeWorkflow(DAOFactory.getApiDAO(), DAOFactory.getAPISubscriptionDAO(),
+                    DAOFactory.getWorkflowDAO(), APIManagerFactory.getInstance().geApiLifecycleManager(),
+                    APIManagerFactory.getInstance().getApiGateway());
             workflow.setWorkflowType(workflowType);
         } else if (WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE.equals(workflowType)) {
-            workflow = new ApplicationUpdateWorkflow();
+            workflow = new ApplicationUpdateWorkflow(DAOFactory.getApplicationDAO(), DAOFactory.getWorkflowDAO(),
+                    APIManagerFactory.getInstance().getApiGateway());
             workflow.setWorkflowType(workflowType);
         }
         return workflow;

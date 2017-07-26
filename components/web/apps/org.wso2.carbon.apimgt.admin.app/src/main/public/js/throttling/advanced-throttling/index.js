@@ -12,7 +12,7 @@ $(function () {
 
         var callbacks = {
             onSuccess: function () {
-                _initDataTable(raw_data);
+                _initDataTable(raw_data.data.list);
             },
             onFailure: function (message, e) {
 
@@ -35,7 +35,7 @@ $(function () {
     );
 
     $(document).on('click', 'a.deletePolicy', function () {
-        var uuid = $(this).attr("data-uuid");
+        var policyId = $(this).attr("data-uuid");
         var type = "alert";
         var layout = "topCenter";
         noty({
@@ -47,7 +47,7 @@ $(function () {
                  buttons : [
                      { addClass: 'btn btn-primary', text: 'Ok', onClick: function ($noty) {
                          $noty.close();
-                         var promised_delete_tier =  policyInstance.deletePolicyByUuid(API, uuid);
+                         var promised_delete_tier =  policyInstance.deletePolicyByUuid(API, policyId);
                          promised_delete_tier.then(deletePolicySuccessCallback)
                                  .catch(function (error) {
                                      var message = "Error occurred while deleting application";
@@ -73,15 +73,13 @@ $(function () {
 
     function _initDataTable(raw_data) {
         $('#api-policy').DataTable({
-            ajax: function (data, callback, settings) {
-                callback(raw_data);
-            },
+            data: raw_data,
             columns: [
-                {'data': 'name'},
-                {'data': 'description'},
-                {'data': 'unitTime'},
-                {'data': 'timeUnit'},
-                {'data': 'name'}
+                {'data': "displayName"},
+                {'data': "description"},
+                {'data': "quotaPolicy.unitTime"},
+                {'data': "quotaPolicy.timeUnit"},
+                {'data': "displayName"}
             ],
             columnDefs: [
                 {
@@ -106,7 +104,7 @@ $(function () {
                 href: "",
                 title: 'Edit'
             })
-                .attr("data-uuid", row.uuid)
+                .attr("data-uuid", row.policyId)
                 .addClass("btn btn-sm padding-reduce-on-grid-view tier-edit")
                 .append(editSpanIcon)
                 .append(editSpanText);
@@ -116,7 +114,7 @@ $(function () {
             var deleteSpanIcon = $("<span>").addClass("fw-stack").append(deleteIcon1).append(deleteIcon2);
             var deleteSpanText = $("<span>").addClass("hidden-xs").text("delete");
             var delete_button = $('<a>', {id: data, href: '#', 'data-id': data, title: 'delete'})
-                    .attr("data-uuid", row.uuid)
+                    .attr("data-uuid", row.policyId)
                     .addClass("btn btn-sm padding-reduce-on-grid-view deletePolicy")
                     .append(deleteSpanIcon)
                     .append(deleteSpanText);
@@ -149,8 +147,8 @@ $(function () {
 
     $(document).on('click', ".tier-edit", function (e) {
         e.preventDefault();
-        var uuid = $(this).data('uuid');
-        var policy_obj =  policyInstance.getPoliciesByUuid(uuid , API);
+        var policyId = $(this).data('uuid');
+        var policy_obj =  policyInstance.getPoliciesByUuid(policyId , API);
 
         policy_obj.then(function (response) {
             var raw_data = {
@@ -207,16 +205,17 @@ $(function () {
 
         apiPolicyNew.policyDescription = policyDescription;
         apiPolicyNew.policyLevel = policyLevel;
-        apiPolicyNew.defaultQuotaPolicy.type = defaultPolicyType;
 
         var defaultPolicyDataUnit;
         if (defaultPolicyType == 'requestCount') {
             defaultPolicyLimit = $('#request-count').val();
             defaultPolicyUnit = $("#request-count-unit option:selected").val();
             defaultPolicyUnitTime = $("#unit-time-count").val();
-            apiPolicyNew.defaultQuotaPolicy.limit.requestCount = defaultPolicyLimit;
-            apiPolicyNew.defaultQuotaPolicy.limit.unitTime = defaultPolicyUnitTime;
-            apiPolicyNew.defaultQuotaPolicy.limit.timeUnit = defaultPolicyUnit;
+            apiPolicyNew.quotaPolicy.requestCount = defaultPolicyLimit;
+            apiPolicyNew.quotaPolicy.unitTime = defaultPolicyUnitTime;
+            apiPolicyNew.quotaPolicy.timeUnit = defaultPolicyUnit;
+            apiPolicyNew.quotaPolicy.type = 'RequestCountLimit';
+            apiPolicyNew.type = 'AdvancedThrottlePolicy';
 
             if (!validateInput(defaultPolicyLimit, $('#request-count'), requiredMsg)) {
                 return false;
@@ -232,10 +231,12 @@ $(function () {
             defaultPolicyDataUnit = $("#bandwidth-unit option:selected").val();
             defaultPolicyUnitTime = $("#unit-time-count").val();
             defaultPolicyUnit = $("#request-count-unit option:selected").val();
-            apiPolicyNew.defaultQuotaPolicy.limit.dataAmount = defaultPolicyLimit;
-            apiPolicyNew.defaultQuotaPolicy.limit.unitTime = defaultPolicyUnitTime;
-            apiPolicyNew.defaultQuotaPolicy.limit.dataUnit = defaultPolicyDataUnit;
-            apiPolicyNew.defaultQuotaPolicy.limit.timeUnit = defaultPolicyUnit;
+            apiPolicyNew.quotaPolicy.dataAmount = defaultPolicyLimit;
+            apiPolicyNew.quotaPolicy.dataUnit = defaultPolicyDataUnit;
+            apiPolicyNew.quotaPolicy.unitTime = defaultPolicyUnitTime;
+            apiPolicyNew.quotaPolicy.timeUnit = defaultPolicyUnit;
+            apiPolicyNew.quotaPolicy.type = 'BandwidthLimit';
+            apiPolicyNew.type = 'AdvancedThrottlePolicy';
 
             if (!validateInput(defaultPolicyLimit, $('#bandwidth'), requiredMsg)) {
                 return false;
@@ -253,18 +254,11 @@ $(function () {
                 return false;
             }
         }
-        var policy = {};
-        policy.policyId = apiPolicyNew.policyId;
-        policy.name = apiPolicyNew.policyName;
-        policy.name = apiPolicyNew.policyName;
-        policy.description = apiPolicyNew.policyDescription;
-        policy.tierLevel = "api" ; // from send to client.
-        policy.unitTime = parseInt(apiPolicyNew.defaultQuotaPolicy.limit.unitTime);
-        policy.timeUnit = apiPolicyNew.defaultQuotaPolicy.limit.timeUnit;
-        policy.stopOnQuotaReach = true;
+        
+        apiPolicyNew.tierLevel = "api";
 
         var policyInstance = new Policy();
-        var promised_update =  policyInstance.update(policy);
+        var promised_update =  policyInstance.update(apiPolicyNew);
         promised_update
             .then(createPolicyCallback)
             .catch(

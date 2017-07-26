@@ -14,12 +14,10 @@ import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
-import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
-import org.wso2.carbon.apimgt.core.workflow.HttpWorkflowResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -534,6 +532,13 @@ public class ApisApiServiceImpl extends ApisApiService {
             String docid = apiProvider.addDocumentationInfo(apiId, documentation);
             documentation = apiProvider.getDocumentationSummary(docid);
             DocumentDTO newDocumentDTO = MappingUtil.toDocumentDTO(documentation);
+            //Add initial inline content as empty String, if the Document type is INLINE
+            if (body.getSourceType() == DocumentDTO.SourceTypeEnum.INLINE) {
+                apiProvider.addDocumentationContent(docid, "");
+                if (log.isDebugEnabled()) {
+                    log.debug("The updated source type of the document " + body.getName() + " is: " + body.getSourceType());
+                }
+            }
             return Response.status(Response.Status.CREATED).entity(newDocumentDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while create  document for api " + apiId;
@@ -682,7 +687,6 @@ public class ApisApiServiceImpl extends ApisApiService {
                     .contains(existingFingerprint)) {
                 return Response.notModified().build();
             }
-
             APIDTO apidto = MappingUtil.toAPIDto(RestAPIPublisherUtil.getApiPublisher(username).getAPIbyUUID(apiId));
             return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(apidto).build();
         } catch (APIManagementException e) {
@@ -692,7 +696,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-
         } catch (IOException e) {
             String errorMessage = "Error while retrieving API : " + apiId;
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
@@ -881,7 +884,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                     .contains(existingFingerprint)) {
                 return Response.notModified().build();
             }
-            String swagger = apiPublisher.getSwagger20Definition(apiId);
+            String swagger = apiPublisher.getApiSwaggerDefinition(apiId);
             return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(swagger).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving swagger definition of API : " + apiId;
@@ -942,7 +945,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
             }
             apiPublisher.saveSwagger20Definition(apiId, apiDefinition);
-            String apiSwagger = apiPublisher.getSwagger20Definition(apiId);
+            String apiSwagger = apiPublisher.getApiSwaggerDefinition(apiId);
             String newFingerprint = apisApiIdSwaggerGetFingerprint(apiId, null, null, null, request);
             return Response.ok().header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"").entity(apiSwagger).build();
         } catch (APIManagementException e) {
@@ -1188,12 +1191,12 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch,
-                            Request request) throws NotFoundException {
+            Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         APIListDTO apiListDTO = null;
         try {
-            apiListDTO = MappingUtil.toAPIListDTO(RestAPIPublisherUtil.getApiPublisher(username).searchAPIs
-                    (limit, offset, query));
+            apiListDTO = MappingUtil
+                    .toAPIListDTO(RestAPIPublisherUtil.getApiPublisher(username).searchAPIs(limit, offset, query));
             return Response.ok().entity(apiListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving APIs";

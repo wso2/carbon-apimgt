@@ -23,35 +23,41 @@ import org.json.simple.JSONObject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Captures common attributes used in an OAuth Application.
  */
 public final class OAuthApplicationInfo {
 
+    private String keyType;
     private String clientId;
     private String clientName;
     private String callBackURL;
     private List<String> grantTypes;
     private String clientSecret;
-    private Map<String, Object> parameters = new HashMap<String, Object>();
-    private boolean isSaasApplication;
-    private String appOwner;
+    private Map<String, Object> parameters = new HashMap<>();
 
-    /**
-     * get client Id (consumer id)
-     *
-     * @return clientId
-     */
+    public String getKeyType() {
+        return keyType;
+    }
+
+    public void setKeyType(String keyType) {
+        this.keyType = keyType;
+    }
+
+    public String getCallBackURL() {
+        return callBackURL;
+    }
+
+    public void setCallBackURL(String callBackURL) {
+        this.callBackURL = callBackURL;
+    }
+
     public String getClientId() {
         return clientId;
     }
 
-    /**
-     * set client Id
-     *
-     * @param clientId  Key of the client.
-     */
     public void setClientId(String clientId) {
         this.clientId = clientId;
     }
@@ -64,29 +70,10 @@ public final class OAuthApplicationInfo {
         this.clientSecret = clientSecret;
     }
 
-    /**
-     * Set client Name of OAuthApplication.
-     *
-     * @param clientName    Name of the application.
-     */
     public void setClientName(String clientName) {
         this.clientName = clientName;
     }
 
-    /**
-     * Set callback URL of OAuthapplication.
-     *
-     * @param callBackURL   call back uris of the application.
-     */
-    public void setCallbackUrl(String callBackURL) {
-        this.callBackURL = callBackURL;
-    }
-
-    /**
-     * Set grant types of OAuth Application.
-     *
-     * @param grantTypes grant types
-     */
     public void setGrantTypes(List<String> grantTypes) {
         this.grantTypes = grantTypes;
     }
@@ -108,10 +95,6 @@ public final class OAuthApplicationInfo {
         return clientName;
     }
 
-    public String getCallbackUrl() {
-        return callBackURL;
-    }
-
     public List<String> getGrantTypes() {
         return grantTypes;
     }
@@ -124,20 +107,43 @@ public final class OAuthApplicationInfo {
         this.parameters.remove(key);
     }
 
-    public boolean getIsSaasApplication() {
-        return isSaasApplication;
+    public Map<String, Object> getParameters() {
+        return parameters;
     }
 
-    public void setIsSaasApplication(boolean isSaasApplication) {
-        this.isSaasApplication = isSaasApplication;
+    public void setParameters(Map<String, Object> parameters) {
+        this.parameters = parameters;
     }
 
-    public String getAppOwner() {
-        return appOwner;
+    @Override
+    public String toString() {
+        return "OAuthApplicationInfo{" +
+                "clientId='" + clientId + '\'' +
+                ", clientName='" + clientName + '\'' +
+                ", callBackURL='" + callBackURL + '\'' +
+                ", parameters=" + parameters.toString() +
+                ", grantTypes=" + grantTypes +
+                '}';
     }
 
-    public void setAppOwner(String appOwner) {
-        this.appOwner = appOwner;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof OAuthApplicationInfo)) {
+            return false;
+        }
+        OAuthApplicationInfo that = (OAuthApplicationInfo) o;
+        return Objects.equals(clientId, that.clientId) &&
+                Objects.equals(clientName, that.clientName) &&
+                Objects.equals(callBackURL, that.callBackURL) &&
+                Objects.equals(grantTypes, that.grantTypes) &&
+                Objects.equals(clientSecret, that.clientSecret);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(clientId, clientName, callBackURL, grantTypes, clientSecret);
+    }
 }

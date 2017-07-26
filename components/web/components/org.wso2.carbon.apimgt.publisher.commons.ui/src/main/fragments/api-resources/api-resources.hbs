@@ -60,10 +60,20 @@
                 <div class="form-group">
                     <label class="col-sm-3 control-label"></label>
                     <div class="col-sm-9">
-                        <button class="btn btn-secondary resource-add-btn" type="button" id="add_resource" data-resource-path="/apis/{apiId}" data-resource-method="put"><span class="icon fw-stack resource-add-span">
-                                            <i class="fw fw-add fw-stack-1x"></i>
-                                            <i class="fw fw-circle-outline fw-stack-2x"></i>
-                            </span>&nbsp;Add</button>
+                        {{#if isStandardAPI}}
+                            <button class="btn btn-secondary resource-add-btn" type="button" id="add_resource" data-resource-path="/apis/{apiId}" data-resource-method="put"><span class="icon fw-stack resource-add-span">
+                                <i class="fw fw-add fw-stack-1x"></i>
+                                <i class="fw fw-circle-outline fw-stack-2x"></i>
+                                </span>&nbsp;Add
+                            </button>
+                        {{else}}
+                            <button class="btn btn-secondary resource-add-btn" type="button" id="add_resource" data-resource-path="/composite-apis/{apiId}" data-resource-method="put"><span class="icon fw-stack resource-add-span">
+                                <i class="fw fw-add fw-stack-1x"></i>
+                                <i class="fw fw-circle-outline fw-stack-2x"></i>
+                                </span>&nbsp;Add
+                            </button>
+                        {{/if}}
+
                     </div>
                 </div>
             </div>
@@ -75,7 +85,11 @@
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                 <div class="panel-group add-margin-bottom-2x" role="tablist" aria-multiselectable="false" id="resource_details">
                     <div>
-                        <input type="button" data-resource-path="/apis/{apiId}" data-resource-method="put" class="btn btn-secondary has-spinner resource-add-btn" id="save_resources" value="{{i18n "Save"}}"/>
+                        {{#if isStandardAPI}}
+                            <input type="button" data-resource-path="/apis/{apiId}" data-resource-method="put" class="btn btn-secondary has-spinner resource-add-btn" id="save_resources" value="{{i18n "Save"}}"/>
+                        {{else}}
+                            <input type="button" data-resource-path="/composite-apis/{apiId}" data-resource-method="put" class="btn btn-secondary has-spinner resource-add-btn" id="save_resources" value="{{i18n "Save"}}"/>
+                        {{/if}}
                     </div>
                 </div>
             </div>

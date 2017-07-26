@@ -38,6 +38,9 @@ import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.Policy;
+import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
@@ -115,7 +118,7 @@ public class APIImportExportTestCase {
         DocumentContent api1Doc3Content = createDocContent(api1Doc3Info, "", null);
 
         Mockito.when(apiPublisher.getAPIbyUUID(api1Id)).thenReturn(api1);
-        Mockito.when(apiPublisher.getSwagger20Definition(api1Id)).thenReturn(api1Definition);
+        Mockito.when(apiPublisher.getApiSwaggerDefinition(api1Id)).thenReturn(api1Definition);
         Mockito.when(apiPublisher.getApiGatewayConfig(api1Id)).thenReturn(api1GatewayConfig);
         Mockito.when(apiPublisher.getAllDocumentation(api1Id, 0, Integer.MAX_VALUE)).thenReturn(api1DocumentInfo);
         Mockito.when(apiPublisher.getDocumentationContent(api1Doc1Id)).thenReturn(api1Doc1Content);
@@ -167,7 +170,7 @@ public class APIImportExportTestCase {
         DocumentContent api4Doc3Content = createDocContent(api4Doc3Info, "", null);
 
         Mockito.when(apiPublisher.getAPIbyUUID(api4Id)).thenReturn(api4);
-        Mockito.when(apiPublisher.getSwagger20Definition(api4Id)).thenReturn(api1Definition);
+        Mockito.when(apiPublisher.getApiSwaggerDefinition(api4Id)).thenReturn(api1Definition);
         Mockito.when(apiPublisher.getApiGatewayConfig(api4Id)).thenReturn(api1GatewayConfig);
         Mockito.when(apiPublisher.getAllDocumentation(api4Id, 0, Integer.MAX_VALUE)).thenReturn(api1DocumentInfo);
         Mockito.when(apiPublisher.getDocumentationContent(api4Doc1Id)).thenReturn(api4Doc1Content);
@@ -199,7 +202,7 @@ public class APIImportExportTestCase {
         DocumentContent api5Doc3Content = createDocContent(api5Doc3Info, "", null);
 
         Mockito.when(apiPublisher.getAPIbyUUID(api5Id)).thenReturn(api5);
-        Mockito.when(apiPublisher.getSwagger20Definition(api5Id)).thenReturn(api1Definition);
+        Mockito.when(apiPublisher.getApiSwaggerDefinition(api5Id)).thenReturn(api1Definition);
         Mockito.when(apiPublisher.getApiGatewayConfig(api5Id)).thenReturn(api1GatewayConfig);
         Mockito.when(apiPublisher.getAllDocumentation(api5Id, 0, Integer.MAX_VALUE)).thenReturn(api5DocumentInfo);
         Mockito.when(apiPublisher.getDocumentationContent(api5Doc1Id)).thenReturn(api5Doc1Content);
@@ -253,7 +256,7 @@ public class APIImportExportTestCase {
         DocumentContent api6Doc3Content = createDocContent(api6Doc3Info, "", null);
 
         Mockito.when(apiPublisher.getAPIbyUUID(api6Id)).thenReturn(api6);
-        Mockito.when(apiPublisher.getSwagger20Definition(api6Id)).thenReturn(api1Definition);
+        Mockito.when(apiPublisher.getApiSwaggerDefinition(api6Id)).thenReturn(api1Definition);
         Mockito.when(apiPublisher.getApiGatewayConfig(api6Id)).thenReturn(api1GatewayConfig);
         Mockito.when(apiPublisher.getAllDocumentation(api6Id, 0, Integer.MAX_VALUE)).thenReturn(api1DocumentInfo);
         Mockito.when(apiPublisher.getDocumentationContent(api6Doc1Id)).thenReturn(api6Doc1Content);
@@ -285,7 +288,7 @@ public class APIImportExportTestCase {
         DocumentContent api7Doc3Content = createDocContent(api7Doc3Info, "", null);
 
         Mockito.when(apiPublisher.getAPIbyUUID(api7Id)).thenReturn(api7);
-        Mockito.when(apiPublisher.getSwagger20Definition(api7Id)).thenReturn(api1Definition);
+        Mockito.when(apiPublisher.getApiSwaggerDefinition(api7Id)).thenReturn(api1Definition);
         Mockito.when(apiPublisher.getApiGatewayConfig(api7Id)).thenReturn(api1GatewayConfig);
         Mockito.when(apiPublisher.getAllDocumentation(api7Id, 0, Integer.MAX_VALUE)).thenReturn(api7DocumentInfo);
         Mockito.when(apiPublisher.getDocumentationContent(api7Doc1Id)).thenReturn(api7Doc1Content);
@@ -293,7 +296,7 @@ public class APIImportExportTestCase {
         Mockito.when(apiPublisher.getThumbnailImage(api7Id)).thenReturn(getClass().getClassLoader().getResourceAsStream
                 ("api1_thumbnail.png"));
 
-        Mockito.when(apiPublisher.getSwagger20Definition(api7Id)).thenThrow(APIManagementException.class);
+        Mockito.when(apiPublisher.getApiSwaggerDefinition(api7Id)).thenThrow(APIManagementException.class);
 
         List<API> apis = new ArrayList<>();
         apis.add(api6);
@@ -503,9 +506,9 @@ public class APIImportExportTestCase {
         transport.add("http");
 
 
-        Set<String> policies = new HashSet<>();
-        policies.add("Silver");
-        policies.add("Bronze");
+        Set<Policy> policies = new HashSet<>();
+        policies.add(new SubscriptionPolicy("Silver"));
+        policies.add(new SubscriptionPolicy("Bronze"));
 
         Set<String> tags = new HashSet<>();
         tags.add("food");
@@ -534,7 +537,7 @@ public class APIImportExportTestCase {
                 isResponseCachingEnabled(true).
                 cacheTimeout(120).
                 isDefaultVersion(true).
-                apiPolicy("Gold").
+                apiPolicy(new APIPolicy("Gold")).
                 transport(transport).
                 tags(tags).
                 policies(policies).
