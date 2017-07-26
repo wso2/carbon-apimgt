@@ -18,7 +18,7 @@ import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 )
 
 public class ConfigurationActivator {
-    private static final Logger log = LoggerFactory.getLogger(ServiceReferenceHolder.class);
+    private static final Logger log = LoggerFactory.getLogger(ConfigurationActivator.class);
     /**
      * Get the ConfigProvider service.
      * This is the bind method that gets called for ConfigProvider service registration that satisfy the policy.
