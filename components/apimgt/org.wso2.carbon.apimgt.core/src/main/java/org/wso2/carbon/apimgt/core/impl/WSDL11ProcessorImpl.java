@@ -31,8 +31,10 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.WSDLInfo;
 import org.wso2.carbon.apimgt.core.models.WSDLOperation;
+import org.wso2.carbon.apimgt.core.models.WSDLOperationParam;
 import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 import org.wso2.carbon.apimgt.core.util.APIMWSDLUtils;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.xml.sax.InputSource;
 
 import java.io.ByteArrayInputStream;
@@ -41,6 +43,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -49,13 +52,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.wsdl.Binding;
+import javax.wsdl.BindingInput;
 import javax.wsdl.BindingOperation;
 import javax.wsdl.Definition;
+import javax.wsdl.Input;
+import javax.wsdl.Message;
+import javax.wsdl.Operation;
+import javax.wsdl.Part;
 import javax.wsdl.Port;
 import javax.wsdl.Service;
 import javax.wsdl.WSDLException;
 import javax.wsdl.extensions.http.HTTPBinding;
 import javax.wsdl.extensions.http.HTTPOperation;
+import javax.wsdl.extensions.http.HTTPUrlReplacement;
+import javax.wsdl.extensions.mime.MIMEContent;
+import javax.wsdl.extensions.soap.SOAPBinding;
+import javax.wsdl.extensions.soap12.SOAP12Binding;
 import javax.wsdl.factory.WSDLFactory;
 import javax.wsdl.xml.WSDLReader;
 import javax.wsdl.xml.WSDLWriter;
@@ -68,17 +80,17 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
     private static final Logger log = LoggerFactory.getLogger(WSDL11ProcessorImpl.class);
     private static final String JAVAX_WSDL_VERBOSE_MODE = "javax.wsdl.verbose";
     private static final String JAVAX_WSDL_IMPORT_DOCUMENTS = "javax.wsdl.importDocuments";
-    private static final String WSDL_VERSION_11 = "1.1";
+    private static final String TEXT_XML_MEDIA_TYPE = "text/xml";
 
     private static volatile WSDLFactory wsdlFactoryInstance;
     private boolean canProcess = false;
 
     //Fields required for processing a single wsdl
-    protected Definition wsdlDefinition;
+    private Definition wsdlDefinition;
 
     //Fields required for processing WSDL archive
-    protected Map<String, Definition> pathToDefinitionMap;
-    protected String wsdlArchiveExtractedPath;
+    private Map<String, Definition> pathToDefinitionMap;
+    private String wsdlArchiveExtractedPath;
 
     private static WSDLFactory getWsdlFactoryInstance() throws APIMgtWSDLException {
         if (wsdlFactoryInstance == null) {
@@ -160,10 +172,16 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
     public WSDLInfo getWsdlInfo() throws APIMgtWSDLException {
         WSDLInfo wsdlInfo = new WSDLInfo();
         Map<String, String> endpointsMap = getEndpoints();
-        Set <WSDLOperation> operations = getOperations();
+        Set<WSDLOperation> operations = getHttpBindingOperations();
         wsdlInfo.setEndpoints(endpointsMap);
-        wsdlInfo.setVersion(WSDL_VERSION_11);
-        wsdlInfo.setOperations(operations);
+        wsdlInfo.setVersion(APIMgtConstants.WSDLConstants.WSDL_VERSION_11);
+        if (!operations.isEmpty()) {
+            wsdlInfo.setHasHttpBindingOperations(true);
+            wsdlInfo.setHttpBindingOperations(operations);
+        } else {
+            wsdlInfo.setHasHttpBindingOperations(false);
+        }
+        wsdlInfo.setHasSoapBindingOperations(hasSoapBindingOperations());
         return wsdlInfo;
     }
 
@@ -227,7 +245,7 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
      *
      * @param exElement ExtensibilityElement
      * @return {@link String}
-     * @throws APIMgtWSDLException
+     * @throws APIMgtWSDLException when the extensibility element is not supported
      */
     private String getAddressUrl(Object exElement) throws APIMgtWSDLException {
         if (exElement instanceof SOAP12AddressImpl) {
@@ -383,13 +401,13 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
      * 
      * @return a set of {@link WSDLOperation} defined in WSDL(s)
      */
-    private Set<WSDLOperation> getOperations() {
+    private Set<WSDLOperation> getHttpBindingOperations() {
         if (wsdlDefinition != null) {
-            return getOperations(wsdlDefinition);
+            return getHttpBindingOperations(wsdlDefinition);
         } else {
             Set<WSDLOperation> allOperations = new HashSet<>();
             for (Definition definition : pathToDefinitionMap.values()) {
-                Set<WSDLOperation> operations = getOperations(definition);
+                Set<WSDLOperation> operations = getHttpBindingOperations(definition);
                 allOperations.addAll(operations);
             }
             return allOperations;
@@ -402,12 +420,12 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
      * @param definition WSDL Definition
      * @return a set of {@link WSDLOperation} defined in the provided WSDL definition
      */
-    private Set<WSDLOperation> getOperations (Definition definition) {
+    private Set<WSDLOperation> getHttpBindingOperations(Definition definition) {
         Set<WSDLOperation> allOperations = new HashSet<>();
         for (Object bindingObj : definition.getAllBindings().values()) {
             if (bindingObj instanceof Binding) {
                 Binding binding = (Binding) bindingObj;
-                Set<WSDLOperation> operations = getOperations(binding);
+                Set<WSDLOperation> operations = getHttpBindingOperations(binding);
                 allOperations.addAll(operations);
             }
         }
@@ -416,33 +434,190 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
 
     /**
      * Retrieves all the operations defined in the provided Binding.
-     * 
+     *
      * @param binding WSDL binding
      * @return a set of {@link WSDLOperation} defined in the provided Binding
      */
-    private Set<WSDLOperation> getOperations(Binding binding) {
+    private Set<WSDLOperation> getHttpBindingOperations(Binding binding) {
         Set<WSDLOperation> allBindingOperations = new HashSet<>();
         if (binding.getExtensibilityElements() != null && binding.getExtensibilityElements().size() > 0) {
             if (binding.getExtensibilityElements().get(0) instanceof HTTPBinding) {
-                HTTPBinding httpBinding = (HTTPBinding)binding.getExtensibilityElements().get(0);
+                HTTPBinding httpBinding = (HTTPBinding) binding.getExtensibilityElements().get(0);
                 String verb = httpBinding.getVerb();
                 for (Object opObj : binding.getBindingOperations()) {
                     if (opObj instanceof BindingOperation) {
                         BindingOperation bindingOperation = (BindingOperation) opObj;
-                        for (Object boExtElement : bindingOperation.getExtensibilityElements()) {
-                            if (boExtElement instanceof HTTPOperation) {
-                                HTTPOperation httpOperation = (HTTPOperation) boExtElement;
-                                if (!StringUtils.isBlank(httpOperation.getLocationURI())) {
-                                    WSDLOperation wsdlOperation = new WSDLOperation(verb,
-                                            httpOperation.getLocationURI());
-                                    allBindingOperations.add(wsdlOperation);
-                                }
-                            }
+                        WSDLOperation wsdlOperation = getOperation(bindingOperation, verb);
+                        if (wsdlOperation != null) {
+                            allBindingOperations.add(wsdlOperation);
                         }
                     }
                 }
             }
         }
         return allBindingOperations;
+    }
+
+    /**
+     * Retrieves WSDL operation given the binding operation and http verb
+     * 
+     * @param bindingOperation {@link BindingOperation} object
+     * @param verb HTTP verb
+     * @return WSDL operation for the given binding operation and http verb
+     */
+    private WSDLOperation getOperation(BindingOperation bindingOperation, String verb) {
+        WSDLOperation wsdlOperation = null;
+        for (Object boExtElement : bindingOperation.getExtensibilityElements()) {
+            if (boExtElement instanceof HTTPOperation) {
+                HTTPOperation httpOperation = (HTTPOperation) boExtElement;
+                if (!StringUtils.isBlank(httpOperation.getLocationURI())) {
+                    wsdlOperation = new WSDLOperation();
+                    wsdlOperation.setVerb(verb);
+                    wsdlOperation.setURI(APIMWSDLUtils.replaceParentheses(httpOperation.getLocationURI()));
+                    if (APIMWSDLUtils.canContainBody(verb)) {
+                        String boContentType = getContentType(bindingOperation.getBindingInput());
+                        wsdlOperation.setContentType(boContentType != null ? boContentType : TEXT_XML_MEDIA_TYPE);
+                    }
+                    List<WSDLOperationParam> paramList = getParameters(bindingOperation, verb,
+                            wsdlOperation.getContentType());
+                    wsdlOperation.setParameters(paramList);
+                }
+            }
+        }
+        return wsdlOperation;
+    }
+
+    /**
+     * Returns the content-type of a provided {@link BindingInput} if it is available
+     * 
+     * @param bindingInput Binding Input object
+     * @return The content-type of the {@link BindingInput}
+     */
+    private String getContentType(BindingInput bindingInput) {
+        List extensibilityElements = bindingInput.getExtensibilityElements();
+        if (extensibilityElements != null) {
+            for (Object ex: extensibilityElements) {
+                if (ex instanceof MIMEContent) {
+                    MIMEContent mimeContentElement = (MIMEContent) ex;
+                    return mimeContentElement.getType();
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns parameters, given http binding operation, verb and content type
+     * 
+     * @param bindingOperation {@link BindingOperation} object
+     * @param verb HTTP verb
+     * @param contentType Content type
+     * @return parameters, given http binding operation, verb and content type
+     */
+    private List<WSDLOperationParam> getParameters(BindingOperation bindingOperation, String verb, String contentType) {
+        List<WSDLOperationParam> params = new ArrayList<>();
+        Operation operation = bindingOperation.getOperation();
+
+        //Returns a single parameter called payload with body type if request can contain a body (PUT/POST) and
+        // content type is not application/x-www-form-urlencoded OR multipart/form-data, 
+        // or content type is not provided
+        if (APIMWSDLUtils.canContainBody(verb) && !APIMWSDLUtils.hasFormDataParams(contentType)) {
+            WSDLOperationParam param = new WSDLOperationParam();
+            param.setName("Payload");
+            param.setParamType(WSDLOperationParam.ParamTypeEnum.BODY);
+            params.add(param);
+            return params;
+        }
+
+        if (operation != null) {
+            Input input = operation.getInput();
+            if (input != null) {
+                Message message = input.getMessage();
+                if (message != null) {
+                    Map map = message.getParts();
+                    map.forEach((name, partObj) -> {
+                        WSDLOperationParam param = new WSDLOperationParam();
+                        param.setName(name.toString());
+                        if (APIMWSDLUtils.canContainBody(verb)) {
+                            //In POST, PUT operations, parameters always in body according to HTTP Binding spec 
+                            if (APIMWSDLUtils.hasFormDataParams(contentType)) {
+                                param.setParamType(WSDLOperationParam.ParamTypeEnum.FORM_DATA);
+                            }
+                            //no else block since if content type is not form-data related, there can be only one
+                            // parameter which is payload body. This is handled in the first if block which is
+                            // if (canContainBody(verb) && !hasFormDataParams(contentType)) { .. }
+                        } else {
+                            //In GET operations, parameters always query or path as per HTTP Binding spec
+                            if (isUrlReplacement(bindingOperation)) {
+                                param.setParamType(WSDLOperationParam.ParamTypeEnum.PATH);
+                            } else {
+                                param.setParamType(WSDLOperationParam.ParamTypeEnum.QUERY);
+                            }
+                        }
+
+                        Part part = (Part)partObj;
+                        param.setDataType(part.getTypeName().getLocalPart());
+                        params.add(param);
+                    });
+                }
+            }
+        }
+        return params;
+    }
+
+    /**
+     * Returns whether the provided binding operation is of URL Replacement type
+     * 
+     * @param bindingOperation Binding operation
+     * @return whether the provided binding operation is of URL Replacement type
+     */
+    private boolean isUrlReplacement(BindingOperation bindingOperation) {
+        List extensibilityElements = bindingOperation.getExtensibilityElements();
+        if (extensibilityElements != null) {
+            for (Object e : extensibilityElements) {
+                if (e instanceof HTTPUrlReplacement) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns if any of the WSDLs (initialized) contains SOAP binding operations
+     *
+     * @return whether the WSDLs (initialized) contains SOAP binding operations
+     */
+    private boolean hasSoapBindingOperations() {
+        if (wsdlDefinition != null) {
+            return hasSoapBindingOperations(wsdlDefinition);
+        } else {
+            for (Definition definition : pathToDefinitionMap.values()) {
+                if (hasSoapBindingOperations(definition)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Returns if the provided WSDL definition contains SOAP binding operations
+     * 
+     * @param definition WSDL definition
+     * @return whether the provided WSDL definition contains SOAP binding operations
+     */
+    private boolean hasSoapBindingOperations(Definition definition) {
+        for (Object bindingObj : definition.getAllBindings().values()) {
+            if (bindingObj instanceof Binding) {
+                Binding binding = (Binding) bindingObj;
+                for (Object ex : binding.getExtensibilityElements()) {
+                    if (ex instanceof SOAPBinding || ex instanceof SOAP12Binding) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

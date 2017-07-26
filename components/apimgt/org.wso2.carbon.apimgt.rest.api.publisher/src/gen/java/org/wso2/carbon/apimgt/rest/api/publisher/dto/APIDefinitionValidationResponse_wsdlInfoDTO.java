@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponse_wsdlInfo_bindingInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponse_wsdlInfo_endpointsDTO;
 import java.util.Objects;
 
@@ -20,6 +21,9 @@ public class APIDefinitionValidationResponse_wsdlInfoDTO   {
 
   @JsonProperty("endpoints")
   private List<APIDefinitionValidationResponse_wsdlInfo_endpointsDTO> endpoints = new ArrayList<APIDefinitionValidationResponse_wsdlInfo_endpointsDTO>();
+
+  @JsonProperty("bindingInfo")
+  private APIDefinitionValidationResponse_wsdlInfo_bindingInfoDTO bindingInfo = null;
 
   public APIDefinitionValidationResponse_wsdlInfoDTO version(String version) {
     this.version = version;
@@ -62,6 +66,24 @@ public class APIDefinitionValidationResponse_wsdlInfoDTO   {
     this.endpoints = endpoints;
   }
 
+  public APIDefinitionValidationResponse_wsdlInfoDTO bindingInfo(APIDefinitionValidationResponse_wsdlInfo_bindingInfoDTO bindingInfo) {
+    this.bindingInfo = bindingInfo;
+    return this;
+  }
+
+   /**
+   * Get bindingInfo
+   * @return bindingInfo
+  **/
+  @ApiModelProperty(value = "")
+  public APIDefinitionValidationResponse_wsdlInfo_bindingInfoDTO getBindingInfo() {
+    return bindingInfo;
+  }
+
+  public void setBindingInfo(APIDefinitionValidationResponse_wsdlInfo_bindingInfoDTO bindingInfo) {
+    this.bindingInfo = bindingInfo;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -73,12 +95,13 @@ public class APIDefinitionValidationResponse_wsdlInfoDTO   {
     }
     APIDefinitionValidationResponse_wsdlInfoDTO apIDefinitionValidationResponseWsdlInfo = (APIDefinitionValidationResponse_wsdlInfoDTO) o;
     return Objects.equals(this.version, apIDefinitionValidationResponseWsdlInfo.version) &&
-        Objects.equals(this.endpoints, apIDefinitionValidationResponseWsdlInfo.endpoints);
+        Objects.equals(this.endpoints, apIDefinitionValidationResponseWsdlInfo.endpoints) &&
+        Objects.equals(this.bindingInfo, apIDefinitionValidationResponseWsdlInfo.bindingInfo);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(version, endpoints);
+    return Objects.hash(version, endpoints, bindingInfo);
   }
 
   @Override
@@ -88,6 +111,7 @@ public class APIDefinitionValidationResponse_wsdlInfoDTO   {
     
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    endpoints: ").append(toIndentedString(endpoints)).append("\n");
+    sb.append("    bindingInfo: ").append(toIndentedString(bindingInfo)).append("\n");
     sb.append("}");
     return sb.toString();
   }

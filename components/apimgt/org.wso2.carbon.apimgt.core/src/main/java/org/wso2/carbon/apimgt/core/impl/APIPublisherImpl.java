@@ -1448,11 +1448,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     @Override
-    public String addAPIFromWSDLArchive(API.APIBuilder apiBuilder, InputStream inputStream)
+    public String addAPIFromWSDLArchive(API.APIBuilder apiBuilder, InputStream inputStream, boolean isHttpBinding)
             throws APIManagementException {
         WSDLArchiveInfo archiveInfo = extractAndValidateWSDLArchive(inputStream);
-        apiBuilder.uriTemplates(
-                APIMWSDLUtils.getUriTemplatesForWSDLOperations(archiveInfo.getWsdlInfo().getOperations()));
+        apiBuilder.uriTemplates(APIMWSDLUtils
+                .getUriTemplatesForWSDLOperations(archiveInfo.getWsdlInfo().getHttpBindingOperations(), isHttpBinding));
         String uuid = addAPI(apiBuilder);
         try (InputStream fileInputStream = new FileInputStream(archiveInfo.getAbsoluteFilePath())) {
             getApiDAO().addOrUpdateWSDLArchive(uuid, fileInputStream, getUsername());
@@ -1471,7 +1471,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     @Override
-    public String addAPIFromWSDLFile(API.APIBuilder apiBuilder, InputStream inputStream) throws APIManagementException {
+    public String addAPIFromWSDLFile(API.APIBuilder apiBuilder, InputStream inputStream, boolean isHttpBinding)
+            throws APIManagementException {
         byte[] wsdlContent;
         try {
             wsdlContent = IOUtils.toByteArray(inputStream);
@@ -1480,6 +1481,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
         }
         WSDLProcessor processor = WSDLProcessFactory.getInstance().getWSDLProcessor(wsdlContent);
+        apiBuilder.uriTemplates(APIMWSDLUtils
+                .getUriTemplatesForWSDLOperations(processor.getWsdlInfo().getHttpBindingOperations(), isHttpBinding));
         if (!processor.canProcess()) {
             throw new APIMgtWSDLException("Unable to process WSDL by the processor " + processor.getClass().getName(),
                     ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
@@ -1491,13 +1494,15 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     @Override
-    public String addAPIFromWSDLURL(API.APIBuilder apiBuilder, String wsdlUrl) throws APIManagementException {
+    public String addAPIFromWSDLURL(API.APIBuilder apiBuilder, String wsdlUrl, boolean isHttpBinding)
+            throws APIManagementException {
         WSDLProcessor processor = WSDLProcessFactory.getInstance().getWSDLProcessor(wsdlUrl);
         if (!processor.canProcess()) {
             throw new APIMgtWSDLException("Unable to process WSDL by the processor " + processor.getClass().getName(),
                     ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
         }
-
+        apiBuilder.uriTemplates(APIMWSDLUtils
+                .getUriTemplatesForWSDLOperations(processor.getWsdlInfo().getHttpBindingOperations(), isHttpBinding));
         String uuid = addAPI(apiBuilder);
         byte[] wsdlContentBytes = processor.getWSDL();
         getApiDAO().addOrUpdateWSDL(uuid, wsdlContentBytes, getUsername());

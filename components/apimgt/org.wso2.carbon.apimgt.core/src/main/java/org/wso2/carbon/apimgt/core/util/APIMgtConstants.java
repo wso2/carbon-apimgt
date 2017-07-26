@@ -187,6 +187,8 @@ public class APIMgtConstants {
         public static final String WSDL_ARCHIVES_FOLDERNAME = "WSDL-archives";
         public static final String WSDL_ARCHIVE_FILENAME = "wsdl-archive.zip";
         public static final String EXTRACTED_WSDL_ARCHIVE_FOLDERNAME = "extracted";
+        public static final String WSDL_VERSION_11 = "1.1";
+        public static final String WSDL_VERSION_20 = "2.0";
     }
 
 

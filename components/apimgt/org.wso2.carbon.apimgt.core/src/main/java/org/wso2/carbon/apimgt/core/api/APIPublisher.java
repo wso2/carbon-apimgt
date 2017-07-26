@@ -417,7 +417,7 @@ public interface APIPublisher extends APIManager {
      * 
      * @param apiId UUID of API
      * @return an stream from the ZIP wsdl archive of a particular API stored in DB
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException if error occurs while accessing the WSDL from the data layer
      */
     InputStream getAPIWSDLArchive(String apiId) throws APIMgtDAOException;
 
@@ -426,10 +426,11 @@ public interface APIPublisher extends APIManager {
      * 
      * @param apiBuilder {@code APIBuilder} instance
      * @param inputStream WSDL archive stream
+     * @param isHttpBinding states whether http binding operations should be used to create resources
      * @return UUID of the created API
      * @throws APIManagementException If fails to add the API
      */
-    String addAPIFromWSDLArchive(API.APIBuilder apiBuilder, InputStream inputStream)
+    String addAPIFromWSDLArchive(API.APIBuilder apiBuilder, InputStream inputStream, boolean isHttpBinding)
             throws APIManagementException;
 
     /**
@@ -437,22 +438,25 @@ public interface APIPublisher extends APIManager {
      *
      * @param apiBuilder {@code APIBuilder} instance
      * @param inputStream WSDL archive stream
+     * @param isHttpBinding states whether http binding operations should be used to create resources
      * @return UUID of the created API
      * @throws APIManagementException If fails to add the API
      */
-    String addAPIFromWSDLFile(API.APIBuilder apiBuilder, InputStream inputStream) throws APIManagementException;
+    String addAPIFromWSDLFile(API.APIBuilder apiBuilder, InputStream inputStream, boolean isHttpBinding)
+            throws APIManagementException;
 
     /**
      * Creates an API using a WSDL URL.
      *
      * @param apiBuilder {@code APIBuilder} instance
      * @param wsdlUrl WSDL URL
+     * @param isHttpBinding states whether http binding operations should be used to create resources
      * @return UUID of the created API
      * @throws APIManagementException If fails to add the API
      * @throws IOException Error occurs while accessing the URL
      */
-    String addAPIFromWSDLURL(API.APIBuilder apiBuilder, String wsdlUrl) throws APIManagementException,
-            IOException;
+    String addAPIFromWSDLURL(API.APIBuilder apiBuilder, String wsdlUrl, boolean isHttpBinding)
+            throws APIManagementException, IOException;
 
     /**
      * Updates a WSDL (single file) of an API.

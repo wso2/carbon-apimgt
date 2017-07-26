@@ -23,13 +23,15 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Information extracted from WSDL 
+ * Information extracted from WSDL
  */
 public class WSDLInfo {
 
     private String version;
     private Map<String, String> endpoints;
-    private Set<WSDLOperation> operations;
+    private boolean hasSoapBindingOperations;
+    private boolean hasHttpBindingOperations;
+    private Set<WSDLOperation> httpBindingOperations;
 
     public WSDLInfo() {
         endpoints = new HashMap<>();
@@ -51,11 +53,27 @@ public class WSDLInfo {
         this.endpoints = endpoints;
     }
 
-    public Set<WSDLOperation> getOperations() {
-        return operations;
+    public Set<WSDLOperation> getHttpBindingOperations() {
+        return httpBindingOperations;
     }
 
-    public void setOperations(Set<WSDLOperation> operations) {
-        this.operations = operations;
+    public void setHasHttpBindingOperations(boolean hasHttpBindingOperations) {
+        this.hasHttpBindingOperations = hasHttpBindingOperations;
+    }
+
+    public boolean hasHttpBindingOperations() {
+        return hasHttpBindingOperations;
+    }
+
+    public void setHasSoapBindingOperations(boolean hasSoapBindingOperations) {
+        this.hasSoapBindingOperations = hasSoapBindingOperations;
+    }
+
+    public boolean hasSoapBindingOperations() {
+        return hasSoapBindingOperations;
+    }
+
+    public void setHttpBindingOperations(Set<WSDLOperation> operations) {
+        this.httpBindingOperations = operations;
     }
 }

@@ -1505,14 +1505,15 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param additionalProperties Additional attributes specified as a stringified JSON with API's schema
      * @param ifMatch If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param implementationType WSDL based API implementation type (SOAP or HTTP_BINDING)
      * @param request msf4j request object
      * @return Imported API
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisImportDefinitionPost(String contentType, String type, InputStream fileInputStream,
-            FileInfo fileDetail, String url, String additionalProperties, String ifMatch, String ifUnmodifiedSince,
-            Request request) throws NotFoundException {
+            FileInfo fileDetail, String url, String additionalProperties, String implementationType, String ifMatch,
+            String ifUnmodifiedSince, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             if (StringUtils.isBlank(type)) {
@@ -1547,6 +1548,20 @@ public class ApisApiServiceImpl extends ApisApiService {
                 //In this case, additionalPropertiesAPI must not be null since we need attributes like name, 
                 // context, version when creating an API from WSDL 
                 if (additionalPropertiesAPI != null) {
+                    final String soap = RestApiConstants.IMPORT_DEFINITION_WSDL_IMPL_TYPE_SOAP;
+                    final String httpBinding = RestApiConstants.IMPORT_DEFINITION_WSDL_IMPL_TYPE_HTTP;
+                    
+                    if (implementationType != null && !soap.equals(implementationType) && !httpBinding
+                            .equals(implementationType)) {
+                        String msg =
+                                "Invalid implementation type. Should be one of '" + soap + "' or '" + httpBinding + "'";
+                        log.error(msg);
+                        ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900700L, msg);
+                        return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();                        
+                    }
+
+                    boolean isHttpBinding = httpBinding.equals(implementationType);
+
                     if (fileInputStream != null) {
                         if (fileDetail.getFileName() == null) {
                             String msg = "File name cannot be null.";
@@ -1554,10 +1569,11 @@ public class ApisApiServiceImpl extends ApisApiService {
                             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900700L, msg);
                             return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
                         }
+                        
                         if (fileDetail.getFileName().endsWith(".zip")) {
-                            uuid = apiPublisher.addAPIFromWSDLArchive(apiBuilder, fileInputStream);
+                            uuid = apiPublisher.addAPIFromWSDLArchive(apiBuilder, fileInputStream, isHttpBinding);
                         } else if (fileDetail.getFileName().endsWith(".wsdl")) {
-                            uuid = apiPublisher.addAPIFromWSDLFile(apiBuilder, fileInputStream);
+                            uuid = apiPublisher.addAPIFromWSDLFile(apiBuilder, fileInputStream, isHttpBinding);
                         } else {
                             String msg = "Unsupported file extension type: " + fileDetail.getFileName();
                             log.error(msg);
@@ -1565,7 +1581,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                             return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
                         }
                     } else {
-                        uuid = apiPublisher.addAPIFromWSDLURL(apiBuilder, url);
+                        uuid = apiPublisher.addAPIFromWSDLURL(apiBuilder, url, isHttpBinding);
                     }
                 } else {
                     String msg = "'additionalProperties' should be specified when creating an API from WSDL";

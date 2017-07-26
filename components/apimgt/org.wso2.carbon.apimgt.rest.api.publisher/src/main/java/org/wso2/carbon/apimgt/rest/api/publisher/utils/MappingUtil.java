@@ -45,6 +45,7 @@ import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponse_wsdlInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponse_wsdlInfo_bindingInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponse_wsdlInfo_endpointsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
@@ -509,6 +510,16 @@ public class MappingUtil {
                 infoDTO.addEndpointsItem(endpointsDTO);
             }
         }
+
+        //currently operations are supported only in WSDL 1.1
+        if (APIMgtConstants.WSDLConstants.WSDL_VERSION_11.equals(info.getVersion())) {
+            APIDefinitionValidationResponse_wsdlInfo_bindingInfoDTO bindingInfoDTO
+                    = new APIDefinitionValidationResponse_wsdlInfo_bindingInfoDTO();
+            bindingInfoDTO.setHasHttpBinding(info.hasHttpBindingOperations());
+            bindingInfoDTO.setHasSoapBinding(info.hasSoapBindingOperations());
+            infoDTO.setBindingInfo(bindingInfoDTO);
+        }
+
         wsdlValidationResponseDTO.setWsdlInfo(infoDTO);
         return wsdlValidationResponseDTO;
     }

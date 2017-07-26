@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.WSDLInfo;
 import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 import org.wso2.carbon.apimgt.core.util.APIMWSDLUtils;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
@@ -74,7 +75,6 @@ public class WSDL20ProcessorImpl implements WSDLProcessor {
     protected boolean canProcess;
     private static volatile WSDLFactory wsdlFactoryInstance;
     private static final Logger log = LoggerFactory.getLogger(WSDL20ProcessorImpl.class);
-    private static final String WSDL_VERSION_20 = "2.0";
 
     private static WSDLFactory getWsdlFactoryInstance() throws WSDLException {
         if (wsdlFactoryInstance == null) {
@@ -216,7 +216,7 @@ public class WSDL20ProcessorImpl implements WSDLProcessor {
         Map<String, String> endpointsMap = getEndpoints();
         WSDLInfo wsdlInfo = new WSDLInfo();
         wsdlInfo.setEndpoints(endpointsMap);
-        wsdlInfo.setVersion(WSDL_VERSION_20);
+        wsdlInfo.setVersion(APIMgtConstants.WSDLConstants.WSDL_VERSION_20);
         return wsdlInfo;
     }
 

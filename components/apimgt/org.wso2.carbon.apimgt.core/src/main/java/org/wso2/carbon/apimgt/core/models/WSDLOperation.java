@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
+import java.util.List;
+
 /**
  * Basic WSDL operation
  */
@@ -25,6 +27,11 @@ public class WSDLOperation {
 
     private String verb;
     private String uri;
+    private String contentType;
+    private List<WSDLOperationParam> parameters;
+
+    public WSDLOperation () {
+    }
 
     public WSDLOperation (String verb, String uri) {
         this.verb = verb;
@@ -45,6 +52,22 @@ public class WSDLOperation {
 
     public String getVerb() {
         return verb;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
+    public void setParameters(List<WSDLOperationParam> parameters) {
+        this.parameters = parameters;
+    }
+
+    public List<WSDLOperationParam> getParameters() {
+        return parameters;
+    }
+
+    public String getContentType() {
+        return contentType;
     }
 
     @Override

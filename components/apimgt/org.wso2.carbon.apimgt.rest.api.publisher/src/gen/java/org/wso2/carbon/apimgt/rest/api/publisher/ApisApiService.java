@@ -166,6 +166,7 @@ public abstract class ApisApiService {
  ,InputStream fileInputStream, FileInfo fileDetail
  ,String url
  ,String additionalProperties
+ ,String implementationType
  ,String ifMatch
  ,String ifUnmodifiedSince
  , Request request) throws NotFoundException;

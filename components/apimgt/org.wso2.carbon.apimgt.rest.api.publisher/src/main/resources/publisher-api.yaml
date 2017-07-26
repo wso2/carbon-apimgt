@@ -1431,6 +1431,22 @@ paths:
           description: Additional attributes specified as a stringified JSON with API's schema
           type: string
           required: false
+        - in: formData
+          name: implementationType
+          type: string
+          enum:
+            - SOAP
+            - HTTP_BINDING
+          default: SOAP
+          description: |
+            Currently this is only used when creating an API using a WSDL.
+            
+            If 'SOAP' is specified, the API will be created with only one resource 'POST /' which is to be used for SOAP 
+            operations.
+            
+            If 'HTTP_BINDING' is specified, the API will be created with resources using HTTP binding operations 
+            which are extracted from the WSDL.
+          required: false
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
@@ -4350,5 +4366,13 @@ definitions:
                   type: string
                   description: "Endpoint URL"
                   example: "http://www.webservicex.net/stockquote.asmx"
-
-
+          bindingInfo:
+            description: |
+              WSDL binding related information
+            properties:
+              hasHttpBinding:
+                description: Indicates whether the WSDL contains HTTP Bindings
+                type: boolean
+              hasSoapBinding:
+                description: Indicates whether the WSDL contains SOAP Bindings
+                type: boolean
