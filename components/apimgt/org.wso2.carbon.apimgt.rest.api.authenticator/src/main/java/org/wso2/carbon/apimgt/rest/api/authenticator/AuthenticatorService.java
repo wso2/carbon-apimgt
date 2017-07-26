@@ -172,7 +172,6 @@ public class AuthenticatorService {
                         .createAccessTokenRequest(userName, password, grantType, refreshToken,
                                 null, validityPeriod, scopes,
                                 consumerKeySecretMap.get("CONSUMER_KEY"), consumerKeySecretMap.get("CONSUMER_SECRET"));
-
                 accessTokenInfo = getKeyManager().getNewAccessToken(accessTokenRequest);
             }
         } catch (KeyManagementException e) {
