@@ -150,7 +150,7 @@ public class LogInServiceTest {
 
     @Test
     public void testLogOut() throws IOException {
-        HttpURLConnection urlConn = request("/login/revoke", HttpMethod.POST, true);
+        HttpURLConnection urlConn = request("/login/logout", HttpMethod.POST, true);
         urlConn.setRequestProperty("Authorization", "Bearer 1234");
         urlConn.setRequestProperty("Cookie", "WSO2_AM_TOKEN_2=2345");
         assertEquals(200, urlConn.getResponseCode());

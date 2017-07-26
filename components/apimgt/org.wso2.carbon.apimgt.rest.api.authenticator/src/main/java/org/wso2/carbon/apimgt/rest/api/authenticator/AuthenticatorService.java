@@ -70,7 +70,7 @@ public class AuthenticatorService {
      * This method returns the details of a DCR application.
      *
      * @param appName Name of the application to be created
-     * @return oAuthData - A JsonObject with DCR application details, scopes, and SSO is enabled or not
+     * @return oAuthData - A JsonObject with DCR application details, scopes, auth endpoint, and SSO is enabled or not
      * @throws APIManagementException When creating DCR application fails
      */
     public JsonObject getAuthenticationConfigurations(String appName)
@@ -99,6 +99,8 @@ public class AuthenticatorService {
                 oAuthData.addProperty(KeyManagerConstants.OAUTH_CLIENT_ID, oAuthApplicationClientId);
                 oAuthData.addProperty(KeyManagerConstants.OAUTH_CALLBACK_URIS, oAuthApplicationCallBackURL);
                 oAuthData.addProperty(KeyManagerConstants.TOKEN_SCOPES, scopes);
+                oAuthData.addProperty(KeyManagerConstants.AUTHORIZATION_ENDPOINT,
+                        storeConfigs.getAuthorizationEndpoint());
                 oAuthData.addProperty("is_sso_enabled", storeConfigs.isSsoEnabled());
             } else {
                 String errorMsg = "No information available in OAuth application.";
@@ -128,7 +130,7 @@ public class AuthenticatorService {
     public AccessTokenInfo getTokens(String appName, String requestURL, String grantType,
                                      String userName, String password, String refreshToken, long validityPeriod)
             throws APIManagementException {
-        AccessTokenInfo accessTokenInfo;
+        AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
         AccessTokenRequest accessTokenRequest = new AccessTokenRequest();
         // Get scopes of the application
         String scopes = getApplicationScopes(appName);
@@ -146,11 +148,12 @@ public class AuthenticatorService {
                 APIMStoreConfigurations storeConfigs = ServiceReferenceHolder.getInstance().getAPIMStoreConfiguration();
                 String callBackURL = storeConfigs.getApimBaseUrl() + "login/callback/" + appName;
                 // Get the Authorization Code
-                String authorizationCode = requestURL.split("=")[1].split("&")[0];
-                if (log.isDebugEnabled()) {
-                    log.debug("Authorization Code for the app " + appName + ": " + authorizationCode);
-                }
-                if (authorizationCode != null) {
+                if (requestURL.contains("code=")) {
+                    String requestURLQueryParameters = requestURL.split("\\?")[1];
+                    String authorizationCode = requestURLQueryParameters.split("=")[1].split("&")[0];
+                    if (log.isDebugEnabled()) {
+                        log.debug("Authorization Code for the app " + appName + ": " + authorizationCode);
+                    }
                     // Get Access & Refresh Tokens
                     accessTokenRequest.setClientId(consumerKeySecretMap.get("CONSUMER_KEY"));
                     accessTokenRequest.setClientSecret(consumerKeySecretMap.get("CONSUMER_SECRET"));
@@ -158,6 +161,7 @@ public class AuthenticatorService {
                     accessTokenRequest.setAuthorizationCode(authorizationCode);
                     accessTokenRequest.setScopes(scopes);
                     accessTokenRequest.setCallbackURI(callBackURL);
+                    accessTokenInfo = getKeyManager().getNewAccessToken(accessTokenRequest);
                 } else {
                     String errorMsg = "No Authorization Code available.";
                     log.error(errorMsg, ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
@@ -168,8 +172,9 @@ public class AuthenticatorService {
                         .createAccessTokenRequest(userName, password, grantType, refreshToken,
                                 null, validityPeriod, scopes,
                                 consumerKeySecretMap.get("CONSUMER_KEY"), consumerKeySecretMap.get("CONSUMER_SECRET"));
+
+                accessTokenInfo = getKeyManager().getNewAccessToken(accessTokenRequest);
             }
-            accessTokenInfo = getKeyManager().getNewAccessToken(accessTokenRequest);
         } catch (KeyManagementException e) {
             String errorMsg = "Error while receiving tokens for OAuth application : " + appName;
             log.error(errorMsg, e, ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);

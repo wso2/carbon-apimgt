@@ -149,7 +149,7 @@ public class AuthenticatorAPI implements Microservice {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/revoke")
+    @Path("/logout")
     public Response logout(@Context Request request) {
         String appContext = AuthUtil.getAppContext(request);
         String restAPIContext;

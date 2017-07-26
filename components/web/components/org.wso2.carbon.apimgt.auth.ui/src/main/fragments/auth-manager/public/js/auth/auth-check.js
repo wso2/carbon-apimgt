@@ -12,10 +12,11 @@ function loginRedirect(){
             var callback_URL = data.callback_url;
             var scopes = data.scopes;
             var is_sso_enabled = data.is_sso_enabled;
+            var authorizationEndpoint = data.authorizationEndpoint;
             if(is_sso_enabled) {
                 // Call SSO Login (When grantType = "authorization_code")
                 // TODO: Add URL to config
-                window.location = "https://"+ window.location.hostname +":9443/oauth2/authorize?response_type=code&client_id="+client_id+"&redirect_uri="+callback_URL+"&scope="+scopes;
+                window.location = authorizationEndpoint+"?response_type=code&client_id="+client_id+"&redirect_uri="+callback_URL+"&scope="+scopes;
                 alert('Redirected to IS Login Page!');
             }
             else {

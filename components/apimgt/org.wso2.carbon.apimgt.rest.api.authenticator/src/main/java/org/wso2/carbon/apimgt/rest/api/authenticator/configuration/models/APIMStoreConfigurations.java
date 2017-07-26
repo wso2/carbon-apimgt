@@ -28,6 +28,8 @@ import org.wso2.carbon.kernel.annotations.Element;
 public class APIMStoreConfigurations {
     @Element(description = "APIM Base URL")
     private String apimBaseUrl = "https://localhost:9292/";
+    @Element(description = "Authorization Endpoint")
+    private String authorizationEndpoint = "https://localhost:9443/oauth2/authorize";
     @Element(description = "SSO Enabled or not")
     private boolean ssoEnabled = true;
 
@@ -37,6 +39,14 @@ public class APIMStoreConfigurations {
 
     public void setApimBaseUrl(String apimBaseUrl) {
         this.apimBaseUrl = apimBaseUrl;
+    }
+
+    public String getAuthorizationEndpoint() {
+        return authorizationEndpoint;
+    }
+
+    public void setAuthorizationEndpoint(String authorizationEndpoint) {
+        this.authorizationEndpoint = authorizationEndpoint;
     }
 
     public boolean isSsoEnabled() {
