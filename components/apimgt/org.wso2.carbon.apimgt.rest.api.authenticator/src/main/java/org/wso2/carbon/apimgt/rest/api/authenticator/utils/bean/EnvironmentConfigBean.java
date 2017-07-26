@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This method retrive the environment information.
+ * This class retrive the environment information.
  *
  */
 public class EnvironmentConfigBean {
