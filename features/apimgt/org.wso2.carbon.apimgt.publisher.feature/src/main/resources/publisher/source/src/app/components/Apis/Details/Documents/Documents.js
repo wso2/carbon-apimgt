@@ -27,6 +27,7 @@ import NewDocDiv from './NewDocDiv';
  # Component hierarchy
  -Documents
     -DocumentsTable
+        -InlineEditor
     -NewDocDiv
         -NewDocInfoDiv
         -NewDocSourceDiv
@@ -59,7 +60,6 @@ class Documents extends Component {
         this.addNewDocBtnListener = this.addNewDocBtnListener.bind(this);
         this.editAPIDocumentListener = this.editAPIDocumentListener.bind(this);
         this.submitUpdateDocumentListener = this.submitUpdateDocumentListener.bind(this);
-        this.viewDocContentHandler = this.viewDocContentHandler.bind(this);
     }
 
     componentDidMount() {
@@ -71,13 +71,13 @@ class Documents extends Component {
      */
     getDocumentsList() {
         let docs = this.client.getDocuments(this.api_id);
-        docs.catch(error_response => {
+        docs.then(response => {
+            this.setState({documentsList: response.obj.list});
+        }).catch(error_response => {
             let error_data = JSON.parse(error_response.data);
             let messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
             console.error(messageTxt);
             message.error("Error in fetching documents list of the API");
-        }).then(response => {
-            this.setState({documentsList: response.obj.list});
         });
     }
 
@@ -110,36 +110,41 @@ class Documents extends Component {
             summary: this.state.docSummary,
             sourceType: this.state.docSourceType,
             sourceUrl: this.state.docSourceURL,
-            inlineContent: "string",
+            inlineContent: null,
             permission: '[{"groupId" : "1000", "permission" : ["READ","UPDATE"]},{"groupId" : "1001", "permission" : ["READ","UPDATE"]}]',
             visibility: "API_LEVEL"
         }
         const promised_add = this.client.addDocument(this.api_id, api_documents_data);
-        promised_add.catch(function (error) {
-            const error_data = JSON.parse(error_response.data);
-            const messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
-            message.error(messageTxt);
-        }).then((done) => {
+        promised_add.then(done => {
             const dt_data = done.obj;
             const docId = dt_data.documentId;
+            let addFileSuccess = true;
             if (api_documents_data.sourceType == "FILE") {
                 const file = this.state.docFile;
                 const promised_add_file = this.client.addFileToDocument(this.api_id, docId, file);
-                promised_add_file.catch(function (error) {
+                promised_add_file.catch(function (error_response) {
+                    addFileSuccess = false;
                     const error_data = JSON.parse(error_response.data);
                     const messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
                     console.error(messageTxt);
                     message.error("Failed adding file to the newly added document");
                 });
             }
-            api_documents_data.documentId = docId;
-            const updatedDocList = this.state.documentsList;
-            updatedDocList.push(api_documents_data);
-            this.setState({
-                documentsList: updatedDocList,
-            });
-            this.resetNewDocDetails();
-            message.success("New document added successfully");
+
+            if (addFileSuccess) {
+                api_documents_data.documentId = docId;
+                const updatedDocList = this.state.documentsList;
+                updatedDocList.push(api_documents_data);
+                this.setState({
+                    documentsList: updatedDocList,
+                });
+                this.resetNewDocDetails();
+                message.success("New document added successfully");
+            }
+        }).catch(error_response => {
+            const error_data = JSON.parse(error_response.data);
+            const messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+            message.error(messageTxt);
         });
     }
 
@@ -234,18 +239,13 @@ class Documents extends Component {
             summary: this.state.docSummary,
             sourceType: this.state.docSourceType,
             sourceUrl: this.state.docSourceURL,
-            inlineContent: "string",
+            inlineContent: null,
             permission: '[{"groupId" : "1000", "permission" : ["READ","UPDATE"]},{"groupId" : "1001", "permission" : ["READ","UPDATE"]}]',
             visibility: "API_LEVEL",
             fileName: this.state.docFilePath
         }
         const promised_update = this.client.updateDocument(this.api_id, api_documents_data.documentId, api_documents_data);
-        promised_update.catch(function (error_response) {
-            let error_data = JSON.parse(error_response.data);
-            let messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
-            console.error(messageTxt);
-            message.error(messageTxt);
-        }).then((response) => {
+        promised_update.then(response => {
             const dt_data = response.obj;
             const docId = dt_data.documentId;
             if (dt_data.sourceType == "FILE") {
@@ -262,32 +262,12 @@ class Documents extends Component {
             this.resetNewDocDetails();
             this.getDocumentsList();
             message.success("Document updated successfully");
+        }).catch(function (error_response) {
+            let error_data = JSON.parse(error_response.data);
+            let messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+            console.error(messageTxt);
+            message.error(messageTxt);
         });
-    }
-
-    /*
-     On click listener for 'View' link on each document related row in the documents table.
-     1- If the document type is 'URL' open it in new tab
-     2- If the document type is 'INLINE' open the content with an inline editor
-     3- If the document type is 'FILE' download the file
-     */
-    viewDocContentHandler(document) {
-        if (document.sourceType == "URL") {
-            window.open(document.sourceUrl, '_blank');
-        } else if (document.sourceType == "INLINE") {
-            //TODO Open In line doc editor
-            //href = contextPath + "/apis/" + this.api_id + "/documents/" + document.documentId + "/docInlineEditor";
-        } else if (document.sourceType == "FILE") {
-            let promised_get_content = this.client.getFileForDocument(this.api_id, document.documentId);
-            promised_get_content.catch((error_response) => {
-                let error_data = JSON.parse(error_response.data);
-                let messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
-                console.error(messageTxt);
-            }).then((done) => {
-                console.log(JSON.stringify(done));
-                this.downloadFile(done);
-            })
-        }
     }
 
     /*
@@ -357,11 +337,13 @@ class Documents extends Component {
                 <hr color="#f2f2f2"/>
                 {
                     (this.state.documentsList && (this.state.documentsList.length > 0) ) ? (
-                        <DocumentsTable apiId={this.api_id} client={this.client}
+                        <DocumentsTable apiId={this.api_id}
+                                        client={this.client}
                                         documentsList={this.state.documentsList}
                                         deleteDocHandler={this.deleteDocHandler}
                                         onEditAPIDocument={this.editAPIDocumentListener}
                                         viewDocContentHandler={this.viewDocContentHandler}
+                                        downloadFile={this.downloadFile}
                         /> ) :
                         (<div style={{paddingTop: 20}}><p>No documents added into the API</p></div>)
                 }

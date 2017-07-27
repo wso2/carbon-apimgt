@@ -138,8 +138,8 @@ public class SampleTestObjectCreator {
     private static final String SAMPLE_IP_1 = "12.32.45.3";
     private static final String SAMPLE_IP_2 = "24.34.1.45";
     private static final String SAMPLE_CUSTOM_RULE = "Sample Custom Rule";
-    private static final String ADMIN_ROLE_ID = "cfbde56e-4352-498e-b6dc-85a6f1f8b058";
-    private static final String DEVELOPER_ROLE_ID = "cfdce56e-8434-498e-b6dc-85a6f2d8f035";
+    public static final String ADMIN_ROLE_ID = "cfbde56e-4352-498e-b6dc-85a6f1f8b058";
+    public static final String DEVELOPER_ROLE_ID = "cfdce56e-8434-498e-b6dc-85a6f2d8f035";
     public static  APIPolicy unlimitedApiPolicy = new APIPolicy(UUID.randomUUID().toString(), UNLIMITED_TIER);
     public static  APIPolicy goldApiPolicy = new APIPolicy(UUID.randomUUID().toString(), GOLD_TIER);
     public static  APIPolicy silverApiPolicy = new APIPolicy(UUID.randomUUID().toString(), SILVER_TIER);
@@ -212,10 +212,10 @@ public class SampleTestObjectCreator {
                 createdBy(ADMIN).
                 updatedBy(ADMIN).
                 lastUpdatedTime(LocalDateTime.now()).
-                permission(permissionJson).
+                apiPermission(permissionJson).
                 uriTemplates(getMockUriTemplates()).
                 apiDefinition(apiDefinition);
-        HashMap map = new HashMap();
+        Map map = new HashMap();
         map.put(DEVELOPER_ROLE_ID, 6);
         map.put(ADMIN_ROLE_ID, 7);
         apiBuilder.permissionMap(map);
@@ -286,11 +286,15 @@ public class SampleTestObjectCreator {
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.setAllowOrigins(Arrays.asList("*"));
 
-        HashMap permissionMap = new HashMap();
+        String permissionJson = "[{\"groupId\" : \"developer\", \"permission\" : "
+                + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\"," +
+                "\"DELETE\"]}]";
+
+        Map permissionMap = new HashMap();
         permissionMap.put(DEVELOPER_ROLE_ID, 6);
         permissionMap.put(ADMIN_ROLE_ID, 7);
 
-        API.APIBuilder apiBuilder = new API.APIBuilder("Adam", "restaurantAPI", "0.9").
+        API.APIBuilder apiBuilder = new API.APIBuilder(ADMIN, "restaurantAPI", "0.9").
                 id(UUID.randomUUID().toString()).
                 context("weather").
                 description("Get Food & Beverage Info").
@@ -308,6 +312,7 @@ public class SampleTestObjectCreator {
                 visibleRoles(new HashSet<>(Arrays.asList(CUSTOMER_ROLE, MANAGER_ROLE, EMPLOYEE_ROLE))).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
+                apiPermission(permissionJson).
                 permissionMap(permissionMap).
                 createdTime(LocalDateTime.now()).
                 createdBy(API_CREATOR).
@@ -344,7 +349,11 @@ public class SampleTestObjectCreator {
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.setAllowOrigins(Arrays.asList("*"));
 
-        HashMap permissionMap = new HashMap();
+        String permissionJson = "[{\"groupId\" : \"developer\", \"permission\" : "
+                + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\"," +
+                "\"DELETE\"]}]";
+
+        Map permissionMap = new HashMap();
         permissionMap.put(DEVELOPER_ROLE_ID, 6);
         permissionMap.put(ADMIN_ROLE_ID, 7);
 
@@ -367,6 +376,7 @@ public class SampleTestObjectCreator {
                 visibleRoles(new HashSet<>(Arrays.asList(CUSTOMER_ROLE, MANAGER_ROLE, EMPLOYEE_ROLE))).
                 businessInformation(businessInformation).
                 corsConfiguration(corsConfiguration).
+                apiPermission(permissionJson).
                 permissionMap(permissionMap).
                 createdTime(LocalDateTime.now()).
                 createdBy(API_CREATOR).
@@ -891,6 +901,7 @@ public class SampleTestObjectCreator {
         String permissionJson = "[{\"groupId\" : \"developer\", \"permission\" : "
                 + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\"," +
                 "\"DELETE\"]}]";
+
         Map<String, Endpoint> endpointMap = new HashMap<>();
         endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT,
                 new Endpoint.Builder().id(endpointId).name("api1-production--endpint")
@@ -918,10 +929,10 @@ public class SampleTestObjectCreator {
                 createdBy(ADMIN).
                 updatedBy(ADMIN).
                 lastUpdatedTime(LocalDateTime.now()).
-                permission(permissionJson).
+                apiPermission(permissionJson).
                 uriTemplates(getMockUriTemplates()).
                 apiDefinition(apiDefinition);
-        HashMap map = new HashMap();
+        Map map = new HashMap();
         map.put(DEVELOPER_ROLE_ID, 6);
         map.put(ADMIN_ROLE_ID, 7);
         apiBuilder.permissionMap(map);
