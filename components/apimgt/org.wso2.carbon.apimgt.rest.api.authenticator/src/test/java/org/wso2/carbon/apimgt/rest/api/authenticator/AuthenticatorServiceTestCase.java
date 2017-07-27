@@ -65,7 +65,7 @@ public class AuthenticatorServiceTestCase {
         Assert.assertEquals(responseEmptyOAuthDataObj, emptyOAuthDataObj);
 
         // Error Path - When DCR application creation fails and throws an APIManagementException
-        Mockito.when(keyManager.createApplication(Mockito.any())).thenThrow(APIManagementException.class);
+        Mockito.when(keyManager.createApplication(Mockito.any())).thenThrow(KeyManagementException.class);
         try {
             authenticatorService.getAuthenticationConfigurations("store");
         } catch (APIManagementException e) {
