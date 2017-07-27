@@ -80,15 +80,4 @@ public class ApplicationThrottlePolicyTemplateBuilder extends ThrottlePolicyTemp
         return policyTemplateLocation + POLICY_VELOCITY_APP + XML_EXTENSION;
     }
 
-
-    @Override public Map<String, String> getThrottlePolicyTemplate() throws APITemplateException {
-        try {
-            templateMap.put(applicationPolicy.getPolicyName(), getThrottlePolicyForAppLevel());
-        } catch (APITemplateException e) {
-            String errorMessage = "Error while creating template for application throttle policy.";
-            log.error(errorMessage, e);
-            throw new APITemplateException(errorMessage, ExceptionCodes.THROTTLE_TEMPLATE_EXCEPTION);
-        }
-        return templateMap;
-    }
 }
