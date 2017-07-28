@@ -32,6 +32,34 @@ class SingleClient {
      * @returns {SingleClient|*|null}
      */
     constructor(args = {}) {
+
+        this.currentenv = localStorage.getItem("correctvalue");
+        this.envdetails = new ConfigManager();
+        console.log(this.envdetails);
+
+       this.envdetails.env_response.then((response) =>{
+             let allenvs = response.data.environments;
+           localStorage.setItem("environmentSC",JSON.stringify(allenvs));
+        });
+
+
+        if (typeof this.currentenv == 'undefined'){
+            console.log("a");
+            this.host = window.location.host;
+        }else {
+            console.log("b");
+             let correctvalue ;
+                for (let value of JSON.parse(localStorage.getItem("environmentSC"))) {
+
+                    if (this.currentenv == value.env) {
+
+                        correctvalue = value;
+                        console.log(correctvalue);
+                    }
+                }
+                this.host = correctvalue.envIsHost;
+        }
+
         if (SingleClient._instance) {
             return SingleClient._instance;
         }
@@ -118,7 +146,7 @@ class SingleClient {
 
     static _getSwaggerURL() {
         /* TODO: Read this from configuration ~tmkb*/
-        return window.location.protocol + "//" + window.location.host + "/api/am/publisher/v1.0/apis/swagger.yaml";
+        return window.location.protocol + "//" + window.location.host + "/api/am/publisher/v1.0/apis/swagger.json";
     }
 
     /**
