@@ -1,7 +1,7 @@
 @App:name('analytics_events_pre_process')
 
 @source(type='wso2event', @map(type='wso2event'))
-Define stream ResponseStream (
+Define stream CompositeResponseStream (
 api STRING,
 context STRING,
 version STRING,
@@ -39,119 +39,112 @@ backend_latency  INT,
 security_latency  INT,
 throttling_latency  INT,
 request_mediation_latency  INT,
-respons_mediation_latency  INT,
+response_mediation_latency  INT,
 other_latency  INT
 );
 
 @sink(type='inMemory', topic='apim.analytics.request', @map(type='passThrough'))
-Define stream perMinuteRequests (
-api STRING, context STRING, version STRING, publisher STRING,
-uri_template STRING, method STRING, consumer_key STRING, application_name STRING, user_id STRING,
-total_request_count LONG, request_time LONG,
-year INT, month INT, day INT, hour INT, minute INT
+Define stream RequestStream (
+api STRING,
+context STRING,
+version STRING,
+publisher STRING,
+subscription_policy STRING,
+uri_template STRING,
+method STRING,
+consumer_key STRING,
+application_name STRING,
+application_id STRING,
+application_owner STRING,
+user_id STRING,
+subscriber STRING,
+request_count INT,
+request_event_time LONG,
+gateway_domain STRING,
+gateway_ip STRING,
+is_throttled BOOL,
+throttled_reason STRING,
+throttled_policy STRING,
+client_ip STRING,
+user_agent STRING,
+host_name STRING
 );
 
 @sink(type='inMemory', topic='apim.analytics.response', @map(type='passThrough'))
-Define stream perMinuteResponses (
-api STRING, context STRING, version STRING, publisher STRING,
-uri_template STRING, method STRING, consumer_key STRING, application_name STRING, user_id STRING,
-response_code INT, destination STRING, total_response_count LONG, response_time LONG,
-year INT, month INT, day INT, hour INT, minute INT
+Define stream ResponseStream (
+api STRING,
+context STRING,
+version STRING,
+publisher STRING,
+subscription_policy STRING,
+uri_template STRING,
+method STRING,
+consumer_key STRING,
+application_name STRING,
+application_id STRING,
+application_owner STRING,
+user_id STRING,
+subscriber STRING,
+response_count INT,
+response_event_time LONG,
+gateway_domain STRING,
+gateway_ip STRING,
+client_ip STRING,
+user_agent STRING,
+host_name STRING,
+cache_hit  BOOL,
+response_size  INT,
+protocol  STRING,
+response_code  INT,
+destination  STRING
 );
 
--- per second request
-from ResponseStream#window.externalTimeBatch(request_event_time, 1 sec, 0, 10 sec, true)
-select request_event_time as startTime, api, version, publisher, context, consumer_key, application_name, user_id,
-uri_template, method, max(request_event_time) as requestTime, count() as total_request_count
-group by api, version, publisher, context, consumer_key, application_name, user_id, uri_template, method
-insert into perSecondRequestsTemp;
+@sink(type='inMemory', topic='apim.analytics.execution.time', @map(type='passThrough'))
+Define stream ExecutionTimeStream (
+api STRING,
+context STRING,
+version STRING,
+publisher STRING,
+subscription_policy STRING,
+uri_template STRING,
+method STRING,
+consumer_key STRING,
+application_name STRING,
+application_id STRING,
+application_owner STRING,
+user_id STRING,
+subscriber STRING,
+gateway_domain STRING,
+gateway_ip STRING,
+client_ip STRING,
+user_agent STRING,
+host_name STRING,
+response_time  INT,
+service_time  INT,
+backend_time  INT,
+backend_latency  INT,
+security_latency  INT,
+throttling_latency  INT,
+request_mediation_latency  INT,
+response_mediation_latency  INT,
+other_latency  INT
+);
 
-from perSecondRequestsTemp
-select (startTime - (startTime % 1000)) as startTime,
-convert((startTime - (startTime % 1000)), 'string') as facetStartTime,
-time:extract(startTime, 'year') as year,
-time:extract(startTime, 'month') as month,
-time:extract(startTime, 'day') as day,
-time:extract(startTime, 'hour') as hour,
-time:extract(startTime, 'minute') as minute,
-time:extract(startTime, 'second') as second,
-api, version, publisher, context, consumer_key, application_name, user_id, uri_template, method,
-requestTime, total_request_count
-insert into perSecondRequests;
+from CompositeResponseStream select
+api ,context ,version ,publisher ,subscription_policy ,uri_template ,method ,consumer_key ,application_name ,
+application_id ,application_owner ,user_id ,subscriber ,request_count ,request_event_time ,gateway_domain ,gateway_ip ,
+is_throttled ,throttled_reason ,throttled_policy ,client_ip ,user_agent ,host_name
+insert into RequestStream;
 
+from CompositeResponseStream select
+api ,context ,version ,publisher ,subscription_policy ,uri_template ,method ,consumer_key ,application_name ,
+application_id ,application_owner ,user_id ,subscriber ,response_count ,response_event_time ,gateway_domain ,gateway_ip,
+client_ip ,user_agent ,host_name ,cache_hit  ,response_size  ,protocol  ,response_code  ,destination
+insert into ResponseStream;
 
--- per minute request
-from perSecondRequests
-select startTime,
-str:concat(facetStartTime, '_', api, '_', version, '_', publisher, '_', context, '_', consumer_key, '_',
-    uri_template, '_', method, '_', user_id) as uniqueId,
-year, month, day, hour, minute, second, consumer_key, context, api, version, uri_template, method,
-requestTime, user_id, publisher, total_request_count, application_name
-insert into perSecondRequestsWithUniqueId;
-
-/*from perSecondRequestsWithUniqueId#window.uniqueExternalTimeBatch(uniqueId, startTime, 60 sec, 59999 millisec, 10 sec, true)*/
-from perSecondRequestsWithUniqueId#window.externalTimeBatch(startTime, 60 sec, 59999 millisec, 10 sec, true)
-select startTime, consumer_key, context, api, version, uri_template, method,
-max(requestTime) as requestTime, user_id, publisher, sum(total_request_count) as total_request_count,
-application_name
-group by consumer_key, context, api, version, user_id, publisher, uri_template, method
-insert into perMinuteRequestsTemp;
-
-
-from perMinuteRequestsTemp select
-api, context, version, publisher, uri_template, method, consumer_key, application_name,
-user_id, total_request_count, requestTime as request_time,
-time:extract(startTime, 'year') as year,
-time:extract(startTime, 'month') as month,
-time:extract(startTime, 'day') as day,
-time:extract(startTime, 'hour') as hour,
-time:extract(startTime, 'minute') as minute
-insert into perMinuteRequests;
-
--- per second response
-from ResponseStream#window.externalTimeBatch(response_event_time, 1 sec, 0, 10 sec, true)
-select response_event_time as startTime, api, version, publisher, context, consumer_key, application_name, user_id,
-uri_template, method, max(response_event_time) as responseTime, count() as total_response_count,
-response_code, destination
-group by api, version, publisher, context, consumer_key, application_name, user_id, uri_template, method,
-response_code, destination
-insert into perSecondResponseTemp;
-
-from perSecondResponseTemp
-select (startTime - (startTime % 1000)) as startTime,
-convert((startTime - (startTime % 1000)), 'string') as facetStartTime,
-time:extract(startTime, 'year') as year,
-time:extract(startTime, 'month') as month,
-time:extract(startTime, 'day') as day,
-time:extract(startTime, 'hour') as hour,
-time:extract(startTime, 'minute') as minute,
-time:extract(startTime, 'second') as second,
-api, version, publisher, context, consumer_key, application_name, user_id, uri_template, method,
-responseTime, total_response_count, response_code, destination
-insert into perSecondResponse;
-
-from perSecondResponse
-select startTime, str:concat(facetStartTime, '_', api, '_', version, '_', publisher, '_', context, '_', consumer_key,
-    '_', uri_template, '_', method, '_', user_id, '_', response_code, '_', destination) as uniqueId,
-year, month, day, hour, minute, second, consumer_key, context, api, version, uri_template, method,
-responseTime, user_id, publisher, total_response_count, application_name, response_code, destination
-insert into perSecondResponsesWithUniqueId;
-
-/*from perSecondResponsesWithUniqueId#window.uniqueExternalTimeBatch(uniqueId, startTime, 60 sec, 59999 millisec, 10 sec, true)*/
-from perSecondResponsesWithUniqueId#window.externalTimeBatch(startTime, 60 sec, 59999 millisec, 10 sec, true)
-select startTime, consumer_key, context, api, version, uri_template, method,
-max(responseTime) as responseTime, user_id, publisher, sum(total_response_count) as total_response_count,
-application_name, response_code, destination
-group by consumer_key, context, api, version, user_id, publisher, uri_template, method, response_code, destination
-insert into perMinuteResponsesTemp;
-
-
-from perMinuteResponsesTemp select
-api, context, version, publisher, uri_template, method, consumer_key, application_name,
-user_id, response_code, destination, total_response_count, responseTime as response_time,
-time:extract(startTime, 'year') as year,
-time:extract(startTime, 'month') as month,
-time:extract(startTime, 'day') as day,
-time:extract(startTime, 'hour') as hour,
-time:extract(startTime, 'minute') as minute
-insert into perMinuteResponses;
+from CompositeResponseStream select
+api ,context ,version ,publisher ,subscription_policy ,uri_template ,method ,consumer_key ,application_name ,
+application_id ,application_owner ,user_id ,subscriber ,gateway_domain ,gateway_ip ,client_ip ,user_agent ,host_name ,
+response_time  ,service_time  ,backend_time  ,backend_latency  ,security_latency  ,throttling_latency  ,
+request_mediation_latency  ,response_mediation_latency  ,other_latency
+insert into ExecutionTimeStream;

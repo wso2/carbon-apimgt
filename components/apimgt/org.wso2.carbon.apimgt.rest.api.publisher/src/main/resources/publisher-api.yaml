@@ -3158,13 +3158,6 @@ definitions:
       workflowStatus:
         type: string
         example: APPROVED
-      userPermissionsForApi:
-        type: array
-        description: |
-          LoggedIn user permissions for the API
-        items:
-          type: string
-        example: ["READ","UPDATE"]
 
 #-----------------------------------------------------
 # The API resource

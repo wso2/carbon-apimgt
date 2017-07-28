@@ -79,7 +79,7 @@ public final class API {
         gatewayConfig = builder.gatewayConfig;
         apiDefinition = builder.apiDefinition;
         if (builder.apiPermission != null) {
-            apiPermission = builder.apiPermission.toString();
+            apiPermission = builder.apiPermission;
         } else {
             apiPermission = "";
         }
@@ -321,7 +321,7 @@ public final class API {
     private String copiedFromApiId;
     private final String apiDefinition;
     private final Map permissionMap;
-    private final String apiPermission;
+    private String apiPermission;
     private final String workflowStatus;
     private final Policy apiPolicy;
     private List<String> userSpecificApiPermissions;
@@ -338,7 +338,6 @@ public final class API {
         private String id;
         private String provider;
         private String name;
-        private String permission;
 
         public APIBuilder(FileApi api) {
             id = api.getId();
@@ -377,9 +376,9 @@ public final class API {
             gatewayConfig = api.getGatewayConfig();
             apiDefinition = api.getApiDefinition();
             if (api.getApiPermission() != null) {
-                apiPermission = new StringBuilder(api.getApiPermission());
+                apiPermission = api.getApiPermission();
             } else {
-                apiPermission = new StringBuilder("");
+                apiPermission = "";
             }
             permissionMap = api.getPermissionMap();
             workflowStatus = api.getWorkflowStatus();
@@ -425,7 +424,7 @@ public final class API {
             return gatewayConfig;
         }
 
-        public StringBuilder getApiPermission() {
+        public String getApiPermission() {
             return apiPermission;
         }
 
@@ -487,7 +486,7 @@ public final class API {
         private String lifeCycleStatus;
         private String lifecycleInstanceId;
         private Map permissionMap;
-        private StringBuilder apiPermission;
+        private String apiPermission;
         private Map<String, Endpoint> endpoint = Collections.EMPTY_MAP;
         private String gatewayConfig;
         private String wsdlUri = "";
@@ -552,9 +551,9 @@ public final class API {
             this.copiedFromApiId = copy.copiedFromApiId;
             this.apiDefinition = copy.apiDefinition;
             if (copy.apiPermission != null) {
-                this.apiPermission = new StringBuilder(copy.apiPermission);
+                this.apiPermission = copy.apiPermission;
             } else {
-                this.apiPermission = new StringBuilder();
+                this.apiPermission = "";
             }
             this.apiPolicy = copy.apiPolicy;
             this.permissionMap = new HashMap<>();
@@ -679,7 +678,7 @@ public final class API {
             return this;
         }
 
-        public APIBuilder apiPermission(StringBuilder apiPermission) {
+        public APIBuilder apiPermission(String apiPermission) {
             this.apiPermission = apiPermission;
             return this;
         }
@@ -802,12 +801,6 @@ public final class API {
             this.policies = policies;
             return this;
         }
-
-        public APIBuilder permission(String permission) {
-            this.permission = permission;
-            return this;
-        }
-
 
         /**
          * Sets the {@code policies} and returns a reference to this APIBuilder so that the methods can be chained
@@ -1063,14 +1056,6 @@ public final class API {
             return permissionMap;
         }
 
-        public String getPermission() {
-            return permission;
-        }
-
-        public void setPermission(String permission) {
-            this.permission = permission;
-        }
-
         public String getWorkflowStatus() {
             return workflowStatus;
         }
@@ -1086,5 +1071,9 @@ public final class API {
 
     public void setUserSpecificApiPermissions(List<String> userSpecificApiPermissions) {
         this.userSpecificApiPermissions = userSpecificApiPermissions;
+    }
+
+    public void setApiPermission(String apiPermission) {
+        this.apiPermission = apiPermission;
     }
 }
