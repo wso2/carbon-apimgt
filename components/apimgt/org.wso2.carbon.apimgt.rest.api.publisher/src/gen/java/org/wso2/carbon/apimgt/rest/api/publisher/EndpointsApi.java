@@ -48,7 +48,11 @@ public class EndpointsApi implements Microservice  {
     @Path("/{endpointId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Delete an endpoint", notes = "This operation can be used to delete an existing Endpoint proving the Id of the Endpoint. ", response = void.class, tags={ "Endpoint (individual)", })
+    @io.swagger.annotations.ApiOperation(value = "Delete an endpoint", notes = "This operation can be used to delete an existing Endpoint proving the Id of the Endpoint. ", response = void.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_create", description = "Create API")
+        })
+    }, tags={ "Endpoint (individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Resource successfully deleted. ", response = void.class),
         
@@ -69,7 +73,11 @@ public class EndpointsApi implements Microservice  {
     @Path("/{endpointId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Get specific endpoints", notes = "This operation can be used to retrieve endpoint specific details. ", response = EndPointDTO.class, tags={ "Endpoint (individual)", })
+    @io.swagger.annotations.ApiOperation(value = "Get specific endpoints", notes = "This operation can be used to retrieve endpoint specific details. ", response = EndPointDTO.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_create", description = "Create API")
+        })
+    }, tags={ "Endpoint (individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Endpoint details returned. ", response = EndPointDTO.class),
         
@@ -88,7 +96,11 @@ public class EndpointsApi implements Microservice  {
     @Path("/{endpointId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Update a Tier", notes = "This operation can be used to update an existing endpoint. `PUT https://127.0.0.1:9443/api/am/publisher/v1.0/endpoints/api/Low` ", response = EndPointDTO.class, tags={ "Endpoint (individual)", })
+    @io.swagger.annotations.ApiOperation(value = "Update a Tier", notes = "This operation can be used to update an existing endpoint. `PUT https://127.0.0.1:9443/api/am/publisher/v1.0/endpoints/api/Low` ", response = EndPointDTO.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_create", description = "Create API")
+        })
+    }, tags={ "Endpoint (individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Subscription updated. ", response = EndPointDTO.class),
         
@@ -110,7 +122,11 @@ public class EndpointsApi implements Microservice  {
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Get all endpoints", notes = "This operation can be used to retrieve the list of endpoints available. ", response = EndPointListDTO.class, tags={ "Endpoint (Collection)", })
+    @io.swagger.annotations.ApiOperation(value = "Get all endpoints", notes = "This operation can be used to retrieve the list of endpoints available. ", response = EndPointListDTO.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "Endpoint (Collection)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Endpoint list is returned. ", response = EndPointListDTO.class),
         
@@ -128,7 +144,11 @@ public class EndpointsApi implements Microservice  {
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Check given Endpoint is already exist ", notes = "Using this operation, you can check a given Endpoint name is already used. You need to provide the name you want to check. ", response = void.class, tags={ "Endpoint (Collection)", })
+    @io.swagger.annotations.ApiOperation(value = "Check given Endpoint is already exist ", notes = "Using this operation, you can check a given Endpoint name is already used. You need to provide the name you want to check. ", response = void.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_create", description = "Create API")
+        })
+    }, tags={ "Endpoint (Collection)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Requested Endpoint attibute status is returned ", response = void.class),
         
@@ -148,7 +168,11 @@ public class EndpointsApi implements Microservice  {
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Add a new endpoint", notes = "This operation can be used to add a new endpoint. ", response = EndPointDTO.class, tags={ "Endpoint (Collection)", })
+    @io.swagger.annotations.ApiOperation(value = "Add a new endpoint", notes = "This operation can be used to add a new endpoint. ", response = EndPointDTO.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_create", description = "Create API")
+        })
+    }, tags={ "Endpoint (Collection)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 201, message = "Created. Successful response with the newly created Document object as entity in the body. Location header contains URL of newly added document. ", response = EndPointDTO.class),
         
