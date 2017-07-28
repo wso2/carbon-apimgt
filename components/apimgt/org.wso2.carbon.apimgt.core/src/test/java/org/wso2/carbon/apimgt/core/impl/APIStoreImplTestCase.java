@@ -24,6 +24,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -99,6 +100,7 @@ import java.util.Map;
 /**
  * Test class for APIStore
  */
+@PrepareForTest(APIUtils.class)
 public class APIStoreImplTestCase {
 
     private static final String USER_NAME = "admin";
