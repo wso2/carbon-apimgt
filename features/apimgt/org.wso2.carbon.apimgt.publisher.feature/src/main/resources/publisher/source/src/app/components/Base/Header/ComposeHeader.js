@@ -43,6 +43,7 @@ const ComposeHeader = (props) => {
                 className='custom-menu'
                 theme="light"
             >
+
                 <SubMenu
                     title={<span><Icon type="down"/>{ AuthManager.getUser() ? AuthManager.getUser().name : ""}</span>}>
                     <Menu.Item key="setting:2"><Icon type="user"/>Profile</Menu.Item>
@@ -61,6 +62,10 @@ const ComposeHeader = (props) => {
                             <Icon type="fork" style={{fontSize: 20}}/> Apis
                         </Link>
                     </Menu.Item>
+                </SubMenu>
+
+                <SubMenu key="sub2" title={<span><Icon type="desktop" /><span>Environment</span></span>}>
+                    {JSON.parse(localStorage.getItem("environmentSC")).map(environment => <Menu.Item key={environment.env}>{environment.env}</Menu.Item>)}
                 </SubMenu>
             </Menu>
         </Header>

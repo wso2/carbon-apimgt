@@ -20,25 +20,31 @@ import React, {Component} from 'react'
 import './login.css'
 import {Switch, Redirect} from 'react-router-dom'
 import AuthManager from '../../data/AuthManager'
+import ConfigManager from '../../data/ConfigManager'
 import qs from 'qs'
 import {Layout, Breadcrumb} from 'antd';
 const {Header, Content, Footer} = Layout;
 import {Form, Icon, Input, Button, Checkbox, message} from 'antd';
 import {Card} from 'antd';
 import {Row, Col} from 'antd';
+import { Select } from 'antd';
+
 const FormItem = Form.Item;
+const Option = Select.Option;
 
 
 class NormalLoginForm extends Component {
 
     constructor(props) {
         super(props);
-        this.authManager = new AuthManager();
+        this.authManager = new AuthManager()
+        this.configManager = new ConfigManager();
         this.state = {
             isLogin: false,
             referrer: "/",
             userNameEmpty: true,
-            loading: false
+            loading: false,
+            env: []
         };
     }
 
@@ -51,7 +57,20 @@ class NormalLoginForm extends Component {
                 console.log('Received values of form: ', values);
                 let username = values.userName;
                 let password = values.password;
-                let loginPromise = this.authManager.authenticateUser(username, password);
+                let currentEnvironment = values.currentEnv;
+                localStorage.setItem("correctvalue",currentEnvironment);
+                var correctvalue ;
+                for (let value of this.state.env) {
+
+                    if (currentEnvironment == value.env) {
+
+                        correctvalue = value;
+                         console.log(correctvalue);
+                    }
+                }
+
+                console.log(correctvalue);
+                let loginPromise = this.authManager.authenticateUser(username, password, correctvalue); // todo here changes are being done by adding an extra paramter.which id values
                 loginPromise.then((response) => {
                     this.setState({isLogin: AuthManager.getUser(), loading: false});
                 }).catch((error) => {
@@ -73,6 +92,14 @@ class NormalLoginForm extends Component {
         if (params.referrer) {
             this.setState({referrer: params.referrer});
         }
+        let envdetails = this.configManager;
+        envdetails.env_response.then((response) => {
+            let enviromentdetails = response.data.environments;
+            console.log(enviromentdetails);
+            this.setState({env: enviromentdetails});
+        });
+
+        console.log(envdetails)
     }
 
     emitEmpty = () => {
@@ -84,6 +111,9 @@ class NormalLoginForm extends Component {
     render() {
         const {getFieldDecorator} = this.props.form;
         const makeEmptySuffix = this.state.userNameEmpty ? <Icon type="close-circle" onClick={this.emitEmpty}/> : '';
+        const er = this.state.env.length;
+
+        console.log(er);
 
         if (!this.state.isLogin) { // If not logged in, go to login page
             return (
@@ -104,6 +134,22 @@ class NormalLoginForm extends Component {
                                    placeholder="Password"/>
                         )}
                     </FormItem>
+                    { er > 1 &&
+                        <FormItem
+                            hasFeedback>
+                            {getFieldDecorator('currentEnv', {
+                                initialValue: 'default',
+                                rules: [
+                                    {required: true, message: 'Please select Environment ! '},
+                                ],
+                            })(
+                                (<Select placeholder="Select Environment ">
+                                    {this.state.env.map(environment => <Option
+                                        key={environment.env}>{environment.env}</Option>)}
+                                </Select>)
+                            )}
+                        </FormItem>
+                    }
                     <FormItem>
                         {getFieldDecorator('remember', {
                             valuePropName: 'checked',
