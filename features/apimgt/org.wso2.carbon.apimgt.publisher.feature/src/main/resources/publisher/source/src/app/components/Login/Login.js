@@ -20,6 +20,7 @@ import React, {Component} from 'react'
 import './login.css'
 import {Switch, Redirect} from 'react-router-dom'
 import AuthManager from '../../data/AuthManager'
+import ConfigManager from '../../data/ConfigManager'
 import qs from 'qs'
 import TextField from 'material-ui/TextField';
 import Paper from 'material-ui/Paper';
@@ -32,7 +33,8 @@ class Login extends Component {
 
     constructor(props) {
         super(props);
-        this.authManager = new AuthManager();
+        this.authManager = new AuthManager()
+        this.configManager = new ConfigManager();
         this.state = {
             isLogin: false,
             referrer: "/",

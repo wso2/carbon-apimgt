@@ -34,47 +34,59 @@ class SingleClient {
      * @param {{}} args : Accept as an optional argument for SwaggerClient constructor.Merge the given args with default args.
      * @returns {SingleClient|*|null}
      */
-    constructor(v1,v2,args = {}) {
+    constructor(args = {}) {
 
+        this.currentenv = localStorage.getItem("correctvalue");
+        this.envdetails = new ConfigManager();
+        console.log(this.envdetails);
 
-        this.host = v1;
-        this.port = v2;
-
-        // this.detailed = new Factory("default")
-        // console.log(this.detailed);
-
-        // if (SingleClient._instance) {
-        //     return SingleClient._instance;
-        // }
-
-console.log("working")
-            const authorizations = {
-                OAuth2Security: {
-                    token: {access_token: AuthManager.getUser().getPartialToken()}
-                }
-            };
-            let promisedResolve = Swagger.resolve({url: window.location.protocol + "//" + this.host +
-            "/api/am/publisher/v1.0/apis/swagger.yaml"});
-            this._client = promisedResolve.then(
-                resolved => {
-                    const argsv = Object.assign(args,
-                        {
-                            spec: this._fixSpec(resolved.spec),
-                            authorizations: authorizations,
-                            requestInterceptor: this._getRequestInterceptor(),
-                            responseInterceptor: this._getResponseInterceptor()
-                        });
-                    return new Swagger(argsv);
-                }
-            );
-            console.log(this._client);
-        this._client = this._client.then((response)=>{
-            debugger
-     response.http.credentials = 'include';
-     return response;
+       this.envdetails.env_response.then((response) =>{
+             let allenvs = response.data.environments;
+           localStorage.setItem("environmentSC",JSON.stringify(allenvs));
         });
+
+
+        if (typeof this.currentenv == 'undefined'){
+            console.log("a");
+            this.host = window.location.host;
+        }else {
+            console.log("b");
+             let correctvalue ;
+                for (let value of JSON.parse(localStorage.getItem("environmentSC"))) {
+
+                    if (this.currentenv == value.env) {
+
+                        correctvalue = value;
+                        console.log(correctvalue);
+                    }
+                }
+                this.host = correctvalue.envIsHost;
+        }
+
+        if (SingleClient._instance) {
+            return SingleClient._instance;
+        }
+        const authorizations = {
+            OAuth2Security: {
+                token: {access_token: AuthManager.getUser().getPartialToken()}
+            }
+        };
+        let promisedResolve = Swagger.resolve({url: SingleClient._getSwaggerURL()});
+        SingleClient.spec = promisedResolve;
+        this._client = promisedResolve.then(
+            resolved => {
+                const argsv = Object.assign(args,
+                    {
+                        spec: this._fixSpec(resolved.spec),
+                        authorizations: authorizations,
+                        requestInterceptor: this._getRequestInterceptor(),
+                        responseInterceptor: this._getResponseInterceptor()
+                    });
+                return new Swagger(argsv);
+            }
+        );
         this._client.catch(AuthManager.unauthorizedErrorHandler);
-        // SingleClient._instance = this;
+        SingleClient._instance = this;
     }
 
     /**
@@ -157,6 +169,23 @@ console.log("working")
                 return resolved.spec.paths[resourcePath] && resolved.spec.paths[resourcePath][resourceMethod] && resolved.spec.paths[resourcePath][resourceMethod].security[0].OAuth2Security[0];
             }
         )
+    }
+
+    /**
+     * Get Scope for a particular resource path
+     *
+     * @param resourcePath resource path of the action
+     * @param resourceMethod resource method of the action
+     */
+    static getScopeForResource(resourcePath, resourceMethod) {
+        if(!SingleClient.spec){
+            SingleClient.spec = Swagger.resolve({url: SingleClient._getSwaggerURL()});
+        }
+        return SingleClient.spec.then(
+            resolved => {
+                return resolved.spec.paths[resourcePath][resourceMethod].security[0].OAuth2Security[0];
+            }
+        );
     }
 }
 

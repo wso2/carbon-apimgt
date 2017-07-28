@@ -26,84 +26,53 @@ const SubMenu = Menu.SubMenu;
 const MenuItemGroup = Menu.ItemGroup;
 const {Header} = Layout;
 
+const ComposeHeader = (props) => {
+    let params = qs.stringify({referrer: props.location.pathname});
 
-class ComposeHeader extends Component {
-    constructor(props) {
-        super(props);
+    return (
+        <Header className='custom-header'>
+            <div className="logo">
+                <Link to="/apis">
+                    <img className="brand" src="/publisher/public/images/logo.svg" alt="wso2-logo"/>
+                    <span>API Publisher</span>
+                </Link>
+            </div>
 
-        this.params = qs.stringify({referrer: props.location.pathname});
-        this.state = {
-            availableEnv: []
-        };
-    }
+            <Menu
+                mode="horizontal"
+                defaultSelectedKeys={['2']}
+                className='custom-menu'
+                theme="light"
+            >
 
-    componentDidMount(){
-        let envdetails = new ConfigManager();
-        envdetails.env_response.then((response) =>{
-            let allAvailableEnv = response.data.environments;
-            this.setState({availableEnv: allAvailableEnv});
+                <SubMenu
+                    title={<span><Icon type="down"/>{ AuthManager.getUser() ? AuthManager.getUser().name : ""}</span>}>
+                    <Menu.Item key="setting:2"><Icon type="user"/>Profile</Menu.Item>
+                    <Menu.Item key="setting:1">
+                        <Link to={{pathname: '/logout', search: params}}><Icon type="logout"/>Logout</Link>
+                    </Menu.Item>
+                </SubMenu>
+                <SubMenu title={<Icon type="appstore-o" style={{fontSize: 20}}/>}>
+                    <Menu.Item key="endpoints">
+                        <Link to={{pathname: '/endpoints'}}>
+                            <Icon type="rocket" style={{fontSize: 20}}/> Endpoints
+                        </Link>
+                    </Menu.Item>
+                    <Menu.Item key="settings">
+                        <Link to={{pathname: '/apis'}}>
+                            <Icon type="fork" style={{fontSize: 20}}/> Apis
+                        </Link>
+                    </Menu.Item>
+                </SubMenu>
 
-        })
+                <SubMenu key="sub2" title={<span><Icon type="desktop" /><span>Environment</span></span>}>
+                    {JSON.parse(localStorage.getItem("environmentSC")).map(environment => <Menu.Item key={environment.env}>{environment.env}</Menu.Item>)}
+                </SubMenu>
+            </Menu>
+        </Header>
 
-    }
-
-    handleClick = (e) =>{
-console.log(e);
-    }
-
-    render() {
-        return (
-            <Header className='custom-header'>
-                <div className="logo">
-                    <Link to="/apis">
-                        <img className="brand" src="/publisher/public/images/logo.svg" alt="wso2-logo"/>
-                        <span>API Publisher</span>
-                    </Link>
-                </div>
-
-                <Menu
-                    mode="horizontal"
-                    defaultSelectedKeys={['2']}
-                    className='custom-menu'
-                    theme="light"
-                >
-
-                    <SubMenu
-                        title={<span><Icon
-                            type="down"/>{ AuthManager.getUser() ? AuthManager.getUser().name : ""}</span>}>
-                        <Menu.Item key="setting:2"><Icon type="user"/>Profile</Menu.Item>
-                        <Menu.Item key="setting:1">
-                            <Link to={{pathname: '/logout', search: this.params}}><Icon type="logout"/>Logout</Link>
-                        </Menu.Item>
-                    </SubMenu>
-                    <SubMenu title={<Icon type="appstore-o" style={{fontSize: 20}}/>}>
-                        <Menu.Item key="endpoints">
-                            <Link to={{pathname: '/endpoints'}}>
-                                <Icon type="rocket" style={{fontSize: 20}}/> Endpoints
-                            </Link>
-                        </Menu.Item>
-                        <Menu.Item key="settings">
-                            <Link to={{pathname: '/apis'}}>
-                                <Icon type="fork" style={{fontSize: 20}}/> Apis
-                            </Link>
-                        </Menu.Item>
-                    </SubMenu>
-
-                    {localStorage.getItem("currentEnv") != 'default' &&
-                    <SubMenu title={<span><Icon type="setting"/>{localStorage
-                        .getItem("currentEnv")}</span>}>
-                        {this.state.availableEnv.map(environment => <Menu.Item onSelect={this.handleClick}
-                            key={environment.env}>{environment.env}</Menu.Item>)}
-
-                    </SubMenu>
-                    }
-                </Menu>
-            </Header>
-
-        );
-    }
-}
-
+    );
+};
 
 // Using `withRouter` helper from React-Router-Dom to get the current user location to be used with logout action,
 // We pass the current path in referrer parameter to redirect back the user to where he/she was after login.

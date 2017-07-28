@@ -138,7 +138,7 @@ class AuthManager {
         /* TODO: IMHO it's better to get this key (`wso2_user`) from configs */
     }
 
-    static getEnvironment(){
+    static getEnvironment() {
         let currentEnvironment = localStorage.getItem("currentEnv");
         return currentEnvironment;
     }
@@ -148,12 +148,6 @@ class AuthManager {
         return this.host + this.token;
     }
 
-    getTokenEnpointEnv(detailedValue){
-
-        return window.location.protocol + "//" + detailedValue.envIsHost + this.token;
-    }
-
-
     /**
      * By given username and password Authenticate the user, Since this REST API has no swagger definition,
      * Can't use swaggerjs to generate client.Hence using Axios to make AJAX calls
@@ -161,10 +155,13 @@ class AuthManager {
      * @param {String} password : Plain text password
      * @returns {AxiosPromise} : Promise object with the login request made
      */
-    authenticateUser(username, password, detailedValue) {
+    authenticateUser(username, password, correctvalue) {
+        console.log(correctvalue);
 
-        let tokenDetails = (typeof detailedValue == 'undefined') ?  this.getTokenEndpoint(): this.getTokenEnpointEnv(detailedValue);
+        let tokenDetails = '';
+        tokenDetails = (typeof correctvalue == 'undefined') ? this.getTokenEndpoint() : correctvalue.envIsEndPoint;
 
+        console.log(tokenDetails);
         const headers = {
             'Authorization': 'Basic deidwe',
             'Accept': 'application/json',
@@ -177,7 +174,7 @@ class AuthManager {
             validity_period: 3600,
             scopes: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage apim:subscription_view apim:subscription_block apim:subscribe'
         };
-        let promised_response = axios.post(tokenDetails, qs.stringify(data), {headers: headers }); // enable with credeantials
+        let promised_response = axios.post(tokenDetails, qs.stringify(data), {headers: headers});
         promised_response.then(response => {
             console.log(response.headers.setH);
             const validityPeriod = response.data.validityPeriod; // In seconds
@@ -187,7 +184,7 @@ class AuthManager {
             user.scopes = response.data.scopes.split(" ");
             AuthManager.setUser(user);
 
-        }).catch(function(e) {
+        }).catch(function (e) {
             console.log(e); //
         });
         return promised_response;
@@ -235,7 +232,9 @@ class AuthManager {
     static hasScopes(resourcePath, resourceMethod) {
         let userscopes = this.getUser().scopes;
         let validScope = SingleClient.getScopeForResource(resourcePath, resourceMethod);
-        return validScope.then(scope => {return userscopes.includes(scope)});
+        return validScope.then(scope => {
+            return userscopes.includes(scope)
+        });
     }
 
 }
