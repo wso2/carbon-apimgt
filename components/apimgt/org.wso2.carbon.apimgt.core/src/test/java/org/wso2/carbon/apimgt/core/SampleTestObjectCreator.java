@@ -111,6 +111,7 @@ public class SampleTestObjectCreator {
     private static final String UPDATED_SAMPLE_SUBSCRIPTION_POLICY = "Updated SampleSubscriptionPolicy";
     private static final String UPDATED_SAMPLE_SUBSCRIPTION_POLICY_DESCRIPTION = "Updated SampleSubscriptionPolicy "
             + "Description";
+    private static final String SAMPLE_CUSTOM_ATTRIBUTE = "CUSTOM ATTRIBUTE SAMPLE";
     private static final String PRODUCTION_ENDPOINT = "production";
     private static final String SAMPLE_API_WSDL = "http://www.webservicex.net/globalweather.asmx?op=GetWeather?wsdl";
     private static final String FIFTY_PER_MIN_TIER = "50PerMin";
@@ -700,6 +701,7 @@ public class SampleTestObjectCreator {
         applicationPolicy.setUuid(UUID.randomUUID().toString());
         applicationPolicy.setDisplayName(SAMPLE_APP_POLICY);
         applicationPolicy.setDescription(SAMPLE_APP_POLICY_DESCRIPTION);
+        applicationPolicy.setCustomAttributes(SAMPLE_CUSTOM_ATTRIBUTE.getBytes());
         QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
         defaultQuotaPolicy.setType(REQUEST_COUNT_TYPE);
         RequestCountLimit requestCountLimit = new RequestCountLimit(TIME_UNIT_SECONDS, 10000, 1000);
@@ -725,6 +727,7 @@ public class SampleTestObjectCreator {
         subscriptionPolicy.setUuid(UUID.randomUUID().toString());
         subscriptionPolicy.setDisplayName(SAMPLE_SUBSCRIPTION_POLICY);
         subscriptionPolicy.setDescription(SAMPLE_SUBSCRIPTION_POLICY_DESCRIPTION);
+        subscriptionPolicy.setCustomAttributes(SAMPLE_CUSTOM_ATTRIBUTE.getBytes());
         QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
         defaultQuotaPolicy.setType(REQUEST_COUNT_TYPE);
         RequestCountLimit requestCountLimit = new RequestCountLimit(TIME_UNIT_SECONDS, 10000, 1000);

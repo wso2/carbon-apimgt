@@ -18,12 +18,14 @@
 
 package org.wso2.carbon.apimgt.core.models.policy;
 
+import java.util.Arrays;
+
 /**
  * contains {@link ApplicationPolicy} attributes
  */
 public class ApplicationPolicy extends Policy {
 
-    private String customAttributes;
+    private byte[] customAttributes;
 
     public ApplicationPolicy(String name) {
         super(name);
@@ -32,15 +34,14 @@ public class ApplicationPolicy extends Policy {
     public ApplicationPolicy(String uuid, String policyName) {
         super(uuid, policyName);
     }
-    
-    public String getCustomAttributes() {
-        return customAttributes;
+
+    public byte[] getCustomAttributes() {
+        return customAttributes != null ? Arrays.copyOf(customAttributes, customAttributes.length) : new byte[0];
     }
 
-    public void setCustomAttributes(String customAttributes) {
-        this.customAttributes = customAttributes;
+    public void setCustomAttributes(byte[] customAttributes) {
+        this.customAttributes = Arrays.copyOf(customAttributes, customAttributes.length);
     }
-
     @Override
     public String toString() {
         return "ApplicationPolicy [policyName=" + getPolicyName()
