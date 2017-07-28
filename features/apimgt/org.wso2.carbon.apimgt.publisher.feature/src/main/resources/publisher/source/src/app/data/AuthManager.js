@@ -33,6 +33,7 @@ class AuthManager {
         this.userscope = null;
         this.bearer = "Bearer ";
         this.contextPath = "/publisher";
+        this.envs = "/login/infoenv";
     }
 
     static refreshTokenOnExpire() {
@@ -139,6 +140,7 @@ class AuthManager {
         return this.host + this.token;
     }
 
+
     /**
      * By given username and password Authenticate the user, Since this REST API has no swagger definition,
      * Can't use swaggerjs to generate client.Hence using Axios to make AJAX calls
@@ -146,7 +148,13 @@ class AuthManager {
      * @param {String} password : Plain text password
      * @returns {AxiosPromise} : Promise object with the login request made
      */
-    authenticateUser(username, password) {
+    authenticateUser(username, password, correctvalue) {
+     console.log(correctvalue);
+
+        let tokenDetails = '';
+        tokenDetails = (typeof correctvalue == 'undefined') ?  this.getTokenEndpoint(): correctvalue.envIsEndPoint;
+
+console.log(tokenDetails);
         const headers = {
             'Authorization': 'Basic deidwe',
             'Accept': 'application/json',
@@ -159,7 +167,7 @@ class AuthManager {
             validity_period: 3600,
             scopes: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage apim:subscription_view apim:subscription_block apim:subscribe'
         };
-        let promised_response = axios.post(this.getTokenEndpoint(), qs.stringify(data), {headers: headers});
+        let promised_response = axios.post(tokenDetails, qs.stringify(data), {headers: headers});
         promised_response.then(response => {
             const validityPeriod = response.data.validityPeriod; // In seconds
             const WSO2_AM_TOKEN_1 = response.data.partialToken;
@@ -170,6 +178,7 @@ class AuthManager {
         });
         return promised_response;
     }
+
 
     /**
      * Revoke the issued OAuth access token for currently logged in user and clear both cookie and localstorage data.
