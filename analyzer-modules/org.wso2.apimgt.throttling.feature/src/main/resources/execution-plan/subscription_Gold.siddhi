@@ -1,4 +1,6 @@
-		@App:name('sub_Gold')
+		@App:name('subscription_Gold')
+
+		@App:description('ExecutionPlan for subscription_Gold')
 
 		@source(type='inMemory', topic='apim', @map(type='passThrough'))
 		define stream RequestStream (messageID string, appKey string, appTier string, subscriptionKey string, apiKey string, apiTier string, subscriptionTier string, resourceKey string, resourceTier string, userId string,  apiContext string, apiVersion string, apiName string, propertiesMap string);

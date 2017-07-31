@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.APILCWorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
+import org.wso2.carbon.apimgt.core.util.ThrottleConstants;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -599,11 +600,11 @@ public class ApiDAOImpl implements ApiDAO {
                 connection.setAutoCommit(false);
 
                 addCompositeAPIRelatedInformation(connection, statement, api);
-
+                String policyUuid = DAOFactory.getPolicyDAO()
+                        .getSubscriptionPolicy(ThrottleConstants.DEFAULT_SUB_POLICY_UNLIMITED).getUuid();
                 APISubscriptionDAOImpl apiSubscriptionDAO = (APISubscriptionDAOImpl) DAOFactory.getAPISubscriptionDAO();
-                apiSubscriptionDAO.createSubscription(api.getId(), api.getApplicationId(),
-                        UUID.randomUUID().toString(), PolicyDAOImpl.UNLIMITED_TIER,
-                        APIMgtConstants.SubscriptionStatus.ACTIVE, connection);
+                apiSubscriptionDAO.createSubscription(api.getId(), api.getApplicationId(), UUID.randomUUID().toString(),
+                        policyUuid, APIMgtConstants.SubscriptionStatus.ACTIVE, connection);
 
                 connection.commit();
             } catch (SQLException e) {
