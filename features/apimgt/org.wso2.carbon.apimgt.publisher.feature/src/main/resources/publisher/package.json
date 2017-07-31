@@ -29,7 +29,7 @@
     "react-router-dom": "^4.1.1",
     "react-tap-event-plugin": "^2.0.1",
     "react-toastify": "^1.7.0",
-    "swagger-client": "2.1.27",
+    "swagger-client": "3.0.19",
     "react-quill": "1.0.0"
   },
   "devDependencies": {
