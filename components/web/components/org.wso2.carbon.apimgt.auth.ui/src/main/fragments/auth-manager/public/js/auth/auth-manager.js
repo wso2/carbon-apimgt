@@ -117,7 +117,7 @@ authManager.refresh = function (authzHeader) {
 
 };
 authManager.logout = function (authzHeader) {
-    var url = contextPath + '/auth/apis/login/revoke';
+    var url = contextPath + '/auth/apis/login/logout';
     return $.ajax({
         type: 'POST',
         url: url,
