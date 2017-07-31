@@ -22,6 +22,9 @@ import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeysDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationTokenDTO;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ApplicationKeyMappingUtil {
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationKeyMappingUtil.class);
@@ -33,6 +36,14 @@ public class ApplicationKeyMappingUtil {
         applicationKeyDTO.setConsumerSecret(applicationKeys.getClientSecret());
         applicationKeyDTO.setSupportedGrantTypes(applicationKeys.getGrantTypes());
         return applicationKeyDTO;
+    }
+
+    public static List<ApplicationKeysDTO> fromApplicationKeyListToDTOList(List<OAuthApplicationInfo> keysList) {
+        List<ApplicationKeysDTO> applicationKeysDTOList = new ArrayList<>();
+        for (OAuthApplicationInfo oAuthApplicationInfo : keysList) {
+            applicationKeysDTOList.add(fromApplicationKeysToDTO(oAuthApplicationInfo));
+        }
+        return applicationKeysDTOList;
     }
 
     public static ApplicationTokenDTO fromApplicationTokenToDTO(ApplicationToken applicationToken){

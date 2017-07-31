@@ -26,11 +26,11 @@ import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
+import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -165,10 +165,10 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         Application app3 = apisAndApps.getApps().get(2);
         Application app4 = apisAndApps.getApps().get(3);
 
-        registerOAuthAppForApplication(applicationDAO, "client-key-for-app-1", "client-secret-for-app-1", app1.getId());
-        registerOAuthAppForApplication(applicationDAO, "client-key-for-app-2", "client-secret-for-app-2", app2.getId());
-        registerOAuthAppForApplication(applicationDAO, "client-key-for-app-3", "client-secret-for-app-3", app3.getId());
-        registerOAuthAppForApplication(applicationDAO, "client-key-for-app-4", "client-secret-for-app-4", app4.getId());
+        registerOAuthAppForApplication(applicationDAO, "client-key-for-app-1", app1.getId());
+        registerOAuthAppForApplication(applicationDAO, "client-key-for-app-2", app2.getId());
+        registerOAuthAppForApplication(applicationDAO, "client-key-for-app-3", app3.getId());
+        registerOAuthAppForApplication(applicationDAO, "client-key-for-app-4", app4.getId());
 
         //get all subscriptions
         List<SubscriptionValidationData> subscriptions = subscriptionDAO.getAPISubscriptionsOfAPIForValidation(-1);
@@ -225,12 +225,9 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         }
     }
 
-    private void registerOAuthAppForApplication(ApplicationDAO applicationDAO, String clientKey, String clintSecret,
-                                                String appId) throws APIMgtDAOException {
-        OAuthApplicationInfo oAuthAppInfo = new OAuthApplicationInfo();
-        oAuthAppInfo.setClientId(clientKey);
-        oAuthAppInfo.setClientSecret(clintSecret);
-        applicationDAO.addApplicationKeys(appId, "Application", oAuthAppInfo);
+    private void registerOAuthAppForApplication(ApplicationDAO applicationDAO, String clientKey, String appId)
+            throws APIMgtDAOException {
+        applicationDAO.addApplicationKeys(appId, KeyManagerConstants.OAUTH_CLIENT_PRODUCTION, clientKey);
     }
 
     @Test
@@ -251,10 +248,10 @@ public class SubscriptionDAOImplIT extends DAOIntegrationTestBase {
         Application app3 = apisAndApps.getApps().get(2);
         Application app4 = apisAndApps.getApps().get(3);
 
-        registerOAuthAppForApplication(applicationDAO, "client-key-for-app-1", "client-secret-for-app-1", app1.getId());
-        registerOAuthAppForApplication(applicationDAO, "client-key-for-app-2", "client-secret-for-app-2", app2.getId());
-        registerOAuthAppForApplication(applicationDAO, "client-key-for-app-3", "client-secret-for-app-3", app3.getId());
-        registerOAuthAppForApplication(applicationDAO, "client-key-for-app-4", "client-secret-for-app-4", app4.getId());
+        registerOAuthAppForApplication(applicationDAO, "client-key-for-app-1", app1.getId());
+        registerOAuthAppForApplication(applicationDAO, "client-key-for-app-2", app2.getId());
+        registerOAuthAppForApplication(applicationDAO, "client-key-for-app-3", app3.getId());
+        registerOAuthAppForApplication(applicationDAO, "client-key-for-app-4", app4.getId());
 
         //get subscriptions of api1 (app2, app4)
         List<SubscriptionValidationData> subscriptions = subscriptionDAO.getAPISubscriptionsOfAPIForValidation(
