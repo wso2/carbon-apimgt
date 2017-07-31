@@ -16,7 +16,8 @@
  * under the License.
  */
 "use strict";
-import SwaggerClient from 'swagger-client'
+import Swagger from 'swagger-client'
+import AuthManager from './AuthManager'
 
 /**
  * This class expose single swaggerClient instance created using the given swagger URL (Publisher, Store, ect ..)
@@ -34,26 +35,76 @@ class SingleClient {
         if (SingleClient._instance) {
             return SingleClient._instance;
         }
-        // instance variable _client is meant to be served as pvt variable
-        this._client = new SwaggerClient(Object.assign(args, {
-            url: this._getSwaggerURL(),
-            usePromise: true
-        }));
-        this._client.then(
-            (swagger) => {
-                swagger.setHost(window.location.host);
-                /* TODO: Set hostname according to the APIM environment selected by user*/
-                swagger.setSchemes(["https"]);
+        const authorizations = {
+            OAuth2Security: {
+                token: {access_token: AuthManager.getUser().getPartialToken()}
+            }
+        };
+        let promisedResolve = Swagger.resolve({url: this._getSwaggerURL()});
+        this._client = promisedResolve.then(
+            resolved => {
+                const argsv = Object.assign(args,
+                    {
+                        spec: this._fixSpec(resolved.spec),
+                        authorizations: authorizations,
+                        requestInterceptor: this._getRequestInterceptor(),
+                        responseInterceptor: this._getResponseInterceptor()
+                    });
+                return new Swagger(argsv);
             }
         );
-        this._client.catch(
-            error => {
-                if (process.env.NODE_ENV !== "production") {
-                    console.log(error);
-                }
-            }
-        );
+        this._client.catch(AuthManager.unauthorizedErrorHandler);
         SingleClient._instance = this;
+    }
+
+    /**
+     * Temporary method to fix the hostname attribute Till following issues get fixed ~tmkb
+     * https://github.com/swagger-api/swagger-js/issues/1081
+     * https://github.com/swagger-api/swagger-js/issues/1045
+     * @param spec {JSON} : Json object of the specification
+     * @returns {JSON} : Fixed specification
+     * @private
+     */
+    _fixSpec(spec) {
+        spec.host = window.location.host; //TODO: Set hostname according to the APIM environment selected by user ~tmkb
+        return spec;
+    }
+
+
+    /**
+     * Get the ETag of a given resource key from the session storage
+     * @param key {string} key of resource.
+     * @returns {string} ETag value for the given key
+     */
+    static getETag(key) {
+        return sessionStorage.getItem("etag_" + key);
+    }
+
+    /**
+     * Add an ETag to a given resource key into the session storage
+     * @param key {string} key of resource.
+     * @param etag {string} etag value to be stored against the key
+     */
+    static addETag(key, etag) {
+        sessionStorage.setItem("etag_" + key, etag);
+    }
+
+    _getResponseInterceptor() {
+        return (data) => {
+            if (data.headers.etag) {
+                SingleClient.addETag(data.url, data.headers.etag);
+            }
+            return data;
+        }
+    }
+
+    _getRequestInterceptor() {
+        return (data) => {
+            if (SingleClient.getETag(data.url) && (data.method === "PUT" || data.method === "DELETE" || data.method === "POST")) {
+                data.headers["If-Match"] = SingleClient.getETag(data.url);
+            }
+            return data;
+        }
     }
 
     /**
@@ -66,7 +117,7 @@ class SingleClient {
 
     _getSwaggerURL() {
         /* TODO: Read this from configuration ~tmkb*/
-        return window.location.protocol + "//" + window.location.host + "/api/am/publisher/v1.0/apis/swagger.json";
+        return window.location.protocol + "//" + window.location.host + "/api/am/publisher/v1.0/apis/swagger.yaml";
     }
 }
 
