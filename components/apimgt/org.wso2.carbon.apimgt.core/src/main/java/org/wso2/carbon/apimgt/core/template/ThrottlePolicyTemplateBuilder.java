@@ -26,8 +26,6 @@ import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.wso2.carbon.apimgt.core.models.policy.PolicyConstants;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Generate throttle policy using velocity template
@@ -37,7 +35,6 @@ abstract class ThrottlePolicyTemplateBuilder {
 
     protected String policyTemplateLocation =
             "resources" + File.separator + "template" + File.separator + "policy_templates" + File.separator;
-    protected Map<String, String> templateMap = new HashMap<>();
     public static final String PIPELINE_ITEM = "pipelineItem";
     public static final String PIPELINE = "pipeline";
     public static final String POLICY = "policy";
