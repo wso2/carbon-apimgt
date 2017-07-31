@@ -101,7 +101,7 @@ public class AuthenticatorService {
                 oAuthData.addProperty(KeyManagerConstants.TOKEN_SCOPES, scopes);
                 oAuthData.addProperty(KeyManagerConstants.AUTHORIZATION_ENDPOINT,
                         storeConfigs.getAuthorizationEndpoint());
-                oAuthData.addProperty("is_sso_enabled", storeConfigs.isSsoEnabled());
+                oAuthData.addProperty(AuthenticatorConstants.SSO_ENABLED, storeConfigs.isSsoEnabled());
             } else {
                 String errorMsg = "No information available in OAuth application.";
                 log.error(errorMsg, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
@@ -143,7 +143,7 @@ public class AuthenticatorService {
             log.debug("Received consumer key & secret for " + appName + " application.");
         }
         try {
-            if (grantType.equals(KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE)) {
+            if (KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE.equals(grantType)) {
                 // Access token for authorization code grant type
                 APIMStoreConfigurations storeConfigs = ServiceReferenceHolder.getInstance().getAPIMStoreConfiguration();
                 String callBackURL = storeConfigs.getApimBaseUrl() + "login/callback/" + appName;
@@ -166,7 +166,7 @@ public class AuthenticatorService {
                     String errorMsg = "No Authorization Code available.";
                     log.error(errorMsg, ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
                 }
-            } else if (grantType.equals(KeyManagerConstants.PASSWORD_GRANT_TYPE)) {
+            } else if (KeyManagerConstants.PASSWORD_GRANT_TYPE.equals(grantType)) {
                 // Access token for password code grant type
                 accessTokenRequest = AuthUtil
                         .createAccessTokenRequest(userName, password, grantType, refreshToken,
@@ -233,8 +233,8 @@ public class AuthenticatorService {
             OAuthApplicationInfo oAuthApplicationInfo;
             oAuthApplicationInfo = createDCRApplication(appName, "http://temporary.callback/url", grantTypes);
 
-            consumerKeySecretMap.put("CONSUMER_KEY", oAuthApplicationInfo.getClientId());
-            consumerKeySecretMap.put("CONSUMER_SECRET", oAuthApplicationInfo.getClientSecret());
+            consumerKeySecretMap.put(AuthenticatorConstants.CONSUMER_KEY, oAuthApplicationInfo.getClientId());
+            consumerKeySecretMap.put(AuthenticatorConstants.CONSUMER_SECRET, oAuthApplicationInfo.getClientSecret());
 
             AuthUtil.getConsumerKeySecretMap().put(appName, consumerKeySecretMap);
             return consumerKeySecretMap;
@@ -253,11 +253,11 @@ public class AuthenticatorService {
     private String getApplicationScopes(String appName) throws APIManagementException {
         String scopes = "";
         String applicationRestAPI = null;
-        if (appName.equals(AuthenticatorConstants.STORE_APPLICATION)) {
+        if (AuthenticatorConstants.STORE_APPLICATION.equals(appName)) {
             applicationRestAPI = RestApiUtil.getStoreRestAPIResource();
-        } else if (appName.equals(AuthenticatorConstants.PUBLISHER_APPLICATION)) {
+        } else if (AuthenticatorConstants.PUBLISHER_APPLICATION.equals(appName)) {
             applicationRestAPI = RestApiUtil.getPublisherRestAPIResource();
-        } else if (appName.equals(AuthenticatorConstants.ADMIN_APPLICATION)) {
+        } else if (AuthenticatorConstants.ADMIN_APPLICATION.equals(appName)) {
             applicationRestAPI = RestApiUtil.getAdminRestAPIResource();
         }
         try {
@@ -301,7 +301,7 @@ public class AuthenticatorService {
             // for the oAuthAppRequest constructor argument.
             // This value is not related to DCR application creation.
             OAuthAppRequest oAuthAppRequest = new OAuthAppRequest(clientName,
-                    callBackURL, "Application", grantTypes);
+                    callBackURL, AuthenticatorConstants.APPLICATION_KEY_TYPE, grantTypes);
             oAuthApplicationInfo = getKeyManager().createApplication(oAuthAppRequest);
         } catch (KeyManagementException e) {
             String errorMsg = "Error while creating the keys for OAuth application : " + clientName;
