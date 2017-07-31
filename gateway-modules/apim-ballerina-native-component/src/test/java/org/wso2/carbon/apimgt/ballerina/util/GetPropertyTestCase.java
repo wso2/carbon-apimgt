@@ -28,36 +28,24 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.ballerina.caching.util.BTestUtils;
 
 /**
- * Cache Test class which handles caching test for ballerina native cache implementation for API Manager
- *
- * @since 0.10-SNAPSHOT
+ * Test class for get property using ballerina
  */
-public class JSONParseTestCase {
+public class GetPropertyTestCase {
+
     private ProgramFile bLangProgram;
-    private static final String s1 = "WSO2 Inc.";
 
     @BeforeClass
     public void setup() {
-        bLangProgram = BTestUtils.parseBalFile("samples/util/jsonParse.bal");
+        bLangProgram = BTestUtils.parseBalFile("samples/util/getPropertyTest.bal");
     }
 
     @Test
-    public void testSetProperty() {
-        //Create arguments to initiate cache
+    public void testGetProperty() {
         BValue[] args = {};
-        //Test ballerina cache create, put and get
-        BValue[] returns = BLangFunctions.invokeNew(bLangProgram, "testParseJson", args);
-        //Assert if cache entry is BValue
+        //Test the get property operation using ballerina
+        BValue[] returns = BLangFunctions.invokeNew(bLangProgram, "testGetProperty", args);
         Assert.assertTrue(returns[0] instanceof BBoolean);
         Assert.assertTrue(((BBoolean) returns[0]).booleanValue());
     }
 
-    @Test
-    public void testInvalidJson() {
-        BValue[] args = {};
-        //Test ballerina json parse
-        BValue[] returns = BLangFunctions.invokeNew(bLangProgram, "testInvalidJson", args);
-        Assert.assertTrue(returns[0] instanceof BBoolean);
-        Assert.assertFalse(((BBoolean) returns[0]).booleanValue());
-    }
 }
