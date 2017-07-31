@@ -55,7 +55,6 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.APIRatingException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
-import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -337,7 +336,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             String msg = "One of input values is null or empty. Application Id: " + applicationId + " Client Id: "
                     + clientId + (StringUtils.isEmpty(clientSecret) ? " Client Secret: " + clientSecret : "");
             log.error(msg);
-            throw new KeyManagementException(msg, ExceptionCodes.OAUTH2_APP_MAP_FAILED);
+            throw new APIManagementException(msg, ExceptionCodes.OAUTH2_APP_MAP_FAILED);
         }
 
         //Checking whether given consumer key and secret match with an existing OAuth app.
@@ -345,7 +344,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         OAuthApplicationInfo oAuthApp = getKeyManager().retrieveApplication(clientId);
         if (oAuthApp == null || !clientSecret.equals(oAuthApp.getClientSecret())) {
             String msg = "Unable to find OAuth app. The provided Client Id is invalid. Client Id: " + clientId;
-            throw new KeyManagementException(msg, ExceptionCodes.OAUTH2_APP_MAP_FAILED);
+            throw new APIManagementException(msg, ExceptionCodes.OAUTH2_APP_MAP_FAILED);
         }
 
         try {
@@ -373,25 +372,102 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
     @Override
     public List<OAuthApplicationInfo> getApplicationKeys(String applicationId) throws APIManagementException {
-        //List<OAuthApplicationInfo> allKeysFromDB = getApplicationDAO().getApplicationKeys(applicationId);
-        //for (OAuthApplicationInfo key : allKeysFromDB) {
-            //return null;
-        //}
+        if (log.isDebugEnabled()) {
+            log.debug("Getting keys of App: " + applicationId);
+        }
 
-        //getKeyManager().retrieveApplication(applicationId);
-        return null;
+        if (StringUtils.isEmpty(applicationId)) {
+            String msg = "Input value is null or empty. Application Id: " + applicationId;
+            log.error(msg);
+            throw new APIManagementException(msg, ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
+        }
+
+        try {
+            List<OAuthApplicationInfo> allKeysFromDB = getApplicationDAO().getApplicationKeys(applicationId);
+            for (OAuthApplicationInfo keys : allKeysFromDB) {
+                OAuthApplicationInfo oAuthApp = getKeyManager().retrieveApplication(keys.getClientId());
+                keys.setClientSecret(oAuthApp.getClientSecret());
+                keys.setGrantTypes(oAuthApp.getGrantTypes());
+                keys.setCallBackURL(oAuthApp.getCallBackURL());
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Retrieved all keys of App: " + applicationId);
+            }
+            return allKeysFromDB;
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while getting keys of application: " + applicationId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
+        }
     }
 
     @Override
     public OAuthApplicationInfo getApplicationKeys(String applicationId, String keyType) throws APIManagementException {
-       return null;
+        if (log.isDebugEnabled()) {
+            log.debug("Getting " + keyType + " keys of App: " + applicationId);
+        }
+
+        if (StringUtils.isEmpty(applicationId) || StringUtils.isEmpty(keyType)) {
+            String msg = "One of input values is null or empty. Application Id: " + applicationId + " Key Type: "
+                    + keyType;
+            log.error(msg);
+            throw new APIManagementException(msg, ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
+        }
+
+        try {
+            OAuthApplicationInfo keysFromDB = getApplicationDAO().getApplicationKeys(applicationId, keyType);
+            OAuthApplicationInfo oAuthApp = getKeyManager().retrieveApplication(keysFromDB.getClientId());
+            keysFromDB.setClientSecret(oAuthApp.getClientSecret());
+            keysFromDB.setGrantTypes(oAuthApp.getGrantTypes());
+            keysFromDB.setCallBackURL(oAuthApp.getCallBackURL());
+            if (log.isDebugEnabled()) {
+                log.debug("Retrieved " + keyType + " keys of App: " + applicationId);
+            }
+            return keysFromDB;
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while getting " + keyType + " keys of application: " + applicationId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
+        }
     }
 
     @Override
     public OAuthApplicationInfo updateGrantTypesAndCallbackURL(String applicationId, String keyType,
                                                                List<String> grantTypes, String callbackURL)
             throws APIManagementException {
-        return null;
+        if (log.isDebugEnabled()) {
+            log.debug("Updating " + keyType + " grant type/callback of App: " + applicationId);
+        }
+
+        if (StringUtils.isEmpty(applicationId) || StringUtils.isEmpty(keyType)) {
+            String msg = "One of input values is null or empty. Application Id: " + applicationId + " Key Type: "
+                    + keyType;
+            log.error(msg);
+            throw new APIManagementException(msg, ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
+        }
+
+        if (grantTypes == null || grantTypes.isEmpty() || StringUtils.isEmpty(callbackURL)) {
+            String msg = "Both Grant Types list and Callback URL can't be null or empty at once.";
+            log.error(msg);
+            throw new APIManagementException(msg, ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
+        }
+
+        try {
+            OAuthApplicationInfo appFromDB = getApplicationDAO().getApplicationKeys(applicationId, keyType);
+            OAuthApplicationInfo oAuthApp = getKeyManager().retrieveApplication(appFromDB.getClientId());
+            oAuthApp.setGrantTypes(grantTypes);
+            oAuthApp.setCallBackURL(callbackURL);
+            oAuthApp = getKeyManager().updateApplication(oAuthApp);
+            if (log.isDebugEnabled()) {
+                log.debug("Updated " + keyType + " grant type/callback of App: " + applicationId);
+            }
+            return oAuthApp;
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while updating " + keyType + " grant type/callback of application: "
+                    + applicationId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
+        }
     }
 
     @Override
