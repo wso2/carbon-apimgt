@@ -47,7 +47,11 @@ public class ExportApi implements Microservice  {
     @Path("/apis")
     @Consumes({ "application/json" })
     @Produces({ "application/zip" })
-    @io.swagger.annotations.ApiOperation(value = "Export information related to an API.", notes = "This operation can be used to export information related to a particular API. ", response = File.class, tags={ "Export Configuration", })
+    @io.swagger.annotations.ApiOperation(value = "Export information related to an API.", notes = "This operation can be used to export information related to a particular API. ", response = File.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "Export Configuration", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Export Configuration returned. ", response = File.class),
         
