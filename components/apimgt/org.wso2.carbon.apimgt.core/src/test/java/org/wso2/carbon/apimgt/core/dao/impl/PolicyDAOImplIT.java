@@ -68,6 +68,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
                 + "fingerprint expected to be different before and after updating for policy: "
                 + policy.getPolicyName());
         updatedAPIPolicy.setUuid(null);
+        //test for exception
         try {
             policyDAO.updateApiPolicy(updatedAPIPolicy);
         } catch (APIMgtDAOException ex) {
@@ -95,7 +96,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNotEquals(fingerprintBeforeUpdatingPolicy, fingerprintAfterUpdatingPolicy, "Policy "
                 + "fingerprint expected to be different before and after updating for policy: "
                 + policy.getPolicyName());
-
+        //Test for exception uuid null
         updatedPolicy.setUuid(null);
         try {
             policyDAO.updateApplicationPolicy(updatedPolicy);
@@ -214,7 +215,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
             Assert.assertEquals(ex.getMessage(), "Subscription Policy not found for name: "
                     + addedPolicy.getPolicyName());
         }
-
+        //test for exception: retrieving not available policy
         try {
             policyDAO.getSubscriptionPolicyByUuid(policy.getUuid());
             Assert.fail("Exception expected, but not thrown.");

@@ -396,6 +396,15 @@ public class SampleTestObjectCreator {
         HashMap permissionMap = new HashMap();
         permissionMap.put(DEVELOPER_ROLE_ID, 6);
         permissionMap.put(ADMIN_ROLE_ID, 15);
+        permissionMap.put(ADMIN_ROLE_ID, 7);
+        Application app = createDefaultApplication();
+        //generate random name for each time when generating unique composite API
+        app.setName(UUID.randomUUID().toString());
+        try {
+            DAOFactory.getApplicationDAO().addApplication(app);
+        } catch (APIMgtDAOException e) {
+            log.error("Error adding application", e);
+        }
 
         CompositeAPI.Builder apiBuilder = new CompositeAPI.Builder().
                 id(UUID.randomUUID().toString()).
@@ -406,7 +415,7 @@ public class SampleTestObjectCreator {
                 description("Get Food & Beverage Info").
                 transport(transport).
                 permissionMap(permissionMap).
-                applicationId(UUID.randomUUID().toString()).
+                applicationId(app.getId()).
                 createdTime(LocalDateTime.now()).
                 createdBy(API_CREATOR).
                 uriTemplates(Collections.emptyMap()).
