@@ -232,17 +232,4 @@ public class APIThrottlePolicyTemplateBuilder extends ThrottlePolicyTemplateBuil
         return conditionString;
     }
 
-    @Override
-    public Map<String, String> getThrottlePolicyTemplate() throws APITemplateException {
-        try {
-            templateMap = getThrottlePolicyTemplateForPipelines();
-            templateMap.put(apiPolicy.getPolicyName(), getThrottlePolicyTemplateForAPILevelDefaultCondition());
-        } catch (APITemplateException e) {
-            String errorMessage = "Error while creating template for advanced throttle policy.";
-            log.error(errorMessage, e);
-            throw new APITemplateException(errorMessage, ExceptionCodes.THROTTLE_TEMPLATE_EXCEPTION);
-        }
-        return templateMap;
-    }
-
 }

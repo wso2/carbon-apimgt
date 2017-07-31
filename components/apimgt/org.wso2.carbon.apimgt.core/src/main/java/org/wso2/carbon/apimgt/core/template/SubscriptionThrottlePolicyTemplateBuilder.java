@@ -80,15 +80,5 @@ public class SubscriptionThrottlePolicyTemplateBuilder extends ThrottlePolicyTem
     private String getTemplatePathForSubscription() {
         return policyTemplateLocation + POLICY_VELOCITY_SUB + XML_EXTENSION;
     }
-
-    @Override public Map<String, String> getThrottlePolicyTemplate() throws APITemplateException {
-        try {
-            templateMap.put(SUBSCRIPTION + subscriptionPolicy.getPolicyName(), getThrottlePolicyForSubscriptionLevel());
-        } catch (APITemplateException e) {
-            String errorMessage = "Error while creating template for subscription throttle policy.";
-            log.error(errorMessage, e);
-            throw new APITemplateException(errorMessage, ExceptionCodes.THROTTLE_TEMPLATE_EXCEPTION);
-        }
-        return templateMap;
-    }
+    
 }

@@ -29,6 +29,7 @@ import Permission from './Permission'
 import Endpoints from './Endpoints'
 import Subscriptions from './Subscriptions/Subscriptions'
 
+
 export default class Details extends Component {
     componentDidMount() {
         this.props.setLeftMenu(true);
