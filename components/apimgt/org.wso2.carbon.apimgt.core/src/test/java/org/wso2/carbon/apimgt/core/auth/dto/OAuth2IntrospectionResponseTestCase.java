@@ -21,6 +21,9 @@ package org.wso2.carbon.apimgt.core.auth.dto;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+/*
+   Test cases for OAuth2IntrospectionResponse class
+ */
 public class OAuth2IntrospectionResponseTestCase {
     OAuth2IntrospectionResponse oAuth2IntrospectionResponse = new OAuth2IntrospectionResponse();
 

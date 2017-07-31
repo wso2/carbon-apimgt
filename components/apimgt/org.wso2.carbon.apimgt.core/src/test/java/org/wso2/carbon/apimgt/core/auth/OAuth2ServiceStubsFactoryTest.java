@@ -21,8 +21,11 @@ package org.wso2.carbon.apimgt.core.auth;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+/*
+   Test cases for OAuth2ServiceStubsFactory class
+ */
 public class OAuth2ServiceStubsFactoryTest {
-    @Test (description = "Test for getOAuth2ServiceStubs() method")
+    @Test(description = "Test for getOAuth2ServiceStubs() method")
     public void testGetOAuth2ServiceStubs() throws Exception {
         Assert.assertTrue(OAuth2ServiceStubsFactory.getOAuth2ServiceStubs() instanceof OAuth2ServiceStubs);
     }

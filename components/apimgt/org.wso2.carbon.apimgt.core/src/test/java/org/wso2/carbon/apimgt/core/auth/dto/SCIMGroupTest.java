@@ -24,6 +24,9 @@ import org.testng.annotations.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+   Test cases for SCIMGroup class
+ */
 public class SCIMGroupTest {
     SCIMGroup scimGroup = new SCIMGroup();
 

@@ -21,8 +21,11 @@ package org.wso2.carbon.apimgt.core.auth;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+/*
+   Test cases for SCIMServiceStubFactory class
+ */
 public class SCIMServiceStubFactoryTest {
-    @Test (description = "Test for getSCIMServiceStub() method")
+    @Test(description = "Test for getSCIMServiceStub() method")
     public void testGetSCIMServiceStub() throws Exception {
         Assert.assertTrue(SCIMServiceStubFactory.getSCIMServiceStub() instanceof SCIMServiceStub);
     }

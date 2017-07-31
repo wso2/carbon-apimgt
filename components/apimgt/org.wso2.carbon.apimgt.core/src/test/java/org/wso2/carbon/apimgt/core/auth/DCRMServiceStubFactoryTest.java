@@ -21,8 +21,11 @@ package org.wso2.carbon.apimgt.core.auth;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+/*
+   Test cases for DCRMServiceStubFactory class
+ */
 public class DCRMServiceStubFactoryTest {
-    @Test (description = "Test for getDCRMServiceStub() method")
+    @Test(description = "Test for getDCRMServiceStub() method")
     public void testGetDCRMServiceStub() throws Exception {
         Assert.assertTrue(DCRMServiceStubFactory.getDCRMServiceStub() instanceof DCRMServiceStub);
     }

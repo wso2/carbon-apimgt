@@ -24,6 +24,9 @@ import org.testng.annotations.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+   Test cases for SCIMUserTest class
+ */
 public class SCIMUserTestCase {
     SCIMUser scimUser = new SCIMUser();
     public static final List<SCIMUser.SCIMUserGroups> SCIM_GROUPS = new ArrayList<>();

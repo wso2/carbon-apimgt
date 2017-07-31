@@ -21,7 +21,9 @@ package org.wso2.carbon.apimgt.core.auth;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-
+/*
+   Test cases for OAuth2ServiceStubs class
+ */
 public class OAuth2ServiceStubsTest {
     String tokenEndpoint = "https://localhost:9443/oauth2/token";
     String revokeEndpoint = "https://localhost:9443/oauth2/revoke";
