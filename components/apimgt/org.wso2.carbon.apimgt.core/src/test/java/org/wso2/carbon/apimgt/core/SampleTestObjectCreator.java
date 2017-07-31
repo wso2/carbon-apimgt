@@ -188,7 +188,7 @@ public class SampleTestObjectCreator {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         String permissionJson = "[{\"groupId\" : \"developer\", \"permission\" : "
                 + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\"," +
-                "\"DELETE\"]}]";
+                "\"DELETE\", \"MANAGE_SUBSCRIPTION\"]}]";
 
         API.APIBuilder apiBuilder = new API.APIBuilder(ADMIN, "WeatherAPI", API_VERSION).
                 id(UUID.randomUUID().toString()).
@@ -204,6 +204,7 @@ public class SampleTestObjectCreator {
                 apiPolicy(unlimitedApiPolicy).
                 transport(transport).
                 tags(tags).
+                policies(policies).
                 visibility(API.Visibility.PUBLIC).
                 visibleRoles(new HashSet<>()).
                 businessInformation(businessInformation).
@@ -217,7 +218,7 @@ public class SampleTestObjectCreator {
                 apiDefinition(apiDefinition);
         Map map = new HashMap();
         map.put(DEVELOPER_ROLE_ID, 6);
-        map.put(ADMIN_ROLE_ID, 7);
+        map.put(ADMIN_ROLE_ID, 15);
         apiBuilder.permissionMap(map);
         return apiBuilder;
     }
@@ -288,11 +289,11 @@ public class SampleTestObjectCreator {
 
         String permissionJson = "[{\"groupId\" : \"developer\", \"permission\" : "
                 + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\"," +
-                "\"DELETE\"]}]";
+                "\"DELETE\", \"MANAGE_SUBSCRIPTION\"]}]";
 
         Map permissionMap = new HashMap();
         permissionMap.put(DEVELOPER_ROLE_ID, 6);
-        permissionMap.put(ADMIN_ROLE_ID, 7);
+        permissionMap.put(ADMIN_ROLE_ID, 15);
 
         API.APIBuilder apiBuilder = new API.APIBuilder(ADMIN, "restaurantAPI", "0.9").
                 id(UUID.randomUUID().toString()).
@@ -351,11 +352,11 @@ public class SampleTestObjectCreator {
 
         String permissionJson = "[{\"groupId\" : \"developer\", \"permission\" : "
                 + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\"," +
-                "\"DELETE\"]}]";
+                "\"DELETE\", \"MANAGE_SUBSCRIPTION\"]}]";
 
         Map permissionMap = new HashMap();
         permissionMap.put(DEVELOPER_ROLE_ID, 6);
-        permissionMap.put(ADMIN_ROLE_ID, 7);
+        permissionMap.put(ADMIN_ROLE_ID, 15);
 
         API.APIBuilder apiBuilder = new API.APIBuilder(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
                 API_VERSION).
@@ -393,7 +394,7 @@ public class SampleTestObjectCreator {
 
         HashMap permissionMap = new HashMap();
         permissionMap.put(DEVELOPER_ROLE_ID, 6);
-        permissionMap.put(ADMIN_ROLE_ID, 7);
+        permissionMap.put(ADMIN_ROLE_ID, 15);
 
         CompositeAPI.Builder apiBuilder = new CompositeAPI.Builder().
                 id(UUID.randomUUID().toString()).
@@ -900,7 +901,7 @@ public class SampleTestObjectCreator {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         String permissionJson = "[{\"groupId\" : \"developer\", \"permission\" : "
                 + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\"," +
-                "\"DELETE\"]}]";
+                "\"DELETE\", \"MANAGE_SUBSCRIPTION\"]}]";
 
         Map<String, Endpoint> endpointMap = new HashMap<>();
         endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT,
@@ -934,7 +935,7 @@ public class SampleTestObjectCreator {
                 apiDefinition(apiDefinition);
         Map map = new HashMap();
         map.put(DEVELOPER_ROLE_ID, 6);
-        map.put(ADMIN_ROLE_ID, 7);
+        map.put(ADMIN_ROLE_ID, 15);
         apiBuilder.permissionMap(map);
         return apiBuilder;
     }
