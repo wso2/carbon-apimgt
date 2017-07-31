@@ -65,12 +65,13 @@ class NormalLoginForm extends Component {
                     if (currentEnvironment == value.env) {
 
                         correctvalue = value;
-                         console.log(correctvalue);
+                        console.log(correctvalue);
                     }
                 }
 
                 console.log(correctvalue);
-                let loginPromise = this.authManager.authenticateUser(username, password, correctvalue); // todo here changes are being done by adding an extra paramter.which id values
+               localStorage.setItem("working",JSON.stringify(correctvalue));
+                let loginPromise = this.authManager.authenticateUser(username, password,correctvalue);
                 loginPromise.then((response) => {
                     this.setState({isLogin: AuthManager.getUser(), loading: false});
                 }).catch((error) => {
@@ -138,7 +139,7 @@ class NormalLoginForm extends Component {
                         <FormItem
                             hasFeedback>
                             {getFieldDecorator('currentEnv', {
-                                initialValue: 'default',
+                                initialValue: this.state.env[0].env,
                                 rules: [
                                     {required: true, message: 'Please select Environment ! '},
                                 ],
