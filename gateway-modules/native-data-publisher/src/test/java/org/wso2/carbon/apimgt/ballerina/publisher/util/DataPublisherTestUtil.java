@@ -25,29 +25,29 @@ import java.io.File;
  */
 public class DataPublisherTestUtil {
     public static final String LOCAL_HOST = "localhost";
-    public static String CONFIG_PATH = "";
+    public static String configPath = "";
 
     public static void setTrustStoreParams() {
-        String trustStore = CONFIG_PATH + File.separator + "bre" + File.separator + "security" + File.separator +
+        String trustStore = configPath + File.separator + "bre" + File.separator + "security" + File.separator +
                                                                                                "client-truststore.jks";
         System.setProperty("javax.net.ssl.trustStore", trustStore);
         System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
     }
 
     public static void setKeyStoreParams() {
-        String keyStore = CONFIG_PATH + File.separator + "bre" + File.separator + "security" + File.separator
+        String keyStore = configPath + File.separator + "bre" + File.separator + "security" + File.separator
                                                                                                     + "wso2carbon.jks";
         System.setProperty("Security.KeyStore.Location", keyStore);
         System.setProperty("Security.KeyStore.Password", "wso2carbon");
     }
 
     public static String getDataAgentConfigPath() {
-        return CONFIG_PATH + File.separator + "stats" + File.separator + "configs" +
+        return configPath + File.separator + "stats" + File.separator + "configs" +
                 File.separator + "data-agent-config.xml";
     }
 
     public static String getDataBridgeConfigPath() {
-        return CONFIG_PATH + File.separator + "stats" + File.separator +
+        return configPath + File.separator + "stats" + File.separator +
                 "configs" + File.separator + "databridge.config.yaml";
     }
 }
