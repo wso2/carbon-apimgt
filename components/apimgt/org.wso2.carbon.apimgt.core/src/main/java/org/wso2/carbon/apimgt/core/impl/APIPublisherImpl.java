@@ -207,10 +207,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     api.setApiPermission(replaceGroupIdWithName(permissionString));
                 }
             }
-        } catch (APIMgtDAOException e) {
-            String errorMsg = "Error occurred while retrieving API with id " + uuid;
-            log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         } catch (ParseException e) {
             String errorMsg = "Error occurred while parsing the permission json string for API " + api.getName();
             log.error(errorMsg, e);
@@ -294,7 +290,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     Map<String, Integer> roleNamePermissionList;
                     roleNamePermissionList = getAPIPermissionArray(apiBuilder.getApiPermission());
                     apiBuilder.permissionMap(roleNamePermissionList);
-
                 }
 
                 createdAPI = apiBuilder.build();
