@@ -51,15 +51,6 @@ public class APIConfigContextTestCase {
         apiConfigContext.validate();
     }
 
-    // @Test
-    // public void testAPINameWithNumber () throws APITemplateException {
-    // API nameWithNumberAPI = new API.APIBuilder("provider", "1_test_api","1.0.0")
-    // .id(UUID.randomUUID().toString()).context("testcontext").build();
-    // APIConfigContext apiConfigContext = new APIConfigContext(nameWithNumberAPI, "org.test");
-    // apiConfigContext.validate();
-    // String actualServiceName = (String) apiConfigContext.getContext().get("serviceName");
-    // Assert.assertEquals(actualServiceName, "test api");
-    // }
 
     @Test
     public void testCompositeAPIConfigContext() {
