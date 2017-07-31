@@ -129,7 +129,8 @@ public class AuthenticatorAPI implements Microservice {
                     .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_2 + "_" + environmentConfigurations.getEnvironmentName(),
                             part2, appContext, true, true, "");
             NewCookie restAPIContextCookie = AuthUtil
-                    .cookieBuilder(APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J, part2, restAPIContext, true, true,
+                    .cookieBuilder(APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J + "_" +environmentConfigurations.getEnvironmentName(),
+                            part2, restAPIContext, true, true,
                             "");
             NewCookie refreshTokenCookie, refreshTokenHttpOnlyCookie;
             // Refresh token is not set to cookie if remember me is not set.
