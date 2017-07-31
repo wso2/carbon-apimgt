@@ -64,7 +64,7 @@ public class EventPublisherTestCase {
         bLangProgram = BTestUtils.parseBalFile(BALLERINA_TEST_SCRIPT_LOCATION);
         Path programPath = Paths.get(EventPublisherTestCase.class.getProtectionDomain()
                                                                                 .getCodeSource().getLocation().toURI());
-        DataPublisherTestUtil.CONFIG_PATH = programPath.toString();
+        DataPublisherTestUtil.configPath = programPath.toString();
         //set ballerina home to test running directory as event publisher looking to it
         System.setProperty("ballerina.home", programPath.toString());
         thriftTestServer.addStreamDefinition(StreamDefinitions.getStreamDefinitionFault());
