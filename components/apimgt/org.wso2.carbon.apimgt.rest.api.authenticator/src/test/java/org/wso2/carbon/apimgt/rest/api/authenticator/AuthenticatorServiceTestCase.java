@@ -103,9 +103,14 @@ public class AuthenticatorServiceTestCase {
         //// When an error occurred - Eg: Access denied
         AccessTokenInfo emptyTokenInfo = new AccessTokenInfo();
         Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenReturn(emptyTokenInfo);
-        AccessTokenInfo tokenInfoResponseForInvalidAuthCode = authenticatorService.getTokens("store", "https://localhost:9292/auth/callback/store?error=access_denied&session_state=xxx-session-state-xxx", "authorization_code",
-                null, null, null, 0);
-        Assert.assertEquals(tokenInfoResponseForInvalidAuthCode, emptyTokenInfo);
+        AccessTokenInfo tokenInfoResponseForInvalidAuthCode = new AccessTokenInfo();
+        try {
+            tokenInfoResponseForInvalidAuthCode = authenticatorService.getTokens("store", "https://localhost:9292/auth/callback/store?error=access_denied&session_state=xxx-session-state-xxx", "authorization_code",
+                    null, null, null, 0);
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "No Authorization Code available.");
+            Assert.assertEquals(tokenInfoResponseForInvalidAuthCode, emptyTokenInfo);
+        }
 
         // Happy Path - 200 - Password grant type
         Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenReturn(tokenInfo);

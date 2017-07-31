@@ -258,7 +258,7 @@ public class AuthenticatorAPI implements Microservice {
         } else {
             restAPIContext = AuthenticatorConstants.REST_CONTEXT + appContext;
         }
-        String requestURL = (String) request.getProperty("REQUEST_URL");
+        String requestURL = (String) request.getProperty(AuthenticatorConstants.REQUEST_URL);
 
         APIMStoreConfigurations storeConfigs = ServiceReferenceHolder.getInstance().getAPIMStoreConfiguration();
         AuthResponseBean authResponseBean = new AuthResponseBean();

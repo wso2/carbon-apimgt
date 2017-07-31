@@ -165,6 +165,7 @@ public class AuthenticatorService {
                 } else {
                     String errorMsg = "No Authorization Code available.";
                     log.error(errorMsg, ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
+                    throw new APIManagementException(errorMsg, ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
                 }
             } else if (KeyManagerConstants.PASSWORD_GRANT_TYPE.equals(grantType)) {
                 // Access token for password code grant type
@@ -210,7 +211,7 @@ public class AuthenticatorService {
             responseBean.setAuthUser(getUsernameFromJWT(accessTokenInfo.getIdToken()));
         }
         responseBean.setScopes(accessTokenInfo.getScopes());
-        responseBean.setType("Bearer");
+        responseBean.setType(AuthenticatorConstants.BEARER_PREFIX);
         responseBean.setValidityPeriod(accessTokenInfo.getValidityPeriod());
         responseBean.setIdToken(accessTokenInfo.getIdToken());
         return responseBean;
@@ -275,6 +276,7 @@ public class AuthenticatorService {
             } else {
                 String errorMsg = "Error while getting application rest API resource.";
                 log.error(errorMsg, ExceptionCodes.INTERNAL_ERROR);
+                throw new APIManagementException(errorMsg, ExceptionCodes.INTERNAL_ERROR);
             }
         } catch (APIManagementException e) {
             String errorMsg = "Error while reading scopes from swagger definition.";
