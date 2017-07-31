@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Comment;
+import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
@@ -45,7 +46,9 @@ import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.core.util.EndPointComparator;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -121,9 +124,6 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
                 "EmployeeAPI", "NonAdminAPI"};
         Assert.assertTrue(resultAPINameList.containsAll(Arrays.asList(expectedAPINames)) &&
                 Arrays.asList(expectedAPINames).containsAll(resultAPINameList));
-        userRoles.clear();
-        apiResults.clear();
-        resultAPINameList.clear();
 
     }
 
@@ -191,11 +191,6 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         userRoles.clear();
         attributeMap.clear();
 
-        //cleanup added APIs
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
-        for (String apiID : apiIDList) {
-            apiDAO.deleteAPI(apiID);
-        }
     }
 
     /**
@@ -1683,4 +1678,52 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
             }
         }
     }
+
+    @Test
+    public void testAddGetDeleteCompositeAPI() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        String gateWayConfig = SampleTestObjectCreator.createSampleGatewayConfig();
+        CompositeAPI compositeAPI = SampleTestObjectCreator.createUniqueCompositeAPI().gatewayConfig(gateWayConfig)
+                .build();
+        //Add application associated with Composite API
+        apiDAO.addApplicationAssociatedAPI(compositeAPI);
+        CompositeAPI addedAPI = apiDAO.getCompositeAPI(compositeAPI.getId());
+        Assert.assertNotNull(addedAPI);
+        Assert.assertEquals(compositeAPI.getContext(), addedAPI.getContext());
+
+        //Composite API gateway config
+        Assert.assertNotNull(apiDAO.getCompositeAPIGatewayConfig(addedAPI.getId()));
+
+        //Check for swagger definition
+        Assert.assertNotNull(apiDAO.getCompositeApiSwaggerDefinition(addedAPI.getId()));
+
+        //Update gateway config
+        String fingerprintBeforeUpdate = ETagUtils
+                .generateETag(apiDAO.getLastUpdatedTimeOfGatewayConfig(addedAPI.getId()));
+        Assert.assertNotNull(fingerprintBeforeUpdate);
+        Thread.sleep(1);
+
+        String gwConfig = SampleTestObjectCreator.createAlternativeGatewayConfig();
+        apiDAO.updateCompositeAPIGatewayConfig(addedAPI.getId(),
+                new ByteArrayInputStream(gwConfig.getBytes(StandardCharsets.UTF_8)), ADMIN);
+        String fingerprintAfterUpdate = ETagUtils
+                .generateETag(apiDAO.getLastUpdatedTimeOfGatewayConfig(addedAPI.getId()));
+        Assert.assertNotNull(fingerprintAfterUpdate);
+        Assert.assertNotEquals(fingerprintBeforeUpdate, fingerprintAfterUpdate);
+
+        //Composite API Summary
+        CompositeAPI summaryAPI = apiDAO.getCompositeAPISummary(compositeAPI.getId());
+        Assert.assertNotNull(summaryAPI);
+        Assert.assertEquals(compositeAPI.getContext(), summaryAPI.getContext());
+
+        //Composite APIs retrieving
+        List<CompositeAPI> compositeAPIS = apiDAO.getCompositeAPIs(new HashSet<>(), compositeAPI.getProvider(), 4, 4);
+        Assert.assertEquals(compositeAPI.getId(), compositeAPIS.get(0).getId());
+
+        //Delete Composite API
+        apiDAO.deleteCompositeApi(compositeAPI.getId());
+        Assert.assertNull(apiDAO.getCompositeAPI(compositeAPI.getId()));
+
+    }
+
 }

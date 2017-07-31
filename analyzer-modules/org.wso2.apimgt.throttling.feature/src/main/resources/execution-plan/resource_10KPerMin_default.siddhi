@@ -1,5 +1,6 @@
 
 @App:name('resource_10KPerMin_default')
+@App:description('ExecutionPlan for resource_10KPerMin_default')
 
 @source(type='inMemory', topic='apim', @map(type='passThrough'))
 define stream RequestStream (messageID string, appKey string, appTier string, subscriptionKey string, apiKey string, apiTier string, subscriptionTier string, resourceKey string, resourceTier string, userId string,  apiContext string, apiVersion string, apiName string, propertiesMap string);
