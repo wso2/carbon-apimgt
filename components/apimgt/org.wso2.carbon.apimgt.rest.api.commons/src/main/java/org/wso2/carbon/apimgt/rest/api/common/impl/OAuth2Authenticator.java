@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.rest.api.common.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.api.RESTAPIAuthenticator;
 import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
+import org.wso2.carbon.apimgt.rest.api.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.messaging.Headers;
 import org.wso2.msf4j.Request;
@@ -44,6 +45,7 @@ import org.wso2.msf4j.util.SystemVariableUtil;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -72,11 +74,14 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
     @Override
     public boolean authenticate(Request request, Response responder, ServiceMethodInfo serviceMethodInfo)
             throws APIMgtSecurityException {
+        Map map = ServiceReferenceHolder.getInstance().getAPIMConfiguration(); // added for the working purposes
+        System.out.print(map); // added for the working purposes
         ErrorHandler errorHandler = null;
         boolean isTokenValid = false;
         Headers headers = request.getHeaders();
         if (headers != null && headers.contains(RestApiConstants.COOKIE_HEADER) && isCookieExists(headers,
-                APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J)) {
+                APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J + "_Env")) {
+            // TODO for now hard coded the environment need to append the environmrnt
             String accessToken = null;
             String cookies = headers.get(RestApiConstants.COOKIE_HEADER);
             String partialTokenFromCookie = extractPartialAccessTokenFromCookie(cookies);
