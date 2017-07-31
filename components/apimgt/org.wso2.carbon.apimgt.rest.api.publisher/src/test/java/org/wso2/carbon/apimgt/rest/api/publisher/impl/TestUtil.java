@@ -1,6 +1,6 @@
 /*
  *
- *   Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *   Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *   WSO2 Inc. licenses this file to you under the Apache License,
  *   Version 2.0 (the "License"); you may not use this file except
@@ -28,7 +28,13 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_endpointDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPointDTO;
 import org.wso2.msf4j.Request;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 
 public class TestUtil {
 
@@ -84,9 +90,6 @@ public class TestUtil {
         api.setResponseCaching("true");
         api.isDefaultVersion(true);
         api.setCacheTimeout(120);
-//        api.transport(transport);
-//        api.setTags(tags);
-
 
         return api;
     }
