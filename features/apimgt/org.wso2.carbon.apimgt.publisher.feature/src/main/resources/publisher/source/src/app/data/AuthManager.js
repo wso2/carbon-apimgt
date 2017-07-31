@@ -114,8 +114,8 @@ class AuthManager {
      * @returns {User | null} Is any user has logged in or not
      */
     static getUser() {
-        const userData = localStorage.getItem("wso2_user");
-        const partialToken = Utils.getCookie("WSO2_AM_TOKEN_1");
+        const userData = localStorage.getItem(User.CONST.LOCALSTORAGE_USER);
+        const partialToken = Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1);
         if (!(userData && partialToken)) {
             return null;
         }
@@ -129,9 +129,9 @@ class AuthManager {
      */
     static setUser(user) {
         if (!user instanceof User) {
-            throw "Invalid user object";
+            throw new Error("Invalid user object");
         }
-        localStorage.setItem("wso2_user", JSON.stringify(user.toJson()));
+        localStorage.setItem(User.CONST.LOCALSTORAGE_USER, JSON.stringify(user.toJson()));
         /* TODO: IMHO it's better to get this key (`wso2_user`) from configs */
     }
 
@@ -177,7 +177,7 @@ class AuthManager {
     logout() {
         let authHeader = this.bearer + AuthManager.getUser().getPartialToken();
         //TODO Will have to change the logout end point url to contain the app context(i.e. publisher/store, etc.)
-        let url = this.host + "/login/revoke";
+        let url = this.host + "/login/logout";
         let headers = {
             'Accept': 'application/json',
             'Authorization': authHeader

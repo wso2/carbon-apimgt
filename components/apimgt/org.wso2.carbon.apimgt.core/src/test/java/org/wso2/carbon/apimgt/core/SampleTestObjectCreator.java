@@ -188,7 +188,7 @@ public class SampleTestObjectCreator {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         String permissionJson = "[{\"groupId\" : \"developer\", \"permission\" : "
                 + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\"," +
-                "\"DELETE\"]}]";
+                "\"DELETE\", \"MANAGE_SUBSCRIPTION\"]}]";
 
         API.APIBuilder apiBuilder = new API.APIBuilder(ADMIN, "WeatherAPI", API_VERSION).
                 id(UUID.randomUUID().toString()).
@@ -204,6 +204,7 @@ public class SampleTestObjectCreator {
                 apiPolicy(unlimitedApiPolicy).
                 transport(transport).
                 tags(tags).
+                policies(policies).
                 visibility(API.Visibility.PUBLIC).
                 visibleRoles(new HashSet<>()).
                 businessInformation(businessInformation).
@@ -217,7 +218,7 @@ public class SampleTestObjectCreator {
                 apiDefinition(apiDefinition);
         Map map = new HashMap();
         map.put(DEVELOPER_ROLE_ID, 6);
-        map.put(ADMIN_ROLE_ID, 7);
+        map.put(ADMIN_ROLE_ID, 15);
         apiBuilder.permissionMap(map);
         return apiBuilder;
     }
@@ -288,11 +289,11 @@ public class SampleTestObjectCreator {
 
         String permissionJson = "[{\"groupId\" : \"developer\", \"permission\" : "
                 + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\"," +
-                "\"DELETE\"]}]";
+                "\"DELETE\", \"MANAGE_SUBSCRIPTION\"]}]";
 
         Map permissionMap = new HashMap();
         permissionMap.put(DEVELOPER_ROLE_ID, 6);
-        permissionMap.put(ADMIN_ROLE_ID, 7);
+        permissionMap.put(ADMIN_ROLE_ID, 15);
 
         API.APIBuilder apiBuilder = new API.APIBuilder(ADMIN, "restaurantAPI", "0.9").
                 id(UUID.randomUUID().toString()).
@@ -351,11 +352,11 @@ public class SampleTestObjectCreator {
 
         String permissionJson = "[{\"groupId\" : \"developer\", \"permission\" : "
                 + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\"," +
-                "\"DELETE\"]}]";
+                "\"DELETE\", \"MANAGE_SUBSCRIPTION\"]}]";
 
         Map permissionMap = new HashMap();
         permissionMap.put(DEVELOPER_ROLE_ID, 6);
-        permissionMap.put(ADMIN_ROLE_ID, 7);
+        permissionMap.put(ADMIN_ROLE_ID, 15);
 
         API.APIBuilder apiBuilder = new API.APIBuilder(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
                 API_VERSION).
@@ -393,7 +394,7 @@ public class SampleTestObjectCreator {
 
         HashMap permissionMap = new HashMap();
         permissionMap.put(DEVELOPER_ROLE_ID, 6);
-        permissionMap.put(ADMIN_ROLE_ID, 7);
+        permissionMap.put(ADMIN_ROLE_ID, 15);
 
         CompositeAPI.Builder apiBuilder = new CompositeAPI.Builder().
                 id(UUID.randomUUID().toString()).
@@ -900,7 +901,7 @@ public class SampleTestObjectCreator {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         String permissionJson = "[{\"groupId\" : \"developer\", \"permission\" : "
                 + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\"," +
-                "\"DELETE\"]}]";
+                "\"DELETE\", \"MANAGE_SUBSCRIPTION\"]}]";
 
         Map<String, Endpoint> endpointMap = new HashMap<>();
         endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT,
@@ -934,7 +935,7 @@ public class SampleTestObjectCreator {
                 apiDefinition(apiDefinition);
         Map map = new HashMap();
         map.put(DEVELOPER_ROLE_ID, 6);
-        map.put(ADMIN_ROLE_ID, 7);
+        map.put(ADMIN_ROLE_ID, 15);
         apiBuilder.permissionMap(map);
         return apiBuilder;
     }
@@ -1108,6 +1109,91 @@ public class SampleTestObjectCreator {
 
                         "\nfrom ResultStream#throttler:emitOnStateChange(throttleKey, isThrottled)" + "\nselect *\n"
                         + "insert into GlobalThrottleStream;";
+
+        return siddhiApp;
+    }
+    
+    public static String createDefaultSiddhiAppForAPIThrottlePolicy() {
+        APIPolicy apiPolicy = createDefaultAPIPolicy();
+        String siddhiApp = "\n@App:name('resource_" + apiPolicy.getPolicyName() + "_condition_0')"
+                + "\n@App:description('ExecutionPlan for resource_" + apiPolicy.getPolicyName() + "_condition_0')\n"
+
+                + "\n@source(type='inMemory', topic='apim', @map(type='passThrough'))"
+                + "\ndefine stream RequestStream (messageID string, appKey string, appTier string, "
+                + "subscriptionKey string,"
+                + " apiKey string, apiTier string, subscriptionTier string, resourceKey string,"
+                + " resourceTier string, userId string,  apiContext string, apiVersion string, "
+                + "appTenant string, apiTenant "
+                + "string, appId string, apiName string, propertiesMap string);\n"
+
+                + "\n@sink(type='jms', @map(type='text'),"
+                + "\nfactory.initial='org.apache.activemq.jndi.ActiveMQInitialContextFactory',"
+                + " provider.url='tcp://localhost:61616', "
+                + "destination='TEST.FOO', connection.factory.type='topic',"
+                + "\nconnection.factory.jndi.name='TopicConnectionFactory')"
+                + "\ndefine stream GlobalThrottleStream (throttleKey string, isThrottled bool,"
+                + " expiryTimeStamp long);\n"
+
+                + "\nFROM RequestStream"
+                + "\nSELECT messageID, (resourceTier == 'SampleAPIPolicy' AND (regex:find('Chrome',"
+                + "cast(map:get(propertiesMap,'Browser'),"
+                + "'string'))) AND (regex:find('attributed',"
+                + "cast(map:get(propertiesMap,'/path/path2'),'string'))) AND "
+                + "(cast(map:get(propertiesMap,'Location'),'string')=='Colombo'))"
+                + " AS isEligible, str:concat(resourceKey,"
+                + "'_condition_0') AS throttleKey, propertiesMap" + "\nINSERT INTO EligibilityStream;\n"
+
+                + "\nFROM EligibilityStream[isEligible==true]#throttler:timeBatch(1 s, 0)"
+                + "\nselect throttleKey, (count(messageID) >= 1000) as isThrottled,"
+                + " expiryTimeStamp group by throttleKey"
+                + "\nINSERT ALL EVENTS into ResultStream;\n"
+
+                + "\nfrom ResultStream#throttler:emitOnStateChange(throttleKey, isThrottled)" + "\nselect *"
+                + "\ninsert into GlobalThrottleStream;\n";
+
+        return siddhiApp;
+    }
+
+    public static String createDefaultSiddhiAppForAPILevelDefaultThrottlePolicy() {
+        APIPolicy apiPolicy = createDefaultAPIPolicy();
+        String siddhiApp = "\n@App:name('resource_" + apiPolicy.getPolicyName() + "_default')"
+                + "\n@App:description('ExecutionPlan for resource_" + apiPolicy.getPolicyName() + "_default')\n"
+
+                + "\n@source(type='inMemory', topic='apim', @map(type='passThrough'))"
+                + "\ndefine stream RequestStream (messageID string, appKey string,"
+                + " appTier string, subscriptionKey string,"
+                + " apiKey string, apiTier string, subscriptionTier string, resourceKey string,"
+                + " resourceTier string, userId string,  apiContext string, apiVersion string, appTenant string,"
+                + " apiTenant string,"
+                + " appId string, apiName string, propertiesMap string);\n"
+
+                + "\n@sink(type='jms', @map(type='text'),"
+                + "\nfactory.initial='org.apache.activemq.jndi.ActiveMQInitialContextFactory',"
+                + " provider.url='tcp://localhost:61616',"
+                + " destination='TEST.FOO', connection.factory.type='topic',"
+                + "\nconnection.factory.jndi.name='TopicConnectionFactory')"
+                + "\ndefine stream GlobalThrottleStream (throttleKey string, isThrottled bool,"
+                + " expiryTimeStamp long);\n"
+
+                + "\nFROM RequestStream"
+                + "\nSELECT messageID, (resourceTier == 'SampleAPIPolicy' AND "
+                + "NOT(((3232238595l<=cast(map:get(propertiesMap,'ip'),'Long')"
+                + " AND 3232258067l>=cast(map:get(propertiesMap,'ip'),'Long')) AND "
+                + "(cast(map:get(propertiesMap,'ip'),'Long')==2066353720l)) "
+                + "OR ((regex:find('Chrome',cast(map:get(propertiesMap,'Browser'),'string')))"
+                + " AND (regex:find('attributed',"
+                + "cast(map:get(propertiesMap,'/path/path2'),'string')))"
+                + " AND (cast(map:get(propertiesMap,'Location'),'string')=='Colombo'))))"
+                + " AS isEligible, resourceKey AS throttleKey, propertiesMap"
+                + "\nINSERT INTO EligibilityStream;\n"
+
+                + "\nFROM EligibilityStream[isEligible==true]#throttler:timeBatch(1000 s, 0)"
+                + "\nselect throttleKey, (count(messageID) >= 10000) as isThrottled,"
+                + " expiryTimeStamp group by throttleKey"
+                + "\nINSERT ALL EVENTS into ResultStream;\n"
+
+                + "\nfrom ResultStream#throttler:emitOnStateChange(throttleKey, isThrottled)" + "\nselect *"
+                + "\ninsert into GlobalThrottleStream;\n";
 
         return siddhiApp;
     }

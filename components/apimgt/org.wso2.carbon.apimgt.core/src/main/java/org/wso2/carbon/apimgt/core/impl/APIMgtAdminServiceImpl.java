@@ -419,7 +419,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     public List<UriTemplate> getAllResourcesForApi(String apiContext, String apiVersion) throws APIManagementException {
         try {
             return apiDAO.getResourcesOfApi(apiContext, apiVersion);
-        } catch (APIManagementException e) {
+        } catch (APIMgtDAOException e) {
             String msg = "Couldn't retrieve resources for Api Name: " + apiContext;
             log.error(msg, e);
             throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);

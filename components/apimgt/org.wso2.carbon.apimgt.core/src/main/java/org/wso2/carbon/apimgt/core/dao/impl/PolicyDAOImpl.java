@@ -1632,7 +1632,6 @@ public class PolicyDAOImpl implements PolicyDAO {
                     conditionGroupIDs
                             .add(resultSet.getInt(APIMgtConstants.ThrottlePolicyConstants.COLUMN_CONDITION_ID));
                 }
-                ;
                 return conditionGroupIDs;
             }
         }

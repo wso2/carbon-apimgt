@@ -18,6 +18,8 @@
 
 import AuthManager from "../src/app/data/AuthManager.js"
 import Os from 'os'
+import Utils from '../src/app/data/utils'
+import User from '../src/app/data/User'
 
 class TestUtils {
     static setupMockEnvironment() {
@@ -50,9 +52,33 @@ class TestUtils {
         };
     }
 
+    /**
+     * Logged a user(get an OAuth access token) for a given user and set the *FULL* access tokens in WSO2_AM_TOKEN_1,
+     * Since test request is made in node environment HTTP only cookies are also accessible, Hence merging HTTP only and
+     * other to build the complete access token
+     * @param username
+     * @param password
+     * @returns {AxiosPromise}
+     */
     static userLogin(username = 'admin', password = 'admin') {
         let authenticator = new AuthManager();
-        return authenticator.authenticateUser(username, password);
+        let promisedAuth = authenticator.authenticateUser(username, password);
+        promisedAuth.then(
+            response => {
+                let WSO2_AM_TOKEN_MSF4J;
+                for (let cookie of response.headers["set-cookie"]) {
+                    const parts = cookie.split('=');
+                    if (parts[0] === User.CONST.WSO2_AM_TOKEN_MSF4J) {
+                        WSO2_AM_TOKEN_MSF4J = parts[1].split(';')[0];
+                        break;
+                    }
+                }
+                const {partialToken, validityPeriod} = response.data;
+                document.clearCookies();
+                Utils.setCookie(User.CONST.WSO2_AM_TOKEN_1, partialToken + WSO2_AM_TOKEN_MSF4J, validityPeriod, "/publisher");
+            }
+        );
+        return promisedAuth;
     }
 }
 

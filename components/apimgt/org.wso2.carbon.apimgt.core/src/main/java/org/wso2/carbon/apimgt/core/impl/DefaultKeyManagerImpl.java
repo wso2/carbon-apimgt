@@ -249,7 +249,6 @@ public class DefaultKeyManagerImpl implements KeyManager {
 
     @Override
     public AccessTokenInfo getNewAccessToken(AccessTokenRequest tokenRequest) throws KeyManagementException {
-
         if (tokenRequest == null) {
             throw new KeyManagementException("No information available to generate Token. AccessTokenRequest is null",
                     ExceptionCodes.INVALID_TOKEN_REQUEST);
@@ -321,7 +320,6 @@ public class DefaultKeyManagerImpl implements KeyManager {
                     " Error Response Body: " + response.body().toString(),
                     ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
         }
-
     }
 
     @Override
