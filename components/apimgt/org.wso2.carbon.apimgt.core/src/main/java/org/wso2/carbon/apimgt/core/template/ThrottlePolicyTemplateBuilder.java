@@ -97,12 +97,5 @@ abstract class ThrottlePolicyTemplateBuilder {
         velocityengine.init();
         return velocityengine;
     }
-
-    /**
-     * Return siddhi query template for policy level.
-     *
-     * @return Map with policy file(siddhi app name) and siddhi query
-     * @throws APITemplateException if throttle template generator fails
-     */
-    public abstract Map<String, String> getThrottlePolicyTemplate() throws APITemplateException;
+    
 }
