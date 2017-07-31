@@ -1784,14 +1784,12 @@ public class ApiDAOImpl implements ApiDAO {
     public boolean isDocumentExist(String apiId, DocumentInfo documentInfo) throws APIMgtDAOException {
         final String query = "SELECT AM_API_DOC_META_DATA.UUID FROM AM_API_DOC_META_DATA INNER JOIN AM_API_RESOURCES " +
                 "ON AM_API_DOC_META_DATA.UUID=AM_API_RESOURCES.UUID WHERE AM_API_RESOURCES.API_ID = ? AND " +
-                "AM_API_DOC_META_DATA.NAME=? AND AM_API_DOC_META_DATA.TYPE= ? AND AM_API_DOC_META_DATA.SOURCE_TYPE= ?";
+                "AM_API_DOC_META_DATA.NAME=?";
         boolean exist = false;
         try (Connection connection = DAOUtil.getConnection(); PreparedStatement preparedStatement = connection
                 .prepareStatement(query)) {
             preparedStatement.setString(1, apiId);
             preparedStatement.setString(2, documentInfo.getName());
-            preparedStatement.setString(3, documentInfo.getType().toString());
-            preparedStatement.setString(4, documentInfo.getSourceType().toString());
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     exist = true;

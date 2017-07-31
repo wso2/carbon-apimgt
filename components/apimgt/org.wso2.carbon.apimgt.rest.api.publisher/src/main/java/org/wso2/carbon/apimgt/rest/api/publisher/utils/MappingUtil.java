@@ -317,6 +317,7 @@ public class MappingUtil {
                 summary(documentDTO.getSummary()).
                 name(documentDTO.getName()).
                 otherType(documentDTO.getOtherTypeName()).
+                fileName(documentDTO.getFileName()).
                 sourceType(DocumentInfo.SourceType.valueOf(documentDTO.getSourceType().toString())).
                 sourceURL(documentDTO.getSourceUrl()).
                 type(DocumentInfo.DocType.valueOf(documentDTO.getType().toString())).

@@ -26,11 +26,11 @@ import NewDocDiv from './NewDocDiv';
  Documents tab related React components.
  # Component hierarchy
  -Documents
-    -DocumentsTable
-        -InlineEditor
-    -NewDocDiv
-        -NewDocInfoDiv
-        -NewDocSourceDiv
+ -DocumentsTable
+ -InlineEditor
+ -NewDocDiv
+ -NewDocInfoDiv
+ -NewDocSourceDiv
  */
 class Documents extends Component {
     constructor(props) {
@@ -51,6 +51,7 @@ class Documents extends Component {
             documentsList: null,
             updatingDoc: false
         };
+        this.initialDocSourceType = null;
         this.addNewDocBtnListener = this.addNewDocBtnListener.bind(this);
         this.handleDocInputChange = this.handleDocInputChange.bind(this);
         this.submitAddNewDocListener = this.submitAddNewDocListener.bind(this);
@@ -74,7 +75,7 @@ class Documents extends Component {
         docs.then(response => {
             this.setState({documentsList: response.obj.list});
         }).catch(error_response => {
-            let error_data = JSON.parse(error_response.data);
+            let error_data = JSON.parse(error_response.message);
             let messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
             console.error(messageTxt);
             message.error("Error in fetching documents list of the API");
@@ -110,41 +111,43 @@ class Documents extends Component {
             summary: this.state.docSummary,
             sourceType: this.state.docSourceType,
             sourceUrl: this.state.docSourceURL,
-            inlineContent: null,
+            inlineContent: "",
             permission: '[{"groupId" : "1000", "permission" : ["READ","UPDATE"]},{"groupId" : "1001", "permission" : ["READ","UPDATE"]}]',
-            visibility: "API_LEVEL"
+            visibility: "API_LEVEL",
+            fileName: (this.state.docFilePath != null) ? this.state.docFilePath.replace(/^.*[\\\/]/, '') : null
         }
         const promised_add = this.client.addDocument(this.api_id, api_documents_data);
         promised_add.then(done => {
             const dt_data = done.obj;
             const docId = dt_data.documentId;
-            let addFileSuccess = true;
+            let promised_add_file;
             if (api_documents_data.sourceType == "FILE") {
                 const file = this.state.docFile;
-                const promised_add_file = this.client.addFileToDocument(this.api_id, docId, file);
+                promised_add_file = this.client.addFileToDocument(this.api_id, docId, file);
                 promised_add_file.catch(function (error_response) {
-                    addFileSuccess = false;
-                    const error_data = JSON.parse(error_response.data);
+                    const error_data = JSON.parse(error_response.mesage);
                     const messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
                     console.error(messageTxt);
                     message.error("Failed adding file to the newly added document");
+                    return;
                 });
             }
 
-            if (addFileSuccess) {
-                api_documents_data.documentId = docId;
-                const updatedDocList = this.state.documentsList;
-                updatedDocList.push(api_documents_data);
-                this.setState({
-                    documentsList: updatedDocList,
-                });
-                this.resetNewDocDetails();
-                message.success("New document added successfully");
-            }
+            api_documents_data.documentId = docId;
+            const updatedDocList = this.state.documentsList;
+            updatedDocList.push(api_documents_data);
+            this.setState({
+                documentsList: updatedDocList,
+            });
+            this.resetNewDocDetails();
+            message.success("New document added successfully");
+
+
         }).catch(error_response => {
-            const error_data = JSON.parse(error_response.data);
+            const error_data = JSON.parse(error_response.message);
             const messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
-            message.error(messageTxt);
+            console.error(messageTxt);
+            message.error("Failure in adding new document");
         });
     }
 
@@ -156,6 +159,25 @@ class Documents extends Component {
         this.setState({
             [name]: event.target.value
         });
+
+        if (name == "docSourceType") {
+            if (event.target.value == "URL") {
+                this.setState({
+                    docFilePath: null
+                });
+            }
+            else if (event.target.value == "INLINE") {
+                this.setState({
+                    docSourceURL: "",
+                    docFilePath: null
+                });
+            } else if (event.target.value == "FILE") {
+                this.setState({
+                    docSourceURL: ""
+                });
+            }
+        }
+
         if (event.target.type == "file") {
             this.setState({
                 docFile: event.target.files[0]
@@ -217,6 +239,7 @@ class Documents extends Component {
             docSummary: document.summary,
             updatingDoc: true
         });
+        this.initialDocSourceType = document.sourceType;
     }
 
     /*
@@ -239,31 +262,55 @@ class Documents extends Component {
             summary: this.state.docSummary,
             sourceType: this.state.docSourceType,
             sourceUrl: this.state.docSourceURL,
-            inlineContent: null,
+            inlineContent: "",
             permission: '[{"groupId" : "1000", "permission" : ["READ","UPDATE"]},{"groupId" : "1001", "permission" : ["READ","UPDATE"]}]',
             visibility: "API_LEVEL",
-            fileName: this.state.docFilePath
+            fileName: (this.state.docFilePath != null) ? this.state.docFilePath.replace(/^.*[\\\/]/, '') : null
         }
         const promised_update = this.client.updateDocument(this.api_id, api_documents_data.documentId, api_documents_data);
         promised_update.then(response => {
             const dt_data = response.obj;
             const docId = dt_data.documentId;
+            let promised_add_file = Promise.reject();
+            let promised_add_empty_inline_content = Promise.reject();
             if (dt_data.sourceType == "FILE") {
                 if (this.state.docFile != null) {
-                    const promised_add_file = this.client.addFileToDocument(this.api_id, docId, this.state.docFile);
-                    promised_add_file.catch(() => {
-                        const error_data = JSON.parse(error_response.data);
+                    promised_add_file = this.client.addFileToDocument(this.api_id, docId, this.state.docFile);
+                    promised_add_file.catch((error_response) => {
+                        const error_data = JSON.parse(error_response.message);
                         const messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
                         console.error(messageTxt);
                         message.error("Failed updating document file")
                     });
                 }
+            } else {
+                promised_add_file = Promise['resolve']();
             }
-            this.resetNewDocDetails();
-            this.getDocumentsList();
-            message.success("Document updated successfully");
+            if (this.initialDocSourceType != api_documents_data.sourceType) { //source type has been changed
+                if (api_documents_data.sourceType == "INLINE") {
+                    //Add empty inline content to document when the source type was changed to 'INLINE'
+                    promised_add_empty_inline_content = this.client.addInlineContentToDocument(this.api_id, docId, "");
+                    promised_add_empty_inline_content.catch((error_response) => {
+                        const error_data = JSON.parse(error_response.data);
+                        const messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+                        console.error(messageTxt);
+                        message.error("Failed adding empty inline content to document");
+                    });
+                } else {
+                    promised_add_empty_inline_content = Promise['resolve']();
+                }
+            } else {
+                promised_add_empty_inline_content = Promise['resolve']();
+            }
+            Promise.all([promised_add_file, promised_add_empty_inline_content]).then(() => {
+                this.resetNewDocDetails();
+                this.getDocumentsList();
+                message.success("Document updated successfully");
+            });
+            Promise.all([promised_add_file, promised_add_empty_inline_content]).catch(() => {
+            });
         }).catch(function (error_response) {
-            let error_data = JSON.parse(error_response.data);
+            let error_data = JSON.parse(error_response.message);
             let messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
             console.error(messageTxt);
             message.error(messageTxt);
