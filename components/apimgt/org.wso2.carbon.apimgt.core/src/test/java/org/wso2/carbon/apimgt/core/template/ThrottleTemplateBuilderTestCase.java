@@ -78,20 +78,20 @@ public class ThrottleTemplateBuilderTestCase {
     
     @Test
     public void testSiddhiQueryForAPIPolicy() throws APITemplateException {
-    	APIPolicy apiPolicy = SampleTestObjectCreator.createDefaultAPIPolicy();
-    	APIThrottlePolicyTemplateBuilder templateBuilder = new APIThrottlePolicyTemplateBuilder(apiPolicy);
-    	Map<String, String> siddhiQueryMap = templateBuilder.getThrottlePolicyTemplateForPipelines();
-    	String actualQuery= siddhiQueryMap.get("resource_SampleAPIPolicy_condition_0");
-    	String expectedQuery = SampleTestObjectCreator.createDefaultSiddhiAppForAPIThrottlePolicy();
-    	Assert.assertEquals(actualQuery, expectedQuery);    	
+        APIPolicy apiPolicy = SampleTestObjectCreator.createDefaultAPIPolicy();
+        APIThrottlePolicyTemplateBuilder templateBuilder = new APIThrottlePolicyTemplateBuilder(apiPolicy);
+        Map<String, String> siddhiQueryMap = templateBuilder.getThrottlePolicyTemplateForPipelines();
+        String actualQuery = siddhiQueryMap.get("resource_SampleAPIPolicy_condition_0");
+        String expectedQuery = SampleTestObjectCreator.createDefaultSiddhiAppForAPIThrottlePolicy();
+        Assert.assertEquals(actualQuery, expectedQuery);
     }
-    
+
     @Test
     public void testSiddhiQueryForAPILevelDefaultConditions() throws APITemplateException {
-    	APIPolicy apiPolicy = SampleTestObjectCreator.createDefaultAPIPolicy();
-    	APIThrottlePolicyTemplateBuilder templateBuilder = new APIThrottlePolicyTemplateBuilder(apiPolicy);
-    	String actualQuery = templateBuilder.getThrottlePolicyTemplateForAPILevelDefaultCondition();
-    	String expectedQuery = SampleTestObjectCreator.createDefaultSiddhiAppForAPILevelDefaultThrottlePolicy();
-    	Assert.assertEquals(actualQuery, expectedQuery);
+        APIPolicy apiPolicy = SampleTestObjectCreator.createDefaultAPIPolicy();
+        APIThrottlePolicyTemplateBuilder templateBuilder = new APIThrottlePolicyTemplateBuilder(apiPolicy);
+        String actualQuery = templateBuilder.getThrottlePolicyTemplateForAPILevelDefaultCondition();
+        String expectedQuery = SampleTestObjectCreator.createDefaultSiddhiAppForAPILevelDefaultThrottlePolicy();
+        Assert.assertEquals(actualQuery, expectedQuery);
     }
 }
