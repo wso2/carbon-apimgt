@@ -21,6 +21,11 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 
+/**
+ * 
+ * Test cases for URI template comparison
+ *
+ */
 public class URITemplateComparatorTestCase {
 
     @Test

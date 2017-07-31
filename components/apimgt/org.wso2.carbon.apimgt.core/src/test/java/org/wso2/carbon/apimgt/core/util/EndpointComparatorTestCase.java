@@ -22,6 +22,11 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import java.util.UUID;
 
+/**
+ * 
+ * Test cases for Endpoint comparison
+ *
+ */
 public class EndpointComparatorTestCase {
 
     @Test

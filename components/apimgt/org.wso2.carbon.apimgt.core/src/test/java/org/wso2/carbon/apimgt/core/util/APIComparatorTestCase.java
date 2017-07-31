@@ -21,6 +21,11 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.models.API;
 
+/**
+ * 
+ * Test cases for API Comparison
+ *
+ */
 public class APIComparatorTestCase {
 
     @Test
