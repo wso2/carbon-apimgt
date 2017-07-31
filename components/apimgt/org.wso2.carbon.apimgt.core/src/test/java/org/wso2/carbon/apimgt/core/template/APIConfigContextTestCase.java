@@ -17,9 +17,16 @@
  */
 package org.wso2.carbon.apimgt.core.template;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
 
 /**
  * Test cases for APIConfigContext
@@ -28,18 +35,57 @@ import org.wso2.carbon.apimgt.core.models.API;
 public class APIConfigContextTestCase {
 	
 	@Test
-	public void createValidAPIConfigContext() throws APITemplateException {
-		
+	public void testValidAPIConfigContext() throws APITemplateException {		
 		APIConfigContext apiConfigContext = new APIConfigContext(SampleTestObjectCreator.createDefaultAPI().build(), "org.test");
-		apiConfigContext.validate();		
+		apiConfigContext.validate();
+		String actualPackageFromContext = (String) apiConfigContext.getContext().get("package");
+		Assert.assertEquals(actualPackageFromContext, "org.test");
 	}
 	
 	@Test(expectedExceptions = APITemplateException.class)
-	public void createInvalidAPIConfigContext() throws APITemplateException {
-		
-		API emptyNamedAPI = new API.APIBuilder("provider", "", "1.0.0").build();	
+	public void testInvalidAPIConfigContext() throws APITemplateException {		
+		API emptyNamedAPI = new API.APIBuilder("provider", "", "1.0.0").context("testcontext").id(UUID.randomUUID().toString()).build();	// empty name
 		APIConfigContext apiConfigContext = new APIConfigContext(emptyNamedAPI, "org.test");		
 		apiConfigContext.validate();		
+	}
+	
+//	@Test
+//	public void testAPINameWithNumber () throws APITemplateException {
+//		API nameWithNumberAPI = new API.APIBuilder("provider", "1_test_api","1.0.0").id(UUID.randomUUID().toString()).context("testcontext").build();
+//		APIConfigContext apiConfigContext = new APIConfigContext(nameWithNumberAPI, "org.test");
+//		apiConfigContext.validate();
+//		String actualServiceName = (String) apiConfigContext.getContext().get("serviceName");
+//		Assert.assertEquals(actualServiceName, "test api");
+//	}
+	
+	@Test
+	public void testCompositeAPIConfigContext() {		
+		APIConfigContext apiConfigContext = new APIConfigContext(SampleTestObjectCreator.createDefaultAPI().build(), "org.test");
+		CompositeAPIConfigContext compositeAPIConfigContext = new CompositeAPIConfigContext(apiConfigContext, null, null);
+		String actualPackageFromCompositeContext = (String) compositeAPIConfigContext.getContext().get("package");
+		Assert.assertEquals(actualPackageFromCompositeContext, "org.test");		
+	}
+	
+	@Test
+	public void testResourceConfigContext() {		
+		APIConfigContext apiConfigContext = new APIConfigContext(SampleTestObjectCreator.createDefaultAPI().build(), "org.test");
+		TemplateBuilderDTO templateBuilderDTO = new TemplateBuilderDTO();
+		templateBuilderDTO.setTemplateId("t1");
+		List<TemplateBuilderDTO> templateList = new ArrayList<TemplateBuilderDTO>();
+		templateList.add(templateBuilderDTO);
+		ResourceConfigContext resourceConfigContext = new ResourceConfigContext(apiConfigContext, templateList);
+		List<TemplateBuilderDTO> templatesFromContext = (List<TemplateBuilderDTO>) resourceConfigContext.getContext().get("apiResources");
+		String templateIdFromContext = templatesFromContext.get(0).getTemplateId();
+		Assert.assertEquals(templateIdFromContext, "t1");
+	}
+	
+	@Test
+	public void testEndpointContext() {
+		
+		Endpoint ep = Endpoint.newEndpoint().name("Ep1").build();
+		EndpointContext endpointContext = new EndpointContext(ep, "org.test");
+		Endpoint epFromContext = (Endpoint) endpointContext.getContext().get("endpoint");
+		Assert.assertEquals(epFromContext.getName(), "Ep1");		
 	}
 
 }
