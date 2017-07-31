@@ -17,7 +17,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.rest.api.publisher.importexport.api;
+package org.wso2.carbon.apimgt.rest.api.publisher.utils;
 
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.IOUtils;
@@ -44,8 +44,6 @@ import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.utils.ApiImportExportManager;
-import org.wso2.carbon.apimgt.rest.api.publisher.utils.FileBasedApiImportExportManager;
 
 import java.io.File;
 import java.io.FileInputStream;
