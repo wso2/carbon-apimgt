@@ -46,7 +46,7 @@ public class SaveFileTestCase {
         //the below call should be successful since the path is valid (it should return true)
         boolean saveFileStatus = Util.saveFile(path, content);
         Assert.assertTrue(saveFileStatus);
-        path = "This/is/an/invalid/path";
+        path = "ThisIsAnInvalidPath";
         //the below call should fail since the path is invalid (it should return false)
         saveFileStatus = Util.saveFile(path, content);
         Assert.assertFalse(saveFileStatus);
