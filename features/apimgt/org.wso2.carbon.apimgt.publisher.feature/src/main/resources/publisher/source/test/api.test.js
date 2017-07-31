@@ -27,10 +27,6 @@ describe('Api',
     function () {
         before("Make any REST API calls ,Login a user and get access token", function (done) {
             TestUtils.userLogin().then((response) => {
-                document.clearCookies();
-                for (let cookie of response.headers["set-cookie"]) {
-                    document.cookie = cookie.split(';')[0];
-                }
                 done();
             })
         });
