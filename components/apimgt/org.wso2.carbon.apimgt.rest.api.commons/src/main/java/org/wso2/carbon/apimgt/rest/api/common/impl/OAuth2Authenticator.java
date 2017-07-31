@@ -75,23 +75,13 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
     public boolean authenticate(Request request, Response responder, ServiceMethodInfo serviceMethodInfo)
             throws APIMgtSecurityException {
         Map map = ServiceReferenceHolder.getInstance().getAPIMConfiguration(); // added for the working purposes
-        String environmentName;
-        if (map != null) {
+        System.out.print(map); // added for the working purposes
 
-            if (map.get("environmentName") != null) {
-                environmentName = (String) map.get("environmentName");
-            } else {
-                environmentName = "default";
-            }
-
-        } else {
-            environmentName = "default";
-        }
         ErrorHandler errorHandler = null;
         boolean isTokenValid = false;
         Headers headers = request.getHeaders();
         if (headers != null && headers.contains(RestApiConstants.COOKIE_HEADER) && isCookieExists(headers,
-                APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J + "_" + environmentName)) {
+                APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J + "_Env")) {
             // TODO for now hard coded the environment need to append the environmrnt
             String accessToken = null;
             String cookies = headers.get(RestApiConstants.COOKIE_HEADER);

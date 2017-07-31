@@ -54,6 +54,8 @@ export default class ConfigManager {
         return this.host + this.envs;
     }
 
+
+
     /**
      * get information of the available for the environments
      */
