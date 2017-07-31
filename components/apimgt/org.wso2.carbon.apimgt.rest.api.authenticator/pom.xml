@@ -155,10 +155,6 @@
             </plugin>
 
             <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.extensions.configuration.maven.plugin</artifactId>
                 <executions>
