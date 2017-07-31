@@ -57,6 +57,29 @@
             <version>${carbon.analytics.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.wso2.carbon.analytics</groupId>
+            <artifactId>org.wso2.carbon.databridge.core</artifactId>
+            <version>${carbon.analytics.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.analytics</groupId>
+            <artifactId>org.wso2.carbon.databridge.commons</artifactId>
+            <version>${carbon.analytics.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.analytics</groupId>
+            <artifactId>org.wso2.carbon.databridge.receiver.thrift</artifactId>
+            <version>${carbon.analytics.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.user.api</artifactId>
+            <version>4.4.11</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.json.wso2</groupId>
             <artifactId>json</artifactId>
             <version>${org.json.wso2.version}</version>

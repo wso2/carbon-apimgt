@@ -76,12 +76,12 @@ public class DASThriftTestServer {
         this.dataTables.clear();
     }
 
-    public void addStreamDefinition(StreamDefinition streamDefinition, int tenantId)
+    public void addStreamDefinition(StreamDefinition streamDefinition)
             throws StreamDefinitionStoreException {
         streamDefinitionStore.saveStreamDefinitionToStore(streamDefinition);
     }
 
-    public void addStreamDefinition(String streamDefinitionStr, int tenantId)
+    public void addStreamDefinition(String streamDefinitionStr)
             throws StreamDefinitionStoreException, MalformedStreamDefinitionException {
         StreamDefinition streamDefinition = EventDefinitionConverterUtils.convertFromJson(streamDefinitionStr);
         getStreamDefinitionStore().saveStreamDefinitionToStore(streamDefinition);
@@ -100,7 +100,7 @@ public class DASThriftTestServer {
         numberOfEventsReceived = new AtomicInteger(0);
         DataBridge databridge = new DataBridge(new AuthenticationHandler() {
             public boolean authenticate(String userName, String password) {
-                return true;// allays authenticate to true
+                return true; // allays authenticate to true
             }
 
             public String getTenantDomain(String userName) {
@@ -163,10 +163,11 @@ public class DASThriftTestServer {
     }
 
     public int getNumberOfEventsReceived() {
-        if (numberOfEventsReceived != null)
+        if (numberOfEventsReceived != null) {
             return numberOfEventsReceived.get();
-        else
+        } else {
             return 0;
+        }
     }
 
     public void resetReceivedEvents() {
@@ -207,9 +208,9 @@ public class DASThriftTestServer {
                 Thread.sleep(stopAfterTimeMilliSeconds);
             } catch (InterruptedException e) {
             }
-            if (thriftDataReceiver != null)
+            if (thriftDataReceiver != null) {
                 thriftDataReceiver.stop();
-
+            }
             eventReceived = getNumberOfEventsReceived();
 
             log.info("Number of events received in server shutdown :" + eventReceived);

@@ -7,7 +7,7 @@ import org.wso2.carbon.apimgt.ballerina.publisher;
 
 function publishRequestEvent (dto:EventHolderDTO event) {
     json payload = util:getRequestEventPayload(event);
-    publisher:EventConnector das = holder:getAnalyticsPublisher();
+    publisher:EventConnector das = holder:\();
     publisher:EventConnector.publish(das, payload);
 }
 
