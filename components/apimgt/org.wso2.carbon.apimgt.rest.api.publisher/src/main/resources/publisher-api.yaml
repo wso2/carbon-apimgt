@@ -3462,6 +3462,9 @@ definitions:
           type:
             type: string
             example: "Production"
+      securityScheme:
+        type: integer
+        default: 0
       operations:
        type: array
        items:

@@ -3,6 +3,7 @@ import ballerina.lang.messages;
 import ballerina.lang.jsons;
 import ballerina.lang.errors;
 import ballerina.lang.system;
+import ballerina.lang.strings;
 import ballerina.net.http;
 import org.wso2.carbon.apimgt.gateway.dto as dto;
 import org.wso2.carbon.apimgt.gateway.holders as holders;
@@ -250,12 +251,15 @@ function fromJsonToGatewayConfDTO (json conf) (dto:GatewayConfDTO) {
 }
 
 function fromJSONToAPIDTO (json api) (dto:APIDTO) {
+    system:println("In GATEWAY utils.bal : " + strings:valueOf(api));
     dto:APIDTO APIDTO = {};
-    APIDTO.id, err = (string)api.id;
-    APIDTO.name, err = (string)api.name;
-    APIDTO.version, err = (string)api.version;
-    APIDTO.context, err = (string)api.context;
-    APIDTO.lifeCycleStatus, err = (string)api.lifeCycleStatus;
+    APIDTO.id = (string)api.id;
+    APIDTO.name = (string)api.name;
+    APIDTO.version = (string)api.version;
+    APIDTO.context = (string)api.context;
+    APIDTO.lifeCycleStatus = (string)api.lifeCycleStatus;
+    APIDTO.securityScheme = jsons:getInt(api, "$.securityScheme");
+    system:println("Success...");
     return APIDTO;
 
 }

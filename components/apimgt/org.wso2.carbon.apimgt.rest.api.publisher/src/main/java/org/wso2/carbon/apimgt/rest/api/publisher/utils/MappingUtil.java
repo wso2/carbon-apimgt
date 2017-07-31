@@ -235,6 +235,20 @@ public class MappingUtil {
             Policy policy = new APIPolicy(apidto.getApiPolicy());
             apiBuilder.apiPolicy(policy);
         }
+
+        /**
+         * (values in binary)
+         * 00 - no security scheme
+         * 01 - apikey
+         * 10 - oauth
+         * 11 - apikey and oauth
+         */
+        if (apidto.getSecurityScheme() != null) {
+            apiBuilder.securityScheme(apidto.getSecurityScheme());
+        } else {
+            apiBuilder.securityScheme(3);
+        }
+
         return apiBuilder;
     }
 
