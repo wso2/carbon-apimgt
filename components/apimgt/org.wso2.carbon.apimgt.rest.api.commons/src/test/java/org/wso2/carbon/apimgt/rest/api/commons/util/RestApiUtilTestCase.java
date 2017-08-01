@@ -170,10 +170,24 @@ public class RestApiUtilTestCase {
     public void testGetGatewayConfigGetURL() throws Exception {
 
         String uuid = "7a94efa3-7626-4add-b5a5-0d93a8640c0e";
+        String pathExpected = RestApiConstants.GATEWAY_CONFIG_GET_URL + "/" + uuid + "/gateway-config";
+        String path = RestApiUtil.getGatewayConfigGetURL(uuid);
+        Assert.assertEquals(path, pathExpected);
+    }
+    @Test(description = "Test get gateway config URL")
+    public void testGetGetSwaggerGetURL() throws Exception {
+
+        String uuid = "7a94efa3-7626-4add-b5a5-0d93a8640c0e";
         String pathExpected = RestApiConstants.SWAGGER_GET_URL + "/" + uuid + "/swagger";
         String path = RestApiUtil.getSwaggerGetURL(uuid);
         Assert.assertEquals(path, pathExpected);
+    }
 
+    @Test
+    public void testIsUrl() throws Exception {
+
+        String url = "/api/am/publisher/v1/apis/7a94efa3-7626-4add-b5a5-0d93a8640c0e/swagger";
+        Assert.assertTrue(RestApiUtil.isURL(url));
     }
 
     @Test(description = "Test Find Policy given tier name")
@@ -270,6 +284,9 @@ public class RestApiUtilTestCase {
         String actualAdminContext = RestApiUtil.getContext("admin");
         String expectedAdminContext = apimConfigurations.getAdminContext();
         Assert.assertEquals(actualAdminContext, expectedAdminContext);
+
+        String actualContext = RestApiUtil.getContext("test");
+        Assert.assertEquals(actualContext, null);
     }
 
     @Test(description = "Test Map REST API Policy Level to Policy Level Enum")
