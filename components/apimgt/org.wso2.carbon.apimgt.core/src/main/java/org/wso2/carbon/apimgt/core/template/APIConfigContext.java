@@ -18,6 +18,7 @@
 */
 package org.wso2.carbon.apimgt.core.template;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.VelocityContext;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -60,12 +61,12 @@ public class APIConfigContext extends ConfigContext {
     @Override
     public void validate() throws APITemplateException {
         //see if api name ,version, context sets
-        if (name.isEmpty() || context.isEmpty() || version.isEmpty()) {
+        if (StringUtils.isEmpty(name) || StringUtils.isEmpty(context) || StringUtils.isEmpty(version)) {
             throw new APITemplateException("API property validation failed", ExceptionCodes.TEMPLATE_EXCEPTION);
         }
 
         //adding string prefix if api name starting with a number
-        if (name.matches("^(\\d)+")) {
+        if (Character.isDigit(name.charAt(0))) {
             serviceNamePrefix = "prefix_";
         }
     }
