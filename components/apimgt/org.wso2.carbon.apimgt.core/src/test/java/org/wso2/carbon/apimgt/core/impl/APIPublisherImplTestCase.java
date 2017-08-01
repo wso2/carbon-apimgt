@@ -571,7 +571,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiSubscriptionDAO.getSubscriptionCountByAPI(uuid)).thenReturn(0L);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiSubscriptionDAO,
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(USER, identityProvider, apiDAO, apiSubscriptionDAO,
                 apiLifecycleManager, gateway);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
 
@@ -3085,7 +3085,7 @@ public class APIPublisherImplTestCase {
     }
 
     private APIPublisherImpl getApiPublisherImpl(APISubscriptionDAO apiSubscriptionDAO, APIGateway gatewayPublisher) {
-        return new APIPublisherImpl(USER, null, null, null, apiSubscriptionDAO, null, null, null, null, null,
+        return new APIPublisherImpl(USER, null, null, null, null, apiSubscriptionDAO, null, null, null, null, null,
                 new GatewaySourceGeneratorImpl(), gatewayPublisher);
     }
 
@@ -3163,12 +3163,5 @@ public class APIPublisherImplTestCase {
                                                  GatewaySourceGenerator gatewaySourceGenerator, APIGateway gateway) {
         return new APIPublisherImpl(user, identityProvider, null, apiDAO, null, null, null, apiLifecycleManager,
                 null, null, null, gatewaySourceGenerator, gateway);
-    }
-
-    private APIPublisherImpl getApiPublisherImpl(String user, IdentityProvider identityProvider, ApiDAO apiDAO,
-            APILifecycleManager apiLifecycleManager, GatewaySourceGenerator gatewaySourceGenerator, APIGateway gateway,
-            PolicyDAO policyDAO) {
-        return new APIPublisherImpl(user, identityProvider, apiDAO, null, null, policyDAO, apiLifecycleManager, null,
-                null, null, gatewaySourceGenerator, gateway);
     }
 }
