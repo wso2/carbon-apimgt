@@ -24,15 +24,18 @@ package org.wso2.carbon.apimgt.rest.api.admin.throttling.mappings;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.models.policy.CustomPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomRuleDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.mappings.CustomPolicyMappingUtil;
+
+import java.util.UUID;
 
 public class CustomPolicyMappingUtilTest {
 
     @Test(description = "Convert custom Policy to DTO object")
     public void fromCustomPolicyToDTOTest() throws Exception    {
         CustomPolicy policy = new CustomPolicy("SampleCustomPolicy");
-
+        policy.setUuid(UUID.randomUUID().toString());
         CustomRuleDTO dto = CustomPolicyMappingUtil.fromCustomPolicyToDTO(policy);
         Assert.assertNotNull(dto);
     }
@@ -40,11 +43,8 @@ public class CustomPolicyMappingUtilTest {
     @Test(description = "Convert DTO to Model")
     public void fromCustomPolicyDTOToModelTest() throws Exception   {
         CustomRuleDTO dto = new CustomRuleDTO();
-
         CustomPolicyMappingUtil.fromCustomPolicyDTOToModel(dto);
-
         Assert.assertNotNull(dto);
-
     }
 
 

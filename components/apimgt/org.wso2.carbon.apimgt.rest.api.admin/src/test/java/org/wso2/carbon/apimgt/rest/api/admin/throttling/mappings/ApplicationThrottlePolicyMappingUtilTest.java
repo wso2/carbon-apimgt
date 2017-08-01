@@ -35,19 +35,14 @@ public class ApplicationThrottlePolicyMappingUtilTest {
     @Test
     public void fromApplicationThrottlePolicyToDTOTest() throws Exception   {
         Policy policy = new ApplicationPolicy(UUID.randomUUID().toString(), "SampleAppPolicy");
-
         ApplicationThrottlePolicyDTO dto = ApplicationThrottlePolicyMappingUtil.fromApplicationThrottlePolicyToDTO(policy);
-
         Assert.assertNotNull(dto);
     }
 
     @Test
     public void fromApplicationThrottlePolicyDTOToModelTest() throws    Exception   {
         ApplicationThrottlePolicyDTO dto = new ApplicationThrottlePolicyDTO();
-
-
         ApplicationPolicy policy = ApplicationThrottlePolicyMappingUtil.fromApplicationThrottlePolicyDTOToModel(dto);
-
         Assert.assertNotNull(policy);
     }
 

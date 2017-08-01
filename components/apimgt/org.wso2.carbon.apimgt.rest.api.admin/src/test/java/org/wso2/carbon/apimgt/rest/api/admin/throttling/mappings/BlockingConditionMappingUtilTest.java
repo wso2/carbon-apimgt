@@ -35,11 +35,9 @@ public class BlockingConditionMappingUtilTest {
 
     @Test(description = "Convert Blocking Condition to DTO")
     public void fromBlockingConditionToDTOTest()   throws  Exception   {
-
         BlockConditions conditions = new BlockConditions();
         conditions.setUuid(UUID.randomUUID().toString());
         BlockingConditionDTO dto = BlockingConditionMappingUtil.fromBlockingConditionToDTO(conditions);
-
         Assert.assertNotNull(dto);
     }
 
@@ -50,7 +48,6 @@ public class BlockingConditionMappingUtilTest {
         dto.setConditionType(BLOCKING_CONDITIONS_IP);
         dto.setConditionValue("12.32.45.3");
         dto.setStatus(true);
-
         BlockConditions conditions = BlockingConditionMappingUtil.fromBlockingConditionDTOToBlockCondition(dto);
         Assert.assertNotNull(conditions);
     }
