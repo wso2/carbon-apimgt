@@ -171,7 +171,9 @@ public enum ExceptionCodes implements ErrorHandler {
     ENDPOINT_CONFIG_NOT_FOUND(90070, "Endpoint Config Not found", 404, "Error while retrieving Endpoint " +
             "Configuration"),
     UNSUPPORTED_THROTTLE_CONDITION_TYPE(900975, "Throttle Condition Error", 400, "Throttle Condition type is not "
-            + "supported");
+            + "supported"),
+    INVALID_DOCUMENT_CONTENT_DATA(900976, "Invalid document content data provided", 400, "Mismatch between provided " +
+            "document content data and Document Source Type given");
 
     private final long errorCode;
     private final String errorMessage;

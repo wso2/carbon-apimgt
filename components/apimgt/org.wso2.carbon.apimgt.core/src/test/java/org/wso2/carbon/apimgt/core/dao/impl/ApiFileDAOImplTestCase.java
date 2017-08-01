@@ -38,7 +38,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 
 
-public class ApiFileDAOImplIT {
+public class ApiFileDAOImplTestCase {
     private static final String EDITOR_SAVE_PATH = "editorSavePath";
     private static final String EDITOR_MODE = "editorMode";
     private static final String ADMIN = "admin";
