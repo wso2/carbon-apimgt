@@ -20,7 +20,9 @@ package org.wso2.carbon.apimgt.rest.api.admin.throttling.mappings;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.models.policy.Condition;
 import org.wso2.carbon.apimgt.core.models.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.core.models.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.*;
 import org.wso2.carbon.apimgt.rest.api.admin.exceptions.UnsupportedThrottleConditionTypeException;
 import org.wso2.carbon.apimgt.rest.api.admin.exceptions.UnsupportedThrottleLimitTypeException;
@@ -38,7 +40,8 @@ public class CommonThrottleMappingUtilTestCase {
         throttleLimitDTO.setBandwidthLimit(bandwidthLimitDTO);
         throttleLimitDTO.setTimeUnit("min");
         throttleLimitDTO.setUnitTime(1);
-        CommonThrottleMappingUtil.fromDTOToQuotaPolicy(throttleLimitDTO);
+        QuotaPolicy policy = CommonThrottleMappingUtil.fromDTOToQuotaPolicy(throttleLimitDTO);
+        Assert.assertNotNull(policy);
     }
 
     @Test(description = "Convert Request Count Throttle Limit DTO to Quota Policy")
@@ -50,7 +53,8 @@ public class CommonThrottleMappingUtilTestCase {
         throttleLimitDTO.setRequestCountLimit(requestCountLimitDTO);
         throttleLimitDTO.setTimeUnit("sec");
         throttleLimitDTO.setUnitTime(1);
-        CommonThrottleMappingUtil.fromDTOToQuotaPolicy(throttleLimitDTO);
+        QuotaPolicy policy = CommonThrottleMappingUtil.fromDTOToQuotaPolicy(throttleLimitDTO);
+        Assert.assertNotNull(policy);
     }
 
     @Test(description = "Convert Invalid Throttle Limit DTO to Quota Policy")
@@ -75,7 +79,8 @@ public class CommonThrottleMappingUtilTestCase {
         ipConditionDTO.setIpConditionType(PolicyConstants.IP_SPECIFIC_TYPE);
         ipConditionDTO.setSpecificIP("10.100.0.168");
         throttleConditionDTO.setIpCondition(ipConditionDTO);
-        CommonThrottleMappingUtil.fromDTOToCondition(throttleConditionDTO);
+        Condition condition = CommonThrottleMappingUtil.fromDTOToCondition(throttleConditionDTO);
+        Assert.assertNotNull(condition);
     }
 
     @Test(description = "Convert IP range IPCondition DTO to IPCondition Model object")
@@ -87,7 +92,8 @@ public class CommonThrottleMappingUtilTestCase {
         ipConditionDTO.setStartingIP("10.100.0.158");
         ipConditionDTO.setEndingIP("10.100.0.178");
         throttleConditionDTO.setIpCondition(ipConditionDTO);
-        CommonThrottleMappingUtil.fromDTOToCondition(throttleConditionDTO);
+        Condition condition = CommonThrottleMappingUtil.fromDTOToCondition(throttleConditionDTO);
+        Assert.assertNotNull(condition);
     }
 
     @Test(description = "Convert IP range IPCondition DTO to IPCondition Model object")
@@ -113,7 +119,8 @@ public class CommonThrottleMappingUtilTestCase {
         headerConditionDTO.setHeaderName("testHeader");
         headerConditionDTO.setHeaderValue("testHeaderValue");
         throttleConditionDTO.setHeaderCondition(headerConditionDTO);
-        CommonThrottleMappingUtil.fromDTOToCondition(throttleConditionDTO);
+        Condition condition = CommonThrottleMappingUtil.fromDTOToCondition(throttleConditionDTO);
+        Assert.assertNotNull(condition);
     }
 
     @Test(description = "Convert Query param Condition DTO to QueryParamCondition Model object")
@@ -124,7 +131,9 @@ public class CommonThrottleMappingUtilTestCase {
         queryParameterConditionDTO.setParameterName("testParam");
         queryParameterConditionDTO.setParameterValue("testParamValue");
         throttleConditionDTO.setQueryParameterCondition(queryParameterConditionDTO);
-        CommonThrottleMappingUtil.fromDTOToCondition(throttleConditionDTO);
+        Condition condition = CommonThrottleMappingUtil.fromDTOToCondition(throttleConditionDTO);
+        Assert.assertNotNull(condition);
+
     }
 
     @Test(description = "Convert JWT Condition DTO to JWTCondition Model object")
@@ -135,7 +144,8 @@ public class CommonThrottleMappingUtilTestCase {
         jwtClaimsConditionDTO.setAttribute("testAttribute");
         jwtClaimsConditionDTO.setClaimUrl("http://wso2.org/claims");
         throttleConditionDTO.setJwtClaimsCondition(jwtClaimsConditionDTO);
-        CommonThrottleMappingUtil.fromDTOToCondition(throttleConditionDTO);
+        Condition condition = CommonThrottleMappingUtil.fromDTOToCondition(throttleConditionDTO);
+        Assert.assertNotNull(condition);
     }
 
     @Test(description = "Convert Invalid Condition DTO to Model object")
