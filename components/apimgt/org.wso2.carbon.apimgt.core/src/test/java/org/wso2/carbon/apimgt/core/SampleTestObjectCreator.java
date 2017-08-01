@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.Function;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
@@ -65,6 +66,8 @@ import org.wso2.carbon.lcm.core.impl.LifecycleState;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -136,6 +139,7 @@ public class SampleTestObjectCreator {
     private static final String PATH_THUMBNAIL_IMG_2 = "api/thumbnail2.jpg";
     private static final String PATH_INLINE_DOC_1 = "document/inline1.txt";
     private static final String PATH_INLINE_DOC_2 = "document/inline2.txt";
+    private static final String PATH_FILE_DOC_1 = "document/pdf-sample.pdf";
     private static final String SAMPLE_IP_1 = "12.32.45.3";
     private static final String SAMPLE_IP_2 = "24.34.1.45";
     private static final String SAMPLE_CUSTOM_RULE = "Sample Custom Rule";
@@ -504,12 +508,55 @@ public class SampleTestObjectCreator {
         return builder.build();
     }
 
+    /**
+     * Creates a file type documentation info sample
+     * 
+     * @return a file type documentation info sample
+     */
+    public static DocumentInfo createFileDocumentationInfo() {
+        //created by admin
+        DocumentInfo.Builder builder = new DocumentInfo.Builder();
+        builder.id(UUID.randomUUID().toString());
+        builder.name(SAMPLE_DOC_NAME);
+        builder.type(DocumentInfo.DocType.HOWTO);
+        builder.summary("Summary of PDF Type Documentation");
+        builder.sourceType(DocumentInfo.SourceType.FILE);
+        builder.sourceURL(EMPTY_STRING);
+        builder.otherType(EMPTY_STRING);
+        builder.visibility(DocumentInfo.Visibility.API_LEVEL);
+        builder.createdTime(LocalDateTime.now());
+        builder.lastUpdatedTime(LocalDateTime.now());
+        return builder.build();
+    }
+
+    /**
+     * Retrieves a sample file inline content string
+     *
+     * @return file inline content string
+     * @throws IOException If unable to read doc file resource
+     */
     public static String createDefaultInlineDocumentationContent() throws IOException {
         return IOUtils.toString(Thread.currentThread().getContextClassLoader().getResourceAsStream(PATH_INLINE_DOC_1));
     }
 
+    /**
+     * Retrieves a sample file inline content string
+     *
+     * @return file inline content string
+     * @throws IOException If unable to read doc file resource
+     */
     public static String createAlternativeInlineDocumentationContent() throws IOException {
         return IOUtils.toString(Thread.currentThread().getContextClassLoader().getResourceAsStream(PATH_INLINE_DOC_2));
+    }
+
+    /**
+     * Retrieves file content byte array
+     *
+     * @return file content byte array
+     * @throws IOException If unable to read doc file resource
+     */
+    public static byte[] createDefaultFileDocumentationContent() throws IOException {
+        return IOUtils.toByteArray(Thread.currentThread().getContextClassLoader().getResourceAsStream(PATH_FILE_DOC_1));
     }
 
     public static Application createDefaultApplication() {
@@ -563,6 +610,36 @@ public class SampleTestObjectCreator {
         application.setUpdatedUser(ADMIN);
         application.setUpdatedTime(LocalDateTime.now());
         return application;
+    }
+
+    /**
+     * Creates a sample function
+     *
+     * @return a sample function
+     * @throws URISyntaxException if error occurred while initializing the URI
+     */
+    public static Function createDefaultFunction() throws URISyntaxException {
+        return new Function("sampleFunction1", new URI("http://localhost/test1"));
+    }
+
+    /**
+     * Creates an alternative function
+     *
+     * @return an alternative function
+     * @throws URISyntaxException if error occurred while initializing the URI
+     */
+    public static Function createAlternativeFunction() throws URISyntaxException {
+        return new Function("alternativeFunction1", new URI("http://localhost/test-alternative1"));
+    }
+
+    /**
+     * Creates an alternative function
+     *
+     * @return an alternative function
+     * @throws URISyntaxException if error occurred while initializing the URI
+     */
+    public static Function createAlternativeFunction2() throws URISyntaxException {
+        return new Function("alternativeFunction2", new URI("http://localhost/test-alternative2"));
     }
 
     /**
@@ -884,6 +961,18 @@ public class SampleTestObjectCreator {
         return comment;
     }
 
+    public static Comment createAlternativeComment(String apiId) {
+        Comment comment = new Comment();
+        comment.setUuid(UUID.randomUUID().toString());
+        comment.setApiId(apiId);
+        comment.setCommentText("this is a sample comment - alternative");
+        comment.setCommentedUser("admin");
+        comment.setUpdatedUser("admin");
+        comment.setCreatedTime(LocalDateTime.now());
+        comment.setUpdatedTime(LocalDateTime.now());
+        return comment;
+    }
+    
     public static Rating createDefaultRating(String apiId) {
         Rating rating = new Rating();
         rating.setUuid(UUID.randomUUID().toString());

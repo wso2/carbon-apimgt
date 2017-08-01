@@ -44,13 +44,32 @@ public class APIConfigContextTestCase {
     }
 
     @Test(expectedExceptions = APITemplateException.class)
-    public void testInvalidAPIConfigContext() throws APITemplateException {
-        API emptyNamedAPI = new API.APIBuilder("provider", "", "1.0.0").context("testcontext")
+    public void testWithEmptyParameters() throws APITemplateException {
+        API emptyNamedAPI = new API.APIBuilder("", "", "").context("testcontext")
                 .id(UUID.randomUUID().toString()).build(); // empty name
         APIConfigContext apiConfigContext = new APIConfigContext(emptyNamedAPI, "org.test");
         apiConfigContext.validate();
     }
+    
+    @Test(expectedExceptions = APITemplateException.class)
+    public void testWithNullParameters() throws APITemplateException {
+        API emptyNamedAPI = new API.APIBuilder(null, null, "1.0.0").context("testcontext")
+                .id(UUID.randomUUID().toString()).build(); // name and provider null
+        APIConfigContext apiConfigContext = new APIConfigContext(emptyNamedAPI, "org.test");
+        apiConfigContext.validate();
+    }
 
+    
+    @Test
+    public void testAPINameWithNumber() throws APITemplateException {
+        String apiId = UUID.randomUUID().toString();
+        API nameWithNumberAPI = new API.APIBuilder("provider", "1111testapi", "1.0.0").id(apiId).context("testcontext")
+                .build();
+        APIConfigContext apiConfigContext = new APIConfigContext(nameWithNumberAPI, "org.test");
+        apiConfigContext.validate();
+        String actualServiceName = (String) apiConfigContext.getContext().get("serviceName");
+        Assert.assertEquals(actualServiceName, "prefix_1111testapi_" + apiId.replaceAll("-", "_"));
+    }
 
     @Test
     public void testCompositeAPIConfigContext() {

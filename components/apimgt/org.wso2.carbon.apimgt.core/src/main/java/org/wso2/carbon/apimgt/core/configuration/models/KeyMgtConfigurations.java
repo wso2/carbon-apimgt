@@ -30,13 +30,13 @@ public class KeyMgtConfigurations {
     @Element(description = "Key Manager Implementation class")
     private String keyManagerImplClass = "org.wso2.carbon.apimgt.core.impl.DefaultKeyManagerImpl";
     @Element(description = "DCR Endpoint URL")
-    private String dcrEndpoint = "http://localhost:9763/identity/connect/register";
+    private String dcrEndpoint = "https://localhost:9443/identity/connect/register";
     @Element(description = "Token Endpoint URL")
     private String tokenEndpoint = "https://localhost:9443/oauth2/token";
     @Element(description = "Revoke Endpoint URL")
     private String revokeEndpoint = "https://localhost:9443/oauth2/revoke";
     @Element(description = "Introspect Endpoint URL")
-    private String introspectEndpoint = "http://localhost:9763/oauth2/introspect";
+    private String introspectEndpoint = "https://localhost:9443/oauth2/introspect";
     @Element(description = "Key manager Credentials")
     private CredentialConfigurations keyManagerCredentials = new CredentialConfigurations();
     @Element(description = "Alias of Key Manager Certificate in Client Trust Store")

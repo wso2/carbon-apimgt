@@ -1,7 +1,5 @@
-package org.wso2.carbon.apimgt.rest.api.commons.interceptor;
 /*
- *
- *   Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *   Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *   WSO2 Inc. licenses this file to you under the Apache License,
  *   Version 2.0 (the "License"); you may not use this file except
@@ -18,11 +16,14 @@ package org.wso2.carbon.apimgt.rest.api.commons.interceptor;
  *  under the License.
  *
  */
+package org.wso2.carbon.apimgt.rest.api.commons.interceptors;
 
+
+import org.junit.Test;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.testng.Assert;
-import org.testng.annotations.Test;
+
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
@@ -37,26 +38,18 @@ import org.wso2.msf4j.ServiceMethodInfo;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.Mockito.when;
-
-
-/*
-* This is the test class for APIMOAuth2SecurityInterceptor
-*
-* */
 public class RESTAPISecurityInterceptorTestCase {
 
-    private static final String USER = "admin";
-
-    @Test(description = "Test get autherization")
-    void testGetApisSuccess() throws APIManagementException {
+    @Test
+    public void testGetApisSuccess() throws APIManagementException {
 
         CarbonMessage carbonMessage = Mockito.mock(CarbonMessage.class);
         Request requestObj = Mockito.mock(Request.class);
+
         try {
             PowerMockito.whenNew(Request.class).withArguments(carbonMessage).thenReturn(requestObj);
         } catch (Exception e) {
-            throw new APIMgtSecurityException("Error while moking Request Object ", e);
+            throw new APIMgtSecurityException("Error while mocking Request Object ", e);
         }
         Header authHeader = Mockito.mock(Header.class);
         authHeader.setName(RestApiConstants.AUTHORIZATION_HTTP_HEADER);
@@ -72,7 +65,7 @@ public class RESTAPISecurityInterceptorTestCase {
 
         Headers headers = Mockito.mock(Headers.class);
         headers.set(headersList);
-        when(requestObj.getHeaders()).thenReturn(headers);
+        Mockito.when(requestObj.getHeaders()).thenReturn(headers);
         requestObj.getHeaders().set(headersList);
 
         Response responseObj = Mockito.mock(Response.class);
@@ -86,4 +79,6 @@ public class RESTAPISecurityInterceptorTestCase {
             Assert.assertEquals(isAuthorized, false);
         }
     }
+
+
 }

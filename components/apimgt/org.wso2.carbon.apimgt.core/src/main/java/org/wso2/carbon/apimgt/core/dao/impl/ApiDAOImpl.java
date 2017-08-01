@@ -1620,7 +1620,7 @@ public class ApiDAOImpl implements ApiDAO {
     public InputStream getDocumentFileContent(String resourceID) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
             return ApiResourceDAO.getBinaryResource(connection, resourceID);
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             throw new APIMgtDAOException(e);
         }
     }
