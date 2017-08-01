@@ -21,6 +21,7 @@
 package org.wso2.carbon.apimgt.core.models;
 
 import java.net.URI;
+import java.util.Objects;
 
 /**
  * Object mapper for Function.
@@ -65,5 +66,18 @@ public class Function {
         return endpointURI;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Function) {
+            Function functionObj = (Function) obj;
+            return name != null && name.equals(functionObj.getName()) && endpointURI != null && endpointURI
+                    .equals(functionObj.getEndpointURI());
+        }
+        return false;
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, endpointURI);
+    }
 }

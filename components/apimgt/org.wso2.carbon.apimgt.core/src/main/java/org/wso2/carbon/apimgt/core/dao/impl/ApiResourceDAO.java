@@ -27,7 +27,6 @@ import org.wso2.carbon.apimgt.core.models.ResourceCategory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -172,23 +171,22 @@ class ApiResourceDAO {
         return null;
     }
 
-    static InputStream getBinaryResource(Connection connection, String resourceID) throws SQLException {
+    static InputStream getBinaryResource(Connection connection, String resourceID) throws SQLException, IOException {
         final String query = "SELECT RESOURCE_BINARY_VALUE FROM AM_API_RESOURCES WHERE UUID = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, resourceID);
             statement.execute();
 
-            try (ResultSet rs =  statement.getResultSet()) {
+            try (ResultSet rs = statement.getResultSet()) {
                 if (rs.next()) {
-                    Blob blob = rs.getBlob("RESOURCE_BINARY_VALUE");
-                    if (blob != null) {
-                        return blob.getBinaryStream();
+                    InputStream inputStream = rs.getBinaryStream("RESOURCE_BINARY_VALUE");
+                    if (inputStream != null) {
+                        return new ByteArrayInputStream(IOUtils.toByteArray(inputStream));
                     }
                 }
             }
         }
-
         return null;
     }
 
