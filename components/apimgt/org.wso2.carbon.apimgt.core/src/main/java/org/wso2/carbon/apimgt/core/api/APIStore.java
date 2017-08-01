@@ -190,14 +190,14 @@ public interface APIStore extends APIManager {
     /**
      * Generates oAuth keys for an application.
      *
-     * @param applicationId   Id of the Application.
-     * @param tokenType       Token type (PRODUCTION | SANDBOX)
-     * @param callbackUrl     Callback URL
-     * @param grantTypes      List of grant types to be supported by the application
+     * @param applicationId Id of the Application.
+     * @param keyType       Key type (PRODUCTION | SANDBOX)
+     * @param callbackUrl   Callback URL
+     * @param grantTypes    List of grant types to be supported by the application
      * @return {@link OAuthApplicationInfo}  Generated OAuth client information
      * @throws APIManagementException If oauth application creation was failed
      */
-    OAuthApplicationInfo generateApplicationKeys(String applicationId, String tokenType,
+    OAuthApplicationInfo generateApplicationKeys(String applicationId, String keyType,
                                                  String callbackUrl, List<String> grantTypes)
             throws APIManagementException;
 
@@ -205,14 +205,46 @@ public interface APIStore extends APIManager {
      * Provision out-of-band OAuth clients (Semi-manual client registration)
      *
      * @param applicationId Application ID
-     * @param tokenType     Token type (PRODUCTION | SANDBOX)
+     * @param keyType       Key type (PRODUCTION | SANDBOX)
      * @param clientId      Client ID of the OAuth application
      * @param clientSecret  Client secret of the OAuth application
      * @return {@link OAuthApplicationInfo}  Existing OAuth client information
      * @throws APIManagementException If oauth application mapping was failed
      */
-    OAuthApplicationInfo provideApplicationKeys(String applicationId, String tokenType, String clientId,
-                                                String clientSecret) throws APIManagementException;
+    OAuthApplicationInfo mapApplicationKeys(String applicationId, String keyType, String clientId,
+                                            String clientSecret) throws APIManagementException;
+
+    /**
+     * Get application key information
+     *
+     * @param applicationId Application Id
+     * @return {@link OAuthApplicationInfo}  Application key information list
+     * @throws APIManagementException if error occurred while retrieving application keys
+     */
+    List<OAuthApplicationInfo> getApplicationKeys(String applicationId) throws APIManagementException;
+
+    /**
+     * Get application key information of a given key type
+     *
+     * @param applicationId Application Id
+     * @param keyType       Key Type (Production | Sandbox)
+     * @return {@link OAuthApplicationInfo}  Application key information
+     * @throws APIManagementException if error occurred while retrieving application keys
+     */
+    OAuthApplicationInfo getApplicationKeys(String applicationId, String keyType) throws APIManagementException;
+
+    /**
+     * Update grantTypes and callback URL of an application
+     *
+     * @param applicationId Application Id
+     * @param keyType       Key Type (Production | Sandbox)
+     * @param grantTypes    New Grant Type list
+     * @param callbackURL   New callback URL
+     * @return {@link OAuthApplicationInfo}  Application key information list
+     * @throws APIManagementException if error occurred while retrieving application keys
+     */
+    OAuthApplicationInfo updateGrantTypesAndCallbackURL(String applicationId, String keyType, List<String> grantTypes,
+                                                        String callbackURL) throws APIManagementException;
 
     /**
      * Generate an application access token (and revoke current token, if any)
