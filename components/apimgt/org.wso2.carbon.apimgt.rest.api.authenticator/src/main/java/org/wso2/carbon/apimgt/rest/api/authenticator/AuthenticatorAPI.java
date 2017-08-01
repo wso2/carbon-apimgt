@@ -46,6 +46,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
@@ -75,15 +76,15 @@ public class AuthenticatorAPI implements Microservice {
     @Path ("/token/{appName}")
     @Produces (MediaType.APPLICATION_JSON)
     @Consumes ({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.MULTIPART_FORM_DATA })
-    public Response authenticate(@Context Request request, @FormDataParam ("username") String userName,
-            @FormDataParam ("password") String password, @FormDataParam ("grant_type") String grantType,
-            @FormDataParam ("validity_period") String validityPeriod,
+    public Response authenticate(@Context Request request, @PathParam("appName") String appName,
+            @FormDataParam ("username") String userName, @FormDataParam ("password") String password,
+            @FormDataParam ("grant_type") String grantType, @FormDataParam ("validity_period") String validityPeriod,
             @FormDataParam ("remember_me") boolean isRememberMe, @FormDataParam ("scopes") String scopesList) {
         try {
             KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();
             AuthenticatorService authenticatorService = new AuthenticatorService(keyManager);
             AuthResponseBean authResponseBean = new AuthResponseBean();
-            String appContext = AuthUtil.getAppContext(request);
+            String appContext = "/" + appName;
             String restAPIContext;
             if (appContext.contains(AuthenticatorConstants.EDITOR_APPLICATION) ||
                     request.getUri().contains(AuthenticatorConstants.PUBLISHER_APPLICATION)) {
@@ -167,9 +168,9 @@ public class AuthenticatorAPI implements Microservice {
 
     @POST
     @Produces (MediaType.APPLICATION_JSON)
-    @Path ("/logout")
-    public Response logout(@Context Request request) {
-        String appContext = AuthUtil.getAppContext(request);
+    @Path ("/logout/{appName}")
+    public Response logout(@Context Request request, @PathParam("appName") String appName) {
+        String appContext = "/" + appName;
         String restAPIContext;
         if (appContext.contains(AuthenticatorConstants.EDITOR_APPLICATION)) {
             restAPIContext = AuthenticatorConstants.REST_CONTEXT + "/" + AuthenticatorConstants.PUBLISHER_APPLICATION;
@@ -219,9 +220,7 @@ public class AuthenticatorAPI implements Microservice {
     @GET
     @Path("/login/{appName}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response redirect(@Context Request request) {
-        String appContext = AuthUtil.getAppContext(request);
-        String appName = appContext.substring(1);
+    public Response redirect(@Context Request request, @PathParam("appName") String appName) {
         try {
             KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();
             AuthenticatorService authenticatorService = new AuthenticatorService(keyManager);
@@ -248,11 +247,10 @@ public class AuthenticatorAPI implements Microservice {
     @GET
     @Path("/callback/{appName}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response callback(@Context Request request) {
-        String appContext = AuthUtil.getAppContext(request).split("\\?")[0];
-        String appName = appContext.substring(1);
+    public Response callback(@Context Request request, @PathParam("appName") String appName) {
+        String appContext = "/" + appName;
         String restAPIContext;
-        if (appContext.contains(AuthenticatorConstants.EDITOR_APPLICATION) ||
+        if (AuthenticatorConstants.EDITOR_APPLICATION.equals(appName) ||
                 request.getUri().contains(AuthenticatorConstants.PUBLISHER_APPLICATION)) {
             restAPIContext = AuthenticatorConstants.REST_CONTEXT + "/" + AuthenticatorConstants.PUBLISHER_APPLICATION;
         } else {
