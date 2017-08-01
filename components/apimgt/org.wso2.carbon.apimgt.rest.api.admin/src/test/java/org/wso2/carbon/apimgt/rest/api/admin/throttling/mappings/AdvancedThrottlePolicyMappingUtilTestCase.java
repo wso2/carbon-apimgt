@@ -37,20 +37,15 @@ public class AdvancedThrottlePolicyMappingUtilTestCase {
         APIPolicy apiPolicy = new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY);
         apiPolicy.setUuid(UUID.randomUUID().toString());
         apiPolicy.setDisplayName("SampleAPIPolicy");
-
-
         AdvancedThrottlePolicyDTO dto = AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyToDTO(apiPolicy);
-
         Assert.assertNotNull(dto);
     }
 
     @Test(description = "Convert Policy DTO to Policy object")
     public void fromAdvancedPolicyDTOToPolicyTest() throws Exception    {
-
         AdvancedThrottlePolicyDTO dto = new AdvancedThrottlePolicyDTO();
-
         APIPolicy policy = AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyDTOToPolicy(dto);
-        Assert.assertNotNull(dto);
+        Assert.assertNotNull(policy);
     }
 
 

@@ -25,7 +25,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.ThrottleLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.mappings.SubscriptionThrottlePolicyMappingUtil;
 
 import java.util.UUID;
@@ -35,9 +34,7 @@ public class SubscriptionThrottlePolicyMappingUtinTest {
     @Test(description = "Convert Subscription Throttle Policy to DTO")
     public void fromSubscriptionThrottlePolicyToDTOTest() throws Exception  {
         SubscriptionPolicy policy = new SubscriptionPolicy(UUID.randomUUID().toString(),"SampleSubscriptionPolicy");
-
         SubscriptionThrottlePolicyDTO dto = SubscriptionThrottlePolicyMappingUtil.fromSubscriptionThrottlePolicyToDTO(policy);
-
         Assert.assertNotNull(dto);
     }
 
@@ -48,7 +45,6 @@ public class SubscriptionThrottlePolicyMappingUtinTest {
         dto.setRateLimitCount(1);
         dto.setStopOnQuotaReach(true);
         SubscriptionPolicy policy = SubscriptionThrottlePolicyMappingUtil.fromSubscriptionThrottlePolicyDTOToModel(dto);
-
         Assert.assertNotNull(policy);
     }
 
