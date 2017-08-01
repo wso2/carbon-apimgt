@@ -129,7 +129,6 @@ class Resource extends React.Component{
         };
         this.propsSubmitHandler = this.propsSubmitHandler.bind(this);
         this.saveFieldCallback = this.saveFieldCallback.bind(this);
-        console.info(this.props.method);
     }
     propsSubmitHandler(values){
         const defaultParams = {

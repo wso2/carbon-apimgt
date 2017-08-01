@@ -133,14 +133,11 @@ class Resources extends React.Component{
         this.setState({paths:tmpPaths});
     }
     updateResources(){
-        debugger;
         let tmpSwagger = this.state.swagger;
         tmpSwagger.paths = this.state.paths;
         this.setState({api:tmpSwagger});
-        console.info(JSON.stringify(tmpSwagger));
         let promised_api = this.api.updateSwagger(this.api_uuid, this.state.swagger);
         promised_api.then((response) => {
-            console.info(response.obj);
         }).catch(error => {
             if (process.env.NODE_ENV !== "production")
                 console.log(error);
@@ -184,7 +181,6 @@ class Resources extends React.Component{
                             let that = this;
                             return (
                                 Object.keys(path).map( (innerKey) => {
-                                    console.info("Printing innerkey ...", innerKey);
                                     return <Resource path={key} method={innerKey} methodData={path[innerKey]} updatePath={that.updatePath} />
                                 })
                             );
