@@ -120,7 +120,7 @@ public class RestApiUtilTestCase {
 
         final String expectedErrorDTOString1 = "class ErrorDTO {\n" +
                 "  code: 900300\n" +
-                "  message: null\n" +
+                "  message: Error Message\n" +
                 "  description: Test Error Description\n" +
                 "  moreInfo: {param3=test3, param1=test1, param2=test2}\n" +
                 "  error: []\n" +
@@ -134,11 +134,11 @@ public class RestApiUtilTestCase {
                 "  error: []\n" +
                 "}\n";
 
-        ErrorDTO errorDTO1 = RestApiUtil.getErrorDTO(errorHandler, paramList);
+        ErrorDTO errorDTO1 = RestApiUtil.getErrorDTO(errorHandler, (HashMap<String, String>) paramList, ex);
         Assert.assertEquals(errorDTO1.toString(), expectedErrorDTOString1);
 
         when(ex.getMessage()).thenReturn(null);
-        ErrorDTO errorDTO2 = RestApiUtil.getErrorDTO(errorHandler, paramList);
+        ErrorDTO errorDTO2 = RestApiUtil.getErrorDTO(errorHandler, (HashMap<String, String>) paramList, ex);
         Assert.assertEquals(errorDTO2.toString(), expectedErrorDTOString2);
     }
 
