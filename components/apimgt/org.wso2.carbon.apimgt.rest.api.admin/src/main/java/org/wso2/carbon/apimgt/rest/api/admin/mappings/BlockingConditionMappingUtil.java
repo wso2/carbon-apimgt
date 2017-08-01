@@ -71,8 +71,8 @@ public class BlockingConditionMappingUtil {
         dto.setConditionId(blockCondition.getUuid());
         dto.setConditionType(blockCondition.getConditionType());
         dto.setStatus(blockCondition.isEnabled());
-        if (blockCondition.getConditionType()
-                .equals(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITION_IP_RANGE)) {
+        if (APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITION_IP_RANGE
+                .equals(blockCondition.getConditionType())) {
             dto.setIpCondition(fromBlockConditionToIpConditionDTO(blockCondition));
         }
         String conditionValue = blockCondition.getConditionValue();
