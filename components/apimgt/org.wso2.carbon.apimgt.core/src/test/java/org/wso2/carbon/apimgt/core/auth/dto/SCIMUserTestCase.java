@@ -29,7 +29,6 @@ import java.util.List;
  */
 public class SCIMUserTestCase {
     SCIMUser scimUser = new SCIMUser();
-    public static final List<SCIMUser.SCIMUserGroups> SCIM_GROUPS = new ArrayList<>();
 
     @Test(description = "Test for the setter and getter method of schemas")
     public void schemsSetterAndGetterTest() {
@@ -39,27 +38,6 @@ public class SCIMUserTestCase {
         schemas.add("SampleSchema3");
         scimUser.setSchemas(schemas);
         Assert.assertEquals(scimUser.getSchemas(), schemas);
-    }
-
-    @Test(description = "Test for the setter and getter method of schemas")
-    public void userIdSetterAndGetterTest() {
-        final String testUserId = "TestId0001";
-        scimUser.setId(testUserId);
-        Assert.assertEquals(scimUser.getId(), testUserId);
-    }
-
-    @Test(description = "Test for the setter and getter method of user name")
-    public void userNameSetterAndGetterTest() {
-        final String testUserName = "TestUser0001";
-        scimUser.setUsername(testUserName);
-        Assert.assertEquals(scimUser.getUsername(), testUserName);
-    }
-
-    @Test(description = "Test for the setter and getter method of password")
-    public void passwordSetterAndGetterTest() {
-        final String testUserPassword = "pwd0001";
-        scimUser.setPassword(testUserPassword);
-        Assert.assertEquals(scimUser.getPassword(), testUserPassword);
     }
 
     @Test(description = "Test for the setter and getter method of emails")
@@ -73,10 +51,11 @@ public class SCIMUserTestCase {
 
     @Test(description = "Test the setter and getter method of user group")
     public void userGoupsSetterAndGetterTest() {
-        SCIM_GROUPS.add(new SCIMUser.SCIMUserGroups("group_001", "Group1"));
-        SCIM_GROUPS.add(new SCIMUser.SCIMUserGroups("group_002", "Group2"));
-        scimUser.setGroups(SCIM_GROUPS);
-        Assert.assertEquals(scimUser.getGroups(), SCIM_GROUPS);
+        final List<SCIMUser.SCIMUserGroups> scimGroups = new ArrayList<>();
+        scimGroups.add(new SCIMUser.SCIMUserGroups("group_001", "Group1"));
+        scimGroups.add(new SCIMUser.SCIMUserGroups("group_002", "Group2"));
+        scimUser.setGroups(scimGroups);
+        Assert.assertEquals(scimUser.getGroups(), scimGroups);
     }
 
     @Test(description = "Test for the getters and setters in SCIMUserEmails inner class")

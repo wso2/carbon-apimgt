@@ -26,6 +26,6 @@ public class APIMConfigurationServiceTestCase {
     @Test (description = "Test case for getInstance method in APIMConfigurationService class")
     public void getInstanceTestCase() {
         APIMConfigurationService apimConfigurationService = APIMConfigurationService.getInstance();
-        Assert.assertNotNull(apimConfigurationService);
+        Assert.assertTrue(apimConfigurationService instanceof APIMConfigurationService);
     }
 }

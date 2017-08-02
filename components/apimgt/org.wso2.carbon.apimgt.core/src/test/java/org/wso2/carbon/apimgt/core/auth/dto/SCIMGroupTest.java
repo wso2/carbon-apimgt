@@ -31,18 +31,6 @@ public class SCIMGroupTest {
     SCIMGroup scimGroup = new SCIMGroup();
 
     @Test
-    public void idSetterAndGetterTest() throws Exception {
-        scimGroup.setId("id_0001");
-        Assert.assertEquals(scimGroup.getId(), "id_0001");
-    }
-
-    @Test
-    public void displayNameGetterAndSetterTest() throws Exception {
-        scimGroup.setDisplayName("GROUP1");
-        Assert.assertEquals(scimGroup.getDisplayName(), "GROUP1");
-    }
-
-    @Test
     public void scimGroupMembersTest() throws Exception {
         List<SCIMGroup.SCIMGroupMembers> scimGroupMembers = new ArrayList<>();
 

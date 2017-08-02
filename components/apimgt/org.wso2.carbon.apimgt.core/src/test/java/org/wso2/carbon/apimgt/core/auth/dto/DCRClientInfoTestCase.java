@@ -31,34 +31,6 @@ public class DCRClientInfoTestCase {
     DCRClientInfo dcrClientInfo = new DCRClientInfo();
 
     @Test
-    public void registrationClientUriSettergAndGetterTest() {
-        final String registrationClientUriValue = "https://localhost:9443/oauth/xxx-xxx-xxx-xxx";
-        dcrClientInfo.setRegistrationClientUri(registrationClientUriValue);
-        Assert.assertEquals(dcrClientInfo.getRegistrationClientUri(), registrationClientUriValue);
-    }
-
-    @Test
-    public void registrationAccessTokenSetterAndGetterTest() {
-        final String registrationAccessTokenValue = "xxx-new-reg-access-token-xxx";
-        dcrClientInfo.setRegistrationAccessToken(registrationAccessTokenValue);
-        Assert.assertEquals(dcrClientInfo.getRegistrationAccessToken(), registrationAccessTokenValue);
-    }
-
-    @Test
-    public void clientIdIssuedAtGetterAndSetterTest() {
-        final String clientIdIssuedAtTime = "15-04-2017 03:34:44";
-        dcrClientInfo.setClientIdIssuedAt(clientIdIssuedAtTime);
-        Assert.assertEquals(dcrClientInfo.getClientIdIssuedAt(), clientIdIssuedAtTime);
-    }
-
-    @Test
-    public void clientSecretExpiresAtSetterAndGetterTest() {
-        final String clientSecretExpiresAtTime = "16-04-2017 03:34:44";
-        dcrClientInfo.setClientSecretExpiresAt(clientSecretExpiresAtTime);
-        Assert.assertEquals(dcrClientInfo.getClientSecretExpiresAt(), clientSecretExpiresAtTime);
-    }
-
-    @Test
     public void redirectURIsGetterAndSetterTest() {
         List<String> redirectUris = new ArrayList<>();
         redirectUris.add("http://test.url.1.com");
@@ -67,34 +39,6 @@ public class DCRClientInfoTestCase {
         Assert.assertEquals(dcrClientInfo.getRedirectURIs(), redirectUris);
         dcrClientInfo.addCallbackUrl(null);
         Assert.assertTrue(dcrClientInfo.getRedirectURIs().size() == 2);
-    }
-
-    @Test
-    public void tokenEndpointAuthMethodSetterAndGetterTest() {
-        final String tokenEndpointAuthMethod = "password";
-        dcrClientInfo.setTokenEndpointAuthMethod(tokenEndpointAuthMethod);
-        Assert.assertEquals(dcrClientInfo.getTokenEndpointAuthMethod(), tokenEndpointAuthMethod);
-    }
-
-    @Test
-    public void jwksUriGetterAndSetterTest() {
-        final String jwksUri = "https://jwksuri/xxx.xyz";
-        dcrClientInfo.setJwksUri(jwksUri);
-        Assert.assertEquals(dcrClientInfo.getJwksUri(), jwksUri);
-    }
-
-    @Test
-    public void userinfoSignedResponseAlgGetterAndSetterTest() {
-        final String userinfoSignedResponseAlgValue = "testing-userinfoSignedResponseAlg";
-        dcrClientInfo.setUserinfoSignedResponseAlg(userinfoSignedResponseAlgValue);
-        Assert.assertEquals(dcrClientInfo.getUserinfoSignedResponseAlg(), userinfoSignedResponseAlgValue);
-    }
-
-    @Test
-    public void logoUriSetterAndGetterTest() {
-        final String logoUri = "https://logouri/xxx.xyz";
-        dcrClientInfo.setLogoUri(logoUri);
-        Assert.assertEquals(dcrClientInfo.getLogoUri(), logoUri);
     }
 
     @Test
@@ -110,6 +54,4 @@ public class DCRClientInfoTestCase {
         Assert.assertEquals(grantTypesAdded, grantTypes);
         Assert.assertTrue(grantTypesAdded.size() == 2);
     }
-
-
 }
