@@ -41,7 +41,7 @@ node("${nodeLabel}") {
         currentBuild.result = 'FAILURE'
         throw any //rethrow exception to prevent the build from proceeding
     }finally{
-        step([$class: 'JacocoPublisher', exclusionPattern: '**/dto/*.class,**/rest/api/*/factories/*.class,**/rest/api/*/*.class'])
+        step([$class: 'JacocoPublisher', exclusionPattern: '**/apimgt/authenticator/*.class,**/apimgt/authenticator/**/*.class,**/dto/*.class,**/exception/*.class,**/rest/api/*/factories/*.class,**/rest/api/*/*.class'])
         step([$class: 'Mailer', notifyEveryUnstableBuild: true, recipients: '', sendToIndividuals: true])
     }
 }
