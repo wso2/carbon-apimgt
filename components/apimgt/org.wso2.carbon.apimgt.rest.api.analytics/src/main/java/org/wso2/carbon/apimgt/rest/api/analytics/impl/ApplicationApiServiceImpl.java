@@ -13,8 +13,8 @@ import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.msf4j.Request;
 
-import java.util.List;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 public class ApplicationApiServiceImpl extends ApplicationApiService {
 
@@ -26,6 +26,10 @@ public class ApplicationApiServiceImpl extends ApplicationApiService {
 
         String username = RestApiUtil.getLoggedInUsername();
         try {
+            if (log.isDebugEnabled()) {
+                log.debug("Retrieving applications created over time. " +
+                        "From: " + from + " to: " + to + " created by: " + createdBy);
+            }
             Analyzer analyzer = RestApiUtil.getAnalyzer(username);
             List<ApplicationCount> applicationCountList = analyzer
                     .getApplicationCount(createdBy, subscribedTo, from, to);

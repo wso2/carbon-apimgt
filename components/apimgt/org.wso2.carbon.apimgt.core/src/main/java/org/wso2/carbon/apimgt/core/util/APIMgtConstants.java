@@ -122,6 +122,8 @@ public class APIMgtConstants {
     public static final String NAMESPACE_ADMIN_API = "wso2.carbon.apimgt.admin.rest.api";
     public static final String NAMESPACE_ANALYTICS_API = "wso2.carbon.apimgt.analytics.rest.api";
 
+    public static final String DATE_TIME_FORMAT = "yyyy-MM-dd hh:mm:ss";
+
     /**
      * Application statuses.
      */
