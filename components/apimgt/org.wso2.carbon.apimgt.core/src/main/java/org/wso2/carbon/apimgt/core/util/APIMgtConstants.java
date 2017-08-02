@@ -291,6 +291,9 @@ public class APIMgtConstants {
         public static final String APPLICATION_NAME = "APPLICATION_NAME";
         public static final String CONSUMER_KEY = "CONSUMER_KEY";
         public static final String APPLICATION_ID = "APPLICATION_ID";
+        public static final String KEY_TYPE = "KEY_TYPE";
+        public static final String GRANT_TYPES = "GRANT_TYPES";
+        public static final String CALLBACK_URL = "CALLBACK_URL";
         public static final String APPLICATION_QUERY = "APPLICATION_QUERY";
         public static final String API_ID = "API_ID";
         public static final String TIER = "TIER";

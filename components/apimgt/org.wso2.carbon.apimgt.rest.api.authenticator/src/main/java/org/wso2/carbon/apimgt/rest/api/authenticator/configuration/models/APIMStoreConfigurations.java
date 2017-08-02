@@ -31,7 +31,7 @@ public class APIMStoreConfigurations {
     @Element(description = "Authorization Endpoint")
     private String authorizationEndpoint = "https://localhost:9443/oauth2/authorize";
     @Element(description = "SSO Enabled or not")
-    private boolean ssoEnabled = true;
+    private boolean ssoEnabled = false;
 
     public String getApimBaseUrl() {
         return apimBaseUrl;

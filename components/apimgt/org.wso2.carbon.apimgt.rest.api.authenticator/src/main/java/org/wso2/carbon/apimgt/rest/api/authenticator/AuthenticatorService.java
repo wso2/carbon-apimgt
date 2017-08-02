@@ -188,7 +188,7 @@ public class AuthenticatorService {
      *
      * @param appName Name of the application
      * @param accessToken Access token to be revoked
-     * @throws KeyManagementException When revoking access token fails
+     * @throws APIManagementException When revoking access token fails
      */
     public void revokeAccessToken(String appName, String accessToken) throws APIManagementException {
         Map<String, String> consumerKeySecretMap = getConsumerKeySecret(appName);
