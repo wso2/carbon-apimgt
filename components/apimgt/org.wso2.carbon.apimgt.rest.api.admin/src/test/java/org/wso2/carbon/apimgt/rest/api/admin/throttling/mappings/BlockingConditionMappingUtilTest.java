@@ -30,15 +30,19 @@ import org.wso2.carbon.apimgt.rest.api.admin.mappings.BlockingConditionMappingUt
 import java.util.UUID;
 
 import static org.wso2.carbon.apimgt.core.util.APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_IP;
+import static org.wso2.carbon.apimgt.core.util.APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITION_IP_RANGE;
 
 public class BlockingConditionMappingUtilTest {
 
     @Test(description = "Convert Blocking Condition to DTO")
     public void fromBlockingConditionToDTOTest()   throws  Exception   {
         BlockConditions conditions = new BlockConditions();
-        conditions.setUuid(UUID.randomUUID().toString());
+        String uuid = UUID.randomUUID().toString();
+        conditions.setUuid(uuid);
         BlockingConditionDTO dto = BlockingConditionMappingUtil.fromBlockingConditionToDTO(conditions);
         Assert.assertNotNull(dto);
+        Assert.assertEquals(uuid, dto.getConditionId());
+
     }
 
     @Test(description = "From Blocking Condition DTO to Model")
@@ -50,14 +54,16 @@ public class BlockingConditionMappingUtilTest {
         dto.setStatus(true);
         BlockConditions conditions = BlockingConditionMappingUtil.fromBlockingConditionDTOToBlockCondition(dto);
         Assert.assertNotNull(conditions);
+        Assert.assertEquals(BLOCKING_CONDITIONS_IP, conditions.getConditionType());
     }
 
     @Test(description = "From Blocking Condition to DTO")
     public void fromBlockConditionToIpConditionDTOTest() throws Exception   {
-
         BlockConditions conditions = new BlockConditions();
         conditions.setUuid(UUID.randomUUID().toString());
+        conditions.setConditionType(BLOCKING_CONDITION_IP_RANGE);
         BlockingConditionDTO dto = BlockingConditionMappingUtil.fromBlockingConditionToDTO(conditions);
         Assert.assertNotNull(dto);
+        Assert.assertEquals(dto.getConditionType(), BLOCKING_CONDITION_IP_RANGE);
     }
 }
