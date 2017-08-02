@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.ballerina.maps;
 
-import org.ballerinalang.model.values.BBoolean;
-import org.ballerinalang.model.values.BJSON;
 import org.ballerinalang.model.values.BString;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.util.codegen.ProgramFile;
