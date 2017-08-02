@@ -19,13 +19,6 @@
  */
 package org.wso2.carbon.apimgt.core.util;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.UUID;
-
 import org.apache.commons.io.IOUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -33,7 +26,12 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.template.dto.GatewayConfigDTO;
-
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.UUID;
 /**
  * 
  * Test cases for {@link APIFileUtils}
@@ -71,14 +69,16 @@ public class APIFileUtilsTestCase {
         // read content as text
         String contentRead = APIFileUtils.readFileContentAsText(dirPath + File.separatorChar + fileName);
         Assert.assertEquals(contentRead, "This is some test content");
-        
+
         // read content as stream
-        InputStream contentReadInputStream = APIFileUtils.readFileContentAsStream(dirPath + File.separatorChar + fileName);
+        InputStream contentReadInputStream = APIFileUtils
+                .readFileContentAsStream(dirPath + File.separatorChar + fileName);
         Assert.assertEquals(IOUtils.toString(contentReadInputStream), "This is some test content");
-        
+
         // write stream to filesystem
         APIFileUtils.writeStreamToFile(dirPath + File.separatorChar + "write-stream-to-file", contentReadInputStream);
-        Assert.assertTrue(Files.exists(Paths.get(dirPath + File.separatorChar + "write-stream-to-file")), "File doesn't exists");
+        Assert.assertTrue(Files.exists(Paths.get(dirPath + File.separatorChar + "write-stream-to-file")),
+                "File doesn't exists");
 
         // create archive
         APIFileUtils.archiveDirectory(new File(dirPath).getAbsolutePath(),
@@ -116,19 +116,19 @@ public class APIFileUtilsTestCase {
         APIFileUtils.deleteDirectory(dirPath);
         Assert.assertFalse(Files.exists(Paths.get(dirPath)), "Directory has not deleted");
     }
-    
-    @Test (expectedExceptions = APIMgtDAOException.class)
+
+    @Test(expectedExceptions = APIMgtDAOException.class)
     public void testDeleteInvalidFiles() throws APIMgtDAOException {
-        APIFileUtils.deleteFile(dirPath + File.separatorChar + "nonexistingfile");        
+        APIFileUtils.deleteFile(dirPath + File.separatorChar + "nonexistingfile");
     }
 
-    @Test (expectedExceptions = APIMgtDAOException.class)
-    public void testReadInvalidContentAsText() throws APIMgtDAOException  {
-        APIFileUtils.readFileContentAsText(dirPath + File.separatorChar + "nonexistingfile");        
+    @Test(expectedExceptions = APIMgtDAOException.class)
+    public void testReadInvalidContentAsText() throws APIMgtDAOException {
+        APIFileUtils.readFileContentAsText(dirPath + File.separatorChar + "nonexistingfile");
     }
-    
-    @Test (expectedExceptions = APIMgtDAOException.class)
-    public void testReadInvalidContentAsStream() throws APIMgtDAOException  {
-        APIFileUtils.readFileContentAsStream(dirPath + File.separatorChar + "nonexistingfile");        
+
+    @Test(expectedExceptions = APIMgtDAOException.class)
+    public void testReadInvalidContentAsStream() throws APIMgtDAOException {
+        APIFileUtils.readFileContentAsStream(dirPath + File.separatorChar + "nonexistingfile");
     }
 }
