@@ -16,7 +16,7 @@
  * under the License.
  */
 import React from 'react';
-import {Form, Icon, Input, Button, message, Upload, Radio , Steps, Spin } from 'antd';
+import {Alert, Form, Icon, Input, Button, message, Upload, Radio , Steps, Spin} from 'antd';
 import WSDLValidationStep from './Steps/WSDLValidationStep'
 import WSDLFillAPIInfoStep from './Steps/WSDLFillAPIInfoStep'
 import API from '../../../../data/api.js'
@@ -34,12 +34,14 @@ class ApiCreateWSDLSteppedForm extends React.Component {
             file: null,
             wsdlUrl: null,
             isValidating: false,
+            validationFailed: false,
             endpoints: [],
             apiName: null,
             apiVersion: null,
             apiContext: null,
             apiEndpoint: null,
             implementationType: null,
+            validationFailedMessage: null,
             bindingInfo: {
                 hasSoapBinding: false,
                 hasHttpBinding: false
@@ -51,9 +53,8 @@ class ApiCreateWSDLSteppedForm extends React.Component {
     }
 
     next() {
-        // this.setState({ current: this.state.current + 1});
         if (this.state.current === 0) { // validation form
-            this.setState({isValidating: true});
+            this.setState({isValidating: true, validationFailed:false});
             if (this.state.uploadMethod === "url") {
                 this.validateWSDLUrlInCurrentState();
             } else { // WSDL file
@@ -90,14 +91,14 @@ class ApiCreateWSDLSteppedForm extends React.Component {
         let wsdlUrl = this.state.wsdlUrl;
         let new_api = new API('');
         let promised_validationResponse = new_api.validateWSDLUrl(wsdlUrl);
-        promised_validationResponse.then(this.validateWSDLUrlCallback);
+        promised_validationResponse.then(this.validateWSDLUrlCallback).catch(this.validateWSDLUrlCallbackOnError);
     }
 
     validateWSDLFileInCurrentState() {
         let file = this.state.file;
         let new_api = new API('');
         let promised_validationResponse = new_api.validateWSDLFile(file.originFileObj);
-        promised_validationResponse.then(this.validateWSDLUrlCallback);
+        promised_validationResponse.then(this.validateWSDLUrlCallback).catch(this.validateWSDLUrlCallbackOnError);
     }
 
     validateWSDLUrlCallback = (response) => {
@@ -139,7 +140,21 @@ class ApiCreateWSDLSteppedForm extends React.Component {
                 hasHttpBinding: hasHttpBinding,
                 implementationType: defaultImplementationType
             });
+        } else {
+            this.setState({
+                isValidating: false,
+                validationFailed: true,
+                validationFailedMessage: "Invalid WSDL Content"
+            });
         }
+    };
+
+    validateWSDLUrlCallbackOnError = (response) => {
+        this.setState({
+            isValidating: false,
+            validationFailed: true,
+            validationFailedMessage: response.response.body.description
+        });
     };
 
     handleCreateWSDLAPI() {
@@ -249,6 +264,15 @@ class ApiCreateWSDLSteppedForm extends React.Component {
                     {
                         this.state.isValidating &&
                         <Spin tip=" Validating..."/>
+                    }
+                    {
+                        this.state.validationFailed &&
+                        <Alert
+                            message="Validation Failed"
+                            type="error"
+                            description={this.state.validationFailedMessage}
+                            showIcon
+                        />
                     }
                 </div>
             </div>

@@ -103,7 +103,7 @@ class WSDLValidationForm extends React.Component {
                     </div>
                 </FormItem>
                 <FormItem className={this.toggleWSDLType("url")}>
-                    {getFieldDecorator('userName', { //todo what is this??
+                    {getFieldDecorator('userName', {
                         rules: [{ required: false, message: 'Please input WSDL URL!' }],
                     })(
                         <Input name="url" prefix={<Icon type="user" style={{ fontSize: 13 }} />} placeholder="WSDL URL" onChange={this.handleWSDLUrlChanged}/>
