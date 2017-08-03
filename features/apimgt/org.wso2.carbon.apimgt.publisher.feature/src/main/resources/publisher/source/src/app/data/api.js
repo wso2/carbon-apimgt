@@ -37,9 +37,13 @@ class API {
      */
     _requestMetaData(data = {}) {
         AuthManager.refreshTokenOnExpire(); /* TODO: This should be moved to an interceptor ~tmkb*/
-        return {
+        let metaData = {
             requestContentType: data['Content-Type'] || "application/json"
         };
+        if (data['Accept']) {
+            metaData.responseContentType = data['Accept'];
+        }
+        return metaData;
     }
 
     /**
@@ -673,6 +677,16 @@ class API {
                     this._requestMetaData({"Content-Type": "multipart/form-data"}));
         });
         return promised_validationResponse;
+    }
+
+    getWSDL(apiId) {
+        let promised_wsdlResponse = this.client.then((client) => {
+            return client.apis["API (Individual)"].get_apis__apiId__wsdl({
+                    "apiId": apiId
+                },
+                this._requestMetaData({"Accept": "application/octet-stream"}));
+        });
+        return promised_wsdlResponse;
     }
 }
 

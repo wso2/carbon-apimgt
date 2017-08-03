@@ -33,6 +33,7 @@ class Overview extends Component {
             notFound: false
         };
         this.api_uuid = this.props.match.params.api_uuid;
+        this.downloadWSDL = this.downloadWSDL.bind(this);
     }
 
     componentDidMount() {
@@ -53,6 +54,41 @@ class Overview extends Component {
                 }
             }
         );
+    }
+
+    downloadWSDL() {
+        const api = new Api();
+        let promised_wsdl = api.getWSDL(this.api_uuid);
+        promised_wsdl.then(
+            response => {
+                let windowUrl = window.URL || window.webkitURL;
+                let binary = new Blob([response.data]);
+                let url = windowUrl.createObjectURL(binary);
+                let anchor = document.createElement('a');
+                anchor.href = url;
+                if (response.headers['content-disposition']) {
+                    anchor.download = Overview.getWSDLFileName(response.headers['content-disposition']);
+                } else {
+                    //assumes a single WSDL in text format
+                    anchor.download = this.state.api.provider +
+                        "-" + this.state.api.name + "-" + this.state.api.version + ".wsdl"
+                }
+                anchor.click();
+                windowUrl.revokeObjectURL(url);
+            }
+        )
+    }
+
+    static getWSDLFileName(content_disposition_header) {
+        let filename = "default.wsdl";
+        if (content_disposition_header && content_disposition_header.indexOf('attachment') !== -1) {
+            let filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+            let matches = filenameRegex.exec(content_disposition_header);
+            if (matches !== null && matches[1]) {
+                filename = matches[1].replace(/['"]/g, '');
+            }
+        }
+        return filename;
     }
 
     render() {
@@ -135,6 +171,15 @@ class Overview extends Component {
                                 <span className="ant-form-text">{"WSO2 Support"}</span>
                                 <a className="ant-form-text" href="#email">{"(support@wso2.com)"}</a>
                             </FormItem>
+                            {
+                                api.wsdlUri && (
+                                    <FormItem {...formItemLayout} label="WSDL">
+                                        <span className="ant-form-text">
+                                            <a onClick={this.downloadWSDL}>Download</a>
+                                        </span>
+                                    </FormItem>
+                                )
+                            }
                         </Form>
                     </Col>
                 </Row>

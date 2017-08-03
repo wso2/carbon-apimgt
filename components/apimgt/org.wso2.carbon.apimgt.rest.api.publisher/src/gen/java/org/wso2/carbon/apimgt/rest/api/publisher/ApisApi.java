@@ -544,8 +544,12 @@ public class ApisApi implements Microservice  {
     @GET
     @Path("/{apiId}/wsdl")
     @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Get swagger definition", notes = "This operation can be used to retrieve the swagger definition of an API. ", response = void.class, tags={ "API (Individual)", })
+    @Produces({ "application/octet-stream" })
+    @io.swagger.annotations.ApiOperation(value = "Get swagger definition", notes = "This operation can be used to retrieve the swagger definition of an API. ", response = void.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "API (Individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Requested WSDL document of the API is returned ", response = void.class),
         
@@ -566,7 +570,11 @@ public class ApisApi implements Microservice  {
     @Path("/{apiId}/wsdl")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Update WSDL definition", notes = "This operation can be used to update the WSDL definition of an existing API. WSDL to be updated is passed as a form data parameter `inlineContent`. ", response = void.class, tags={ "API (Individual)", })
+    @io.swagger.annotations.ApiOperation(value = "Update WSDL definition", notes = "This operation can be used to update the WSDL definition of an existing API. WSDL to be updated is passed as a form data parameter `inlineContent`. ", response = void.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_create", description = "Create API")
+        })
+    }, tags={ "API (Individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Successful response with updated WSDL definition ", response = void.class),
         
@@ -741,7 +749,11 @@ public class ApisApi implements Microservice  {
     @Path("/validate-definition")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Validate API definition and retrieve a summary", notes = "This operation can be used to validate a swagger or WSDL definition and retrieve a summary. ", response = APIDefinitionValidationResponseDTO.class, tags={ "API (Collection)", })
+    @io.swagger.annotations.ApiOperation(value = "Validate API definition and retrieve a summary", notes = "This operation can be used to validate a swagger or WSDL definition and retrieve a summary. ", response = APIDefinitionValidationResponseDTO.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_create", description = "Create API")
+        })
+    }, tags={ "API (Collection)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. API definition validation information is returned ", response = APIDefinitionValidationResponseDTO.class),
         
