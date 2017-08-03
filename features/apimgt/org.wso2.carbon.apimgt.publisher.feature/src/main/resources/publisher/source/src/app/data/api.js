@@ -476,11 +476,10 @@ class API {
         var promised_addDocument = this.client.then(
             (client) => {
                 let payload = {apiId: api_id, body: body, "Content-Type": "application/json"};
-                return client.apis["Document (Collection)"].post_apis_apiId_documents(
+                return client.apis["Document (Collection)"].post_apis__apiId__documents(
                     payload, this._requestMetaData());
             }
         );
-
         return promised_addDocument;
     }
 
@@ -496,7 +495,7 @@ class API {
                     file: fileToDocument,
                     "Content-Type": "application/json"
                 };
-                return client.apis["Document (Individual)"].post_apis_apiId_documents_documentId_content(
+                return client.apis["Document (Individual)"].post_apis__apiId__documents__documentId__content(
                     payload, this._requestMetaData({"Content-Type": "multipart/form-data"}));
             }
         );
@@ -516,7 +515,7 @@ class API {
                     inlineContent: inline_content,
                     "Content-Type": "application/json"
                 };
-                return client.apis["Document (Individual)"].post_apis_apiId_documents_documentId_content(
+                return client.apis["Document (Individual)"].post_apis__apiId__documents__documentId__content(
                     payload, this._requestMetaData({"Content-Type": "multipart/form-data"}));
             }
         );
@@ -527,7 +526,7 @@ class API {
         var promised_getDocContent = this.client.then(
             (client) => {
                 let payload = {apiId: api_id, documentId: docId, "Accept": "application/octet-stream"};
-                return client.apis["Document (Individual)"].get_apis__apiId_documents_documentId_content(
+                return client.apis["Document (Individual)"].get_apis__apiId__documents__documentId__content(
                     payload, this._requestMetaData({"Content-Type": "multipart/form-data"}));
             }
         );
@@ -540,9 +539,9 @@ class API {
     getInlineContentOfDocument(api_id, docId) {
         var promised_getDocContent = this.client.then(
             (client) => {
-                let payload = {apiId: api_id, documentId: docId, "Accept": "text/plain"};
-                return client.apis["Document (Individual)"].get_apis__apiId_documents_documentId_content(
-                    payload, this._requestMetaData());
+                let payload = {apiId: api_id, documentId: docId};
+                return client.apis["Document (Individual)"].get_apis__apiId__documents__documentId_content(
+                    payload);
             }
         );
         return promised_getDocContent;
@@ -551,7 +550,7 @@ class API {
     getDocuments(api_id, callback) {
         var promise_get_all = this.client.then(
             (client) => {
-                return client.apis["Document (Collection)"].get_apis__apiId_documents({apiId: api_id}, this._requestMetaData());
+                return client.apis["Document (Collection)"].get_apis__apiId__documents({apiId: api_id}, this._requestMetaData());
             }
         );
         if (callback) {
@@ -570,7 +569,7 @@ class API {
                     documentId: docId,
                     "Content-Type": "application/json"
                 };
-                return client.apis["Document (Individual)"].put_apis_apiId_documents_documentId(
+                return client.apis["Document (Individual)"].put_apis__apiId__documents__documentId_(
                     payload, this._requestMetaData());
             }
         );
@@ -580,7 +579,7 @@ class API {
     getDocument(api_id, docId, callback) {
         var promise_get = this.client.then(
             (client) => {
-                return client.apis["Document (Individual)"].get_apis__apiId_documents_documentId({
+                return client.apis["Document (Individual)"].get_apis__apiId__documents__documentId_({
                         apiId: api_id,
                         documentId: docId
                     },
@@ -594,7 +593,7 @@ class API {
     deleteDocument(api_id, document_id) {
         var promise_deleteDocument = this.client.then(
             (client) => {
-                return client.apis["Document (Individual)"].delete_apis_apiId_documents_documentId({
+                return client.apis["Document (Individual)"].delete_apis__apiId__documents__documentId_({
                         apiId: api_id,
                         documentId: document_id
                     },
