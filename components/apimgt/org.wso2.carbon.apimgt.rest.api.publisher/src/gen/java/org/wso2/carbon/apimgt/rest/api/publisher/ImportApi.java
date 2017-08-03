@@ -64,11 +64,10 @@ public class ImportApi implements Microservice  {
     public Response importApisPost(
             @FormDataParam("file") InputStream fileInputStream,
             @FormDataParam("file") FileInfo fileDetail
-,@ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType
 ,@ApiParam(value = "If defined, updates the existing provider of each API with the specified provider. This is to cater scenarios where the current API provider does not exist in the environment that the API is imported to. ") @QueryParam("provider") String provider
 , @Context Request request)
     throws NotFoundException {
-        return delegate.importApisPost(fileInputStream, fileDetail,contentType,provider, request);
+        return delegate.importApisPost(fileInputStream, fileDetail,provider, request);
     }
     @PUT
     @Path("/apis")
@@ -90,10 +89,9 @@ public class ImportApi implements Microservice  {
     public Response importApisPut(
             @FormDataParam("file") InputStream fileInputStream,
             @FormDataParam("file") FileInfo fileDetail
-,@ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType
 ,@ApiParam(value = "If defined, updates the existing provider of each API with the specified provider. This is to cater scenarios where the current API provider does not exist in the environment that the API is imported to. ") @QueryParam("provider") String provider
 , @Context Request request)
     throws NotFoundException {
-        return delegate.importApisPut(fileInputStream, fileDetail,contentType,provider, request);
+        return delegate.importApisPut(fileInputStream, fileDetail,provider, request);
     }
 }

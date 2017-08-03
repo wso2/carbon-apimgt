@@ -19,8 +19,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 public abstract class LabelsApiService {
-    public abstract Response labelsGet(String accept
- ,String ifNoneMatch
+    public abstract Response labelsGet(String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
 }

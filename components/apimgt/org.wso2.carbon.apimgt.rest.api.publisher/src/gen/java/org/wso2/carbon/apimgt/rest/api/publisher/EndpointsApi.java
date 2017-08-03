@@ -62,12 +62,11 @@ public class EndpointsApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = void.class) })
     public Response endpointsEndpointIdDelete(@ApiParam(value = "**Endpoint ID** consisting of the **UUID** of the Endpoint**. ",required=true) @PathParam("endpointId") String endpointId
-,@ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
 , @Context Request request)
     throws NotFoundException {
-        return delegate.endpointsEndpointIdDelete(endpointId,contentType,ifMatch,ifUnmodifiedSince, request);
+        return delegate.endpointsEndpointIdDelete(endpointId,ifMatch,ifUnmodifiedSince, request);
     }
     @GET
     @Path("/{endpointId}")
@@ -85,12 +84,11 @@ public class EndpointsApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = EndPointDTO.class) })
     public Response endpointsEndpointIdGet(@ApiParam(value = "**Endpoint ID** consisting of the **UUID** of the Endpoint**. ",required=true) @PathParam("endpointId") String endpointId
-,@ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
 , @Context Request request)
     throws NotFoundException {
-        return delegate.endpointsEndpointIdGet(endpointId,contentType,ifMatch,ifUnmodifiedSince, request);
+        return delegate.endpointsEndpointIdGet(endpointId,ifMatch,ifUnmodifiedSince, request);
     }
     @PUT
     @Path("/{endpointId}")
@@ -111,12 +109,11 @@ public class EndpointsApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = EndPointDTO.class) })
     public Response endpointsEndpointIdPut(@ApiParam(value = "**Endpoint ID** consisting of the **UUID** of the Endpoint**. ",required=true) @PathParam("endpointId") String endpointId
 ,@ApiParam(value = "Tier object that needs to be modified " ,required=true) EndPointDTO body
-,@ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
 , @Context Request request)
     throws NotFoundException {
-        return delegate.endpointsEndpointIdPut(endpointId,body,contentType,ifMatch,ifUnmodifiedSince, request);
+        return delegate.endpointsEndpointIdPut(endpointId,body,ifMatch,ifUnmodifiedSince, request);
     }
     @GET
     
@@ -133,12 +130,11 @@ public class EndpointsApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = EndPointListDTO.class),
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = EndPointListDTO.class) })
-    public Response endpointsGet(@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
-,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
+    public Response endpointsGet(@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
 , @Context Request request)
     throws NotFoundException {
-        return delegate.endpointsGet(accept,ifNoneMatch,ifModifiedSince, request);
+        return delegate.endpointsGet(ifNoneMatch,ifModifiedSince, request);
     }
     @HEAD
     
@@ -158,11 +154,10 @@ public class EndpointsApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = void.class) })
     public Response endpointsHead(@ApiParam(value = "") @QueryParam("name") String name
-,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 , @Context Request request)
     throws NotFoundException {
-        return delegate.endpointsHead(name,accept,ifNoneMatch, request);
+        return delegate.endpointsHead(name,ifNoneMatch, request);
     }
     @POST
     
@@ -180,12 +175,10 @@ public class EndpointsApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format. ", response = EndPointDTO.class) })
     public Response endpointsPost(@ApiParam(value = "EndPoint object that needs to be added " ,required=true) EndPointDTO body
-,@ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType
-,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
 , @Context Request request)
     throws NotFoundException {
-        return delegate.endpointsPost(body,contentType,accept,ifNoneMatch,ifModifiedSince, request);
+        return delegate.endpointsPost(body,ifNoneMatch,ifModifiedSince, request);
     }
 }
