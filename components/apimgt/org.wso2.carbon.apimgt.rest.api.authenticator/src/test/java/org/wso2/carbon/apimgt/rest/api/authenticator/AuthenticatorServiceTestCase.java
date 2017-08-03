@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.rest.api.authenticator;
 
 import com.google.gson.JsonObject;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -30,6 +31,7 @@ import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 import org.wso2.carbon.apimgt.rest.api.authenticator.constants.AuthenticatorConstants;
 import org.wso2.carbon.apimgt.rest.api.authenticator.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.rest.api.authenticator.utils.bean.AuthResponseBean;
 
 /**
  * Test class for AuthenticatorService.
@@ -136,5 +138,61 @@ public class AuthenticatorServiceTestCase {
 
     @Test
     public void testSetAccessTokenData() throws Exception {
+        // Happy Path
+        //// AccessTokenInfo object
+        AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
+        accessTokenInfo.setIdToken("eyJ4NXQiOiJObUptT0dVeE16WmxZak0yWkRSaE5UWmxZVEExWXpkaFpUUmlPV0UwTldJMk0ySm1PVGMxWkEiLCJraWQiOiJkMGVjNTE0YTMyYjZmODhjMGFiZDEyYTI4NDA2OTliZGQzZGViYTlkIiwiYWxnIjoiUlMyNTYifQ.eyJhdF9oYXNoIjoiWGg3bFZpSDZDS2pZLXRIT09JaWN5QSIsInN1YiI6ImFkbWluIiwiYXVkIjpbInR6NlJGQnhzdV93Z0RCd3FyUThvVmo3d25FTWEiXSwiYXpwIjoidHo2UkZCeHN1X3dnREJ3cXJROG9Wajd3bkVNYSIsImF1dGhfdGltZSI6MTUwMTczMzQ1NiwiaXNzIjoiaHR0cHM6XC9cL2xvY2FsaG9zdDo5NDQzXC9vYXV0aDJcL3Rva2VuIiwiZXhwIjoxNTAxNzM3MDU3LCJpYXQiOjE1MDE3MzM0NTd9.XXX-XXX");
+        accessTokenInfo.setValidityPeriod(-2L);
+        accessTokenInfo.setScopes("apim:workflow_approve apim:subscribe openid");
+
+        //// Expected AuthResponseBean object
+        AuthResponseBean expectedAuthResponseBean = new AuthResponseBean();
+        expectedAuthResponseBean.setTokenValid(true);
+        expectedAuthResponseBean.setAuthUser("admin");
+        expectedAuthResponseBean.setScopes(accessTokenInfo.getScopes());
+        expectedAuthResponseBean.setType(AuthenticatorConstants.BEARER_PREFIX);
+        expectedAuthResponseBean.setValidityPeriod(accessTokenInfo.getValidityPeriod());
+        expectedAuthResponseBean.setIdToken(accessTokenInfo.getIdToken());
+
+        KeyManager keyManager = Mockito.mock(KeyManager.class);
+        AuthenticatorService authenticatorService = new AuthenticatorService(keyManager);
+
+        //// Actual response
+        AuthResponseBean authResponseBean = new AuthResponseBean();
+        authResponseBean = authenticatorService.setAccessTokenData(authResponseBean, accessTokenInfo);
+        Assert.assertTrue(EqualsBuilder.reflectionEquals(expectedAuthResponseBean,authResponseBean));
+
+        // Happy Path - When id token is null
+        //// AccessTokenInfo object with null id token
+        AccessTokenInfo invalidTokenInfo = new AccessTokenInfo();
+        invalidTokenInfo.setValidityPeriod(-2L);
+        invalidTokenInfo.setScopes("apim:workflow_approve apim:subscribe openid");
+
+        //// Expected AuthResponseBean object when id token is null
+        AuthResponseBean expectedResponseBean = new AuthResponseBean();
+        expectedResponseBean.setTokenValid(true);
+        expectedResponseBean.setScopes(invalidTokenInfo.getScopes());
+        expectedResponseBean.setType(AuthenticatorConstants.BEARER_PREFIX);
+        expectedResponseBean.setValidityPeriod(invalidTokenInfo.getValidityPeriod());
+        expectedResponseBean.setIdToken(invalidTokenInfo.getIdToken());
+
+        //// Actual response when id token is null
+        AuthResponseBean responseBean = new AuthResponseBean();
+        authenticatorService.setAccessTokenData(responseBean, invalidTokenInfo);
+        Assert.assertTrue(EqualsBuilder.reflectionEquals(expectedResponseBean, responseBean));
+
+        // Error Path - When parsing JWT fails and throws KeyManagementException
+        //// AccessTokenInfo object with invalid ID token format
+        AccessTokenInfo invalidAccessTokenInfo = new AccessTokenInfo();
+        invalidAccessTokenInfo.setIdToken("xxx-invalid-id-token-xxx");
+        invalidAccessTokenInfo.setValidityPeriod(-2L);
+        invalidAccessTokenInfo.setScopes("apim:workflow_approve apim:subscribe openid");
+
+        try {
+            AuthResponseBean errorResponseBean = new AuthResponseBean();
+            authenticatorService.setAccessTokenData(errorResponseBean, invalidAccessTokenInfo);
+        } catch (KeyManagementException e) {
+            Assert.assertEquals(e.getMessage(), "JWT Parsing failed. Invalid JWT.");
+        }
     }
 }
