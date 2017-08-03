@@ -105,6 +105,7 @@ public class MappingUtil {
         apidto.setLabels(new ArrayList<>(api.getLabels()));
         apidto.setTransport(new ArrayList<>(api.getTransport()));
         apidto.setUserPermissionsForApi(api.getUserSpecificApiPermissions());
+        apidto.setSecurityScheme(api.getSecurityScheme());
         for (Policy policy : api.getPolicies()) {
             apidto.addPoliciesItem(policy.getPolicyName());
         }
