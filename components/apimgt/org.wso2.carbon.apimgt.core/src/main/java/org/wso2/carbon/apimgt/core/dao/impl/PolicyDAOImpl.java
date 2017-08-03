@@ -286,8 +286,8 @@ public class PolicyDAOImpl implements PolicyDAO {
     private static void addApplicationPolicy(ApplicationPolicy policy, Connection connection) throws SQLException {
 
         final String query = "INSERT INTO AM_APPLICATION_POLICY (UUID, NAME, DISPLAY_NAME, " +
-                "DESCRIPTION, QUOTA_TYPE, QUOTA, QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED) " +
-                "VALUES (?,?,?,?,?,?,?,?,?,?)";
+                "DESCRIPTION, QUOTA_TYPE, QUOTA, QUOTA_UNIT, UNIT_TIME, TIME_UNIT, IS_DEPLOYED, CUSTOM_ATTRIBUTES) " +
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 
         Limit limit = policy.getDefaultQuotaPolicy().getLimit();
 
@@ -301,7 +301,7 @@ public class PolicyDAOImpl implements PolicyDAO {
             statement.setInt(8, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
             statement.setString(9, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
             statement.setBoolean(10, policy.isDeployed());
-
+            statement.setBytes(11, policy.getCustomAttributes());
             statement.execute();
         }
     }
@@ -697,9 +697,7 @@ public class PolicyDAOImpl implements PolicyDAO {
                         InputStream inputStream = rs.getBinaryStream(APIMgtConstants
                                 .ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
                         if (inputStream != null) {
-                            applicationPolicy.setCustomAttributes(IOUtils.toString(inputStream));
-                        } else {
-                            applicationPolicy.setCustomAttributes("");
+                            applicationPolicy.setCustomAttributes(IOUtils.toByteArray(inputStream));
                         }
                         return applicationPolicy;
                     } else {
@@ -1213,144 +1211,6 @@ public class PolicyDAOImpl implements PolicyDAO {
     }
 
     /**
-     * Adds the default policies
-     *
-     * @throws APIMgtDAOException if an error occurs while adding the default policies
-     */
-    static void initDefaultPolicies() throws APIMgtDAOException {
-        try (Connection connection = DAOUtil.getConnection()) {
-            try {
-                if (!isDefaultPoliciesExist(connection)) {
-                    connection.setAutoCommit(false);
-
-                    APIPolicy unlimitedApiPolicy = createDefaultApiPolicyWithRequestCountLimit(UNLIMITED_TIER);
-                    addApiPolicy(unlimitedApiPolicy, connection);
-                    APIPolicy goldApiPolicy = createDefaultApiPolicyWithRequestCountLimit(GOLD_TIER);
-                    addApiPolicy(goldApiPolicy, connection);
-                    APIPolicy silverApiPolicy = createDefaultApiPolicyWithRequestCountLimit(SILVER_TIER);
-                    addApiPolicy(silverApiPolicy, connection);
-                    APIPolicy bronzeApiPolicy = createDefaultApiPolicyWithRequestCountLimit(BRONZE_TIER);
-                    addApiPolicy(bronzeApiPolicy, connection);
-
-                    SubscriptionPolicy unlimitedSubscriptionPolicy =
-                            createDefaultSubscriptionPolicyWithRequestCountLimit(UNLIMITED_TIER);
-                    addSubscriptionPolicy(unlimitedSubscriptionPolicy, connection);
-                    SubscriptionPolicy goldSubscriptionPolicy =
-                            createDefaultSubscriptionPolicyWithRequestCountLimit
-                                    (GOLD_TIER);
-                    addSubscriptionPolicy(goldSubscriptionPolicy, connection);
-                    SubscriptionPolicy silverSubscriptionPolicy =
-                            createDefaultSubscriptionPolicyWithRequestCountLimit(SILVER_TIER);
-                    addSubscriptionPolicy(silverSubscriptionPolicy, connection);
-                    SubscriptionPolicy bronzeSubscriptionPolicy =
-                            createDefaultSubscriptionPolicyWithRequestCountLimit(BRONZE_TIER);
-                    addSubscriptionPolicy(bronzeSubscriptionPolicy, connection);
-
-                    ApplicationPolicy fiftyPerMinApplicationPolicy =
-                            createDefaultApplicationPolicyWithRequestCountLimit(FIFTY_PER_MIN_TIER);
-                    addApplicationPolicy(fiftyPerMinApplicationPolicy, connection);
-                    ApplicationPolicy twentyPerMinApplicationPolicy =
-                            createDefaultApplicationPolicyWithRequestCountLimit(TWENTY_PER_MIN_TIER);
-                    addApplicationPolicy(twentyPerMinApplicationPolicy, connection);
-                    connection.commit();
-                }
-            } catch (SQLException e) {
-                connection.rollback();
-                throw new APIMgtDAOException(e);
-            } finally {
-                connection.setAutoCommit(DAOUtil.isAutoCommit());
-            }
-        } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
-        }
-    }
-
-    /**
-     * util method for creating a default api policy
-     *
-     * @param tier tier
-     * @return {@link APIPolicy} instance
-     */
-    private static APIPolicy createDefaultApiPolicyWithRequestCountLimit(String tier) {
-        APIPolicy apiPolicy = new APIPolicy(tier);
-        apiPolicy.setDisplayName(tier);
-        apiPolicy.setDescription(tier);
-        apiPolicy.setDefaultQuotaPolicy(new QuotaPolicy());
-        apiPolicy.getDefaultQuotaPolicy().setType(REQUEST_COUNT_TYPE);
-        RequestCountLimit requestCountLimit = new RequestCountLimit(SECONDS_TIMUNIT, 60, 1);
-        apiPolicy.setPipelines(null);
-        apiPolicy.setUuid(UUID.randomUUID().toString());
-        apiPolicy.setDeployed(false);
-        apiPolicy.getDefaultQuotaPolicy().setLimit(requestCountLimit);
-        return apiPolicy;
-    }
-
-    /**
-     * util method for creating a default application policy
-     *
-     * @param tier tier
-     * @return {@link ApplicationPolicy} instance
-     */
-    private static ApplicationPolicy createDefaultApplicationPolicyWithRequestCountLimit(String tier) {
-        ApplicationPolicy applicationPolicy = new ApplicationPolicy(tier);
-        applicationPolicy.setDisplayName(tier);
-        applicationPolicy.setDescription(tier);
-        applicationPolicy.setDefaultQuotaPolicy(new QuotaPolicy());
-        applicationPolicy.getDefaultQuotaPolicy().setType(REQUEST_COUNT_TYPE);
-        RequestCountLimit requestCountLimit = new RequestCountLimit(SECONDS_TIMUNIT, 1, 10);
-        applicationPolicy.setUuid(UUID.randomUUID().toString());
-        applicationPolicy.setDeployed(false);
-        applicationPolicy.getDefaultQuotaPolicy().setLimit(requestCountLimit);
-        return applicationPolicy;
-    }
-
-    /**
-     * util method for creating a default subscription policy
-     *
-     * @param tier tier
-     * @return {@link SubscriptionPolicy} instance
-     */
-    private static SubscriptionPolicy createDefaultSubscriptionPolicyWithRequestCountLimit(String tier) {
-        SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(tier);
-        subscriptionPolicy.setDisplayName(tier);
-        subscriptionPolicy.setDescription(tier);
-        subscriptionPolicy.setDefaultQuotaPolicy(new QuotaPolicy());
-        subscriptionPolicy.getDefaultQuotaPolicy().setType(REQUEST_COUNT_TYPE);
-        RequestCountLimit requestCountLimit = new RequestCountLimit(MINUTE_TIMEUNIT, 1, Integer.MAX_VALUE);
-        subscriptionPolicy.setUuid(UUID.randomUUID().toString());
-        subscriptionPolicy.setDeployed(false);
-        subscriptionPolicy.getDefaultQuotaPolicy().setLimit(requestCountLimit);
-        subscriptionPolicy.setRateLimitCount(0);
-        subscriptionPolicy.setRateLimitTimeUnit(null);
-        subscriptionPolicy.setBillingPlan(null);
-        subscriptionPolicy.setStopOnQuotaReach(false);
-        subscriptionPolicy.setCustomAttributes(new byte[0]);
-        return subscriptionPolicy;
-    }
-
-    /**
-     * Checks if the default policies are already added
-     *
-     * @param connection DB Connection instance
-     * @return true if default policies already exists, else false
-     * @throws SQLException if an error occurs while checking the existence of the default policies
-     */
-    private static boolean isDefaultPoliciesExist(Connection connection) throws SQLException {
-        final String query = "SELECT 1 FROM AM_API_POLICY";
-
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-
-            try (ResultSet rs = statement.executeQuery()) {
-                if (rs.next()) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /**
      * Adding pipelines of API policy to database
      *
      * @param connection connection to db
@@ -1632,7 +1492,6 @@ public class PolicyDAOImpl implements PolicyDAO {
                     conditionGroupIDs
                             .add(resultSet.getInt(APIMgtConstants.ThrottlePolicyConstants.COLUMN_CONDITION_ID));
                 }
-                ;
                 return conditionGroupIDs;
             }
         }
@@ -1860,7 +1719,13 @@ public class PolicyDAOImpl implements PolicyDAO {
             } else if (APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_IP.equals(conditionType)) {
                 valid = true;
             } else if (APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITION_IP_RANGE.equals(conditionType)) {
-                valid = isIPRangeConditionValid(blockConditions.getStartingIP(), blockConditions.getEndingIP());
+                if (isIPRangeConditionValid(blockConditions.getStartingIP(), blockConditions.getEndingIP())) {
+                    valid = true;
+                } else {
+                    throw new APIMgtDAOException(
+                            "Couldn't Save Block Condition Due to Invalid IP Range -> Starting IP : " + blockConditions
+                                    .getStartingIP() + " EndingIP : " + blockConditions.getEndingIP());
+                }
             }
             if (valid) {
                 try (Connection connection = DAOUtil.getConnection();

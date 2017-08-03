@@ -76,7 +76,11 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             ps.setString(1, appId);
             try (ResultSet rs = ps.executeQuery()) {
                 application = this.createApplicationFromResultSet(rs);
-                setApplicationKeys(conn, application, appId);
+                if (application == null) {
+                    throw new APIMgtDAOException("Application is not available in the system.",
+                            ExceptionCodes.APPLICATION_NOT_FOUND);
+                }
+                application.setApplicationKeys(getApplicationKeys(appId));
             }
         } catch (SQLException ex) {
             throw new APIMgtDAOException(ex);
@@ -151,21 +155,6 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     }
 
     /**
-     * Retrieves summary data of all available Applications. This method supports result pagination and
-     * ensures results returned are those that belong to the specified Group ID
-     *
-     * @param offset  The number of results from the beginning that is to be ignored
-     * @param limit   The maximum number of results to be returned after the offset
-     * @param groupID The Group ID to filter results by
-     * @return {@code Application[]} matching results
-     * @throws APIMgtDAOException   If failed to retrieve applications.
-     */
-    @Override
-    public Application[] getApplicationsForGroup(int offset, int limit, String groupID) throws APIMgtDAOException {
-        return new Application[0];
-    }
-
-    /**
      * Retrieves summary data of all available Applications that match the given search criteria. This method supports
      * result pagination and ensuring results returned are for Apps belonging to the specified username
      *
@@ -176,21 +165,6 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     @Override
     public Application[] searchApplicationsForUser(String searchString, String userId)
             throws APIMgtDAOException {
-        //TODO
-        return new Application[0];
-    }
-
-    /**
-     * Retrieves summary data of all available Applications that match the given search criteria. This method supports
-     * result pagination and ensuring results returned are for Apps belonging to the specified Group ID
-     *
-     * @param searchString The search string provided
-     * @param groupID      The Group ID to filter results by
-     * @return An array of matching {@link Application} objects
-     * @throws APIMgtDAOException   If failed to retrieve applications.
-     */
-    @Override
-    public Application[] searchApplicationsForGroup(String searchString, String groupID) throws APIMgtDAOException {
         //TODO
         return new Application[0];
     }
@@ -393,7 +367,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     }
 
     @Override
-    public void addApplicationKeys(String appId, String keyType, OAuthApplicationInfo oAuthAppDetails)
+    public void addApplicationKeys(String appId, String keyType, String consumerKey)
             throws APIMgtDAOException {
         final String addApplicationKeysQuery = "INSERT INTO AM_APP_KEY_MAPPING (APPLICATION_ID, CLIENT_ID, KEY_TYPE) " +
                 "VALUES (?, ?, ?)";
@@ -401,7 +375,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             conn.setAutoCommit(false);
             try (PreparedStatement ps = conn.prepareStatement(addApplicationKeysQuery)) {
                 ps.setString(1, appId);
-                ps.setString(2, oAuthAppDetails.getClientId());
+                ps.setString(2, consumerKey);
                 ps.setString(3, keyType);
                 ps.executeUpdate();
                 conn.commit();
@@ -416,9 +390,51 @@ public class ApplicationDAOImpl implements ApplicationDAO {
         }
     }
 
-    /**
-     * @see ApplicationDAO#getLastUpdatedTimeOfApplication(String)
-     */
+    public List<OAuthApplicationInfo> getApplicationKeys(String appId) throws APIMgtDAOException {
+        final String getApplicationKeysQuery = "SELECT CLIENT_ID, KEY_TYPE FROM AM_APP_KEY_MAPPING " +
+                "WHERE APPLICATION_ID = ?";
+        List<OAuthApplicationInfo> keyList = new ArrayList<>();
+        try (Connection conn = DAOUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(getApplicationKeysQuery)) {
+            ps.setString(1, appId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    OAuthApplicationInfo appKeys = new OAuthApplicationInfo();
+                    appKeys.setClientId(rs.getString("CLIENT_ID"));
+                    appKeys.setKeyType(rs.getString("KEY_TYPE"));
+                    keyList.add(appKeys);
+                }
+            }
+        } catch (SQLException ex) {
+            throw new APIMgtDAOException(ex);
+        }
+        return keyList;
+    }
+
+    @Override
+    public OAuthApplicationInfo getApplicationKeys(String appId, String keyType) throws APIMgtDAOException {
+        final String getApplicationKeysQuery = "SELECT CLIENT_ID FROM AM_APP_KEY_MAPPING " +
+                "WHERE APPLICATION_ID = ? AND KEY_TYPE = ?";
+        try (Connection conn = DAOUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(getApplicationKeysQuery)) {
+            ps.setString(1, appId);
+            ps.setString(2, keyType);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    OAuthApplicationInfo appKeys = new OAuthApplicationInfo();
+                    appKeys.setClientId(rs.getString("CLIENT_ID"));
+                    appKeys.setKeyType(keyType);
+                    return appKeys;
+                } else {
+                    throw new APIMgtDAOException("Application Key mapping not found",
+                            ExceptionCodes.APPLICATION_KEY_MAPPING_NOT_FOUND);
+                }
+            }
+        } catch (SQLException ex) {
+            throw new APIMgtDAOException(ex);
+        }
+    }
+
     @Override
     public String getLastUpdatedTimeOfApplication(String applicationId) throws APIMgtDAOException {
         return EntityDAO.getLastUpdatedTimeOfResourceByUUID(AM_APPLICATION_TABLE_NAME, applicationId);
@@ -444,25 +460,6 @@ public class ApplicationDAOImpl implements ApplicationDAO {
             throw new APIMgtDAOException(ex);
         }
         return applicationList;
-    }
-
-    private void setApplicationKeys(Connection conn, Application application, String applicationId)
-            throws APIMgtDAOException {
-        final String getApplicationKeysQuery =
-                "SELECT CLIENT_ID, KEY_TYPE FROM AM_APP_KEY_MAPPING WHERE " + "APPLICATION_ID = ?";
-        try (PreparedStatement ps = conn.prepareStatement(getApplicationKeysQuery)) {
-            ps.setString(1, applicationId);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    OAuthApplicationInfo appKeys = new OAuthApplicationInfo();
-                    appKeys.setClientId(rs.getString("CLIENT_ID"));
-                    appKeys.setKeyType(rs.getString("KEY_TYPE"));
-                    application.addApplicationKeys(appKeys);
-                }
-            }
-        } catch (SQLException ex) {
-            throw new APIMgtDAOException(ex);
-        }
     }
 
     private List<Application> createApplicationsFromResultSet(ResultSet rs) throws SQLException, APIMgtDAOException {

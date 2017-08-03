@@ -63,12 +63,17 @@ public enum ExceptionCodes implements ErrorHandler {
     COMMENT_LENGTH_EXCEEDED(900326, "Comment length exceeds max limit", 400, "Comment length exceeds allowed maximum "
             + "number of characters"),
     API_TYPE_INVALID(900327, "API Type specified is invalid.", 400, "API Type specified is invalid"),
-    UNSUPPORTED_API_DEFINITION_TYPE(900329, "Unsupported Definition Type", 400,
+    APPLICATION_KEY_MAPPING_NOT_FOUND(900328, "Application Key mapping not found", 404, "Application Key mapping not " +
+            "found"),
+    NO_UPDATE_PERMISSIONS(900329, "No permissions to update API.", 403, "No permissions to update API."),
+    NO_DELETE_PERMISSIONS(900330, "No permissions to delete API.", 403, "No permissions to delete API."),
+    UNSUPPORTED_API_DEFINITION_TYPE(900331, "Unsupported Definition Type", 400,
             "Unsupported Definition Type. Only SWAGGER and WSDL are allowed."),
 
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),
-
+    RESOURCE_NOT_FOUND(900401, "Resource not found", 404, "Requested resource not found"),
+    RESOURCE_RETRIEVAL_FAILED(900402, "Resource retrieval failed", 400, "Resource retrieval failed"),
 
     // Endpoint related codes
     ENDPOINT_NOT_FOUND(900450, "Endpoint Not Found", 404, "Endpoint Not Found"),
@@ -117,10 +122,6 @@ public enum ExceptionCodes implements ErrorHandler {
     KEY_MANAGER_INITIALIZATION_FAILED(900606, "Key Manager initialization failed", 500,
             "Key Manager initialization failed"),
     ROLE_DOES_NOT_EXIST(900607, "Role does not exist in the system", 404, "Role does not exist in the system"),
-    MULTIPLE_ROLES_EXIST(900608, "Multiple roles with the same display name exist in the system", 500, "Multiple " +
-            "roles with the same display name exist in the system"),
-    MULTIPLE_USERS_EXIST(900609, "Multiple users with the same username exist in the system", 500, "Multiple " +
-            "users with the same username exist in the system"),
 
 
     // Labels related codes
@@ -184,7 +185,9 @@ public enum ExceptionCodes implements ErrorHandler {
     ENDPOINT_CONFIG_NOT_FOUND(90070, "Endpoint Config Not found", 404, "Error while retrieving Endpoint " +
             "Configuration"),
     UNSUPPORTED_THROTTLE_CONDITION_TYPE(900975, "Throttle Condition Error", 400, "Throttle Condition type is not "
-            + "supported");
+            + "supported"),
+    INVALID_DOCUMENT_CONTENT_DATA(900976, "Invalid document content data provided", 400, "Mismatch between provided " +
+            "document content data and Document Source Type given");
 
     private final long errorCode;
     private final String errorMessage;

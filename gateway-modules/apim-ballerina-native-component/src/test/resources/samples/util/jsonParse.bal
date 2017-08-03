@@ -1,5 +1,6 @@
 import org.wso2.carbon.apimgt.ballerina.util;
 import ballerina.lang.system;
+import ballerina.lang.errors;
 
 function testParseJson () (boolean) {
     string actual = "{\"enabled\":false,\"type\":null,\"username\":null,\"password\":null}";
@@ -7,18 +8,20 @@ function testParseJson () (boolean) {
     system:println(parsedJson);
     if (parsedJson != null) {
         system:println("object exist");
-        boolean enabled = (boolean)parsedJson.enabled;
+        errors:TypeCastError err;
+        boolean enabled;
+        enabled, err = (boolean)parsedJson.enabled;
         string type;
         string username;
         string password;
         if(parsedJson.type != null){
-            type = (string)parsedJson.type;
+            type, err = (string)parsedJson.type;
         }
         if(parsedJson.username != null){
-            username = (string)parsedJson.username;
+            username, err = (string)parsedJson.username;
         }
         if(parsedJson.password != null){
-            password = (string)parsedJson.password;
+            password, err = (string)parsedJson.password;
         }
         if (!enabled) {
             return true;
@@ -28,4 +31,14 @@ function testParseJson () (boolean) {
     } else {
         return false;
     }
+}
+
+function testInvalidJson () (boolean) {
+    string invalidJsonString = "{Invlid JSON}";
+    try{
+        json parsedJson = util:parse(invalidJsonString);
+    } catch (errors:Error err) {
+        return false;
+    }
+    return true;
 }

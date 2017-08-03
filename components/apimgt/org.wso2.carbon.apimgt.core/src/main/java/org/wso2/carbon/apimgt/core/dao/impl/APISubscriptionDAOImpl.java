@@ -331,12 +331,12 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 "SUBS.API_ID AS API_ID, SUBS.APPLICATION_ID AS APP_ID, SUBS.SUB_STATUS AS SUB_STATUS, " +
                 "SUBS.SUB_TYPE AS SUB_TYPE, APP.NAME AS APP_NAME, APP.APPLICATION_POLICY_ID AS APP_POLICY_ID, " +
                 "APP.APPLICATION_STATUS AS APP_STATUS, " +
-                "APP.CREATED_BY AS APP_OWNER, POLICY.NAME AS SUBS_POLICY, API.PROVIDER AS API_PROVIDER, API.NAME " +
-                "AS API_NAME, API.CONTEXT AS API_CONTEXT, API.VERSION AS API_VERSION " +
+                "APP.CREATED_BY AS APP_OWNER, POLICY.NAME AS SUBS_POLICY, POLICY.UUID AS SUBS_POLICY_ID, " +
+                "API.PROVIDER AS API_PROVIDER, API.NAME AS API_NAME, API.CONTEXT AS API_CONTEXT, " +
+                "API.VERSION AS API_VERSION " +
                 "FROM AM_SUBSCRIPTION SUBS, AM_APPLICATION APP, AM_SUBSCRIPTION_POLICY POLICY, AM_API API " +
                 "WHERE  SUBS.APPLICATION_ID = APP.UUID AND SUBS.TIER_ID = POLICY.UUID " +
-                "AND API.UUID = SUBS.API_ID AND API.PROVIDER = ? " +
-                "AND SUBS.SUB_STATUS NOT IN (?,?)";
+                "AND API.UUID = SUBS.API_ID AND API.PROVIDER = ? ";
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(getSubscriptionsByAPISql)) {
             ps.setString(1, username);
@@ -497,7 +497,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
             try {
                 for (Subscription subscription : subscriptionList) {
                     createSubscription(subscription.getApi().getId(), subscription.getApplication().getId(),
-                            subscription.getId(), subscription.getPolicy().getPolicyName(), subscription.getStatus(),
+                            subscription.getId(), subscription.getPolicy().getUuid(), subscription.getStatus(),
                             conn);
                 }
                 conn.commit();
@@ -586,11 +586,11 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
     /**
      * Validates a subscription
      *
-     * @param apiContext Context of the API
-     * @param apiVersion Version of the API
-     * @param clientId   Client id of the application
+     * @param apiContext  Context of the API
+     * @param apiVersion  Version of the API
+     * @param clientId    Client id of the application
      * @return Subscription Validation Information
-     * @throws APIMgtDAOException If failed to get subscription validation results.
+     * @throws APIMgtDAOException   If failed to get subscription validation results.
      */
     public SubscriptionValidationResult validateSubscription(String apiContext, String apiVersion, String clientId)
             throws APIMgtDAOException {
@@ -604,7 +604,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 "AND SUBS.TIER_ID = POLICY.UUID AND KEYS.APPLICATION_ID = APP.UUID";
         SubscriptionValidationResult validationInfo = new SubscriptionValidationResult(false);
         try (Connection conn = DAOUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(validateSubscriptionSql)) {
+                PreparedStatement ps = conn.prepareStatement(validateSubscriptionSql)) {
             ps.setString(1, apiContext);
             ps.setString(2, apiVersion);
             ps.setString(3, clientId);

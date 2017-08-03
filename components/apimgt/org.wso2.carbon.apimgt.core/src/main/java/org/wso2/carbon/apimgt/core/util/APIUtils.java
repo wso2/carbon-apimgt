@@ -39,6 +39,7 @@ import org.wso2.carbon.lcm.core.impl.LifecycleState;
 
 import java.time.Duration;
 import java.time.temporal.Temporal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -268,6 +269,29 @@ public class APIUtils {
     }
 
     /**
+     * This method is used to construct the aggregate permission list from the aggregate permission integer value
+     *
+     * @param permissionValue - The aggregate permission value for the logged in user
+     * @return The array containing the aggregate permissions for the logged in user
+     */
+    public static List<String> constructApiPermissionsListForValue(Integer permissionValue) {
+        List<String> array = new ArrayList<String>();
+        if ((permissionValue & APIMgtConstants.Permission.READ_PERMISSION) != 0) {
+            array.add(APIMgtConstants.Permission.READ);
+        }
+        if ((permissionValue & APIMgtConstants.Permission.UPDATE_PERMISSION) != 0) {
+            array.add(APIMgtConstants.Permission.UPDATE);
+        }
+        if ((permissionValue & APIMgtConstants.Permission.DELETE_PERMISSION) != 0) {
+            array.add(APIMgtConstants.Permission.DELETE);
+        }
+        if ((permissionValue & APIMgtConstants.Permission.MANAGE_SUBSCRIPTION_PERMISSION) != 0) {
+            array.add(APIMgtConstants.Permission.MANAGE_SUBSCRIPTION);
+        }
+        return array;
+    }
+
+    /**
      * This method returns all available roles
      *
      * @return all available roles
@@ -348,7 +372,8 @@ public class APIUtils {
     }
 
     /**
-     * This method will return map with role names and its permission values.
+     * This method will return map with role names and its permission values. This is not for an API. This is for other
+     * resources of an API.
      *
      * @param permissionJsonString Permission json object a string
      * @return Map of permission values.

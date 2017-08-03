@@ -601,10 +601,10 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#getAPIs()
+     * @see ApiDAO#getAPIs(Set, String)
      */
     @Override
-    public List<API> getAPIs() throws APIMgtDAOException {
+    public List<API> getAPIs(Set<String> roles, String user) throws APIMgtDAOException {
 
         File[] files = new File(storagePath).listFiles();
         List<API> apiList = new ArrayList<>();

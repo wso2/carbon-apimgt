@@ -14,83 +14,8 @@
  * limitations under the License.
  */
 "use strict";
-import SwaggerClient from 'swagger-client'
-import AuthClient from './AuthManager'
-import Utils from './utils'
+import AuthManager from './AuthManager'
 import SingleClient from './SingleClient'
-/**
- * Manage API access keys with corresponding keys,Not related to the keymanager used in backend
- */
-class KeyManager {
-    /**
-     *
-     * @param {string} access_key - Default access key if only one access key is using
-     */
-    constructor(access_key = '') {
-        this._keys = {};
-        this.addKey(access_key);
-    }
-
-    /**
-     *
-     * @param {string} access_key - Access key to be saved
-     * @param {string} scope - Scope of the access key provided above
-     * @returns {string} - Return newly added key in success
-     */
-    addKey(access_key, scope = 'default') {
-        if (!(scope in this._keys)) {
-            this._keys[scope] = access_key;
-            return this._keys[scope];
-        } else {
-            throw 'Key already exist `' + this._keys[scope] + '` for scope `' + scope + '`';
-        }
-
-    }
-
-    /**
-     * Replace existing key with new valid key
-     * @param {string} access_key
-     * @param {string} scope
-     * @returns {string} - Return updated key
-     */
-    updateKey(access_key, scope = 'default') {
-        this._keys[scope] = access_key;
-        return this._keys;
-    }
-
-    /**
-     * Get key by giving the scope of the key
-     * @param {string} scope
-     * @returns {string|null} - If key found return it else null
-     */
-    getKey(scope) {
-        if (scope === undefined) {
-            scope = 'default';
-            if (this.size() > 1) {
-                throw 'Should provide scope parameter when there are more than single key'
-            }
-        }
-        if (scope in this._keys) {
-            return this._keys[scope]
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Retrun the number of keys in the hash
-     * @returns {number} Count of the access keys
-     */
-    size() {
-        var keys_count = 0;
-        for (var index in this._keys) {
-            if (this._keys.hasOwnProperty(index) && this._keys[index]) {
-                keys_count++;
-            }
-        }
-        return keys_count;
-    }
-}
 
 /**
  * An abstract representation of an API
@@ -101,54 +26,7 @@ class API {
      * @param {string} access_key - Access key for invoking the backend REST API call.
      */
     constructor() {
-        let args = {
-            requestInterceptor: this._getRequestInterceptor(),
-            responseInterceptor: this._getResponseInterceptor()
-        };
-        this.client = new SingleClient(args).client;
-    }
-
-    /**
-     * Get the ETag of a given resource key from the session storage
-     * @param key {string} key of resource.
-     * @returns {string} ETag value for the given key
-     */
-    static getETag(key) {
-        return sessionStorage.getItem("etag_" + key);
-    }
-
-    /**
-     * Add an ETag to a given resource key into the session storage
-     * @param key {string} key of resource.
-     * @param etag {string} etag value to be stored against the key
-     */
-    static addETag(key, etag) {
-        sessionStorage.setItem("etag_" + key, etag);
-    }
-
-    _getResponseInterceptor() {
-        let responseInterceptor = {
-            apply: function (data) {
-                if (data.headers.etag) {
-                    API.addETag(data.url, data.headers.etag);
-                }
-                return data;
-            }
-        };
-        return responseInterceptor;
-    }
-
-    _getRequestInterceptor() {
-        let requestInterceptor = {
-            apply: function (data) {
-                if (API.getETag(data.url) && (data.method == "PUT" || data.method == "DELETE"
-                    || data.method == "POST")) {
-                    data.headers["If-Match"] = API.getETag(data.url);
-                }
-                return data;
-            }
-        };
-        return requestInterceptor;
+        this.client = new SingleClient().client;
     }
 
     /**
@@ -158,19 +36,10 @@ class API {
      * @private
      */
     _requestMetaData(data = {}) {
-        AuthClient.refreshTokenOnExpire();
-        let access_key_header = "Bearer " + AuthClient.getUser().getPartialToken(); // Anti-CSRF token
-        let request_meta = {
-            clientAuthorizations: {
-                am_token1: new SwaggerClient.ApiKeyAuthorization("Authorization", access_key_header, "header")
-            },
+        AuthManager.refreshTokenOnExpire(); /* TODO: This should be moved to an interceptor ~tmkb*/
+        return {
             requestContentType: data['Content-Type'] || "application/json"
         };
-        let am_token2 = Utils.getCookie('WSO2_AM_TOKEN_MSF4J'); // This cookie is meant to be send via browser, Hence this will be overridden by browser
-        if (am_token2) {
-            request_meta.clientAuthorizations['am_token2'] = new SwaggerClient.ApiKeyAuthorization("Cookie", "WSO2_AM_TOKEN_MSF4J=" + am_token2, "header")
-        }
-        return request_meta;
     }
 
     /**
@@ -208,24 +77,24 @@ class API {
             payload = {file: api_data, 'Content-Type': "multipart/form-data"};
             promise_create = this.client.then(
                 (client) => {
-                    return client["API (Collection)"].post_apis_import_definition(payload,
-                        this._requestMetaData({'Content-Type': "multipart/form-data"})).catch(AuthClient.unauthorizedErrorHandler);
+                    return client.apis["API (Collection)"].post_apis_import_definition(payload,
+                        this._requestMetaData({'Content-Type': "multipart/form-data"}));
                 }
             );
         } else if (api_data.type === 'swagger-url') {
             payload = {url: api_data.url, 'Content-Type': "multipart/form-data"};
             promise_create = this.client.then(
                 (client) => {
-                    return client["API (Collection)"].post_apis_import_definition(payload,
-                        this._requestMetaData({'Content-Type': "multipart/form-data"})).catch(AuthClient.unauthorizedErrorHandler);
+                    return client.apis["API (Collection)"].post_apis_import_definition(payload,
+                        this._requestMetaData({'Content-Type': "multipart/form-data"}));
                 }
             );
         } else {
             payload = {body: this._updateTemplate(api_data), "Content-Type": "application/json"};
             promise_create = this.client.then(
                 (client) => {
-                    return client["API (Collection)"].post_apis(
-                        payload, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+                    return client.apis["API (Collection)"].post_apis(
+                        payload, this._requestMetaData());
                 }
             );
         }
@@ -279,7 +148,7 @@ class API {
     getAll(callback = null) {
         var promise_get_all = this.client.then(
             (client) => {
-                return client["API (Collection)"].get_apis({}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+                return client.apis["API (Collection)"].get_apis({}, this._requestMetaData());
             }
         );
         if (callback) {
@@ -298,8 +167,8 @@ class API {
     get(id, callback = null) {
         var promise_get = this.client.then(
             (client) => {
-                return client["API (Individual)"].get_apis_apiId(
-                    {apiId: id}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+                return client.apis["API (Individual)"].get_apis__apiId_(
+                    {apiId: id}, this._requestMetaData());
             }
         );
         if (callback) {
@@ -319,9 +188,9 @@ class API {
     createNewAPIVersion(id, version, callback = null) {
         var promise_copy_api = this.client.then(
             (client) => {
-                return client["API (Individual)"].post_apis_copy_api(
+                return client.apis["API (Individual)"].post_apis_copy_api(
                     {apiId: id, newVersion: version},
-                    this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+                    this._requestMetaData());
             }
         );
         if (callback) {
@@ -340,8 +209,8 @@ class API {
     getSwagger(id, callback = null) {
         var promise_get = this.client.then(
             (client) => {
-                return client["API (Individual)"].get_apis_apiId_swagger(
-                    {apiId: id}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+                return client.apis["API (Individual)"].get_apis__apiId_swagger(
+                    {apiId: id}, this._requestMetaData());
             }
         );
         if (callback) {
@@ -363,8 +232,8 @@ class API {
                     "endpointId": JSON.stringify(swagger),
                     "Content-Type": "multipart/form-data"
                 };
-                return client["API (Individual)"].put_apis_apiId_swagger(
-                    payload, this._requestMetaData({'Content-Type': "multipart/form-data"})).catch(AuthClient.unauthorizedErrorHandler);
+                return client.apis["API (Individual)"].put_apis_apiId_swagger(
+                    payload, this._requestMetaData({'Content-Type': "multipart/form-data"}));
             }
         );
         return promised_update;
@@ -378,8 +247,8 @@ class API {
     policies(tier_level) {
         var promise_policies = this.client.then(
             (client) => {
-                return client["Throttling Tier (Collection)"].get_policies_tierLevel(
-                    {tierLevel: 'subscription'}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+                return client.apis["Throttling Tier (Collection)"].get_policies__tierLevel_(
+                    {tierLevel: 'subscription'}, this._requestMetaData());
             }
         );
         return promise_policies;
@@ -394,8 +263,8 @@ class API {
     deleteAPI(id) {
         var promised_delete = this.client.then(
             (client) => {
-                return client["API (Individual)"].delete_apis_apiId(
-                    {apiId: id}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+                return client.apis["API (Individual)"].delete_apis__apiId_(
+                    {apiId: id}, this._requestMetaData());
             }
         );
         return promised_delete;
@@ -409,8 +278,8 @@ class API {
     getLcState(id, callback = null) {
         var promise_lc_get = this.client.then(
             (client) => {
-                return client["API (Individual)"].get_apis_apiId_lifecycle(
-                    {apiId: id}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+                return client.apis["API (Individual)"].get_apis__apiId__lifecycle(
+                    {apiId: id}, this._requestMetaData());
             }
         );
         if (callback) {
@@ -428,8 +297,8 @@ class API {
     getLcHistory(id, callback = null) {
         var promise_lc_history_get = this.client.then(
             (client) => {
-                return client["API (Individual)"].get_apis_apiId_lifecycle_history(
-                    {apiId: id}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+                return client.apis["API (Individual)"].get_apis__apiId__lifecycle_history(
+                    {apiId: id}, this._requestMetaData());
             }
         );
         if (callback) {
@@ -449,8 +318,8 @@ class API {
         var payload = {action: state, apiId: id, lifecycleChecklist: checkedItems, "Content-Type": "application/json"};
         var promise_lc_update = this.client.then(
             (client) => {
-                return client["API (Individual)"].post_apis_change_lifecycle(
-                    payload, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+                return client.apis["API (Individual)"].post_apis_change_lifecycle(
+                    payload, this._requestMetaData());
             }
         );
         if (callback) {
@@ -468,8 +337,8 @@ class API {
     cleanupPendingTask(id, callback = null) {
         var promise_deletePendingTask = this.client.then(
             (client) => {
-                return client["API (Individual)"].delete_apis_apiId_lifecycle_lifecycle_pending_task({apiId: id},
-                    this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+                return client.apis["API (Individual)"].delete_apis_apiId_lifecycle_lifecycle_pending_task({apiId: id},
+                    this._requestMetaData());
             }
         );
         return promise_deletePendingTask;
@@ -482,9 +351,8 @@ class API {
     update(api) {
         var promised_update = this.client.then(
             (client) => {
-                let payload = {apiId: api.id, body: api, "Content-Type": "application/json"};
-                return client["API (Individual)"].put_apis_apiId(
-                    payload, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+                let payload = {apiId: api.id, body: api};
+                return client.apis["API (Individual)"].put_apis__apiId_(payload);
             }
         );
         return promised_update;
@@ -498,10 +366,10 @@ class API {
     subscriptions(id, callback = null) {
         var promise_subscription = this.client.then(
             (client) => {
-                return client["Subscription (Collection)"].get_subscriptions(
+                return client.apis["Subscription (Collection)"].get_subscriptions(
                     {apiId: id},
                     this._requestMetaData()
-                ).catch(AuthClient.unauthorizedErrorHandler);
+                );
             }
         );
         if (callback) {
@@ -520,10 +388,10 @@ class API {
     blockSubscriptions(id, state, callback = null) {
         var promise_subscription = this.client.then(
             (client) => {
-                return client["Subscription (Individual)"].post_subscriptions_block_subscription(
+                return client.apis["Subscription (Individual)"].post_subscriptions_block_subscription(
                     {subscriptionId: id, blockState: state},
                     this._requestMetaData()
-                ).catch(AuthClient.unauthorizedErrorHandler);
+                );
             }
         );
         if (callback) {
@@ -541,10 +409,10 @@ class API {
     unblockSubscriptions(id, callback = null) {
         var promise_subscription = this.client.then(
             (client) => {
-                return client["Subscription (Individual)"].post_subscriptions_unblock_subscription(
+                return client.apis["Subscription (Individual)"].post_subscriptions_unblock_subscription(
                     {subscriptionId: id},
                     this._requestMetaData()
-                ).catch(AuthClient.unauthorizedErrorHandler);
+                );
             }
         );
         if (callback) {
@@ -563,10 +431,10 @@ class API {
         var promised_addEndpoint = this.client.then(
             (client) => {
                 let payload = {body: body, "Content-Type": "application/json"};
-                return client["Endpoint (Collection)"].post_endpoints(
+                return client.apis["Endpoint (Collection)"].post_endpoints(
                     payload, this._requestMetaData());
             }
-        ).catch(AuthClient.unauthorizedErrorHandler);
+        );
 
         return promised_addEndpoint;
     }
@@ -579,8 +447,11 @@ class API {
     deleteEndpoint(id) {
         var promised_delete = this.client.then(
             (client) => {
-                return client["Endpoint (individual)"].delete_endpoints_endpointId(
-                    {endpointId: id,'Content-Type': 'application/json'}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+                return client.apis["Endpoint (individual)"].delete_endpoints__endpointId_(
+                    {
+                        endpointId: id,
+                        'Content-Type': 'application/json'
+                    }, this._requestMetaData());
             }
         );
         return promised_delete;
@@ -593,8 +464,8 @@ class API {
     getEndpoints() {
         return this.client.then(
             (client) => {
-                return client["Endpoint (Collection)"].get_endpoints(
-                    {}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+                return client.apis["Endpoint (Collection)"].get_endpoints(
+                    {}, this._requestMetaData());
             }
         );
     }
@@ -607,11 +478,11 @@ class API {
     getEndpoint(id) {
         return this.client.then(
             (client) => {
-                return client["Endpoint (individual)"].get_endpoints_endpointId(
+                return client.apis["Endpoint (individual)"].get_endpoints_endpointId(
                     {
                         endpointId: id,
                         'Content-Type': 'application/json'
-                    }, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+                    }, this._requestMetaData());
             }
         );
     }
@@ -624,13 +495,13 @@ class API {
     updateEndpoint(data) {
         return this.client.then(
             (client) => {
-                return client["Endpoint (individual)"].put_endpoints_endpointId(
+                return client.apis["Endpoint (individual)"].put_endpoints_endpointId(
                     {
                         endpointId: data.id,
                         body: data,
                         'Content-Type': 'application/json'
-                    }, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
-            }).catch(AuthClient.unauthorizedErrorHandler);
+                    }, this._requestMetaData());
+            });
     }
 
 
@@ -639,14 +510,17 @@ class API {
         var promised_addDocument = this.client.then(
             (client) => {
                 let payload = {apiId: api_id, body: body, "Content-Type": "application/json"};
-                return client["Document (Collection)"].post_apis_apiId_documents(
+                return client.apis["Document (Collection)"].post_apis_apiId_documents(
                     payload, this._requestMetaData());
             }
-        ).catch(AuthClient.unauthorizedErrorHandler);
+        );
 
         return promised_addDocument;
     }
 
+    /*
+     Add a File resource to a document
+     */
     addFileToDocument(api_id, docId, fileToDocument) {
         var promised_addFileToDocument = this.client.then(
             (client) => {
@@ -656,36 +530,66 @@ class API {
                     file: fileToDocument,
                     "Content-Type": "application/json"
                 };
-                return client["Document (Individual)"].post_apis_apiId_documents_documentId_content(
+                return client.apis["Document (Individual)"].post_apis_apiId_documents_documentId_content(
                     payload, this._requestMetaData({"Content-Type": "multipart/form-data"}));
             }
-        ).catch(AuthClient.unauthorizedErrorHandler);
+        );
 
         return promised_addFileToDocument;
+    }
+
+    /*
+     Add inline content to a INLINE type document
+     */
+    addInlineContentToDocument(api_id, doc_id, inline_content) {
+        var promised_addInlineContentToDocument = this.client.then(
+            (client) => {
+                let payload = {
+                    apiId: api_id,
+                    documentId: doc_id,
+                    inlineContent: inline_content,
+                    "Content-Type": "application/json"
+                };
+                return client.apis["Document (Individual)"].post_apis_apiId_documents_documentId_content(
+                    payload, this._requestMetaData({"Content-Type": "multipart/form-data"}));
+            }
+        );
+        return promised_addInlineContentToDocument;
     }
 
     getFileForDocument(api_id, docId) {
         var promised_getDocContent = this.client.then(
             (client) => {
                 let payload = {apiId: api_id, documentId: docId, "Accept": "application/octet-stream"};
-                return client["Document (Individual)"].get_apis_apiId_documents_documentId_content(
+                return client.apis["Document (Individual)"].get_apis__apiId_documents_documentId_content(
                     payload, this._requestMetaData({"Content-Type": "multipart/form-data"}));
             }
-        ).catch(AuthClient.unauthorizedErrorHandler);
-
+        );
         return promised_getDocContent;
-
     }
 
+    /*
+     Get the inline content of a given document
+     */
+    getInlineContentOfDocument(api_id, docId) {
+        var promised_getDocContent = this.client.then(
+            (client) => {
+                let payload = {apiId: api_id, documentId: docId, "Accept": "text/plain"};
+                return client.apis["Document (Individual)"].get_apis__apiId_documents_documentId_content(
+                    payload, this._requestMetaData());
+            }
+        );
+        return promised_getDocContent;
+    }
 
     getDocuments(api_id, callback) {
         var promise_get_all = this.client.then(
             (client) => {
-                return client["Document (Collection)"].get_apis_apiId_documents({apiId: api_id}, this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+                return client.apis["Document (Collection)"].get_apis__apiId_documents({apiId: api_id}, this._requestMetaData());
             }
         );
         if (callback) {
-            return promise_get_all.catch(AuthClient.unauthorizedErrorHandler).then(callback);
+            return promise_get_all.then(callback);
         } else {
             return promise_get_all;
         }
@@ -697,24 +601,24 @@ class API {
                 let payload = {
                     apiId: api_id,
                     body: body,
-                    documentId: $('#docId').val(),
+                    documentId: docId,
                     "Content-Type": "application/json"
                 };
-                return client["Document (Individual)"].put_apis_apiId_documents_documentId(
+                return client.apis["Document (Individual)"].put_apis_apiId_documents_documentId(
                     payload, this._requestMetaData());
             }
-        ).catch(AuthClient.unauthorizedErrorHandler);
+        );
         return promised_updateDocument;
     }
 
     getDocument(api_id, docId, callback) {
         var promise_get = this.client.then(
             (client) => {
-                return client["Document (Individual)"].get_apis_apiId_documents_documentId({
+                return client.apis["Document (Individual)"].get_apis__apiId_documents_documentId({
                         apiId: api_id,
                         documentId: docId
                     },
-                    this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+                    this._requestMetaData());
             }
         );
         return promise_get;
@@ -724,11 +628,11 @@ class API {
     deleteDocument(api_id, document_id) {
         var promise_deleteDocument = this.client.then(
             (client) => {
-                return client["Document (Individual)"].delete_apis_apiId_documents_documentId({
+                return client.apis["Document (Individual)"].delete_apis_apiId_documents_documentId({
                         apiId: api_id,
                         documentId: document_id
                     },
-                    this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+                    this._requestMetaData());
             }
         );
         return promise_deleteDocument;
@@ -741,8 +645,8 @@ class API {
     labels() {
         var promise_labels = this.client.then(
             (client) => {
-                return client["Label (Collection)"].get_labels({},
-                    this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
+                return client.apis["Label (Collection)"].get_labels({},
+                    this._requestMetaData());
             }
         );
         return promise_labels;

@@ -21,6 +21,7 @@
 package org.wso2.carbon.apimgt.core.impl;
 
 import org.mockito.Mockito;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.api.APIGateway;
@@ -31,79 +32,118 @@ import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
+import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class APIMgtAdminServiceImplTestCase {
 
     private static final Integer LIMIT = 2;
     private static final String API_VERSION = "1.0.0";
+    private static final String API_ID = "erbde56e-4512-498d-b6dc-85a6f1f8b058";
     private static final String API_CONTEXT = "/testContext";
-    private static final String POLICY_LEVEL = "policyLevel";
     private static final String POLICY_NAME = "policyName";
 
     @Test(description = "Get api subscriptions")
     public void testGetAPISubscriptions() throws APIManagementException {
-        APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
+        APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
         APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforAPISubscriptionDAO(apiSubscriptionDAO);
-        when(apiSubscriptionDAO.getAPISubscriptionsOfAPIForValidation(LIMIT))
-                .thenReturn(new ArrayList<>());
+        Mockito.when(apiSubscriptionDAO.getAPISubscriptionsOfAPIForValidation(LIMIT)).thenReturn(new ArrayList<>());
         adminService.getAPISubscriptions(LIMIT);
-        verify(apiSubscriptionDAO, times(1)).getAPISubscriptionsOfAPIForValidation(LIMIT);
+        Mockito.verify(apiSubscriptionDAO, Mockito.times(1)).getAPISubscriptionsOfAPIForValidation(LIMIT);
     }
 
     @Test(description = "Get api subscriptions of API")
     public void testGetAPISubscriptionsOfApi() throws APIManagementException {
-        APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
+        APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
         APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforAPISubscriptionDAO(apiSubscriptionDAO);
-        when(apiSubscriptionDAO.getAPISubscriptionsOfAPIForValidation(API_CONTEXT, API_VERSION))
+        Mockito.when(apiSubscriptionDAO.getAPISubscriptionsOfAPIForValidation(API_CONTEXT, API_VERSION))
                 .thenReturn(new ArrayList<SubscriptionValidationData>());
         adminService.getAPISubscriptionsOfApi(API_CONTEXT, API_VERSION);
-        verify(apiSubscriptionDAO, times(1)).getAPISubscriptionsOfAPIForValidation(API_CONTEXT, API_VERSION);
+        Mockito.verify(apiSubscriptionDAO, Mockito.times(1))
+                .getAPISubscriptionsOfAPIForValidation(API_CONTEXT, API_VERSION);
     }
 
-    @Test(description = "Get policy")
+    @Test(description = "Get policy by level and name")
     public void testGetPolicy() throws APIManagementException {
-        PolicyDAO policyDAO = mock(PolicyDAO.class);
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
         APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforPolicyDAO(policyDAO);
-        Policy policy = mock(Policy.class);
-        when(policyDAO.getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, POLICY_NAME))
+        Policy policy = Mockito.mock(Policy.class);
+        Mockito.when(policyDAO.getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, POLICY_NAME))
                 .thenReturn(policy);
         adminService.getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, POLICY_NAME);
-        verify(policyDAO, times(1)).getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, POLICY_NAME);
+        Mockito.verify(policyDAO, Mockito.times(1))
+                .getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, POLICY_NAME);
+
+        //Error path
+        Mockito.when(policyDAO.getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, POLICY_NAME))
+                .thenThrow(APIMgtDAOException.class);
+        try {
+            adminService.getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, POLICY_NAME);
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(),
+                    "Couldn't retrieve Throttle Policy with level: " + APIMgtAdminService.PolicyLevel.application.name()
+                            + ", name: " + POLICY_NAME);
+        }
     }
 
     @Test(description = "Get all policies by level")
     public void testGetAllPoliciesByLevel() throws APIManagementException {
-        PolicyDAO policyDAO = mock(PolicyDAO.class);
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
         APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforPolicyDAO(policyDAO);
-        Policy policy = mock(Policy.class);
+        Policy policy = Mockito.mock(Policy.class);
         List<Policy> policyList = new ArrayList<>();
         policyList.add(policy);
-        when(policyDAO.getPoliciesByLevel(APIMgtAdminService.PolicyLevel.application)).thenReturn(policyList);
+        Mockito.when(policyDAO.getPoliciesByLevel(APIMgtAdminService.PolicyLevel.application)).thenReturn(policyList);
         adminService.getPoliciesByLevel(APIMgtAdminService.PolicyLevel.application);
-        verify(policyDAO, times(1)).getPoliciesByLevel(APIMgtAdminService.PolicyLevel.application);
+        Mockito.verify(policyDAO, Mockito.times(1)).getPoliciesByLevel(APIMgtAdminService.PolicyLevel.application);
+
+        //Error path
+        Mockito.when(policyDAO.getPoliciesByLevel(APIMgtAdminService.PolicyLevel.application))
+                .thenThrow(APIMgtDAOException.class);
+        try {
+            adminService.getPoliciesByLevel(APIMgtAdminService.PolicyLevel.application);
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(),
+                    "Couldn't retrieve Throttle Policies with level: " + APIMgtAdminService.PolicyLevel.application
+                            .name());
+        }
     }
 
     @Test(description = "Add policy")
     public void testAddPolicy() throws APIManagementException {
-        PolicyDAO policyDAO = mock(PolicyDAO.class);
-        APIGateway apiGateway = mock(APIGateway.class);
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        APIGateway apiGateway = Mockito.mock(APIGateway.class);
         APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforPolicyDAO(policyDAO, apiGateway);
-        APIPolicy policy = mock(APIPolicy.class);
+        APIPolicy policy = SampleTestObjectCreator.createDefaultAPIPolicy();
         adminService.addApiPolicy(policy);
-        verify(policyDAO, times(1)).addApiPolicy(
-                policy);
+        Mockito.verify(policyDAO, Mockito.times(1)).addApiPolicy(policy);
+
+        //Error path
+        Mockito.doThrow(APIMgtDAOException.class).when(policyDAO).addApiPolicy(policy);
+        try {
+            adminService.addApiPolicy(policy);
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "Couldn't add API policy for uuid: " + policy.getUuid());
+        }
+    }
+
+    @Test(description = "Add policy when policy id is null")
+    public void testAddPolicyWhenPolicyIdNull() throws APIManagementException {
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        APIGateway apiGateway = Mockito.mock(APIGateway.class);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforPolicyDAO(policyDAO, apiGateway);
+        APIPolicy policy = SampleTestObjectCreator.createDefaultAPIPolicy();
+        policy.setUuid(null);
+        adminService.addApiPolicy(policy);
+        Mockito.verify(policyDAO, Mockito.times(1)).addApiPolicy(policy);
     }
 
     @Test(description = "Delete a label")
@@ -186,6 +226,397 @@ public class APIMgtAdminServiceImplTestCase {
         Mockito.verify(labelDAO, Mockito.times(1)).updateLabel(label1);
     }
 
+    @Test(description = "Test add application policy")
+    public void testAddApplicationPolicy() throws APIManagementException {
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        APIGateway apiGateway = Mockito.mock(APIGateway.class);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforPolicyDAO(policyDAO, apiGateway);
+        ApplicationPolicy policy = SampleTestObjectCreator.createDefaultApplicationPolicy();
+        adminService.addApplicationPolicy(policy);
+        Mockito.verify(policyDAO, Mockito.times(1)).addApplicationPolicy(policy);
+
+        //Error path
+        Mockito.doThrow(APIMgtDAOException.class).when(policyDAO).addApplicationPolicy(policy);
+        try {
+            adminService.addApplicationPolicy(policy);
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "Couldn't add Application for uuid: " + policy.getUuid());
+        }
+    }
+
+    @Test(description = "Test add application policy when the policy ID is null")
+    public void testAddApplicationPolicyWhenPolicyIdNull() throws APIManagementException {
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        APIGateway apiGateway = Mockito.mock(APIGateway.class);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforPolicyDAO(policyDAO, apiGateway);
+        ApplicationPolicy policy = SampleTestObjectCreator.createDefaultApplicationPolicy();
+        policy.setUuid(null);
+        adminService.addApplicationPolicy(policy);
+        Mockito.verify(policyDAO, Mockito.times(1)).addApplicationPolicy(policy);
+    }
+
+    @Test(description = "Test add subscription policy")
+    public void testAddSubscriptionPolicy() throws APIManagementException {
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        APIGateway apiGateway = Mockito.mock(APIGateway.class);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforPolicyDAO(policyDAO, apiGateway);
+        SubscriptionPolicy policy = SampleTestObjectCreator.createDefaultSubscriptionPolicy();
+        adminService.addSubscriptionPolicy(policy);
+        Mockito.verify(policyDAO, Mockito.times(1)).addSubscriptionPolicy(policy);
+
+        //Error path
+        Mockito.doThrow(APIMgtDAOException.class).when(policyDAO).addSubscriptionPolicy(policy);
+        try {
+            adminService.addSubscriptionPolicy(policy);
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "Couldn't add Subscription policy for uuid: " + policy.getUuid());
+        }
+    }
+
+    @Test(description = "Test add subscription policy when the policy ID is null")
+    public void testAddSubscriptionPolicyWhenPolicyIdNull() throws APIManagementException {
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        APIGateway apiGateway = Mockito.mock(APIGateway.class);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforPolicyDAO(policyDAO, apiGateway);
+        SubscriptionPolicy policy = SampleTestObjectCreator.createDefaultSubscriptionPolicy();
+        policy.setUuid(null);
+        adminService.addSubscriptionPolicy(policy);
+        Mockito.verify(policyDAO, Mockito.times(1)).addSubscriptionPolicy(policy);
+    }
+
+    @Test(description = "Test update API policy")
+    public void testUpdateApiPolicy() throws APIManagementException {
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        APIGateway apiGateway = Mockito.mock(APIGateway.class);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforPolicyDAO(policyDAO, apiGateway);
+        APIPolicy apiPolicy = SampleTestObjectCreator.createDefaultAPIPolicy();
+        adminService.updateApiPolicy(apiPolicy);
+        Mockito.verify(policyDAO, Mockito.times(1)).updateApiPolicy(apiPolicy);
+
+        //Error path
+        Mockito.doThrow(APIMgtDAOException.class).when(policyDAO).updateApiPolicy(apiPolicy);
+        try {
+            adminService.updateApiPolicy(apiPolicy);
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "Couldn't update API policy for uuid: " + apiPolicy.getUuid());
+        }
+    }
+
+    @Test(description = "Test update subscription policy")
+    public void testUpdateSubscriptionPolicy() throws APIManagementException {
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        APIGateway apiGateway = Mockito.mock(APIGateway.class);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforPolicyDAO(policyDAO, apiGateway);
+        SubscriptionPolicy subscriptionPolicy = SampleTestObjectCreator.createDefaultSubscriptionPolicy();
+        adminService.updateSubscriptionPolicy(subscriptionPolicy);
+        Mockito.verify(policyDAO, Mockito.times(1)).updateSubscriptionPolicy(subscriptionPolicy);
+
+        //Error path
+        Mockito.doThrow(APIMgtDAOException.class).when(policyDAO).updateSubscriptionPolicy(subscriptionPolicy);
+        try {
+            adminService.updateSubscriptionPolicy(subscriptionPolicy);
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(),
+                    "Couldn't update Subscription policy for uuid: " + subscriptionPolicy.getUuid());
+        }
+    }
+
+    @Test(description = "Test update application policy")
+    public void testUpdateApplicationPolicy() throws APIManagementException {
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        APIGateway apiGateway = Mockito.mock(APIGateway.class);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforPolicyDAO(policyDAO, apiGateway);
+        ApplicationPolicy applicationPolicy = SampleTestObjectCreator.createDefaultApplicationPolicy();
+        adminService.updateApplicationPolicy(applicationPolicy);
+        Mockito.verify(policyDAO, Mockito.times(1)).updateApplicationPolicy(applicationPolicy);
+
+        //Error path
+        Mockito.doThrow(APIMgtDAOException.class).when(policyDAO).updateApplicationPolicy(applicationPolicy);
+        try {
+            adminService.updateApplicationPolicy(applicationPolicy);
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(),
+                    "Couldn't update Application policy for uuid: " + applicationPolicy.getUuid());
+        }
+    }
+
+    @Test(description = "Test delete policy")
+    public void testDeletePolicy() throws APIManagementException {
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        APIGateway apiGateway = Mockito.mock(APIGateway.class);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforPolicyDAO(policyDAO, apiGateway);
+        APIPolicy apiPolicy = SampleTestObjectCreator.createDefaultAPIPolicy();
+        Mockito.when(policyDAO.getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api, apiPolicy.getPolicyName()))
+                .thenReturn(apiPolicy);
+        adminService.deletePolicy(apiPolicy.getPolicyName(), APIMgtAdminService.PolicyLevel.api);
+        Mockito.verify(policyDAO, Mockito.times(1))
+                .getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api, apiPolicy.getPolicyName());
+        Mockito.verify(policyDAO, Mockito.times(1))
+                .deletePolicy(APIMgtAdminService.PolicyLevel.api, apiPolicy.getPolicyName());
+
+        //Error path
+        Mockito.doThrow(APIMgtDAOException.class).when(policyDAO)
+                .deletePolicy(APIMgtAdminService.PolicyLevel.api, apiPolicy.getPolicyName());
+        try {
+            adminService.deletePolicy(apiPolicy.getPolicyName(), APIMgtAdminService.PolicyLevel.api);
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(),
+                    "Couldn't delete policy with name: " + apiPolicy.getPolicyName() + ", level: "
+                            + APIMgtAdminService.PolicyLevel.api);
+        }
+    }
+
+    @Test(description = "Test delete policy by UUID")
+    public void testDeletePolicyByUuid() throws APIManagementException {
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        APIGateway apiGateway = Mockito.mock(APIGateway.class);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforPolicyDAO(policyDAO, apiGateway);
+        APIPolicy apiPolicy = SampleTestObjectCreator.createDefaultAPIPolicy();
+        adminService.deletePolicyByUuid(apiPolicy.getUuid(), APIMgtAdminService.PolicyLevel.api);
+
+        //Error path
+        Mockito.doThrow(APIMgtDAOException.class).when(policyDAO)
+                .deletePolicyByUuid(APIMgtAdminService.PolicyLevel.api, apiPolicy.getUuid());
+        try {
+            adminService.deletePolicyByUuid(apiPolicy.getUuid(), APIMgtAdminService.PolicyLevel.api);
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "Couldn't delete policy with id: " + apiPolicy.getUuid() + ", level: "
+                    + APIMgtAdminService.PolicyLevel.api);
+        }
+    }
+
+    @Test(description = "Test getting API policy")
+    public void testGetApiPolicy() throws APIManagementException {
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforPolicyDAO(policyDAO);
+        APIPolicy apiPolicy = SampleTestObjectCreator.createDefaultAPIPolicy();
+        Mockito.when(policyDAO.getApiPolicy(apiPolicy.getPolicyName())).thenReturn(apiPolicy);
+        adminService.getApiPolicy(apiPolicy.getPolicyName());
+        Mockito.verify(policyDAO, Mockito.times(1)).getApiPolicy(apiPolicy.getPolicyName());
+
+        //Error path
+        Mockito.when(policyDAO.getApiPolicy(apiPolicy.getPolicyName())).thenThrow(APIMgtDAOException.class);
+        try {
+            adminService.getApiPolicy(apiPolicy.getPolicyName());
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "Couldn't retrieve API policy with name: " + apiPolicy.getPolicyName());
+        }
+    }
+
+    @Test(description = "Test getting Application policy")
+    public void testGetApplicationPolicy() throws APIManagementException {
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforPolicyDAO(policyDAO);
+        ApplicationPolicy applicationPolicy = SampleTestObjectCreator.createDefaultApplicationPolicy();
+        Mockito.when(policyDAO.getApplicationPolicy(applicationPolicy.getPolicyName())).thenReturn(applicationPolicy);
+        adminService.getApplicationPolicy(applicationPolicy.getPolicyName());
+        Mockito.verify(policyDAO, Mockito.times(1)).getApplicationPolicy(applicationPolicy.getPolicyName());
+
+        //Error path
+        Mockito.when(policyDAO.getApplicationPolicy(applicationPolicy.getPolicyName()))
+                .thenThrow(APIMgtDAOException.class);
+        try {
+            adminService.getApplicationPolicy(applicationPolicy.getPolicyName());
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(),
+                    "Couldn't retrieve Application policy with name: " + applicationPolicy.getPolicyName());
+        }
+    }
+
+    @Test(description = "Test getting Subscription policy")
+    public void testGetSubscriptionPolicy() throws APIManagementException {
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforPolicyDAO(policyDAO);
+        SubscriptionPolicy subscriptionPolicy = SampleTestObjectCreator.createDefaultSubscriptionPolicy();
+        Mockito.when(policyDAO.getSubscriptionPolicy(subscriptionPolicy.getPolicyName()))
+                .thenReturn(subscriptionPolicy);
+        adminService.getSubscriptionPolicy(subscriptionPolicy.getPolicyName());
+        Mockito.verify(policyDAO, Mockito.times(1)).getSubscriptionPolicy(subscriptionPolicy.getPolicyName());
+
+        //Error path
+        Mockito.when(policyDAO.getSubscriptionPolicy(subscriptionPolicy.getPolicyName()))
+                .thenThrow(APIMgtDAOException.class);
+        try {
+            adminService.getSubscriptionPolicy(subscriptionPolicy.getPolicyName());
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(),
+                    "Couldn't retrieve Subscription policy with name: " + subscriptionPolicy.getPolicyName());
+        }
+    }
+
+    @Test(description = "Test getting API policy by UUID")
+    public void testGetApiPolicyByUuid() throws APIManagementException {
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforPolicyDAO(policyDAO);
+        APIPolicy apiPolicy = SampleTestObjectCreator.createDefaultAPIPolicy();
+        Mockito.when(policyDAO.getApiPolicyByUuid(apiPolicy.getUuid())).thenReturn(apiPolicy);
+        adminService.getApiPolicyByUuid(apiPolicy.getUuid());
+        Mockito.verify(policyDAO, Mockito.times(1)).getApiPolicyByUuid(apiPolicy.getUuid());
+
+        //Error path
+        Mockito.when(policyDAO.getApiPolicyByUuid(apiPolicy.getUuid())).thenThrow(APIMgtDAOException.class);
+        try {
+            adminService.getApiPolicyByUuid(apiPolicy.getUuid());
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "Couldn't retrieve API policy with id: " + apiPolicy.getUuid());
+        }
+    }
+
+    @Test(description = "Test getting Application policy by UUID")
+    public void testGetApplicationPolicyByUuid() throws APIManagementException {
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforPolicyDAO(policyDAO);
+        ApplicationPolicy applicationPolicy = SampleTestObjectCreator.createDefaultApplicationPolicy();
+        Mockito.when(policyDAO.getApplicationPolicyByUuid(applicationPolicy.getUuid())).thenReturn(applicationPolicy);
+        adminService.getApplicationPolicyByUuid(applicationPolicy.getUuid());
+        Mockito.verify(policyDAO, Mockito.times(1)).getApplicationPolicyByUuid(applicationPolicy.getUuid());
+
+        //Error path
+        Mockito.when(policyDAO.getApplicationPolicyByUuid(applicationPolicy.getUuid()))
+                .thenThrow(APIMgtDAOException.class);
+        try {
+            adminService.getApplicationPolicyByUuid(applicationPolicy.getUuid());
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(),
+                    "Couldn't retrieve Application policy with id: " + applicationPolicy.getUuid());
+        }
+    }
+
+    @Test(description = "Test getting Subscription policy by UUID")
+    public void testGetSubscriptionPolicyByUuid() throws APIManagementException {
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforPolicyDAO(policyDAO);
+        SubscriptionPolicy subscriptionPolicy = SampleTestObjectCreator.createDefaultSubscriptionPolicy();
+        Mockito.when(policyDAO.getSubscriptionPolicyByUuid(subscriptionPolicy.getUuid()))
+                .thenReturn(subscriptionPolicy);
+        adminService.getSubscriptionPolicyByUuid(subscriptionPolicy.getUuid());
+        Mockito.verify(policyDAO, Mockito.times(1)).getSubscriptionPolicyByUuid(subscriptionPolicy.getUuid());
+
+        //Error path
+        Mockito.when(policyDAO.getSubscriptionPolicyByUuid(subscriptionPolicy.getUuid()))
+                .thenThrow(APIMgtDAOException.class);
+        try {
+            adminService.getSubscriptionPolicyByUuid(subscriptionPolicy.getUuid());
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(),
+                    "Couldn't retrieve Subscription policy with id: " + subscriptionPolicy.getUuid());
+        }
+    }
+
+    @Test(description = "Test getting all API Policies")
+    public void testGetApiPolicies() throws APIManagementException {
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforPolicyDAO(policyDAO);
+        adminService.getApiPolicies();
+        Mockito.verify(policyDAO, Mockito.times(1)).getApiPolicies();
+
+        //Error path
+        Mockito.when(policyDAO.getApiPolicies()).thenThrow(APIMgtDAOException.class);
+        try {
+            adminService.getApiPolicies();
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "Couldn't retrieve API policies");
+        }
+    }
+
+    @Test(description = "Test getting all Application Policies")
+    public void testGetApplicationPolicies() throws APIManagementException {
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforPolicyDAO(policyDAO);
+        adminService.getApplicationPolicies();
+        Mockito.verify(policyDAO, Mockito.times(1)).getApplicationPolicies();
+
+        //Error path
+        Mockito.when(policyDAO.getApplicationPolicies()).thenThrow(APIMgtDAOException.class);
+        try {
+            adminService.getApplicationPolicies();
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "Couldn't retrieve Application policies");
+        }
+    }
+
+    @Test(description = "Test getting all Subscription Policies")
+    public void testGetSubscriptionPolicies() throws APIManagementException {
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforPolicyDAO(policyDAO);
+        adminService.getSubscriptionPolicies();
+        Mockito.verify(policyDAO, Mockito.times(1)).getSubscriptionPolicies();
+
+        //Error path
+        Mockito.when(policyDAO.getSubscriptionPolicies()).thenThrow(APIMgtDAOException.class);
+        try {
+            adminService.getSubscriptionPolicies();
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "Couldn't retrieve Subscription policies");
+        }
+    }
+
+    @Test(description = "Test getting API gateway service configuration")
+    public void testGetAPIGatewayServiceConfig() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforApiDAO(apiDAO);
+        adminService.getAPIGatewayServiceConfig(API_ID);
+        Mockito.verify(apiDAO, Mockito.times(1)).getGatewayConfigOfAPI(API_ID);
+
+        //Error path
+        Mockito.when(apiDAO.getGatewayConfigOfAPI(API_ID)).thenThrow(APIMgtDAOException.class);
+        try {
+            adminService.getAPIGatewayServiceConfig(API_ID);
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "Couldn't retrieve gateway configuration for apiId " + API_ID);
+        }
+    }
+
+    @Test(description = "Test getting all resources for API")
+    public void testGetAllResourcesForApi() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforApiDAO(apiDAO);
+        adminService.getAllResourcesForApi(API_CONTEXT, API_VERSION);
+        Mockito.verify(apiDAO, Mockito.times(1)).getResourcesOfApi(API_CONTEXT, API_VERSION);
+
+        //Error path
+        Mockito.when(apiDAO.getResourcesOfApi(API_CONTEXT, API_VERSION)).thenThrow(APIMgtDAOException.class);
+        try {
+            adminService.getAllResourcesForApi(API_CONTEXT, API_VERSION);
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "Couldn't retrieve resources for Api Name: " + API_CONTEXT);
+        }
+    }
+
+    @Test(description = "Test getting APIs by status")
+    public void testGetAPIsByStatus() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APIMgtAdminServiceImpl adminService = newAPIMgtAdminServiceImplforApiDAO(apiDAO);
+        adminService.getAPIsByStatus(new ArrayList<>(), APIStatus.CREATED.getStatus());
+        Mockito.verify(apiDAO, Mockito.times(1)).getAPIsByStatus(new ArrayList<>(), APIStatus.CREATED.getStatus());
+
+        //Error path
+        //When gateway labels are null
+        try {
+            adminService.getAPIsByStatus(null, APIStatus.CREATED.getStatus());
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "Gateway labels cannot be null");
+        }
+
+        //Error path
+        //When status is null
+        try {
+            adminService.getAPIsByStatus(new ArrayList<>(), null);
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "Status cannot be null");
+        }
+
+        //Error path
+        //APIMgtDAOException
+        Mockito.when(apiDAO.getAPIsByStatus(new ArrayList<>(), APIStatus.CREATED.getStatus()))
+                .thenThrow(APIMgtDAOException.class);
+        try {
+            adminService.getAPIsByStatus(new ArrayList<>(), APIStatus.CREATED.getStatus());
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "Error occurred while getting the API list in given states");
+        }
+    }
+
     private APIMgtAdminServiceImpl newAPIMgtAdminServiceImplforApiDAO(ApiDAO apiDAO) {
         return new APIMgtAdminServiceImpl(null, null, apiDAO, null, null, null);
     }
@@ -194,14 +625,15 @@ public class APIMgtAdminServiceImplTestCase {
         return new APIMgtAdminServiceImpl(null, policyDAO, null, null, null, null);
     }
 
-    private APIMgtAdminServiceImpl newAPIMgtAdminServiceImplforAPISubscriptionDAO(APISubscriptionDAO
-                                                                                          apiSubscriptionDAO) {
+    private APIMgtAdminServiceImpl newAPIMgtAdminServiceImplforAPISubscriptionDAO(
+            APISubscriptionDAO apiSubscriptionDAO) {
         return new APIMgtAdminServiceImpl(apiSubscriptionDAO, null, null, null, null, null);
     }
 
     private APIMgtAdminServiceImpl newAPIMgtAdminServiceImplforLabelDAO(LabelDAO labelDAO) {
         return new APIMgtAdminServiceImpl(null, null, null, labelDAO, null, null);
     }
+
     private APIMgtAdminServiceImpl newAPIMgtAdminServiceImplforPolicyDAO(PolicyDAO policyDAO, APIGateway apiGateway) {
         return new APIMgtAdminServiceImpl(null, policyDAO, null, null, null, apiGateway);
     }

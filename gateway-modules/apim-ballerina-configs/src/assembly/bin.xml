@@ -25,7 +25,11 @@
 
     <fileSets>
         <fileSet>
-            <directory>./configs</directory>
+            <directory>./target/</directory>
+            <includes>
+                <include>*.bmz</include>
+                <include>*.bsz</include>
+            </includes>
             <outputDirectory>.</outputDirectory>
             <fileMode>644</fileMode>
         </fileSet>

@@ -131,11 +131,13 @@ public interface ApiDAO {
     /**
      * Retrieves summary data of all available APIs.
      *
+     * @param roles The set of roles of the current user
+     * @param user The userName of the current user
      * @return {@code List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    List<API> getAPIs() throws APIMgtDAOException;
+    List<API> getAPIs(Set<String> roles, String user) throws APIMgtDAOException;
 
     /**
      * Retrieves summary data of all available APIs with life cycle status that matches the status list provided

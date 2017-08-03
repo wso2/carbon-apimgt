@@ -306,6 +306,9 @@ public class APIMgtConstants {
         public static final String APPLICATION_NAME = "APPLICATION_NAME";
         public static final String CONSUMER_KEY = "CONSUMER_KEY";
         public static final String APPLICATION_ID = "APPLICATION_ID";
+        public static final String KEY_TYPE = "KEY_TYPE";
+        public static final String GRANT_TYPES = "GRANT_TYPES";
+        public static final String CALLBACK_URL = "CALLBACK_URL";
         public static final String APPLICATION_QUERY = "APPLICATION_QUERY";
         public static final String API_ID = "API_ID";
         public static final String TIER = "TIER";
@@ -325,10 +328,11 @@ public class APIMgtConstants {
      * Permission related constants
      */
     public static class Permission {
-        public static final int SUBSCRIBE_PERMISSION = 8;
-        public static final int READ_PERMISSION = 4;
+        public static final int MANAGE_SUBSCRIPTION_PERMISSION = 8; //Publisher side API permission
+        public static final int SUBSCRIBE_PERMISSION = 8; //Store side permission
+        public static final int READ_PERMISSION = 1;
         public static final int UPDATE_PERMISSION = 2;
-        public static final int DELETE_PERMISSION = 1;
+        public static final int DELETE_PERMISSION = 4;
         public static final String EVERYONE_GROUP = "EVERYONE";
         public static final String GROUP_ID = "groupId";
         public static final String PERMISSION = "permission";
@@ -336,7 +340,7 @@ public class APIMgtConstants {
         public static final String UPDATE = "UPDATE";
         public static final String DELETE = "DELETE";
         public static final String SUBSCRIPTION = "SUBSCRIPTION";
-
+        public static final String MANAGE_SUBSCRIPTION = "MANAGE_SUBSCRIPTION";
     }
 
     /**

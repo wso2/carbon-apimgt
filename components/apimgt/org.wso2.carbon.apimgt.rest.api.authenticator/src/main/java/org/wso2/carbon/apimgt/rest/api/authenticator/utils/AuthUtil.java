@@ -56,7 +56,7 @@ public class AuthUtil {
 
     public static String getAppContext(Request request) {
         //TODO this method should provide uuf app context. Consider the scenarios of reverse proxy as well.
-        return "/" + request.getProperty("REQUEST_URL").toString().split("/")[1];
+        return "/" + request.getProperty("REQUEST_URL").toString().split("/")[3];
     }
 
     public static Map<String, Map<String, String>> getConsumerKeySecretMap() {
@@ -152,7 +152,8 @@ public class AuthUtil {
      * @param path  Context to which cookie should be set.
      * @param isHttpOnly    If this a http only cookie.
      * @param isSecure      If this a secure cookie.
-     * @return Cookie object..
+     * @param expiresIn     Expiration time of the cookie.
+     * @return Cookie object.
      */
     public static NewCookie cookieBuilder(String name, String value, String path, boolean isSecure,
             boolean isHttpOnly, String expiresIn) {

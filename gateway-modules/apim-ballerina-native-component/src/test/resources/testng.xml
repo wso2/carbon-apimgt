@@ -26,12 +26,17 @@ under the License.
         <packages>
             <package name="org.wso2.carbon.apimgt.ballerina.caching"/>
             <package name="org.wso2.carbon.apimgt.ballerina.util"/>
+            <package name="org.wso2.carbon.apimgt.ballerina.maps"/>
         </packages>
         <classes>
             <class name="org.wso2.carbon.apimgt.ballerina.caching.CacheTest"/>
             <class name="org.wso2.carbon.apimgt.ballerina.util.WaitTestCase"/>
             <class name="org.wso2.carbon.apimgt.ballerina.caching.CacheRemoveTest"/>
             <class name="org.wso2.carbon.apimgt.ballerina.util.SetPropertyCase"/>
+            <class name="org.wso2.carbon.apimgt.ballerina.util.GetPropertyTestCase"/>
+            <class name="org.wso2.carbon.apimgt.ballerina.util.SaveFileTestCase"/>
+            <class name="org.wso2.carbon.apimgt.ballerina.maps.MapPutAndGetTestCase"/>
+            <class name="org.wso2.carbon.apimgt.ballerina.maps.MapRemoveTestCase"/>
         </classes>
     </test>
 </suite>

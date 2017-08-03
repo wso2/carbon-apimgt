@@ -38,11 +38,23 @@ public class JWTConfigurations {
         return enableJWTGeneration;
     }
 
+    public void setEnableJWTGeneration(boolean enableJWTGeneration) {
+        this.enableJWTGeneration = enableJWTGeneration;
+    }
+
     public String getJwtHeader() {
         return jwtHeader;
     }
 
+    public void setJwtHeader(String jwtHeader) {
+        this.jwtHeader = jwtHeader;
+    }
+
     public String getSignatureAlgorithm() {
         return signatureAlgorithm;
+    }
+
+    public void setSignatureAlgorithm(String signatureAlgorithm) {
+        this.signatureAlgorithm = signatureAlgorithm;
     }
 }

@@ -36,15 +36,27 @@ public class ThrottlingConfigurations {
     @Element(description = "JMS Connection configurations")
     private JMSConnectionConfiguration jmsConnectionConfiguration = new JMSConnectionConfiguration();
 
-    public JMSConnectionConfiguration getJmsConnectionConfiguration() {
-        return jmsConnectionConfiguration;
-    }
-
     public DataPublisherConfigurations getDataPublisherConfigurations() {
         return dataPublisherConfigurations;
     }
 
+    public void setDataPublisherConfigurations(DataPublisherConfigurations dataPublisherConfigurations) {
+        this.dataPublisherConfigurations = dataPublisherConfigurations;
+    }
+
     public PolicyDeployerConfiguration getPolicyDeployerConfiguration() {
         return policyDeployerConfiguration;
+    }
+
+    public void setPolicyDeployerConfiguration(PolicyDeployerConfiguration policyDeployerConfiguration) {
+        this.policyDeployerConfiguration = policyDeployerConfiguration;
+    }
+
+    public JMSConnectionConfiguration getJmsConnectionConfiguration() {
+        return jmsConnectionConfiguration;
+    }
+
+    public void setJmsConnectionConfiguration(JMSConnectionConfiguration jmsConnectionConfiguration) {
+        this.jmsConnectionConfiguration = jmsConnectionConfiguration;
     }
 }

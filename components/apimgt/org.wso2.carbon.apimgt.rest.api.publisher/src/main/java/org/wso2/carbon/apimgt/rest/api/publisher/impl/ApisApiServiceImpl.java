@@ -4,10 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
@@ -19,7 +15,6 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
-import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.impl.WSDLProcessFactory;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -59,12 +54,9 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.StringTokenizer;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
@@ -247,7 +239,6 @@ public class ApisApiServiceImpl extends ApisApiService {
                 log.error(msg);
                 return Response.status(Response.Status.NOT_FOUND).entity(errorDTO).build();
             }
-            DocumentInfo.Builder docBuilder = new DocumentInfo.Builder(documentation);
             //add content depending on the availability of either input stream or inline content
             if (fileInputStream != null) {
                 if (!documentation.getSourceType().equals(DocumentInfo.SourceType.FILE)) {
@@ -257,28 +248,26 @@ public class ApisApiServiceImpl extends ApisApiService {
                     log.error(msg);
                     return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
                 }
-                docBuilder = docBuilder.fileName(fileDetail.getFileName());
                 apiProvider.uploadDocumentationFile(documentId, fileInputStream, fileDetail.getContentType());
             } else if (inlineContent != null) {
                 if (!documentation.getSourceType().equals(DocumentInfo.SourceType.INLINE)) {
                     String msg = "Source type of document " + documentId + " is not INLINE";
                     log.error(msg);
-                    ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
+                    ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900976L, msg);
+                    return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
                 }
                 apiProvider.addDocumentationContent(documentId, inlineContent);
             } else {
                 String msg = "Either 'file' or 'inlineContent' should be specified";
                 log.error(msg);
-                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900976L, msg);
+                return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
             }
-            apiProvider.updateDocumentation(apiId, docBuilder.build());
-            //retrieving the updated doc and the URI
-            DocumentInfo updatedDoc = apiProvider.getDocumentationSummary(documentId);
             String newFingerprint = apisApiIdDocumentsDocumentIdContentGetFingerprint(apiId, documentId, null,
                     null, null, request);
-            DocumentDTO documentDTO = MappingUtil.toDocumentDTO(updatedDoc);
             return Response.status(Response.Status.CREATED)
-                    .header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"").entity(documentDTO).build();
+                    .header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"")
+                    .build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding content to document" + documentId;
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -432,7 +421,6 @@ public class ApisApiServiceImpl extends ApisApiService {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
             }
 
-            //DocumentInfo documentInfo = MappingUtil.toDocumentInfo(body);
             DocumentInfo documentInfoOld = apiPublisher.getDocumentationSummary(documentId);
             //validation checks for existence of the document
             if (documentInfoOld == null) {
@@ -549,6 +537,13 @@ public class ApisApiServiceImpl extends ApisApiService {
             String docid = apiProvider.addDocumentationInfo(apiId, documentation);
             documentation = apiProvider.getDocumentationSummary(docid);
             DocumentDTO newDocumentDTO = MappingUtil.toDocumentDTO(documentation);
+            //Add initial inline content as empty String, if the Document type is INLINE
+            if (body.getSourceType() == DocumentDTO.SourceTypeEnum.INLINE) {
+                apiProvider.addDocumentationContent(docid, "");
+                if (log.isDebugEnabled()) {
+                    log.debug("The updated source type of the document " + body.getName() + " is: " + body.getSourceType());
+                }
+            }
             return Response.status(Response.Status.CREATED).entity(newDocumentDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while create  document for api " + apiId;
@@ -697,18 +692,11 @@ public class ApisApiServiceImpl extends ApisApiService {
                     .contains(existingFingerprint)) {
                 return Response.notModified().build();
             }
-            API api = RestAPIPublisherUtil.getApiPublisher(username).getAPIbyUUID(apiId);
-            api.setUserSpecificApiPermissions(getAPIPermissionsOfLoggedInUser(username, api));
-            APIDTO apidto = MappingUtil.toAPIDto(api);
-
+            APIDTO apidto = MappingUtil.toAPIDto(RestAPIPublisherUtil.getApiPublisher(username).getAPIbyUUID(apiId));
             boolean isWSDLExists = RestAPIPublisherUtil.getApiPublisher(username).isWSDLExists(apiId);
             if (isWSDLExists) {
                 String wsdlUri = RestApiConstants.WSDL_URI_TEMPLATE.replace(RestApiConstants.APIID_PARAM, api.getId());
                 apidto.setWsdlUri(wsdlUri);
-            }
-            String permissionString = apidto.getPermission();
-            if (!StringUtils.isEmpty(permissionString)) {
-                apidto.setPermission(replaceGroupIdWithName(permissionString));
             }
             return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(apidto).build();
         } catch (APIManagementException e) {
@@ -718,122 +706,12 @@ public class ApisApiServiceImpl extends ApisApiService {
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-        } catch (ParseException e) {
-            String errorMessage = "Parse Exception while retrieving API : " + apiId;
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
-            log.error(errorMessage, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
         } catch (IOException e) {
             String errorMessage = "Error while retrieving API : " + apiId;
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
             log.error(errorMessage, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
         }
-    }
-
-    /**
-     * This method retrieves the set of overall permissions for a given api for the logged in user
-     *
-     * @param loggedInUserName - Logged in user
-     * @param api - The API whose permissions for the logged in user is retrieved
-     * @return The overall list of permissions for the given API for the logged in user
-     */
-    private List<String> getAPIPermissionsOfLoggedInUser(String loggedInUserName, API api) throws APIManagementException {
-        IdentityProvider idp = APIManagerFactory.getInstance().getIdentityProvider();
-        Set<String> permissionArrayForUser = new HashSet();
-        //Setting default permissions for API
-        permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-        permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
-        permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
-        Map<String, Integer> permissionMap = api.getPermissionMap();
-
-        //TODO: Remove the check for admin after IS adds an ID to admin user
-        if (permissionMap != null && !permissionMap.isEmpty() && !"admin".equals(loggedInUserName)) {
-            String userId = idp.getIdOfUser(loggedInUserName);
-            List<String> loggedInUserRoles = idp.getRoleIdsOfUser(userId);
-            List<String> permissionRoleList = getRolesFromPermissionMap(permissionMap);
-            List<String> rolesOfUserWithAPIPermissions = null;
-            //To prevent a possible null pointer exception
-            if (loggedInUserRoles == null) {
-                loggedInUserRoles = new ArrayList<>();
-            }
-            //get the intersection - retainAll() transforms first set to the result of intersection
-            loggedInUserRoles.retainAll(permissionRoleList);
-            if (!loggedInUserRoles.isEmpty()) {
-                rolesOfUserWithAPIPermissions = loggedInUserRoles;
-            }
-            if (rolesOfUserWithAPIPermissions != null) {
-                //remove all elements from set
-                permissionArrayForUser.clear();
-                for (String role : rolesOfUserWithAPIPermissions) {
-                    Integer permission = permissionMap.get(role);
-                    if (permission == APIMgtConstants.Permission.READ_PERMISSION) {
-                        permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-                    } else if (permission == (APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.UPDATE_PERMISSION)) {
-                        permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-                        permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
-                    } else if (permission == (APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.DELETE_PERMISSION)) {
-                        permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-                        permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
-                    } else if (permission == APIMgtConstants.Permission.READ_PERMISSION + APIMgtConstants.Permission.UPDATE_PERMISSION
-                            + APIMgtConstants.Permission.DELETE_PERMISSION) {
-                        permissionArrayForUser.add(APIMgtConstants.Permission.READ);
-                        permissionArrayForUser.add(APIMgtConstants.Permission.UPDATE);
-                        permissionArrayForUser.add(APIMgtConstants.Permission.DELETE);
-                    }
-                }
-            }
-        }
-        List<String> finalAggregatedPermissionList = new ArrayList<>();
-        finalAggregatedPermissionList.addAll(permissionArrayForUser);
-        return finalAggregatedPermissionList;
-    }
-
-    /**
-     * This method is used to extract the groupIds or roles from the permissionMap
-     *
-     * @param permissionMap - The map containing the group IDs(roles) and their permissions
-     * @return - The list of groupIds specified for permissions
-     */
-    private List<String> getRolesFromPermissionMap(Map<String, Integer> permissionMap) {
-        List<String> permissionRoleList = new ArrayList<>();
-        for (String groupId : permissionMap.keySet()) {
-            permissionRoleList.add(groupId);
-        }
-        return permissionRoleList;
-    }
-
-    /**
-     * This method replaces the groupId field's value of the api permisisons string to the role name before sending to
-     * frontend
-     *
-     * @param permissionString - permissions string containing role ids in the groupId field
-     * @return the permission string replacing the groupId field's value to role name
-     * @throws ParseException - if there is an erro rparsing the permission json
-     * @throws APIManagementException - if there is an error getting the IdentityProvider instance
-     */
-    private String replaceGroupIdWithName(String permissionString) throws ParseException, APIManagementException {
-        IdentityProvider idp = APIManagerFactory.getInstance().getIdentityProvider();
-        JSONArray updatedPermissionArray = new JSONArray();
-        JSONParser jsonParser = new JSONParser();
-        JSONArray originalPermissionArray = (JSONArray) jsonParser.parse(permissionString);
-
-        for (Object permissionObj : originalPermissionArray) {
-            JSONObject jsonObject = (JSONObject) permissionObj;
-            String groupId = (String) jsonObject.get(APIMgtConstants.Permission.GROUP_ID);
-            try {
-                String groupName = idp.getRoleName(groupId);
-                JSONObject updatedPermissionJsonObj = new JSONObject();
-                updatedPermissionJsonObj.put(APIMgtConstants.Permission.GROUP_ID, groupName);
-                updatedPermissionJsonObj.put(APIMgtConstants.Permission.PERMISSION, jsonObject.get(APIMgtConstants.Permission.PERMISSION));
-                updatedPermissionArray.add(updatedPermissionJsonObj);
-            } catch (IdentityProviderException e) {
-                //lets the execution continue after logging the exception
-                String errorMessage = "Role with ID " + groupId +" no longer exists in the system";
-                log.error(errorMessage, e);
-            }
-        }
-        return updatedPermissionArray.toJSONString();
     }
 
     /**
@@ -1413,13 +1291,12 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch,
-                            Request request) throws NotFoundException {
+            Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         APIListDTO apiListDTO = null;
         try {
-            List<API> apiList = RestAPIPublisherUtil.getApiPublisher(username).searchAPIs(limit, offset, query);
-            List<API> updatedApiList = setAllApiPermissionsForUser(username, apiList);
-            apiListDTO = MappingUtil.toAPIListDTO(updatedApiList);
+            apiListDTO = MappingUtil
+                    .toAPIListDTO(RestAPIPublisherUtil.getApiPublisher(username).searchAPIs(limit, offset, query));
             return Response.ok().entity(apiListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving APIs";
@@ -1428,27 +1305,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-    }
-
-    /**
-     * This method updates the list of apis searched, based on the permissions of the loggedin user
-     *
-     * @param loggedInUserName - Logged in user name
-     * @param originalAPIList - original api list returned from the search operation
-     * @return the updated list of apis based on user permissions
-     * @throws APIManagementException
-     */
-    private List<API> setAllApiPermissionsForUser(String loggedInUserName, List<API> originalAPIList)
-            throws APIManagementException {
-        List<API> updatedAPIList = new ArrayList<API>();
-        for (API api : originalAPIList) {
-            List<String> aggregatedApiPermissions = getAPIPermissionsOfLoggedInUser(loggedInUserName, api);
-            if (!aggregatedApiPermissions.isEmpty()) {
-                api.setUserSpecificApiPermissions(aggregatedApiPermissions);
-                updatedAPIList.add(api);
-            }
-        }
-        return updatedAPIList;
     }
 
     /**

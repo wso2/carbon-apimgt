@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="analytics-apim-capps" default="zip" basedir=".">
+
+    <property name="project-name" value="${ant.project.name}"/>
+    <property name="res-dir" value="configs"/>
+    <property name="target-dir" value="target"/>
+
+    <property name="configs" value="src/main/capp"/>
+
+
+    <target name="clean">
+        <delete dir="${target-dir}"/>
+        <!--<delete file="${res-dir}/${ANALYTICS_APIM_capp_name}-${ANALYTICS_APIM_capp_version}.car"/>-->
+    </target>
+
+    <target name="pre-configure">
+        <mkdir dir="${target-dir}"/>
+    </target>
+
+    <target name="service">
+        <zip destfile="${target-dir}/services.bsz">
+            <zipfileset dir="${res-dir}">
+                <exclude name="org/wso2/carbon/apimgt/gateway/Authentication.bal"/>
+                <exclude name="org/wso2/carbon/apimgt/gateway/Throttling.bal"/>
+                <exclude name="main/**"/>
+                <exclude name="service/**"/>
+            </zipfileset>
+            <zipfileset dir="${res-dir}/service">
+            </zipfileset>
+        </zip>
+    </target>
+
+    <target name="auth">
+        <zip destfile="${target-dir}/auth.bmz">
+            <zipfileset dir="${res-dir}">
+                <exclude name="org/wso2/carbon/apimgt/gateway/apimPublisherEventListner.bal"/>
+                <exclude name="org/wso2/carbon/apimgt/gateway/apimStoreEventListner.bal"/>
+                <exclude name="org/wso2/carbon/apimgt/gateway/CoreThrottleEventListener."/>
+                <exclude name="org/wso2/carbon/apimgt/gateway/gatewayInit.bal"/>
+                <exclude name="org/wso2/carbon/apimgt/gateway/throttleEventListner.bal"/>
+                <exclude name="org/wso2/carbon/apimgt/gateway/Throttling.bal"/>
+                <exclude name="main/**"/>
+                <exclude name="service/**"/>
+            </zipfileset>
+            <zipfileset dir="${res-dir}/main">
+            </zipfileset>
+        </zip>
+    </target>
+
+    <target name="throttle">
+        <zip destfile="${target-dir}/throttle.bmz">
+            <zipfileset dir="${res-dir}">
+                <exclude name="org/wso2/carbon/apimgt/gateway/apimPublisherEventListner.bal"/>
+                <exclude name="org/wso2/carbon/apimgt/gateway/apimStoreEventListner.bal"/>
+                <exclude name="org/wso2/carbon/apimgt/gateway/CoreThrottleEventListener."/>
+                <exclude name="org/wso2/carbon/apimgt/gateway/gatewayInit.bal"/>
+                <exclude name="org/wso2/carbon/apimgt/gateway/throttleEventListner.bal"/>
+                <exclude name="org/wso2/carbon/apimgt/gateway/Authentication.bal"/>
+                <exclude name="main/**"/>
+                <exclude name="service/**"/>
+            </zipfileset>
+            <zipfileset dir="${res-dir}/main">
+            </zipfileset>
+        </zip>
+    </target>
+
+    <target name="analytics" >
+        <zip destfile="${target-dir}/analytics.bmz">
+            <zipfileset dir="${res-dir}">
+                <exclude name="org/wso2/carbon/apimgt/gateway/Authentication.bal"/>
+                <exclude name="org/wso2/carbon/apimgt/gateway/Throttling.bal"/>
+                <exclude name="service/main/**"/>
+            </zipfileset>
+        </zip>
+    </target>
+
+    <target name="zip" depends="clean,pre-configure">
+        <antcall target="service" />
+        <antcall target="auth" />
+        <antcall target="throttle" />
+        <antcall target="analytics" />
+    </target>
+</project>
+

@@ -1798,9 +1798,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
+#######################################################
 # The "Generate Keys" Processing Function resource API
-######################################################
+#######################################################
   '/applications/{applicationId}/generate-keys':
 
 #-----------------------------------------------------
@@ -1820,11 +1820,10 @@ paths:
           schema:
             $ref: '#/definitions/ApplicationKeyGenerateRequest'
         - $ref: '#/parameters/Content-Type'
-        - $ref: '#/parameters/If-Match'
-        - $ref: '#/parameters/If-Unmodified-Since'
       tags:
         - Application (individual)
         - Generate Keys
+        - Application Keys
       responses:
         200:
           description: |
@@ -1837,16 +1836,6 @@ paths:
               description: |
                 The content type of the body.
               type: string
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional request.
-              type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional reuquests.‚
-              type: string
         400:
           description: |
             Bad Request.
@@ -1866,38 +1855,37 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# The "Provide Keys" Processing Function resource API
-######################################################
-  '/applications/{applicationId}/provide-keys':
+
+##############################################################
+# The "Map Application Keys" Processing Function resource API
+##############################################################
+  '/applications/{applicationId}/map-keys':
 
 #-----------------------------------------------------
-# Provide keys for an application
+# Mapping keys for an application
 #-----------------------------------------------------
     post:
       x-scope: apim:subscribe
       description: |
-        Provide keys (Consumer key/secret) to application
+        Map keys (Consumer key/secret) to an application
       parameters:
         - $ref: '#/parameters/applicationId'
         - in: body
           name: body
           description: |
-            Application key provision request object
+            Application key mapping request object
           required: true
           schema:
-            $ref: '#/definitions/ApplicationKeyProvisionRequest'
+            $ref: '#/definitions/ApplicationKeyMappingRequest'
         - $ref: '#/parameters/Content-Type'
-        - $ref: '#/parameters/If-Match'
-        - $ref: '#/parameters/If-Unmodified-Since'
       tags:
         - Application (individual)
-        - Provision Keys
+        - Application Keys
       responses:
         200:
           description: |
             OK.
-            Keys are provisioned.
+            Keys are mapped.
           schema:
             $ref: '#/definitions/ApplicationKeys'
           headers:
@@ -1905,15 +1893,158 @@ paths:
               description: |
                 The content type of the body.
               type: string
-            ETag:
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+
+######################################################
+# The "Application Keys" resource APIs
+######################################################
+  '/applications/{applicationId}/keys':
+
+#-----------------------------------------------------
+# Get all keys of an application
+#-----------------------------------------------------
+    get:
+      x-scope: apim:subscribe
+      description: |
+        Retrieve keys (Consumer key/secret) of application
+      parameters:
+        - $ref: '#/parameters/applicationId'
+        - $ref: '#/parameters/Accept'
+      tags:
+        - Application (individual)
+        - Application Keys
+      responses:
+        200:
+          description: |
+            OK.
+            Keys are returned.
+          schema:
+            $ref: '#/definitions/ApplicationKeysList'
+          headers:
+            Content-Type:
               description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional request.
+                The content type of the body.
               type: string
-            Last-Modified:
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The resource does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+
+######################################################
+# The "Application Keys of One Type" resource APIs
+######################################################
+  '/applications/{applicationId}/keys/{keyType}':
+
+#-----------------------------------------------------
+# Get a key of an application by key type
+#-----------------------------------------------------
+    get:
+      x-scope: apim:subscribe
+      description: |
+        Retrieve keys (Consumer key/secret) of application by a given type
+      parameters:
+        - $ref: '#/parameters/applicationId'
+        - $ref: '#/parameters/keyType'
+        - $ref: '#/parameters/Accept'
+      tags:
+        - Application (individual)
+        - Application Keys
+      responses:
+        200:
+          description: |
+            OK.
+            Keys of given type are returned.
+          schema:
+            $ref: '#/definitions/ApplicationKeys'
+          headers:
+            Content-Type:
               description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional reuquests.‚
+                The content type of the body.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The resource does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+#--------------------------------------------------------------------
+# Update grant types and callback url of an application
+#--------------------------------------------------------------------
+    put:
+      x-scope: apim:subscribe
+      description: |
+        Update grant types and callback url (Consumer Key and Consumer Secret are ignored)
+      parameters:
+        - $ref: '#/parameters/applicationId'
+        - $ref: '#/parameters/keyType'
+        - in: body
+          name: body
+          description: |
+            Grant types/Callback URL update request object
+          required: true
+          schema:
+            $ref: '#/definitions/ApplicationKeys'
+        - $ref: '#/parameters/Content-Type'
+      tags:
+        - Application (individual)
+        - Application Keys
+      responses:
+        200:
+          description: |
+            Ok.
+            Grant types or/and callback url is/are updated.
+          schema:
+            $ref: '#/definitions/ApplicationKeys'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
               type: string
         400:
           description: |
@@ -1936,12 +2067,12 @@ paths:
 
 
 ######################################################
-# The "Generate Tokens" Processing Function resource API
+# The "Generate Token" Processing Function resource API
 ######################################################
   '/applications/{applicationId}/generate-token':
 
 #-----------------------------------------------------
-# Generate tokens for an application
+# Generate a token for an application
 #-----------------------------------------------------
     post:
       x-scope: apim:subscribe
@@ -1961,7 +2092,7 @@ paths:
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
         - Application (individual)
-        - Generate Application Tokens
+        - Generate Application Token
       responses:
         200:
           description: |
@@ -1973,16 +2104,6 @@ paths:
             Content-Type:
               description: |
                 The content type of the body.
-              type: string
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional request.
-              type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional reuquests.‚
               type: string
         400:
           description: |
@@ -2567,6 +2688,19 @@ parameters:
       **Application Identifier** consisting of the UUID of the Application.
     required: true
     type: string
+
+# Application Key Type
+# Specified as part of the path expression
+  keyType:
+    name: keyType
+    in: path
+    description: |
+      **Application Key Type** standing for the type of the keys (i.e. Production or Sandbox).
+    required: true
+    type: string
+    enum:
+      - PRODUCTION
+      - SANDBOX
 
 # API Type
 # Specified as part of the query string
@@ -3495,6 +3629,21 @@ definitions:
           - SANDBOX
 
 #-----------------------------------------------------
+# The Application Keys List resource
+#-----------------------------------------------------
+  ApplicationKeysList:
+    title: Application Keys List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of applications keys returned.
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/ApplicationKeys'
+
+#-----------------------------------------------------
 # The Application Key Generation Request schema
 #-----------------------------------------------------
   ApplicationKeyGenerateRequest :
@@ -3519,14 +3668,13 @@ definitions:
 
 
 #-----------------------------------------------------
-# The Application Key Provision Request schema
+# The Application Key Mapping Request schema
 #-----------------------------------------------------
-  ApplicationKeyProvisionRequest :
+  ApplicationKeyMappingRequest :
     title: Application key provision request object
     required:
       - consumerKey
       - consumerSecret
-      - keyType
     properties:
       consumerKey:
         type: string

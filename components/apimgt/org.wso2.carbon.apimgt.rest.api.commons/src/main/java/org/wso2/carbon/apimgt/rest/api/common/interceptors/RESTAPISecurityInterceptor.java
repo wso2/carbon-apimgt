@@ -94,17 +94,14 @@ public class RESTAPISecurityInterceptor implements Interceptor {
         String protocol = (String) request.getProperty(PROTOCOL);
         Swagger swagger = null;
         if (requestURI.contains("/publisher")) {
-            if (requestURI.contains("swagger.json")) {
+            if (requestURI.contains("swagger.yaml")) {
                 try {
                     yamlContent = RestApiUtil.getPublisherRestAPIResource();
-                    swagger = new SwaggerParser().parse(yamlContent);
-                    swagger.setBasePath(RestApiUtil.getContext(RestApiConstants.APPType.PUBLISHER));
-                    swagger.setHost(RestApiUtil.getHost(protocol.toLowerCase(Locale.ENGLISH)));
                 } catch (APIManagementException e) {
-                    log.error("Couldn't find swagger.json for publisher", e);
+                    log.error("Couldn't find swagger.yaml for publisher", e);
                 }
-                response.setStatus(javax.ws.rs.core.Response.Status.OK.getStatusCode()).setEntity(Json.pretty
-                        (swagger)).setMediaType(MediaType.APPLICATION_JSON).send();
+                response.setStatus(javax.ws.rs.core.Response.Status.OK.getStatusCode()).setEntity(yamlContent)
+                        .setMediaType("text/x-yaml").send();
                 return false;
             }
         } else if (requestURI.contains("/store")) {

@@ -77,10 +77,7 @@ public class BasicAuthAuthenticator implements RESTAPIAuthenticator {
 
     private boolean authenticate(String username, String password) {
         //todo improve
-        if (username.equals(password)) {
-            return true;
-        }
-        return false;
+        return username.equals(password);
 
     }
 }
