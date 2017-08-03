@@ -358,6 +358,11 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     @Override
+    public boolean isWSDLExists(String apiId) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public String getWSDL(String apiId) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }

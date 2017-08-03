@@ -908,6 +908,16 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     @Override
+    public boolean isWSDLExists(String apiId) throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()) {
+            return ApiResourceDAO.isResourceExistsForCategory(connection, apiId, ResourceCategory.WSDL_ZIP)
+                    || ApiResourceDAO.isResourceExistsForCategory(connection, apiId, ResourceCategory.WSDL_TEXT);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+    
+    @Override
     public String getWSDL(String apiId) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
 

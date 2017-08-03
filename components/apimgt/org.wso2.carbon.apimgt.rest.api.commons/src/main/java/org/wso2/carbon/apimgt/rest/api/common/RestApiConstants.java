@@ -111,8 +111,9 @@ public class RestApiConstants {
     public static final String THROTTLING_CUSTOM_ATTRIBUTE_NAME = "name";
     public static final String THROTTLING_CUSTOM_ATTRIBUTE_VALUE = "value";
 
-    public static final String IMPORT_DEFINITION_WSDL_IMPL_TYPE_SOAP = "SOAP";
-    public static final String IMPORT_DEFINITION_WSDL_IMPL_TYPE_HTTP = "HTTP_BINDING";
+    public static final String IMPORT_DEFINITION_WSDL_IMPL_TYPE_SOAP = "soap";
+    public static final String IMPORT_DEFINITION_WSDL_IMPL_TYPE_HTTP = "httpBinding";
+    public static final String WSDL_URI_TEMPLATE = "/apis/{apiId}/wsdl";
     
     
 

@@ -261,6 +261,11 @@ public abstract class AbstractAPIManager implements APIManager {
         return getApiDAO().isWSDLArchiveExists(apiId);
     }
 
+    @Override
+    public boolean isWSDLExists(String apiId) throws APIMgtDAOException {
+        return getApiDAO().isWSDLExists(apiId);
+    }
+
     /**
      * Returns a paginated list of documentation attached to a particular API
      *

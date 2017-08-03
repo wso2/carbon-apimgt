@@ -27,6 +27,9 @@ public class URITemplateParam {
     private ParamTypeEnum paramType;
     private String dataType;
 
+    /**
+     * Parameter types
+     */
     public enum ParamTypeEnum {
         QUERY, BODY, PATH, FORM_DATA
     }

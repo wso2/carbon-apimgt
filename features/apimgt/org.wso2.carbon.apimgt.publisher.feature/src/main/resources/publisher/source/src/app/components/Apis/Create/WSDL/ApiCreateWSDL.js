@@ -39,7 +39,11 @@ class ApiCreateWSDLSteppedForm extends React.Component {
             apiVersion: null,
             apiContext: null,
             apiEndpoint: null,
-            implementationType: null
+            implementationType: null,
+            bindingInfo: {
+                hasSoapBinding: false,
+                hasHttpBinding: false
+            }
         };
         
         this.handleFillAPIInfoStepUpdate = this.handleFillAPIInfoStepUpdate.bind(this);
@@ -100,15 +104,41 @@ class ApiCreateWSDLSteppedForm extends React.Component {
         let data = JSON.parse(response.data);
         if (data.isValid) {
             const current = this.state.current + 1;
-
             let uniqueEndpointSet = new Set();
             let allEndpoints = data.wsdlInfo.endpoints;
+            let apiEndpoint = null;
+            let hasHttpBinding = false;
+            let hasSoapBinding = false;
+            let defaultImplementationType = "soap";
+            
             for (let i = 0; i < allEndpoints.length; i++) {
                 uniqueEndpointSet.add(allEndpoints[i].location);
             }
             let uniqueEndpoints = Array.from(uniqueEndpointSet);
             
-            this.setState({ current: current, isValidating: false, endpoints: uniqueEndpoints});
+            if (uniqueEndpoints.length > 0) {
+                apiEndpoint = uniqueEndpoints[0];
+            }
+
+            if (data.wsdlInfo.bindingInfo) {
+                hasHttpBinding = data.wsdlInfo.bindingInfo.hasHttpBinding;
+                defaultImplementationType = "httpBinding"
+            }
+
+            if (data.wsdlInfo.bindingInfo) {
+                hasSoapBinding = data.wsdlInfo.bindingInfo.hasSoapBinding;
+                defaultImplementationType = "soap"
+            }
+
+            this.setState({
+                current: current,
+                isValidating: false,
+                endpoints: uniqueEndpoints,
+                apiEndpoint: apiEndpoint,
+                hasSoapBinding: hasSoapBinding,
+                hasHttpBinding: hasHttpBinding,
+                implementationType: defaultImplementationType
+            });
         }
     };
 
@@ -149,7 +179,7 @@ class ApiCreateWSDLSteppedForm extends React.Component {
         };
         let api_data = {
             additionalProperties: JSON.stringify(api_attributes),
-            importOptions: "implementationType:" + implementationType
+            implementationType: implementationType
         };
 
         if (uploadMethod === "url"){
@@ -184,7 +214,12 @@ class ApiCreateWSDLSteppedForm extends React.Component {
         }, {
             title: 'Create API',
             content: <WSDLFillAPIInfoStep endpoints={this.state.endpoints}
-                                          handleFillAPIInfoStepUpdate={(e) => this.handleFillAPIInfoStepUpdate(e)}/>,
+                                          handleFillAPIInfoStepUpdate={(e) => this.handleFillAPIInfoStepUpdate(e)}
+                                          hasSoapBinding={this.state.hasSoapBinding}
+                                          hasHttpBinding={this.state.hasHttpBinding}
+                                          implementationType={this.state.implementationType}
+                                          apiEndpoint={this.state.apiEndpoint}
+            />,
         }];
 
         return (

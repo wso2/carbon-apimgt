@@ -33,6 +33,7 @@ class WSDLFillAPIInfoForm extends React.Component {
     constructor(props) {
         super(props);
         this.handleFillAPIInfoStepUpdate = this.handleFillAPIInfoStepUpdate.bind(this);
+        this.getEndpoints = this.getEndpoints.bind(this);
     }
 
     getEndpoints() {
@@ -94,33 +95,33 @@ class WSDLFillAPIInfoForm extends React.Component {
                                 <FormItem label="Endpoint"
                                           labelCol={{span: 9}}
                                           wrapperCol={{span: 13}}>
-                                    {
-                                    getFieldDecorator('apiEndpoint', {
-                                    rules: [{required: false, message: 'Please input Api endpoint'}],
-                                })
-                                    (
-                                        <Select
-                                            name="apiEndpoint"
-                                            mode="combobox"
-                                            size='default'
-                                            onChange={this.handleFillAPIInfoStepUpdate}
-                                            prefix={<Icon type="user" style={{fontSize: 13}}/>}>
-                                            {this.getEndpoints()}
-                                        </Select>
-                                    )
-                                    }
+                                    <Select
+                                        name="apiEndpoint"
+                                        mode="combobox"
+                                        size='default'
+                                        onChange={this.handleFillAPIInfoStepUpdate}
+                                        defaultValue={this.props.apiEndpoint}
+                                        prefix={<Icon type="user" style={{fontSize: 13}}/>}>
+                                        {this.getEndpoints()}
+                                    </Select>
                                 </FormItem>
-                                <FormItem
-                                    label="Implementation Type"
-                                    labelCol={{span: 9}}
-                                    wrapperCol={{span: 13}}>
-                                    {getFieldDecorator('radio-group')(
-                                        <RadioGroup onChange={this.handleFillAPIInfoStepUpdate}>
-                                            <Radio style={radioStyle} name="implementationType" value="soap">Pass-through SOAP API</Radio>
-                                            <Radio style={radioStyle} name="implementationType" value="httpBinding">With HTTP binding operations</Radio>
+                                {
+                                    (this.props.hasHttpBinding || this.props.hasSoapBinding)
+                                        &&
+                                    <FormItem
+                                        label="Implementation Type"
+                                        labelCol={{span: 9}}
+                                        wrapperCol={{span: 13}}>
+                                        <RadioGroup onChange={this.handleFillAPIInfoStepUpdate}
+                                                    defaultValue={this.props.implementationType}>
+                                            <Radio style={radioStyle} name="implementationType" value={"soap"}
+                                                   disabled={!this.props.hasSoapBinding}>Pass-through SOAP API</Radio>
+                                            <Radio style={radioStyle} name="implementationType" value={"httpBinding"}
+                                                   disabled={!this.props.hasHttpBinding}>With HTTP binding
+                                                operations</Radio>
                                         </RadioGroup>
-                                    )}
-                                </FormItem>
+                                    </FormItem>
+                                }
                             </Panel>
                         </Collapse>
                     </Col>
@@ -137,7 +138,12 @@ class WSDLFillAPIInfoStep extends React.Component {
         return <WSDLFillAPIInfoFormGenerated 
             history={this.props.history} 
             endpoints={this.props.endpoints}
-            handleFillAPIInfoStepUpdate={this.props.handleFillAPIInfoStepUpdate}/>
+            handleFillAPIInfoStepUpdate={this.props.handleFillAPIInfoStepUpdate}
+            hasSoapBinding={this.props.hasSoapBinding}
+            hasHttpBinding={this.props.hasHttpBinding}
+            implementationType={this.props.implementationType}
+            apiEndpoint={this.props.apiEndpoint}
+        />
     }
 }
 

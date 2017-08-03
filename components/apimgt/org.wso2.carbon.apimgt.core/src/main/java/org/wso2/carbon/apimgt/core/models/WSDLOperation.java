@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.core.models;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Basic WSDL operation
@@ -31,11 +32,6 @@ public class WSDLOperation {
     private List<WSDLOperationParam> parameters;
 
     public WSDLOperation () {
-    }
-
-    public WSDLOperation (String verb, String uri) {
-        this.verb = verb;
-        this.uri = uri;
     }
 
     public void setURI(String uri) {
@@ -79,5 +75,10 @@ public class WSDLOperation {
         } else {
             return super.equals(obj);
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(verb, uri);
     }
 }

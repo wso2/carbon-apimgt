@@ -1435,8 +1435,8 @@ paths:
           name: implementationType
           type: string
           enum:
-            - SOAP
-            - HTTP_BINDING
+            - soap
+            - httpBinding
           default: SOAP
           description: |
             Currently this is only used when creating an API using a WSDL.

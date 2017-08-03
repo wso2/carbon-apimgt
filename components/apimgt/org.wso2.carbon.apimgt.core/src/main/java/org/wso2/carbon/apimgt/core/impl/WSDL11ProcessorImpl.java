@@ -555,7 +555,7 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
                             }
                         }
 
-                        Part part = (Part)partObj;
+                        Part part = (Part) partObj;
                         param.setDataType(part.getTypeName().getLocalPart());
                         params.add(param);
                     });

@@ -297,4 +297,13 @@ public interface APIManager {
      * @throws APIMgtDAOException If an error occurs while accessing data layer
      */
     boolean isWSDLArchiveExists(String apiId) throws APIMgtDAOException;
+
+    /**
+     * Checks whether an WSDL exists for an API.
+     *
+     * @param apiId UUID of API
+     * @return true if an WSDL exists for an API
+     * @throws APIMgtDAOException If an error occurs while accessing data layer
+     */
+    boolean isWSDLExists(String apiId) throws APIMgtDAOException;
 }

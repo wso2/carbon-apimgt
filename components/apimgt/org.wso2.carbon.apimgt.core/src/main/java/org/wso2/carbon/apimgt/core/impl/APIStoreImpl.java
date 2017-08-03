@@ -1294,7 +1294,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         WSDLProcessor processor = WSDLProcessFactory.getInstance().getWSDLProcessorForPath(extractedLocation);
         String wsdlPath = processor.getUpdatedWSDLPath(api, label);
         String wsdlArchiveProcessedFileName =
-                api.getProvider() + "-" + api.getName() + "-" + api.getVersion() + "-wsdl";
+                api.getProvider() + "-" + api.getName() + "-" + api.getVersion() + "-" + labelName + "-wsdl";
         APIFileUtils.archiveDirectory(wsdlPath, rootPath, wsdlArchiveProcessedFileName);
         return new WSDLArchiveInfo(rootPath, wsdlArchiveProcessedFileName + ".zip");
     }

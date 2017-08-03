@@ -319,7 +319,7 @@ public class ApisApi implements Microservice  {
     @GET
     @Path("/{apiId}/wsdl")
     @Consumes({ "application/json" })
-    @Produces({ "application/json" })
+    @Produces({ "application/octet-stream" })
     @io.swagger.annotations.ApiOperation(value = "Get WSDL definition", notes = "This operation can be used to retrieve the swagger definition of an API. ", response = void.class, tags={ "API (individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Requested WSDL document of the API is returned ", response = void.class),

@@ -544,7 +544,12 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
 
             API api = apiStore.getAPIbyUUID(apiId);
+            boolean isWSDLExists = apiStore.isWSDLExists(apiId);
             apiToReturn = APIMappingUtil.toAPIDTO(api);
+            if (isWSDLExists) {
+                String wsdlUri = RestApiConstants.WSDL_URI_TEMPLATE.replace(RestApiConstants.APIID_PARAM, api.getId());
+                apiToReturn.setWsdlUri(wsdlUri);
+            }
             return Response.ok().entity(apiToReturn)
                     .header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"")
                     .build();

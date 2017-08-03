@@ -700,6 +700,12 @@ public class ApisApiServiceImpl extends ApisApiService {
             API api = RestAPIPublisherUtil.getApiPublisher(username).getAPIbyUUID(apiId);
             api.setUserSpecificApiPermissions(getAPIPermissionsOfLoggedInUser(username, api));
             APIDTO apidto = MappingUtil.toAPIDto(api);
+
+            boolean isWSDLExists = RestAPIPublisherUtil.getApiPublisher(username).isWSDLExists(apiId);
+            if (isWSDLExists) {
+                String wsdlUri = RestApiConstants.WSDL_URI_TEMPLATE.replace(RestApiConstants.APIID_PARAM, api.getId());
+                apidto.setWsdlUri(wsdlUri);
+            }
             String permissionString = apidto.getPermission();
             if (!StringUtils.isEmpty(permissionString)) {
                 apidto.setPermission(replaceGroupIdWithName(permissionString));
@@ -1675,13 +1681,13 @@ public class ApisApiServiceImpl extends ApisApiService {
                 type = APIDefinitionValidationResponseDTO.DefinitionTypeEnum.SWAGGER.toString();
             }
 
-            Response response = buildResponseIfParamsInvalid(type, fileInputStream, url);
-            if (response != null)
-                return response;
+            Response responseIfParamsInvalid = buildResponseIfParamsInvalid(type, fileInputStream, url);
+            if (responseIfParamsInvalid != null)
+                return responseIfParamsInvalid;
 
             if (APIDefinitionValidationResponseDTO.DefinitionTypeEnum.SWAGGER.toString().equals(type)) {
                 // TODO implement swagger validation
-                return response.noContent().build();
+                return Response.noContent().build();
             } else { //WSDL type
 
                 WSDLProcessor processor = null;

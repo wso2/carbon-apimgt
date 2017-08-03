@@ -248,8 +248,8 @@ class API {
         payload = {
             type: "WSDL",
             additionalProperties: api_data.additionalProperties,
+            implementationType: api_data.implementationType,
             'Content-Type': "multipart/form-data",
-            importOptions: api_data.importOptions
         };
         if (api_data.url) {
             payload.url = api_data.url;

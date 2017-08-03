@@ -519,6 +519,15 @@ public interface ApiDAO {
     boolean isWSDLArchiveExists(String apiId) throws APIMgtDAOException;
 
     /**
+     * Checks whether an WSDL exists for an API.
+     *
+     * @param apiId UUID of API
+     * @return true if an WSDL exists for an API
+     * @throws APIMgtDAOException If an error occurs while accessing data layer
+     */
+    boolean isWSDLExists(String apiId) throws APIMgtDAOException;
+
+    /**
      * Retrieves the WSDL of the API
      *
      * @param apiId UUID of the API
@@ -542,7 +551,7 @@ public interface ApiDAO {
      * @param apiId UUID of API
      * @param wsdlContent WSDL content as byte array
      * @param createdBy the user who adds the WSDL
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException when updating the WSDL failed in DB level
      */
     void addOrUpdateWSDL(String apiId, byte[] wsdlContent, String createdBy) throws APIMgtDAOException;
 
