@@ -287,8 +287,7 @@ class API {
             "context": null,
             "version": null,
             "permission": null,
-            "endpoint": [],
-            "wsdlUri": null
+            "endpoint": []
         };
         var user_keys = Object.keys(api_data);
         for (var index in user_keys) {
@@ -816,20 +815,5 @@ class API {
             }
         );
         return promised_delete;
-    }
-
-    validateWSDL(wsdlUrl, callback) {
-        var promised_validateWSDL = this.client.then(
-            (client) => {
-            return client["WSDLs (Individual)"].post_wsdls_validate({wsdlUrl:wsdlUrl,"Content-Type": "application/json"},
-                this._requestMetaData()).catch(AuthClient.unauthorizedErrorHandler);
-            }
-        );
-
-        if (callback) {
-            return promised_validateWSDL.then(callback);
-        } else {
-            return promised_validateWSDL;
-        }
     }
 }

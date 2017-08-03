@@ -115,9 +115,6 @@ function createAPIHandler(event) {
                         console.debug(error_response);
                     });
             break;
-        case "wsdl-option":
-            createAPIUsingEndpoint("wsdl");
-            break;
     }
 }
 /**
@@ -191,10 +188,10 @@ function createAPIFromSwagger(input_type) {
 /**
  * Do create API with endpoint
  *
- * @param apiType
+ * @param response
  */
-function createAPIUsingEndpoint(apiType) {
-    var endpoints = constructEndpointsForApi(apiType);
+function createAPIUsingEndpoint() {
+    var endpoints = constructEndpointsForApi();
     if (endpoints != false) {
         var api_data = {
             name: $("#new-api-name").val(),
@@ -202,9 +199,6 @@ function createAPIUsingEndpoint(apiType) {
             version: $('#new-api-version').val(),
             endpoint: endpoints
         };
-        if (apiType == "wsdl") {
-            api_data.wsdlUri = $("#wsdl-url").val();
-        }
         var new_api = new API('');
         var promised_create = new_api.create(api_data);
         promised_create
@@ -245,25 +239,20 @@ function createAPIUsingEndpoint(apiType) {
         $('[data-toggle="loading"]').loading('hide');
     }
 }
-function constructEndpointsForApi(apiType) {
+function constructEndpointsForApi() {
     var endpoint = [];
-    if (apiType) {
-        apiType = "-" + apiType;
-    } else {
-        apiType = "";
-    }
-    
-    var productionLevel = $('input[name=endpoint-select-production' + apiType + ']:checked').val();
-    var sandBoxLevel = $('input[name=endpoint-select-sandbox' + apiType + ']:checked').val();
+
+    var productionLevel = $('input[name=endpoint-select-production]:checked').val();
+    var sandBoxLevel = $('input[name=endpoint-select-sandbox]:checked').val();
     var productionEndpoint, sandboxEndpoint;
     if (productionLevel == "global") {
-        var endpointId = $('#global-endpoint-production' + apiType + ' option:selected').val();
+        var endpointId = $('#global-endpoint-production option:selected').val();
         endpoint.push({
             'key': endpointId,
             'type': 'production'
         });
     } else {
-        productionEndpoint = constructEndpoint('production' + apiType);
+        productionEndpoint = constructEndpoint('production');
         if (productionEndpoint != false) {
             endpoint.push({
                 'inline': productionEndpoint,
@@ -272,13 +261,13 @@ function constructEndpointsForApi(apiType) {
         }
     }
     if (sandBoxLevel == "global") {
-        var endpointId = $('#global-endpoint-sandbox' + apiType + ' option:selected').val();
+        var endpointId = $('#global-endpoint-sandbox option:selected').val();
         endpoint.push({
             'key': endpointId,
             'type': 'sandbox'
         });
     } else {
-        sandboxEndpoint = constructEndpoint('sandbox' + apiType);
+        sandboxEndpoint = constructEndpoint('sandbox');
         if (sandboxEndpoint != false) {
             endpoint.push({
                 'inline': sandboxEndpoint,
