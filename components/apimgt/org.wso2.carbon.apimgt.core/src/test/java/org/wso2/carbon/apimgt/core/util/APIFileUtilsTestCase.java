@@ -49,17 +49,13 @@ public class APIFileUtilsTestCase {
     String parentDir = tmpDirStr + File.separatorChar + uuid1;
     String dirPath = parentDir + File.separatorChar + uuid2;
 
-    @BeforeClass
-    public void setup() throws IOException {
-    }
-
     @AfterClass
     public void deleteTempDirectory() throws IOException {
         FileUtils.deleteDirectory(new File(parentDir));
     }
 
     @Test
-    public void testCreateDirectory() throws Exception {
+    public void testAPIFileUtils() throws Exception {
         APIFileUtils.createDirectory(dirPath);
         Assert.assertTrue(Files.exists(Paths.get(dirPath)), "Directory doesn't exists");
 
