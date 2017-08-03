@@ -23,7 +23,10 @@ package org.wso2.carbon.apimgt.core.api;
 import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.exception.APICommentException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
+import org.wso2.carbon.apimgt.core.exception.APINotFoundException;
 import org.wso2.carbon.apimgt.core.exception.APIRatingException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -38,6 +41,7 @@ import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
 import org.wso2.carbon.apimgt.core.models.Tag;
 import org.wso2.carbon.apimgt.core.models.User;
+import org.wso2.carbon.apimgt.core.models.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationResponse;
 
@@ -521,6 +525,36 @@ public interface APIStore extends APIManager {
      * @throws APIManagementException If failed to add the Composite API.
      */
     String addCompositeApiFromDefinition(String swaggerResourceUrl) throws APIManagementException;
+
+    /**
+     * Returns the WSDL of a given API UUID and gateway label name
+     * 
+     * @param apiId API Id
+     * @param labelName gateway label name
+     * @param validateLabelInAPI if true, the specified label must be present in the API
+     * @return WSDL of the API as {@link String}
+     * @throws APIMgtDAOException if error occurs while accessing the WSDL from the data layer
+     * @throws APIMgtWSDLException if error occurs while parsing/manipulating the WSDL
+     * @throws APINotFoundException If API cannot be found
+     * @throws LabelException If Label related error occurs
+     */
+    String getAPIWSDL(String apiId, String labelName, boolean validateLabelInAPI)
+            throws APIMgtDAOException, APIMgtWSDLException, APINotFoundException, LabelException;
+
+    /**
+     * Returns the WSDL archive info of a given API UUID and gateway label name
+     *
+     * @param apiId API Id
+     * @param labelName gateway label name
+     * @param validateLabelInAPI if true, the specified label must be present in the API
+     * @return WSDL archive information {@link WSDLArchiveInfo}
+     * @throws APIMgtDAOException if error occurs while accessing the WSDL from the data layer
+     * @throws APIMgtWSDLException if error occurs while parsing/manipulating the WSDL
+     * @throws APINotFoundException If API cannot be found
+     * @throws LabelException If Label related error occurs
+     */
+    WSDLArchiveInfo getAPIWSDLArchive(String apiId, String labelName, boolean validateLabelInAPI)
+            throws APIMgtDAOException, APIMgtWSDLException, APINotFoundException, LabelException;
 
     /**
      * Store user self signup

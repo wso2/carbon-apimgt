@@ -61,10 +61,10 @@ public class TierDTO   {
   private Map<String, String> attributes = new HashMap<String, String>();
 
   @JsonProperty("requestCount")
-  private int requestCount;
+  private Integer requestCount = null;
 
   @JsonProperty("unitTime")
-  private int unitTime;
+  private Integer unitTime = null;
 
   /**
    * This attribute declares whether this policy is available under commercial or free 
@@ -180,7 +180,7 @@ public class TierDTO   {
     this.attributes = attributes;
   }
 
-  public TierDTO requestCount(int requestCount) {
+  public TierDTO requestCount(Integer requestCount) {
     this.requestCount = requestCount;
     return this;
   }
@@ -190,15 +190,15 @@ public class TierDTO   {
    * @return requestCount
   **/
   @ApiModelProperty(required = true, value = "Maximum number of requests which can be sent within a provided unit time ")
-  public int getRequestCount() {
+  public Integer getRequestCount() {
     return requestCount;
   }
 
-  public void setRequestCount(int requestCount) {
+  public void setRequestCount(Integer requestCount) {
     this.requestCount = requestCount;
   }
 
-  public TierDTO unitTime(int unitTime) {
+  public TierDTO unitTime(Integer unitTime) {
     this.unitTime = unitTime;
     return this;
   }
@@ -208,11 +208,11 @@ public class TierDTO   {
    * @return unitTime
   **/
   @ApiModelProperty(required = true, value = "")
-  public int getUnitTime() {
+  public Integer getUnitTime() {
     return unitTime;
   }
 
-  public void setUnitTime(int unitTime) {
+  public void setUnitTime(Integer unitTime) {
     this.unitTime = unitTime;
   }
 

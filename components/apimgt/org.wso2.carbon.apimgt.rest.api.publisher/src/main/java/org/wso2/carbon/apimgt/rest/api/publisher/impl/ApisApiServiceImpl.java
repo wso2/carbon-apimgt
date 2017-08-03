@@ -1,19 +1,27 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
+import org.wso2.carbon.apimgt.core.api.IdentityProvider;
+import org.wso2.carbon.apimgt.core.api.WSDLProcessor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.core.impl.WSDLProcessFactory;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.WSDLArchiveInfo;
+import org.wso2.carbon.apimgt.core.models.WSDLInfo;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
@@ -24,6 +32,7 @@ import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
@@ -684,6 +693,11 @@ public class ApisApiServiceImpl extends ApisApiService {
                 return Response.notModified().build();
             }
             APIDTO apidto = MappingUtil.toAPIDto(RestAPIPublisherUtil.getApiPublisher(username).getAPIbyUUID(apiId));
+            boolean isWSDLExists = RestAPIPublisherUtil.getApiPublisher(username).isWSDLExists(apiId);
+            if (isWSDLExists) {
+                String wsdlUri = RestApiConstants.WSDL_URI_TEMPLATE.replace(RestApiConstants.APIID_PARAM, apiId);
+                apidto.setWsdlUri(wsdlUri);
+            }
             return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(apidto).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving API : " + apiId;
@@ -1070,6 +1084,96 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     /**
+     * Retrieves the WSDL of the particular API. If the WSDL is added as a single file/URL, the text content of the WSDL
+     * will be retrived. If the WSDL is added as an archive, the binary content of the archive will be retrieved.
+     *
+     * @param apiId UUID of API
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param request msf4j request
+     * @return WSDL archive/file content
+     * @throws NotFoundException
+     */
+    @Override
+    public Response apisApiIdWsdlGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince,
+            Request request) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            InputStream wsdlStream = null;
+            boolean isWSDLArchiveExists = apiPublisher.isWSDLArchiveExists(apiId);
+            if (isWSDLArchiveExists) {
+                wsdlStream = apiPublisher.getAPIWSDLArchive(apiId);
+                if (wsdlStream != null) {
+                    API api = apiPublisher.getAPIbyUUID(apiId);
+                    String wsdlFileName =
+                            api.getProvider() + "-" + api.getName() + "-" + api.getVersion() + "-wsdl-archive.zip";
+
+                    return Response.ok(wsdlStream)
+                            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE)
+                            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + wsdlFileName + "\"")
+                            .build();
+                } else {
+                    return Response.noContent().build();
+                }
+            } else {
+                String wsdlText = apiPublisher.getAPIWSDL(apiId);
+                return Response.ok(wsdlText, MediaType.TEXT_PLAIN).build();  //TODO text/xml content type
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving WSDL of API : " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+    /**
+     * Updates the WSDL of an existing API. File can be uploaded as a single WSDL (.wsdl) or a zipped WSDL 
+     * archive (.zip). 
+     * 
+     * @param apiId UUID of API
+     * @param fileInputStream file content stream
+     * @param fileDetail file details
+     * @param contentType Content-Type header value
+     * @param ifMatch If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param request msf4j request
+     * @return 200 OK if upadating was successful.
+     * @throws NotFoundException
+     */
+    @Override
+    public Response apisApiIdWsdlPut(String apiId, InputStream fileInputStream, FileInfo fileDetail,
+            String contentType, String ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            if (fileDetail.getFileName().endsWith(".zip")) {
+                apiPublisher.updateAPIWSDLArchive(apiId, fileInputStream);
+                return Response.ok().build();
+            } else if (fileDetail.getFileName().endsWith(".wsdl")) {
+                String updatedWSDL = apiPublisher.updateAPIWSDL(apiId, fileInputStream);
+                return Response.ok(updatedWSDL, MediaType.TEXT_PLAIN).build();
+            } else {
+                String msg = "Unsupported file extension type: " + fileDetail.getFileName();
+                log.error(msg);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900700L, msg);
+                return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while updating WSDL of API : " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+    /**
      * Change the lifecycle state of an API
      *
      * @param action             lifecycle action
@@ -1253,46 +1357,100 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     /**
-     * Import an API from from a swagger definition
-     *
-     * @param fileInputStream   file content stream
-     * @param fileDetail        meta infomation about the file
-     * @param url               swagger url
-     * @param contentType       Content-Type header value
-     * @param ifMatch           If-Match header value
+     * Import an API from a Swagger or WSDL
+     * 
+     * @param contentType Content-Type header value
+     * @param type definition type. If not specified, default will be SWAGGER
+     * @param fileInputStream file content stream, can be either archive or a single text file
+     * @param fileDetail file details
+     * @param url URL of the definition
+     * @param additionalProperties Additional attributes specified as a stringified JSON with API's schema
+     * @param ifMatch If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @param request           msf4j request object
+     * @param implementationType WSDL based API implementation type (SOAP or HTTP_BINDING)
+     * @param request msf4j request object
      * @return Imported API
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response apisImportDefinitionPost(String contentType, InputStream fileInputStream, FileInfo fileDetail,
-                                             String url,
-                                             String ifMatch, String ifUnmodifiedSince, Request request)
-            throws NotFoundException {
+    public Response apisImportDefinitionPost(String contentType, String type, InputStream fileInputStream,
+            FileInfo fileDetail, String url, String additionalProperties, String implementationType, String ifMatch,
+            String ifUnmodifiedSince, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
+            if (StringUtils.isBlank(type)) {
+                type = APIDefinitionValidationResponseDTO.DefinitionTypeEnum.SWAGGER.toString();
+            }
 
-            if (fileInputStream != null && url != null) {
-                String msg = "Only one of 'file' and 'url' should be specified";
-                log.error(msg);
-                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
-                return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+            Response response = buildResponseIfParamsInvalid(type, fileInputStream, url);
+            if (response != null)
+                return response;
+
+            API.APIBuilder apiBuilder = null;
+            APIDTO additionalPropertiesAPI = null;
+            if (!StringUtils.isBlank(additionalProperties)) {
+                ObjectMapper mapper = new ObjectMapper();
+                additionalPropertiesAPI = mapper.readValue(additionalProperties, APIDTO.class);
+                apiBuilder = MappingUtil.toAPI(additionalPropertiesAPI);
             }
 
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String uuid = "";
-            if (fileInputStream != null) {
-                uuid = apiPublisher.addApiFromDefinition(fileInputStream);
-            } else if (url != null) {
-                URL swaggerUrl = new URL(url);
-                HttpURLConnection urlConn = (HttpURLConnection) swaggerUrl.openConnection();
-                uuid = apiPublisher.addApiFromDefinition(urlConn);
-            } else {
-                String msg = "Either 'file' or 'inlineContent' should be specified";
-                log.error(msg);
-                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
-                return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+
+            if (APIDefinitionValidationResponseDTO.DefinitionTypeEnum.SWAGGER.toString().equals(type)) {
+                if (fileInputStream != null) {
+                    uuid = apiPublisher.addApiFromDefinition(fileInputStream);
+                } else {
+                    URL swaggerUrl = new URL(url);
+                    HttpURLConnection urlConn = (HttpURLConnection) swaggerUrl.openConnection();
+                    uuid = apiPublisher.addApiFromDefinition(urlConn);
+                }
+            } else { // WSDL type
+
+                //In this case, additionalPropertiesAPI must not be null since we need attributes like name, 
+                // context, version when creating an API from WSDL 
+                if (additionalPropertiesAPI != null) {
+                    final String soap = RestApiConstants.IMPORT_DEFINITION_WSDL_IMPL_TYPE_SOAP;
+                    final String httpBinding = RestApiConstants.IMPORT_DEFINITION_WSDL_IMPL_TYPE_HTTP;
+                    
+                    if (implementationType != null && !soap.equals(implementationType) && !httpBinding
+                            .equals(implementationType)) {
+                        String msg =
+                                "Invalid implementation type. Should be one of '" + soap + "' or '" + httpBinding + "'";
+                        log.error(msg);
+                        ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900700L, msg);
+                        return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();                        
+                    }
+
+                    boolean isHttpBinding = httpBinding.equals(implementationType);
+
+                    if (fileInputStream != null) {
+                        if (fileDetail.getFileName() == null) {
+                            String msg = "File name cannot be null.";
+                            log.error(msg);
+                            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900700L, msg);
+                            return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+                        }
+                        
+                        if (fileDetail.getFileName().endsWith(".zip")) {
+                            uuid = apiPublisher.addAPIFromWSDLArchive(apiBuilder, fileInputStream, isHttpBinding);
+                        } else if (fileDetail.getFileName().endsWith(".wsdl")) {
+                            uuid = apiPublisher.addAPIFromWSDLFile(apiBuilder, fileInputStream, isHttpBinding);
+                        } else {
+                            String msg = "Unsupported file extension type: " + fileDetail.getFileName();
+                            log.error(msg);
+                            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900700L, msg);
+                            return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+                        }
+                    } else {
+                        uuid = apiPublisher.addAPIFromWSDLURL(apiBuilder, url, isHttpBinding);
+                    }
+                } else {
+                    String msg = "'additionalProperties' should be specified when creating an API from WSDL";
+                    log.error(msg);
+                    ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900700L, msg);
+                    return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+                }
             }
             API returnAPI = apiPublisher.getAPIbyUUID(uuid);
             return Response.status(Response.Status.CREATED).entity(MappingUtil.toAPIDto(returnAPI)).build();
@@ -1357,6 +1515,77 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     /**
+     * Validates a provided API definition
+     * 
+     * @param contentType Content-Type header value
+     * @param type API definition type (SWAGGER or WSDL)
+     * @param fileInputStream file content stream
+     * @param fileDetail file details
+     * @param url URL of the definition
+     * @param request msf4j request
+     * @return API definition validation information
+     * @throws NotFoundException
+     */
+    @Override
+    public Response apisValidateDefinitionPost(String contentType, String type, InputStream fileInputStream,
+            FileInfo fileDetail, String url, Request request) throws NotFoundException {
+        String errorMessage = "Error while validating the definition";
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            if (StringUtils.isBlank(type)) {
+                type = APIDefinitionValidationResponseDTO.DefinitionTypeEnum.SWAGGER.toString();
+            }
+
+            Response responseIfParamsInvalid = buildResponseIfParamsInvalid(type, fileInputStream, url);
+            if (responseIfParamsInvalid != null)
+                return responseIfParamsInvalid;
+
+            if (APIDefinitionValidationResponseDTO.DefinitionTypeEnum.SWAGGER.toString().equals(type)) {
+                // TODO implement swagger validation
+                return Response.noContent().build();
+            } else { //WSDL type
+
+                WSDLProcessor processor = null;
+                WSDLInfo info = null;
+                if (!StringUtils.isBlank(url)) {
+                    processor = WSDLProcessFactory.getInstance().getWSDLProcessor(url);
+                    info = processor.getWsdlInfo();
+                } else {
+                    if (fileDetail.getFileName().endsWith(".zip")) {
+                        WSDLArchiveInfo archiveInfo = apiPublisher.extractAndValidateWSDLArchive(fileInputStream);
+                        info = archiveInfo.getWsdlInfo();
+                    } else if (fileDetail.getFileName().endsWith(".wsdl")) {
+                        byte[] wsdlContent = IOUtils.toByteArray(fileInputStream);
+                        processor = WSDLProcessFactory.getInstance().getWSDLProcessor(wsdlContent);
+                        info = processor.getWsdlInfo();
+                    } else {
+                        String msg = "Unsupported file extension type: " + fileDetail.getFileName();
+                        log.error(msg);
+                        ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900700L, msg);
+                        return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+                    }
+                }
+                if (info != null) {
+                    APIDefinitionValidationResponseDTO responseDTO = MappingUtil.toWSDLValidationResponseDTO(info);
+                    return Response.ok(responseDTO).build();
+                }
+                APIDefinitionValidationResponseDTO responseDTO = new APIDefinitionValidationResponseDTO();
+                responseDTO.isValid(false);
+                return Response.ok().entity(responseDTO).build();
+            }
+        } catch (APIManagementException e) {
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        } catch (IOException e) {
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
+        }
+    }
+
+    /**
      * Remove pending lifecycle state change workflow tasks.
      * 
      * @param apiId api id
@@ -1380,5 +1609,39 @@ public class ApisApiServiceImpl extends ApisApiService {
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
+    }
+
+    /**
+     * Validate API deefinition import/validate parameters
+     * 
+     * @param type API definition type (SWAGGER or WSDL)
+     * @param fileInputStream file content stream
+     * @param url URL of the definition
+     * @return Response if any parameter is invalid. Otherwise returns null.
+     */
+    private Response buildResponseIfParamsInvalid(String type, InputStream fileInputStream, String url) {
+        final String SWAGGER = APIDefinitionValidationResponseDTO.DefinitionTypeEnum.SWAGGER.toString();
+        final String WSDL = APIDefinitionValidationResponseDTO.DefinitionTypeEnum.WSDL.toString();
+        if (!SWAGGER.equals(type) && !WSDL.equals(type)) {
+            String errorMessage = "Unsupported definition type. Only SWAGGER or WSDL is allowed";
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(ExceptionCodes.UNSUPPORTED_API_DEFINITION_TYPE);
+            log.error(errorMessage);
+            return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+        }
+
+        if (url == null && fileInputStream == null) {
+            String msg = "Either 'file' or 'url' should be specified";
+            log.error(msg);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900700L, msg);
+            return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+        }
+
+        if (fileInputStream != null && url != null) {
+            String msg = "Only one of 'file' and 'url' should be specified";
+            log.error(msg);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900700L, msg);
+            return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
+        }
+        return null;
     }
 }

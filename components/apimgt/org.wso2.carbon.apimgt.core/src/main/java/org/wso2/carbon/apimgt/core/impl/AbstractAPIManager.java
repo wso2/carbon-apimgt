@@ -246,7 +246,8 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return swagger string
      * @throws APIManagementException   If failed to retrieve swagger definition.
      */
-    @Override public String getApiSwaggerDefinition(String api) throws APIManagementException {
+    @Override
+    public String getApiSwaggerDefinition(String api) throws APIManagementException {
         try {
             return getApiDAO().getApiSwaggerDefinition(api);
 
@@ -256,6 +257,16 @@ public abstract class AbstractAPIManager implements APIManager {
             throw new APIManagementException(errorMsg + api, e, e.getErrorHandler());
         }
 
+    }
+
+    @Override
+    public boolean isWSDLArchiveExists(String apiId) throws APIMgtDAOException {
+        return getApiDAO().isWSDLArchiveExists(apiId);
+    }
+
+    @Override
+    public boolean isWSDLExists(String apiId) throws APIMgtDAOException {
+        return getApiDAO().isWSDLExists(apiId);
     }
 
     /**
