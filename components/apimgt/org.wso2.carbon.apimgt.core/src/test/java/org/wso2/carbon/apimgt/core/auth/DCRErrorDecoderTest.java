@@ -32,7 +32,7 @@ import java.util.Map;
   Test cases for class DCRErrorDecoder
  */
 public class DCRErrorDecoderTest {
-    @Test
+    @Test (description = "Test Response error decoding")
     public void testDecode() throws Exception {
         final String errorName = "Test Error";
         final String errorDescription = "The description of test error";
