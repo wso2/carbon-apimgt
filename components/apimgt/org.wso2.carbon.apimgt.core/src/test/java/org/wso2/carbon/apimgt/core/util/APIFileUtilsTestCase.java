@@ -22,9 +22,9 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.FileApi;
 import org.wso2.carbon.apimgt.core.template.dto.GatewayConfigDTO;
@@ -34,7 +34,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.UUID;
-
 /**
  * 
  * Test cases for {@link APIFileUtils}
@@ -143,7 +142,21 @@ public class APIFileUtilsTestCase {
         // delete directory
         APIFileUtils.deleteDirectory(dirPath);
         Assert.assertFalse(Files.exists(Paths.get(dirPath)), "Directory has not deleted");
+    }
+    
+    @Test(expectedExceptions = APIMgtDAOException.class)
+    public void testDeleteInvalidFiles() throws APIMgtDAOException {
+        APIFileUtils.deleteFile(dirPath + File.separatorChar + "nonexistingfile");
+    }
 
+    @Test(expectedExceptions = APIMgtDAOException.class)
+    public void testReadInvalidContentAsText() throws APIMgtDAOException {
+        APIFileUtils.readFileContentAsText(dirPath + File.separatorChar + "nonexistingfile");
+    }
+
+    @Test(expectedExceptions = APIMgtDAOException.class)
+    public void testReadInvalidContentAsStream() throws APIMgtDAOException {
+        APIFileUtils.readFileContentAsStream(dirPath + File.separatorChar + "nonexistingfile");
     }
 
 }
