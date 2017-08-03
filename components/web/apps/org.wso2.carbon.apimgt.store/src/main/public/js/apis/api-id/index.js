@@ -222,7 +222,6 @@ $(function () {
                                                             "labelName": labelName},
                                                         {"responseContentType": 'application/octet-stream'},
                                                         function (blob) {
-                                                            debugger;
                                                             let windowUrl = window.URL || window.webkitURL;
                                                             let binary = new Blob([blob.data]);
                                                             let url = windowUrl.createObjectURL(binary);

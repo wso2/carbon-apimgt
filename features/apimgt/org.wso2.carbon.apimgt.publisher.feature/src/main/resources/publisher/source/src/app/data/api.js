@@ -127,9 +127,8 @@ class API {
         }
         promise_create = this.client.then(
             (client) => {
-                return client["API (Collection)"].post_apis_import_definition(payload,
-                    this._requestMetaData({'Content-Type': "multipart/form-data"}))
-                    .catch(AuthClient.unauthorizedErrorHandler);
+                return client.apis["API (Collection)"].post_apis_import_definition(payload,
+                    this._requestMetaData({'Content-Type': "multipart/form-data"}));
             }
         );
         if (callback) {
@@ -654,26 +653,24 @@ class API {
 
     validateWSDLUrl(wsdlUrl) {
         let promised_validationResponse = this.client.then((client) => {
-            return client["API (Collection)"]
+            return client.apis["API (Collection)"]
                 .post_apis_validate_definition({
                     "type": "WSDL",
                     "url": wsdlUrl,
                     "Content-Type": "multipart/form-data"}, 
-                    this._requestMetaData({"Content-Type": "multipart/form-data"}))
-                .catch(AuthClient.unauthorizedErrorHandler);
+                    this._requestMetaData({"Content-Type": "multipart/form-data"}));
         });
         return promised_validationResponse;
     }
 
     validateWSDLFile(file) {
         let promised_validationResponse = this.client.then((client) => {
-            return client["API (Collection)"]
+            return client.apis["API (Collection)"]
                 .post_apis_validate_definition({
                         "type": "WSDL",
                         "file": file,
                         "Content-Type": "multipart/form-data"},
-                    this._requestMetaData({"Content-Type": "multipart/form-data"}))
-                .catch(AuthClient.unauthorizedErrorHandler);
+                    this._requestMetaData({"Content-Type": "multipart/form-data"}));
         });
         return promised_validationResponse;
     }

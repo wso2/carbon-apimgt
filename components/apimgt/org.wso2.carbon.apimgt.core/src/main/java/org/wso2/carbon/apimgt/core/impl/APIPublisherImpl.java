@@ -114,12 +114,12 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     // Map to store observers, which observe APIPublisher events
     private Map<String, EventObserver> eventObservers = new HashMap<>();
 
-    public APIPublisherImpl(String username, IdentityProvider idp, KeyManager keyManager,ApiDAO apiDAO, ApplicationDAO applicationDAO,
-                            APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, 
-                                    APILifecycleManager apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO, TagDAO tagDAO,
-                            GatewaySourceGenerator gatewaySourceGenerator, APIGateway apiGatewayPublisher) {
-        super(username, idp, keyManager,apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, apiLifecycleManager, 
-                labelDAO,workflowDAO, tagDAO, gatewaySourceGenerator, apiGatewayPublisher);
+    public APIPublisherImpl(String username, IdentityProvider idp, KeyManager keyManager, ApiDAO apiDAO,
+            ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO,
+            APILifecycleManager apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO, TagDAO tagDAO,
+            GatewaySourceGenerator gatewaySourceGenerator, APIGateway apiGatewayPublisher) {
+        super(username, idp, keyManager, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, apiLifecycleManager,
+                labelDAO, workflowDAO, tagDAO, gatewaySourceGenerator, apiGatewayPublisher);
     }
 
     /**

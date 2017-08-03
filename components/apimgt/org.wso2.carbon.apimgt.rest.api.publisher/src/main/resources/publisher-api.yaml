@@ -1500,7 +1500,9 @@ paths:
 # Resume the workflow by approving or rejecting the workflow request
 #-------------------------------------------------------------------
     post:
-      x-scope: apim:api_create
+      security:
+        - OAuth2Security:
+          - apim:api_create
       summary: Validate API definition and retrieve a summary
       consumes:
         - multipart/form-data
