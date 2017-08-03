@@ -21,13 +21,12 @@ package org.wso2.carbon.apimgt.rest.api.publisher.utils;
 
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.IOUtils;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
@@ -59,6 +58,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.testng.Assert.assertEquals;
+
 public class APIImportExportTestCase {
 
     private static final Logger log = LoggerFactory.getLogger(APIImportExportTestCase.class);
@@ -72,8 +73,8 @@ public class APIImportExportTestCase {
             "import-export-test";
     private APIPublisher apiPublisher;
 
-    @BeforeClass(description = "Initialize")
-    protected void setUp () throws Exception  {
+    @Before
+    public void setUp () throws Exception  {
         api1Definition = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("api1_swagger_definition.json"));
         api1GatewayConfig = "api 1 dummy gateway config";
         api2Definition = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("api2_swagger_definition.json"));
@@ -82,8 +83,8 @@ public class APIImportExportTestCase {
         log.info("Test directory: " + importExportRootDirectory);
     }
 
-    @Test(description = "Test getAPIDetails - single API")
-    void testGetApiDetails () throws APIManagementException {
+    @Test
+    public void testGetApiDetails () throws APIManagementException {
         printTestMethodName();
         apiPublisher = Mockito.mock(APIPublisher.class);
 
@@ -130,12 +131,12 @@ public class APIImportExportTestCase {
 
         ApiImportExportManager importExportManager = new ApiImportExportManager(apiPublisher);
         Set<APIDetails> apiDetailsSet = importExportManager.getAPIDetails(Integer.MAX_VALUE, 0, "*");
-        Assert.assertEquals(new ArrayList<>(apiDetailsSet).get(0).getApi().getId().equals(api1Id), true,
+        assertEquals(new ArrayList<>(apiDetailsSet).get(0).getApi().getId().equals(api1Id), true,
                 "APIDetails not retrieved correctly for API: " + api1.getName() + ", version: " + api1.getVersion());
     }
 
-    @Test(description = "Test getAPIDetails - multiple APIs with non-critical error in retrieving information of one API")
-    void testGetMultipleApiDetailsWithNonFatalErrors () throws APIManagementException {
+    @Test
+    public void testGetMultipleApiDetailsWithNonFatalErrors () throws APIManagementException {
         printTestMethodName();
         apiPublisher = Mockito.mock(APIPublisher.class);
 
@@ -217,11 +218,11 @@ public class APIImportExportTestCase {
 
         ApiImportExportManager importExportManager = new ApiImportExportManager(apiPublisher);
         Set<APIDetails> apiDetailsSet = importExportManager.getAPIDetails(Integer.MAX_VALUE, 0, "*");
-        Assert.assertEquals(apiDetailsSet.size() == 2, true, "Error getting API details");
+        assertEquals(apiDetailsSet.size() == 2, true, "Error getting API details");
     }
 
-    @Test(description = "Test getAPIDetails - multiple APIs with critical error in retrieving information of one API")
-    void testGetMultipleApiDetailsWithFatalErrors () throws APIManagementException {
+    @Test
+    public void testGetMultipleApiDetailsWithFatalErrors () throws APIManagementException {
         printTestMethodName();
         apiPublisher = Mockito.mock(APIPublisher.class);
 
@@ -303,11 +304,11 @@ public class APIImportExportTestCase {
 
         ApiImportExportManager importExportManager = new ApiImportExportManager(apiPublisher);
         Set<APIDetails> apiDetailsSet = importExportManager.getAPIDetails(Integer.MAX_VALUE, 0, "*");
-        Assert.assertEquals(apiDetailsSet.size() == 1, true, "Error getting API details");
+        assertEquals(apiDetailsSet.size() == 1, true, "Error getting API details");
     }
 
-    @Test(description = "Test updateAPIDetails")
-    void testUpdateApiDetails () throws APIManagementException {
+    @Test
+    public void testUpdateApiDetails () throws APIManagementException {
         printTestMethodName();
         apiPublisher = Mockito.mock(APIPublisher.class);
 
@@ -354,7 +355,7 @@ public class APIImportExportTestCase {
         importExportManager.addAPIDetails(api2Details);
     }
 
-    @Test(description = "Test API export and import")
+    @Test
     public void testApiExportAndImport () throws Exception {
         printTestMethodName();
         apiPublisher = Mockito.mock(APIPublisher.class);
@@ -475,7 +476,7 @@ public class APIImportExportTestCase {
         // check if two APIs are written to the file system
         String unzipPath = importExportRootDirectory + File.separator + "unzipped-export-archive";
         APIFileUtils.extractArchive(exportedApiArchiveFilePath, unzipPath);
-        Assert.assertEquals(APIFileUtils.getDirectoryList(unzipPath).size() == 2, true,
+        assertEquals(APIFileUtils.getDirectoryList(unzipPath).size() == 2, true,
                 "Exported API count is not equal to 2");
 
         Mockito.when(apiPublisher.checkIfAPIExists(api2Id)).thenReturn(true);
@@ -598,8 +599,8 @@ public class APIImportExportTestCase {
                 " ------------------");
     }
 
-    @AfterClass
-    protected void tearDown () {
+    @After
+    public void tearDown () {
         try {
             APIFileUtils.deleteDirectory(importExportRootDirectory);
         } catch (APIMgtDAOException e) {
