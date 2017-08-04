@@ -1,3 +1,4 @@
+
 package org.wso2.carbon.apimgt.rest.api.core.factories;
 
 import org.slf4j.Logger;
@@ -19,7 +20,7 @@ public class GatewaysApiServiceFactory {
                     DAOFactory.getApiDAO(), DAOFactory.getLabelDAO(), DAOFactory.getApplicationDAO(), new
                     APIGatewayPublisherImpl());
         } catch (APIMgtDAOException e) {
-            throw new RuntimeException("Error occurred while initializing GatewaysApiService");
+            throw new RuntimeException("Error occurred while initializing GatewaysApiService", e);
         }
         return service;
     }
