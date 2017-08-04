@@ -20,13 +20,18 @@ package org.wso2.carbon.apimgt.rest.api.admin.throttling.mappings;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.models.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.core.models.policy.Condition;
 import org.wso2.carbon.apimgt.core.models.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.core.models.policy.QuotaPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.*;
 import org.wso2.carbon.apimgt.rest.api.admin.exceptions.UnsupportedThrottleConditionTypeException;
 import org.wso2.carbon.apimgt.rest.api.admin.exceptions.UnsupportedThrottleLimitTypeException;
 import org.wso2.carbon.apimgt.rest.api.admin.mappings.CommonThrottleMappingUtil;
+
+import static org.wso2.carbon.apimgt.core.models.policy.PolicyConstants.KB;
+import static org.wso2.carbon.apimgt.core.models.policy.PolicyConstants.REQUEST_COUNT_LIMIT_TYPE;
 
 public class CommonThrottleMappingUtilTestCase {
 
@@ -36,12 +41,18 @@ public class CommonThrottleMappingUtilTestCase {
         throttleLimitDTO.setType(PolicyConstants.BANDWIDTH_LIMIT_TYPE);
         BandwidthLimitDTO bandwidthLimitDTO = new BandwidthLimitDTO();
         bandwidthLimitDTO.setDataAmount(10);
-        bandwidthLimitDTO.setDataUnit(PolicyConstants.KB);
+        bandwidthLimitDTO.setDataUnit(KB);
         throttleLimitDTO.setBandwidthLimit(bandwidthLimitDTO);
         throttleLimitDTO.setTimeUnit("min");
         throttleLimitDTO.setUnitTime(1);
         QuotaPolicy policy = CommonThrottleMappingUtil.fromDTOToQuotaPolicy(throttleLimitDTO);
         Assert.assertNotNull(policy);
+        Assert.assertEquals(policy.getType(), PolicyConstants.BANDWIDTH_TYPE);
+        BandwidthLimit bandwidthLimit = (BandwidthLimit) policy.getLimit();
+        Assert.assertEquals(bandwidthLimit.getDataAmount(), 10);
+        Assert.assertEquals(bandwidthLimit.getDataUnit(), KB );
+        Assert.assertEquals(bandwidthLimit.getTimeUnit(), "min");
+        Assert.assertEquals(bandwidthLimit.getUnitTime(), 1);
     }
 
     @Test(description = "Convert Request Count Throttle Limit DTO to Quota Policy")
@@ -55,6 +66,12 @@ public class CommonThrottleMappingUtilTestCase {
         throttleLimitDTO.setUnitTime(1);
         QuotaPolicy policy = CommonThrottleMappingUtil.fromDTOToQuotaPolicy(throttleLimitDTO);
         Assert.assertNotNull(policy);
+        RequestCountLimit limit = (RequestCountLimit) policy.getLimit();
+        Assert.assertNotNull(limit);
+        Assert.assertEquals(limit.getRequestCount(), 100);
+        Assert.assertEquals(limit.getTimeUnit(), "sec");
+        Assert.assertEquals(limit.getUnitTime(), 1);
+
     }
 
     @Test(description = "Convert Invalid Throttle Limit DTO to Quota Policy")

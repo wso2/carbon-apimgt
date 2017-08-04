@@ -29,13 +29,19 @@ import org.wso2.carbon.apimgt.rest.api.admin.mappings.SubscriptionThrottlePolicy
 
 import java.util.UUID;
 
-public class SubscriptionThrottlePolicyMappingUtinTest {
+public class SubscriptionThrottlePolicyMappingUtilTest {
+    String uuid = UUID.randomUUID().toString();
+    String name = "SampleSubscriptionPolicy";
+
 
     @Test(description = "Convert Subscription Throttle Policy to DTO")
     public void fromSubscriptionThrottlePolicyToDTOTest() throws Exception  {
-        SubscriptionPolicy policy = new SubscriptionPolicy(UUID.randomUUID().toString(),"SampleSubscriptionPolicy");
+
+        SubscriptionPolicy policy = new SubscriptionPolicy(uuid, name);
         SubscriptionThrottlePolicyDTO dto = SubscriptionThrottlePolicyMappingUtil.fromSubscriptionThrottlePolicyToDTO(policy);
         Assert.assertNotNull(dto);
+        Assert.assertEquals(dto.getPolicyName(), name);
+        Assert.assertEquals(dto.getPolicyId(), uuid);
     }
 
     @Test(description = "Convert Subscription Throttle Policy DTO to Model")
@@ -46,6 +52,9 @@ public class SubscriptionThrottlePolicyMappingUtinTest {
         dto.setStopOnQuotaReach(true);
         SubscriptionPolicy policy = SubscriptionThrottlePolicyMappingUtil.fromSubscriptionThrottlePolicyDTOToModel(dto);
         Assert.assertNotNull(policy);
+        Assert.assertEquals(policy.getRateLimitCount(), 1);
+        Assert.assertEquals(policy.getRateLimitTimeUnit(), "m");
+        Assert.assertEquals(policy.isStopOnQuotaReach(), true);
     }
 
 }

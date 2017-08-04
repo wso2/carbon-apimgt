@@ -31,20 +31,27 @@ import org.wso2.carbon.apimgt.rest.api.admin.mappings.CustomPolicyMappingUtil;
 import java.util.UUID;
 
 public class CustomPolicyMappingUtilTest {
+    String name = "SampleCustomPolicy";
+    String uuid = UUID.randomUUID().toString();
 
     @Test(description = "Convert custom Policy to DTO object")
     public void fromCustomPolicyToDTOTest() throws Exception    {
-        CustomPolicy policy = new CustomPolicy("SampleCustomPolicy");
-        policy.setUuid(UUID.randomUUID().toString());
+
+        CustomPolicy policy = new CustomPolicy(name);
+        policy.setUuid(uuid);
         CustomRuleDTO dto = CustomPolicyMappingUtil.fromCustomPolicyToDTO(policy);
         Assert.assertNotNull(dto);
+        Assert.assertEquals(dto.getPolicyName(), name);
+        Assert.assertEquals(dto.getPolicyId(), uuid);
     }
 
     @Test(description = "Convert DTO to Model")
     public void fromCustomPolicyDTOToModelTest() throws Exception   {
         CustomRuleDTO dto = new CustomRuleDTO();
-        CustomPolicyMappingUtil.fromCustomPolicyDTOToModel(dto);
-        Assert.assertNotNull(dto);
+        dto.setPolicyName(name);
+        CustomPolicy policy = CustomPolicyMappingUtil.fromCustomPolicyDTOToModel(dto);
+        Assert.assertNotNull(policy);
+        Assert.assertEquals(policy.getPolicyName(), name);
     }
 
 

@@ -39,9 +39,11 @@ public class BlockingConditionMappingUtilTest {
         BlockConditions conditions = new BlockConditions();
         String uuid = UUID.randomUUID().toString();
         conditions.setUuid(uuid);
+        conditions.setConditionType(BLOCKING_CONDITION_IP_RANGE);
         BlockingConditionDTO dto = BlockingConditionMappingUtil.fromBlockingConditionToDTO(conditions);
         Assert.assertNotNull(dto);
         Assert.assertEquals(uuid, dto.getConditionId());
+        Assert.assertEquals(dto.getConditionType(), BLOCKING_CONDITION_IP_RANGE);
 
     }
 
@@ -55,6 +57,7 @@ public class BlockingConditionMappingUtilTest {
         BlockConditions conditions = BlockingConditionMappingUtil.fromBlockingConditionDTOToBlockCondition(dto);
         Assert.assertNotNull(conditions);
         Assert.assertEquals(BLOCKING_CONDITIONS_IP, conditions.getConditionType());
+        Assert.assertEquals(conditions.getConditionValue(), "12.32.45.3");
     }
 
     @Test(description = "From Blocking Condition to DTO")
@@ -62,8 +65,13 @@ public class BlockingConditionMappingUtilTest {
         BlockConditions conditions = new BlockConditions();
         conditions.setUuid(UUID.randomUUID().toString());
         conditions.setConditionType(BLOCKING_CONDITION_IP_RANGE);
+        conditions.setStartingIP("12.23.45.3");
+        conditions.setEndingIP("23.45.2.1");
         BlockingConditionDTO dto = BlockingConditionMappingUtil.fromBlockingConditionToDTO(conditions);
         Assert.assertNotNull(dto);
         Assert.assertEquals(dto.getConditionType(), BLOCKING_CONDITION_IP_RANGE);
+        Assert.assertEquals(dto.getIpCondition().getStartingIP(), "12.23.45.3");
+        Assert.assertEquals(dto.getIpCondition().getEndingIP(), "23.45.2.1");
+
     }
 }
