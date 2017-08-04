@@ -58,7 +58,12 @@ class NormalLoginForm extends Component {
                 let username = values.userName;
                 let password = values.password;
                 let currentEnvironment = values.currentEnv;
-                localStorage.setItem("correctvalue",currentEnvironment);
+                if(typeof currentEnvironment == "undefined"){
+                    localStorage.setItem("correctvalue","default");
+                }else{
+                    localStorage.setItem("correctvalue",currentEnvironment);
+                }
+
                 var correctvalue ;
                 for (let value of this.state.env) {
 
