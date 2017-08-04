@@ -2,35 +2,52 @@ package org.wso2.carbon.apimgt.rest.api.core.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
+import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
+import org.wso2.carbon.apimgt.core.dao.ApiDAO;
+import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
+import org.wso2.carbon.apimgt.core.dao.LabelDAO;
+import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.impl.APIMgtAdminServiceImpl;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.RegistrationSummary;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.core.GatewaysApiService;
 import org.wso2.carbon.apimgt.rest.api.core.NotFoundException;
+import org.wso2.carbon.apimgt.rest.api.core.dto.LabelInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.RegistrationDTO;
+import org.wso2.carbon.apimgt.rest.api.core.utils.MappingUtil;
+import org.wso2.msf4j.Request;
 
 import java.util.HashMap;
 import java.util.List;
-
-import java.io.InputStream;
-
-import org.wso2.carbon.apimgt.rest.api.core.dto.LabelInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.core.dto.RegistrationDTO;
-import org.wso2.carbon.apimgt.rest.api.core.dto.RegistrationSummaryDTO;
-import org.wso2.carbon.apimgt.rest.api.core.utils.MappingUtil;
-import org.wso2.msf4j.Request;
-import org.wso2.msf4j.formparam.FormDataParam;
-import org.wso2.msf4j.formparam.FileInfo;
-
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 public class GatewaysApiServiceImpl extends GatewaysApiService {
 
     private static final Logger log = LoggerFactory.getLogger(GatewaysApiServiceImpl.class);
+
+    private APISubscriptionDAO apiSubscriptionDAO;
+    private PolicyDAO policyDAO;
+    private ApiDAO apiDAO;
+    private LabelDAO labelDAO;
+    private ApplicationDAO applicationDAO;
+    private APIGateway apiGateway;
+
+
+    public GatewaysApiServiceImpl(APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, ApiDAO apiDAO,
+                                  LabelDAO labelDAO, ApplicationDAO applicationDAO, APIGateway apiGateway) {
+        this.apiSubscriptionDAO = apiSubscriptionDAO;
+        this.policyDAO = policyDAO;
+        this.apiDAO = apiDAO;
+        this.labelDAO = labelDAO;
+        this.applicationDAO = applicationDAO;
+        this.apiGateway = apiGateway;
+    }
 
     /**
      * Register gateway
@@ -48,7 +65,8 @@ public class GatewaysApiServiceImpl extends GatewaysApiService {
             LabelInfoDTO labelInfoDTO = body.getLabelInfo();
 
             if (labelInfoDTO != null) {
-                APIMgtAdminService adminService = RestApiUtil.getAPIMgtAdminService();
+                APIMgtAdminService adminService =  new APIMgtAdminServiceImpl(apiSubscriptionDAO, policyDAO, apiDAO,
+                        labelDAO, applicationDAO, apiGateway);
                 String overwriteLabels = labelInfoDTO.getOverwriteLabels();
                 List<Label> labels = MappingUtil.convertToLabels(labelInfoDTO.getLabelList());
                 adminService.registerGatewayLabels(labels, overwriteLabels);
