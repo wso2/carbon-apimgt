@@ -21,11 +21,9 @@ import javax.ws.rs.core.SecurityContext;
 
 public abstract class ImportApiService {
     public abstract Response importApisPost(InputStream fileInputStream, FileInfo fileDetail
- ,String contentType
  ,String provider
  , Request request) throws NotFoundException;
     public abstract Response importApisPut(InputStream fileInputStream, FileInfo fileDetail
- ,String contentType
  ,String provider
  , Request request) throws NotFoundException;
 }
