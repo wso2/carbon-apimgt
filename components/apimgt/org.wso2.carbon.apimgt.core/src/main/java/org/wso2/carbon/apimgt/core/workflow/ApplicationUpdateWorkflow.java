@@ -33,6 +33,8 @@ import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 
+import java.time.LocalDateTime;
+
 /**
  * Application update model class for workflow
  */
@@ -83,6 +85,7 @@ public class ApplicationUpdateWorkflow extends Workflow {
         application.setId(applicationId);
         application.setUpdatedUser(updatedUser);
         application.setPermissionString(permission);
+        application.setUpdatedTime(LocalDateTime.now());
 
         if (existingApplication == null && updatedApplication == null) {
             // this is when complete method is executed through workflow rest api
