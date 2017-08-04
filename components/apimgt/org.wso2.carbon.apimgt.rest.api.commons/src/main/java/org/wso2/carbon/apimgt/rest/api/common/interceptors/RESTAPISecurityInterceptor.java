@@ -105,6 +105,7 @@ public class RESTAPISecurityInterceptor implements Interceptor {
                 return false;
             }
         } else if (requestURI.contains("/store")) {
+            /*TODO: Remove below swagger.json serving path when old Store UUF app is removed ~tmkb*/
             if (requestURI.contains("swagger.json")) {
                 try {
                     yamlContent = RestApiUtil.getStoreRestAPIResource();
@@ -117,6 +118,15 @@ public class RESTAPISecurityInterceptor implements Interceptor {
                 }
                 response.setStatus(javax.ws.rs.core.Response.Status.OK.getStatusCode()).setEntity(Json.pretty
                         (swagger)).setMediaType(MediaType.APPLICATION_JSON).send();
+                return false;
+            } else if (requestURI.contains("swagger.yaml")) {
+                try {
+                    yamlContent = RestApiUtil.getStoreRestAPIResource();
+                } catch (APIManagementException e) {
+                    log.error("Couldn't find swagger.yaml for store", e);
+                }
+                response.setStatus(javax.ws.rs.core.Response.Status.OK.getStatusCode()).setEntity(yamlContent)
+                        .setMediaType("text/x-yaml").send();
                 return false;
             }
         } else if (requestURI.contains("/editor") || requestURI.contains("keyserver") || requestURI.contains("core")) {
