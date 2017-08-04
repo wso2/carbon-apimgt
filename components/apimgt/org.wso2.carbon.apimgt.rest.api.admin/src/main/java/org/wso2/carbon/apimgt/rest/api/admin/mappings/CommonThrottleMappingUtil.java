@@ -33,7 +33,6 @@ import org.wso2.carbon.apimgt.core.models.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.core.models.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.core.models.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
-import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.BandwidthLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ConditionalGroupDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomAttributeDTO;
@@ -87,6 +86,7 @@ public class CommonThrottleMappingUtil {
      */
     public static List<ConditionalGroupDTO> fromPipelineListToConditionalGroupDTOList(List<Pipeline> pipelines)
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
+
         List<ConditionalGroupDTO> groupDTOs = new ArrayList<>();
         if (pipelines != null) {
             for (Pipeline pipeline : pipelines) {
@@ -106,6 +106,7 @@ public class CommonThrottleMappingUtil {
      */
     public static Pipeline fromConditionalGroupDTOToPipeline(ConditionalGroupDTO dto)
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
+
         Pipeline pipeline = new Pipeline();
         pipeline.setDescription(dto.getDescription());
         pipeline.setEnabled(true);
@@ -126,6 +127,7 @@ public class CommonThrottleMappingUtil {
      */
     public static ConditionalGroupDTO fromPipelineToConditionalGroupDTO(Pipeline pipeline)
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
+
         ConditionalGroupDTO groupDTO = new ConditionalGroupDTO();
         groupDTO.setDescription(pipeline.getDescription());
         groupDTO.setLimit(fromQuotaPolicyToDTO(pipeline.getQuotaPolicy()));
@@ -144,6 +146,7 @@ public class CommonThrottleMappingUtil {
      */
     public static List<Condition> fromDTOListToConditionList(List<ThrottleConditionDTO> throttleConditionDTOs)
             throws UnsupportedThrottleConditionTypeException {
+
         List<Condition> conditions = new ArrayList<>();
         if (throttleConditionDTOs != null) {
             for (ThrottleConditionDTO dto : throttleConditionDTOs) {
@@ -162,6 +165,7 @@ public class CommonThrottleMappingUtil {
      */
     public static List<ThrottleConditionDTO> fromConditionListToDTOList(List<Condition> conditions)
             throws UnsupportedThrottleConditionTypeException {
+
         List<ThrottleConditionDTO> dtoList = new ArrayList<>();
         if (conditions != null) {
             for (Condition condition : conditions) {
@@ -192,7 +196,7 @@ public class CommonThrottleMappingUtil {
             String msg = "Throttle Condition type " + dto.getType() + " is not supported";
             log.error(msg);
             throw new UnsupportedThrottleConditionTypeException(msg,
-                    ExceptionCodes.UNSUPPORTED_THROTTLE_CONDITION_TYPE);
+                                                                ExceptionCodes.UNSUPPORTED_THROTTLE_CONDITION_TYPE);
         }
     }
 
@@ -203,7 +207,7 @@ public class CommonThrottleMappingUtil {
      * @return Derived DTO object from the model object
      * @throws UnsupportedThrottleConditionTypeException
      */
-    public static ThrottleConditionDTO fromConditionToDTO(Condition condition)   //.................
+    public static ThrottleConditionDTO fromConditionToDTO(Condition condition)
             throws UnsupportedThrottleConditionTypeException {
         if (condition instanceof IPCondition) {
             return fromIPConditionToDTO((IPCondition) condition);
@@ -243,8 +247,10 @@ public class CommonThrottleMappingUtil {
      */
     public static ThrottleLimitDTO fromQuotaPolicyToDTO(QuotaPolicy quotaPolicy)
             throws UnsupportedThrottleLimitTypeException {
+
         Limit limit = quotaPolicy.getLimit();
         String throttleLimitType = quotaPolicy.getType();
+
         if (PolicyConstants.REQUEST_COUNT_TYPE.equals(throttleLimitType)) {
             if (limit instanceof RequestCountLimit) {
                 RequestCountLimit requestCountLimit = (RequestCountLimit) limit;
