@@ -34,9 +34,8 @@ public class AnalyticsMappingUtil {
         ApplicationCountListDTO applicationCountListDTO = new ApplicationCountListDTO();
         List<ApplicationCountDTO> applicationCountDTOList = new ArrayList<>();
         applicationCountListDTO.setCount(applicationCountList.size());
-
-        for (int i = 0; i < applicationCountList.size(); i++) {
-            applicationCountDTOList.add(fromApplicationCountToDTO(applicationCountList.get(i)));
+        for (ApplicationCount applicationCount : applicationCountList) {
+            applicationCountDTOList.add(fromApplicationCountToDTO(applicationCount));
         }
 
         applicationCountListDTO.setList(applicationCountDTOList);

@@ -219,8 +219,8 @@ public class APIManagerFactory {
 
     private Analyzer newAnalyzer(String username) throws APIMgtDAOException {
         try {
-            UserAwareAnalyzer userAwareAnalyzer = new UserAwareAnalyzer(username, DAOFactory.getAnalyticsDAO());
-            return userAwareAnalyzer;
+            AnalyzerImpl analyzer = new AnalyzerImpl(username, DAOFactory.getAnalyticsDAO());
+            return analyzer;
         } catch (APIMgtDAOException e) {
             throw new APIMgtDAOException("Couldn't Create Analyzer", ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }

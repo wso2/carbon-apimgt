@@ -52,6 +52,25 @@ produces:
   - application/json
 
 
+securityDefinitions:
+  OAuth2Security:
+    type: oauth2
+    flow: password
+    tokenUrl: https://localhost:9443/token
+    scopes:
+      apim:api_view: View API
+      apim:api_create: Create API
+      apim:api_update: Update API
+      apim:api_delete: Delete API
+      apim:apidef_update: Update API Definition
+      apim:api_publish: Publish API
+      apim:subscription_view: View Subscription
+      apim:subscription_block: Block Subscription
+
+security:
+  - OAuth2Security:
+    - apim:api_view
+
 paths:
 
 #-----------------------------------------------------
@@ -60,7 +79,15 @@ paths:
 
   /application/applications_created_over_time:
     get:
-      x-scope: apim:api_publish
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/analytics/v1.0/application/applications_created_over_time?from=2017-05-30%2012:32:41.972&to=2017-07-30%202:32:41.972&created_by=admin&subscribed_to=TestAPI"
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/swagger
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 329\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}"
+      summary: Get application created over time
+      security:
+        - OAuth2Security:
+           - apim:api_view
       summary: |
         Retrieve application created over time details
       description: |

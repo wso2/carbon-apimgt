@@ -71,7 +71,9 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
                     log.debug("Setting created by to query:" + createdBy);
                     statement.setString(3, createdBy);
                 }
-                log.debug("Executing query " + query);
+                if (log.isDebugEnabled()) {
+                    log.debug("Executing query " + query);
+                }
                 statement.execute();
                 try (ResultSet rs = statement.getResultSet()) {
                     long count = 0;
