@@ -112,7 +112,6 @@ paths:
             If no advanced attribute modifier has been specified, search will match the
             given query string against API Name.
           type: string
-        - $ref : "#/parameters/Accept"
         - $ref : "#/parameters/If-None-Match"
       tags:
         - API Collection
@@ -156,7 +155,6 @@ paths:
         Get details of an API
       parameters:
         - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since' 
       tags:
@@ -210,7 +208,6 @@ paths:
         Get the swagger of an API
       parameters:
         - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -267,7 +264,6 @@ paths:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
         - API (individual)
@@ -319,7 +315,6 @@ paths:
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/documentId'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -380,7 +375,6 @@ paths:
         parameters:
           - $ref: '#/parameters/apiId'
           - $ref: '#/parameters/documentId'
-          - $ref: '#/parameters/Accept'
           - $ref: '#/parameters/If-None-Match'
           - $ref: '#/parameters/If-Modified-Since'
         tags:
@@ -447,7 +441,6 @@ paths:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
-        - $ref: '#/parameters/Accept'
       tags:
         - API (individual)
         - Retrieve Rating
@@ -486,7 +479,6 @@ paths:
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/ratingId'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -550,7 +542,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Rating'
-        - $ref: '#/parameters/Content-Type'
       tags:
         - API (individual)
         - Create
@@ -602,7 +593,6 @@ paths:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
-        - $ref: '#/parameters/Accept'
       tags:
         - Comments Collection
         - Retrieve
@@ -640,7 +630,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Comment'
-        - $ref: '#/parameters/Content-Type'
       tags:
         - API (individual)
         - Create
@@ -694,7 +683,6 @@ paths:
       parameters:
         - $ref: '#/parameters/commentId'
         - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -789,7 +777,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Comment'
-        - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
@@ -888,7 +875,6 @@ paths:
             given query string against Composite API Name.
 
           type: string
-        - $ref : "#/parameters/Accept"
         - $ref : "#/parameters/If-None-Match"
       tags:
         - CompositeAPI (Collection)
@@ -941,7 +927,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/CompositeAPI'
-        - $ref: '#/parameters/Content-Type'
       tags:
         - CompositeAPI (Collection)
       responses:
@@ -1001,7 +986,6 @@ paths:
         Using this operation, you can retrieve complete details of a single Composite API. You need to provide the Id of the Composite API to retrive it.
       parameters:
         - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -1067,7 +1051,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/CompositeAPI'
-        - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
@@ -1190,7 +1173,6 @@ paths:
         This operation can be used to retrieve the swagger definition of a Composite API.
       parameters:
         - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -1263,7 +1245,6 @@ paths:
           description: Swagger definition of the Composite API
           type: string
           required: true
-        - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
@@ -1338,7 +1319,6 @@ paths:
         This operation can be used to retrieve the Ballerina implementation of a Composite API.
       parameters:
         - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -1411,7 +1391,6 @@ paths:
           description: Ballerina implementation of the Composite API
           type: file
           required: true
-        - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
@@ -1496,7 +1475,6 @@ paths:
           type: string
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
         - Application Collection
@@ -1552,7 +1530,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Application'
-        - $ref: '#/parameters/Content-Type'
       tags:
         - Application (individual)
         - Create
@@ -1623,7 +1600,6 @@ paths:
         Get application details
       parameters:
         - $ref: '#/parameters/applicationId'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -1685,7 +1661,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Application'
-        - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
@@ -1803,7 +1778,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/ApplicationKeyGenerateRequest'
-        - $ref: '#/parameters/Content-Type'
       tags:
         - Application (individual)
         - Generate Keys
@@ -1863,7 +1837,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/ApplicationKeyMappingRequest'
-        - $ref: '#/parameters/Content-Type'
       tags:
         - Application (individual)
         - Application Keys
@@ -1915,7 +1888,6 @@ paths:
         Retrieve keys (Consumer key/secret) of application
       parameters:
         - $ref: '#/parameters/applicationId'
-        - $ref: '#/parameters/Accept'
       tags:
         - Application (individual)
         - Application Keys
@@ -1968,7 +1940,6 @@ paths:
       parameters:
         - $ref: '#/parameters/applicationId'
         - $ref: '#/parameters/keyType'
-        - $ref: '#/parameters/Accept'
       tags:
         - Application (individual)
         - Application Keys
@@ -2022,7 +1993,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/ApplicationKeys'
-        - $ref: '#/parameters/Content-Type'
       tags:
         - Application (individual)
         - Application Keys
@@ -2081,7 +2051,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/ApplicationTokenGenerateRequest'
-        - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
@@ -2141,7 +2110,6 @@ paths:
         - $ref: '#/parameters/apiType'
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/limit'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
         - Subscription Collection
@@ -2190,7 +2158,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Subscription'
-        - $ref: '#/parameters/Content-Type'
       tags:
         - Subscription (individual)
         - Create
@@ -2253,7 +2220,6 @@ paths:
         Get subscription details
       parameters:
         - $ref: '#/parameters/subscriptionId'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -2347,7 +2313,6 @@ paths:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/tierLevel'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
         - Tier Collection
@@ -2395,7 +2360,6 @@ paths:
       parameters:
         - $ref: '#/parameters/tierName'
         - $ref: '#/parameters/tierLevel'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -2454,7 +2418,6 @@ paths:
       parameters:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
         - Tag Collection
@@ -2505,7 +2468,6 @@ paths:
         This operation can be used to retrieve the information of the labels
       parameters:
         - $ref: '#/parameters/labels-Q'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -2611,7 +2573,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/User'
-        - $ref: '#/parameters/Content-Type'
       tags:
         - Signup
       responses:
@@ -2806,24 +2767,6 @@ parameters:
     default: 0
     type: integer
 
-# The HTTP Accept header
-  Accept:
-    name: Accept
-    in: header
-    description: |
-      Media types acceptable for the response. Default is JSON.
-    default: JSON
-    type: string
-
-# The HTTP Content-Type header
-  Content-Type:
-    name: Content-Type
-    in: header
-    description: |
-      Media type of the entity in the body. Default is JSON.
-    default: JSON
-    required: true
-    type : string
 
 # The HTTP If-None-Match header
 # Used to avoid retrieving data that are already cached
