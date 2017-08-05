@@ -33,13 +33,11 @@ public abstract class ApisApiService {
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdDocumentsDocumentIdContentGet(String apiId
  ,String documentId
- ,String accept
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdDocumentsDocumentIdContentPost(String apiId
  ,String documentId
- ,String contentType
  ,InputStream fileInputStream, FileInfo fileDetail
  ,String inlineContent
  ,String ifMatch
@@ -52,52 +50,43 @@ public abstract class ApisApiService {
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdDocumentsDocumentIdGet(String apiId
  ,String documentId
- ,String accept
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdDocumentsDocumentIdPut(String apiId
  ,String documentId
  ,DocumentDTO body
- ,String contentType
  ,String ifMatch
  ,String ifUnmodifiedSince
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdDocumentsGet(String apiId
  ,Integer limit
  ,Integer offset
- ,String accept
  ,String ifNoneMatch
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdDocumentsPost(String apiId
  ,DocumentDTO body
- ,String contentType
  ,String ifMatch
  ,String ifUnmodifiedSince
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdGatewayConfigGet(String apiId
- ,String accept
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdGatewayConfigPut(String apiId
  ,String gatewayConfig
- ,String contentType
  ,String ifMatch
  ,String ifUnmodifiedSince
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdGet(String apiId
- ,String accept
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdLifecycleGet(String apiId
- ,String accept
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdLifecycleHistoryGet(String apiId
- ,String accept
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
@@ -105,40 +94,33 @@ public abstract class ApisApiService {
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdPut(String apiId
  ,APIDTO body
- ,String contentType
  ,String ifMatch
  ,String ifUnmodifiedSince
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdSwaggerGet(String apiId
- ,String accept
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdSwaggerPut(String apiId
  ,String endpointId
- ,String contentType
  ,String ifMatch
  ,String ifUnmodifiedSince
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdThumbnailGet(String apiId
- ,String accept
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdThumbnailPost(String apiId
  ,InputStream fileInputStream, FileInfo fileDetail
- ,String contentType
  ,String ifMatch
  ,String ifUnmodifiedSince
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdWsdlGet(String apiId
- ,String accept
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdWsdlPut(String apiId
  ,InputStream fileInputStream, FileInfo fileDetail
- ,String contentType
  ,String ifMatch
  ,String ifUnmodifiedSince
  , Request request) throws NotFoundException;
@@ -154,15 +136,12 @@ public abstract class ApisApiService {
     public abstract Response apisGet(Integer limit
  ,Integer offset
  ,String query
- ,String accept
  ,String ifNoneMatch
  , Request request) throws NotFoundException;
     public abstract Response apisHead(String query
- ,String accept
  ,String ifNoneMatch
  , Request request) throws NotFoundException;
-    public abstract Response apisImportDefinitionPost(String contentType
- ,String type
+    public abstract Response apisImportDefinitionPost(String type
  ,InputStream fileInputStream, FileInfo fileDetail
  ,String url
  ,String additionalProperties
@@ -171,10 +150,8 @@ public abstract class ApisApiService {
  ,String ifUnmodifiedSince
  , Request request) throws NotFoundException;
     public abstract Response apisPost(APIDTO body
- ,String contentType
  , Request request) throws NotFoundException;
-    public abstract Response apisValidateDefinitionPost(String contentType
- ,String type
+    public abstract Response apisValidateDefinitionPost(String type
  ,InputStream fileInputStream, FileInfo fileDetail
  ,String url
  , Request request) throws NotFoundException;
