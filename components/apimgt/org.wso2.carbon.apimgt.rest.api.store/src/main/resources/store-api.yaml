@@ -2933,7 +2933,6 @@ definitions:
 #-----------------------------------------------------
   CompositeAPIInfo:
     title: Composite API Info object with basic API details.
-    required:
     allOf:
       - $ref: '#/definitions/BaseAPIInfo'
       - properties:
@@ -3029,7 +3028,6 @@ definitions:
 #-----------------------------------------------------
   CompositeAPI:
     title: Composite API object
-    required:
     allOf:
       - $ref: '#/definitions/BaseAPI'
       - properties:
