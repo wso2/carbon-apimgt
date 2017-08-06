@@ -85,9 +85,9 @@ class ComposeHeader extends Component {
                         </Menu.Item>
                     </SubMenu>
 
-                    {localStorage.getItem("correctvalue") != 'default' &&
+                    {localStorage.getItem("currentEnv") != 'default' &&
                     <SubMenu title={<span><Icon type="setting"/>{localStorage
-                        .getItem("correctvalue")}</span>}>
+                        .getItem("currentEnv")}</span>}>
                         {this.state.availableEnv.map(environment => <Menu.Item
                             key={environment.env}>{environment.env}</Menu.Item>)}
 
