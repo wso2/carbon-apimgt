@@ -18,6 +18,8 @@
 "use strict";
 import Swagger from 'swagger-client'
 import AuthManager from './AuthManager'
+import ConfigManager from './ConfigManager'
+
 
 /**
  * This class expose single swaggerClient instance created using the given swagger URL (Publisher, Store, ect ..)
@@ -32,27 +34,51 @@ class SingleClient {
      * @returns {SingleClient|*|null}
      */
     constructor(args = {}) {
+
+        this.currentenv = localStorage.getItem("currentEnv");
+        this.envdetails = new ConfigManager();
+
         if (SingleClient._instance) {
             return SingleClient._instance;
         }
-        const authorizations = {
-            OAuth2Security: {
-                token: {access_token: AuthManager.getUser().getPartialToken()}
+        this._client = this.envdetails.env_response.then((response) => {
+            let allenvs = response.data.environments;
+            if (this.currentenv == "default") {
+                this.host = window.location.host;
+            } else {
+                let environmentValue;
+                for (let value of allenvs) {
+
+                    if (this.currentenv == value.env) {
+
+                        environmentValue = value;
+
+                    }
+                }
+                this.host = environmentValue.envIsHost;
             }
-        };
-        let promisedResolve = Swagger.resolve({url: this._getSwaggerURL()});
-        this._client = promisedResolve.then(
-            resolved => {
-                const argsv = Object.assign(args,
-                    {
-                        spec: this._fixSpec(resolved.spec),
-                        authorizations: authorizations,
-                        requestInterceptor: this._getRequestInterceptor(),
-                        responseInterceptor: this._getResponseInterceptor()
-                    });
-                return new Swagger(argsv);
-            }
-        );
+
+            const authorizations = {
+                OAuth2Security: {
+                    token: {access_token: AuthManager.getUser().getPartialToken()}
+                }
+            };
+            let promisedResolve = Swagger.resolve({url: window.location.protocol + "//" + this.host +
+            "/api/am/publisher/v1.0/apis/swagger.yaml"});
+            this._client = promisedResolve.then(
+                resolved => {
+                    const argsv = Object.assign(args,
+                        {
+                            spec: this._fixSpec(resolved.spec),
+                            authorizations: authorizations,
+                            requestInterceptor: this._getRequestInterceptor(),
+                            responseInterceptor: this._getResponseInterceptor()
+                        });
+                    return new Swagger(argsv);
+                }
+            );
+            return this._client;
+        });
         this._client.catch(AuthManager.unauthorizedErrorHandler);
         SingleClient._instance = this;
     }
@@ -117,7 +143,7 @@ class SingleClient {
 
     _getSwaggerURL() {
         /* TODO: Read this from configuration ~tmkb*/
-        return window.location.protocol + "//" + window.location.host + "/api/am/publisher/v1.0/apis/swagger.yaml";
+        return window.location.protocol + "//" + window.location.host + "/api/am/publisher/v1.0/apis/swagger.json";
     }
 }
 
