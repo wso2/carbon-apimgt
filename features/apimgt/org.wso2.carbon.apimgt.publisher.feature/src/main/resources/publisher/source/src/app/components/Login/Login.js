@@ -54,29 +54,25 @@ class NormalLoginForm extends Component {
         this.setState({loading: true});
         this.props.form.validateFields((err, values) => {
             if (!err) {
-                console.log('Received values of form: ', values);
                 let username = values.userName;
                 let password = values.password;
                 let currentEnvironment = values.currentEnv;
                 if(typeof currentEnvironment == "undefined"){
-                    localStorage.setItem("correctvalue","default");
+                    localStorage.setItem("currentEnv","default");
                 }else{
-                    localStorage.setItem("correctvalue",currentEnvironment);
+                    localStorage.setItem("currentEnv",currentEnvironment);
                 }
 
-                var correctvalue ;
+                var detailedValue ;
                 for (let value of this.state.env) {
 
                     if (currentEnvironment == value.env) {
 
-                        correctvalue = value;
-                        console.log(correctvalue);
+                        detailedValue = value;
+                        console.log(detailedValue);
                     }
                 }
-
-                console.log(correctvalue);
-               localStorage.setItem("working",JSON.stringify(correctvalue));
-                let loginPromise = this.authManager.authenticateUser(username, password,correctvalue);
+                let loginPromise = this.authManager.authenticateUser(username, password,detailedValue);
                 loginPromise.then((response) => {
                     this.setState({isLogin: AuthManager.getUser(), loading: false});
                 }).catch((error) => {
@@ -98,14 +94,12 @@ class NormalLoginForm extends Component {
         if (params.referrer) {
             this.setState({referrer: params.referrer});
         }
-        let envdetails = this.configManager;
-        envdetails.env_response.then((response) => {
-            let enviromentdetails = response.data.environments;
-            console.log(enviromentdetails);
-            this.setState({env: enviromentdetails});
+        let envDetails = this.configManager;
+        envDetails.env_response.then((response) => {
+            let enviromentDetails = response.data.environments;
+            this.setState({env: enviromentDetails});
         });
 
-        console.log(envdetails)
     }
 
     emitEmpty = () => {
@@ -117,9 +111,9 @@ class NormalLoginForm extends Component {
     render() {
         const {getFieldDecorator} = this.props.form;
         const makeEmptySuffix = this.state.userNameEmpty ? <Icon type="close-circle" onClick={this.emitEmpty}/> : '';
-        const er = this.state.env.length;
+        const environmentLength = this.state.env.length;
 
-        console.log(er);
+
 
         if (!this.state.isLogin) { // If not logged in, go to login page
             return (
@@ -140,7 +134,7 @@ class NormalLoginForm extends Component {
                                    placeholder="Password"/>
                         )}
                     </FormItem>
-                    { er > 1 &&
+                    { environmentLength > 1 &&
                         <FormItem
                             hasFeedback>
                             {getFieldDecorator('currentEnv', {

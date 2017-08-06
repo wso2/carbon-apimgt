@@ -18,6 +18,8 @@
 "use strict";
 import Swagger from 'swagger-client'
 import AuthManager from './AuthManager'
+import ConfigManager from './ConfigManager'
+
 
 /**
  * This class expose single swaggerClient instance created using the given swagger URL (Publisher, Store, ect ..)
@@ -33,55 +35,51 @@ class SingleClient {
      */
     constructor(args = {}) {
 
-        this.currentenv = localStorage.getItem("correctvalue");
+        this.currentenv = localStorage.getItem("currentEnv");
         this.envdetails = new ConfigManager();
         console.log(this.envdetails);
-
-       this.envdetails.env_response.then((response) =>{
-             let allenvs = response.data.environments;
-           localStorage.setItem("environmentSC",JSON.stringify(allenvs));
-        });
-
-
-        if (typeof this.currentenv == 'undefined'){
-            console.log("a");
-            this.host = window.location.host;
-        }else {
-            console.log("b");
-             let correctvalue ;
-                for (let value of JSON.parse(localStorage.getItem("environmentSC"))) {
-
-                    if (this.currentenv == value.env) {
-
-                        correctvalue = value;
-                        console.log(correctvalue);
-                    }
-                }
-                this.host = correctvalue.envIsHost;
-        }
 
         if (SingleClient._instance) {
             return SingleClient._instance;
         }
-        const authorizations = {
-            OAuth2Security: {
-                token: {access_token: AuthManager.getUser().getPartialToken()}
+        this._client = this.envdetails.env_response.then((response) => {
+            let allenvs = response.data.environments;
+            if (this.currentenv == "default") {
+                this.host = window.location.host;
+            } else {
+                let environmentValue;
+                for (let value of allenvs) {
+
+                    if (this.currentenv == value.env) {
+
+                        environmentValue = value;
+
+                    }
+                }
+                this.host = environmentValue.envIsHost;
             }
-        };
-        let promisedResolve = Swagger.resolve({url: SingleClient._getSwaggerURL()});
-        SingleClient.spec = promisedResolve;
-        this._client = promisedResolve.then(
-            resolved => {
-                const argsv = Object.assign(args,
-                    {
-                        spec: this._fixSpec(resolved.spec),
-                        authorizations: authorizations,
-                        requestInterceptor: this._getRequestInterceptor(),
-                        responseInterceptor: this._getResponseInterceptor()
-                    });
-                return new Swagger(argsv);
-            }
-        );
+
+            const authorizations = {
+                OAuth2Security: {
+                    token: {access_token: AuthManager.getUser().getPartialToken()}
+                }
+            };
+            let promisedResolve = Swagger.resolve({url: window.location.protocol + "//" + this.host +
+            "/api/am/publisher/v1.0/apis/swagger.yaml"});
+            this._client = promisedResolve.then(
+                resolved => {
+                    const argsv = Object.assign(args,
+                        {
+                            spec: this._fixSpec(resolved.spec),
+                            authorizations: authorizations,
+                            requestInterceptor: this._getRequestInterceptor(),
+                            responseInterceptor: this._getResponseInterceptor()
+                        });
+                    return new Swagger(argsv);
+                }
+            );
+            return this._client;
+        });
         this._client.catch(AuthManager.unauthorizedErrorHandler);
         SingleClient._instance = this;
     }
