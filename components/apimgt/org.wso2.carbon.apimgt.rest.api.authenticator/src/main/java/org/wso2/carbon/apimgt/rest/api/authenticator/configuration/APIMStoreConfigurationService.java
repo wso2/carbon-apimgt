@@ -32,6 +32,7 @@ public class APIMStoreConfigurationService {
         apimStoreConfigurations = ServiceReferenceHolder.getInstance().getAPIMStoreConfiguration();
     }
 
+
     public static APIMStoreConfigurationService getInstance() {
         return apimStoreConfigurationService;
     }

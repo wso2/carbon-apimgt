@@ -154,11 +154,15 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
      * @throws APIMgtSecurityException if the Authorization header is invalid
      */
     private String extractPartialAccessTokenFromCookie(String cookie) {
+        Map map = ServiceReferenceHolder.getInstance().getAPIMConfiguration(); // added for the working purposes
+        System.out.print(map); // added for the working purposes
+        String environmentName = (String) map.get("environmentName");
         if (cookie != null) {
             cookie = cookie.trim();
             String[] cookies = cookie.split(";");
             String token2 = Arrays.stream(cookies)
-                    .filter(name -> name.contains(APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J))
+                    .filter(name -> name.contains(APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J + "_"
+                            + environmentName))
                     .findFirst().orElse("");
             String tokensArr[] = token2.split("=");
             if (tokensArr.length == 2) {
