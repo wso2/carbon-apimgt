@@ -148,6 +148,12 @@ class AuthManager {
         return this.host + this.token;
     }
 
+    getTokenEnpointEnv(detailedValue){
+
+        return window.location.protocol + "//" + detailedValue.envIsHost + this.token;
+    }
+
+
     /**
      * By given username and password Authenticate the user, Since this REST API has no swagger definition,
      * Can't use swaggerjs to generate client.Hence using Axios to make AJAX calls
@@ -155,13 +161,10 @@ class AuthManager {
      * @param {String} password : Plain text password
      * @returns {AxiosPromise} : Promise object with the login request made
      */
-    authenticateUser(username, password, correctvalue) {
-        console.log(correctvalue);
+    authenticateUser(username, password, detailedValue) {
 
-        let tokenDetails = '';
-        tokenDetails = (typeof correctvalue == 'undefined') ? this.getTokenEndpoint() : correctvalue.envIsEndPoint;
+        let tokenDetails = (typeof detailedValue == 'undefined') ?  this.getTokenEndpoint(): this.getTokenEnpointEnv(detailedValue);
 
-        console.log(tokenDetails);
         const headers = {
             'Authorization': 'Basic deidwe',
             'Accept': 'application/json',
