@@ -138,7 +138,13 @@ class AuthManager {
     }
 
     getTokenEndpoint() {
+        console.log("working");
         return this.host + this.token;
+    }
+
+    getTokenEnpointEnv(detailedValue){
+
+        return window.location.protocol + "//" + detailedValue.envIsHost + this.token;
     }
 
 
@@ -149,13 +155,10 @@ class AuthManager {
      * @param {String} password : Plain text password
      * @returns {AxiosPromise} : Promise object with the login request made
      */
-    authenticateUser(username, password, correctvalue) {
-     console.log(correctvalue);
+    authenticateUser(username, password, detailedValue) {
 
-        let tokenDetails = '';
-        tokenDetails = (typeof correctvalue == 'undefined') ?  this.getTokenEndpoint(): correctvalue.envIsEndPoint;
+        let tokenDetails = (typeof detailedValue == 'undefined') ?  this.getTokenEndpoint(): this.getTokenEnpointEnv(detailedValue);
 
-console.log(tokenDetails);
         const headers = {
             'Authorization': 'Basic deidwe',
             'Accept': 'application/json',
