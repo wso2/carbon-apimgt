@@ -218,7 +218,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             //retrieves the document and send 404 if not found
             DocumentInfo documentation = apiProvider.getDocumentationSummary(documentId);
             if (documentation == null) {
-                String msg = "Documntation not found " + documentId;
+                String msg = "Documentation not found " + documentId;
                 log.error(msg);
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
                 log.error(msg);
