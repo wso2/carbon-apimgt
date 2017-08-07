@@ -365,7 +365,7 @@ public class SampleTestObjectCreator {
      *
      * @return Application Object
      */
-    protected static Application createRandomApplication() {
+    public static Application createRandomApplication() {
         Application application = new Application(UUID.randomUUID().toString(), UUID.randomUUID().toString());
         application.setId(UUID.randomUUID().toString());
         application.setDescription("This is a test application");
