@@ -100,9 +100,10 @@ public class CommonThrottleMappingUtilTestCase {
         ipConditionDTO.setIpConditionType(PolicyConstants.IP_SPECIFIC_TYPE);
         ipConditionDTO.setSpecificIP("10.100.0.168");
         throttleConditionDTO.setIpCondition(ipConditionDTO);
-        Condition condition = CommonThrottleMappingUtil.fromDTOToCondition(throttleConditionDTO);
+        IPCondition condition = (IPCondition) CommonThrottleMappingUtil.fromDTOToCondition(throttleConditionDTO);
         Assert.assertNotNull(condition);
         Assert.assertNotNull(condition.getCondition());
+        Assert.assertEquals(condition.getSpecificIP(), "10.100.0.168");
     }
 
     @Test(description = "Convert IP range IPCondition DTO to IPCondition Model object")
