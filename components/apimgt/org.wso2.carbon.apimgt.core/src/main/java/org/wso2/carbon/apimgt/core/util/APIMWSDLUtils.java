@@ -19,6 +19,8 @@ package org.wso2.carbon.apimgt.core.util;
 
 import io.swagger.models.HttpMethod;
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.URITemplateParam;
@@ -46,7 +48,7 @@ public class APIMWSDLUtils {
     private static final int READ_TIMEOUT = 30000;
     private static final String APPLICATION_FORM_URLENCODED = "application/x-www-form-urlencoded";
     private static final String MULTIPART_FORM_DATA = "multipart/form-data";
-
+    private static final Logger log = LoggerFactory.getLogger(APIMWSDLUtils.class);
     /**
      * Retrieves the WSDL located in the provided URI ({@code wsdlUrl}
      *
@@ -116,6 +118,16 @@ public class APIMWSDLUtils {
 
         //add default "POST /" operation if no http binding methods required or operations are not provided
         if (!isHttpBinding || operations == null || operations.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append("Adding the POST / operation. ");
+                stringBuilder.append("isHttpBinding: ").append(isHttpBinding).append(". ");
+                stringBuilder.append("operations are null?: ").append(operations == null).append(". ");
+                if (operations != null) {
+                    stringBuilder.append("operations are empty?: ").append(operations.isEmpty()).append(". ");
+                }
+                log.debug(stringBuilder.toString());
+            }
             UriTemplate.UriTemplateBuilder builderForPOSTRootCtx = new UriTemplate.UriTemplateBuilder();
             builderForPOSTRootCtx.uriTemplate("/");
             builderForPOSTRootCtx.httpVerb("POST");
@@ -127,6 +139,9 @@ public class APIMWSDLUtils {
 
         //add URI templates for operations
         for (WSDLOperation operation : operations) {
+            if (log.isDebugEnabled()) {
+                log.debug("Adding URI template for WSDL operation: " + operation.getVerb() + ", " + operation.getURI());
+            }
             UriTemplate.UriTemplateBuilder builder = new UriTemplate.UriTemplateBuilder();
             builder.uriTemplate(operation.getURI().startsWith("/") ? operation.getURI() : "/" + operation.getURI());
             builder.httpVerb(operation.getVerb());

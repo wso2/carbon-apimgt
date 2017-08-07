@@ -72,7 +72,7 @@ public class WSDL20ProcessorImpl implements WSDLProcessor {
     protected String wsdlArchiveExtractedPath;
 
     //Common fields
-    protected boolean canProcess;
+    private boolean canProcess;
     private static volatile WSDLFactory wsdlFactoryInstance;
     private static final Logger log = LoggerFactory.getLogger(WSDL20ProcessorImpl.class);
 
@@ -106,6 +106,10 @@ public class WSDL20ProcessorImpl implements WSDLProcessor {
             wsdlSource.setSource(domElement);
             wsdlDescription = reader.readWSDL(wsdlSource);
             canProcess = true;
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully initialized an instance of " + this.getClass().getSimpleName()
+                        + " with a single WSDL.");
+            }
         } catch (WSDLException | ParserConfigurationException | SAXException | IOException e) {
             //This implementation class cannot process the WSDL.
             log.debug("Cannot process the WSDL by " + this.getClass().getName(), e);
@@ -144,6 +148,10 @@ public class WSDL20ProcessorImpl implements WSDLProcessor {
     public byte[] getUpdatedWSDL(API api, Label label) throws APIMgtWSDLException {
         if (label != null) {
             updateEndpoints(label.getAccessUrls(), api, wsdlDescription);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully updated the endpoints of WSDL with API:" + api.getId() + ", label:" + label
+                        .getName());
+            }
             return getWSDL();
         }
         return new byte[0];
@@ -163,12 +171,21 @@ public class WSDL20ProcessorImpl implements WSDLProcessor {
             reader.setFeature(WSDLReader.FEATURE_VALIDATION, false);
             File folderToImport = new File(path);
             Collection<File> foundWSDLFiles = APIFileUtils.searchFilesWithMatchingExtension(folderToImport, "wsdl");
+            if (log.isDebugEnabled()) {
+                log.debug("Found " + foundWSDLFiles.size() + " WSDL file(s) in path " + path);
+            }
             for (File file : foundWSDLFiles) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Processing WSDL file: " + file.getAbsolutePath());
+                }
                 Description description = reader.readWSDL(file.getAbsolutePath());
                 pathToDescriptionMap.put(file.getAbsolutePath(), description);
             }
             if (foundWSDLFiles.size() > 0) {
                 canProcess = true;
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully processed all WSDL files in path " + path);
             }
         } catch (WSDLException e) {
             //This implementation class cannot process the WSDL.
@@ -191,7 +208,13 @@ public class WSDL20ProcessorImpl implements WSDLProcessor {
         if (label != null) {
             for (Map.Entry<String, Description> entry : pathToDescriptionMap.entrySet()) {
                 Description description = entry.getValue();
+                if (log.isDebugEnabled()) {
+                    log.debug("Updating endpoints of WSDL: " + entry.getKey());
+                }
                 updateEndpoints(label.getAccessUrls(), api, description);
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully updated endpoints of WSDL: " + entry.getKey());
+                }
                 try (FileOutputStream wsdlFileOutputStream = new FileOutputStream(new File(entry.getKey()))) {
                     WSDLWriter writer = getWsdlFactoryInstance().newWSDLWriter();
                     writer.writeWSDL(description.toElement(), wsdlFileOutputStream);
@@ -234,6 +257,9 @@ public class WSDL20ProcessorImpl implements WSDLProcessor {
         String selectedUrl;
         try {
             selectedUrl = APIMWSDLUtils.getSelectedEndpoint(endpointURLs) + context;
+            if (log.isDebugEnabled()) {
+                log.debug("Selected URL for updating endpoints of WSDL: " + selectedUrl);
+            }
         } catch (MalformedURLException e) {
             throw new APIMgtWSDLException("Error while selecting endpoints for WSDL", e,
                     ExceptionCodes.INTERNAL_WSDL_EXCEPTION);

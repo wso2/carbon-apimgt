@@ -1340,15 +1340,15 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
     @Override
-    public String getAPIWSDL(String apiId, String labelName, boolean validateLabelInAPI)
+    public String getAPIWSDL(String apiId, String labelName)
             throws APIMgtDAOException, APIMgtWSDLException, APINotFoundException, LabelException {
         API api = getApiDAO().getAPI(apiId);
         if (api == null) {
             throw new APINotFoundException("API with id " + apiId + " not found.", ExceptionCodes.API_NOT_FOUND);
         }
 
-        //If validateLabelInAPI is enabled, api.getLabels() should not be null and the labels should contain labelName
-        if (validateLabelInAPI && (api.getLabels() == null || !api.getLabels().contains(labelName))) {
+        //api.getLabels() should not be null and the labels should contain labelName
+        if ((api.getLabels() == null || !api.getLabels().contains(labelName))) {
             throw new LabelException("API with id " + apiId + " does not contain label " + labelName,
                     ExceptionCodes.LABEL_NOT_FOUND_IN_API);
         }
@@ -1357,7 +1357,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         Label label = getLabelDAO().getLabelByName(labelName);
 
         if (!StringUtils.isEmpty(wsdl)) {
-            WSDLProcessor processor = null;
+            WSDLProcessor processor;
             try {
                 processor = WSDLProcessFactory.getInstance()
                         .getWSDLProcessor(wsdl.getBytes(APIMgtConstants.ENCODING_UTF_8));
@@ -1371,34 +1371,46 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
     @Override
-    public WSDLArchiveInfo getAPIWSDLArchive(String apiId, String labelName, boolean validateLabelInAPI)
+    public WSDLArchiveInfo getAPIWSDLArchive(String apiId, String labelName)
             throws APIMgtDAOException, APIMgtWSDLException, APINotFoundException, LabelException {
         API api = getApiDAO().getAPI(apiId);
         if (api == null) {
             throw new APINotFoundException("API with id " + apiId + " not found.", ExceptionCodes.API_NOT_FOUND);
         }
 
-        //If validateLabelInAPI is enabled, api.getLabels() should not be null and the labels should contain labelName
-        if (validateLabelInAPI && (api.getLabels() == null || !api.getLabels().contains(labelName))) {
+        //api.getLabels() should not be null and the labels should contain labelName
+        if ((api.getLabels() == null || !api.getLabels().contains(labelName))) {
             throw new LabelException("API with id " + apiId + " does not contain label " + labelName,
                     ExceptionCodes.LABEL_NOT_FOUND_IN_API);
         }
 
-        InputStream wsdlZipInputStream = getApiDAO().getWSDLArchive(apiId);
-        String rootPath = System.getProperty(APIMgtConstants.JAVA_IO_TMPDIR)
-                + File.separator + APIMgtConstants.WSDLConstants.WSDL_ARCHIVES_FOLDERNAME
-                + File.separator + UUID.randomUUID().toString();
-        String archivePath = rootPath + File.separator + APIMgtConstants.WSDLConstants.WSDL_ARCHIVE_FILENAME;
-        String extractedLocation = APIFileUtils.extractUploadedArchive(wsdlZipInputStream,
-                APIMgtConstants.WSDLConstants.EXTRACTED_WSDL_ARCHIVE_FOLDERNAME, archivePath, rootPath);
-
-        Label label = getLabelDAO().getLabelByName(labelName);
-        WSDLProcessor processor = WSDLProcessFactory.getInstance().getWSDLProcessorForPath(extractedLocation);
-        String wsdlPath = processor.getUpdatedWSDLPath(api, label);
-        String wsdlArchiveProcessedFileName =
-                api.getProvider() + "-" + api.getName() + "-" + api.getVersion() + "-" + labelName + "-wsdl";
-        APIFileUtils.archiveDirectory(wsdlPath, rootPath, wsdlArchiveProcessedFileName);
-        return new WSDLArchiveInfo(rootPath, wsdlArchiveProcessedFileName + ".zip");
+        try (InputStream wsdlZipInputStream = getApiDAO().getWSDLArchive(apiId)) {
+            String rootPath = System.getProperty(APIMgtConstants.JAVA_IO_TMPDIR)
+                    + File.separator + APIMgtConstants.WSDLConstants.WSDL_ARCHIVES_FOLDERNAME
+                    + File.separator + UUID.randomUUID().toString();
+            String archivePath = rootPath + File.separator + APIMgtConstants.WSDLConstants.WSDL_ARCHIVE_FILENAME;
+            String extractedLocation = APIFileUtils.extractUploadedArchive(wsdlZipInputStream,
+                    APIMgtConstants.WSDLConstants.EXTRACTED_WSDL_ARCHIVE_FOLDERNAME, archivePath, rootPath);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully extracted WSDL archive in path: " + extractedLocation);
+            }
+            Label label = getLabelDAO().getLabelByName(labelName);
+            WSDLProcessor processor = WSDLProcessFactory.getInstance().getWSDLProcessorForPath(extractedLocation);
+            String wsdlPath = processor.getUpdatedWSDLPath(api, label);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully updated WSDLs in path [" + extractedLocation + "] with endpoints of label: "
+                        + labelName + " and context of API " + api.getContext());
+            }
+            String wsdlArchiveProcessedFileName =
+                    api.getProvider() + "-" + api.getName() + "-" + api.getVersion() + "-" + labelName + "-wsdl";
+            APIFileUtils.archiveDirectory(wsdlPath, rootPath, wsdlArchiveProcessedFileName);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully archived WSDL files: " + wsdlPath);
+            }
+            return new WSDLArchiveInfo(rootPath, wsdlArchiveProcessedFileName + ".zip");
+        } catch (IOException e) {
+            throw new APIMgtWSDLException(e);
+        }
     }
 
     /**

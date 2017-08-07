@@ -28,4 +28,16 @@ public class APIMgtWSDLException extends APIManagementException {
     public APIMgtWSDLException(String msg, ExceptionCodes code) {
         super(msg, code);
     }
+
+    public APIMgtWSDLException(String msg) {
+        super(msg, ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
+    }
+
+    public APIMgtWSDLException(String msg, Throwable e) {
+        super(msg, e, ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
+    }
+
+    public APIMgtWSDLException(Throwable throwable) {
+        super(throwable);
+    }
 }

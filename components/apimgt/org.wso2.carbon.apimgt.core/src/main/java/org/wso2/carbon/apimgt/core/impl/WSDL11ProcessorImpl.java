@@ -86,11 +86,11 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
     private boolean canProcess = false;
 
     //Fields required for processing a single wsdl
-    private Definition wsdlDefinition;
+    protected Definition wsdlDefinition;
 
     //Fields required for processing WSDL archive
-    private Map<String, Definition> pathToDefinitionMap;
-    private String wsdlArchiveExtractedPath;
+    protected Map<String, Definition> pathToDefinitionMap;
+    protected String wsdlArchiveExtractedPath;
 
     private static WSDLFactory getWsdlFactoryInstance() throws APIMgtWSDLException {
         if (wsdlFactoryInstance == null) {
@@ -122,6 +122,10 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
         try {
             wsdlDefinition = wsdlReader.readWSDL(null, new InputSource(new ByteArrayInputStream(wsdlContent)));
             canProcess = true;
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully initialized an instance of " + this.getClass().getSimpleName()
+                        + " with a single WSDL.");
+            }
         } catch (WSDLException e) {
             //This implementation class cannot process the WSDL.
             log.debug("Cannot process the WSDL by " + this.getClass().getName(), e);
@@ -132,7 +136,7 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
 
     /**
      * {@inheritDoc}
-     * Will return true if all the provided WSDL files in the initialized path is of 1.1 and can be successfully 
+     * Will return true if all the provided WSDL files in the initialized path is of 1.1 and can be successfully
      * parsed by WSDL4J.
      */
     @Override
@@ -147,13 +151,22 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
         try {
             File folderToImport = new File(path);
             Collection<File> foundWSDLFiles = APIFileUtils.searchFilesWithMatchingExtension(folderToImport, "wsdl");
+            if (log.isDebugEnabled()) {
+                log.debug("Found " + foundWSDLFiles.size() + " WSDL file(s) in path " + path);
+            }
             for (File file : foundWSDLFiles) {
                 String absWSDLPath = file.getAbsolutePath();
+                if (log.isDebugEnabled()) {
+                    log.debug("Processing WSDL file: " + absWSDLPath);
+                }
                 Definition definition = wsdlReader.readWSDL(null, absWSDLPath);
                 pathToDefinitionMap.put(absWSDLPath, definition);
             }
             if (foundWSDLFiles.size() > 0) {
                 canProcess = true;
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully processed all WSDL files in path " + path);
             }
         } catch (WSDLException e) {
             //This implementation class cannot process the WSDL.
@@ -187,6 +200,7 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
 
     /**
      * {@inheritDoc}
+     *
      * @return WSDL 1.1 content bytes
      */
     @Override
@@ -198,7 +212,7 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
     /**
      * Updates the WSDL's endpoints based on the provided API (context) and Label (host).
      *
-     * @param api Provided API object
+     * @param api   Provided API object
      * @param label Provided label object
      * @return Updated WSDL 1.1 content bytes
      * @throws APIMgtWSDLException Error while updating the WSDL
@@ -215,7 +229,7 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
     /**
      * Updates the endpoints of all the WSDL files in the path based on the provided API (context) and Label (host).
      *
-     * @param api Provided API object
+     * @param api   Provided API object
      * @param label Provided label object
      * @return Updated WSDL file path
      * @throws APIMgtWSDLException Error while updating WSDL files
@@ -225,7 +239,13 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
         if (label != null) {
             for (Map.Entry<String, Definition> entry : pathToDefinitionMap.entrySet()) {
                 Definition definition = entry.getValue();
+                if (log.isDebugEnabled()) {
+                    log.debug("Updating endpoints of WSDL: " + entry.getKey());
+                }
                 updateEndpoints(label.getAccessUrls(), api, definition);
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully updated endpoints of WSDL: " + entry.getKey());
+                }
                 try (FileOutputStream wsdlFileOutputStream = new FileOutputStream(new File(entry.getKey()))) {
                     WSDLWriter writer = getWsdlFactoryInstance().newWSDLWriter();
                     writer.writeWSDL(definition, wsdlFileOutputStream);
@@ -262,7 +282,7 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
 
     /**
      * Get endpoints defined in WSDL file(s).
-     * 
+     *
      * @return a Map of endpoint names and their URIs.
      * @throws APIMgtWSDLException if error occurs while reading endpoints
      */
@@ -308,11 +328,11 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
     }
 
     /**
-     * Clear the actual service endpoints in {@code definition} and use {@code selectedEndpoint} instead of 
+     * Clear the actual service endpoints in {@code definition} and use {@code selectedEndpoint} instead of
      * actual endpoints.
-     * 
+     *
      * @param selectedEndpoint Endpoint which will replace the WSDL endpoints
-     * @param definition WSDL Definition
+     * @param definition       WSDL Definition
      * @throws APIMgtWSDLException If an error occurred while updating endpoints
      */
     private void updateEndpoints(String selectedEndpoint, Definition definition) throws APIMgtWSDLException {
@@ -336,7 +356,7 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
     /**
      * Get the addressURl from the Extensibility element.
      *
-     * @param exElement - ExtensibilityElement
+     * @param exElement              - ExtensibilityElement
      * @param endpointWithApiContext Endpoint (gateway host + api context) which will replace the WSDL endpoints
      * @throws APIMgtWSDLException If an error occurred while updating endpoints
      */
@@ -359,8 +379,8 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
      * Updates the endpoints of the {@code definition} based on the provided {@code endpointURLs} and {@code api}.
      *
      * @param endpointURLs Endpoint URIs
-     * @param api Provided API object
-     * @param definition WSDL Definition
+     * @param api          Provided API object
+     * @param definition   WSDL Definition
      * @throws APIMgtWSDLException If an error occurred while updating endpoints
      */
     private void updateEndpoints(List<String> endpointURLs, API api, Definition definition) throws APIMgtWSDLException {
@@ -368,6 +388,9 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
         String selectedUrl;
         try {
             selectedUrl = APIMWSDLUtils.getSelectedEndpoint(endpointURLs) + context;
+            if (log.isDebugEnabled()) {
+                log.debug("Selected URL for updating endpoints of WSDL:" + selectedUrl);
+            }
         } catch (MalformedURLException e) {
             throw new APIMgtWSDLException("Error while selecting endpoints for WSDL", e,
                     ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
@@ -379,7 +402,7 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
 
     /**
      * Retrieves a {@link ByteArrayOutputStream} for provided {@link Definition}.
-     * 
+     *
      * @param definition WSDL Definition
      * @return A {@link ByteArrayOutputStream} for provided {@link Definition}
      * @throws APIMgtWSDLException If an error occurs while creating {@link ByteArrayOutputStream}
@@ -398,7 +421,7 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
 
     /**
      * Retrieves all the operations defined in WSDL(s).
-     * 
+     *
      * @return a set of {@link WSDLOperation} defined in WSDL(s)
      */
     private Set<WSDLOperation> getHttpBindingOperations() {
@@ -416,7 +439,7 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
 
     /**
      * Retrieves all the operations defined in the provided WSDL definition.
-     * 
+     *
      * @param definition WSDL Definition
      * @return a set of {@link WSDLOperation} defined in the provided WSDL definition
      */
@@ -460,9 +483,9 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
 
     /**
      * Retrieves WSDL operation given the binding operation and http verb
-     * 
+     *
      * @param bindingOperation {@link BindingOperation} object
-     * @param verb HTTP verb
+     * @param verb             HTTP verb
      * @return WSDL operation for the given binding operation and http verb
      */
     private WSDLOperation getOperation(BindingOperation bindingOperation, String verb) {
@@ -474,6 +497,11 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
                     wsdlOperation = new WSDLOperation();
                     wsdlOperation.setVerb(verb);
                     wsdlOperation.setURI(APIMWSDLUtils.replaceParentheses(httpOperation.getLocationURI()));
+                    if (log.isDebugEnabled()) {
+                        log.debug("Found HTTP Binding operation; name: " + bindingOperation.getName() + " ["
+                                + wsdlOperation.getVerb() + " "
+                                + wsdlOperation.getURI() + "]");
+                    }
                     if (APIMWSDLUtils.canContainBody(verb)) {
                         String boContentType = getContentType(bindingOperation.getBindingInput());
                         wsdlOperation.setContentType(boContentType != null ? boContentType : TEXT_XML_MEDIA_TYPE);
@@ -489,14 +517,14 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
 
     /**
      * Returns the content-type of a provided {@link BindingInput} if it is available
-     * 
+     *
      * @param bindingInput Binding Input object
      * @return The content-type of the {@link BindingInput}
      */
     private String getContentType(BindingInput bindingInput) {
         List extensibilityElements = bindingInput.getExtensibilityElements();
         if (extensibilityElements != null) {
-            for (Object ex: extensibilityElements) {
+            for (Object ex : extensibilityElements) {
                 if (ex instanceof MIMEContent) {
                     MIMEContent mimeContentElement = (MIMEContent) ex;
                     return mimeContentElement.getType();
@@ -508,10 +536,10 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
 
     /**
      * Returns parameters, given http binding operation, verb and content type
-     * 
+     *
      * @param bindingOperation {@link BindingOperation} object
-     * @param verb HTTP verb
-     * @param contentType Content type
+     * @param verb             HTTP verb
+     * @param contentType      Content type
      * @return parameters, given http binding operation, verb and content type
      */
     private List<WSDLOperationParam> getParameters(BindingOperation bindingOperation, String verb, String contentType) {
@@ -526,6 +554,10 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
             param.setName("Payload");
             param.setParamType(WSDLOperationParam.ParamTypeEnum.BODY);
             params.add(param);
+            if (log.isDebugEnabled()) {
+                log.debug(
+                        "Adding default Param for operation:" + operation.getName() + ", contentType: " + contentType);
+            }
             return params;
         }
 
@@ -538,10 +570,19 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
                     map.forEach((name, partObj) -> {
                         WSDLOperationParam param = new WSDLOperationParam();
                         param.setName(name.toString());
+                        if (log.isDebugEnabled()) {
+                            log.debug("Identified param for operation: " + operation.getName() + " param: " + name);
+                        }
                         if (APIMWSDLUtils.canContainBody(verb)) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Operation " + operation.getName() + " can contain a body.");
+                            }
                             //In POST, PUT operations, parameters always in body according to HTTP Binding spec 
                             if (APIMWSDLUtils.hasFormDataParams(contentType)) {
                                 param.setParamType(WSDLOperationParam.ParamTypeEnum.FORM_DATA);
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Param " + name + " type was set to formData.");
+                                }
                             }
                             //no else block since if content type is not form-data related, there can be only one
                             // parameter which is payload body. This is handled in the first if block which is
@@ -550,13 +591,22 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
                             //In GET operations, parameters always query or path as per HTTP Binding spec
                             if (isUrlReplacement(bindingOperation)) {
                                 param.setParamType(WSDLOperationParam.ParamTypeEnum.PATH);
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Param " + name + " type was set to Path.");
+                                }
                             } else {
                                 param.setParamType(WSDLOperationParam.ParamTypeEnum.QUERY);
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Param " + name + " type was set to Query.");
+                                }
                             }
                         }
 
                         Part part = (Part) partObj;
                         param.setDataType(part.getTypeName().getLocalPart());
+                        if (log.isDebugEnabled()) {
+                            log.debug("Param " + name + " data type was set to " + param.getDataType());
+                        }
                         params.add(param);
                     });
                 }
@@ -567,7 +617,7 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
 
     /**
      * Returns whether the provided binding operation is of URL Replacement type
-     * 
+     *
      * @param bindingOperation Binding operation
      * @return whether the provided binding operation is of URL Replacement type
      */
@@ -603,7 +653,7 @@ public class WSDL11ProcessorImpl implements WSDLProcessor {
 
     /**
      * Returns if the provided WSDL definition contains SOAP binding operations
-     * 
+     *
      * @param definition WSDL definition
      * @return whether the provided WSDL definition contains SOAP binding operations
      */

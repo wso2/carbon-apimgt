@@ -1064,6 +1064,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             InputStream wsdlStream = null;
             boolean isWSDLArchiveExists = apiPublisher.isWSDLArchiveExists(apiId);
+            if (log.isDebugEnabled()) {
+                log.debug("API has WSDL archive?: " + isWSDLArchiveExists);
+            }
             if (isWSDLArchiveExists) {
                 wsdlStream = apiPublisher.getAPIWSDLArchive(apiId);
                 if (wsdlStream != null) {
@@ -1080,7 +1083,8 @@ public class ApisApiServiceImpl extends ApisApiService {
                 }
             } else {
                 String wsdlText = apiPublisher.getAPIWSDL(apiId);
-                return Response.ok(wsdlText, MediaType.TEXT_PLAIN).build();  //TODO text/xml content type
+                //TODO need to use text/xml content type. It does not work due to an issue with MSF4J -malinthaa
+                return Response.ok(wsdlText, MediaType.TEXT_PLAIN).build();
             }
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving WSDL of API : " + apiId;
@@ -1118,7 +1122,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 String updatedWSDL = apiPublisher.updateAPIWSDL(apiId, fileInputStream);
                 return Response.ok(updatedWSDL, MediaType.TEXT_PLAIN).build();
             } else {
-                String msg = "Unsupported file extension type: " + fileDetail.getFileName();
+                String msg = "Unsupported extension type of file: " + fileDetail.getFileName();
                 log.error(msg);
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900700L, msg);
                 return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
@@ -1345,15 +1349,24 @@ public class ApisApiServiceImpl extends ApisApiService {
             API.APIBuilder apiBuilder = null;
             APIDTO additionalPropertiesAPI = null;
             if (!StringUtils.isBlank(additionalProperties)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Deseriallizing additionalProperties: " + additionalProperties);
+                }
                 ObjectMapper mapper = new ObjectMapper();
                 additionalPropertiesAPI = mapper.readValue(additionalProperties, APIDTO.class);
                 apiBuilder = MappingUtil.toAPI(additionalPropertiesAPI);
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully deseriallized additionalProperties: " + additionalProperties);
+                }
             }
 
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String uuid = "";
 
             if (APIDefinitionValidationResponseDTO.DefinitionTypeEnum.SWAGGER.toString().equals(type)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Adding an API by importing a swagger.");
+                }
                 if (fileInputStream != null) {
                     uuid = apiPublisher.addApiFromDefinition(fileInputStream);
                 } else {
@@ -1362,6 +1375,10 @@ public class ApisApiServiceImpl extends ApisApiService {
                     uuid = apiPublisher.addApiFromDefinition(urlConn);
                 }
             } else { // WSDL type
+
+                if (log.isDebugEnabled()) {
+                    log.debug("Adding an API by importing a WSDL.");
+                }
 
                 //In this case, additionalPropertiesAPI must not be null since we need attributes like name, 
                 // context, version when creating an API from WSDL 
@@ -1390,16 +1407,25 @@ public class ApisApiServiceImpl extends ApisApiService {
                         
                         if (fileDetail.getFileName().endsWith(".zip")) {
                             uuid = apiPublisher.addAPIFromWSDLArchive(apiBuilder, fileInputStream, isHttpBinding);
+                            if (log.isDebugEnabled()) {
+                                log.debug("Successfully added API with WSDL archive " + fileDetail.getFileName());
+                            }
                         } else if (fileDetail.getFileName().endsWith(".wsdl")) {
                             uuid = apiPublisher.addAPIFromWSDLFile(apiBuilder, fileInputStream, isHttpBinding);
+                            if (log.isDebugEnabled()) {
+                                log.debug("Successfully added API with WSDL file " + fileDetail.getFileName());
+                            }
                         } else {
-                            String msg = "Unsupported file extension type: " + fileDetail.getFileName();
+                            String msg = "Unsupported extension type of file: " + fileDetail.getFileName();
                             log.error(msg);
                             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900700L, msg);
                             return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
                         }
                     } else {
                         uuid = apiPublisher.addAPIFromWSDLURL(apiBuilder, url, isHttpBinding);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Successfully added API with WSDL URL " + url);
+                        }
                     }
                 } else {
                     String msg = "'additionalProperties' should be specified when creating an API from WSDL";
@@ -1492,10 +1518,14 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
 
             Response responseIfParamsInvalid = buildResponseIfParamsInvalid(type, fileInputStream, url);
-            if (responseIfParamsInvalid != null)
+            if (responseIfParamsInvalid != null) {
                 return responseIfParamsInvalid;
+            }
 
             if (APIDefinitionValidationResponseDTO.DefinitionTypeEnum.SWAGGER.toString().equals(type)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Validating a swagger file.");
+                }
                 // TODO implement swagger validation
                 return Response.noContent().build();
             } else { //WSDL type
@@ -1505,16 +1535,25 @@ public class ApisApiServiceImpl extends ApisApiService {
                 if (!StringUtils.isBlank(url)) {
                     processor = WSDLProcessFactory.getInstance().getWSDLProcessor(url);
                     info = processor.getWsdlInfo();
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully validated WSDL URL " + url);
+                    }
                 } else {
                     if (fileDetail.getFileName().endsWith(".zip")) {
                         WSDLArchiveInfo archiveInfo = apiPublisher.extractAndValidateWSDLArchive(fileInputStream);
                         info = archiveInfo.getWsdlInfo();
+                        if (log.isDebugEnabled()) {
+                            log.debug("Successfully validated WSDL archive " + fileDetail.getFileName());
+                        }
                     } else if (fileDetail.getFileName().endsWith(".wsdl")) {
                         byte[] wsdlContent = IOUtils.toByteArray(fileInputStream);
                         processor = WSDLProcessFactory.getInstance().getWSDLProcessor(wsdlContent);
                         info = processor.getWsdlInfo();
+                        if (log.isDebugEnabled()) {
+                            log.debug("Successfully validated WSDL file " + fileDetail.getFileName());
+                        }
                     } else {
-                        String msg = "Unsupported file extension type: " + fileDetail.getFileName();
+                        String msg = "Unsupported extension type of file: " + fileDetail.getFileName();
                         log.error(msg);
                         ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900700L, msg);
                         return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();

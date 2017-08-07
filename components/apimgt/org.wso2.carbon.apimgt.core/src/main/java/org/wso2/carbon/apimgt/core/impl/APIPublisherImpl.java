@@ -1627,11 +1627,26 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public String addAPIFromWSDLArchive(API.APIBuilder apiBuilder, InputStream inputStream, boolean isHttpBinding)
             throws APIManagementException {
         WSDLArchiveInfo archiveInfo = extractAndValidateWSDLArchive(inputStream);
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully extracted and validated WSDL file. Location: " + archiveInfo.getAbsoluteFilePath());
+        }
+
         apiBuilder.uriTemplates(APIMWSDLUtils
                 .getUriTemplatesForWSDLOperations(archiveInfo.getWsdlInfo().getHttpBindingOperations(), isHttpBinding));
         String uuid = addAPI(apiBuilder);
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully added the API. uuid: " + uuid);
+        }
+
         try (InputStream fileInputStream = new FileInputStream(archiveInfo.getAbsoluteFilePath())) {
             getApiDAO().addOrUpdateWSDLArchive(uuid, fileInputStream, getUsername());
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully added/updated the WSDL archive. uuid: " + uuid);
+            }
+
+            if (APIMgtConstants.WSDLConstants.WSDL_VERSION_20.equals(archiveInfo.getWsdlInfo().getVersion())) {
+                log.info("Extraction of HTTP Binding operations is not supported for WSDL 2.0.");
+            }
             return uuid;
         } catch (IOException e) {
             throw new APIMgtWSDLException("Unable to process WSDL archive at " + archiveInfo.getAbsoluteFilePath(), e,
@@ -1665,7 +1680,16 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
 
         String uuid = addAPI(apiBuilder);
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully added the API. uuid: " + uuid);
+        }
         getApiDAO().addOrUpdateWSDL(uuid, wsdlContent, getUsername());
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully added the WSDL file to database. API uuid: " + uuid);
+        }
+        if (APIMgtConstants.WSDLConstants.WSDL_VERSION_20.equals(processor.getWsdlInfo().getVersion())) {
+            log.info("Extraction of HTTP Binding operations is not supported for WSDL 2.0.");
+        }
         return uuid;
     }
 
@@ -1680,8 +1704,17 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         apiBuilder.uriTemplates(APIMWSDLUtils
                 .getUriTemplatesForWSDLOperations(processor.getWsdlInfo().getHttpBindingOperations(), isHttpBinding));
         String uuid = addAPI(apiBuilder);
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully added the API. uuid: " + uuid);
+        }
         byte[] wsdlContentBytes = processor.getWSDL();
         getApiDAO().addOrUpdateWSDL(uuid, wsdlContentBytes, getUsername());
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully added the content of WSDL URL to database. WSDL URL: " + wsdlUrl);
+        }
+        if (APIMgtConstants.WSDLConstants.WSDL_VERSION_20.equals(processor.getWsdlInfo().getVersion())) {
+            log.info("Extraction of HTTP Binding operations is not supported for WSDL 2.0.");
+        }
         return uuid;
     }
 
@@ -1697,8 +1730,13 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                         "Unable to process WSDL by the processor " + processor.getClass().getName(),
                         ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
             }
-
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully validated the content of WSDL. API uuid: " + apiId);
+            }
             getApiDAO().addOrUpdateWSDL(apiId, wsdlContent, getUsername());
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully added WSDL to the DB. API uuid: " + apiId);
+            }
             return new String(wsdlContent, APIMgtConstants.ENCODING_UTF_8);
         } catch (IOException e) {
             throw new APIMgtWSDLException("Error while updating WSDL of API " + apiId, e,
@@ -1711,10 +1749,17 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             throws APIMgtDAOException, APIMgtWSDLException {
         WSDLArchiveInfo archiveInfo = null;
         InputStream fileInputStream = null;
-        try  {
+        try {
             archiveInfo = extractAndValidateWSDLArchive(inputStream);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully extracted and validated WSDL file. Location: " + archiveInfo
+                        .getAbsoluteFilePath());
+            }
             fileInputStream = new FileInputStream(archiveInfo.getAbsoluteFilePath());
             getApiDAO().addOrUpdateWSDLArchive(apiId, fileInputStream, getUsername());
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully updated the WSDL archive in DB. API uuid: " + apiId);
+            }
         } catch (IOException e) {
             throw new APIMgtWSDLException("Unable to process WSDL archive at " + archiveInfo.getAbsoluteFilePath(), e,
                     ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
@@ -1953,6 +1998,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         String archivePath = path + File.separator + APIMgtConstants.WSDLConstants.WSDL_ARCHIVE_FILENAME;
         String extractedLocation = APIFileUtils.extractUploadedArchive(inputStream,
                 APIMgtConstants.WSDLConstants.EXTRACTED_WSDL_ARCHIVE_FOLDERNAME, archivePath, path);
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully extracted WSDL archive. Location: " + extractedLocation);
+        }
+
         WSDLProcessor processor = WSDLProcessFactory.getInstance().getWSDLProcessorForPath(extractedLocation);
         if (!processor.canProcess()) {
             throw new APIMgtWSDLException("Unable to process WSDL by the processor " + processor.getClass().getName(),

@@ -531,14 +531,13 @@ public interface APIStore extends APIManager {
      * 
      * @param apiId API Id
      * @param labelName gateway label name
-     * @param validateLabelInAPI if true, the specified label must be present in the API
      * @return WSDL of the API as {@link String}
      * @throws APIMgtDAOException if error occurs while accessing the WSDL from the data layer
      * @throws APIMgtWSDLException if error occurs while parsing/manipulating the WSDL
      * @throws APINotFoundException If API cannot be found
      * @throws LabelException If Label related error occurs
      */
-    String getAPIWSDL(String apiId, String labelName, boolean validateLabelInAPI)
+    String getAPIWSDL(String apiId, String labelName)
             throws APIMgtDAOException, APIMgtWSDLException, APINotFoundException, LabelException;
 
     /**
@@ -546,14 +545,13 @@ public interface APIStore extends APIManager {
      *
      * @param apiId API Id
      * @param labelName gateway label name
-     * @param validateLabelInAPI if true, the specified label must be present in the API
      * @return WSDL archive information {@link WSDLArchiveInfo}
      * @throws APIMgtDAOException if error occurs while accessing the WSDL from the data layer
      * @throws APIMgtWSDLException if error occurs while parsing/manipulating the WSDL
      * @throws APINotFoundException If API cannot be found
      * @throws LabelException If Label related error occurs
      */
-    WSDLArchiveInfo getAPIWSDLArchive(String apiId, String labelName, boolean validateLabelInAPI)
+    WSDLArchiveInfo getAPIWSDLArchive(String apiId, String labelName)
             throws APIMgtDAOException, APIMgtWSDLException, APINotFoundException, LabelException;
 
     /**

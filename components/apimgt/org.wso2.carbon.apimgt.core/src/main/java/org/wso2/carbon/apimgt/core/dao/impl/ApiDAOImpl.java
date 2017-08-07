@@ -992,32 +992,30 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     public void addOrUpdateWSDLArchive(String apiID, InputStream inputStream, String updatedBy)
             throws APIMgtDAOException {
-        if (inputStream != null) {
-            try (Connection connection = DAOUtil.getConnection()) {
-                try {
-                    connection.setAutoCommit(false);
-                    if (!ApiResourceDAO.isResourceExistsForCategory(connection, apiID,
-                            ResourceCategory.WSDL_ZIP)) {
-                        if (ApiResourceDAO.isResourceExistsForCategory(connection, apiID,
-                                ResourceCategory.WSDL_TEXT)) {
-                            removeWSDL(apiID);
-                        }
-                        ApiResourceDAO.addBinaryResource(connection, apiID, UUID.randomUUID().toString(),
-                                ResourceCategory.WSDL_ZIP, MediaType.APPLICATION_OCTET_STREAM, inputStream, updatedBy);
-                    } else {
-                        ApiResourceDAO.updateBinaryResourceForCategory(connection, apiID,
-                                ResourceCategory.WSDL_ZIP, inputStream, updatedBy);
+        try (Connection connection = DAOUtil.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                if (!ApiResourceDAO.isResourceExistsForCategory(connection, apiID,
+                        ResourceCategory.WSDL_ZIP)) {
+                    if (ApiResourceDAO.isResourceExistsForCategory(connection, apiID,
+                            ResourceCategory.WSDL_TEXT)) {
+                        removeWSDL(apiID);
                     }
-                    connection.commit();
-                } catch (SQLException e) {
-                    connection.rollback();
-                    throw new APIMgtDAOException(e);
-                } finally {
-                    connection.setAutoCommit(DAOUtil.isAutoCommit());
+                    ApiResourceDAO.addBinaryResource(connection, apiID, UUID.randomUUID().toString(),
+                            ResourceCategory.WSDL_ZIP, MediaType.APPLICATION_OCTET_STREAM, inputStream, updatedBy);
+                } else {
+                    ApiResourceDAO.updateBinaryResourceForCategory(connection, apiID,
+                            ResourceCategory.WSDL_ZIP, inputStream, updatedBy);
                 }
+                connection.commit();
             } catch (SQLException e) {
+                connection.rollback();
                 throw new APIMgtDAOException(e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
         }
     }
 
