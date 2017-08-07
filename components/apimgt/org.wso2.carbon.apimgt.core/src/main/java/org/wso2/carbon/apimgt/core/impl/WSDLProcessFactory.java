@@ -58,7 +58,7 @@ public class WSDLProcessFactory {
 
     /**
      * Returns the appropriate WSDL 1.1 or 2.0 processor based on the content of the provided {@code wsdlUrl}.
-     * 
+     *
      * @param wsdlUrl URL of the WSDL
      * @return WSDL 1.1 or 2.0 processor for the provided content
      * @throws APIMgtWSDLException If an error occurs while determining the processor

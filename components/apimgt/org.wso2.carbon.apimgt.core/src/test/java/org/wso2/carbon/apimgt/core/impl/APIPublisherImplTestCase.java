@@ -21,6 +21,7 @@
 package org.wso2.carbon.apimgt.core.impl;
 
 import com.google.common.io.Files;
+import org.apache.commons.io.IOUtils;
 import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -2057,6 +2058,85 @@ public class APIPublisherImplTestCase {
         }
     }
 
+    @Test(description = "Test adding an API from WSDL file")
+    public void testAddUpdateAPIFromWSDLFile() throws APIManagementException, LifecycleException, IOException {
+        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI()
+                .endpoint(SampleTestObjectCreator.getMockEndpointMap());
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
+        APIGateway gateway = Mockito.mock(APIGateway.class);
+        APILifecycleManager apiLifecycleManager = getDefaultMockedAPILifecycleManager();
+        PolicyDAO policyDAO = getDefaultMockedPolicyDAO();
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
+                gateway, policyDAO);
+        String endpointId = apiBuilder.getEndpoint().get("production").getId();
+        Endpoint endpoint = new Endpoint.Builder().id(endpointId).name("testEndpoint").build();
+        Mockito.when(apiDAO.getEndpoint(endpointId)).thenReturn(endpoint);
+        apiPublisher
+                .addAPIFromWSDLFile(apiBuilder, SampleTestObjectCreator.createDefaultWSDL11ContentInputStream(), true);
+        Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
+        Mockito.verify(apiDAO, Mockito.times(1))
+                .addOrUpdateWSDL(apiBuilder.getId(),
+                        IOUtils.toByteArray(SampleTestObjectCreator.createDefaultWSDL11ContentInputStream()), USER);
+        Mockito.verify(apiLifecycleManager, Mockito.times(1)).addLifecycle(APIMgtConstants.API_LIFECYCLE, USER);
+
+        apiPublisher
+                .updateAPIWSDL(apiBuilder.getId(), SampleTestObjectCreator.createAlternativeWSDL11ContentInputStream());
+        Mockito.verify(apiDAO, Mockito.times(1))
+                .addOrUpdateWSDL(apiBuilder.getId(),
+                        IOUtils.toByteArray(SampleTestObjectCreator.createAlternativeWSDL11ContentInputStream()), USER);
+    }
+
+    @Test(description = "Test adding an API from WSDL archive")
+    public void testAddUpdateAPIFromWSDLArchive() throws APIManagementException, LifecycleException, IOException {
+        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI()
+                .endpoint(SampleTestObjectCreator.getMockEndpointMap());
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
+        APIGateway gateway = Mockito.mock(APIGateway.class);
+        APILifecycleManager apiLifecycleManager = getDefaultMockedAPILifecycleManager();
+        PolicyDAO policyDAO = getDefaultMockedPolicyDAO();
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
+                gateway, policyDAO);
+        String endpointId = apiBuilder.getEndpoint().get("production").getId();
+        Endpoint endpoint = new Endpoint.Builder().id(endpointId).name("testEndpoint").build();
+        Mockito.when(apiDAO.getEndpoint(endpointId)).thenReturn(endpoint);
+        apiPublisher.addAPIFromWSDLArchive(apiBuilder, SampleTestObjectCreator.createDefaultWSDL11ArchiveInputStream(),
+                true);
+        Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
+        Mockito.verify(apiDAO, Mockito.times(1))
+                .addOrUpdateWSDLArchive(Mockito.eq(apiBuilder.getId()), Mockito.anyObject(), Mockito.eq(USER));
+
+        apiPublisher.updateAPIWSDLArchive(apiBuilder.getId(),
+                SampleTestObjectCreator.createAlternativeWSDL11ArchiveInputStream());
+        Mockito.verify(apiDAO, Mockito.times(2))
+                .addOrUpdateWSDLArchive(Mockito.eq(apiBuilder.getId()), Mockito.anyObject(), Mockito.eq(USER));
+    }
+
+    @Test(description = "Retrieve a WSDL of an API")
+    public void testGetAPIWSDL() throws APIManagementException, IOException {
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
+        Mockito.when(apiDAO.getWSDL(api.getId()))
+                .thenReturn(new String(SampleTestObjectCreator.createDefaultWSDL11Content()));
+        String updatedWSDL = apiPublisher.getAPIWSDL(api.getId());
+        Assert.assertNotNull(updatedWSDL);
+        Assert.assertTrue(updatedWSDL.contains(SampleTestObjectCreator.ORIGINAL_ENDPOINT_WEATHER));
+    }
+
+    @Test(description = "Retrieve a WSDL archive of an API")
+    public void testGetAPIWSDLArchive() throws APIManagementException, IOException {
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APIPublisher apiPublisher = getApiPublisherImpl(apiDAO);
+        Mockito.when(apiDAO.getWSDLArchive(api.getId()))
+                .thenReturn(SampleTestObjectCreator.createDefaultWSDL11ArchiveInputStream());
+        InputStream inputStream = apiPublisher.getAPIWSDLArchive(api.getId());
+        Assert.assertNotNull(inputStream);
+    }
+
     @Test(description = "Save swagger definition for API")
     public void testSaveSwagger20Definition() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
@@ -2994,6 +3074,29 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiDAO.getEndpointByName(endpoint2.getName())).thenReturn(endpoint2);
         apiPublisher.updateAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).updateAPI(apiBuilder.getId(), apiBuilder.build());
+    }
+
+    private PolicyDAO getDefaultMockedPolicyDAO() throws APIManagementException {
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api,
+                APIMgtConstants.DEFAULT_API_POLICY)).thenReturn(new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY));
+        Mockito.when(
+                policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription, GOLD_TIER))
+                .thenReturn(new SubscriptionPolicy(GOLD_TIER));
+        Mockito.when(
+                policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription, SILVER_TIER))
+                .thenReturn(new SubscriptionPolicy(SILVER_TIER));
+        Mockito.when(
+                policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription, BRONZE_TIER))
+                .thenReturn(new SubscriptionPolicy(BRONZE_TIER));
+        return policyDAO;
+    }
+
+    private APILifecycleManager getDefaultMockedAPILifecycleManager() throws LifecycleException {
+        APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
+        Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, USER))
+                .thenReturn(new LifecycleState());
+        return apiLifecycleManager;
     }
 
     private APIPublisherImpl getApiPublisherImpl() {

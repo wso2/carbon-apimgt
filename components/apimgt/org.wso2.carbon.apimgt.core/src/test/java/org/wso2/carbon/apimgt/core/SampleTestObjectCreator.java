@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.core;
 
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
@@ -57,6 +58,7 @@ import org.wso2.carbon.apimgt.core.models.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.core.models.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
@@ -64,6 +66,7 @@ import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationWorkflow;
 import org.wso2.carbon.apimgt.core.workflow.Workflow;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -130,7 +133,6 @@ public class SampleTestObjectCreator {
     private static final String TEST_APP_1 = "TestApp";
     private static final String TEST_APP_2 = "TestApp2";
     private static final String TEMPLATE_ID = "getApisApiIdGet";
-    private static final String ACCESS_URL = "https://test.";
     private static final String ALT_SWAGGER_PATH = "api/alternativeSwagger.json";
     private static final String SAMPLE_GTW_CONFIG_PATH = "api/sampleGatewayConfig.bal";
     private static final String ALT_GTW_CONFIG_PATH = "api/alternativeGatewayConfig.bal";
@@ -139,11 +141,22 @@ public class SampleTestObjectCreator {
     private static final String PATH_INLINE_DOC_1 = "document/inline1.txt";
     private static final String PATH_INLINE_DOC_2 = "document/inline2.txt";
     private static final String PATH_FILE_DOC_1 = "document/pdf-sample.pdf";
+    private static final String PATH_WSDL11_File_1 = "wsdl/WeatherForecast.wsdl";
+    private static final String PATH_WSDL11_File_2 = "wsdl/stockQuote.wsdl";
+    private static final String PATH_WSDL20_File_1 = "wsdl/myServiceWsdl2.wsdl";
+    private static final String PATH_WSDL11_ZIP_1 = "wsdl/WSDL11Files_1.zip";
+    private static final String PATH_WSDL11_ZIP_2 = "wsdl/WSDL11Files_2.zip";
+    private static final String PATH_WSDL20_ZIP_1 = "wsdl/WSDL20Files.zip";
     private static final String SAMPLE_IP_1 = "12.32.45.3";
     private static final String SAMPLE_IP_2 = "24.34.1.45";
     private static final String SAMPLE_CUSTOM_RULE = "Sample Custom Rule";
     public static final String ADMIN_ROLE_ID = "cfbde56e-4352-498e-b6dc-85a6f1f8b058";
     public static final String DEVELOPER_ROLE_ID = "cfdce56e-8434-498e-b6dc-85a6f2d8f035";
+
+    public static final String ACCESS_URL = "https://test.";
+    public static final String ORIGINAL_ENDPOINT_WEATHER = "http://www.webservicex.net/WeatherForecast.asmx";
+    public static final String ORIGINAL_ENDPOINT_STOCK_QUOTE = "http://www.webservicex.net/stockquote.asmx";
+
     public static  APIPolicy unlimitedApiPolicy = new APIPolicy(UUID.randomUUID().toString(), UNLIMITED_TIER);
     public static  APIPolicy goldApiPolicy = new APIPolicy(UUID.randomUUID().toString(), GOLD_TIER);
     public static  APIPolicy silverApiPolicy = new APIPolicy(UUID.randomUUID().toString(), SILVER_TIER);
@@ -636,6 +649,100 @@ public class SampleTestObjectCreator {
      */
     public static Function createAlternativeFunction2() throws URISyntaxException {
         return new Function("alternativeFunction2", new URI("http://localhost/test-alternative2"));
+    }
+
+    /**
+     * Returns default WSDL 1.1 file content stream
+     *
+     * @return default WSDL 1.1 file content stream
+     */
+    public static InputStream createDefaultWSDL11ContentInputStream() throws IOException {
+        return Thread.currentThread().getContextClassLoader().getResourceAsStream(PATH_WSDL11_File_1);
+    }
+
+    /**
+     * Returns default WSDL 1.1 file
+     *
+     * @return default WSDL 1.1 file
+     */
+    public static byte[] createDefaultWSDL11Content() throws IOException {
+        return IOUtils.toByteArray(createDefaultWSDL11ContentInputStream());
+    }
+
+    /**
+     * Returns alternative WSDL 1.1 file content stream
+     *
+     * @return alternative WSDL 1.1 file content stream
+     */
+    public static InputStream createAlternativeWSDL11ContentInputStream() throws IOException {
+        return Thread.currentThread().getContextClassLoader().getResourceAsStream(PATH_WSDL11_File_2);
+    }
+
+    /**
+     * Returns default WSDL 1.1 file
+     *
+     * @return default WSDL 1.1 file
+     */
+    public static byte[] createAlternativeWSDL11Content() throws IOException {
+        return IOUtils
+                .toByteArray(Thread.currentThread().getContextClassLoader().getResourceAsStream(PATH_WSDL11_File_2));
+    }
+
+    /**
+     * Returns default WSDL 2.0 file
+     *
+     * @return default WSDL 2.0 file
+     */
+    public static byte[] createDefaultWSDL20Content() throws IOException {
+        return IOUtils
+                .toByteArray(Thread.currentThread().getContextClassLoader().getResourceAsStream(PATH_WSDL20_File_1));
+    }
+
+    /**
+     * Returns default WSDL 1.0 archive's input stream
+     *
+     * @return default WSDL 1.0 archive's input stream
+     */
+    public static InputStream createDefaultWSDL11ArchiveInputStream() throws IOException, APIMgtDAOException {
+        return Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream(PATH_WSDL11_ZIP_1);
+    }
+
+    /**
+     * Returns alternative WSDL 1.0 archive's input stream
+     *
+     * @return alternative WSDL 1.0 archive's input stream
+     */
+    public static InputStream createAlternativeWSDL11ArchiveInputStream() throws IOException, APIMgtDAOException {
+        return Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream(PATH_WSDL11_ZIP_2);
+    }
+
+    /**
+     * Returns default WSDL 1.0 archive extracted path
+     *
+     * @return default WSDL 1.0 archive extracted path
+     */
+    public static String createDefaultWSDL11Archive() throws IOException, APIMgtDAOException {
+        InputStream zipInputStream = createDefaultWSDL11ArchiveInputStream();
+        final String tempFolderPath =
+                SystemUtils.getJavaIoTmpDir() + File.separator + UUID.randomUUID().toString();
+        String archivePath = tempFolderPath + File.separator + "wsdl11.zip";
+        return APIFileUtils.extractUploadedArchive(zipInputStream, "extracted", archivePath, tempFolderPath);
+    }
+
+    /**
+     * Returns default WSDL 2.0 archive extracted path
+     *
+     * @return default WSDL 2.0 archive extracted path
+     */
+    public static String createDefaultWSDL20Archive() throws APIMgtDAOException {
+        InputStream zipInputStream = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream(PATH_WSDL20_ZIP_1);
+        final String tempFolderPath =
+                SystemUtils.getJavaIoTmpDir() + File.separator + UUID.randomUUID().toString();
+        String archivePath = tempFolderPath + File.separator + "wsdl20.zip";
+        return APIFileUtils.extractUploadedArchive(zipInputStream, "extracted", archivePath, tempFolderPath);
     }
 
     /**

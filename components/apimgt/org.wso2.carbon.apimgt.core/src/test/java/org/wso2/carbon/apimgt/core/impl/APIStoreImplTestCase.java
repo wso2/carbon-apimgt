@@ -65,6 +65,7 @@ import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
 import org.wso2.carbon.apimgt.core.models.User;
+import org.wso2.carbon.apimgt.core.models.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.core.models.WorkflowConfig;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
@@ -87,6 +88,7 @@ import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
 import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -96,6 +98,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Test class for APIStore
@@ -185,6 +188,54 @@ public class APIStoreImplTestCase {
         Assert.assertNotNull(actualAPIs);
         Mockito.verify(apiDAO, Mockito.times(1)).
                 getAPIsByStatus(Arrays.asList(STATUS_CREATED, STATUS_PUBLISHED));
+    }
+
+    @Test(description = "Retrieve a WSDL of an API")
+    public void testGetAPIWSDL() throws APIManagementException, IOException {
+        final String labelName = "SampleLabel";
+
+        Label label = SampleTestObjectCreator.createLabel(labelName).build();
+        Set<String> labels = new HashSet<>();
+        labels.add(label.getName());
+        API api = SampleTestObjectCreator.createDefaultAPI().labels(labels).build();
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
+        APIStore apiStore = getApiStoreImpl(apiDAO, labelDAO);
+        Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
+        Mockito.when(labelDAO.getLabelByName(labelName)).thenReturn(label);
+        Mockito.when(apiDAO.getWSDL(api.getId()))
+                .thenReturn(new String(SampleTestObjectCreator.createDefaultWSDL11Content()));
+        String expectedEndpoint = SampleTestObjectCreator.ACCESS_URL + labelName
+                + (api.getContext().startsWith("/") ? api.getContext() : "/" + api.getContext());
+        String updatedWSDL = apiStore.getAPIWSDL(api.getId(), label.getName());
+        Assert.assertTrue(updatedWSDL.contains(expectedEndpoint));
+    }
+
+    @Test(description = "Retrieve a WSDL archive of an API")
+    public void testGetAPIWSDLArchive() throws APIManagementException, IOException {
+        final String labelName = "SampleLabel";
+
+        Label label = SampleTestObjectCreator.createLabel(labelName).build();
+        Set<String> labels = new HashSet<>();
+        labels.add(label.getName());
+        API api = SampleTestObjectCreator.createDefaultAPI().labels(labels).build();
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
+        APIStore apiStore = getApiStoreImpl(apiDAO, labelDAO);
+        Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
+        Mockito.when(labelDAO.getLabelByName(labelName)).thenReturn(label);
+        Mockito.when(apiDAO.getWSDLArchive(api.getId()))
+                .thenReturn(SampleTestObjectCreator.createDefaultWSDL11ArchiveInputStream());
+        String expectedEndpoint = SampleTestObjectCreator.ACCESS_URL + labelName
+                + (api.getContext().startsWith("/") ? api.getContext() : "/" + api.getContext());
+        WSDLArchiveInfo archiveInfo = apiStore.getAPIWSDLArchive(api.getId(), label.getName());
+        Assert.assertNotNull(archiveInfo);
+        Assert.assertNotNull(archiveInfo.getWsdlInfo());
+        Assert.assertNotNull(archiveInfo.getWsdlInfo().getEndpoints());
+        Map<String, String> endpoints = archiveInfo.getWsdlInfo().getEndpoints();
+        Assert.assertTrue(endpoints.containsValue(expectedEndpoint));
+        Assert.assertFalse(endpoints.containsValue(SampleTestObjectCreator.ORIGINAL_ENDPOINT_STOCK_QUOTE));
+        Assert.assertFalse(endpoints.containsValue(SampleTestObjectCreator.ORIGINAL_ENDPOINT_WEATHER));
     }
 
     @Test(description = "Add Composite API")
@@ -1357,6 +1408,10 @@ public class APIStoreImplTestCase {
 
     private APIStoreImpl getApiStoreImpl(ApiDAO apiDAO) {
         return new APIStoreImpl(USER_NAME, null, null, apiDAO, null, null, null, null, null, null, null, null);
+    }
+
+    private APIStoreImpl getApiStoreImpl(ApiDAO apiDAO, LabelDAO labelDAO) {
+        return new APIStoreImpl(USER_NAME, null, null, apiDAO, null, null, null, null, labelDAO, null, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl(IdentityProvider idp, KeyManager keyManager, ApiDAO apiDAO,

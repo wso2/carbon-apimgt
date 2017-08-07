@@ -1407,7 +1407,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             if (log.isDebugEnabled()) {
                 log.debug("Successfully archived WSDL files: " + wsdlPath);
             }
-            return new WSDLArchiveInfo(rootPath, wsdlArchiveProcessedFileName + ".zip");
+            WSDLArchiveInfo archiveInfo = new WSDLArchiveInfo(rootPath, wsdlArchiveProcessedFileName + ".zip");
+            archiveInfo.setWsdlInfo(processor.getWsdlInfo());
+            return archiveInfo;
         } catch (IOException e) {
             throw new APIMgtWSDLException(e);
         }
