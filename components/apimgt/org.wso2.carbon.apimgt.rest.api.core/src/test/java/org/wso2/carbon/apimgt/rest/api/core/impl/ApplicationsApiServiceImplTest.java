@@ -42,7 +42,7 @@ import java.util.List;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(APIManagerFactory.class)
-public class ApplicationsApiServiceImplTestCase {
+public class ApplicationsApiServiceImplTest {
 
     @Test
     public void applicationsGetTestCase() throws Exception {

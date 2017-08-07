@@ -43,7 +43,7 @@ import java.util.List;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(APIManagerFactory.class)
-public class BlacklistApiServiceImplTestCase {
+public class BlacklistApiServiceImplTest {
 
     @Test
     public void blacklistGetTestCase() throws Exception {
