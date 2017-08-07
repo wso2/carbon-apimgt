@@ -18,9 +18,6 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.mappings;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.rest.api.admin.exceptions.UnsupportedThrottleConditionTypeException;
 import org.wso2.carbon.apimgt.rest.api.admin.exceptions.UnsupportedThrottleLimitTypeException;
@@ -36,8 +33,6 @@ import java.util.List;
  * and vice-versa
  */
 public class ApplicationThrottlePolicyMappingUtil {
-
-    private static final Logger log = LoggerFactory.getLogger(ApplicationThrottlePolicyMappingUtil.class);
 
     /**
      * Converts an array of Application Policy objects into a List DTO
@@ -71,8 +66,10 @@ public class ApplicationThrottlePolicyMappingUtil {
      */
     public static ApplicationThrottlePolicyDTO fromApplicationThrottlePolicyToDTO(Policy appPolicy)
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
+
         ApplicationThrottlePolicyDTO policyDTO = new ApplicationThrottlePolicyDTO();
         policyDTO = CommonThrottleMappingUtil.updateFieldsFromToPolicyToDTO(appPolicy, policyDTO);
+
         if (appPolicy.getDefaultQuotaPolicy() != null) {
             policyDTO.setDefaultLimit(CommonThrottleMappingUtil.fromQuotaPolicyToDTO(appPolicy.getDefaultQuotaPolicy()));
         }
