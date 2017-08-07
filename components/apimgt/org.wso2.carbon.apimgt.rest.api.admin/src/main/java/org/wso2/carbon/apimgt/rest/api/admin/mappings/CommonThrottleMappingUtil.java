@@ -374,7 +374,9 @@ public class CommonThrottleMappingUtil {
     public static IPCondition fromDTOToIPCondition(ThrottleConditionDTO dto)
             throws UnsupportedThrottleConditionTypeException {
         String ipConditionType = mapIPConditionTypeFromDTOToModel(dto.getIpCondition().getIpConditionType());
+
         IPCondition ipCondition = new IPCondition(ipConditionType);
+
         ipCondition = updateFieldsFromDTOToCondition(dto, ipCondition);
         ipCondition.setSpecificIP(dto.getIpCondition().getSpecificIP());
         ipCondition.setStartingIP(dto.getIpCondition().getStartingIP());

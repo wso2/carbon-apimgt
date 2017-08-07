@@ -30,8 +30,6 @@ import org.wso2.carbon.apimgt.rest.api.admin.mappings.AdvancedThrottlePolicyMapp
 
 import java.util.UUID;
 
-import static org.wso2.carbon.apimgt.core.util.APIMgtConstants.ThrottlePolicyConstants.API_LEVEL;
-
 public class AdvancedThrottlePolicyMappingUtilTestCase {
 
     @Test(description = "Convert Policy to DTO")
