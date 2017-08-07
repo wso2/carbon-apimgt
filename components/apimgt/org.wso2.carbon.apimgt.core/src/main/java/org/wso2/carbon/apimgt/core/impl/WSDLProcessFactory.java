@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.core.impl;
 
 import org.wso2.carbon.apimgt.core.api.WSDLProcessor;
+import org.wso2.carbon.apimgt.core.configuration.APIMConfigurationService;
 import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.util.APIMWSDLUtils;
@@ -36,8 +37,7 @@ public class WSDLProcessFactory {
 
     private WSDLProcessFactory() {
         wsdlProcessorClasses = new ArrayList<>();
-        wsdlProcessorClasses.add("org.wso2.carbon.apimgt.core.impl.WSDL11ProcessorImpl");
-        wsdlProcessorClasses.add("org.wso2.carbon.apimgt.core.impl.WSDL20ProcessorImpl");
+        wsdlProcessorClasses.addAll(APIMConfigurationService.getInstance().getApimConfigurations().getWsdlProcessors());
     }
 
     /**
@@ -76,7 +76,7 @@ public class WSDLProcessFactory {
      * @throws APIMgtWSDLException If an error occurs while determining the processor
      */
     public WSDLProcessor getWSDLProcessorForPath(String wsdlPath) throws APIMgtWSDLException {
-        for (String clazz : wsdlProcessorClasses) {
+        for (String clazz : getWSDLProcessorClasses()) {
             WSDLProcessor processor;
             try {
                 processor = (WSDLProcessor) Class.forName(clazz).newInstance();
@@ -103,7 +103,7 @@ public class WSDLProcessFactory {
      * @throws APIMgtWSDLException If an error occurs while determining the processor
      */
     public WSDLProcessor getWSDLProcessor(byte[] wsdlContent) throws APIMgtWSDLException {
-        for (String clazz : wsdlProcessorClasses) {
+        for (String clazz : getWSDLProcessorClasses()) {
             WSDLProcessor processor;
             try {
                 processor = (WSDLProcessor) Class.forName(clazz).newInstance();
@@ -120,5 +120,14 @@ public class WSDLProcessFactory {
         //no processors found if this line reaches
         throw new APIMgtWSDLException("No WSDL processor found to process WSDL content",
                 ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
+    }
+
+    /**
+     * Retrieves the list of WSDL processor classes which are currently in use
+     * 
+     * @return The list of WSDL processor classes which are currently in use
+     */
+    public List<String> getWSDLProcessorClasses() {
+        return wsdlProcessorClasses;
     }
 }
