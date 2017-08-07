@@ -116,7 +116,6 @@ public class SampleTestObjectCreator {
             + "Description";
     private static final String SAMPLE_CUSTOM_ATTRIBUTE = "CUSTOM ATTRIBUTE SAMPLE";
     private static final String PRODUCTION_ENDPOINT = "production";
-    private static final String SAMPLE_API_WSDL = "http://www.webservicex.net/globalweather.asmx?op=GetWeather?wsdl";
     private static final String FIFTY_PER_MIN_TIER = "50PerMin";
     private static final String TWENTY_PER_MIN_TIER = "20PerMin";
     private static final String TIME_UNIT_SECONDS = "s";
@@ -202,7 +201,6 @@ public class SampleTestObjectCreator {
                 lifeCycleStatus(APIStatus.CREATED.getStatus()).
                 lifecycleInstanceId(UUID.randomUUID().toString()).
                 endpoint(Collections.emptyMap()).
-                wsdlUri("http://localhost:9443/echo?wsdl").
                 isResponseCachingEnabled(false).
                 cacheTimeout(60).
                 isDefaultVersion(false).
@@ -306,7 +304,6 @@ public class SampleTestObjectCreator {
                 description("Get Food & Beverage Info").
                 lifeCycleStatus(APIStatus.CREATED.getStatus()).
                 endpoint(Collections.emptyMap()).
-                wsdlUri(SAMPLE_API_WSDL).
                 isResponseCachingEnabled(true).
                 cacheTimeout(120).
                 isDefaultVersion(true).
@@ -370,7 +367,6 @@ public class SampleTestObjectCreator {
                 description("Get Food & Beverage Info").
                 lifeCycleStatus(APIStatus.CREATED.getStatus()).
                 endpoint(Collections.emptyMap()).
-                wsdlUri(SAMPLE_API_WSDL).
                 isResponseCachingEnabled(true).
                 cacheTimeout(120).
                 isDefaultVersion(true).
