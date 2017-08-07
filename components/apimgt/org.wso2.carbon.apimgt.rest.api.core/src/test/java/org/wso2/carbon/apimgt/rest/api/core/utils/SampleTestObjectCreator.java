@@ -344,7 +344,7 @@ public class SampleTestObjectCreator {
      *
      * @return BlockConditions object
      */
-    protected static BlockConditions createUniqueBlockConditions(String conditionType) {
+    public static BlockConditions createUniqueBlockConditions(String conditionType) {
         BlockConditions blockConditions = new BlockConditions();
         blockConditions.setUuid(UUID.randomUUID().toString());
         blockConditions.setConditionId(new Random().nextInt());
