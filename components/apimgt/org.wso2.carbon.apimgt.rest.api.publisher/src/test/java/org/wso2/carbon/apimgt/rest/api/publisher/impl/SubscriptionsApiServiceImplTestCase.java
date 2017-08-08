@@ -283,6 +283,58 @@ public class SubscriptionsApiServiceImplTestCase {
         assertTrue(response.getEntity().toString().contains("Invalid state change for subscription"));
     }
 
+    @Test
+    public void testSubscriptionsSubscriptionIdGet() throws Exception {
+        printTestMethodName();
+        SubscriptionsApiServiceImpl subscriptionsApiService = new SubscriptionsApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        String sub1 = UUID.randomUUID().toString();
+        Subscription subscription = SampleTestObjectCreator.createSubscription(sub1);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Mockito.doReturn(subscription).doThrow(new IllegalArgumentException())
+                .when(apiPublisher).getSubscriptionByUUID(sub1);
+        Response response = subscriptionsApiService.
+                subscriptionsSubscriptionIdGet(sub1, null, null, null, getRequest());
+        assertEquals(response.getStatus(), 200);
+        assertTrue(response.getEntity().toString().contains(sub1));
+    }
+
+    @Test
+    public void testSubscriptionsSubscriptionIdGetExist() throws Exception {
+        printTestMethodName();
+        SubscriptionsApiServiceImpl subscriptionsApiService = new SubscriptionsApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        String sub1 = UUID.randomUUID().toString();
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Mockito.doReturn(null).doThrow(new IllegalArgumentException())
+                .when(apiPublisher).getSubscriptionByUUID(sub1);
+        Response response = subscriptionsApiService.
+                subscriptionsSubscriptionIdGet(sub1, null, null, null, getRequest());
+        assertEquals(response.getStatus(), 404);
+        assertTrue(response.getEntity().toString().contains("Subscription not found"));
+    }
+
+    @Test
+    public void testSubscriptionsSubscriptionIdGetException() throws Exception {
+        printTestMethodName();
+        SubscriptionsApiServiceImpl subscriptionsApiService = new SubscriptionsApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        String sub1 = UUID.randomUUID().toString();
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.SUBSCRIPTION_STATE_INVALID))
+                .when(apiPublisher).getSubscriptionByUUID(sub1);
+        Response response = subscriptionsApiService.
+                subscriptionsSubscriptionIdGet(sub1, null, null, null, getRequest());
+        assertEquals(response.getStatus(), 400);
+        assertTrue(response.getEntity().toString().contains("Invalid state change for subscription"));
+    }
+
     // Sample request to be used by tests
     private Request getRequest() throws Exception {
         CarbonMessage carbonMessage = Mockito.mock(CarbonMessage.class);
