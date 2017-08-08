@@ -16,7 +16,8 @@
   ~ * limitations under the License.
   ~ */
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -115,6 +116,12 @@
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.publisher.feature</artifactId>
+                <version>${carbon.apimgt.version}</version>
+                <type>zip</type>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.store.feature</artifactId>
                 <version>${carbon.apimgt.version}</version>
                 <type>zip</type>
             </dependency>
@@ -277,6 +284,11 @@
             <dependency>
                 <groupId>org.powermock</groupId>
                 <artifactId>powermock-api-mockito</artifactId>
+                <version>${powermock.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.powermock</groupId>
+                <artifactId>powermock-module-junit4</artifactId>
                 <version>${powermock.version}</version>
             </dependency>
             <dependency>
@@ -656,7 +668,8 @@
                             </goals>
                             <configuration>
                                 <dataFile>${basedir}/target/coverage-reports/aggregate.exec</dataFile>
-                                <outputDirectory>${basedir}/target/coverage-reports/site/jacoco-aggregate</outputDirectory>
+                                <outputDirectory>${basedir}/target/coverage-reports/site/jacoco-aggregate
+                                </outputDirectory>
                             </configuration>
                         </execution>
                         <execution>
@@ -688,7 +701,8 @@
                     <version>${maven.surefire.plugin.version}</version>
                     <configuration>
                         <systemPropertyVariables>
-                            <jacoco-agent.destfile>${basedir}/target/coverage-reports/jacoco-ut.exec</jacoco-agent.destfile>
+                            <jacoco-agent.destfile>${basedir}/target/coverage-reports/jacoco-ut.exec
+                            </jacoco-agent.destfile>
                         </systemPropertyVariables>
                     </configuration>
                 </plugin>
@@ -698,7 +712,8 @@
                     <version>2.19.1</version>
                     <configuration>
                         <systemPropertyVariables>
-                            <jacoco-agent.destfile>${basedir}/target/coverage-reports/jacoco-it.exec</jacoco-agent.destfile>
+                            <jacoco-agent.destfile>${basedir}/target/coverage-reports/jacoco-it.exec
+                            </jacoco-agent.destfile>
                         </systemPropertyVariables>
                     </configuration>
                     <executions>
