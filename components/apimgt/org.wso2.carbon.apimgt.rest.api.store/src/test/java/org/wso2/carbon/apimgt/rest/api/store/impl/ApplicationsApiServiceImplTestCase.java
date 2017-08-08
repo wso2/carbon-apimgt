@@ -171,6 +171,84 @@ public class ApplicationsApiServiceImplTestCase {
     }
 
     @Test
+    public void testApplicationsApplicationIdKeysKeyTypeGet() throws APIManagementException, NotFoundException {
+        TestUtil.printTestMethodName();
+        String applicationId = UUID.randomUUID().toString();
+        String keyType = "PRODUCTION";
+
+        ApplicationsApiServiceImpl applicationsApiService = new ApplicationsApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+
+        List<String> grantTypes = new ArrayList<>();
+        grantTypes.add("password");
+        grantTypes.add("jwt");
+
+        OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
+        oAuthApplicationInfo.setKeyType(keyType);
+        oAuthApplicationInfo.setClientId(UUID.randomUUID().toString());
+        oAuthApplicationInfo.setClientSecret(UUID.randomUUID().toString());
+        oAuthApplicationInfo.setGrantTypes(grantTypes);
+
+        Mockito.when(apiStore.getApplicationKeys(applicationId, keyType)).thenReturn(oAuthApplicationInfo);
+
+        Response response = applicationsApiService.applicationsApplicationIdKeysKeyTypeGet
+                (applicationId, keyType, contentType, getRequest());
+
+        Assert.assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    public void testApplicationsApplicationIdKeysKeyTypePut() throws APIManagementException, NotFoundException {
+        TestUtil.printTestMethodName();
+        String applicationId = UUID.randomUUID().toString();
+        String accessToken = UUID.randomUUID().toString();
+        String clientID = UUID.randomUUID().toString();
+        String clientSecret = UUID.randomUUID().toString();
+        String keyType = "PRODUCTION";
+
+        ApplicationsApiServiceImpl applicationsApiService = new ApplicationsApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+
+        ApplicationTokenDTO applicationTokenDTO = new ApplicationTokenDTO();
+        applicationTokenDTO.setAccessToken(accessToken);
+        applicationTokenDTO.setTokenScopes("SCOPE1");
+        applicationTokenDTO.setValidityTime((long) 100000);
+
+        List<String> grantTypes = new ArrayList<>();
+        grantTypes.add("password");
+        grantTypes.add("jwt");
+
+        ApplicationKeysDTO applicationKeysDTO = new ApplicationKeysDTO();
+        applicationKeysDTO.setConsumerKey(clientID);
+        applicationKeysDTO.setConsumerSecret(clientSecret);
+        applicationKeysDTO.setKeyType(ApplicationKeysDTO.KeyTypeEnum.PRODUCTION);
+        applicationKeysDTO.setCallbackUrl(null);
+        applicationKeysDTO.setSupportedGrantTypes(grantTypes);
+
+        OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
+        oAuthApplicationInfo.setKeyType(keyType);
+        oAuthApplicationInfo.setClientId(UUID.randomUUID().toString());
+        oAuthApplicationInfo.setClientSecret(UUID.randomUUID().toString());
+        oAuthApplicationInfo.setGrantTypes(grantTypes);
+
+        Mockito.when(apiStore.updateGrantTypesAndCallbackURL(applicationId, keyType, grantTypes, null))
+                .thenReturn(oAuthApplicationInfo);
+
+        Response response = applicationsApiService.applicationsApplicationIdKeysKeyTypePut
+                (applicationId, keyType, applicationKeysDTO, contentType, getRequest());
+
+        Assert.assertEquals(200, response.getStatus());
+    }
+
+    @Test
     public void testApplicationsApplicationIdGenerateTokenPost() throws APIManagementException, NotFoundException {
         TestUtil.printTestMethodName();
         String applicationId = UUID.randomUUID().toString();
