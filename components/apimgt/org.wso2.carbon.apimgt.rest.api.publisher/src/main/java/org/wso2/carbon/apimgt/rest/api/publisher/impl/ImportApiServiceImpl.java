@@ -30,15 +30,14 @@ public class ImportApiServiceImpl extends ImportApiService {
      *
      * @param fileInputStream content stream of the zip file which contains exported API(s)
      * @param fileDetail      meta information of the zip file
-     * @param contentType     Content-Type header
      * @param provider        provider of the API (if it needs to be updated)
      * @param request         ms4j request object
      * @return List of APIs that were imported
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response importApisPost(InputStream fileInputStream, FileInfo fileDetail, String contentType, String
-            provider, Request request) throws NotFoundException {
+    public Response importApisPost(InputStream fileInputStream, FileInfo fileDetail, String provider,
+            Request request) throws NotFoundException {
 
         APIPublisher publisher = null;
 
@@ -64,15 +63,14 @@ public class ImportApiServiceImpl extends ImportApiService {
      *
      * @param fileInputStream content stream of the zip file which contains exported API(s)
      * @param fileDetail      meta information of the zip file
-     * @param contentType     Content-Type header
      * @param provider        provider of the API (if it needs to be updated)
      * @param request         ms4j request object
      * @return List of APIs that were imported
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response importApisPut(InputStream fileInputStream, FileInfo fileDetail, String contentType, String
-            provider, Request request) throws NotFoundException {
+    public Response importApisPut(InputStream fileInputStream, FileInfo fileDetail, String provider,
+            Request request) throws NotFoundException {
 
         APIPublisher publisher = null;
 

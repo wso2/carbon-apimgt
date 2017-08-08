@@ -76,18 +76,6 @@ public interface ApplicationDAO {
     Application[] getApplicationsForUser(int offset, int limit, String userName) throws APIMgtDAOException;
 
     /**
-     * Retrieves summary data of all available Applications. This method supports result pagination and
-     * ensures results returned are those that belong to the specified Group ID
-     *
-     * @param offset  The number of results from the beginning that is to be ignored
-     * @param limit   The maximum number of results to be returned after the offset
-     * @param groupID The Group ID to filter results by
-     * @return {@code Application[]} matching results
-     * @throws APIMgtDAOException   If failed to get applications.
-     */
-    Application[] getApplicationsForGroup(int offset, int limit, String groupID) throws APIMgtDAOException;
-
-    /**
      * Retrieves summary data of all available Applications that match the given search criteria. This method supports
      * result pagination and ensuring results returned are for Apps belonging to the specified username
      *
@@ -97,17 +85,6 @@ public interface ApplicationDAO {
      * @throws APIMgtDAOException   If failed to get applications.
      */
     Application[] searchApplicationsForUser(String searchString, String userId) throws APIMgtDAOException;
-
-    /**
-     * Retrieves summary data of all available Applications that match the given search criteria. This method supports
-     * result pagination and ensuring results returned are for Apps belonging to the specified Group ID
-     *
-     * @param searchString The search string provided
-     * @param groupID      The Group ID to filter results by
-     * @return An array of matching {@link Application} objects
-     * @throws APIMgtDAOException   If failed to get applications.
-     */
-    Application[] searchApplicationsForGroup(String searchString, String groupID) throws APIMgtDAOException;
 
     /**
      * Add a new instance of an Application
@@ -148,11 +125,29 @@ public interface ApplicationDAO {
      *
      * @param appId     UUID of the application
      * @param keyType     Key Type (Production | Sandbox | Application)
-     * @param oAuthAppDetails   Oauth application detail object.
+     * @param consumerKey   Consumer key of Oauth application.
      * @throws APIMgtDAOException   If failed to add application keys.
      */
-    void addApplicationKeys(String appId, String keyType, OAuthApplicationInfo oAuthAppDetails)
-            throws APIMgtDAOException;
+    void addApplicationKeys(String appId, String keyType, String consumerKey) throws APIMgtDAOException;
+
+    /**
+     * Get all application keys of an application
+     *
+     * @param appId   UUID of the application
+     * @return List of {@link OAuthApplicationInfo}. Application key list
+     * @throws APIMgtDAOException If failed to get application keys.
+     */
+    List<OAuthApplicationInfo> getApplicationKeys(String appId) throws APIMgtDAOException;
+
+    /**
+     * Get application keys (of an application) of a given key type
+     *
+     * @param appId   UUID of the application
+     * @param keyType Key Type (Production | Sandbox | Application)
+     * @return {@link OAuthApplicationInfo} Application key information
+     * @throws APIMgtDAOException If failed to get application keys.
+     */
+    OAuthApplicationInfo getApplicationKeys(String appId, String keyType) throws APIMgtDAOException;
     
     /**
      * Update the state of an existing Application

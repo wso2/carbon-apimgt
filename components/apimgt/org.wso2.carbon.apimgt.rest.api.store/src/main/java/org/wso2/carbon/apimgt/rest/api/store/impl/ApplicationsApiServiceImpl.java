@@ -24,7 +24,7 @@ import org.wso2.carbon.apimgt.rest.api.store.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyProvisionRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyMappingRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeysDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationTokenDTO;
@@ -141,8 +141,6 @@ public class ApplicationsApiServiceImpl
      * @param applicationId   Application ID
      * @param body            Application information which are required to generate keys
      * @param contentType     Content-Type header value
-     * @param ifMatch         If-Match header value
-     * @param ifUnmodifiedSince If-UnModified-Since header value
      * @param request         msf4j request object
      * @return Generated application key detials
      * @throws NotFoundException When the particular resource does not exist in the system
@@ -150,8 +148,7 @@ public class ApplicationsApiServiceImpl
     @Override
     public Response applicationsApplicationIdGenerateKeysPost(String applicationId,
                                                               ApplicationKeyGenerateRequestDTO body,
-                                                              String contentType, String ifMatch,
-                                                              String ifUnmodifiedSince, Request request)
+                                                              String contentType, Request request)
             throws NotFoundException {
         try {
             String username = RestApiUtil.getLoggedInUsername();
@@ -171,33 +168,129 @@ public class ApplicationsApiServiceImpl
     }
 
     /**
-     * Provide application keys
+     * Retrieve Keys of an application
+     *
+     * @param applicationId Application Id
+     * @param accept        Accept header value
+     * @param request       msf4j request object
+     * @return Application Key Information
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
+    @Override
+    public Response applicationsApplicationIdKeysGet(String applicationId, String accept, Request request)
+            throws NotFoundException {
+        try {
+            String username = RestApiUtil.getLoggedInUsername();
+            APIStore apiConsumer = RestApiUtil.getConsumer(username);
+            List<OAuthApplicationInfo> oAuthApps = apiConsumer.getApplicationKeys(applicationId);
+            List<ApplicationKeysDTO> appKeys = ApplicationKeyMappingUtil.fromApplicationKeyListToDTOList(oAuthApps);
+            return Response.ok().entity(appKeys).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error occurred while retrieving application keys of application: "
+                    + applicationId;
+            Map<String, String> paramList = new HashMap<>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+    /**
+     * Retrieve Keys of an application by key type
+     *
+     * @param applicationId Application Id
+     * @param keyType       Key Type (Production | Sandbox)
+     * @param accept        Accept header value
+     * @param request       msf4j request object
+     * @return Application Key Information
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
+    @Override
+    public Response applicationsApplicationIdKeysKeyTypeGet(String applicationId, String keyType, String accept,
+                                                            Request request) throws NotFoundException {
+        try {
+            String username = RestApiUtil.getLoggedInUsername();
+            APIStore apiConsumer = RestApiUtil.getConsumer(username);
+            OAuthApplicationInfo oAuthApp = apiConsumer.getApplicationKeys(applicationId, keyType);
+            ApplicationKeysDTO appKeys = ApplicationKeyMappingUtil.fromApplicationKeysToDTO(oAuthApp);
+            return Response.ok().entity(appKeys).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error occurred while retrieving '" + keyType + "' application keys of application: "
+                    + applicationId;
+            Map<String, String> paramList = new HashMap<>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
+            paramList.put(APIMgtConstants.ExceptionsConstants.KEY_TYPE, keyType);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+    /**
+     * Update grant types/callback URL
+     *
+     * @param applicationId Application Id
+     * @param keyType       Key Type (Production | Sandbox)
+     * @param body          Grant type and callback URL infomation
+     * @param contentType   Content-Type header value
+     * @param request       msf4j request object
+     * @return Updated Key Information
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
+    @Override
+    public Response applicationsApplicationIdKeysKeyTypePut(String applicationId, String keyType,
+                                                            ApplicationKeysDTO body, String contentType,
+                                                            Request request) throws NotFoundException {
+        try {
+            String username = RestApiUtil.getLoggedInUsername();
+            APIStore apiConsumer = RestApiUtil.getConsumer(username);
+            OAuthApplicationInfo oAuthApp = apiConsumer.updateGrantTypesAndCallbackURL(applicationId, keyType,
+                    body.getSupportedGrantTypes(), body.getCallbackUrl());
+            ApplicationKeysDTO appKeys = ApplicationKeyMappingUtil.fromApplicationKeysToDTO(oAuthApp);
+            return Response.ok().entity(appKeys).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error occurred while updating '" + keyType + "'-type grant types/callback url of " +
+                    "application: " + applicationId;
+            Map<String, String> paramList = new HashMap<>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
+            paramList.put(APIMgtConstants.ExceptionsConstants.KEY_TYPE, keyType);
+            paramList.put(APIMgtConstants.ExceptionsConstants.CALLBACK_URL, body.getCallbackUrl());
+            String grantTypes = null;
+            if (body.getSupportedGrantTypes() != null) {
+                grantTypes = String.join(",", body.getSupportedGrantTypes());
+            }
+            paramList.put(APIMgtConstants.ExceptionsConstants.GRANT_TYPES, grantTypes);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+
+    /**
+     * Map application keys
      *
      * @param applicationId   Application ID
-     * @param body            Application and key information
+     * @param body            Application key mapping information
      * @param contentType     Content-Type header value
-     * @param ifMatch         If-Match header value
-     * @param ifUnmodifiedSince If-UnModified-Since header value
      * @param request         msf4j request object
      * @return Generated application key detials
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response applicationsApplicationIdProvideKeysPost(String applicationId,
-                                                             ApplicationKeyProvisionRequestDTO body,
-                                                             String contentType, String ifMatch,
-                                                             String ifUnmodifiedSince, Request request)
+    public Response applicationsApplicationIdMapKeysPost(String applicationId, ApplicationKeyMappingRequestDTO body,
+                                                         String contentType, Request request)
             throws NotFoundException {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
-            OAuthApplicationInfo oAuthApp = apiConsumer.provideApplicationKeys(applicationId,
+            OAuthApplicationInfo oAuthApp = apiConsumer.mapApplicationKeys(applicationId,
                     body.getKeyType().name(), body.getConsumerKey(), body.getConsumerSecret());
             ApplicationKeysDTO appKeys = ApplicationKeyMappingUtil.fromApplicationKeysToDTO(oAuthApp);
             return Response.ok().entity(appKeys).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error occurred while provisioning application keys for application: "
-                    + applicationId;
+            String errorMessage = "Error occurred while mapping application keys with application: " + applicationId;
             Map<String, String> paramList = new HashMap<>();
             paramList.put(APIMgtConstants.ExceptionsConstants.APPLICATION_ID, applicationId);
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);

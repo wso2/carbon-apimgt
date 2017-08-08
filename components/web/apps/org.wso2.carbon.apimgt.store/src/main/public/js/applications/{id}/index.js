@@ -509,7 +509,7 @@ var generateKeys = function () {
         }, function (keys) {
             if(keys.status == 200){
                 var jsonData = JSON.parse(keys.data)
-                client["Generate Application Tokens"].post_applications_applicationId_generate_token(
+                client["Generate Application Token"].post_applications_applicationId_generate_token(
                     {
                         "applicationId": id,
                         "Content-Type": "application/json",

@@ -95,15 +95,14 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      * @param apiId       ID of the API
      * @param limit       Maximum subscriptions to return
      * @param offset      Starting position of the pagination
-     * @param accept      Accept header value
      * @param ifNoneMatch If-Match header value
      * @param request     ms4j request object
      * @return List of qualifying subscriptions DTOs as the response
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response subscriptionsGet(String apiId, Integer limit, Integer offset, String accept, String ifNoneMatch,
-                                     Request request) throws NotFoundException {
+    public Response subscriptionsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch,
+            Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         List<Subscription> subscriptionList;
         try {
@@ -132,7 +131,6 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      * Retrieves a single subscription
      *
      * @param subscriptionId  ID of the subscription
-     * @param accept          Accept header value
      * @param ifNoneMatch     If-Match header value
      * @param ifModifiedSince If-Modified-Since value
      * @param request         ms4j request object
@@ -140,13 +138,12 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response subscriptionsSubscriptionIdGet(String subscriptionId, String accept, String ifNoneMatch, String
-            ifModifiedSince, Request request) throws
-            NotFoundException {
+    public Response subscriptionsSubscriptionIdGet(String subscriptionId, String ifNoneMatch,
+            String ifModifiedSince, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            String existingFingerprint = subscriptionsSubscriptionIdGetFingerprint(subscriptionId, accept, ifNoneMatch,
+            String existingFingerprint = subscriptionsSubscriptionIdGetFingerprint(subscriptionId, ifNoneMatch,
                     ifModifiedSince, request);
             if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
                     .contains(existingFingerprint)) {
@@ -181,14 +178,13 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      * Retrieve the fingerprint of the subscription
      *
      * @param subscriptionId  ID of the subscription
-     * @param accept          Accept header value
      * @param ifNoneMatch     If-Match header value
      * @param ifModifiedSince If-Modified-Since value
      * @param request         ms4j request object
      * @return Fingerprint of the subscription
      */
-    public String subscriptionsSubscriptionIdGetFingerprint(String subscriptionId, String accept, String ifNoneMatch,
-                                                            String ifModifiedSince, Request request) {
+    public String subscriptionsSubscriptionIdGetFingerprint(String subscriptionId, String ifNoneMatch,
+            String ifModifiedSince, Request request) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username)

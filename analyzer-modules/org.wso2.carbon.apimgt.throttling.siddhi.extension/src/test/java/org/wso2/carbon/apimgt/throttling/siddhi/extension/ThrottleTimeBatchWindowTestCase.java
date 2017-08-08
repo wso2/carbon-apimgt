@@ -45,7 +45,6 @@ public class ThrottleTimeBatchWindowTestCase {
     }
 
     @Test
-    @Ignore
     public void throttleTimeWindowBatchTest1() throws InterruptedException {
         SiddhiManager siddhiManager = new SiddhiManager();
         String cseEventStream = "" + "define stream cseEventStream (symbol string, price float, volume int);";
@@ -85,7 +84,6 @@ public class ThrottleTimeBatchWindowTestCase {
     }
 
     @Test
-    @Ignore
     public void throttleTimeWindowBatchTest2() throws InterruptedException {
         SiddhiManager siddhiManager = new SiddhiManager();
 
@@ -117,7 +115,7 @@ public class ThrottleTimeBatchWindowTestCase {
         inputHandler.send(new Object[] { "WSO2", 60.5f, 1 });
         Thread.sleep(10000);
         Assert.assertEquals(2, inEventCount);
-        Assert.assertEquals(0.0d, lastRemoveEvent.getData()[1]);
+        Assert.assertEquals("WSO2", lastRemoveEvent.getData()[0]);
         Assert.assertTrue(eventArrived);
         executionPlanRuntime.shutdown();
     }

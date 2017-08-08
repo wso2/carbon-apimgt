@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.Function;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
@@ -65,6 +66,8 @@ import org.wso2.carbon.lcm.core.impl.LifecycleState;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -111,6 +114,7 @@ public class SampleTestObjectCreator {
     private static final String UPDATED_SAMPLE_SUBSCRIPTION_POLICY = "Updated SampleSubscriptionPolicy";
     private static final String UPDATED_SAMPLE_SUBSCRIPTION_POLICY_DESCRIPTION = "Updated SampleSubscriptionPolicy "
             + "Description";
+    private static final String SAMPLE_CUSTOM_ATTRIBUTE = "CUSTOM ATTRIBUTE SAMPLE";
     private static final String PRODUCTION_ENDPOINT = "production";
     private static final String SAMPLE_API_WSDL = "http://www.webservicex.net/globalweather.asmx?op=GetWeather?wsdl";
     private static final String FIFTY_PER_MIN_TIER = "50PerMin";
@@ -135,6 +139,7 @@ public class SampleTestObjectCreator {
     private static final String PATH_THUMBNAIL_IMG_2 = "api/thumbnail2.jpg";
     private static final String PATH_INLINE_DOC_1 = "document/inline1.txt";
     private static final String PATH_INLINE_DOC_2 = "document/inline2.txt";
+    private static final String PATH_FILE_DOC_1 = "document/pdf-sample.pdf";
     private static final String SAMPLE_IP_1 = "12.32.45.3";
     private static final String SAMPLE_IP_2 = "24.34.1.45";
     private static final String SAMPLE_CUSTOM_RULE = "Sample Custom Rule";
@@ -188,7 +193,7 @@ public class SampleTestObjectCreator {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         String permissionJson = "[{\"groupId\" : \"developer\", \"permission\" : "
                 + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\"," +
-                "\"DELETE\"]}]";
+                "\"DELETE\", \"MANAGE_SUBSCRIPTION\"]}]";
 
         API.APIBuilder apiBuilder = new API.APIBuilder(ADMIN, "WeatherAPI", API_VERSION).
                 id(UUID.randomUUID().toString()).
@@ -204,6 +209,7 @@ public class SampleTestObjectCreator {
                 apiPolicy(unlimitedApiPolicy).
                 transport(transport).
                 tags(tags).
+                policies(policies).
                 visibility(API.Visibility.PUBLIC).
                 visibleRoles(new HashSet<>()).
                 businessInformation(businessInformation).
@@ -217,7 +223,7 @@ public class SampleTestObjectCreator {
                 apiDefinition(apiDefinition);
         Map map = new HashMap();
         map.put(DEVELOPER_ROLE_ID, 6);
-        map.put(ADMIN_ROLE_ID, 7);
+        map.put(ADMIN_ROLE_ID, 15);
         apiBuilder.permissionMap(map);
         return apiBuilder;
     }
@@ -288,11 +294,11 @@ public class SampleTestObjectCreator {
 
         String permissionJson = "[{\"groupId\" : \"developer\", \"permission\" : "
                 + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\"," +
-                "\"DELETE\"]}]";
+                "\"DELETE\", \"MANAGE_SUBSCRIPTION\"]}]";
 
         Map permissionMap = new HashMap();
         permissionMap.put(DEVELOPER_ROLE_ID, 6);
-        permissionMap.put(ADMIN_ROLE_ID, 7);
+        permissionMap.put(ADMIN_ROLE_ID, 15);
 
         API.APIBuilder apiBuilder = new API.APIBuilder(ADMIN, "restaurantAPI", "0.9").
                 id(UUID.randomUUID().toString()).
@@ -351,11 +357,11 @@ public class SampleTestObjectCreator {
 
         String permissionJson = "[{\"groupId\" : \"developer\", \"permission\" : "
                 + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\"," +
-                "\"DELETE\"]}]";
+                "\"DELETE\", \"MANAGE_SUBSCRIPTION\"]}]";
 
         Map permissionMap = new HashMap();
         permissionMap.put(DEVELOPER_ROLE_ID, 6);
-        permissionMap.put(ADMIN_ROLE_ID, 7);
+        permissionMap.put(ADMIN_ROLE_ID, 15);
 
         API.APIBuilder apiBuilder = new API.APIBuilder(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
                 API_VERSION).
@@ -393,7 +399,16 @@ public class SampleTestObjectCreator {
 
         HashMap permissionMap = new HashMap();
         permissionMap.put(DEVELOPER_ROLE_ID, 6);
+        permissionMap.put(ADMIN_ROLE_ID, 15);
         permissionMap.put(ADMIN_ROLE_ID, 7);
+        Application app = createDefaultApplication();
+        //generate random name for each time when generating unique composite API
+        app.setName(UUID.randomUUID().toString());
+        try {
+            DAOFactory.getApplicationDAO().addApplication(app);
+        } catch (APIMgtDAOException e) {
+            log.error("Error adding application", e);
+        }
 
         CompositeAPI.Builder apiBuilder = new CompositeAPI.Builder().
                 id(UUID.randomUUID().toString()).
@@ -404,7 +419,7 @@ public class SampleTestObjectCreator {
                 description("Get Food & Beverage Info").
                 transport(transport).
                 permissionMap(permissionMap).
-                applicationId(UUID.randomUUID().toString()).
+                applicationId(app.getId()).
                 createdTime(LocalDateTime.now()).
                 createdBy(API_CREATOR).
                 uriTemplates(Collections.emptyMap()).
@@ -493,12 +508,55 @@ public class SampleTestObjectCreator {
         return builder.build();
     }
 
+    /**
+     * Creates a file type documentation info sample
+     * 
+     * @return a file type documentation info sample
+     */
+    public static DocumentInfo createFileDocumentationInfo() {
+        //created by admin
+        DocumentInfo.Builder builder = new DocumentInfo.Builder();
+        builder.id(UUID.randomUUID().toString());
+        builder.name(SAMPLE_DOC_NAME);
+        builder.type(DocumentInfo.DocType.HOWTO);
+        builder.summary("Summary of PDF Type Documentation");
+        builder.sourceType(DocumentInfo.SourceType.FILE);
+        builder.sourceURL(EMPTY_STRING);
+        builder.otherType(EMPTY_STRING);
+        builder.visibility(DocumentInfo.Visibility.API_LEVEL);
+        builder.createdTime(LocalDateTime.now());
+        builder.lastUpdatedTime(LocalDateTime.now());
+        return builder.build();
+    }
+
+    /**
+     * Retrieves a sample file inline content string
+     *
+     * @return file inline content string
+     * @throws IOException If unable to read doc file resource
+     */
     public static String createDefaultInlineDocumentationContent() throws IOException {
         return IOUtils.toString(Thread.currentThread().getContextClassLoader().getResourceAsStream(PATH_INLINE_DOC_1));
     }
 
+    /**
+     * Retrieves a sample file inline content string
+     *
+     * @return file inline content string
+     * @throws IOException If unable to read doc file resource
+     */
     public static String createAlternativeInlineDocumentationContent() throws IOException {
         return IOUtils.toString(Thread.currentThread().getContextClassLoader().getResourceAsStream(PATH_INLINE_DOC_2));
+    }
+
+    /**
+     * Retrieves file content byte array
+     *
+     * @return file content byte array
+     * @throws IOException If unable to read doc file resource
+     */
+    public static byte[] createDefaultFileDocumentationContent() throws IOException {
+        return IOUtils.toByteArray(Thread.currentThread().getContextClassLoader().getResourceAsStream(PATH_FILE_DOC_1));
     }
 
     public static Application createDefaultApplication() {
@@ -552,6 +610,36 @@ public class SampleTestObjectCreator {
         application.setUpdatedUser(ADMIN);
         application.setUpdatedTime(LocalDateTime.now());
         return application;
+    }
+
+    /**
+     * Creates a sample function
+     *
+     * @return a sample function
+     * @throws URISyntaxException if error occurred while initializing the URI
+     */
+    public static Function createDefaultFunction() throws URISyntaxException {
+        return new Function("sampleFunction1", new URI("http://localhost/test1"));
+    }
+
+    /**
+     * Creates an alternative function
+     *
+     * @return an alternative function
+     * @throws URISyntaxException if error occurred while initializing the URI
+     */
+    public static Function createAlternativeFunction() throws URISyntaxException {
+        return new Function("alternativeFunction1", new URI("http://localhost/test-alternative1"));
+    }
+
+    /**
+     * Creates an alternative function
+     *
+     * @return an alternative function
+     * @throws URISyntaxException if error occurred while initializing the URI
+     */
+    public static Function createAlternativeFunction2() throws URISyntaxException {
+        return new Function("alternativeFunction2", new URI("http://localhost/test-alternative2"));
     }
 
     /**
@@ -699,6 +787,7 @@ public class SampleTestObjectCreator {
         applicationPolicy.setUuid(UUID.randomUUID().toString());
         applicationPolicy.setDisplayName(SAMPLE_APP_POLICY);
         applicationPolicy.setDescription(SAMPLE_APP_POLICY_DESCRIPTION);
+        applicationPolicy.setCustomAttributes(SAMPLE_CUSTOM_ATTRIBUTE.getBytes());
         QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
         defaultQuotaPolicy.setType(REQUEST_COUNT_TYPE);
         RequestCountLimit requestCountLimit = new RequestCountLimit(TIME_UNIT_SECONDS, 10000, 1000);
@@ -724,6 +813,7 @@ public class SampleTestObjectCreator {
         subscriptionPolicy.setUuid(UUID.randomUUID().toString());
         subscriptionPolicy.setDisplayName(SAMPLE_SUBSCRIPTION_POLICY);
         subscriptionPolicy.setDescription(SAMPLE_SUBSCRIPTION_POLICY_DESCRIPTION);
+        subscriptionPolicy.setCustomAttributes(SAMPLE_CUSTOM_ATTRIBUTE.getBytes());
         QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
         defaultQuotaPolicy.setType(REQUEST_COUNT_TYPE);
         RequestCountLimit requestCountLimit = new RequestCountLimit(TIME_UNIT_SECONDS, 10000, 1000);
@@ -871,6 +961,18 @@ public class SampleTestObjectCreator {
         return comment;
     }
 
+    public static Comment createAlternativeComment(String apiId) {
+        Comment comment = new Comment();
+        comment.setUuid(UUID.randomUUID().toString());
+        comment.setApiId(apiId);
+        comment.setCommentText("this is a sample comment - alternative");
+        comment.setCommentedUser("admin");
+        comment.setUpdatedUser("admin");
+        comment.setCreatedTime(LocalDateTime.now());
+        comment.setUpdatedTime(LocalDateTime.now());
+        return comment;
+    }
+    
     public static Rating createDefaultRating(String apiId) {
         Rating rating = new Rating();
         rating.setUuid(UUID.randomUUID().toString());
@@ -900,7 +1002,7 @@ public class SampleTestObjectCreator {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         String permissionJson = "[{\"groupId\" : \"developer\", \"permission\" : "
                 + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\"," +
-                "\"DELETE\"]}]";
+                "\"DELETE\", \"MANAGE_SUBSCRIPTION\"]}]";
 
         Map<String, Endpoint> endpointMap = new HashMap<>();
         endpointMap.put(APIMgtConstants.PRODUCTION_ENDPOINT,
@@ -934,7 +1036,7 @@ public class SampleTestObjectCreator {
                 apiDefinition(apiDefinition);
         Map map = new HashMap();
         map.put(DEVELOPER_ROLE_ID, 6);
-        map.put(ADMIN_ROLE_ID, 7);
+        map.put(ADMIN_ROLE_ID, 15);
         apiBuilder.permissionMap(map);
         return apiBuilder;
     }
@@ -1108,6 +1210,91 @@ public class SampleTestObjectCreator {
 
                         "\nfrom ResultStream#throttler:emitOnStateChange(throttleKey, isThrottled)" + "\nselect *\n"
                         + "insert into GlobalThrottleStream;";
+
+        return siddhiApp;
+    }
+    
+    public static String createDefaultSiddhiAppForAPIThrottlePolicy() {
+        APIPolicy apiPolicy = createDefaultAPIPolicy();
+        String siddhiApp = "\n@App:name('resource_" + apiPolicy.getPolicyName() + "_condition_0')"
+                + "\n@App:description('ExecutionPlan for resource_" + apiPolicy.getPolicyName() + "_condition_0')\n"
+
+                + "\n@source(type='inMemory', topic='apim', @map(type='passThrough'))"
+                + "\ndefine stream RequestStream (messageID string, appKey string, appTier string, "
+                + "subscriptionKey string,"
+                + " apiKey string, apiTier string, subscriptionTier string, resourceKey string,"
+                + " resourceTier string, userId string,  apiContext string, apiVersion string, "
+                + "appTenant string, apiTenant "
+                + "string, appId string, apiName string, propertiesMap string);\n"
+
+                + "\n@sink(type='jms', @map(type='text'),"
+                + "\nfactory.initial='org.apache.activemq.jndi.ActiveMQInitialContextFactory',"
+                + " provider.url='tcp://localhost:61616', "
+                + "destination='TEST.FOO', connection.factory.type='topic',"
+                + "\nconnection.factory.jndi.name='TopicConnectionFactory')"
+                + "\ndefine stream GlobalThrottleStream (throttleKey string, isThrottled bool,"
+                + " expiryTimeStamp long);\n"
+
+                + "\nFROM RequestStream"
+                + "\nSELECT messageID, (resourceTier == 'SampleAPIPolicy' AND (regex:find('Chrome',"
+                + "cast(map:get(propertiesMap,'Browser'),"
+                + "'string'))) AND (regex:find('attributed',"
+                + "cast(map:get(propertiesMap,'/path/path2'),'string'))) AND "
+                + "(cast(map:get(propertiesMap,'Location'),'string')=='Colombo'))"
+                + " AS isEligible, str:concat(resourceKey,"
+                + "'_condition_0') AS throttleKey, propertiesMap" + "\nINSERT INTO EligibilityStream;\n"
+
+                + "\nFROM EligibilityStream[isEligible==true]#throttler:timeBatch(1 s, 0)"
+                + "\nselect throttleKey, (count(messageID) >= 1000) as isThrottled,"
+                + " expiryTimeStamp group by throttleKey"
+                + "\nINSERT ALL EVENTS into ResultStream;\n"
+
+                + "\nfrom ResultStream#throttler:emitOnStateChange(throttleKey, isThrottled)" + "\nselect *"
+                + "\ninsert into GlobalThrottleStream;\n";
+
+        return siddhiApp;
+    }
+
+    public static String createDefaultSiddhiAppForAPILevelDefaultThrottlePolicy() {
+        APIPolicy apiPolicy = createDefaultAPIPolicy();
+        String siddhiApp = "\n@App:name('resource_" + apiPolicy.getPolicyName() + "_default')"
+                + "\n@App:description('ExecutionPlan for resource_" + apiPolicy.getPolicyName() + "_default')\n"
+
+                + "\n@source(type='inMemory', topic='apim', @map(type='passThrough'))"
+                + "\ndefine stream RequestStream (messageID string, appKey string,"
+                + " appTier string, subscriptionKey string,"
+                + " apiKey string, apiTier string, subscriptionTier string, resourceKey string,"
+                + " resourceTier string, userId string,  apiContext string, apiVersion string, appTenant string,"
+                + " apiTenant string,"
+                + " appId string, apiName string, propertiesMap string);\n"
+
+                + "\n@sink(type='jms', @map(type='text'),"
+                + "\nfactory.initial='org.apache.activemq.jndi.ActiveMQInitialContextFactory',"
+                + " provider.url='tcp://localhost:61616',"
+                + " destination='TEST.FOO', connection.factory.type='topic',"
+                + "\nconnection.factory.jndi.name='TopicConnectionFactory')"
+                + "\ndefine stream GlobalThrottleStream (throttleKey string, isThrottled bool,"
+                + " expiryTimeStamp long);\n"
+
+                + "\nFROM RequestStream"
+                + "\nSELECT messageID, (resourceTier == 'SampleAPIPolicy' AND "
+                + "NOT(((3232238595l<=cast(map:get(propertiesMap,'ip'),'Long')"
+                + " AND 3232258067l>=cast(map:get(propertiesMap,'ip'),'Long')) AND "
+                + "(cast(map:get(propertiesMap,'ip'),'Long')==2066353720l)) "
+                + "OR ((regex:find('Chrome',cast(map:get(propertiesMap,'Browser'),'string')))"
+                + " AND (regex:find('attributed',"
+                + "cast(map:get(propertiesMap,'/path/path2'),'string')))"
+                + " AND (cast(map:get(propertiesMap,'Location'),'string')=='Colombo'))))"
+                + " AS isEligible, resourceKey AS throttleKey, propertiesMap"
+                + "\nINSERT INTO EligibilityStream;\n"
+
+                + "\nFROM EligibilityStream[isEligible==true]#throttler:timeBatch(1000 s, 0)"
+                + "\nselect throttleKey, (count(messageID) >= 10000) as isThrottled,"
+                + " expiryTimeStamp group by throttleKey"
+                + "\nINSERT ALL EVENTS into ResultStream;\n"
+
+                + "\nfrom ResultStream#throttler:emitOnStateChange(throttleKey, isThrottled)" + "\nselect *"
+                + "\ninsert into GlobalThrottleStream;\n";
 
         return siddhiApp;
     }
