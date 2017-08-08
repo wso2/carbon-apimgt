@@ -110,7 +110,6 @@ public class APIStoreImplTestCase {
     private static final String STATUS_PUBLISHED = "PUBLISHED";
     private static final String UUID = "7a2298c4-c905-403f-8fac-38c73301631f";
     private static final String TIER = "gold";
-    private static final String ALTERNATIVE_TIER = "silver";
     private static final String APPLICATION_POLICY_LEVEL = "application";
     private static final String POLICY_NAME = "gold";
 
