@@ -149,6 +149,28 @@ public class ApplicationsApiServiceImplTestCase {
     }
 
     @Test
+    public void testApplicationsApplicationIdKeysGet() throws APIManagementException, NotFoundException {
+        TestUtil.printTestMethodName();
+        String applicationId = UUID.randomUUID().toString();
+
+        ApplicationsApiServiceImpl applicationsApiService = new ApplicationsApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+
+        List<OAuthApplicationInfo> oAuthApplicationInfoList = new ArrayList<>();
+
+        Mockito.when(apiStore.getApplicationKeys(applicationId)).thenReturn(oAuthApplicationInfoList);
+
+        Response response = applicationsApiService.applicationsApplicationIdKeysGet
+                (applicationId, contentType, getRequest());
+
+        Assert.assertEquals(200, response.getStatus());
+    }
+
+    @Test
     public void testApplicationsApplicationIdGenerateTokenPost() throws APIManagementException, NotFoundException {
         TestUtil.printTestMethodName();
         String applicationId = UUID.randomUUID().toString();
