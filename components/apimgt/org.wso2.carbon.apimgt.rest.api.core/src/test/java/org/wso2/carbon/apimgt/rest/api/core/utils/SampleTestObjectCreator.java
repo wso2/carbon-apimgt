@@ -344,7 +344,7 @@ public class SampleTestObjectCreator {
      *
      * @return BlockConditions object
      */
-    protected static BlockConditions createUniqueBlockConditions(String conditionType) {
+    public static BlockConditions createUniqueBlockConditions(String conditionType) {
         BlockConditions blockConditions = new BlockConditions();
         blockConditions.setUuid(UUID.randomUUID().toString());
         blockConditions.setConditionId(new Random().nextInt());
@@ -365,7 +365,7 @@ public class SampleTestObjectCreator {
      *
      * @return Application Object
      */
-    protected static Application createRandomApplication() {
+    public static Application createRandomApplication() {
         Application application = new Application(UUID.randomUUID().toString(), UUID.randomUUID().toString());
         application.setId(UUID.randomUUID().toString());
         application.setDescription("This is a test application");

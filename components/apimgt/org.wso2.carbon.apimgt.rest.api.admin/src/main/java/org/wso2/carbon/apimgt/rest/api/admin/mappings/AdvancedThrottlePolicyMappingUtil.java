@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Pipeline;
-import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.AdvancedThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.AdvancedThrottlePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ConditionalGroupDTO;
@@ -94,8 +93,11 @@ public class AdvancedThrottlePolicyMappingUtil {
      */
     public static AdvancedThrottlePolicyDTO fromAdvancedPolicyToDTO(APIPolicy policy)
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
+
         AdvancedThrottlePolicyDTO policyDTO = new AdvancedThrottlePolicyDTO();
+
         policyDTO = CommonThrottleMappingUtil.updateFieldsFromToPolicyToDTO(policy, policyDTO);
+
         List<ConditionalGroupDTO> groupDTOs = CommonThrottleMappingUtil
                 .fromPipelineListToConditionalGroupDTOList(policy.getPipelines());
         policyDTO.setConditionalGroups(groupDTOs);
@@ -116,6 +118,7 @@ public class AdvancedThrottlePolicyMappingUtil {
      */
     public static AdvancedThrottlePolicyDTO fromAdvancedPolicyToInfoDTO(APIPolicy apiPolicy)
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
+
         AdvancedThrottlePolicyDTO policyDTO = new AdvancedThrottlePolicyDTO();
         policyDTO = CommonThrottleMappingUtil.updateFieldsFromToPolicyToDTO(apiPolicy, policyDTO);
         if (apiPolicy.getDefaultQuotaPolicy() != null) {
