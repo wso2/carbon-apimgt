@@ -19,8 +19,8 @@
  */
 package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.junit.Assert;
+import org.junit.Test;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class ApplicationMappingUtilTestCase {
+
 
     @Test
     public void testFromApplicationsToDTO() {
