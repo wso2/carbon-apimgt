@@ -507,6 +507,11 @@
                 <version>${slf4j.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.powermock</groupId>
+                <artifactId>powermock-module-junit4</artifactId>
+                <version>${powermock.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.woden.wso2</groupId>
                 <artifactId>woden</artifactId>
                 <version>${apache.woden.version}</version>
@@ -796,8 +801,8 @@
 
         <antlr4.runtime.version>4.5.1.wso2v1</antlr4.runtime.version>
         <plugin.version.antlr>4.5.1</plugin.version.antlr>
-        <mockito.version>1.9.0</mockito.version>
-        <powermock.version>1.4.11</powermock.version>
+        <mockito.version>1.10.19</mockito.version>
+        <powermock.version>1.6.4</powermock.version>
         <geronimo.version>1.6</geronimo.version>
         <geronimo.stax.version>1.0.1</geronimo.stax.version>
         <javax.version>1.8.0_45</javax.version>
