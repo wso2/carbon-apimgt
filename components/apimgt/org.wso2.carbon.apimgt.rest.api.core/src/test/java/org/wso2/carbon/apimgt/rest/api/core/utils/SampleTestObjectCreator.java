@@ -382,7 +382,7 @@ public class SampleTestObjectCreator {
      *
      * @return APIBuilder with unique API details
      */
-    protected static API.APIBuilder createUniqueAPI() {
+    public static API.APIBuilder createUniqueAPI() {
         Set<String> transport = new HashSet<>();
         transport.add(HTTP);
 
