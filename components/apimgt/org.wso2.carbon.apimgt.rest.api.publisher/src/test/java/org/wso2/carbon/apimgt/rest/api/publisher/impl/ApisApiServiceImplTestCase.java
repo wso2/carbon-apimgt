@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -9,14 +10,18 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
+import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.APIPublisherImpl;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
+import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
 import org.wso2.carbon.apimgt.rest.api.common.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.publisher.common.SampleTestObjectCreator;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
@@ -29,7 +34,10 @@ import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.UUID;
 
 import static junit.framework.TestCase.assertEquals;
@@ -818,6 +826,608 @@ public class ApisApiServiceImplTestCase {
         assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
     }
 
+
+    @Test
+    public void testApisApiIdLifecycleHistoryGetAPINotExist() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Mockito.doReturn(false).doThrow(new IllegalArgumentException())
+                .when(apiPublisher).checkIfAPIExists(apiId);
+        Response response = apisApiService.apisApiIdLifecycleHistoryGet(apiId, null,
+                null, null, getRequest());
+        assertEquals(response.getStatus(), 404);
+        assertTrue(response.getEntity().toString().contains("API not found"));
+    }
+
+    @Test
+    public void testApisApiIdLifecycleHistoryGet() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        API api = SampleTestObjectCreator.createDefaultAPI().id(apiId).build();
+        Mockito.doReturn(true).doThrow(new IllegalArgumentException())
+                .when(apiPublisher).checkIfAPIExists(apiId);
+        Mockito.doReturn(api).doThrow(new IllegalArgumentException())
+                .when(apiPublisher).getAPIbyUUID(apiId);
+        Response response = apisApiService.apisApiIdLifecycleHistoryGet(apiId, null,
+                null, null, getRequest());
+        assertEquals(response.getStatus(), 200);
+    }
+
+    @Test
+    public void testApisApiIdLifecycleHistoryGetException() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
+                .when(apiPublisher).checkIfAPIExists(apiId);
+        Response response = apisApiService.apisApiIdLifecycleHistoryGet(apiId, null,
+                null, null, getRequest());
+        assertEquals(response.getStatus(), 400);
+        assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
+    }
+
+
+    @Test
+    public void testApisApiIdPut() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI();
+        API api = apiBuilder.id(apiId).build();
+        APIDTO apidto = MappingUtil.toAPIDto(api);
+        Mockito.doReturn(api).doThrow(new IllegalArgumentException())
+                .when(apiPublisher).getAPIbyUUID(apiId);
+        Mockito.doNothing().doThrow(new IllegalArgumentException())
+                .when(apiPublisher).updateAPI(apiBuilder);
+        Response response = apisApiService.apisApiIdPut(apiId, apidto, null,
+                null, null, getRequest());
+        assertEquals(response.getStatus(), 200);
+        assertTrue(response.getEntity().toString().contains(api.getId()));
+        assertTrue(response.getEntity().toString().contains(api.getName()));
+    }
+
+    @Test
+    public void testApisApiIdPutException() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI();
+        API api = apiBuilder.id(apiId).build();
+        APIDTO apidto = MappingUtil.toAPIDto(api);
+        Mockito.doNothing().doThrow(new IllegalArgumentException())
+                .when(apiPublisher).updateAPI(apiBuilder);
+        Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
+                .when(apiPublisher).getAPIbyUUID(apiId);
+        Response response = apisApiService.apisApiIdPut(apiId, apidto, null,
+                null, null, getRequest());
+        assertEquals(response.getStatus(), 400);
+        assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
+    }
+
+    @Test
+    public void testApisApiIdSwaggerGet() throws Exception {
+        printTestMethodName();
+        String swagger = "sample swagger";
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Mockito.doReturn(swagger).doThrow(new IllegalArgumentException())
+                .when(apiPublisher).getApiSwaggerDefinition(apiId);
+        Response response = apisApiService.apisApiIdSwaggerGet(apiId, null,
+                null, null, getRequest());
+        assertEquals(response.getStatus(), 200);
+        assertTrue(response.getEntity().toString().contains(swagger));
+    }
+
+    @Test
+    public void testApisApiIdSwaggerGetException() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
+                .when(apiPublisher).getApiSwaggerDefinition(apiId);
+        Response response = apisApiService.apisApiIdSwaggerGet(apiId, null,
+                null, null, getRequest());
+        assertEquals(response.getStatus(), 400);
+        assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
+    }
+
+    @Test
+    public void testApisApiIdSwaggerPut() throws Exception {
+        printTestMethodName();
+        String swagger = "sample swagger";
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Mockito.doNothing().doThrow(new IllegalArgumentException())
+                .when(apiPublisher).saveSwagger20Definition(apiId, swagger);
+        Mockito.doReturn(swagger).doThrow(new IllegalArgumentException())
+                .when(apiPublisher).getApiSwaggerDefinition(apiId);
+        Response response = apisApiService.apisApiIdSwaggerPut(apiId, swagger, null,
+                null, null, getRequest());
+        assertEquals(response.getStatus(), 200);
+        assertTrue(response.getEntity().toString().contains(swagger));
+    }
+
+    @Test
+    public void testApisApiIdSwaggerPutException() throws Exception {
+        printTestMethodName();
+        String swagger = "sample swagger";
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Mockito.doNothing().doThrow(new IllegalArgumentException())
+                .when(apiPublisher).saveSwagger20Definition(apiId, swagger);
+        Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
+                .when(apiPublisher).getApiSwaggerDefinition(apiId);
+        Response response = apisApiService.apisApiIdSwaggerGet(apiId, null,
+                null, null, getRequest());
+        assertEquals(response.getStatus(), 400);
+        assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
+    }
+
+
+    @Test
+    public void testApisApiIdThumbnailGet() throws Exception {
+        printTestMethodName();
+        ClassLoader classLoader = getClass().getClassLoader();
+        File file = new File(classLoader.getResource("api1_thumbnail.png").getFile());
+        FileInputStream fis = null;
+        fis = new FileInputStream(file);
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Mockito.doReturn(fis).doThrow(new IllegalArgumentException())
+                .when(apiPublisher).getThumbnailImage(apiId);
+        Response response = apisApiService.apisApiIdThumbnailGet(apiId, null,
+                null, null, getRequest());
+        fis.close();
+        assertEquals(response.getStatus(), 200);
+        assertTrue(response.getStringHeaders().get("Content-Disposition").toString().contains("filename"));
+    }
+
+
+    @Test
+    public void testApisApiIdThumbnailGetException() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
+                .when(apiPublisher).getThumbnailImage(apiId);
+        Response response = apisApiService.apisApiIdThumbnailGet(apiId, null,
+                null, null, getRequest());
+        assertEquals(response.getStatus(), 400);
+        assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
+    }
+
+    @Test
+    public void testApisApiIdThumbnailPost() throws Exception {
+        printTestMethodName();
+        ClassLoader classLoader = getClass().getClassLoader();
+        File file = new File(classLoader.getResource("api1_thumbnail.png").getFile());
+        FileInputStream fis = null;
+        fis = new FileInputStream(file);
+        FileInfo fileDetail = new FileInfo();
+        fileDetail.setFileName("test.png");
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Mockito.doNothing().doThrow(new IllegalArgumentException())
+                .when(apiPublisher).saveThumbnailImage(apiId, fis, fileDetail.getFileName());
+        Response response = apisApiService.apisApiIdThumbnailPost(apiId, fis, fileDetail, null,
+                null, null, getRequest());
+        fis.close();
+        assertEquals(response.getStatus(), 201);
+        assertTrue(response.getEntity().toString().contains("application/octet-strea"));
+    }
+
+
+    @Test
+    public void testApisApiIdThumbnailPostException() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        FileInfo fileDetail = new FileInfo();
+        fileDetail.setFileName("test.png");
+        Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
+                .when(apiPublisher).saveThumbnailImage(apiId, null, fileDetail.getFileName());
+        Response response = apisApiService.apisApiIdThumbnailPost(apiId, null, fileDetail, null,
+                null, null, getRequest());
+        assertEquals(response.getStatus(), 400);
+        assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
+    }
+
+
+    @Test
+    public void testApisChangeLifecyclePostWithChecklistItemChange() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        String checklist = "test1:test1,test2:test2";
+        String action = "CheckListItemChange";
+        WorkflowResponse workflowResponse = new GeneralWorkflowResponse();
+        workflowResponse.setWorkflowStatus(WorkflowStatus.APPROVED);
+
+        Map<String, Boolean> lifecycleChecklistMap = new HashMap<>();
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Mockito.doNothing().doThrow(new IllegalArgumentException())
+                .when(apiPublisher).updateCheckListItem(apiId, action, lifecycleChecklistMap);
+        Response response = apisApiService.apisChangeLifecyclePost(action, apiId, checklist,
+                            null, null, getRequest());
+        assertEquals(response.getStatus(), 200);
+        assertTrue(response.getEntity().toString().contains("APPROVED"));
+    }
+
+    @Test
+    public void testApisChangeLifecyclePostWithoutChecklistItemNonChange() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        String checklist = "test1:test1,test2:test2";
+        String action = "CheckListItemChangeDifferent";
+        Map<String, Boolean> lifecycleChecklistMap = new HashMap<>();
+        if (checklist != null) {
+            String[] checkList = checklist.split(",");
+            for (String checkList1 : checkList) {
+                StringTokenizer attributeTokens = new StringTokenizer(checkList1, ":");
+                String attributeName = attributeTokens.nextToken();
+                Boolean attributeValue = Boolean.valueOf(attributeTokens.nextToken());
+                lifecycleChecklistMap.put(attributeName, attributeValue);
+            }
+        }
+
+        WorkflowResponse workflowResponse = new GeneralWorkflowResponse();
+        workflowResponse.setWorkflowStatus(WorkflowStatus.CREATED);
+
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Mockito.doReturn(workflowResponse).doThrow(new IllegalArgumentException())
+                .when(apiPublisher).updateAPIStatus(apiId, action, lifecycleChecklistMap);
+        Response response = apisApiService.apisChangeLifecyclePost(action, apiId, checklist,
+                null, null, getRequest());
+        assertEquals(response.getStatus(), 202);
+        assertTrue(response.getEntity().toString().contains("CREATED"));
+    }
+
+    @Test
+    public void testApisChangeLifecyclePostException() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        String action = "CheckListItemChange";
+        WorkflowResponse workflowResponse = new GeneralWorkflowResponse();
+        workflowResponse.setWorkflowStatus(WorkflowStatus.APPROVED);
+
+        Map<String, Boolean> lifecycleChecklistMap = new HashMap<>();
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
+                .when(apiPublisher).updateCheckListItem(apiId, action, lifecycleChecklistMap);
+        Response response = apisApiService.apisChangeLifecyclePost(action, apiId, null,
+                null, null, getRequest());
+        assertEquals(response.getStatus(), 400);
+        assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
+    }
+
+    @Test
+    public void testApisCopyApiPost() throws Exception {
+        printTestMethodName();
+        String newVersion = "1.0.0";
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        String newAPIId = UUID.randomUUID().toString();
+        API newAPI = SampleTestObjectCreator.createDefaultAPI().id(newAPIId).build();
+        Mockito.doReturn(newAPIId).doThrow(new IllegalArgumentException())
+                .when(apiPublisher).createNewAPIVersion(apiId, newVersion);
+        Mockito.doReturn(newAPI).doThrow(new IllegalArgumentException())
+                .when(apiPublisher).getAPIbyUUID(newAPIId);
+        Response response = apisApiService.apisCopyApiPost(newVersion, apiId, getRequest());
+        assertEquals(response.getStatus(), 201);
+        assertTrue(response.getEntity().toString().contains(newAPIId));
+    }
+
+
+    @Test
+    public void testApisCopyApiPostException() throws Exception {
+        printTestMethodName();
+        String newVersion = "1.0.0";
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        String newAPIId = UUID.randomUUID().toString();
+        Mockito.doReturn(newAPIId).doThrow(new IllegalArgumentException())
+                .when(apiPublisher).createNewAPIVersion(apiId, newVersion);
+        Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
+                .when(apiPublisher).getAPIbyUUID(newAPIId);
+        Response response = apisApiService.apisCopyApiPost(newVersion, apiId, getRequest());
+        assertEquals(response.getStatus(), 400);
+        assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
+    }
+
+    @Test
+    public void testApisGet() throws Exception {
+        printTestMethodName();
+        List<API> apis = new ArrayList<>();
+        apis.add(SampleTestObjectCreator.createDefaultAPI().name("newAPI1").build());
+        apis.add(SampleTestObjectCreator.createDefaultAPI().name("newAPI2").build());
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Mockito.doReturn(apis).doThrow(new IllegalArgumentException())
+                .when(apiPublisher).searchAPIs(10, 0, "");
+        Response response = apisApiService.apisGet(10, 0, "", null, null, getRequest());
+        assertEquals(response.getStatus(), 200);
+        assertTrue(response.getEntity().toString().contains("newAPI1"));
+        assertTrue(response.getEntity().toString().contains("newAPI2"));
+    }
+
+
+    @Test
+    public void testApisGetException() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
+                .when(apiPublisher).searchAPIs(10, 0, "");
+        Response response = apisApiService.apisGet(10, 0, "", null, null, getRequest());
+        assertEquals(response.getStatus(), 400);
+        assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
+    }
+
+
+    @Test
+    public void testApisHeadNameMatch() throws Exception {
+        printTestMethodName();
+        String word = "name:testName";
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Mockito.doReturn(true).doThrow(new IllegalArgumentException())
+                .when(apiPublisher).checkIfAPINameExists("testName");
+        Response response = apisApiService.apisHead(word, null, null, getRequest());
+        assertEquals(response.getStatus(), 200);
+    }
+
+
+    @Test
+    public void testApisHeadContextMatch() throws Exception {
+        printTestMethodName();
+        String word = "context:testContext";
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Mockito.doReturn(true).doThrow(new IllegalArgumentException())
+                .when(apiPublisher).checkIfAPIContextExists("testContext");
+        Response response = apisApiService.apisHead(word, null, null, getRequest());
+        assertEquals(response.getStatus(), 200);
+    }
+
+    @Test
+    public void testApisHeadNoWord() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Mockito.doReturn(true).doThrow(new IllegalArgumentException())
+                .when(apiPublisher).checkIfAPIContextExists("testContext");
+        Response response = apisApiService.apisHead("", null, null, getRequest());
+        assertEquals(response.getStatus(), 400);
+    }
+
+    @Test
+    public void testApisHeadNotFound() throws Exception {
+        printTestMethodName();
+        String word = "abc:testContext";
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Mockito.doReturn(true).doThrow(new IllegalArgumentException())
+                .when(apiPublisher).checkIfAPIContextExists("testContext");
+        Response response = apisApiService.apisHead(word, null, null, getRequest());
+        assertEquals(response.getStatus(), 404);
+    }
+
+    @Test
+    public void testApisHeadException() throws Exception {
+        printTestMethodName();
+        String word = "context:testContext";
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
+                .when(apiPublisher).checkIfAPIContextExists("testContext");
+        Response response = apisApiService.apisHead(word, null, null, getRequest());
+        assertEquals(response.getStatus(), 400);
+        assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
+    }
+
+    @Test
+    public void testApisImportDefinitionPostNonEmpty() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        ClassLoader classLoader = getClass().getClassLoader();
+        File file = new File(classLoader.getResource("swagger.json").getFile());
+        FileInputStream fis = null;
+        fis = new FileInputStream(file);
+
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Response response = apisApiService.apisImportDefinitionPost(null, fis, null, "test", null, null, getRequest());
+        fis.close();
+        assertEquals(response.getStatus(), 400);
+        assertTrue(response.getEntity().toString().contains("Only one of 'file' and 'url' should be specified"));
+    }
+
+
+    @Test
+    public void testApisImportDefinitionPostByFile() throws Exception {
+
+        ClassLoader classLoader = getClass().getClassLoader();
+        File file = new File(classLoader.getResource("swagger.json").getFile());
+        FileInputStream fis = null;
+        fis = new FileInputStream(file);
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        String apiId = UUID.randomUUID().toString();
+        API api = SampleTestObjectCreator.createDefaultAPI().id(apiId).build();
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Mockito.doReturn(apiId).doThrow(new IllegalArgumentException()).when(apiPublisher).
+                addApiFromDefinition(fis);
+        Mockito.doReturn(api).doThrow(new IllegalArgumentException()).when(apiPublisher).
+                getAPIbyUUID(apiId);
+        Response response = apisApiService.
+                apisImportDefinitionPost(null, fis, null, null, null, null, getRequest());
+        fis.close();
+        assertEquals(response.getStatus(), 201);
+        assertTrue(response.getEntity().toString().contains(apiId));
+    }
+
+    @Test
+    public void testApisImportDefinitionPostException() throws Exception {
+        ClassLoader classLoader = getClass().getClassLoader();
+        File file = new File(classLoader.getResource("swagger.json").getFile());
+        FileInputStream fis = null;
+        fis = new FileInputStream(file);
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
+                            .when(apiPublisher).addApiFromDefinition(fis);
+        Response response = apisApiService.
+                apisImportDefinitionPost(null, fis, null, null, null, null, getRequest());
+        fis.close();
+        assertEquals(response.getStatus(), 400);
+        assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
+    }
+
+    @Test
+    public void testApisPost() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI();
+        API api = apiBuilder.id(apiId).build();
+        APIDTO apidto = MappingUtil.toAPIDto(api);
+        Mockito.doReturn(apiId).doThrow(new IllegalArgumentException())
+                .when(apiPublisher).addAPI(apiBuilder);
+        Mockito.doReturn(api).doThrow(new IllegalArgumentException())
+                .when(apiPublisher).getAPIbyUUID(apiId);
+        Response response = apisApiService.apisPost(apidto, null, getRequest());
+        assertEquals(response.getStatus(), 201);
+        assertTrue(response.getEntity().toString().contains(api.getId()));
+        assertTrue(response.getEntity().toString().contains(api.getName()));
+    }
+
+    @Test
+    public void testApisPostException() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI();
+        API api = apiBuilder.id(apiId).build();
+        APIDTO apidto = MappingUtil.toAPIDto(api);
+        Mockito.doReturn(apiId).doThrow(new IllegalArgumentException())
+                .when(apiPublisher).addAPI(apiBuilder);
+        Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
+                .when(apiPublisher).getAPIbyUUID(apiId);
+        Response response = apisApiService.apisPost(apidto, null, getRequest());
+        assertEquals(response.getStatus(), 400);
+        assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
+    }
 
     // Sample request to be used by tests
     private Request getRequest() throws Exception {
