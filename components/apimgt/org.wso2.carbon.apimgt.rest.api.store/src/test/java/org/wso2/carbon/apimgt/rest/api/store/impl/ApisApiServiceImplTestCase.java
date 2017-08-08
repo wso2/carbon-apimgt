@@ -157,44 +157,6 @@ public class ApisApiServiceImplTestCase {
     }
 
     @Test
-    public void testApisApiIdCommentsPost() throws APIManagementException, NotFoundException {
-        printTestMethodName();
-        String apiId = UUID.randomUUID().toString();
-        String commentId = UUID.randomUUID().toString();
-        String newCommentID = UUID.randomUUID().toString();
-
-        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
-        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
-
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
-
-        CommentDTO commentDTO = new CommentDTO();
-        commentDTO.setCommentId(commentId);
-        commentDTO.setApiId(apiId);
-        commentDTO.setCommentText("comment text");
-        commentDTO.setCreatedBy("creater");
-        commentDTO.setLastUpdatedBy("updater");
-
-        Comment comment = new Comment();
-        comment.setUuid(newCommentID);
-        comment.setCommentedUser("commentedUser");
-        comment.setCommentText("this is a comment");
-        comment.setCreatedUser("createdUser");
-        comment.setUpdatedUser("updatedUser");
-        comment.setCreatedTime(LocalDateTime.now().minusHours(1));
-        comment.setUpdatedTime(LocalDateTime.now());
-
-        Mockito.when(apiStore.addComment(comment, apiId)).thenReturn(newCommentID);
-        Mockito.when(apiStore.getCommentByUUID(newCommentID, apiId)).thenReturn(comment);
-
-        Response response = apisApiService.apisApiIdCommentsPost(apiId, commentDTO, contentType, getRequest());
-
-        Assert.assertEquals(201, response.getStatus());
-    }
-
-    @Test
     public void testApisApiIdCommentsCommentIdPut() throws APIManagementException, NotFoundException {
         printTestMethodName();
         String apiId = UUID.randomUUID().toString();
@@ -471,52 +433,6 @@ public class ApisApiServiceImplTestCase {
         Response response = apisApiService.apisApiIdUserRatingPut(apiId, ratingDTO, contentType, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
-    }
-
-    @Test
-    public void testApisApiIdUserRatingPutWhenNew() throws APIManagementException, NotFoundException {
-        printTestMethodName();
-        String apiId = UUID.randomUUID().toString();
-        String rateId = UUID.randomUUID().toString();
-
-        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
-        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
-
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
-
-        Rating rating = new Rating();
-        rating.setApiId(apiId);
-        rating.setRating(5);
-        rating.setUsername(USER);
-        rating.setUuid(rateId);
-        rating.setCreatedUser(USER);
-        rating.setCreatedTime(LocalDateTime.now().minusHours(2));
-        rating.setLastUpdatedUser(USER);
-        rating.setLastUpdatedTime(LocalDateTime.now());
-
-        RatingDTO ratingDTO = RatingMappingUtil.fromRatingToDTO(rating);
-
-        String newRatingID = UUID.randomUUID().toString();
-
-        Rating ratingNow = new Rating();
-        ratingNow.setApiId(apiId);
-        ratingNow.setRating(3);
-        ratingNow.setUsername(USER);
-        ratingNow.setUuid(newRatingID);
-        ratingNow.setCreatedUser(USER);
-        ratingNow.setCreatedTime(LocalDateTime.now().minusHours(2));
-        ratingNow.setLastUpdatedUser(USER);
-        ratingNow.setLastUpdatedTime(LocalDateTime.now());
-
-        Mockito.when(apiStore.getRatingForApiFromUser(apiId, USER)).thenReturn(null);
-        Mockito.when(apiStore.addRating(apiId, ratingNow)).thenReturn(newRatingID);
-        Mockito.when(apiStore.getRatingByUUID(apiId, newRatingID)).thenReturn(rating);
-
-        Response response = apisApiService.apisApiIdUserRatingPut(apiId, ratingDTO, contentType, getRequest());
-
-        Assert.assertEquals(201, response.getStatus());
     }
 
     @Test
