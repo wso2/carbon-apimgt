@@ -21,6 +21,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.common;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -264,6 +265,16 @@ public class SampleTestObjectCreator {
         builder.createdTime(LocalDateTime.now());
         builder.lastUpdatedTime(LocalDateTime.now());
         return builder;
+    }
+
+    public static Subscription createSubscription(String uuid) {
+        if(StringUtils.isEmpty(uuid)) {
+            uuid = UUID.randomUUID().toString();
+        }
+        Subscription subscription = new Subscription(uuid, createDefaultApplication(), createDefaultAPI().build(),
+                                                     goldApiPolicy);
+        subscription.setStatus(APIMgtConstants.SubscriptionStatus.ACTIVE);
+        return subscription;
     }
 
     public static Application createDefaultApplication() {
