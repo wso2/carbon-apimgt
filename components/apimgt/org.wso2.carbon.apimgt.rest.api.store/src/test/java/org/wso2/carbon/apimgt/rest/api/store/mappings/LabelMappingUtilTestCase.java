@@ -21,32 +21,37 @@ package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
+import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.User;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
+import org.wso2.carbon.apimgt.rest.api.store.common.SampleObjectCreator;
+import org.wso2.carbon.apimgt.rest.api.store.dto.LabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.UserDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.testng.Assert.assertEquals;
 
 public class LabelMappingUtilTestCase {
 
     @Test
-    public void testFromWorkflowResponseToDTO() {
-        WorkflowResponse workflowResponse = new GeneralWorkflowResponse();
-        workflowResponse.setWorkflowStatus(WorkflowStatus.APPROVED);
-        WorkflowResponseDTO workflowResponseDTO = MiscMappingUtil.fromWorkflowResponseToDTO(workflowResponse);
-        assertEquals(workflowResponseDTO.getWorkflowStatus().name(), workflowResponse.getWorkflowStatus().name());
-    }
+    public void testToLabelListDTO() {
+        List<Label> labelList = new ArrayList<>();
+        Label label1 = SampleObjectCreator.createLabel("label1").build();
+        Label label2 = SampleObjectCreator.createLabel("label2").build();
+        labelList.add(label1);
+        labelList.add(label2);
+        LabelListDTO labelListDTO = LabelMappingUtil.toLabelListDTO(labelList);
+        assertEquals(labelListDTO.getCount(), (Integer)labelList.size());
+        assertEquals(labelListDTO.getList().get(0).getName(), label1.getName());
+        assertEquals(labelListDTO.getList().get(0).getAccessUrls(), label1.getAccessUrls());
+        assertEquals(labelListDTO.getList().get(0).getLabelId(), label1.getId());
+        assertEquals(labelListDTO.getList().get(1).getName(), label2.getName());
+        assertEquals(labelListDTO.getList().get(1).getAccessUrls(), label2.getAccessUrls());
+        assertEquals(labelListDTO.getList().get(1).getLabelId(), label2.getId());
 
-    @Test
-    public void testFromUserDTOToUser() {
-        UserDTO userDTO = new UserDTO().email("test@gmail.com").firstName("Test1").lastName("test2").password("dummy")
-                                        .username("myuser1");
-        User user = MiscMappingUtil.fromUserDTOToUser(userDTO);
-        assertEquals(userDTO.getEmail(), user.getEmail());
-        assertEquals(userDTO.getFirstName(), user.getFirstName());
-        assertEquals(userDTO.getLastName(), user.getLastName());
-        assertEquals(userDTO.getPassword(), new String(user.getPassword()));
-        assertEquals(userDTO.getUsername(), user.getUsername());
     }
 }

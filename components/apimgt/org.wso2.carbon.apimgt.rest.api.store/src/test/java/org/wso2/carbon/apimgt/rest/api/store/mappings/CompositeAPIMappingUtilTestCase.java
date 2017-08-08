@@ -21,33 +21,76 @@ package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
+import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.User;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
+import org.wso2.carbon.apimgt.rest.api.store.common.SampleObjectCreator;
+import org.wso2.carbon.apimgt.rest.api.store.dto.CompositeAPIDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.CompositeAPIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.UserDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static org.testng.Assert.assertEquals;
 
 public class CompositeAPIMappingUtilTestCase {
 
     @Test
-    public void testFromWorkflowResponseToDTO() {
-        WorkflowResponse workflowResponse = new GeneralWorkflowResponse();
-        workflowResponse.setWorkflowStatus(WorkflowStatus.APPROVED);
-        WorkflowResponseDTO workflowResponseDTO = MiscMappingUtil.fromWorkflowResponseToDTO(workflowResponse);
-        assertEquals(workflowResponseDTO.getWorkflowStatus().name(), workflowResponse.getWorkflowStatus().name());
+    public void testToCompositeAPIDTOAndViceVersa() {
+        Set<String> labels =  new HashSet<>();
+        labels.add("label1");
+        //Test compositeAPI to CompositeAPIDTO
+        CompositeAPI compositeAPI = SampleObjectCreator.createCompositeAPIModelBuilder().labels(labels).build();
+        CompositeAPIDTO compositeAPIDTO = CompositeAPIMappingUtil.toCompositeAPIDTO(compositeAPI);
+        assertEquals(compositeAPI.getId(), compositeAPIDTO.getId());
+        assertEquals(compositeAPI.getName(), compositeAPIDTO.getName());
+        assertEquals(compositeAPI.getProvider(), compositeAPIDTO.getProvider());
+        assertEquals(compositeAPI.getVersion(), compositeAPIDTO.getVersion());
+        assertEquals(compositeAPI.getContext(), compositeAPIDTO.getContext());
+        assertEquals(compositeAPI.getDescription(), compositeAPIDTO.getDescription());
+        assertEquals(compositeAPI.getLabels().size(), compositeAPIDTO.getLabels().size());
+        assertEquals(compositeAPI.getApplicationId(), compositeAPIDTO.getApplicationId());
+
+        //Test CompositeAPIDTO to compositeAPI
+        CompositeAPI compositeAPIGenerated = CompositeAPIMappingUtil.toAPI(compositeAPIDTO).build();
+        assertEquals(compositeAPIGenerated.getId(), compositeAPIDTO.getId());
+        assertEquals(compositeAPIGenerated.getName(), compositeAPIDTO.getName());
+        assertEquals(compositeAPIGenerated.getProvider(), compositeAPIDTO.getProvider());
+        assertEquals(compositeAPIGenerated.getVersion(), compositeAPIDTO.getVersion());
+        assertEquals(compositeAPIGenerated.getContext(), compositeAPIDTO.getContext());
+        assertEquals(compositeAPIGenerated.getDescription(), compositeAPIDTO.getDescription());
+        assertEquals(compositeAPIGenerated.getLabels().size(), compositeAPIDTO.getLabels().size());
+        assertEquals(compositeAPIGenerated.getApplicationId(), compositeAPIDTO.getApplicationId());
     }
 
     @Test
-    public void testFromUserDTOToUser() {
-        UserDTO userDTO = new UserDTO().email("test@gmail.com").firstName("Test1").lastName("test2").password("dummy")
-                                        .username("myuser1");
-        User user = MiscMappingUtil.fromUserDTOToUser(userDTO);
-        assertEquals(userDTO.getEmail(), user.getEmail());
-        assertEquals(userDTO.getFirstName(), user.getFirstName());
-        assertEquals(userDTO.getLastName(), user.getLastName());
-        assertEquals(userDTO.getPassword(), new String(user.getPassword()));
-        assertEquals(userDTO.getUsername(), user.getUsername());
+    public void testToCompositeAPIListDTO() {
+        List<CompositeAPI> apisResult = new ArrayList<>();
+        CompositeAPI comp1 = SampleObjectCreator.createCompositeAPIModelBuilder().name("newComp1").build();
+        CompositeAPI comp2 = SampleObjectCreator.createCompositeAPIModelBuilder().name("newComp2").build();
+        apisResult.add(comp1);
+        apisResult.add(comp2);
+        CompositeAPIListDTO compositeAPIListDTO = CompositeAPIMappingUtil.toCompositeAPIListDTO(apisResult);
+        assertEquals(compositeAPIListDTO.getCount(), (Integer) apisResult.size());
+        assertEquals(comp1.getId(), compositeAPIListDTO.getList().get(0).getId());
+        assertEquals(comp1.getName(), compositeAPIListDTO.getList().get(0).getName());
+        assertEquals(comp1.getProvider(), compositeAPIListDTO.getList().get(0).getProvider());
+        assertEquals(comp1.getVersion(), compositeAPIListDTO.getList().get(0).getVersion());
+        assertEquals(comp1.getContext(), compositeAPIListDTO.getList().get(0).getContext());
+        assertEquals(comp1.getDescription(), compositeAPIListDTO.getList().get(0).getDescription());
+        assertEquals(comp1.getApplicationId(), compositeAPIListDTO.getList().get(0).getApplicationId());
+
+        assertEquals(comp2.getId(), compositeAPIListDTO.getList().get(1).getId());
+        assertEquals(comp2.getName(), compositeAPIListDTO.getList().get(1).getName());
+        assertEquals(comp2.getProvider(), compositeAPIListDTO.getList().get(1).getProvider());
+        assertEquals(comp2.getVersion(), compositeAPIListDTO.getList().get(1).getVersion());
+        assertEquals(comp2.getContext(), compositeAPIListDTO.getList().get(1).getContext());
+        assertEquals(comp2.getDescription(), compositeAPIListDTO.getList().get(1).getDescription());
+        assertEquals(comp2.getApplicationId(), compositeAPIListDTO.getList().get(1).getApplicationId());
     }
 }
