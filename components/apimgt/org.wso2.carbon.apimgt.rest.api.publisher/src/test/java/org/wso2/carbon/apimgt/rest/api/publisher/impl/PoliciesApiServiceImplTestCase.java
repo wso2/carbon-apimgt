@@ -91,6 +91,41 @@ public class PoliciesApiServiceImplTestCase {
         assertTrue(response.getEntity().toString().contains("Throttle Policy level invalid"));
     }
 
+    @Test
+    public void testPoliciesTierLevelTierNameGet() throws Exception {
+        printTestMethodName();
+        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Policy gold = SampleTestObjectCreator.goldSubscriptionPolicy;
+        Mockito.doReturn(gold).doThrow(new IllegalArgumentException())
+                .when(apiPublisher).getPolicyByName(
+                RestApiUtil.mapRestApiPolicyLevelToPolicyLevelEnum("subscription"), "Gold");
+        Response response = policiesApiService.
+                policiesTierLevelTierNameGet("Gold", "subscription", null, null, null, getRequest());
+        assertEquals(response.getStatus(), 200);
+        assertTrue(response.getEntity().toString().contains("Gold"));
+    }
+
+    @Test
+    public void testPoliciesTierLevelTierNameGetException() throws Exception {
+        printTestMethodName();
+        PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Mockito.doThrow(new LabelException("Error occurred", ExceptionCodes.POLICY_LEVEL_NOT_SUPPORTED))
+                .when(apiPublisher).getPolicyByName(
+                RestApiUtil.mapRestApiPolicyLevelToPolicyLevelEnum("subscription"), "Gold");
+        Response response = policiesApiService.
+                policiesTierLevelTierNameGet("Gold", "subscription", null, null, null, getRequest());
+        assertEquals(response.getStatus(), 400);
+        assertTrue(response.getEntity().toString().contains("Throttle Policy level invalid"));
+    }
+
     // Sample request to be used by tests
     private Request getRequest() throws Exception {
         CarbonMessage carbonMessage = Mockito.mock(CarbonMessage.class);
