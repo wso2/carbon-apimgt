@@ -49,7 +49,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
     @Override
     public Response endpointsEndpointIdDelete(String endpointId, String ifMatch, String ifUnmodifiedSince,
             Request request) throws NotFoundException {
-        String username = "";
+        String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String existingFingerprint = endpointsEndpointIdGetFingerprint(endpointId, null, null,
@@ -85,7 +85,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
     @Override
     public Response endpointsEndpointIdGet(String endpointId, String ifNoneMatch, String ifModifiedSince,
             Request request) throws NotFoundException {
-        String username = "";
+        String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             Endpoint endPoint = apiPublisher.getEndpoint(endpointId);
@@ -160,7 +160,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
     @Override
     public Response endpointsEndpointIdPut(String endpointId, EndPointDTO body, String ifMatch,
             String ifUnmodifiedSince, Request request) throws NotFoundException {
-        String username = "";
+        String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             Endpoint endpoint = MappingUtil.toEndpoint(body);
@@ -214,7 +214,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
     @Override
     public Response endpointsGet(String ifNoneMatch, String ifModifiedSince, Request request)
             throws NotFoundException {
-        String username = "";
+        String username = RestApiUtil.getLoggedInUsername();
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             List<Endpoint> endpointList = apiPublisher.getAllEndpoints();
@@ -270,7 +270,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
     @Override
     public Response endpointsPost(EndPointDTO body, String ifNoneMatch, String ifModifiedSince,
             Request request) throws NotFoundException {
-        String username = "";
+        String username = RestApiUtil.getLoggedInUsername();;
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             Endpoint endpoint = MappingUtil.toEndpoint(body);

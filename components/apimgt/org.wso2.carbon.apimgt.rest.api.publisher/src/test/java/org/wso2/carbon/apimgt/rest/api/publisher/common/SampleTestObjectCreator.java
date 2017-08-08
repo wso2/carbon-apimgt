@@ -244,6 +244,12 @@ public class SampleTestObjectCreator {
                 .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).type("http").build();
     }
 
+    public static Endpoint.Builder createMockEndpointBuilder() {
+        return new Endpoint.Builder().endpointConfig("{'type':'http','url':'http://localhost:8280'}").id(endpointId)
+                .maxTps(1000L).security("{\"enabled\":false}").name("Endpoint1")
+                .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).type("http");
+    }
+
     public static DocumentInfo.Builder createDefaultDocumentationInfo() {
         //created by admin
         DocumentInfo.Builder builder = new DocumentInfo.Builder();
