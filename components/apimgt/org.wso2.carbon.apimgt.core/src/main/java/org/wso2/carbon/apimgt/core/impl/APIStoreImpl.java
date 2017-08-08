@@ -128,21 +128,21 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     /**
      * Constructor.
      *
-     * @param username   Logged in user's username
-     * @param apiDAO  API Data Access Object
-     * @param applicationDAO  Application Data Access Object
-     * @param apiSubscriptionDAO   API Subscription Data Access Object
-     * @param policyDAO Policy Data Access Object
-     * @param tagDAO Tag Data Access Object
-     * @param labelDAO Label Data Access Object
-     * @param workflowDAO WorkFlow Data Access Object
+     * @param username               Logged in user's username
+     * @param apiDAO                 API Data Access Object
+     * @param applicationDAO         Application Data Access Object
+     * @param apiSubscriptionDAO     API Subscription Data Access Object
+     * @param policyDAO              Policy Data Access Object
+     * @param tagDAO                 Tag Data Access Object
+     * @param labelDAO               Label Data Access Object
+     * @param workflowDAO            WorkFlow Data Access Object
      * @param gatewaySourceGenerator GatewaySourceGenerator object
-     * @param apiGateway APIGateway object
+     * @param apiGateway             APIGateway object
      */
     public APIStoreImpl(String username, IdentityProvider idp, ApiDAO apiDAO, ApplicationDAO applicationDAO,
                         APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, TagDAO tagDAO, LabelDAO labelDAO,
-            WorkflowDAO workflowDAO, GatewaySourceGenerator gatewaySourceGenerator,
-            APIGateway apiGateway) {
+                        WorkflowDAO workflowDAO, GatewaySourceGenerator gatewaySourceGenerator,
+                        APIGateway apiGateway) {
         super(username, idp, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, new APILifeCycleManagerImpl(),
                 labelDAO, workflowDAO, tagDAO, gatewaySourceGenerator, apiGateway);
     }
@@ -548,7 +548,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 workflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
                 workflow.setStatus(WorkflowStatus.CREATED);
                 workflow.setCreatedTime(LocalDateTime.now());
-                workflow.setExternalWorkflowReference(UUID.randomUUID().toString());        
+                workflow.setExternalWorkflowReference(UUID.randomUUID().toString());
                 workflow.setSubscriber(getUsername());
 
                 String workflowDescription = "Subscription deletion workflow for the subscription to api "
@@ -557,10 +557,10 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                         + subscription.getApplication().getName() + " with tier " + subscription.getPolicy()
                         + " by " + getUsername();
                 workflow.setWorkflowDescription(workflowDescription);
-                
+
                 WorkflowResponse response = removeSubscriptionWFExecutor.execute(workflow);
                 workflow.setStatus(response.getWorkflowStatus());
-                
+
 
                 if (WorkflowStatus.CREATED != response.getWorkflowStatus()) {
                     completeWorkflow(removeSubscriptionWFExecutor, workflow);
@@ -650,7 +650,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
      *
      * @param apiId UUID of the api
      * @throws APIMgtResourceNotFoundException if API does not exist
-     * @throws APIMgtDAOException if error occurred while accessing data layer
+     * @throws APIMgtDAOException              if error occurred while accessing data layer
      */
     public void checkIfApiExists(String apiId) throws APIMgtResourceNotFoundException, APIMgtDAOException {
         ApiDAO apiDAO = getApiDAO();
@@ -782,7 +782,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         log.error(errorMsg);
         throw new APICommentException(errorMsg, ExceptionCodes.COMMENT_LENGTH_EXCEEDED);
     }
-
 
 
     @Override
@@ -995,7 +994,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         try {
             appId = apiBuilder.getApplicationId();
             List<Subscription> subscriptions = getApiSubscriptionDAO().getAPISubscriptionsByApplication(
-                                                                       apiBuilder.getApplicationId(), ApiType.STANDARD);
+                    apiBuilder.getApplicationId(), ApiType.STANDARD);
             for (Subscription subscription : subscriptions) {
                 CompositeAPIEndpointDTO endpointDTO = new CompositeAPIEndpointDTO();
                 API api = subscription.getApi();
@@ -1004,7 +1003,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 endpointDTO.setTransportType(APIMgtConstants.HTTPS);
                 // TODO: replace host with gateway domain host
                 String endpointUrl = APIMgtConstants.HTTPS + "://" + config.getHostname() + "/" + api.getContext()
-                                     + "/" + api.getVersion();
+                        + "/" + api.getVersion();
                 endpointDTO.setEndpointUrl(endpointUrl);
                 endpointDTOs.add(endpointDTO);
             }
@@ -1088,7 +1087,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 throw new APIManagementException(errorMsg, e, e.getErrorHandler());
             } catch (IOException e) {
                 String errorMsg = "Error occurred while reading gateway configuration the API - " +
-                                        apiBuilder.getName();
+                        apiBuilder.getName();
                 log.error(errorMsg, e);
                 throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
             }
@@ -1367,7 +1366,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             if (application == null) {
                 String message = "Application cannot be found for id :" + appId;
                 throw new APIManagementException(message, ExceptionCodes.APPLICATION_NOT_FOUND);
-            }           
+            }
             //delete application creation pending tasks
             cleanupPendingTaskForApplicationDeletion(application);
             WorkflowExecutor removeApplicationWFExecutor = WorkflowExecutorFactory.getInstance().
@@ -1412,7 +1411,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         // get subscriptions with pending status
         List<Subscription> pendingSubscriptions = getApiSubscriptionDAO()
                 .getPendingAPISubscriptionsByApplication(appId);
-  
+
         String applicationStatus = application.getStatus();
 
         if (pendingSubscriptions == null || pendingSubscriptions.isEmpty()) {
@@ -1426,7 +1425,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
             // this means there are pending subscriptions. It also implies that there cannot be pending application
             // approvals (cannot subscribe to a pending application)
-            for (Iterator iterator = pendingSubscriptions.iterator(); iterator.hasNext();) {
+            for (Iterator iterator = pendingSubscriptions.iterator(); iterator.hasNext(); ) {
                 Subscription pendingSubscription = (Subscription) iterator.next();
 
                 // delete pending tasks for subscripton creation if any
@@ -1435,9 +1434,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             }
         }
         //delete pending tasks for application update if any
-        cleanupPendingTask(updateApplicationWFExecutor, appId, WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);        
+        cleanupPendingTask(updateApplicationWFExecutor, appId, WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);
     }
-    
+
     private void cleanupPendingTaskForSubscriptionDeletion(Subscription subscription) throws APIManagementException {
         WorkflowExecutor createSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance()
                 .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
