@@ -76,7 +76,7 @@ public class ApisApiServiceImplTestCase {
 
         Response response = apisApiService.apisApiIdGatewayConfigGet(apiID, null, getRequest());
 
-        Assert.assertEquals(response.getStatus(), 200);
+        Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
     }
 
     @Test
@@ -97,7 +97,7 @@ public class ApisApiServiceImplTestCase {
 
         Response response = apisApiService.apisApiIdGatewayConfigGet(apiID, null, getRequest());
 
-        Assert.assertEquals(response.getStatus(), 404);
+        Assert.assertEquals(response.getStatus(), Response.Status.NOT_FOUND.getStatusCode());
     }
 
     @Test
@@ -121,7 +121,7 @@ public class ApisApiServiceImplTestCase {
 
         Response response = apisApiService.apisApiIdGatewayConfigGet(apiID, null, getRequest());
 
-        Assert.assertEquals(response.getStatus(), 500);
+        Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
 
     @Test
@@ -146,7 +146,7 @@ public class ApisApiServiceImplTestCase {
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         Response response = apisApiService.apisGet(labels, "Published", getRequest());
 
-        Assert.assertEquals(response.getStatus(), 200);
+        Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
 
         Integer count = ((APIListDTO) response.getEntity()).getCount();
 
@@ -166,7 +166,7 @@ public class ApisApiServiceImplTestCase {
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         Response response = apisApiService.apisGet(labels, null, getRequest());
 
-        Assert.assertEquals(response.getStatus(), 200);
+        Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
     }
 
     @Test
@@ -182,7 +182,7 @@ public class ApisApiServiceImplTestCase {
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         Response response = apisApiService.apisGet(labels, "", getRequest());
 
-        Assert.assertEquals(response.getStatus(), 200);
+        Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
     }
 
     @Test
@@ -198,7 +198,7 @@ public class ApisApiServiceImplTestCase {
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         Response response = apisApiService.apisGet(labels, "Published", getRequest());
 
-        Assert.assertEquals(response.getStatus(), 200);
+        Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
     }
 
     @Test
@@ -214,7 +214,7 @@ public class ApisApiServiceImplTestCase {
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         Response response = apisApiService.apisGet(labels, "Published", getRequest());
 
-        Assert.assertEquals(response.getStatus(), 200);
+        Assert.assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
     }
 
     @Test
@@ -237,7 +237,7 @@ public class ApisApiServiceImplTestCase {
 
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         Response response = apisApiService.apisGet(labels, "Published", getRequest());
-        Assert.assertEquals(response.getStatus(), 500);
+        Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
 
     private Request getRequest() throws Exception {
