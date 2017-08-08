@@ -331,7 +331,7 @@ public class SampleTestObjectCreator {
      *
      * @return Endpoint object
      */
-    protected static Endpoint createUniqueEndpoint() {
+    public static Endpoint createUniqueEndpoint() {
         Endpoint endpoint = new Endpoint.Builder().id(UUID.randomUUID().toString()).name(UUID.randomUUID().toString()).
                 type(UUID.randomUUID().toString()).endpointConfig(UUID.randomUUID().toString()).
                 applicableLevel(UUID.randomUUID().toString()).security(UUID.randomUUID().toString()).
