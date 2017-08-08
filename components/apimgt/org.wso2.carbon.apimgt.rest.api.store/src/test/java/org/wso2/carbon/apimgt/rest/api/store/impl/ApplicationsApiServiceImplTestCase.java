@@ -44,7 +44,6 @@ import org.wso2.carbon.apimgt.rest.api.store.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyProvisionRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeysDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationTokenGenerateRequestDTO;
@@ -144,47 +143,7 @@ public class ApplicationsApiServiceImplTestCase {
         applicationKeyGenerateRequestDTO.setGrantTypesToBeSupported(grantTypes);
 
         Response response = applicationsApiService.applicationsApplicationIdGenerateKeysPost
-                (applicationId, applicationKeyGenerateRequestDTO, contentType, null, null,
-                        getRequest());
-
-        Assert.assertEquals(200, response.getStatus());
-    }
-
-    @Test
-    public void testPpplicationsApplicationIdProvideKeysPost() throws APIManagementException, NotFoundException {
-        TestUtil.printTestMethodName();
-        String applicationId = UUID.randomUUID().toString();
-
-        ApplicationsApiServiceImpl applicationsApiService = new ApplicationsApiServiceImpl();
-        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
-
-        PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
-
-        List<String> grantTypes = new ArrayList<>();
-        grantTypes.add("password");
-        grantTypes.add("jwt");
-
-        String clientID = UUID.randomUUID().toString();
-        String clientSecret = UUID.randomUUID().toString();
-
-        OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
-        oAuthApplicationInfo.setKeyType("PRODUCTION");
-        oAuthApplicationInfo.setClientId(clientID);
-        oAuthApplicationInfo.setClientSecret(clientSecret);
-        oAuthApplicationInfo.setGrantTypes(grantTypes);
-
-        Mockito.when(apiStore.provideApplicationKeys(applicationId, "PRODUCTION", clientID, clientSecret))
-                .thenReturn(oAuthApplicationInfo);
-
-        ApplicationKeyProvisionRequestDTO applicationKeyProvisionRequestDTO = new ApplicationKeyProvisionRequestDTO();
-        applicationKeyProvisionRequestDTO.setConsumerKey(clientID);
-        applicationKeyProvisionRequestDTO.setConsumerSecret(clientSecret);
-        applicationKeyProvisionRequestDTO.setKeyType(ApplicationKeyProvisionRequestDTO.KeyTypeEnum.PRODUCTION);
-
-        Response response = applicationsApiService.applicationsApplicationIdProvideKeysPost
-                (applicationId, applicationKeyProvisionRequestDTO, contentType, null, null, getRequest());
+                (applicationId, applicationKeyGenerateRequestDTO, contentType, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }
