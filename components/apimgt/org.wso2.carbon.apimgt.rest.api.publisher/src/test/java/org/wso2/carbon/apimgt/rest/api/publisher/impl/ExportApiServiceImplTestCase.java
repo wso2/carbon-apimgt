@@ -62,7 +62,7 @@ public class ExportApiServiceImplTestCase {
         PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
                 thenReturn(apiPublisher);
         Response response = exportApiService.
-                exportApisGet("", null, null, null, getRequest());
+                exportApisGet("", null, null, getRequest());
         assertEquals(response.getStatus(), 404);
     }
 

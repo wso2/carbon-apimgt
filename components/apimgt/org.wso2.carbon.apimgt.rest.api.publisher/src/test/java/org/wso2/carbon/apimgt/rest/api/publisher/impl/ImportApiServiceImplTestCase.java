@@ -61,7 +61,7 @@ public class ImportApiServiceImplTestCase {
         PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
                 thenReturn(apiPublisher);
         Response response = importApiService.
-                importApisPost(fis, null, null, null, getRequest());
+                importApisPost(fis, null, null, getRequest());
         assertEquals(response.getStatus(), 500);
         assertTrue(response.getEntity().toString().contains("Error while importing the given APIs"));
     }
@@ -79,7 +79,7 @@ public class ImportApiServiceImplTestCase {
         PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
                 thenReturn(apiPublisher);
         Response response = importApiService.
-                importApisPut(fis, null, null, null, getRequest());
+                importApisPut(fis, null, null, getRequest());
         assertEquals(response.getStatus(), 500);
         assertTrue(response.getEntity().toString().contains("Error while importing the given APIs"));
     }

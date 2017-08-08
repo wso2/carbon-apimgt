@@ -235,7 +235,7 @@ public class SubscriptionsApiServiceImplTestCase {
         Mockito.doReturn(subscriptions).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).getSubscriptionsByAPI(apiId);
         Response response = subscriptionsApiService.
-                subscriptionsGet(apiId, 10, 0, null, null, getRequest());
+                subscriptionsGet(apiId, 10, 0, null, getRequest());
         assertEquals(response.getStatus(), 200);
         assertTrue(response.getEntity().toString().contains(sub1));
         assertTrue(response.getEntity().toString().contains(sub2));
@@ -258,7 +258,7 @@ public class SubscriptionsApiServiceImplTestCase {
         Mockito.doReturn(subscriptions).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).getSubscriptionsByAPI(apiId);
         Response response = subscriptionsApiService.
-                subscriptionsGet(null, 10, 0, null, null, getRequest());
+                subscriptionsGet(null, 10, 0, null, getRequest());
     }
 
     @Test
@@ -278,7 +278,7 @@ public class SubscriptionsApiServiceImplTestCase {
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.SUBSCRIPTION_STATE_INVALID))
                 .when(apiPublisher).getSubscriptionsByAPI(apiId);
         Response response = subscriptionsApiService.
-                subscriptionsGet(apiId, 10, 0, null, null, getRequest());
+                subscriptionsGet(apiId, 10, 0, null, getRequest());
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("Invalid state change for subscription"));
     }
@@ -296,7 +296,7 @@ public class SubscriptionsApiServiceImplTestCase {
         Mockito.doReturn(subscription).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).getSubscriptionByUUID(sub1);
         Response response = subscriptionsApiService.
-                subscriptionsSubscriptionIdGet(sub1, null, null, null, getRequest());
+                subscriptionsSubscriptionIdGet(sub1, null, null, getRequest());
         assertEquals(response.getStatus(), 200);
         assertTrue(response.getEntity().toString().contains(sub1));
     }
@@ -313,7 +313,7 @@ public class SubscriptionsApiServiceImplTestCase {
         Mockito.doReturn(null).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).getSubscriptionByUUID(sub1);
         Response response = subscriptionsApiService.
-                subscriptionsSubscriptionIdGet(sub1, null, null, null, getRequest());
+                subscriptionsSubscriptionIdGet(sub1, null, null, getRequest());
         assertEquals(response.getStatus(), 404);
         assertTrue(response.getEntity().toString().contains("Subscription not found"));
     }
@@ -330,7 +330,7 @@ public class SubscriptionsApiServiceImplTestCase {
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.SUBSCRIPTION_STATE_INVALID))
                 .when(apiPublisher).getSubscriptionByUUID(sub1);
         Response response = subscriptionsApiService.
-                subscriptionsSubscriptionIdGet(sub1, null, null, null, getRequest());
+                subscriptionsSubscriptionIdGet(sub1, null, null, getRequest());
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("Invalid state change for subscription"));
     }

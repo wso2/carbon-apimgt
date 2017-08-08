@@ -67,7 +67,7 @@ public class EndpointsApiServiceImplTestCase {
         Mockito.doNothing().doThrow(new IllegalArgumentException())
                 .when(apiPublisher).deleteEndpoint(endpointId);
         Response response = endpointsApiService.
-                endpointsEndpointIdDelete(endpointId, null, null, null, getRequest());
+                endpointsEndpointIdDelete(endpointId, null, null, getRequest());
         assertEquals(response.getStatus(), 200);
     }
 
@@ -84,7 +84,7 @@ public class EndpointsApiServiceImplTestCase {
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.ENDPOINT_ADD_FAILED))
                 .when(apiPublisher).deleteEndpoint(endpointId);
         Response response = endpointsApiService.
-                endpointsEndpointIdDelete(endpointId, null, null, null, getRequest());
+                endpointsEndpointIdDelete(endpointId, null, null, getRequest());
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("Endpoint adding failed"));
     }
@@ -103,7 +103,7 @@ public class EndpointsApiServiceImplTestCase {
         Mockito.doReturn(endpoint).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).getEndpoint(endpointId);
         Response response = endpointsApiService.
-                endpointsEndpointIdGet(endpointId, null, null, null, getRequest());
+                endpointsEndpointIdGet(endpointId, null, null, getRequest());
         assertEquals(response.getStatus(), 200);
         assertTrue(response.getEntity().toString().contains(endpointId));
     }
@@ -121,7 +121,7 @@ public class EndpointsApiServiceImplTestCase {
         Mockito.doReturn(null).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).getEndpoint(endpointId);
         Response response = endpointsApiService.
-                endpointsEndpointIdGet(endpointId, null, null, null, getRequest());
+                endpointsEndpointIdGet(endpointId, null, null, getRequest());
         assertEquals(response.getStatus(), 404);
         assertTrue(response.getEntity().toString().contains("Endpoint Not Found"));
     }
@@ -139,7 +139,7 @@ public class EndpointsApiServiceImplTestCase {
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.APPLICATION_INACTIVE))
                 .when(apiPublisher).getEndpoint(endpointId);
         Response response = endpointsApiService.
-                endpointsEndpointIdGet(endpointId, null, null, null, getRequest());
+                endpointsEndpointIdGet(endpointId, null, null, getRequest());
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("Application is not active"));
     }
@@ -165,7 +165,7 @@ public class EndpointsApiServiceImplTestCase {
         Mockito.doNothing().doThrow(new IllegalArgumentException())
                 .when(apiPublisher).updateEndpoint(newEndpoint);
         Response response = endpointsApiService.
-                endpointsEndpointIdPut(endpointOldId, endPointDTO, null, null, null, getRequest());
+                endpointsEndpointIdPut(endpointOldId, endPointDTO, null, null, getRequest());
         assertEquals(response.getStatus(), 200);
         assertTrue(response.getEntity().toString().contains("newNameEndpoint"));
     }
@@ -184,7 +184,7 @@ public class EndpointsApiServiceImplTestCase {
         Mockito.doReturn(null).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).getEndpoint(endpointId);
         Response response = endpointsApiService.
-                endpointsEndpointIdPut(endpointId, endPointDTO, null, null, null, getRequest());
+                endpointsEndpointIdPut(endpointId, endPointDTO, null, null, getRequest());
         assertEquals(response.getStatus(), 404);
         assertTrue(response.getEntity().toString().contains("Endpoint Not Found"));
     }
@@ -203,7 +203,7 @@ public class EndpointsApiServiceImplTestCase {
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.ENDPOINT_ALREADY_EXISTS))
                 .when(apiPublisher).getEndpoint(endpointId);
         Response response = endpointsApiService.
-                endpointsEndpointIdPut(endpointId, endPointDTO, null, null, null, getRequest());
+                endpointsEndpointIdPut(endpointId, endPointDTO, null, null, getRequest());
         assertEquals(response.getStatus(), 409);
         assertTrue(response.getEntity().toString().contains("Endpoint already exists"));
     }
@@ -225,7 +225,7 @@ public class EndpointsApiServiceImplTestCase {
         Mockito.doReturn(endpointList).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).getAllEndpoints();
         Response response = endpointsApiService.
-                endpointsGet(null, null, null, getRequest());
+                endpointsGet(null, null, getRequest());
         assertEquals(response.getStatus(), 200);
         assertTrue(response.getEntity().toString().contains(endpoint1.getId()));
         assertTrue(response.getEntity().toString().contains(endpoint2.getId()));
@@ -242,7 +242,7 @@ public class EndpointsApiServiceImplTestCase {
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.ENDPOINT_ADD_FAILED))
                 .when(apiPublisher).getAllEndpoints();
         Response response = endpointsApiService.
-                endpointsGet(null, null, null, getRequest());
+                endpointsGet(null, null, getRequest());
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("Endpoint adding failed"));
     }
@@ -259,7 +259,7 @@ public class EndpointsApiServiceImplTestCase {
         Mockito.doReturn(true).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).isEndpointExist(name);
         Response response = endpointsApiService.
-                endpointsHead(name, null, null, getRequest());
+                endpointsHead(name, null, getRequest());
         assertEquals(response.getStatus(), 200);
     }
 
@@ -275,7 +275,7 @@ public class EndpointsApiServiceImplTestCase {
         Mockito.doReturn(false).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).isEndpointExist(name);
         Response response = endpointsApiService.
-                endpointsHead(name, null, null, getRequest());
+                endpointsHead(name, null, getRequest());
         assertEquals(response.getStatus(), 404);
     }
 
@@ -291,7 +291,7 @@ public class EndpointsApiServiceImplTestCase {
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.ENDPOINT_ADD_FAILED))
                 .when(apiPublisher).isEndpointExist(name);
         Response response = endpointsApiService.
-                endpointsHead(name, null, null, getRequest());
+                endpointsHead(name, null, getRequest());
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("Endpoint adding failed"));
     }
@@ -315,7 +315,7 @@ public class EndpointsApiServiceImplTestCase {
         Mockito.doReturn(endpoint).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).getEndpoint(endpointId);
         Response response = endpointsApiService.
-                endpointsPost(endPointDTO, null, null, null, null, getRequest());
+                endpointsPost(endPointDTO, null, null, getRequest());
         assertEquals(response.getStatus(), 201);
     }
 
@@ -335,7 +335,7 @@ public class EndpointsApiServiceImplTestCase {
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.ENDPOINT_ALREADY_EXISTS))
                 .when(apiPublisher).addEndpoint(endpoint);
         Response response = endpointsApiService.
-                endpointsPost(endPointDTO, null, null, null, null, getRequest());
+                endpointsPost(endPointDTO, null, null, getRequest());
         assertEquals(response.getStatus(), 409);
         assertTrue(response.getEntity().toString().contains("Endpoint already exists"));
     }

@@ -115,7 +115,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doReturn(documentContent).doThrow(new IllegalArgumentException()).when(apiPublisher).
                                                         getDocumentationContent(documentId);
         Response response = apisApiService.
-                            apisApiIdDocumentsDocumentIdContentGet(api1Id, documentId, null, null, null, getRequest());
+                            apisApiIdDocumentsDocumentIdContentGet(api1Id, documentId, null, null, getRequest());
         assertEquals(response.getStatus(), 200);
         assertEquals(inlineContent, response.getEntity().toString());
     }
@@ -137,7 +137,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doReturn(documentContent).doThrow(new IllegalArgumentException()).when(apiPublisher).
                                             getDocumentationContent(documentId);
         Response response = apisApiService.
-                apisApiIdDocumentsDocumentIdContentGet(api1Id, documentId, null, null, null, getRequest());
+                apisApiIdDocumentsDocumentIdContentGet(api1Id, documentId, null, null, getRequest());
         assertEquals(response.getStatus(), 200);
         assertTrue(response.getStringHeaders().get("Content-Disposition").toString().contains(fileName));
     }
@@ -156,7 +156,7 @@ public class ApisApiServiceImplTestCase {
                 ExceptionCodes.DOCUMENT_CONTENT_NOT_FOUND)).when(apiPublisher).
                 getDocumentationContent(documentId);
         Response response = apisApiService.
-                apisApiIdDocumentsDocumentIdContentGet(api1Id, documentId, null, null, null, getRequest());
+                apisApiIdDocumentsDocumentIdContentGet(api1Id, documentId, null, null, getRequest());
         assertEquals(response.getStatus(), 404);
         assertTrue(response.getEntity().toString().contains("Document content not found"));
     }
@@ -180,7 +180,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(apiPublisher).
                 uploadDocumentationFile(documentId, fis, "application/pdf");
         Response response = apisApiService.
-                apisApiIdDocumentsDocumentIdContentPost(api1Id, documentId, "application/pdf",
+                apisApiIdDocumentsDocumentIdContentPost(api1Id, documentId,
                                                         fis, null, inlineContent, null, null, getRequest());
         fis.close();
         assertEquals(response.getStatus(), 400);
@@ -202,7 +202,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doReturn(null).doThrow(new IllegalArgumentException()).when(apiPublisher).
                 getDocumentationSummary(documentId);
         Response response = apisApiService.
-                apisApiIdDocumentsDocumentIdContentPost(api1Id, documentId, "application/pdf",
+                apisApiIdDocumentsDocumentIdContentPost(api1Id, documentId,
                         null, null, null, null, null, getRequest());
         assertEquals(response.getStatus(), 404);
         assertTrue(response.getEntity().toString().contains("Documentation not found"));
@@ -234,7 +234,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(apiPublisher).
                 uploadDocumentationFile(documentId, fis, contentType);
         Response response = apisApiService.
-                apisApiIdDocumentsDocumentIdContentPost(api1Id, documentId, null,
+                apisApiIdDocumentsDocumentIdContentPost(api1Id, documentId,
                         fis, fileDetail, null, null, null, getRequest());
         fis.close();
         assertEquals(response.getStatus(), 201);
@@ -266,7 +266,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(apiPublisher).
                 uploadDocumentationFile(documentId, fis, contentType);
         Response response = apisApiService.
-                apisApiIdDocumentsDocumentIdContentPost(api1Id, documentId, null,
+                apisApiIdDocumentsDocumentIdContentPost(api1Id, documentId,
                         fis, fileDetail, null, null, null, getRequest());
         fis.close();
         assertEquals(response.getStatus(), 400);
@@ -292,7 +292,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(apiPublisher).
                 addDocumentationContent(documentId, inlineContent);
         Response response = apisApiService.
-                apisApiIdDocumentsDocumentIdContentPost(api1Id, documentId, null,
+                apisApiIdDocumentsDocumentIdContentPost(api1Id, documentId,
                         null, null, inlineContent, null, null, getRequest());
         assertEquals(response.getStatus(), 201);
     }
@@ -315,7 +315,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(apiPublisher).
                 addDocumentationContent(documentId, inlineContent);
         Response response = apisApiService.
-                apisApiIdDocumentsDocumentIdContentPost(api1Id, documentId, null,
+                apisApiIdDocumentsDocumentIdContentPost(api1Id, documentId,
                         null, null, inlineContent, null, null, getRequest());
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("is not INLINE"));
@@ -340,7 +340,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(apiPublisher).
                 addDocumentationContent(documentId, inlineContent);
         Response response = apisApiService.
-                apisApiIdDocumentsDocumentIdContentPost(api1Id, documentId, null,
+                apisApiIdDocumentsDocumentIdContentPost(api1Id, documentId,
                         null, null, null, null, null, getRequest());
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("Either 'file' or 'inlineContent' should be specified"));
@@ -361,7 +361,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.DOCUMENT_CONTENT_NOT_FOUND))
                                                             .when(apiPublisher).getDocumentationSummary(documentId);
         Response response = apisApiService.
-                apisApiIdDocumentsDocumentIdContentPost(api1Id, documentId, null,
+                apisApiIdDocumentsDocumentIdContentPost(api1Id, documentId,
                         null, null, null, null, null, getRequest());
         assertEquals(response.getStatus(), 404);
         assertTrue(response.getEntity().toString().contains("Document content not found"));
@@ -415,7 +415,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doReturn(documentInfo).doThrow(new IllegalArgumentException())
                                                     .when(apiPublisher).getDocumentationSummary(documentId);
         Response response = apisApiService.apisApiIdDocumentsDocumentIdGet(apiId, documentId,
-                null, null, null, getRequest());
+                null, null, getRequest());
         assertEquals(response.getStatus(), 200);
         assertTrue(response.getEntity().toString().contains("Summary of Calculator Documentation"));
     }
@@ -433,7 +433,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doReturn(null).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).getDocumentationSummary(documentId);
         Response response = apisApiService.apisApiIdDocumentsDocumentIdGet(apiId, documentId,
-                null, null, null, getRequest());
+                null, null, getRequest());
         assertEquals(response.getStatus(), 404);
         assertTrue(response.getEntity().toString().contains("Documntation not found"));
     }
@@ -451,7 +451,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.INVALID_DOCUMENT_CONTENT_DATA))
                 .when(apiPublisher).getDocumentationSummary(documentId);
         Response response = apisApiService.apisApiIdDocumentsDocumentIdGet(apiId, documentId,
-                null, null, null, getRequest());
+                null, null, getRequest());
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("Invalid document content data provided"));
     }
@@ -471,7 +471,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doReturn(null).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).getDocumentationSummary(documentId);
         Response response = apisApiService.apisApiIdDocumentsDocumentIdPut(apiId, documentId,
-                documentDTO, null, null, null, getRequest());
+                documentDTO, null, null, getRequest());
         assertEquals(response.getStatus(), 404);
         assertTrue(response.getEntity().toString().contains("Error while getting document"));
     }
@@ -492,7 +492,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doReturn(documentInfo).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).getDocumentationSummary(documentId);
         Response response = apisApiService.apisApiIdDocumentsDocumentIdPut(apiId, documentId,
-                documentDTO, null, null, null, getRequest());
+                documentDTO, null, null, getRequest());
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("otherTypeName cannot be empty if type is OTHER."));
     }
@@ -502,7 +502,8 @@ public class ApisApiServiceImplTestCase {
         printTestMethodName();
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
-        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo().build();
+        DocumentInfo documentInfo = SampleTestObjectCreator.createDefaultDocumentationInfo()
+                .sourceType(DocumentInfo.SourceType.URL).build();
         DocumentDTO documentDTO = MappingUtil.toDocumentDTO(documentInfo);
         PowerMockito.mockStatic(RestAPIPublisherUtil.class);
         PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
@@ -512,8 +513,8 @@ public class ApisApiServiceImplTestCase {
         Mockito.doReturn(documentInfo).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).getDocumentationSummary(documentId);
         Response response = apisApiService.apisApiIdDocumentsDocumentIdPut(apiId, documentId,
-                documentDTO, null, null, null, getRequest());
-        assertEquals(response.getStatus(), 200);
+                documentDTO, null, null, getRequest());
+        assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("Invalid document sourceUrl Format"));
     }
 
@@ -536,7 +537,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doReturn("updated").doThrow(new IllegalArgumentException())
                 .when(apiPublisher).updateDocumentation(apiId, documentInfo1);
         Response response = apisApiService.apisApiIdDocumentsDocumentIdPut(apiId, documentId,
-                documentDTO, null, null, null, getRequest());
+                documentDTO, null, null, getRequest());
         assertEquals(response.getStatus(), 200);
         assertTrue(response.getEntity().toString().contains("My new summary"));
     }
@@ -560,7 +561,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.INVALID_DOCUMENT_CONTENT_DATA))
                 .when(apiPublisher).updateDocumentation(apiId, documentInfo1);
         Response response = apisApiService.apisApiIdDocumentsDocumentIdPut(apiId, documentId,
-                documentDTO, null, null, null, getRequest());
+                documentDTO, null, null, getRequest());
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("Invalid document content data provided"));
     }
@@ -582,7 +583,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doReturn(documentInfos).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).getAllDocumentation(apiId, offset, limit);
         Response response = apisApiService.apisApiIdDocumentsGet(apiId, 10,
-                0, null, null, getRequest());
+                0, null, getRequest());
         assertEquals(response.getStatus(), 200);
         assertTrue(response.getEntity().toString().contains("NewName1"));
     }
@@ -599,7 +600,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.INVALID_DOCUMENT_CONTENT_DATA))
                 .when(apiPublisher).getAllDocumentation(apiId, 0, 10);
         Response response = apisApiService.apisApiIdDocumentsGet(apiId, 10,
-                0, null, null, getRequest());
+                0, null, getRequest());
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("Invalid document content data provided"));
     }
@@ -617,7 +618,7 @@ public class ApisApiServiceImplTestCase {
                                     .type(DocumentInfo.DocType.OTHER).otherType("").build();
         DocumentDTO documentDTO = MappingUtil.toDocumentDTO(documentInfo);
         Response response = apisApiService.apisApiIdDocumentsPost(apiId, documentDTO,
-                null, null, null, getRequest());
+                null, null, getRequest());
     }
 
     @Test(expected = BadRequestException.class)
@@ -633,7 +634,7 @@ public class ApisApiServiceImplTestCase {
                 .sourceType(DocumentInfo.SourceType.URL).sourceURL("").build();
         DocumentDTO documentDTO = MappingUtil.toDocumentDTO(documentInfo);
         Response response = apisApiService.apisApiIdDocumentsPost(apiId, documentDTO,
-                null, null, null, getRequest());
+                null, null, getRequest());
     }
 
     @Test
@@ -655,7 +656,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doNothing().doThrow(new IllegalArgumentException())
                 .when(apiPublisher).addDocumentationContent(documentDTO.getDocumentId(), "");
         Response response = apisApiService.apisApiIdDocumentsPost(apiId, documentDTO,
-                null, null, null, getRequest());
+                null, null, getRequest());
         assertEquals(response.getStatus(), 201);
         assertTrue(response.getEntity().toString().contains(documentDTO.getDocumentId()));
     }
@@ -675,7 +676,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.INVALID_DOCUMENT_CONTENT_DATA))
                 .when(apiPublisher).addDocumentationInfo(apiId, documentInfo);
         Response response = apisApiService.apisApiIdDocumentsPost(apiId, documentDTO,
-                null, null, null, getRequest());
+                null, null, getRequest());
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("Invalid document content data provided"));
     }
@@ -692,7 +693,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doReturn("Sample Config").doThrow(new IllegalArgumentException())
                 .when(apiPublisher).getApiGatewayConfig(apiId);
         Response response = apisApiService.apisApiIdGatewayConfigGet(apiId, null,
-                null, null, getRequest());
+                null, getRequest());
         assertEquals(response.getStatus(), 200);
         assertTrue(response.getEntity().toString().contains("Sample Config"));
     }
@@ -709,7 +710,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.GATEWAY_EXCEPTION))
                                 .when(apiPublisher).getApiGatewayConfig(apiId);
         Response response = apisApiService.apisApiIdGatewayConfigGet(apiId, null,
-                null, null, getRequest());
+                null, getRequest());
         assertEquals(response.getStatus(), 500);
         assertTrue(response.getEntity().toString().contains("Gateway publishing Error"));
     }
@@ -728,7 +729,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doNothing().doThrow(new IllegalArgumentException())
                 .when(apiPublisher).updateApiGatewayConfig(apiId, gatewayConfig);
         Response response = apisApiService.apisApiIdGatewayConfigPut(apiId, gatewayConfig,
-                null, null, null, getRequest());
+                null, null, getRequest());
         assertEquals(response.getStatus(), 200);
     }
 
@@ -745,7 +746,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.GATEWAY_EXCEPTION))
                 .when(apiPublisher).updateApiGatewayConfig(apiId, gatewayConfig);
         Response response = apisApiService.apisApiIdGatewayConfigPut(apiId, gatewayConfig, null,
-                null, null, getRequest());
+                null, getRequest());
         assertEquals(response.getStatus(), 500);
         assertTrue(response.getEntity().toString().contains("Gateway publishing Error"));
     }
@@ -762,7 +763,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doReturn(false).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).checkIfAPIExists(apiId);
         Response response = apisApiService.apisApiIdGet(apiId, null,
-                null, null, getRequest());
+                null, getRequest());
         assertEquals(response.getStatus(), 404);
         assertTrue(response.getEntity().toString().contains("API not found"));
     }
@@ -782,7 +783,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doReturn(api).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).getAPIbyUUID(apiId);
         Response response = apisApiService.apisApiIdGet(apiId, null,
-                null, null, getRequest());
+                null, getRequest());
         assertEquals(response.getStatus(), 200);
         assertTrue(response.getEntity().toString().contains(api.getId()));
         assertTrue(response.getEntity().toString().contains(api.getName()));
@@ -800,7 +801,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
                 .when(apiPublisher).checkIfAPIExists(apiId);
         Response response = apisApiService.apisApiIdGet(apiId, null,
-                null, null, getRequest());
+                null, getRequest());
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
     }
@@ -820,7 +821,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doReturn(lifecycleState).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).getAPILifeCycleData(apiId);
         Response response = apisApiService.apisApiIdLifecycleGet(apiId, null,
-                null, null, getRequest());
+                null, getRequest());
         assertEquals(response.getStatus(), 200);
         LifecycleState lifecycleStateRetrieve = (LifecycleState) response.getEntity();
         assertEquals(lifecycleStateRetrieve.getLcName(), lifecycleState.getLcName());
@@ -839,7 +840,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
                 .when(apiPublisher).getAPILifeCycleData(apiId);
         Response response = apisApiService.apisApiIdLifecycleGet(apiId, null,
-                null, null, getRequest());
+                null, getRequest());
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
     }
@@ -857,7 +858,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doReturn(false).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).checkIfAPIExists(apiId);
         Response response = apisApiService.apisApiIdLifecycleHistoryGet(apiId, null,
-                null, null, getRequest());
+                null, getRequest());
         assertEquals(response.getStatus(), 404);
         assertTrue(response.getEntity().toString().contains("API not found"));
     }
@@ -877,7 +878,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doReturn(api).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).getAPIbyUUID(apiId);
         Response response = apisApiService.apisApiIdLifecycleHistoryGet(apiId, null,
-                null, null, getRequest());
+                null, getRequest());
         assertEquals(response.getStatus(), 200);
     }
 
@@ -893,7 +894,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
                 .when(apiPublisher).checkIfAPIExists(apiId);
         Response response = apisApiService.apisApiIdLifecycleHistoryGet(apiId, null,
-                null, null, getRequest());
+                null, getRequest());
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
     }
@@ -916,7 +917,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doNothing().doThrow(new IllegalArgumentException())
                 .when(apiPublisher).updateAPI(apiBuilder);
         Response response = apisApiService.apisApiIdPut(apiId, apidto, null,
-                null, null, getRequest());
+                null, getRequest());
         assertEquals(response.getStatus(), 200);
         assertTrue(response.getEntity().toString().contains(api.getId()));
         assertTrue(response.getEntity().toString().contains(api.getName()));
@@ -939,7 +940,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
                 .when(apiPublisher).getAPIbyUUID(apiId);
         Response response = apisApiService.apisApiIdPut(apiId, apidto, null,
-                null, null, getRequest());
+                null, getRequest());
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
     }
@@ -957,7 +958,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doReturn(swagger).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).getApiSwaggerDefinition(apiId);
         Response response = apisApiService.apisApiIdSwaggerGet(apiId, null,
-                null, null, getRequest());
+                null, getRequest());
         assertEquals(response.getStatus(), 200);
         assertTrue(response.getEntity().toString().contains(swagger));
     }
@@ -974,7 +975,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
                 .when(apiPublisher).getApiSwaggerDefinition(apiId);
         Response response = apisApiService.apisApiIdSwaggerGet(apiId, null,
-                null, null, getRequest());
+                null, getRequest());
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
     }
@@ -994,7 +995,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doReturn(swagger).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).getApiSwaggerDefinition(apiId);
         Response response = apisApiService.apisApiIdSwaggerPut(apiId, swagger, null,
-                null, null, getRequest());
+                null, getRequest());
         assertEquals(response.getStatus(), 200);
         assertTrue(response.getEntity().toString().contains(swagger));
     }
@@ -1014,7 +1015,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
                 .when(apiPublisher).getApiSwaggerDefinition(apiId);
         Response response = apisApiService.apisApiIdSwaggerGet(apiId, null,
-                null, null, getRequest());
+                null, getRequest());
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
     }
@@ -1036,7 +1037,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doReturn(fis).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).getThumbnailImage(apiId);
         Response response = apisApiService.apisApiIdThumbnailGet(apiId, null,
-                null, null, getRequest());
+                null, getRequest());
         fis.close();
         assertEquals(response.getStatus(), 200);
         assertTrue(response.getStringHeaders().get("Content-Disposition").toString().contains("filename"));
@@ -1055,7 +1056,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
                 .when(apiPublisher).getThumbnailImage(apiId);
         Response response = apisApiService.apisApiIdThumbnailGet(apiId, null,
-                null, null, getRequest());
+                null, getRequest());
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
     }
@@ -1078,7 +1079,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doNothing().doThrow(new IllegalArgumentException())
                 .when(apiPublisher).saveThumbnailImage(apiId, fis, fileDetail.getFileName());
         Response response = apisApiService.apisApiIdThumbnailPost(apiId, fis, fileDetail, null,
-                null, null, getRequest());
+                null, getRequest());
         fis.close();
         assertEquals(response.getStatus(), 201);
         assertTrue(response.getEntity().toString().contains("application/octet-strea"));
@@ -1099,7 +1100,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
                 .when(apiPublisher).saveThumbnailImage(apiId, null, fileDetail.getFileName());
         Response response = apisApiService.apisApiIdThumbnailPost(apiId, null, fileDetail, null,
-                null, null, getRequest());
+                null, getRequest());
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
     }
@@ -1238,7 +1239,7 @@ public class ApisApiServiceImplTestCase {
                 thenReturn(apiPublisher);
         Mockito.doReturn(apis).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).searchAPIs(10, 0, "");
-        Response response = apisApiService.apisGet(10, 0, "", null, null, getRequest());
+        Response response = apisApiService.apisGet(10, 0, "", null, getRequest());
         assertEquals(response.getStatus(), 200);
         assertTrue(response.getEntity().toString().contains("newAPI1"));
         assertTrue(response.getEntity().toString().contains("newAPI2"));
@@ -1255,7 +1256,7 @@ public class ApisApiServiceImplTestCase {
                 thenReturn(apiPublisher);
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
                 .when(apiPublisher).searchAPIs(10, 0, "");
-        Response response = apisApiService.apisGet(10, 0, "", null, null, getRequest());
+        Response response = apisApiService.apisGet(10, 0, "",null, getRequest());
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
     }
@@ -1272,7 +1273,7 @@ public class ApisApiServiceImplTestCase {
                 thenReturn(apiPublisher);
         Mockito.doReturn(true).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).checkIfAPINameExists("testName");
-        Response response = apisApiService.apisHead(word, null, null, getRequest());
+        Response response = apisApiService.apisHead(word, null, getRequest());
         assertEquals(response.getStatus(), 200);
     }
 
@@ -1288,7 +1289,7 @@ public class ApisApiServiceImplTestCase {
                 thenReturn(apiPublisher);
         Mockito.doReturn(true).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).checkIfAPIContextExists("testContext");
-        Response response = apisApiService.apisHead(word, null, null, getRequest());
+        Response response = apisApiService.apisHead(word, null, getRequest());
         assertEquals(response.getStatus(), 200);
     }
 
@@ -1302,7 +1303,7 @@ public class ApisApiServiceImplTestCase {
                 thenReturn(apiPublisher);
         Mockito.doReturn(true).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).checkIfAPIContextExists("testContext");
-        Response response = apisApiService.apisHead("", null, null, getRequest());
+        Response response = apisApiService.apisHead("", null, getRequest());
         assertEquals(response.getStatus(), 400);
     }
 
@@ -1317,7 +1318,7 @@ public class ApisApiServiceImplTestCase {
                 thenReturn(apiPublisher);
         Mockito.doReturn(true).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).checkIfAPIContextExists("testContext");
-        Response response = apisApiService.apisHead(word, null, null, getRequest());
+        Response response = apisApiService.apisHead(word, null, getRequest());
         assertEquals(response.getStatus(), 404);
     }
 
@@ -1332,7 +1333,7 @@ public class ApisApiServiceImplTestCase {
                 thenReturn(apiPublisher);
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
                 .when(apiPublisher).checkIfAPIContextExists("testContext");
-        Response response = apisApiService.apisHead(word, null, null, getRequest());
+        Response response = apisApiService.apisHead(word, null, getRequest());
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
     }
@@ -1350,7 +1351,7 @@ public class ApisApiServiceImplTestCase {
         PowerMockito.mockStatic(RestAPIPublisherUtil.class);
         PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
                 thenReturn(apiPublisher);
-        Response response = apisApiService.apisImportDefinitionPost(null, fis, null, "test", null, null, getRequest());
+        Response response = apisApiService.apisImportDefinitionPost(fis, null, "test", null, null, getRequest());
         fis.close();
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("Only one of 'file' and 'url' should be specified"));
@@ -1377,7 +1378,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doReturn(api).doThrow(new IllegalArgumentException()).when(apiPublisher).
                 getAPIbyUUID(apiId);
         Response response = apisApiService.
-                apisImportDefinitionPost(null, fis, null, null, null, null, getRequest());
+                apisImportDefinitionPost(fis, null, null, null, null, getRequest());
         fis.close();
         assertEquals(response.getStatus(), 201);
         assertTrue(response.getEntity().toString().contains(apiId));
@@ -1398,7 +1399,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
                             .when(apiPublisher).addApiFromDefinition(fis);
         Response response = apisApiService.
-                apisImportDefinitionPost(null, fis, null, null, null, null, getRequest());
+                apisImportDefinitionPost(fis, null, null, null, null, getRequest());
         fis.close();
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
@@ -1420,7 +1421,7 @@ public class ApisApiServiceImplTestCase {
                 .when(apiPublisher).addAPI(apiBuilder);
         Mockito.doReturn(api).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).getAPIbyUUID(apiId);
-        Response response = apisApiService.apisPost(apidto, null, getRequest());
+        Response response = apisApiService.apisPost(apidto, getRequest());
         assertEquals(response.getStatus(), 201);
         assertTrue(response.getEntity().toString().contains(api.getId()));
         assertTrue(response.getEntity().toString().contains(api.getName()));
@@ -1442,7 +1443,7 @@ public class ApisApiServiceImplTestCase {
                 .when(apiPublisher).addAPI(apiBuilder);
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
                 .when(apiPublisher).getAPIbyUUID(apiId);
-        Response response = apisApiService.apisPost(apidto, null, getRequest());
+        Response response = apisApiService.apisPost(apidto, getRequest());
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
     }

@@ -68,7 +68,7 @@ public class PoliciesApiServiceImplTestCase {
                 .when(apiPublisher).getAllPoliciesByLevel(
                     RestApiUtil.mapRestApiPolicyLevelToPolicyLevelEnum("subscription"));
         Response response = policiesApiService.
-                policiesTierLevelGet("subscription", null, null, null, null, getRequest());
+                policiesTierLevelGet("subscription", null, null, null, getRequest());
         assertEquals(response.getStatus(), 200);
         assertTrue(response.getEntity().toString().contains("Gold"));
         assertTrue(response.getEntity().toString().contains("Silver"));
@@ -86,7 +86,7 @@ public class PoliciesApiServiceImplTestCase {
                 .when(apiPublisher).getAllPoliciesByLevel(
                 RestApiUtil.mapRestApiPolicyLevelToPolicyLevelEnum("subscription"));
         Response response = policiesApiService.
-                policiesTierLevelGet("subscription", null, null, null, null, getRequest());
+                policiesTierLevelGet("subscription", null, null, null, getRequest());
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("Throttle Policy level invalid"));
     }
@@ -104,7 +104,7 @@ public class PoliciesApiServiceImplTestCase {
                 .when(apiPublisher).getPolicyByName(
                 RestApiUtil.mapRestApiPolicyLevelToPolicyLevelEnum("subscription"), "Gold");
         Response response = policiesApiService.
-                policiesTierLevelTierNameGet("Gold", "subscription", null, null, null, getRequest());
+                policiesTierLevelTierNameGet("Gold", "subscription", null, null, getRequest());
         assertEquals(response.getStatus(), 200);
         assertTrue(response.getEntity().toString().contains("Gold"));
     }
@@ -121,7 +121,7 @@ public class PoliciesApiServiceImplTestCase {
                 .when(apiPublisher).getPolicyByName(
                 RestApiUtil.mapRestApiPolicyLevelToPolicyLevelEnum("subscription"), "Gold");
         Response response = policiesApiService.
-                policiesTierLevelTierNameGet("Gold", "subscription", null, null, null, getRequest());
+                policiesTierLevelTierNameGet("Gold", "subscription", null, null, getRequest());
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("Throttle Policy level invalid"));
     }
