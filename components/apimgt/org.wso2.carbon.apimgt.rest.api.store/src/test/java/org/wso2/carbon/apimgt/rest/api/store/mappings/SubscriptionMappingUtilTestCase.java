@@ -31,23 +31,4 @@ import static org.testng.Assert.assertEquals;
 
 public class SubscriptionMappingUtilTestCase {
 
-    @Test
-    public void testFromWorkflowResponseToDTO() {
-        WorkflowResponse workflowResponse = new GeneralWorkflowResponse();
-        workflowResponse.setWorkflowStatus(WorkflowStatus.APPROVED);
-        WorkflowResponseDTO workflowResponseDTO = MiscMappingUtil.fromWorkflowResponseToDTO(workflowResponse);
-        assertEquals(workflowResponseDTO.getWorkflowStatus().name(), workflowResponse.getWorkflowStatus().name());
-    }
-
-    @Test
-    public void testFromUserDTOToUser() {
-        UserDTO userDTO = new UserDTO().email("test@gmail.com").firstName("Test1").lastName("test2").password("dummy")
-                                        .username("myuser1");
-        User user = MiscMappingUtil.fromUserDTOToUser(userDTO);
-        assertEquals(userDTO.getEmail(), user.getEmail());
-        assertEquals(userDTO.getFirstName(), user.getFirstName());
-        assertEquals(userDTO.getLastName(), user.getLastName());
-        assertEquals(userDTO.getPassword(), new String(user.getPassword()));
-        assertEquals(userDTO.getUsername(), user.getUsername());
-    }
 }
