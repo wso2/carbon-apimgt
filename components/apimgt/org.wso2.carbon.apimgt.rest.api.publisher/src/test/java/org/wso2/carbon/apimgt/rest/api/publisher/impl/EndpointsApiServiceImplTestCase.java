@@ -12,7 +12,6 @@ import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.APIPublisherImpl;
-import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.rest.api.publisher.common.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPointDTO;
@@ -22,12 +21,15 @@ import org.wso2.carbon.messaging.CarbonMessage;
 import org.wso2.msf4j.Request;
 
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(RestAPIPublisherUtil.class)
+@PrepareForTest({RestAPIPublisherUtil.class, MappingUtil.class})
 public class EndpointsApiServiceImplTestCase {
 
     private static final Logger log = LoggerFactory.getLogger(EndpointsApiServiceImplTestCase.class);
@@ -187,6 +189,137 @@ public class EndpointsApiServiceImplTestCase {
         assertTrue(response.getEntity().toString().contains("Endpoint already exists"));
     }
 
+
+    @Test
+    public void testEndpointsGet() throws Exception {
+        printTestMethodName();
+        EndpointsApiServiceImpl endpointsApiService = new EndpointsApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Endpoint endpoint1 = SampleTestObjectCreator.createMockEndpoint();
+        Endpoint endpoint2 = SampleTestObjectCreator.createMockEndpoint();
+        List<Endpoint> endpointList = new ArrayList<>();
+        endpointList.add(endpoint1);
+        endpointList.add(endpoint2);
+        Mockito.doReturn(endpointList).doThrow(new IllegalArgumentException())
+                .when(apiPublisher).getAllEndpoints();
+        Response response = endpointsApiService.
+                endpointsGet(null, null, null, getRequest());
+        assertEquals(response.getStatus(), 200);
+        assertTrue(response.getEntity().toString().contains(endpoint1.getId()));
+        assertTrue(response.getEntity().toString().contains(endpoint2.getId()));
+    }
+
+    @Test
+    public void testEndpointsGetException() throws Exception {
+        printTestMethodName();
+        EndpointsApiServiceImpl endpointsApiService = new EndpointsApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.ENDPOINT_ADD_FAILED))
+                .when(apiPublisher).getAllEndpoints();
+        Response response = endpointsApiService.
+                endpointsGet(null, null, null, getRequest());
+        assertEquals(response.getStatus(), 400);
+        assertTrue(response.getEntity().toString().contains("Endpoint adding failed"));
+    }
+
+    @Test
+    public void testEndpointsHead() throws Exception {
+        printTestMethodName();
+        String name = "test";
+        EndpointsApiServiceImpl endpointsApiService = new EndpointsApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Mockito.doReturn(true).doThrow(new IllegalArgumentException())
+                .when(apiPublisher).isEndpointExist(name);
+        Response response = endpointsApiService.
+                endpointsHead(name, null, null, getRequest());
+        assertEquals(response.getStatus(), 200);
+    }
+
+    @Test
+    public void testEndpointsHeadNotExist() throws Exception {
+        printTestMethodName();
+        String name = "test";
+        EndpointsApiServiceImpl endpointsApiService = new EndpointsApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Mockito.doReturn(false).doThrow(new IllegalArgumentException())
+                .when(apiPublisher).isEndpointExist(name);
+        Response response = endpointsApiService.
+                endpointsHead(name, null, null, getRequest());
+        assertEquals(response.getStatus(), 404);
+    }
+
+    @Test
+    public void testEndpointsHeadException() throws Exception {
+        printTestMethodName();
+        EndpointsApiServiceImpl endpointsApiService = new EndpointsApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        String name = "test";
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.ENDPOINT_ADD_FAILED))
+                .when(apiPublisher).isEndpointExist(name);
+        Response response = endpointsApiService.
+                endpointsHead(name, null, null, getRequest());
+        assertEquals(response.getStatus(), 400);
+        assertTrue(response.getEntity().toString().contains("Endpoint adding failed"));
+    }
+
+    @Test
+    public void testEndpointsPost() throws Exception {
+        printTestMethodName();
+        EndpointsApiServiceImpl endpointsApiService = new EndpointsApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.mockStatic(MappingUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Endpoint endpoint = SampleTestObjectCreator.createMockEndpointBuilder().build();
+        EndPointDTO endPointDTO = MappingUtil.toEndPointDTO(endpoint);
+        String endpointId = UUID.randomUUID().toString();
+        PowerMockito.when(MappingUtil.toEndpoint(endPointDTO)).
+                thenReturn(endpoint);
+        Mockito.doReturn(endpointId).doThrow(new IllegalArgumentException())
+                .when(apiPublisher).addEndpoint(endpoint);
+        Mockito.doReturn(endpoint).doThrow(new IllegalArgumentException())
+                .when(apiPublisher).getEndpoint(endpointId);
+        Response response = endpointsApiService.
+                endpointsPost(endPointDTO, null, null, null, null, getRequest());
+        assertEquals(response.getStatus(), 201);
+    }
+
+    @Test
+    public void testEndpointsPostException() throws Exception {
+        printTestMethodName();
+        EndpointsApiServiceImpl endpointsApiService = new EndpointsApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.mockStatic(MappingUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Endpoint endpoint = SampleTestObjectCreator.createMockEndpoint();
+        EndPointDTO endPointDTO = MappingUtil.toEndPointDTO(endpoint);
+        PowerMockito.when(MappingUtil.toEndpoint(endPointDTO)).
+                thenReturn(endpoint);
+        Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.ENDPOINT_ALREADY_EXISTS))
+                .when(apiPublisher).addEndpoint(endpoint);
+        Response response = endpointsApiService.
+                endpointsPost(endPointDTO, null, null, null, null, getRequest());
+        assertEquals(response.getStatus(), 409);
+        assertTrue(response.getEntity().toString().contains("Endpoint already exists"));
+    }
 
     // Sample request to be used by tests
     private Request getRequest() throws Exception {
