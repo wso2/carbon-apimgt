@@ -11,18 +11,22 @@ import org.wso2.carbon.apimgt.gateway.constants;
 errors:TypeCastError err;
 
 function constructAccessTokenNotFoundPayload (message response) {
+    system:println("constructAccessTokenNotFoundPayload() in Utils");
     json payload = {"code":900902, "message":"accessToken invalid"};
     messages:setJsonPayload(response, payload);
 }
 function constructAccessTokenExpiredPayload (message response) {
+    system:println("constructAccessTokenExpiredPayload() in Utils");
     json payload = {"code":900901, "message":"accessToken expired"};
     messages:setJsonPayload(response, payload);
 }
 function constructSubscriptionNotFound (message response) {
+    system:println("constructSubscriptionNotFound() in Utils");
     json payload = {"code":900903, "message":"subscription not found"};
     messages:setJsonPayload(response, payload);
 }
 function constructSubscriptionBlocked (message response, string context, string version) {
+    system:println("constructSubscriptionBlocked() in Utils");
     json payload = {
                        "fault":{
                                    "code":900907,
@@ -34,6 +38,7 @@ function constructSubscriptionBlocked (message response, string context, string 
     messages:setJsonPayload(response, payload);
 }
 function constructAPIIsInMaintenance (message response) {
+    system:println("constructAPIIsInMaintenance() in Utils");
     messages:setHeader(response, "Content-Type", "application/json");
     http:setStatusCode(response, 503);
     json payload = {"code":700700, "message":"This API has been blocked temporarily"};
@@ -46,6 +51,7 @@ function constructIncorrectAuthorization (message response) {
 }
 
 function fromJsonToIntrospectDto (json introspectResponse) (dto:IntrospectDto) {
+    system:println("fromJsonToIntrospectDto() in Utils");
     dto:IntrospectDto introspectDto = {};
     introspectDto.active, err = (boolean)introspectResponse.active;
     if (introspectDto.active) {
@@ -74,6 +80,7 @@ function fromJsonToIntrospectDto (json introspectResponse) (dto:IntrospectDto) {
     return introspectDto;
 }
 function fromJsonToSubscriptionDto (json subscriptionResponse) (dto:SubscriptionDto) {
+    system:println("fromJsonToSubscriptionDto() in Utils");
     dto:SubscriptionDto subscriptionDto = {};
     subscriptionDto.apiName, err = (string)subscriptionResponse.apiName;
     subscriptionDto.apiContext, err = (string)subscriptionResponse.apiContext;
@@ -87,6 +94,7 @@ function fromJsonToSubscriptionDto (json subscriptionResponse) (dto:Subscription
     return subscriptionDto;
 }
 function fromJsonToResourceDto (json resourceResponse) (dto:ResourceDto) {
+    system:println("fromJsonToResourceDto() in Utils");
     dto:ResourceDto resourceDto = {};
     resourceDto.uriTemplate, err = (string)resourceResponse.uriTemplate;
     resourceDto.httpVerb, err = (string)resourceResponse.httpVerb;
@@ -96,6 +104,7 @@ function fromJsonToResourceDto (json resourceResponse) (dto:ResourceDto) {
     return resourceDto;
 }
 function retrieveSubscriptions () (boolean) {
+    system:println("retrieveSubscriptions() in Utils");
     string query = "/api/am/core/v1.0/subscriptions?limit=-1";
     message request = {};
     http:ClientConnector apiInfoConnector = create http:ClientConnector(getAPICoreURL());
@@ -107,6 +116,7 @@ function retrieveSubscriptions () (boolean) {
 }
 
 function putIntoSubscriptionCache (json subscriptions) {
+    system:println("putIntoSubscriptionCache() in Utils");
     int length = jsons:getInt(subscriptions, "$.length()");
     int i = 0;
     while (i < length) {
@@ -119,6 +129,7 @@ function putIntoSubscriptionCache (json subscriptions) {
 }
 
 function removeFromSubscriptionCache (json subscriptions) {
+    system:println("removefromSubscriptionCache() in Utils");
     int length = jsons:getInt(subscriptions, "$.length()");
     int i = 0;
     while (i < length) {
@@ -132,21 +143,33 @@ function removeFromSubscriptionCache (json subscriptions) {
 }
 
 function retrieveResources (string apiContext, string apiVersion) {
+    system:println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+    system:println("retrieveResources() in Utils");
+
     string query = "/api/am/core/v1.0/resources/?apiContext=" + apiContext + "&apiVersion=" + apiVersion;
     message request = {};
     http:ClientConnector apiInfoConnector = create http:ClientConnector(getAPICoreURL());
-    messages:setHeader(request, "Content-Type", "application/json");
+    messages:setHeader(request, "Content-Type", "application/json");  //message object, header name, header value
     message response = http:ClientConnector.get(apiInfoConnector, query, request);
     json resources = messages:getJsonPayload(response);
-    int length = jsons:getInt(resources, "$.list.length()");
+    int length = jsons:getInt(resources, "$.list.length()");//Evaluates the JSONPath on a JSON object and returns the integer value.
     int i = 0;
     while (i < length) {
         json resource1 = resources.list[i];
+
+        system:println("resource1  : ");
+       system:println(resource1);
         holders:putIntoResourceCache(apiContext, apiVersion, fromJsonToResourceDto(resource1));
         i = i + 1;
     }
+
+    system:println("resources :");
+    system:println(resources);
+
+    system:println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 }
 function retrieveApplications () (boolean) {
+    system:println("retrieveApplications() in Utils");
     string query = "/api/am/core/v1.0/applications";
     message request = {};
     http:ClientConnector apiInfoConnector = create http:ClientConnector(getAPICoreURL());
@@ -165,6 +188,7 @@ function retrieveApplications () (boolean) {
     return true;
 }
 function retrievePolicies () (boolean) {
+    system:println("retrievePolicies() in Utils");
     string query = "/api/am/core/v1.0/policies";
     message request = {};
     http:ClientConnector apiInfoConnector = create http:ClientConnector(getAPICoreURL());
@@ -185,6 +209,7 @@ function retrievePolicies () (boolean) {
 }
 
 function putIntoApplicationCache (json application) {
+    system:println("putIntoApplicationCache() in Utils");
     dto:ApplicationDto applicationDto = {};
     applicationDto.applicationId, err = (string)application.applicationId;
     applicationDto.applicationName, err = (string)application.name;
@@ -193,6 +218,7 @@ function putIntoApplicationCache (json application) {
     holders:putIntoApplicationCache(applicationDto);
 }
 function putIntoPolicyCache (json policy) {
+    system:println("putIntoPolicyCache() in Utils");
     dto:PolicyDto policyDto = {};
     policyDto.id, err = (string)policy.id;
     policyDto.name, err = (string)policy.name;
@@ -200,11 +226,13 @@ function putIntoPolicyCache (json policy) {
     holders:putIntoPolicyCache(policyDto);
 }
 function removeFromApplicationCache (json application) {
+    system:println("removeFromApplicationCache() in Utils");
     string applicationId;
     applicationId, err = (string)application.applicationId;
     holders:removeApplicationFromCache(applicationId);
 }
 function fromJsonToGatewayConfDTO (json conf) (dto:GatewayConfDTO) {
+    system:println("fromJsonToGatewayConfDTO() in Utils");
     dto:GatewayConfDTO gatewayConf = {};
 
     //Extract key manager information and populate KeyManageInfoDTO to be cached
@@ -269,6 +297,7 @@ function fromJsonToGatewayConfDTO (json conf) (dto:GatewayConfDTO) {
 }
 
 function fromJSONToAPIDTO (json api) (dto:APIDTO) {
+    system:println("fromJsonToAPIDTO() in Utils");
     dto:APIDTO APIDTO = {};
     APIDTO.id, err = (string)api.id;
     APIDTO.name, err = (string)api.name;
@@ -281,9 +310,11 @@ function fromJSONToAPIDTO (json api) (dto:APIDTO) {
 }
 
 function getSystemProperty (string prop) (string) {
+    system:println("getSystemProperty() in Utils");
     string pathValue = "";
     try {
         pathValue = system:getEnv(prop);
+        system:println(pathValue);
         if (pathValue != "") {
             return pathValue;
         }
@@ -294,6 +325,7 @@ function getSystemProperty (string prop) (string) {
 }
 
 function getStringProperty (message msg, string propertyKey) (string) {
+    system:println("getStringProperty() in Utils");
     string value = "";
     try {
         value = messages:getProperty(msg, propertyKey);
@@ -307,11 +339,13 @@ function getStringProperty (message msg, string propertyKey) (string) {
 }
 
 function getJsonString (json jsonObject, string jsonPath) (string) {
+    system:println("getJsonString() in Utils");
     string value = "";
     value, err = (string)jsonObject.jsonPath;
     return value;
 }
 function fromJsonToBlockConditionDto (json event) (dto:BlockConditionDto) {
+    system:println("fromJsonToBlockConditionDto() in Utils");
     string key = "";
     dto:BlockConditionDto blockConditionDto = {};
     blockConditionDto.enabled, err = (boolean)event.enabled;

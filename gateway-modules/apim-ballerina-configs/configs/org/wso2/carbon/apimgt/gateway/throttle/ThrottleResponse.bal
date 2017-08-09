@@ -1,6 +1,7 @@
 package org.wso2.carbon.apimgt.gateway.throttle;
 
 import ballerina.lang.messages;
+import ballerina.lang.system;
 
 const string THROTTLED_OUT_REASON = "THROTTLE_OUT_REASON";
 const string THROTTLED_ERROR_CODE = "THROTTLED_ERROR_CODE";
@@ -23,6 +24,7 @@ const int HTTP_TOO_MANY_REQUESTS = 429;
 const int HTTP_UNAUTHORIZED = 401;
 
 function setThrottledResponse(message msg){
+    system:println("setThrottledResponse() in ThrottleResponse");
     json jsonPayload = {};
     jsonPayload.Error_Code =(string)messages:getProperty(msg, THROTTLED_ERROR_CODE);
     jsonPayload.Error_Message = (string)messages:getProperty(msg, THROTTLED_OUT_REASON);

@@ -16,18 +16,21 @@ boolean isBlockingConditionsPresent = false;
 boolean isKeyTemplatesPresent = false;
 
 function addThrottleData (string key, string value) {
+    system:println("addThrottleData() in ThrottleHolder");
     throttleDataMap = getMapFromHolder("throttleDataMap");
     throttleDataMap[key] = value;
     mapHolder:putMapEntry("throttleDataMap", throttleDataMap);
 }
 
 function removeThrottleData (string key) {
+    system:println("removeThrottleData() in ThrottleHolder");
     throttleDataMap = getMapFromHolder("throttleDataMap");
     maps:remove(throttleDataMap, key);
     mapHolder:putMapEntry("throttleDataMap", throttleDataMap);
 }
 
 function addKeyTemplate (string key, string value) {
+    system:println("addKeyTemplate() in ThrottleHolder");
     keyTemplateMap = getMapFromHolder("keyTemplateMap");
     keyTemplateMap[key] = value;
     mapHolder:putMapEntry("keyTemplateMap", keyTemplateMap);
@@ -35,6 +38,7 @@ function addKeyTemplate (string key, string value) {
 }
 
 function removeKeyTemplate (string key) {
+    system:println("removeKeyTemplate() in ThrottleHolder");
     keyTemplateMap = getMapFromHolder("keyTemplateMap");
     maps:remove(keyTemplateMap, key);
     mapHolder:putMapEntry("keyTemplateMap", keyTemplateMap);
@@ -46,11 +50,13 @@ function removeKeyTemplate (string key) {
 }
 
 function getKeyTemplateMap () (map) {
+    system:println("getKeyTemplateMap() in ThrottleHolder");
     keyTemplateMap = getMapFromHolder("keyTemplateMap");
     return keyTemplateMap;
 }
 
 function getThrottleNextAccessTimestamp (string key) (string) {
+    system:println("getThrottleNextAccessTimestamp() in ThrottleHolder");
     errors:TypeCastError err;
     string value;
     throttleDataMap = getMapFromHolder("throttleDataMap");
@@ -59,22 +65,27 @@ function getThrottleNextAccessTimestamp (string key) (string) {
 }
 
 function isBlockingConditionsPresent () (boolean) {
+    system:println("isBlockingConditionsPresent() in ThrottleHolder");
     return isBlockingConditionsPresent;
 }
 
 function setBlockingConditionsPresent (boolean blockingConditionsPresent) {
+    system:println("setBlockingConditionsPresent() in ThrottleHolder");
     isBlockingConditionsPresent = blockingConditionsPresent;
 }
 
 function isKeyTemplatesPresent () (boolean) {
+    system:println("isKeyTemplatesPresent() in ThrottleHolder");
     return isKeyTemplatesPresent;
 }
 
 function setKeyTemplatesPresent (boolean keyTemplatesPresent) {
+    system:println("setKeyTemplatesPresent() in ThrottleHolder");
     isKeyTemplatesPresent = keyTemplatesPresent;
 }
 
 function isRequestBlocked (string apiBlockingKey, string applicationBlockingKey, string userBlockingKey, string ipBlockingKey) (boolean) {
+    system:println("isRequestBlocked() in ThrottleHolder");
     map blockConditions = getBlockConditionMap();
     return (blockConditions[apiBlockingKey] != null ||
             blockConditions[applicationBlockingKey] != null ||
@@ -82,6 +93,7 @@ function isRequestBlocked (string apiBlockingKey, string applicationBlockingKey,
             blockConditions[ipBlockingKey] != null || isIpRangeBlocked(ipBlockingKey, blockConditions));
 }
 function isIpRangeBlocked (string ipBlockingKey, map conditionsMap) (boolean) {
+    system:println("isIpRangeBlocked() in ThrottleHolder");
     boolean status = false;
     if (ipBlockingKey != "") {
         int longValueOfIp = apimgtUtil:convertIpToLong(ipBlockingKey);
@@ -106,6 +118,7 @@ function isIpRangeBlocked (string ipBlockingKey, map conditionsMap) (boolean) {
 }
 
 function isThrottled (string throttleKey, message msg) (boolean) {
+    system:println("isThrottled() in ThrottleHolder");
     throttleDataMap = getMapFromHolder("throttleDataMap");
     if (throttleDataMap[throttleKey] != null) {
 
@@ -129,6 +142,7 @@ function isThrottled (string throttleKey, message msg) (boolean) {
 }
 
 function getMapFromHolder(string mapName)(map){
+    system:println("getMapfromHolder() in ThrottleHolder");
     any object = mapHolder:getMapEntry(mapName);
     var retrivedMap, castErr = (map)object;
     if(castErr != null) {
@@ -139,6 +153,7 @@ function getMapFromHolder(string mapName)(map){
 }
 
 function addThrottleMaps()(boolean){
+    system:println("addThrottleMaps() in ThrottleHolder");
     map throttleMap = {};
     map keyTemplateMap = {};
     mapHolder:putMapEntry("throttleDataMap", throttleMap);

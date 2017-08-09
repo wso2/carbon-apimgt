@@ -21,6 +21,7 @@ service<jms> ThrottleJmsService {
 
     @http:GET {}
     resource onMessage (message m) {
+        system:println("resource onMessage() in throttleEventListner");
         try {
             
             system:println("OnMessage fired ............");
@@ -69,6 +70,7 @@ service<jms> ThrottleJmsService {
 }
 
 function handleThrottleUpdateMessage(json event){
+    system:println("handleThrottleUpdateMessage() in throttleEventListner");
     errors:TypeCastError err;
     string throttleKey;
     throttleKey, err = (string)event.throttleKey;
@@ -87,7 +89,7 @@ function handleThrottleUpdateMessage(json event){
 
 
 function handleKeyTemplateMessage(json event) {
-
+    system:println("handleKeyTemplateMessage() in throttleEventListner");
     string eventMsg;
     errors:TypeCastError err;
     eventMsg, err = (string )event[Constants:KEY_TEMPLATE_KEY];

@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.ballerina.util as apimgtUtil;
 service<jms> apimPublisherEventListner {
 
     resource onMessage (message m) {
+        system:println("resource onMessage() in apimPublisherEventListner");
             json event = messages:getJsonPayload(m);
             errors:TypeCastError err;
             string eventType;
