@@ -51,7 +51,7 @@ public class SelfSignupApiServiceImplTestCase {
         APIStore apiStore = Mockito.mock(APIStoreImpl.class);
 
         PowerMockito.mockStatic(RestApiUtil.class);
-        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        PowerMockito.when(RestApiUtil.getConsumer()).thenReturn(apiStore);
         PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
 
         User user = new User();
