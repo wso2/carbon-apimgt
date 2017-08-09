@@ -352,6 +352,47 @@ public class ApiFileDAOImpl implements ApiDAO {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public boolean isWSDLArchiveExists(String apiId) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isWSDLExists(String apiId) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getWSDL(String apiId) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public InputStream getWSDLArchive(String apiId) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void removeWSDL(String apiId) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override public void addOrUpdateWSDL(String apiId, byte[] wsdlContent, String createdBy)
+            throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void addOrUpdateWSDLArchive(String apiID, InputStream inputStream, String updatedBy)
+            throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void removeWSDLArchiveOfAPI(String apiId) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * @see ApiDAO#getGatewayConfigOfAPI(String apiID)
      */

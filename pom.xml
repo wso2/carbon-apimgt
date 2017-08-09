@@ -523,6 +523,21 @@
                 <artifactId>powermock-module-junit4</artifactId>
                 <version>${powermock.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.woden.wso2</groupId>
+                <artifactId>woden</artifactId>
+                <version>${apache.woden.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>wsdl4j.wso2</groupId>
+                <artifactId>wsdl4j</artifactId>
+                <version>${wsdl4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ws.commons.schema.wso2</groupId>
+                <artifactId>XmlSchema</artifactId>
+                <version>${xmlschema.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -889,5 +904,8 @@
         <nimbusds.import.version.range>[2.26.1, 2.26.2)</nimbusds.import.version.range>
         <geronimo-jms.version>1.1.0.wso2v1</geronimo-jms.version>
         <geronimo-jms.import.version.range>[1.1.0, 1.2.0)</geronimo-jms.import.version.range>
+        <apache.woden.version>1.0.0.M9-wso2v1</apache.woden.version>
+        <wsdl4j.version>1.6.2.wso2v4</wsdl4j.version>
+        <xmlschema.version>1.4.7.wso2v2</xmlschema.version>
     </properties>
 </project>

@@ -239,6 +239,62 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+################################################################
+# The WSDL resource of "Individual API" resource APIs
+################################################################
+
+  /apis/{apiId}/wsdl:
+#-----------------------------------------------------
+# Retrieve the API swagger definition
+#-----------------------------------------------------
+    get:
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9292/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/wsdl"
+      x-wso2-request: |
+        GET https://127.0.0.1:9292/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/wsdl
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 329\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"x-wso2-security\": {\"apim\": {\"x-wso2-scopes\": []}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}"
+      summary: Get WSDL definition
+      description: |
+        This operation can be used to retrieve the swagger definition of an API.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/labelName-Q'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
+      tags:
+        - API (individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Requested WSDL document of the API is returned
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
 ######################################################
 # The "Document Collection" resource APIs
 ######################################################
@@ -2706,6 +2762,15 @@ parameters:
     required: true
     type: string
 
+# List of labels
+# Specified as part of the query string
+  labelName-Q:
+    name: labelName
+    in: query
+    description: |
+      Name of the label
+    type: string
+
 ######################################################
 # The resources used by some of the APIs above within the message body
 ######################################################
@@ -2892,6 +2957,8 @@ definitions:
             type: array
             items:
               type: string
+          wsdlUri:
+            type: string
           businessInformation:
             properties:
               businessOwner:

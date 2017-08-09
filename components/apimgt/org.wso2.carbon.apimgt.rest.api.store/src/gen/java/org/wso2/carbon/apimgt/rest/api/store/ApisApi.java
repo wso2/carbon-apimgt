@@ -321,6 +321,27 @@ public class ApisApi implements Microservice  {
         return delegate.apisApiIdUserRatingPut(apiId,body, request);
     }
     @GET
+    @Path("/{apiId}/wsdl")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Get WSDL definition", notes = "This operation can be used to retrieve the swagger definition of an API. ", response = void.class, tags={ "API (individual)", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Requested WSDL document of the API is returned ", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = void.class) })
+    public Response apisApiIdWsdlGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
+,@ApiParam(value = "Name of the label ") @QueryParam("labelName") String labelName
+,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
+,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
+, @Context Request request)
+    throws NotFoundException {
+        return delegate.apisApiIdWsdlGet(apiId,labelName,ifNoneMatch,ifModifiedSince, request);
+    }
+    @GET
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })

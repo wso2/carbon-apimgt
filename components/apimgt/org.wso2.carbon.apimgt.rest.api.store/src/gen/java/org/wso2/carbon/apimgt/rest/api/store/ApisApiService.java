@@ -84,6 +84,11 @@ public abstract class ApisApiService {
     public abstract Response apisApiIdUserRatingPut(String apiId
  ,RatingDTO body
  , Request request) throws NotFoundException;
+    public abstract Response apisApiIdWsdlGet(String apiId
+ ,String labelName
+ ,String ifNoneMatch
+ ,String ifModifiedSince
+ , Request request) throws NotFoundException;
     public abstract Response apisGet(Integer limit
  ,Integer offset
  ,String query

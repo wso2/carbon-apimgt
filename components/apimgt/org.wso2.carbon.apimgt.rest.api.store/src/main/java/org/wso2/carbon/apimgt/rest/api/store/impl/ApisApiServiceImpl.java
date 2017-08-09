@@ -1,5 +1,8 @@
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -8,11 +11,13 @@ import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -20,6 +25,8 @@ import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Rating;
+import org.wso2.carbon.apimgt.core.models.WSDLArchiveInfo;
+import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -522,7 +529,12 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
 
             API api = apiStore.getAPIbyUUID(apiId);
+            boolean isWSDLExists = apiStore.isWSDLExists(apiId);
             apiToReturn = APIMappingUtil.toAPIDTO(api);
+            if (isWSDLExists) {
+                String wsdlUri = RestApiConstants.WSDL_URI_TEMPLATE.replace(RestApiConstants.APIID_PARAM, api.getId());
+                apiToReturn.setWsdlUri(wsdlUri);
+            }
             return Response.ok().entity(apiToReturn)
                     .header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"")
                     .build();
@@ -645,6 +657,100 @@ public class ApisApiServiceImpl extends ApisApiService {
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorHandler);
             log.error(errorMessage, e);
             return Response.status(errorHandler.getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+    /**
+     * Retrieves the WSDL of the particular API. If the WSDL is added as a single file/URL, the text content of the WSDL
+     * will be retrived. If the WSDL is added as an archive, the binary content of the archive will be retrieved.
+     * 
+     * @param apiId UUID of API
+     * @param labelName Name of the label
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param request msf4j request
+     * @return WSDL archive/file content
+     * @throws NotFoundException
+     */
+    @Override
+    public Response apisApiIdWsdlGet(String apiId, String labelName, String ifNoneMatch,
+            String ifModifiedSince, Request request) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername();
+        WSDLArchiveInfo wsdlArchiveInfo = null;
+        try {
+            APIStore apiStore = RestApiUtil.getConsumer(username);
+            String wsdlString;
+
+            boolean isWSDLArchiveExists = apiStore.isWSDLArchiveExists(apiId);
+            if (log.isDebugEnabled()) {
+                log.debug("API has WSDL archive?: " + isWSDLArchiveExists);
+            }
+            if (isWSDLArchiveExists) {
+                if (StringUtils.isBlank(labelName)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Label not provided since retrieving WSDL archive for default label. API: " + apiId);
+                    }
+                    wsdlArchiveInfo = apiStore.getAPIWSDLArchive(apiId, APIMgtConstants.LabelConstants.DEFAULT);
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Retrieving WSDL archive for label: " + labelName);
+                    }
+                    wsdlArchiveInfo = apiStore.getAPIWSDLArchive(apiId, labelName);
+                }
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully retrieved WSDL archive for API: " + apiId);
+                }
+                //wsdlArchiveInfo will not be null all the time so no need null check
+                File archive = new File(wsdlArchiveInfo.getAbsoluteFilePath());
+                return Response.ok(archive)
+                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE)
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\""
+                                + wsdlArchiveInfo.getFileName() + "\"")
+                        .build();
+            } else {
+                if (StringUtils.isBlank(labelName)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Label not provided since retrieving WSDL for default label. API: " + apiId);
+                    }
+                    wsdlString = apiStore.getAPIWSDL(apiId, APIMgtConstants.LabelConstants.DEFAULT);
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Retrieving WSDL for label: " + labelName);
+                    }
+                    wsdlString = apiStore.getAPIWSDL(apiId, labelName);
+                }
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully retrieved WSDL for API: " + apiId);
+                }
+                if (!StringUtils.isEmpty(wsdlString)) {
+                    return Response.ok(wsdlString)
+                            .header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN)
+                            .build();
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("WSDL has no content for API: " + apiId);
+                    }
+                    return Response.noContent().build();
+                }
+            }
+        } catch (APIManagementException e) {
+            Map<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error("Error while getting WSDL for API:" + apiId + " and label:" + labelName, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        } finally {
+            //Commented below since MSFJ fails to reply when the files are already deleted. Need to fix this properly
+            /*
+            if (wsdlArchiveInfo != null) {
+                try {
+                    APIFileUtils.deleteDirectory(wsdlArchiveInfo.getLocation());
+                } catch (APIMgtDAOException e) {
+                    //This is not a blocker. Give a warning and continue
+                    log.warn("Error occured while deleting processed WSDL artifacts folder : " + wsdlArchiveInfo
+                            .getLocation());
+                }
+            }*/
         }
     }
 

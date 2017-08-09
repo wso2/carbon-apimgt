@@ -1351,7 +1351,8 @@ public class ApisApiServiceImplTestCase {
         PowerMockito.mockStatic(RestAPIPublisherUtil.class);
         PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
                 thenReturn(apiPublisher);
-        Response response = apisApiService.apisImportDefinitionPost(fis, null, "test", null, null, getRequest());
+        Response response = apisApiService
+                .apisImportDefinitionPost("SWAGGER", fis, null, "test", null, null, null, null, getRequest());
         fis.close();
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("Only one of 'file' and 'url' should be specified"));
@@ -1378,7 +1379,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doReturn(api).doThrow(new IllegalArgumentException()).when(apiPublisher).
                 getAPIbyUUID(apiId);
         Response response = apisApiService.
-                apisImportDefinitionPost(fis, null, null, null, null, getRequest());
+                apisImportDefinitionPost("SWAGGER", fis, null, null, null, null, null, null, getRequest());
         fis.close();
         assertEquals(response.getStatus(), 201);
         assertTrue(response.getEntity().toString().contains(apiId));
@@ -1399,7 +1400,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
                             .when(apiPublisher).addApiFromDefinition(fis);
         Response response = apisApiService.
-                apisImportDefinitionPost(fis, null, null, null, null, getRequest());
+                apisImportDefinitionPost("SWAGGER", fis, null, null, null, null, null, null, getRequest());
         fis.close();
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
