@@ -25,8 +25,11 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.core.models.policy.CustomPolicy;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomRuleDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomRuleListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.mappings.CustomPolicyMappingUtil;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class CustomPolicyMappingUtilTest {
@@ -53,5 +56,34 @@ public class CustomPolicyMappingUtilTest {
         Assert.assertEquals(policy.getPolicyName(), name);
     }
 
+    @Test(description = "Convert List<CustomPolicy> to CustomRuleListDTO")
+    public void fromCustomPolicyArrayToListDTOTest() throws Exception   {
+        CustomPolicy customPolicy1 = new CustomPolicy("namw1");
+        customPolicy1.setDescription("custom policy desc1");
+        customPolicy1.setKeyTemplate("keytemplate1");
+        customPolicy1.setSiddhiQuery("sample query1");
 
+        CustomPolicy customPolicy2 = new CustomPolicy("namw2");
+        customPolicy2.setDescription("custom policy desc2");
+        customPolicy2.setKeyTemplate("keytemplate2");
+        customPolicy2.setSiddhiQuery("sample query2");
+        List<CustomPolicy> customPolicyList = new ArrayList<>();
+        customPolicyList.add(customPolicy1);
+        customPolicyList.add(customPolicy2);
+        CustomRuleListDTO listDTO = CustomPolicyMappingUtil.fromCustomPolicyArrayToListDTO(customPolicyList);
+
+        Assert.assertEquals((Integer) customPolicyList.size(), listDTO.getCount());
+        Assert.assertEquals(customPolicy1.getPolicyName(), listDTO.getList().get(0).getPolicyName());
+        Assert.assertEquals(customPolicy1.getDisplayName(), listDTO.getList().get(0).getDisplayName());
+        Assert.assertEquals(customPolicy1.getKeyTemplate(), listDTO.getList().get(0).getKeyTemplate());
+        Assert.assertEquals(customPolicy1.getSiddhiQuery(), listDTO.getList().get(0).getSiddhiQuery());
+        Assert.assertEquals(customPolicy1.getDescription(), listDTO.getList().get(0).getDescription());
+
+        Assert.assertEquals(customPolicy2.getPolicyName(), listDTO.getList().get(1).getPolicyName());
+        Assert.assertEquals(customPolicy2.getDisplayName(), listDTO.getList().get(1).getDisplayName());
+        Assert.assertEquals(customPolicy2.getKeyTemplate(), listDTO.getList().get(1).getKeyTemplate());
+        Assert.assertEquals(customPolicy2.getSiddhiQuery(), listDTO.getList().get(1).getSiddhiQuery());
+        Assert.assertEquals(customPolicy2.getDescription(), listDTO.getList().get(1).getDescription());
+
+    }
 }

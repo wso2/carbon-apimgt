@@ -20,15 +20,9 @@
 package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
 import org.testng.annotations.Test;
-import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.models.Label;
-import org.wso2.carbon.apimgt.core.models.User;
-import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
-import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
-import org.wso2.carbon.apimgt.rest.api.store.common.SampleObjectCreator;
+import org.wso2.carbon.apimgt.rest.api.store.common.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.rest.api.store.dto.LabelListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.UserDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,8 +34,8 @@ public class LabelMappingUtilTestCase {
     @Test
     public void testToLabelListDTO() {
         List<Label> labelList = new ArrayList<>();
-        Label label1 = SampleObjectCreator.createLabel("label1").build();
-        Label label2 = SampleObjectCreator.createLabel("label2").build();
+        Label label1 = SampleTestObjectCreator.createLabel("label1").build();
+        Label label2 = SampleTestObjectCreator.createLabel("label2").build();
         labelList.add(label1);
         labelList.add(label2);
         LabelListDTO labelListDTO = LabelMappingUtil.toLabelListDTO(labelList);

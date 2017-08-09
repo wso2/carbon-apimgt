@@ -76,13 +76,6 @@ public class BlockingConditionMappingUtil {
             dto.setIpCondition(fromBlockConditionToIpConditionDTO(blockCondition));
         }
         String conditionValue = blockCondition.getConditionValue();
-        if (APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_IP.equals(blockCondition.getConditionType())) {
-            int index = conditionValue.indexOf(":");
-            if (index > -1) {
-                // Removing Tenant Domain from IP
-                conditionValue = conditionValue.substring(index + 1, conditionValue.length());
-            }
-        }
         dto.setConditionValue(conditionValue);
         return dto;
     }
