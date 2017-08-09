@@ -45,16 +45,16 @@ public class TierMappingUtilTestCase {
         assertEquals(tierListDTO.getList().get(0).getName(), policy1.getPolicyName());
         assertEquals(tierListDTO.getList().get(0).getDescription(), policy1.getDescription());
         assertEquals(tierListDTO.getList().get(0).getTierLevel().name(), "SUBSCRIPTION");
-        assertEquals(tierListDTO.getList().get(0).getUnitTime(), policy1.
+        assertEquals(tierListDTO.getList().get(0).getUnitTime().longValue(), policy1.
                                                         getDefaultQuotaPolicy().getLimit().getUnitTime());
-        assertEquals(tierListDTO.getList().get(0).getRequestCount(), ((RequestCountLimit)
+        assertEquals(tierListDTO.getList().get(0).getRequestCount().longValue(), ((RequestCountLimit)
                                                     policy1.getDefaultQuotaPolicy().getLimit()).getRequestCount());
         assertEquals(tierListDTO.getList().get(1).getName(), policy2.getPolicyName());
         assertEquals(tierListDTO.getList().get(1).getDescription(), policy2.getDescription());
         assertEquals(tierListDTO.getList().get(1).getTierLevel().name(), "SUBSCRIPTION");
-        assertEquals(tierListDTO.getList().get(1).getUnitTime(), policy2.
+        assertEquals(tierListDTO.getList().get(1).getUnitTime().longValue(), policy2.
                 getDefaultQuotaPolicy().getLimit().getUnitTime());
-        assertEquals(tierListDTO.getList().get(1).getRequestCount(), ((BandwidthLimit)
+        assertEquals(tierListDTO.getList().get(1).getRequestCount().longValue(), ((BandwidthLimit)
                 policy2.getDefaultQuotaPolicy().getLimit()).getDataAmount());
     }
 }

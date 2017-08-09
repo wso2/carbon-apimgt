@@ -24,7 +24,6 @@ package org.wso2.carbon.apimgt.rest.api.admin.throttling.mappings;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
-import org.wso2.carbon.apimgt.core.models.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
@@ -46,7 +45,7 @@ public class ApplicationThrottlePolicyMappingUtilTest {
     String uuid = UUID.randomUUID().toString();
     String displayName = "Sample Display Name";
 
-    @Test
+    @Test(description = "Convert from Policy to DTO")
     public void fromApplicationThrottlePolicyToDTOTest() throws Exception   {
 
         Policy policy = new ApplicationPolicy(uuid,policyName);
@@ -66,7 +65,7 @@ public class ApplicationThrottlePolicyMappingUtilTest {
         Assert.assertEquals(dto.getDisplayName(), displayName);
     }
 
-    @Test
+    @Test(description = "Convert from DTO to Policy")
     public void fromApplicationThrottlePolicyDTOToModelTest() throws    Exception   {
         ApplicationThrottlePolicyDTO dto = new ApplicationThrottlePolicyDTO();
         dto.setDisplayName(displayName);
@@ -93,7 +92,7 @@ public class ApplicationThrottlePolicyMappingUtilTest {
 
     }
 
-    @Test
+    @Test(description = "Convert from Policy Array to DTO")
     public void testFromApplicationPolicyArrayToListDTO() throws Exception   {
         List<ApplicationPolicy> appPolicies = new ArrayList<>();
         ApplicationPolicy policy1 = SampleTestObjectCreator.createApplicationPolicyWithRequestLimit("Gold");
