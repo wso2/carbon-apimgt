@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.APIMgtAdminServiceImpl;
 import org.wso2.carbon.apimgt.rest.api.admin.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.admin.impl.LabelsApiServiceImpl;
@@ -60,8 +61,37 @@ public class LabelsApiServiceImplTest {
                 labelsApiService.labelsLabelIdDelete(labelId, null, null, getRequest());
 
         Assert.assertEquals(response.getStatus(),200);
+    }
 
+    @Test
+    public void labelsLabelIdDeleteTestException()    throws NotFoundException, APIManagementException {
+        printTestMethodName();
 
+        String labelId = UUID.randomUUID().toString();
+        LabelsApiServiceImpl labelsApiService = new LabelsApiServiceImpl();
+        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
+
+        Mockito.doThrow(new APIManagementException("Error", ExceptionCodes.APIMGT_DAO_EXCEPTION)).when(adminService).deleteLabel(labelId);
+        javax.ws.rs.core.Response response =
+                labelsApiService.labelsLabelIdDelete(labelId, null, null, getRequest());
+
+        Assert.assertEquals(500, response.getStatus());
+    }
+
+    @Test
+    public void labelsLabelIdDeleteTestNullLabel()    throws NotFoundException, APIManagementException {
+        printTestMethodName();
+        LabelsApiServiceImpl labelsApiService = new LabelsApiServiceImpl();
+        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
+
+        javax.ws.rs.core.Response response =
+                labelsApiService.labelsLabelIdDelete(null, null, null, getRequest());
+
+        Assert.assertEquals(400, response.getStatus());
     }
 
 
