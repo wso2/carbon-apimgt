@@ -4,6 +4,9 @@
         <%
         (function() {
                 include("jagg.jag");
+                var i18n = require("i18n");
+                var localeResourcesBasePath = "/site/conf/locales/jaggery/";
+                i18n.init(request, localeResourcesBasePath);
                 var site = require("/site/conf/site.json");
                 var log = new Log();
                 var samlResponse = request.getParameter("SAMLResponse");
@@ -166,16 +169,57 @@
                         if(hasPublisherAccess){
                         showURL=hasPublisherAccess.permitted;
                         }
-                        jagg.setUser({username:ssoRelyingParty.getLoggedInUser(sessionId), cookie:null, hasPublisherAccess:showURL});
-                        sessionId = session.getId();
-                        ssoRelyingParty.setSessionAuthenticated(sessionId, samlResponse, session);
-                        ssoRelyingParty.addSession(session);
-                        session.put("showLogin", "false");
-                        session.put("LOGGED_IN_USER",ssoRelyingParty.getLoggedInUser(sessionId));
+
                         //First check whether user is having sufficent permissions [create/publish]
                          if(!isUserPermitted.permitted ){
-                         response.sendRedirect("../site/pages/logout.jag");
-                         } else{
+        %>
+        <script src="../site/themes/wso2/libs/jquery_1.11.0/jquery-1.11.3.min.js"></script>
+        <script src="../site/themes/wso2/libs/bootstrap_3.3.5/js/bootstrap.js"></script>
+        <link rel="stylesheet" href="../site/themes/wso2/libs/bootstrap_3.3.5/css/bootstrap.css">
+        <style>
+        </style>
+
+        <script>
+
+        $(document).ready(function(){
+             $('#infoModal').modal({
+                backdrop: 'static',
+                keyboard: false
+            })
+        });
+
+        function redirectFunction() {
+            window.location = <%=requestedURI%>;
+        }
+        </script>
+
+        <div class="modal fade" id="infoModal" role="dialog">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title"><%=i18n.localize("403: User Not Permitted")%></h4>
+                    </div>
+                    <div class="modal-body">
+                        <p><%=i18n.localize("User is not permitted to login to store.")%></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal" onclick="redirectFunction()">
+                        <%=i18n.localize("Return to public store")%></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <%
+                        } else {
+                            jagg.setUser({username:ssoRelyingParty.getLoggedInUser(sessionId), cookie:null, hasPublisherAccess:showURL});
+                            sessionId = session.getId();
+                            ssoRelyingParty.setSessionAuthenticated(sessionId, samlResponse, session);
+                            ssoRelyingParty.addSession(session);
+                            session.put("showLogin", "false");
+                            session.put("LOGGED_IN_USER",ssoRelyingParty.getLoggedInUser(sessionId));
+
 			            var username = ssoRelyingParty.getLoggedInUser(sessionId);
 			            var manager = jagg.module("manager");
           		        var  store = manager.getAPIStoreObj();
