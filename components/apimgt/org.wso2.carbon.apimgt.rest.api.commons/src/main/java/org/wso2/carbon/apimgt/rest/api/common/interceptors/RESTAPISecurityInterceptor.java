@@ -195,6 +195,7 @@ public class RESTAPISecurityInterceptor implements Interceptor {
         responder.setStatus(errorHandler.getHttpStatusCode());
         responder.setHeader(javax.ws.rs.core.HttpHeaders.WWW_AUTHENTICATE, RestApiConstants.AUTH_TYPE_OAUTH2);
         responder.setEntity(errorDTO);
+        responder.setMediaType(MediaType.APPLICATION_JSON);
         responder.send();
     }
 }

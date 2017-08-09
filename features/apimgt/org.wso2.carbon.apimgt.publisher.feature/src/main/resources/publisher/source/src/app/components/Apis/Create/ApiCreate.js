@@ -18,6 +18,8 @@
 import React, {Component} from 'react'
 import ApiCreateEndpoint from './Endpoint/ApiCreateEndpoint'
 import ApiCreateSwagger from './Swagger/ApiCreateSwagger'
+import ApiCreateWSDL from './WSDL/ApiCreateWSDL'
+
 import {Route, Switch, Link} from 'react-router-dom'
 import './ApiCreate.css'
 
@@ -55,7 +57,7 @@ class ApiCreate extends Component {
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link to="/api/create/rest">
+                                        <Link to="/api/create/wsdl">
                                             <div className="test_button ch-item depth-1 ripple-effect">
                                                 <div className="ch-info-wrap">
                                                     <div className="ch-info">
@@ -112,6 +114,7 @@ class ApiCreate extends Component {
                         } />
                         <Route path={"/api/create/rest"} component={ApiCreateEndpoint}/>
                         <Route path={"/api/create/swagger"} component={ApiCreateSwagger}/>
+                        <Route path={"/api/create/wsdl"} component={ApiCreateWSDL}/>
                     </Switch>
                     {/*<ApiCreateEndpoint/>*/}
 

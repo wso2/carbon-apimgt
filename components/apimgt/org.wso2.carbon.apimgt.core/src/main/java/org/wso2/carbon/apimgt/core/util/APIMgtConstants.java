@@ -25,6 +25,8 @@ package org.wso2.carbon.apimgt.core.util;
  */
 public class APIMgtConstants {
 
+    public static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
+    public static final String ENCODING_UTF_8 = "UTF-8";
     public static final String DEPRECATE_PREVIOUS_VERSIONS = "Deprecate old versions after publish the API";
     public static final String REQUIRE_RE_SUBSCRIPTIONS = "Require re-subscription when publish the API";
     public static final String CHECK_LIST_ITEM_CHANGE_EVENT = "CheckListItemChange";
@@ -176,6 +178,19 @@ public class APIMgtConstants {
         public static final String THUMBNAIL_FILE_NAME = "thumbnail";
         public static final String ENDPOINTS_ROOT_DIRECTORY = "Endpoints";
     }
+
+
+    /**
+     * WSDL Constants
+     */
+    public static class WSDLConstants {
+        public static final String WSDL_ARCHIVES_FOLDERNAME = "WSDL-archives";
+        public static final String WSDL_ARCHIVE_FILENAME = "wsdl-archive.zip";
+        public static final String EXTRACTED_WSDL_ARCHIVE_FOLDERNAME = "extracted";
+        public static final String WSDL_VERSION_11 = "1.1";
+        public static final String WSDL_VERSION_20 = "2.0";
+    }
+
 
     /**
      * Throttle policy related constants
@@ -481,4 +496,12 @@ public class APIMgtConstants {
         public static final String STORE = "store";
         public static final String ADMIN = "admin";
     }
+
+    /**
+     * Label related constants
+     */
+    public static class LabelConstants {
+        public static final String DEFAULT = "Default";
+    }
+    
 }

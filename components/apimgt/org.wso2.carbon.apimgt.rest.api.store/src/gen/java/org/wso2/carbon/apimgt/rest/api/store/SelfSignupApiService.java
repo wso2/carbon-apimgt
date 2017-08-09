@@ -21,6 +21,5 @@ import javax.ws.rs.core.SecurityContext;
 
 public abstract class SelfSignupApiService {
     public abstract Response selfSignupPost(UserDTO body
- ,String contentType
  , Request request) throws NotFoundException;
 }

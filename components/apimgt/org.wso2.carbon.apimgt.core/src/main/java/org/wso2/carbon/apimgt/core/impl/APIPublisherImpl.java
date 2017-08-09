@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
+import org.wso2.carbon.apimgt.core.api.WSDLProcessor;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
@@ -48,6 +49,7 @@ import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
@@ -66,11 +68,14 @@ import org.wso2.carbon.apimgt.core.models.Provider;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
+import org.wso2.carbon.apimgt.core.models.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.template.APIConfigContext;
 import org.wso2.carbon.apimgt.core.template.APITemplateException;
 import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
+import org.wso2.carbon.apimgt.core.util.APIFileUtils;
+import org.wso2.carbon.apimgt.core.util.APIMWSDLUtils;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.APILCWorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
@@ -82,6 +87,8 @@ import org.wso2.carbon.lcm.core.impl.LifecycleEventManager;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
 import org.wso2.carbon.lcm.sql.beans.LifecycleHistoryBean;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -108,10 +115,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     private Map<String, EventObserver> eventObservers = new HashMap<>();
 
     public APIPublisherImpl(String username, IdentityProvider idp, KeyManager keyManager, ApiDAO apiDAO,
-                            ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO,
-                            APILifecycleManager apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO,
-                            TagDAO tagDAO, GatewaySourceGenerator gatewaySourceGenerator,
-                            APIGateway apiGatewayPublisher) {
+            ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO,
+            APILifecycleManager apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO, TagDAO tagDAO,
+            GatewaySourceGenerator gatewaySourceGenerator, APIGateway apiGatewayPublisher) {
         super(username, idp, keyManager, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, apiLifecycleManager,
                 labelDAO, workflowDAO, tagDAO, gatewaySourceGenerator, apiGatewayPublisher);
     }
@@ -234,6 +240,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         if (StringUtils.isEmpty(apiBuilder.getId())) {
             apiBuilder.id(UUID.randomUUID().toString());
         }
+
         LocalDateTime localDateTime = LocalDateTime.now();
         apiBuilder.createdTime(localDateTime);
         apiBuilder.lastUpdatedTime(localDateTime);
@@ -321,6 +328,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
                 APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
                         "successfully.", log);
+
                 // 'API_M Functions' related code
                 //Create a payload with event specific details
                 Map<String, String> eventPayload = new HashMap<>();
@@ -910,7 +918,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
     }
 
-
     /**
      * Create a new version of the <code>api</code>, with version <code>newVersion</code>
      *
@@ -971,7 +978,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
         return newVersionedId;
     }
-
 
     /**
      * Attach Documentation (without content) to an API
@@ -1327,7 +1333,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
     }
 
-
     /**
      * This method returns the lifecycle data for an API including current state,next states.
      *
@@ -1608,6 +1613,171 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
     }
 
+    @Override
+    public String getAPIWSDL(String apiId) throws APIMgtDAOException {
+        return getApiDAO().getWSDL(apiId);
+    }
+
+    @Override
+    public InputStream getAPIWSDLArchive(String apiId) throws APIMgtDAOException {
+        return getApiDAO().getWSDLArchive(apiId);
+    }
+
+    @Override
+    public String addAPIFromWSDLArchive(API.APIBuilder apiBuilder, InputStream inputStream, boolean isHttpBinding)
+            throws APIManagementException {
+        WSDLArchiveInfo archiveInfo = extractAndValidateWSDLArchive(inputStream);
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully extracted and validated WSDL file. Location: " + archiveInfo.getAbsoluteFilePath());
+        }
+
+        apiBuilder.uriTemplates(APIMWSDLUtils
+                .getUriTemplatesForWSDLOperations(archiveInfo.getWsdlInfo().getHttpBindingOperations(), isHttpBinding));
+        String uuid = addAPI(apiBuilder);
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully added the API. uuid: " + uuid);
+        }
+
+        try (InputStream fileInputStream = new FileInputStream(archiveInfo.getAbsoluteFilePath())) {
+            getApiDAO().addOrUpdateWSDLArchive(uuid, fileInputStream, getUsername());
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully added/updated the WSDL archive. uuid: " + uuid);
+            }
+
+            if (APIMgtConstants.WSDLConstants.WSDL_VERSION_20.equals(archiveInfo.getWsdlInfo().getVersion())) {
+                log.info("Extraction of HTTP Binding operations is not supported for WSDL 2.0.");
+            }
+            return uuid;
+        } catch (IOException e) {
+            throw new APIMgtWSDLException("Unable to process WSDL archive at " + archiveInfo.getAbsoluteFilePath(), e,
+                    ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
+        } finally {
+            try {
+                APIFileUtils.deleteDirectory(archiveInfo.getLocation());
+            } catch (APIMgtDAOException e) {
+                //This is not a blocker. Give a warning and continue
+                log.warn("Error occured while deleting processed WSDL artifacts folder : " + archiveInfo.getLocation());
+            }
+        }
+    }
+
+    @Override
+    public String addAPIFromWSDLFile(API.APIBuilder apiBuilder, InputStream inputStream, boolean isHttpBinding)
+            throws APIManagementException {
+        byte[] wsdlContent;
+        try {
+            wsdlContent = IOUtils.toByteArray(inputStream);
+        } catch (IOException e) {
+            throw new APIMgtWSDLException("Error while converting input stream to byte array", e,
+                    ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
+        }
+        WSDLProcessor processor = WSDLProcessFactory.getInstance().getWSDLProcessor(wsdlContent);
+        apiBuilder.uriTemplates(APIMWSDLUtils
+                .getUriTemplatesForWSDLOperations(processor.getWsdlInfo().getHttpBindingOperations(), isHttpBinding));
+        if (!processor.canProcess()) {
+            throw new APIMgtWSDLException("Unable to process WSDL by the processor " + processor.getClass().getName(),
+                    ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
+        }
+
+        String uuid = addAPI(apiBuilder);
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully added the API. uuid: " + uuid);
+        }
+        getApiDAO().addOrUpdateWSDL(uuid, wsdlContent, getUsername());
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully added the WSDL file to database. API uuid: " + uuid);
+        }
+        if (APIMgtConstants.WSDLConstants.WSDL_VERSION_20.equals(processor.getWsdlInfo().getVersion())) {
+            log.info("Extraction of HTTP Binding operations is not supported for WSDL 2.0.");
+        }
+        return uuid;
+    }
+
+    @Override
+    public String addAPIFromWSDLURL(API.APIBuilder apiBuilder, String wsdlUrl, boolean isHttpBinding)
+            throws APIManagementException {
+        WSDLProcessor processor = WSDLProcessFactory.getInstance().getWSDLProcessor(wsdlUrl);
+        if (!processor.canProcess()) {
+            throw new APIMgtWSDLException("Unable to process WSDL by the processor " + processor.getClass().getName(),
+                    ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
+        }
+        apiBuilder.uriTemplates(APIMWSDLUtils
+                .getUriTemplatesForWSDLOperations(processor.getWsdlInfo().getHttpBindingOperations(), isHttpBinding));
+        String uuid = addAPI(apiBuilder);
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully added the API. uuid: " + uuid);
+        }
+        byte[] wsdlContentBytes = processor.getWSDL();
+        getApiDAO().addOrUpdateWSDL(uuid, wsdlContentBytes, getUsername());
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully added the content of WSDL URL to database. WSDL URL: " + wsdlUrl);
+        }
+        if (APIMgtConstants.WSDLConstants.WSDL_VERSION_20.equals(processor.getWsdlInfo().getVersion())) {
+            log.info("Extraction of HTTP Binding operations is not supported for WSDL 2.0.");
+        }
+        return uuid;
+    }
+
+    @Override
+    public String updateAPIWSDL(String apiId, InputStream inputStream)
+            throws APIMgtDAOException, APIMgtWSDLException {
+        byte[] wsdlContent;
+        try {
+            wsdlContent = IOUtils.toByteArray(inputStream);
+            WSDLProcessor processor = WSDLProcessFactory.getInstance().getWSDLProcessor(wsdlContent);
+            if (!processor.canProcess()) {
+                throw new APIMgtWSDLException(
+                        "Unable to process WSDL by the processor " + processor.getClass().getName(),
+                        ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully validated the content of WSDL. API uuid: " + apiId);
+            }
+            getApiDAO().addOrUpdateWSDL(apiId, wsdlContent, getUsername());
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully added WSDL to the DB. API uuid: " + apiId);
+            }
+            return new String(wsdlContent, APIMgtConstants.ENCODING_UTF_8);
+        } catch (IOException e) {
+            throw new APIMgtWSDLException("Error while updating WSDL of API " + apiId, e,
+                    ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
+        }
+    }
+
+    @Override
+    public void updateAPIWSDLArchive(String apiId, InputStream inputStream)
+            throws APIMgtDAOException, APIMgtWSDLException {
+        WSDLArchiveInfo archiveInfo = null;
+        InputStream fileInputStream = null;
+        try {
+            archiveInfo = extractAndValidateWSDLArchive(inputStream);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully extracted and validated WSDL file. Location: " + archiveInfo
+                        .getAbsoluteFilePath());
+            }
+            fileInputStream = new FileInputStream(archiveInfo.getAbsoluteFilePath());
+            getApiDAO().addOrUpdateWSDLArchive(apiId, fileInputStream, getUsername());
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully updated the WSDL archive in DB. API uuid: " + apiId);
+            }
+        } catch (IOException e) {
+            throw new APIMgtWSDLException("Unable to process WSDL archive at " + archiveInfo.getAbsoluteFilePath(), e,
+                    ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
+        } finally {
+            try {
+                if (fileInputStream != null) {
+                    fileInputStream.close();
+                }
+                if (archiveInfo != null) {
+                    APIFileUtils.deleteDirectory(archiveInfo.getLocation());
+                }
+            } catch (APIMgtDAOException | IOException e) {
+                //This is not a blocker. Give a warning and continue
+                log.warn("Error occured while deleting processed WSDL artifacts folder : " + archiveInfo.getLocation());
+            }
+        }
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -1746,7 +1916,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public void notifyObservers(Event event, String username, ZonedDateTime eventTime,
-                                Map<String, String> metaData) {
+            Map<String, String> metaData) {
 
         Set<Map.Entry<String, EventObserver>> eventObserverEntrySet = eventObservers.entrySet();
         eventObserverEntrySet.forEach(eventObserverEntry -> eventObserverEntry.getValue().captureEvent(event,
@@ -1808,6 +1978,40 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
     }
 
+    @Override
+    public boolean isEndpointExist(String name) throws APIManagementException {
+        try {
+            return getApiDAO().isEndpointExist(name);
+        } catch (APIMgtDAOException e) {
+            String msg = "Couldn't find existence of endpoint :" + name;
+            throw new APIManagementException(msg, e.getErrorHandler());
+        }
+    }
+
+    @Override
+    public WSDLArchiveInfo extractAndValidateWSDLArchive(InputStream inputStream)
+            throws APIMgtDAOException, APIMgtWSDLException {
+
+        String path = System.getProperty(APIMgtConstants.JAVA_IO_TMPDIR)
+                + File.separator + APIMgtConstants.WSDLConstants.WSDL_ARCHIVES_FOLDERNAME
+                + File.separator + UUID.randomUUID().toString();
+        String archivePath = path + File.separator + APIMgtConstants.WSDLConstants.WSDL_ARCHIVE_FILENAME;
+        String extractedLocation = APIFileUtils.extractUploadedArchive(inputStream,
+                APIMgtConstants.WSDLConstants.EXTRACTED_WSDL_ARCHIVE_FOLDERNAME, archivePath, path);
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully extracted WSDL archive. Location: " + extractedLocation);
+        }
+
+        WSDLProcessor processor = WSDLProcessFactory.getInstance().getWSDLProcessorForPath(extractedLocation);
+        if (!processor.canProcess()) {
+            throw new APIMgtWSDLException("Unable to process WSDL by the processor " + processor.getClass().getName(),
+                    ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
+        }
+        WSDLArchiveInfo archiveInfo = new WSDLArchiveInfo(path, APIMgtConstants.WSDLConstants.WSDL_ARCHIVE_FILENAME);
+        archiveInfo.setWsdlInfo(processor.getWsdlInfo());
+        return archiveInfo;
+    }
+
     private void cleanupPendingTaskForAPIStateChange(String apiId) throws APIManagementException {
         String workflowExtRef = getWorkflowDAO().getExternalWorkflowReferenceForPendingTask(apiId,
                 WorkflowConstants.WF_TYPE_AM_API_STATE);
@@ -1825,16 +2029,4 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isEndpointExist(String name) throws APIManagementException {
-        try {
-            return getApiDAO().isEndpointExist(name);
-        } catch (APIMgtDAOException e) {
-            String msg = "Couldn't find existence of endpoint :" + name;
-            throw new APIManagementException(msg, e.getErrorHandler());
-        }
-    }
 }

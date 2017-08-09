@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.api.LabelExtractor;
+import org.wso2.carbon.apimgt.core.api.WSDLProcessor;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
@@ -52,6 +53,8 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
+import org.wso2.carbon.apimgt.core.exception.APINotFoundException;
 import org.wso2.carbon.apimgt.core.exception.APIRatingException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
@@ -76,11 +79,13 @@ import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.Tag;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.User;
+import org.wso2.carbon.apimgt.core.models.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.template.APIConfigContext;
 import org.wso2.carbon.apimgt.core.template.dto.CompositeAPIEndpointDTO;
 import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
+import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ApplicationStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
@@ -95,6 +100,7 @@ import org.wso2.carbon.apimgt.core.workflow.SubscriptionDeletionWorkflow;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExecutorFactory;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -1330,6 +1336,82 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             String msg = "Error while getting the swagger resource from url";
             log.error(msg, e);
             throw new APIManagementException(msg, ExceptionCodes.API_DEFINITION_MALFORMED);
+        }
+    }
+
+    @Override
+    public String getAPIWSDL(String apiId, String labelName)
+            throws APIMgtDAOException, APIMgtWSDLException, APINotFoundException, LabelException {
+        API api = getApiDAO().getAPI(apiId);
+        if (api == null) {
+            throw new APINotFoundException("API with id " + apiId + " not found.", ExceptionCodes.API_NOT_FOUND);
+        }
+
+        //api.getLabels() should not be null and the labels should contain labelName
+        if ((api.getLabels() == null || !api.getLabels().contains(labelName))) {
+            throw new LabelException("API with id " + apiId + " does not contain label " + labelName,
+                    ExceptionCodes.LABEL_NOT_FOUND_IN_API);
+        }
+
+        String wsdl = getApiDAO().getWSDL(apiId);
+        Label label = getLabelDAO().getLabelByName(labelName);
+
+        if (!StringUtils.isEmpty(wsdl)) {
+            WSDLProcessor processor;
+            try {
+                processor = WSDLProcessFactory.getInstance()
+                        .getWSDLProcessor(wsdl.getBytes(APIMgtConstants.ENCODING_UTF_8));
+                return new String(processor.getUpdatedWSDL(api, label), APIMgtConstants.ENCODING_UTF_8);
+            } catch (UnsupportedEncodingException e) {
+                throw new APIMgtWSDLException("WSDL content is not in utf-8 encoding", e,
+                        ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public WSDLArchiveInfo getAPIWSDLArchive(String apiId, String labelName)
+            throws APIMgtDAOException, APIMgtWSDLException, APINotFoundException, LabelException {
+        API api = getApiDAO().getAPI(apiId);
+        if (api == null) {
+            throw new APINotFoundException("API with id " + apiId + " not found.", ExceptionCodes.API_NOT_FOUND);
+        }
+
+        //api.getLabels() should not be null and the labels should contain labelName
+        if ((api.getLabels() == null || !api.getLabels().contains(labelName))) {
+            throw new LabelException("API with id " + apiId + " does not contain label " + labelName,
+                    ExceptionCodes.LABEL_NOT_FOUND_IN_API);
+        }
+
+        try (InputStream wsdlZipInputStream = getApiDAO().getWSDLArchive(apiId)) {
+            String rootPath = System.getProperty(APIMgtConstants.JAVA_IO_TMPDIR)
+                    + File.separator + APIMgtConstants.WSDLConstants.WSDL_ARCHIVES_FOLDERNAME
+                    + File.separator + UUID.randomUUID().toString();
+            String archivePath = rootPath + File.separator + APIMgtConstants.WSDLConstants.WSDL_ARCHIVE_FILENAME;
+            String extractedLocation = APIFileUtils.extractUploadedArchive(wsdlZipInputStream,
+                    APIMgtConstants.WSDLConstants.EXTRACTED_WSDL_ARCHIVE_FOLDERNAME, archivePath, rootPath);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully extracted WSDL archive in path: " + extractedLocation);
+            }
+            Label label = getLabelDAO().getLabelByName(labelName);
+            WSDLProcessor processor = WSDLProcessFactory.getInstance().getWSDLProcessorForPath(extractedLocation);
+            String wsdlPath = processor.getUpdatedWSDLPath(api, label);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully updated WSDLs in path [" + extractedLocation + "] with endpoints of label: "
+                        + labelName + " and context of API " + api.getContext());
+            }
+            String wsdlArchiveProcessedFileName =
+                    api.getProvider() + "-" + api.getName() + "-" + api.getVersion() + "-" + labelName + "-wsdl";
+            APIFileUtils.archiveDirectory(wsdlPath, rootPath, wsdlArchiveProcessedFileName);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully archived WSDL files: " + wsdlPath);
+            }
+            WSDLArchiveInfo archiveInfo = new WSDLArchiveInfo(rootPath, wsdlArchiveProcessedFileName + ".zip");
+            archiveInfo.setWsdlInfo(processor.getWsdlInfo());
+            return archiveInfo;
+        } catch (IOException e) {
+            throw new APIMgtWSDLException(e);
         }
     }
 

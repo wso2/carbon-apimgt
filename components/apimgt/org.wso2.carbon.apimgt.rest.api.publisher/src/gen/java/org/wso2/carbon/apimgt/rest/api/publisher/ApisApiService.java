@@ -8,6 +8,7 @@ import org.wso2.msf4j.formparam.FileInfo;
 import org.wso2.msf4j.Request;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
@@ -114,6 +115,15 @@ public abstract class ApisApiService {
  ,String ifMatch
  ,String ifUnmodifiedSince
  , Request request) throws NotFoundException;
+    public abstract Response apisApiIdWsdlGet(String apiId
+ ,String ifNoneMatch
+ ,String ifModifiedSince
+ , Request request) throws NotFoundException;
+    public abstract Response apisApiIdWsdlPut(String apiId
+ ,InputStream fileInputStream, FileInfo fileDetail
+ ,String ifMatch
+ ,String ifUnmodifiedSince
+ , Request request) throws NotFoundException;
     public abstract Response apisChangeLifecyclePost(String action
  ,String apiId
  ,String lifecycleChecklist
@@ -131,11 +141,18 @@ public abstract class ApisApiService {
     public abstract Response apisHead(String query
  ,String ifNoneMatch
  , Request request) throws NotFoundException;
-    public abstract Response apisImportDefinitionPost(InputStream fileInputStream, FileInfo fileDetail
+    public abstract Response apisImportDefinitionPost(String type
+ ,InputStream fileInputStream, FileInfo fileDetail
  ,String url
+ ,String additionalProperties
+ ,String implementationType
  ,String ifMatch
  ,String ifUnmodifiedSince
  , Request request) throws NotFoundException;
     public abstract Response apisPost(APIDTO body
+ , Request request) throws NotFoundException;
+    public abstract Response apisValidateDefinitionPost(String type
+ ,InputStream fileInputStream, FileInfo fileDetail
+ ,String url
  , Request request) throws NotFoundException;
 }

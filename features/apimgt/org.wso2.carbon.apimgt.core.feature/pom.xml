@@ -133,6 +133,18 @@
             <groupId>io.github.openfeign</groupId>
             <artifactId>feign-gson</artifactId>
         </dependency>
+        <dependency>
+            <groupId>wsdl4j.wso2</groupId>
+            <artifactId>wsdl4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.woden.wso2</groupId>
+            <artifactId>woden</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ws.commons.schema.wso2</groupId>
+            <artifactId>XmlSchema</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -358,6 +370,18 @@
                                 <bundle>
                                     <symbolicName>io.github.openfeign.feign-gson</symbolicName>
                                     <version>${feign.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>wsdl4j</symbolicName>
+                                    <version>${wsdl4j.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>woden</symbolicName>
+                                    <version>${apache.woden.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>XmlSchema</symbolicName>
+                                    <version>${xmlschema.version}</version>
                                 </bundle>
                             </bundles>
                         </configuration>

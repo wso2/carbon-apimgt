@@ -1883,6 +1883,122 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
+    public void testSingleWSDLForAPI() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
+                .apiDefinition(SampleTestObjectCreator.apiDefinition);
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+
+        //there can't be any WSDLs added at first
+        boolean isWSDLExists = apiDAO.isWSDLExists(api.getId());
+        Assert.assertFalse(isWSDLExists);
+        boolean isWSDLArchiveExists = apiDAO.isWSDLArchiveExists(api.getId());
+        Assert.assertFalse(isWSDLArchiveExists);
+
+        //add a WSDL
+        byte[] wsdlContentBytes = SampleTestObjectCreator.createDefaultWSDL11Content();
+        apiDAO.addOrUpdateWSDL(api.getId(), wsdlContentBytes, ADMIN);
+
+        //retrieves and check whether they are same
+        String receivedFromDB = apiDAO.getWSDL(api.getId());
+        Assert.assertEquals(new String(wsdlContentBytes), receivedFromDB);
+
+        //now there should be a single WSDL for API exists but no WSDL archives
+        isWSDLExists = apiDAO.isWSDLExists(api.getId());
+        Assert.assertTrue(isWSDLExists);
+        isWSDLArchiveExists = apiDAO.isWSDLArchiveExists(api.getId());
+        Assert.assertFalse(isWSDLArchiveExists);
+
+        //update the WSDL file
+        wsdlContentBytes = SampleTestObjectCreator.createAlternativeWSDL11Content();
+        apiDAO.addOrUpdateWSDL(api.getId(), wsdlContentBytes, ADMIN);
+
+        //retrieves and check whether updated successfully
+        receivedFromDB = apiDAO.getWSDL(api.getId());
+        Assert.assertEquals(new String(wsdlContentBytes), receivedFromDB);
+
+        //update with a WSDL archive
+        InputStream wsdl11ArchiveInputStream = SampleTestObjectCreator.createDefaultWSDL11ArchiveInputStream();
+        byte[] wsdlArchiveBytesDefault = IOUtils
+                .toByteArray(SampleTestObjectCreator.createDefaultWSDL11ArchiveInputStream());
+        apiDAO.addOrUpdateWSDLArchive(api.getId(), wsdl11ArchiveInputStream, ADMIN);
+
+        //retrieves and check whether successfully updated
+        InputStream wsdlArchiveInputStreamFromDB = apiDAO.getWSDLArchive(api.getId());
+        byte[] streamFromDBBytes = IOUtils.toByteArray(wsdlArchiveInputStreamFromDB);
+        Assert.assertEquals(wsdlArchiveBytesDefault.length, streamFromDBBytes.length);
+
+        //removes and validate
+        apiDAO.removeWSDLArchiveOfAPI(api.getId());
+        isWSDLExists = apiDAO.isWSDLExists(api.getId());
+        Assert.assertFalse(isWSDLExists);
+        isWSDLArchiveExists = apiDAO.isWSDLArchiveExists(api.getId());
+        Assert.assertFalse(isWSDLArchiveExists);
+    }
+
+    @Test
+    public void testWSDLArchiveForAPI() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
+                .apiDefinition(SampleTestObjectCreator.apiDefinition);
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+
+        //there can't be any WSDLs added at first
+        boolean isWSDLExists = apiDAO.isWSDLExists(api.getId());
+        Assert.assertFalse(isWSDLExists);
+        boolean isWSDLArchiveExists = apiDAO.isWSDLArchiveExists(api.getId());
+        Assert.assertFalse(isWSDLArchiveExists);
+
+        //add a WSDL
+        InputStream wsdl11ArchiveInputStream = SampleTestObjectCreator.createDefaultWSDL11ArchiveInputStream();
+        byte[] wsdlArchiveBytesDefault = IOUtils
+                .toByteArray(SampleTestObjectCreator.createDefaultWSDL11ArchiveInputStream());
+        apiDAO.addOrUpdateWSDLArchive(api.getId(), wsdl11ArchiveInputStream, ADMIN);
+        
+        //retrieves and check whether they are same
+        InputStream wsdlArchiveInputStreamFromDB = apiDAO.getWSDLArchive(api.getId());
+        byte[] streamFromDBBytes = IOUtils.toByteArray(wsdlArchiveInputStreamFromDB);
+        Assert.assertEquals(wsdlArchiveBytesDefault.length, streamFromDBBytes.length);
+
+        //now there should be a single WSDL for API exists but no WSDL archives
+        isWSDLExists = apiDAO.isWSDLExists(api.getId());
+        Assert.assertTrue(isWSDLExists);
+        isWSDLArchiveExists = apiDAO.isWSDLArchiveExists(api.getId());
+        Assert.assertTrue(isWSDLArchiveExists);
+
+        //update the WSDL archive
+        InputStream alternativeWSDL11ArchiveInputStream = SampleTestObjectCreator
+                .createAlternativeWSDL11ArchiveInputStream();
+        apiDAO.addOrUpdateWSDLArchive(api.getId(), alternativeWSDL11ArchiveInputStream, ADMIN);
+
+        //retrieves and check whether updated successfully
+        byte[] wsdlArchiveBytesAlternative = IOUtils
+                .toByteArray(SampleTestObjectCreator.createAlternativeWSDL11ArchiveInputStream());
+        wsdlArchiveInputStreamFromDB = apiDAO.getWSDLArchive(api.getId());
+        streamFromDBBytes = IOUtils.toByteArray(wsdlArchiveInputStreamFromDB);
+        Assert.assertEquals(streamFromDBBytes.length, wsdlArchiveBytesAlternative.length);
+
+        //update the WSDL with a file
+        byte[] wsdlContentBytes = SampleTestObjectCreator.createAlternativeWSDL11Content();
+        apiDAO.addOrUpdateWSDL(api.getId(), wsdlContentBytes, ADMIN);
+
+        //retrieves and check whether updated successfully
+        String receivedFromDB = apiDAO.getWSDL(api.getId());
+        Assert.assertEquals(new String(wsdlContentBytes), receivedFromDB);
+
+        //removes and validate
+        apiDAO.removeWSDL(api.getId());
+        isWSDLExists = apiDAO.isWSDLExists(api.getId());
+        Assert.assertFalse(isWSDLExists);
+        isWSDLArchiveExists = apiDAO.isWSDLArchiveExists(api.getId());
+        Assert.assertFalse(isWSDLArchiveExists);
+    }
+
+    @Test
     public void testAddGetDeleteCompositeAPI() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         String gateWayConfig = SampleTestObjectCreator.createSampleGatewayConfig();

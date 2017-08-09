@@ -489,7 +489,7 @@ public final class API {
         private String apiPermission;
         private Map<String, Endpoint> endpoint = Collections.EMPTY_MAP;
         private String gatewayConfig;
-        private String wsdlUri = "";
+        private String wsdlUri;
         private boolean isResponseCachingEnabled;
         private int cacheTimeout;
         private boolean isDefaultVersion;

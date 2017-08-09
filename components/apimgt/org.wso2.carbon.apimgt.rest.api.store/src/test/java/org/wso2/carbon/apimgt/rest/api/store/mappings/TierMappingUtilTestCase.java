@@ -20,15 +20,41 @@
 package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
 import org.testng.annotations.Test;
-import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
-import org.wso2.carbon.apimgt.core.models.User;
-import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
-import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
-import org.wso2.carbon.apimgt.rest.api.store.dto.UserDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
+import org.wso2.carbon.apimgt.core.models.policy.BandwidthLimit;
+import org.wso2.carbon.apimgt.core.models.policy.Policy;
+import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
+import org.wso2.carbon.apimgt.rest.api.store.common.SampleTestObjectCreator;
+import org.wso2.carbon.apimgt.rest.api.store.dto.TierListDTO;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.testng.Assert.assertEquals;
 
 public class TierMappingUtilTestCase {
 
+    @Test
+    public void testFromTierListToDTO() {
+        Policy policy1 = SampleTestObjectCreator.createSubscriptionPolicyWithRequestLimit("Gold");
+        Policy policy2 = SampleTestObjectCreator.createSubscriptionPolicyWithBndwidthLimit("Silver");
+        List<Policy> policyList = new ArrayList<>();
+        policyList.add(policy1);
+        policyList.add(policy2);
+        TierListDTO tierListDTO = TierMappingUtil.fromTierListToDTO(policyList, "subscription", 10, 0);
+        assertEquals(tierListDTO.getCount(), (Integer) policyList.size());
+        assertEquals(tierListDTO.getList().get(0).getName(), policy1.getPolicyName());
+        assertEquals(tierListDTO.getList().get(0).getDescription(), policy1.getDescription());
+        assertEquals(tierListDTO.getList().get(0).getTierLevel().name(), "SUBSCRIPTION");
+        assertEquals(tierListDTO.getList().get(0).getUnitTime(), policy1.
+                                                        getDefaultQuotaPolicy().getLimit().getUnitTime());
+        assertEquals(tierListDTO.getList().get(0).getRequestCount(), ((RequestCountLimit)
+                                                    policy1.getDefaultQuotaPolicy().getLimit()).getRequestCount());
+        assertEquals(tierListDTO.getList().get(1).getName(), policy2.getPolicyName());
+        assertEquals(tierListDTO.getList().get(1).getDescription(), policy2.getDescription());
+        assertEquals(tierListDTO.getList().get(1).getTierLevel().name(), "SUBSCRIPTION");
+        assertEquals(tierListDTO.getList().get(1).getUnitTime(), policy2.
+                getDefaultQuotaPolicy().getLimit().getUnitTime());
+        assertEquals(tierListDTO.getList().get(1).getRequestCount(), ((BandwidthLimit)
+                policy2.getDefaultQuotaPolicy().getLimit()).getDataAmount());
+    }
 }

@@ -63,7 +63,6 @@ public class ApplicationsApiServiceImplTestCase {
     private final static Logger logger = LoggerFactory.getLogger(ApplicationsApiService.class);
 
     private static final String USER = "admin";
-    private static final String contentType = "application/json";
 
 
     @Test
@@ -106,7 +105,7 @@ public class ApplicationsApiServiceImplTestCase {
         Mockito.when(apiStore.getApplication(applicationId, USER)).thenReturn(application);
 
         Response response = applicationsApiService.applicationsApplicationIdGet
-                (applicationId, contentType, null, null, getRequest());
+                (applicationId, null, null, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -143,7 +142,7 @@ public class ApplicationsApiServiceImplTestCase {
         applicationKeyGenerateRequestDTO.setGrantTypesToBeSupported(grantTypes);
 
         Response response = applicationsApiService.applicationsApplicationIdGenerateKeysPost
-                (applicationId, applicationKeyGenerateRequestDTO, contentType, getRequest());
+                (applicationId, applicationKeyGenerateRequestDTO, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -164,8 +163,7 @@ public class ApplicationsApiServiceImplTestCase {
 
         Mockito.when(apiStore.getApplicationKeys(applicationId)).thenReturn(oAuthApplicationInfoList);
 
-        Response response = applicationsApiService.applicationsApplicationIdKeysGet
-                (applicationId, contentType, getRequest());
+        Response response = applicationsApiService.applicationsApplicationIdKeysGet(applicationId, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -196,7 +194,7 @@ public class ApplicationsApiServiceImplTestCase {
         Mockito.when(apiStore.getApplicationKeys(applicationId, keyType)).thenReturn(oAuthApplicationInfo);
 
         Response response = applicationsApiService.applicationsApplicationIdKeysKeyTypeGet
-                (applicationId, keyType, contentType, getRequest());
+                (applicationId, keyType, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -243,7 +241,7 @@ public class ApplicationsApiServiceImplTestCase {
                 .thenReturn(oAuthApplicationInfo);
 
         Response response = applicationsApiService.applicationsApplicationIdKeysKeyTypePut
-                (applicationId, keyType, applicationKeysDTO, contentType, getRequest());
+                (applicationId, keyType, applicationKeysDTO, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -280,7 +278,7 @@ public class ApplicationsApiServiceImplTestCase {
         generateRequestDTO.setValidityPeriod(10000);
 
         Response response = applicationsApiService.applicationsApplicationIdGenerateTokenPost
-                (applicationId, generateRequestDTO, contentType, null, null, getRequest());
+                (applicationId, generateRequestDTO, null, null, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -341,7 +339,7 @@ public class ApplicationsApiServiceImplTestCase {
         Mockito.when(apiStore.getApplication(applicationId, USER)).thenReturn(getSampleApplication(applicationId));
 
         Response response = applicationsApiService.applicationsApplicationIdPut
-                (applicationId, applicationDTO, contentType, null, null, getRequest());
+                (applicationId, applicationDTO, null, null, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -369,7 +367,7 @@ public class ApplicationsApiServiceImplTestCase {
         Mockito.when(apiStore.getApplications(USER)).thenReturn(applicationList);
 
         Response response = applicationsApiService.applicationsGet
-                (null, 10, 0, contentType, null, getRequest());
+                (null, 10, 0, null, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -398,7 +396,7 @@ public class ApplicationsApiServiceImplTestCase {
         Mockito.when(apiStore.getApplications(USER)).thenReturn(applicationList);
 
         Response response = applicationsApiService.applicationsGet
-                ("*", 10, 0, contentType, null, getRequest());
+                ("*", 10, 0, null, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -458,7 +456,7 @@ public class ApplicationsApiServiceImplTestCase {
         applicationDTO.setToken(applicationTokenDTO);
         applicationDTO.setKeys(applicationKeysDTOList);
 
-        Response response = applicationsApiService.applicationsPost(applicationDTO, contentType, getRequest());
+        Response response = applicationsApiService.applicationsPost(applicationDTO, getRequest());
 
         Assert.assertEquals(201, response.getStatus());
     }

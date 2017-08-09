@@ -22,6 +22,8 @@ import org.wso2.carbon.kernel.annotations.Configuration;
 import org.wso2.carbon.kernel.annotations.Element;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Class to hold APIM configuration parameters and generate yaml file
@@ -76,6 +78,11 @@ public class APIMConfigurations {
 
     @Element(description = "rating upper limit")
     private int ratingMaxValue = 5;
+
+    @Element(description = "WSDL processor implementations")
+    private List<String> wsdlProcessors = Arrays.asList(
+            "org.wso2.carbon.apimgt.core.impl.WSDL11ProcessorImpl",
+            "org.wso2.carbon.apimgt.core.impl.WSDL20ProcessorImpl");
 
     public boolean isReverseProxyEnabled() {
         return reverseProxyEnabled;
@@ -211,5 +218,13 @@ public class APIMConfigurations {
 
     public void setRatingMaxValue(int ratingMaxValue) {
         this.ratingMaxValue = ratingMaxValue;
+    }
+
+    public List<String> getWsdlProcessors() {
+        return wsdlProcessors;
+    }
+
+    public void setWsdlProcessors(List<String> wsdlProcessors) {
+        this.wsdlProcessors = wsdlProcessors;
     }
 }

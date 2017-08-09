@@ -65,6 +65,16 @@ x-wso2-security:
         name: apim:workflow_approve
         key: apim:workflow_approve 
 
+securityDefinitions:
+  OAuth2Security:
+    type: oauth2
+    flow: password
+    tokenUrl: https://localhost:9443/token
+    scopes:
+      apim:subscribe: Subscribe API
+      apim:workflow_approve: Approve Workflow
+      apim:self-signup: Self Sign-up
+
 ######################################################
 # The "API Collection" resource APIs
 ######################################################
@@ -103,7 +113,6 @@ paths:
             If no advanced attribute modifier has been specified, search will match the
             given query string against API Name.
           type: string
-        - $ref : "#/parameters/Accept"
         - $ref : "#/parameters/If-None-Match"
       tags:
         - API Collection
@@ -116,9 +125,6 @@ paths:
           schema:
             $ref: '#/definitions/APIList'
           headers:
-            Content-Type:
-              description: The content type of the body.
-              type: string
             ETag:
               description: |
                 Entity Tag of the response resource. Used by caches, or in conditional requests.
@@ -147,7 +153,6 @@ paths:
         Get details of an API
       parameters:
         - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since' 
       tags:
@@ -159,10 +164,6 @@ paths:
             OK.
             Requested API is returned
           headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
             ETag:
               description: |
                 Entity Tag of the response resource. Used by caches, or in conditional requests.
@@ -201,7 +202,6 @@ paths:
         Get the swagger of an API
       parameters:
         - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -213,10 +213,6 @@ paths:
             OK.
             Requested swagger document of the API is returned
           headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
             ETag:
               description: |
                 Entity Tag of the response resource. Used by caches, or in conditional requests.
@@ -230,6 +226,62 @@ paths:
           description: |
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+################################################################
+# The WSDL resource of "Individual API" resource APIs
+################################################################
+
+  /apis/{apiId}/wsdl:
+#-----------------------------------------------------
+# Retrieve the API swagger definition
+#-----------------------------------------------------
+    get:
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9292/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/wsdl"
+      x-wso2-request: |
+        GET https://127.0.0.1:9292/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/wsdl
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 329\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"x-wso2-security\": {\"apim\": {\"x-wso2-scopes\": []}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}"
+      summary: Get WSDL definition
+      description: |
+        This operation can be used to retrieve the swagger definition of an API.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/labelName-Q'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
+      tags:
+        - API (individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Requested WSDL document of the API is returned
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
         404:
           description: |
             Not Found.
@@ -258,7 +310,6 @@ paths:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
         - API (individual)
@@ -271,10 +322,6 @@ paths:
           schema:
             $ref: '#/definitions/DocumentList'
           headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
             ETag:
               description: |
                 Entity Tag of the response resource. Used by caches, or in conditional requests.
@@ -310,7 +357,6 @@ paths:
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/documentId'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -324,10 +370,6 @@ paths:
           schema:
             $ref: '#/definitions/Document'
           headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
             ETag:
               description: |
                 Entity Tag of the response resource.
@@ -371,7 +413,6 @@ paths:
         parameters:
           - $ref: '#/parameters/apiId'
           - $ref: '#/parameters/documentId'
-          - $ref: '#/parameters/Accept'
           - $ref: '#/parameters/If-None-Match'
           - $ref: '#/parameters/If-Modified-Since'
         tags:
@@ -383,10 +424,6 @@ paths:
               OK.
               File or inline content returned.
             headers:
-              Content-Type:
-                description: |
-                  The content type of the body.
-                type: string
               ETag:
                 description: |
                   Entity Tag of the response resource.
@@ -438,7 +475,6 @@ paths:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
-        - $ref: '#/parameters/Accept'
       tags:
         - API (individual)
         - Retrieve Rating
@@ -449,11 +485,6 @@ paths:
             Rating returned.
           schema:
             $ref: '#/definitions/RatingList'
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
         404:
           description: |
             Not Found.
@@ -467,17 +498,21 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Retrieve a specific rating of an API
-#-----------------------------------------------------
+######################################################
+# The "Individual API Rating" resource APIs
+######################################################
+
   '/apis/{apiId}/ratings/{ratingId}':
+
+  #-----------------------------------------------------
+  # Retrieve a specific rating of an API
+  #-----------------------------------------------------
     get:
       description: |
             Get a specific rating of an API.
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/ratingId'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -491,10 +526,6 @@ paths:
           schema:
             $ref: '#/definitions/Rating'
           headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
             ETag:
               description: |
                 Entity Tag of the response resource.
@@ -522,11 +553,19 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-#-----------------------------------------------------
-# Add or update rating
-#-----------------------------------------------------
+######################################################
+# The "User API Rating" resource APIs
+######################################################
+
   '/apis/{apiId}/user-rating':
+
+  #-----------------------------------------------------
+  # Add or update rating
+  #-----------------------------------------------------
     put:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
       x-scope: apim:subscribe
       description: |
         Adds or updates a rating
@@ -539,7 +578,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Rating'
-        - $ref: '#/parameters/Content-Type'
       tags:
         - API (individual)
         - Create
@@ -555,10 +593,6 @@ paths:
             Location:
               description: |
                 Location to the newly created Rating.
-              type: string
-            Content-Type:
-              description: |
-                The content type of the body.
               type: string
             ETag:
               description: |
@@ -591,7 +625,6 @@ paths:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
-        - $ref: '#/parameters/Accept'
       tags:
         - Comments Collection
         - Retrieve
@@ -602,11 +635,6 @@ paths:
             Comments list is returned.
           schema:
             $ref: '#/definitions/CommentList'
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
         406:
           description: |
             Not Acceptable. The requested media type is not supported
@@ -617,6 +645,9 @@ paths:
 # Add a new Comment
 #-----------------------------------------------------
     post:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
       x-scope: apim:subscribe
       parameters:
         - $ref: '#/parameters/apiId'
@@ -627,7 +658,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Comment'
-        - $ref: '#/parameters/Content-Type'
       tags:
         - API (individual)
         - Create
@@ -643,10 +673,6 @@ paths:
             Location:
               description: |
                 Location to the newly created Comment.
-              type: string
-            Content-Type:
-              description: |
-                The content type of the body.
               type: string
             ETag:
               description: |
@@ -676,13 +702,11 @@ paths:
 # Retrieve an individual Comment for a certain API
 #-----------------------------------------------------------------------
     get:
-      x-scope: apim:subscribe
       description: |
         Get the individual comment given by a username for a certain API.
       parameters:
         - $ref: '#/parameters/commentId'
         - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -696,10 +720,6 @@ paths:
           schema:
             $ref: '#/definitions/Comment'
           headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
             ETag:
               description: |
                 Entity Tag of the response resource.
@@ -731,6 +751,9 @@ paths:
 # Delete a particular Comment
 #-----------------------------------------------------
     delete:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
       x-scope: apim:subscribe
       description: |
         Remove a Comment
@@ -760,6 +783,9 @@ paths:
 # Update a particular Comment
 #-----------------------------------------------------
     put:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
       x-scope: apim:subscribe
       description: |
         Update a certain Comment
@@ -773,7 +799,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Comment'
-        - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
@@ -790,10 +815,6 @@ paths:
             Location:
               description: |
                 The URL of the newly created resource.
-              type: string
-            Content-Type:
-              description: |
-                The content type of the body.
               type: string
             ETag:
               description: |
@@ -833,6 +854,9 @@ paths:
 # Retrieving the list of all Composite APIs qualifying under a given search condition
 #-----------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
       x-scope: apim:subscribe
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9090/api/am/store/v1/composite-apis"
       x-wso2-request: |
@@ -870,7 +894,6 @@ paths:
             given query string against Composite API Name.
 
           type: string
-        - $ref : "#/parameters/Accept"
         - $ref : "#/parameters/If-None-Match"
       tags:
         - CompositeAPI (Collection)
@@ -882,9 +905,6 @@ paths:
           schema:
             $ref: '#/definitions/CompositeAPIList'
           headers:
-            Content-Type:
-              description: The content type of the body.
-              type: string
             ETag:
               description: |
                 Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
@@ -904,6 +924,9 @@ paths:
 # Create a new Composite API
 #-----------------------------------------------------
     post:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
       x-scope: apim:subscribe
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json https://127.0.0.1:9090/api/am/store/v1/composite-apis"
       x-wso2-request: "POST https://127.0.0.1:9090/api/am/store/v1/composite-apis\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\r\n   \"name\": \"PizzaShackAPI\",\r\n   \"description\": \"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\r\\n\",\r\n   \"context\": \"/pizzashack\",\r\n   \"version\": \"1.0.0\",\r\n   \"provider\": \"admin\",\r\n   \"wsdlUri\": null,\r\n   \"lifeCycleStatus\": \"PUBLISHED\",\r\n   \"responseCaching\": \"Disabled\",\r\n   \"cacheTimeout\": 300,\r\n   \"destinationStatsEnabled\": false,\r\n   \"isDefaultVersion\": false,\r\n   \"transport\":    [\r\n      \"http\",\r\n      \"https\"\r\n   ],\r\n   \"tags\": [\"pizza\"],\r\n   \"policies\": [\"Unlimited\"],\r\n   \"maxTps\":    {\r\n      \"sandbox\": 5000,\r\n      \"production\": 1000\r\n   },\r\n   \"visibility\": \"PUBLIC\",\r\n   \"visibleRoles\": [],\r\n   \"visibleTenants\": [],\r\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9090/am/sample/pizzashack/v1/api/\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9090/am/sample/pizzashack/v1/api/\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\r\n   \"endpointSecurity\":    {\r\n      \"username\": \"user\",\r\n      \"type\": \"basic\",\r\n      \"password\": \"pass\"\r\n   },\r\n   \"gatewayEnvironments\": \"Production and Sandbox\",\r\n   \"sequences\": [],\r\n   \"subscriptionAvailability\": null,\r\n   \"subscriptionAvailableTenants\": [],\r\n   \"businessInformation\":    {\r\n      \"businessOwnerEmail\": \"marketing@pizzashack.com\",\r\n      \"technicalOwnerEmail\": \"architecture@pizzashack.com\",\r\n      \"technicalOwner\": \"John Doe\",\r\n      \"businessOwner\": \"Jane Roe\"\r\n   },\r\n   \"corsConfiguration\":    {\r\n      \"accessControlAllowOrigins\": [\"*\"],\r\n      \"accessControlAllowHeaders\":       [\r\n         \"authorization\",\r\n         \"Access-Control-Allow-Origin\",\r\n         \"Content-Type\",\r\n         \"SOAPAction\"\r\n      ],\r\n      \"accessControlAllowMethods\":       [\r\n         \"GET\",\r\n         \"PUT\",\r\n         \"POST\",\r\n         \"DELETE\",\r\n         \"PATCH\",\r\n         \"OPTIONS\"\r\n      ],\r\n      \"accessControlAllowCredentials\": false,\r\n      \"corsConfigurationEnabled\": false\r\n   }\r\n}"
@@ -921,7 +944,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/CompositeAPI'
-        - $ref: '#/parameters/Content-Type'
       tags:
         - CompositeAPI (Collection)
       responses:
@@ -936,10 +958,6 @@ paths:
             Location:
               description: |
                 The URL of the newly created resource.
-              type: string
-            Content-Type:
-              description: |
-                The content type of the body.
               type: string
             ETag:
               description: |
@@ -968,6 +986,9 @@ paths:
 # Retrieve the details of a Composite API definition
 #-----------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
       x-scope: apim:subscribe
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9090/api/am/store/v1/composite-apis/7a2298c4-c905-403f-8fac-38c73301631f"
       x-wso2-request: |
@@ -979,7 +1000,6 @@ paths:
         Using this operation, you can retrieve complete details of a single Composite API. You need to provide the Id of the Composite API to retrive it.
       parameters:
         - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -990,10 +1010,6 @@ paths:
             OK.
             Requested Compoiste API is returned
           headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
             ETag:
               description: |
                 Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
@@ -1026,6 +1042,9 @@ paths:
 # Update the definition of a Composite API
 #-----------------------------------------------------
     put:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
       x-scope: apim:subscribe
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X PUT -d @data.json https://127.0.0.1:9090/api/am/store/v1/composite-apis/7a2298c4-c905-403f-8fac-38c73301631f"
       x-wso2-request: "PUT https://127.0.0.1:9090/api/am/store/v1/composite-apis/7a2298c4-c905-403f-8fac-38c73301631f\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\r\n   \"id\": \"7a2298c4-c905-403f-8fac-38c73301631f\",\r\n   \"name\": \"PizzaShackAPI\",\r\n   \"description\": \"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\r\\n\",\r\n   \"context\": \"/pizzashack\",\r\n   \"version\": \"1.0.0\",\r\n   \"provider\": \"admin\",\r\n   \"endpointId\": \"{\\\"paths\\\":{\\\"/order\\\":{\\\"post\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Create a new Order\\\",\\\"parameters\\\":[{\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Order object that needs to be added\\\",\\\"name\\\":\\\"body\\\",\\\"required\\\":true,\\\"in\\\":\\\"body\\\"}],\\\"responses\\\":{\\\"201\\\":{\\\"headers\\\":{\\\"Location\\\":{\\\"description\\\":\\\"The URL of the newly created resource.\\\",\\\"type\\\":\\\"string\\\"}},\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Created.\\\"}}}},\\\"/menu\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Return a list of available menu items\\\",\\\"parameters\\\":[],\\\"responses\\\":{\\\"200\\\":{\\\"headers\\\":{},\\\"schema\\\":{\\\"title\\\":\\\"Menu\\\",\\\"properties\\\":{\\\"list\\\":{\\\"items\\\":{\\\"$ref\\\":\\\"#/definitions/MenuItem\\\"},\\\"type\\\":\\\"array\\\"}},\\\"type\\\":\\\"object\\\"},\\\"description\\\":\\\"OK.\\\"}}}}},\\\"schemes\\\":[\\\"https\\\"],\\\"produces\\\":[\\\"application/json\\\"],\\\"swagger\\\":\\\"2.0\\\",\\\"definitions\\\":{\\\"MenuItem\\\":{\\\"title\\\":\\\"Pizza menu Item\\\",\\\"properties\\\":{\\\"price\\\":{\\\"type\\\":\\\"string\\\"},\\\"description\\\":{\\\"type\\\":\\\"string\\\"},\\\"name\\\":{\\\"type\\\":\\\"string\\\"},\\\"image\\\":{\\\"type\\\":\\\"string\\\"}},\\\"required\\\":[\\\"name\\\"]},\\\"Order\\\":{\\\"title\\\":\\\"Pizza Order\\\",\\\"properties\\\":{\\\"customerName\\\":{\\\"type\\\":\\\"string\\\"},\\\"delivered\\\":{\\\"type\\\":\\\"boolean\\\"},\\\"address\\\":{\\\"type\\\":\\\"string\\\"},\\\"pizzaType\\\":{\\\"type\\\":\\\"string\\\"},\\\"creditCardNumber\\\":{\\\"type\\\":\\\"string\\\"},\\\"quantity\\\":{\\\"type\\\":\\\"number\\\"},\\\"orderId\\\":{\\\"type\\\":\\\"integer\\\"}},\\\"required\\\":[\\\"orderId\\\"]}},\\\"consumes\\\":[\\\"application/json\\\"],\\\"info\\\":{\\\"title\\\":\\\"PizzaShackAPI\\\",\\\"description\\\":\\\"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\\\n\\\",\\\"license\\\":{\\\"name\\\":\\\"Apache 2.0\\\",\\\"url\\\":\\\"http://www.apache.org/licenses/LICENSE-2.0.html\\\"},\\\"contact\\\":{\\\"email\\\":\\\"architecture@pizzashack.com\\\",\\\"name\\\":\\\"John Doe\\\",\\\"url\\\":\\\"http://www.pizzashack.com\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\",\r\n   \"wsdlUri\": null,\r\n   \"lifeCycleStatus\": \"CREATED\",\r\n   \"responseCaching\": \"Disabled\",\r\n   \"cacheTimeout\": 300,\r\n   \"destinationStatsEnabled\": null,\r\n   \"isDefaultVersion\": false,\r\n   \"transport\":    [\r\n      \"https\"\r\n   ],\r\n   \"tags\": [\"pizza\",\"chicken\"],\r\n   \"policies\": [\"Unlimited\"],\r\n   \"maxTps\":    {\r\n      \"sandbox\": 500,\r\n      \"production\": 100\r\n   },\r\n   \"visibility\": \"PUBLIC\",\r\n   \"visibleRoles\": [],\r\n   \"visibleTenants\": [],\r\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9090/am/sample/pizzashack/v1/api/\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9090/am/sample/pizzashack/v1/api/\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\r\n   \"endpointSecurity\":    {\r\n      \"username\": \"user\",\r\n      \"type\": \"basic\",\r\n      \"password\": \"pass\"\r\n   },\r\n   \"gatewayEnvironments\": \"Production and Sandbox\",\r\n   \"sequences\": [],\r\n   \"subscriptionAvailability\": null,\r\n   \"subscriptionAvailableTenants\": [],\r\n   \"businessInformation\":    {\r\n      \"businessOwnerEmail\": \"marketing@pizzashack.com\",\r\n      \"technicalOwnerEmail\": \"architecture@pizzashack.com\",\r\n      \"technicalOwner\": \"John Doe\",\r\n      \"businessOwner\": \"Jane Roe\"\r\n   },\r\n   \"corsConfiguration\":    {\r\n      \"accessControlAllowOrigins\": [\"*\"],\r\n      \"accessControlAllowHeaders\":       [\r\n         \"authorization\",\r\n         \"Access-Control-Allow-Origin\",\r\n         \"Content-Type\",\r\n         \"SOAPAction\"\r\n      ],\r\n      \"accessControlAllowMethods\":       [\r\n         \"GET\",\r\n         \"PUT\",\r\n         \"POST\",\r\n         \"DELETE\",\r\n         \"PATCH\",\r\n         \"OPTIONS\"\r\n      ],\r\n      \"accessControlAllowCredentials\": false,\r\n      \"corsConfigurationEnabled\": false\r\n   }\r\n}"
@@ -1043,7 +1062,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/CompositeAPI'
-        - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
@@ -1059,10 +1077,6 @@ paths:
             Location:
               description: |
                 The URL of the newly created resource.
-              type: string
-            Content-Type:
-              description: |
-                The content type of the body.
               type: string
             ETag:
               description: |
@@ -1102,6 +1116,9 @@ paths:
 # Delete the definition of a Composite API
 #-----------------------------------------------------
     delete:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
       x-scope: apim:subscribe
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X DELETE https://127.0.0.1:9090/api/am/store/v1/composite-apis/6fb74674-4ab8-4b52-9886-f9a376985060"
       x-wso2-request: |
@@ -1151,6 +1168,9 @@ paths:
 # Retrieve the Composite API swagger definition
 #-----------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
       x-scope: apim:subscribe
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9090/api/am/store/v1/composite-apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/swagger"
       x-wso2-request: |
@@ -1162,7 +1182,6 @@ paths:
         This operation can be used to retrieve the swagger definition of a Composite API.
       parameters:
         - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -1173,10 +1192,6 @@ paths:
             OK.
             Requested swagger document of the Composite API is returned
           headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
             ETag:
               description: |
                 Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
@@ -1209,6 +1224,9 @@ paths:
     put:
       consumes:
         - multipart/form-data
+      security:
+        - OAuth2Security:
+          - apim:subscribe
       x-scope: apim:subscribe
       x-wso2-curl: "curl -k -H \"Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\" -F endpointId=\"{\\\"paths\\\":{\\\"\\/*\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"responses\\\":{\\\"200\\\":{\\\"description\\\":\\\"OK\\\"}}}}},\\\"x-wso2-security\\\":{\\\"apim\\\":{\\\"x-wso2-scopes\\\":[]}},\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"PhoneVerification\\\",\\\"description\\\":\\\"Verify a phone number\\\",\\\"contact\\\":{\\\"email\\\":\\\"xx@ee.com\\\",\\\"name\\\":\\\"xx\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\" -X PUT \"https://127.0.0.1:9090/api/am/store/v1/composite-apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/swagger\""
       x-wso2-request: |
@@ -1233,7 +1251,6 @@ paths:
           description: Swagger definition of the Composite API
           type: string
           required: true
-        - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
@@ -1247,10 +1264,6 @@ paths:
             Location:
               description: |
                 The URL of the newly created resource.
-              type: string
-            Content-Type:
-              description: |
-                The content type of the body.
               type: string
             ETag:
               description: |
@@ -1295,6 +1308,9 @@ paths:
 # Retrieve the Composite API swagger definition
 #-----------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
       x-scope: apim:subscribe
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9090/api/am/store/v1/composite-apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/implementation"
       x-wso2-request: |
@@ -1306,7 +1322,6 @@ paths:
         This operation can be used to retrieve the Ballerina implementation of a Composite API.
       parameters:
         - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -1317,10 +1332,6 @@ paths:
             OK.
             Requested Ballerina implementation of the Composite API is returned
           headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
             ETag:
               description: |
                 Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
@@ -1353,6 +1364,9 @@ paths:
     put:
       consumes:                                  
         - multipart/form-data
+      security:
+        - OAuth2Security:
+          - apim:subscribe
       x-scope: apim:subscribe
       x-wso2-curl: "curl -k -H \"Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\" -F endpointId=\"{\\\"paths\\\":{\\\"\\/*\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"responses\\\":{\\\"200\\\":{\\\"description\\\":\\\"OK\\\"}}}}},\\\"x-wso2-security\\\":{\\\"apim\\\":{\\\"x-wso2-scopes\\\":[]}},\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"PhoneVerification\\\",\\\"description\\\":\\\"Verify a phone number\\\",\\\"contact\\\":{\\\"email\\\":\\\"xx@ee.com\\\",\\\"name\\\":\\\"xx\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\" -X PUT \"https://127.0.0.1:9090/api/am/store/v1/composite-apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/implementation\""
       x-wso2-request: |
@@ -1377,7 +1391,6 @@ paths:
           description: Ballerina implementation of the Composite API
           type: file
           required: true
-        - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
@@ -1393,10 +1406,6 @@ paths:
             Location:
               description: |
                 The URL of the newly created resource.
-              type: string
-            Content-Type:
-              description: |
-                The content type of the body.
               type: string
             ETag:
               description: |
@@ -1442,6 +1451,9 @@ paths:
 # Retrieve a list of all applications of a certain subscriber
 #-----------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
       x-scope: apim:subscribe
       description: |
         Get a list of applications
@@ -1460,7 +1472,6 @@ paths:
           type: string
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
         - Application Collection
@@ -1473,10 +1484,6 @@ paths:
           schema:
             $ref: '#/definitions/ApplicationList'
           headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
             ETag:
               description: |
                 Entity Tag of the response resource.
@@ -1503,6 +1510,9 @@ paths:
 # Create a new application
 #-----------------------------------------------------
     post:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
       x-scope: apim:subscribe
       description: |
         Create a new application.
@@ -1514,7 +1524,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Application'
-        - $ref: '#/parameters/Content-Type'
       tags:
         - Application (individual)
         - Create
@@ -1530,10 +1539,6 @@ paths:
             Location:
               description: |
                 Location of the newly created Application.
-              type: string
-            Content-Type:
-              description: |
-                The content type of the body.
               type: string
             ETag:
               description: |
@@ -1578,12 +1583,14 @@ paths:
 # Retrieve the details about a certain application
 #-----------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
       x-scope: apim:subscribe
       description: |
         Get application details
       parameters:
         - $ref: '#/parameters/applicationId'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -1597,10 +1604,6 @@ paths:
           schema:
             $ref: '#/definitions/Application'
           headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
             ETag:
               description: |
                 Entity Tag of the response resource. Used by caches, or in conditional requests.
@@ -1631,6 +1634,9 @@ paths:
 # Update a certain application
 #-----------------------------------------------------
     put:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
       x-scope: apim:subscribe
       description: |
         Update application details
@@ -1643,7 +1649,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Application'
-        - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
@@ -1660,10 +1665,6 @@ paths:
             Location:
               description: |
                 The URL of the newly created resource.
-              type: string
-            Content-Type:
-              description: |
-                The content type of the body.
               type: string
             ETag:
               description: |
@@ -1697,6 +1698,9 @@ paths:
 # Delete a certain application
 #-----------------------------------------------------
     delete:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
       x-scope: apim:subscribe
       description: |
         Remove an application
@@ -1745,6 +1749,9 @@ paths:
 # Generate keys for an application
 #-----------------------------------------------------
     post:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
       x-scope: apim:subscribe
       description: |
         Generate keys (Consumer key/secret) for application
@@ -1757,7 +1764,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/ApplicationKeyGenerateRequest'
-        - $ref: '#/parameters/Content-Type'
       tags:
         - Application (individual)
         - Generate Keys
@@ -1769,11 +1775,6 @@ paths:
             Keys are generated.
           schema:
             $ref: '#/definitions/ApplicationKeys'
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
         400:
           description: |
             Bad Request.
@@ -1803,6 +1804,9 @@ paths:
 # Mapping keys for an application
 #-----------------------------------------------------
     post:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
       x-scope: apim:subscribe
       description: |
         Map keys (Consumer key/secret) to an application
@@ -1815,7 +1819,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/ApplicationKeyMappingRequest'
-        - $ref: '#/parameters/Content-Type'
       tags:
         - Application (individual)
         - Application Keys
@@ -1826,11 +1829,6 @@ paths:
             Keys are mapped.
           schema:
             $ref: '#/definitions/ApplicationKeys'
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
         400:
           description: |
             Bad Request.
@@ -1860,12 +1858,14 @@ paths:
 # Get all keys of an application
 #-----------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
       x-scope: apim:subscribe
       description: |
         Retrieve keys (Consumer key/secret) of application
       parameters:
         - $ref: '#/parameters/applicationId'
-        - $ref: '#/parameters/Accept'
       tags:
         - Application (individual)
         - Application Keys
@@ -1876,11 +1876,6 @@ paths:
             Keys are returned.
           schema:
             $ref: '#/definitions/ApplicationKeysList'
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
         400:
           description: |
             Bad Request.
@@ -1910,13 +1905,15 @@ paths:
 # Get a key of an application by key type
 #-----------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
       x-scope: apim:subscribe
       description: |
         Retrieve keys (Consumer key/secret) of application by a given type
       parameters:
         - $ref: '#/parameters/applicationId'
         - $ref: '#/parameters/keyType'
-        - $ref: '#/parameters/Accept'
       tags:
         - Application (individual)
         - Application Keys
@@ -1927,11 +1924,6 @@ paths:
             Keys of given type are returned.
           schema:
             $ref: '#/definitions/ApplicationKeys'
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
         400:
           description: |
             Bad Request.
@@ -1955,6 +1947,9 @@ paths:
 # Update grant types and callback url of an application
 #--------------------------------------------------------------------
     put:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
       x-scope: apim:subscribe
       description: |
         Update grant types and callback url (Consumer Key and Consumer Secret are ignored)
@@ -1968,7 +1963,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/ApplicationKeys'
-        - $ref: '#/parameters/Content-Type'
       tags:
         - Application (individual)
         - Application Keys
@@ -1979,11 +1973,6 @@ paths:
             Grant types or/and callback url is/are updated.
           schema:
             $ref: '#/definitions/ApplicationKeys'
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
         400:
           description: |
             Bad Request.
@@ -2013,6 +2002,9 @@ paths:
 # Generate a token for an application
 #-----------------------------------------------------
     post:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
       x-scope: apim:subscribe
       description: |
         Generate an access token for application by client_credentials grant type
@@ -2025,7 +2017,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/ApplicationTokenGenerateRequest'
-        - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
@@ -2038,11 +2029,6 @@ paths:
             Token is generated.
           schema:
             $ref: '#/definitions/ApplicationToken'
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
         400:
           description: |
             Bad Request.
@@ -2072,6 +2058,9 @@ paths:
 # Retrieve all subscriptions of a certain API and application
 #-----------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
       x-scope: apim:subscribe
       description: |
         Get subscription list.
@@ -2083,7 +2072,6 @@ paths:
         - $ref: '#/parameters/apiType'
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/limit'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
         - Subscription Collection
@@ -2096,10 +2084,6 @@ paths:
           schema:
             $ref: '#/definitions/SubscriptionList'
           headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
             ETag:
               description: |
                 Entity Tag of the response resource.
@@ -2119,6 +2103,9 @@ paths:
 # Create a new subscription
 #-----------------------------------------------------
     post:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
       x-scope: apim:subscribe
       description: |
         Add a new subscription
@@ -2130,7 +2117,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Subscription'
-        - $ref: '#/parameters/Content-Type'
       tags:
         - Subscription (individual)
         - Create
@@ -2146,10 +2132,6 @@ paths:
             Location:
               description: |
                 Location to the newly created subscription.
-              type: string
-            Content-Type:
-              description: |
-                The content type of the body.
               type: string
             ETag:
               description: |
@@ -2186,12 +2168,14 @@ paths:
 # Retrieve a certain subscription
 #-----------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
       x-scope: apim:subscribe
       description: |
         Get subscription details
       parameters:
         - $ref: '#/parameters/subscriptionId'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -2205,9 +2189,6 @@ paths:
           schema:
             $ref: '#/definitions/Subscription'
           headers:
-            Content-Type:
-              description: The content type of the body.
-              type: string
             ETag:
               description: 'Entity Tag of the response resource. Used by caches, or in conditional requests.'
               type: string
@@ -2229,6 +2210,9 @@ paths:
 # Delete a certain subscription
 #-----------------------------------------------------
     delete:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
       x-scope: apim:subscribe
       description: |
         Remove subscription
@@ -2283,7 +2267,6 @@ paths:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/tierLevel'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
         - Tier Collection
@@ -2298,9 +2281,6 @@ paths:
             items:
               $ref: '#/definitions/TierList'
           headers:
-            Content-Type:
-              description: The content type of the body.
-              type: string
             ETag:
               description: |
                 Entity Tag of the response resource.
@@ -2331,7 +2311,6 @@ paths:
       parameters:
         - $ref: '#/parameters/tierName'
         - $ref: '#/parameters/tierLevel'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -2345,10 +2324,6 @@ paths:
           schema:
             $ref: '#/definitions/Tier'
           headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
             ETag:
               description: |
                 Entity Tag of the response resource.
@@ -2390,7 +2365,6 @@ paths:
       parameters:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
         - Tag Collection
@@ -2403,10 +2377,6 @@ paths:
           schema:
             $ref: '#/definitions/TagList'
           headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
             ETag:
               description: |
                 Entity Tag of the response resource.
@@ -2441,7 +2411,6 @@ paths:
         This operation can be used to retrieve the information of the labels
       parameters:
         - $ref: '#/parameters/labels-Q'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -2454,10 +2423,6 @@ paths:
           schema:
              $ref: '#/definitions/LabelList'
           headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
             ETag:
               description: |
                 Entity Tag of the response resource.
@@ -2483,6 +2448,9 @@ paths:
 # Resume the workflow by approving or rejecting the workflow request
 #-------------------------------------------------------------------
     put:
+      security:
+        - OAuth2Security:
+          - apim:workflow_approve
       x-scope: apim:workflow_approve
       summary: Update workflow status
       description: |
@@ -2505,11 +2473,6 @@ paths:
             Workflow request information is returned.
           schema:
             $ref: '#/definitions/WorkflowResponse'
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
         400:
           description: |
             Bad Request.
@@ -2532,7 +2495,10 @@ paths:
 # Register a new user
 #-----------------------------------------------------
     post:
-      x-scope: apim:signup
+      security:
+        - OAuth2Security:
+          - apim:self-signup
+      x-scope: apim:self-signup
       description: |
         User self signup API
       parameters:
@@ -2543,7 +2509,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/User'
-        - $ref: '#/parameters/Content-Type'
       tags:
         - Signup
       responses:
@@ -2738,24 +2703,6 @@ parameters:
     default: 0
     type: integer
 
-# The HTTP Accept header
-  Accept:
-    name: Accept
-    in: header
-    description: |
-      Media types acceptable for the response. Default is JSON.
-    default: JSON
-    type: string
-
-# The HTTP Content-Type header
-  Content-Type:
-    name: Content-Type
-    in: header
-    description: |
-      Media type of the entity in the body. Default is JSON.
-    default: JSON
-    required: true
-    type : string
 
 # The HTTP If-None-Match header
 # Used to avoid retrieving data that are already cached
@@ -2813,6 +2760,15 @@ parameters:
     description: |
       Defines comma separated list of labels
     required: true
+    type: string
+
+# List of labels
+# Specified as part of the query string
+  labelName-Q:
+    name: labelName
+    in: query
+    description: |
+      Name of the label
     type: string
 
 ######################################################
@@ -2922,7 +2878,6 @@ definitions:
 #-----------------------------------------------------
   CompositeAPIInfo:
     title: Composite API Info object with basic API details.
-    required:
     allOf:
       - $ref: '#/definitions/BaseAPIInfo'
       - properties:
@@ -3002,6 +2957,8 @@ definitions:
             type: array
             items:
               type: string
+          wsdlUri:
+            type: string
           businessInformation:
             properties:
               businessOwner:
@@ -3018,7 +2975,6 @@ definitions:
 #-----------------------------------------------------
   CompositeAPI:
     title: Composite API object
-    required:
     allOf:
       - $ref: '#/definitions/BaseAPI'
       - properties:
