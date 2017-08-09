@@ -319,4 +319,28 @@ public class SampleTestObjectCreator {
         applicationPolicy.setDisplayName("displayName");
         return applicationPolicy;
     }
+
+    public static APIPolicy createAPIPolicyWithRequestLimit(String name) {
+        APIPolicy apiPolicy = new APIPolicy(name);
+        apiPolicy.setDescription("testDescription");
+        QuotaPolicy quotaPolicy = new QuotaPolicy();
+        quotaPolicy.setType("requestCount");
+        RequestCountLimit requestCountLimit = new RequestCountLimit("s", 60 ,10);
+        quotaPolicy.setLimit(requestCountLimit);
+        apiPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        apiPolicy.setDisplayName("displayName");
+        return apiPolicy;
+    }
+
+    public static APIPolicy createAPIPolicyWithBndwidthLimit(String name) {
+        APIPolicy apiPolicy = new APIPolicy(name);
+        apiPolicy.setDescription("testDescription");
+        QuotaPolicy quotaPolicy = new QuotaPolicy();
+        quotaPolicy.setType("bandwidth");
+        BandwidthLimit bandwidthLimit = new BandwidthLimit("s", 60 ,10, "mb");
+        quotaPolicy.setLimit(bandwidthLimit);
+        apiPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        apiPolicy.setDisplayName("displayName");
+        return apiPolicy;
+    }
 }

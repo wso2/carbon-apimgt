@@ -23,8 +23,11 @@ package org.wso2.carbon.apimgt.rest.api.admin.throttling.mappings;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.RequestCountLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ThrottleLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.mappings.SubscriptionThrottlePolicyMappingUtil;
 
 import java.util.UUID;
@@ -39,6 +42,7 @@ public class SubscriptionThrottlePolicyMappingUtilTest {
 
         SubscriptionPolicy policy = new SubscriptionPolicy(uuid, name);
         SubscriptionThrottlePolicyDTO dto = SubscriptionThrottlePolicyMappingUtil.fromSubscriptionThrottlePolicyToDTO(policy);
+
         Assert.assertNotNull(dto);
         Assert.assertEquals(dto.getPolicyName(), name);
         Assert.assertEquals(dto.getPolicyId(), uuid);
@@ -50,11 +54,25 @@ public class SubscriptionThrottlePolicyMappingUtilTest {
         dto.setRateLimitTimeUnit("m");
         dto.setRateLimitCount(1);
         dto.setStopOnQuotaReach(true);
+        ThrottleLimitDTO throttleLimitDTO = new ThrottleLimitDTO();
+        throttleLimitDTO.setType("RequestCountLimit");
+        throttleLimitDTO.setTimeUnit("s");
+        throttleLimitDTO.setUnitTime(1);
+        RequestCountLimitDTO requestCountLimitDTO = new RequestCountLimitDTO();
+        requestCountLimitDTO.setRequestCount(2);
+        throttleLimitDTO.setRequestCountLimit(requestCountLimitDTO);
+        dto.setDefaultLimit(throttleLimitDTO);
         SubscriptionPolicy policy = SubscriptionThrottlePolicyMappingUtil.fromSubscriptionThrottlePolicyDTOToModel(dto);
         Assert.assertNotNull(policy);
         Assert.assertEquals(policy.getRateLimitCount(), 1);
         Assert.assertEquals(policy.getRateLimitTimeUnit(), "m");
         Assert.assertEquals(policy.isStopOnQuotaReach(), true);
+        Assert.assertEquals(policy.getDefaultQuotaPolicy().getType(), "requestCount");
+        Assert.assertEquals(policy.getDefaultQuotaPolicy().getLimit().getTimeUnit(), dto.getDefaultLimit().getTimeUnit());
+        Assert.assertEquals((Integer) policy.getDefaultQuotaPolicy().getLimit().getUnitTime(),
+                dto.getDefaultLimit().getUnitTime());
+        Assert.assertEquals((Integer)((RequestCountLimit)policy.getDefaultQuotaPolicy().getLimit()).getRequestCount(),
+                dto.getDefaultLimit().getRequestCountLimit().getRequestCount());
     }
 
 }
