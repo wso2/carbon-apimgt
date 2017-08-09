@@ -86,7 +86,6 @@ public abstract class ApisApiService {
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdWsdlGet(String apiId
  ,String labelName
- ,String accept
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;

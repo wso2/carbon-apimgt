@@ -666,7 +666,6 @@ public class ApisApiServiceImpl extends ApisApiService {
      * 
      * @param apiId UUID of API
      * @param labelName Name of the label
-     * @param accept Accept header value
      * @param ifNoneMatch If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @param request msf4j request
@@ -674,7 +673,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @throws NotFoundException
      */
     @Override
-    public Response apisApiIdWsdlGet(String apiId, String labelName, String accept, String ifNoneMatch,
+    public Response apisApiIdWsdlGet(String apiId, String labelName, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         WSDLArchiveInfo wsdlArchiveInfo = null;
