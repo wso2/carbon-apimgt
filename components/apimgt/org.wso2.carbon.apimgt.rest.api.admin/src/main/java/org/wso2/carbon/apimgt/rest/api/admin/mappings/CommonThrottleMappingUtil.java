@@ -63,8 +63,8 @@ public class CommonThrottleMappingUtil {
      *
      * @param conditionalGroupDTOs a list of Conditional Group DTOs
      * @return Derived list of Pipelines from list of Conditional Group DTOs
-     * @throws UnsupportedThrottleLimitTypeException
-     * @throws UnsupportedThrottleConditionTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
+     * @throws UnsupportedThrottleConditionTypeException - If error occurs
      */
     public static List<Pipeline> fromConditionalGroupDTOListToPipelineList(
             List<ConditionalGroupDTO> conditionalGroupDTOs)
@@ -81,8 +81,8 @@ public class CommonThrottleMappingUtil {
      *
      * @param pipelines A list of pipeline objects
      * @return Derived list of DTO objects from Pipeline list
-     * @throws UnsupportedThrottleLimitTypeException
-     * @throws UnsupportedThrottleConditionTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
+     * @throws UnsupportedThrottleConditionTypeException - If error occurs
      */
     public static List<ConditionalGroupDTO> fromPipelineListToConditionalGroupDTOList(List<Pipeline> pipelines)
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
@@ -101,8 +101,8 @@ public class CommonThrottleMappingUtil {
      *
      * @param dto Conditional Group DTO
      * @return Derived Pipeline object from Conditional Group DTO
-     * @throws UnsupportedThrottleLimitTypeException
-     * @throws UnsupportedThrottleConditionTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
+     * @throws UnsupportedThrottleConditionTypeException - If error occurs
      */
     public static Pipeline fromConditionalGroupDTOToPipeline(ConditionalGroupDTO dto)
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
@@ -122,8 +122,8 @@ public class CommonThrottleMappingUtil {
      *
      * @param pipeline Pipeline object
      * @return Derived DTO object from Pipeline object
-     * @throws UnsupportedThrottleLimitTypeException
-     * @throws UnsupportedThrottleConditionTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
+     * @throws UnsupportedThrottleConditionTypeException - If error occurs
      */
     public static ConditionalGroupDTO fromPipelineToConditionalGroupDTO(Pipeline pipeline)
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
@@ -142,7 +142,7 @@ public class CommonThrottleMappingUtil {
      *
      * @param throttleConditionDTOs list of Throttle Condition DTOs
      * @return Derived list of model Condition objects from Throttle Condition DTOs
-     * @throws UnsupportedThrottleConditionTypeException
+     * @throws UnsupportedThrottleConditionTypeException - If error occurs
      */
     public static List<Condition> fromDTOListToConditionList(List<ThrottleConditionDTO> throttleConditionDTOs)
             throws UnsupportedThrottleConditionTypeException {
@@ -161,7 +161,7 @@ public class CommonThrottleMappingUtil {
      *
      * @param conditions List of Condition objects
      * @return a list of Throttle Condition DTO objects derived from a list of model Condition objects
-     * @throws UnsupportedThrottleConditionTypeException
+     * @throws UnsupportedThrottleConditionTypeException - If error occurs
      */
     public static List<ThrottleConditionDTO> fromConditionListToDTOList(List<Condition> conditions)
             throws UnsupportedThrottleConditionTypeException {
@@ -205,7 +205,7 @@ public class CommonThrottleMappingUtil {
      *
      * @param condition Throttle condition model object
      * @return Derived DTO object from the model object
-     * @throws UnsupportedThrottleConditionTypeException
+     * @throws UnsupportedThrottleConditionTypeException - If error occurs
      */
     public static ThrottleConditionDTO fromConditionToDTO(Condition condition)
             throws UnsupportedThrottleConditionTypeException {
@@ -229,7 +229,7 @@ public class CommonThrottleMappingUtil {
      *
      * @param dto Throttle limit DTO object
      * @return Derived Quota policy object from DTO
-     * @throws UnsupportedThrottleLimitTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
      */
     public static QuotaPolicy fromDTOToQuotaPolicy(ThrottleLimitDTO dto) throws UnsupportedThrottleLimitTypeException {
         QuotaPolicy quotaPolicy = new QuotaPolicy();
@@ -243,7 +243,7 @@ public class CommonThrottleMappingUtil {
      *
      * @param quotaPolicy Quota Policy object
      * @return Throttle Limit DTO object derived from the Quota Policy object
-     * @throws UnsupportedThrottleLimitTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
      */
     public static ThrottleLimitDTO fromQuotaPolicyToDTO(QuotaPolicy quotaPolicy)
             throws UnsupportedThrottleLimitTypeException {
@@ -281,7 +281,7 @@ public class CommonThrottleMappingUtil {
      *
      * @param dto Throttle Limit DTO object
      * @return Limit object derived from DTO
-     * @throws UnsupportedThrottleLimitTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
      */
 
     public static Limit fromDTOToLimit(ThrottleLimitDTO dto) throws UnsupportedThrottleLimitTypeException {
@@ -545,7 +545,7 @@ public class CommonThrottleMappingUtil {
      * @param policy Policy model object
      * @param <T>    Type of Policy model
      * @return Updated Policy object with common fields
-     * @throws UnsupportedThrottleLimitTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
      */
     public static <T extends Policy> T updateFieldsFromDTOToPolicy(ThrottlePolicyDTO dto, T policy)
             throws UnsupportedThrottleLimitTypeException {
@@ -562,7 +562,7 @@ public class CommonThrottleMappingUtil {
      * @param policy Policy model object
      * @param <T>    Type of Throttle Policy DTO object model
      * @return Updated Throttle Policy DTO object with common fields
-     * @throws UnsupportedThrottleLimitTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
      */
     public static <T extends ThrottlePolicyDTO> T updateFieldsFromToPolicyToDTO(Policy policy, T dto)
             throws UnsupportedThrottleLimitTypeException {

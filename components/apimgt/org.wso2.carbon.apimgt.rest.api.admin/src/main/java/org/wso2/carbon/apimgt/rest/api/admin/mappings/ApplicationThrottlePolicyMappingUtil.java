@@ -39,7 +39,7 @@ public class ApplicationThrottlePolicyMappingUtil {
      *
      * @param appPolicies Array of Application Policies
      * @return A List DTO of converted Application Policies
-     * @throws UnsupportedThrottleLimitTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
      */
     public static ApplicationThrottlePolicyListDTO fromApplicationPolicyArrayToListDTO(
             List<ApplicationPolicy> appPolicies) throws UnsupportedThrottleLimitTypeException,
@@ -62,7 +62,7 @@ public class ApplicationThrottlePolicyMappingUtil {
      *
      * @param appPolicy An Application Policy model object
      * @return Converted Application policy REST API DTO object
-     * @throws UnsupportedThrottleLimitTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
      */
     public static ApplicationThrottlePolicyDTO fromApplicationThrottlePolicyToDTO(Policy appPolicy)
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
@@ -81,7 +81,7 @@ public class ApplicationThrottlePolicyMappingUtil {
      *
      * @param dto Application Policy DTO Object
      * @return Converted Application Policy Model object
-     * @throws UnsupportedThrottleLimitTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
      */
         public static ApplicationPolicy fromApplicationThrottlePolicyDTOToModel(ApplicationThrottlePolicyDTO dto)
             throws UnsupportedThrottleLimitTypeException {
