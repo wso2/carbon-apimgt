@@ -37,7 +37,7 @@ import static org.wso2.carbon.apimgt.core.util.APIMgtConstants.ThrottlePolicyCon
 
 public class BlockingConditionMappingUtilTestCase {
 
-    @Test()
+    @Test(description = "Convert Blocking Condition to DTO")
     public void fromBlockingConditionToDTOTest()   throws  Exception   {
         BlockConditions conditions = new BlockConditions();
         String uuid = UUID.randomUUID().toString();
@@ -50,7 +50,7 @@ public class BlockingConditionMappingUtilTestCase {
 
     }
 
-    @Test()
+    @Test(description = "From Blocking Condition DTO to Model")
     public void fromBlockingConditionDTOToBlockConditionTest() throws Exception {
         BlockingConditionDTO dto = new BlockingConditionDTO();
         dto.setConditionId(UUID.randomUUID().toString());
@@ -67,7 +67,7 @@ public class BlockingConditionMappingUtilTestCase {
         Assert.assertEquals(conditions.getEndingIP(), dto.getIpCondition().getEndingIP());
     }
 
-    @Test()
+    @Test(description = "From Blocking Condition to DTO")
     public void fromBlockConditionToIpConditionDTOTest() throws Exception   {
         BlockConditions conditions = new BlockConditions();
         conditions.setUuid(UUID.randomUUID().toString());

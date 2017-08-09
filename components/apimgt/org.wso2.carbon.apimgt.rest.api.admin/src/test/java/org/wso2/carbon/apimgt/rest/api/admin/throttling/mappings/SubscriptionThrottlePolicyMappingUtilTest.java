@@ -47,7 +47,7 @@ public class SubscriptionThrottlePolicyMappingUtilTest {
     String name = "SampleSubscriptionPolicy";
 
 
-    @Test()
+    @Test(description = "Convert Subscription Throttle Policy to DTO")
     public void fromSubscriptionThrottlePolicyToDTOTest() throws Exception  {
 
         SubscriptionPolicy policy = new SubscriptionPolicy(uuid, name);
@@ -69,7 +69,7 @@ public class SubscriptionThrottlePolicyMappingUtilTest {
 
     }
 
-    @Test()
+    @Test(description = "Convert Subscription Throttle Policy DTO to Model")
     public void fromSubscriptionThrottlePolicyDTOToModelTest() throws Exception {
         SubscriptionThrottlePolicyDTO dto = new SubscriptionThrottlePolicyDTO();
         dto.setRateLimitTimeUnit("m");

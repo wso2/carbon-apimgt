@@ -42,7 +42,7 @@ import java.util.UUID;
 
 public class AdvancedThrottlePolicyMappingUtilTestCase {
 
-    @Test()
+    @Test(description = "Convert Policy to DTO")
     public void fromAdvancedPolicyToDTOTest() throws Exception  {
         APIPolicy apiPolicy = new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY);
         String uuid = UUID.randomUUID().toString();
@@ -68,7 +68,7 @@ public class AdvancedThrottlePolicyMappingUtilTestCase {
                 dto.getDefaultLimit().getRequestCountLimit().getRequestCount());
     }
 
-    @Test()
+    @Test(description = "Convert Policy DTO to Policy object")
     public void fromAdvancedPolicyDTOToPolicyTest() throws Exception    {
         AdvancedThrottlePolicyDTO dto = new AdvancedThrottlePolicyDTO();
         dto.setDisplayName(APIMgtConstants.DEFAULT_API_POLICY);

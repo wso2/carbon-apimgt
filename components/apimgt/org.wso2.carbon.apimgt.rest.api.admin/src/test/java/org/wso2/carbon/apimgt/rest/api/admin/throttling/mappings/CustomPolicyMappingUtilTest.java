@@ -36,7 +36,7 @@ public class CustomPolicyMappingUtilTest {
     String name = "SampleCustomPolicy";
     String uuid = UUID.randomUUID().toString();
 
-    @Test()
+    @Test(description = "Convert custom Policy to DTO object")
     public void fromCustomPolicyToDTOTest() throws Exception    {
 
         CustomPolicy policy = new CustomPolicy(name);
@@ -47,7 +47,7 @@ public class CustomPolicyMappingUtilTest {
         Assert.assertEquals(dto.getPolicyId(), uuid);
     }
 
-    @Test()
+    @Test(description = "Convert DTO to Model")
     public void fromCustomPolicyDTOToModelTest() throws Exception   {
         CustomRuleDTO dto = new CustomRuleDTO();
         dto.setPolicyName(name);
