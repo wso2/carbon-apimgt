@@ -41,7 +41,7 @@
 									</a>
                                 </div>
                                 <div class="add-padding-2x app-data ">
-                                    <h4 class="apiNameWrap"><a title="API Browse" href="<%=jagg.getMappedUrl("/site/pages/item-info.jag")%>?name={{ name }}&version={{ version }}&provider={{ provider }}<%=urlPrefix%>">{{ name }}-{{ version }}</a></h4>
+                                    <h4 class="truncate"><a title="API Browse" href="<%=jagg.getMappedUrl("/site/pages/item-info.jag")%>?name={{ name }}&version={{ version }}&provider={{ provider }}<%=urlPrefix%>">{{ name }}-{{ version }}</a></h4>
                                     <h5>{{ displayOwner }}</h5>
 									<input type="hidden" class="rating recent_rating" disabled="disabled" value="{{ rates }}" />
                                 </div>
