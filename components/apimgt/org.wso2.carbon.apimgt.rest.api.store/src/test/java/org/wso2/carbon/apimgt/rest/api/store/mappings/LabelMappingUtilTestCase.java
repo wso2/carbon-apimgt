@@ -39,7 +39,7 @@ public class LabelMappingUtilTestCase {
         labelList.add(label1);
         labelList.add(label2);
         LabelListDTO labelListDTO = LabelMappingUtil.toLabelListDTO(labelList);
-        assertEquals(labelListDTO.getCount(), (Integer)labelList.size());
+        assertEquals(labelListDTO.getCount(), (Integer) labelList.size());
         assertEquals(labelListDTO.getList().get(0).getName(), label1.getName());
         assertEquals(labelListDTO.getList().get(0).getAccessUrls(), label1.getAccessUrls());
         assertEquals(labelListDTO.getList().get(0).getLabelId(), label1.getId());

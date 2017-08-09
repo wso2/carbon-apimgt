@@ -32,11 +32,13 @@ import java.util.Set;
 
 import static org.testng.Assert.assertEquals;
 
+;
+
 public class CompositeAPIMappingUtilTestCase {
 
     @Test
     public void testToCompositeAPIDTOAndViceVersa() {
-        Set<String> labels =  new HashSet<>();
+        Set<String> labels = new HashSet<>();
         labels.add("label1");
         //Test compositeAPI to CompositeAPIDTO
         CompositeAPI compositeAPI = SampleTestObjectCreator.createCompositeAPIModelBuilder().labels(labels).build();

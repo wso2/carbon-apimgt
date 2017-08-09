@@ -37,7 +37,7 @@ public class TagMappingUtilTestCase {
         Tag tag = tagBuilder.name("tag1").count(1).build();
         TagDTO tagDTO = TagMappingUtil.fromTagToDTO(tag);
         assertEquals(tag.getName(), tagDTO.getName());
-        assertEquals((Integer)tag.getCount(), tagDTO.getWeight());
+        assertEquals((Integer) tag.getCount(), tagDTO.getWeight());
     }
 
     @Test
@@ -49,10 +49,10 @@ public class TagMappingUtilTestCase {
         tags.add(tag1);
         tags.add(tag2);
         TagListDTO tagListDTO = TagMappingUtil.fromTagListToDTO(tags, 10, 0);
-        assertEquals((Integer)tags.size(), tagListDTO.getCount());
+        assertEquals((Integer) tags.size(), tagListDTO.getCount());
         assertEquals(tagListDTO.getList().get(0).getName(), tag1.getName());
-        assertEquals(tagListDTO.getList().get(0).getWeight(), (Integer)tag1.getCount());
+        assertEquals(tagListDTO.getList().get(0).getWeight(), (Integer) tag1.getCount());
         assertEquals(tagListDTO.getList().get(1).getName(), tag2.getName());
-        assertEquals(tagListDTO.getList().get(1).getWeight(), (Integer)tag2.getCount());
+        assertEquals(tagListDTO.getList().get(1).getWeight(), (Integer) tag2.getCount());
     }
 }
