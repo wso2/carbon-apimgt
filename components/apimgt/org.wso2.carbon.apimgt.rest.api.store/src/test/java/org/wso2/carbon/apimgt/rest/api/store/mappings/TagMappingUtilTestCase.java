@@ -20,18 +20,9 @@
 package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
 import org.testng.annotations.Test;
-import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
-import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Tag;
-import org.wso2.carbon.apimgt.core.models.User;
-import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
-import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
-import org.wso2.carbon.apimgt.rest.api.store.common.SampleObjectCreator;
-import org.wso2.carbon.apimgt.rest.api.store.dto.LabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TagDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TagListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.UserDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +37,7 @@ public class TagMappingUtilTestCase {
         Tag tag = tagBuilder.name("tag1").count(1).build();
         TagDTO tagDTO = TagMappingUtil.fromTagToDTO(tag);
         assertEquals(tag.getName(), tagDTO.getName());
-        assertEquals((Integer)tag.getCount(), tagDTO.getWeight());
+        assertEquals((Integer) tag.getCount(), tagDTO.getWeight());
     }
 
     @Test
@@ -58,10 +49,10 @@ public class TagMappingUtilTestCase {
         tags.add(tag1);
         tags.add(tag2);
         TagListDTO tagListDTO = TagMappingUtil.fromTagListToDTO(tags, 10, 0);
-        assertEquals((Integer)tags.size(), tagListDTO.getCount());
+        assertEquals((Integer) tags.size(), tagListDTO.getCount());
         assertEquals(tagListDTO.getList().get(0).getName(), tag1.getName());
-        assertEquals(tagListDTO.getList().get(0).getWeight(), (Integer)tag1.getCount());
+        assertEquals(tagListDTO.getList().get(0).getWeight(), (Integer) tag1.getCount());
         assertEquals(tagListDTO.getList().get(1).getName(), tag2.getName());
-        assertEquals(tagListDTO.getList().get(1).getWeight(), (Integer)tag2.getCount());
+        assertEquals(tagListDTO.getList().get(1).getWeight(), (Integer) tag2.getCount());
     }
 }

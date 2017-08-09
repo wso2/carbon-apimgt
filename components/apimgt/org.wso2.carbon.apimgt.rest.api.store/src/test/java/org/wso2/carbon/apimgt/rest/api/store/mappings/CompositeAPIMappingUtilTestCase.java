@@ -20,16 +20,10 @@
 package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
 import org.testng.annotations.Test;
-import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
-import org.wso2.carbon.apimgt.core.models.User;
-import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
-import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
-import org.wso2.carbon.apimgt.rest.api.store.common.SampleObjectCreator;
+import org.wso2.carbon.apimgt.rest.api.store.common.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CompositeAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CompositeAPIListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.UserDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -38,14 +32,16 @@ import java.util.Set;
 
 import static org.testng.Assert.assertEquals;
 
+;
+
 public class CompositeAPIMappingUtilTestCase {
 
     @Test
     public void testToCompositeAPIDTOAndViceVersa() {
-        Set<String> labels =  new HashSet<>();
+        Set<String> labels = new HashSet<>();
         labels.add("label1");
         //Test compositeAPI to CompositeAPIDTO
-        CompositeAPI compositeAPI = SampleObjectCreator.createCompositeAPIModelBuilder().labels(labels).build();
+        CompositeAPI compositeAPI = SampleTestObjectCreator.createCompositeAPIModelBuilder().labels(labels).build();
         CompositeAPIDTO compositeAPIDTO = CompositeAPIMappingUtil.toCompositeAPIDTO(compositeAPI);
         assertEquals(compositeAPI.getId(), compositeAPIDTO.getId());
         assertEquals(compositeAPI.getName(), compositeAPIDTO.getName());
@@ -71,8 +67,8 @@ public class CompositeAPIMappingUtilTestCase {
     @Test
     public void testToCompositeAPIListDTO() {
         List<CompositeAPI> apisResult = new ArrayList<>();
-        CompositeAPI comp1 = SampleObjectCreator.createCompositeAPIModelBuilder().name("newComp1").build();
-        CompositeAPI comp2 = SampleObjectCreator.createCompositeAPIModelBuilder().name("newComp2").build();
+        CompositeAPI comp1 = SampleTestObjectCreator.createCompositeAPIModelBuilder().name("newComp1").build();
+        CompositeAPI comp2 = SampleTestObjectCreator.createCompositeAPIModelBuilder().name("newComp2").build();
         apisResult.add(comp1);
         apisResult.add(comp2);
         CompositeAPIListDTO compositeAPIListDTO = CompositeAPIMappingUtil.toCompositeAPIListDTO(apisResult);

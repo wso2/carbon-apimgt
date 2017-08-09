@@ -94,7 +94,7 @@ public class TestUtil {
 
     }
 
-    protected static Map<String, Endpoint> createEndpointTypeToIdMap (Endpoint sandboxEndpointId, Endpoint
+    protected static Map<String, Endpoint> createEndpointTypeToIdMap(Endpoint sandboxEndpointId, Endpoint
             productionEndpointId) {
 
         Map<String, Endpoint> endpointTypeToIdMap = new HashedMap();
@@ -124,7 +124,7 @@ public class TestUtil {
         businessInformation.setTechnicalOwner("Jane Doe");
         businessInformation.setBusinessOwnerEmail("jane.doe@annonymous.com");
 
-        CorsConfiguration corsConfiguration =  new CorsConfiguration();
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setEnabled(true);
         corsConfiguration.setAllowMethods(Arrays.asList("GET", "POST", "DELETE"));
         corsConfiguration.setAllowHeaders(Arrays.asList("Authorization", "X-Custom"));
