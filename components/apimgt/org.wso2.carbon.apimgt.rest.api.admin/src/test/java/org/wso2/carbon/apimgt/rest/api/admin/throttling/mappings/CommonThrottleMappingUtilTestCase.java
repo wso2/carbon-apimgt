@@ -17,11 +17,10 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.throttling.mappings;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.junit.Assert;
+import org.junit.Test;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.policy.BandwidthLimit;
-import org.wso2.carbon.apimgt.core.models.policy.Condition;
 import org.wso2.carbon.apimgt.core.models.policy.HeaderCondition;
 import org.wso2.carbon.apimgt.core.models.policy.IPCondition;
 import org.wso2.carbon.apimgt.core.models.policy.JWTClaimsCondition;
@@ -39,7 +38,7 @@ import static org.wso2.carbon.apimgt.core.models.policy.PolicyConstants.KB;
 
 public class CommonThrottleMappingUtilTestCase {
 
-    @Test(description = "Convert Bandwidth Throttle Limit DTO to Quota Policy")
+    @Test()
     public void fromBandwidthThrottleLimitDtoToQuotaPolicyTest () throws Exception {
         ThrottleLimitDTO throttleLimitDTO = new ThrottleLimitDTO();
         throttleLimitDTO.setType(PolicyConstants.BANDWIDTH_LIMIT_TYPE);
@@ -59,7 +58,7 @@ public class CommonThrottleMappingUtilTestCase {
         Assert.assertEquals(bandwidthLimit.getUnitTime(), 1);
     }
 
-    @Test(description = "Convert Request Count Throttle Limit DTO to Quota Policy")
+    @Test()
     public void fromRequestCountThrottleLimitDtoToQuotaPolicyTest () throws Exception {
         ThrottleLimitDTO throttleLimitDTO = new ThrottleLimitDTO();
         throttleLimitDTO.setType(PolicyConstants.REQUEST_COUNT_LIMIT_TYPE);
@@ -78,7 +77,7 @@ public class CommonThrottleMappingUtilTestCase {
 
     }
 
-    @Test(description = "Convert Invalid Throttle Limit DTO to Quota Policy")
+    @Test()
     public void fromInvalidThrottleLimitDtoToQuotaPolicyTest () throws Exception {
         ThrottleLimitDTO throttleLimitDTO = new ThrottleLimitDTO();
         throttleLimitDTO.setType("UnsupportedType");
@@ -92,7 +91,7 @@ public class CommonThrottleMappingUtilTestCase {
         }
     }
 
-    @Test(description = "Convert IP specific IPCondition DTO to IPCondition Model object")
+    @Test()
     public void fromSpecificIPConditionDtoToIPConditionModelTest () throws Exception {
         ThrottleConditionDTO throttleConditionDTO = new ThrottleConditionDTO();
         throttleConditionDTO.setType(PolicyConstants.IP_CONDITION_TYPE);
@@ -106,7 +105,7 @@ public class CommonThrottleMappingUtilTestCase {
         Assert.assertEquals(condition.getSpecificIP(), "10.100.0.168");
     }
 
-    @Test(description = "Convert IP range IPCondition DTO to IPCondition Model object")
+    @Test()
     public void fromIPRangeConditionDtoToIPConditionModelTest () throws Exception {
         ThrottleConditionDTO throttleConditionDTO = new ThrottleConditionDTO();
         throttleConditionDTO.setType(PolicyConstants.IP_CONDITION_TYPE);
@@ -122,7 +121,7 @@ public class CommonThrottleMappingUtilTestCase {
         Assert.assertEquals(condition.getType(), IP_RANGE_TYPE);
     }
 
-    @Test(description = "Convert IP range IPCondition DTO to IPCondition Model object")
+    @Test()
     public void fromInvalidIPConditionDtoToIPConditionModelTest () throws Exception {
         ThrottleConditionDTO throttleConditionDTO = new ThrottleConditionDTO();
         throttleConditionDTO.setType(PolicyConstants.IP_CONDITION_TYPE);
@@ -137,7 +136,7 @@ public class CommonThrottleMappingUtilTestCase {
         }
     }
 
-    @Test(description = "Convert Header Condition DTO to HeaderCondition Model object")
+    @Test()
     public void fromHeaderConditionDtoToHeaderConditionModelTest () throws Exception {
         ThrottleConditionDTO throttleConditionDTO = new ThrottleConditionDTO();
         throttleConditionDTO.setType(PolicyConstants.HEADER_CONDITION_TYPE);
@@ -151,7 +150,7 @@ public class CommonThrottleMappingUtilTestCase {
         Assert.assertEquals(condition.getValue(), "testHeaderValue");
     }
 
-    @Test(description = "Convert Query param Condition DTO to QueryParamCondition Model object")
+    @Test()
     public void fromQueryParamsConditionDtoToQueryParamsConditionModelTest () throws Exception {
         ThrottleConditionDTO throttleConditionDTO = new ThrottleConditionDTO();
         throttleConditionDTO.setType(PolicyConstants.QUERY_PARAMS_CONDITION_TYPE);
@@ -167,7 +166,7 @@ public class CommonThrottleMappingUtilTestCase {
 
     }
 
-    @Test(description = "Convert JWT Condition DTO to JWTCondition Model object")
+    @Test()
     public void fromJWTConditionDtoToJWTConditionModelTest () throws Exception {
         ThrottleConditionDTO throttleConditionDTO = new ThrottleConditionDTO();
         throttleConditionDTO.setType(PolicyConstants.JWT_CLAIMS_CONDITION_TYPE);
@@ -181,7 +180,7 @@ public class CommonThrottleMappingUtilTestCase {
         Assert.assertEquals(condition.getClaimUrl(), "http://wso2.org/claims");
     }
 
-    @Test(description = "Convert Invalid Condition DTO to Model object")
+    @Test()
     public void fromInvalidConditionDtoToInvalidConditionModelTest ()  throws Exception {
         ThrottleConditionDTO throttleConditionDTO = new ThrottleConditionDTO();
         throttleConditionDTO.setType("InvalidCondition");
