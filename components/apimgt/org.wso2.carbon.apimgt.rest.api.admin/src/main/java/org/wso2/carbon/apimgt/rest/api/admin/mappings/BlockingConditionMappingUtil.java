@@ -38,7 +38,7 @@ public class BlockingConditionMappingUtil {
      *
      * @param blockConditionList A List of Block Conditions
      * @return REST API List DTO object derived from Block Condition list
-     * @throws UnsupportedThrottleLimitTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
      */
     public static BlockingConditionListDTO fromBlockConditionListToListDTO(List<BlockConditions> blockConditionList)
             throws UnsupportedThrottleLimitTypeException {
@@ -60,7 +60,7 @@ public class BlockingConditionMappingUtil {
      *
      * @param blockCondition Block condition model object
      * @return Block condition DTO object derived from block condition model object
-     * @throws UnsupportedThrottleLimitTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
      */
     public static BlockingConditionDTO fromBlockingConditionToDTO(BlockConditions blockCondition)
             throws UnsupportedThrottleLimitTypeException {
@@ -92,7 +92,7 @@ public class BlockingConditionMappingUtil {
      *
      * @param blockingConditionDTO blockindConditionDTO to be converted
      * @return BlockCondition Object
-     * @throws UnsupportedThrottleLimitTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
      */
     public static BlockConditions fromBlockingConditionDTOToBlockCondition(BlockingConditionDTO blockingConditionDTO)
             throws UnsupportedThrottleLimitTypeException {

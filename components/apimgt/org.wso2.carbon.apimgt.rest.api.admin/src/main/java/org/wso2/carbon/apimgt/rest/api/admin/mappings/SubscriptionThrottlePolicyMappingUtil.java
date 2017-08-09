@@ -54,7 +54,7 @@ public class SubscriptionThrottlePolicyMappingUtil {
      *
      * @param subscriptionPolicies Array of Subscription Policies
      * @return A List DTO of converted Subscription Policies
-     * @throws SubscriptionThrottlePolicyException
+     * @throws SubscriptionThrottlePolicyException - If error occurs
      */
     public static SubscriptionThrottlePolicyListDTO fromSubscriptionPolicyArrayToListDTO(
             List<SubscriptionPolicy> subscriptionPolicies) throws SubscriptionThrottlePolicyException {
@@ -76,7 +76,7 @@ public class SubscriptionThrottlePolicyMappingUtil {
      *
      * @param policy Subscription Policy model object
      * @return Converted Subscription policy REST API DTO object
-     * @throws SubscriptionThrottlePolicyException
+     * @throws SubscriptionThrottlePolicyException - If error occurs
      */
     public static SubscriptionThrottlePolicyDTO fromSubscriptionThrottlePolicyToDTO(SubscriptionPolicy policy)
             throws SubscriptionThrottlePolicyException {
@@ -116,7 +116,7 @@ public class SubscriptionThrottlePolicyMappingUtil {
      *
      * @param dto Subscription policy DTO object
      * @return Converted Subscription policy model object
-     * @throws UnsupportedThrottleLimitTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
      */
     @SuppressWarnings("unchecked") public static SubscriptionPolicy fromSubscriptionThrottlePolicyDTOToModel(
             SubscriptionThrottlePolicyDTO dto) throws APIManagementException {
