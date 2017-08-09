@@ -1023,10 +1023,10 @@ var change_token = function() {
     	$("#access_token").val(key);
     	//Set changed token as the token for API calls
     	if(key && key.trim() != "") {
-    		swaggerUi.api.clientAuthorizations.add("key",
+    		swaggerUi.api.clientAuthorizations.add("OAuth2Security",
     				new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer "+ key, "header"));
     	} else{
-    		swaggerUi.api.clientAuthorizations.add("key",
+    		swaggerUi.api.clientAuthorizations.add("OAuth2Security",
     				new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer ", "header"));
     	}
     }

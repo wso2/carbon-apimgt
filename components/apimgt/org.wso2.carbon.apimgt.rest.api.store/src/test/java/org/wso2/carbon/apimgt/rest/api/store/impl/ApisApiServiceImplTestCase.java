@@ -60,7 +60,6 @@ public class ApisApiServiceImplTestCase {
     private final static Logger logger = LoggerFactory.getLogger(ApisApiServiceImplTestCase.class);
 
     private static final String USER = "admin";
-    private static final String contentType = "application/json";
 
     @Test
     public void testApisApiIdCommentsCommentIdDelete() throws NotFoundException, APIManagementException {
@@ -111,7 +110,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.when(apiStore.getCommentByUUID(commentId, apiId)).thenReturn(comment);
 
         Response response = apisApiService.apisApiIdCommentsCommentIdGet
-                (commentId, apiId, null, null, null, getRequest());
+                (commentId, apiId, null, null, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -151,7 +150,7 @@ public class ApisApiServiceImplTestCase {
         commentList.add(comment2);
 
         Mockito.when(apiStore.getCommentsForApi(apiId)).thenReturn(commentList);
-        Response response = apisApiService.apisApiIdCommentsGet(apiId, 3, 0, contentType, getRequest());
+        Response response = apisApiService.apisApiIdCommentsGet(apiId, 3, 0, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -188,7 +187,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.when(apiStore.getCommentByUUID(commentId, apiId)).thenReturn(comment);
 
         Response response = apisApiService.apisApiIdCommentsCommentIdPut
-                (commentId, apiId, commentDTO, contentType, null, null, getRequest());
+                (commentId, apiId, commentDTO,null, null, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -222,9 +221,9 @@ public class ApisApiServiceImplTestCase {
         Mockito.when(apiStore.getDocumentationContent(documentIdInline)).thenReturn(documentContentInline);
 
         Response responseFile = apisApiService.apisApiIdDocumentsDocumentIdContentGet
-                (apiId, documentIdFile, contentType, null, null, getRequest());
+                (apiId, documentIdFile, null, null, getRequest());
         Response responseInline = apisApiService.apisApiIdDocumentsDocumentIdContentGet
-                (apiId, documentIdInline, contentType, null, null, getRequest());
+                (apiId, documentIdInline, null, null, getRequest());
 
         Assert.assertEquals(200, responseFile.getStatus());
         Assert.assertEquals(200, responseInline.getStatus());
@@ -250,7 +249,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.when(apiStore.getDocumentationSummary(documentId)).thenReturn(documentInfoFile);
 
         Response response = apisApiService.apisApiIdDocumentsDocumentIdGet
-                (apiId, documentId, contentType, null, null, getRequest());
+                (apiId, documentId, null, null, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -282,7 +281,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.when(apiStore.getAllDocumentation(apiId, 0, 10)).thenReturn(documentInfoList);
 
         Response response = apisApiService.apisApiIdDocumentsGet
-                (apiId, 10, 0, contentType, null, getRequest());
+                (apiId, 10, 0, null, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -308,7 +307,7 @@ public class ApisApiServiceImplTestCase {
 
         Mockito.when(apiStore.getAPIbyUUID(apiId)).thenReturn(api);
 
-        Response response = apisApiService.apisApiIdGet(apiId, contentType, null, null, getRequest());
+        Response response = apisApiService.apisApiIdGet(apiId, null, null, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -355,7 +354,7 @@ public class ApisApiServiceImplTestCase {
 
         Mockito.when(apiStore.getRatingsListForApi(apiId)).thenReturn(ratingList);
 
-        Response response = apisApiService.apisApiIdRatingsGet(apiId, 10, 0, contentType, getRequest());
+        Response response = apisApiService.apisApiIdRatingsGet(apiId, 10, 0, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -385,7 +384,7 @@ public class ApisApiServiceImplTestCase {
 
         Mockito.when(apiStore.getRatingByUUID(apiId, rateId)).thenReturn(rating);
 
-        Response response = apisApiService.apisApiIdRatingsGet(apiId, 10, 0, contentType, getRequest());
+        Response response = apisApiService.apisApiIdRatingsGet(apiId, 10, 0, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -430,7 +429,7 @@ public class ApisApiServiceImplTestCase {
                 .updateRating(apiId, ratingNow.getUuid(), rating);
         Mockito.when(apiStore.getRatingByUUID(apiId, ratingNow.getUuid())).thenReturn(ratingNow);
 
-        Response response = apisApiService.apisApiIdUserRatingPut(apiId, ratingDTO, contentType, getRequest());
+        Response response = apisApiService.apisApiIdUserRatingPut(apiId, ratingDTO, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -449,7 +448,7 @@ public class ApisApiServiceImplTestCase {
 
         Mockito.when(apiStore.getApiSwaggerDefinition(apiId)).thenReturn("SWAGGER DEFINITION");
 
-        Response response = apisApiService.apisApiIdSwaggerGet(apiId, contentType, null, null, getRequest());
+        Response response = apisApiService.apisApiIdSwaggerGet(apiId, null, null, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -478,7 +477,7 @@ public class ApisApiServiceImplTestCase {
 
         Mockito.when(apiStore.searchAPIs("", 0, 1)).thenReturn(apiList);
 
-        Response response = apisApiService.apisGet(10, 0, "", contentType, null, getRequest());
+        Response response = apisApiService.apisGet(10, 0, "", null, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }

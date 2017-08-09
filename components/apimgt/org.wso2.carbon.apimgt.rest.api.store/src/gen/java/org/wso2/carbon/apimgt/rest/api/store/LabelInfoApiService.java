@@ -20,7 +20,6 @@ import javax.ws.rs.core.SecurityContext;
 
 public abstract class LabelInfoApiService {
     public abstract Response labelInfoGet(String labels
- ,String accept
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;

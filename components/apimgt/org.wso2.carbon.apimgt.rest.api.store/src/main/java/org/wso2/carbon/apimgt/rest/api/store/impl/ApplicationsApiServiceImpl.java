@@ -44,10 +44,10 @@ import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
-        "2016-11-01T13:48:55.078+05:30")
-public class ApplicationsApiServiceImpl
-        extends ApplicationsApiService {
+/**
+ * Implementation of Applications resource
+ */
+public class ApplicationsApiServiceImpl extends ApplicationsApiService {
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationsApiServiceImpl.class);
 
@@ -67,8 +67,7 @@ public class ApplicationsApiServiceImpl
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
-            String existingFingerprint = applicationsApplicationIdGetFingerprint(applicationId, null, null, null,
-                    request);
+            String existingFingerprint = applicationsApplicationIdGetFingerprint(applicationId, null, null, request);
             if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
                     .contains(existingFingerprint)) {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
@@ -89,7 +88,6 @@ public class ApplicationsApiServiceImpl
      * Retrives an existing application
      *
      * @param applicationId   application Id
-     * @param accept          Accept header value
      * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @param request         msf4j request object
@@ -97,13 +95,13 @@ public class ApplicationsApiServiceImpl
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response applicationsApplicationIdGet(String applicationId, String accept, String ifNoneMatch,
-                                                 String ifModifiedSince, Request request) throws NotFoundException {
+    public Response applicationsApplicationIdGet(String applicationId, String ifNoneMatch,
+            String ifModifiedSince, Request request) throws NotFoundException {
         ApplicationDTO applicationDTO = null;
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
-            String existingFingerprint = applicationsApplicationIdGetFingerprint(applicationId, accept, ifNoneMatch,
+            String existingFingerprint = applicationsApplicationIdGetFingerprint(applicationId, ifNoneMatch,
                     ifModifiedSince, request);
             if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
                     .contains(existingFingerprint)) {
@@ -140,16 +138,13 @@ public class ApplicationsApiServiceImpl
      *
      * @param applicationId   Application ID
      * @param body            Application information which are required to generate keys
-     * @param contentType     Content-Type header value
      * @param request         msf4j request object
      * @return Generated application key detials
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response applicationsApplicationIdGenerateKeysPost(String applicationId,
-                                                              ApplicationKeyGenerateRequestDTO body,
-                                                              String contentType, Request request)
-            throws NotFoundException {
+            ApplicationKeyGenerateRequestDTO body, Request request) throws NotFoundException {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
@@ -171,14 +166,12 @@ public class ApplicationsApiServiceImpl
      * Retrieve Keys of an application
      *
      * @param applicationId Application Id
-     * @param accept        Accept header value
      * @param request       msf4j request object
      * @return Application Key Information
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response applicationsApplicationIdKeysGet(String applicationId, String accept, Request request)
-            throws NotFoundException {
+    public Response applicationsApplicationIdKeysGet(String applicationId, Request request) throws NotFoundException {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
@@ -201,14 +194,13 @@ public class ApplicationsApiServiceImpl
      *
      * @param applicationId Application Id
      * @param keyType       Key Type (Production | Sandbox)
-     * @param accept        Accept header value
      * @param request       msf4j request object
      * @return Application Key Information
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response applicationsApplicationIdKeysKeyTypeGet(String applicationId, String keyType, String accept,
-                                                            Request request) throws NotFoundException {
+    public Response applicationsApplicationIdKeysKeyTypeGet(String applicationId, String keyType,
+            Request request) throws NotFoundException {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
@@ -232,16 +224,14 @@ public class ApplicationsApiServiceImpl
      *
      * @param applicationId Application Id
      * @param keyType       Key Type (Production | Sandbox)
-     * @param body          Grant type and callback URL infomation
-     * @param contentType   Content-Type header value
+     * @param body          Grant type and callback URL information
      * @param request       msf4j request object
      * @return Updated Key Information
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response applicationsApplicationIdKeysKeyTypePut(String applicationId, String keyType,
-                                                            ApplicationKeysDTO body, String contentType,
-                                                            Request request) throws NotFoundException {
+            ApplicationKeysDTO body, Request request) throws NotFoundException {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
@@ -273,15 +263,13 @@ public class ApplicationsApiServiceImpl
      *
      * @param applicationId   Application ID
      * @param body            Application key mapping information
-     * @param contentType     Content-Type header value
      * @param request         msf4j request object
      * @return Generated application key detials
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response applicationsApplicationIdMapKeysPost(String applicationId, ApplicationKeyMappingRequestDTO body,
-                                                         String contentType, Request request)
-            throws NotFoundException {
+    public Response applicationsApplicationIdMapKeysPost(String applicationId,
+            ApplicationKeyMappingRequestDTO body, Request request) throws NotFoundException {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
@@ -304,7 +292,6 @@ public class ApplicationsApiServiceImpl
      *
      * @param applicationId   Application ID
      * @param body            Application information which are required to generate tokens
-     * @param contentType     Content-Type header value
      * @param ifMatch         If-Match header value
      * @param ifUnmodifiedSince If-UnModified-Since header value
      * @param request         msf4j request object
@@ -313,9 +300,7 @@ public class ApplicationsApiServiceImpl
      */
     @Override
     public Response applicationsApplicationIdGenerateTokenPost(String applicationId,
-                                                               ApplicationTokenGenerateRequestDTO body,
-                                                               String contentType, String ifMatch,
-                                                               String ifUnmodifiedSince, Request request)
+            ApplicationTokenGenerateRequestDTO body, String ifMatch, String ifUnmodifiedSince, Request request)
             throws NotFoundException {
         try {
             String username = RestApiUtil.getLoggedInUsername();
@@ -339,14 +324,13 @@ public class ApplicationsApiServiceImpl
      * Retrieves the fingerprint of a application given its UUID
      *
      * @param applicationId   application Id
-     * @param accept          Accept header value
      * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @param request         msf4j request object
      * @return Retrieves the fingerprint of a application
      */
-    public String applicationsApplicationIdGetFingerprint(String applicationId, String accept, String ifNoneMatch,
-                                                          String ifModifiedSince, Request request) {
+    public String applicationsApplicationIdGetFingerprint(String applicationId, String ifNoneMatch,
+            String ifModifiedSince, Request request) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             String lastUpdatedTime = RestApiUtil.getConsumer(username).getLastUpdatedTimeOfApplication(applicationId);
@@ -364,7 +348,6 @@ public class ApplicationsApiServiceImpl
      *
      * @param applicationId     application Id
      * @param body              Application details to be updated
-     * @param contentType       Content-Type header
      * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param request           msf4j request object
@@ -372,15 +355,13 @@ public class ApplicationsApiServiceImpl
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body,
-                                                 String contentType, String ifMatch, String ifUnmodifiedSince,
-                                                 Request request) throws NotFoundException {
+    public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body, String ifMatch,
+            String ifUnmodifiedSince, Request request) throws NotFoundException {
         ApplicationDTO updatedApplicationDTO = null;
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
-            String existingFingerprint = applicationsApplicationIdGetFingerprint(applicationId, null, null, null,
-                    request);
+            String existingFingerprint = applicationsApplicationIdGetFingerprint(applicationId, null, null, request);
             if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
                     .contains(existingFingerprint)) {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
@@ -412,8 +393,7 @@ public class ApplicationsApiServiceImpl
             //retrieves the updated application and send as the response
             Application updatedApplication = apiConsumer.getApplication(applicationId, username);
             updatedApplicationDTO = ApplicationMappingUtil.fromApplicationToDTO(updatedApplication);
-            String newFingerprint = applicationsApplicationIdGetFingerprint(applicationId, null, null, null,
-                    request);
+            String newFingerprint = applicationsApplicationIdGetFingerprint(applicationId, null, null, request);
 
 
             //if workflow is in pending state or if the executor sends any httpworklfowresponse (workflow state can
@@ -452,15 +432,14 @@ public class ApplicationsApiServiceImpl
      * @param query       Search query
      * @param limit       Max number of applications to return
      * @param offset      Starting position of pagination
-     * @param accept      Accept header value
      * @param ifNoneMatch If-None-Match header value
      * @param request     msf4j request object
      * @return A list of qualifying application DTOs as the response
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response applicationsGet(String query, Integer limit, Integer offset, String accept,
-                                    String ifNoneMatch, Request request) throws NotFoundException {
+    public Response applicationsGet(String query, Integer limit, Integer offset, String ifNoneMatch,
+            Request request) throws NotFoundException {
 
         ApplicationListDTO applicationListDTO = null;
         String username = RestApiUtil.getLoggedInUsername();
@@ -499,14 +478,12 @@ public class ApplicationsApiServiceImpl
      * Adds a new application
      *
      * @param body        Application details to be added
-     * @param contentType Content-Type header
      * @param request     msf4j request object
      * @return 201 Response if successful
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response applicationsPost(ApplicationDTO body, String contentType, Request request)
-            throws NotFoundException {
+    public Response applicationsPost(ApplicationDTO body, Request request) throws NotFoundException {
         URI location = null;
         ApplicationDTO createdApplicationDTO = null;
         String username = RestApiUtil.getLoggedInUsername();
