@@ -20,18 +20,9 @@
 package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
 import org.testng.annotations.Test;
-import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
-import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Tag;
-import org.wso2.carbon.apimgt.core.models.User;
-import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
-import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
-import org.wso2.carbon.apimgt.rest.api.store.common.SampleObjectCreator;
-import org.wso2.carbon.apimgt.rest.api.store.dto.LabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TagDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TagListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.UserDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.WorkflowResponseDTO;
 
 import java.util.ArrayList;
 import java.util.List;

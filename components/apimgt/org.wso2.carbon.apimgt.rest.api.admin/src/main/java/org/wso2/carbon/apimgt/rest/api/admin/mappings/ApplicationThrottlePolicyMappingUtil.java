@@ -83,7 +83,7 @@ public class ApplicationThrottlePolicyMappingUtil {
      * @return Converted Application Policy Model object
      * @throws UnsupportedThrottleLimitTypeException
      */
-    public static ApplicationPolicy fromApplicationThrottlePolicyDTOToModel(ApplicationThrottlePolicyDTO dto)
+        public static ApplicationPolicy fromApplicationThrottlePolicyDTOToModel(ApplicationThrottlePolicyDTO dto)
             throws UnsupportedThrottleLimitTypeException {
 
         ApplicationPolicy appPolicy = new ApplicationPolicy(dto.getPolicyName());

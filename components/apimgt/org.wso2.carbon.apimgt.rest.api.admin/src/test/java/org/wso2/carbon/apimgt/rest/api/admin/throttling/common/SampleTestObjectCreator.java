@@ -1,5 +1,4 @@
 /*
- *
  *   Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *   WSO2 Inc. licenses this file to you under the Apache License,
@@ -17,10 +16,8 @@
  *  under the License.
  *
  */
+package org.wso2.carbon.apimgt.rest.api.admin.throttling.common;
 
-package org.wso2.carbon.apimgt.rest.api.publisher.common;
-
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,19 +25,21 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
+import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
-import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
+import org.wso2.carbon.apimgt.core.models.policy.QuotaPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -56,7 +55,7 @@ import java.util.UUID;
 import static org.wso2.carbon.apimgt.core.dao.impl.PolicyDAOImpl.UNLIMITED_TIER;
 
 public class SampleTestObjectCreator {
-
+    private static final String ACCESS_URL = "dummyUrl";
     private static final String HTTP = "http";
     private static final String HTTPS = "https";
     private static final String GOLD_TIER = "Gold";
@@ -106,7 +105,6 @@ public class SampleTestObjectCreator {
     private static final String TEST_APP_1 = "TestApp";
     private static final String TEST_APP_2 = "TestApp2";
     private static final String TEMPLATE_ID = "getApisApiIdGet";
-    private static final String ACCESS_URL = "https://test.";
     private static final String ALT_SWAGGER_PATH = "api/alternativeSwagger.json";
     private static final String SAMPLE_GTW_CONFIG_PATH = "api/sampleGatewayConfig.bal";
     private static final String ALT_GTW_CONFIG_PATH = "api/alternativeGatewayConfig.bal";
@@ -119,7 +117,7 @@ public class SampleTestObjectCreator {
     private static final String SAMPLE_CUSTOM_RULE = "Sample Custom Rule";
     public static final String ADMIN_ROLE_ID = "cfbde56e-4352-498e-b6dc-85a6f1f8b058";
     public static final String DEVELOPER_ROLE_ID = "cfdce56e-8434-498e-b6dc-85a6f2d8f035";
-    public static  APIPolicy unlimitedApiPolicy = new APIPolicy(UUID.randomUUID().toString(), UNLIMITED_TIER);
+    public static APIPolicy unlimitedApiPolicy = new APIPolicy(UUID.randomUUID().toString(), UNLIMITED_TIER);
     public static  APIPolicy goldApiPolicy = new APIPolicy(UUID.randomUUID().toString(), GOLD_TIER);
     public static  APIPolicy silverApiPolicy = new APIPolicy(UUID.randomUUID().toString(), SILVER_TIER);
     public static  APIPolicy bronzeApiPolicy = new APIPolicy(UUID.randomUUID().toString(), BRONZE_TIER);
@@ -131,7 +129,7 @@ public class SampleTestObjectCreator {
             new SubscriptionPolicy(UUID.randomUUID().toString(), SILVER_TIER);
     public static  SubscriptionPolicy bronzeSubscriptionPolicy =
             new SubscriptionPolicy(UUID.randomUUID().toString(), BRONZE_TIER);
-    public static  ApplicationPolicy fiftyPerMinApplicationPolicy =
+    public static ApplicationPolicy fiftyPerMinApplicationPolicy =
             new ApplicationPolicy(UUID.randomUUID().toString(), FIFTY_PER_MIN_TIER);
     public static  ApplicationPolicy twentyPerMinApplicationPolicy =
             new ApplicationPolicy(UUID.randomUUID().toString(), TWENTY_PER_MIN_TIER);
@@ -141,14 +139,32 @@ public class SampleTestObjectCreator {
     public static String endpointId = UUID.randomUUID().toString();
     public static String WORKFLOW_STATUS = "ACTIVE";
 
-    static {
-        try {
-            inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("swagger.json");
-            apiDefinition = IOUtils.toString(inputStream);
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
+    public static CompositeAPI.Builder createCompositeAPIModelBuilder() {
+        CompositeAPI.Builder compositeAPIBuilder = new CompositeAPI.Builder();
+        compositeAPIBuilder.id(UUID.randomUUID().toString()).name("CompisteAPI").apiDefinition("definition").
+                            applicationId(UUID.randomUUID().toString()).context("testcontext").provider("provider")
+                            .version("1.0.0").context("testcontext").description("testdesc").labels(new HashSet<>());
+        return compositeAPIBuilder;
+    }
 
+    public static Label.Builder createLabel(String name) {
+
+        List<String> accessUrls = new ArrayList<>();
+        accessUrls.add(ACCESS_URL + name);
+        return new Label.Builder().
+                id(UUID.randomUUID().toString()).
+                name(name).
+                accessUrls(accessUrls);
+    }
+
+    public static Subscription createSubscription(String uuid) {
+        if(StringUtils.isEmpty(uuid)) {
+            uuid = UUID.randomUUID().toString();
+        }
+        Subscription subscription = new Subscription(uuid, createDefaultApplication(), createDefaultAPI().build(),
+                goldApiPolicy);
+        subscription.setStatus(APIMgtConstants.SubscriptionStatus.ACTIVE);
+        return subscription;
     }
 
     public static API.APIBuilder createDefaultAPI() {
@@ -227,6 +243,12 @@ public class SampleTestObjectCreator {
         return apiBuilder;
     }
 
+    public static Endpoint createMockEndpoint() {
+        return new Endpoint.Builder().endpointConfig("{'type':'http','url':'http://localhost:8280'}").id(endpointId)
+                .maxTps(1000L).security("{\"enabled\":false}").name("Endpoint1")
+                .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).type("http").build();
+    }
+
     public static Map<String, UriTemplate> getMockUriTemplates() {
         Map<String, UriTemplate> uriTemplateMap = new HashMap();
         UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
@@ -237,44 +259,6 @@ public class SampleTestObjectCreator {
         uriTemplateBuilder.httpVerb(APIMgtConstants.FunctionsConstants.GET);
         uriTemplateMap.put(TEMPLATE_ID, uriTemplateBuilder.build());
         return uriTemplateMap;
-    }
-
-    public static Endpoint createMockEndpoint() {
-        return new Endpoint.Builder().endpointConfig("{'type':'http','url':'http://localhost:8280'}").id(endpointId)
-                .maxTps(1000L).security("{\"enabled\":false}").name("Endpoint1")
-                .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).type("http").build();
-    }
-
-    public static Endpoint.Builder createMockEndpointBuilder() {
-        return new Endpoint.Builder().endpointConfig("{'type':'http','url':'http://localhost:8280'}").id(endpointId)
-                .maxTps(1000L).security("{\"enabled\":false}").name("Endpoint1")
-                .applicableLevel(APIMgtConstants.GLOBAL_ENDPOINT).type("http");
-    }
-
-    public static DocumentInfo.Builder createDefaultDocumentationInfo() {
-        //created by admin
-        DocumentInfo.Builder builder = new DocumentInfo.Builder();
-        builder.id(UUID.randomUUID().toString());
-        builder.name(SAMPLE_DOC_NAME);
-        builder.type(DocumentInfo.DocType.HOWTO);
-        builder.summary("Summary of Calculator Documentation");
-        builder.sourceType(DocumentInfo.SourceType.INLINE);
-        builder.sourceURL(EMPTY_STRING);
-        builder.otherType(EMPTY_STRING);
-        builder.visibility(DocumentInfo.Visibility.API_LEVEL);
-        builder.createdTime(LocalDateTime.now());
-        builder.lastUpdatedTime(LocalDateTime.now());
-        return builder;
-    }
-
-    public static Subscription createSubscription(String uuid) {
-        if(StringUtils.isEmpty(uuid)) {
-            uuid = UUID.randomUUID().toString();
-        }
-        Subscription subscription = new Subscription(uuid, createDefaultApplication(), createDefaultAPI().build(),
-                                                     goldApiPolicy);
-        subscription.setStatus(APIMgtConstants.SubscriptionStatus.ACTIVE);
-        return subscription;
     }
 
     public static Application createDefaultApplication() {
@@ -290,13 +274,73 @@ public class SampleTestObjectCreator {
         return application;
     }
 
-    public static Label.Builder createLabel(String name) {
+    public static SubscriptionPolicy createSubscriptionPolicyWithRequestLimit(String name) {
+        SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(name);
+        subscriptionPolicy.setDescription("testDescription");
+        QuotaPolicy quotaPolicy = new QuotaPolicy();
+        quotaPolicy.setType("requestCount");
+        RequestCountLimit requestCountLimit = new RequestCountLimit("s", 60 ,10);
+        quotaPolicy.setLimit(requestCountLimit);
+        subscriptionPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        return subscriptionPolicy;
+    }
 
-        List<String> accessUrls = new ArrayList<>();
-        accessUrls.add(ACCESS_URL + name);
-        return new Label.Builder().
-                id(UUID.randomUUID().toString()).
-                name(name).
-                accessUrls(accessUrls);
+    public static SubscriptionPolicy createSubscriptionPolicyWithBndwidthLimit(String name) {
+        SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(name);
+        subscriptionPolicy.setDescription("testDescription");
+        QuotaPolicy quotaPolicy = new QuotaPolicy();
+        quotaPolicy.setType("bandwidth");
+        BandwidthLimit bandwidthLimit = new BandwidthLimit("s", 60 ,10, "mb");
+        quotaPolicy.setLimit(bandwidthLimit);
+        subscriptionPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        return subscriptionPolicy;
+    }
+
+    public static ApplicationPolicy createApplicationPolicyWithRequestLimit(String name) {
+        ApplicationPolicy applicationPolicy = new ApplicationPolicy(name);
+        applicationPolicy.setDescription("testDescription");
+        QuotaPolicy quotaPolicy = new QuotaPolicy();
+        quotaPolicy.setType("requestCount");
+        RequestCountLimit requestCountLimit = new RequestCountLimit("s", 60 ,10);
+        quotaPolicy.setLimit(requestCountLimit);
+        applicationPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        applicationPolicy.setDisplayName("displayName");
+        return applicationPolicy;
+    }
+
+    public static ApplicationPolicy createApplicationPolicyWithBndwidthLimit(String name) {
+        ApplicationPolicy applicationPolicy = new ApplicationPolicy(name);
+        applicationPolicy.setDescription("testDescription");
+        QuotaPolicy quotaPolicy = new QuotaPolicy();
+        quotaPolicy.setType("bandwidth");
+        BandwidthLimit bandwidthLimit = new BandwidthLimit("s", 60 ,10, "mb");
+        quotaPolicy.setLimit(bandwidthLimit);
+        applicationPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        applicationPolicy.setDisplayName("displayName");
+        return applicationPolicy;
+    }
+
+    public static APIPolicy createAPIPolicyWithRequestLimit(String name) {
+        APIPolicy apiPolicy = new APIPolicy(name);
+        apiPolicy.setDescription("testDescription");
+        QuotaPolicy quotaPolicy = new QuotaPolicy();
+        quotaPolicy.setType("requestCount");
+        RequestCountLimit requestCountLimit = new RequestCountLimit("s", 60 ,10);
+        quotaPolicy.setLimit(requestCountLimit);
+        apiPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        apiPolicy.setDisplayName("displayName");
+        return apiPolicy;
+    }
+
+    public static APIPolicy createAPIPolicyWithBndwidthLimit(String name) {
+        APIPolicy apiPolicy = new APIPolicy(name);
+        apiPolicy.setDescription("testDescription");
+        QuotaPolicy quotaPolicy = new QuotaPolicy();
+        quotaPolicy.setType("bandwidth");
+        BandwidthLimit bandwidthLimit = new BandwidthLimit("s", 60 ,10, "mb");
+        quotaPolicy.setLimit(bandwidthLimit);
+        apiPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        apiPolicy.setDisplayName("displayName");
+        return apiPolicy;
     }
 }
