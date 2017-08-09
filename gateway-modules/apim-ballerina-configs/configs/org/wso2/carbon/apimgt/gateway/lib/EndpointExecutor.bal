@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.gateway.lib;
 
+import ballerina.lang.system;
 import org.wso2.carbon.apimgt.gateway.dto;
 import org.wso2.carbon.apimgt.gateway.holders;
 import ballerina.net.http;
@@ -8,6 +9,7 @@ import ballerina.lang.messages;
 import org.wso2.carbon.apimgt.gateway.constants;
 
 function execute_endpoint (string endpointName, string httpVerb, string path, message m) (message) {
+    system:println("execute_endpoint() in EndpointExecutor");
     dto:EndpointDto endpoint = holders:getFromEndpointCache(endpointName);
     message response;
     if (endpoint != null) {

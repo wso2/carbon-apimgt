@@ -15,10 +15,12 @@ import org.wso2.carbon.apimgt.ballerina.util;
 errors:TypeCastError err;
 
 function main(string[] args) {
+    system:println("main() in Throttling");
     system:println("Hello, World!");
 }
 
 function requestInterceptor (message m) (boolean, message) {
+    system:println("requestInterceptor() in Throttling");
     system:println("invoking throttle interceptor");
     boolean isThrottled = isRequestThrottled(m);
     system:println("isRequestThrottled " + isThrottled);
@@ -26,11 +28,13 @@ function requestInterceptor (message m) (boolean, message) {
 }
 
 function responseInterceptor (message m) (boolean, message) {
+    system:println("responseInterceptor() in Throttling");
     system:println("invoking response throttle interceptor");
     return true, m;
 }
 
 function isRequestThrottled( message msg) (boolean){
+    system:println("isRequestThrottled() in Throttling");
     // will return true if the request is throttled
 
     //Throttle Keys
@@ -184,13 +188,14 @@ function isRequestThrottled( message msg) (boolean){
 }
 
 function setInvalidUser(message msg){
+    system:println("setInvalidUser() in Throttling");
     messages:setStringPayload(msg, "API is Throttled Out");
 }
 
 
 function publishEvent(message m, string userId, string applicationId, string apiContext, string apiVersion,string apiTier,
                       string applicationTier, string subscriptionTier, string resourceLevelThrottleKey, string resourceTier,string ip) {
-
+    system:println("publishEvent() in Throttling");
     string messageID = "messageID";
     string appKey = applicationId+ ":" + userId;
     string subscriptionKey = applicationId + ":" + apiContext + ":" + apiVersion;

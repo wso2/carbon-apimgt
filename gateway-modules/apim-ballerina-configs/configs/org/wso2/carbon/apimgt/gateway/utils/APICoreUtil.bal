@@ -12,7 +12,7 @@ import org.wso2.carbon.apimgt.ballerina.util as apimgtUtil;
 import ballerina.lang.strings;
 import org.wso2.carbon.apimgt.ballerina.util;
 function registerGateway () (json) {
-
+    system:println("registerGateway() in APICoreUtil");
     json labelInfoPayload = {};
     message request = {};
     message response = {};
@@ -34,22 +34,33 @@ function registerGateway () (json) {
     return gatewayConfig;
 }
 
-function loadAPIs () {
+function loadAPIs (json apis) {
 
-    json apis = getAPIs();
+    //json apis = getAPIs();
     int index = 0;
     errors:TypeCastError err;
     int count;
     count, err = (int)apis.count;
     json apiList = apis.list;
 
+    system:println("loadAPIs() in APICoreUtil");
+    system:println(apis);
+    system:println(apiList);
     while (index < count) {
+        //for every API loaded this will run
 
         dto:APIDTO api = fromJSONToAPIDTO(apiList[index]);
-
+        system:println(apiList[index]);
         //Retrieve API configuration
         string apiConfig;
         int status;
+        system:println("*******************************************************");
+        system:println("api :");
+        system:println(api);
+        system:println("api.id :");
+        system:println(api.id);
+        system:println("*******************************************************");
+
         status, apiConfig = getAPIServiceConfig(api.id);
         int maxRetries = 3;
         int i = 0;
@@ -71,7 +82,7 @@ function loadAPIs () {
 }
 
 function getAPIs () (json) {
-
+    system:println("start getAPIs() in APICoreUtil");
     string apiCoreURL;
     message request = {};
     message response = {};
@@ -81,15 +92,48 @@ function getAPIs () (json) {
         string query = "?labels=Default";
         response = http:ClientConnector.get(client, "/api/am/core/v1.0/apis" + query, request);
         apiList = messages:getJsonPayload(response);
+        system:println(apiList);
+
+        // compare with the offline repo, if any change update it accordingly
+
+        system:println("end getAPIs() in APICoreUtil");
         return apiList;
     } catch (errors:Error e) {
         system:println("Error occurred while retrieving gateway APIs from API Core. " + e.msg);
         throw e;
     }
+    system:println("end getAPIs() in APICoreUtil");
     return apiList;
 }
-function getEndpoints () (json) {
 
+function getOfflineAPIs () (json) {
+    system:println("start getOfflineAPIs() in APICoreUtil");
+
+    string offlineDirectory;
+    json apiList;
+    try {
+
+        //files:File target = {path:getOfflineDirectory()};
+        //files:open(target, "r");         //opens the file in the read mode
+        //var content, n = files:read(target, 100000000);
+
+        //string strAPIList = blobs:toString(content, "utf-8");
+        //apiList = strAPIList;
+        //system:println(apiList);
+        apiList = getOfflineAPIList();
+        system:println("end getOfflineAPIs() in APICoreUtil");
+        return apiList;
+
+    } catch (errors:Error e) {
+        system:println("Error occurred while retrieving gateway APIs from API Core. " + e.msg);
+        throw e;
+    }
+    system:println("end getOfflineAPIs() in APICoreUtil");
+    return apiList;
+}
+
+function getEndpoints () (json) {
+    system:println("getEndpoints() in APICoreUtil");
     string apiCoreURL;
     message request = {};
     message response = {};
@@ -99,6 +143,8 @@ function getEndpoints () (json) {
         string query = "?limit=-1";
         response = http:ClientConnector.get(client, "/api/am/core/v1.0/endpoints" + query, request);
         endpointList = messages:getJsonPayload(response);
+        system:println("endpointList");
+        system:println(endpointList);
         return endpointList;
     } catch (errors:Error e) {
         system:println("Error occurred while retrieving gateway APIs from API Core. " + e.msg);
@@ -106,8 +152,29 @@ function getEndpoints () (json) {
     }
     return endpointList;
 }
-function getBlockConditions () (json) {
 
+function getOfflineEndpoints () (json) {
+    system:println("getOfflineEndpoints() in APICoreUtil");
+    string apiCoreURL;
+    message request = {};
+    message response = {};
+    json endpointList;
+    try {
+        http:ClientConnector client = create http:ClientConnector(getAPICoreURL());
+        string query = "?limit=-1";
+        response = http:ClientConnector.get(client, "/api/am/core/v1.0/endpoints" + query, request);
+        endpointList = messages:getJsonPayload(response);
+        system:println(endpointList);
+        return endpointList;
+    } catch (errors:Error e) {
+        system:println("Error occurred while retrieving gateway APIs from API Core. " + e.msg);
+        throw e;
+    }
+    return endpointList;
+}
+
+function getBlockConditions () (json) {
+    system:println("getBlockConditions() in APICoreUtil");
     string apiCoreURL;
     message request = {};
     message response = {};
@@ -117,6 +184,8 @@ function getBlockConditions () (json) {
         string query = "?limit=-1";
         response = http:ClientConnector.get(client, "/api/am/core/v1.0/blacklist" + query, request);
         blockConditionList = messages:getJsonPayload(response);
+        system:println("block Condition List");
+        system:println(blockConditionList);
         return blockConditionList;
     } catch (errors:Error e) {
         system:println("Error occurred while retrieving gateway APIs from API Core. " + e.msg);
@@ -125,7 +194,7 @@ function getBlockConditions () (json) {
     return blockConditionList;
 }
 function loadGlobalEndpoints () {
-
+    system:println("loadGlobalEndpoints() in APICoreUtil");
     json endpoints = getEndpoints();
     int index = 0;
     errors:TypeCastError err;
@@ -141,7 +210,7 @@ function loadGlobalEndpoints () {
     }
 }
 function loadBlockConditions () {
-
+    system:println("loadBlockConditions() in APICoreUtil");
     json blockConditions = getBlockConditions();
     int index = 0;
     errors:TypeCastError err;
@@ -158,6 +227,7 @@ function loadBlockConditions () {
 }
 
 function getAPIServiceConfig (string apiId) (int, string) {
+    system:println("getAPIServiceConfig() in APICoreUtil");
     message request = {};
     message response = {};
     string apiConfig;
@@ -171,9 +241,14 @@ function getAPIServiceConfig (string apiId) (int, string) {
         system:println("Error occurred while retrieving service configuration for API : " + apiId);
         throw e;
     }
+    system:println("status");
+    system:println(status);
+    system:println("apiConfig");
+    system:println(apiConfig);
     return status, apiConfig;
 }
 function getEndpointConfig (string endpointId) (int, string) {
+    system:println("getEndpointConfig() in APICoreUtil");
     message request = {};
     message response = {};
     string apiConfig;
@@ -190,6 +265,7 @@ function getEndpointConfig (string endpointId) (int, string) {
     return status, apiConfig;
 }
 function fromJsonToEndpointDto (json endpointConfig) (dto:EndpointDto) {
+    system:println("fromJsonToEndpointDto() in APICoreUtil");
     dto:EndpointDto endpointDto = {};
     errors:TypeCastError err;
     string endpointConfigValue;
@@ -212,7 +288,9 @@ function fromJsonToEndpointDto (json endpointConfig) (dto:EndpointDto) {
     }
     return endpointDto;
 }
+
 function getAPICoreURL () (string) {
+    system:println("getAPICoreURL() in APICoreUtil");
     string apiCoreURL;
 
     if (getSystemProperty(Constants:API_CORE_URL) != "") {
@@ -223,13 +301,29 @@ function getAPICoreURL () (string) {
     return apiCoreURL;
 }
 
+function getOfflineDirectory () (string) {
+
+    //has to use a switch statement here whether to read form which file
+    //decide factor should be passed as an argument to the method.
+    system:println("getOfflineDirectory() in APICoreUtil");
+    string offlineDirectory;
+
+    if (getSystemProperty(Constants:OFFLINE_DIRECTORY) != "") {
+        offlineDirectory = getSystemProperty(Constants:OFFLINE_DIRECTORY);
+    } else {
+        offlineDirectory = "/home/sabeena/Documents/OfflineDirectory/getAPIs.txt";
+    }
+    return offlineDirectory;
+}
 
 function deployService (dto:APIDTO api, string config) {
+    system:println("deployService() in APICoreUtil");
     string fileName = api.id + ".bal";
     string serviceName = api.name + "_" + strings:replace(api.id, "-", "_");
     deployment:deployService(fileName, serviceName, config, "org/wso2/carbon/apimgt/gateway");
 }
 function deployFile (string id, string config) {
+    system:println("deployFile() in APICoreUtil");
     string fileName = id + ".bal";
     deployment:deploy(fileName, config, "org/wso2/carbon/apimgt/gateway");
 }
@@ -242,6 +336,7 @@ function updateService (dto:APIDTO api, string config) {
 
 
 function buildPayload () (json) {
+    system:println("buildPayload() in APICoreUtil");
     json label1 = {};
     label1.name = "Default";
     json label1AccessURLs = ["https://localhost:9092"];

@@ -17,14 +17,19 @@ service<http> gatewayInitService {
 }
 
 function initGateway () (boolean) {
-
+    system:println("initGateway() in gatewayInit");
     try {
         //Register gateway in API Core
         gatewayUtil:registerGateway();
         //Retrieve APIs from API Core and deploy
-        gatewayUtil:loadAPIs();
+
+        gatewayUtil:loadAPIs(gatewayUtil:getAPIs());
+        gatewayUtil:loadAPIs(gatewayUtil:getOfflineAPIs());
+
         gatewayUtil:loadGlobalEndpoints();
+
         gatewayUtil:loadBlockConditions();
+
     } catch (errors:Error e) {
         system:println("Error while initilazing API gateway. " + e.msg);
     }

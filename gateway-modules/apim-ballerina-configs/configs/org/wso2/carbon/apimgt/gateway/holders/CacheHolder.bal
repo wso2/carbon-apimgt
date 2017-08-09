@@ -14,6 +14,7 @@ map applicationCache = {};
 map userInfoCache = {};
 string apiCoreUrl;
 function getFromTokenCache (string key) (dto:IntrospectDto) {
+    system:println("getFromTokenCache() in CacheHolder");
     any introspect = caching:getCacheEntry(constants:TOKEN_CACHE, key);
     if (introspect != null) {
         dto:IntrospectDto dto;
@@ -25,9 +26,11 @@ function getFromTokenCache (string key) (dto:IntrospectDto) {
     }
 }
 function putIntoTokenCache (string key, dto:IntrospectDto introspectDto) {
+    system:println("putIntoTokenCache() in CacheHolder");
     caching:putCacheEntry(constants:TOKEN_CACHE, key, introspectDto);
 }
 function getFromSubscriptionCache (string apiContext, string version, string consumerKey) (dto:SubscriptionDto) {
+    system:println("getFromSubscriptionCache() in CacheHolder");
     string key = apiContext + ":" + version + ":" + consumerKey;
     any subscription = caching:getCacheEntry(constants:SUBSCRIPTION_CACHE, key);
     if (subscription != null) {
@@ -40,10 +43,12 @@ function getFromSubscriptionCache (string apiContext, string version, string con
     }
 }
 function putIntoSubscriptionCache (dto:SubscriptionDto subscriptionDto) {
+    system:println("putIntoSubscriptionCache() in CacheHolder");
     string key = subscriptionDto.apiContext + ":" + subscriptionDto.apiVersion + ":" + subscriptionDto.consumerKey;
     caching:putCacheEntry(constants:SUBSCRIPTION_CACHE, key, subscriptionDto);
 }
 function getFromResourceCache (string apiContext, string apiVersion, string resourceUri, string httpVerb) (dto:ResourceDto) {
+    system:println("getFromResourceCache() in CacheHolder");
     string internalKey = resourceUri + ":" + httpVerb;
     string key = apiContext + ":" + apiVersion;
     any resourceMapEntry = caching:getCacheEntry(constants:RESOURCE_CACHE, key);
@@ -63,6 +68,7 @@ function getFromResourceCache (string apiContext, string apiVersion, string reso
     }
 }
 function putIntoResourceCache (string apiContext, string apiVersion, dto:ResourceDto resourceDto) {
+    system:println("putIntoResourceCache() in CacheHolder");
     string internalKey = resourceDto.uriTemplate + ":" + resourceDto.httpVerb;
     string key = apiContext + ":" + apiVersion;
     map resourceMap = {};
@@ -76,17 +82,21 @@ function putIntoResourceCache (string apiContext, string apiVersion, dto:Resourc
     caching:putCacheEntry(constants:RESOURCE_CACHE, key, resourceMap);
 }
 function removeFromTokenCache (string key) {
+    system:println("removeFromTokenCache() in CacheHolder");
     caching:removeCacheEntry(constants:TOKEN_CACHE, key);
 }
 function putIntoAPICache (dto:APIDTO apidto) {
+    system:println("putIntoAPICache() in CacheHolder");
     string key = apidto.context + ":" + apidto.version;
     caching:putCacheEntry(constants:API_CACHE, key, apidto);
 }
 function removeFromAPICache (dto:APIDTO apidto) {
+    system:println("removeFromAPICache() in CacheHolder");
     string key = apidto.context + ":" + apidto.version;
     caching:removeCacheEntry(constants:API_CACHE, key);
 }
 function getFromAPICache (string key) (dto:APIDTO) {
+    system:println("getFromAPICache() in CacheHolder");
     any api = caching:getCacheEntry(constants:API_CACHE, key);
     if (api != null) {
         dto:APIDTO dto;
@@ -98,12 +108,16 @@ function getFromAPICache (string key) (dto:APIDTO) {
     }
 }
 function setGatewayConf (dto:GatewayConfDTO conf) {
+    system:println("setGatewayConf() in CacheHolder");
     gatewayConf = conf;
     apimgtMaps:putMapEntry("gatewayConfig", gatewayConf);
     keyManagerConf = conf.keyManagerInfo;
 }
 function getGatewayConf () (dto:GatewayConfDTO) {
-    any dto = apimgtMaps:getMapEntry("gatewayConfig");
+
+    system:println("getGatewayConf() in CacheHolder");
+    any dto = apimgtMaps:getMapEntry("gatewayConfig");;
+
     errors:TypeCastError err;
     if(dto!=null){
         gatewayConf, err = (dto:GatewayConfDTO)dto;
@@ -112,23 +126,31 @@ function getGatewayConf () (dto:GatewayConfDTO) {
     return gatewayConf;
 }
 function getKeyManagerConf () (dto:KeyManagerInfoDTO) {
+    system:println("getKeyManagerConf() in CacheHolder");
     getGatewayConf();
     return keyManagerConf;
 }
 function getAnalyticsConf () (dto:AnalyticsInfoDTO) {
+
     getGatewayConf();
+    system:println("getAnalyticsConf() in CacheHolder");
+
     return gatewayConf.analyticsInfo;
 }
 
 function getThrottleConf () (dto:ThrottlingInfoDTO) {
+
     getGatewayConf();
+    system:println("getThrottleConf() in CacheHolder");
     return gatewayConf.throttlingInfo;
 }
 
 function putIntoApplicationCache (dto:ApplicationDto applicationDto) {
+    system:println("putIntoApplicationCache() in CacheHolder");
     caching:putCacheEntry(constants:APPLICATION_CACHE, applicationDto.applicationId, applicationDto);
 }
 function getFromApplicationCache (string applicationId) (dto:ApplicationDto) {
+    system:println("getFromApplicationCache() in CacheHolder");
     any application = caching:getCacheEntry(constants:APPLICATION_CACHE, applicationId);
     if (application != null) {
         dto:ApplicationDto dto;
@@ -140,18 +162,22 @@ function getFromApplicationCache (string applicationId) (dto:ApplicationDto) {
     }
 }
 function removeApplicationFromCache (string applicationId) {
+    system:println("removeApplicationFromCache() in CacheHolder");
     caching:removeCacheEntry(constants:APPLICATION_CACHE, applicationId);
 }
 function removeFromResources (string apiContext, string apiVersion) {
+    system:println("removeFromResources() in CacheHolder");
     string key = apiContext + ":" + apiVersion;
     caching:removeCacheEntry(constants:RESOURCE_CACHE, key);
 }
 function removeFromSubscriptionCache (string apiContext, string apiVersion, string consumerKey) {
+    system:println("removeFromSubscriptionCache() in CacheHolder");
     string key = apiContext + ":" + apiVersion + ":" + consumerKey;
     caching:removeCacheEntry(constants:SUBSCRIPTION_CACHE, key);
 }
 
 function initializeCache () (boolean) {
+    system:println("initializeCache() in CacheHolder");
     //cache for token introspect
     caching:createCache(constants:TOKEN_CACHE, "15");
     //cache for subscription
@@ -171,6 +197,7 @@ function initializeCache () (boolean) {
     return true;
 }
 function getFromUserInfoCache (string userId) (json) {
+    system:println("getFromUserInfoCache() in CacheHolder");
     if (userInfoCache[userId] != null) {
         json value;
         errors:TypeCastError err;
@@ -181,14 +208,17 @@ function getFromUserInfoCache (string userId) (json) {
     }
 }
 function putIntoUserInfoCache (string userId, json userInfo) {
+    system:println("putIntoUserInfoCache() in CacheHolder");
     if (userInfoCache[userId] == null) {
         userInfoCache[userId] = userInfo;
     }
 }
 function putIntoPolicyCache (dto:PolicyDto policyDto) {
+    system:println("putIntoPolicyCache() in CacheHolder");
     caching:putCacheEntry(constants:POLICY_CACHE, policyDto.id, policyDto);
 }
 function getFromPolicyCache (string id) (dto:PolicyDto) {
+    system:println("getFromPolicyCache() in CacheHolder");
     any policy = caching:getCacheEntry(constants:POLICY_CACHE, id);
     if (policy != null) {
         dto:PolicyDto dto;
@@ -200,16 +230,20 @@ function getFromPolicyCache (string id) (dto:PolicyDto) {
     }
 }
 function removeFromPolicyCache (string id) {
+    system:println("removeFromPolicyCache() in CacheHolder");
     caching:removeCacheEntry(constants:POLICY_CACHE, id);
 }
 function putIntoEndpointCache (dto:EndpointDto endpointDto) {
+    system:println("putIntoEndpointCache() in CacheHolder");
     caching:putCacheEntry(constants:ENDPOINT_CACHE, endpointDto.name, endpointDto);
 
 }
 function removeFromEndpointCache (string endpointId) {
+    system:println("removeFromEndpointCache() in CacheHolder");
     caching:removeCacheEntry(constants:ENDPOINT_CACHE, endpointId);
 }
 function getFromEndpointCache (string endpointId) (dto:EndpointDto) {
+    system:println("getFromEndpointCache() in CacheHolder");
     any endpoint = caching:getCacheEntry(constants:ENDPOINT_CACHE, endpointId);
     if (endpoint != null) {
         system:println("not null");
@@ -222,10 +256,12 @@ function getFromEndpointCache (string endpointId) (dto:EndpointDto) {
     }
 }
 function updateEndpointCache (dto:EndpointDto endpointDto) {
+    system:println("updateEndpointCache() in CacheHolder");
     removeFromEndpointCache(endpointDto.name);
     putIntoEndpointCache(endpointDto);
 }
 function addBlockConditions (dto:BlockConditionDto blockConditionDto) {
+    system:println("addBlockConditions() in CacheHolder");
     any entry = apimgtMaps:getMapEntry(constants:BLOCK_CONDITION_MAP);
     system:println(blockConditionDto.key);
     map blockConditionMap = {};
@@ -237,6 +273,7 @@ function addBlockConditions (dto:BlockConditionDto blockConditionDto) {
     apimgtMaps:putMapEntry(constants:BLOCK_CONDITION_MAP, blockConditionMap);
 }
 function removeBlockCondition (dto:BlockConditionDto blockConditionDto) {
+    system:println("removeBlockConditions() in CacheHolder");
     any entry = apimgtMaps:getMapEntry(constants:BLOCK_CONDITION_MAP);
     map blockConditionMap = {};
     errors:TypeCastError err;
@@ -247,6 +284,7 @@ function removeBlockCondition (dto:BlockConditionDto blockConditionDto) {
     apimgtMaps:putMapEntry(constants:BLOCK_CONDITION_MAP, blockConditionMap);
 }
 function updateBlockCondition (dto:BlockConditionDto blockConditionDto) {
+    system:println("updateBlockConditions() in CacheHolder");
     any entry = apimgtMaps:getMapEntry(constants:BLOCK_CONDITION_MAP);
     map blockConditionMap = {};
     errors:TypeCastError err;
@@ -260,6 +298,7 @@ function updateBlockCondition (dto:BlockConditionDto blockConditionDto) {
     apimgtMaps:putMapEntry(constants:BLOCK_CONDITION_MAP, blockConditionMap);
 }
 function getBlockConditionMap ()(map) {
+    system:println("getBlockConditionMap() in CacheHolder");
     any entry = apimgtMaps:getMapEntry(constants:BLOCK_CONDITION_MAP);
     map blockConditionMap = {};
     errors:TypeCastError err;
