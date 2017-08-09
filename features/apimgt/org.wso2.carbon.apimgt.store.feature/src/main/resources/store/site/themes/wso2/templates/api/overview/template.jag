@@ -59,11 +59,15 @@
 	                    if(environmenturls[urltype] != ""){
                             if (api.type.toUpperCase() == "WS") {
                                 var url = environmenturls[urltype];
-                                var cut = url.match(":(.*):");
-                                if (cut){
-                                    var host = cut[1];
+                                if(url.match("^ws:")) {
+                                    var gatewayUrl = url;
                                 } else {
-                                    var host = "host";
+                                    var cut = url.match(":(.*):");
+                                    if (cut){
+                                        var gatewayUrl = "ws:" + cut[1]+ ":9099";
+                                    } else {
+                                        var gatewayUrl = "ws://host:9099";
+                                    }
                                 }
                             }
                         %>
@@ -72,14 +76,14 @@
                                 <%if (api.type.toUpperCase() != "WS") {%>
                                     "<%=environmenturls[urltype]%><%=encode.forHtmlAttribute(api.context)%>"
                                 <%} else {%>
-                                    "ws:<%=host%>:9099<%=encode.forHtml(api.context)%>"
+                                    "<%=gatewayUrl%><%=encode.forHtml(api.context)%>"
                                 <%}%>
                                 class="pull-right copy-button"  title="<%=i18n.localize("Copy")%>"><i class="fw fw-copy"></i>
                             </a>
 	    	                <%if (api.type.toUpperCase() != "WS") {%>
                                 <%=encode.forHtml(environmenturls[urltype])%><%=encode.forHtml(api.context)%>
                             <%} else {%>
-                                ws:<%=host%>:9099<%=encode.forHtml(api.context)%>
+                                <%=gatewayUrl%><%=encode.forHtml(api.context)%>
                             <%}%>
 	                        <%if (api.isDefaultVersion){
 	                            var apiContext = api.context;
@@ -88,7 +92,7 @@
                                 <%if (api.type.toUpperCase() != "WS") {%>
                                     <%=encode.forHtml(environmenturls[urltype])%><%=encode.forHtml(apiContext)%>
                                 <%} else {%>
-                                    ws:<%=host%>:9099<%=encode.forHtml(apiContext)%>
+                                    <%=gatewayUrl%><%=encode.forHtml(apiContext)%>
                                 <%}%>
 	                        <%}%>
 	                    </div>
