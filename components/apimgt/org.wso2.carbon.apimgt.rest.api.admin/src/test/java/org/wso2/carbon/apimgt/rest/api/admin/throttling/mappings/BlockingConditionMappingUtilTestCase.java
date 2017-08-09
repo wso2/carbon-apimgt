@@ -21,8 +21,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.throttling.mappings;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.junit.Assert;
+import org.junit.Test;
 import org.wso2.carbon.apimgt.core.models.BlockConditions;
 import org.wso2.carbon.apimgt.core.models.policy.IPCondition;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.BlockingConditionDTO;
@@ -39,7 +39,7 @@ import static org.wso2.carbon.apimgt.core.util.APIMgtConstants.ThrottlePolicyCon
 
 public class BlockingConditionMappingUtilTestCase {
 
-    @Test(description = "Convert Blocking Condition to DTO")
+    @Test()
     public void fromBlockingConditionToDTOTest()   throws  Exception   {
         BlockConditions conditions = new BlockConditions();
         String uuid = UUID.randomUUID().toString();
@@ -52,7 +52,7 @@ public class BlockingConditionMappingUtilTestCase {
 
     }
 
-    @Test(description = "From Blocking Condition DTO to Model")
+    @Test()
     public void fromBlockingConditionDTOToBlockConditionTest() throws Exception {
         BlockingConditionDTO dto = new BlockingConditionDTO();
         dto.setConditionId(UUID.randomUUID().toString());
@@ -69,7 +69,7 @@ public class BlockingConditionMappingUtilTestCase {
         Assert.assertEquals(conditions.getEndingIP(), dto.getIpCondition().getEndingIP());
     }
 
-    @Test(description = "From Blocking Condition to DTO")
+    @Test()
     public void fromBlockConditionToIpConditionDTOTest() throws Exception   {
         BlockConditions conditions = new BlockConditions();
         conditions.setUuid(UUID.randomUUID().toString());

@@ -23,7 +23,6 @@ package org.wso2.carbon.apimgt.rest.api.admin.throttling.mappings;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import org.wso2.carbon.apimgt.core.models.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.core.models.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
@@ -47,7 +46,7 @@ public class SubscriptionThrottlePolicyMappingUtilTest {
     String name = "SampleSubscriptionPolicy";
 
 
-    @Test(description = "Convert Subscription Throttle Policy to DTO")
+    @Test()
     public void fromSubscriptionThrottlePolicyToDTOTest() throws Exception  {
 
         SubscriptionPolicy policy = new SubscriptionPolicy(uuid, name);
@@ -69,7 +68,7 @@ public class SubscriptionThrottlePolicyMappingUtilTest {
 
     }
 
-    @Test(description = "Convert Subscription Throttle Policy DTO to Model")
+    @Test()
     public void fromSubscriptionThrottlePolicyDTOToModelTest() throws Exception {
         SubscriptionThrottlePolicyDTO dto = new SubscriptionThrottlePolicyDTO();
         dto.setRateLimitTimeUnit("m");
