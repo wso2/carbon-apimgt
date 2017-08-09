@@ -21,10 +21,9 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.throttling.mappings;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.models.BlockConditions;
-import org.wso2.carbon.apimgt.core.models.policy.IPCondition;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.BlockingConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.BlockingConditionListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.IPConditionDTO;
@@ -34,7 +33,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static org.wso2.carbon.apimgt.core.util.APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_IP;
 import static org.wso2.carbon.apimgt.core.util.APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITION_IP_RANGE;
 
 public class BlockingConditionMappingUtilTestCase {

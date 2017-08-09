@@ -17,8 +17,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.throttling.mappings;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.core.models.policy.HeaderCondition;
@@ -40,7 +40,6 @@ import java.util.List;
 import static org.testng.Assert.assertEquals;
 import static org.wso2.carbon.apimgt.core.models.policy.PolicyConstants.IP_RANGE_TYPE;
 import static org.wso2.carbon.apimgt.core.models.policy.PolicyConstants.KB;
-import static org.wso2.carbon.apimgt.core.models.policy.PolicyConstants.REQUEST_COUNT_TYPE;
 
 public class CommonThrottleMappingUtilTestCase {
 

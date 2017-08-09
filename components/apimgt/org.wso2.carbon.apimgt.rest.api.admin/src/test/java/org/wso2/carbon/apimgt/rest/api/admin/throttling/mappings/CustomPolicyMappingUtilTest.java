@@ -21,8 +21,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.throttling.mappings;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.models.policy.CustomPolicy;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomRuleDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomRuleListDTO;
