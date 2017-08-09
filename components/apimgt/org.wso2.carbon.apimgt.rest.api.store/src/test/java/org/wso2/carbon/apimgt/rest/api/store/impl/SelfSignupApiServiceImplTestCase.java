@@ -70,7 +70,7 @@ public class SelfSignupApiServiceImplTestCase {
 
         Mockito.doNothing().when(apiStore).selfSignUp(user);
 
-        Response response = selfSignupApiService.selfSignupPost(userDTO, contentType, TestUtil.getRequest());
+        Response response = selfSignupApiService.selfSignupPost(userDTO, TestUtil.getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }

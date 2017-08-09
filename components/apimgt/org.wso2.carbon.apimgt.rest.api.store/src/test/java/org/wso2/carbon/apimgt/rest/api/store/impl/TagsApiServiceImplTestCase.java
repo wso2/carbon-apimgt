@@ -64,7 +64,7 @@ public class TagsApiServiceImplTestCase {
         Mockito.when(apiStore.getAllTags()).thenReturn(tagList);
 
         Response response = tagsApiService
-                .tagsGet(10, 0, contentType, null, TestUtil.getRequest());
+                .tagsGet(10, 0, null, TestUtil.getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }

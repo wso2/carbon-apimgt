@@ -76,7 +76,7 @@ public class SubscriptionsApiServiceImplTestCase {
         Mockito.when(apiStore.getSubscriptionsByAPI(apiId)).thenReturn(subscriptionList);
 
         Response response = subscriptionsApiService.subscriptionsGet
-                (apiId, null, null, 0, 10, contentType, null, TestUtil.getRequest());
+                (apiId, null, null, 0, 10, null, TestUtil.getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -105,7 +105,7 @@ public class SubscriptionsApiServiceImplTestCase {
                 .thenReturn(subscriptionList);
 
         Response response = subscriptionsApiService.subscriptionsGet
-                (null, applicationId, ApiType.STANDARD.toString(), 0, 10, contentType, null, TestUtil.getRequest());
+                (null, applicationId, ApiType.STANDARD.toString(), 0, 10, null, TestUtil.getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -140,7 +140,7 @@ public class SubscriptionsApiServiceImplTestCase {
                 SubscriptionMappingUtil.fromSubscriptionToDTO(SampleTestObjectCreator.createSubscription(subsID1));
 
         Response response = subscriptionsApiService.subscriptionsPost
-                (subscriptionDTO, contentType, TestUtil.getRequest());
+                (subscriptionDTO, TestUtil.getRequest());
 
         Assert.assertEquals(404, response.getStatus());
     }
@@ -185,7 +185,7 @@ public class SubscriptionsApiServiceImplTestCase {
         Mockito.when(apiStore.getSubscriptionByUUID(subsID1)).thenReturn(subscription);
 
         Response response = subscriptionsApiService.subscriptionsSubscriptionIdGet
-                (subsID1, contentType, null, null, TestUtil.getRequest());
+                (subsID1, null, null, TestUtil.getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }

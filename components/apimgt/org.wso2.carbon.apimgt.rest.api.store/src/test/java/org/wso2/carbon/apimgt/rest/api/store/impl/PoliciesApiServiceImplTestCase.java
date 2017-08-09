@@ -64,7 +64,7 @@ public class PoliciesApiServiceImplTestCase {
                 .thenReturn(tierList);
 
         Response response = policiesApiService.policiesTierLevelGet
-                (tierLevel, 10, 0, contentType, null, TestUtil.getRequest());
+                (tierLevel, 10, 0, null, TestUtil.getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -89,7 +89,7 @@ public class PoliciesApiServiceImplTestCase {
                 .thenReturn(policy);
 
         Response response = policiesApiService.policiesTierLevelTierNameGet
-                (tierName, tierLevel, contentType, null, null, TestUtil.getRequest());
+                (tierName, tierLevel, null, null, TestUtil.getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }

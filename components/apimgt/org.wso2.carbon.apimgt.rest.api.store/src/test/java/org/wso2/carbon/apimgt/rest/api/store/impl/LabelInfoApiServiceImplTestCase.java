@@ -59,7 +59,7 @@ public class LabelInfoApiServiceImplTestCase {
 
         Mockito.when(apiStore.getLabelInfo(labelNames, USER)).thenReturn(labelList);
 
-        Response response = labelInfoApiService.labelInfoGet("label1", contentType, null, null,
+        Response response = labelInfoApiService.labelInfoGet("label1", null, null,
                 TestUtil.getRequest());
 
         Assert.assertEquals(200, response.getStatus());
@@ -81,7 +81,7 @@ public class LabelInfoApiServiceImplTestCase {
 
         Mockito.when(apiStore.getLabelInfo(labelNames, USER)).thenReturn(labelList);
 
-        Response response = labelInfoApiService.labelInfoGet(null, contentType, null, null,
+        Response response = labelInfoApiService.labelInfoGet(null, null, null,
                 TestUtil.getRequest());
 
         Assert.assertEquals(400, response.getStatus());

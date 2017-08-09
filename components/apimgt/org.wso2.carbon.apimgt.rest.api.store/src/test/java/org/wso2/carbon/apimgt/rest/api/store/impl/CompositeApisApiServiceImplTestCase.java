@@ -89,7 +89,7 @@ public class CompositeApisApiServiceImplTestCase {
         Mockito.when(apiStore.getCompositeAPIbyId(apiID)).thenReturn(compositeAPI);
 
         Response response = compositeApisApiService.compositeApisApiIdGet
-                (apiID, contentType, null, null, TestUtil.getRequest());
+                (apiID, null, null, TestUtil.getRequest());
 
         Assert.assertEquals(200, response.getStatus());
         Assert.assertTrue(response.getEntity().toString().contains(compositeAPI.getName()));
@@ -110,7 +110,7 @@ public class CompositeApisApiServiceImplTestCase {
         Mockito.when(apiStore.isCompositeAPIExist(apiID)).thenReturn(Boolean.FALSE);
 
         Response response = compositeApisApiService.compositeApisApiIdGet
-                (apiID, contentType, null, null, TestUtil.getRequest());
+                (apiID, null, null, TestUtil.getRequest());
 
         Assert.assertEquals(404, response.getStatus());
     }
@@ -132,7 +132,7 @@ public class CompositeApisApiServiceImplTestCase {
         Mockito.when(apiStore.getCompositeApiImplementation(apiID)).thenReturn(implementation);
 
         Response response = compositeApisApiService.compositeApisApiIdImplementationGet
-                (apiID, contentType, null, null, TestUtil.getRequest());
+                (apiID, null, null, TestUtil.getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -159,7 +159,7 @@ public class CompositeApisApiServiceImplTestCase {
                 .updateCompositeApiImplementation(apiID, implmentation);
 
         Response response = compositeApisApiService.compositeApisApiIdImplementationPut
-                (apiID, implmentation, fileInfo, contentType, null, null, TestUtil.getRequest());
+                (apiID, implmentation, fileInfo, null, null, TestUtil.getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -186,7 +186,7 @@ public class CompositeApisApiServiceImplTestCase {
                 .updateCompositeApi(builder);
 
         Response response = compositeApisApiService.compositeApisApiIdImplementationPut
-                (apiID, implmentation, fileInfo, contentType, null, null, TestUtil.getRequest());
+                (apiID, implmentation, fileInfo, null, null, TestUtil.getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -206,7 +206,7 @@ public class CompositeApisApiServiceImplTestCase {
         Mockito.when(apiStore.getCompositeApiDefinition(apiID)).thenReturn("SWAGGER_DEFINITION");
 
         Response response = compositeApisApiService.compositeApisApiIdSwaggerGet
-                (apiID, contentType, null, null, TestUtil.getRequest());
+                (apiID, null, null, TestUtil.getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -230,7 +230,7 @@ public class CompositeApisApiServiceImplTestCase {
         Mockito.when(apiStore.getCompositeApiDefinition(apiID)).thenReturn(swagger);
 
         Response response = compositeApisApiService.compositeApisApiIdSwaggerPut
-                (apiID, swagger, contentType, null, null, TestUtil.getRequest());
+                (apiID, swagger, null, null, TestUtil.getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -257,7 +257,7 @@ public class CompositeApisApiServiceImplTestCase {
         Mockito.when(apiStore.searchCompositeAPIs(query, 0, 10)).thenReturn(compositeAPIList);
 
         Response response = compositeApisApiService.compositeApisGet
-                (10, 0, query, contentType, null, TestUtil.getRequest());
+                (10, 0, query, null, TestUtil.getRequest());
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -282,7 +282,7 @@ public class CompositeApisApiServiceImplTestCase {
         Mockito.when(apiStore.getCompositeAPIbyId(compositeAPI.getId())).thenReturn(compositeAPI);
 
         Response response = compositeApisApiService.compositeApisPost
-                (compositeAPIDTO, contentType, TestUtil.getRequest());
+                (compositeAPIDTO, TestUtil.getRequest());
 
         Assert.assertEquals(201, response.getStatus());
     }
