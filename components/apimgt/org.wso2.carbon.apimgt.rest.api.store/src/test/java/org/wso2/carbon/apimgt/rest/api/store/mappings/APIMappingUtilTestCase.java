@@ -20,8 +20,8 @@
 package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
 import org.apache.commons.collections.map.HashedMap;
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.junit.Assert;
+import org.junit.Test;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;

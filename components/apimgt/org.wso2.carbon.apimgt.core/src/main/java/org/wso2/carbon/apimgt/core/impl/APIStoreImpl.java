@@ -217,7 +217,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     @Override
     public WorkflowResponse updateApplication(String uuid, Application application) throws APIManagementException {
         try {
-            //get old app 
+            //get old app
             Application existingApplication = getApplicationDAO().getApplication(uuid);
             if (existingApplication != null) {
                 WorkflowExecutor executor = WorkflowExecutorFactory.getInstance()
@@ -646,7 +646,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 log.error(errorMsg);
                 throw new APIManagementException(errorMsg, ExceptionCodes.SUBSCRIPTION_NOT_FOUND);
             } else {
-                //remove pending tasks for subscription creation first 
+                //remove pending tasks for subscription creation first
                 cleanupPendingTaskForSubscriptionDeletion(subscription);
 
                 SubscriptionDeletionWorkflow workflow = new SubscriptionDeletionWorkflow(getApiSubscriptionDAO(),
@@ -656,7 +656,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 workflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
                 workflow.setStatus(WorkflowStatus.CREATED);
                 workflow.setCreatedTime(LocalDateTime.now());
-                workflow.setExternalWorkflowReference(UUID.randomUUID().toString());        
+                workflow.setExternalWorkflowReference(UUID.randomUUID().toString());
                 workflow.setSubscriber(getUsername());
 
                 String workflowDescription = "Subscription deletion workflow for the subscription to api "
@@ -665,10 +665,10 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                         + subscription.getApplication().getName() + " with tier " + subscription.getPolicy()
                         + " by " + getUsername();
                 workflow.setWorkflowDescription(workflowDescription);
-                
+
                 WorkflowResponse response = removeSubscriptionWFExecutor.execute(workflow);
                 workflow.setStatus(response.getWorkflowStatus());
-                
+
 
                 if (WorkflowStatus.CREATED != response.getWorkflowStatus()) {
                     completeWorkflow(removeSubscriptionWFExecutor, workflow);
@@ -1103,7 +1103,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         try {
             appId = apiBuilder.getApplicationId();
             List<Subscription> subscriptions = getApiSubscriptionDAO().getAPISubscriptionsByApplication(
-                                                                       apiBuilder.getApplicationId(), ApiType.STANDARD);
+                    apiBuilder.getApplicationId(), ApiType.STANDARD);
             for (Subscription subscription : subscriptions) {
                 CompositeAPIEndpointDTO endpointDTO = new CompositeAPIEndpointDTO();
                 API api = subscription.getApi();
@@ -1112,7 +1112,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 endpointDTO.setTransportType(APIMgtConstants.HTTPS);
                 // TODO: replace host with gateway domain host
                 String endpointUrl = APIMgtConstants.HTTPS + "://" + config.getHostname() + "/" + api.getContext()
-                                     + "/" + api.getVersion();
+                        + "/" + api.getVersion();
                 endpointDTO.setEndpointUrl(endpointUrl);
                 endpointDTOs.add(endpointDTO);
             }
@@ -1196,7 +1196,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 throw new APIManagementException(errorMsg, e, e.getErrorHandler());
             } catch (IOException e) {
                 String errorMsg = "Error occurred while reading gateway configuration the API - " +
-                                        apiBuilder.getName();
+                        apiBuilder.getName();
                 log.error(errorMsg, e);
                 throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
             }
@@ -1551,7 +1551,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             if (application == null) {
                 String message = "Application cannot be found for id :" + appId;
                 throw new APIManagementException(message, ExceptionCodes.APPLICATION_NOT_FOUND);
-            }           
+            }
             //delete application creation pending tasks
             cleanupPendingTaskForApplicationDeletion(application);
             WorkflowExecutor removeApplicationWFExecutor = WorkflowExecutorFactory.getInstance().
@@ -1596,7 +1596,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         // get subscriptions with pending status
         List<Subscription> pendingSubscriptions = getApiSubscriptionDAO()
                 .getPendingAPISubscriptionsByApplication(appId);
-  
+
         String applicationStatus = application.getStatus();
 
         if (pendingSubscriptions == null || pendingSubscriptions.isEmpty()) {
@@ -1619,9 +1619,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             }
         }
         //delete pending tasks for application update if any
-        cleanupPendingTask(updateApplicationWFExecutor, appId, WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);        
+        cleanupPendingTask(updateApplicationWFExecutor, appId, WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);
     }
-    
+
     private void cleanupPendingTaskForSubscriptionDeletion(Subscription subscription) throws APIManagementException {
         WorkflowExecutor createSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance()
                 .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);

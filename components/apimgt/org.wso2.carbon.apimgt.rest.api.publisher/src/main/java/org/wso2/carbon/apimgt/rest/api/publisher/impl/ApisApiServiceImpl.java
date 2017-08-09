@@ -225,7 +225,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             //retrieves the document and send 404 if not found
             DocumentInfo documentation = apiProvider.getDocumentationSummary(documentId);
             if (documentation == null) {
-                String msg = "Documntation not found " + documentId;
+                String msg = "Documentation not found " + documentId;
                 log.error(msg);
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
                 log.error(msg);
@@ -753,7 +753,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return lifecycle history of the API
      * @throws NotFoundException When the particular resource does not exist in the system
      */
-    @Override 
+    @Override
     public Response apisApiIdLifecycleHistoryGet(String apiId, String ifNoneMatch, String ifModifiedSince,
         Request request) throws NotFoundException {
 
@@ -1018,7 +1018,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             String ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
-            APIPublisher apiPublisher = APIManagerFactory.getInstance().getAPIProvider(username);
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String existingFingerprint = apisApiIdThumbnailGetFingerprint(apiId, null, null, request);
             if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
                     .contains(existingFingerprint)) {

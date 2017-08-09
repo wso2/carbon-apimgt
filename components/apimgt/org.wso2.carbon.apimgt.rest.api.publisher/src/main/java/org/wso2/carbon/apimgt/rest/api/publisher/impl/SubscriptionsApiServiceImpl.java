@@ -241,8 +241,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             String errorMessage = "Failed to unblock subscription :" + subscriptionId + " in gateway";
             log.error(errorMessage, e);
             return Response.status(Response.Status.ACCEPTED).build();
-        }
-         catch (APIManagementException e) {
+        } catch (APIManagementException e) {
             String errorMessage = "Error while unblocking the subscription " + subscriptionId;
             HashMap<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.SUBSCRIPTION_ID, subscriptionId);

@@ -58,7 +58,7 @@ DOC.prototype._requestMetaData = function _requestMetaData() {
     var access_key_header = "Bearer " + getCookie("WSO2_AM_TOKEN_1");
     var request_meta = {
         clientAuthorizations: {
-            api_key: new SwaggerClient.ApiKeyAuthorization("Authorization", access_key_header, "header")
+            OAuth2Security: new SwaggerClient.ApiKeyAuthorization("Authorization", access_key_header, "header")
         },
         requestContentType: data['Content-Type'] || "application/json"
     };

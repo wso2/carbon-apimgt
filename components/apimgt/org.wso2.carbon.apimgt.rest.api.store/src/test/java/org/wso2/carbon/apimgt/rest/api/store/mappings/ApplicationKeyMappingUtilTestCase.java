@@ -19,8 +19,8 @@
  */
 package org.wso2.carbon.apimgt.rest.api.store.mappings;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.junit.Assert;
+import org.junit.Test;
 import org.wso2.carbon.apimgt.core.models.ApplicationToken;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeysDTO;

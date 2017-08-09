@@ -343,6 +343,7 @@ public class MappingUtil {
         for (DocumentInfo documentInfo : documentInfoResults) {
             documentListDTO.addListItem(toDocumentDTO(documentInfo));
         }
+        documentListDTO.setCount(documentInfoResults.size());
         return documentListDTO;
     }
 
@@ -378,6 +379,8 @@ public class MappingUtil {
         for (Subscription subscription : subscriptionList) {
             subscriptionListDTO.addListItem(fromSubscription(subscription));
         }
+        //TODO need to change when pagination implementation goes on
+        subscriptionListDTO.count(subscriptionList.size());
         return subscriptionListDTO;
     }
 
