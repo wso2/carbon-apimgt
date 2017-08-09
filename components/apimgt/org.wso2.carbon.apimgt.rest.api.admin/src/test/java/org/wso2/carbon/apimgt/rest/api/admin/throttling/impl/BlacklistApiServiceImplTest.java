@@ -47,8 +47,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static org.wso2.carbon.apimgt.core.util.APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_IP;
+
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(RestApiUtil.class)
+@PrepareForTest({RestApiUtil.class, BlockingConditionMappingUtil.class})
 public class BlacklistApiServiceImplTest {
     private final static Logger logger = LoggerFactory.getLogger(BlacklistApiServiceImplTest.class);
 
@@ -116,16 +118,22 @@ public class BlacklistApiServiceImplTest {
         String uuid = UUID.randomUUID().toString();
         BlockingConditionDTO dto = new BlockingConditionDTO();
         dto.setConditionId(uuid);
+        dto.setStatus(true);
+        dto.setConditionType(BLOCKING_CONDITIONS_IP);
+        dto.setConditionValue("12.32.45.3");
 
         APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
         PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.mockStatic(BlockingConditionMappingUtil.class);
         PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
         BlockConditions conditions = BlockingConditionMappingUtil.fromBlockingConditionDTOToBlockCondition(dto);
         Mockito.doReturn(uuid).doThrow(new IllegalArgumentException()).when(adminService).addBlockCondition(conditions);
         Mockito.doReturn(conditions).doThrow(new IllegalArgumentException()).when(adminService)
                 .getBlockConditionByUUID(uuid);
+        PowerMockito.when(BlockingConditionMappingUtil.fromBlockingConditionDTOToBlockCondition(dto))
+                .thenReturn(conditions);
         Response response = blacklistApiService.blacklistPost(dto, null, getRequest());
-        Assert.assertEquals(response.getStatus(), 201);
+        Assert.assertEquals(201, response.getStatus());
     }
 
     @Test
@@ -136,6 +144,8 @@ public class BlacklistApiServiceImplTest {
         BlockingConditionDTO dto = new BlockingConditionDTO();
         dto.setConditionId(UUID.randomUUID().toString());
         dto.setStatus(true);
+        dto.setConditionType(BLOCKING_CONDITIONS_IP);
+        dto.setConditionValue("12.32.45.3");
         APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
