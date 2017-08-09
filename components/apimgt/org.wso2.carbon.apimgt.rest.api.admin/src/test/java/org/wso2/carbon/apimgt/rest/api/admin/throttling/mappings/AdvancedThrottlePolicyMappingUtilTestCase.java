@@ -21,8 +21,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.throttling.mappings;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.junit.Assert;
+import org.junit.Test;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.AdvancedThrottlePolicyDTO;
@@ -32,7 +32,7 @@ import java.util.UUID;
 
 public class AdvancedThrottlePolicyMappingUtilTestCase {
 
-    @Test(description = "Convert Policy to DTO")
+    @Test()
     public void fromAdvancedPolicyToDTOTest() throws Exception  {
         APIPolicy apiPolicy = new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY);
         String uuid = UUID.randomUUID().toString();
@@ -48,7 +48,7 @@ public class AdvancedThrottlePolicyMappingUtilTestCase {
         Assert.assertEquals(dto.getDescription(), description);
     }
 
-    @Test(description = "Convert Policy DTO to Policy object")
+    @Test()
     public void fromAdvancedPolicyDTOToPolicyTest() throws Exception    {
         AdvancedThrottlePolicyDTO dto = new AdvancedThrottlePolicyDTO();
         dto.setDisplayName(APIMgtConstants.DEFAULT_API_POLICY);
