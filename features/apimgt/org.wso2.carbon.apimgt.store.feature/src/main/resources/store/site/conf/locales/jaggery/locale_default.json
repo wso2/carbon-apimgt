@@ -335,5 +335,8 @@
     "subscription": "subscription",
     "subscriptionStatus": "subscriptionStatus",
     "tenants": "Visible to Tenants",
-    "timeWarn": "timeWarn"
+    "timeWarn": "timeWarn",
+    "403: User Not Permitted": "403: User Not Permitted",
+    "User is not permitted to login to store.": "User is not permitted to login to store.",
+    "Return to public store": "Return to public store"
 }

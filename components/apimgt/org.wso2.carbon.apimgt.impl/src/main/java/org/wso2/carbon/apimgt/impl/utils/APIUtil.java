@@ -1566,7 +1566,9 @@ public final class APIUtil {
                 if (url.startsWith("https:")) {
                     gatewayHTTPSURL = url;
                 } else {
-                    gatewayHTTPURL = url;
+                    if (!url.startsWith("ws:")) {
+                        gatewayHTTPURL = url;
+                    }
                 }
             }
 
