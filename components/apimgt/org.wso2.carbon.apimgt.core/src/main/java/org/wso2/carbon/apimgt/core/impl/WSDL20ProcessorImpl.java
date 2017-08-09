@@ -50,6 +50,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -270,7 +271,7 @@ public class WSDL20ProcessorImpl implements WSDLProcessor {
     }
 
     /**
-     * Clear the actual service endpoints in {@code description} and use {@code selectedEndpoint} instead of 
+     * Clear the actual service endpoints in {@code description} and use {@code selectedEndpoint} instead of
      * actual endpoints.
      *
      * @param selectedEndpoint Endpoint which will replace the WSDL endpoints
@@ -279,20 +280,21 @@ public class WSDL20ProcessorImpl implements WSDLProcessor {
      */
     private void updateEndpoints(String selectedEndpoint, Description description) throws APIMgtWSDLException {
         Service[] serviceMap = description.getServices();
-        try {
-            for (Service svc : serviceMap) {
-                Endpoint[] portMap = svc.getEndpoints();
-                for (Endpoint endpoint : portMap) {
-                    EndpointElement element = endpoint.toElement();
+        for (Service svc : serviceMap) {
+            Endpoint[] portMap = svc.getEndpoints();
+            for (Endpoint endpoint : portMap) {
+                EndpointElement element = endpoint.toElement();
+                try {
                     element.setAddress(new URI(selectedEndpoint));
+                } catch (URISyntaxException e) {
+                    throw new APIMgtWSDLException(
+                            "Error occurred while setting the wsdl address location as " + selectedEndpoint, e,
+                            ExceptionCodes.INTERNAL_WSDL_EXCEPTION);
                 }
             }
-        } catch (Exception e) {
-            String errorMsg = "Error occurred while getting the wsdl address location";
-            log.error(errorMsg, e);
         }
     }
-    
+
     /**
      * Get endpoints defined in WSDL file(s).
      *
