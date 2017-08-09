@@ -36,7 +36,7 @@ public class CustomPolicyMappingUtil {
      *
      * @param customPolicies An array of custom policy model objects
      * @return A List DTO of Custom Policy DTOs derived from the array of model objects
-     * @throws UnsupportedThrottleLimitTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
      */
     public static CustomRuleListDTO fromCustomPolicyArrayToListDTO(List<CustomPolicy> customPolicies)
             throws UnsupportedThrottleLimitTypeException {
@@ -58,7 +58,7 @@ public class CustomPolicyMappingUtil {
      *
      * @param globalPolicy Custom Policy model object
      * @return DTO object derived from the Policy model object
-     * @throws UnsupportedThrottleLimitTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
      */
     public static CustomRuleDTO fromCustomPolicyToDTO(CustomPolicy globalPolicy)
             throws UnsupportedThrottleLimitTypeException {
@@ -74,7 +74,7 @@ public class CustomPolicyMappingUtil {
      *
      * @param dto Custom Policy DTO object
      * @return Model object derived from DTO
-     * @throws UnsupportedThrottleLimitTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
      */
     public static CustomPolicy fromCustomPolicyDTOToModel(CustomRuleDTO dto)
             throws UnsupportedThrottleLimitTypeException {
