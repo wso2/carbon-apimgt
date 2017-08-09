@@ -32,7 +32,7 @@ import java.util.UUID;
 import static org.wso2.carbon.apimgt.core.util.APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_IP;
 import static org.wso2.carbon.apimgt.core.util.APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITION_IP_RANGE;
 
-public class BlockingConditionMappingUtilTest {
+public class BlockingConditionMappingUtilTestCase {
 
     @Test(description = "Convert Blocking Condition to DTO")
     public void fromBlockingConditionToDTOTest()   throws  Exception   {
@@ -61,6 +61,21 @@ public class BlockingConditionMappingUtilTest {
     }
 
     @Test(description = "From Blocking Condition to DTO")
+    public void fromBlockConditionToIpConditionDTOTest() throws Exception   {
+        BlockConditions conditions = new BlockConditions();
+        conditions.setUuid(UUID.randomUUID().toString());
+        conditions.setConditionType(BLOCKING_CONDITION_IP_RANGE);
+        conditions.setStartingIP("12.23.45.3");
+        conditions.setEndingIP("23.45.2.1");
+        BlockingConditionDTO dto = BlockingConditionMappingUtil.fromBlockingConditionToDTO(conditions);
+        Assert.assertNotNull(dto);
+        Assert.assertEquals(dto.getConditionType(), BLOCKING_CONDITION_IP_RANGE);
+        Assert.assertEquals(dto.getIpCondition().getStartingIP(), "12.23.45.3");
+        Assert.assertEquals(dto.getIpCondition().getEndingIP(), "23.45.2.1");
+
+    }
+
+    @Test(description = "From Blocking Condition List to DTO")
     public void fromBlockConditionToIpConditionDTOTest() throws Exception   {
         BlockConditions conditions = new BlockConditions();
         conditions.setUuid(UUID.randomUUID().toString());
