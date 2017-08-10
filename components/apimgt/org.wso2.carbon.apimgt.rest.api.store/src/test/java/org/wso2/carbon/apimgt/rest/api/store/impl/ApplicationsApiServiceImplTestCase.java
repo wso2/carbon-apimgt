@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.APIStoreImpl;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.ApplicationToken;
@@ -89,6 +90,27 @@ public class ApplicationsApiServiceImplTestCase {
     }
 
     @Test
+    public void testApplicationsApplicationIdDeleteErrorCase() throws APIManagementException, NotFoundException {
+        TestUtil.printTestMethodName();
+        String applicationId = UUID.randomUUID().toString();
+
+        ApplicationsApiServiceImpl applicationsApiService = new ApplicationsApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+
+        Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.APPLICATION_NOT_FOUND))
+                .when(apiStore).deleteApplication(applicationId);
+
+        Response response = applicationsApiService.applicationsApplicationIdDelete
+                (applicationId, null, null, TestUtil.getRequest());
+
+        Assert.assertEquals(404, response.getStatus());
+    }
+
+    @Test
     public void testApplicationsApplicationIdGet() throws APIManagementException, NotFoundException {
         TestUtil.printTestMethodName();
         String applicationId = UUID.randomUUID().toString();
@@ -108,6 +130,27 @@ public class ApplicationsApiServiceImplTestCase {
                 (applicationId, null, null, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    public void testApplicationsApplicationIdGetErrorCase() throws APIManagementException, NotFoundException {
+        TestUtil.printTestMethodName();
+        String applicationId = UUID.randomUUID().toString();
+
+        ApplicationsApiServiceImpl applicationsApiService = new ApplicationsApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+
+        Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.APPLICATION_NOT_FOUND))
+                .when(apiStore).getApplication(applicationId, USER);
+
+        Response response = applicationsApiService.applicationsApplicationIdGet
+                (applicationId, null, null, getRequest());
+
+        Assert.assertEquals(404, response.getStatus());
     }
 
     @Test
@@ -148,6 +191,42 @@ public class ApplicationsApiServiceImplTestCase {
     }
 
     @Test
+    public void testApplicationsApplicationIdGenerateKeysPostErrorCase() throws APIManagementException, NotFoundException {
+        TestUtil.printTestMethodName();
+        String applicationId = UUID.randomUUID().toString();
+
+        ApplicationsApiServiceImpl applicationsApiService = new ApplicationsApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+
+        List<String> grantTypes = new ArrayList<>();
+        grantTypes.add("password");
+        grantTypes.add("jwt");
+
+        OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
+        oAuthApplicationInfo.setKeyType("PRODUCTION");
+        oAuthApplicationInfo.setClientId(UUID.randomUUID().toString());
+        oAuthApplicationInfo.setClientSecret(UUID.randomUUID().toString());
+        oAuthApplicationInfo.setGrantTypes(grantTypes);
+
+        Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.APPLICATION_TOKEN_GENERATION_FAILED))
+                .when(apiStore).generateApplicationKeys(applicationId, "PRODUCTION", null, grantTypes);
+
+        ApplicationKeyGenerateRequestDTO applicationKeyGenerateRequestDTO = new ApplicationKeyGenerateRequestDTO();
+        applicationKeyGenerateRequestDTO.setKeyType(ApplicationKeyGenerateRequestDTO.KeyTypeEnum.PRODUCTION);
+        applicationKeyGenerateRequestDTO.setCallbackUrl(null);
+        applicationKeyGenerateRequestDTO.setGrantTypesToBeSupported(grantTypes);
+
+        Response response = applicationsApiService.applicationsApplicationIdGenerateKeysPost
+                (applicationId, applicationKeyGenerateRequestDTO, getRequest());
+
+        Assert.assertEquals(500, response.getStatus());
+    }
+
+    @Test
     public void testApplicationsApplicationIdKeysGet() throws APIManagementException, NotFoundException {
         TestUtil.printTestMethodName();
         String applicationId = UUID.randomUUID().toString();
@@ -166,6 +245,26 @@ public class ApplicationsApiServiceImplTestCase {
         Response response = applicationsApiService.applicationsApplicationIdKeysGet(applicationId, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    public void testApplicationsApplicationIdKeysGetErrorCase() throws APIManagementException, NotFoundException {
+        TestUtil.printTestMethodName();
+        String applicationId = UUID.randomUUID().toString();
+
+        ApplicationsApiServiceImpl applicationsApiService = new ApplicationsApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+
+        Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.APPLICATION_KEY_MAPPING_NOT_FOUND))
+                .when(apiStore).getApplicationKeys(applicationId);
+
+        Response response = applicationsApiService.applicationsApplicationIdKeysGet(applicationId, getRequest());
+
+        Assert.assertEquals(404, response.getStatus());
     }
 
     @Test
@@ -197,6 +296,28 @@ public class ApplicationsApiServiceImplTestCase {
                 (applicationId, keyType, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    public void testApplicationsApplicationIdKeysKeyTypeGetErrorCase() throws APIManagementException, NotFoundException {
+        TestUtil.printTestMethodName();
+        String applicationId = UUID.randomUUID().toString();
+        String keyType = "PRODUCTION";
+
+        ApplicationsApiServiceImpl applicationsApiService = new ApplicationsApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+
+        Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.APPLICATION_KEY_MAPPING_NOT_FOUND))
+                .when(apiStore).getApplicationKeys(applicationId, keyType);
+
+        Response response = applicationsApiService.applicationsApplicationIdKeysKeyTypeGet
+                (applicationId, keyType, getRequest());
+
+        Assert.assertEquals(404, response.getStatus());
     }
 
     @Test
@@ -247,6 +368,47 @@ public class ApplicationsApiServiceImplTestCase {
     }
 
     @Test
+    public void testApplicationsApplicationIdKeysKeyTypePutErrorCase() throws APIManagementException, NotFoundException {
+        TestUtil.printTestMethodName();
+        String applicationId = UUID.randomUUID().toString();
+        String accessToken = UUID.randomUUID().toString();
+        String clientID = UUID.randomUUID().toString();
+        String clientSecret = UUID.randomUUID().toString();
+        String keyType = "PRODUCTION";
+
+        ApplicationsApiServiceImpl applicationsApiService = new ApplicationsApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+
+        ApplicationTokenDTO applicationTokenDTO = new ApplicationTokenDTO();
+        applicationTokenDTO.setAccessToken(accessToken);
+        applicationTokenDTO.setTokenScopes("SCOPE1");
+        applicationTokenDTO.setValidityTime((long) 100000);
+
+        List<String> grantTypes = new ArrayList<>();
+        grantTypes.add("password");
+        grantTypes.add("jwt");
+
+        ApplicationKeysDTO applicationKeysDTO = new ApplicationKeysDTO();
+        applicationKeysDTO.setConsumerKey(clientID);
+        applicationKeysDTO.setConsumerSecret(clientSecret);
+        applicationKeysDTO.setKeyType(ApplicationKeysDTO.KeyTypeEnum.PRODUCTION);
+        applicationKeysDTO.setCallbackUrl(null);
+        applicationKeysDTO.setSupportedGrantTypes(grantTypes);
+
+        Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.INTERNAL_ERROR))
+                .when(apiStore).updateGrantTypesAndCallbackURL(applicationId, keyType, grantTypes, null);
+
+        Response response = applicationsApiService.applicationsApplicationIdKeysKeyTypePut
+                (applicationId, keyType, applicationKeysDTO, getRequest());
+
+        Assert.assertEquals(500, response.getStatus());
+    }
+
+    @Test
     public void testApplicationsApplicationIdGenerateTokenPost() throws APIManagementException, NotFoundException {
         TestUtil.printTestMethodName();
         String applicationId = UUID.randomUUID().toString();
@@ -281,6 +443,38 @@ public class ApplicationsApiServiceImplTestCase {
                 (applicationId, generateRequestDTO, null, null, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    public void testApplicationsApplicationIdGenerateTokenPostErrorCase() throws APIManagementException, NotFoundException {
+        TestUtil.printTestMethodName();
+        String applicationId = UUID.randomUUID().toString();
+        String accessToken = UUID.randomUUID().toString();
+        String clientID = UUID.randomUUID().toString();
+        String clientSecret = UUID.randomUUID().toString();
+
+        ApplicationsApiServiceImpl applicationsApiService = new ApplicationsApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+
+        ApplicationTokenGenerateRequestDTO generateRequestDTO = new ApplicationTokenGenerateRequestDTO();
+        generateRequestDTO.setConsumerKey(clientID);
+        generateRequestDTO.setConsumerSecret(clientSecret);
+        generateRequestDTO.setRevokeToken("revokeToken");
+        generateRequestDTO.setScopes("SCOPE1");
+        generateRequestDTO.setValidityPeriod(10000);
+
+        Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.APPLICATION_TOKEN_GENERATION_FAILED))
+                .when(apiStore).generateApplicationToken
+                (clientID, clientSecret, "SCOPE1", 10000, "revokeToken");
+
+        Response response = applicationsApiService.applicationsApplicationIdGenerateTokenPost
+                (applicationId, generateRequestDTO, null, null, getRequest());
+
+        Assert.assertEquals(500, response.getStatus());
     }
 
     @Test
@@ -345,6 +539,65 @@ public class ApplicationsApiServiceImplTestCase {
     }
 
     @Test
+    public void testApplicationsApplicationIdPutErrorCase() throws APIManagementException, NotFoundException {
+        TestUtil.printTestMethodName();
+        String applicationId = UUID.randomUUID().toString();
+        String accessToken = UUID.randomUUID().toString();
+        String clientID = UUID.randomUUID().toString();
+        String clientSecret = UUID.randomUUID().toString();
+
+        ApplicationsApiServiceImpl applicationsApiService = new ApplicationsApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+
+        ApplicationTokenDTO applicationTokenDTO = new ApplicationTokenDTO();
+        applicationTokenDTO.setAccessToken(accessToken);
+        applicationTokenDTO.setTokenScopes("SCOPE1");
+        applicationTokenDTO.setValidityTime((long) 100000);
+
+        List<String> grantTypes = new ArrayList<>();
+        grantTypes.add("password");
+        grantTypes.add("jwt");
+
+        ApplicationKeysDTO applicationKeysDTO = new ApplicationKeysDTO();
+        applicationKeysDTO.setConsumerKey(clientID);
+        applicationKeysDTO.setConsumerSecret(clientSecret);
+        applicationKeysDTO.setKeyType(ApplicationKeysDTO.KeyTypeEnum.PRODUCTION);
+        applicationKeysDTO.setCallbackUrl(null);
+        applicationKeysDTO.setSupportedGrantTypes(grantTypes);
+
+        List<ApplicationKeysDTO> applicationKeysDTOList = new ArrayList<>();
+        applicationKeysDTOList.add(applicationKeysDTO);
+
+        ApplicationDTO applicationDTO = new ApplicationDTO();
+        applicationDTO.setApplicationId(applicationId);
+        applicationDTO.setDescription("sample application");
+        applicationDTO.setName("app1");
+        applicationDTO.setSubscriber("subscriber");
+        applicationDTO.setPermission("permission");
+        applicationDTO.setLifeCycleStatus("APPROVED");
+        applicationDTO.setThrottlingTier("UNLIMITED");
+        applicationDTO.setToken(applicationTokenDTO);
+        applicationDTO.setKeys(applicationKeysDTOList);
+
+        WorkflowResponse workflowResponse = new GeneralWorkflowResponse();
+        workflowResponse.setWorkflowStatus(WorkflowStatus.APPROVED);
+
+        Mockito.when(apiStore.getApplication(applicationId, USER))
+                .thenReturn(getSampleApplication(applicationId));
+        Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.INTERNAL_ERROR))
+                .when(apiStore).updateApplication(applicationId, getSampleApplication(applicationId));
+
+        Response response = applicationsApiService.applicationsApplicationIdPut
+                (applicationId, applicationDTO, null, null, getRequest());
+
+        Assert.assertEquals(500, response.getStatus());
+    }
+
+    @Test
     public void testApplicationsGetBlankQuery() throws APIManagementException, NotFoundException {
         TestUtil.printTestMethodName();
         String applicationId1 = UUID.randomUUID().toString();
@@ -402,7 +655,82 @@ public class ApplicationsApiServiceImplTestCase {
     }
 
     @Test
+    public void testApplicationsGetQueryErrorCase() throws APIManagementException, NotFoundException {
+        TestUtil.printTestMethodName();
+
+        ApplicationsApiServiceImpl applicationsApiService = new ApplicationsApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+
+        Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.APPLICATION_NOT_FOUND))
+                .when(apiStore).getApplicationByName(USER, "*");
+
+        Response response = applicationsApiService.applicationsGet
+                ("*", 10, 0, null, getRequest());
+
+        Assert.assertEquals(404, response.getStatus());
+    }
+
+    @Test
     public void testApplicationsPost() throws APIManagementException, NotFoundException {
+        TestUtil.printTestMethodName();
+        String applicationId = UUID.randomUUID().toString();
+        String accessToken = UUID.randomUUID().toString();
+        String clientID = UUID.randomUUID().toString();
+        String clientSecret = UUID.randomUUID().toString();
+
+        ApplicationsApiServiceImpl applicationsApiService = new ApplicationsApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+
+        Application application = getSampleApplication(applicationId);
+
+        ApplicationTokenDTO applicationTokenDTO = new ApplicationTokenDTO();
+        applicationTokenDTO.setAccessToken(accessToken);
+        applicationTokenDTO.setTokenScopes("SCOPE1");
+        applicationTokenDTO.setValidityTime((long) 100000);
+
+        List<String> grantTypes = new ArrayList<>();
+        grantTypes.add("password");
+        grantTypes.add("jwt");
+
+        ApplicationKeysDTO applicationKeysDTO = new ApplicationKeysDTO();
+        applicationKeysDTO.setConsumerKey(clientID);
+        applicationKeysDTO.setConsumerSecret(clientSecret);
+        applicationKeysDTO.setKeyType(ApplicationKeysDTO.KeyTypeEnum.PRODUCTION);
+        applicationKeysDTO.setCallbackUrl(null);
+        applicationKeysDTO.setSupportedGrantTypes(grantTypes);
+
+        List<ApplicationKeysDTO> applicationKeysDTOList = new ArrayList<>();
+        applicationKeysDTOList.add(applicationKeysDTO);
+
+        ApplicationDTO applicationDTO = new ApplicationDTO();
+        applicationDTO.setApplicationId(applicationId);
+        applicationDTO.setDescription("sample application");
+        applicationDTO.setName("app1");
+        applicationDTO.setSubscriber("subscriber");
+        applicationDTO.setPermission("permission");
+        applicationDTO.setLifeCycleStatus("APPROVED");
+        applicationDTO.setThrottlingTier("UNLIMITED");
+        applicationDTO.setToken(applicationTokenDTO);
+        applicationDTO.setKeys(applicationKeysDTOList);
+
+        Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.INTERNAL_ERROR))
+                .when(apiStore).addApplication(application);
+
+        Response response = applicationsApiService.applicationsPost(applicationDTO, getRequest());
+
+        Assert.assertEquals(500, response.getStatus());
+    }
+
+    @Test
+    public void testApplicationsPostErrorCase() throws APIManagementException, NotFoundException {
         TestUtil.printTestMethodName();
         String applicationId = UUID.randomUUID().toString();
         String accessToken = UUID.randomUUID().toString();
