@@ -27,14 +27,10 @@ service<jms> apimStoreEventListner {
             string eventType;
             eventType, err = (string)event[Constants:EVENT_TYPE];
             if (strings:equalsIgnoreCase(eventType, Constants:SUBSCRIPTION_CREATE)) {
-                system:println("creating subscription....");
                 json subscriptionsList = event.subscriptionsList;
-                system:println(jsons:toString(subscriptionsList));
                 gatewayUtil:putIntoSubscriptionCache(subscriptionsList);
             } else if (strings:equalsIgnoreCase(eventType, Constants:SUBSCRIPTION_DELETE)) {
-                system:println("deleting subscription...");
                 json subscriptionsList = event.subscriptionsList;
-                system:println(jsons:toString(subscriptionsList));
                 gatewayUtil:removeFromSubscriptionCache(subscriptionsList);
             } else if (strings:equalsIgnoreCase(eventType, Constants:APPLICATION_CREATE)) {
                 gatewayUtil:putIntoApplicationCache(event);
