@@ -1976,7 +1976,7 @@ public class ApiDAOImpl implements ApiDAO {
     private List<API> constructAPISummaryList(Connection connection, PreparedStatement statement) throws SQLException {
         List<API> apiList = new ArrayList<>();
         try (ResultSet rs = statement.executeQuery()) {
-          ResultSetMetaData metadata = rs.getMetaData();
+            ResultSetMetaData metadata = rs.getMetaData();
             int columnCount = metadata.getColumnCount();
             boolean schemeExists = false;
             for (int i = 0; i < columnCount; i++) {
@@ -1986,38 +1986,22 @@ public class ApiDAOImpl implements ApiDAO {
                 }
             }
 
-            if (!schemeExists) {
-                while (rs.next()) {
-                    String apiPrimaryKey = rs.getString("UUID");
-                    API apiSummary = new API.APIBuilder(rs.getString("PROVIDER"), rs.getString("NAME"),
-                            rs.getString("VERSION")).
-                            id(apiPrimaryKey).
-                            context(rs.getString("CONTEXT")).
-                            description(rs.getString("DESCRIPTION")).
-                            lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
-                            lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
-                            workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).
-                            securityScheme(4).
-                            permissionMap(getPermissionMapForApi(connection, apiPrimaryKey)).build();
+            while (rs.next()) {
+                String apiPrimaryKey = rs.getString("UUID");
+                API apiSummary = new API.APIBuilder(rs.getString("PROVIDER"), rs.getString("NAME"),
+                        rs.getString("VERSION")).
+                        id(apiPrimaryKey).
+                        context(rs.getString("CONTEXT")).
+                        description(rs.getString("DESCRIPTION")).
+                        lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
+                        lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
+                        workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).
+                        permissionMap(getPermissionMapForApi(connection, apiPrimaryKey)).build();
 
-                    apiList.add(apiSummary);
+                if (schemeExists) {
+                    apiSummary = new API.APIBuilder(apiSummary).securityScheme(rs.getInt("SECURITY_SCHEME")).build();
                 }
-            } else {
-                while (rs.next()) {
-                    String apiPrimaryKey = rs.getString("UUID");
-                    API apiSummary = new API.APIBuilder(rs.getString("PROVIDER"), rs.getString("NAME"),
-                            rs.getString("VERSION")).
-                            id(apiPrimaryKey).
-                            context(rs.getString("CONTEXT")).
-                            description(rs.getString("DESCRIPTION")).
-                            lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
-                            lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
-                            workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).
-                            securityScheme(rs.getInt("SECURITY_SCHEME")).
-                            permissionMap(getPermissionMapForApi(connection, apiPrimaryKey)).build();
-
-                    apiList.add(apiSummary);
-                }
+                apiList.add(apiSummary);
             }
 
        }
