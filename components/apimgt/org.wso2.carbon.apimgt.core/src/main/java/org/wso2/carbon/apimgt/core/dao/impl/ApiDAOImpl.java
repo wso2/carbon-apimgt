@@ -1988,7 +1988,7 @@ public class ApiDAOImpl implements ApiDAO {
 
             while (rs.next()) {
                 String apiPrimaryKey = rs.getString("UUID");
-                API apiSummary = new API.APIBuilder(rs.getString("PROVIDER"), rs.getString("NAME"),
+                API.APIBuilder apiSummaryBuilder = new API.APIBuilder(rs.getString("PROVIDER"), rs.getString("NAME"),
                         rs.getString("VERSION")).
                         id(apiPrimaryKey).
                         context(rs.getString("CONTEXT")).
@@ -1996,11 +1996,13 @@ public class ApiDAOImpl implements ApiDAO {
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
                         lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
                         workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).
-                        permissionMap(getPermissionMapForApi(connection, apiPrimaryKey)).build();
+                        permissionMap(getPermissionMapForApi(connection, apiPrimaryKey));
 
                 if (schemeExists) {
-                    apiSummary = new API.APIBuilder(apiSummary).securityScheme(rs.getInt("SECURITY_SCHEME")).build();
+                    apiSummaryBuilder = apiSummaryBuilder.securityScheme(rs.getInt("SECURITY_SCHEME"));
                 }
+                
+                API apiSummary = apiSummaryBuilder.build();
                 apiList.add(apiSummary);
             }
 
