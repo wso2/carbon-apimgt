@@ -43,18 +43,22 @@ function authenticate (message m) (boolean, message) {
     //todo need to have elected resource to be in properties
     string uriTemplate = "/";
     string httpVerb = strings:toUpperCase(http:getMethod(m));
+
+    string authHeader;
+    string apikeyHeader;
+    errors:Error authErr = null;
+    errors:Error apikeyErr = null;
+
     //check api status
     string apiIdentifier = apiContext + ":" + version;
     dto:APIDTO apiDto = holder:getFromAPICache(apiIdentifier);
 
     if (apiDto == null){
-        system:println("API not found");
         http:setStatusCode(response, 404);
         return false, response;
     }
 
     if (constants:MAINTENANCE == apiDto.lifeCycleStatus) {
-        system:println("API is in maintenance state");
         gatewayUtil:constructAPIIsInMaintenance(response);
         return false, response;
     }
@@ -62,7 +66,6 @@ function authenticate (message m) (boolean, message) {
     resourceDto = validateResource(apiContext, version, uriTemplate, httpVerb);
 
     if (resourceDto == null) {
-        system:println("Resource not found");
         http:setStatusCode(response, 404);
         return false, response;
     }
@@ -77,11 +80,6 @@ function authenticate (message m) (boolean, message) {
         //and return method
     }
 
-    string authHeader;
-    string apikeyHeader;
-    errors:Error authErr = null;
-    errors:Error apikeyErr = null;
-
     authHeader, authErr = extractHeaderWithName(constants:AUTHORIZATION, m);
     apikeyHeader, apikeyErr = extractHeaderWithName("apikey", m);
 
@@ -91,6 +89,7 @@ function authenticate (message m) (boolean, message) {
     }
 
     if (authErr == null && ((apiDto.securityScheme == 1) || (apiDto.securityScheme == 3))) {
+        system:println("inside auth");
         string authToken = strings:replace(authHeader, constants:BEARER, ""); //use split method instead
 
         if (strings:length(authToken) == 0) {
@@ -139,9 +138,9 @@ function authenticate (message m) (boolean, message) {
         subscriptionDto = validateSubscription(apiContext, version, introspectDto);
 
         if (subscriptionDto != null) {
-            boolean subscriptionExists = false;
-            subscriptionExists, response = isSubscriptionBlocked(subscriptionDto, response, apiDto);
-            if (!subscriptionExists) {
+            boolean subscriptionBlocked = false;
+            subscriptionBlocked, response = isSubscriptionBlocked(subscriptionDto, response, apiDto);
+            if (subscriptionBlocked) {
                 state = false;
                 return state, response;
             }
@@ -162,12 +161,12 @@ function authenticate (message m) (boolean, message) {
 
     } else if (apikeyErr == null && ((apiDto.securityScheme == 2) || (apiDto.securityScheme == 3))) {
         system:println("Api key check..");
-        string apiKey = strings:replace(apikeyHeader, constants:APIKEY, "");
+        string apiKey = apikeyHeader;
         subscriptionDto = holder:getFromSubscriptionCache(apiContext, version, apiKey);
         if (subscriptionDto != null) {
-            boolean subscriptionExists = false;
-            subscriptionExists, response = isSubscriptionBlocked(subscriptionDto, response, apiDto);
-            if (!subscriptionExists) {
+            boolean subscriptionBlocked = false;
+            subscriptionBlocked, response = isSubscriptionBlocked(subscriptionDto, response, apiDto);
+            if (subscriptionBlocked) {
                 state = false;
                 return state, response;
             }
