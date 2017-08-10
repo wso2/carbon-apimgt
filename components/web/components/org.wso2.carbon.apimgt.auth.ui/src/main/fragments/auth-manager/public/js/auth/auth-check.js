@@ -17,7 +17,6 @@ function loginRedirect(){
                 // Call SSO Login (When grantType = "authorization_code")
                 // TODO: Add URL to config
                 window.location = authorizationEndpoint+"?response_type=code&client_id="+client_id+"&redirect_uri="+callback_URL+"&scope="+scopes;
-                alert('Redirected to IS Login Page!');
             }
             else {
                 // Call Default Login (When grantType = "password")
