@@ -145,7 +145,7 @@ public class APIDTO   {
   private List<API_endpointDTO> endpoint = new ArrayList<API_endpointDTO>();
 
   @JsonProperty("securityScheme")
-  private Integer securityScheme = null;
+  private List<String> securityScheme = new ArrayList<String>();
 
   @JsonProperty("operations")
   private List<API_operationsDTO> operations = new ArrayList<API_operationsDTO>();
@@ -735,8 +735,13 @@ public class APIDTO   {
     this.endpoint = endpoint;
   }
 
-  public APIDTO securityScheme(Integer securityScheme) {
+  public APIDTO securityScheme(List<String> securityScheme) {
     this.securityScheme = securityScheme;
+    return this;
+  }
+
+  public APIDTO addSecuritySchemeItem(String securitySchemeItem) {
+    this.securityScheme.add(securitySchemeItem);
     return this;
   }
 
@@ -745,11 +750,11 @@ public class APIDTO   {
    * @return securityScheme
   **/
   @ApiModelProperty(value = "")
-  public Integer getSecurityScheme() {
+  public List<String> getSecurityScheme() {
     return securityScheme;
   }
 
-  public void setSecurityScheme(Integer securityScheme) {
+  public void setSecurityScheme(List<String> securityScheme) {
     this.securityScheme = securityScheme;
   }
 

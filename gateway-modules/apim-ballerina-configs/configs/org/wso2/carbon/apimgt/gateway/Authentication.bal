@@ -44,153 +44,146 @@ function authenticate (message m) (boolean, message) {
     string uriTemplate = "/";
     string httpVerb = strings:toUpperCase(http:getMethod(m));
     //check api status
-    string apiKey = apiContext + ":" + version;
-    dto:APIDTO apiDto = holder:getFromAPICache(apiKey);
+    string apiIdentifier = apiContext + ":" + version;
+    dto:APIDTO apiDto = holder:getFromAPICache(apiIdentifier);
 
-    system:println("Scheme in authentication.bal : " + apiDto.securityScheme);
-    if (apiDto != null) {
-        if (constants:MAINTENANCE == apiDto.lifeCycleStatus) {
-            gatewayUtil:constructAPIIsInMaintenance(response);
+    if (apiDto == null){
+        system:println("API not found");
+        http:setStatusCode(response, 404);
+        return false, response;
+    }
+
+    if (constants:MAINTENANCE == apiDto.lifeCycleStatus) {
+        system:println("API is in maintenance state");
+        gatewayUtil:constructAPIIsInMaintenance(response);
+        return false, response;
+    }
+
+    resourceDto = validateResource(apiContext, version, uriTemplate, httpVerb);
+
+    if (resourceDto == null) {
+        system:println("Resource not found");
+        http:setStatusCode(response, 404);
+        return false, response;
+    }
+
+    if (resourceDto.authType == constants:AUTHENTICATION_TYPE_NONE) {
+        // set user as anonymous
+        // set throttling tier as unauthenticated
+    }
+
+    if (apiDto.securityScheme == 0) {
+        //pass request without authentication
+        //and return method
+    }
+
+    string authHeader;
+    string apikeyHeader;
+    errors:Error authErr = null;
+    errors:Error apikeyErr = null;
+
+    authHeader, authErr = extractHeaderWithName(constants:AUTHORIZATION, m);
+    apikeyHeader, apikeyErr = extractHeaderWithName("apikey", m);
+
+    if (authErr != null && apikeyErr != null) {
+        http:setStatusCode(response, 400);
+        return false, response;
+    }
+
+    if (authErr == null && ((apiDto.securityScheme == 1) || (apiDto.securityScheme == 3))) {
+        string authToken = strings:replace(authHeader, constants:BEARER, ""); //use split method instead
+
+        if (strings:length(authToken) == 0) {
+            // token incorrect
+            gatewayUtil:constructAccessTokenNotFoundPayload(response);
+            http:setStatusCode(response, 401);
             return false, response;
         }
 
-        //check resource exist in cache
-        resourceDto = validateResource(apiContext, version, uriTemplate, httpVerb);
+        dto:IntrospectDto introspectDto = holder:getFromTokenCache(authToken);
+        if (introspectDto == null) {
+            introspectCacheHit = false;
+            // if not exist
+            introspectDto = doIntrospect(authToken);
+        }
 
-        if (resourceDto != null) {
-            if (resourceDto.authType != constants:AUTHENTICATION_TYPE_NONE) {
-                system:println("auth Type : " + resourceDto.authType);
-                try {
-                    string authHeader = messages:getHeader(m, constants:AUTHORIZATION);
-                    //* if ballerina supports bitwise and operation, the condition below can be just,
-                    //* if (strings:contains(authHeader, constants:BEARER) && (((apiDto.securityScheme & 2) == 2))
-                    if (strings:contains(authHeader, constants:BEARER) && ((apiDto.securityScheme == 2) || (apiDto.securityScheme == 3))) {
-                        //extract key
-                        system:println("inside ....");
-                        string authToken = messages:getHeader(m, constants:AUTHORIZATION);
-                        authToken = strings:replace(authToken, constants:BEARER, "");
-                        if (strings:length(authToken) == 0) {
-                            // token incorrect
-                            gatewayUtil:constructAccessTokenNotFoundPayload(response);
-                            http:setStatusCode(response, 401);
-                            return false, response;
-                        }
-                        //check key exist in cache
-                        dto:IntrospectDto introspectDto = holder:getFromTokenCache(authToken);
-                        if (introspectDto == null) {
-                            introspectCacheHit = false;
-                            // if not exist
-                            introspectDto = doIntrospect(authToken);
-                        }
+        if (!introspectDto.active) {
+            // access token expired
+            gatewayUtil:constructAccessTokenExpiredPayload(response);
+            return false, response;
+        }
 
-                        //check token is active
-                        if (introspectDto.active) {
-                            // if token had exp
-                            if (introspectDto.exp != -1) {
-                                //put into cache
-                                holder:putIntoTokenCache(authToken, introspectDto);
-                            }
-                            if (introspectDto.username != "") {
-                                userInfo = holder:getFromUserInfoCache(introspectDto.username);
-                                if ((userInfo == null) && (introspectDto.scope != "") && (strings:contains(introspectDto.scope, "openid"))) {
-                                    userInfo = retrieveUserInfo(authToken);
-                                    holder:putIntoUserInfoCache(introspectDto.username, userInfo);
-                                }
-                            }
-                            // if token come from cache hit
-                            if (introspectCacheHit) {
+        // if token had exp
+        if (introspectDto.exp != -1) {
+            //put into cache
+            holder:putIntoTokenCache(authToken, introspectDto);
+        }
+        if (introspectDto.username != "") {
+            userInfo = holder:getFromUserInfoCache(introspectDto.username);
+            if ((userInfo == null) && (introspectDto.scope != "")
+                && (strings:contains(introspectDto.scope, "openid"))) {
+                userInfo = retrieveUserInfo(authToken);
+                holder:putIntoUserInfoCache(introspectDto.username, userInfo);
+            }
+        }
+        // if token come from cache hit
+        if (introspectCacheHit) {
 
-                                if (introspectDto.exp < system:currentTimeMillis() / 1000) {
-                                    holder:removeFromTokenCache(authToken);
-                                    gatewayUtil:constructAccessTokenExpiredPayload(response);
-                                    return false, response;
-                                }
-                            }
-                            // validating subscription
-                            subscriptionDto = validateSubscription(apiContext, version, introspectDto);
-                            if (subscriptionDto != null) {
-                                if (subscriptionDto.status == constants:SUBSCRIPTION_STATUS_BLOCKED) {
-                                    gatewayUtil:constructSubscriptionBlocked(response, apiDto.context, apiDto.version);
-                                    return false, response;
-                                } else if (subscriptionDto.status == constants:SUBSCRIPTION_STATUS_PROD_ONLY_BLOCKED) {
-                                    if (subscriptionDto.keyEnvType == constants:ENV_TYPE_PRODUCTION) {
-                                        gatewayUtil:constructSubscriptionBlocked(response, apiDto.context, apiDto.version);
-                                        return false, response;
-                                    }
-                                } else if (subscriptionDto.status == constants:SUBSCRIPTION_STATUS_SANDBOX_ONLY_BLOCKED) {
-                                    if (subscriptionDto.keyEnvType == constants:ENV_TYPE_SANDBOX) {
-                                        gatewayUtil:constructSubscriptionBlocked(response, apiDto.context, apiDto.version);
-                                        return false, response;
-                                    }
-                                }
-                                if (validateScopes(resourceDto, introspectDto)) {
-                                    dto:KeyValidationDto keyValidationInfo = constructKeyValidationDto(authToken, introspectDto, subscriptionDto, resourceDto);
-                                    util:setProperty(m, "KEY_VALIDATION_INFO", keyValidationInfo);
-                                    messages:setProperty(m, constants:KEY_TYPE, subscriptionDto.keyEnvType);
-                                    state = true;
-                                    response = m;
-                                }
-                            } else {
-                                //subscription missing
-                                gatewayUtil:constructSubscriptionNotFound(response);
-                                return false, response;
-                            }
-                        } else {
-                            // access token expired
-                            gatewayUtil:constructAccessTokenExpiredPayload(response);
-                            return false, response;
-                        }
+            if (introspectDto.exp < system:currentTimeMillis() / 1000) {
+                holder:removeFromTokenCache(authToken);
+                gatewayUtil:constructAccessTokenExpiredPayload(response);
+                return false, response;
+            }
+        }
+        // validating subscription
+        subscriptionDto = validateSubscription(apiContext, version, introspectDto);
 
-                        //* if (strings:contains(authHeader, constants:BEARER) && (((apiDto.securityScheme & 1) == 2))
-                    } else if (strings:contains(authHeader, constants:APIKEY) && ((apiDto.securityScheme == 1) || (apiDto.securityScheme == 3))) {
-                        system:println("Api key check..");
-                        string ak = strings:replace(authHeader, constants:APIKEY, "");
-                        subscriptionDto = holder:getFromSubscriptionCache(apiContext, version, ak);
-                        if (subscriptionDto != null) {
-                            if (subscriptionDto.status == constants:SUBSCRIPTION_STATUS_BLOCKED) {
-                                gatewayUtil:constructSubscriptionBlocked(response, apiDto.context, apiDto.version);
-                                return false, response;
-                            } else if (subscriptionDto.status == constants:SUBSCRIPTION_STATUS_PROD_ONLY_BLOCKED) {
-                                if (subscriptionDto.keyEnvType == constants:ENV_TYPE_PRODUCTION) {
-                                    gatewayUtil:constructSubscriptionBlocked(response, apiDto.context, apiDto.version);
-                                    return false, response;
-                                }
-                            } else if (subscriptionDto.status == constants:SUBSCRIPTION_STATUS_SANDBOX_ONLY_BLOCKED) {
-                                if (subscriptionDto.keyEnvType == constants:ENV_TYPE_SANDBOX) {
-                                    gatewayUtil:constructSubscriptionBlocked(response, apiDto.context, apiDto.version);
-                                    return false, response;
-                                }
-                            }
+        if (subscriptionDto != null) {
+            boolean subscriptionExists = false;
+            subscriptionExists, response = isSubscriptionBlocked(subscriptionDto, response, apiDto);
+            if (!subscriptionExists) {
+                state = false;
+                return state, response;
+            }
 
-                            //scope validation does not apply for apikey
-                            dto:KeyValidationDto keyValidationInfo = constructAPIKeyValidationDto(subscriptionDto, resourceDto);
-                            util:setProperty(m, "KEY_VALIDATION_INFO", keyValidationInfo);
-                            messages:setProperty(m, constants:KEY_TYPE, subscriptionDto.keyEnvType);
-                            state = true;
-                            response = m;
-                        } else {
-                            gatewayUtil:constructSubscriptionNotFound(response);
-                            return false, response;
-                        }
-                    }
-                }
-                catch (errors:Error e) {
-                    messages:setHeader(response, "Content-Type", "application/json");
-                    http:setStatusCode(response, 401);
-                    gatewayUtil:constructAccessTokenNotFoundPayload(response);
-                    return false, response;
-                }
-            } else {
-                // set user as anonymous
-                // set throttling tier as unauthenticated
+            if (validateScopes(resourceDto, introspectDto)) {
+                dto:KeyValidationDto keyValidationInfo =
+                constructKeyValidationDto(authToken, introspectDto, subscriptionDto, resourceDto);
+                util:setProperty(m, "KEY_VALIDATION_INFO", keyValidationInfo);
+                messages:setProperty(m, constants:KEY_TYPE, subscriptionDto.keyEnvType);
+                state = true;
+                response = m;
             }
         } else {
-            http:setStatusCode(response, 404);
-
+            //subscription missing
+            gatewayUtil:constructSubscriptionNotFound(response);
+            return false, response;
         }
-    } else {
-        http:setStatusCode(response, 404);
+
+    } else if (apikeyErr == null && ((apiDto.securityScheme == 2) || (apiDto.securityScheme == 3))) {
+        system:println("Api key check..");
+        string apiKey = strings:replace(apikeyHeader, constants:APIKEY, "");
+        subscriptionDto = holder:getFromSubscriptionCache(apiContext, version, apiKey);
+        if (subscriptionDto != null) {
+            boolean subscriptionExists = false;
+            subscriptionExists, response = isSubscriptionBlocked(subscriptionDto, response, apiDto);
+            if (!subscriptionExists) {
+                state = false;
+                return state, response;
+            }
+            //scope validation does not apply for apikey
+            dto:KeyValidationDto keyValidationInfo =
+            constructAPIKeyValidationDto(subscriptionDto, resourceDto);
+            util:setProperty(m, "KEY_VALIDATION_INFO", keyValidationInfo);
+            messages:setProperty(m, constants:KEY_TYPE, subscriptionDto.keyEnvType);
+            state = true;
+            response = m;
+        } else {
+            gatewayUtil:constructSubscriptionNotFound(response);
+            return false, response;
+        }
     }
+
     return state, response;
 }
 
@@ -200,7 +193,8 @@ function doIntrospect (string authToken) (dto:IntrospectDto) {
     dto:CredentialsDTO credentials = keyManagerConf.credentials;
     messages:setStringPayload(request, "token=" + authToken);
     messages:setHeader(request, "Content-Type", "application/x-www-form-urlencoded");
-    messages:setHeader(request, constants:AUTHORIZATION, "Basic " + utils:base64encode(credentials.username + ":" + credentials.password));
+    messages:setHeader(request, constants:AUTHORIZATION, "Basic " + utils:base64encode(credentials.username + ":"
+                                                                                       + credentials.password));
     http:ClientConnector introspectConnector = create http:ClientConnector(keyManagerConf.introspectEndpoint);
     message introspectResponse = http:ClientConnector.post (introspectConnector,"/", request);
     dto:IntrospectDto introspectDto = gatewayUtil:fromJsonToIntrospectDto(messages:getJsonPayload(introspectResponse));
@@ -232,7 +226,7 @@ function validateScopes (dto:ResourceDto resourceDto, dto:IntrospectDto introspe
 function constructAPIKeyValidationDto (dto:SubscriptionDto subscriptionDto, dto:ResourceDto resourceDto) (dto:KeyValidationDto ) {
     dto:KeyValidationDto keyValidationInfoDTO = {};
     dto:ApplicationDto applicationDto = holder:getFromApplicationCache(subscriptionDto.applicationId);
-    keyValidationInfoDTO.username = "admin@carbon.super"; // subscriptionDTo.owner
+    keyValidationInfoDTO.username = applicationDto.applicationOwner;
     dto:PolicyDto applicationPolicy = holder:getFromPolicyCache(applicationDto.applicationPolicy);
     keyValidationInfoDTO.applicationPolicy = applicationPolicy.name;
     dto:PolicyDto subscriptionPolicy = holder:getFromPolicyCache(subscriptionDto.subscriptionPolicy);
@@ -255,7 +249,8 @@ function constructAPIKeyValidationDto (dto:SubscriptionDto subscriptionDto, dto:
     return keyValidationInfoDTO;
 }
 
-function constructKeyValidationDto (string token, dto:IntrospectDto introspectDto, dto:SubscriptionDto subscriptionDto, dto:ResourceDto resourceDto) (dto:KeyValidationDto ){
+function constructKeyValidationDto (string token, dto:IntrospectDto introspectDto, dto:SubscriptionDto subscriptionDto,
+                                    dto:ResourceDto resourceDto) (dto:KeyValidationDto ){
     dto:KeyValidationDto keyValidationInfoDTO = {};
     dto:ApplicationDto applicationDto = holder:getFromApplicationCache(subscriptionDto.applicationId);
     keyValidationInfoDTO.username = introspectDto.username;
@@ -286,6 +281,36 @@ function retrieveUserInfo (string token) (json) {
     messages:setHeader(request, "Content-Type", "application/json");
     messages:setHeader(request, constants:AUTHORIZATION, "Bearer " + token);
     http:ClientConnector userInfoConnector = create http:ClientConnector(keyURl);
-    message userInfoResponse = http:ClientConnector.post (userInfoConnector, constants:USER_INFO_CONTEXT + "?schema=openid", request);
+    message userInfoResponse = http:ClientConnector.post (userInfoConnector, constants:USER_INFO_CONTEXT
+                                                                             + "?schema=openid", request);
     return messages:getJsonPayload(userInfoResponse);
+}
+
+function isSubscriptionBlocked (dto:SubscriptionDto subscriptionDto, message response, dto:APIDTO apiDto)
+                                                                                                (boolean, message) {
+    if (subscriptionDto.status == constants:SUBSCRIPTION_STATUS_BLOCKED) {
+        gatewayUtil:constructSubscriptionBlocked(response, apiDto.context, apiDto.version);
+        return true, response;
+    } else if ((subscriptionDto.status == constants:SUBSCRIPTION_STATUS_PROD_ONLY_BLOCKED) &&
+    (subscriptionDto.keyEnvType == constants:ENV_TYPE_PRODUCTION)) {
+            gatewayUtil:constructSubscriptionBlocked(response, apiDto.context, apiDto.version);
+            return true, response;
+    } else if ((subscriptionDto.status == constants:SUBSCRIPTION_STATUS_SANDBOX_ONLY_BLOCKED)
+      && (subscriptionDto.keyEnvType == constants:ENV_TYPE_SANDBOX)) {
+            gatewayUtil:constructSubscriptionBlocked(response, apiDto.context, apiDto.version);
+            return true, response;
+    }
+    return false, response;
+}
+
+function extractHeaderWithName (string headerName, message msg) (string, errors:Error) {
+    string headerValue = "";
+    errors:Error err = null;
+    try {
+        headerValue = messages:getHeader(msg, headerName);
+    } catch (errors:Error err){
+        headerValue = "";
+        return headerValue, err;
+    }
+    return headerValue, err;
 }

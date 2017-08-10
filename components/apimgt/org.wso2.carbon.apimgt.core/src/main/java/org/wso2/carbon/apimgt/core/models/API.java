@@ -331,7 +331,7 @@ public final class API {
     private final String workflowStatus;
     private final Policy apiPolicy;
     private List<String> userSpecificApiPermissions;
-    private final int securityScheme;
+    private int securityScheme;
 
     public String getWorkflowStatus() {
         return workflowStatus;

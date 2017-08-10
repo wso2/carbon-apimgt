@@ -105,7 +105,7 @@ public class MappingUtil {
         apidto.setLabels(new ArrayList<>(api.getLabels()));
         apidto.setTransport(new ArrayList<>(api.getTransport()));
         apidto.setUserPermissionsForApi(api.getUserSpecificApiPermissions());
-        apidto.setSecurityScheme(api.getSecurityScheme());
+        apidto.setSecurityScheme(mapSecuritySchemeIntToList(api.getSecurityScheme()));
         for (Policy policy : api.getPolicies()) {
             apidto.addPoliciesItem(policy.getPolicyName());
         }
@@ -222,7 +222,9 @@ public class MappingUtil {
                 businessInformation(businessInformation).
                 uriTemplates(uriTemplateList).
                 corsConfiguration(corsConfiguration).
-                wsdlUri(apidto.getWsdlUri());
+                wsdlUri(apidto.getWsdlUri()).
+                securityScheme(mapSecuritySchemeListToInt(apidto.getSecurityScheme()));
+
         if (apidto.getIsDefaultVersion() != null) {
             apiBuilder.isDefaultVersion(apidto.getIsDefaultVersion());
         }
@@ -237,17 +239,12 @@ public class MappingUtil {
             apiBuilder.apiPolicy(policy);
         }
 
-        /**
-         * (values in binary)
-         * 00 - no security scheme
-         * 01 - apikey
-         * 10 - oauth
-         * 11 - apikey and oauth
-         */
         if (apidto.getSecurityScheme() != null) {
-            apiBuilder.securityScheme(apidto.getSecurityScheme());
-        } else {
             apiBuilder.securityScheme(3);
+          //  List<String> securityScheme = apidto.getSecurityScheme();
+          //  apiBuilder.securityScheme(mapSecuritySchemeListToInt(securityScheme));
+        } else {
+            apiBuilder.securityScheme(2);
         }
 
         return apiBuilder;
@@ -286,6 +283,7 @@ public class MappingUtil {
             apiInfo.setLifeCycleStatus(apiSummary.getLifeCycleStatus());
             apiInfo.setVersion(apiSummary.getVersion());
             apiInfo.setWorkflowStatus(apiSummary.getWorkflowStatus());
+            apiInfo.setSecurityScheme(mapSecuritySchemeIntToList(apiSummary.getSecurityScheme()));
             apiInfoList.add(apiInfo);
         }
         return apiInfoList;
@@ -541,4 +539,30 @@ public class MappingUtil {
         wsdlValidationResponseDTO.setWsdlInfo(infoDTO);
         return wsdlValidationResponseDTO;
     }
+
+    public static int mapSecuritySchemeListToInt(List<String> securityScheme) {
+        int securitySchemeValue = 0;
+        for(String scheme : securityScheme) {
+            switch (scheme) {
+                case "Oauth" : securitySchemeValue = securitySchemeValue | 2;
+                    break;
+                case "apikey" : securitySchemeValue = securitySchemeValue | 1;
+                    break;
+                default:break;
+            }
+        }
+        return securitySchemeValue;
+    }
+
+    public static List<String> mapSecuritySchemeIntToList(int securityScheme) {
+        List<String> securitySchemesList = new ArrayList<String>();
+        if ((securityScheme & 1) == 1) { //Oauth
+            securitySchemesList.add("Oauth");
+        }
+        if ((securityScheme & 2) == 2) { //apikey
+            securitySchemesList.add("apikey");
+        }
+        return securitySchemesList;
+    }
+
 }

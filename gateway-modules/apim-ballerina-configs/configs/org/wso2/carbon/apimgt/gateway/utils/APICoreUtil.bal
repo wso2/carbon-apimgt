@@ -81,7 +81,6 @@ function getAPIs () (json) {
         string query = "?labels=Default";
         response = http:ClientConnector.get(client, "/api/am/core/v1.0/apis" + query, request);
         apiList = messages:getJsonPayload(response);
-        system:println("API list in getAPIS : " + strings:valueOf(apiList));
         return apiList;
     } catch (errors:Error e) {
         system:println("Error occurred while retrieving gateway APIs from API Core. " + e.msg);
