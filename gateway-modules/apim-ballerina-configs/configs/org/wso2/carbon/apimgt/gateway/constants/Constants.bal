@@ -27,6 +27,7 @@ const string INTROSPECT_CONTEXT = "/oauth2/introspect";
 const string USER_INFO_CONTEXT = "/oauth2/userinfo";
 const string AUTHORIZATION = "Authorization";
 const string BEARER = "Bearer ";
+const string APIKEY = "apikey ";
 const string AUTHENTICATION_TYPE_NONE = "None";
 const string KEY_VALIDATION_INFO = "KEY_VALIDATION_INFO";
 const string TOKEN_CACHE = "TOKEN_CACHE";

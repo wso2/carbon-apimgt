@@ -43,8 +43,9 @@ public class MssqlSQLStatements implements ApiDAOVendorSpecificStatements {
     private static final Logger log = LoggerFactory.getLogger(MssqlSQLStatements.class);
     private static final String API_SUMMARY_SELECT =
             "SELECT DISTINCT API.UUID, API.PROVIDER, API.NAME, API.CONTEXT, API.VERSION, API.DESCRIPTION,"
-                    + "API.CURRENT_LC_STATUS, API.LIFECYCLE_INSTANCE_ID, API.LC_WORKFLOW_STATUS, API.API_TYPE_ID "
-                    + "FROM AM_API API LEFT JOIN AM_API_GROUP_PERMISSION PERMISSION ON UUID = API_ID";
+                    + "API.CURRENT_LC_STATUS, API.LIFECYCLE_INSTANCE_ID, API.LC_WORKFLOW_STATUS, API.API_TYPE_ID, "
+                    + "API.SECURITY_SCHEME FROM AM_API API LEFT JOIN AM_API_GROUP_PERMISSION PERMISSION ON "
+                    + "UUID = API_ID";
 
     private Map<String, StoreApiAttributeSearch> searchMap;
 

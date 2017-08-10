@@ -148,6 +148,7 @@ public class MappingUtil {
             apiInfo.setName(api.getName());
             apiInfo.setLifeCycleStatus(api.getLifeCycleStatus());
             apiInfo.setVersion(api.getVersion());
+            apiInfo.setSecurityScheme(api.getSecurityScheme());
             apiInfoList.add(apiInfo);
         }
         return apiInfoList;

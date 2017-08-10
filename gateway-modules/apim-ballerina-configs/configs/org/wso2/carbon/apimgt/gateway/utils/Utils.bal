@@ -256,6 +256,7 @@ function fromJSONToAPIDTO (json api) (dto:APIDTO) {
     APIDTO.version, err = (string)api.version;
     APIDTO.context, err = (string)api.context;
     APIDTO.lifeCycleStatus, err = (string)api.lifeCycleStatus;
+    APIDTO.securityScheme = jsons:getInt(api, "$.securityScheme");
     return APIDTO;
 
 }
