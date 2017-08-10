@@ -6,7 +6,6 @@ import ballerina.net.http;
 import ballerina.lang.system;
 import ballerina.lang.errors;
 import ballerina.lang.strings;
-import ballerina.lang.jsons;
 import org.wso2.carbon.apimgt.gateway.constants as Constants;
 import org.wso2.carbon.apimgt.gateway.utils as gatewayUtil;
 
@@ -19,6 +18,7 @@ import org.wso2.carbon.apimgt.gateway.utils as gatewayUtil;
 }
 
 service<jms> apimStoreEventListner {
+    
     @http:GET {}
     resource onMessage (message m) {
         try {
