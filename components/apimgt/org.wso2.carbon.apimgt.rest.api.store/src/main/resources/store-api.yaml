@@ -245,7 +245,7 @@ paths:
 
   /apis/{apiId}/wsdl:
 #-----------------------------------------------------
-# Retrieve the API swagger definition
+# Retrieve the API WSDL definition
 #-----------------------------------------------------
     get:
       produces:
