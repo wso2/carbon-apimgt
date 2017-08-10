@@ -89,7 +89,6 @@ function authenticate (message m) (boolean, message) {
     }
 
     if (authErr == null && ((apiDto.securityScheme == 1) || (apiDto.securityScheme == 3))) {
-        system:println("inside auth");
         string authToken = strings:replace(authHeader, constants:BEARER, ""); //use split method instead
 
         if (strings:length(authToken) == 0) {
