@@ -64,12 +64,14 @@ class Resources extends React.Component{
     }
 
     onChange(checkedValues) {
-        console.log('checked = ', checkedValues);
         this.setState({tmpMethods:checkedValues});
     }
     onChangeInput(e) {
-        console.log('checked = ', e.target.value);
-        this.setState({tmpResourceName:e.target.value});
+        let value = e.target.value;
+        if(value.indexOf("/") === -1 ){
+            value = "/" + value;
+        }
+        this.setState({tmpResourceName:value});
     }
     addResources(){
         const defaultGet =  {
@@ -111,6 +113,25 @@ class Resources extends React.Component{
             ]
         };
 
+        const defaultDelete =  {
+            description: 'description',
+            produces: 'application/xml,application/json',
+            responses: {
+                200: {
+                    "description": ""
+                }
+            },
+            parameters: []
+        };
+        const defaultHead =  {
+            responses: {
+                200: {
+                    "description": ""
+                }
+            },
+            parameters: []
+        };
+
         let pathValue = {};
 
         this.state.tmpMethods.map( (method ) => {
@@ -120,6 +141,19 @@ class Resources extends React.Component{
                     break;
                 case "POST" :
                     pathValue["POST"] = defaultPost;
+                    break;
+                case "PUT" :
+                    pathValue["PUT"] = defaultPost;
+                    break;
+                case "PATCH" :
+                    pathValue["PATCH"] = defaultPost;
+                    break;
+                case "DELETE" :
+                    pathValue["DELETE"] = defaultDelete;
+                    break;
+                case "HEAD" :
+                    pathValue["HEAD"] = defaultHead;
+                    break;
             }
         });
 
@@ -129,7 +163,11 @@ class Resources extends React.Component{
     }
     updatePath(path,method,value) {
         let tmpPaths = this.state.paths;
-        tmpPaths[path][method] = value;
+        if(value === null){
+            delete tmpPaths[path][method];
+        } else{
+            tmpPaths[path][method] = value;
+        }
         this.setState({paths:tmpPaths});
     }
     updateResources(){
@@ -138,6 +176,7 @@ class Resources extends React.Component{
         this.setState({api:tmpSwagger});
         let promised_api = this.api.updateSwagger(this.api_uuid, this.state.swagger);
         promised_api.then((response) => {
+            console.info(response);
         }).catch(error => {
             if (process.env.NODE_ENV !== "production")
                 console.log(error);
