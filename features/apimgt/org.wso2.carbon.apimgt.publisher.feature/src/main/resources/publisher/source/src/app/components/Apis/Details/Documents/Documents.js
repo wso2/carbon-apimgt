@@ -26,11 +26,11 @@ import NewDocDiv from './NewDocDiv';
  Documents tab related React components.
  # Component hierarchy
  -Documents
- -DocumentsTable
- -InlineEditor
- -NewDocDiv
- -NewDocInfoDiv
- -NewDocSourceDiv
+    -DocumentsTable
+        -InlineEditor
+    -NewDocDiv
+        -NewDocInfoDiv
+        -NewDocSourceDiv
  */
 class Documents extends Component {
     constructor(props) {
@@ -96,9 +96,9 @@ class Documents extends Component {
      */
     submitAddNewDocListener() {
         if (
-            (this.state.docSourceType == null) || (this.state.docName == "") ||
-            (this.state.docSourceType == "URL" && this.state.docSourceURL == "") ||
-            (this.state.docSourceType == "FILE" && this.state.docFile == null)
+            (this.state.docSourceType == null) || (this.state.docName === "") ||
+            (this.state.docSourceType === "URL" && this.state.docSourceURL === "") ||
+            (this.state.docSourceType === "FILE" && this.state.docFile == null)
         ) {
             message.error("Enter the required details before adding the document");
             return;
@@ -121,7 +121,7 @@ class Documents extends Component {
             const dt_data = done.obj;
             const docId = dt_data.documentId;
             let promised_add_file;
-            if (api_documents_data.sourceType == "FILE") {
+            if (api_documents_data.sourceType === "FILE") {
                 const file = this.state.docFile;
                 promised_add_file = this.client.addFileToDocument(this.api_id, docId, file);
                 promised_add_file.catch(function (error_response) {
@@ -160,25 +160,25 @@ class Documents extends Component {
             [name]: event.target.value
         });
 
-        if (name == "docSourceType") {
-            if (event.target.value == "URL") {
+        if (name === "docSourceType") {
+            if (event.target.value === "URL") {
                 this.setState({
                     docFilePath: null
                 });
             }
-            else if (event.target.value == "INLINE") {
+            else if (event.target.value === "INLINE") {
                 this.setState({
                     docSourceURL: "",
                     docFilePath: null
                 });
-            } else if (event.target.value == "FILE") {
+            } else if (event.target.value === "FILE") {
                 this.setState({
                     docSourceURL: ""
                 });
             }
         }
 
-        if (event.target.type == "file") {
+        if (event.target.type === "file") {
             this.setState({
                 docFile: event.target.files[0]
             });
@@ -248,8 +248,8 @@ class Documents extends Component {
      */
     submitUpdateDocumentListener() {
         if (
-            (this.state.docSourceType == null) || (this.state.docName == "") ||
-            (this.state.docSourceType == "URL" && this.state.docSourceURL == "")
+            (this.state.docSourceType == null) || (this.state.docName === "") ||
+            (this.state.docSourceType === "URL" && this.state.docSourceURL === "")
         ) {
             message.error("Enter the required details before adding the document");
             return;
@@ -271,14 +271,15 @@ class Documents extends Component {
         promised_update.then(response => {
             const dt_data = response.obj;
             const docId = dt_data.documentId;
-            let promised_add_file = Promise.reject();
-            let promised_add_empty_inline_content = Promise.reject();
-            if (dt_data.sourceType == "FILE") {
+            let promised_add_file = new Promise(() => {});
+            let promised_add_empty_inline_content = new Promise(() => {});
+            if (dt_data.sourceType === "FILE") {
                 if (this.state.docFile != null) {
                     promised_add_file = this.client.addFileToDocument(this.api_id, docId, this.state.docFile);
                     promised_add_file.catch((error_response) => {
                         const error_data = JSON.parse(error_response.message);
-                        const messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+                        const messageTxt =
+                            "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
                         console.error(messageTxt);
                         message.error("Failed updating document file")
                     });
@@ -287,20 +288,34 @@ class Documents extends Component {
                 promised_add_file = Promise['resolve']();
             }
             if (this.initialDocSourceType != api_documents_data.sourceType) { //source type has been changed
-                if (api_documents_data.sourceType == "INLINE") {
+                if (api_documents_data.sourceType === "INLINE") {
                     //Add empty inline content to document when the source type was changed to 'INLINE'
-                    promised_add_empty_inline_content = this.client.addInlineContentToDocument(this.api_id, docId, "");
+                    promised_add_empty_inline_content =
+                        this.client.addInlineContentToDocument(this.api_id, docId, "<p></p>");
                     promised_add_empty_inline_content.catch((error_response) => {
                         const error_data = JSON.parse(error_response.data);
-                        const messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+                        const messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " +
+                            error_data.message + ".";
                         console.error(messageTxt);
                         message.error("Failed adding empty inline content to document");
                     });
                 } else {
                     promised_add_empty_inline_content = Promise['resolve']();
                 }
+                if(api_documents_data.sourceType === "FILE") {
+                    if (api_documents_data.fileName == null) {
+                        message.error("A File resource is not selected. Select a File resource to update the source " +
+                            "type to 'File'");
+                    }
+                }
             } else {
                 promised_add_empty_inline_content = Promise['resolve']();
+                if (api_documents_data.fileName == null) {
+                    promised_add_file = Promise['resolve']();
+                    if(api_documents_data.sourceType === "FILE") {
+                        message.info("The FILE resource of the document is not updated as a file resource is not selected");
+                    }
+                }
             }
             Promise.all([promised_add_file, promised_add_empty_inline_content]).then(() => {
                 this.resetNewDocDetails();
@@ -308,6 +323,7 @@ class Documents extends Component {
                 message.success("Document updated successfully");
             });
             Promise.all([promised_add_file, promised_add_empty_inline_content]).catch(() => {
+                message.error("Error occurred in updating the document")
             });
         }).catch(function (error_response) {
             let error_data = JSON.parse(error_response.message);
