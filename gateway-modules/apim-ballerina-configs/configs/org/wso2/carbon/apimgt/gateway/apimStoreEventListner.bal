@@ -18,7 +18,7 @@ import org.wso2.carbon.apimgt.gateway.utils as gatewayUtil;
 }
 
 service<jms> apimStoreEventListner {
-    
+
     @http:GET {}
     resource onMessage (message m) {
         try {
