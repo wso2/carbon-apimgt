@@ -28,7 +28,10 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
+import org.wso2.carbon.apimgt.core.exception.APICommentException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIRatingException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.APIStoreImpl;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Comment;
@@ -42,7 +45,6 @@ import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.RatingDTO;
-import org.wso2.carbon.apimgt.rest.api.store.mappings.CommentMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.RatingMappingUtil;
 import org.wso2.carbon.messaging.CarbonMessage;
 import org.wso2.msf4j.Request;
@@ -53,6 +55,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static junit.framework.TestCase.assertEquals;
+
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(RestApiUtil.class)
 public class ApisApiServiceImplTestCase {
@@ -60,6 +64,8 @@ public class ApisApiServiceImplTestCase {
     private final static Logger logger = LoggerFactory.getLogger(ApisApiServiceImplTestCase.class);
 
     private static final String USER = "admin";
+    private static final String IF_MATCH = null;
+    private static final String IF_UNMODIFIED_SINCE = null;
 
     @Test
     public void testApisApiIdCommentsCommentIdDelete() throws NotFoundException, APIManagementException {
@@ -79,9 +85,59 @@ public class ApisApiServiceImplTestCase {
 
         javax.ws.rs.core.Response response =
                 apisApiService.apisApiIdCommentsCommentIdDelete
-                        (commentId, apiId, null, null, getRequest());
+                        (null, apiId, null, null, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    public void testApisApiIdCommentsCommentIdDeleteNotFound() throws APIManagementException, NotFoundException {
+        printTestMethodName();
+        String apiId = UUID.randomUUID().toString();
+        String commentId = UUID.randomUUID().toString();
+
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+
+        Mockito.doThrow(new APICommentException("Error occurred", ExceptionCodes.COMMENT_NOT_FOUND))
+                .when(apiStore).deleteComment(commentId, apiId, USER);
+
+        Response response = apisApiService.apisApiIdCommentsCommentIdDelete
+                (commentId, apiId, IF_MATCH, IF_UNMODIFIED_SINCE, getRequest());
+
+        assertEquals(response.getStatus(), 404);
+    }
+
+    @Test
+    public void testApisApiIdCommentsCommentIdDeleteIfMatchStringExistingFingerprintCheck()
+            throws APIManagementException, NotFoundException {
+        printTestMethodName();
+        String apiId = UUID.randomUUID().toString();
+        String commentId = UUID.randomUUID().toString();
+
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+
+        String existingFingerprint = "existingFingerprint";
+
+        Mockito.when(apisApiService.apisApiIdCommentsCommentIdDeleteFingerprint
+                (commentId, apiId, "test", "test", getRequest()))
+                .thenReturn(existingFingerprint);
+        Mockito.doNothing().doThrow(new IllegalArgumentException()).when(apiStore)
+                .deleteComment(commentId, apiId, USER);
+
+        Response response = apisApiService.apisApiIdCommentsCommentIdDelete
+                (commentId, apiId, "test", "test", getRequest());
+
+        assertEquals(response.getStatus(), 412);
     }
 
     @Test
@@ -113,6 +169,28 @@ public class ApisApiServiceImplTestCase {
                 (commentId, apiId, null, null, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    public void testApisApiIdCommentsCommentIdGetNotFound() throws APIManagementException, NotFoundException {
+        printTestMethodName();
+        String apiId = UUID.randomUUID().toString();
+        String commentId = UUID.randomUUID().toString();
+
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+
+        Mockito.doThrow(new APICommentException("Error occurred", ExceptionCodes.COMMENT_NOT_FOUND))
+                .when(apiStore).getCommentByUUID(commentId, apiId);
+
+        Response response = apisApiService.apisApiIdCommentsCommentIdGet
+                (commentId, apiId, null, null, getRequest());
+
+        Assert.assertEquals(404, response.getStatus());
     }
 
     @Test
@@ -156,6 +234,26 @@ public class ApisApiServiceImplTestCase {
     }
 
     @Test
+    public void testApisApiIdCommentsGetNotFound() throws APIManagementException, NotFoundException {
+        printTestMethodName();
+        String apiId = UUID.randomUUID().toString();
+
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+
+        Mockito.doThrow(new APICommentException("Error occurred", ExceptionCodes.COMMENT_NOT_FOUND))
+                .when(apiStore).getCommentsForApi(apiId);
+
+        Response response = apisApiService.apisApiIdCommentsGet(apiId, 3, 0, getRequest());
+
+        Assert.assertEquals(404, response.getStatus());
+    }
+
+    @Test
     public void testApisApiIdCommentsCommentIdPut() throws APIManagementException, NotFoundException {
         printTestMethodName();
         String apiId = UUID.randomUUID().toString();
@@ -187,9 +285,48 @@ public class ApisApiServiceImplTestCase {
         Mockito.when(apiStore.getCommentByUUID(commentId, apiId)).thenReturn(comment);
 
         Response response = apisApiService.apisApiIdCommentsCommentIdPut
-                (commentId, apiId, commentDTO,null, null, getRequest());
+                (commentId, apiId, commentDTO, null, null, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    public void testApisApiIdCommentsCommentIdPutErrorCase() throws APIManagementException, NotFoundException {
+        printTestMethodName();
+        String apiId = UUID.randomUUID().toString();
+        String commentId = UUID.randomUUID().toString();
+
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+
+        CommentDTO commentDTO = new CommentDTO();
+        commentDTO.setApiId(apiId);
+        commentDTO.setCommentText("comment text");
+        commentDTO.setCreatedBy("creater");
+        commentDTO.setLastUpdatedBy("updater");
+
+        Comment comment = new Comment();
+        comment.setCommentedUser("commentedUser");
+        comment.setCommentText("this is a comment");
+        comment.setCreatedUser("createdUser");
+        comment.setUpdatedUser("updatedUser");
+        comment.setCreatedTime(LocalDateTime.now().minusHours(1));
+        comment.setUpdatedTime(LocalDateTime.now());
+
+        Mockito.doThrow(new APICommentException("Error occurred", ExceptionCodes.INTERNAL_ERROR))
+                .when(apiStore).updateComment(comment, commentId, apiId, USER);
+        Mockito.doThrow(new APICommentException("Error occurred", ExceptionCodes.INTERNAL_ERROR))
+                .when(apiStore).getCommentByUUID(commentId, apiId);
+
+
+        Response response = apisApiService.apisApiIdCommentsCommentIdPut
+                (commentId, apiId, commentDTO, IF_MATCH, IF_UNMODIFIED_SINCE, getRequest());
+
+        Assert.assertEquals(ExceptionCodes.INTERNAL_ERROR.getHttpStatusCode(), response.getStatus());
     }
 
     @Test
@@ -230,6 +367,35 @@ public class ApisApiServiceImplTestCase {
     }
 
     @Test
+    public void testApisApiIdDocumentsDocumentIdContentGetErrorCase() throws APIManagementException, NotFoundException {
+        printTestMethodName();
+        String apiId = UUID.randomUUID().toString();
+
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+
+        String documentIdFile = UUID.randomUUID().toString();
+        String documentIdInline = UUID.randomUUID().toString();
+
+        Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.DOCUMENT_CONTENT_NOT_FOUND))
+                .when(apiStore).getDocumentationContent(documentIdFile);
+        Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.DOCUMENT_CONTENT_NOT_FOUND))
+                .when(apiStore).getDocumentationContent(documentIdInline);
+
+        Response responseFile = apisApiService.apisApiIdDocumentsDocumentIdContentGet
+                (apiId, documentIdFile, null, null, getRequest());
+        Response responseInline = apisApiService.apisApiIdDocumentsDocumentIdContentGet
+                (apiId, documentIdInline, null, null, getRequest());
+
+        Assert.assertEquals(404, responseFile.getStatus());
+        Assert.assertEquals(404, responseInline.getStatus());
+    }
+
+    @Test
     public void testApisApiIdDocumentsDocumentIdGet() throws APIManagementException, NotFoundException {
         printTestMethodName();
         String apiId = UUID.randomUUID().toString();
@@ -252,6 +418,28 @@ public class ApisApiServiceImplTestCase {
                 (apiId, documentId, null, null, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    public void testApisApiIdDocumentsDocumentIdGetErrorCase() throws APIManagementException, NotFoundException {
+        printTestMethodName();
+        String apiId = UUID.randomUUID().toString();
+        String documentId = UUID.randomUUID().toString();
+
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+
+        Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.DOCUMENT_NOT_FOUND))
+                .when(apiStore).getDocumentationSummary(documentId);
+
+        Response response = apisApiService.apisApiIdDocumentsDocumentIdGet
+                (apiId, documentId, null, null, getRequest());
+
+        Assert.assertEquals(404, response.getStatus());
     }
 
     @Test
@@ -287,6 +475,27 @@ public class ApisApiServiceImplTestCase {
     }
 
     @Test
+    public void testApisApiIdDocumentsGetErrorCase() throws APIManagementException, NotFoundException {
+        printTestMethodName();
+        String apiId = UUID.randomUUID().toString();
+
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+
+        Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.DOCUMENT_NOT_FOUND))
+                .when(apiStore).getAllDocumentation(apiId, 0, 10);
+
+        Response response = apisApiService.apisApiIdDocumentsGet
+                (apiId, 10, 0, null, getRequest());
+
+        Assert.assertEquals(404, response.getStatus());
+    }
+
+    @Test
     public void testApisApiIdGet() throws APIManagementException, NotFoundException {
         printTestMethodName();
         String apiId = UUID.randomUUID().toString();
@@ -310,6 +519,26 @@ public class ApisApiServiceImplTestCase {
         Response response = apisApiService.apisApiIdGet(apiId, null, null, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    public void testApisApiIdGetErrorCase() throws APIManagementException, NotFoundException {
+        printTestMethodName();
+        String apiId = UUID.randomUUID().toString();
+
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+
+        Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.API_NOT_FOUND))
+                .when(apiStore).getAPIbyUUID(apiId);
+
+        Response response = apisApiService.apisApiIdGet(apiId, null, null, getRequest());
+
+        Assert.assertEquals(404, response.getStatus());
     }
 
     @Test
@@ -360,6 +589,27 @@ public class ApisApiServiceImplTestCase {
     }
 
     @Test
+    public void testApisApiIdRatingsGetErrorCase() throws APIManagementException, NotFoundException {
+        printTestMethodName();
+        String apiId = UUID.randomUUID().toString();
+        String rateId = UUID.randomUUID().toString();
+
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+
+        Mockito.doThrow(new APIRatingException("Error occurred", ExceptionCodes.RATING_NOT_FOUND))
+                .when(apiStore).getRatingForApiFromUser(apiId, USER);
+
+        Response response = apisApiService.apisApiIdRatingsGet(apiId, 10, 0, getRequest());
+
+        Assert.assertEquals(404, response.getStatus());
+    }
+
+    @Test
     public void testApisApiIdRatingsRatingIdGet() throws APIManagementException, NotFoundException {
         printTestMethodName();
         String apiId = UUID.randomUUID().toString();
@@ -387,6 +637,27 @@ public class ApisApiServiceImplTestCase {
         Response response = apisApiService.apisApiIdRatingsGet(apiId, 10, 0, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    public void testApisApiIdRatingsRatingIdGetErrorCase() throws APIManagementException, NotFoundException {
+        printTestMethodName();
+        String apiId = UUID.randomUUID().toString();
+        String rateId = UUID.randomUUID().toString();
+
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+
+        Mockito.doThrow(new APIRatingException("Error occurred", ExceptionCodes.RATING_NOT_FOUND))
+                .when(apiStore).getRatingForApiFromUser(apiId, USER);
+
+        Response response = apisApiService.apisApiIdRatingsGet(apiId, 10, 0, getRequest());
+
+        Assert.assertEquals(404, response.getStatus());
     }
 
     @Test
@@ -435,6 +706,39 @@ public class ApisApiServiceImplTestCase {
     }
 
     @Test
+    public void testApisApiIdUserRatingPutErrorCase() throws APIManagementException, NotFoundException {
+        printTestMethodName();
+        String apiId = UUID.randomUUID().toString();
+        String rateId = UUID.randomUUID().toString();
+
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+
+        Mockito.doThrow(new APIRatingException("Error Occured", ExceptionCodes.RATING_NOT_FOUND))
+                .when(apiStore).getRatingForApiFromUser(apiId, USER);
+
+        Rating rating = new Rating();
+        rating.setApiId(apiId);
+        rating.setRating(5);
+        rating.setUsername(USER);
+        rating.setUuid(rateId);
+        rating.setCreatedUser(USER);
+        rating.setCreatedTime(LocalDateTime.now().minusHours(2));
+        rating.setLastUpdatedUser(USER);
+        rating.setLastUpdatedTime(LocalDateTime.now());
+
+        RatingDTO ratingDTO = RatingMappingUtil.fromRatingToDTO(rating);
+
+        Response response = apisApiService.apisApiIdUserRatingPut(apiId, ratingDTO, getRequest());
+
+        Assert.assertEquals(404, response.getStatus());
+    }
+
+    @Test
     public void testApisApiIdSwaggerGet() throws APIManagementException, NotFoundException {
         printTestMethodName();
         String apiId = UUID.randomUUID().toString();
@@ -451,6 +755,26 @@ public class ApisApiServiceImplTestCase {
         Response response = apisApiService.apisApiIdSwaggerGet(apiId, null, null, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    public void testApisApiIdSwaggerGetErrorCase() throws APIManagementException, NotFoundException {
+        printTestMethodName();
+        String apiId = UUID.randomUUID().toString();
+
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+
+        Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.API_NOT_FOUND))
+                .when(apiStore).getApiSwaggerDefinition(apiId);
+
+        Response response = apisApiService.apisApiIdSwaggerGet(apiId, null, null, getRequest());
+
+        Assert.assertEquals(404, response.getStatus());
     }
 
     @Test
@@ -480,6 +804,26 @@ public class ApisApiServiceImplTestCase {
         Response response = apisApiService.apisGet(10, 0, "", null, getRequest());
 
         Assert.assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    public void testApisGetErrorCase() throws APIManagementException, NotFoundException {
+        printTestMethodName();
+        String apiId = UUID.randomUUID().toString();
+
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+
+        Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.API_NOT_FOUND))
+                .when(apiStore).searchAPIs("", 0, 10);
+
+        Response response = apisApiService.apisGet(10, 0, "", null, getRequest());
+
+        Assert.assertEquals(404, response.getStatus());
     }
 
     // Sample request to be used by tests
