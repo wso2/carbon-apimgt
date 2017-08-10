@@ -29,7 +29,6 @@ service<jms> apimPublisherEventListner {
             system:println("eventType " + eventType);
             if (strings:equalsIgnoreCase(eventType, Constants:API_CREATE)) {
                 json apiSummary = event.apiSummary;
-                system:println("API Summary : " + strings:valueOf(apiSummary));
                 if (apiSummary != null) {
 
                     dto:APIDTO api = gatewayUtil:fromJSONToAPIDTO(apiSummary);

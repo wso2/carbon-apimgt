@@ -79,7 +79,6 @@ function removeFromTokenCache (string key) {
     caching:removeCacheEntry(constants:TOKEN_CACHE, key);
 }
 function putIntoAPICache (dto:APIDTO apidto) {
-    system:println("security type : " + apidto.securityScheme);
     string key = apidto.context + ":" + apidto.version;
     caching:putCacheEntry(constants:API_CACHE, key, apidto);
 }
