@@ -297,7 +297,7 @@ public class SampleTestObjectCreator {
      *
      * @return UriTemplate object
      */
-    protected static UriTemplate createUniqueUriTemplate() {
+    public static UriTemplate createUniqueUriTemplate() {
         UriTemplate.UriTemplateBuilder uriTemplate = UriTemplate.UriTemplateBuilder.getInstance().
                 templateId(UUID.randomUUID().toString())
                 .uriTemplate(UUID.randomUUID().toString());
