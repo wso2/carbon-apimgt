@@ -11,6 +11,7 @@ import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
+import org.wso2.carbon.apimgt.core.dao.impl.LabelDAOImpl;
 import org.wso2.carbon.apimgt.core.exception.APIConfigRetrievalException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
@@ -31,7 +32,6 @@ import org.wso2.carbon.apimgt.core.models.policy.CustomPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -354,6 +354,51 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     }
 
     @Override
+    public List<Label> getLabels() throws APIManagementException {
+        try {
+             return labelDAO.getLabels();
+        } catch (APIMgtDAOException e) {
+            String msg = "Error occurred while Getting all  labels";
+            log.error(msg, e);
+            throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    @Override
+    public Label getLabelByID(String labelID) throws APIManagementException {
+        Label  label = null;
+        try {
+            label = labelDAO.getLabelByID(labelID);
+        } catch (APIMgtDAOException e) {
+            String msg = "Error occurred while getting the label by ID";
+            log.error(msg, e);
+            throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return label;
+    }
+
+    @Override
+    public Label addLabel(Label label) throws APIManagementException {
+      try {
+         return LabelDAOImpl.addLabel(label);
+        } catch (APIMgtDAOException e) {
+            String msg = "Error occurred while adding the labels";
+            log.error(msg, e);
+            throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    public void updateLabel(Label updatedLabel) throws APIManagementException {
+        try {
+            labelDAO.updateLabel(updatedLabel);
+        } catch (APIMgtDAOException e) {
+            String msg = "Error occurred while updating the label -" + updatedLabel.getId();
+            log.error(msg, e);
+            throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+    }
+
+    @Override
     public void deleteLabel(String labelId) throws APIManagementException {
 
         try {
@@ -363,45 +408,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
             log.error(msg, e);
             throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
-    }
-
-    @Override
-    public void registerGatewayLabels(List<Label> labels, String overwriteLabels) throws APIManagementException {
-
-        if (!labels.isEmpty()) {
-            List<String> labelNames = new ArrayList<>();
-            boolean overwriteValues = Boolean.parseBoolean(overwriteLabels);
-
-            for (Label label : labels) {
-                labelNames.add(label.getName());
-            }
-
-            try {
-                List<Label> existingLabels = labelDAO.getLabelsByName(labelNames);
-
-                if (!existingLabels.isEmpty()) {
-                    List<Label> labelsToRemove = new ArrayList<>();
-
-                    for (Label existingLabel : existingLabels) {
-                        for (Label label : labels) {
-                            if (existingLabel.getName().equals(label.getName())) {
-                                if (overwriteValues) {
-                                    labelDAO.updateLabel(label);
-                                }
-                                labelsToRemove.add(label);
-                            }
-                        }
-                    }
-                    labels.removeAll(labelsToRemove);    // Remove already existing labels from the list
-                }
-                labelDAO.addLabels(labels);
-            } catch (APIMgtDAOException e) {
-                String msg = "Error occurred while registering gateway labels";
-                log.error(msg, e);
-                throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
-            }
-        }
-
     }
 
     @Override

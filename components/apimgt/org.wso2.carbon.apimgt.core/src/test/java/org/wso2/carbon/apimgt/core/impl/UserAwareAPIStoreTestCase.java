@@ -42,7 +42,6 @@ import java.util.Map;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mock;
 
 /**
  * Test class for UserAwareAPIStore
@@ -76,10 +75,10 @@ public class UserAwareAPIStoreTestCase {
     }
     @Test(description = "Delete application")
     public void testDeleteApplication() throws APIManagementException {
-        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        APISubscriptionDAO subscriptionDAO = mock(APISubscriptionDAO.class);
-        WorkflowDAO workflowDAO = mock(WorkflowDAO.class);
-        APIGateway apiGateway = mock(APIGateway.class);
+        ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
+        APISubscriptionDAO subscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
+        WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
+        APIGateway apiGateway = Mockito.mock(APIGateway.class);
         APIStore apiStore = getUserAwareAPIStore(applicationDAO, subscriptionDAO, workflowDAO, apiGateway);
         Application applicationFromDAO = SampleTestObjectCreator.createDefaultApplication();
         applicationFromDAO.setId(UUID);
@@ -91,8 +90,8 @@ public class UserAwareAPIStoreTestCase {
 
     @Test(description = "Try delete null application", expectedExceptions = APIMgtResourceNotFoundException.class)
     public void testDeleteApplicationNull() throws APIManagementException {
-        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        APIGateway apiGateway = mock(APIGateway.class);
+        ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
+        APIGateway apiGateway = Mockito.mock(APIGateway.class);
         APIStore apiStore = getUserAwareAPIStore(applicationDAO, apiGateway);
         apiStore.deleteApplication(UUID);
     }
@@ -100,7 +99,7 @@ public class UserAwareAPIStoreTestCase {
     @Test(description = "Try delete application by anonymous or different user",
             expectedExceptions = APIMgtResourceNotFoundException.class)
     public void testDeleteApplicationAnonymousUser() throws APIManagementException {
-        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
         APIStore apiStore = getUserAwareAPIStore(applicationDAO);
         Application applicationFromDAO = new Application(APP_NAME, null);
         applicationFromDAO.setCreatedUser(ANONYMOUS_USER);
@@ -110,10 +109,10 @@ public class UserAwareAPIStoreTestCase {
 
     @Test(description = "Update application")
     public void testUpdateApplication() throws APIManagementException {
-        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
-        WorkflowDAO workflowDAO = mock(WorkflowDAO.class);
-        APIGateway apiGateway = mock(APIGateway.class);
-        PolicyDAO policyDAO = mock(PolicyDAO.class);
+        ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
+        WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
+        APIGateway apiGateway = Mockito.mock(APIGateway.class);
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
         APIStore apiStore = getUserAwareAPIStore(applicationDAO, workflowDAO, apiGateway, policyDAO);
         ApplicationPolicy applicationPolicy = new ApplicationPolicy(UUID, "UNLIMITED");
         Application applicationFromDAO = new Application(APP_NAME, null);
@@ -130,7 +129,7 @@ public class UserAwareAPIStoreTestCase {
 
     @Test(description = "Try update null application", expectedExceptions = APIMgtResourceNotFoundException.class)
     public void testUpdateApplicationNull() throws APIManagementException {
-        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
         APIStore apiStore = getUserAwareAPIStore(applicationDAO);
         apiStore.updateApplication(UUID, null);
     }
@@ -138,7 +137,7 @@ public class UserAwareAPIStoreTestCase {
     @Test(description = "Try update application by anonymous or different user",
             expectedExceptions = APIMgtResourceNotFoundException.class)
     public void testUpdateApplicationAnonymousUser() throws APIManagementException {
-        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
         APIStore apiStore = getUserAwareAPIStore(applicationDAO);
         Application applicationFromDAO = new Application(APP_NAME, null);
         applicationFromDAO.setCreatedUser(ANONYMOUS_USER);
@@ -153,7 +152,7 @@ public class UserAwareAPIStoreTestCase {
 
     @Test(description = "Exception when deleting application", expectedExceptions = APIMgtDAOException.class)
     public void testDeleteApplicationException() throws APIManagementException {
-        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
         APIStore apiStore = getUserAwareAPIStore(applicationDAO);
         Application applicationFromDAO = new Application(APP_NAME, null);
         applicationFromDAO.setCreatedUser(USER_NAME);
@@ -164,7 +163,7 @@ public class UserAwareAPIStoreTestCase {
 
     @Test(description = "Exception when updating application", expectedExceptions = APIMgtDAOException.class)
     public void testUpdateApplicationException() throws APIManagementException {
-        ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
+        ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
         APIStore apiStore = getUserAwareAPIStore(applicationDAO);
         Application applicationFromDAO = new Application(APP_NAME, null);
         Application newApplication = new Application("NEW_APP", null);

@@ -1,13 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +32,17 @@ import org.wso2.carbon.apimgt.rest.api.store.mappings.CommentMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.DocumentationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.RatingMappingUtil;
 import org.wso2.msf4j.Request;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
         "2016-11-01T13:48:55.078+05:30")
@@ -757,6 +760,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      *
      * @param limit       maximum number of APIs returns
      * @param offset      starting index
+     * @param labels      Labels of the store for which the apis need to be retrieved
      * @param query       search condition
      * @param accept      Accept header value
      * @param ifNoneMatch If-None-Match header value
@@ -764,14 +768,18 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return matched APIs for the given search condition
      */
     @Override
-    public Response apisGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch,
-                            Request request) throws NotFoundException {
+    public Response apisGet(Integer limit, Integer offset, String labels, String query, String accept, String
+            ifNoneMatch, Request request) throws NotFoundException {
         List<API> apisResult = null;
         APIListDTO apiListDTO = null;
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIStore apiStore = RestApiUtil.getConsumer(username);
-            apisResult = apiStore.searchAPIs(query, offset, limit);
+            List<String> labelList = new ArrayList<>();
+            if(labels != null){
+                labelList = Arrays.asList(labels.split(","));
+            }
+            apisResult = apiStore.searchAPIsByStoreLabels(query, offset, limit, labelList);
             // convert API
             apiListDTO = APIMappingUtil.toAPIListDTO(apisResult);
         } catch (APIManagementException e) {

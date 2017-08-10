@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.core.models;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -42,7 +43,7 @@ public class CompositeAPI {
     private final String description;
     private final String gatewayConfig;
     private final Set<String> transport;
-    private final Set<String> labels;
+    private final List<String> labels;
     private final String applicationId;
     private final LocalDateTime createdTime;
     private final String createdBy;
@@ -111,7 +112,7 @@ public class CompositeAPI {
         return transport;
     }
 
-    public Set<String> getLabels() {
+    public List<String> getLabels() {
         return labels;
     }
 
@@ -209,7 +210,7 @@ public class CompositeAPI {
         private String description;
         private String gatewayConfig;
         private Set<String> transport;
-        private Set<String> labels;
+        private List<String> labels;
         private String applicationId;
         private LocalDateTime createdTime;
         private String createdBy;
@@ -346,7 +347,7 @@ public class CompositeAPI {
          * @param labels the {@code labels} to set
          * @return a reference to this Builder
          */
-        public Builder labels(Set<String> labels) {
+        public Builder labels(List<String> labels) {
             this.labels = labels;
             return this;
         }
@@ -524,7 +525,7 @@ public class CompositeAPI {
             return transport;
         }
 
-        public Set<String> getLabels() {
+        public List<String> getLabels() {
             return labels;
         }
 

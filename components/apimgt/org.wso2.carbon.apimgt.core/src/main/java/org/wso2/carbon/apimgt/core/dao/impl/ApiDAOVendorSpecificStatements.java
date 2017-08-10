@@ -46,6 +46,8 @@ public interface ApiDAOVendorSpecificStatements {
      */
     String getApiSearchQuery(int roleCount);
 
+    String  getApiSearchByStoreLabelsQuery(int roleCount, int labelCount);
+
     /**
      * Returns the query string to be used for the attribute search query. This is required to construct the
      * PreparedStatement which will be created externally

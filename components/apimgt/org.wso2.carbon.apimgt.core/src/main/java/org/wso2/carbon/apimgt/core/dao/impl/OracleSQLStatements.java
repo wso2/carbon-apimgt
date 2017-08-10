@@ -251,4 +251,17 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
         }
 
     }
+
+    @Override
+    public String  getApiSearchByStoreLabelsQuery(int roleCount, int labelCount) {
+        return API_SUMMARY_SELECT +
+                " INNER JOIN AM_API_LABEL_MAPPING LM ON API.UUID=LM.API_ID" +
+                " WHERE LM.LABEL_ID IN ( SELECT LABEL_ID FROM AM_LABELS WHERE LABEL_NAME IN (" +
+                DAOUtil.getParameterString(labelCount) + ")" +
+                " LEFT JOIN FTL_SEARCH_DATA (?, 0, 0) FT ON API.UUID=FT.KEYS[0]" +
+                " WHERE API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
+                " AND ((`GROUP_ID` IN (" + DAOUtil.getParameterString(roleCount) + ")) OR (PROVIDER = ?))" +
+                " AND FT.TABLE='AM_API'" +
+                " GROUP BY UUID ORDER BY NAME OFFSET ? LIMIT ?";
+    }
 }

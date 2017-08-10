@@ -2,9 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -26,6 +25,9 @@ public class LabelDTO   {
     this.labelId = labelId;
     return this;
   }
+
+  @JsonProperty("labelTypeName")
+  private String labelTypeName = null;
 
    /**
    * Get labelId
@@ -81,6 +83,20 @@ public class LabelDTO   {
     this.accessUrls = accessUrls;
   }
 
+  public LabelDTO labelTypeName(String labelTypeName) {
+    this.labelTypeName = labelTypeName;
+    return this;
+  }
+
+  /**
+   * the  type of the label example: \"Gateway\"
+   * @return labelTypeName
+   **/
+  @ApiModelProperty(required = true, value = "the  type of the label example: \"Gateway\" ")
+  public String getLabelTypeName() {
+    return labelTypeName;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -93,12 +109,13 @@ public class LabelDTO   {
     LabelDTO label = (LabelDTO) o;
     return Objects.equals(this.labelId, label.labelId) &&
         Objects.equals(this.name, label.name) &&
+        Objects.equals(this.labelTypeName, label.labelTypeName) &&
         Objects.equals(this.accessUrls, label.accessUrls);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(labelId, name, accessUrls);
+    return Objects.hash(labelId, name, labelTypeName, accessUrls);
   }
 
   @Override
@@ -108,6 +125,7 @@ public class LabelDTO   {
     
     sb.append("    labelId: ").append(toIndentedString(labelId)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    type: ").append(toIndentedString(labelTypeName)).append("\n");
     sb.append("    accessUrls: ").append(toIndentedString(accessUrls)).append("\n");
     sb.append("}");
     return sb.toString();

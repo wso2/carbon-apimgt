@@ -13,8 +13,8 @@ import java.util.Objects;
  * ThrottlePolicyDTO
  */
 public class ThrottlePolicyDTO   {
-  @JsonProperty("policyId")
-  private String policyId = null;
+  @JsonProperty("id")
+  private String id = null;
 
   @JsonProperty("policyName")
   private String policyName = null;
@@ -31,22 +31,22 @@ public class ThrottlePolicyDTO   {
   @JsonProperty("type")
   private String type = null;
 
-  public ThrottlePolicyDTO policyId(String policyId) {
-    this.policyId = policyId;
+  public ThrottlePolicyDTO id(String id) {
+    this.id = id;
     return this;
   }
 
    /**
-   * Get policyId
-   * @return policyId
+   * Get id
+   * @return id
   **/
   @ApiModelProperty(value = "")
-  public String getPolicyId() {
-    return policyId;
+  public String getId() {
+    return id;
   }
 
-  public void setPolicyId(String policyId) {
-    this.policyId = policyId;
+  public void setId(String id) {
+    this.id = id;
   }
 
   public ThrottlePolicyDTO policyName(String policyName) {
@@ -149,7 +149,7 @@ public class ThrottlePolicyDTO   {
       return false;
     }
     ThrottlePolicyDTO throttlePolicy = (ThrottlePolicyDTO) o;
-    return Objects.equals(this.policyId, throttlePolicy.policyId) &&
+    return Objects.equals(this.id, throttlePolicy.id) &&
         Objects.equals(this.policyName, throttlePolicy.policyName) &&
         Objects.equals(this.displayName, throttlePolicy.displayName) &&
         Objects.equals(this.description, throttlePolicy.description) &&
@@ -159,7 +159,7 @@ public class ThrottlePolicyDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(policyId, policyName, displayName, description, isDeployed, type);
+    return Objects.hash(id, policyName, displayName, description, isDeployed, type);
   }
 
   @Override
@@ -167,7 +167,7 @@ public class ThrottlePolicyDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class ThrottlePolicyDTO {\n");
     
-    sb.append("    policyId: ").append(toIndentedString(policyId)).append("\n");
+    sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    policyName: ").append(toIndentedString(policyName)).append("\n");
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");

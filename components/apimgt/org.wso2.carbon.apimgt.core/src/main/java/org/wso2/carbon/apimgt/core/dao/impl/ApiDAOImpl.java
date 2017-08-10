@@ -303,11 +303,11 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     /**
-     * @see ApiDAO#getAPIsByStatus(Set, List)
+     * @see ApiDAO#getAPIsByStatus(Set, List, List)
      */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<API> getAPIsByStatus(Set<String> roles, List<String> statuses)
+    public List<API> getAPIsByStatus(Set<String> roles, List<String> statuses, List<String> labels)
             throws APIMgtDAOException {
         //check for null at the beginning before constructing the query to retrieve APIs from database
         if (roles == null || statuses == null) {
@@ -318,7 +318,15 @@ public class ApiDAOImpl implements ApiDAO {
         //the below query will be used to retrieve the union of,
         //published/prototyped APIs (statuses) with public visibility and
         //published/prototyped APIs with restricted visibility where APIs are restricted based on roles of the user
-        final String query = API_SUMMARY_SELECT + " WHERE " +
+        String labelQuery = null;
+      if (labels.isEmpty()) {
+          labelQuery =   "SELECT LABEL_ID FROM  AM_LABELS WHERE TYPE_NAME='STORE'";
+      } else {
+          labelQuery =   "SELECT LABEL_ID FROM  AM_LABELS WHERE NAME IN ( " +
+                  DAOUtil.getParameterString(labels.size())  + ") AND TYPE_NAME='STORE'";
+      }
+        final String query = "Select UUID, PROVIDER, NAME, CONTEXT, VERSION, DESCRIPTION, CURRENT_LC_STATUS, " +
+                "LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS  FROM (" + API_SUMMARY_SELECT + " WHERE " +
                 "VISIBILITY = '" + API.Visibility.PUBLIC + "' " +
                 "AND " +
                 "CURRENT_LC_STATUS  IN (" + DAOUtil.getParameterString(statuses.size()) + ") AND " +
@@ -330,9 +338,9 @@ public class ApiDAOImpl implements ApiDAO {
                 "AND " +
                 "UUID IN (SELECT API_ID FROM AM_API_VISIBLE_ROLES WHERE ROLE IN " +
                 "(" + DAOUtil.getParameterString(roles.size()) + ")) " +
-                "AND " + "CURRENT_LC_STATUS  IN (" +
-                DAOUtil.getParameterString(statuses.size()) + ") AND " +
-                "API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)";
+                " AND CURRENT_LC_STATUS  IN (" + DAOUtil.getParameterString(statuses.size()) + ") AND " +
+                " API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)) A" +
+                " JOIN AM_API_LABEL_MAPPING LM ON A.UUID=LM.API_ID WHERE LM.LABEL_ID IN (" + labelQuery + ")";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -354,6 +362,10 @@ public class ApiDAOImpl implements ApiDAO {
             }
 
             statement.setString(++i, ApiType.STANDARD.toString());
+            //Set the label names in the query
+            for (String label : labels) {
+                statement.setString(++i, label);
+            }
 
             return constructAPISummaryList(connection, statement);
         } catch (SQLException e) {
@@ -383,65 +395,13 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    @Override
-    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<CompositeAPI> searchCompositeAPIs(Set<String> roles, String user, String searchString,
-                                                  int offset, int limit) throws APIMgtDAOException {
-        final String query = sqlStatements.getApiSearchQuery(roles.size());
-        try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-            sqlStatements.setApiSearchStatement(statement, roles, user, searchString,
-                    ApiType.COMPOSITE, offset, limit);
-
-            return getCompositeAPISummaryList(connection, statement);
-        } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
-        }
-    }
-
     /**
-     * @see ApiDAO#attributeSearchAPIs(Set, String, Map, int, int)
+     * @see ApiDAO#searchAPIsByAttributeInStore(List roles, List labels, Map attributeMap, int offset, int limit)
      */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<API> attributeSearchAPIs(Set<String> roles, String user, Map<String, String> attributeMap,
-                                         int offset, int limit) throws APIMgtDAOException {
-        final String query = sqlStatements.getApiAttributeSearchQuery(attributeMap, roles.size());
-        try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-
-            DatabaseMetaData md = connection.getMetaData();
-            Iterator<Map.Entry<String, String>> entries = attributeMap.entrySet().iterator();
-            while (entries.hasNext()) {
-                Map.Entry<String, String> entry = entries.next();
-                String tableName = connection.getMetaData().getDriverName().contains("PostgreSQL") ?
-                        AM_API_TABLE_NAME.toLowerCase(Locale.ENGLISH) :
-                        AM_API_TABLE_NAME;
-                String columnName = connection.getMetaData().getDriverName().contains("PostgreSQL") ?
-                        entry.getKey().toLowerCase(Locale.ENGLISH) :
-                        entry.getKey().toUpperCase(Locale.ENGLISH);
-                if (!checkTableColumnExists(md, tableName, columnName)) {
-                    throw new APIMgtDAOException(
-                            "Wrong search attribute. Attribute does not exist with name : " + entry.getKey());
-                }
-            }
-
-            sqlStatements.setApiAttributeSearchStatement(statement, roles, user, attributeMap,
-                    ApiType.STANDARD, offset, limit);
-
-            return constructAPISummaryList(connection, statement);
-
-        } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
-        }
-    }
-
-    /**
-     * @see ApiDAO#searchAPIsByAttributeInStore(List roles, Map attributeMap, int offset, int limit)
-     */
-    @Override
-    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<API> searchAPIsByAttributeInStore(List<String> roles, Map<String, String> attributeMap,
+    public List<API> searchAPIsByAttributeInStore(List<String> roles, List<String> labels, Map<String, String>
+            attributeMap,
                                                   int offset, int limit) throws APIMgtDAOException {
 
         try (Connection connection = DAOUtil.getConnection();
@@ -496,6 +456,79 @@ public class ApiDAOImpl implements ApiDAO {
             throw new APIMgtDAOException(errorMsg, e);
         }
     }
+
+    /**
+     * @see ApiDAO#searchAPIsByStoreLabel(Set, String, String, int, int, List)
+     */
+    @Override
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
+    public List<API> searchAPIsByStoreLabel(Set<String> roles, String user, String searchString,
+                                            int offset, int limit, List<String> labels) throws APIMgtDAOException {
+        final String query = sqlStatements.getApiSearchByStoreLabelsQuery(roles.size(), labels.size());
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            sqlStatements.setApiSearchStatement(statement, roles, user, searchString,
+                    ApiType.STANDARD, offset, limit);
+
+            return constructAPISummaryList(connection, statement);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    @Override
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
+    public List<CompositeAPI> searchCompositeAPIs(Set<String> roles, String user, String searchString,
+                                                  int offset, int limit) throws APIMgtDAOException {
+        final String query = sqlStatements.getApiSearchQuery(roles.size());
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            sqlStatements.setApiSearchStatement(statement, roles, user, searchString,
+                    ApiType.COMPOSITE, offset, limit);
+
+            return getCompositeAPISummaryList(connection, statement);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    /**
+     * @see ApiDAO#attributeSearchAPIs(Set, String, Map, int, int)
+     */
+    @Override
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
+    public List<API> attributeSearchAPIs(Set<String> roles, String user, Map<String, String>
+            attributeMap, int offset, int limit) throws APIMgtDAOException {
+        final String query = sqlStatements.getApiAttributeSearchQuery(attributeMap, roles.size());
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            DatabaseMetaData md = connection.getMetaData();
+            Iterator<Map.Entry<String, String>> entries = attributeMap.entrySet().iterator();
+            while (entries.hasNext()) {
+                Map.Entry<String, String> entry = entries.next();
+                String tableName = connection.getMetaData().getDriverName().contains("PostgreSQL") ?
+                        AM_API_TABLE_NAME.toLowerCase(Locale.ENGLISH) :
+                        AM_API_TABLE_NAME;
+                String columnName = connection.getMetaData().getDriverName().contains("PostgreSQL") ?
+                        entry.getKey().toLowerCase(Locale.ENGLISH) :
+                        entry.getKey().toUpperCase(Locale.ENGLISH);
+                if (!checkTableColumnExists(md, tableName, columnName)) {
+                    throw new APIMgtDAOException(
+                            "Wrong search attribute. Attribute does not exist with name : " + entry.getKey());
+                }
+            }
+
+            sqlStatements.setApiAttributeSearchStatement(statement, roles, user, attributeMap,
+                    ApiType.STANDARD, offset, limit);
+
+            return constructAPISummaryList(connection, statement);
+
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
 
     /**
      * @see ApiDAO#isAPINameExists(String, String)
@@ -611,7 +644,7 @@ public class ApiDAOImpl implements ApiDAO {
      * @throws SQLException if error occurs while accessing data layer
      */
     private void addAPIRelatedInformation(Connection connection, PreparedStatement statement, final API api)
-            throws SQLException {
+            throws SQLException, org.wso2.carbon.apimgt.core.exception.APIMgtDAOException {
         String apiPrimaryKey = api.getId();
         statement.setString(1, api.getProvider());
         statement.setString(2, api.getName());
@@ -682,7 +715,8 @@ public class ApiDAOImpl implements ApiDAO {
      * @throws SQLException if error occurs while accessing data layer
      */
     private void addCompositeAPIRelatedInformation(Connection connection, PreparedStatement statement,
-                                                   final CompositeAPI api) throws SQLException {
+                                                   final CompositeAPI api)
+            throws SQLException , org.wso2.carbon.apimgt.core.exception.APIMgtDAOException {
         String apiPrimaryKey = api.getId();
         statement.setString(1, api.getProvider());
         statement.setString(2, api.getName());
@@ -861,8 +895,9 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     private void deleteAPIRelatedInformation(Connection connection, PreparedStatement statement, String apiID)
-            throws IOException, SQLException {
+    throws IOException, SQLException {
         deleteEndPointsForOperation(connection, apiID);
+        deleteLabelsMapping(connection, apiID);
         deleteUrlMappings(connection, apiID);
         deleteEndPointsForApi(connection, apiID);
         statement.setString(1, apiID);
@@ -1425,6 +1460,7 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
+
     @Override
     public double getAverageRating(String apiId) throws APIMgtDAOException {
         final String query = "SELECT AVG(RATING) FROM AM_API_RATINGS WHERE API_ID = ?";
@@ -1823,7 +1859,7 @@ public class ApiDAOImpl implements ApiDAO {
                         isResponseCachingEnabled(rs.getBoolean("IS_RESPONSE_CACHED")).
                         cacheTimeout(rs.getInt("CACHE_TIMEOUT")).
                         tags(getTags(connection, apiPrimaryKey)).
-                        labels(getLabelNames(connection, apiPrimaryKey)).
+                        labels(getLabelIdsForAPI(connection, apiPrimaryKey)).
                         wsdlUri(ApiResourceDAO.getTextValueForCategory(connection, apiPrimaryKey, ResourceCategory
                                 .WSDL_URI)).
                         transport(getTransports(connection, apiPrimaryKey)).
@@ -1885,7 +1921,7 @@ public class ApiDAOImpl implements ApiDAO {
                         version(rs.getString("VERSION")).
                         context(rs.getString("CONTEXT")).
                         description(rs.getString("DESCRIPTION")).
-                        labels(getLabelNames(connection, apiPrimaryKey)).
+                        labels(getLabelIdsForAPI(connection, apiPrimaryKey)).
                         transport(getTransports(connection, apiPrimaryKey)).
                         applicationId(getCompositeAPIApplicationId(connection, apiPrimaryKey)).
                         createdBy(rs.getString("CREATED_BY")).
@@ -2521,10 +2557,11 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     public List<API> getAPIsByGatewayLabel(List<String> gatewayLabels) throws APIMgtDAOException {
+
         final String query = "SELECT DISTINCT UUID, PROVIDER, A.NAME, CONTEXT, VERSION, DESCRIPTION, CURRENT_LC_STATUS,"
                 + " LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS FROM AM_API A INNER JOIN AM_API_LABEL_MAPPING M ON A.UUID"
-                + " = M.API_ID INNER JOIN AM_LABELS L ON L.LABEL_ID = M.LABEL_ID WHERE L.NAME IN (" + DAOUtil
-                .getParameterString(gatewayLabels.size()) + ")";
+                + " = M.API_ID INNER JOIN AM_LABELS L ON L.LABEL_ID = M.LABEL_ID WHERE L.TYPE_NAME = 'GATEWAY' AND" +
+                " L.NAME IN (" + DAOUtil.getParameterString(gatewayLabels.size()) + ")";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -2915,15 +2952,15 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    private void addLabelMapping(Connection connection, String apiID, Set<String> labels) throws SQLException {
-
+    private void addLabelMapping(Connection connection, String apiID, java.util.List<String> labels)
+            throws SQLException, org.wso2.carbon.apimgt.core.exception.APIMgtDAOException {
         if (labels != null && !labels.isEmpty()) {
             final String query = "INSERT INTO AM_API_LABEL_MAPPING (API_ID, LABEL_ID) VALUES (?,?)";
 
             try (PreparedStatement statement = connection.prepareStatement(query)) {
-                for (String label : labels) {
+                for (String labelID : labels) {
                     statement.setString(1, apiID);
-                    statement.setString(2, LabelDAOImpl.getLabelID(label));
+                    statement.setString(2, new LabelDAOImpl().getLabelByID(labelID).getId());
                     statement.addBatch();
                 }
                 statement.executeBatch();
@@ -2939,8 +2976,8 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
-    private Set<String> getLabelNames(Connection connection, String apiID) throws SQLException {
-        Set<String> labelNames = new HashSet<>();
+    private java.util.List<String> getLabelIdsForAPI(Connection connection, String apiID) throws SQLException {
+        java.util.List<String> labelIDs = new java.util.ArrayList<>();
 
         final String query = "SELECT LABEL_ID FROM AM_API_LABEL_MAPPING WHERE API_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -2948,19 +2985,14 @@ public class ApiDAOImpl implements ApiDAO {
             statement.execute();
 
             try (ResultSet rs = statement.getResultSet()) {
-                List<String> labelIDs = new ArrayList<>();
 
                 while (rs.next()) {
                     labelIDs.add(rs.getString("LABEL_ID"));
                 }
-
-                if (!labelIDs.isEmpty()) {
-                    labelNames = LabelDAOImpl.getLabelNamesByIDs(labelIDs);
-                }
             }
         }
 
-        return labelNames;
+        return labelIDs;
     }
 
     private Set<String> getTransports(Connection connection, String apiID) throws SQLException {

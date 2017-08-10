@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.publisher.dto;
+package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,34 +12,37 @@ import java.util.Objects;
  * LabelDTO
  */
 public class LabelDTO   {
-  @JsonProperty("labelId")
-  private String labelId = null;
+  @JsonProperty("labelUUID")
+  private String labelUUID = null;
 
   @JsonProperty("name")
   private String name = null;
 
-  @JsonProperty("type")
-  private String type = null;
+  @JsonProperty("description")
+  private String description = null;
 
-  @JsonProperty("access_urls")
+  @JsonProperty("labelTypeName")
+  private String labelTypeName = null;
+
+  @JsonProperty("accessUrls")
   private List<String> accessUrls = new ArrayList<String>();
 
-  public LabelDTO labelId(String labelId) {
-    this.labelId = labelId;
+  public LabelDTO labelUUID(String labelUUID) {
+    this.labelUUID = labelUUID;
     return this;
   }
 
    /**
-   * Get labelId
-   * @return labelId
+   * Get labelUUID
+   * @return labelUUID
   **/
-  @ApiModelProperty(required = true, value = "")
-  public String getLabelId() {
-    return labelId;
+  @ApiModelProperty(value = "")
+  public String getLabelUUID() {
+    return labelUUID;
   }
 
-  public void setLabelId(String labelId) {
-    this.labelId = labelId;
+  public void setLabelUUID(String labelUUID) {
+    this.labelUUID = labelUUID;
   }
 
   public LabelDTO name(String name) {
@@ -51,7 +54,7 @@ public class LabelDTO   {
    * Get name
    * @return name
   **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(example = "Public", required = true, value = "")
   public String getName() {
     return name;
   }
@@ -60,22 +63,34 @@ public class LabelDTO   {
     this.name = name;
   }
 
-  public LabelDTO type(String type) {
-    this.type = type;
+  public LabelDTO description(String description) {
+    this.description = description;
     return this;
   }
 
    /**
-   * Get type
-   * @return type
+   * Get description
+   * @return description
   **/
-  @ApiModelProperty(required = true, value = "")
-  public String getType() {
-    return type;
+  @ApiModelProperty(example = "Label to use for public APIs", value = "")
+  public String getDescription() {
+    return description;
   }
 
-  public void setType(String type) {
-    this.type = type;
+  public void setDescription(String description) {
+    this.description = description;
+  }
+   /**
+   * the  type of the label example: \"Gateway\" 
+   * @return labelTypeName
+  **/
+  @ApiModelProperty(required = true, value = "the  type of the label example: \"Gateway\" ")
+  public String getLabelTypeName() {
+    return labelTypeName;
+  }
+
+  public void setLabelTypeName(String labelTypeName) {
+    this.labelTypeName = labelTypeName;
   }
 
   public LabelDTO accessUrls(List<String> accessUrls) {
@@ -92,7 +107,7 @@ public class LabelDTO   {
    * Get accessUrls
    * @return accessUrls
   **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(value = "")
   public List<String> getAccessUrls() {
     return accessUrls;
   }
@@ -111,15 +126,16 @@ public class LabelDTO   {
       return false;
     }
     LabelDTO label = (LabelDTO) o;
-    return Objects.equals(this.labelId, label.labelId) &&
+    return Objects.equals(this.labelUUID, label.labelUUID) &&
         Objects.equals(this.name, label.name) &&
-        Objects.equals(this.type, label.type) &&
+        Objects.equals(this.description, label.description) &&
+        Objects.equals(this.labelTypeName, label.labelTypeName) &&
         Objects.equals(this.accessUrls, label.accessUrls);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(labelId, name, type, accessUrls);
+    return Objects.hash(labelUUID, name, description, labelTypeName, accessUrls);
   }
 
   @Override
@@ -127,9 +143,10 @@ public class LabelDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class LabelDTO {\n");
     
-    sb.append("    labelId: ").append(toIndentedString(labelId)).append("\n");
+    sb.append("    labelUUID: ").append(toIndentedString(labelUUID)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    type: ").append(toIndentedString(type)).append("\n");
+    sb.append("    description: ").append(toIndentedString(description)).append("\n");
+    sb.append("    labelTypeName: ").append(toIndentedString(labelTypeName)).append("\n");
     sb.append("    accessUrls: ").append(toIndentedString(accessUrls)).append("\n");
     sb.append("}");
     return sb.toString();

@@ -33,7 +33,6 @@ import org.wso2.carbon.apimgt.core.models.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.core.models.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.core.models.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
-import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.BandwidthLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ConditionalGroupDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomAttributeDTO;
@@ -559,7 +558,7 @@ public class CommonThrottleMappingUtil {
     public static <T extends ThrottlePolicyDTO> T updateFieldsFromToPolicyToDTO(Policy policy, T dto)
             throws UnsupportedThrottleLimitTypeException {
 
-        dto.setPolicyId(policy.getUuid());
+        dto.setId(policy.getUuid());
         dto.setDisplayName(policy.getDisplayName());
         dto.setIsDeployed(policy.isDeployed());
         dto.setDescription(policy.getDescription());

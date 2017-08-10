@@ -5,7 +5,7 @@ import io.swagger.annotations.ApiParam;
 
 import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.LabelListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.factories.LabelInfoApiServiceFactory;
+import org.wso2.carbon.apimgt.rest.api.store.factories.LabelsApiServiceFactory;
 
 import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
@@ -31,17 +31,17 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 @Component(
-    name = "org.wso2.carbon.apimgt.rest.api.store.LabelInfoApi",
+    name = "org.wso2.carbon.apimgt.rest.api.store.LabelsApi",
     service = Microservice.class,
     immediate = true
 )
-@Path("/api/am/store/v1.[\\d]+/label-info")
+@Path("/api/am/store/v1.[\\d]+/labels")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
-@ApplicationPath("/label-info")
-@io.swagger.annotations.Api(description = "the label-info API")
-public class LabelInfoApi implements Microservice  {
-   private final LabelInfoApiService delegate = LabelInfoApiServiceFactory.getLabelInfoApi();
+@ApplicationPath("/labels")
+@io.swagger.annotations.Api(description = "the labels API")
+public class LabelsApi implements Microservice  {
+   private final LabelsApiService delegate = LabelsApiServiceFactory.getLabelsApi();
 
     @GET
     
@@ -54,12 +54,12 @@ public class LabelInfoApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = LabelListDTO.class),
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = LabelListDTO.class) })
-    public Response labelInfoGet(@ApiParam(value = "Defines comma separated list of labels ",required=true) @QueryParam("labels") String labels
+    public Response labelsGet(@ApiParam(value = "type of the label. ") @QueryParam("labelType") String labelType
 ,@ApiParam(value = "Media types acceptable for the response. Default is JSON. " , defaultValue="JSON")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
 , @Context Request request)
     throws NotFoundException {
-        return delegate.labelInfoGet(labels,accept,ifNoneMatch,ifModifiedSince, request);
+        return delegate.labelsGet(labelType,accept,ifNoneMatch,ifModifiedSince, request);
     }
 }

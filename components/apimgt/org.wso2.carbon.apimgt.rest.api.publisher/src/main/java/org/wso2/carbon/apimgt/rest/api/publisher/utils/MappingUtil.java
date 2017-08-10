@@ -79,6 +79,7 @@ public class MappingUtil {
      *
      * @param api API object
      * @return APIDTO object with provided API object
+     * @throws     IOException
      */
     public static APIDTO toAPIDto(API api) throws IOException {
         APIDTO apidto = new APIDTO();
@@ -159,6 +160,7 @@ public class MappingUtil {
      *
      * @param apidto APIDTO object with API data
      * @return APIBuilder object
+     * @throws JsonProcessingException
      */
     public static API.APIBuilder toAPI(APIDTO apidto) throws JsonProcessingException {
         BusinessInformation businessInformation = new BusinessInformation();
@@ -210,7 +212,7 @@ public class MappingUtil {
                 policies(subscriptionPolicies).
                 permission(apidto.getPermission()).
                 tags(new HashSet<>(apidto.getTags())).
-                labels(new HashSet<>(apidto.getLabels())).
+                labels(new ArrayList<>(apidto.getLabels())).
                 transport(new HashSet<>(apidto.getTransport())).
                 isResponseCachingEnabled(Boolean.valueOf(apidto.getResponseCaching())).
                 businessInformation(businessInformation).
@@ -396,6 +398,7 @@ public class MappingUtil {
      *
      * @param endpoint endpoint model instance
      * @return EndPointDTO instance containing endpoint data
+     * @throws IOException
      */
     public static EndPointDTO toEndPointDTO(Endpoint endpoint) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
@@ -419,6 +422,7 @@ public class MappingUtil {
      *
      * @param endPointDTO Contains data of a endpoint
      * @return Endpoint model instance containing endpoint data
+     * @throws JsonProcessingException
      */
     public static Endpoint toEndpoint(EndPointDTO endPointDTO) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
@@ -464,6 +468,7 @@ public class MappingUtil {
             LabelDTO labelDTO = new LabelDTO();
             labelDTO.setLabelId(label.getId());
             labelDTO.setName(label.getName());
+            labelDTO.setType(label.getType());
             labelDTO.setAccessUrls(label.getAccessUrls());
             labelDTOs.add(labelDTO);
         }

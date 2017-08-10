@@ -6,13 +6,20 @@ import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
-import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.CustomPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.admin.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.admin.PoliciesApiService;
-import org.wso2.carbon.apimgt.rest.api.admin.dto.*;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.AdvancedThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.AdvancedThrottlePolicyListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationThrottlePolicyListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomRuleDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomRuleListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.mappings.AdvancedThrottlePolicyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.mappings.ApplicationThrottlePolicyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.mappings.CustomPolicyMappingUtil;
@@ -21,10 +28,10 @@ import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.msf4j.Request;
 
-import javax.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.ws.rs.core.Response;
 
 public class PoliciesApiServiceImpl extends PoliciesApiService {
 
@@ -67,7 +74,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
      * @return Response object
      * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
-    @Override public Response policiesThrottlingAdvancedPolicyIdDelete(String policyId, String ifMatch,
+    @Override public Response policiesThrottlingAdvancedIdDelete(String policyId, String ifMatch,
             String ifUnmodifiedSince, Request request) throws NotFoundException {
         APIMgtAdminService.PolicyLevel tierLevel = APIMgtAdminService.PolicyLevel.api;
         if (log.isDebugEnabled()) {
@@ -85,7 +92,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
      * @return Response object
      * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
-    @Override public Response policiesThrottlingAdvancedPolicyIdGet(String policyId, String ifNoneMatch,
+    @Override public Response policiesThrottlingAdvancedIdGet(String policyId, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
         if (log.isDebugEnabled()) {
             log.info("Received Advanced Policy Get request. Policy uuid: " + policyId);
@@ -116,7 +123,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
      * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
     @Override
-    public Response policiesThrottlingAdvancedPolicyIdPut(String policyId, AdvancedThrottlePolicyDTO body,
+    public Response policiesThrottlingAdvancedIdPut(String policyId, AdvancedThrottlePolicyDTO body,
             String contentType, String ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
         APIMgtAdminService.PolicyLevel tierLevel = APIMgtAdminService.PolicyLevel.api;
         if (log.isDebugEnabled()) {
@@ -214,7 +221,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
      * @return Response object
      * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
-    @Override public Response policiesThrottlingApplicationPolicyIdDelete(String policyId, String ifMatch,
+    @Override public Response policiesThrottlingApplicationIdDelete(String policyId, String ifMatch,
             String ifUnmodifiedSince, Request request) throws NotFoundException {
 
         APIMgtAdminService.PolicyLevel tierLevel = APIMgtAdminService.PolicyLevel.application;
@@ -234,7 +241,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
      * @return Response object  Response with matching {@link ApplicationThrottlePolicyDTO} object
      * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
-    @Override public Response policiesThrottlingApplicationPolicyIdGet(String policyId, String ifNoneMatch,
+    @Override public Response policiesThrottlingApplicationIdGet(String policyId, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
 
         if (log.isDebugEnabled()) {
@@ -266,7 +273,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
      * @return Response object  response object with the updated application throttle policy resource
      * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
-    @Override public Response policiesThrottlingApplicationPolicyIdPut(String policyId,
+    @Override public Response policiesThrottlingApplicationIdPut(String policyId,
             ApplicationThrottlePolicyDTO body, String contentType, String ifMatch, String ifUnmodifiedSince,
             Request request) throws NotFoundException {
 
@@ -520,7 +527,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
      * @return Response object
      * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
-    @Override public Response policiesThrottlingSubscriptionPolicyIdDelete(String policyId, String ifMatch,
+    @Override public Response policiesThrottlingSubscriptionIdDelete(String policyId, String ifMatch,
             String ifUnmodifiedSince, Request request) throws NotFoundException {
         APIMgtAdminService.PolicyLevel tierLevel = APIMgtAdminService.PolicyLevel.subscription;
         if (log.isDebugEnabled()) {
@@ -538,7 +545,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
      * @return Response object
      * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
-    @Override public Response policiesThrottlingSubscriptionPolicyIdGet(String policyId, String ifNoneMatch,
+    @Override public Response policiesThrottlingSubscriptionIdGet(String policyId, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
         if (log.isDebugEnabled()) {
             log.info("Received Subscription Policy Get request. Policy uuid: " + policyId);
@@ -570,7 +577,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
      * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
     @Override
-    public Response policiesThrottlingSubscriptionPolicyIdPut(String policyId,
+    public Response policiesThrottlingSubscriptionIdPut(String policyId,
             SubscriptionThrottlePolicyDTO body, String contentType, String ifMatch, String ifUnmodifiedSince,
             Request request) throws NotFoundException {
         APIMgtAdminService.PolicyLevel tierLevel = APIMgtAdminService.PolicyLevel.subscription;

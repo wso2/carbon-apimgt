@@ -1,6 +1,5 @@
 package org.wso2.carbon.apimgt.core.dao.impl;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
@@ -13,11 +12,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -38,7 +34,7 @@ public class LabelDAOImpl implements LabelDAO {
     @Override
     public List<Label> getLabels() throws APIMgtDAOException {
 
-        final String query = "SELECT LABEL_ID, NAME FROM AM_LABELS";
+        final String query = "SELECT * FROM AM_LABELS";
 
         List<Label> labels = new ArrayList<>();
 
@@ -50,6 +46,7 @@ public class LabelDAOImpl implements LabelDAO {
                     Label label = new Label.Builder().
                             id(rs.getString("LABEL_ID")).
                             name(rs.getString("NAME")).
+                            type(rs.getString("TYPE_NAME")).
                             accessUrls(getLabelAccessUrls(rs.getString("LABEL_ID"))).build();
 
                     labels.add(label);
@@ -65,60 +62,117 @@ public class LabelDAOImpl implements LabelDAO {
     }
 
     /**
-     * @see LabelDAO#addLabels(List)
+     * Retrieve access urls of a label by label Id
+     *
+     * @param labelId Id of the label
+     * @return List of access urls of the label
+     * @throws APIMgtDAOException if error occurs while retrieving access urls
      */
-    @Override
-    public void addLabels(List<Label> labels) throws APIMgtDAOException {
+    private static List<String> getLabelAccessUrls(String labelId) throws APIMgtDAOException {
 
-        if (!labels.isEmpty()) {
+        final String query = "SELECT ACCESS_URL FROM AM_LABEL_ACCESS_URL_MAPPING WHERE LABEL_ID = ?";
+        List<String> accessUrls = new ArrayList<>();
 
-            final String query = "INSERT INTO AM_LABELS (LABEL_ID, NAME) VALUES (?,?)";
-            Map<String, List<String>> urlMap = new HashMap<>();
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, labelId);
 
-            try (Connection connection = DAOUtil.getConnection();
-                 PreparedStatement statement = connection.prepareStatement(query)) {
-
-                for (Label label : labels) {
-                    statement.setString(1, label.getId());
-                    statement.setString(2, label.getName());
-                    statement.addBatch();
-                    urlMap.put(label.getId(), label.getAccessUrls());
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    accessUrls.add(rs.getString("ACCESS_URL"));
                 }
-                statement.executeBatch();
-
-                if (!urlMap.isEmpty()) {
-                    for (Map.Entry<String, List<String>> entry : urlMap.entrySet()) {
-                        insertAccessUrlMappings(entry.getKey(), entry.getValue());
-                    }
-                }
-            } catch (SQLException e) {
-                String message = "Error while adding label data";
-                log.error(message, e);
-                throw new APIMgtDAOException(e);
             }
+        } catch (SQLException e) {
+            String message = "Error while retrieving access url for [label id] " + labelId;
+            log.error(message, e);
+            throw new APIMgtDAOException(e);
         }
+
+        return accessUrls;
     }
 
     /**
-     * Adds a single label
-     * 
-     * @param label label
-     * @throws APIMgtDAOException If error occurs while adding a label
+     * @see LabelDAO#getLabelByID(String)
      */
-    private static void addLabel(Label label) throws APIMgtDAOException {
-        final String query = "INSERT INTO AM_LABELS (LABEL_ID, NAME) VALUES (?,?)";
+    @Override
+    public Label getLabelByID(String labelID) throws APIMgtDAOException {
+
+        final String query = "SELECT LABEL_ID, NAME, TYPE_NAME FROM AM_LABELS WHERE LABEL_ID = ?";
+
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, labelID);
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return new Label.Builder().
+                            id(rs.getString("LABEL_ID")).
+                            name(rs.getString("NAME")).
+                            type(rs.getString("TYPE_NAME")).
+                            accessUrls(getLabelAccessUrls(rs.getString("LABEL_ID"))).build();
+                } else {
+                    return null;
+                }
+            }
+        } catch (SQLException e) {
+            String message = "Error while retrieving label [label ID] " + labelID;
+            log.error(message, e);
+            throw new APIMgtDAOException(e);
+        }
+
+    }
+
+    /**
+     * @see LabelDAO#getLabelIdByNameAndType(String, String)
+     */
+    @Override
+    public String getLabelIdByNameAndType(String name, String type) throws APIMgtDAOException {
+
+        final String query = "SELECT LABEL_ID FROM AM_LABELS WHERE NAME = ? AND TYPE_NAME = ?";
+
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+             statement.setString(1, name);
+             statement.setString(2, type);
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("LABEL_ID");
+                } else {
+                    return null;
+                }
+            }
+        } catch (SQLException e) {
+            String message = "Error while retrieving label ID of label [label Name] " + name;
+            log.error(message, e);
+            throw new APIMgtDAOException(e);
+        }
+
+    }
+
+    /**
+     * Add a new label
+     *
+     * @param label the label to ADD
+     * @return {@link Label} a label object with the newly added label ID
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    public static Label addLabel(Label label) throws APIMgtDAOException {
+        final String query = "INSERT INTO AM_LABELS (LABEL_ID, NAME, TYPE_NAME) VALUES (?,?,?)";
 
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
-            statement.setString(1, label.getId());
+            String labelId = UUID.randomUUID().toString();
+            statement.setString(1, labelId);
             statement.setString(2, label.getName());
+            statement.setString(3, label.getType().toUpperCase(Locale.ENGLISH));
             statement.executeUpdate();
 
             connection.commit();
             if (!label.getAccessUrls().isEmpty()) {
-                insertAccessUrlMappings(label.getId(), label.getAccessUrls());
+                insertAccessUrlMappings(labelId, label.getAccessUrls());
             }
+            return new Label.Builder().id(labelId).name(label.getName()).description(label.getDescription()).
+                    accessUrls(label.getAccessUrls()).type(label.getType()).build();
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
         }
@@ -161,159 +215,47 @@ public class LabelDAOImpl implements LabelDAO {
     }
 
     /**
-     * Retrieve access urls of a label by label Id
-     *
-     * @param labelId Id of the label
-     * @return List of access urls of the label
-     * @throws APIMgtDAOException if error occurs while retrieving access urls
-     */
-    private static List<String> getLabelAccessUrls(String labelId) throws APIMgtDAOException {
-
-        final String query = "SELECT ACCESS_URL FROM AM_LABEL_ACCESS_URL_MAPPING WHERE LABEL_ID = ?";
-        List<String> accessUrls = new ArrayList<>();
-
-        try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, labelId);
-
-            try (ResultSet rs = statement.executeQuery()) {
-                while (rs.next()) {
-                    accessUrls.add(rs.getString("ACCESS_URL"));
-                }
-            }
-        } catch (SQLException e) {
-            String message = "Error while retrieving access url for [label id] " + labelId;
-            log.error(message, e);
-            throw new APIMgtDAOException(e);
-        }
-
-        return accessUrls;
-    }
-
-    /**
-     * @see LabelDAO#getLabelByName(String)
+     * @see LabelDAO#updateLabel(Label)
      */
     @Override
-    public Label getLabelByName(String labelName) throws APIMgtDAOException {
-
-        final String query = "SELECT LABEL_ID, NAME FROM AM_LABELS WHERE NAME = ?";
-
+    public Label updateLabel(Label updatedLabel) throws APIMgtDAOException {
+        final String query = "UPDATE AM_LABELS SET NAME=? , TYPE_NAME=? WHERE LABEL_ID=?";
+        String labelId = updatedLabel.getId();
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, labelName);
-            try (ResultSet rs = statement.executeQuery()) {
-                if (rs.next()) {
-                    return new Label.Builder().
-                            id(rs.getString("LABEL_ID")).
-                            name(rs.getString("NAME")).
-                            accessUrls(getLabelAccessUrls(rs.getString("LABEL_ID"))).build();
-                } else {
-                    return null;
-                }
-            }
-        } catch (SQLException e) {
-            String message = "Error while retrieving label [label name] " + labelName;
-            log.error(message, e);
-            throw new APIMgtDAOException(e);
-        }
-
-    }
-
-    /**
-     * @see LabelDAO#getLabelsByName(List)
-     */
-    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    @Override
-    public List<Label> getLabelsByName(List<String> labelNames) throws APIMgtDAOException {
-
-        List<Label> matchingLabels = new ArrayList<>();
-
-        if (!labelNames.isEmpty()) {
-            final String query = "SELECT LABEL_ID, NAME FROM AM_LABELS WHERE NAME IN (" +
-                    DAOUtil.getParameterString(labelNames.size()) + ")";
-
-            try (Connection connection = DAOUtil.getConnection();
-                 PreparedStatement statement = connection.prepareStatement(query)) {
-
-                for (int i = 0; i < labelNames.size(); ++i) {
-                    statement.setString(i + 1, labelNames.get(i));
-                }
-
-                try (ResultSet rs = statement.executeQuery()) {
-                    while (rs.next()) {
-                        Label label = new Label.Builder().
-                                id(rs.getString("LABEL_ID")).
-                                name(rs.getString("NAME")).
-                                accessUrls(getLabelAccessUrls(rs.getString("LABEL_ID"))).build();
-
-                        matchingLabels.add(label);
-                    }
+            try {
+                 connection.setAutoCommit(false);
+                 statement.setString(1, updatedLabel.getName());
+                 if (updatedLabel.getType() != null) {
+                     statement.setString(2, updatedLabel.getType().toUpperCase(Locale.ENGLISH));
+                 } else {
+                     statement.setString(2, updatedLabel.getType());
+                 }
+                 statement.setString(3, updatedLabel.getId());
+                 statement.executeUpdate();
+                 connection.commit();
+                 deleteLabelAccessUrlMappings(labelId);
+                if ("GATEWAY".equalsIgnoreCase(updatedLabel.getType())) {
+                   insertAccessUrlMappings(labelId, updatedLabel.getAccessUrls());
                 }
             } catch (SQLException e) {
-                String message = "Error while retrieving labels";
+                connection.rollback();
+                String message = "Error while updating the label" +
+                        " [label id] " + labelId;
                 log.error(message, e);
                 throw new APIMgtDAOException(e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
+            return new Label.Builder().id(labelId).name(updatedLabel.getName()).
+                    description(updatedLabel.getDescription()).accessUrls(updatedLabel.getAccessUrls()).
+                    type(updatedLabel.getType()).build();
+        } catch (SQLException e) {
+            String message = "Error while updating the label [label ID] " + labelId;
+            log.error(message, e);
+            throw new APIMgtDAOException(e);
         }
 
-        return matchingLabels;
-    }
-
-    /**
-     * Retrieve label names by label ids
-     *
-     * @param labelIDs List of label ids
-     * @return List of label names
-     * @throws SQLException if error occurs while retrieving label names
-     */
-    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    static Set<String> getLabelNamesByIDs(List<String> labelIDs) throws SQLException {
-        Set<String> labelNames = new HashSet<>();
-
-        if (!labelIDs.isEmpty()) {
-            final String query = "SELECT NAME FROM AM_LABELS WHERE LABEL_ID IN (" +
-                    DAOUtil.getParameterString(labelIDs.size()) + ")";
-
-            try (Connection connection = DAOUtil.getConnection();
-                 PreparedStatement statement = connection.prepareStatement(query)) {
-
-                for (int i = 0; i < labelIDs.size(); ++i) {
-                    statement.setString(i + 1, labelIDs.get(i));
-                }
-
-                try (ResultSet rs = statement.executeQuery()) {
-                    while (rs.next()) {
-                        labelNames.add(rs.getString("NAME"));
-                    }
-                }
-            }
-        }
-        return labelNames;
-    }
-
-    /**
-     * Retrieve label id by label name
-     *
-     * @param labelName Name of the label
-     * @return Id of the label
-     * @throws SQLException if error occurs while retrieving label id
-     */
-    static String getLabelID(String labelName) throws SQLException {
-
-        final String query = "SELECT LABEL_ID from AM_LABELS where NAME=?";
-
-        try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, labelName);
-            statement.execute();
-
-            try (ResultSet rs = statement.getResultSet()) {
-                if (rs.next()) {
-                    return rs.getString("LABEL_ID");
-                }
-            }
-        }
-        throw new SQLException("Label " + labelName + ", does not exist");
     }
 
     /**
@@ -333,31 +275,14 @@ public class LabelDAOImpl implements LabelDAO {
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                String message = "Error while deleting the label [label id] " + labelId;
+                String message = "Error while deleting the label" +
+                        " [label id] " + labelId;
                 log.error(message, e);
                 throw new APIMgtDAOException(e);
             } finally {
                 connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
-        }
-
-    }
-
-    /**
-     * @see LabelDAO#updateLabel(Label)
-     */
-    @Override
-    public void updateLabel(Label updatedLabel) throws APIMgtDAOException {
-
-        try {
-            String labelId = getLabelID(updatedLabel.getName());
-            deleteLabelAccessUrlMappings(labelId);
-            insertAccessUrlMappings(labelId, updatedLabel.getAccessUrls());
-        } catch (SQLException e) {
-            String message = "Error while updating the label [label name] " + updatedLabel.getName();
-            log.error(message, e);
             throw new APIMgtDAOException(e);
         }
 
@@ -400,12 +325,22 @@ public class LabelDAOImpl implements LabelDAO {
      * @throws APIMgtDAOException If an error occurred while adding labels.
      */
     static void initDefaultLabels() throws APIMgtDAOException {
-        if (!isLabelsExists()) {
+        if (!isLabelsExists(APIMgtConstants.DEFAULT_LABEL_NAME, APIMgtConstants.LABEL_TYPE_GATEWAY)) {
             //Todo : default labels need to be configurable
             List<String> accessUrls = new ArrayList<>();
             Label.Builder labelBuilder = new Label.Builder();
-            labelBuilder.id(UUID.randomUUID().toString());
             labelBuilder.name(APIMgtConstants.DEFAULT_LABEL_NAME);
+            labelBuilder.type(APIMgtConstants.LABEL_TYPE_GATEWAY);
+            accessUrls.add(APIMgtConstants.DEFAULT_LABEL_ACCESS_URL);
+            labelBuilder.accessUrls(accessUrls);
+            addLabel(labelBuilder.build());
+        }
+        if (!isLabelsExists(APIMgtConstants.DEFAULT_LABEL_NAME, APIMgtConstants.LABEL_TYPE_STORE)) {
+            //Todo : default labels need to be configurable
+            List<String> accessUrls = new ArrayList<>();
+            Label.Builder labelBuilder = new Label.Builder();
+            labelBuilder.name(APIMgtConstants.DEFAULT_LABEL_NAME);
+            labelBuilder.type(APIMgtConstants.LABEL_TYPE_STORE);
             accessUrls.add(APIMgtConstants.DEFAULT_LABEL_ACCESS_URL);
             labelBuilder.accessUrls(accessUrls);
             addLabel(labelBuilder.build());
@@ -418,17 +353,46 @@ public class LabelDAOImpl implements LabelDAO {
      * @return true if there are any labels available in the system
      * @throws APIMgtDAOException If an error occurs while checking labels existence
      */
-    private static boolean isLabelsExists() throws APIMgtDAOException {
-        final String query = "SELECT 1 FROM AM_LABELS";
+    private static boolean isLabelsExists(String name, String type) throws APIMgtDAOException {
+        final String query = "SELECT * FROM AM_LABELS WHERE NAME=? AND TYPE_NAME=?";
         try (Connection connection = DAOUtil.getConnection();
-                PreparedStatement statement = connection.prepareStatement(query);
-                ResultSet rs = statement.executeQuery()) {
-            if (rs.next()) {
-                return true;
-            }
+                PreparedStatement statement = connection.prepareStatement(query)) {
+                statement.setString(1, name);
+                statement.setString(2, type);
+
+               try (ResultSet rs = statement.executeQuery()) {
+                   if (rs.next()) {
+                       return true;
+                   }
+               }
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
         }
         return false;
+    }
+
+
+    @Override
+    public List<Label> getLabelsByType(String type) throws APIMgtDAOException {
+        final String query = "SELECT LABEL_ID, NAME, TYPE_NAME FROM AM_LABELS WHERE TYPE_NAME = ?";
+        List<Label> labels = new ArrayList<>();
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1,  type.toUpperCase(Locale.ENGLISH));
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    labels.add(new Label.Builder().
+                            id(rs.getString("LABEL_ID")).
+                            name(rs.getString("NAME")).
+                            type(rs.getString("TYPE_NAME")).
+                            accessUrls(getLabelAccessUrls(rs.getString("LABEL_ID"))).build());
+                }
+            }
+            return  labels;
+        } catch (SQLException e) {
+            String message = "Error while retrieving label [label type] " + type;
+            log.error(message, e);
+            throw new APIMgtDAOException(e);
+        }
     }
 }

@@ -30,15 +30,15 @@ public abstract class PoliciesApiService {
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
-    public abstract Response policiesThrottlingAdvancedPolicyIdDelete(String policyId
+    public abstract Response policiesThrottlingAdvancedIdDelete(String id
  ,String ifMatch
  ,String ifUnmodifiedSince
  , Request request) throws NotFoundException;
-    public abstract Response policiesThrottlingAdvancedPolicyIdGet(String policyId
+    public abstract Response policiesThrottlingAdvancedIdGet(String id
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
-    public abstract Response policiesThrottlingAdvancedPolicyIdPut(String policyId
+    public abstract Response policiesThrottlingAdvancedIdPut(String id
  ,AdvancedThrottlePolicyDTO body
  ,String contentType
  ,String ifMatch
@@ -51,15 +51,15 @@ public abstract class PoliciesApiService {
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
-    public abstract Response policiesThrottlingApplicationPolicyIdDelete(String policyId
+    public abstract Response policiesThrottlingApplicationIdDelete(String id
  ,String ifMatch
  ,String ifUnmodifiedSince
  , Request request) throws NotFoundException;
-    public abstract Response policiesThrottlingApplicationPolicyIdGet(String policyId
+    public abstract Response policiesThrottlingApplicationIdGet(String id
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
-    public abstract Response policiesThrottlingApplicationPolicyIdPut(String policyId
+    public abstract Response policiesThrottlingApplicationIdPut(String id
  ,ApplicationThrottlePolicyDTO body
  ,String contentType
  ,String ifMatch
@@ -93,15 +93,15 @@ public abstract class PoliciesApiService {
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
-    public abstract Response policiesThrottlingSubscriptionPolicyIdDelete(String policyId
+    public abstract Response policiesThrottlingSubscriptionIdDelete(String id
  ,String ifMatch
  ,String ifUnmodifiedSince
  , Request request) throws NotFoundException;
-    public abstract Response policiesThrottlingSubscriptionPolicyIdGet(String policyId
+    public abstract Response policiesThrottlingSubscriptionIdGet(String id
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
-    public abstract Response policiesThrottlingSubscriptionPolicyIdPut(String policyId
+    public abstract Response policiesThrottlingSubscriptionIdPut(String id
  ,SubscriptionThrottlePolicyDTO body
  ,String contentType
  ,String ifMatch

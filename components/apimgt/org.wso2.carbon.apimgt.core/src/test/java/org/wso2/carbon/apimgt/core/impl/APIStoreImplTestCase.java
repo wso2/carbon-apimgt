@@ -23,7 +23,6 @@ package org.wso2.carbon.apimgt.core.impl;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -138,12 +137,27 @@ public class APIStoreImplTestCase {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIStore apiStore = getApiStoreImpl(apiDAO);
         List<API> apimResultsFromDAO = new ArrayList<>();
-        Mockito.when(apiDAO.searchAPIs(new HashSet<>(), "admin", "pizza",
-                1, 2)).thenReturn(apimResultsFromDAO);
-        List<API> apis = apiStore.searchAPIs("pizza", 1, 2);
+        Mockito.when(apiDAO.searchAPIsByStoreLabel(new HashSet<>(), "admin", "pizza",
+                1, 2, new ArrayList<>())).thenReturn(apimResultsFromDAO);
+        List<API> apis = apiStore.searchAPIsByStoreLabels("pizza", 1, 2, new ArrayList<>());
         Assert.assertNotNull(apis);
-        Mockito.verify(apiDAO, Mockito.atLeastOnce()).searchAPIs(APIUtils.getAllRolesOfUser("admin"),
-                "admin", "pizza", 1, 2);
+        Mockito.verify(apiDAO, Mockito.atLeastOnce()).searchAPIsByStoreLabel(APIUtils.getAllRolesOfUser("admin"),
+                "admin", "pizza", 1, 2, new ArrayList<>());
+    }
+
+    @Test(description = "Search APIs with labels")
+    public void searchAPIsByStoreLabels() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APIStore apiStore = getApiStoreImpl(apiDAO);
+        List<API> apimResultsFromDAO = new ArrayList<>();
+        List<String> labelList = new ArrayList<>();
+        labelList.add("Default");
+        Mockito.when(apiDAO.searchAPIsByStoreLabel(new HashSet<>(), "admin", "pizza",
+                1, 2, labelList)).thenReturn(apimResultsFromDAO);
+        List<API> apis = apiStore.searchAPIsByStoreLabels("pizza", 1, 2, labelList);
+        Assert.assertNotNull(apis);
+        Mockito.verify(apiDAO, Mockito.atLeastOnce()).searchAPIsByStoreLabel(APIUtils.getAllRolesOfUser("admin"),
+                "admin", "pizza", 1, 2, labelList);
     }
 
     @Test(description = "Search APIs with an empty query")
@@ -155,23 +169,67 @@ public class APIStoreImplTestCase {
         statuses.add(APIStatus.PUBLISHED.getStatus());
         statuses.add(APIStatus.PROTOTYPED.getStatus());
         Mockito.when(apiDAO.getAPIsByStatus(statuses)).thenReturn(apimResultsFromDAO);
-        List<API> apis = apiStore.searchAPIs("", 1, 2);
+        List<API> apis = apiStore.searchAPIsByStoreLabels("", 1, 2, new ArrayList<>());
         Assert.assertNotNull(apis);
-        Mockito.verify(apiDAO, Mockito.atLeastOnce()).getAPIsByStatus(APIUtils.getAllRolesOfUser("admin"),
-                statuses);
+        Mockito.verify(apiDAO, Mockito.atLeastOnce()).getAPIsByStatus(APIUtils
+                .getAllRolesOfUser("admin"), statuses, new ArrayList<String>());
     }
 
-    @Test(description = "Search API", expectedExceptions = APIManagementException.class)
-    public void searchAPIsWithException() throws Exception {
-        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
-        APIStore apiStore = getApiStoreImpl(apiDAO);
-        PowerMockito.mockStatic(APIUtils.class); // TODO
-        Mockito.when(apiDAO.searchAPIs(APIUtils.getAllRolesOfUser("admin"), "admin",
-                "select *", 1, 2)).thenThrow(APIMgtDAOException
-                .class);
-        //doThrow(new Exception()).when(APIUtils).logAndThrowException(null, null, null)).
-        apiStore.searchAPIs("select *", 1, 2);
+    @Test(description = "get all labels")
+    public void getAllLabels() throws Exception {
+        LabelDAO labelDao = Mockito.mock(LabelDAO.class);
+        APIStore apiStore = getApiStoreImpl(labelDao);
+        List<Label> labels = new ArrayList<>();
+        Label label = new Label.Builder().id("123").name("Default").type("STORE").accessUrls(new ArrayList<>()).build();
+        labels.add(label);
+        Mockito.when(labelDao.getLabels()).thenReturn(labels);
+        List<Label> returnedLabels = apiStore.getAllLabels();
+        Assert.assertNotNull(returnedLabels);
+        Mockito.verify(labelDao, Mockito.atLeastOnce()).getLabels();
     }
+
+    @Test(description = "get all labels Exception", expectedExceptions = Exception.class)
+    public void getAllLabelsException() throws Exception {
+        LabelDAO labelDao = Mockito.mock(LabelDAO.class);
+        APIStore apiStore = getApiStoreImpl();
+        List<Label> labels = new ArrayList<>();
+        Label label = new Label.Builder().id("123").name("Default").type("STORE").accessUrls(new ArrayList<>()).build();
+        labels.add(label);
+
+        Mockito.when(labelDao.getLabels()).thenReturn(labels);
+        Mockito.doThrow(new LabelException("Error occurred while retrieving labels ")).when(labelDao).getLabels();
+        apiStore.getAllLabels();
+    }
+
+    @Test(description = "get  labels by STORE type")
+    public void getLabelsByType() throws Exception {
+        LabelDAO labelDao = Mockito.mock(LabelDAO.class);
+        APIStore apiStore = getApiStoreImpl(labelDao);
+        List<Label> labels = new ArrayList<>();
+        Label label = new Label.Builder().id("123").name("Default").type("STORE").accessUrls(new ArrayList<>()).build();
+        labels.add(label);
+        Mockito.when(labelDao.getLabelsByType("STORE")).thenReturn(labels);
+        List<Label> returnedLabels = apiStore.getLabelsByType("STORE");
+        Assert.assertNotNull(returnedLabels);
+        Mockito.verify(labelDao, Mockito.atLeastOnce()).getLabelsByType("STORE");
+    }
+
+
+    @Test(description = "get labels by type Exception", expectedExceptions = Exception.class)
+    public void getLabelsByTypeException() throws Exception {
+        LabelDAO labelDao = Mockito.mock(LabelDAO.class);
+        APIStore apiStore = getApiStoreImpl();
+        List<Label> labels = new ArrayList<>();
+        Label label = new Label.Builder().id("123").name("Default").type("STORE").accessUrls(new ArrayList<>()).build();
+        labels.add(label);
+
+        Mockito.when(labelDao.getLabelsByType("STORE")).thenReturn(labels);
+        Mockito.doThrow(new LabelException("Error occurred while retrieving labels ")).when(labelDao).
+                getLabelsByType("STORE");
+        apiStore.getLabelsByType("STORE");
+    }
+
+
 
     @Test(description = "Retrieve an API by status")
     public void getAPIsByStatus() throws APIManagementException {
@@ -659,21 +717,6 @@ public class APIStoreImplTestCase {
                 POLICY_NAME);
     }
 
-    @Test(description = "Retrieve labels")
-    public void testGetLabelInfo() throws APIManagementException {
-        LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
-        APIStore apiStore = getApiStoreImpl(labelDAO);
-        List<Label> labelList = new ArrayList<>();
-        List<String> labelNames = new ArrayList<>();
-        Label label = SampleTestObjectCreator.createLabel("Public").build();
-        labelList.add(label);
-        labelNames.add(label.getName());
-        Mockito.when(labelDAO.getLabelsByName(labelNames)).thenReturn(labelList);
-        List<Label> returnedLabels = apiStore.getLabelInfo(labelNames, USER_NAME);
-        Assert.assertEquals(returnedLabels, labelList);
-        Mockito.verify(labelDAO, Mockito.times(1)).getLabelsByName(labelNames);
-    }
-
     @Test(description = "Add comment")
     public void testAddComment() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
@@ -1150,17 +1193,6 @@ public class APIStoreImplTestCase {
         Mockito.when(policyDAO.getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, TIER)).thenReturn
                 (policy);
         apiStore.addApplication(application);
-    }
-
-    @Test(description = "Exception when retrieving labels", expectedExceptions = LabelException.class)
-    public void testGetLabelInfoException() throws APIManagementException {
-        LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
-        APIStore apiStore = getApiStoreImpl(labelDAO);
-        List<String> labels = new ArrayList<>();
-        labels.add("label");
-        Mockito.when(labelDAO.getLabelsByName(labels))
-                .thenThrow(new APIMgtDAOException("Error occurred while retrieving label information"));
-        apiStore.getLabelInfo(labels, USER_NAME);
     }
 
     // End of exception testing

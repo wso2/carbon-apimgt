@@ -70,7 +70,8 @@ public class ApiImportExportManager {
      * @return {@link APIDetails} instance
      * @throws APIManagementException if an error occurs while retrieving API details
      */
-    public Set<APIDetails> getAPIDetails(Integer limit, Integer offset, String query) throws APIManagementException {
+    public Set<APIDetails> getAPIDetails(Integer limit, Integer offset, String query) throws
+            APIManagementException {
 
         Set<APIDetails> apiDetailSet = new HashSet<>();
         // search for APIs
