@@ -146,7 +146,7 @@ class Endpoint extends Component {
 
         if (prod.url === undefined) {
             prodJSON.key = prod;
-        } else {
+        } else if(prod.url != null) {
             let inline = {};
             inline.endpointConfig = JSON.stringify({serviceUrl: prod.url});
             inline.endpointSecurity = {enabled: false};
@@ -157,7 +157,7 @@ class Endpoint extends Component {
 
         if (sandbox.url === undefined) {
             sandboxJSON.key = sandbox;
-        } else {
+        } else if (sandbox.url != null ) {
             let inline = {};
             inline.endpointConfig = JSON.stringify({serviceUrl: sandbox.url});
             inline.endpointSecurity = {enabled: false};
