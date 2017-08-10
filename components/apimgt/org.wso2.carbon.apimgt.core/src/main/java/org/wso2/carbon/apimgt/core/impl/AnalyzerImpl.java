@@ -23,6 +23,8 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.AnalyticsException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.models.analytics.APICount;
+import org.wso2.carbon.apimgt.core.models.analytics.APIInfo;
 import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
 
 import java.util.List;
@@ -44,7 +46,7 @@ public class AnalyzerImpl implements Analyzer {
 
     @Override
     public List<ApplicationCount> getApplicationCount(String createdBy, String subscribedTo, String fromTime,
-            String toTime) throws APIManagementException {
+                                                      String toTime) throws APIManagementException {
         List<ApplicationCount> applicationCountList;
         try {
             applicationCountList = getAnalyticsDAO().getApplicationCount(createdBy, subscribedTo, fromTime, toTime);
@@ -53,6 +55,31 @@ public class AnalyzerImpl implements Analyzer {
             throw new AnalyticsException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return applicationCountList;
+    }
+
+    @Override
+    public List<APIInfo> getAPIInfo(String createdBy, String fromTime,
+                                    String toTime) throws APIManagementException {
+        List<APIInfo> apiInfoList;
+        try {
+            apiInfoList = getAnalyticsDAO().getAPIInfo(createdBy, fromTime, toTime);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while fetching API information";
+            throw new AnalyticsException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return apiInfoList;
+    }
+
+    @Override
+    public List<APICount> getAPICount(String createdBy, String fromTime, String toTime) throws APIManagementException {
+        List<APICount> apiCountList;
+        try {
+            apiCountList = getAnalyticsDAO().getAPICount(createdBy, fromTime, toTime);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while fetching API count information";
+            throw new AnalyticsException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return apiCountList;
     }
 
     public AnalyticsDAO getAnalyticsDAO() {

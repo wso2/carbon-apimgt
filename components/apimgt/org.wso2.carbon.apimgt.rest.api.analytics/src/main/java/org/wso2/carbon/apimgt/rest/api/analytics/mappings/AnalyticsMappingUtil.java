@@ -15,17 +15,26 @@
 */
 package org.wso2.carbon.apimgt.rest.api.analytics.mappings;
 
+import org.wso2.carbon.apimgt.core.models.analytics.APICount;
+import org.wso2.carbon.apimgt.core.models.analytics.APIInfo;
 import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
+import org.wso2.carbon.apimgt.rest.api.analytics.dto.APICountDTO;
+import org.wso2.carbon.apimgt.rest.api.analytics.dto.APICountListDTO;
+import org.wso2.carbon.apimgt.rest.api.analytics.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.analytics.dto.APIInfoListDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.ApplicationCountDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.ApplicationCountListDTO;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Mapping Utils for Analytics REST API.
+ */
 public class AnalyticsMappingUtil {
 
     /**
-     * Converts and ApplicationCountList to if failed to get admin api resource
+     * Converts and ApplicationCountList to ApplicationCountListDTO
      *
      * @param applicationCountList list of ApplicationCount objects
      * @return corresponding ApplicationCountListDTO object
@@ -42,12 +51,64 @@ public class AnalyticsMappingUtil {
         return applicationCountListDTO;
     }
 
+
+    /**
+     * Converts and APICountList to APICountDTO
+     *
+     * @param apiCountList list of APICount objects
+     * @return corresponding APICountListDTO object
+     */
+    public static APICountListDTO fromAPICountToListDTO(List<APICount> apiCountList) {
+        APICountListDTO apiCountListDTO = new APICountListDTO();
+        List<APICountDTO> apiCountDTOList = new ArrayList<>();
+        apiCountListDTO.setCount(apiCountList.size());
+        for (APICount apiInfo : apiCountList) {
+            apiCountDTOList.add(fromAPICountToDTO(apiInfo));
+        }
+        apiCountListDTO.setList(apiCountDTOList);
+        return apiCountListDTO;
+    }
+
+    /**
+     * Converts and APIInfoList to APIInfoListDTO
+     *
+     * @param apiInfoList list of ApiInfo objects
+     * @return corresponding APIInfoListDTO object
+     */
+    public static APIInfoListDTO fromAPIInfoToListDTO(List<APIInfo> apiInfoList) {
+        APIInfoListDTO apiInfoListDTO = new APIInfoListDTO();
+        List<APIInfoDTO> apiInfoDTOList = new ArrayList<>();
+        apiInfoListDTO.setCount(apiInfoList.size());
+        for (APIInfo apiInfo : apiInfoList) {
+            apiInfoDTOList.add(fromAPIInfoToDTO(apiInfo));
+        }
+        apiInfoListDTO.setList(apiInfoDTOList);
+        return apiInfoListDTO;
+    }
+
+    private static APIInfoDTO fromAPIInfoToDTO(APIInfo apiInfo) {
+        APIInfoDTO apiInfoDTO = new APIInfoDTO();
+        apiInfoDTO.setName(apiInfo.getName());
+        apiInfoDTO.setContext(apiInfo.getContext());
+        apiInfoDTO.setDescription(apiInfo.getDescription());
+        apiInfoDTO.setLifeCycleStatus(apiInfo.getLifeCycleStatus());
+        apiInfoDTO.setProvider(apiInfo.getProvider());
+        apiInfoDTO.setWorkflowStatus(apiInfo.getWorkflowStatus());
+        apiInfoDTO.setTime(apiInfo.getCreatedTime());
+        return apiInfoDTO;
+    }
+
+    private static APICountDTO fromAPICountToDTO(APICount apiCount) {
+        APICountDTO apiCountDTO = new APICountDTO();
+        apiCountDTO.setTime(apiCount.getTimestamp());
+        apiCountDTO.setCount(apiCount.getCount());
+        return apiCountDTO;
+    }
+
     private static ApplicationCountDTO fromApplicationCountToDTO(ApplicationCount applicationCount) {
         ApplicationCountDTO applicationCountDTO = new ApplicationCountDTO();
-
         applicationCountDTO.setTime(applicationCount.getTimestamp());
         applicationCountDTO.setCount(applicationCount.getCount());
-
         return applicationCountDTO;
     }
 }

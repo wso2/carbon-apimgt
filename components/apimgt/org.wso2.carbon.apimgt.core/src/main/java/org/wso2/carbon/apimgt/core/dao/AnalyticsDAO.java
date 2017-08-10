@@ -16,6 +16,8 @@
 package org.wso2.carbon.apimgt.core.dao;
 
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.models.analytics.APICount;
+import org.wso2.carbon.apimgt.core.models.analytics.APIInfo;
 import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
 
 import java.util.List;
@@ -25,6 +27,40 @@ import java.util.List;
  */
 public interface AnalyticsDAO {
 
+    /**
+     * Retrieves applications created overtime information.
+     *
+     * @param createdBy     Filter for create user
+     * @param subscribedTo  Filter for subscribed APIs
+     * @param fromTimestamp Filter for from timestamp
+     * @param toTimestamp   Filter for to timestamp
+     * @return valid {@link ApplicationCount} List or null
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
     List<ApplicationCount> getApplicationCount(String createdBy, String subscribedTo, String fromTimestamp,
-            String toTimestamp) throws APIMgtDAOException;
+                                               String toTimestamp) throws APIMgtDAOException;
+
+    /**
+     * Retrieves APIs created overtime information.
+     *
+     * @param createdBy     Filter for create user
+     * @param fromTimestamp Filter for from timestamp
+     * @param toTimestamp   Filter for to timestamp
+     * @return valid {@link APIInfo} List or null
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    List<APIInfo> getAPIInfo(String createdBy, String fromTimestamp,
+                             String toTimestamp) throws APIMgtDAOException;
+
+    /**
+     * Retrieves APIs created overtime information.
+     *
+     * @param createdBy     Filter for create user
+     * @param fromTimestamp Filter for from timestamp
+     * @param toTimestamp   Filter for to timestamp
+     * @return valid {@link APIInfo} List or null
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    List<APICount> getAPICount(String createdBy, String fromTimestamp,
+                               String toTimestamp) throws APIMgtDAOException;
 }
