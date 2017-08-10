@@ -127,8 +127,11 @@ class Resource extends React.Component{
             visible: false,
             method:this.props.methodData
         };
+        console.info(this.props);
         this.propsSubmitHandler = this.propsSubmitHandler.bind(this);
         this.saveFieldCallback = this.saveFieldCallback.bind(this);
+        this.toggleMethodData = this.toggleMethodData.bind(this);
+        this.deleteResource = this.deleteResource.bind(this);
     }
     propsSubmitHandler(values){
         const defaultParams = {
@@ -137,12 +140,7 @@ class Resource extends React.Component{
             required: "false",
             in: "body",
             schema: {
-                type: "object",
-                properties: {
-                    payload: {
-                        type: "string"
-                    }
-                }
+                type: "object"
             }
         };
         let tmpMethod = this.state.method;
@@ -171,28 +169,36 @@ class Resource extends React.Component{
         }
         this.props.updatePath(this.props.path,this.props.method,this.state.method);
     }
+    toggleMethodData(){
+        this.setState({visible: !this.state.visible});
+    }
+    deleteResource(){
+        /* We set null and call the update method of the Resources class */
+        this.props.updatePath(this.props.path,this.props.method,null);
+    }
     render(){
         return (
             <div>
                 <Row type="flex" justify="start" className="resource-head">
-                    <Col span={4}>
-                        <Tag color="#2db7f5">{this.props.method}</Tag>{this.props.path}
+                    <Col span={8}>
+                        <a onClick={this.toggleMethodData}> <Tag color="#2db7f5">{this.props.method}</Tag>{this.props.path}</a>
                     </Col>
                     <Col span={8}>Description</Col>
-                    <Col span={12} style={{textAlign:"right"}}><Icon type="delete" /> </Col>
+                    <Col span={8} style={{textAlign:"right", cursor:"pointer"}} onClick={this.deleteResource}><Icon type="delete" /> </Col>
                 </Row>
+                {this.state.visible ?
                 <Row type="flex" justify="start" className="resource-body">
-                    <Col span={4}>Description</Col>
+                    <Col span={4}><strong>Description</strong></Col>
                     <Col span={20}>
                         <InlineEditableField saveFieldCallback={this.saveFieldCallback} fieldValue={this.state.method.description} fieldName="description" />
                     </Col>
 
-                    <Col span={4}>Produces</Col>
+                    <Col span={4}><strong>Produces</strong></Col>
                     <Col span={20}>
                         <InlineEditableField saveFieldCallback={this.saveFieldCallback} fieldValue={this.state.method.produces} fieldName="produces" />
                     </Col>
 
-                    <Col span={4}>Consumes</Col>
+                    <Col span={4}><strong>Consumes</strong></Col>
                     <Col span={20}>
                         <InlineEditableField saveFieldCallback={this.saveFieldCallback} fieldValue={this.state.method.consumes} fieldName="consumes" />
                     </Col>
@@ -217,8 +223,9 @@ class Resource extends React.Component{
                                     return <tr>
                                         <td><InlineEditableField saveFieldCallback={this.saveFieldCallback} fieldIndex={i} fieldValue={param.name} fieldName="param.name" /></td>
                                         <td><InlineEditableField saveFieldCallback={this.saveFieldCallback} fieldIndex={i} fieldValue={param.description} fieldName="param.description" /></td>
-                                        <td><InlineEditableField saveFieldCallback={this.saveFieldCallback} fieldIndex={i} fieldValue={param.schema.type} fieldName="param.schema.type" /></td>
-                                        <td><InlineEditableField saveFieldCallback={this.saveFieldCallback} fieldIndex={i} fieldValue={param.schema.properties.payload.type} fieldName="param.schema.properties.payload.type" /></td>
+                                        <td></td><td></td>
+                                        {/*<td><InlineEditableField saveFieldCallback={this.saveFieldCallback} fieldIndex={i} fieldValue={param.schema.type} fieldName="param.schema.type" /></td>*/}
+                                        {/*<td><InlineEditableField saveFieldCallback={this.saveFieldCallback} fieldIndex={i} fieldValue={param.schema.properties.payload.type} fieldName="param.schema.properties.payload.type" /></td>*/}
                                         <td><InlineEditableField saveFieldCallback={this.saveFieldCallback} fieldIndex={i} fieldValue={param.required} fieldName="param.required" /></td>
                                         <td>
                                             <a><Icon type="delete" onClick={()=>this.deleteParam(i)} /></a>
@@ -231,7 +238,7 @@ class Resource extends React.Component{
                             </table>
                             : ''}
                     </Col>
-                </Row>
+                </Row> : null}
 
             </div>
         )
