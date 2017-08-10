@@ -61,11 +61,6 @@ class LifeCycle extends Component {
                                                  api={this.state.api}/>
                             </Card>
                         </Col>
-                        <Col span={12}>
-                            <Card title="Change policy" bordered={false} style={{margin: '5px'}}>
-                                <Policies policies={this.state.policies} api={this.state.api} />
-                            </Card>
-                        </Col>
                     </Row>
                     <Row gutter={16}>
                         <Col span={12}>

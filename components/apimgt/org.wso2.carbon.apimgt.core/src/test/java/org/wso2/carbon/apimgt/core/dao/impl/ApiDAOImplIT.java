@@ -1835,7 +1835,6 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
             apiList.remove(api);
         }
         Assert.assertTrue(apiList.isEmpty());
-
     }
 
     @Test
@@ -1852,7 +1851,6 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API expectedAPI = SampleTestObjectCreator.copyAPIIgnoringNonEditableFields(api, substituteAPI);
         Assert.assertNotNull(apiFromDB);
         Assert.assertEquals(apiFromDB, expectedAPI, TestUtil.printDiff(apiFromDB, expectedAPI));
-
     }
 
     @Test
@@ -2042,7 +2040,5 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         //Delete Composite API
         apiDAO.deleteCompositeApi(compositeAPI.getId());
         Assert.assertNull(apiDAO.getCompositeAPI(compositeAPI.getId()));
-
     }
-
 }

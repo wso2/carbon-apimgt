@@ -3284,6 +3284,10 @@ definitions:
       workflowStatus:
         type: string
         example: APPROVED
+      securityScheme:
+        type: array
+        items:
+          type: string
 
 #-----------------------------------------------------
 # The API resource
@@ -3462,6 +3466,10 @@ definitions:
           type:
             type: string
             example: "Production"
+      securityScheme:
+        type: array
+        items:
+          type: string
       operations:
        type: array
        items:

@@ -69,6 +69,7 @@ public class FileApi {
     private String workflowStatus;
     private String apiPolicy;
     private List<String> userSpecificApiPermissions;
+    private int securityScheme;
 
     public String getId() {
         return id;
@@ -405,6 +406,14 @@ public class FileApi {
 
     public void setUserSpecificApiPermissions(List<String> userSpecificApiPermissions) {
         this.userSpecificApiPermissions = userSpecificApiPermissions;
+    }
+
+    public int getSecurityScheme() {
+        return securityScheme;
+    }
+
+    public void setSecurityScheme(int securityScheme) {
+        this.securityScheme = securityScheme;
     }
 
     public FileApi() {

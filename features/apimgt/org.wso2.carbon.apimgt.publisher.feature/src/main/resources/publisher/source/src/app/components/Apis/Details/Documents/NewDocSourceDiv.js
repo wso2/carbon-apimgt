@@ -39,7 +39,7 @@ class NewDocSourceDiv extends Component {
                     <FormItem style={{margin: 0}}>
                         <label>
                             <input type="radio" name="docSourceType" value="INLINE"
-                                   checked={this.props.selectedSourceType == 'INLINE'}
+                                   checked={this.props.selectedSourceType === 'INLINE'}
                                    onClick={this.handleInputChange}/>
                             Inline
                         </label>
@@ -47,23 +47,24 @@ class NewDocSourceDiv extends Component {
                     <FormItem style={{margin: 0}}>
                         <label>
                             <input type="radio" name="docSourceType" value="URL"
-                                   checked={this.props.selectedSourceType == 'URL'}
+                                   checked={this.props.selectedSourceType === 'URL'}
                                    onClick={this.handleInputChange}/>
                             URL
                         </label>
-                        {this.props.selectedSourceType == "URL" &&
-                        <Input type="text" name="docSourceURL" placeholder="eg: http://wso2.com/api-management" onChange={this.handleInputChange}
+                        {this.props.selectedSourceType === "URL" &&
+                        <Input type="text" name="docSourceURL" placeholder="eg: http://wso2.com/api-management"
+                               onChange={this.handleInputChange}
                                value={this.props.docSourceURL}/>
                         }
                     </FormItem>
                     <FormItem style={{margin: 0}}>
                         <label>
                             <input type="radio" name="docSourceType" value="FILE"
-                                   checked={this.props.selectedSourceType == 'FILE'}
+                                   checked={this.props.selectedSourceType === 'FILE'}
                                    onClick={this.handleInputChange}/>
                             File
                         </label>
-                        {this.props.selectedSourceType == "FILE" &&
+                        {this.props.selectedSourceType === "FILE" &&
                         <div marginWidth={10}>
                             <form>
                                 <div>

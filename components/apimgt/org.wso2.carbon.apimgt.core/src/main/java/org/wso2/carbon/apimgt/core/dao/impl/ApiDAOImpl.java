@@ -58,6 +58,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
@@ -84,13 +85,14 @@ public class ApiDAOImpl implements ApiDAO {
     private final ApiDAOVendorSpecificStatements sqlStatements;
 
     private static final String API_SUMMARY_SELECT = "SELECT DISTINCT UUID, PROVIDER, NAME, CONTEXT, VERSION, " +
-            "DESCRIPTION, CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS FROM AM_API";
+            "DESCRIPTION, CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS, SECURITY_SCHEME FROM AM_API";
 
     private static final String API_SELECT = "SELECT UUID, PROVIDER, NAME, CONTEXT, VERSION, IS_DEFAULT_VERSION, " +
             "DESCRIPTION, VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, TECHNICAL_OWNER, TECHNICAL_EMAIL, " +
             "BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, CURRENT_LC_STATUS, " +
             "CORS_ENABLED, CORS_ALLOW_ORIGINS, CORS_ALLOW_CREDENTIALS, CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS, " +
-            "CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME, COPIED_FROM_API, UPDATED_BY, LC_WORKFLOW_STATUS FROM AM_API";
+            "CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME, COPIED_FROM_API, UPDATED_BY, LC_WORKFLOW_STATUS, " +
+            "SECURITY_SCHEME FROM AM_API";
 
     private static final String COMPOSITE_API_SUMMARY_SELECT = "SELECT UUID, PROVIDER, NAME, CONTEXT, VERSION, " +
             "DESCRIPTION, LC_WORKFLOW_STATUS FROM AM_API";
@@ -100,7 +102,8 @@ public class ApiDAOImpl implements ApiDAO {
             "UUID, TECHNICAL_OWNER, TECHNICAL_EMAIL, BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, " +
             "CURRENT_LC_STATUS, CORS_ENABLED, CORS_ALLOW_ORIGINS, CORS_ALLOW_CREDENTIALS, CORS_ALLOW_HEADERS, " +
             "CORS_ALLOW_METHODS, API_TYPE_ID, CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME, COPIED_FROM_API, " +
-            "UPDATED_BY, LC_WORKFLOW_STATUS) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            "UPDATED_BY, LC_WORKFLOW_STATUS, SECURITY_SCHEME) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?," +
+            "?,?,?,?,?,?,?,?)";
 
     private static final String API_DELETE = "DELETE FROM AM_API WHERE UUID = ?";
 
@@ -662,6 +665,7 @@ public class ApiDAOImpl implements ApiDAO {
         statement.setString(26, api.getCopiedFromApiId());
         statement.setString(27, api.getUpdatedBy());
         statement.setString(28, APILCWorkflowStatus.APPROVED.toString());
+        statement.setInt(29, api.getSecurityScheme());
         statement.execute();
 
         if (API.Visibility.RESTRICTED == api.getVisibility()) {
@@ -1961,6 +1965,7 @@ public class ApiDAOImpl implements ApiDAO {
                         policies(getSubscripitonPolciesByAPIId(connection, apiPrimaryKey)).copiedFromApiId(rs.getString
                         ("COPIED_FROM_API")).
                         workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).
+                        securityScheme(rs.getInt("SECURITY_SCHEME")).
                         apiPolicy(getApiPolicyByAPIId(connection, apiPrimaryKey)).build();
             }
         }
@@ -1971,18 +1976,37 @@ public class ApiDAOImpl implements ApiDAO {
     private List<API> constructAPISummaryList(Connection connection, PreparedStatement statement) throws SQLException {
         List<API> apiList = new ArrayList<>();
         try (ResultSet rs = statement.executeQuery()) {
+            ResultSetMetaData metadata = rs.getMetaData();
+            int columnCount = metadata.getColumnCount();
+            boolean schemeExists = false;
+            for (int i = 0; i < columnCount; i++) {
+                if (metadata.getColumnName(i + 1).equals("SECURITY_SCHEME")) {
+                    schemeExists = true;
+                    break;
+                }
+            }
+
             while (rs.next()) {
-                API apiSummary = new API.APIBuilder(rs.getString("PROVIDER"), rs.getString("NAME"),
+                String apiPrimaryKey = rs.getString("UUID");
+                API.APIBuilder apiSummaryBuilder = new API.APIBuilder(rs.getString("PROVIDER"), rs.getString("NAME"),
                         rs.getString("VERSION")).
-                        id(rs.getString("UUID")).
+                        id(apiPrimaryKey).
                         context(rs.getString("CONTEXT")).
                         description(rs.getString("DESCRIPTION")).
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
                         lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
-                        workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).build();
+                        workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).
+                        permissionMap(getPermissionMapForApi(connection, apiPrimaryKey));
+
+                if (schemeExists) {
+                    apiSummaryBuilder = apiSummaryBuilder.securityScheme(rs.getInt("SECURITY_SCHEME"));
+                }
+                
+                API apiSummary = apiSummaryBuilder.build();
                 apiList.add(apiSummary);
             }
-        }
+
+       }
 
         return apiList;
     }
@@ -2623,7 +2647,8 @@ public class ApiDAOImpl implements ApiDAO {
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     public List<API> getAPIsByStatus(List<String> gatewayLabels, String status) throws APIMgtDAOException {
         final String query = "SELECT DISTINCT UUID, PROVIDER, A.NAME, CONTEXT, VERSION, DESCRIPTION, CURRENT_LC_STATUS,"
-                + " LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS FROM AM_API A INNER JOIN AM_API_LABEL_MAPPING M ON A.UUID"
+                + " LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS, SECURITY_SCHEME FROM AM_API A INNER JOIN " +
+                " AM_API_LABEL_MAPPING M ON A.UUID"
                 + " = M.API_ID INNER JOIN AM_LABELS L ON L.LABEL_ID = M.LABEL_ID WHERE L.NAME IN (" + DAOUtil
                 .getParameterString(gatewayLabels.size()) + ") AND A.CURRENT_LC_STATUS=?";
 
@@ -2646,7 +2671,8 @@ public class ApiDAOImpl implements ApiDAO {
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     public List<API> getAPIsByGatewayLabel(List<String> gatewayLabels) throws APIMgtDAOException {
         final String query = "SELECT DISTINCT UUID, PROVIDER, A.NAME, CONTEXT, VERSION, DESCRIPTION, CURRENT_LC_STATUS,"
-                + " LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS FROM AM_API A INNER JOIN AM_API_LABEL_MAPPING M ON A.UUID"
+                + " LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS, SECURITY_SCHEME FROM AM_API A INNER JOIN " +
+                "AM_API_LABEL_MAPPING M ON A.UUID"
                 + " = M.API_ID INNER JOIN AM_LABELS L ON L.LABEL_ID = M.LABEL_ID WHERE L.NAME IN (" + DAOUtil
                 .getParameterString(gatewayLabels.size()) + ")";
 

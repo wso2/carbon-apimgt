@@ -269,7 +269,7 @@ public class SampleTestObjectCreator {
      *
      * @return SubscriptionValidationData object
      */
-    protected static SubscriptionValidationData createSubscriptionValidationData() {
+    public static SubscriptionValidationData createSubscriptionValidationData() {
         SubscriptionValidationData subscriptionData = new SubscriptionValidationData(UUID.randomUUID().toString(),
                 UUID.randomUUID().toString(), UUID.randomUUID().toString());
         subscriptionData.setSubscriptionPolicy(UUID.randomUUID().toString());
@@ -297,7 +297,7 @@ public class SampleTestObjectCreator {
      *
      * @return UriTemplate object
      */
-    protected static UriTemplate createUniqueUriTemplate() {
+    public static UriTemplate createUniqueUriTemplate() {
         UriTemplate.UriTemplateBuilder uriTemplate = UriTemplate.UriTemplateBuilder.getInstance().
                 templateId(UUID.randomUUID().toString())
                 .uriTemplate(UUID.randomUUID().toString());

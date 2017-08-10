@@ -6,4 +6,5 @@ struct APIDTO {
     string version;
     string context;
     string lifeCycleStatus;
+    int securityScheme;
 }

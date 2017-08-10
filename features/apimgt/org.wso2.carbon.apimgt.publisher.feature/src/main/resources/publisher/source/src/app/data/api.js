@@ -212,7 +212,7 @@ class API {
     getSwagger(id, callback = null) {
         var promise_get = this.client.then(
             (client) => {
-                return client.apis["API (Individual)"].get_apis__apiId_swagger(
+                return client.apis["API (Individual)"].get_apis__apiId__swagger(
                     {apiId: id}, this._requestMetaData());
             }
         );
@@ -235,7 +235,7 @@ class API {
                     "endpointId": JSON.stringify(swagger),
                     "Content-Type": "multipart/form-data"
                 };
-                return client.apis["API (Individual)"].put_apis_apiId_swagger(
+                return client.apis["API (Individual)"].put_apis__apiId__swagger(
                     payload, this._requestMetaData({'Content-Type': "multipart/form-data"}));
             }
         );
@@ -577,7 +577,7 @@ class API {
         var promised_getDocContent = this.client.then(
             (client) => {
                 let payload = {apiId: api_id, documentId: docId};
-                return client.apis["Document (Individual)"].get_apis__apiId__documents__documentId_content(
+                return client.apis["Document (Individual)"].get_apis__apiId__documents__documentId__content(
                     payload);
             }
         );

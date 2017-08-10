@@ -87,6 +87,7 @@ public final class API {
         workflowStatus = builder.workflowStatus;
         apiPolicy = builder.apiPolicy;
         userSpecificApiPermissions = builder.userSpecificApiPermissions;
+        securityScheme = builder.securityScheme;
     }
 
     public Map getPermissionMap() {
@@ -229,6 +230,10 @@ public final class API {
         return userSpecificApiPermissions;
     }
 
+    public int getSecurityScheme() {
+        return securityScheme;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -269,7 +274,8 @@ public final class API {
                 Objects.equals(lifecycleState, api.lifecycleState) &&
                 Objects.equals(uriTemplates, api.uriTemplates) &&
                 Objects.equals(copiedFromApiId, api.copiedFromApiId) &&
-                Objects.equals(endpoint, api.endpoint);
+                Objects.equals(endpoint, api.endpoint) &&
+                Objects.equals(securityScheme, api.securityScheme);
     }
 
     @Override
@@ -278,7 +284,7 @@ public final class API {
                 endpoint, gatewayConfig, wsdlUri, isResponseCachingEnabled, cacheTimeout, isDefaultVersion,
                 transport, tags, labels, visibility, visibleRoles, businessInformation, corsConfiguration,
                 applicationId, createdTime, createdBy, updatedBy, lastUpdatedTime, lifecycleState,
-                uriTemplates, copiedFromApiId, workflowStatus);
+                uriTemplates, copiedFromApiId, workflowStatus, securityScheme);
     }
 
 
@@ -325,6 +331,7 @@ public final class API {
     private final String workflowStatus;
     private final Policy apiPolicy;
     private List<String> userSpecificApiPermissions;
+    private int securityScheme;
 
     public String getWorkflowStatus() {
         return workflowStatus;
@@ -480,6 +487,10 @@ public final class API {
             return userSpecificApiPermissions;
         }
 
+        public int getSecurityScheme() {
+            return securityScheme;
+        }
+
         private String version;
         private String context;
         private String description;
@@ -513,6 +524,7 @@ public final class API {
         private String apiDefinition;
         private String workflowStatus;
         private List<String> userSpecificApiPermissions;
+        private int securityScheme;
 
         public APIBuilder(String provider, String name, String version) {
             this.provider = provider;
@@ -559,6 +571,7 @@ public final class API {
             this.permissionMap = new HashMap<>();
             this.workflowStatus = copy.workflowStatus;
             this.userSpecificApiPermissions = new ArrayList<String>();
+            this.securityScheme = copy.securityScheme;
         }
 
         /**
@@ -960,6 +973,11 @@ public final class API {
          */
         public APIBuilder workflowStatus(String workflowStatus) {
             this.workflowStatus = workflowStatus;
+            return this;
+        }
+
+        public APIBuilder securityScheme(int securityScheme) {
+            this.securityScheme = securityScheme;
             return this;
         }
 
