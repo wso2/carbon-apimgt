@@ -239,14 +239,6 @@ public class MappingUtil {
             apiBuilder.apiPolicy(policy);
         }
 
-        if (apidto.getSecurityScheme() != null) {
-            apiBuilder.securityScheme(3);
-          //  List<String> securityScheme = apidto.getSecurityScheme();
-          //  apiBuilder.securityScheme(mapSecuritySchemeListToInt(securityScheme));
-        } else {
-            apiBuilder.securityScheme(2);
-        }
-
         return apiBuilder;
     }
 
