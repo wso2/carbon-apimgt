@@ -63,15 +63,15 @@ class DocumentsTable extends Component {
      3- If the document type is 'FILE' download the file
      */
     viewDocContentHandler(document) {
-        if (document.sourceType == "URL") {
+        if (document.sourceType === "URL") {
             window.open(document.sourceUrl, '_blank');
-        } else if (document.sourceType == "INLINE") {
+        } else if (document.sourceType === "INLINE") {
                 this.setState({
                     documentId:document.documentId,
                     showInlineEditor:true,
                     selectedDocName:document.name
                 });
-        } else if (document.sourceType == "FILE") {
+        } else if (document.sourceType === "FILE") {
             let promised_get_content = this.props.client.getFileForDocument(this.props.apiId, document.documentId);
             promised_get_content.then((done) => {
                 this.props.downloadFile(done);

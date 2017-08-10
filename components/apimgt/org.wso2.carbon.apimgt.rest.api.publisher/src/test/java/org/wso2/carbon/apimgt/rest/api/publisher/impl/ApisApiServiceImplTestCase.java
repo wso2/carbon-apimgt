@@ -19,6 +19,10 @@
  */
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -35,11 +39,14 @@ import org.wso2.carbon.apimgt.core.impl.APIPublisherImpl;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.WSDLArchiveInfo;
+import org.wso2.carbon.apimgt.core.models.WSDLInfo;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
 import org.wso2.carbon.apimgt.rest.api.common.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.publisher.common.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
@@ -59,6 +66,7 @@ import java.util.StringTokenizer;
 import java.util.UUID;
 
 import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(PowerMockRunner.class)
@@ -67,6 +75,14 @@ public class ApisApiServiceImplTestCase {
 
     private static final Logger log = LoggerFactory.getLogger(ApisApiServiceImplTestCase.class);
     private static final String USER = "admin";
+    private static final String WSDL = "WSDL";
+    private static final String SWAGGER = "SWAGGER";
+    private static final String WSDL_FILE = "stockQuote.wsdl";
+    private static final String WSDL_FILE_LOCATION = "wsdl" + File.separator + WSDL_FILE;
+    private static final String WSDL_ZIP = "WSDLFiles.zip";
+    private static final String WSDL_ZIP_LOCATION = "wsdl" + File.separator + WSDL_ZIP;
+    private static final String WSDL_FILE_INVALID = "stockQuote_invalid.wsdl";
+    private static final String WSDL_FILE_INVALID_LOCATION = "wsdl" + File.separator + WSDL_FILE_INVALID;
 
     @Test
     public void testDeleteApi() throws Exception {
@@ -1400,10 +1416,245 @@ public class ApisApiServiceImplTestCase {
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
                             .when(apiPublisher).addApiFromDefinition(fis);
         Response response = apisApiService.
-                apisImportDefinitionPost("SWAGGER", fis, null, null, null, null, null, null, getRequest());
+                apisImportDefinitionPost(null, fis, null, null, null, null, null, null, getRequest());
         fis.close();
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
+    }
+
+    @Test
+    public void testApisImportDefinitionPostWSDLFile() throws Exception {
+        printTestMethodName();
+        File file = new File(getClass().getClassLoader().getResource(WSDL_FILE_LOCATION).getFile());
+        FileInputStream fis = new FileInputStream(file);
+        FileInfo fileInfo = new FileInfo();
+        fileInfo.setFileName(WSDL_FILE);
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        String apiId = UUID.randomUUID().toString();
+        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().id(apiId);
+        API api = apiBuilder.build();
+        APIDTO apiDto = MappingUtil.toAPIDto(api);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String additionalProperties = objectMapper.writeValueAsString(apiDto);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Mockito.doReturn(api).doThrow(new IllegalArgumentException()).when(apiPublisher).
+                getAPIbyUUID(apiId);
+        Mockito.doReturn(apiId).when(apiPublisher)
+                .addAPIFromWSDLFile(Mockito.argThat(getAPIBuilderMatcher(apiBuilder)), Mockito.eq(fis),
+                        Mockito.eq(false));
+        Response response = apisApiService.
+                apisImportDefinitionPost(WSDL, fis, fileInfo, null, additionalProperties, null, null, null,
+                        getRequest());
+        fis.close();
+        assertEquals(response.getStatus(), 201);
+        assertTrue(response.getEntity().toString().contains(apiId));
+    }
+
+    @Test
+    public void testApisImportDefinitionPostWSDLArchive() throws Exception {
+        printTestMethodName();
+        File file = new File(getClass().getClassLoader().getResource(WSDL_ZIP_LOCATION).getFile());
+        FileInputStream fis = new FileInputStream(file);
+        FileInfo fileInfo = new FileInfo();
+        fileInfo.setFileName(WSDL_ZIP);
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        String apiId = UUID.randomUUID().toString();
+        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().id(apiId);
+        API api = apiBuilder.build();
+        APIDTO apiDto = MappingUtil.toAPIDto(api);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String additionalProperties = objectMapper.writeValueAsString(apiDto);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Mockito.doReturn(api).doThrow(new IllegalArgumentException()).when(apiPublisher).
+                getAPIbyUUID(apiId);
+        Mockito.doReturn(apiId).when(apiPublisher)
+                .addAPIFromWSDLArchive(Mockito.argThat(getAPIBuilderMatcher(apiBuilder)), Mockito.eq(fis),
+                        Mockito.eq(false));
+        Response response = apisApiService.
+                apisImportDefinitionPost(WSDL, fis, fileInfo, null, additionalProperties, null, null, null,
+                        getRequest());
+        fis.close();
+        assertEquals(response.getStatus(), 201);
+        assertTrue(response.getEntity().toString().contains(apiId));
+    }
+
+    @Test
+    public void testApisImportDefinitionPostWSDLWithNoAdditionalProperties() throws Exception {
+        printTestMethodName();
+        File file = new File(getClass().getClassLoader().getResource(WSDL_ZIP_LOCATION).getFile());
+        FileInputStream fis = new FileInputStream(file);
+        FileInfo fileInfo = new FileInfo();
+        fileInfo.setFileName(WSDL_ZIP);
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Response response = apisApiService.
+                apisImportDefinitionPost(WSDL, fis, fileInfo, null, null, null, null, null,
+                        getRequest());
+        fis.close();
+        assertEquals(response.getStatus(), 400);
+    }
+
+    @Test
+    public void testApisImportDefinitionPostWSDLWithNoFilename() throws Exception {
+        printTestMethodName();
+        File file = new File(getClass().getClassLoader().getResource(WSDL_ZIP_LOCATION).getFile());
+        FileInputStream fis = new FileInputStream(file);
+        FileInfo fileInfo = new FileInfo();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        String apiId = UUID.randomUUID().toString();
+        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().id(apiId);
+        API api = apiBuilder.build();
+        APIDTO apiDto = MappingUtil.toAPIDto(api);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String additionalProperties = objectMapper.writeValueAsString(apiDto);
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Response response = apisApiService.
+                apisImportDefinitionPost(WSDL, fis, fileInfo, null, additionalProperties, null, null, null,
+                        getRequest());
+        fis.close();
+        assertEquals(response.getStatus(), 400);
+    }
+
+    @Test
+    public void testApisImportDefinitionPostWSDLWithInvalidFileExtension() throws Exception {
+        printTestMethodName();
+        File file = new File(getClass().getClassLoader().getResource("swagger.json").getFile());
+        FileInputStream fis = new FileInputStream(file);
+        FileInfo fileInfo = new FileInfo();
+        fileInfo.setFileName("swagger.json");
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        String apiId = UUID.randomUUID().toString();
+        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().id(apiId);
+        API api = apiBuilder.build();
+        APIDTO apiDto = MappingUtil.toAPIDto(api);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String additionalProperties = objectMapper.writeValueAsString(apiDto);
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Response response = apisApiService.
+                apisImportDefinitionPost(WSDL, fis, fileInfo, null, additionalProperties, null, null, null,
+                        getRequest());
+        fis.close();
+        assertEquals(response.getStatus(), 400);
+    }
+
+    @Test
+    public void testApisImportDefinitionPostWSDLWithInvalidImplementationType() throws Exception {
+        printTestMethodName();
+        File file = new File(getClass().getClassLoader().getResource(WSDL_FILE_LOCATION).getFile());
+        FileInputStream fis = new FileInputStream(file);
+        FileInfo fileInfo = new FileInfo();
+        fileInfo.setFileName(WSDL_FILE);
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        String apiId = UUID.randomUUID().toString();
+        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI().id(apiId);
+        API api = apiBuilder.build();
+        APIDTO apiDto = MappingUtil.toAPIDto(api);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String additionalProperties = objectMapper.writeValueAsString(apiDto);
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Response response = apisApiService.
+                apisImportDefinitionPost(WSDL, fis, fileInfo, null, additionalProperties, "InvalidType", null, null,
+                        getRequest());
+        fis.close();
+        assertEquals(response.getStatus(), 400);
+    }
+
+    @Test
+    public void testApisValidateDefinitionPostWSDLFile() throws Exception {
+        printTestMethodName();
+        File file = new File(getClass().getClassLoader().getResource(WSDL_FILE_LOCATION).getFile());
+        FileInputStream fis = new FileInputStream(file);
+        FileInfo fileInfo = new FileInfo();
+        fileInfo.setFileName(WSDL_FILE);
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Response response = apisApiService.
+                apisValidateDefinitionPost(WSDL, fis, fileInfo, null, getRequest());
+        fis.close();
+        assertEquals(response.getStatus(), 200);
+    }
+
+    @Test
+    public void testApisValidateDefinitionPostWSDLArchive() throws Exception {
+        printTestMethodName();
+        File file = new File(getClass().getClassLoader().getResource(WSDL_ZIP_LOCATION).getFile());
+        FileInputStream fis = new FileInputStream(file);
+        FileInfo fileInfo = new FileInfo();
+        fileInfo.setFileName(WSDL_ZIP);
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        WSDLArchiveInfo archiveInfo = new WSDLArchiveInfo("/tmp", "sample.zip");
+        WSDLInfo wsdlInfo = new WSDLInfo();
+        wsdlInfo.setVersion("1.1");
+        archiveInfo.setWsdlInfo(wsdlInfo);
+        Mockito.doReturn(archiveInfo).doThrow(new IllegalArgumentException()).when(apiPublisher)
+                .extractAndValidateWSDLArchive(fis);
+        Response response = apisApiService.
+                apisValidateDefinitionPost(WSDL, fis, fileInfo, null, getRequest());
+        fis.close();
+        assertEquals(response.getStatus(), 200);
+        assertTrue(response.getEntity() instanceof APIDefinitionValidationResponseDTO);
+        assertTrue(((APIDefinitionValidationResponseDTO)response.getEntity()).getIsValid());
+    }
+
+    @Test
+    public void testApisValidateDefinitionPostWSDLFileInvalid() throws Exception {
+        printTestMethodName();
+        File file = new File(getClass().getClassLoader().getResource(WSDL_FILE_INVALID_LOCATION).getFile());
+        FileInputStream fis = new FileInputStream(file);
+        FileInfo fileInfo = new FileInfo();
+        fileInfo.setFileName(WSDL_FILE_INVALID);
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Response response = apisApiService.
+                apisValidateDefinitionPost(WSDL, fis, fileInfo, null, getRequest());
+        fis.close();
+        assertEquals(response.getStatus(), 400);
+    }
+
+    @Test
+    public void testApisValidateDefinitionPostWSDLFileInvalidExtension() throws Exception {
+        printTestMethodName();
+        File file = new File(getClass().getClassLoader().getResource("swagger.json").getFile());
+        FileInputStream fis = new FileInputStream(file);
+        FileInfo fileInfo = new FileInfo();
+        fileInfo.setFileName("swagger.json");
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        Response response = apisApiService.
+                apisValidateDefinitionPost(WSDL, fis, fileInfo, null, getRequest());
+        fis.close();
+        assertEquals(response.getStatus(), 400);
     }
 
     @Test
@@ -1447,6 +1698,20 @@ public class ApisApiServiceImplTestCase {
         Response response = apisApiService.apisPost(apidto, getRequest());
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
+    }
+
+    private Matcher<API.APIBuilder> getAPIBuilderMatcher(API.APIBuilder apiBuilder) {
+        return new BaseMatcher<API.APIBuilder>() {
+            @Override
+            public boolean matches(Object o) {
+                return o instanceof API.APIBuilder && ((API.APIBuilder) o).getId() != null && ((API.APIBuilder) o)
+                        .getId().equals(apiBuilder.getId());
+            }
+
+            @Override
+            public void describeTo(Description description) {
+            }
+        };
     }
 
     // Sample request to be used by tests

@@ -577,7 +577,7 @@ class API {
         var promised_getDocContent = this.client.then(
             (client) => {
                 let payload = {apiId: api_id, documentId: docId};
-                return client.apis["Document (Individual)"].get_apis__apiId__documents__documentId_content(
+                return client.apis["Document (Individual)"].get_apis__apiId__documents__documentId__content(
                     payload);
             }
         );
