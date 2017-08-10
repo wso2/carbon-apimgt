@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import {Card, Button} from 'antd'
+import {Card, Button, message} from 'antd'
 
 import GenericEndpointInputs from './GenericEndpointInputs'
 import Api from '../../../../data/api'
@@ -8,61 +8,92 @@ import Loading from '../../../Base/Loading/Loading'
 
 class Endpoint extends Component {
 
-    constructor(props){
+    constructor(props) {
         super(props);
         this.state = {
-            endpoints : {
-
-            },
-            productionEndpoint : {
-            },
-            sandboxEndpoint : {
-            }
+            endpoints: {},
+            productionEndpoint: {},
+            sandboxEndpoint: {},
+            dropDownItems : {}
         };
         this.api_uuid = props.match.params.api_uuid;
         this.endpoint_type = props.endpoint_type;
         this.handleProductionInputs = this.handleProductionInputs.bind(this);
         this.handleSandboxInputs = this.handleSandboxInputs.bind(this);
         this.updateEndpoints = this.updateEndpoints.bind(this);
+        this.dropdownItems =  null;
     }
 
-    componentDidMount(){
+    componentDidMount() {
 
         // Populate Defined endpoints dropdowns
         const api = new Api();
-        const promised_endpoints = api.getEndpoints();
-        /* TODO: Handle catch case , auth errors and ect ~tmkb*/
-        promised_endpoints.then(
-            response => {
-                this.setState({endpoints: response.obj.list});
-            }
-        );
+        let promised_endpoints = api.getEndpoints();
 
         // Populate endpoint details
         let promised_api = api.get(this.api_uuid);
-        promised_api.then(
-            response => {
-                let api_response = response.obj;
+
+        let setSelectedEp = Promise.all([promised_endpoints, promised_api]).then(
+            (response) => {
+                let epMap = {};
+                this.dropdownItems = [<Option key="custom">Custom...</Option>];
+                for (let ep of JSON.parse(response[0].data).list) {
+                    epMap[ep.id] = ep;
+                    // construct dropdown
+                    this.dropdownItems.push(<Option key={ep.id}>{ep.name}</Option>);
+                }
+
+                this.setState({endpoints: epMap});
+
                 let default_prod_ep = null;
                 let default_sandbox_ep = null;
+                let selected_prod_ep = null;
+                let selected_sandbox_ep = null;
+                let isGlobalEPSelectedSand = false;
+                let isGlobalEPSelectedProd = false;
 
-                for(var i in api_response.endpoint) {
+                let endpointInAPI = JSON.parse(response[1].data).endpoint;
+                for (var i in endpointInAPI) {
 
-                    if(api_response.endpoint[i].inline != undefined) {
-                        let endpoint_element = api_response.endpoint[i].inline.endpointConfig;
-                        if(api_response.endpoint[i].type == 'production') {
+                    if (endpointInAPI[i].inline != undefined) {
+                        let endpoint_element = endpointInAPI[i].inline.endpointConfig;
+                        if (endpointInAPI[i].type == 'production') {
                             default_prod_ep = JSON.parse(endpoint_element).serviceUrl;
-                        }else if(api_response.endpoint[i].type == 'sandbox') {
+                        } else if (endpointInAPI[i].type == 'sandbox') {
                             default_sandbox_ep = JSON.parse(endpoint_element).serviceUrl;
+                        }
+                    } else { // global endpoint with key
+                        let endpoint_key = endpointInAPI[i].key;
+                        if (endpointInAPI[i].type == 'production') {
+                            selected_prod_ep = epMap[endpoint_key].name;
+                            default_prod_ep = JSON.parse(epMap[endpoint_key].endpointConfig).serviceUrl;
+                            isGlobalEPSelectedProd = true;
+                        } else if (endpointInAPI[i].type == 'sandbox') {
+                            selected_sandbox_ep = epMap[endpoint_key].name;
+                            default_sandbox_ep = JSON.parse(epMap[endpoint_key].endpointConfig).serviceUrl;
+                            isGlobalEPSelectedSand = true;
                         }
                     }
                 }
 
-                this.setState({api: response.obj,
-                    productionEndpoint : {url : default_prod_ep, username : "my-prod-username"},
-                    sandboxEndpoint : {url : default_sandbox_ep, username : "my-sandbx-username"} });
-            }
-        ).catch(
+                this.setState({
+                    api: response[1].data,
+                    productionEndpoint: {
+                        url: default_prod_ep,
+                        username: "",
+                        selectedep: selected_prod_ep,
+                        isGlobalEPSelected: isGlobalEPSelectedProd
+                    },
+                    sandboxEndpoint: {
+                        url: default_sandbox_ep,
+                        username: "",
+                        selectedep: selected_sandbox_ep,
+                        isGlobalEPSelected: isGlobalEPSelectedSand
+                    }
+                });
+
+
+            }).catch(
             error => {
                 if (process.env.NODE_ENV !== "production") {
                     console.log(error);
@@ -75,48 +106,64 @@ class Endpoint extends Component {
         );
     }
 
-    handleProductionInputs(e){
+
+    handleProductionInputs(e) {
         let prod = this.state.productionEndpoint;
-        prod[e.target.name]= e.target.value;
-        this.setState({productionEndpoint: prod});
+        const eventName = e.target.name;
+        if (eventName === "uuid") {
+            this.setState({productionEndpoint: e.target.value})
+        } else {
+            prod[eventName] = e.target.value;
+            this.setState({productionEndpoint: prod});
+
+        }
     }
 
-    handleSandboxInputs(e){
+    handleSandboxInputs(e) {
         let sandbox = this.state.sandboxEndpoint;
-        sandbox[e.target.name]= e.target.value;
-        this.setState({sandboxEndpoint: sandbox});
+        const eventName = e.target.name;
+        if (eventName === "uuid") {
+            this.setState({sandboxEndpoint: e.target.value})
+        } else {
+            sandbox[eventName] = e.target.value;
+            this.setState({sandboxEndpoint: sandbox});
+        }
     }
 
-    updateEndpoints(e){
+
+    getURLType(serviceUrl) {
+        // remove last : character
+        return new URL(serviceUrl).protocol.replace(/\:$/, '');;
+    }
+
+    updateEndpoints(e) {
 
         //this.setState({loading: true});
         let prod = this.state.productionEndpoint;
         let sandbox = this.state.sandboxEndpoint;
-        let prodJSON = null;
-        let sandboxJSON = null;
+        let prodJSON = {type: "production"};
+        let sandboxJSON = {type: "sandbox"};
 
-        if(!prod.url == "") {
-            prodJSON = {
-                inline: {
-                    endpointConfig: JSON.stringify({serviceUrl: prod.url}),
-                    endpointSecurity: {enabled: false},
-                    type: "http",
-                    maxTps: 1000
-                },
-                type : "production"
-            }
+        if (prod.url === undefined) {
+            prodJSON.key = prod;
+        } else {
+            let inline = {};
+            inline.endpointConfig = JSON.stringify({serviceUrl: prod.url});
+            inline.endpointSecurity = {enabled: false};
+            inline.type = this.getURLType(prod.url);
+            inline.maxTps = 1000;
+            prodJSON.inline = inline;
         }
 
-        if(!sandbox.url == "") {
-            sandboxJSON = {
-                inline: {
-                    endpointConfig: JSON.stringify({serviceUrl: sandbox.url}),
-                    endpointSecurity: {enabled: false},
-                    type: "http",
-                    maxTps: 1000
-                },
-                type : "sandbox"
-            }
+        if (sandbox.url === undefined) {
+            sandboxJSON.key = sandbox;
+        } else {
+            let inline = {};
+            inline.endpointConfig = JSON.stringify({serviceUrl: sandbox.url});
+            inline.endpointSecurity = {enabled: false};
+            inline.type = this.getURLType(sandbox.url);
+            inline.maxTps = 1000;
+            sandboxJSON.inline = inline;
         }
 
         const api = new Api();
@@ -134,8 +181,16 @@ class Endpoint extends Component {
                 this.setState({loading: false});
                 message.info("Endpoints updated successfully");
             })
-        });
+        }).catch(
+            error => {
+                if (process.env.NODE_ENV !== "production") {
+                    console.log(error);
+                }
+                message.error("Error occurred when updating endpoints");
+            }
+        );
     }
+
 
 
     render() {
@@ -147,15 +202,24 @@ class Endpoint extends Component {
         return (
             <div>
                 <Card title="Production Endpoint" bordered={false} style={{width: '90%', marginBottom: '10px'}}>
-                    <GenericEndpointInputs handleInputs={this.handleProductionInputs} epList={this.state.endpoints} endpoint={this.state.productionEndpoint} match={this.props.match}/>
+                    <GenericEndpointInputs handleInputs={this.handleProductionInputs}
+                                           epList={this.state.endpoints}
+                                           endpoint={this.state.productionEndpoint}
+                                           dropdownItems={this.dropdownItems}
+                                           match={this.props.match}/>
                 </Card>
                 <Card title="Sandbox Endpoint" bordered={false} style={{width: '90%'}}>
-                    <GenericEndpointInputs handleInputs={this.handleSandboxInputs} epList={this.state.endpoints} endpoint={this.state.sandboxEndpoint} match={this.props.match}/>
+                    <GenericEndpointInputs handleInputs={this.handleSandboxInputs}
+                                           epList={this.state.endpoints}
+                                           dropdownItems={this.dropdownItems}
+                                           endpoint={this.state.sandboxEndpoint}
+                                           match={this.props.match}/>
                 </Card>
                 <Button style={{margin: "5px"}} type="primary" onClick={() => this.updateEndpoints()}>Save</Button>
             </div>
         );
     }
-};
+}
+;
 
 export default Endpoint
