@@ -70,7 +70,6 @@ import java.util.StringTokenizer;
 import java.util.UUID;
 
 import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(PowerMockRunner.class)
@@ -1372,7 +1371,7 @@ public class ApisApiServiceImplTestCase {
         PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
                 thenReturn(apiPublisher);
         Response response = apisApiService
-                .apisImportDefinitionPost("SWAGGER", fis, null, "test", null, null, null, null, getRequest());
+                .apisImportDefinitionPost(SWAGGER, fis, null, "test", null, null, null, null, getRequest());
         fis.close();
         assertEquals(response.getStatus(), 400);
         assertTrue(response.getEntity().toString().contains("Only one of 'file' and 'url' should be specified"));
@@ -1399,7 +1398,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.doReturn(api).doThrow(new IllegalArgumentException()).when(apiPublisher).
                 getAPIbyUUID(apiId);
         Response response = apisApiService.
-                apisImportDefinitionPost("SWAGGER", fis, null, null, null, null, null, null, getRequest());
+                apisImportDefinitionPost(SWAGGER, fis, null, null, null, null, null, null, getRequest());
         fis.close();
         assertEquals(response.getStatus(), 201);
         assertTrue(response.getEntity().toString().contains(apiId));
