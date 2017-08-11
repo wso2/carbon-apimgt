@@ -18,6 +18,7 @@
  */
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,6 +33,7 @@ import org.wso2.carbon.apimgt.core.exception.APICommentException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIRatingException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.core.impl.APIStoreImpl;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Comment;
@@ -39,6 +41,7 @@ import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Rating;
+import org.wso2.carbon.apimgt.core.models.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -50,6 +53,8 @@ import org.wso2.carbon.messaging.CarbonMessage;
 import org.wso2.msf4j.Request;
 
 import javax.ws.rs.core.Response;
+import java.io.File;
+import java.io.FileInputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,6 +71,10 @@ public class ApisApiServiceImplTestCase {
     private static final String USER = "admin";
     private static final String IF_MATCH = null;
     private static final String IF_UNMODIFIED_SINCE = null;
+    private static final String WSDL_FILE = "stockQuote.wsdl";
+    private static final String WSDL_FILE_LOCATION = "wsdl" + File.separator + WSDL_FILE;
+    private static final String WSDL_ZIP = "WSDLFiles.zip";
+    private static final String WSDL_ZIP_LOCATION = "wsdl" + File.separator + WSDL_ZIP;
 
     @Test
     public void testApisApiIdCommentsCommentIdDelete() throws NotFoundException, APIManagementException {
@@ -778,6 +787,78 @@ public class ApisApiServiceImplTestCase {
     }
 
     @Test
+    public void testApisApiIdWsdlGetFile() throws Exception {
+        printTestMethodName();
+        final String uuid = "11112222-3333-4444-5555-666677778888";
+        File file = new File(getClass().getClassLoader().getResource(WSDL_FILE_LOCATION).getFile());
+        String wsdlContent = IOUtils.toString(new FileInputStream(file));
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIStore apiStore = powerMockDefaultAPIStore();
+        Mockito.doReturn(true).when(apiStore).isWSDLExists(uuid);
+        Mockito.doReturn(false).when(apiStore).isWSDLArchiveExists(uuid);
+        Mockito.doReturn(wsdlContent).when(apiStore).getAPIWSDL(uuid, "Sample");
+        Response response = apisApiService.apisApiIdWsdlGet(uuid, "Sample", null, null, getRequest());
+        Assert.assertEquals(response.getStatus(), 200);
+        Assert.assertTrue(response.getEntity().toString().contains("StockQuote"));
+    }
+
+    @Test
+    public void testApisApiIdWsdlGetFileWithoutLabel() throws Exception {
+        printTestMethodName();
+        final String uuid = "11112222-3333-4444-5555-666677778888";
+        File file = new File(getClass().getClassLoader().getResource(WSDL_FILE_LOCATION).getFile());
+        String wsdlContent = IOUtils.toString(new FileInputStream(file));
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIStore apiStore = powerMockDefaultAPIStore();
+        Mockito.doReturn(true).when(apiStore).isWSDLExists(uuid);
+        Mockito.doReturn(false).when(apiStore).isWSDLArchiveExists(uuid);
+        Mockito.doReturn(wsdlContent).when(apiStore).getAPIWSDL(uuid, APIMgtConstants.LabelConstants.DEFAULT);
+        Response response = apisApiService.apisApiIdWsdlGet(uuid, null, null, null, getRequest());
+        Assert.assertEquals(response.getStatus(), 200);
+        Assert.assertTrue(response.getEntity().toString().contains("StockQuote"));
+    }
+
+    @Test
+    public void testApisApiIdWsdlGetArchive() throws Exception {
+        printTestMethodName();
+        final String uuid = "11112222-3333-4444-5555-666677778888";
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIStore apiStore = powerMockDefaultAPIStore();
+        Mockito.doReturn(true).when(apiStore).isWSDLExists(uuid);
+        Mockito.doReturn(true).when(apiStore).isWSDLArchiveExists(uuid);
+        WSDLArchiveInfo archiveInfo = new WSDLArchiveInfo(WSDL_ZIP_LOCATION, WSDL_ZIP);
+        Mockito.doReturn(archiveInfo).when(apiStore).getAPIWSDLArchive(uuid, "Sample");
+        Response response = apisApiService.apisApiIdWsdlGet(uuid, "Sample", null, null, getRequest());
+        Assert.assertEquals(response.getStatus(), 200);
+        Assert.assertTrue(response.getEntity() instanceof File);
+    }
+
+    @Test
+    public void testApisApiIdWsdlGetNone() throws Exception {
+        printTestMethodName();
+        final String uuid = "11112222-3333-4444-5555-666677778888";
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIStore apiStore = powerMockDefaultAPIStore();
+        Mockito.doReturn(false).when(apiStore).isWSDLExists(uuid);
+        Response response = apisApiService.apisApiIdWsdlGet(uuid, "Sample", null, null, getRequest());
+        assertEquals(response.getStatus(), 204);
+    }
+
+    @Test
+    public void testApisApiIdWsdlGetException() throws Exception {
+        printTestMethodName();
+        final String uuid = "11112222-3333-4444-5555-666677778888";
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIStore apiStore = powerMockDefaultAPIStore();
+        Mockito.doReturn(true).when(apiStore).isWSDLExists(uuid);
+        Mockito.doReturn(false).when(apiStore).isWSDLArchiveExists(uuid);
+        Mockito.doThrow(new APIMgtWSDLException("Error while retrieving WSDL", ExceptionCodes.INTERNAL_WSDL_EXCEPTION))
+                .when(apiStore).getAPIWSDL(uuid, "Sample");
+        Response response = apisApiService.apisApiIdWsdlGet(uuid, "Sample", null, null, getRequest());
+        assertEquals(response.getStatus(), 500);
+    }
+
+    @Test
     public void testApisGet() throws APIManagementException, NotFoundException {
         printTestMethodName();
         String apiId = UUID.randomUUID().toString();
@@ -837,6 +918,14 @@ public class ApisApiServiceImplTestCase {
             throw new APIMgtSecurityException("Error while mocking Request Object ", e);
         }
         return request;
+    }
+
+    private APIStore powerMockDefaultAPIStore() throws APIManagementException {
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        return apiStore;
     }
 
     private static void printTestMethodName() {

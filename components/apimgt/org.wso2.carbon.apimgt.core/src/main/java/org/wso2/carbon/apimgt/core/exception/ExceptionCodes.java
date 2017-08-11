@@ -74,6 +74,7 @@ public enum ExceptionCodes implements ErrorHandler {
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),
     RESOURCE_NOT_FOUND(900401, "Resource not found", 404, "Requested resource not found"),
     RESOURCE_RETRIEVAL_FAILED(900402, "Resource retrieval failed", 400, "Resource retrieval failed"),
+    MALFORMED_URL(900403, "Malformed URL", 400, "Malformed URL"),
 
     // Endpoint related codes
     ENDPOINT_NOT_FOUND(900450, "Endpoint Not Found", 404, "Endpoint Not Found"),

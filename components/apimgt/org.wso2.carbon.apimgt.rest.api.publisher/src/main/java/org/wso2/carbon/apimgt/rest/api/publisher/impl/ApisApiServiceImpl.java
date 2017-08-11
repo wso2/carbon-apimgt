@@ -1063,24 +1063,25 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             InputStream wsdlStream = null;
+            if (!apiPublisher.isWSDLExists(apiId)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("WSDL has no content for API: " + apiId);
+                }
+                return Response.noContent().build();
+            }
             boolean isWSDLArchiveExists = apiPublisher.isWSDLArchiveExists(apiId);
             if (log.isDebugEnabled()) {
                 log.debug("API has WSDL archive?: " + isWSDLArchiveExists);
             }
             if (isWSDLArchiveExists) {
                 wsdlStream = apiPublisher.getAPIWSDLArchive(apiId);
-                if (wsdlStream != null) {
-                    API api = apiPublisher.getAPIbyUUID(apiId);
-                    String wsdlFileName =
-                            api.getProvider() + "-" + api.getName() + "-" + api.getVersion() + "-wsdl-archive.zip";
-
-                    return Response.ok(wsdlStream)
-                            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE)
-                            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + wsdlFileName + "\"")
-                            .build();
-                } else {
-                    return Response.noContent().build();
-                }
+                API api = apiPublisher.getAPIbyUUID(apiId);
+                String wsdlFileName =
+                        api.getProvider() + "-" + api.getName() + "-" + api.getVersion() + "-wsdl-archive.zip";
+                return Response.ok(wsdlStream)
+                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE)
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + wsdlFileName + "\"")
+                        .build();
             } else {
                 String wsdlText = apiPublisher.getAPIWSDL(apiId);
                 //TODO need to use text/xml content type. It does not work due to an issue with MSF4J -malinthaa
@@ -1442,12 +1443,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-        } catch (MalformedURLException e) {
-            String errorMessage = "Error while constructing swagger url";
-            ErrorHandler errorHandler = ExceptionCodes.SWAGGER_URL_MALFORMED;
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorHandler);
-            log.error(errorMessage, e);
-            return Response.status(errorHandler.getHttpStatusCode()).entity(errorDTO).build();
         } catch (IOException e) {
             String errorMessage = "Error while adding new API";
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);

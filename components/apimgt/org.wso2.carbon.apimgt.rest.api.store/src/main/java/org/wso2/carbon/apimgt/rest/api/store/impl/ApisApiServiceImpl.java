@@ -680,23 +680,25 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             String wsdlString;
+            if (!apiStore.isWSDLExists(apiId)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("WSDL has no content for API: " + apiId);
+                }
+                return Response.noContent().build();
+            }
+            if (StringUtils.isBlank(labelName)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Label not provided since retrieving WSDL archive for default label. API: " + apiId);
+                }
+                labelName = APIMgtConstants.LabelConstants.DEFAULT;
+            }
 
             boolean isWSDLArchiveExists = apiStore.isWSDLArchiveExists(apiId);
             if (log.isDebugEnabled()) {
                 log.debug("API has WSDL archive?: " + isWSDLArchiveExists);
             }
             if (isWSDLArchiveExists) {
-                if (StringUtils.isBlank(labelName)) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Label not provided since retrieving WSDL archive for default label. API: " + apiId);
-                    }
-                    wsdlArchiveInfo = apiStore.getAPIWSDLArchive(apiId, APIMgtConstants.LabelConstants.DEFAULT);
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Retrieving WSDL archive for label: " + labelName);
-                    }
-                    wsdlArchiveInfo = apiStore.getAPIWSDLArchive(apiId, labelName);
-                }
+                wsdlArchiveInfo = apiStore.getAPIWSDLArchive(apiId, labelName);
                 if (log.isDebugEnabled()) {
                     log.debug("Successfully retrieved WSDL archive for API: " + apiId);
                 }
@@ -708,30 +710,13 @@ public class ApisApiServiceImpl extends ApisApiService {
                                 + wsdlArchiveInfo.getFileName() + "\"")
                         .build();
             } else {
-                if (StringUtils.isBlank(labelName)) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Label not provided since retrieving WSDL for default label. API: " + apiId);
-                    }
-                    wsdlString = apiStore.getAPIWSDL(apiId, APIMgtConstants.LabelConstants.DEFAULT);
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Retrieving WSDL for label: " + labelName);
-                    }
-                    wsdlString = apiStore.getAPIWSDL(apiId, labelName);
-                }
+                wsdlString = apiStore.getAPIWSDL(apiId, labelName);
                 if (log.isDebugEnabled()) {
                     log.debug("Successfully retrieved WSDL for API: " + apiId);
                 }
-                if (!StringUtils.isEmpty(wsdlString)) {
-                    return Response.ok(wsdlString)
-                            .header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN)
-                            .build();
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("WSDL has no content for API: " + apiId);
-                    }
-                    return Response.noContent().build();
-                }
+                return Response.ok(wsdlString)
+                        .header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN)
+                        .build();
             }
         } catch (APIManagementException e) {
             Map<String, String> paramList = new HashMap<String, String>();
