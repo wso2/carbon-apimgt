@@ -549,9 +549,9 @@ public class MappingUtil {
                 default:break;
             }
         }
-        
+
         if (securityScheme.size() == 0) {
-            securitySchemeValue = 3;
+            securitySchemeValue = 1;
         }
 
         return securitySchemeValue;
