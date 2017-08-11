@@ -156,6 +156,44 @@ paths:
             The requested media type is not supported
 
 #-----------------------------------------------------
+#  Retrieve APIs created over time details
+#-----------------------------------------------------
+
+  /api/subscriber_count_by_apis:
+    get:
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/analytics/v1.0/api/apis_created_over_time?from=2017-05-30%2012:32:41.972&to=2017-07-30%202:32:41.972&created_by=admin&subscribed_to=TestAPI"
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/analytics/v1.0/api/subscriber_count_by_apis
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 329\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}"
+      summary: Get subscriber count by APIs
+      security:
+        - OAuth2Security:
+           - apim:api_view
+      summary: |
+        Retrieve Subscriber count by APIs
+      description: |
+        Get subscriber count by APIs from summarized data.
+      parameters:
+        - $ref: '#/parameters/created_by'
+      responses:
+        200:
+          description: |
+            OK.
+            Requested subscriber count by API information is returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/APISubscriptionList'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+
+#-----------------------------------------------------
 #  Retrieve APIs details
 #-----------------------------------------------------
 
@@ -313,7 +351,7 @@ definitions:
 # The API Info resource
 #-----------------------------------------------------
   APIInfo:
-    title: API Info object with basic API details.
+    title: APIInfo object with basic API details.
     properties:
       id:
         type: string
@@ -346,6 +384,33 @@ definitions:
         format: int64
         description: |
           Timestamp
+
+#-----------------------------------------------------
+# The API Subscription resource
+#-----------------------------------------------------
+  APISubscriptionCount:
+    title: APISubscription object with subscription details.
+    properties:
+      id:
+        type: string
+        example: 01234567-0123-0123-0123-012345678901
+      name:
+        type: string
+        example: CalculatorAPI
+      version:
+        type: string
+        example: 1.0.0
+      provider:
+        description: |
+          If the provider value is not given, the user invoking the API will be used as the provider.
+        type: string
+        example: admin
+      count:
+        description: |
+          No of subscriptions.
+        type: integer
+        example: 4
+
 
 #-----------------------------------------------------
 # The APICountList resource
@@ -395,3 +460,28 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/APIInfo'
+
+#-----------------------------------------------------
+# The APISubscriptionList resource
+#-----------------------------------------------------
+  APISubscriptionList:
+    title: APISubscriptionList List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of APIs.
+      next:
+        type: string
+        description: |
+          Link to the next subset of resources qualified.
+          Empty if no more resources are to be returned.
+      previous:
+        type: string
+        description: |
+          Link to the previous subset of resources qualified.
+          Empty if current subset is the first subset returned.
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/APISubscriptionCount'

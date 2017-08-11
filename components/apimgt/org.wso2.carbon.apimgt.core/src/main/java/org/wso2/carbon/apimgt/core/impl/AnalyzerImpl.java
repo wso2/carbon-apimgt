@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.core.exception.AnalyticsException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.analytics.APICount;
 import org.wso2.carbon.apimgt.core.models.analytics.APIInfo;
+import org.wso2.carbon.apimgt.core.models.analytics.APISubscriptionCount;
 import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
 
 import java.util.List;
@@ -80,6 +81,18 @@ public class AnalyzerImpl implements Analyzer {
             throw new AnalyticsException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return apiCountList;
+    }
+
+    @Override
+    public List<APISubscriptionCount> getAPISubscriptionCount(String createdBy) throws APIManagementException {
+        List<APISubscriptionCount> apiSubscriptionCountList;
+        try {
+            apiSubscriptionCountList = getAnalyticsDAO().getAPISubscriptionCount(createdBy);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while fetching API subscription count information";
+            throw new AnalyticsException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return apiSubscriptionCountList;
     }
 
     public AnalyticsDAO getAnalyticsDAO() {

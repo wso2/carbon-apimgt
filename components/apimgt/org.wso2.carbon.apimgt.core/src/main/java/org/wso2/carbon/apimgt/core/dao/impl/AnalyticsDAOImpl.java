@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.core.dao.AnalyticsDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.analytics.APICount;
 import org.wso2.carbon.apimgt.core.models.analytics.APIInfo;
+import org.wso2.carbon.apimgt.core.models.analytics.APISubscriptionCount;
 import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
@@ -162,18 +163,78 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
         return apiInfoList;
     }
 
+    /**
+     * Retrieves API subscription count information
+     *
+     * @param provider Filter for api provider
+     * @return valid {@link APISubscriptionCount} List or null
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    @Override
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
+    public List<APISubscriptionCount> getAPISubscriptionCount(String provider) throws APIMgtDAOException {
+        final String query;
+        if (("all").equals(provider)) {
+            query = "SELECT api.UUID,api.NAME,api.VERSION,api.PROVIDER,count(subs.UUID) as COUNT " +
+                    "FROM AM_SUBSCRIPTION subs,AM_API api " +
+                    "WHERE api.UUID=subs.API_ID " +
+                    "AND subs.SUB_STATUS = 'ACTIVE' " +
+                    "GROUP BY subs.API_ID;";
+        } else {
+            query = "SELECT api.UUID,api.NAME,api.VERSION,api.PROVIDER,count(subs.UUID) as COUNT " +
+                    "FROM AM_SUBSCRIPTION subs,AM_API api " +
+                    "WHERE api.UUID=subs.API_ID " +
+                    "AND subs.SUB_STATUS = 'ACTIVE' " +
+                    "AND api.PROVIDER = ? " +
+                    "GROUP BY subs.API_ID;";
+        }
+        List<APISubscriptionCount> apiSubscriptionCountList = new ArrayList<>();
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            try {
+                if (!("all").equals(provider)) {
+                    statement.setString(1, provider);
+                }
+                if (log.isDebugEnabled()) {
+                    log.debug("Executing query " + query);
+                }
+                statement.execute();
+                try (ResultSet rs = statement.getResultSet()) {
+                    while (rs.next()) {
+                        APISubscriptionCount apiSubscriptionCount = new APISubscriptionCount();
+                        apiSubscriptionCount.setId(rs.getString("UUID"));
+                        apiSubscriptionCount.setName(rs.getString("NAME"));
+                        apiSubscriptionCount.setVersion(rs.getString("VERSION"));
+                        apiSubscriptionCount.setProvider(rs.getString("PROVIDER"));
+                        apiSubscriptionCount.setCount(rs.getInt("COUNT"));
+                        apiSubscriptionCountList.add(apiSubscriptionCount);
+                    }
+                }
+            } catch (SQLException e) {
+                String errorMsg = "Error while retrieving API subscription count information from db";
+                log.error(errorMsg, e);
+                throw new APIMgtDAOException(errorMsg, e);
+            }
+        } catch (SQLException e) {
+            String errorMsg = "Error while creating database connection/prepared-statement";
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e);
+        }
+        return apiSubscriptionCountList;
+    }
+
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     public List<APIInfo> getAPIInfo(String createdBy, String fromTimestamp, String toTimestamp)
             throws APIMgtDAOException {
         final String query;
         if (("all").equals(createdBy)) {
-            query = "SELECT PROVIDER,NAME,CONTEXT,VERSION,CREATED_TIME,CURRENT_LC_STATUS," +
+            query = "SELECT UUID,PROVIDER,NAME,CONTEXT,VERSION,CREATED_TIME,CURRENT_LC_STATUS," +
                     "LC_WORKFLOW_STATUS  " +
                     "FROM AM_API " +
                     "WHERE CREATED_TIME BETWEEN ? AND ? GROUP BY CREATED_TIME ORDER BY CREATED_TIME ASC";
         } else {
-            query = "SELECT PROVIDER,NAME,CONTEXT,VERSION,CREATED_BY,CREATED_TIME,CURRENT_LC_STATUS," +
+            query = "SELECT UUID,PROVIDER,NAME,CONTEXT,VERSION,CREATED_BY,CREATED_TIME,CURRENT_LC_STATUS," +
                     "LC_WORKFLOW_STATUS  " +
                     "FROM AM_API " +
                     "WHERE (CREATED_TIME BETWEEN ? AND ?) AND CREATED_BY = ? GROUP BY CREATED_TIME ORDER BY " +
@@ -200,6 +261,7 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
                 try (ResultSet rs = statement.getResultSet()) {
                     while (rs.next()) {
                         APIInfo apiInfo = new APIInfo();
+                        apiInfo.setId(rs.getString("UUID"));
                         apiInfo.setProvider(rs.getString("PROVIDER"));
                         apiInfo.setName(rs.getString("NAME"));
                         apiInfo.setContext(rs.getString("CONTEXT"));

@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.core.dao;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.analytics.APICount;
 import org.wso2.carbon.apimgt.core.models.analytics.APIInfo;
+import org.wso2.carbon.apimgt.core.models.analytics.APISubscriptionCount;
 import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
 
 import java.util.List;
@@ -63,4 +64,13 @@ public interface AnalyticsDAO {
      */
     List<APICount> getAPICount(String createdBy, String fromTimestamp,
                                String toTimestamp) throws APIMgtDAOException;
+
+    /**
+     * Retrieves API subscription count information
+     *
+     * @param provider     Filter for api provider
+     * @return valid {@link APISubscriptionCount} List or null
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    List<APISubscriptionCount> getAPISubscriptionCount(String provider) throws APIMgtDAOException;
 }

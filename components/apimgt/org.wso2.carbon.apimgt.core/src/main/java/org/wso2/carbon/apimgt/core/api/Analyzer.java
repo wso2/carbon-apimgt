@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.core.api;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.analytics.APICount;
 import org.wso2.carbon.apimgt.core.models.analytics.APIInfo;
+import org.wso2.carbon.apimgt.core.models.analytics.APISubscriptionCount;
 import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
 
 import java.util.List;
@@ -33,4 +34,6 @@ public interface Analyzer {
     List<APIInfo> getAPIInfo(String createdBy, String fromTime, String toTime) throws APIManagementException;
 
     List<APICount> getAPICount(String createdBy, String fromTime, String toTime) throws APIManagementException;
+
+    List<APISubscriptionCount> getAPISubscriptionCount(String createdBy) throws APIManagementException;
 }

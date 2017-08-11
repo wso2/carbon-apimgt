@@ -6,10 +6,12 @@ import org.wso2.carbon.apimgt.core.api.Analyzer;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.analytics.APICount;
 import org.wso2.carbon.apimgt.core.models.analytics.APIInfo;
+import org.wso2.carbon.apimgt.core.models.analytics.APISubscriptionCount;
 import org.wso2.carbon.apimgt.rest.api.analytics.ApiApiService;
 import org.wso2.carbon.apimgt.rest.api.analytics.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.APICountListDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.APIInfoListDTO;
+import org.wso2.carbon.apimgt.rest.api.analytics.dto.APISubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.mappings.AnalyticsMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -28,8 +30,8 @@ public class ApiApiServiceImpl extends ApiApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             if (log.isDebugEnabled()) {
-                log.debug("Retrieving APIs created over time. From: " + from + " to: " + to + " " +
-                        "created by: " + createdBy);
+                log.debug("Retrieving APIs created over time. [From: " + from + " to: " + to + " " +
+                        "created by: " + createdBy + "]");
             }
             Analyzer analyzer = RestApiUtil.getAnalyzer(username);
             List<APICount> apiCountList = analyzer.getAPICount(createdBy, from, to);
@@ -46,17 +48,39 @@ public class ApiApiServiceImpl extends ApiApiService {
     }
 
     @Override
+    public Response apiSubscriberCountByApisGet(String createdBy, Request request) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            if (log.isDebugEnabled()) {
+                log.debug("Retrieving APIs created over time. [created by: " + createdBy + "]");
+            }
+            Analyzer analyzer = RestApiUtil.getAnalyzer(username);
+            List<APISubscriptionCount> apiSubscriptionCountList = analyzer.getAPISubscriptionCount(createdBy);
+            APISubscriptionListDTO apiSubscriptionListDTO = AnalyticsMappingUtil
+                    .fromAPISubscriptionInfoListToDTO(apiSubscriptionCountList);
+            return Response.ok().entity(apiSubscriptionListDTO).build();
+
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving API subscription info";
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+    @Override
     public Response apiApiInfoGet(String from, String to, String createdBy, String apiFilter, Request request)
             throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             if (log.isDebugEnabled()) {
-                log.debug("Retrieving API information. From: " + from + " to: " + to + " created by: " + createdBy);
+                log.debug("Retrieving API information. [From: " + from + " to: " + to + " created by: " +
+                        "" + createdBy + "]");
             }
             Analyzer analyzer = RestApiUtil.getAnalyzer(username);
             List<APIInfo> apiInfoList = analyzer.getAPIInfo(createdBy, from, to);
             APIInfoListDTO apiInfoListDTO = AnalyticsMappingUtil
-                    .fromAPIInfoToListDTO(apiInfoList);
+                    .fromAPIInfoListToDTO(apiInfoList);
             return Response.ok().entity(apiInfoListDTO).build();
 
         } catch (APIManagementException e) {

@@ -17,11 +17,14 @@ package org.wso2.carbon.apimgt.rest.api.analytics.mappings;
 
 import org.wso2.carbon.apimgt.core.models.analytics.APICount;
 import org.wso2.carbon.apimgt.core.models.analytics.APIInfo;
+import org.wso2.carbon.apimgt.core.models.analytics.APISubscriptionCount;
 import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.APICountDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.APICountListDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.APIInfoListDTO;
+import org.wso2.carbon.apimgt.rest.api.analytics.dto.APISubscriptionCountDTO;
+import org.wso2.carbon.apimgt.rest.api.analytics.dto.APISubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.ApplicationCountDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.ApplicationCountListDTO;
 
@@ -75,7 +78,7 @@ public class AnalyticsMappingUtil {
      * @param apiInfoList list of ApiInfo objects
      * @return corresponding APIInfoListDTO object
      */
-    public static APIInfoListDTO fromAPIInfoToListDTO(List<APIInfo> apiInfoList) {
+    public static APIInfoListDTO fromAPIInfoListToDTO(List<APIInfo> apiInfoList) {
         APIInfoListDTO apiInfoListDTO = new APIInfoListDTO();
         List<APIInfoDTO> apiInfoDTOList = new ArrayList<>();
         apiInfoListDTO.setCount(apiInfoList.size());
@@ -86,8 +89,33 @@ public class AnalyticsMappingUtil {
         return apiInfoListDTO;
     }
 
+    /**
+     * Converts and APISubscriptionInfoList to APIInfoListDTO
+     *
+     * @param apiSubscriptionCountList list of ApiInfo objects
+     * @return corresponding APIInfoListDTO object
+     */
+    public static APISubscriptionListDTO fromAPISubscriptionInfoListToDTO(List<APISubscriptionCount>
+                                                                                  apiSubscriptionCountList) {
+        APISubscriptionListDTO apiSubscriptionListDTO = new APISubscriptionListDTO();
+        List<APISubscriptionCountDTO> apiSubscriptionDTOList = new ArrayList<>();
+        apiSubscriptionListDTO.setCount(apiSubscriptionCountList.size());
+        for (APISubscriptionCount apiSubscriptionCount : apiSubscriptionCountList) {
+            APISubscriptionCountDTO apiSubscriptionDTO = new APISubscriptionCountDTO();
+            apiSubscriptionDTO.setId(apiSubscriptionCount.getId());
+            apiSubscriptionDTO.setName(apiSubscriptionCount.getName());
+            apiSubscriptionDTO.setVersion(apiSubscriptionCount.getVersion());
+            apiSubscriptionDTO.setProvider(apiSubscriptionCount.getProvider());
+            apiSubscriptionDTO.setCount(apiSubscriptionCount.getCount());
+            apiSubscriptionDTOList.add(apiSubscriptionDTO);
+        }
+        apiSubscriptionListDTO.setList(apiSubscriptionDTOList);
+        return apiSubscriptionListDTO;
+    }
+
     private static APIInfoDTO fromAPIInfoToDTO(APIInfo apiInfo) {
         APIInfoDTO apiInfoDTO = new APIInfoDTO();
+        apiInfoDTO.setId(apiInfo.getId());
         apiInfoDTO.setName(apiInfo.getName());
         apiInfoDTO.setContext(apiInfo.getContext());
         apiInfoDTO.setDescription(apiInfo.getDescription());
