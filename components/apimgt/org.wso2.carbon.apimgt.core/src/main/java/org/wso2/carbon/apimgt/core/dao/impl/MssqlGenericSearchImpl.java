@@ -27,7 +27,7 @@ import org.wso2.carbon.apimgt.core.models.APIStatus;
 class MssqlGenericSearchImpl implements StoreApiAttributeSearch {
 
     private static final String API_SUMMARY_SELECT_STORE = "SELECT UUID, PROVIDER, NAME, CONTEXT, " +
-            "VERSION, DESCRIPTION, CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS " +
+            "VERSION, DESCRIPTION, CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS, SECURITY_SCHEME " +
             "FROM AM_API ";
 
     @Override

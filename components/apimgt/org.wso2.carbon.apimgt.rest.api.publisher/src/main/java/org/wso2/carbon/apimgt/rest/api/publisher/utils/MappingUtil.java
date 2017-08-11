@@ -532,6 +532,12 @@ public class MappingUtil {
         return wsdlValidationResponseDTO;
     }
 
+    /**
+     * This method maps the security scheme list in to an integer values
+     *
+     * @param securityScheme security schemes list
+     * @return security scheme integer value
+     */
     public static int mapSecuritySchemeListToInt(List<String> securityScheme) {
         int securitySchemeValue = 0;
         for(String scheme : securityScheme) {
@@ -543,9 +549,20 @@ public class MappingUtil {
                 default:break;
             }
         }
+
+        if (securityScheme.isEmpty()) {
+            securitySchemeValue = 1;
+        }
+
         return securitySchemeValue;
     }
 
+    /**
+     * This method maps the security scheme int in to a string list
+     *
+     * @param securityScheme security schemes int value
+     * @return security scheme list
+     */
     public static List<String> mapSecuritySchemeIntToList(int securityScheme) {
         List<String> securitySchemesList = new ArrayList<String>();
         if ((securityScheme & 1) == 1) { //Oauth

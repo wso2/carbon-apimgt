@@ -58,7 +58,6 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
@@ -1976,19 +1975,9 @@ public class ApiDAOImpl implements ApiDAO {
     private List<API> constructAPISummaryList(Connection connection, PreparedStatement statement) throws SQLException {
         List<API> apiList = new ArrayList<>();
         try (ResultSet rs = statement.executeQuery()) {
-            ResultSetMetaData metadata = rs.getMetaData();
-            int columnCount = metadata.getColumnCount();
-            boolean schemeExists = false;
-            for (int i = 0; i < columnCount; i++) {
-                if (metadata.getColumnName(i + 1).equals("SECURITY_SCHEME")) {
-                    schemeExists = true;
-                    break;
-                }
-            }
-
             while (rs.next()) {
                 String apiPrimaryKey = rs.getString("UUID");
-                API.APIBuilder apiSummaryBuilder = new API.APIBuilder(rs.getString("PROVIDER"), rs.getString("NAME"),
+                API apiSummary = new API.APIBuilder(rs.getString("PROVIDER"), rs.getString("NAME"),
                         rs.getString("VERSION")).
                         id(apiPrimaryKey).
                         context(rs.getString("CONTEXT")).
@@ -1996,13 +1985,9 @@ public class ApiDAOImpl implements ApiDAO {
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
                         lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
                         workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).
-                        permissionMap(getPermissionMapForApi(connection, apiPrimaryKey));
+                        permissionMap(getPermissionMapForApi(connection, apiPrimaryKey)).
+                        securityScheme(rs.getInt("SECURITY_SCHEME")).build();
 
-                if (schemeExists) {
-                    apiSummaryBuilder = apiSummaryBuilder.securityScheme(rs.getInt("SECURITY_SCHEME"));
-                }
-                
-                API apiSummary = apiSummaryBuilder.build();
                 apiList.add(apiSummary);
             }
 
