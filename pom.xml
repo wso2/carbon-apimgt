@@ -532,7 +532,12 @@
                 <artifactId>XmlSchema</artifactId>
                 <version>${xmlschema.version}</version>
             </dependency>
-        </dependencies>
+            <dependency>
+                <groupId>org.wso2.orbit.io.swagger</groupId>
+                <artifactId>swagger-codegen</artifactId>
+                <version>${swagger.codegen.version}</version>
+            </dependency>
+        </dependencies> 
     </dependencyManagement>
 
     <build>
@@ -901,5 +906,6 @@
         <apache.woden.version>1.0.0.M9-wso2v1</apache.woden.version>
         <wsdl4j.version>1.6.2.wso2v4</wsdl4j.version>
         <xmlschema.version>1.4.7.wso2v2</xmlschema.version>
+        <swagger.codegen.version>2.2.0.wso2v2</swagger.codegen.version>
     </properties>
 </project>
