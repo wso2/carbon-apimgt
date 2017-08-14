@@ -24,6 +24,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 import org.wso2.carbon.apimgt.core.workflow.Workflow;
@@ -86,7 +87,7 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
         Assert.assertEquals(retrieveWorflow.getStatus(), WorkflowStatus.APPROVED);
     }
     
-    @Test 
+    @Test
     public void testUpdateWorkflowStatusWithoutAddingEntry() throws Exception {
         WorkflowDAO workflowDAO = DAOFactory.getWorkflowDAO();
         String workflowRefId = UUID.randomUUID().toString();
@@ -94,9 +95,17 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
         workflow.setStatus(WorkflowStatus.APPROVED);
         workflow.setUpdatedTime(LocalDateTime.now());
         workflowDAO.updateWorkflowStatus(workflow);
-        Workflow retrieveWorflow = workflowDAO.retrieveWorkflow(workflow.getExternalWorkflowReference());
 
-        Assert.assertNull(retrieveWorflow, "workflow entry is in the database");
+        // Workflow entry should not be in the db. so exception should be thrown
+        try {
+            workflowDAO.retrieveWorkflow(workflow.getExternalWorkflowReference());
+            // should throw exception.
+            Assert.fail("Expected exception is not thrown when entry is not in the DB");
+        } catch (APIMgtDAOException e) {
+            String msg = "Workflow not found for : " + workflowRefId;
+            Assert.assertEquals(e.getMessage(), msg);
+            Assert.assertEquals(e.getErrorHandler().getErrorCode(), 900551);
+        }
     }
 
     @Test
@@ -171,10 +180,17 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
         Workflow workflow = SampleTestObjectCreator.createWorkflow(workflowRefId);
         workflowDAO.addWorkflowEntry(workflow);
         workflowDAO.deleteWorkflowEntryforExternalReference(workflow.getExternalWorkflowReference());
-        
-        Workflow retrieveWorflow = workflowDAO.retrieveWorkflow(workflow.getExternalWorkflowReference());
-        Assert.assertNull(retrieveWorflow, "Workflow entry still exists");
 
+        // Workflow entry should not be in the db. so exception should be thrown
+        try {
+            workflowDAO.retrieveWorkflow(workflow.getExternalWorkflowReference());
+            // should throw exception.
+            Assert.fail("Expected exception is not thrown when entry is not in the DB");
+        } catch (APIMgtDAOException e) {
+            String msg = "Workflow not found for : " + workflowRefId;
+            Assert.assertEquals(e.getMessage(), msg);
+            Assert.assertEquals(e.getErrorHandler().getErrorCode(), 900551);
+        }
     }
     
     @Test

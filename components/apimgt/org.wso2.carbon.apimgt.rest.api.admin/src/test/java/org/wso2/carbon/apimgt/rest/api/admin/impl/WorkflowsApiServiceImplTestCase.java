@@ -28,6 +28,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.APIMgtAdminServiceImpl;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
@@ -165,6 +166,23 @@ public class WorkflowsApiServiceImplTestCase {
 
     }
     
+    @Test
+    public void testWorkflowsWorkflowReferenceIdGetForInvalidReference() throws Exception {
+        printTestMethodName();
+        WorkflowsApiServiceImpl workflowsApiService = new WorkflowsApiServiceImpl();
+        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
+        String workflowRefId = UUID.randomUUID().toString();
+
+        String message = "Workflow not found for : " + workflowRefId;
+        Mockito.doThrow( new APIMgtDAOException(message, ExceptionCodes.WORKFLOW_NOT_FOUND)).when(adminService)
+                .retrieveWorkflow(workflowRefId);
+
+        Response response = workflowsApiService.workflowsWorkflowReferenceIdGet(workflowRefId, getRequest());
+        assertEquals(404, response.getStatus());
+
+    }
     @Test
     public void testWorkflowsGetWithoutType() throws Exception {
         printTestMethodName();

@@ -667,7 +667,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         } catch (APIMgtDAOException e) {
             String message = "Error while retrieving workflow entry for :" + workflowRefId;
             log.error(message, e);
-            throw new APIManagementException(message, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIManagementException(message, e, e.getErrorHandler());
         }    
     }
 

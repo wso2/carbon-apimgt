@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.WorkflowUtils;
 import org.wso2.carbon.apimgt.core.workflow.Workflow;
@@ -137,7 +138,14 @@ public class WorkflowDAOImpl implements WorkflowDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 List<Workflow> list = this.createWorkflowFromResultSet(rs);
                 if (!list.isEmpty()) {
+                    // workflowReference is a unique value.
+                    //there is only one entry for that value. Hence get the first      
                     workflow = list.get(0);
+                } else {
+                    // not found
+                    String msg = "Workflow not found for : " + workflowReference;
+                    log.warn(msg);
+                    throw new APIMgtDAOException(msg, ExceptionCodes.WORKFLOW_NOT_FOUND);
                 }
 
             } catch (ParseException e) {
