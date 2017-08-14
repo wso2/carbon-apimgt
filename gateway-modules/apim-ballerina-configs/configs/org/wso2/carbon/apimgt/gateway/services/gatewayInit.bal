@@ -22,14 +22,14 @@ function initGateway () (boolean) {
         //Register gateway in API Core
         gatewayUtil:registerGateway();
         //Retrieve APIs from API Core and deploy
-
-        gatewayUtil:loadAPIs(gatewayUtil:getAPIs());
-        gatewayUtil:loadAPIs(gatewayUtil:getOfflineAPIs());
-
+        system:println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+        gatewayUtil:loadAPIs();
+        gatewayUtil:loadOfflineAPIs();
+        system:println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
         gatewayUtil:loadGlobalEndpoints();
-
+        system:println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
         gatewayUtil:loadBlockConditions();
-
+        system:println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
     } catch (errors:Error e) {
         system:println("Error while initilazing API gateway. " + e.msg);
     }

@@ -10,6 +10,8 @@ import org.wso2.carbon.apimgt.gateway.holders as holder;
 import org.wso2.carbon.apimgt.ballerina.deployment;
 import org.wso2.carbon.apimgt.ballerina.util as apimgtUtil;
 import ballerina.lang.strings;
+import ballerina.lang.files;
+import ballerina.lang.blobs;
 import org.wso2.carbon.apimgt.ballerina.util;
 function registerGateway () (json) {
     system:println("registerGateway() in APICoreUtil");
@@ -34,9 +36,9 @@ function registerGateway () (json) {
     return gatewayConfig;
 }
 
-function loadAPIs (json apis) {
+function loadAPIs () {
 
-    //json apis = getAPIs();
+    json apis = getAPIs();
     int index = 0;
     errors:TypeCastError err;
     int count;
@@ -106,30 +108,111 @@ function getAPIs () (json) {
     return apiList;
 }
 
-function getOfflineAPIs () (json) {
-    system:println("start getOfflineAPIs() in APICoreUtil");
+function returnValue(string pair)(string){
+    string[] array = strings:split(pair," ");
+    return array[1];
+}
 
-    string offlineDirectory;
-    json apiList;
-    try {
+function returnAPI(int i,string[] array)(dto:APIDTO){
+    dto:APIDTO api = {};
+    api.id=returnValue(array[i+1]);
+   // system:println(api.id);
+    api.name=returnValue(array[i+2]);
+    //system:println(api.name);
+    api.context=returnValue(array[i+3]);
+    //system:println(api.context);
+    api.version=returnValue(array[i+4]);
+    //system:println(api.version);
+    api.lifeCycleStatus=returnValue(array[i+5]);
+    //system:println(api.lifeCycleStatus);
+    return api;
+}
+function loadOfflineAPIs () {
+    system:println("start loadOfflineAPIs() in APICoreUtil");
+    json apiList={};
 
-        //files:File target = {path:getOfflineDirectory()};
-        //files:open(target, "r");         //opens the file in the read mode
-        //var content, n = files:read(target, 100000000);
+    files:File t = {path:"/home/sabeena/Desktop/API Repo/getOfflineAPIs.txt"};
+    files:open(t, "r");         //opens the file in the read mode
+    var content, n = files:read(t, 100000000);
+        //so there's a limit! only 100000000 can be read
 
-        //string strAPIList = blobs:toString(content, "utf-8");
-        //apiList = strAPIList;
-        //system:println(apiList);
-        apiList = getOfflineAPIList();
-        system:println("end getOfflineAPIs() in APICoreUtil");
-        return apiList;
+    string strAPIList = blobs:toString(content, "utf-8");
+    string[] array = strings:split(strAPIList, "\n");
 
-    } catch (errors:Error e) {
-        system:println("Error occurred while retrieving gateway APIs from API Core. " + e.msg);
-        throw e;
+    //system:println("array okay");
+    //system:println(array);
+
+    var count,_ = <int>array[0];
+    apiList.count = count;
+//system:println(apiList);
+    //dto:APIDTO list = [];
+    int index=0;
+
+    while(index<count){
+        dto:APIDTO api = returnAPI(5*index,array);
+        //list[index] = api;
+
+        string apiConfig;
+        int status;
+
+       // system:println(api);
+
+        status, apiConfig = getOfflineAPIServiceConfig(api.id);
+
+        system:println("status");
+        system:println(status);
+        system:println("apiConfig");
+        system:println(apiConfig);
+
+        int maxRetries = 3;
+        int i = 0;
+        while (status == Constants:NOT_FOUND) {
+            apimgtUtil:wait(10000);
+            status, apiConfig = getOfflineAPIServiceConfig(api.id);
+            i = i + 1;
+            if (i > maxRetries) {
+                break;
+            }
+        }
+        //todo : tobe implement
+        // deployService(api, apiConfig);
+        //Update API cache
+        holder:putIntoAPICache(api);
+
+        //system:println("ai me :(");
+
+        retrieveOfflineResources(api.context, api.version);
+
+        index = index+1;
+
     }
-    system:println("end getOfflineAPIs() in APICoreUtil");
-    return apiList;
+
+
+
+    system:println("end loadOfflineAPIs() in APICoreUtil");
+}
+
+function getOfflineAPIServiceConfig (string apiId) (int, string) {
+    system:println("start getOfflineAPIServiceConfig() in APICoreUtil");
+    string apiConfig;
+    int status;
+    files:File target = {path:"/home/sabeena/Desktop/API Repo/"+ apiId + ".bal"};
+    boolean b = files:exists(target);
+    system:println(b);
+    if(b){
+        files:open(target, "r");
+        var content, n = files:read(target, 100000000);
+        apiConfig = blobs:toString(content, "utf-8");
+        status = 200;
+    }else{
+        target = {path:"/home/sabeena/Desktop/API Repo/ErrorDTO.bal"};
+        files:open(target, "r");
+        var content, n = files:read(target, 100000000);
+        apiConfig = blobs:toString(content, "utf-8");
+        status= 404;
+    }
+    system:println("end getOfflineAPIServiceConfig() in APICoreUtil");
+    return status, apiConfig;
 }
 
 function getEndpoints () (json) {
@@ -235,6 +318,7 @@ function getAPIServiceConfig (string apiId) (int, string) {
     try {
         http:ClientConnector client = create http:ClientConnector(getAPICoreURL());
         response = http:ClientConnector.get(client, "/api/am/core/v1.0/apis/" + apiId + "/gateway-config", request);
+
         apiConfig = messages:getStringPayload(response);
         status = http:getStatusCode(response);
     } catch (errors:Error e) {
@@ -247,6 +331,7 @@ function getAPIServiceConfig (string apiId) (int, string) {
     system:println(apiConfig);
     return status, apiConfig;
 }
+
 function getEndpointConfig (string endpointId) (int, string) {
     system:println("getEndpointConfig() in APICoreUtil");
     message request = {};
@@ -299,21 +384,6 @@ function getAPICoreURL () (string) {
         apiCoreURL = "https://localhost:9292";
     }
     return apiCoreURL;
-}
-
-function getOfflineDirectory () (string) {
-
-    //has to use a switch statement here whether to read form which file
-    //decide factor should be passed as an argument to the method.
-    system:println("getOfflineDirectory() in APICoreUtil");
-    string offlineDirectory;
-
-    if (getSystemProperty(Constants:OFFLINE_DIRECTORY) != "") {
-        offlineDirectory = getSystemProperty(Constants:OFFLINE_DIRECTORY);
-    } else {
-        offlineDirectory = "/home/sabeena/Documents/OfflineDirectory/getAPIs.txt";
-    }
-    return offlineDirectory;
 }
 
 function deployService (dto:APIDTO api, string config) {
