@@ -941,26 +941,26 @@ public class APIMgtAdminServiceImplTestCase {
     }
 
     private APIMgtAdminServiceImpl getAPIMgtAdminServiceImpl(ApiDAO apiDAO) {
-        return new APIMgtAdminServiceImpl(null, null, apiDAO, null, null, null);
+        return new APIMgtAdminServiceImpl(null, null, apiDAO, null, null, null, null);
     }
 
     private APIMgtAdminServiceImpl getAPIMgtAdminServiceImpl(ApplicationDAO applicationDAO) {
-        return new APIMgtAdminServiceImpl(null, null, null, null, applicationDAO, null);
+        return new APIMgtAdminServiceImpl(null, null, null, null, applicationDAO, null, null);
     }
 
     private APIMgtAdminServiceImpl getAPIMgtAdminServiceImpl(PolicyDAO policyDAO) {
-        return new APIMgtAdminServiceImpl(null, policyDAO, null, null, null, null);
+        return new APIMgtAdminServiceImpl(null, policyDAO, null, null, null, null, null);
     }
 
     private APIMgtAdminServiceImpl getAPIMgtAdminServiceImpl(APISubscriptionDAO apiSubscriptionDAO) {
-        return new APIMgtAdminServiceImpl(apiSubscriptionDAO, null, null, null, null, null);
+        return new APIMgtAdminServiceImpl(apiSubscriptionDAO, null, null, null, null, null, null);
     }
 
     private APIMgtAdminServiceImpl getAPIMgtAdminServiceImpl(LabelDAO labelDAO) {
-        return new APIMgtAdminServiceImpl(null, null, null, labelDAO, null, null);
+        return new APIMgtAdminServiceImpl(null, null, null, labelDAO, null, null, null);
     }
 
     private APIMgtAdminServiceImpl getAPIMgtAdminServiceImpl(PolicyDAO policyDAO, APIGateway apiGateway) {
-        return new APIMgtAdminServiceImpl(null, policyDAO, null, null, null, apiGateway);
+        return new APIMgtAdminServiceImpl(null, policyDAO, null, null, null, apiGateway, null);
     }
 }
