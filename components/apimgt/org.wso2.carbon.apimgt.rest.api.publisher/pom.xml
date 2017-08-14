@@ -213,7 +213,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.parent.parent.basedir}/docs/AM300/apidocs/publisher
+                            <outputDirectory>${project.parent.parent.basedir}/docs/apis/publisher/v1.0
                             </outputDirectory>
                             <resources>
                                 <resource>
