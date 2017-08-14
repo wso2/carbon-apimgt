@@ -7,7 +7,9 @@ import ballerina.net.http;
 import org.wso2.carbon.apimgt.gateway.dto as dto;
 import org.wso2.carbon.apimgt.gateway.holders as holders;
 import org.wso2.carbon.apimgt.gateway.constants;
-
+import ballerina.lang.strings;
+import ballerina.lang.blobs;
+import ballerina.lang.files;
 errors:TypeCastError err;
 
 function constructAccessTokenNotFoundPayload (message response) {
@@ -111,6 +113,8 @@ function retrieveSubscriptions () (boolean) {
     messages:setHeader(request, "Content-Type", "application/json");
     message response = http:ClientConnector.get(apiInfoConnector, query, request);
     json subscriptions = messages:getJsonPayload(response);
+    system:println("subscriptions : ");
+    system:println(subscriptions);
     putIntoSubscriptionCache(subscriptions.list);
     return true;
 }
@@ -140,6 +144,51 @@ function removeFromSubscriptionCache (json subscriptions) {
         i = i + 1;
     }
 
+}
+
+function returnVal(string pair)(string){
+    string[] array = strings:split(pair,":");
+    return array[1];
+}
+
+function returnResource(int i,string[] array)(dto:ResourceDto){
+    dto:ResourceDto res = {};
+
+    res.uriTemplate=returnVal(array[i]);
+    system:println(res.uriTemplate);
+    res.httpVerb=returnVal(array[i+1]);
+    system:println(res.httpVerb);
+    res.authType=returnVal(array[i+2]);
+    system:println(res.authType);
+    res.policy=returnVal(array[i+3]);
+    system:println(res.policy);
+    res.scope=returnVal(array[i+4]);
+    system:println(res.scope);
+
+    return res;
+}
+
+function retrieveOfflineResources(string apiContext, string apiVersion){
+    system:println("start retrieveOfflineResources() in Utils");
+
+    files:File t = {path:"/home/sabeena/Desktop/API Repo/retrieveOfflineResources.txt"};
+    files:open(t, "r");
+    var content, n = files:read(t, 100000000);
+
+    string strAPIList = blobs:toString(content, "utf-8");
+    string[] array = strings:split(strAPIList, "\n");
+    system:println(array);
+
+    int index = 0;
+
+    while(index<6){
+        dto:ResourceDto res = returnResource(5*index,array);
+        holders:putIntoResourceCache(apiContext, apiVersion, res);
+        system:println(res);
+        index = index + 1;
+    }
+
+    system:println("end retrieveROfflineesources() in Utils");
 }
 
 function retrieveResources (string apiContext, string apiVersion) {
@@ -178,6 +227,8 @@ function retrieveApplications () (boolean) {
     json applications = messages:getJsonPayload(response);
     int length = jsons:getInt(applications, "$.list.length()");
     int i = 0;
+    system:println("applications :");
+    system:println(applications);
     if (length > 0) {
         while (i < length) {
             json application = applications.list[i];
@@ -195,6 +246,8 @@ function retrievePolicies () (boolean) {
     messages:setHeader(request, "Content-Type", "application/json");
     message response = http:ClientConnector.get(apiInfoConnector, query, request);
     json policies = messages:getJsonPayload(response);
+    system:println("policies :");
+    system:println(policies);
     int length;
     length, err = (int)policies.count;
     int i = 0;
