@@ -1157,9 +1157,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
             APIUtils.verifyValidityOfApiUpdate(apiBuilder, originalAPI);
 
-            try {
+            try (InputStream gatewayConfig = getApiDAO().getCompositeAPIGatewayConfig(apiBuilder.getId())) {
                 String updatedSwagger = apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder);
-                InputStream gatewayConfig = getApiDAO().getCompositeAPIGatewayConfig(apiBuilder.getId());
                 GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
                 APIConfigContext apiConfigContext = new APIConfigContext(apiBuilder.build(), config
                         .getGatewayPackageName());
