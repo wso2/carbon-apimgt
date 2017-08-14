@@ -262,6 +262,8 @@ public class AuthenticatorService {
             applicationRestAPI = RestApiUtil.getPublisherRestAPIResource();
         } else if (AuthenticatorConstants.ADMIN_APPLICATION.equals(appName)) {
             applicationRestAPI = RestApiUtil.getAdminRestAPIResource();
+        } else if (AuthenticatorConstants.ADMIN_NEW_APPLICATION.equals(appName)) {
+            applicationRestAPI = RestApiUtil.getAdminRestAPIResource();
         }
         //Todo: when all swaggers modified with no vendor extension, following swagger parser should be modified.
         //todo: for now only publisher swagger have been modified for no vendor extensions

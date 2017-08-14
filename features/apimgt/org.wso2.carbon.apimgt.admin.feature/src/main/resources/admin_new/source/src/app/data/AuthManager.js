@@ -23,19 +23,16 @@ import Configs from './ConfigManager'
 import Utils from './utils'
 import User from './User'
 
-const context = "publisher";
-
 class AuthManager {
     constructor() {
         /* TODO: Move this to configuration ~tmkb*/
         this.host = window.location.protocol + "//" + window.location.host;
-        //TODO context: publisher ???
-        this.token = "/login/token/" + context;
+        this.token = "/login/token/admin_new";
         this.isLogged = false;
         this.username = null;
         this.userscope = null;
         this.bearer = "Bearer ";
-        this.contextPath = "/store_new";
+        this.contextPath = "/admin_new";
     }
 
     static refreshTokenOnExpire() {
@@ -55,7 +52,7 @@ class AuthManager {
                 function (error) {
                     let error_data = JSON.parse(error.responseText);
                     let message = "Error while refreshing token" + "<br/> You will be redirect to the login page ...";
-                    /*noty({
+                    noty({
                         text: message,
                         type: 'error',
                         dismissQueue: true,
@@ -70,7 +67,7 @@ class AuthManager {
                                 window.location = loginPageUri;
                             },
                         }
-                    });*/
+                    });
 
                 }
             );
@@ -88,7 +85,7 @@ class AuthManager {
         }
         let message = "The session has expired" + ".<br/> You will be redirect to the login page ...";
         if (typeof noty !== 'undefined') {
-            /*noty({
+            noty({
                 text: message,
                 type: 'error',
                 dismissQueue: true,
@@ -103,7 +100,7 @@ class AuthManager {
                         window.location = loginPageUri;
                     },
                 }
-            });*/
+            });
         } else {
             throw error_response;
         }
@@ -131,7 +128,6 @@ class AuthManager {
      * @param {User} user : An instance of the {User} class
      */
     static setUser(user) {
-        console.info("Setting user", user);
         if (!user instanceof User) {
             throw new Error("Invalid user object");
         }
@@ -161,16 +157,18 @@ class AuthManager {
             password: password,
             grant_type: 'password',
             validity_period: 3600,
-            scopes: 'apim:subscribe apim:signup apim:workflow_approve'
+            scopes: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage apim:subscription_view apim:subscription_block apim:subscribe'
         };
         let promised_response = axios.post(this.getTokenEndpoint(), qs.stringify(data), {headers: headers});
         promised_response.then(response => {
             const validityPeriod = response.data.validityPeriod; // In seconds
             const WSO2_AM_TOKEN_1 = response.data.partialToken;
             const user = new User(response.data.authUser, response.data.idToken);
-            user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, "/store_new");
+            user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, "/admin_new");
             user.scopes = response.data.scopes.split(" ");
             AuthManager.setUser(user);
+        }).catch(function (error) {
+            console.log("");
         });
         return promised_response;
     }
@@ -180,10 +178,11 @@ class AuthManager {
      */
     logout() {
         let authHeader = this.bearer + AuthManager.getUser().getPartialToken();
-        //TODO Will have to change the logout end point url to contain the app context(i.e. publisher/store, etc.)
-        let url = this.host + "/login/logout";
+        //TODO Will have to change the logout end point url to contain the app context(i.e. admin_new/store, etc.)
+        let url = this.host + "/login/logout/admin_new";
         let headers = {
             'Accept': 'application/json',
+            'Content-Type': 'application/json',
             'Authorization': authHeader
         };
         const promisedLogout = axios.post(url, null, {headers: headers});
@@ -197,7 +196,8 @@ class AuthManager {
         let params = {
             grant_type: 'refresh_token',
             validity_period: '3600',
-            scopes: 'apim:subscribe apim:signup apim:workflow_approve'
+            scopes: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage' +
+            ' apim:subscription_view apim:subscription_block apim:subscribe'
         };
         let referrer = (document.referrer.indexOf("https") !== -1) ? document.referrer : null;
         let url = this.contextPath + '/auth/apis/login/token';
