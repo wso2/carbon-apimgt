@@ -11,9 +11,9 @@ import org.wso2.carbon.apimgt.rest.api.analytics.dto.APISubscriptionCountDTO;
 import java.util.Objects;
 
 /**
- * APISubscriptionListDTO
+ * APISubscriptionCountListDTO
  */
-public class APISubscriptionListDTO   {
+public class APISubscriptionCountListDTO   {
   @JsonProperty("count")
   private Integer count = null;
 
@@ -26,7 +26,7 @@ public class APISubscriptionListDTO   {
   @JsonProperty("list")
   private List<APISubscriptionCountDTO> list = new ArrayList<APISubscriptionCountDTO>();
 
-  public APISubscriptionListDTO count(Integer count) {
+  public APISubscriptionCountListDTO count(Integer count) {
     this.count = count;
     return this;
   }
@@ -44,7 +44,7 @@ public class APISubscriptionListDTO   {
     this.count = count;
   }
 
-  public APISubscriptionListDTO next(String next) {
+  public APISubscriptionCountListDTO next(String next) {
     this.next = next;
     return this;
   }
@@ -62,7 +62,7 @@ public class APISubscriptionListDTO   {
     this.next = next;
   }
 
-  public APISubscriptionListDTO previous(String previous) {
+  public APISubscriptionCountListDTO previous(String previous) {
     this.previous = previous;
     return this;
   }
@@ -80,12 +80,12 @@ public class APISubscriptionListDTO   {
     this.previous = previous;
   }
 
-  public APISubscriptionListDTO list(List<APISubscriptionCountDTO> list) {
+  public APISubscriptionCountListDTO list(List<APISubscriptionCountDTO> list) {
     this.list = list;
     return this;
   }
 
-  public APISubscriptionListDTO addListItem(APISubscriptionCountDTO listItem) {
+  public APISubscriptionCountListDTO addListItem(APISubscriptionCountDTO listItem) {
     this.list.add(listItem);
     return this;
   }
@@ -112,11 +112,11 @@ public class APISubscriptionListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    APISubscriptionListDTO apISubscriptionList = (APISubscriptionListDTO) o;
-    return Objects.equals(this.count, apISubscriptionList.count) &&
-        Objects.equals(this.next, apISubscriptionList.next) &&
-        Objects.equals(this.previous, apISubscriptionList.previous) &&
-        Objects.equals(this.list, apISubscriptionList.list);
+    APISubscriptionCountListDTO apISubscriptionCountList = (APISubscriptionCountListDTO) o;
+    return Objects.equals(this.count, apISubscriptionCountList.count) &&
+        Objects.equals(this.next, apISubscriptionCountList.next) &&
+        Objects.equals(this.previous, apISubscriptionCountList.previous) &&
+        Objects.equals(this.list, apISubscriptionCountList.list);
   }
 
   @Override
@@ -127,7 +127,7 @@ public class APISubscriptionListDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APISubscriptionListDTO {\n");
+    sb.append("class APISubscriptionCountListDTO {\n");
     
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
     sb.append("    next: ").append(toIndentedString(next)).append("\n");

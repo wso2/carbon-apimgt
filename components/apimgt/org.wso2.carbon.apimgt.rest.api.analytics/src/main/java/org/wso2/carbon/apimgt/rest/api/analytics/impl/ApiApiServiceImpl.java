@@ -11,7 +11,7 @@ import org.wso2.carbon.apimgt.rest.api.analytics.ApiApiService;
 import org.wso2.carbon.apimgt.rest.api.analytics.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.APICountListDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.APIInfoListDTO;
-import org.wso2.carbon.apimgt.rest.api.analytics.dto.APISubscriptionListDTO;
+import org.wso2.carbon.apimgt.rest.api.analytics.dto.APISubscriptionCountListDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.mappings.AnalyticsMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -56,7 +56,7 @@ public class ApiApiServiceImpl extends ApiApiService {
             }
             Analyzer analyzer = RestApiUtil.getAnalyzer(username);
             List<APISubscriptionCount> apiSubscriptionCountList = analyzer.getAPISubscriptionCount(createdBy);
-            APISubscriptionListDTO apiSubscriptionListDTO = AnalyticsMappingUtil
+            APISubscriptionCountListDTO apiSubscriptionListDTO = AnalyticsMappingUtil
                     .fromAPISubscriptionInfoListToDTO(apiSubscriptionCountList);
             return Response.ok().entity(apiSubscriptionListDTO).build();
 

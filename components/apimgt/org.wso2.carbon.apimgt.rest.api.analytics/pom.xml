@@ -22,7 +22,7 @@
     <parent>
         <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>7.0.37-SNAPSHOT</version>
+        <version>7.0.40-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -170,7 +170,7 @@
             org.wso2.carbon.apimgt.rest.api.analytics.*; version="${carbon.apimgt.version}"
         </export.package>
         <carbon.component>
-            osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="2"
+            osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="3"
         </carbon.component>
     </properties>
 

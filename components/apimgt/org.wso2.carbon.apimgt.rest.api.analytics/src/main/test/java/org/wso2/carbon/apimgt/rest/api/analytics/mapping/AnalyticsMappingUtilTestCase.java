@@ -29,6 +29,9 @@ import org.wso2.carbon.apimgt.rest.api.analytics.mappings.AnalyticsMappingUtil;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Test cases for Analytics Mapping Util methods.
+ */
 public class AnalyticsMappingUtilTestCase {
 
     @Test

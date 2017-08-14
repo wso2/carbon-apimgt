@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.core.models.analytics.APICount;
 import org.wso2.carbon.apimgt.core.models.analytics.APIInfo;
 import org.wso2.carbon.apimgt.core.models.analytics.APISubscriptionCount;
 import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
+import org.wso2.carbon.apimgt.core.models.analytics.SubscriptionCount;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.sql.Connection;
@@ -164,7 +165,7 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
     }
 
     /**
-     * Retrieves API subscription count information
+     * Retrieves API subscription count information.
      *
      * @param provider Filter for api provider
      * @return valid {@link APISubscriptionCount} List or null
@@ -221,6 +222,77 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
             throw new APIMgtDAOException(errorMsg, e);
         }
         return apiSubscriptionCountList;
+    }
+
+    /**
+     * Retrieves Subscription count information.
+     *
+     * @param createdBy     Filter for api createdBy
+     * @param fromTimestamp Filter for from timestamp
+     * @param toTimestamp   @return valid {@link SubscriptionCount} List or null
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    @Override
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
+    public List<SubscriptionCount> getSubscriptionCount(String createdBy, String fromTimestamp, String toTimestamp)
+            throws APIMgtDAOException {
+        final String query;
+        if (("all").equals(createdBy)) {
+            query = "SELECT COUNT(UUID) AS COUNT, CREATED_TIME AS TIME " +
+                    "FROM AM_SUBSCRIPTION  " +
+                    "WHERE (CREATED_TIME BETWEEN ? AND ?) " +
+                    "GROUP BY CREATED_TIME ORDER BY CREATED_TIME ASC;";
+        } else {
+            query = "SELECT COUNT(subs.UUID) AS COUNT, CREATED_TIME AS time " +
+                    "FROM AM_SUBSCRIPTION subs, AM_API  api  " +
+                    "WHERE (CREATED_TIME BETWEEN ? AND ?) " +
+                    "AND  subs.api_id=api.uuid " +
+                    "AND api.created_by=? " +
+                    "GROUP BY CREATED_TIME ORDER BY CREATED_TIME ASC;";
+        }
+
+        List<SubscriptionCount> subscriptionCountList = new ArrayList<>();
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat(APIMgtConstants.DATE_TIME_FORMAT);
+            try {
+                Timestamp fromTime = new Timestamp(dateFormat.parse(fromTimestamp).getTime());
+                Timestamp toTime = new java.sql.Timestamp(dateFormat.parse(toTimestamp).getTime());
+                statement.setTimestamp(1, fromTime);
+                statement.setTimestamp(2, toTime);
+                if (!("all").equals(createdBy)) {
+                    log.debug("Setting created by to query:" + createdBy);
+                    statement.setString(3, createdBy);
+                }
+                if (log.isDebugEnabled()) {
+                    log.debug("Executing query " + query);
+                }
+                statement.execute();
+                try (ResultSet rs = statement.getResultSet()) {
+                    while (rs.next()) {
+                        SubscriptionCount subscriptionCount = new SubscriptionCount();
+                        subscriptionCount.setTimestamp(rs.getTimestamp("TIME").getTime());
+                        subscriptionCount.setCount(rs.getInt("COUNT"));
+                        subscriptionCountList.add(subscriptionCount);
+                    }
+                }
+            } catch (SQLException e) {
+                String errorMsg = "Error while retrieving subscription count information from db";
+                log.error(errorMsg, e);
+                throw new APIMgtDAOException(errorMsg, e);
+            } catch (ParseException e) {
+                String errorMsg = "Error while parsing timestamp while retrieving subscription count information " +
+                        "from db";
+                log.error(errorMsg, e);
+                throw new APIMgtDAOException(errorMsg, e);
+            }
+        } catch (SQLException e) {
+            String errorMsg = "Error while creating database connection/prepared-statement";
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e);
+        }
+        return subscriptionCountList;
+
     }
 
     @Override

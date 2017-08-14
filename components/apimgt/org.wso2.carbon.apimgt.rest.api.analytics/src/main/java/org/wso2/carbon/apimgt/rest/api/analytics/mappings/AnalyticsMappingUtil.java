@@ -19,14 +19,17 @@ import org.wso2.carbon.apimgt.core.models.analytics.APICount;
 import org.wso2.carbon.apimgt.core.models.analytics.APIInfo;
 import org.wso2.carbon.apimgt.core.models.analytics.APISubscriptionCount;
 import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
+import org.wso2.carbon.apimgt.core.models.analytics.SubscriptionCount;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.APICountDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.APICountListDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.APIInfoListDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.APISubscriptionCountDTO;
-import org.wso2.carbon.apimgt.rest.api.analytics.dto.APISubscriptionListDTO;
+import org.wso2.carbon.apimgt.rest.api.analytics.dto.APISubscriptionCountListDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.ApplicationCountDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.ApplicationCountListDTO;
+import org.wso2.carbon.apimgt.rest.api.analytics.dto.SubscriptionCountDTO;
+import org.wso2.carbon.apimgt.rest.api.analytics.dto.SubscriptionCountListDTO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +40,7 @@ import java.util.List;
 public class AnalyticsMappingUtil {
 
     /**
-     * Converts and ApplicationCountList to ApplicationCountListDTO
+     * Converts and ApplicationCountList to ApplicationCountListDTO.
      *
      * @param applicationCountList list of ApplicationCount objects
      * @return corresponding ApplicationCountListDTO object
@@ -56,7 +59,7 @@ public class AnalyticsMappingUtil {
 
 
     /**
-     * Converts and APICountList to APICountDTO
+     * Converts and APICountList to APICountDTO.
      *
      * @param apiCountList list of APICount objects
      * @return corresponding APICountListDTO object
@@ -73,7 +76,7 @@ public class AnalyticsMappingUtil {
     }
 
     /**
-     * Converts and APIInfoList to APIInfoListDTO
+     * Converts and APIInfoList to APIInfoListDTO.
      *
      * @param apiInfoList list of ApiInfo objects
      * @return corresponding APIInfoListDTO object
@@ -90,14 +93,14 @@ public class AnalyticsMappingUtil {
     }
 
     /**
-     * Converts and APISubscriptionInfoList to APIInfoListDTO
+     * Converts and APISubscriptionInfoList to APIInfoListDTO.
      *
      * @param apiSubscriptionCountList list of ApiInfo objects
      * @return corresponding APIInfoListDTO object
      */
-    public static APISubscriptionListDTO fromAPISubscriptionInfoListToDTO(List<APISubscriptionCount>
-                                                                                  apiSubscriptionCountList) {
-        APISubscriptionListDTO apiSubscriptionListDTO = new APISubscriptionListDTO();
+    public static APISubscriptionCountListDTO fromAPISubscriptionInfoListToDTO(List<APISubscriptionCount>
+                                                                                       apiSubscriptionCountList) {
+        APISubscriptionCountListDTO apiSubscriptionListDTO = new APISubscriptionCountListDTO();
         List<APISubscriptionCountDTO> apiSubscriptionDTOList = new ArrayList<>();
         apiSubscriptionListDTO.setCount(apiSubscriptionCountList.size());
         for (APISubscriptionCount apiSubscriptionCount : apiSubscriptionCountList) {
@@ -111,6 +114,27 @@ public class AnalyticsMappingUtil {
         }
         apiSubscriptionListDTO.setList(apiSubscriptionDTOList);
         return apiSubscriptionListDTO;
+    }
+
+    /**
+     * Converts and SubscriptionInfoList to SubscriptionInfoListDTO.
+     *
+     * @param subscriptionCountList list of SubscriptionCount objects
+     * @return corresponding APIInfoListDTO object
+     */
+    public static SubscriptionCountListDTO fromSubscriptionCountListToDTO(List<SubscriptionCount>
+                                                                                  subscriptionCountList) {
+        SubscriptionCountListDTO subscriptionCountListDTO = new SubscriptionCountListDTO();
+        List<SubscriptionCountDTO> subscriptionCountDTOList = new ArrayList<>();
+        subscriptionCountListDTO.setCount(subscriptionCountList.size());
+        for (SubscriptionCount subscriptionCount : subscriptionCountList) {
+            SubscriptionCountDTO subscriptionCountDTO = new SubscriptionCountDTO();
+            subscriptionCountDTO.setTime(subscriptionCount.getTimestamp());
+            subscriptionCountDTO.setCount(subscriptionCount.getCount());
+            subscriptionCountDTOList.add(subscriptionCountDTO);
+        }
+        subscriptionCountListDTO.setList(subscriptionCountDTOList);
+        return subscriptionCountListDTO;
     }
 
     private static APIInfoDTO fromAPIInfoToDTO(APIInfo apiInfo) {

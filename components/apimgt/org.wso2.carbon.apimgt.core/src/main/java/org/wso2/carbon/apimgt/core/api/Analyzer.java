@@ -20,11 +20,12 @@ import org.wso2.carbon.apimgt.core.models.analytics.APICount;
 import org.wso2.carbon.apimgt.core.models.analytics.APIInfo;
 import org.wso2.carbon.apimgt.core.models.analytics.APISubscriptionCount;
 import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
+import org.wso2.carbon.apimgt.core.models.analytics.SubscriptionCount;
 
 import java.util.List;
 
 /**
- * Interface for analytics specific methods
+ * Interface for analytics specific methods.
  */
 public interface Analyzer {
 
@@ -36,4 +37,7 @@ public interface Analyzer {
     List<APICount> getAPICount(String createdBy, String fromTime, String toTime) throws APIManagementException;
 
     List<APISubscriptionCount> getAPISubscriptionCount(String createdBy) throws APIManagementException;
+
+    List<SubscriptionCount> getSubscriptionCount(String createdBy, String fromTime, String toTime)
+            throws APIManagementException;
 }
