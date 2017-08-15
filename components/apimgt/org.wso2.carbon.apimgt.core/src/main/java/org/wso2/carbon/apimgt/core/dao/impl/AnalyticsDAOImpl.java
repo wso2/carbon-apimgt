@@ -38,7 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Implementation class of AnalyticsDao interface.
+ * Implementation class of AnalyticsDAO interface.
  */
 public class AnalyticsDAOImpl implements AnalyticsDAO {
 
@@ -227,17 +227,17 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
     /**
      * Retrieves Subscription count information.
      *
-     * @param createdBy     Filter for api createdBy
+     * @param subscriptionFilter     Filter for api subscriptionFilter
      * @param fromTimestamp Filter for from timestamp
      * @param toTimestamp   @return valid {@link SubscriptionCount} List or null
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<SubscriptionCount> getSubscriptionCount(String createdBy, String fromTimestamp, String toTimestamp)
-            throws APIMgtDAOException {
+    public List<SubscriptionCount> getSubscriptionCount(String subscriptionFilter, String fromTimestamp, String
+            toTimestamp) throws APIMgtDAOException {
         final String query;
-        if (("all").equals(createdBy)) {
+        if (("all").equals(subscriptionFilter)) {
             query = "SELECT COUNT(UUID) AS COUNT, CREATED_TIME AS TIME " +
                     "FROM AM_SUBSCRIPTION  " +
                     "WHERE (CREATED_TIME BETWEEN ? AND ?) " +
@@ -260,9 +260,9 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
                 Timestamp toTime = new java.sql.Timestamp(dateFormat.parse(toTimestamp).getTime());
                 statement.setTimestamp(1, fromTime);
                 statement.setTimestamp(2, toTime);
-                if (!("all").equals(createdBy)) {
-                    log.debug("Setting created by to query:" + createdBy);
-                    statement.setString(3, createdBy);
+                if (!("all").equals(subscriptionFilter)) {
+                    log.debug("Setting created by:" + subscriptionFilter);
+                    statement.setString(3, subscriptionFilter);
                 }
                 if (log.isDebugEnabled()) {
                     log.debug("Executing query " + query);

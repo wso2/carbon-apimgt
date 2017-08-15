@@ -16,7 +16,7 @@
 package org.wso2.carbon.apimgt.core.models.analytics;
 
 /**
- * API Info model
+ * API Info model.
  */
 public class APIInfo {
 

@@ -29,6 +29,9 @@ import java.util.List;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+/**
+ * AnalyzerImpl Test Cases.
+ */
 public class AnalyzerImplTestCase {
 
     private static final String USER_NAME = "john";
@@ -36,8 +39,7 @@ public class AnalyzerImplTestCase {
     private static final String TO_TIMESTAMP = "2017-07-30 2:32:41.972";
 
     @Test(description = "get application count test")
-    public void testGetApplicationCount()
-            throws APIManagementException {
+    public void testGetApplicationCount() throws APIManagementException {
         AnalyticsDAO analyticsDAO = Mockito.mock(AnalyticsDAO.class);
         ApplicationCount applicationCount1 = new ApplicationCount();
         ApplicationCount applicationCount2 = new ApplicationCount();

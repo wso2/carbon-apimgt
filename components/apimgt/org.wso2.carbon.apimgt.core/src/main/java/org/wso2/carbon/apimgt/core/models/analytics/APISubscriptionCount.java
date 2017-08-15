@@ -27,7 +27,6 @@ public class APISubscriptionCount {
     private String provider;
     private int count;
 
-
     public String getId() {
         return id;
     }

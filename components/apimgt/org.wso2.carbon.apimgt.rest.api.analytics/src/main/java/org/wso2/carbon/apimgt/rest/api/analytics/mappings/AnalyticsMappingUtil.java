@@ -93,12 +93,12 @@ public class AnalyticsMappingUtil {
     }
 
     /**
-     * Converts and APISubscriptionInfoList to APIInfoListDTO.
+     * Converts and APISubscriptionCountList to APISubscriptionCountListDTO.
      *
-     * @param apiSubscriptionCountList list of ApiInfo objects
-     * @return corresponding APIInfoListDTO object
+     * @param apiSubscriptionCountList list of APISubscriptionCount objects
+     * @return corresponding APISubscriptionCountListDTO object
      */
-    public static APISubscriptionCountListDTO fromAPISubscriptionInfoListToDTO(List<APISubscriptionCount>
+    public static APISubscriptionCountListDTO fromAPISubscriptionCountListToDTO(List<APISubscriptionCount>
                                                                                        apiSubscriptionCountList) {
         APISubscriptionCountListDTO apiSubscriptionListDTO = new APISubscriptionCountListDTO();
         List<APISubscriptionCountDTO> apiSubscriptionDTOList = new ArrayList<>();
@@ -141,6 +141,7 @@ public class AnalyticsMappingUtil {
         APIInfoDTO apiInfoDTO = new APIInfoDTO();
         apiInfoDTO.setId(apiInfo.getId());
         apiInfoDTO.setName(apiInfo.getName());
+        apiInfoDTO.setVersion(apiInfo.getVersion());
         apiInfoDTO.setContext(apiInfo.getContext());
         apiInfoDTO.setDescription(apiInfo.getDescription());
         apiInfoDTO.setLifeCycleStatus(apiInfo.getLifeCycleStatus());

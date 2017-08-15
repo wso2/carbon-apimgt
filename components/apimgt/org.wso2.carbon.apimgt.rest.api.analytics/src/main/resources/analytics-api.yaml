@@ -274,6 +274,46 @@ paths:
             Not Acceptable.
             The requested media type is not supported
 
+#-----------------------------------------------------
+#  Retrieve Subscriptions created over time details
+#-----------------------------------------------------
+
+  /subscription/subscription_info:
+    get:
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/analytics/v1.0/subscription/subscriptions_created_over_time?from=2017-05-30%2012:32:41.972&to=2017-07-30%202:32:41.972&created_by=admin&subscribed_to=TestAPI"
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/analytics/v1.0/api/apis_created_over_time
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 329\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}"
+      summary: Get Subscription information
+      security:
+        - OAuth2Security:
+           - apim:api_view
+      summary: |
+        Retrieve Subscription details
+      description: |
+        Get Subscription details from summarized data.
+      parameters:
+        - $ref: '#/parameters/from'
+        - $ref: '#/parameters/to'
+        - $ref: '#/parameters/api_filter'
+      responses:
+        200:
+          description: |
+            OK.
+            Requested APIs created over time information is returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            $ref: '#/definitions/SubscriptionCountList'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+
 ######################################################
 # Parameter definitions
 ######################################################

@@ -57,7 +57,7 @@ public class ApiApiServiceImpl extends ApiApiService {
             Analyzer analyzer = RestApiUtil.getAnalyzer(username);
             List<APISubscriptionCount> apiSubscriptionCountList = analyzer.getAPISubscriptionCount(createdBy);
             APISubscriptionCountListDTO apiSubscriptionListDTO = AnalyticsMappingUtil
-                    .fromAPISubscriptionInfoListToDTO(apiSubscriptionCountList);
+                    .fromAPISubscriptionCountListToDTO(apiSubscriptionCountList);
             return Response.ok().entity(apiSubscriptionListDTO).build();
 
         } catch (APIManagementException e) {
