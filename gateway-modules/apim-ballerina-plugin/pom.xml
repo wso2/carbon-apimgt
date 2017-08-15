@@ -21,30 +21,26 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-gateway-modules</artifactId>
-        <version>7.0.39</version>
+        <version>7.0.40-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>apim-ballerina-plugin</artifactId>
-    <packaging>jar</packaging>
     <name>APIM Ballerina plugin</name>
 
     <dependencies>
         <dependency>
             <groupId>org.ballerinalang</groupId>
             <artifactId>ballerina-launcher</artifactId>
-            <version>0.89</version>
         </dependency>
         <dependency>
             <groupId>org.ballerinalang</groupId>
             <artifactId>ballerina-core</artifactId>
-            <version>0.89</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.ballerina.native</artifactId>
-            <version>7.0.39</version>
         </dependency>
     </dependencies>
 

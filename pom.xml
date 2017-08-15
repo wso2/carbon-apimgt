@@ -500,12 +500,12 @@
             <dependency>
                 <groupId>org.ballerinalang</groupId>
                 <artifactId>ballerina-core</artifactId>
-                <version>0.89</version>
+                <version>${ballerina.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.ballerinalang</groupId>
                 <artifactId>workspace-service</artifactId>
-                <version>0.89</version>
+                <version>${ballerina.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -531,6 +531,26 @@
                 <groupId>org.apache.ws.commons.schema.wso2</groupId>
                 <artifactId>XmlSchema</artifactId>
                 <version>${xmlschema.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>apim-ballerina-plugin</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ballerinalang</groupId>
+                <artifactId>ballerina-launcher</artifactId>
+                <version>${ballerina.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.ballerina.native</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.ballerina.publisher</artifactId>
+                <version>${carbon.apimgt.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -901,5 +921,7 @@
         <apache.woden.version>1.0.0.M9-wso2v1</apache.woden.version>
         <wsdl4j.version>1.6.2.wso2v4</wsdl4j.version>
         <xmlschema.version>1.4.7.wso2v2</xmlschema.version>
+
+        <ballerina.version>0.89</ballerina.version>
     </properties>
 </project>
