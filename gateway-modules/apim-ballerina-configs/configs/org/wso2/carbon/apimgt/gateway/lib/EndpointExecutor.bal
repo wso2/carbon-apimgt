@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.gateway;
+package org.wso2.carbon.apimgt.gateway.lib;
 
 import org.wso2.carbon.apimgt.gateway.dto;
 import org.wso2.carbon.apimgt.gateway.holders;
