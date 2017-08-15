@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.CustomPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.core.workflow.Workflow;
 
 import java.util.List;
 import java.util.Set;
@@ -422,5 +423,39 @@ public interface APIMgtAdminService {
      * @throws APIManagementException if failed getting custom policy
      */
     CustomPolicy getCustomRuleByUUID(String uuid) throws APIManagementException;
+    
+    /**
+     * Retrieve workflow for the given workflow reference ID
+     * @param workflowRefId External workflow reference Id
+     * @return Workflow workflow entry
+     * @throws APIManagementException if API Manager core level exception occurred
+     */
+    Workflow retrieveWorkflow(String workflowRefId) throws APIManagementException;
+    
+    /**
+     * Complete workflow task 
+     * @param workflowExecutor executor related to the workflow task
+     * @param workflow workflow object
+     * @return WorkflowResponse WorkflowResponse of the executor
+     * @throws APIManagementException if API Manager core level exception occurred
+     */
+    WorkflowResponse completeWorkflow(WorkflowExecutor workflowExecutor, Workflow workflow)
+            throws APIManagementException;
+    
+    /**
+     * Retrieve uncompleted workflows for the given type
+     * @param type type of workflow
+     * @return {@code List<Workflow>} list of workflows
+     * @throws APIManagementException if API Manager core level exception occurred
+     */
+    List<Workflow> retrieveUncompletedWorkflowsByType(String type) throws APIManagementException;
+    
+    /**
+     * Retrieve uncompleted workflows 
+     * 
+     * @return {@code List<Workflow>} list of workflows
+     * @throws APIManagementException if API Manager core level exception occurred
+     */
+    List<Workflow> retrieveUncompletedWorkflows() throws APIManagementException;
 
 }

@@ -79,6 +79,14 @@ x-wso2-security:
         roles: admin
         name: apim:label_manage
         key: apim:label_manage
+      - description: ""
+        roles: admin
+        name: apim:workflow_view
+        key: apim:workflow_view
+      - description: ""
+        roles: admin
+        name: apim:workflow_approve
+        key: apim:workflow_approve
 
 ######################################################
 # The "API Collection" resource APIs
@@ -1649,6 +1657,158 @@ paths:
             $ref: '#/definitions/Error'
 
 ######################################################
+# The "workflows collection" resource API
+######################################################
+  '/workflows':
+
+#-----------------------------------------------------
+# Retrieve all workflows entries
+#-----------------------------------------------------
+    get:
+      x-scope: apim:workflow_view
+      summary: Get all the uncompleted Workflows
+      description: |
+        Get all uncompleted workflows entries
+      parameters:
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
+        - name: type
+          in: query
+          description: |
+            List all the uncompleted workflow tasks for the given type of workflows. 
+            If not provided, list all the uncompleted tasks.
+          required: false
+          type: string
+      tags:
+        - Workflows (Collection)
+      responses:
+        200:
+          description: |
+            OK.
+            Workflows returned
+          schema:
+            $ref: '#/definitions/WorkflowList'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests.
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional reuquests.
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported.
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
+# The "Workflow approval" resource API
+######################################################
+  /workflows/{workflowReferenceId}:
+
+#-------------------------------------------------------------------
+# Resume the workflow by approving or rejecting the workflow request
+#-------------------------------------------------------------------
+    put:
+      x-scope: apim:workflow_approve
+      summary: Update workflow status
+      description: |
+        This operation can be used to approve or reject a workflow task. .
+      parameters:
+       - $ref: '#/parameters/workflowReferenceId'
+       - in: body
+         name: body
+         description: |
+            Workflow event that need to be updated
+         required: true
+         schema:
+           $ref: '#/definitions/WorkflowRequest'
+      tags:
+        - Workflows (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Workflow request information is returned.
+          schema:
+            $ref: '#/definitions/WorkflowResponse'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Workflow for the given reference in not found.
+          schema:
+            $ref: '#/definitions/Error'
+
+#-------------------------------------------------------------------
+# Retrieve workflow information for the given reference id
+#-------------------------------------------------------------------
+    get:
+      x-scope: apim:workflow_view
+      summary: Retrieve workflow information
+      description: |
+        This operation can be used to retrieve a workflow task. 
+      parameters:
+       - $ref: '#/parameters/workflowReferenceId'
+
+      tags:
+        - Workflows (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Workflow request information is returned.
+          schema:
+            $ref: '#/definitions/Workflow'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Workflow for the given reference in not found.
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
 # Parameters - required by some of the APIs above
 ######################################################
 parameters:
@@ -1770,6 +1930,16 @@ parameters:
       Starting point within the complete list of items qualified.
     default: 0
     type: integer
+
+# Workflow reference ID
+# Specified as part of the path expression
+  workflowReferenceId:
+    name: workflowReferenceId
+    in: path
+    description: |
+      Workflow reference id
+    required: true
+    type: string
 
 ######################################################
 # The resources used by some of the APIs above within the message body
@@ -2260,6 +2430,93 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Label'
+
+#-----------------------------------------------------
+# The workflow request resource
+#-----------------------------------------------------
+  WorkflowRequest:
+    title: Workflow Complete Request
+    required:
+      - status
+    properties:
+      status:
+        description: |
+          This attribute declares whether this workflow task is approved or rejected.
+        type: string
+        enum:
+          - APPROVED
+          - REJECTED
+        example: APPROVED
+      attributes:
+        description: |
+          Custom attributes to complete the workflow task
+        type: object
+        additionalProperties:
+          type: string
+        example: {}
+      description:
+        type: string
+        example: "Approve workflow request."
+
+#-----------------------------------------------------
+# The workflow executor's response resource
+#-----------------------------------------------------
+  WorkflowResponse:
+    title: Workflow Response
+    required:
+      - workflowStatus
+    properties:
+      workflowStatus:
+        description: |
+          This attribute declares whether this workflow task is approved or rejected.
+        type: string
+        enum:
+          - CREATED
+          - APPROVED
+          - REJECTED
+          - REGISTERED
+        example: APPROVED
+      jsonPayload:
+        description: |
+          Attributes that returned after the workflow execution
+        type: string
+#-----------------------------------------------------
+# The Workflow List resource
+#-----------------------------------------------------
+  WorkflowList:
+    title: Workflow List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of workflow entries returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/Workflow'
+
+#-----------------------------------------------------
+# The Workflow Info resource
+#-----------------------------------------------------
+  Workflow:
+    title: Workflow object details.
+    properties:
+      referenceId:
+        type: string
+        example: 12225615-0c99-43db-b691-c7e1bc23e149
+      type:
+        type: string
+        example: AM_APPLICATION_CREATION
+      description:
+        type: string
+        example: Application created by foo 
+      createdTime:
+        type: string
+        example: CREATED
+      workflowStatus:
+        type: string
+        example: APPROVED
 
 #-----------------------------------------------------
 # END-OF-FILE
