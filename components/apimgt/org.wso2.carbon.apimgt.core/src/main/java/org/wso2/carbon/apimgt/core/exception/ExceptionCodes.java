@@ -110,6 +110,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "request received by publisher"),
     INCOMPATIBLE_WORKFLOW_REQUEST_FOR_STORE(900560, "Incompatible workflow request", 400, "Incompatible workflow " +
             "request received by store"),
+    WORKFLOW_RETRIEVE_EXCEPTION(900561, "Workflow retrieval error", 400, "Provided parameter is not valid"),
 
     // Auth related codes
     ROLES_CANNOT_BE_EMPTY(900600, "Role list cannot be empty", 400, "Role list cannot be empty"),
