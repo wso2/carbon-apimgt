@@ -355,6 +355,7 @@ public final class API {
             description = api.getDescription();
             lifeCycleStatus = api.getLifeCycleStatus();
             lifecycleInstanceId = api.getLifecycleInstanceId();
+            securityScheme = api.getSecurityScheme();
             endpoint = api.getEndpoint();
             wsdlUri = api.getWsdlUri();
             isResponseCachingEnabled = api.isResponseCachingEnabled();
