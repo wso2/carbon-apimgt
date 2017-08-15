@@ -12,6 +12,9 @@
                         {{this}} <br/>
                     </div>
                 {{/each}}
+                {{#if @params.wsdlUrl}}
+                    <a class="wsdl_download" label_name={{this.name}} wsdlUri={{@params.wsdlUrl}}?labelName={{this.name}} title="Download WSDL" target="_blank">Download WSDL</a>
+                {{/if}}
         {{/each}}
     </div>
 </div>

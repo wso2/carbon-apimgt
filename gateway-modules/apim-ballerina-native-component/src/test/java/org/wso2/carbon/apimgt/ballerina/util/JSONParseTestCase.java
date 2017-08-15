@@ -51,4 +51,13 @@ public class JSONParseTestCase {
         Assert.assertTrue(returns[0] instanceof BBoolean);
         Assert.assertTrue(((BBoolean) returns[0]).booleanValue());
     }
+
+    @Test
+    public void testInvalidJson() {
+        BValue[] args = {};
+        //Test ballerina json parse
+        BValue[] returns = BLangFunctions.invokeNew(bLangProgram, "testInvalidJson", args);
+        Assert.assertTrue(returns[0] instanceof BBoolean);
+        Assert.assertFalse(((BBoolean) returns[0]).booleanValue());
+    }
 }

@@ -24,11 +24,13 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
+import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.CustomPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 
 import java.io.File;
+import java.util.Map;
 
 /**
  * Test cases for API Throttle policy template builder.
@@ -72,5 +74,24 @@ public class ThrottleTemplateBuilderTestCase {
         String siddhiQuery = templateBuilder.getThrottlePolicyTemplateForCustomPolicy();
         String sampleQuery = SampleTestObjectCreator.createDefaultCustomPolicySiddhiApp();
         Assert.assertEquals(siddhiQuery, sampleQuery);
+    }
+    
+    @Test
+    public void testSiddhiQueryForAPIPolicy() throws APITemplateException {
+        APIPolicy apiPolicy = SampleTestObjectCreator.createDefaultAPIPolicy();
+        APIThrottlePolicyTemplateBuilder templateBuilder = new APIThrottlePolicyTemplateBuilder(apiPolicy);
+        Map<String, String> siddhiQueryMap = templateBuilder.getThrottlePolicyTemplateForPipelines();
+        String actualQuery = siddhiQueryMap.get("resource_SampleAPIPolicy_condition_0");
+        String expectedQuery = SampleTestObjectCreator.createDefaultSiddhiAppForAPIThrottlePolicy();
+        Assert.assertEquals(actualQuery, expectedQuery);
+    }
+
+    @Test
+    public void testSiddhiQueryForAPILevelDefaultConditions() throws APITemplateException {
+        APIPolicy apiPolicy = SampleTestObjectCreator.createDefaultAPIPolicy();
+        APIThrottlePolicyTemplateBuilder templateBuilder = new APIThrottlePolicyTemplateBuilder(apiPolicy);
+        String actualQuery = templateBuilder.getThrottlePolicyTemplateForAPILevelDefaultCondition();
+        String expectedQuery = SampleTestObjectCreator.createDefaultSiddhiAppForAPILevelDefaultThrottlePolicy();
+        Assert.assertEquals(actualQuery, expectedQuery);
     }
 }

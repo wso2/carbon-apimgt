@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Comment;
+import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
@@ -45,7 +46,9 @@ import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.core.util.EndPointComparator;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -121,9 +124,6 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
                 "EmployeeAPI", "NonAdminAPI"};
         Assert.assertTrue(resultAPINameList.containsAll(Arrays.asList(expectedAPINames)) &&
                 Arrays.asList(expectedAPINames).containsAll(resultAPINameList));
-        userRoles.clear();
-        apiResults.clear();
-        resultAPINameList.clear();
 
     }
 
@@ -191,11 +191,6 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         userRoles.clear();
         attributeMap.clear();
 
-        //cleanup added APIs
-        ApiDAO apiDAO = DAOFactory.getApiDAO();
-        for (String apiID : apiIDList) {
-            apiDAO.deleteAPI(apiID);
-        }
     }
 
     /**
@@ -763,6 +758,103 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
+    public void testGetAPIsByStatusAndLabel() throws Exception {
+        // Define statuses used in test
+        final String publishedStatus = "PUBLISHED";
+        final String createdStatus = "CREATED";
+
+        // Define labels used in test
+        final String publicLabel = "public";
+        final String privateLabel = "private";
+
+        //Add labels
+        LabelDAO labelDAO = DAOFactory.getLabelDAO();
+        Label label1 = SampleTestObjectCreator.createLabel(publicLabel).build();
+        Label label2 = SampleTestObjectCreator.createLabel(privateLabel).build();
+        List<Label> labelList = new ArrayList<>();
+        labelList.add(label1);
+        labelList.add(label2);
+        labelDAO.addLabels(labelList);
+
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+
+        // Define number of APIs to be created for a given status
+        final int numberOfPublishedWithLabelPublicPrivate = 1;
+        final int numberOfPublishedWithLabelPrivate = 2;
+        final int numberOfCreatedWithLabelPublic = 3;
+
+        // Add APIs with Status = PUBLISHED having labels "public" and "private" 
+        List<API> publishedAPIsPublicPrivateSummary = new ArrayList<>();
+        Set<String> labelsPublicPrivate = new HashSet<>(Arrays.asList(publicLabel, privateLabel));
+        testAddGetEndpoint();
+        for (int i = 0; i < numberOfPublishedWithLabelPublicPrivate; ++i) {
+            API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(publishedStatus)
+                    .labels(labelsPublicPrivate)
+                    .build();
+            publishedAPIsPublicPrivateSummary.add(SampleTestObjectCreator.getSummaryFromAPI(api));
+            apiDAO.addAPI(api);
+        }
+
+        // Add APIs with Status = PUBLISHED having label "private"
+        List<API> publishedAPIsPrivateSummary = new ArrayList<>();
+        Set<String> labelsPrivate = new HashSet<>(Collections.singletonList(privateLabel));
+        for (int i = 0; i < numberOfPublishedWithLabelPrivate; ++i) {
+            API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(publishedStatus)
+                    .labels(labelsPrivate)
+                    .build();
+            publishedAPIsPrivateSummary.add(SampleTestObjectCreator.getSummaryFromAPI(api));
+            apiDAO.addAPI(api);
+        }
+
+        // Add APIs with Status = CREATED having labels "public"
+        List<API> createdAPIsPublicSummary = new ArrayList<>();
+        Set<String> labelsPublic = new HashSet<>(Collections.singletonList(publicLabel));
+        for (int i = 0; i < numberOfCreatedWithLabelPublic; ++i) {
+            API api = SampleTestObjectCreator.createUniqueAPI().lifeCycleStatus(createdStatus)
+                    .labels(labelsPublic)
+                    .build();
+            createdAPIsPublicSummary.add(SampleTestObjectCreator.getSummaryFromAPI(api));
+            apiDAO.addAPI(api);
+        }
+
+        //verifying APIs with Status = PUBLISHED having labels "public" or "private" 
+        List<API> publishedPublicPrivateApiListFromDB = apiDAO
+                .getAPIsByStatus(Arrays.asList(publicLabel, privateLabel), publishedStatus);
+        
+        List<API> publishedApisWithPublicOrPrivateLabels = new ArrayList<>();
+        publishedApisWithPublicOrPrivateLabels.addAll(publishedAPIsPrivateSummary);
+        publishedApisWithPublicOrPrivateLabels.addAll(publishedAPIsPublicPrivateSummary);
+
+        Assert.assertTrue(
+                APIUtils.isListsEqualIgnoreOrder(publishedPublicPrivateApiListFromDB,
+                        publishedApisWithPublicOrPrivateLabels, new APIComparator()));
+
+        List<API> publishedApisWithPrivateLabels = new ArrayList<>();
+        publishedApisWithPrivateLabels.addAll(publishedAPIsPrivateSummary);
+        publishedApisWithPrivateLabels.addAll(publishedAPIsPublicPrivateSummary);
+
+        
+        //verifying APIs with Status = PUBLISHED having label "private" 
+        List<API> publishedPrivateApiListFromDB = apiDAO
+                .getAPIsByStatus(Collections.singletonList(privateLabel), publishedStatus);
+        Assert.assertTrue(
+                APIUtils.isListsEqualIgnoreOrder(publishedPrivateApiListFromDB, publishedApisWithPrivateLabels,
+                        new APIComparator()));
+
+        //verifying APIs with Status = CREATED having label "public" 
+        List<API> createdPublicApiListFromDB = apiDAO
+                .getAPIsByStatus(Collections.singletonList(publicLabel), createdStatus);
+        Assert.assertTrue(
+                APIUtils.isListsEqualIgnoreOrder(createdPublicApiListFromDB, createdAPIsPublicSummary,
+                        new APIComparator()));
+
+        //verifying APIs with Status = CREATED having label "private" 
+        List<API> createdPrivateApiListFromDB = apiDAO
+                .getAPIsByStatus(Collections.singletonList(privateLabel), createdStatus);
+        Assert.assertTrue(createdPrivateApiListFromDB.isEmpty());
+    }
+
+    @Test
     public void testSearchAPIs() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
 
@@ -954,6 +1046,29 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         List<DocumentInfo> documentInfoListFromDB = apiDAO.getDocumentsInfoList(api.getId());
         Assert.assertTrue(documentInfoListFromDB.containsAll(documentInfoList));
         Assert.assertTrue(documentInfoList.size() == documentInfoListFromDB.size());
+    }
+
+    @Test(description = "Getting document content for an API")
+    public void testGetDocumentContent() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        testAddGetEndpoint();
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        apiDAO.addAPI(api);
+        DocumentInfo documentInfo1 = SampleTestObjectCreator.createDefaultDocumentationInfo();
+        apiDAO.addDocumentInfo(api.getId(), documentInfo1);
+        List<DocumentInfo> documentInfoList = new ArrayList<>();
+        documentInfoList.add(documentInfo1);
+        List<DocumentInfo> documentInfoListFromDB = apiDAO.getDocumentsInfoList(api.getId());
+        Assert.assertTrue(documentInfoListFromDB.containsAll(documentInfoList));
+
+        DocumentInfo documentInfo = SampleTestObjectCreator.createFileDocumentationInfo();
+        apiDAO.addDocumentInfo(api.getId(), documentInfo);
+        byte[] contentBytes = SampleTestObjectCreator.createDefaultFileDocumentationContent();
+
+        apiDAO.addDocumentFileContent(documentInfo.getId(), new ByteArrayInputStream(contentBytes), "application/pdf",
+                ADMIN);
+        byte[] retrievedContentFromDB = IOUtils.toByteArray(apiDAO.getDocumentFileContent(documentInfo.getId()));
+        Assert.assertEquals(contentBytes.length, retrievedContentFromDB.length);
     }
 
     @Test(description = "Getting document info for an API")
@@ -1155,6 +1270,14 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertEquals(endpoint, retrieved);
     }
 
+    @Test
+    public void testEndpointExists() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        Endpoint endpoint = SampleTestObjectCreator.createMockEndpoint();
+        apiDAO.addEndpoint(endpoint);
+        Assert.assertTrue(apiDAO.isEndpointExist(endpoint.getName()));
+    }
+
     @Test(description = "Test getting endpoint by name")
     public void testGetEndpointByName() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
@@ -1201,7 +1324,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testAddGetAllEndPoints() throws Exception {
+    public void testAddGetAllEndPointsAndUUIDs() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         Endpoint endpoint1 = SampleTestObjectCreator.createMockEndpoint();
         Endpoint endpoint2 = SampleTestObjectCreator.createAlternativeEndpoint();
@@ -1215,6 +1338,14 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         endpointListAdd.add(endpoint1);
         endpointListAdd.add(endpoint2);
         List<Endpoint> endpointList = apiDAO.getEndpoints();
+
+        //verifying global endpoints
+        List<String> globalEndpointUuidList = apiDAO.getUUIDsOfGlobalEndpoints();
+        Assert.assertEquals(globalEndpointUuidList.size(), 2);
+        Assert.assertTrue(globalEndpointUuidList.contains(endpoint1.getId()));
+        Assert.assertTrue(globalEndpointUuidList.contains(endpoint2.getId()));
+
+        //verifying all endpoints
         Assert.assertNotEquals(3, endpointList.size());
         APIUtils.isListsEqualIgnoreOrder(endpointListAdd, endpointList, new EndPointComparator());
     }
@@ -1223,26 +1354,45 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     public void testAddGetAPIWithLabels() throws Exception {
 
         LabelDAO labelDAO = DAOFactory.getLabelDAO();
-        Label label1 = SampleTestObjectCreator.createLabel("public").build();
-        Label label2 = SampleTestObjectCreator.createLabel("private").build();
+        Label labelPublic = SampleTestObjectCreator.createLabel("public").build();
+        Label labelPrivate = SampleTestObjectCreator.createLabel("private").build();
         List<Label> labelList = new ArrayList<>();
-        labelList.add(label1);
-        labelList.add(label2);
+        labelList.add(labelPublic);
+        labelList.add(labelPrivate);
         labelDAO.addLabels(labelList);
 
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         Set<String> labelNames = new HashSet<>();
-        labelNames.add(label1.getName());
-        labelNames.add(label2.getName());
+        labelNames.add(labelPublic.getName());
+        labelNames.add(labelPrivate.getName());
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI();
-        API api = builder.labels(labelNames).build();
+        API apiWithBothLabels = builder.labels(labelNames).build();
         testAddGetEndpoint();
-        apiDAO.addAPI(api);
+        apiDAO.addAPI(apiWithBothLabels);
 
-        API apiFromDB = apiDAO.getAPI(api.getId());
+        Set<String> publicLabelOnlySet = new HashSet<>();
+        publicLabelOnlySet.add(labelPublic.getName());
+        API.APIBuilder builder2 = SampleTestObjectCreator.createAlternativeAPI();
+        API apiWithPublicLabel = builder2.labels(publicLabelOnlySet).build();
+        apiDAO.addAPI(apiWithPublicLabel);
+
+        API apiFromDB = apiDAO.getAPI(apiWithBothLabels.getId());
         Assert.assertNotNull(apiFromDB);
         Assert.assertEquals(apiFromDB.getLabels().size(), 2);
-        Assert.assertTrue(api.equals(apiFromDB), TestUtil.printDiff(api, apiFromDB));
+        Assert.assertTrue(apiWithBothLabels.equals(apiFromDB), TestUtil.printDiff(apiWithBothLabels, apiFromDB));
+
+        List<API> apiListPublicPrivate = apiDAO
+                .getAPIsByGatewayLabel(Arrays.asList(labelPublic.getName(), labelPrivate.getName()));
+        Assert.assertEquals(apiListPublicPrivate.size(), 2);
+        Assert.assertTrue(TestUtil.testAPIEqualsLazy(apiListPublicPrivate.get(0), apiWithBothLabels) || TestUtil
+                .testAPIEqualsLazy(apiListPublicPrivate.get(1), apiWithBothLabels));
+        Assert.assertTrue(TestUtil.testAPIEqualsLazy(apiListPublicPrivate.get(0), apiWithPublicLabel) || TestUtil
+                .testAPIEqualsLazy(apiListPublicPrivate.get(1), apiWithPublicLabel));
+
+        List<API> apiListPrivate = apiDAO.getAPIsByGatewayLabel(Collections.singletonList(labelPrivate.getName()));
+        Assert.assertEquals(apiListPrivate.size(), 1);
+        Assert.assertTrue(TestUtil.testAPIEqualsLazy(apiListPrivate.get(0), apiWithBothLabels));
+        Assert.assertFalse(TestUtil.testAPIEqualsLazy(apiListPrivate.get(0), apiWithPublicLabel));
     }
 
     @Test
@@ -1465,6 +1615,29 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
+    public void testAddGetCommentsOfAPI() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
+                .apiDefinition(SampleTestObjectCreator.apiDefinition);
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+        Comment comment1 = SampleTestObjectCreator.createDefaultComment(api.getId());
+        Comment comment2 = SampleTestObjectCreator.createAlternativeComment(api.getId());
+        apiDAO.addComment(comment1, api.getId());
+        apiDAO.addComment(comment2, api.getId());
+
+        List<Comment> commentsFromDB = apiDAO.getCommentsForApi(api.getId());
+        Assert.assertEquals(commentsFromDB.size(), 2);
+        Assert.assertTrue(
+                commentsFromDB.get(0).getCommentText().equals(comment1.getCommentText()) || commentsFromDB.get(0)
+                        .getCommentText().equals(comment2.getCommentText()));
+        Assert.assertTrue(
+                commentsFromDB.get(1).getCommentText().equals(comment1.getCommentText()) || commentsFromDB.get(1)
+                        .getCommentText().equals(comment2.getCommentText()));
+    }
+
+    @Test
     public void testDeleteComment() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
@@ -1490,13 +1663,23 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         apiDAO.addAPI(api);
         Comment comment1 = SampleTestObjectCreator.createDefaultComment(api.getId());
         apiDAO.addComment(comment1, api.getId());
+        String lastUpdatedTime1 = apiDAO.getLastUpdatedTimeOfComment(comment1.getUuid());
+
+        //Keep at least millisecond difference between the two timestamps
+        Thread.sleep(1);
+
         Comment comment2 = SampleTestObjectCreator.createDefaultComment(api.getId());
         comment2.setCommentText(newCommentText);
         apiDAO.updateComment(comment2, comment1.getUuid(), api.getId());
-        Comment commentFromDB = apiDAO.getCommentByUUID(comment1.getUuid(), api.getId());
-        Assert.assertNotNull(commentFromDB);
-        Assert.assertEquals(newCommentText, commentFromDB.getCommentText());
 
+        Comment commentFromDB = apiDAO.getCommentByUUID(comment1.getUuid(), api.getId());
+        String lastUpdatedTimeAfterUpdating = apiDAO.getLastUpdatedTimeOfComment(comment1.getUuid());
+
+        Assert.assertNotNull(commentFromDB);
+        Assert.assertNotNull(lastUpdatedTime1);
+        Assert.assertNotNull(lastUpdatedTimeAfterUpdating);
+        Assert.assertNotEquals(lastUpdatedTime1, lastUpdatedTimeAfterUpdating);
+        Assert.assertEquals(newCommentText, commentFromDB.getCommentText());
     }
 
     @Test
@@ -1532,7 +1715,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test
-    public void testAddGetAllRatings() throws Exception {
+    public void testGetAllAverageAndUserRatingsOfAPI() throws Exception {
         ApiDAO apiDAO = DAOFactory.getApiDAO();
         API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
                 .apiDefinition(SampleTestObjectCreator.apiDefinition);
@@ -1542,12 +1725,27 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Rating rating1 = SampleTestObjectCreator.createDefaultRating(api.getId());
         apiDAO.addRating(api.getId(), rating1);
         Rating rating2 = SampleTestObjectCreator.createDefaultRating(api.getId());
-        rating2.setRating(3);
+        rating2.setRating(2);
         rating2.setUsername("andrew");
         apiDAO.addRating(api.getId(), rating2);
+        Rating rating3 = SampleTestObjectCreator.createDefaultRating(api.getId());
+        rating3.setRating(3);
+        rating3.setUsername("smith");
+        apiDAO.addRating(api.getId(), rating3);
         List<Rating> ratingsListFromDB = apiDAO.getRatingsListForApi(api.getId());
         Assert.assertNotNull(ratingsListFromDB);
-        Assert.assertEquals(2, ratingsListFromDB.size());
+        Assert.assertEquals(ratingsListFromDB.size(), 3);
+
+        Rating ratingOfJohn = apiDAO.getUserRatingForApiFromUser(api.getId(), "john");
+        Rating ratingOfAndrew = apiDAO.getUserRatingForApiFromUser(api.getId(), "andrew");
+        Rating ratingOfSmith = apiDAO.getUserRatingForApiFromUser(api.getId(), "smith");
+
+        Assert.assertEquals(ratingOfJohn.getRating(), 4);
+        Assert.assertEquals(ratingOfAndrew.getRating(), 2);
+        Assert.assertEquals(ratingOfSmith.getRating(), 3);
+
+        double averageRating = apiDAO.getAverageRating(api.getId());
+        Assert.assertEquals(averageRating, 3, 0.0001);
     }
 
     @Test(expectedExceptions = APIMgtDAOException.class)
@@ -1637,7 +1835,6 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
             apiList.remove(api);
         }
         Assert.assertTrue(apiList.isEmpty());
-
     }
 
     @Test
@@ -1654,7 +1851,6 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API expectedAPI = SampleTestObjectCreator.copyAPIIgnoringNonEditableFields(api, substituteAPI);
         Assert.assertNotNull(apiFromDB);
         Assert.assertEquals(apiFromDB, expectedAPI, TestUtil.printDiff(apiFromDB, expectedAPI));
-
     }
 
     @Test
@@ -1682,5 +1878,167 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
                 }
             }
         }
+    }
+
+    @Test
+    public void testSingleWSDLForAPI() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
+                .apiDefinition(SampleTestObjectCreator.apiDefinition);
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+
+        //there can't be any WSDLs added at first
+        boolean isWSDLExists = apiDAO.isWSDLExists(api.getId());
+        Assert.assertFalse(isWSDLExists);
+        boolean isWSDLArchiveExists = apiDAO.isWSDLArchiveExists(api.getId());
+        Assert.assertFalse(isWSDLArchiveExists);
+
+        //add a WSDL
+        byte[] wsdlContentBytes = SampleTestObjectCreator.createDefaultWSDL11Content();
+        apiDAO.addOrUpdateWSDL(api.getId(), wsdlContentBytes, ADMIN);
+
+        //retrieves and check whether they are same
+        String receivedFromDB = apiDAO.getWSDL(api.getId());
+        Assert.assertEquals(new String(wsdlContentBytes), receivedFromDB);
+
+        //now there should be a single WSDL for API exists but no WSDL archives
+        isWSDLExists = apiDAO.isWSDLExists(api.getId());
+        Assert.assertTrue(isWSDLExists);
+        isWSDLArchiveExists = apiDAO.isWSDLArchiveExists(api.getId());
+        Assert.assertFalse(isWSDLArchiveExists);
+
+        //update the WSDL file
+        wsdlContentBytes = SampleTestObjectCreator.createAlternativeWSDL11Content();
+        apiDAO.addOrUpdateWSDL(api.getId(), wsdlContentBytes, ADMIN);
+
+        //retrieves and check whether updated successfully
+        receivedFromDB = apiDAO.getWSDL(api.getId());
+        Assert.assertEquals(new String(wsdlContentBytes), receivedFromDB);
+
+        //update with a WSDL archive
+        InputStream wsdl11ArchiveInputStream = SampleTestObjectCreator.createDefaultWSDL11ArchiveInputStream();
+        byte[] wsdlArchiveBytesDefault = IOUtils
+                .toByteArray(SampleTestObjectCreator.createDefaultWSDL11ArchiveInputStream());
+        apiDAO.addOrUpdateWSDLArchive(api.getId(), wsdl11ArchiveInputStream, ADMIN);
+
+        //retrieves and check whether successfully updated
+        InputStream wsdlArchiveInputStreamFromDB = apiDAO.getWSDLArchive(api.getId());
+        byte[] streamFromDBBytes = IOUtils.toByteArray(wsdlArchiveInputStreamFromDB);
+        Assert.assertEquals(wsdlArchiveBytesDefault.length, streamFromDBBytes.length);
+
+        //removes and validate
+        apiDAO.removeWSDLArchiveOfAPI(api.getId());
+        isWSDLExists = apiDAO.isWSDLExists(api.getId());
+        Assert.assertFalse(isWSDLExists);
+        isWSDLArchiveExists = apiDAO.isWSDLArchiveExists(api.getId());
+        Assert.assertFalse(isWSDLArchiveExists);
+    }
+
+    @Test
+    public void testWSDLArchiveForAPI() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        API.APIBuilder builder = SampleTestObjectCreator.createDefaultAPI()
+                .apiDefinition(SampleTestObjectCreator.apiDefinition);
+        API api = builder.build();
+        testAddGetEndpoint();
+        apiDAO.addAPI(api);
+
+        //there can't be any WSDLs added at first
+        boolean isWSDLExists = apiDAO.isWSDLExists(api.getId());
+        Assert.assertFalse(isWSDLExists);
+        boolean isWSDLArchiveExists = apiDAO.isWSDLArchiveExists(api.getId());
+        Assert.assertFalse(isWSDLArchiveExists);
+
+        //add a WSDL
+        InputStream wsdl11ArchiveInputStream = SampleTestObjectCreator.createDefaultWSDL11ArchiveInputStream();
+        byte[] wsdlArchiveBytesDefault = IOUtils
+                .toByteArray(SampleTestObjectCreator.createDefaultWSDL11ArchiveInputStream());
+        apiDAO.addOrUpdateWSDLArchive(api.getId(), wsdl11ArchiveInputStream, ADMIN);
+        
+        //retrieves and check whether they are same
+        InputStream wsdlArchiveInputStreamFromDB = apiDAO.getWSDLArchive(api.getId());
+        byte[] streamFromDBBytes = IOUtils.toByteArray(wsdlArchiveInputStreamFromDB);
+        Assert.assertEquals(wsdlArchiveBytesDefault.length, streamFromDBBytes.length);
+
+        //now there should be a single WSDL for API exists but no WSDL archives
+        isWSDLExists = apiDAO.isWSDLExists(api.getId());
+        Assert.assertTrue(isWSDLExists);
+        isWSDLArchiveExists = apiDAO.isWSDLArchiveExists(api.getId());
+        Assert.assertTrue(isWSDLArchiveExists);
+
+        //update the WSDL archive
+        InputStream alternativeWSDL11ArchiveInputStream = SampleTestObjectCreator
+                .createAlternativeWSDL11ArchiveInputStream();
+        apiDAO.addOrUpdateWSDLArchive(api.getId(), alternativeWSDL11ArchiveInputStream, ADMIN);
+
+        //retrieves and check whether updated successfully
+        byte[] wsdlArchiveBytesAlternative = IOUtils
+                .toByteArray(SampleTestObjectCreator.createAlternativeWSDL11ArchiveInputStream());
+        wsdlArchiveInputStreamFromDB = apiDAO.getWSDLArchive(api.getId());
+        streamFromDBBytes = IOUtils.toByteArray(wsdlArchiveInputStreamFromDB);
+        Assert.assertEquals(streamFromDBBytes.length, wsdlArchiveBytesAlternative.length);
+
+        //update the WSDL with a file
+        byte[] wsdlContentBytes = SampleTestObjectCreator.createAlternativeWSDL11Content();
+        apiDAO.addOrUpdateWSDL(api.getId(), wsdlContentBytes, ADMIN);
+
+        //retrieves and check whether updated successfully
+        String receivedFromDB = apiDAO.getWSDL(api.getId());
+        Assert.assertEquals(new String(wsdlContentBytes), receivedFromDB);
+
+        //removes and validate
+        apiDAO.removeWSDL(api.getId());
+        isWSDLExists = apiDAO.isWSDLExists(api.getId());
+        Assert.assertFalse(isWSDLExists);
+        isWSDLArchiveExists = apiDAO.isWSDLArchiveExists(api.getId());
+        Assert.assertFalse(isWSDLArchiveExists);
+    }
+
+    @Test
+    public void testAddGetDeleteCompositeAPI() throws Exception {
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        String gateWayConfig = SampleTestObjectCreator.createSampleGatewayConfig();
+        CompositeAPI compositeAPI = SampleTestObjectCreator.createUniqueCompositeAPI().gatewayConfig(gateWayConfig)
+                .build();
+        //Add application associated with Composite API
+        apiDAO.addApplicationAssociatedAPI(compositeAPI);
+        CompositeAPI addedAPI = apiDAO.getCompositeAPI(compositeAPI.getId());
+        Assert.assertNotNull(addedAPI);
+        Assert.assertEquals(compositeAPI.getContext(), addedAPI.getContext());
+
+        //Composite API gateway config
+        Assert.assertNotNull(apiDAO.getCompositeAPIGatewayConfig(addedAPI.getId()));
+
+        //Check for swagger definition
+        Assert.assertNotNull(apiDAO.getCompositeApiSwaggerDefinition(addedAPI.getId()));
+
+        //Update gateway config
+        String fingerprintBeforeUpdate = ETagUtils
+                .generateETag(apiDAO.getLastUpdatedTimeOfGatewayConfig(addedAPI.getId()));
+        Assert.assertNotNull(fingerprintBeforeUpdate);
+        Thread.sleep(1);
+
+        String gwConfig = SampleTestObjectCreator.createAlternativeGatewayConfig();
+        apiDAO.updateCompositeAPIGatewayConfig(addedAPI.getId(),
+                new ByteArrayInputStream(gwConfig.getBytes(StandardCharsets.UTF_8)), ADMIN);
+        String fingerprintAfterUpdate = ETagUtils
+                .generateETag(apiDAO.getLastUpdatedTimeOfGatewayConfig(addedAPI.getId()));
+        Assert.assertNotNull(fingerprintAfterUpdate);
+        Assert.assertNotEquals(fingerprintBeforeUpdate, fingerprintAfterUpdate);
+
+        //Composite API Summary
+        CompositeAPI summaryAPI = apiDAO.getCompositeAPISummary(compositeAPI.getId());
+        Assert.assertNotNull(summaryAPI);
+        Assert.assertEquals(compositeAPI.getContext(), summaryAPI.getContext());
+
+        //Composite APIs retrieving
+        List<CompositeAPI> compositeAPIS = apiDAO.getCompositeAPIs(new HashSet<>(), compositeAPI.getProvider(), 4, 4);
+        Assert.assertEquals(compositeAPI.getId(), compositeAPIS.get(0).getId());
+
+        //Delete Composite API
+        apiDAO.deleteCompositeApi(compositeAPI.getId());
+        Assert.assertNull(apiDAO.getCompositeAPI(compositeAPI.getId()));
     }
 }

@@ -28,7 +28,10 @@ import org.wso2.carbon.apimgt.core.TestUtil;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.core.exception.BlockConditionAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.models.BlockConditions;
+import org.wso2.carbon.apimgt.core.models.PolicyValidationData;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.CustomPolicy;
@@ -38,6 +41,8 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 public class PolicyDAOImplIT extends DAOIntegrationTestBase {
 
@@ -62,6 +67,15 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNotEquals(fingerprintBeforeUpdatingPolicy, fingerprintAfterUpdatingPolicy, "Policy "
                 + "fingerprint expected to be different before and after updating for policy: "
                 + policy.getPolicyName());
+        updatedAPIPolicy.setUuid(null);
+        //test for exception
+        try {
+            policyDAO.updateApiPolicy(updatedAPIPolicy);
+            Assert.fail("Exception expected, but not thrown.");
+        } catch (APIMgtDAOException ex) {
+            Assert.assertEquals(ex.getMessage(),
+                    "Policy uuid is not found, unable to update policy: " + updatedAPIPolicy.getPolicyName());
+        }
     }
 
     @Test
@@ -83,6 +97,15 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNotEquals(fingerprintBeforeUpdatingPolicy, fingerprintAfterUpdatingPolicy, "Policy "
                 + "fingerprint expected to be different before and after updating for policy: "
                 + policy.getPolicyName());
+        //Test for exception uuid null
+        updatedPolicy.setUuid(null);
+        try {
+            policyDAO.updateApplicationPolicy(updatedPolicy);
+            Assert.fail("Exception expected, but not thrown.");
+        } catch (APIMgtDAOException ex) {
+            Assert.assertEquals(ex.getMessage(),
+                    "Policy uuid is not found, unable to update policy: " + updatedPolicy.getPolicyName());
+        }
     }
 
     @Test
@@ -103,6 +126,15 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNotNull(fingerprintAfterUpdatingPolicy);
         Assert.assertNotEquals(fingerprintBeforeUpdatingPolicy, fingerprintAfterUpdatingPolicy, TestUtil.printDiff
                 (fingerprintBeforeUpdatingPolicy, fingerprintAfterUpdatingPolicy));
+
+        updatedPolicy.setUuid(null);
+        try {
+            policyDAO.updateSubscriptionPolicy(updatedPolicy);
+            Assert.fail("Exception expected, but not thrown.");
+        } catch (APIMgtDAOException ex) {
+            Assert.assertEquals(ex.getMessage(),
+                    "Policy uuid is not found, unable to update policy: " + updatedPolicy.getPolicyName());
+        }
     }
 
     @Test (description = "Add, Get and Delete an API policy")
@@ -123,6 +155,13 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
             Assert.fail("Exception expected, but not thrown.");
         } catch (APIMgtDAOException ex) {
             Assert.assertEquals(ex.getMessage(), "API Policy not found for name: " + addedPolicy.getPolicyName());
+        }
+
+        try {
+            policyDAO.getApiPolicyByUuid(policy.getUuid());
+            Assert.fail("Exception expected, but not thrown.");
+        } catch (APIMgtDAOException ex) {
+            Assert.assertEquals(ex.getMessage(), "API Policy not found for id: " + addedPolicy.getUuid());
         }
     }
 
@@ -147,6 +186,13 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
             Assert.assertEquals(ex.getMessage(), "Application Policy not found for name: " +
                     addedPolicy.getPolicyName());
         }
+
+        try {
+            policyDAO.getApplicationPolicyByUuid(policy.getUuid());
+            Assert.fail("Exception expected, but not thrown.");
+        } catch (APIMgtDAOException ex) {
+            Assert.assertEquals(ex.getMessage(), "Application Policy not found for id: " + addedPolicy.getUuid());
+        }
     }
 
     @Test(description = "Add,Get and Delete Subscription Policies")
@@ -170,6 +216,14 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         } catch (APIMgtDAOException ex) {
             Assert.assertEquals(ex.getMessage(), "Subscription Policy not found for name: "
                     + addedPolicy.getPolicyName());
+        }
+        //test for exception: retrieving not available policy
+        try {
+            policyDAO.getSubscriptionPolicyByUuid(policy.getUuid());
+            Assert.fail("Exception expected, but not thrown.");
+        } catch (APIMgtDAOException ex) {
+            Assert.assertEquals(ex.getMessage(),
+                    "Subscription Policy not found for id: " + addedPolicy.getUuid());
         }
     }
 
@@ -260,7 +314,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
     }
 
     @Test(description = "Add, Get, Delete block condition")
-    public void testAddGetDeleteBlockConditions() throws Exception {
+    public void testAddGetUpdateDeleteBlockConditions() throws Exception {
 
         PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
 
@@ -293,15 +347,20 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertEquals(blockConditionsUser.getConditionValue(), blockConditionsAddedUser.getConditionValue());
         Assert.assertEquals(blockConditionsIpRange.getStartingIP(), blockConditionsAddedIpRange.getStartingIP());
 
+        Assert.assertTrue(policyDAO.updateBlockConditionStateByUUID(uuidIp, true));
+        Assert.assertTrue(policyDAO.getBlockConditionByUUID(uuidIp).isEnabled());
+        Assert.assertTrue(policyDAO.getBlockConditions().size() == 5);
+
         Assert.assertTrue(policyDAO.deleteBlockConditionByUuid(uuidIp));
         Assert.assertTrue(policyDAO.deleteBlockConditionByUuid(uuidIpRange));
         Assert.assertTrue(policyDAO.deleteBlockConditionByUuid(uuidApi));
         Assert.assertTrue(policyDAO.deleteBlockConditionByUuid(uuidApp));
         Assert.assertTrue(policyDAO.deleteBlockConditionByUuid(uuidUser));
+
     }
 
     @Test
-    public void testAddGetDeleteCustomPolicy() throws Exception {
+    public void testAddGetUpdateDeleteCustomPolicy() throws Exception {
         PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
         CustomPolicy customPolicy = SampleTestObjectCreator.createDefaultCustomPolicy();
         String uuid = policyDAO.addCustomPolicy(customPolicy);
@@ -309,8 +368,158 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         CustomPolicy policyAdded = policyDAO.getCustomPolicyByUuid(uuid);
         Assert.assertEquals(customPolicy.getSiddhiQuery(), policyAdded.getSiddhiQuery());
 
+        policyAdded.setDescription("updated custom policy");
+        policyDAO.updateCustomPolicy(policyAdded);
+        Assert.assertEquals(policyDAO.getCustomPolicyByUuid(uuid).getDescription() , "updated custom policy");
+
         policyDAO.deleteCustomPolicy(uuid);
         CustomPolicy policyDeletion = policyDAO.getCustomPolicyByUuid(uuid);
         Assert.assertNull(policyDeletion);
+    }
+
+    @Test
+    public void testGetAllPolicies() throws Exception {
+        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        int size = policyDAO.getAllPolicies().size();
+        APIPolicy apiPolicy = SampleTestObjectCreator.createDefaultAPIPolicy();
+        ApplicationPolicy applicationPolicy = SampleTestObjectCreator.createDefaultApplicationPolicy();
+        SubscriptionPolicy subscriptionPolicy = SampleTestObjectCreator.createDefaultSubscriptionPolicy();
+        policyDAO.addApiPolicy(apiPolicy);
+        policyDAO.addApplicationPolicy(applicationPolicy);
+        policyDAO.addSubscriptionPolicy(subscriptionPolicy);
+        Set<PolicyValidationData> policyValidationData = policyDAO.getAllPolicies();
+        Assert.assertTrue(policyValidationData.size() == size + 3);
+    }
+
+
+    @Test
+    public void testGetCustomPolicies() throws Exception {
+        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        int size = policyDAO.getCustomPolicies().size();
+        CustomPolicy customPolicy = SampleTestObjectCreator.createDefaultCustomPolicy();
+        policyDAO.addCustomPolicy(customPolicy);
+        Assert.assertTrue(policyDAO.getCustomPolicies().size() ==  size + 1);
+    }
+
+    @Test
+    public void testGetPoliciesByLevel() throws Exception {
+        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        int policySize;
+        //api policy by level
+        policySize = policyDAO.getPoliciesByLevel(APIMgtAdminService.PolicyLevel.api).size();
+        APIPolicy apiPolicy = SampleTestObjectCreator.createDefaultAPIPolicy();
+        policyDAO.addApiPolicy(apiPolicy);
+        Assert.assertTrue(policyDAO.getPoliciesByLevel(APIMgtAdminService.PolicyLevel.api).size() == policySize + 1);
+        Assert.assertEquals(policyDAO
+                .getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api, apiPolicy.getPolicyName())
+                .getUuid(), apiPolicy.getUuid());
+        Assert.assertEquals(
+                policyDAO.getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api, apiPolicy.getPolicyName())
+                        .getUuid(), apiPolicy.getUuid());
+
+        //application policy by level
+        policySize = policyDAO.getPoliciesByLevel(APIMgtAdminService.PolicyLevel.application).size();
+        ApplicationPolicy applicationPolicy = SampleTestObjectCreator.createDefaultApplicationPolicy();
+        policyDAO.addApplicationPolicy(applicationPolicy);
+        Assert.assertTrue(
+                policyDAO.getPoliciesByLevel(APIMgtAdminService.PolicyLevel.application).size() == policySize + 1);
+        Assert.assertEquals(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application,
+                applicationPolicy.getPolicyName()).getUuid(), applicationPolicy.getUuid());
+        Assert.assertEquals(policyDAO.getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application,
+                applicationPolicy.getPolicyName()).getUuid(), applicationPolicy.getUuid());
+
+        //subscription policy by level
+        policySize = policyDAO.getPoliciesByLevel(APIMgtAdminService.PolicyLevel.subscription).size();
+        SubscriptionPolicy subscriptionPolicy = SampleTestObjectCreator.createDefaultSubscriptionPolicy();
+        policyDAO.addSubscriptionPolicy(subscriptionPolicy);
+        Assert.assertTrue(
+                policyDAO.getPoliciesByLevel(APIMgtAdminService.PolicyLevel.subscription).size() == policySize + 1);
+        Assert.assertEquals(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                subscriptionPolicy.getPolicyName()).getUuid(), subscriptionPolicy.getUuid());
+        Assert.assertEquals(policyDAO.getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription,
+                subscriptionPolicy.getPolicyName()).getUuid(), subscriptionPolicy.getUuid());
+        //When policy is not in the DB
+        try {
+            policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api, "test");
+        } catch (APIMgtResourceNotFoundException ex) {
+            Assert.assertEquals(ex.getMessage(),
+                    "Policy " + APIMgtAdminService.PolicyLevel.api + "Couldn't found " + "test");
+        }
+    }
+
+    @Test
+    public void testGetPolicyByLevelAndUUUID() throws Exception {
+        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        APIPolicy apiPolicy = SampleTestObjectCreator.createDefaultAPIPolicy();
+        ApplicationPolicy applicationPolicy = SampleTestObjectCreator.createDefaultApplicationPolicy();
+        SubscriptionPolicy subscriptionPolicy = SampleTestObjectCreator.createDefaultSubscriptionPolicy();
+
+        policyDAO.addApiPolicy(apiPolicy);
+        policyDAO.addApplicationPolicy(applicationPolicy);
+        policyDAO.addSubscriptionPolicy(subscriptionPolicy);
+
+        Assert.assertEquals(policyDAO.getPolicyByLevelAndUUID(APIMgtAdminService.PolicyLevel.api, apiPolicy.getUuid())
+                .getPolicyName(), apiPolicy.getPolicyName());
+        Assert.assertEquals(policyDAO
+                .getPolicyByLevelAndUUID(APIMgtAdminService.PolicyLevel.application, applicationPolicy.getUuid())
+                .getPolicyName(), applicationPolicy.getPolicyName());
+        Assert.assertEquals(policyDAO
+                .getPolicyByLevelAndUUID(APIMgtAdminService.PolicyLevel.subscription, subscriptionPolicy.getUuid())
+                .getPolicyName(), subscriptionPolicy.getPolicyName());
+    }
+
+    @Test
+    public void testValidityOfBlockCondition() throws Exception {
+        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        BlockConditions blockConditionIPRange = SampleTestObjectCreator
+                .createDefaultBlockCondition(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITION_IP_RANGE);
+        BlockConditions blockConditionAPI = SampleTestObjectCreator
+                .createDefaultBlockCondition(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_API);
+        BlockConditions blockConditionsApp = SampleTestObjectCreator
+                .createDefaultBlockCondition(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_APPLICATION);
+
+        //Making starting IP > ending IP
+        blockConditionIPRange.setStartingIP("12.34.13.12");
+        blockConditionIPRange.setEndingIP("10.32.44.32");
+        //Giving invalid API context
+        blockConditionAPI.setConditionValue("invalid");
+        //giving invalid app name and invalid UUID
+        String appArray[] = blockConditionsApp.getConditionValue().split(":");
+        UUID appUuid = UUID.randomUUID();
+        String appName = appArray[1];
+        blockConditionsApp.setConditionValue(appUuid + ":" + appName);
+
+        try {
+            policyDAO.addBlockConditions(blockConditionIPRange);
+        } catch (APIMgtDAOException ex) {
+            Assert.assertEquals(ex.getMessage(),
+                    "Couldn't Save Block Condition Due to Invalid IP Range -> Starting IP : " + blockConditionIPRange
+                            .getStartingIP() + " EndingIP : " + blockConditionIPRange.getEndingIP());
+        }
+        try {
+            policyDAO.addBlockConditions(blockConditionAPI);
+        } catch (APIMgtDAOException ex) {
+            Assert.assertEquals(ex.getMessage(),
+                    "Couldn't Save Block Condition Due to Invalid API Context : " + blockConditionAPI
+                            .getConditionValue());
+        }
+
+        try {
+            policyDAO.addBlockConditions(blockConditionsApp);
+        } catch (APIMgtDAOException ex) {
+            Assert.assertEquals(ex.getMessage(),
+                    "Couldn't Save Block Condition Due to Invalid Application : " + appName + ", UUID :"
+                            + appUuid);
+        }
+        //Making IP block condition valid and add twice to check if it shows already existing
+        blockConditionIPRange.setEndingIP("29.23.12.12");
+        policyDAO.addBlockConditions(blockConditionIPRange);
+        try {
+            policyDAO.addBlockConditions(blockConditionIPRange);
+        } catch (BlockConditionAlreadyExistsException ex) {
+            Assert.assertEquals(ex.getMessage(),
+                    "Condition with type: " + blockConditionIPRange.getConditionType() + ", value: "
+                            + blockConditionIPRange.getConditionValue() + " already exists");
+        }
     }
 }

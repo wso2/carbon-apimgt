@@ -157,7 +157,7 @@ public class WorkflowDAOImpl implements WorkflowDAO {
                 workflow.setUpdatedTime(rs.getTimestamp("WF_UPDATED_TIME").toLocalDateTime());
                 workflow.setWorkflowReference(rs.getString("WF_REFERENCE"));
                 workflow.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
-                workflow.setAttributes(WorkflowUtils.jsonStringToMap(rs.getString("WF_ATTRIBUTES")));;
+                workflow.setAttributes(WorkflowUtils.jsonStringToMap(rs.getString("WF_ATTRIBUTES")));
             } else {
                 throw new APIMgtDAOException("Invalid workflow type");
             }        
