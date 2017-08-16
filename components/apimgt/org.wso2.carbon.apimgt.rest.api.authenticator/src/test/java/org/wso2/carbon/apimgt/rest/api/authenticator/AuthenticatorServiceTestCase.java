@@ -47,7 +47,7 @@ public class AuthenticatorServiceTestCase {
 
         //// Expected data object to be passed to the front-end
         JsonObject oAuthData = new JsonObject();
-        String scopes = "apim:workflow_approve apim:subscribe openid";
+        String scopes = "apim:subscribe openid";
         oAuthData.addProperty(KeyManagerConstants.OAUTH_CLIENT_ID, oAuthApplicationInfo.getClientId());
         oAuthData.addProperty(KeyManagerConstants.OAUTH_CALLBACK_URIS, oAuthApplicationInfo.getCallBackURL());
         oAuthData.addProperty(KeyManagerConstants.TOKEN_SCOPES , scopes);
@@ -88,7 +88,7 @@ public class AuthenticatorServiceTestCase {
         //// Expected response object from KeyManager
         AccessTokenInfo tokenInfo = new AccessTokenInfo();
         tokenInfo.setAccessToken("xxx-access-token-xxx");
-        tokenInfo.setScopes("apim:workflow_approve apim:subscribe openid");
+        tokenInfo.setScopes("apim:subscribe openid");
         tokenInfo.setRefreshToken("xxx-refresh-token-xxx");
         tokenInfo.setIdToken("abcdefghijklmnopqrstuvwxyz");
         tokenInfo.setValidityPeriod(-2L);
@@ -143,7 +143,7 @@ public class AuthenticatorServiceTestCase {
         AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
         accessTokenInfo.setIdToken("eyJ4NXQiOiJObUptT0dVeE16WmxZak0yWkRSaE5UWmxZVEExWXpkaFpUUmlPV0UwTldJMk0ySm1PVGMxWkEiLCJraWQiOiJkMGVjNTE0YTMyYjZmODhjMGFiZDEyYTI4NDA2OTliZGQzZGViYTlkIiwiYWxnIjoiUlMyNTYifQ.eyJhdF9oYXNoIjoiWGg3bFZpSDZDS2pZLXRIT09JaWN5QSIsInN1YiI6ImFkbWluIiwiYXVkIjpbInR6NlJGQnhzdV93Z0RCd3FyUThvVmo3d25FTWEiXSwiYXpwIjoidHo2UkZCeHN1X3dnREJ3cXJROG9Wajd3bkVNYSIsImF1dGhfdGltZSI6MTUwMTczMzQ1NiwiaXNzIjoiaHR0cHM6XC9cL2xvY2FsaG9zdDo5NDQzXC9vYXV0aDJcL3Rva2VuIiwiZXhwIjoxNTAxNzM3MDU3LCJpYXQiOjE1MDE3MzM0NTd9.XXX-XXX");
         accessTokenInfo.setValidityPeriod(-2L);
-        accessTokenInfo.setScopes("apim:workflow_approve apim:subscribe openid");
+        accessTokenInfo.setScopes("apim:subscribe openid");
 
         //// Expected AuthResponseBean object
         AuthResponseBean expectedAuthResponseBean = new AuthResponseBean();
@@ -166,7 +166,7 @@ public class AuthenticatorServiceTestCase {
         //// AccessTokenInfo object with null id token
         AccessTokenInfo invalidTokenInfo = new AccessTokenInfo();
         invalidTokenInfo.setValidityPeriod(-2L);
-        invalidTokenInfo.setScopes("apim:workflow_approve apim:subscribe openid");
+        invalidTokenInfo.setScopes("apim:subscribe openid");
 
         //// Expected AuthResponseBean object when id token is null
         AuthResponseBean expectedResponseBean = new AuthResponseBean();
@@ -186,7 +186,7 @@ public class AuthenticatorServiceTestCase {
         AccessTokenInfo invalidAccessTokenInfo = new AccessTokenInfo();
         invalidAccessTokenInfo.setIdToken("xxx-invalid-id-token-xxx");
         invalidAccessTokenInfo.setValidityPeriod(-2L);
-        invalidAccessTokenInfo.setScopes("apim:workflow_approve apim:subscribe openid");
+        invalidAccessTokenInfo.setScopes("apim:subscribe openid");
 
         try {
             AuthResponseBean errorResponseBean = new AuthResponseBean();
