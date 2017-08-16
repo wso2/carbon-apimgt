@@ -21,12 +21,13 @@ import org.ballerinalang.BLangProgramArchiveBuilder;
 import org.ballerinalang.BLangProgramLoader;
 import org.ballerinalang.model.BLangProgram;
 import org.ballerinalang.util.program.BLangPrograms;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -36,8 +37,9 @@ import java.nio.file.Paths;
 public class GenerateArchives {
     public static final String MAIN_TYPE = "main";
     public static final String SERVICE_TYPE = "service";
+    private static final Logger log = LoggerFactory.getLogger(GenerateArchives.class);
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         String type = args[0];
         String srcDir = args[1];
         String packagePath = args[2];
@@ -58,12 +60,11 @@ public class GenerateArchives {
             Path realPath = Paths.get(srcDir + File.separator + packagePath).toRealPath(LinkOption.NOFOLLOW_LINKS);
             if (!Files.isDirectory(realPath, LinkOption.NOFOLLOW_LINKS) && !realPath.toString()
                     .endsWith(BLangPrograms.BSOURCE_FILE_EXT)) {
+                log.error("invalid file or package '" + sourcePath + "'");
                 throw new IllegalArgumentException("invalid file or package '" + sourcePath + "'");
-
             }
-        } catch (NoSuchFileException x) {
-            throw new IllegalArgumentException("no such file or directory: " + sourcePath);
         } catch (IOException e) {
+            log.error("error reading from file: " + sourcePath + " reason: " + e.getMessage(), e);
             throw new RuntimeException("error reading from file: " + sourcePath + " reason: " + e.getMessage(), e);
         }
 
@@ -73,12 +74,12 @@ public class GenerateArchives {
             bLangProgram = new BLangProgramLoader().loadMain(programDirPath, sourcePath);
         } else if (SERVICE_TYPE.equals(type)) {
             bLangProgram = new BLangProgramLoader().loadService(programDirPath, sourcePath);
-        }
-        // TODO Delete existing file  or WARNING
-        if (targetName == null || targetName.isEmpty()) {
-            new BLangProgramArchiveBuilder().build(bLangProgram);
         } else {
-            new BLangProgramArchiveBuilder().build(bLangProgram, targetName.trim());
+            log.error("source type '" + type + "' not supported");
+            throw new RuntimeException("source type '" + type + "' not supported");
         }
+
+        new BLangProgramArchiveBuilder().build(bLangProgram, targetName.trim());
+
     }
 }
