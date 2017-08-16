@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.gateway;
+package org.wso2.carbon.apimgt.gateway.auth;
 import ballerina.net.http;
 import ballerina.lang.messages;
 import ballerina.lang.strings;
