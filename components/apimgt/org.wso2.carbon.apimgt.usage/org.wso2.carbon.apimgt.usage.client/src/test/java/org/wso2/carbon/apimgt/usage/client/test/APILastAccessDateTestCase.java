@@ -26,7 +26,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 /**
- * Testing API Last AccessDate
+ * Testing API Last AccessDate.
  */
 public class APILastAccessDateTestCase extends TestCase {
 
