@@ -22,6 +22,7 @@ import qs from 'qs'
 import Configs from './ConfigManager'
 import Utils from './utils'
 import User from './User'
+import SingleClient from './SingleClient'
 
 class AuthManager {
     constructor() {
@@ -207,6 +208,12 @@ class AuthManager {
             'X-Alt-Referer': referrer
         };
         return axios.post(url, qs.stringify(params), {headers: headers});
+    }
+
+    static hasScopes(resourcePath, resourceMethod) {
+        let userscopes = this.getUser().scopes;
+        let validScope = SingleClient.getScopeForResource(resourcePath, resourceMethod);
+        return validScope.then(scope => {return userscopes.includes(scope)});
     }
 
 }

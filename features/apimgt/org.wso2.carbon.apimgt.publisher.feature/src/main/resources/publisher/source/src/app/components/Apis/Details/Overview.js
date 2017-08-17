@@ -24,6 +24,8 @@ const FormItem = Form.Item;
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import Api from '../../../data/api'
+import {Redirect} from 'react-router-dom'
+import {ScopeValidation, resourceMethod, resourcePath} from '../../../data/ScopeValidation'
 
 class Overview extends Component {
     constructor(props) {
@@ -92,10 +94,14 @@ class Overview extends Component {
     }
 
     render() {
+        let redirect_url = "/apis/" + this.props.match.params.api_uuid + "/overview";
+
         const menu = (
             <Menu>
                 <Menu.Item>
-                    <Link to="">Edit</Link>
+                    <ScopeValidation resourceMethod={resourceMethod.PUT} resourcePath={resourcePath.SINGLE_API}>
+                        <Link to="">Edit</Link>
+                    </ScopeValidation>
                 </Menu.Item>
                 <Menu.Item>
                     <Link to="">Create New Version</Link>

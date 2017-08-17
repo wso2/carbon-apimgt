@@ -24,8 +24,7 @@ import 'react-toastify/dist/ReactToastify.min.css';
 import Policies from '../../Details/LifeCycle/Policies.js'
 
 import {Form, Icon, Input, Button, message, Radio, Collapse, Card, Row, Col} from 'antd'
-import AuthManager from '../../../../data/AuthManager'
-
+import {ScopeValidation, resourceMethod, resourcePath} from '../../../../data/ScopeValidation';
 
 const Panel = Collapse.Panel;
 const FormItem = Form.Item;
@@ -185,17 +184,20 @@ class EndpointForm extends React.Component {
                 </Row>
                 <Row>
                     <Col span={12}>
-                        <Card title="Business Plans" bordered={false} style={{margin: '5px'}}>
-                            {this.state.policies ? <Policies {...props}/> : ''}
-                        </Card>
+                        <ScopeValidation resourcePath={resourcePath.API_CHANGE_LC} resourceMethod={resourceMethod.POST}>
+                            <Card title="Business Plans" bordered={false} style={{margin: '5px'}}>
+                                {this.state.policies ? <Policies {...props}/> : ''}
+                            </Card>
+                        </ScopeValidation>
                     </Col>
                 </Row>
 
                 <FormItem >
-
-                    <Button id="action-create" type="primary" htmlType="submit">
-                        Create
-                    </Button>
+                    <ScopeValidation resourcePath={resourcePath.APIS} resourceMethod={resourceMethod.POST}>
+                        <Button id="action-create" type="primary" htmlType="submit">
+                            Create
+                        </Button>
+                    </ScopeValidation>
                     <Button type="default" htmlType="button"
                             onClick={() => this.props.history.push("/api/create/home")}>
                         Cancel
