@@ -47,7 +47,7 @@ public class PublisherApiServiceImpl extends PublisherApiService {
             }
             //#TODO read from config file
         /* TODO: Check the dot containment in last segment separated by '/' or use regex to capture file extension */
-            if ("publisher".equals(context)) {
+            if (app.equals(context)) {
                 if (rawUri.split("\\?")[0].contains(".")) {
                     filePath = "./deployment/webapps" + path;
                 } else {
@@ -68,4 +68,3 @@ public class PublisherApiServiceImpl extends PublisherApiService {
     }
 
 }
-
