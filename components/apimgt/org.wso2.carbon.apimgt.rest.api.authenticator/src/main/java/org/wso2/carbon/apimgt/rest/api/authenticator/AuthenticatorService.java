@@ -256,8 +256,6 @@ public class AuthenticatorService {
         String applicationRestAPI = null;
         if (AuthenticatorConstants.STORE_APPLICATION.equals(appName)) {
             applicationRestAPI = RestApiUtil.getStoreRestAPIResource();
-        } else if (AuthenticatorConstants.STORE_NEW_APPLICATION.equals(appName)) {
-            applicationRestAPI = RestApiUtil.getStoreRestAPIResource();
         } else if (AuthenticatorConstants.PUBLISHER_APPLICATION.equals(appName)) {
             applicationRestAPI = RestApiUtil.getPublisherRestAPIResource();
         } else if (AuthenticatorConstants.ADMIN_APPLICATION.equals(appName)) {
