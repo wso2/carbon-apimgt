@@ -208,7 +208,6 @@
         </plugins>
     </build>
     <properties>
-        <ballerina.version>0.89</ballerina.version>
         <carvon.user.core.version>4.4.11</carvon.user.core.version>
         <mvn.exec.plugin.version>1.5.0</mvn.exec.plugin.version>
         <mvn.processor.plugin.version>2.2.4</mvn.processor.plugin.version>

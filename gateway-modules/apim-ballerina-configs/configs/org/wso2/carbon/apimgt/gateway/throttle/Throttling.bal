@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.gateway;
+package org.wso2.carbon.apimgt.gateway.throttle;
 
 import ballerina.net.http;
 import ballerina.lang.messages;

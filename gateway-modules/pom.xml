@@ -33,9 +33,10 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>apim-ballerina-configs</module>
+        <module>apim-ballerina-plugin</module>
         <module>apim-ballerina-native-component</module>
         <module>native-data-publisher</module>
+        <module>apim-ballerina-configs</module>
     </modules>
 
 </project>

@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.gateway;
+package org.wso2.carbon.apimgt.gateway.services;
 
 import ballerina.lang.messages;
 import ballerina.net.jms;
