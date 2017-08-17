@@ -123,6 +123,7 @@ class SingleClient {
 
     /**
      * Get Scope for a particular resource path
+     *
      * @param resourcePath resource path of the action
      * @param resourceMethod resource method of the action
      */

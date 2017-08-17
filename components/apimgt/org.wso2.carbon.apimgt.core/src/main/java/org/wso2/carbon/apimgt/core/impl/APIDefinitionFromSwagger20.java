@@ -209,7 +209,8 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         return apiResources;
     }
 
-    @Override public Map<String, String> getScope(String resourceConfigJSON) throws APIManagementException {
+    @Override
+    public Map<String, String> getScope(String resourceConfigJSON) throws APIManagementException {
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(resourceConfigJSON);
         String basePath = swagger.getBasePath();
