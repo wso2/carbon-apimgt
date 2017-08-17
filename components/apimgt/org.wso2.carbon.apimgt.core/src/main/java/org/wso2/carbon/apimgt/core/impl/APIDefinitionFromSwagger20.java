@@ -32,6 +32,8 @@ import io.swagger.models.Response;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.OAuth2Definition;
 import io.swagger.models.auth.SecuritySchemeDefinition;
+import io.swagger.models.auth.ApiKeyAuthDefinition;
+import io.swagger.models.auth.In;
 import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.FormParameter;
 import io.swagger.models.parameters.Parameter;
@@ -383,6 +385,11 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         info.setContact(contact);
         info.setVersion(api.getVersion());
         swagger.setInfo(info);
+
+        if ((api.getSecurityScheme() & 2) == 2) { //apikey
+            swagger.securityDefinition("apikey", new ApiKeyAuthDefinition("apikey", In.HEADER));
+        }
+
         Map<String, Path> stringPathMap = new HashMap();
         for (UriTemplate uriTemplate : api.getUriTemplates().values()) {
             String uriTemplateString = uriTemplate.getUriTemplate();
@@ -412,6 +419,10 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
                 operation.setConsumes(consumesList);
             }
             operation.addResponse("200", getDefaultResponse());
+            if (!uriTemplate.getAuthType().equals(APIMgtConstants.AUTH_NO_AUTHENTICATION) && ((api.getSecurityScheme() & 2) == 2)) {
+              operation.addSecurity("apikey", null);
+            }
+
             if (stringPathMap.containsKey(uriTemplateString)) {
                 Path path = stringPathMap.get(uriTemplateString);
                 path.set(uriTemplate.getHttpVerb().toLowerCase(), operation);

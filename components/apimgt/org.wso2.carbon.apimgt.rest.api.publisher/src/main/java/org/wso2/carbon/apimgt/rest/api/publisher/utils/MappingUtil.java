@@ -551,7 +551,7 @@ public class MappingUtil {
         }
 
         if (securityScheme.isEmpty()) {
-            securitySchemeValue = 1;
+            securitySchemeValue = 3;
         }
 
         return securitySchemeValue;

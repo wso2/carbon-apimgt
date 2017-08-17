@@ -82,6 +82,7 @@ public class TestMappingUtilTestCase {
         assertEquals(api.getApiPermission(), apidto.getPermission());
         assertEquals(api.getLifeCycleStatus(), apidto.getLifeCycleStatus());
         assertEquals(api.getWorkflowStatus(), apidto.getWorkflowStatus());
+        assertEquals(MappingUtil.mapSecuritySchemeIntToList(api.getSecurityScheme()), apidto.getSecurityScheme());
         assertEquals(api.getTags().size(), apidto.getTags().size());
         assertEquals(api.getLabels().size(), apidto.getLabels().size());
         assertEquals(api.getTransport().size(), apidto.getTransport().size());
@@ -139,6 +140,7 @@ public class TestMappingUtilTestCase {
         assertEquals(apidto.getProvider(), mappedAPI.getProvider());
         assertEquals(apidto.getPermission(), mappedAPI.getApiPermission());
         assertEquals(apidto.getLifeCycleStatus(), mappedAPI.getLifeCycleStatus());
+        assertEquals(MappingUtil.mapSecuritySchemeListToInt(apidto.getSecurityScheme()), mappedAPI.getSecurityScheme());
         //Npt mapped it's intentional
         assertNull(mappedAPI.getWorkflowStatus());
         assertEquals(apidto.getTags().size(), mappedAPI.getTags().size());
@@ -383,6 +385,30 @@ public class TestMappingUtilTestCase {
         assertEquals(label1.getName(), labelListDTO.getList().get(0).getName());
         assertEquals(label2.getId(), labelListDTO.getList().get(1).getLabelId());
         assertEquals(label2.getName(), labelListDTO.getList().get(1).getName());
+    }
+
+    @Test
+    void testSecuritySchemeIntToListMapping() {
+        int securityScheme = 3;
+        List<String> securitySchemeList = MappingUtil.mapSecuritySchemeIntToList(securityScheme);
+
+        List<String> testList = new ArrayList<String>();
+        testList.add("Oauth");
+        testList.add("apikey");
+
+
+        assertEquals(securitySchemeList, testList);
+    }
+
+    @Test
+    void testSecuritySchemeListToIntMapping() {
+        List<String> testList = new ArrayList<String>();
+        testList.add("Oauth");
+        testList.add("apikey");
+
+
+        int securityScheme = MappingUtil.mapSecuritySchemeListToInt(testList);
+        assertEquals(securityScheme, 3);
     }
 
 }

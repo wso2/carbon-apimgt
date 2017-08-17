@@ -458,7 +458,8 @@ public class SampleTestObjectCreator {
                 context(api.getContext()).
                 description(api.getDescription()).
                 lifeCycleStatus(api.getLifeCycleStatus()).
-                lifecycleInstanceId(api.getLifecycleInstanceId()).build();
+                lifecycleInstanceId(api.getLifecycleInstanceId()).
+                securityScheme(api.getSecurityScheme()).build();
     }
 
     public static String createAlternativeSwaggerDefinition() throws IOException {
