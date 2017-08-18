@@ -135,7 +135,8 @@ class API {
     get(id, callback = null) {
         var promise_get = this.client.then(
             (client) => {
-                return client.apis["API (Individual)"].get_apis__apiId_(
+                debugger;
+                return client.apis["API (individual)"].get_apis__apiId_(
                     {apiId: id}, this._requestMetaData());
             }
         );
