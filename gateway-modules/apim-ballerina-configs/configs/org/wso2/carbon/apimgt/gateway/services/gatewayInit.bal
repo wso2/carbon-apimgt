@@ -10,8 +10,13 @@ service<http> gatewayInitService {
     boolean isCacheInitialized = holder:initializeCache();
     boolean isMapsAdded = holder:addThrottleMaps();
     boolean isReady = initGateway();
+
     boolean subscriptionsInitialized = gatewayUtil:retrieveSubscriptions();
+    boolean offlineSubsInitialized = gatewayUtil:retrieveOfflineSubscriptions();
+
     boolean applicationsInitialized = gatewayUtil:retrieveApplications();
+    boolean offlineAppssInitialized = gatewayUtil:retrieveOfflineApplications();
+
     boolean policiesInitialized = gatewayUtil:retrievePolicies();
 
 }
