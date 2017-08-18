@@ -1,6 +1,5 @@
 package org.wso2.carbon.apimgt.gateway.utils;
 import ballerina.lang.messages;
-import ballerina.lang.jsons;
 import ballerina.lang.errors;
 import ballerina.lang.system;
 import ballerina.net.http;
@@ -95,14 +94,14 @@ function retrieveSubscriptions () (boolean) {
     message request = {};
     http:ClientConnector apiInfoConnector = create http:ClientConnector(getAPICoreURL());
     messages:setHeader(request, "Content-Type", "application/json");
-    message response = http:ClientConnector.get(apiInfoConnector, query, request);
+    message response = apiInfoConnector.get(query, request);
     json subscriptions = messages:getJsonPayload(response);
     putIntoSubscriptionCache(subscriptions.list);
     return true;
 }
 
 function putIntoSubscriptionCache (json subscriptions) {
-    int length = jsons:getInt(subscriptions, "$.length()");
+    int length = lengthof subscriptions;
     int i = 0;
     while (i < length) {
         json subscription = subscriptions[i];
@@ -114,7 +113,7 @@ function putIntoSubscriptionCache (json subscriptions) {
 }
 
 function removeFromSubscriptionCache (json subscriptions) {
-    int length = jsons:getInt(subscriptions, "$.length()");
+    int length = lengthof subscriptions;
     int i = 0;
     while (i < length) {
         json subscription = subscriptions[i];
@@ -131,9 +130,9 @@ function retrieveResources (string apiContext, string apiVersion) {
     message request = {};
     http:ClientConnector apiInfoConnector = create http:ClientConnector(getAPICoreURL());
     messages:setHeader(request, "Content-Type", "application/json");
-    message response = http:ClientConnector.get(apiInfoConnector, query, request);
+    message response = apiInfoConnector.get(query, request);
     json resources = messages:getJsonPayload(response);
-    int length = jsons:getInt(resources, "$.list.length()");
+    int length = lengthof resources.list;
     int i = 0;
     while (i < length) {
         json resource1 = resources.list[i];
@@ -146,9 +145,9 @@ function retrieveApplications () (boolean) {
     message request = {};
     http:ClientConnector apiInfoConnector = create http:ClientConnector(getAPICoreURL());
     messages:setHeader(request, "Content-Type", "application/json");
-    message response = http:ClientConnector.get(apiInfoConnector, query, request);
+    message response = apiInfoConnector.get(query, request);
     json applications = messages:getJsonPayload(response);
-    int length = jsons:getInt(applications, "$.list.length()");
+    int length = lengthof applications.list;
     int i = 0;
     if (length > 0) {
         while (i < length) {
@@ -164,7 +163,7 @@ function retrievePolicies () (boolean) {
     message request = {};
     http:ClientConnector apiInfoConnector = create http:ClientConnector(getAPICoreURL());
     messages:setHeader(request, "Content-Type", "application/json");
-    message response = http:ClientConnector.get(apiInfoConnector, query, request);
+    message response = apiInfoConnector.get(query, request);
     json policies = messages:getJsonPayload(response);
     int length;
     length, err = (int)policies.count;
@@ -229,7 +228,7 @@ function fromJsonToGatewayConfDTO (json conf) (dto:GatewayConfDTO) {
     json analyticsInfo = conf.analyticsInfo;
     dto:AnalyticsInfoDTO analyticsInfoDTO = {};
     analyticsInfoDTO.enabled, err = (boolean)analyticsInfo.enabled;
-    analyticsInfoDTO.type = "binary"; //(string)analyticsInfo.type;
+    analyticsInfoDTO.protocol = "binary"; //(string)analyticsInfo.type;
     analyticsInfoDTO.serverURL, err = (string)analyticsInfo.serverURL;
     analyticsInfoDTO.authServerURL = "ssl://localhost:9712"; //(string)analyticsInfo.authServerURL;
     dto:CredentialsDTO analyticsServerCredentialsDTO = {};
@@ -243,7 +242,7 @@ function fromJsonToGatewayConfDTO (json conf) (dto:GatewayConfDTO) {
     json throttlingInfo = conf.throttlingInfo;
     dto:ThrottlingInfoDTO throttlingInfoDTO = {};
     throttlingInfoDTO.enabled = true; //(boolean)throttlingInfo.enabled;
-    throttlingInfoDTO.type = "binary"; //(string)throttlingInfo.type;
+    throttlingInfoDTO.protocol = "binary"; //(string)throttlingInfo.type;
     throttlingInfoDTO.serverURL, err = (string)throttlingInfo.serverURL;
     throttlingInfoDTO.authServerURL = "ssl://localhost:9712"; //(string)throttlingInfo.authServerURL;
     json throttlingServerCredentials = throttlingInfo.credentials;
@@ -263,7 +262,7 @@ function fromJSONToAPIDTO (json api) (dto:APIDTO) {
     APIDTO.version, err = (string)api.version;
     APIDTO.context, err = (string)api.context;
     APIDTO.lifeCycleStatus, err = (string)api.lifeCycleStatus;
-    APIDTO.securityScheme = jsons:getInt(api, "$.securityScheme");
+    APIDTO.securityScheme = lengthof api.securityScheme;
     return APIDTO;
 
 }

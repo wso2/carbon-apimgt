@@ -22,7 +22,7 @@ struct JWTInfoDTO {
 
 struct AnalyticsInfoDTO {
     boolean enabled;
-    string type;
+    string protocol;
     string serverURL;
     string authServerURL;
     CredentialsDTO credentials;
@@ -30,7 +30,7 @@ struct AnalyticsInfoDTO {
 
 struct ThrottlingInfoDTO {
     boolean enabled;
-    string type;
+    string protocol;
     string serverURL;
     string authServerURL;
     CredentialsDTO credentials;

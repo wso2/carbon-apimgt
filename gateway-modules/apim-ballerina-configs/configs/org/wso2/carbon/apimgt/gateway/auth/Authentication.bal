@@ -194,7 +194,7 @@ function doIntrospect (string authToken) (dto:IntrospectDto) {
     messages:setHeader(request, constants:AUTHORIZATION, "Basic " + utils:base64encode(credentials.username + ":"
                                                                                        + credentials.password));
     http:ClientConnector introspectConnector = create http:ClientConnector(keyManagerConf.introspectEndpoint);
-    message introspectResponse = http:ClientConnector.post (introspectConnector,"/", request);
+    message introspectResponse = introspectConnector.post("/", request);
     dto:IntrospectDto introspectDto = gatewayUtil:fromJsonToIntrospectDto(messages:getJsonPayload(introspectResponse));
     return introspectDto;
 }
@@ -279,7 +279,7 @@ function retrieveUserInfo (string token) (json) {
     messages:setHeader(request, "Content-Type", "application/json");
     messages:setHeader(request, constants:AUTHORIZATION, "Bearer " + token);
     http:ClientConnector userInfoConnector = create http:ClientConnector(keyURl);
-    message userInfoResponse = http:ClientConnector.post (userInfoConnector, constants:USER_INFO_CONTEXT
+    message userInfoResponse = userInfoConnector.post (constants:USER_INFO_CONTEXT
                                                                              + "?schema=openid", request);
     return messages:getJsonPayload(userInfoResponse);
 }

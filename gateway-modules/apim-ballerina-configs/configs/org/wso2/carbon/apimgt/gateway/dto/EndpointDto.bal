@@ -7,10 +7,10 @@ struct EndpointDto{
     http:ClientConnector clientConnector;
     boolean securityEnable = false;
     Endpoint_Security security;
-    string type;
+    string protocol;
 }
 struct Endpoint_Security{
-    string type;
+    string securityType;
     string username;
     string password;
 }

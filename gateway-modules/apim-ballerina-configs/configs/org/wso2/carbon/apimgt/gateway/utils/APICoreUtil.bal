@@ -21,7 +21,7 @@ function registerGateway () (json) {
         labelInfoPayload.labelInfo = buildPayload();
         http:ClientConnector client = create http:ClientConnector(getAPICoreURL());
         messages:setJsonPayload(request, labelInfoPayload);
-        response = http:ClientConnector.post(client, "/api/am/core/v1.0/gateways/register", request);
+        response = client.post("/api/am/core/v1.0/gateways/register", request);
         gatewayConfig = messages:getJsonPayload(response);
 
         //Set gateway configuration into global cache
@@ -79,7 +79,7 @@ function getAPIs () (json) {
     try {
         http:ClientConnector client = create http:ClientConnector(getAPICoreURL());
         string query = "?labels=Default";
-        response = http:ClientConnector.get(client, "/api/am/core/v1.0/apis" + query, request);
+        response = client.get("/api/am/core/v1.0/apis" + query, request);
         apiList = messages:getJsonPayload(response);
         return apiList;
     } catch (errors:Error e) {
@@ -97,7 +97,7 @@ function getEndpoints () (json) {
     try {
         http:ClientConnector client = create http:ClientConnector(getAPICoreURL());
         string query = "?limit=-1";
-        response = http:ClientConnector.get(client, "/api/am/core/v1.0/endpoints" + query, request);
+        response = client.get("/api/am/core/v1.0/endpoints" + query, request);
         endpointList = messages:getJsonPayload(response);
         return endpointList;
     } catch (errors:Error e) {
@@ -115,7 +115,7 @@ function getBlockConditions () (json) {
     try {
         http:ClientConnector client = create http:ClientConnector(getAPICoreURL());
         string query = "?limit=-1";
-        response = http:ClientConnector.get(client, "/api/am/core/v1.0/blacklist" + query, request);
+        response = client.get("/api/am/core/v1.0/blacklist" + query, request);
         blockConditionList = messages:getJsonPayload(response);
         return blockConditionList;
     } catch (errors:Error e) {
@@ -164,7 +164,7 @@ function getAPIServiceConfig (string apiId) (int, string) {
     int status;
     try {
         http:ClientConnector client = create http:ClientConnector(getAPICoreURL());
-        response = http:ClientConnector.get(client, "/api/am/core/v1.0/apis/" + apiId + "/gateway-config", request);
+        response = client.get("/api/am/core/v1.0/apis/" + apiId + "/gateway-config", request);
         apiConfig = messages:getStringPayload(response);
         status = http:getStatusCode(response);
     } catch (errors:Error e) {
@@ -180,7 +180,7 @@ function getEndpointConfig (string endpointId) (int, string) {
     int status;
     try {
         http:ClientConnector client = create http:ClientConnector(getAPICoreURL());
-        response = http:ClientConnector.get(client, "/api/am/core/v1.0/endpoints/" + endpointId + "/gateway-config", request);
+        response = client.get("/api/am/core/v1.0/endpoints/" + endpointId + "/gateway-config", request);
         apiConfig = messages:getStringPayload(response);
         status = http:getStatusCode(response);
     } catch (errors:Error e) {
