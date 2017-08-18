@@ -125,6 +125,8 @@ function returnAPI(int i,string[] array)(dto:APIDTO){
     //system:println(api.version);
     api.lifeCycleStatus=returnValue(array[i+5]);
     //system:println(api.lifeCycleStatus);
+    api.securityScheme,_=<int>returnValue(array[i+6]);
+    //system:println(api.securityScheme);
     return api;
 }
 function loadOfflineAPIs () {
@@ -149,7 +151,7 @@ function loadOfflineAPIs () {
     int index=0;
 
     while(index<count){
-        dto:APIDTO api = returnAPI(5*index,array);
+        dto:APIDTO api = returnAPI(6*index,array);
         //list[index] = api;
 
         string apiConfig;
@@ -186,9 +188,6 @@ function loadOfflineAPIs () {
         index = index+1;
 
     }
-
-
-
     system:println("end loadOfflineAPIs() in APICoreUtil");
 }
 
@@ -226,7 +225,7 @@ function getEndpoints () (json) {
         string query = "?limit=-1";
         response = http:ClientConnector.get(client, "/api/am/core/v1.0/endpoints" + query, request);
         endpointList = messages:getJsonPayload(response);
-        system:println("endpointList");
+        system:println("endpointList :");
         system:println(endpointList);
         return endpointList;
     } catch (errors:Error e) {

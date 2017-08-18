@@ -107,6 +107,7 @@ function fromJsonToResourceDto (json resourceResponse) (dto:ResourceDto) {
 }
 function retrieveSubscriptions () (boolean) {
     system:println("retrieveSubscriptions() in Utils");
+    system:println("****************************************************************************************************************");
     string query = "/api/am/core/v1.0/subscriptions?limit=-1";
     message request = {};
     http:ClientConnector apiInfoConnector = create http:ClientConnector(getAPICoreURL());
@@ -116,6 +117,64 @@ function retrieveSubscriptions () (boolean) {
     system:println("subscriptions : ");
     system:println(subscriptions);
     putIntoSubscriptionCache(subscriptions.list);
+    system:println("****************************************************************************************************************");
+    return true;
+}
+
+function returnVal(string pair)(string){
+    string[] array = strings:split(pair,":");
+    return array[1];
+}
+
+function returnSubscription(int i,string[] array)(dto:SubscriptionDto){
+    dto:SubscriptionDto sub = {};
+
+    sub.apiName=returnVal(array[i]);
+    //system:println(sub.apiName);
+    sub.apiContext=returnVal(array[i+1]);
+    //system:println(sub.apiContext);
+    sub.apiVersion=returnVal(array[i+2]);
+    //system:println(sub.apiVersion);
+    sub.apiProvider=returnVal(array[i+3]);
+    //system:println(sub.apiProvider);
+    sub.consumerKey=returnVal(array[i+4]);
+    //system:println(sub.consumerKey);
+    sub.subscriptionPolicy=returnVal(array[i+5]);
+    //system:println(sub.subscriptionPolicy);
+    sub.keyEnvType=returnVal(array[i+6]);
+    //system:println(sub.keyEnvType);
+    sub.applicationId=returnVal(array[i+7]);
+    //system:println(sub.applicationId);
+    sub.status=returnVal(array[i+8]);
+    //system:println(sub.status);
+
+    return sub;
+}
+
+function retrieveOfflineSubscriptions () (boolean) {
+    system:println("retrieveOfflineSubscriptions() in Utils");
+    system:println("****************************************************************************************************************");
+
+    files:File t = {path:"/home/sabeena/Desktop/API Repo/retrieveOfflineSubscriptions.txt"};
+    files:open(t, "r");
+    var content, n = files:read(t, 100000000);
+
+    string strSubsList = blobs:toString(content, "utf-8");
+    string[] array = strings:split(strSubsList, "\n");
+    system:println(array);
+    if(array.length % 9 == 0) {
+    int count = array.length / 9;
+    int index = 0;
+
+    while (index < count) {
+        dto:SubscriptionDto subs = returnSubscription(9 * index, array);
+        holders:putIntoSubscriptionCache(subs);
+        system:println(subs);
+        index = index + 1;
+    }
+    }
+
+    system:println("****************************************************************************************************************");
     return true;
 }
 
@@ -127,6 +186,7 @@ function putIntoSubscriptionCache (json subscriptions) {
         json subscription = subscriptions[i];
         dto:SubscriptionDto subscriptionDto = fromJsonToSubscriptionDto(subscription);
         holders:putIntoSubscriptionCache(subscriptionDto);
+        system:println(subscriptionDto);
         i = i + 1;
     }
 
@@ -144,11 +204,6 @@ function removeFromSubscriptionCache (json subscriptions) {
         i = i + 1;
     }
 
-}
-
-function returnVal(string pair)(string){
-    string[] array = strings:split(pair,":");
-    return array[1];
 }
 
 function returnResource(int i,string[] array)(dto:ResourceDto){
@@ -184,7 +239,7 @@ function retrieveOfflineResources(string apiContext, string apiVersion){
     while(index<6){
         dto:ResourceDto res = returnResource(5*index,array);
         holders:putIntoResourceCache(apiContext, apiVersion, res);
-        system:println(res);
+        //system:println(res);
         index = index + 1;
     }
 
@@ -217,8 +272,53 @@ function retrieveResources (string apiContext, string apiVersion) {
 
     system:println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 }
+
+function returnApplication(int i,string[] array)(dto:ApplicationDto){
+    dto:ApplicationDto app = {};
+
+    app.applicationId = returnVal(array[i]);
+    system:println(app.applicationId);
+    app.applicationName = returnVal(array[i + 1]);
+    system:println(app.applicationName);
+    app.applicationPolicy = returnVal(array[i + 3]);
+    system:println(app.applicationPolicy);
+    app.applicationOwner = returnVal(array[i + 2]);
+    system:println(app.applicationOwner);
+
+    return app;
+}
+
+function retrieveOfflineApplications () (boolean) {
+    system:println("retrieveOfflineApplications() in Utils");
+    system:println("****************************************************************************************************************");
+
+    files:File t = {path:"/home/sabeena/Desktop/API Repo/retrieveOfflineApplications.txt"};
+    files:open(t, "r");
+    var content, n = files:read(t, 100000000);
+
+    string strSubsList = blobs:toString(content, "utf-8");
+    string[] array = strings:split(strSubsList, "\n");
+    system:println(array);
+
+    if(array.length % 4 == 0) {
+        int count = array.length / 4;
+        int index = 0;
+
+        while (index < count) {
+            dto:ApplicationDto app = returnApplication(4* index, array);
+            holders:putIntoApplicationCache(app);
+            system:println(app);
+            index = index + 1;
+        }
+    }
+
+    system:println("****************************************************************************************************************");
+    return true;
+}
+
 function retrieveApplications () (boolean) {
     system:println("retrieveApplications() in Utils");
+    system:println("****************************************************************************************************************");
     string query = "/api/am/core/v1.0/applications";
     message request = {};
     http:ClientConnector apiInfoConnector = create http:ClientConnector(getAPICoreURL());
@@ -233,9 +333,11 @@ function retrieveApplications () (boolean) {
         while (i < length) {
             json application = applications.list[i];
             putIntoApplicationCache(application);
+            //system:println(application);
             i = i + 1;
         }
     }
+    system:println("****************************************************************************************************************");
     return true;
 }
 function retrievePolicies () (boolean) {
@@ -268,6 +370,7 @@ function putIntoApplicationCache (json application) {
     applicationDto.applicationName, err = (string)application.name;
     applicationDto.applicationOwner, err = (string)application.subscriber;
     applicationDto.applicationPolicy, err = (string)application.throttlingTier;
+    system:println(applicationDto);
     holders:putIntoApplicationCache(applicationDto);
 }
 function putIntoPolicyCache (json policy) {
