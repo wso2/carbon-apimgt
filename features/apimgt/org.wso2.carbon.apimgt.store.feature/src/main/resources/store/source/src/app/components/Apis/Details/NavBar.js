@@ -92,7 +92,7 @@ class NavBar extends Component {
             <div>
                 <Grid container gutter={24}>
                     <Grid item xs={12} sm={2}>
-                        <Paper><img alt="API thumb" width="100%" src="/publisher/public/images/api/api-default.png"/></Paper>
+                        <Paper><img alt="API thumb" width="100%" src="/store/public/images/api/api-default.png"/></Paper>
                     </Grid>
                     <Grid item xs={12} sm={5}>
                         <Paper>

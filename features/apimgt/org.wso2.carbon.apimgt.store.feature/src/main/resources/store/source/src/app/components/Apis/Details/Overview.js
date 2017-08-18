@@ -87,7 +87,7 @@ class Overview extends Component {
 
                         <Card bodyStyle={{padding: 10}}>
                             <div className="custom-image">
-                                <img alt="API thumb" width="100%" src="/publisher/public/images/api/api-default.png"/>
+                                <img alt="API thumb" width="100%" src="/store/public/images/api/api-default.png"/>
                             </div>
                             <div className="custom-card">
                                 <Badge status="processing" text={api.lifeCycleStatus}/>

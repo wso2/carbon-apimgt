@@ -19,9 +19,9 @@
 import AuthManager from "./AuthManager";
 
 /**
- * Utility class for Publisher application
+ * Utility class for Store application
  */
-class PublisherUtils {
+class StoreUtils {
 
     /**
      * TODO: Remove this method one the initial phase is done, This is used to continue the API class until the login page is create
@@ -92,4 +92,4 @@ class PublisherUtils {
 
 }
 
-export default PublisherUtils;
+export default StoreUtils;

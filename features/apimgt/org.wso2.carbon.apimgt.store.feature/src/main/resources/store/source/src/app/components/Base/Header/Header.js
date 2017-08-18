@@ -32,7 +32,7 @@ const Header = (props) => {
                 </div>
                 <div className="pull-left brand">
                     <Link to="/">
-                        <span>APIM Publisher</span>
+                        <span>APIM Store</span>
                     </Link>
                 </div>
                 <ul className="nav navbar-right">

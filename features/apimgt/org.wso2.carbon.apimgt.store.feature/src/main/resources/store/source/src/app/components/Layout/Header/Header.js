@@ -60,7 +60,7 @@ class Header extends React.Component {
                     <Typography type="title" color="inherit" style={{flex:1}}>
                         <Link to="/" style={{ textDecoration: 'none' }}>
                             <Button color="primary">
-                                <img className="brand" src="/store_new/public/images/logo.svg" alt="wso2-logo"/>
+                                <img className="brand" src="/store/public/images/logo.svg" alt="wso2-logo"/>
                                 <span style={{fontSize:"20px"}}>APIM Store</span>
                             </Button>
 
@@ -86,8 +86,11 @@ class Header extends React.Component {
                         </div>
                         :
                         <div>
-                            <Button color="contrast">Sign Up</Button>
-                            <Button color="contrast">Sign In</Button>
+                                <Button color="contrast">Sign Up</Button>
+
+                            <Link to="/login" style={{ textDecoration: 'none' }}>
+                                <Button color="contrast">Sign In</Button>
+                            </Link>
                         </div> }
 
                 </Toolbar>

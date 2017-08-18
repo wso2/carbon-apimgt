@@ -62,7 +62,7 @@ class Protected extends Component {
 /**
  * Define base routes for the application
  */
-class Publisher extends Component {
+class Store extends Component {
     constructor(props){
         super(props);
         this.authManager = new AuthManager();
@@ -91,20 +91,18 @@ class Publisher extends Component {
 
     render() {
         return (
-            <Router basename="/store_new">
-                <Layout>
+            <Router basename="/store">
                     <Switch>
                         <Redirect exact from="/" to="/apis"/>
                         <Route path={"/login"} component={Login}/>
                         <Route path={"/logout"} component={Logout}/>
-                        <Route path={"/apis"} showLeftMenu={this.state.showLeftMenu} render={ props => (<Apis setLeftMenu={this.setLeftMenu}/>)}/>
-                        <Route path={"/apis2"} component={Listing2}/>
+                        <Layout><Route path={"/apis"} showLeftMenu={this.state.showLeftMenu} render={ props => (<Apis setLeftMenu={this.setLeftMenu}/>)}/></Layout>
                         <Route component={Protected}/>
                     </Switch>
-                </Layout>
+
             </Router>
         );
     }
 }
 
-export default Publisher;
+export default Store;

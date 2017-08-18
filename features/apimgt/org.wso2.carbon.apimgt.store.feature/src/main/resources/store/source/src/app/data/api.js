@@ -114,8 +114,9 @@ class API {
     getAll(callback = null) {
         var promise_get_all = this.client.then(
             (client) => {
+                debugger;
                 console.info("this._requestMetaData()" , this._requestMetaData());
-                return client.apis["API (Collection)"].get_apis({}, this._requestMetaData());
+                return client.apis["API Collection"].get_apis({}, this._requestMetaData());
             }
         );
         if (callback) {

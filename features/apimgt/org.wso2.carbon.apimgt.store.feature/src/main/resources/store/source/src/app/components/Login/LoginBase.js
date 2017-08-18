@@ -24,12 +24,12 @@ const LoginBase = (props) => {
             <header className="header header-default">
                 <div className="container-fluid">
                     <div className="pull-left brand float-remove-xs text-center-xs">
-                        <a href="/publisher/">
+                        <a href="/store/">
                             <img
-                                src="/publisher/public/images/logo.svg"
+                                src="/store/public/images/logo.svg"
 
                                 className="logo"/>
-                            <h1>API Publisher</h1>
+                            <h1>API Store</h1>
                         </a>
                     </div>
                 </div>

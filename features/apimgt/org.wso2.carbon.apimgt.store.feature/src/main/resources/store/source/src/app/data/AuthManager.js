@@ -23,7 +23,7 @@ import Configs from './ConfigManager'
 import Utils from './utils'
 import User from './User'
 
-const context = "publisher";
+const context = "store";
 
 class AuthManager {
     constructor() {
@@ -34,7 +34,7 @@ class AuthManager {
         this.username = null;
         this.userscope = null;
         this.bearer = "Bearer ";
-        this.contextPath = "/store_new";
+        this.contextPath = "/store";
     }
 
     static refreshTokenOnExpire() {
@@ -54,7 +54,7 @@ class AuthManager {
                 function (error) {
                     let error_data = JSON.parse(error.responseText);
                     let message = "Error while refreshing token" + "<br/> You will be redirect to the login page ...";
-                    /*noty({
+                    noty({
                         text: message,
                         type: 'error',
                         dismissQueue: true,
@@ -69,7 +69,7 @@ class AuthManager {
                                 window.location = loginPageUri;
                             },
                         }
-                    });*/
+                    });
 
                 }
             );
@@ -87,7 +87,7 @@ class AuthManager {
         }
         let message = "The session has expired" + ".<br/> You will be redirect to the login page ...";
         if (typeof noty !== 'undefined') {
-            /*noty({
+            noty({
                 text: message,
                 type: 'error',
                 dismissQueue: true,
@@ -102,7 +102,7 @@ class AuthManager {
                         window.location = loginPageUri;
                     },
                 }
-            });*/
+            });
         } else {
             throw error_response;
         }
@@ -167,7 +167,7 @@ class AuthManager {
             const validityPeriod = response.data.validityPeriod; // In seconds
             const WSO2_AM_TOKEN_1 = response.data.partialToken;
             const user = new User(response.data.authUser, response.data.idToken);
-            user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, "/store_new");
+            user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, "/store");
             user.scopes = response.data.scopes.split(" ");
             AuthManager.setUser(user);
         });

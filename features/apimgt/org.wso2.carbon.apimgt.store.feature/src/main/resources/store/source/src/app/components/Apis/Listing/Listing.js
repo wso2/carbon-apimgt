@@ -52,6 +52,7 @@ class Listing extends React.Component {
         let api = new API();
         let promised_apis = api.getAll();
         promised_apis.then((response) => {
+            debugger
             this.setState({apis: response.obj});
         }).catch(error => {
             let status = error.status;
@@ -74,7 +75,7 @@ class Listing extends React.Component {
 
         const { value } = this.state;
         return (
-            <div style={{padding:"20"}}>
+            <div style={{padding:"20px"}}>
                 <BottomNavigation value={value} onChange={this.handleChange} style={{float:"right"}}>
                     <BottomNavigationButton label="List" icon={<ListIcon />} />
                     <BottomNavigationButton label="Grid" icon={<GridOnIcon />} />
@@ -87,7 +88,7 @@ class Listing extends React.Component {
                                 <Grid item xl={2} lg={3} md={4} sm={6} xs={12}>
                                     <Card>
                                         <CardMedia>
-                                            <img alt="example" width="100%" src="/publisher/public/images/api/api-default.png"/>
+                                            <img alt="example" width="100%" src="/store/public/images/api/api-default.png"/>
                                         </CardMedia>
                                         <CardContent>
                                             <Typography type="headline" component="h2">

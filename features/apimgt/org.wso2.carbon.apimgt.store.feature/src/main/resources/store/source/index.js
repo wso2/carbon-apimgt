@@ -18,8 +18,8 @@
 
 import ReactDOM from 'react-dom'
 import React from 'react'
-import Publisher from "./src/App.js"
+import Store from "./src/App.js"
 import { LocaleProvider } from 'antd';
 import enUS from 'antd/lib/locale-provider/en_US';
 
-ReactDOM.render(<LocaleProvider locale={enUS}><Publisher/></LocaleProvider>, document.getElementById("react-root"));
+ReactDOM.render(<LocaleProvider locale={enUS}><Store/></LocaleProvider>, document.getElementById("react-root"));

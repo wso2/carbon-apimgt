@@ -117,7 +117,7 @@ class SingleClient {
 
     _getSwaggerURL() {
         /* TODO: Read this from configuration ~tmkb*/
-        return window.location.protocol + "//" + window.location.host + "/api/am/publisher/v1.0/apis/swagger.yaml";
+        return window.location.protocol + "//" + window.location.host + "/api/am/store/v1.0/apis/swagger.yaml";
     }
 }
 

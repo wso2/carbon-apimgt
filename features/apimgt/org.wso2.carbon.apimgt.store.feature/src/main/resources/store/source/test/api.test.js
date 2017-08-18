@@ -82,7 +82,7 @@ describe('Api',
 
         describe('#getAll',
             function () {
-                it('Should return all the APIs available to the publisher',
+                it('Should return all the APIs available to the store',
                     function () {
                         let api = new Api();
                         let promised_all_apis = api.getAll();
