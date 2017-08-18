@@ -34,6 +34,7 @@ import io.swagger.models.auth.OAuth2Definition;
 import io.swagger.models.auth.SecuritySchemeDefinition;
 import io.swagger.models.auth.ApiKeyAuthDefinition;
 import io.swagger.models.auth.In;
+import io.swagger.models.auth.OAuth2Definition;
 import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.FormParameter;
 import io.swagger.models.parameters.Parameter;
@@ -389,6 +390,9 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         if ((api.getSecurityScheme() & 2) == 2) { //apikey
             swagger.securityDefinition("apikey", new ApiKeyAuthDefinition("apikey", In.HEADER));
         }
+        if ((api.getSecurityScheme() & 1) == 1) {
+            swagger.securityDefinition("oauth2", new OAuth2Definition());
+        }
 
         Map<String, Path> stringPathMap = new HashMap();
         for (UriTemplate uriTemplate : api.getUriTemplates().values()) {
@@ -419,8 +423,14 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
                 operation.setConsumes(consumesList);
             }
             operation.addResponse("200", getDefaultResponse());
-            if (!uriTemplate.getAuthType().equals(APIMgtConstants.AUTH_NO_AUTHENTICATION) && ((api.getSecurityScheme() & 2) == 2)) {
+            if (!uriTemplate.getAuthType().equals(APIMgtConstants.AUTH_NO_AUTHENTICATION) &&
+                    ((api.getSecurityScheme() & 2) == 2)) {
               operation.addSecurity("apikey", null);
+            }
+
+            if (!uriTemplate.getAuthType().equals(APIMgtConstants.AUTH_NO_AUTHENTICATION) &&
+                    ((api.getSecurityScheme() & 1) == 1)) {
+                operation.addSecurity("oauth2", null);
             }
 
             if (stringPathMap.containsKey(uriTemplateString)) {
