@@ -922,6 +922,6 @@
         <wsdl4j.version>1.6.2.wso2v4</wsdl4j.version>
         <xmlschema.version>1.4.7.wso2v2</xmlschema.version>
 
-        <ballerina.version>0.89</ballerina.version>
+        <ballerina.version>0.92</ballerina.version>
     </properties>
 </project>

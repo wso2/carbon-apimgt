@@ -17,9 +17,11 @@
  */
 package org.wso2.carbon.apimgt.plugin;
 
+import org.ballerinalang.BLangCompiler;
 import org.ballerinalang.BLangProgramArchiveBuilder;
 import org.ballerinalang.BLangProgramLoader;
 import org.ballerinalang.model.BLangProgram;
+import org.ballerinalang.util.BLangConstants;
 import org.ballerinalang.util.program.BLangPrograms;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +61,7 @@ public class GenerateArchives {
         try {
             Path realPath = Paths.get(srcDir + File.separator + packagePath).toRealPath(LinkOption.NOFOLLOW_LINKS);
             if (!Files.isDirectory(realPath, LinkOption.NOFOLLOW_LINKS) && !realPath.toString()
-                    .endsWith(BLangPrograms.BSOURCE_FILE_EXT)) {
+                    .endsWith(BLangConstants.BLANG_SRC_FILE_SUFFIX)) {
                 log.error("invalid file or package '" + sourcePath + "'");
                 throw new IllegalArgumentException("invalid file or package '" + sourcePath + "'");
             }
@@ -69,6 +71,9 @@ public class GenerateArchives {
         }
 
         Path programDirPath = Paths.get(srcDir);
+        BLangCompiler.compileAndWrite(programDirPath,Paths.get(packagePath), Paths.get(targetName));
+
+        /*
         BLangProgram bLangProgram = null;
         if (MAIN_TYPE.equals(type)) {
             bLangProgram = new BLangProgramLoader().loadMain(programDirPath, sourcePath);
@@ -80,6 +85,6 @@ public class GenerateArchives {
         }
 
         new BLangProgramArchiveBuilder().build(bLangProgram, targetName.trim());
-
+        */
     }
 }

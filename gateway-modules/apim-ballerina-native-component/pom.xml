@@ -46,6 +46,11 @@
             <artifactId>annotation-processor</artifactId>
             <version>${ballerina.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.ballerinalang</groupId>
+            <artifactId>ballerina-launcher</artifactId>
+            <version>${ballerina.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.wso2.carbon.caching</groupId>
