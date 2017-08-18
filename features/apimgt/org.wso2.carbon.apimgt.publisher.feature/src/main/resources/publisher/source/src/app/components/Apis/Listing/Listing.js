@@ -44,7 +44,6 @@ class Listing extends React.Component {
     constructor(props) {
         super(props);
         this.state = {listType: 'grid', apis: null};
-        this.handleApiDelete = this.handleApiDelete.bind(this);
     }
 
     componentDidMount() {
@@ -70,32 +69,6 @@ class Listing extends React.Component {
         this.setState({listType: value});
     }
 
-    handleApiDelete(api_uuid, name) {
-        const hideMessage = message.loading("Deleting the API ...",0);
-        const api = new API();
-        let promised_delete = api.deleteAPI(api_uuid);
-        promised_delete.then(
-            response => {
-                if (response.status !== 200) {
-                    console.log(response);
-                    message.error("Something went wrong while deleting the " + name + " API!");
-                    hideMessage();
-                    return;
-                }
-                message.success(name + " API deleted successfully!");
-                let api = this.state.apis;
-                for (let apiIndex in api.list) {
-                    if (api.list.hasOwnProperty(apiIndex) && api.list[apiIndex].id === api_uuid) {
-                        api.list.splice(apiIndex, 1);
-                        break;
-                    }
-                }
-                this.setState({active: false, apis: api});
-                hideMessage();
-            }
-        );
-    }
-
     render() {
         if (this.state.notFound) {
             return <ResourceNotFound/>
@@ -114,15 +87,6 @@ class Listing extends React.Component {
             title: 'Version',
             dataIndex: 'version',
             key: 'version',
-        }, {
-            title: 'Action',
-            key: 'action',
-            render: text => {
-                return (
-                    <Popconfirm title="Confirm delete?" onConfirm={() => this.handleApiDelete(text.id, text.name)}>
-                        <Button type="danger" icon="delete">Delete</Button>
-                    </Popconfirm>)
-            },
         }];
         return (
             <div>

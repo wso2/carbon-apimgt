@@ -386,7 +386,7 @@ class Permission extends Component {
 
                             <Card bodyStyle={{padding: 5}}>
                                 <Row style={{marginBottom: "10px"}} type="flex" justify="center">
-                                    <Col span={8}>API Permission</Col>
+                                    <Col span={8}>API Permissions</Col>
                                     <Col span={16}>
                                         <Row>
                                             <Col span={4} style={{margin: "10px"}}>
