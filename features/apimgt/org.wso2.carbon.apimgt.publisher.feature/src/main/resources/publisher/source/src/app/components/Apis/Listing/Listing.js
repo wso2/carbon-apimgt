@@ -22,10 +22,12 @@ import qs from 'qs'
 import ApiThumb from './ApiThumb'
 import '../Apis.css'
 import API from '../../../data/api.js'
+import AuthManager from '../../../data/AuthManager'
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import {Link} from 'react-router-dom'
 import {Table, Popconfirm, Menu, Dropdown, Button, Row, Col, message} from 'antd';
+import {ScopeValidation,resourceMethod, resourcePath} from '../../../data/ScopeValidation';
 
 const menu = (
     <Menu>
@@ -125,9 +127,11 @@ class Listing extends React.Component {
         return (
             <div>
                 <div className="api-add-links">
-                    <Dropdown overlay={menu} placement="topRight">
-                        <Button shape="circle" icon="plus"/>
-                    </Dropdown>
+                    <ScopeValidation resourcePath={resourcePath.APIS} resourceMethod={resourceMethod.POST} >
+                        <Dropdown overlay={menu} placement="topRight">
+                            <Button shape="circle" icon="plus"/>
+                        </Dropdown>
+                    </ScopeValidation>
                 </div>
                 <div className="flex-container">
                     <h2>All APIs</h2>
