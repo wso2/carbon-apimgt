@@ -33,7 +33,6 @@ class ApiPermissionValidation extends React.Component {
     }
 
     render() {
-
         var checkingPermissionType = this.props.checkingPermissionType;
         var userPermissions = this.props.userPermissions;
 

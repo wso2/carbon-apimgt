@@ -66,7 +66,6 @@ class Documents extends Component {
     }
 
     componentDidMount() {
-
         const api = new API();
         let promised_api = api.get(this.api_id);
         promised_api.then(
@@ -396,7 +395,6 @@ class Documents extends Component {
     }
 
     render() {
-
         if (!this.state.api) {
             return <Loading/>
         }
