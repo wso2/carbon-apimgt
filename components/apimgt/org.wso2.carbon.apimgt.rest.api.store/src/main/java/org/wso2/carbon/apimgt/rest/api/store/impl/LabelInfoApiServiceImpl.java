@@ -41,7 +41,7 @@ public class LabelInfoApiServiceImpl extends LabelInfoApiService {
     public Response labelInfoGet(String labels, String ifNoneMatch, String ifModifiedSince, Request request)
             throws NotFoundException {
 
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         LabelListDTO labelListDTO;
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);

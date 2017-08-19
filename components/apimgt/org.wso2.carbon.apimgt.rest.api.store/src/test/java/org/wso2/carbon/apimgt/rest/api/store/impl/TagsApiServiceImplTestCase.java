@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.core.impl.APIStoreImpl;
 import org.wso2.carbon.apimgt.core.models.Tag;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
+import org.wso2.msf4j.Request;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -52,7 +53,8 @@ public class TagsApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = TestUtil.getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Tag tag1 = new Tag.Builder().build();
         Tag tag2 = new Tag.Builder().build();
@@ -64,7 +66,7 @@ public class TagsApiServiceImplTestCase {
         Mockito.when(apiStore.getAllTags()).thenReturn(tagList);
 
         Response response = tagsApiService
-                .tagsGet(10, 0, null, TestUtil.getRequest());
+                .tagsGet(10, 0, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }

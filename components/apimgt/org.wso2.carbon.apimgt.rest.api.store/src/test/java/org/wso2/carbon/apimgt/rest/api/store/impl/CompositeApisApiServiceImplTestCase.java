@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.common.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CompositeAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.CompositeAPIMappingUtil;
+import org.wso2.msf4j.Request;
 import org.wso2.msf4j.formparam.FileInfo;
 
 import javax.ws.rs.core.Response;
@@ -60,13 +61,14 @@ public class CompositeApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = TestUtil.getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(apiStore)
                 .deleteCompositeApi(apiID);
 
         Response response = compositeApisApiService.compositeApisApiIdDelete
-                (apiID, null, null, TestUtil.getRequest());
+                (apiID, null, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -81,7 +83,8 @@ public class CompositeApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = TestUtil.getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         CompositeAPI compositeAPI = SampleTestObjectCreator.createCompositeAPIModelBuilder().build();
 
@@ -89,7 +92,7 @@ public class CompositeApisApiServiceImplTestCase {
         Mockito.when(apiStore.getCompositeAPIbyId(apiID)).thenReturn(compositeAPI);
 
         Response response = compositeApisApiService.compositeApisApiIdGet
-                (apiID, null, null, TestUtil.getRequest());
+                (apiID, null, null, request);
 
         Assert.assertEquals(200, response.getStatus());
         Assert.assertTrue(response.getEntity().toString().contains(compositeAPI.getName()));
@@ -105,12 +108,13 @@ public class CompositeApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = TestUtil.getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Mockito.when(apiStore.isCompositeAPIExist(apiID)).thenReturn(Boolean.FALSE);
 
         Response response = compositeApisApiService.compositeApisApiIdGet
-                (apiID, null, null, TestUtil.getRequest());
+                (apiID, null, null, request);
 
         Assert.assertEquals(404, response.getStatus());
     }
@@ -125,14 +129,15 @@ public class CompositeApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = TestUtil.getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         InputStream implementation = null;
 
         Mockito.when(apiStore.getCompositeApiImplementation(apiID)).thenReturn(implementation);
 
         Response response = compositeApisApiService.compositeApisApiIdImplementationGet
-                (apiID, null, null, TestUtil.getRequest());
+                (apiID, null, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -147,7 +152,8 @@ public class CompositeApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = TestUtil.getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         InputStream implmentation = null;
 
@@ -159,7 +165,7 @@ public class CompositeApisApiServiceImplTestCase {
                 .updateCompositeApiImplementation(apiID, implmentation);
 
         Response response = compositeApisApiService.compositeApisApiIdImplementationPut
-                (apiID, implmentation, fileInfo, null, null, TestUtil.getRequest());
+                (apiID, implmentation, fileInfo, null, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -174,7 +180,8 @@ public class CompositeApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = TestUtil.getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         CompositeAPI.Builder builder = null;
         InputStream implmentation = null;
@@ -186,7 +193,7 @@ public class CompositeApisApiServiceImplTestCase {
                 .updateCompositeApi(builder);
 
         Response response = compositeApisApiService.compositeApisApiIdImplementationPut
-                (apiID, implmentation, fileInfo, null, null, TestUtil.getRequest());
+                (apiID, implmentation, fileInfo, null, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -201,12 +208,13 @@ public class CompositeApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = TestUtil.getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Mockito.when(apiStore.getCompositeApiDefinition(apiID)).thenReturn("SWAGGER_DEFINITION");
 
         Response response = compositeApisApiService.compositeApisApiIdSwaggerGet
-                (apiID, null, null, TestUtil.getRequest());
+                (apiID, null, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -221,7 +229,8 @@ public class CompositeApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = TestUtil.getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         String swagger = "sampleDef";
 
@@ -230,7 +239,7 @@ public class CompositeApisApiServiceImplTestCase {
         Mockito.when(apiStore.getCompositeApiDefinition(apiID)).thenReturn(swagger);
 
         Response response = compositeApisApiService.compositeApisApiIdSwaggerPut
-                (apiID, swagger, null, null, TestUtil.getRequest());
+                (apiID, swagger, null, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -245,7 +254,8 @@ public class CompositeApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = TestUtil.getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         CompositeAPI compositeAPI1 = SampleTestObjectCreator.createCompositeAPIModelBuilder().build();
         CompositeAPI compositeAPI2 = SampleTestObjectCreator.createCompositeAPIModelBuilder().build();
@@ -257,7 +267,7 @@ public class CompositeApisApiServiceImplTestCase {
         Mockito.when(apiStore.searchCompositeAPIs(query, 0, 10)).thenReturn(compositeAPIList);
 
         Response response = compositeApisApiService.compositeApisGet
-                (10, 0, query, null, TestUtil.getRequest());
+                (10, 0, query, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -271,7 +281,8 @@ public class CompositeApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = TestUtil.getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         CompositeAPI compositeAPI = SampleTestObjectCreator.createCompositeAPIModelBuilder().build();
         CompositeAPIDTO compositeAPIDTO = CompositeAPIMappingUtil.toCompositeAPIDTO(compositeAPI);
@@ -282,7 +293,7 @@ public class CompositeApisApiServiceImplTestCase {
         Mockito.when(apiStore.getCompositeAPIbyId(compositeAPI.getId())).thenReturn(compositeAPI);
 
         Response response = compositeApisApiService.compositeApisPost
-                (compositeAPIDTO, TestUtil.getRequest());
+                (compositeAPIDTO, request);
 
         Assert.assertEquals(201, response.getStatus());
     }

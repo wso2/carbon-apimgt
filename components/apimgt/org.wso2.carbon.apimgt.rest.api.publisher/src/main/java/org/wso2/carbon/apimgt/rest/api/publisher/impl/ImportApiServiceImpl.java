@@ -42,7 +42,7 @@ public class ImportApiServiceImpl extends ImportApiService {
         APIPublisher publisher = null;
 
         try {
-            publisher = RestAPIPublisherUtil.getApiPublisher(RestApiUtil.getLoggedInUsername());
+            publisher = RestAPIPublisherUtil.getApiPublisher(RestApiUtil.getLoggedInUsername(request));
 
             FileBasedApiImportExportManager importManager = new FileBasedApiImportExportManager(publisher,
                     System.getProperty("java.io.tmpdir") + File.separator + "imported-api-archives-" +
@@ -75,7 +75,7 @@ public class ImportApiServiceImpl extends ImportApiService {
         APIPublisher publisher = null;
 
         try {
-            publisher = RestAPIPublisherUtil.getApiPublisher(RestApiUtil.getLoggedInUsername());
+            publisher = RestAPIPublisherUtil.getApiPublisher(RestApiUtil.getLoggedInUsername(request));
 
             FileBasedApiImportExportManager importManager = new FileBasedApiImportExportManager(publisher,
                     System.getProperty("java.io.tmpdir") + File.separator + "imported-api-archives-" +
