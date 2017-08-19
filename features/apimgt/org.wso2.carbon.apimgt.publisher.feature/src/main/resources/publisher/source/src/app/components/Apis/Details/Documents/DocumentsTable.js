@@ -19,10 +19,14 @@
 import React, {Component} from 'react'
 import {Table, Popconfirm} from 'antd';
 import InlineEditor from "./InlineEditor";
+import API from '../../../../data/api.js'
+import Loading from '../../../Base/Loading/Loading'
+import {ApiPermissionValidation, permissionType} from '../../../../data/ApiPermissionValidation'
 
 class DocumentsTable extends Component {
     constructor(props) {
         super(props);
+        this.api_id = this.props.apiId;
         this.viewDocContentHandler=this.viewDocContentHandler.bind(this);
         this.handleCloseModal = this.handleCloseModal.bind(this);
         this.state = {
@@ -30,30 +34,27 @@ class DocumentsTable extends Component {
             documentId: null,
             selectedDocName: null
         }
-        this.columns = [{
-            title: 'Name',
-            dataIndex: 'name',
-            key: 'name'
-        }, {
-            title: 'Source',
-            dataIndex: 'sourceType',
-            key: 'sourceType'
-        }, {
-            title: 'Actions',
-            dataIndex: 'actions',
-            key: 'actions',
-            render: (text1, record) => (<div>
-                <a href="#" onClick={() => this.props.onEditAPIDocument(record)}>Edit | </a>
-                <a href="#" onClick={() => this.viewDocContentHandler(record)}>View | </a>
-                <Popconfirm title="Are you sure you want to delete this document?"
-                            onConfirm={() => this.props.deleteDocHandler(record.documentId)}
-                            okText="Yes" cancelText="No">
-                    <a href="#">Delete</a>
-                </Popconfirm>
-            </div>)
-        }
-        ];
         //TODO: Add permission/valid scope checks for document Edit/Delete actions
+    }
+
+    componentDidMount() {
+        const api = new API();
+        let promised_api = api.get(this.api_id);
+        promised_api.then(
+            response => {
+                this.setState({api: response.obj});
+            }
+        ).catch(
+            error => {
+                if (process.env.NODE_ENV !== "production") {
+                    console.log(error);
+                }
+                let status = error.status;
+                if (status === 404) {
+                    this.setState({notFound: true});
+                }
+            }
+        );
     }
 
     /*
@@ -88,6 +89,38 @@ class DocumentsTable extends Component {
     }
 
     render() {
+        if (!this.state.api) {
+            return <Loading/>
+        }
+        this.columns = [{
+            title: 'Name',
+            dataIndex: 'name',
+            key: 'name'
+        }, {
+            title: 'Source',
+            dataIndex: 'sourceType',
+            key: 'sourceType'
+        }, {
+            title: 'Actions',
+            dataIndex: 'actions',
+            key: 'actions',
+            render: (text1, record) => (<div>
+                <ApiPermissionValidation checkingPermissionType={permissionType.UPDATE}
+                                                                 userPermissions={this.state.api.userPermissionsForApi}>
+                    <a href="#" onClick={() => this.props.onEditAPIDocument(record)}>Edit | </a>
+                </ApiPermissionValidation>
+                <a href="#" onClick={() => this.viewDocContentHandler(record)}>View | </a>
+                <ApiPermissionValidation checkingPermissionType={permissionType.UPDATE}
+                                                                 userPermissions={this.state.api.userPermissionsForApi}>
+                    <Popconfirm title="Are you sure you want to delete this document?"
+                                onConfirm={() => this.props.deleteDocHandler(record.documentId)}
+                                okText="Yes" cancelText="No">
+                        <a href="#">Delete</a>
+                    </Popconfirm>
+                </ApiPermissionValidation>
+            </div>)
+        }
+        ];
         return (
             <div style={{paddingTop: 20}}>
                 <h3 style={{paddingBottom: 15}}>Current Documents</h3>

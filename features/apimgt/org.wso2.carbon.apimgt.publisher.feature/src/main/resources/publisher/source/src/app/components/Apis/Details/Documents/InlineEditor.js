@@ -21,10 +21,14 @@ import ReactQuill from 'react-quill';
 import ReactModal from 'react-modal';
 import {Button, Row, Col, message} from 'antd';
 import "../../../../../../../node_modules/react-quill/dist/quill.snow.css"
+import API from '../../../../data/api.js'
+import Loading from '../../../Base/Loading/Loading'
+import {ApiPermissionValidation, permissionType} from '../../../../data/ApiPermissionValidation'
 
 class InlineEditor extends Component {
     constructor(props) {
-        super(props)
+        super(props);
+        this.api_id = this.props.apiId;
         this.state = {
             editorHtml: "",
         }
@@ -38,6 +42,25 @@ class InlineEditor extends Component {
     }
 
     componentDidMount() {
+
+        const api = new API();
+        let promised_api = api.get(this.api_id);
+        promised_api.then(
+            response => {
+                this.setState({api: response.obj});
+            }
+        ).catch(
+            error => {
+                if (process.env.NODE_ENV !== "production") {
+                    console.log(error);
+                }
+                let status = error.status;
+                if (status === 404) {
+                    this.setState({notFound: true});
+                }
+            }
+        );
+
         const promised_inline_content = this.props.client.getInlineContentOfDocument(this.props.apiId, this.props.documentId);
         promised_inline_content.then(response => {
             const contentType = response.headers["content-type"];
@@ -78,6 +101,9 @@ class InlineEditor extends Component {
     }
 
     render() {
+        if (!this.state.api) {
+            return <Loading/>
+        }
         return (
             <div>
                 <div>
@@ -106,15 +132,18 @@ class InlineEditor extends Component {
                             </Col>
                         </Row>
                         <Row gutter={1}>
+                            <ApiPermissionValidation checkingPermissionType={permissionType.UPDATE}
+                                                                 userPermissions={this.state.api.userPermissionsForApi}>
                             <Col span={2}>
-                                <Button type="primary"
-                                        onClick={() => this.saveInlineDocContent(false)}>Save</Button>
+                                    <Button type="primary"
+                                            onClick={() => this.saveInlineDocContent(false)}>Save</Button>
                             </Col>
                             <Col span={3}>
                                 <Button type="primary"
                                         onClick={() => this.saveInlineDocContent(true)}>Save And
                                                                                         Close</Button>
                             </Col>
+                            </ApiPermissionValidation>
                             <Col span={3}>
                                 <Button type="primary"
                                         onClick={this.props.handleCloseModal}>Close</Button>

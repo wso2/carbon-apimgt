@@ -21,6 +21,8 @@ import API from '../../../../data/api.js'
 import {Button, message} from 'antd';
 import DocumentsTable from './DocumentsTable';
 import NewDocDiv from './NewDocDiv';
+import Loading from '../../../Base/Loading/Loading'
+import {ApiPermissionValidation, permissionType} from '../../../../data/ApiPermissionValidation'
 
 /*
  Documents tab related React components.
@@ -64,6 +66,24 @@ class Documents extends Component {
     }
 
     componentDidMount() {
+
+        const api = new API();
+        let promised_api = api.get(this.api_id);
+        promised_api.then(
+            response => {
+                this.setState({api: response.obj});
+            }
+        ).catch(
+            error => {
+                if (process.env.NODE_ENV !== "production") {
+                    console.log(error);
+                }
+                let status = error.status;
+                if (status === 404) {
+                    this.setState({notFound: true});
+                }
+            }
+        );
         this.getDocumentsList();
     }
 
@@ -376,10 +396,17 @@ class Documents extends Component {
     }
 
     render() {
+
+        if (!this.state.api) {
+            return <Loading/>
+        }
         return (
             <div>
-                <Button style={{marginBottom: 30}} onClick={this.addNewDocBtnListener}
-                        type="primary">Add New Document</Button>
+                <ApiPermissionValidation checkingPermissionType={permissionType.UPDATE}
+                                                                 userPermissions={this.state.api.userPermissionsForApi}>
+                    <Button style={{marginBottom: 30}} onClick={this.addNewDocBtnListener}
+                         type="primary">Add New Document</Button>
+                </ApiPermissionValidation>
                 <div>
                     {(this.state.addingNewDoc || this.state.updatingDoc) &&
                     <NewDocDiv

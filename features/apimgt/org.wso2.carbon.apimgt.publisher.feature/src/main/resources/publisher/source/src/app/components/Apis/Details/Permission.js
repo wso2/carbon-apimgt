@@ -40,6 +40,7 @@ const FormItem = Form.Item;
 import Api from '../../../data/api'
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
+import {ApiPermissionValidation, permissionType} from '../../../data/ApiPermissionValidation'
 import {Input} from 'antd';
 import {Checkbox} from 'antd';
 import {Table, Icon} from 'antd';
@@ -202,16 +203,16 @@ class Permission extends Component {
             var isManageSubscription = permissionSubJson['isManageSubscription'];
             var permissionArray = [];
             if (isRead) {
-                permissionArray.push("READ");
+                permissionArray.push(permissionType.READ);
             }
             if (isUpdate) {
-                permissionArray.push("UPDATE");
+                permissionArray.push(permissionType.UPDATE);
             }
             if (isDelete) {
-                permissionArray.push("DELETE");
+                permissionArray.push(permissionType.DELETE);
             }
             if (isManageSubscription) {
-                permissionArray.push("MANAGE_SUBSCRIPTION");
+                permissionArray.push(permissionType.MANAGE_SUBSCRIPTION);
             }
             groupPermissions['groupId'] = roleName;
             groupPermissions['permission'] = permissionArray;
@@ -245,16 +246,16 @@ class Permission extends Component {
 
                 var groupPermissions = {};
 
-                if(permissionArray.includes("READ")) {
+                if(permissionArray.includes(permissionType.READ)) {
                    isRead = true;
                 }
-                if (permissionArray.includes("UPDATE")){
+                if (permissionArray.includes(permissionType.UPDATE)){
                    isUpdate = true;
                 }
-                if (permissionArray.includes("DELETE")) {
+                if (permissionArray.includes(permissionType.DELETE)) {
                    isDelete = true;
                 }
-                if (permissionArray.includes("MANAGE_SUBSCRIPTION")) {
+                if (permissionArray.includes(permissionType.MANAGE_SUBSCRIPTION)) {
                    isManageSubscription = true;
                 }
                 groupPermissions['key'] = roleName;
@@ -285,22 +286,23 @@ class Permission extends Component {
             title: 'Read',
             dataIndex: 'isRead',
             key: 'isRead',
-            render: isChecked => <Checkbox checked={isChecked} name="read" value="READ"></Checkbox>
+            render: isChecked => <Checkbox checked={isChecked} name="read" value={permissionType.READ}></Checkbox>
         }, {
             title: 'Update',
             dataIndex: 'isUpdate',
             key: 'isUpdate',
-            render: isChecked => <Checkbox checked={isChecked} name="update" value="UPDATE"></Checkbox>
+            render: isChecked => <Checkbox checked={isChecked} name="update" value={permissionType.UPDATE}></Checkbox>
         }, {
             title: 'Delete',
             dataIndex: 'isDelete',
             key: 'isDelete',
-            render: isChecked => <Checkbox checked={isChecked} name="delete" value="DELETE"></Checkbox>,
+            render: isChecked => <Checkbox checked={isChecked} name="delete" value={permissionType.DELETE}></Checkbox>,
         }, {
             title: 'Manage Subscriptions',
             dataIndex: 'isManageSubscription',
             key: 'isManageSubscription',
-            render: isChecked => <Checkbox checked={isChecked} name="manage_subscription" value="MANAGE_SUBSCRIPTION"></Checkbox>,
+            render: isChecked => <Checkbox checked={isChecked} name="manage_subscription"
+                                                                 value={permissionType.MANAGE_SUBSCRIPTION}></Checkbox>,
         }, {
             title: 'Action',
             key: 'action',
@@ -326,15 +328,7 @@ class Permission extends Component {
             ),
         }];
 
-        const dataOfScopes = [{
-            key: '1',
-            name: 'John Brown',
-
-        }, {
-            key: '2',
-            name: 'Jim Green',
-
-        }];
+        const dataOfScopes = [];
 
         const permissionData = this.state.permissionData;
 
@@ -390,23 +384,33 @@ class Permission extends Component {
                                     <Col span={16}>
                                         <Row>
                                             <Col span={4} style={{margin: "10px"}}>
-                                                <Input name="roleField" placeholder="role" value={this.state.roleField} onChange={this.handleChangeRoleField}/>
+                                                <Input name="roleField" placeholder="role" value={this.state.roleField}
+                                                                                onChange={this.handleChangeRoleField}/>
                                             </Col>
                                             <Col span={2} style={{margin: "10px"}}>
-                                                <Checkbox name="readField" value="READ" checked={this.state.readField} onChange={this.handleChangeReadField}> Read </Checkbox>
+                                                <Checkbox name="readField" value={permissionType.READ}
+                                                  checked={this.state.readField} onChange={this.handleChangeReadField}>
+                                                                                                        Read </Checkbox>
                                             </Col>
                                             <Col span={2} style={{margin: "10px"}}>
-                                                <Checkbox name="updateField" value="UPDATE" checked={this.state.updateField} onChange={this.handleChangeUpdateField}> Update </Checkbox>
+                                                <Checkbox name="updateField" value={permissionType.UPDATE}
+                                               checked={this.state.updateField} onChange={this.handleChangeUpdateField}>
+                                                                                                      Update </Checkbox>
                                             </Col>
                                             <Col span={2} style={{margin: "10px"}}>
-                                                <Checkbox name="deleteField" value="DELETE" checked={this.state.deleteField} onChange={this.handleChangeDeleteField}> Delete </Checkbox>
+                                                <Checkbox name="deleteField" value={permissionType.DELETE}
+                                               checked={this.state.deleteField} onChange={this.handleChangeDeleteField}>
+                                                                                                      Delete </Checkbox>
                                             </Col>
                                             <Col span={5} style={{margin: "10px"}}>
-                                                <Checkbox name="manageSubField" value="MANAGE_SUBSCRIPTION" checked={this.state.manageSubField} onChange={this.handleChangeManageSubField}>
+                                                <Checkbox name="manageSubField"
+                                          value={permissionType.MANAGE_SUBSCRIPTION} checked={this.state.manageSubField}
+                                                                             onChange={this.handleChangeManageSubField}>
                                                 Manage Subscriptions </Checkbox>
                                             </Col>
                                             <Col span={1} style={{margin: "10px"}}>
-                                                <Button name="add" onClick={this.handleAddRole.bind(this, permissionData)}> Add </Button>
+                                                <Button name="add" onClick=
+                                                          {this.handleAddRole.bind(this, permissionData)}> Add </Button>
                                             </Col>
                                         </Row>
                                     </Col>
@@ -449,9 +453,11 @@ class Permission extends Component {
                                     </Col>
                                 </Row>
                             </Card>
-
-                            <Button loading={this.state.creating} type="primary"
-                                    onClick={this.handleSubmit}>Update</Button>
+                            <ApiPermissionValidation checkingPermissionType={permissionType.UPDATE}
+                                                                 userPermissions={this.state.api.userPermissionsForApi}>
+                                <Button loading={this.state.creating} type="primary"
+                                        onClick={this.handleSubmit}>Update</Button>
+                            </ApiPermissionValidation>
                         </form>
                     </Col>
                 </Row>

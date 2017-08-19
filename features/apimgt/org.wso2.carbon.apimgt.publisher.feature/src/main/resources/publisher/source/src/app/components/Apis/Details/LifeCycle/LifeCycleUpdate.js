@@ -25,6 +25,7 @@ const CheckboxGroup = Checkbox.Group;
 
 import API from '../../../../data/api'
 import {ScopeValidation , resourceMethod, resourcePath} from '../../../../data/ScopeValidation'
+import {ApiPermissionValidation, permissionType} from '../../../../data/ApiPermissionValidation'
 
 export default class LifeCycleUpdate extends Component {
     constructor() {
@@ -94,6 +95,8 @@ export default class LifeCycleUpdate extends Component {
                     <CheckboxGroup options={checkList} defaultValue={checkedItems} onChange={this.handleCheckItem}/>
                 }
                 <ScopeValidation resourcePath={resourcePath.API_CHANGE_LC} resourceMethod={resourceMethod.POST}>
+                <ApiPermissionValidation checkingPermissionType={permissionType.UPDATE}
+                                                     userPermissions={api.userPermissionsForApi}>
                     <ButtonGroup style={{margin: "5px"}} onChange={this.updateLifeCycleState}>
                         {
                             is_workflow_pending ?
@@ -111,6 +114,7 @@ export default class LifeCycleUpdate extends Component {
                                 )
                         }
                     </ButtonGroup>
+                 </ApiPermissionValidation>
                 </ScopeValidation>
             </div>
         );

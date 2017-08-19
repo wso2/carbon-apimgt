@@ -1,6 +1,8 @@
 import React, {Component} from 'react'
 import {Table} from 'antd';
 import API from '../../../../data/api'
+import Loading from '../../../Base/Loading/Loading'
+import {ApiPermissionValidation, permissionType} from '../../../../data/ApiPermissionValidation'
 
 class Subscriptions extends Component {
     constructor(props)   {
@@ -13,6 +15,23 @@ class Subscriptions extends Component {
     }
 
     componentDidMount() {
+        const api = new API();
+        let promised_api = api.get(this.api_uuid);
+        promised_api.then(
+            response => {
+                this.setState({api: response.obj});
+            }
+        ).catch(
+            error => {
+                if (process.env.NODE_ENV !== "production") {
+                    console.log(error);
+                }
+                let status = error.status;
+                if (status === 404) {
+                    this.setState({notFound: true});
+                }
+            }
+        );
        this.fetchData();
     }
 
@@ -80,7 +99,9 @@ class Subscriptions extends Component {
 
 
     render()    {
-
+        if (!this.state.api) {
+            return <Loading/>
+        }
         const {subscriptions} = this.state;
         const columns = [{
             title: 'Application',
@@ -88,19 +109,28 @@ class Subscriptions extends Component {
         },  {
             title: 'Access Control for',
             render: (a,b,c) => (
-                    <div> <label htmlFor="production">Production </label>
-                <input type="checkbox" checked={a.subscriptionStatus === "PROD_ONLY_BLOCKED" || a.subscriptionStatus === "BLOCKED"}
-                       data-sample={a.subscriptionId} id="PROD_ONLY_BLOCKED"
-                       data-current={a.subscriptionStatus}
-                       style={{marginRight: "100px"}}
-                       onChange={this.updateProductionSubscription}
-                        />
-                <label htmlFor="sandbox">Sandbox</label>
-                <input checked={a.subscriptionStatus === "SANDBOX_ONLY_BLOCKED" || a.subscriptionStatus === "BLOCKED"}
-                       type="checkbox" id="SANDBOX_ONLY_BLOCKED" data-sample={a.subscriptionId}
-                       data-current={a.subscriptionStatus}
-                       onChange={this.updateProductionSubscription}/>
-                    </div>)
+                    <div>
+                    <ApiPermissionValidation checkingPermissionType={permissionType.UPDATE}
+                                                                 userPermissions={this.state.api.userPermissionsForApi}>
+                        <ApiPermissionValidation checkingPermissionType={permissionType.MANAGE_SUBSCRIPTION}
+                                                                 userPermissions={this.state.api.userPermissionsForApi}>
+                            <label htmlFor="production">Production </label>
+                            <input type="checkbox" checked={a.subscriptionStatus === "PROD_ONLY_BLOCKED" ||
+                                                                                    a.subscriptionStatus === "BLOCKED"}
+                                data-sample={a.subscriptionId} id="PROD_ONLY_BLOCKED"
+                                data-current={a.subscriptionStatus}
+                                style={{marginRight: "100px"}}
+                                onChange={this.updateProductionSubscription}
+                            />
+                            <label htmlFor="sandbox">Sandbox</label>
+                            <input checked={a.subscriptionStatus === "SANDBOX_ONLY_BLOCKED" ||
+                                                                                    a.subscriptionStatus === "BLOCKED"}
+                                type="checkbox" id="SANDBOX_ONLY_BLOCKED" data-sample={a.subscriptionId}
+                                data-current={a.subscriptionStatus}
+                                onChange={this.updateProductionSubscription}/>
+                        </ApiPermissionValidation>
+                     </ApiPermissionValidation>
+                   </div>)
         }];
         return (
                 <div>

@@ -4,6 +4,7 @@ import {Card, Button, message} from 'antd'
 import GenericEndpointInputs from './GenericEndpointInputs'
 import Api from '../../../../data/api'
 import Loading from '../../../Base/Loading/Loading'
+import {ApiPermissionValidation, permissionType} from '../../../../data/ApiPermissionValidation'
 
 
 class Endpoint extends Component {
@@ -215,7 +216,10 @@ class Endpoint extends Component {
                                            endpoint={this.state.sandboxEndpoint}
                                            match={this.props.match}/>
                 </Card>
-                <Button style={{margin: "5px"}} type="primary" onClick={() => this.updateEndpoints()}>Save</Button>
+                <ApiPermissionValidation checkingPermissionType={permissionType.UPDATE}
+                                                     userPermissions={JSON.parse(this.state.api).userPermissionsForApi}>
+                    <Button style={{margin: "5px"}} type="primary" onClick={() => this.updateEndpoints()}>Save</Button>
+                </ApiPermissionValidation>
             </div>
         );
     }
