@@ -66,7 +66,13 @@ public class RestApiUtil {
      * @param request
      */
     public static String getLoggedInUsername(Request request) {
-        String loggedInUser = request.getProperty(LOGGED_IN_USER).toString();
+        String loggedInUser = null;
+        try {
+            loggedInUser = request.getProperty(LOGGED_IN_USER).toString();
+       } catch (NullPointerException e) {
+           String message = "Error while getting loggedInUser from request";
+           log.error(message, e);
+       }
         return loggedInUser;
     }
 
