@@ -50,7 +50,7 @@ class Listing extends React.Component {
     };
     componentDidMount() {
         let api = new API();
-        let promised_apis = api.getAll();
+        let promised_apis = api.getAllAPIs();
         promised_apis.then((response) => {
             debugger
             this.setState({apis: response.obj});

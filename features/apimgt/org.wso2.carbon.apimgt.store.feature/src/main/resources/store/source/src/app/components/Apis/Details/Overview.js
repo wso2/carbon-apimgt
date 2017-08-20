@@ -30,6 +30,7 @@ class Overview extends Component {
         super(props);
         this.state = {
             api: null,
+            applications: null,
             notFound: false
         };
         this.api_uuid = this.props.match.params.api_uuid;
@@ -37,7 +38,7 @@ class Overview extends Component {
 
     componentDidMount() {
         const api = new Api();
-        let promised_api = api.get(this.api_uuid);
+        let promised_api = api.getAPIById(this.api_uuid);
         promised_api.then(
             response => {
                 this.setState({api: response.obj});
@@ -53,22 +54,29 @@ class Overview extends Component {
                 }
             }
         );
+
+        let promised_applications = api.getAllApplications();
+        promised_applications.then(
+            response => {
+            this.setState({applications: response.obj});
+        }
+        ).catch(
+                error => {
+                if (process.env.NODE_ENV !== "production") {
+                console.log(error);
+            }
+            let status = error.status;
+            if (status === 404) {
+                this.setState({notFound: true});
+            }
+        }
+        );
+
+
+
     }
 
     render() {
-        const menu = (
-            <Menu>
-                <Menu.Item>
-                    <Link to="">Edit</Link>
-                </Menu.Item>
-                <Menu.Item>
-                    <Link to="">Create New Version</Link>
-                </Menu.Item>
-                <Menu.Item>
-                    <Link to="">View Swagger</Link>
-                </Menu.Item>
-            </Menu>
-        );
         const formItemLayout = {
             labelCol: {span: 6},
             wrapperCol: {span: 18}

@@ -48,7 +48,7 @@ class NavBar extends Component {
     }
     componentDidMount() {
         const api = new Api();
-        let promised_api = api.get(this.api_uuid);
+        let promised_api = api.getAPIById(this.api_uuid);
         promised_api.then(
             response => {
                 this.setState({api: response.obj});
