@@ -28,12 +28,13 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.util.BrokerUtil;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import java.util.Properties;
 import javax.jms.JMSException;
 import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
-
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
 /**
  * The implementation for APIM broker
@@ -42,23 +43,26 @@ public class BrokerImpl implements Broker {
 
     private BrokerConfigurations config;
     private TopicConnectionFactory connFactory = null;
+    private static final String CF_NAME_PREFIX = "connectionfactory.";
+    private static final String CF_NAME = "qpidConnectionfactory";
+
     private static final Logger log = LoggerFactory.getLogger(BrokerUtil.class);
 
     public BrokerImpl() {
         config = ServiceReferenceHolder.getInstance().getAPIMConfiguration().getBrokerConfigurations();
         JMSConnectionConfiguration jmsConnectionConfiguration = config.getJmsConnectionConfiguration();
-        Class<?> clientClass = null;
-        Constructor<?> construct = null;
-        Object clientInst = null;
         try {
-            clientClass = Class.forName("org.apache.activemq.ActiveMQConnectionFactory");
-            construct = clientClass.getConstructor(String.class);
-            clientInst = construct.newInstance(jmsConnectionConfiguration.getTopicConnectionFactoryURL());
-            connFactory = (TopicConnectionFactory) clientInst;
-        } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException
-                | InvocationTargetException e) {
+
+            Properties properties = new Properties();
+            properties.put(Context.INITIAL_CONTEXT_FACTORY, jmsConnectionConfiguration.getJavaNamingFactoryInitial());
+            properties.put(CF_NAME_PREFIX + CF_NAME, jmsConnectionConfiguration.getTopicConnectionFactoryURL());
+            InitialContext ctx = new InitialContext(properties);
+            // Lookup connection factory
+            connFactory = (TopicConnectionFactory) ctx.lookup(CF_NAME);
+
+        } catch (NamingException e) {
             String error = "Could not create a JMS client connection from the class";
-            log.error(error);
+            log.error(error, e);
         }
     }
 

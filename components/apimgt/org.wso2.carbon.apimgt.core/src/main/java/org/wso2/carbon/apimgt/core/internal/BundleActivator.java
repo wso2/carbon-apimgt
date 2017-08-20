@@ -63,7 +63,8 @@ public class BundleActivator {
     protected void start(BundleContext bundleContext) {
         try {
             Context ctx = jndiContextManager.newInitialContext();
-            DataSource dataSource = new DataSourceImpl((HikariDataSource) ctx.lookup("java:comp/env/jdbc/WSO2AMDB"));
+            DataSource dataSource = new DataSourceImpl((HikariDataSource)
+                                                               ctx.lookup("java:comp/env/jdbc/WSO2AMDB"));
             DAOUtil.initialize(dataSource);
             WorkflowExtensionsConfigBuilder.build(configProvider);
             Broker broker = new BrokerImpl();

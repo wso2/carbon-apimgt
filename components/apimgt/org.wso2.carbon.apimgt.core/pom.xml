@@ -215,7 +215,18 @@
             <groupId>org.apache.woden.wso2</groupId>
             <artifactId>woden</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.wso2.carbon.business.messaging</groupId>
+            <artifactId>org.wso2.carbon.business.messaging.admin.services</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.business.messaging</groupId>
+            <artifactId>org.wso2.carbon.business.messaging.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.andes.wso2</groupId>
+            <artifactId>andes-client</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -859,6 +870,7 @@
             javax.jms.*,;version="${geronimo-jms.import.version.range}",
             javax.ws.rs.*;version="${javax.ws.rs-api.import.version}",
             org.apache.activemq.*;resolution:=optional,
+            org.wso2.andes.*;version="${andes.version.import.range}",
         </import.package>
         <export.package>
             !org.wso2.carbon.apimgt.core.internal,

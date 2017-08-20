@@ -27,10 +27,10 @@ public class JMSConnectionConfiguration {
 
     @Element(description = "Java naming factory initial")
     private String javaNamingFactoryInitial = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory";
-    @Element(description = "JMS Connectiontion factory JNDI name")
+    @Element(description = "JMS Connection factory JNDI name")
     private String jmsConnectionFactoryJNDIName = "TopicConnectionFactory";
     @Element(description = "Topic connection factory URL")
-    private String topicConnectionFactoryURL = "tcp://localhost:61616";
+    private String topicConnectionFactoryURL = "amqp://admin:admin@carbon/carbon?brokerlist='tcp://localhost:5672";
     @Element(description = "Destination topic name")
     private String topic = "myTopic";
 

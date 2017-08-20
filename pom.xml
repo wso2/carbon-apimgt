@@ -532,6 +532,16 @@
                 <artifactId>XmlSchema</artifactId>
                 <version>${xmlschema.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.business.messaging</groupId>
+                <artifactId>org.wso2.carbon.business.messaging.admin.services</artifactId>
+                <version>${carbon.business.messaging.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.business.messaging</groupId>
+                <artifactId>org.wso2.carbon.business.messaging.core</artifactId>
+                <version>${carbon.business.messaging.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -774,6 +784,8 @@
 
         <carbon.datasources.version>1.0.0</carbon.datasources.version>
 
+        <carbon.business.messaging.version>4.0.2</carbon.business.messaging.version>
+
         <org.wso2.msf4j.version>2.3.0-m1</org.wso2.msf4j.version>
         <msf4j.package.import.version.range>[2.0.0, 3.0.0)</msf4j.package.import.version.range>
 
@@ -883,7 +895,7 @@
         <jacoco.version>0.7.9</jacoco.version>
         <maven.surefire.plugin.version>2.18.1</maven.surefire.plugin.version>
         <google.guava.version>18.0</google.guava.version>
-        <andes.version>3.0.5</andes.version>
+        <andes.version>3.2.22</andes.version>
         <securevault.version>1.0.0-wso2v2</securevault.version>
         <slf4j.version>1.7.22</slf4j.version>
         <feign.version>9.5.0</feign.version>
@@ -893,6 +905,7 @@
         <h2.version>1.4.192</h2.version>
         <carbon.lcm.version>1.1.1</carbon.lcm.version>
         <carbon.lcm.import.version.range>[1.1.0, 1.2.0)</carbon.lcm.import.version.range>
+        <andes.version.import.range>[3.2.0, 3.3.0)</andes.version.import.range>
 
         <nimbusds.version>2.26.1.wso2v2</nimbusds.version>
         <nimbusds.import.version.range>[2.26.1, 2.26.2)</nimbusds.import.version.range>

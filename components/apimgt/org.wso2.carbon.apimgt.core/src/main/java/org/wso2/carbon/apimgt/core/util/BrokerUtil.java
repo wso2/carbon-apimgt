@@ -62,7 +62,7 @@ public class BrokerUtil {
      */
     public static void publishToTopic(String topicName, GatewayEvent gatewayEvent) throws GatewayException {
         TopicSession topicSession = null;
-        Topic topic = null;
+        Topic topic;
         TopicPublisher topicPublisher = null;
         TopicConnection topicConnection = null;
         try {
