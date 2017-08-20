@@ -27,31 +27,101 @@ import Tabs, { Tab } from 'material-ui/Tabs';
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import Api from '../../../data/api'
+import {Select} from 'antd';
 
 class NavBar extends Component {
+
     constructor(props) {
         super(props);
         this.state = {
             api: null,
             notFound: false,
+            applications: [],
+            dropDownApplications: [],
+            dropDownPolicies: [],
+            policies: [],
             index: 0
         };
         this.api_uuid = this.props.match.params.api_uuid;
+        this.dropDownApplications =  null;
+        this.dropDownPolicies =  [];
+        this.policies =  [];
+        this.applications = [];
     }
     static get CONST() {
         return {
             OVERVIEW: "overview",
             DOCUMENTATION: "documentation",
             APICONSOLE: "apiConsole",
-            FORUM: "forum",
+            FORUM: "forum"
         }
     }
+
     componentDidMount() {
         const api = new Api();
+        let retrieveAPI = null;
+        let retrievedApps = null;
         let promised_api = api.getAPIById(this.api_uuid);
         promised_api.then(
             response => {
+            retrieveAPI = response.obj;
                 this.setState({api: response.obj});
+        let promised_applications = api.getAllApplications();
+        promised_applications.then(
+            response => {
+            this.setState({applications: response.obj.list});
+            retrievedApps = response.obj.list;
+
+        let promised_subscriptions = api.getSubscriptions(this.api_uuid, null);
+        promised_subscriptions.then(
+            response => {
+            this.dropDownApplications = [<Option key="custom" onClick={this.handleClick} >New Application</Option>];
+
+        for (var i = 0; i < retrieveAPI.policies.length; i++) {
+            this.dropDownPolicies.push(<Option key={retrieveAPI.policies[i]}>{retrieveAPI.policies[i]}</Option>);
+        }
+        var subscription = {};
+        var subscriptions = response.obj.list;
+        var application = {};
+        var subscribedApp = false;
+        for (var i = 0; i < retrievedApps.length; i++) {
+            subscribedApp = false;
+            application = applications[i];
+            if (application.lifeCycleStatus != "APPROVED") {
+                continue;
+            }
+            for (var j = 0; j < subscriptions.length; j++) {
+                subscription = subscriptions[j];
+                if (subscription.applicationId === application.applicationId) {
+                    subscribedApp = true;
+                    continue;
+                }
+            }
+            if(!subscribedApp) {
+                this.dropDownApplications.push(<Option key={application.id}>{application.name}</Option>);
+            }
+        }
+        this.setState({policies: retrieveAPI.policies});
+    }).catch(
+            error => {
+            if (process.env.NODE_ENV !== "production") {
+            console.log(error);
+        }
+        let status = error.status;
+        if (status === 404) {
+            this.setState({notFound: true});
+        }
+    });
+
+        }).catch(
+                error => {
+                if (process.env.NODE_ENV !== "production") {
+                console.log(error);
+            }
+            let status = error.status;
+            if (status === 404) {
+                this.setState({notFound: true});
+            }});
             }
         ).catch(
             error => {
@@ -64,11 +134,28 @@ class NavBar extends Component {
                 }
             }
         );
-    }
+        debugger;
+    };
+
+    populateApplicationDropdown(){
+        debugger;
+        return this.dropDownApplications;
+    };
+
+    populatePolicyDropdown(){
+        debugger;
+        return this.dropDownPolicies;
+    };
+
+    handleClick(){
+        this.setState({redirect: true});
+    };
+
     handleChange = (event, index) => {
         console.info(event);
         this.setState({ index });
     };
+
     render() {
         /* TODO: This could have been done easily with match object containing api_uuid value , But
          Due to a bug (https://github.com/ReactTraining/react-router/issues/4649) in the latest version(4.1.1),
@@ -90,7 +177,7 @@ class NavBar extends Component {
             </div>;
         return (
             <div>
-                <Grid container gutter={24}>
+                <Grid container>
                     <Grid item xs={12} sm={2}>
                         <Paper><img alt="API thumb" width="100%" src="/store/public/images/api/api-default.png"/></Paper>
                     </Grid>
@@ -112,17 +199,15 @@ class NavBar extends Component {
                             </List>
                         </Paper>
                     </Grid>
-                    <Grid item xs={12} sm={5}>
-                        <Paper>
-                        </Paper>
-                    </Grid>
                 </Grid>
+                 <Select>{this.populateApplicationDropdown()}</Select>
+                 <Select>{this.populatePolicyDropdown()}</Select>
                 <AppBar position="static">
                     <Tabs index={this.state.index} onChange={this.handleChange}>
                         {Object.entries(NavBar.CONST).map(
                             ([key, val]) => {
                                 return (
-                                    <Tab label={val} to={"/apis/" + api_uuid + "/" + val} />
+                                    <Tab label={key} to={"/apis/" + api_uuid + "/" + val} />
                                 );
                             }
                         )}

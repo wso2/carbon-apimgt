@@ -39,11 +39,6 @@ export default class Details extends Component {
         return (
             <div style={{margin:"20"}}>
                 <NavBar/>
-                <Switch>
-                    <Redirect exact from="/apis/:api_uuid" to={redirect_url}/>
-                    <Route path="/apis/:api_uuid/overview" component={Overview}/>
-                    <Route component={PageNotFound}/>
-                </Switch>
             </div>
         );
     }

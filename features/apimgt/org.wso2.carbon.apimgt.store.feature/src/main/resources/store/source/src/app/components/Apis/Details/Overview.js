@@ -24,6 +24,7 @@ const FormItem = Form.Item;
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import Api from '../../../data/api'
+import { Redirect } from 'react-router-dom';
 
 class Overview extends Component {
     constructor(props) {
@@ -31,6 +32,9 @@ class Overview extends Component {
         this.state = {
             api: null,
             applications: null,
+            policies: null,
+            dropDownApplications: null,
+            dropDownPolicies: null,
             notFound: false
         };
         this.api_uuid = this.props.match.params.api_uuid;
@@ -58,7 +62,7 @@ class Overview extends Component {
         let promised_applications = api.getAllApplications();
         promised_applications.then(
             response => {
-            this.setState({applications: response.obj});
+            this.setState({applications: response.obj.list});
         }
         ).catch(
                 error => {
@@ -72,8 +76,60 @@ class Overview extends Component {
         }
         );
 
+        let promised_subscriptions = api.getSubscriptions(this.api_uuid, null);
+        promised_subscriptions.then(
+            response => {
+            this.dropDownApplications = [<Option key="custom" onClick={this.handleClick} >New Application</Option>];
 
+            for (var i = 0; i < this.api.policies.length; i++) {
+                this.dropDownPolicies.push(<Option key={this.api.policies[i]}>{this.api.policies[i]}</Option>);
+            }
+            var subscription = {};
+            var subscriptions = response.obj.list;
+            var application = {};
+            var subscribedApp = false;
+            for (var i = 0; i < this.applications.length; i++) {
+                subscribedApp = false;
+                application = applications[i];
+                if (application.lifeCycleStatus != "APPROVED") {
+                    continue;
+                }
+                for (var j = 0; j < subscriptions.length; j++) {
+                    subscription = subscriptions[j];
+                    if (subscription.applicationId === application.applicationId) {
+                        subscribedApp = true;
+                        continue;
+                    }
+                }
+                if(!subscribedApp) {
+                    this.dropDownApplications.push(<Option key={application.id}>{application.name}</Option>);
+                }
+            }
+            this.policies = this.api.policies;
+        }
+        ).catch(
+                error => {
+                if (process.env.NODE_ENV !== "production") {
+                console.log(error);
+            }
+            let status = error.status;
+            if (status === 404) {
+                this.setState({notFound: true});
+            }
+        }
+        );
+    }
 
+    populateApplicationDropdown(){
+        return this.dropDownApplications;
+    }
+
+    populatePolicyDropdown(){
+        return this.dropDownPolicies;
+    }
+
+    handleClick(){
+        this.setState({redirect: true});
     }
 
     render() {
@@ -87,6 +143,9 @@ class Overview extends Component {
         }
         if (!this.state.api) {
             return <Loading/>
+        }
+        if (this.state.redirect) {
+            return <Redirect push to="/application-create" />;
         }
         return (
             <div>
@@ -103,6 +162,14 @@ class Overview extends Component {
                                 <a href={"/store/apis/" + this.api_uuid} target="_blank" title="Store">View in store</a>
                             </div>
                         </Card>
+                    </Col>
+                    <Col span={10}>
+                        <Select>
+                             {this.populateApplicationDropdown()}
+                        </Select>
+                        <Select>
+                             {this.populatePolicyDropdown()}
+                        </Select>
                     </Col>
                     <Col span={15} offset={1}>
                         <Form layout="vertical">
