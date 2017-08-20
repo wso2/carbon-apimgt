@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, {Component} from 'react'
+import React from 'react'
 
 const NotFound = (props) => {
     return (

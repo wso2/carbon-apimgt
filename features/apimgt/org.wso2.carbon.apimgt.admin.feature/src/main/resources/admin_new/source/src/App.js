@@ -21,36 +21,21 @@ import React, {Component} from 'react'
 import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom'
 import {Base, Login, Logout} from './app/components/'
 import {PageNotFound} from './app/components/Base/Errors'
-//import ApiCreate from './app/components/Apis/Create/ApiCreate'
-
 import AuthManager from './app/data/AuthManager'
 import qs from 'qs'
-import TestHome from './app/components/TestHome'
-
 import 'antd/dist/antd.css'
-import {message} from 'antd'
 import './App.css'
-
+import AdvancedThrottling from './app/components/ThrottlingPolicies/AdvancedThrottling';
+import ApplicationTiers from './app/components/ThrottlingPolicies/ApplicationTiers'
+import SubscriptionTiers from "./app/components/ThrottlingPolicies/SubscriptionTiers";
+import CustomRules from "./app/components/ThrottlingPolicies/CustomRules";
+import BlackList from "./app/components/ThrottlingPolicies/BlackList";
 /**
  * Render protected application paths
  */
 class Protected extends Component {
     constructor(props) {
         super(props);
-        this.state = {showLeftMenu: false};
-        this.setLeftMenu = this.setLeftMenu.bind(this);
-        message.config({top: '48px'}); // .custom-header height + some offset
-        /* TODO: need to fix the header to avoid conflicting with messages */
-    }
-
-    /**
-     * Change the visibility state of left side navigation menu bar
-     * @param {boolean} status : Whether or not to show or hide left side navigation menu
-     */
-    setLeftMenu(status) {
-        this.setState({
-            showLeftMenu: status
-        });
     }
 
     render() {
@@ -58,13 +43,14 @@ class Protected extends Component {
         // Not actively check validity of access token from backend
         if (AuthManager.getUser()) {
             return (
-                <Base showLeftMenu={this.state.showLeftMenu}>
+                <Base>
                     <Switch>
-                        <Redirect exact from="/" to="/testhome"/>
-                        <Route path={"/testhome"} component={TestHome}/>
-                        {/*<Route path={"/apis"} render={ props => (<Apis setLeftMenu={this.setLeftMenu}/>)}/>
-                        <Route path={"/endpoints"} component={Endpoints}/>
-                        <Route path={"/api/create"} component={ApiCreate}/>*/}
+                        <Redirect exact from="/" to="/advanced_throttling"/>
+                        <Route path={"/advanced_throttling"} render={props => (<AdvancedThrottling/>)}/>
+                        <Route path={"/application_tiers"} render={props => (<ApplicationTiers/>)}/>
+                        <Route path={"/subscription_tiers"} render={props => (<SubscriptionTiers/>)}/>
+                        <Route path={"/custom_rules"} render={props => (<CustomRules/>)}/>
+                        <Route path={"/black_list"} render={props => (<BlackList/>)}/>
                         <Route component={PageNotFound}/>
                     </Switch>
                 </Base>
@@ -75,7 +61,6 @@ class Protected extends Component {
             <Redirect to={{pathname: '/login', search: params}}/>
         );
     }
-
 }
 
 /**

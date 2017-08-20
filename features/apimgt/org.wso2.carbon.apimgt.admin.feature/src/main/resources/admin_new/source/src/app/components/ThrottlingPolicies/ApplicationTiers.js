@@ -17,20 +17,19 @@
  */
 
 import React, {Component} from 'react'
+import ActionBar from '../ActionBar'
 
-const APINotFound = (props) => {
-    return (
-        <div>
-            <div className="message message-danger">
-                <h4><i className="icon fw fw-error"/>404 API Not Found!</h4>
-                <p>
-                    Can't find an API associate with the given API ID <span
-                    style={{color: 'green'}}> {props.match.params.api_uuid} </span>
-                </p>
+class ApplicationTiers extends Component {
+    render() {
+        return (
+            <div>
+                <ActionBar/>
+                <div style={{margin:'20px'}}>
+                    This is application tiers home
+                </div>
             </div>
+        );
+    }
+}
 
-        </div>
-    );
-};
-
-export default APINotFound
+export default ApplicationTiers;

@@ -38,7 +38,6 @@ class Logout extends Component {
             let newState = {logoutSuccess: true};
             let queryString = this.props.location.search;
             queryString = queryString.replace(/^\?/, '');
-            /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
             let params = qs.parse(queryString);
             if (params.referrer) {
                 newState['referrer'] = params.referrer;

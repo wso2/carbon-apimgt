@@ -17,13 +17,11 @@
  */
 
 import React, {Component} from 'react'
-
-//import  NavBar  from '../Apis/Details/NavBar';
-import {Layout, Breadcrumb, Icon, Menu} from 'antd';
+import  NavBar  from '../NavBar';
+import {Layout} from 'antd';
 import ComposeHeader from './Header/ComposeHeader'
 import Footer from './Footer/Footer'
 const {Content, Sider} = Layout;
-
 
 class Base extends Component {
     constructor(props) {
@@ -42,31 +40,27 @@ class Base extends Component {
         });
     }
 
-
-
     render() {
         return (
-            <Layout style={{height:'100vh'}}>
+            <Layout style={{height: '100vh'}}>
                 <ComposeHeader />
-                <Content>
-                    <div className="custom-page-heading">
-                        <h1 className="api-heading">APIs</h1>
-                        <span>subheading</span>
-                    </div>
-                    <Layout className="custom-content-wrapper">
-                        {this.props.showLeftMenu ?
-                            <Sider
-                                collapsed={this.state.collapsed}
-                                onCollapse={this.onCollapse}
-                                width={200} style={{padding: '20px 0'}}>
-                                <NavBar/>
-                            </Sider> : <div/>}
-                        <Content >
-                            {this.props.children}
-                        </Content>
-                    </Layout>
-                </Content>
-                <Footer />
+                <Sider
+                    collapsed={this.state.collapsed}
+                    onCollapse={this.onCollapse}
+                    width={300}
+                    style={{
+                        padding: '20px 10px 15px 15px',
+                        backgroundColor: 'White'
+                    }}
+                >
+                    <NavBar/>
+                </Sider>
+                <Layout>
+                    <Content style={{marginTop: 45}}>
+                        {this.props.children}
+                    </Content>
+                    <Footer/>
+                </Layout>
             </Layout>
         );
     }

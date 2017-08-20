@@ -210,7 +210,6 @@ class AuthManager {
         };
         return axios.post(url, qs.stringify(params), {headers: headers});
     }
-
 }
 
 export default AuthManager;

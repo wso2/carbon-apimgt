@@ -22,7 +22,6 @@ import AuthManager from '../../../data/AuthManager.js';
 import qs from 'qs'
 import {Layout, Menu, Icon} from 'antd';
 const SubMenu = Menu.SubMenu;
-const MenuItemGroup = Menu.ItemGroup;
 const {Header} = Layout;
 
 const ComposeHeader = (props) => {
@@ -31,7 +30,7 @@ const ComposeHeader = (props) => {
     return (
         <Header className='custom-header'>
             <div className="logo">
-                <Link to="/apis">
+                <Link to="/">
                     <img className="brand" src="/admin_new/public/images/logo.svg" alt="wso2-logo"/>
                     <span>API Admin Portal</span>
                 </Link>
@@ -50,18 +49,11 @@ const ComposeHeader = (props) => {
                         <Link to={{pathname: '/logout', search: params}}><Icon type="logout"/>Logout</Link>
                     </Menu.Item>
                 </SubMenu>
-                <SubMenu title={<Icon type="appstore-o" style={{fontSize: 20}}/>}>
-                    <Menu.Item key="endpoints">
-                        <Link to={{pathname: '/endpoints'}}>
-                            <Icon type="rocket" style={{fontSize: 20}}/> Endpoints
-                        </Link>
-                    </Menu.Item>
-                    <Menu.Item key="settings">
-                        <Link to={{pathname: '/apis'}}>
-                            <Icon type="fork" style={{fontSize: 20}}/> Apis
-                        </Link>
-                    </Menu.Item>
-                </SubMenu>
+                <Menu.Item key="endpoints">
+                    <Link to={{pathname: '/alerts'}}>
+                        <Icon type="rocket" style={{fontSize: 20}}/>
+                    </Link>
+                </Menu.Item>
             </Menu>
         </Header>
 

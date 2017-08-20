@@ -8,6 +8,9 @@
   display: none;
 }
 
+.ant-layout-sider {
+  width: 30%;
+}
 .custom-layout-header .ant-layout-sider-collapsed .ant-menu-submenu-vertical > .ant-menu-submenu-title:after {
   display: none;
 }
@@ -78,7 +81,6 @@ span.ant-layout-sider-zero-width-trigger{
   position: fixed;
   width: 100%;
   background: #fff;
-  padding: 0 20px;
   height: 45px;
   line-height: 45px;
   box-shadow: 0 1px 2px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.2);

@@ -124,7 +124,7 @@
                     <!--</goals>-->
                     <!--<phase>test</phase>-->
                     <!--<configuration>-->
-                    <!--<workingDirectory>${basedsource/src/main/resources/publisher</workingDirectory>-->
+                    <!--<workingDirectory>${basedsource/src/main/resources/admin_new</workingDirectory>-->
                     <!--<skip>${maven.test.skip}</skip>-->
                     <!--<executable>${npm.executable}</executable>-->
                     <!--<arguments>-->

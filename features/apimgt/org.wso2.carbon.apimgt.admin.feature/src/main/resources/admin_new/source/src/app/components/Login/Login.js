@@ -21,7 +21,7 @@ import './login.css'
 import {Switch, Redirect} from 'react-router-dom'
 import AuthManager from '../../data/AuthManager'
 import qs from 'qs'
-import {Layout, Breadcrumb} from 'antd';
+import {Layout} from 'antd';
 const {Header, Content, Footer} = Layout;
 import {Form, Icon, Input, Button, Checkbox, message} from 'antd';
 import {Card} from 'antd';
@@ -41,7 +41,6 @@ class NormalLoginForm extends Component {
             loading: false
         };
     }
-
 
     handleSubmit = (e) => {
         e.preventDefault();

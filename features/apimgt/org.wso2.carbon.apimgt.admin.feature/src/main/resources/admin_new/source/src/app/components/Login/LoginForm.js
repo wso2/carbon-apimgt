@@ -101,7 +101,7 @@ export default class LoginForm extends Component {
                     </form>
                 </div>
             )
-        } else { // If logged in, redirect to /apis page
+        } else {
             return (
                 <Switch>
                     <Redirect to={this.state.referrer}/>

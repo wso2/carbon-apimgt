@@ -16,21 +16,18 @@
  * under the License.
  */
 
-import React from 'react'
+import React, {Component} from 'react'
+import ActionBar from '../ActionBar'
 
-const ResourceNotFound = (props) => {
-    return (
-        <div>
-            <div className="message message-danger">
-                <h4><i className="icon fw fw-error"/>404 Resource Not Found!</h4>
-                <p>
-                    Can't find the resource you are looking for
-                    <span style={{color: 'green'}}> {props.response ? props.response.statusText : ""} </span>
-                </p>
+export default class CustomRules extends Component {
+    render() {
+        return (
+            <div>
+                <ActionBar/>
+                <div style={{margin:'20px'}}>
+                    Custom Rules page is not implemented yet
+                </div>
             </div>
-
-        </div>
-    );
-};
-
-export default ResourceNotFound
+        );
+    }
+}

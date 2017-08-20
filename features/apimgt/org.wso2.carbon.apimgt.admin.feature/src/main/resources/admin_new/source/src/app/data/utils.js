@@ -19,20 +19,11 @@
 import AuthManager from "./AuthManager";
 
 /**
- * Utility class for Publisher application
+ * Utility class for Admin Portal application
  */
-class PublisherUtils {
+class AdminPortalUtils {
 
-    /**
-     * TODO: Remove this method one the initial phase is done, This is used to continue the API class until the login page is create
-     * @returns {promise}
-     */
-    static autoLogin() {
-        let auth = new AuthManager();
-        return auth.authenticateUser('admin', 'admin');
-    }
-
-    /**
+      /**
      * Get JavaScript accessible cookies saved in browser, by giving the cooke name.
      * @param {String} name : Name of the cookie which need to be retrived
      * @returns {String|null} : If found a cookie with given name , return its value,Else null value is returned
@@ -79,17 +70,6 @@ class PublisherUtils {
         }
         document.cookie = name + "=" + value + expires + "; path=" + path + securedDirective;
     }
-
-    /**
-     * Given an object returns whether the object is empty or not
-     * @param {Object} object : Any JSON object
-     * @returns {boolean}
-     */
-    static isEmptyObject(object) {
-        return Object.keys(object).length === 0 && object.constructor === Object
-    }
-
-
 }
 
-export default PublisherUtils;
+export default AdminPortalUtils;
