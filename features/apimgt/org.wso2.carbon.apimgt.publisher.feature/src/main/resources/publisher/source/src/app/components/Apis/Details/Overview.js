@@ -38,7 +38,6 @@ class Overview extends Component {
         this.api_uuid = this.props.match.params.api_uuid;
         this.downloadWSDL = this.downloadWSDL.bind(this);
         this.handleApiDelete = this.handleApiDelete.bind(this);
-        this.apiDeletePermissionWarning = this.apiDeletePermissionWarning.bind(this);
     }
 
     componentDidMount() {
@@ -59,13 +58,6 @@ class Overview extends Component {
                 }
             }
         );
-    }
-
-    apiDeletePermissionWarning() {
-      Modal.warning({
-        title: 'No Permissions',
-        content: "You don't have permissions to delete this API",
-      });
     }
 
     handleApiDelete(e) {
