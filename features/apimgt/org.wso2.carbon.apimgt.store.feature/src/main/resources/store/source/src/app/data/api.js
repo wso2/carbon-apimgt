@@ -236,6 +236,27 @@ class API {
     }
 
     /**
+     * Get keys of an application
+     * @param applicationId id of the application that needs to get the keys
+     * @param callback {function} Function which needs to be called upon success
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    getKeys(applicationId, callback = null) {
+        debugger;
+        var promise_get = this.client.then(
+                (client) => {
+                return client.apis["Application (individual)"].get_applications__applicationId__keys(
+                    {applicationId:applicationId}, this._requestMetaData());
+        }
+        );
+        if (callback) {
+            return promise_get.then(callback);
+        } else {
+            return promise_get;
+        }
+    }
+
+    /**
      * Get the available labels.
      * @returns {Promise.<TResult>}
      */
