@@ -196,7 +196,7 @@ class API {
      * @param callback {function} Function which needs to be called upon success
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    generateApplicationKeys(applicationId, request_content, callback = null) {
+    generateKeys(applicationId, request_content, callback = null) {
         debugger;
         var promise_get = this.client.then(
                 (client) => {
@@ -219,7 +219,7 @@ class API {
      * @param callback {function} Function which needs to be called upon success
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    generateApplicationKeys(applicationId, request_content, callback = null) {
+    generateToken(applicationId, request_content, callback = null) {
         debugger;
         var promise_get = this.client.then(
                 (client) => {
