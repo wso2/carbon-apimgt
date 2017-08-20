@@ -296,13 +296,13 @@ class Permission extends Component {
             title: 'Delete',
             dataIndex: 'isDelete',
             key: 'isDelete',
-            render: isChecked => <Checkbox checked={isChecked} name="delete" value={permissionType.DELETE}></Checkbox>,
+            render: isChecked => <Checkbox checked={isChecked} name="delete" value={permissionType.DELETE}></Checkbox>
         }, {
             title: 'Manage Subscriptions',
             dataIndex: 'isManageSubscription',
             key: 'isManageSubscription',
             render: isChecked => <Checkbox checked={isChecked} name="manage_subscription"
-                                                                 value={permissionType.MANAGE_SUBSCRIPTION}></Checkbox>,
+                                                                 value={permissionType.MANAGE_SUBSCRIPTION}></Checkbox>
         }, {
             title: 'Action',
             key: 'action',
