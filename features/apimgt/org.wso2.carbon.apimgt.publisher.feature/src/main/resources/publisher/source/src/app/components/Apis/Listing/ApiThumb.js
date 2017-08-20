@@ -20,6 +20,7 @@ import React from 'react'
 import {Link} from 'react-router-dom'
 import {Card, Col, Button, Icon, Popconfirm, message} from 'antd'
 import API from '../../../data/api'
+import {ScopeValidation, resourcePath, resourceMethod} from '../../../data/ScopeValidation'
 
 class ApiThumb extends React.Component {
     constructor(props) {
@@ -67,9 +68,11 @@ class ApiThumb extends React.Component {
                         <p className="description">{this.props.api.description}</p>
                         <div className="api-action-container">
                             <Link to={details_link}>More... <Icon type="edit"/></Link>
-                            <Popconfirm title="Confirm delete?" onConfirm={this.handleApiDelete}>
-                                <Button loading={this.state.loading} type="default" shape="circle" icon="delete"/>
-                            </Popconfirm>
+                            <ScopeValidation resourceMethod={resourceMethod.DELETE} resourcePath={resourcePath.SINGLE_API}>
+                                <Popconfirm title="Confirm delete?" onConfirm={this.handleApiDelete}>
+                                    <Button loading={this.state.loading} type="default" shape="circle" icon="delete"/>
+                                </Popconfirm>
+                            </ScopeValidation>
                         </div>
                     </div>
                 </Card>
