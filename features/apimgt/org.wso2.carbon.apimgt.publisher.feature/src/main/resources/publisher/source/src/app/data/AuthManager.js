@@ -116,8 +116,9 @@ class AuthManager {
      * @returns {User | null} Is any user has logged in or not
      */
     static getUser() {
+        let currentenv = AuthManager.getEnvironment();
         const userData = localStorage.getItem(User.CONST.LOCALSTORAGE_USER);
-        const partialToken = Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1);
+        const partialToken = Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1 + "_" + currentenv);
         if (!(userData && partialToken)) {
             return null;
         }
@@ -135,6 +136,11 @@ class AuthManager {
         }
         localStorage.setItem(User.CONST.LOCALSTORAGE_USER, JSON.stringify(user.toJson()));
         /* TODO: IMHO it's better to get this key (`wso2_user`) from configs */
+    }
+
+    static getEnvironment(){
+        let currentEnvironment = localStorage.getItem("currentEnv");
+        return currentEnvironment;
     }
 
     getTokenEndpoint() {
@@ -171,14 +177,18 @@ class AuthManager {
             validity_period: 3600,
             scopes: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage apim:subscription_view apim:subscription_block apim:subscribe'
         };
-        let promised_response = axios.post(tokenDetails, qs.stringify(data), {headers: headers});
+        let promised_response = axios.post(tokenDetails, qs.stringify(data), {headers: headers }); // enable with credeantials
         promised_response.then(response => {
+            console.log(response.headers.setH);
             const validityPeriod = response.data.validityPeriod; // In seconds
             const WSO2_AM_TOKEN_1 = response.data.partialToken;
             const user = new User(response.data.authUser, response.data.idToken);
             user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, "/publisher");
             user.scopes = response.data.scopes.split(" ");
             AuthManager.setUser(user);
+
+        }).catch(function(e) {
+            console.log(e); //
         });
         return promised_response;
     }

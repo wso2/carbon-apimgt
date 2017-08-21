@@ -45,12 +45,7 @@ import org.wso2.msf4j.formparam.FormDataParam;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -71,6 +66,23 @@ import javax.ws.rs.core.Response;
 public class AuthenticatorAPI implements Microservice {
 
     private static final Logger log = LoggerFactory.getLogger(AuthenticatorAPI.class);
+
+    /**
+     *
+     *
+     */
+    @OPTIONS
+    @Path("/token/{appName}")
+    public Response auth(){
+      return Response.ok()
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD")
+                .header("Access-Control-Allow-Headers", "Accept, Accept-Encoding, Accept-Language," +
+                        " authorization, Cache-Control, Connection, Cookie, Host, Pragma, Referer, User-Agent, Set-Cookie")
+                .header("Access-Control-Allow-Credentials", "true")
+                .build();
+
+    }
 
     /**
      * This method authenticate the user for store app.
@@ -105,7 +117,7 @@ public class AuthenticatorAPI implements Microservice {
                     ErrorDTO errorDTO = new ErrorDTO();
                     errorDTO.setCode(ExceptionCodes.INVALID_AUTHORIZATION_HEADER.getErrorCode());
                     errorDTO.setMessage(ExceptionCodes.INVALID_AUTHORIZATION_HEADER.getErrorMessage());
-                    return Response.status(Response.Status.UNAUTHORIZED).entity(errorDTO).build();
+                    return Response.status(Response.Status.UNAUTHORIZED).entity(errorDTO).header("Access-Control-Allow-Origin", "*").build();
                 }
             }
             AccessTokenInfo accessTokenInfo = authenticatorService.getTokens(appContext.substring(1),
@@ -145,7 +157,7 @@ public class AuthenticatorAPI implements Microservice {
                                 "");
                 return Response.ok(authResponseBean, MediaType.APPLICATION_JSON)
                         .cookie(cookieWithAppContext, httpOnlyCookieWithAppContext, restAPIContextCookie,
-                                refreshTokenCookie, refreshTokenHttpOnlyCookie).header(AuthenticatorConstants.
+                                refreshTokenCookie, refreshTokenHttpOnlyCookie).header("Access-Control-Allow-Origin", "*").header(AuthenticatorConstants.
                                         REFERER_HEADER,
                                 (request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null && request
                                         .getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER)
@@ -156,7 +168,7 @@ public class AuthenticatorAPI implements Microservice {
                                                 "").build();
             } else {
                 return Response.ok(authResponseBean, MediaType.APPLICATION_JSON)
-                        .cookie(cookieWithAppContext, httpOnlyCookieWithAppContext, restAPIContextCookie)
+                        .cookie(cookieWithAppContext, httpOnlyCookieWithAppContext, restAPIContextCookie).header("Access-Control-Allow-Origin", "*")
                         .header(AuthenticatorConstants.
                                         REFERER_HEADER,
                                 (request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null && request
@@ -172,7 +184,7 @@ public class AuthenticatorAPI implements Microservice {
             ErrorDTO errorDTO = AuthUtil.getErrorDTO(e.getErrorHandler(), null);
 
             log.error(e.getMessage(), e);
-            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).header("Access-Control-Allow-Origin", "*").build();
         }
     }
 
