@@ -19,21 +19,14 @@
 
 import React from 'react';
 
-class ApiPermissionValidation extends React.Component {
-    constructor(props){
-        super(props);
-        this.state = {};
-    }
+function ApiPermissionValidation(props) {
+    var checkingPermissionType = props.checkingPermissionType;
+    var userPermissions = props.userPermissions;
 
-    render() {
-        var checkingPermissionType = this.props.checkingPermissionType;
-        var userPermissions = this.props.userPermissions;
-
-        if(userPermissions.includes(checkingPermissionType)) {
-            return (this.props.children);
-        }
-        return null;
+    if(userPermissions.includes(checkingPermissionType)) {
+        return (props.children);
     }
+    return null;
 }
 
 ApiPermissionValidation.permissionType = {
