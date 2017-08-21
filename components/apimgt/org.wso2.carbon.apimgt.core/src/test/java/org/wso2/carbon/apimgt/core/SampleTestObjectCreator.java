@@ -519,7 +519,7 @@ public class SampleTestObjectCreator {
 
     /**
      * Creates a file type documentation info sample
-     * 
+     *
      * @return a file type documentation info sample
      */
     public static DocumentInfo createFileDocumentationInfo() {
@@ -1075,7 +1075,7 @@ public class SampleTestObjectCreator {
         comment.setUpdatedTime(LocalDateTime.now());
         return comment;
     }
-    
+
     public static Rating createDefaultRating(String apiId) {
         Rating rating = new Rating();
         rating.setUuid(UUID.randomUUID().toString());
@@ -1316,7 +1316,7 @@ public class SampleTestObjectCreator {
 
         return siddhiApp;
     }
-    
+
     public static String createDefaultSiddhiAppForAPIThrottlePolicy() {
         APIPolicy apiPolicy = createDefaultAPIPolicy();
         String siddhiApp = "\n@App:name('resource_" + apiPolicy.getPolicyName() + "_condition_0')"
@@ -1400,5 +1400,12 @@ public class SampleTestObjectCreator {
                 + "\ninsert into GlobalThrottleStream;\n";
 
         return siddhiApp;
+    }
+
+    public static String getSampleApiSwagger() throws IOException {
+        //swagger definition
+        InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream("sampleApi.yaml");
+        String definition = IOUtils.toString(stream);
+        return definition;
     }
 }
