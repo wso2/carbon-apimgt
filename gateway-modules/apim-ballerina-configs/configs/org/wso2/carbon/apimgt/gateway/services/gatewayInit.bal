@@ -11,11 +11,9 @@ service<http> gatewayInitService {
     boolean isCacheInitialized = holder:initializeCache();
     boolean isMapsAdded = holder:addThrottleMaps();
     boolean isReady = initGateway();
-
-    boolean subscriptionsInitialized = gatewayUtil:retrieveSubscriptions();
+    
     boolean offlineSubsInitialized = gatewayUtil:retrieveOfflineSubscriptions();
 
-    boolean applicationsInitialized = gatewayUtil:retrieveApplications();
     boolean offlineAppssInitialized = gatewayUtil:retrieveOfflineApplications();
 
     boolean policiesInitialized = gatewayUtil:retrievePolicies();
@@ -29,12 +27,12 @@ function initGateway () (boolean) {
         gatewayUtil:registerGateway();
         //Retrieve APIs from API Core and deploy
         system:println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-        gatewayUtil:loadAPIs();
+        //gatewayUtil:loadAPIs();
         gatewayUtil:loadOfflineAPIs();
         system:println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-        gatewayUtil:loadGlobalEndpoints();
+        //gatewayUtil:loadGlobalEndpoints();
         system:println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-        gatewayUtil:loadBlockConditions();
+        //gatewayUtil:loadBlockConditions();
         system:println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
     } catch (errors:Error e) {
         system:println("Error while initilazing API gateway. " + e.msg);

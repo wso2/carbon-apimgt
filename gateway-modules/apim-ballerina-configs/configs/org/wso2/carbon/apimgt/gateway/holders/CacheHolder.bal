@@ -117,7 +117,7 @@ function setGatewayConf (dto:GatewayConfDTO conf) {
 function getGatewayConf () (dto:GatewayConfDTO) {
 
     system:println("getGatewayConf() in CacheHolder");
-    any dto = apimgtMaps:getMapEntry("gatewayConfig");;
+    any dto = apimgtMaps:getMapEntry("gatewayConfig");
 
     errors:TypeCastError err;
     if(dto!=null){

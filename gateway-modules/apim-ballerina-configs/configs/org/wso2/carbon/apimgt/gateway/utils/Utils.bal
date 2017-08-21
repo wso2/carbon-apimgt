@@ -358,6 +358,8 @@ function retrievePolicies () (boolean) {
         while (i < length) {
             json policy = policies.list[i];
             putIntoPolicyCache(policy);
+            system:println("policy :");
+            system:println(policy);
             i = i + 1;
         }
     }
