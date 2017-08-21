@@ -282,14 +282,14 @@ public class AuthenticatorAPI implements Microservice {
                 String part2 = accessToken.substring(accessToken.length() / 2);
                 NewCookie cookieWithAppContext = AuthUtil
                         .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_1, part1, appContext,
-                                true, false, "future");
+                                true, false, "");
                 authResponseBean.setPartialToken(part1);
                 NewCookie httpOnlyCookieWithAppContext = AuthUtil
                         .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_2, part2, appContext,
-                                true, true, "future");
+                                true, true, "");
                 NewCookie restAPIContextCookie = AuthUtil
                         .cookieBuilder(APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J, part2, restAPIContext,
-                                true, true, "future");
+                                true, true, "");
                 String authUser = authResponseBean.getAuthUser();
                 NewCookie authUserCookie = AuthUtil
                         .cookieBuilder(AuthenticatorConstants.AUTH_USER, authUser, appContext, true, false, "");
