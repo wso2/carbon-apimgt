@@ -77,7 +77,15 @@ const ComposeHeader = (props) => {
                     </Menu.Item>
                 </SubMenu>
 
+ </SubMenu>
 
+                    {localStorage.getItem("currentEnv") != 'default' &&
+                    <SubMenu title={<span><Icon type="setting"/>{localStorage
+                        .getItem("currentEnv")}</span>}>
+                        {this.state.availableEnv.map(environment => <Menu.Item onSelect={this.handleClick}
+                            key={environment.env}>{environment.env}</Menu.Item>)}
+
+                    </SubMenu>
 
             </Menu>
         </Header>

@@ -19,6 +19,7 @@
 import Swagger from 'swagger-client'
 import AuthManager from './AuthManager'
 import ConfigManager from './ConfigManager'
+import Factory from './Factory'
 
 
 /**
@@ -33,32 +34,20 @@ class SingleClient {
      * @param {{}} args : Accept as an optional argument for SwaggerClient constructor.Merge the given args with default args.
      * @returns {SingleClient|*|null}
      */
-    constructor(args = {}) {
+    constructor(v1,v2,args = {}) {
 
-        this.currentenv = localStorage.getItem("currentEnv");
-        this.envdetails = new ConfigManager();
-        console.log(this.envdetails);
 
-        if (SingleClient._instance) {
-            return SingleClient._instance;
-        }
-        this._client = this.envdetails.env_response.then((response) => {
-            let allenvs = response.data.environments;
-            if (this.currentenv == "default") {
-                this.host = window.location.host;
-            } else {
-                let environmentValue;
-                for (let value of allenvs) {
+        this.host = v1;
+        this.port = v2;
 
-                    if (this.currentenv == value.env) {
+        // this.detailed = new Factory("default")
+        // console.log(this.detailed);
 
-                        environmentValue = value;
+        // if (SingleClient._instance) {
+        //     return SingleClient._instance;
+        // }
 
-                    }
-                }
-                this.host = environmentValue.envIsHost;
-            }
-
+console.log("working")
             const authorizations = {
                 OAuth2Security: {
                     token: {access_token: AuthManager.getUser().getPartialToken()}
@@ -78,10 +67,14 @@ class SingleClient {
                     return new Swagger(argsv);
                 }
             );
-            return this._client;
+            console.log(this._client);
+        this._client = this._client.then((response)=>{
+            debugger
+     response.http.credentials = 'include';
+     return response;
         });
         this._client.catch(AuthManager.unauthorizedErrorHandler);
-        SingleClient._instance = this;
+        // SingleClient._instance = this;
     }
 
     /**
@@ -93,7 +86,9 @@ class SingleClient {
      * @private
      */
     _fixSpec(spec) {
-        spec.host = window.location.host; //TODO: Set hostname according to the APIM environment selected by user ~tmkb
+        console.log(this.host);
+        spec.host = this.host; //TODO: Set hostname according to the APIM environment selected by user ~tmkb
+        console.log(spec);
         return spec;
     }
 
@@ -182,7 +177,6 @@ class SingleClient {
     }
 }
 
-SingleClient._instance = null; // A private class variable to preserve the single instance of a swaggerClient
-SingleClient.spec = null;
+// SingleClient._instance = null;  A private class variable to preserve the single instance of a swaggerClient
 
 export default SingleClient
